@@ -32,4 +32,4 @@ owner_group_id = gid {
 file_ownership_match(requierd_uid, requierd_gid) {
     owner_user_id == requierd_uid
     owner_group_id == requierd_gid
-}
+} else = false
