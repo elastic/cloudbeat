@@ -9,22 +9,27 @@ is_file {
     input.osquery.filename
 }
 
-filename = x {
+filename = name {
     is_file
-    x = input.osquery.filename
+    name = input.osquery.filename
 }
 
-filemode = x {
+filemode = mode {
     is_file
-    x = input.osquery.mode
+    mode = input.osquery.mode
 }
 
-owner_user_id = x {
+owner_user_id = uid {
     is_file
-    x = input.osquery.uid
+    uid = input.osquery.uid
 }
 
-owner_group_id = x {
+owner_group_id = gid {
     is_file
-    x = input.osquery.gid
+    gid = input.osquery.gid
+}
+
+file_ownership_match(requierd_uid, requierd_gid) {
+    owner_user_id == requierd_uid
+    owner_group_id == requierd_gid
 }
