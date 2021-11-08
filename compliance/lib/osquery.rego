@@ -9,14 +9,14 @@ is_file {
     input.osquery.filename
 }
 
-filename = name {
+filename = file_name {
     is_file
-    name = input.osquery.filename
+    file_name = input.osquery.filename
 }
 
-filemode = mode {
+filemode = file_mode {
     is_file
-    mode = input.osquery.mode
+    file_mode = input.osquery.mode
 }
 
 owner_user_id = uid {
