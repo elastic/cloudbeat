@@ -1,4 +1,4 @@
-package compliance.lib.osquery
+package compliance.lib.data_adapter
 
 is_osquery {
     input.osquery
