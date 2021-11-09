@@ -6,15 +6,17 @@ import data.compliance.cis
 
 
 # Ensure that the API server pod specification file ownership is set to root:root
-finding = {"evaluation": evaluation, "rule_name": rule_name, "fields": fields, "tags": tags} {
+finding = {"evaluation": evaluation, "rule_name": rule_name, "evidence": evidence, "tags": tags} {
     osquery.filename == "kube-apiserver.yaml"
-    rule_evaluation := osquery.file_ownership_match("root", "root")
+    uid = osquery.owner_user_id
+    gid = osquery.owner_group_id
+    rule_evaluation := common.file_ownership_match(uid, gid, "root", "root")
 
     # set result
     evaluation := common.calculate_result(rule_evaluation)
-    fields := [
-        {"key": "uid", "value": osquery.owner_user_id},
-        {"key": "gid", "value": osquery.owner_group_id}
+    evidence := [
+        {"key": "uid", "value": uid},
+        {"key": "gid", "value": gid}
     ]
     rule_name := "Ensure that the API server pod specification file ownership is set to root:root"
     tags := array.concat(cis.tags, ["CIS 1.1.2"])
