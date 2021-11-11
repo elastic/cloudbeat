@@ -30,7 +30,7 @@ should contain an beat/agent output, e.g. OSQuery
 
 ```json
 {
-    "type": "file",
+    "type": "filesystem",
     "mode": "0700",
     "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
     "uid": "etc",
@@ -87,6 +87,9 @@ should contain an beat/agent output, e.g. OSQuery
 ## Local Testing
 ### Test entire policy
 `opa test -v compliance`
+
+### Test specific rule
+`opa test -v compliance/lib compliance/cis_k8s.rego compliance/rules/cis_1_1_2`
 
 ### Pre-commit hooks
 see [pre-commit](https://pre-commit.com/) package

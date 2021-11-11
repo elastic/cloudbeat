@@ -1,4 +1,4 @@
-package compliance.cis.rules.cis_1_1_1
+package compliance.cis.rules.cis_1_1_3
 
 import data.lib.test
 
@@ -15,7 +15,7 @@ rule_input(filemode) = {
     "mode": filemode,
     "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
     "uid": "root",
-    "filename": "kube-apiserver.yaml",
+    "filename": "kube-controller-manager.yaml",
     "gid": "root"
   }
 }

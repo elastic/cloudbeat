@@ -7,5 +7,5 @@ import data.compliance.cis_k8s
 # output is findings
 
 resource = input
-
 findings = cis_k8s.findings
+
