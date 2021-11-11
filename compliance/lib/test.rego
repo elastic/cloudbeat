@@ -1,9 +1,9 @@
 package lib.test
 
 rule_pass(finding) {
-    finding.evaluation == "passed"
+	finding.evaluation == "passed"
 }
 
 rule_violation(finding) {
-   finding.evaluation == "violation"
+	finding.evaluation == "violation"
 }
