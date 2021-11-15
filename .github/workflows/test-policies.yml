@@ -1,0 +1,17 @@
+name: Test Policies
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test-rego-policies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Pull OPA Docker image and run opa test
+        uses: docker://openpolicyagent/opa
+        with:
+          args: "test --ignore=*.yaml --ignore=*.json -v compliance"

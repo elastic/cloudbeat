@@ -26,7 +26,7 @@ activated_rules:
 ```
 
 ##### `input.json`
-should contain an beat/agent output, e.g. OSQuery
+should contain an beat/agent output, e.g. filesystem data
 
 ```json
 {
