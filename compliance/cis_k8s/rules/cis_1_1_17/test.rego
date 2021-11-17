@@ -4,7 +4,7 @@ import data.cis_k8s.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_violation(finding) with input as rule_input("controller-manager.conf", "0700")
+	test.assert_fail(finding) with input as rule_input("controller-manager.conf", "0700")
 }
 
 test_pass {

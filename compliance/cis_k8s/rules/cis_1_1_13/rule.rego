@@ -14,7 +14,14 @@ finding = result {
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
 		"evidence": {"filemode": filemode},
-		"rule_name": "Ensure that the admin.conf file permissions are set to 644 or more restrictive",
-		"tags": array.concat(cis_k8s.default_tags, ["CIS 1.1.13"]),
 	}
+}
+
+metadata = {
+	"name": "Ensure that the admin.conf file permissions are set to 644 or more restrictive",
+	"description": "The admin.conf is the administrator kubeconfig file defining various settings for the administration of the cluster. You should restrict its file permissions to maintain the integrity of the file. The file should be writable by only the administrators on the system.",
+	"impact": "None",
+	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.1.13", "Master Node Configuration"]),
+	"benchmark": cis_k8s.benchmark_name,
+	"remediation": "chmod 644 /etc/kubernetes/admin.conf",
 }

@@ -1,7 +1,7 @@
 package compliance.lib.data_adapter
 
 is_filesystem {
-	input.type == "filesystem"
+	input.type == "file-system"
 }
 
 filename = file_name {
@@ -12,6 +12,11 @@ filename = file_name {
 filemode = file_mode {
 	is_filesystem
 	file_mode = input.mode
+}
+
+file_path = path {
+	is_filesystem
+	path = input.path
 }
 
 owner_user_id = uid {

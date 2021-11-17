@@ -4,6 +4,6 @@ assert_pass(finding) {
 	finding.evaluation == "passed"
 }
 
-assert_violation(finding) {
-	finding.evaluation == "violation"
+assert_fail(finding) {
+	finding.evaluation == "failed"
 }

@@ -15,7 +15,14 @@ finding = result {
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
 		"evidence": {"uid": uid, "gid": gid},
-		"rule_name": "Ensure that the API server pod specification file ownership is set to root:root",
-		"tags": array.concat(cis_k8s.default_tags, ["CIS 1.1.2"]),
 	}
+}
+
+metadata = {
+	"name": "Ensure that the API server pod specification file ownership is set to root:root",
+	"description": "The API server pod specification file controls various parameters that set the behavior of the API server. You should set its file ownership to maintain the integrity of the file. The file should be owned by root:root.",
+	"impact": "None",
+	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.1.2", "Master Node Configuration"]),
+	"benchmark": cis_k8s.benchmark_name,
+	"remediation": "chown root:root /etc/kubernetes/manifests/kube-apiserver.yaml",
 }

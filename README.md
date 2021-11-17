@@ -1,4 +1,9 @@
-# Cloud Security Posture security policies 
+# Cloud Security Posture - Rego policies
+
+![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/oren-zohar/a7160df46e48dff45b24096de9302d38/raw/csp-security-policies__heads_main.json)
+
+
+
     .
     ├── compliance                         # Compliance policies
     │   ├── lib
@@ -6,8 +11,8 @@
     │   │   ├── data_adapter.rego          # Input data adapter
     │   │   └── test.rego                  # Common Test functions
     │   ├── cis_k8s
-    │   |   ├── cis_k8s.rego               # Handles all Kubernetes CIS rules evalutations
-    │   |   ├── test_data.rego             # CIS Test data functions
+    │   │   ├── cis_k8s.rego               # Handles all Kubernetes CIS rules evalutations
+    │   │   ├── test_data.rego             # CIS Test data functions
     │   │   ├── rules
     │   │   │   ├── cis_1_1_1                  # CIS 1.1.1 rule package 
     │   │   │   │   ├── rule.rego
@@ -32,7 +37,7 @@ should contain an beat/agent output, e.g. filesystem data
 
 ```json
 {
-    "type": "filesystem",
+    "type": "file-system",
     "mode": "0700",
     "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
     "uid": "etc",
@@ -51,37 +56,63 @@ should contain an beat/agent output, e.g. filesystem data
 <summary>Example output</summary>
   
 ```json
-[
-  {
-    "evaluation": "violation",
-    "evidence": {
-      "filemode": "0700"
+{
+  "findings": [
+    {
+      "result": {
+        "evaluation": "failed",
+        "evidence": {
+          "filemode": "0700"
+        }
+      },
+      "rule": {
+        "benchmark": "CIS Kubernetes",
+        "description": "The API server pod specification file controls various parameters that set the behavior of the API server. You should restrict its file permissions to maintain the integrity of the file. The file should be writable by only the administrators on the system.",
+        "impact": "None",
+        "name": "Ensure that the API server pod specification file permissions are set to 644 or more restrictive",
+        "remediation": "chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml",
+        "tags": [
+          "CIS",
+          "CIS v1.6.0",
+          "Kubernetes",
+          "CIS 1.1.1",
+          "Master Node Configuration"
+        ]
+      }
     },
-    "rule_name": "Ensure that the API server pod specification file permissions are set to 644 or more restrictive",
-    "tags": [
-      "CIS",
-      "CIS v1.6.0",
-      "Kubernetes",
-      "CIS 1.1.1"
-    ]
-  },
-  {
-    "evaluation": "violation",
-    "evidence": {
-      "gid": "root",
-      "uid": "etc"
-    },
-    "rule_name": "Ensure that the API server pod specification file ownership is set to root:root",
-    "tags": [
-      "CIS",
-      "CIS v1.6.0",
-      "Kubernetes",
-      "CIS 1.1.2"
-    ]
+    {
+      "result": {
+        "evaluation": "passed",
+        "evidence": {
+          "gid": "root",
+          "uid": "root"
+        }
+      },
+      "rule": {
+        "benchmark": "CIS Kubernetes",
+        "description": "The API server pod specification file controls various parameters that set the behavior of the API server. You should set its file ownership to maintain the integrity of the file. The file should be owned by root:root.",
+        "impact": "None",
+        "name": "Ensure that the API server pod specification file ownership is set to root:root",
+        "remediation": "chown root:root /etc/kubernetes/manifests/kube-apiserver.yaml",
+        "tags": [
+          "CIS",
+          "CIS v1.6.0",
+          "Kubernetes",
+          "CIS 1.1.2",
+          "Master Node Configuration"
+        ]
+      }
+    }
+  ],
+  "resource": {
+    "filename": "kube-apiserver.yaml",
+    "gid": "root",
+    "mode": "0700",
+    "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+    "type": "file-system",
+    "uid": "root"
   }
-]
-
-
+}
 ```
   
 </details>
