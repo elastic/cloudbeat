@@ -5,12 +5,14 @@
     │   │   ├── common.rego                # Common functions
     │   │   ├── data_adapter.rego          # Input data adapter
     │   │   └── test.rego                  # Common Test functions
-    │   ├── rules/cis
-    │   │   ├── cis_1_1_1                  # rule package 
-    │   │   │   ├── rule.rego
-    │   │   │   └── test.rego
-    │   │   └── ...
-    │   └── cis_k8s.rego                   # Handles all Kubernetes CIS rules evalutations
+    │   ├── cis_k8s
+    │   |   ├── cis_k8s.rego               # Handles all Kubernetes CIS rules evalutations
+    │   |   ├── test_data.rego             # CIS Test data functions
+    │   │   ├── rules
+    │   │   │   ├── cis_1_1_1                  # CIS 1.1.1 rule package 
+    │   │   │   │   ├── rule.rego
+    │   │   │   │   └── test.rego
+    │   │   │   └── ...
     └── main.rego                          # Evaluate all policies and returns the findings
     
 ## Local Evaluation
