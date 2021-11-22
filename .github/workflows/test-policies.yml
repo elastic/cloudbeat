@@ -15,3 +15,36 @@ jobs:
         uses: docker://openpolicyagent/opa
         with:
           args: "test --ignore=*.yaml --ignore=*.json -v compliance"
+  
+  test-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Download OPA Binary
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          ./opa -h
+      
+      - name: OPA test coverage
+        run: |
+          RESULT=$(./opa test -v -c compliance)
+          echo "RESULT<<EOF" >> $GITHUB_ENV
+          echo "$RESULT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        
+      - name: Create Coverage Badge
+        uses: schneegans/dynamic-badges-action@v1.1.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: a7160df46e48dff45b24096de9302d38
+          filename: csp-security-policies_coverage.json
+          label: coverage
+          message: ${{ fromJson(env.RESULT).coverage }}
+          namedLogo: Elastic
+          color: green
+          logoColor: lightblue
+
+
