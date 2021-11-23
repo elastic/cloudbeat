@@ -50,6 +50,7 @@ arg_at_least(arguments, key, minimum) {
 	to_number(value) >= minimum
 } else = false {
 	true
+}
 
 # check if file is in path
 file_in_path(path, file_path) {
