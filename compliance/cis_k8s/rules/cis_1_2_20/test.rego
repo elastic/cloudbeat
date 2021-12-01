@@ -1,13 +1,15 @@
-package compliance.cis_k8s.rules.cis_1_2_2
+package compliance.cis_k8s.rules.cis_1_2_20
 
 import data.cis_k8s.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("api_server", "--basic-auth-file=<path/to/auth/file>")
+	test.assert_fail(finding) with input as rule_input("api_server", "--secure-port=0")
 }
 
 test_pass {
+	test.assert_pass(finding) with input as rule_input("api_server", "--secure-port=1")
+	test.assert_pass(finding) with input as rule_input("api_server", "--secure-port=65535")
 	test.assert_pass(finding) with input as rule_input("api_server", "")
 }
 

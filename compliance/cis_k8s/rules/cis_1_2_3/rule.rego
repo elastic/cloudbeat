@@ -1,0 +1,26 @@
+package compliance.cis_k8s.rules.cis_1_2_3
+
+import data.compliance.cis_k8s
+import data.compliance.lib.common
+import data.compliance.lib.data_adapter
+
+# Ensure that the --token-auth-file parameter is not set (Automated)
+finding = result {
+	command_args := data_adapter.api_server_command_args
+	rule_evaluation := common.contains_key(command_args, "--token-auth-file") == false
+
+	# set result
+	result := {
+		"evaluation": common.calculate_result(rule_evaluation),
+		"evidence": {"command_args": command_args},
+	}
+}
+
+metadata = {
+	"name": "Ensure that the --token-auth-file parameter is not set",
+	"description": "The token-based authentication utilizes static tokens to authenticate requests to the apiserver. The tokens are stored in clear-text in a file on the apiserver, and cannot be revoked or rotated without restarting the apiserver. Hence, do not use static token-based authentication.",
+	"impact": "You will have to configure and use alternate authentication mechanisms such as tokens and certificates. Username and password for basic authentication could no longer be used.",
+	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.3", "API Server"]),
+	"benchmark": cis_k8s.benchmark_name,
+	"remediation": "Follow the documentation and configure alternate mechanisms for authentication. Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and remove the --token-auth-file=<filename> parameter.",
+}

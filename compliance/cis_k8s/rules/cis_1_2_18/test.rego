@@ -1,10 +1,10 @@
-package compliance.cis_k8s.rules.cis_1_2_2
+package compliance.cis_k8s.rules.cis_1_2_18
 
 import data.cis_k8s.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("api_server", "--basic-auth-file=<path/to/auth/file>")
+	test.assert_fail(finding) with input as rule_input("api_server", "--insecure-bind-address=")
 }
 
 test_pass {

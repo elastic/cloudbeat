@@ -33,26 +33,50 @@ array_contains(array, key) {
 	true
 }
 
-# gets argument's value
-get_arg_value(arguments, key) = value {
-	contains(arguments[i], key)
-	argument := arguments[i]
-	[_, value] := split(argument, "=")
-}
-
-# checks if argument contains value (argument format is csv)
-arg_values_contains(arguments, key, value) {
-	argument := get_arg_value(arguments, key)
-	values := split(argument, ",")
-	value = values[_]
+contains_key(object, key) {
+	object[key]
 } else = false {
 	true
 }
 
-# checks if a argument is set to greater value then minimum
-arg_at_least(arguments, key, minimum) {
-	value := get_arg_value(arguments, key)
+contains_key_with_value(object, key, value) {
+	object[key] = value
+} else = false {
+	true
+}
+
+# checks if argument contains value (argument format is csv)
+arg_values_contains(arguments, key, value) {
+	argument := arguments[key]
+	values := split(argument, ",")
+	value == values[_]
+} else = false {
+	true
+}
+
+# checks if a value is greater or equals to a minimum value
+greater_or_equal(value, minimum) {
 	to_number(value) >= minimum
+} else = false {
+	true
+}
+
+# checks if duration is greater than some minimum value
+# duration: string (https://pkg.go.dev/time#ParseDuration)
+duration_gt(duration, min_duration) {
+	duration_ns := time.parse_duration_ns(duration)
+	min_duration_ns := time.parse_duration_ns(min_duration)
+	duration_ns >= min_duration_ns
+} else = false {
+	true
+}
+
+# checks if duration is greater or equal to some minimum value
+# duration: string (https://pkg.go.dev/time#ParseDuration)
+duration_gt(duration, min_duration) {
+	duration_ns := time.parse_duration_ns(duration)
+	min_duration_ns := time.parse_duration_ns(min_duration)
+	duration_ns > min_duration_ns
 } else = false {
 	true
 }
