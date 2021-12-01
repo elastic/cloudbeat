@@ -59,7 +59,6 @@ scheduler_args = args {
 	args = process_args(process_args_list)
 }
 
-
 api_server_command_args = args {
 	is_api_server_process
 	args = process_args(process_args_list)
@@ -71,5 +70,15 @@ is_etcd_process {
 
 etcd_args = args {
 	is_etcd_process
+	args = process_args(process_args_list)
+}
+
+is_kublet_process {
+	input.type == "kublet"
+}
+
+# split the process args string into an array
+kublet_args = args {
+	is_kublet_process
 	args = process_args(process_args_list)
 }
