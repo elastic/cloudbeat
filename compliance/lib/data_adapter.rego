@@ -64,3 +64,12 @@ api_server_command_args = args {
 	is_api_server_process
 	args = process_args(process_args_list)
 }
+
+is_etcd_process {
+	input.type == "etcd"
+}
+
+etcd_args = args {
+	is_etcd_process
+	args = process_args(process_args_list)
+}
