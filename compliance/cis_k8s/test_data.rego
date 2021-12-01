@@ -10,6 +10,12 @@ filesystem_input(filename, mode, uid, gid) = {
 	"gid": gid,
 }
 
+# Recivies an array of arguments representing the kube-scheduler command
+scheduler_input(process_type, arguments) = {
+	"type": process_type,
+	"command": concat(" ", array.concat(["kube-scheduler"], arguments)),
+}
+
 # Recivies an array of arguments representing the API Server command
 api_server_input(process_type, arguments) = {
 	"type": process_type,

@@ -50,6 +50,16 @@ is_api_server_process {
 	input.type == "api_server"
 }
 
+is_scheduler_process {
+	input.type == "scheduler"
+}
+
+scheduler_args = args {
+	is_scheduler_process
+	args = process_args(process_args_list)
+}
+
+
 api_server_command_args = args {
 	is_api_server_process
 	args = process_args(process_args_list)
