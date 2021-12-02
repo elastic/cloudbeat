@@ -22,5 +22,5 @@ metadata = {
 	"impact": "You require TLS to be configured on apiserver as well as kubelets.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.6", "API Server"]),
 	"benchmark": cis_k8s.benchmark_name,
-	"remediation": "Follow the Kubernetes documentation and setup the TLS connection between the apiserver and kubelets. Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the -- kubelet-certificate-authority parameter to the path to the cert file for the certificate authority.",
+	"remediation": "Follow the Kubernetes documentation and setup the TLS connection between the apiserver and kubelets. Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the --kubelet-certificate-authority parameter to the path to the cert file for the certificate authority.",
 }

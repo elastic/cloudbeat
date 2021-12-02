@@ -1,5 +1,7 @@
 package compliance.lib.data_adapter
 
+import data.compliance.lib.common
+
 is_filesystem {
 	input.type == "file-system"
 }
@@ -34,7 +36,7 @@ process_args_list = args_list {
 }
 
 process_args(args_list) = args {
-	args = {arg: value | [arg, value] = split(args_list[_], "=")}
+	args = {arg: value | [arg, value] = common.split_key_value(args_list[_])}
 }
 
 is_controller_manager_process {

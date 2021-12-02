@@ -86,3 +86,25 @@ file_in_path(path, file_path) {
 	closed_path := concat("", [file_path, "/"]) # make sure last dir name is closed by "/"
 	contains(closed_path, path)
 }
+
+# splits key value string by first occurrence of =
+split_key_value(key_value_string) = [key, value] {
+	seperator_index := indexof(key_value_string, "=")
+
+	# extract key
+	key_start_index := 0
+	key_length := seperator_index
+	key := substring(key_value_string, key_start_index, key_length)
+
+	# extract value
+	value_start_index := seperator_index + 1
+	value_length := (count(key_value_string) - seperator_index) - 1
+	value := substring(key_value_string, value_start_index, value_length)
+}
+
+test_split_key_value {
+	key_value_string := "--my-arg-name=some_value=true"
+	[arg, value] = split_key_value(key_value_string)
+	arg == "--my-arg-name"
+	value == "some_value=true"
+}

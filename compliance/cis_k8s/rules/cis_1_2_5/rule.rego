@@ -24,7 +24,7 @@ finding = result {
 
 metadata = {
 	"name": "Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate",
-	"description": "The apiserver, by default, does not authenticate itself to the kubelet's HTTPS endpoints. The requests from the apiserver are treated anonymously. You should set up certificate- based kubelet authentication to ensure that the apiserver authenticates itself to kubelets when submitting requests.",
+	"description": "The apiserver, by default, does not authenticate itself to the kubelet's HTTPS endpoints. The requests from the apiserver are treated anonymously. You should set up certificate-based kubelet authentication to ensure that the apiserver authenticates itself to kubelets when submitting requests.",
 	"impact": "You require TLS to be configured on apiserver as well as kubelets.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.5", "API Server"]),
 	"benchmark": cis_k8s.benchmark_name,
