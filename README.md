@@ -5,17 +5,20 @@
     ├── compliance                         # Compliance policies
     │   ├── lib
     │   │   ├── common.rego                # Common functions
+    │   │   ├── common_tests.rego          # Common functions tests
     │   │   ├── data_adapter.rego          # Input data adapter
     │   │   └── test.rego                  # Common Test functions
     │   ├── cis_k8s
     │   │   ├── cis_k8s.rego               # Handles all Kubernetes CIS rules evalutations
-    │   │   ├── test_data.rego             # CIS Test data functions
+    │   │   ├── test_data.rego             # CIS Test data generators
+    │   │   ├── schemas                    # Benchmark's schemas
+    │   │   │   └── input_scehma.rego      
     │   │   ├── rules
     │   │   │   ├── cis_1_1_1              # CIS 1.1.1 rule package 
     │   │   │   │   ├── rule.rego
     │   │   │   │   └── test.rego
     │   │   │   └── ...
-    └── main.rego                          # Evaluate all policies and returns the findings
+    └── main.rego                          # Evaluates all policies and returns the findings
     
 ## Local Evaluation
 Add the following configuration files into the root folder
@@ -44,10 +47,14 @@ should contain an beat/agent output, e.g. filesystem data
 ```
 
 ### Evaluate entire policy into output.json
-`opa eval data.main --format pretty -i input.json -b . > output.json`
+```console
+opa eval data.main --format pretty -i input.json -b . > output.json
+```
 
 ### Evaluate findings only
-`opa eval data.main.findings --format pretty -i input.json -b . > output.json`
+```console
+opa eval data.main.findings --format pretty -i input.json -b . > output.json
+```
 
 <details> 
 <summary>Example output</summary>
@@ -114,12 +121,27 @@ should contain an beat/agent output, e.g. filesystem data
   
 </details>
 
+### Evaluate with input schema
+
+```console
+❯ opa eval data.main --format pretty -i input.json -b . -s compliance/cis_k8s/schemas/input_schema.json
+1 error occurred: compliance/lib/data_adapter.rego:11: rego_type_error: undefined ref: input.filenames
+        input.filenames
+              ^
+              have: "filenames"
+              want (one of): ["command" "filename" "gid" "mode" "path" "type" "uid"]
+
+```
 ## Local Testing
 ### Test entire policy
-`opa test -v compliance`
+```console
+opa test -v compliance
+```
 
 ### Test specific rule
-`opa test -v compliance/lib compliance/cis_k8s.rego compliance/rules/cis_1_1_2`
+```console
+opa test -v compliance/lib compliance/cis_k8s.rego compliance/rules/cis_1_1_2
+```
 
 ### Pre-commit hooks
 see [pre-commit](https://pre-commit.com/) package
