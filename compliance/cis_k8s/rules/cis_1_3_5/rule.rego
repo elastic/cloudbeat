@@ -6,13 +6,17 @@ import data.compliance.lib.data_adapter
 
 # Ensure that the --root-ca-file argument is set as appropriate (Automated)
 finding = result {
-	command_args := data_adapter.controller_manager_args
-	rule_evaluation := common.contains_key(command_args, "--root-ca-file")
+	# filter
+	data_adapter.is_kube_controller_manger
+
+	# evaluate
+	process_args := data_adapter.process_args
+	rule_evaluation := common.contains_key(process_args, "--root-ca-file")
 
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 

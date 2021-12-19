@@ -5,20 +5,25 @@ import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
 # Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)
-command_args := data_adapter.api_server_command_args
+
+# evaluate
+process_args := data_adapter.process_args
 
 default rule_evaluation = false
 
 rule_evaluation {
-	value := command_args["--audit-log-maxsize"]
+	value := process_args["--audit-log-maxsize"]
 	common.greater_or_equal(value, 100)
 }
 
 finding = result {
+	# filter
+	data_adapter.is_kube_apiserver
+
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 

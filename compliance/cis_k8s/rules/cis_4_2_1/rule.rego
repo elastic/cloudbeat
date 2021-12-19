@@ -6,13 +6,17 @@ import data.compliance.lib.data_adapter
 
 # Ensure that the --anonymous-auth argument is set to false (Automated)
 finding = result {
-	command_args := data_adapter.kublet_args
-	rule_evaluation = common.contains_key_with_value(command_args, "--anonymous-auth", "false")
+	# filter
+	data_adapter.is_kubelet
+
+	# evaluate
+	process_args := data_adapter.process_args
+	rule_evaluation = common.contains_key_with_value(process_args, "--anonymous-auth", "false")
 
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 

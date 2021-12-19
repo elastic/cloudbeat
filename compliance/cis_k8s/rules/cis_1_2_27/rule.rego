@@ -7,21 +7,26 @@ import data.compliance.lib.data_adapter
 # Ensure that the --service-account-lookup argument is set to true (Automated)
 
 # Verify that if the --service-account-lookup argument exists it is set to true.
-command_args := data_adapter.api_server_command_args
+
+# evaluate
+process_args := data_adapter.process_args
 
 default rule_evaluation = false
 
 rule_evaluation {
-	common.contains_key_with_value(command_args, "--service-account-lookup", "true")
+	common.contains_key_with_value(process_args, "--service-account-lookup", "true")
 } else {
-	common.contains_key(command_args, "--service-account-lookup") == false
+	common.contains_key(process_args, "--service-account-lookup") == false
 }
 
 finding = result {
+	# filter
+	data_adapter.is_kube_apiserver
+
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 

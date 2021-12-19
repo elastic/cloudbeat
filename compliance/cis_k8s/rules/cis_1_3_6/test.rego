@@ -4,17 +4,17 @@ import data.cis_k8s.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("controller_manager", "")
-	test.assert_fail(finding) with input as rule_input("controller_manager", "--feature-gates=RotateKubeletServerCertificate=false")
+	test.assert_fail(finding) with input as rule_input("")
+	test.assert_fail(finding) with input as rule_input("--feature-gates=RotateKubeletServerCertificate=false")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("controller_manager", "--feature-gates=RotateKubeletServerCertificate=true")
+	test.assert_pass(finding) with input as rule_input("--feature-gates=RotateKubeletServerCertificate=true")
 	true
 }
 
 test_not_evaluated {
-	not finding with input as rule_input("some_process", "")
+	not finding with input as test_data.process_input("some_process", [])
 }
 
-rule_input(process_type, argument) = test_data.controller_manager_input(process_type, [argument])
+rule_input(argument) = test_data.process_input("kube-controller-manager", [argument])

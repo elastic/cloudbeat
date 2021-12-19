@@ -6,13 +6,17 @@ import data.compliance.lib.data_adapter
 
 # Ensure that the --peer-client-cert-auth argument is set to true (Automated)
 finding = result {
-	command_args := data_adapter.etcd_args
-	rule_evaluation := common.contains_key_with_value(command_args, "--peer-client-cert-auth", "true")
+	# filter
+	data_adapter.is_etcd
+
+	# evaluate
+	process_args := data_adapter.process_args
+	rule_evaluation := common.contains_key_with_value(process_args, "--peer-client-cert-auth", "true")
 
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 

@@ -8,79 +8,61 @@ is_filesystem {
 
 filename = file_name {
 	is_filesystem
-	file_name = input.filename
+	file_name := input.filename
 }
 
 filemode = file_mode {
 	is_filesystem
-	file_mode = input.mode
+	file_mode := input.mode
 }
 
 file_path = path {
 	is_filesystem
-	path = input.path
+	path := input.path
 }
 
 owner_user_id = uid {
 	is_filesystem
-	uid = input.uid
+	uid := input.uid
 }
 
 owner_group_id = gid {
 	is_filesystem
-	gid = input.gid
+	gid := input.gid
+}
+
+is_process {
+	input.type == "process"
+}
+
+process_name = name {
+	name := process_args_list[0]
 }
 
 process_args_list = args_list {
-	args_list = split(input.command, " ")
+	args_list := split(input.command, " ")
 }
 
-process_args(args_list) = args {
-	args = {arg: value | [arg, value] = common.split_key_value(args_list[_])}
+process_args = args {
+	args := {arg: value | [arg, value] = common.split_key_value(process_args_list[_])}
 }
 
-is_controller_manager_process {
-	input.type == "controller_manager"
+is_kube_apiserver {
+	process_name == "kube-apiserver"
 }
 
-controller_manager_args = args {
-	is_controller_manager_process
-	args = process_args(process_args_list)
+is_kube_controller_manger {
+	process_name == "kube-controller-manager"
 }
 
-is_api_server_process {
-	input.type == "api_server"
+is_kube_scheduler {
+	process_name == "kube-scheduler"
 }
 
-is_scheduler_process {
-	input.type == "scheduler"
+is_etcd {
+	process_name == "etcd"
 }
 
-scheduler_args = args {
-	is_scheduler_process
-	args = process_args(process_args_list)
-}
-
-api_server_command_args = args {
-	is_api_server_process
-	args = process_args(process_args_list)
-}
-
-is_etcd_process {
-	input.type == "etcd"
-}
-
-etcd_args = args {
-	is_etcd_process
-	args = process_args(process_args_list)
-}
-
-is_kublet_process {
-	input.type == "kublet"
-}
-
-# split the process args string into an array
-kublet_args = args {
-	is_kublet_process
-	args = process_args(process_args_list)
+is_kubelet {
+	process_name == "kubelet"
 }

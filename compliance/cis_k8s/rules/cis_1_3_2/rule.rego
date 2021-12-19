@@ -6,13 +6,17 @@ import data.compliance.lib.data_adapter
 
 # Ensure that the --profiling argument is set to false (Automated)
 finding = result {
-	command_args := data_adapter.controller_manager_args
-	rule_evaluation := common.contains_key_with_value(command_args, "--profiling", "false")
+	# filter
+	data_adapter.is_kube_controller_manger
+
+	# evaluate
+	process_args := data_adapter.process_args
+	rule_evaluation := common.contains_key_with_value(process_args, "--profiling", "false")
 
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 

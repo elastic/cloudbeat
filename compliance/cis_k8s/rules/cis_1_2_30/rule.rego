@@ -5,20 +5,25 @@ import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
 # Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Automated)
-command_args := data_adapter.api_server_command_args
+
+# evaluate
+process_args := data_adapter.process_args
 
 default rule_evaluation = false
 
 rule_evaluation {
-	command_args["--tls-cert-file"]
-	command_args["--tls-private-key-file"]
+	process_args["--tls-cert-file"]
+	process_args["--tls-private-key-file"]
 }
 
 finding = result {
+	# filter
+	data_adapter.is_kube_apiserver
+
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 

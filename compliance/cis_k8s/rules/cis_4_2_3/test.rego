@@ -4,15 +4,15 @@ import data.cis_k8s.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("kublet", "")
+	test.assert_fail(finding) with input as rule_input("")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("kublet", "--client-ca-file=<path/to/client-ca-file>")
+	test.assert_pass(finding) with input as rule_input("--client-ca-file=<path/to/client-ca-file>")
 }
 
 test_not_evaluated {
-	not finding with input as rule_input("some_process", "")
+	not finding with input as test_data.process_input("some_process", [])
 }
 
-rule_input(process_type, argument) = test_data.kublet_input(process_type, [argument])
+rule_input(argument) = test_data.process_input("kubelet", [argument])

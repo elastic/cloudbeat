@@ -7,22 +7,27 @@ import data.compliance.lib.data_adapter
 # Ensure that the --authorization-mode argument is not set to AlwaysAllow (Automated)
 
 # If the --authorization-mode argument is present check that it is not set to AlwaysAllow.
-command_args := data_adapter.kublet_args
+
+# evaluate
+process_args := data_adapter.process_args
 
 default rule_evaluation = false
 
 rule_evaluation {
-	command_args["--authorization-mode"]
-	common.arg_values_contains(command_args, "--authorization-mode", "AlwaysAllow") == false
+	process_args["--authorization-mode"]
+	common.arg_values_contains(process_args, "--authorization-mode", "AlwaysAllow") == false
 }
 
 # todo: If it is not present check that there is a Kubelet config file specified by --config, and that file sets authorization: mode to something other than AlwaysAllow.
 
 finding = result {
+	# filter
+	data_adapter.is_kubelet
+
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 

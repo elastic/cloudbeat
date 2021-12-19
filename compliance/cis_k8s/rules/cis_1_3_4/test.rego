@@ -4,15 +4,15 @@ import data.cis_k8s.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("controller_manager", "")
+	test.assert_fail(finding) with input as rule_input("")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("controller_manager", "--service-account-private-key-file=<filename>")
+	test.assert_pass(finding) with input as rule_input("--service-account-private-key-file=<filename>")
 }
 
 test_not_evaluated {
-	not finding with input as rule_input("some_process", "")
+	not finding with input as test_data.process_input("some_process", [])
 }
 
-rule_input(process_type, argument) = test_data.controller_manager_input(process_type, [argument])
+rule_input(argument) = test_data.process_input("kube-controller-manager", [argument])

@@ -5,20 +5,25 @@ import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
 # Ensure that the --cert-file and --key-file arguments are set as appropriate (Automated)
-command_args := data_adapter.etcd_args
+
+# evaluate
+process_args := data_adapter.process_args
 
 default rule_evaluation = false
 
 rule_evaluation {
-	command_args["--cert-file"]
-	command_args["--key-file"]
+	process_args["--cert-file"]
+	process_args["--key-file"]
 }
 
 finding = result {
+	# filter
+	data_adapter.is_etcd
+
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 

@@ -6,13 +6,17 @@ import data.compliance.lib.data_adapter
 
 # Ensure that the admission control plugin NodeRestriction is set (Automated)
 finding = result {
-	command_args := data_adapter.api_server_command_args
-	rule_evaluation := common.arg_values_contains(command_args, "--enable-admission-plugins", "NodeRestriction")
+	# filter
+	data_adapter.is_kube_apiserver
+
+	# evaluate
+	process_args := data_adapter.process_args
+	rule_evaluation := common.arg_values_contains(process_args, "--enable-admission-plugins", "NodeRestriction")
 
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"command_args": command_args},
+		"evidence": {"process_args": process_args},
 	}
 }
 
