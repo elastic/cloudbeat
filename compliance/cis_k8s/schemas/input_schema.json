@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "The root schema",
+  "examples": [
+    {
+      "type": "process",
+      "command": "kube-apiserver --disable-admission-plugins=PodNodeSelector,NamespaceLifecycle"
+    },
+    {
+      "type": "file-system",
+      "mode": "0700",
+      "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+      "uid": "root",
+      "filename": "kube-apiserver.yaml",
+      "gid": "root"
+    }
+  ],
+  "anyOf": [
+    {
+      "type": "object",
+      "examples": [
+        {
+          "type": "process",
+          "command": "kube-apiserver --disable-admission-plugins=PodNodeSelector,NamespaceLifecycle"
+        }
+      ],
+      "required": [
+        "type",
+        "command"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "process",
+          "title": "The type schema"
+        },
+        "command": {
+          "type": "string",
+          "title": "The command schema",
+          "examples": [
+            "kube-apiserver --disable-admission-plugins=PodNodeSelector,NamespaceLifecycle"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "title": "The second anyOf schema",
+      "examples": [
+        {
+          "type": "file-system",
+          "mode": "0700",
+          "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+          "uid": "root",
+          "filename": "kube-apiserver.yaml",
+          "gid": "root"
+        }
+      ],
+      "required": [
+        "type",
+        "mode",
+        "path",
+        "uid",
+        "filename",
+        "gid"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "file-system",
+          "title": "The type schema"
+        },
+        "mode": {
+          "type": "string",
+          "title": "The mode schema",
+          "examples": [
+            "0700"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "title": "The path schema",
+          "examples": [
+            "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml"
+          ]
+        },
+        "uid": {
+          "type": "string",
+          "title": "The uid schema",
+          "examples": [
+            "root"
+          ]
+        },
+        "filename": {
+          "type": "string",
+          "title": "The filename schema",
+          "examples": [
+            "kube-apiserver.yaml"
+          ]
+        },
+        "gid": {
+          "type": "string",
+          "title": "The gid schema",
+          "examples": [
+            "root"
+          ]
+        }
+      }
+    }
+  ]
+}

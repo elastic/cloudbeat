@@ -21,7 +21,7 @@ file_ownership_match(uid, gid, requierd_uid, requierd_gid) {
 
 # todo: compare performance of regex alternatives
 file_permission_match(filemode, user, group, other) {
-	pattern = sprintf("0?[0-%d][0-%d][0-%d]", [user, group, other])
+	pattern = sprintf("0[0-%d][0-%d][0-%d]", [user, group, other])
 	regex.match(pattern, filemode)
 } else = false {
 	true
@@ -66,17 +66,17 @@ greater_or_equal(value, minimum) {
 duration_gt(duration, min_duration) {
 	duration_ns := time.parse_duration_ns(duration)
 	min_duration_ns := time.parse_duration_ns(min_duration)
-	duration_ns >= min_duration_ns
+	duration_ns > min_duration_ns
 } else = false {
 	true
 }
 
 # checks if duration is greater or equal to some minimum value
 # duration: string (https://pkg.go.dev/time#ParseDuration)
-duration_gt(duration, min_duration) {
+duration_gte(duration, min_duration) {
 	duration_ns := time.parse_duration_ns(duration)
 	min_duration_ns := time.parse_duration_ns(min_duration)
-	duration_ns > min_duration_ns
+	duration_ns >= min_duration_ns
 } else = false {
 	true
 }
@@ -85,6 +85,8 @@ duration_gt(duration, min_duration) {
 file_in_path(path, file_path) {
 	closed_path := concat("", [file_path, "/"]) # make sure last dir name is closed by "/"
 	contains(closed_path, path)
+} else = false {
+	true
 }
 
 # splits key value string by first occurrence of =
@@ -100,11 +102,4 @@ split_key_value(key_value_string) = [key, value] {
 	value_start_index := seperator_index + 1
 	value_length := (count(key_value_string) - seperator_index) - 1
 	value := substring(key_value_string, value_start_index, value_length)
-}
-
-test_split_key_value {
-	key_value_string := "--my-arg-name=some_value=true"
-	[arg, value] = split_key_value(key_value_string)
-	arg == "--my-arg-name"
-	value == "some_value=true"
 }
