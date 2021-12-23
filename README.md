@@ -12,14 +12,14 @@
     │   │   ├── cis_k8s.rego               # Handles all Kubernetes CIS rules evalutations
     │   │   ├── test_data.rego             # CIS Test data generators
     │   │   ├── schemas                    # Benchmark's schemas
-    │   │   │   └── input_scehma.rego      
+    │   │   │   └── input_scehma.rego
     │   │   ├── rules
-    │   │   │   ├── cis_1_1_1              # CIS 1.1.1 rule package 
+    │   │   │   ├── cis_1_1_1              # CIS 1.1.1 rule package
     │   │   │   │   ├── rule.rego
     │   │   │   │   └── test.rego
     │   │   │   └── ...
     └── main.rego                          # Evaluates all policies and returns the findings
-    
+
 ## Local Evaluation
 Add the following configuration files into the root folder
 ##### `data.yaml`
@@ -56,9 +56,9 @@ opa eval data.main --format pretty -i input.json -b . > output.json
 opa eval data.main.findings --format pretty -i input.json -b . > output.json
 ```
 
-<details> 
+<details>
 <summary>Example output</summary>
-  
+
 ```json
 {
   "findings": [
@@ -118,7 +118,7 @@ opa eval data.main.findings --format pretty -i input.json -b . > output.json
   }
 }
 ```
-  
+
 </details>
 
 ### Evaluate with input schema
@@ -140,7 +140,7 @@ opa test -v compliance
 
 ### Test specific rule
 ```console
-opa test -v compliance/lib compliance/cis_k8s.rego compliance/rules/cis_1_1_2
+opa test -v compliance/lib compliance/cis_k8s/test_data.rego compliance/cis_k8s/rules/cis_1_1_2 --ignore="common_tests.rego"
 ```
 
 ### Pre-commit hooks
