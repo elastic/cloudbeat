@@ -103,3 +103,12 @@ split_key_value(key_value_string) = [key, value] {
 	value_length := (count(key_value_string) - seperator_index) - 1
 	value := substring(key_value_string, value_start_index, value_length)
 }
+
+ranges_smaller_than(ranges, value) {
+	range := ranges[_]
+	range < value
+}
+
+ranges_gte(ranges, value) {
+	not ranges_smaller_than(ranges, value)
+}

@@ -7,7 +7,7 @@ import data.compliance.lib.common
 # data is policy/configuration
 # output is findings
 
-resource = input
+resource = input.resource
 
 findings = cis_k8s.findings
 
