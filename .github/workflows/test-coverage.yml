@@ -19,8 +19,8 @@ jobs:
       
       - name: OPA test coverage
         run: |
-          ./opa test -c compliance > coverage.json
-          echo "COVERAGE=${{ jq '.coverage' coverage.json }}" >> $GITHUB_ENV
+          coverage=$( ./opa test -c compliance | jq '.coverage' )
+          echo "COVERAGE=$coverage" >> "$GITHUB_ENV"
         
       - name: Create Coverage Badge
         uses: schneegans/dynamic-badges-action@v1.1.0
