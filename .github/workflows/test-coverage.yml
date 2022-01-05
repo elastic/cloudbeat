@@ -19,10 +19,8 @@ jobs:
       
       - name: OPA test coverage
         run: |
-          RESULT=$(./opa test -v -c compliance)
-          echo "RESULT<<EOF" >> $GITHUB_ENV
-          echo "$RESULT" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          ./opa test -c compliance > coverage.json
+          echo "COVERAGE=${{ jq '.coverage' coverage.json }}" >> $GITHUB_ENV
         
       - name: Create Coverage Badge
         uses: schneegans/dynamic-badges-action@v1.1.0
@@ -31,7 +29,7 @@ jobs:
           gistID: a7160df46e48dff45b24096de9302d38
           filename: csp-security-policies_coverage.json
           label: coverage
-          message: ${{ fromJson(env.RESULT).coverage }}
+          message: ${{ (env.COVERAGE) }}
           namedLogo: Elastic
           color: green
           logoColor: lightblue
