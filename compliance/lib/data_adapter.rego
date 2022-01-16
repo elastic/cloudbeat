@@ -3,36 +3,36 @@ package compliance.lib.data_adapter
 import data.compliance.lib.common
 
 is_filesystem {
-	input.type == "file-system"
+	input.resource.type == "file-system"
 }
 
 filename = file_name {
 	is_filesystem
-	file_name := input.filename
+	file_name := input.resource.filename
 }
 
 filemode = file_mode {
 	is_filesystem
-	file_mode := input.mode
+	file_mode := input.resource.mode
 }
 
 file_path = path {
 	is_filesystem
-	path := input.path
+	path := input.resource.path
 }
 
 owner_user_id = uid {
 	is_filesystem
-	uid := input.uid
+	uid := input.resource.uid
 }
 
 owner_group_id = gid {
 	is_filesystem
-	gid := input.gid
+	gid := input.resource.gid
 }
 
 is_process {
-	input.type == "process"
+	input.resource.type == "process"
 }
 
 process_name = name {
@@ -42,7 +42,7 @@ process_name = name {
 
 process_args_list = args_list {
 	is_process
-	args_list := split(input.command, " ")
+	args_list := split(input.resource.command, " ")
 }
 
 process_args = args {
@@ -70,7 +70,7 @@ is_kubelet {
 }
 
 is_kube_api {
-	input.type == "kube-api"
+	input.resource.type == "kube-api"
 }
 
 pod = p {
