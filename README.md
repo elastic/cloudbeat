@@ -28,8 +28,11 @@ should contain the list of rules you want to evaluate (also supports json)
 ```yaml
 activated_rules:
   cis_k8s:
-    cis_1_1_1: true
-    cis_1_1_2: true
+    - cis_1_1_1
+    - cis_1_1_2
+  cis_eks:
+    - cis_3_1_1
+    - cis_3_1_2
 ```
 
 ##### `input.json`
