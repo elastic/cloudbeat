@@ -3,7 +3,7 @@ package compliance.lib.data_adapter
 import data.compliance.lib.common
 
 is_filesystem {
-	input.resource.type == "file-system"
+	input.type == "file-system"
 }
 
 filename = file_name {
@@ -32,7 +32,7 @@ owner_group_id = gid {
 }
 
 is_process {
-	input.resource.type == "process"
+	input.type == "process"
 }
 
 process_name = name {
@@ -70,7 +70,7 @@ is_kubelet {
 }
 
 is_kube_api {
-	input.resource.type == "kube-api"
+	input.type == "kube-api"
 }
 
 pod = p {
