@@ -9,6 +9,12 @@ import data.compliance.lib.common
 
 resource = input.resource
 
-findings = cis_k8s.findings
+findings := f {
+	# iterate over activated benchmarks
+	benchmarks := [key | data.activated_rules[key]]
+
+	# aggregate findings from activated benchmarks
+	f := [finding | data.compliance[benchmarks[_]].findings[finding]]
+}
 
 metadata = common.metadata
