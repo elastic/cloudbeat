@@ -18,7 +18,7 @@ findings[finding] {
 }
 
 findings[finding] {
-	# no activated rules were configured for this benchmark, run all rules
+	# if no activated rules were configured for this benchmark, run all rules
 	not data.activated_rules.cis_k8s
 
 	finding = {
