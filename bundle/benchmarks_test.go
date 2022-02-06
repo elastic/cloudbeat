@@ -13,3 +13,11 @@ func TestCISKubernetes(t *testing.T) {
 	assert.NoError(err)
 	assert.Greater(len(policies), 70)
 }
+
+func TestCISEKS(t *testing.T) {
+	assert := assert.New(t)
+	policies, err := CISEks()
+
+	assert.NoError(err)
+	assert.NotEmpty(policies)
+}
