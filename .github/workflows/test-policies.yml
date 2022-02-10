@@ -11,8 +11,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Pull OPA Docker image and run opa test
+      - name: OPA test
         uses: docker://openpolicyagent/opa
         with:
           args: "test --ignore=*.yaml --ignore=*.json -v compliance"
+      - name: OPA check -strict
+        uses: docker://openpolicyagent/opa
+        with:
+          args: "check --strict --bundle ."
 
