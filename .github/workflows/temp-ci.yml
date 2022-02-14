@@ -1,0 +1,98 @@
+name: OpaBeat-CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - staging-update-from-upstream
+
+
+env:
+  OPABEAT_REGISTRY: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com
+  OPABEAT_IMAGE_BASE: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com/opabeat
+  OPABEAT_IMAGE: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com/opabeat:${{ github.sha }}
+  AGENT_REGISTRY: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com
+  AGENT_IMAGE_BASE: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com/elastic-agent
+  AGENT_IMAGE: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com/elastic-agent:${{ github.sha }}
+  AWS_ECR_KEY: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
+  AWS_ECR_SECRET: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
+  AWS_ECR_REGION: ${{ secrets.AWS_ECR_REGION_DEVELOP }}
+  K8S_MANIFEST_DIR: cloudbeat/deploy/k8s
+  DEV: true
+  SNAPSHOT: true
+  PLATFORMS: linux/amd64
+  TYPES: docker
+
+jobs:
+  build_opabeat:
+    name: OpaBeat CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.2
+
+      - name: Setup Mage
+        run: |
+          make mage
+
+      - name: Build Opabeat Bin
+        working-directory: cloudbeat
+        run: |
+          GOOS=linux go build -v && docker build -t opabeat .
+
+      - name: Unit Test Opabeat
+        working-directory: ./cloudbeat
+        run: |
+          GOOS=linux go test ./...
+
+      - name: Get diff k8s manifests
+        uses: technote-space/get-diff-action@v4
+        with:
+          PATTERNS: ${{ env.K8S_MANIFEST_DIR }}/**
+
+      - name: Run K8s manifest tests
+        if: env.GIT_DIFF
+        uses: stefanprodan/kube-tools@v1
+        with:
+          kubectl: 1.18.2
+          kubeval: v0.16.1
+          command: |
+            echo "Run kubeval"
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/cloudbeat-ds.yaml
+  build_elastic_agent:
+    name: Elastic-Agent CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Login to ECR
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.OPABEAT_REGISTRY }}
+          username: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
+          password: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.2
+
+      - name: Setup Mage
+        run: |
+          make mage
+
+      # - name: Package Elastic-Agent
+      #   working-directory: x-pack/elastic-agent
+      #   run: |
+      #     DEV=true SNAPSHOT=true PLATFORMS=linux/amd64 TYPES=docker mage -v package
