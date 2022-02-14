@@ -59,7 +59,7 @@ jobs:
           GOOS=linux go build -v && docker build -t cloudbeat .
 
       - name: Unit Test Opabeat
-        working-directory: ./cloudbeat
+        # working-directory: ./cloudbeat
         run: |
           GOOS=linux go test ./...
 
