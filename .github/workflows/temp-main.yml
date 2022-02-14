@@ -55,7 +55,7 @@ jobs:
       #   run: |
       #       make mage
 
-      - name: Build Cloudbeat Bin
+      - name: Build Cloudbeat
         run: |
             GOOS=linux go build -v && docker build -t cloudbeat .
 

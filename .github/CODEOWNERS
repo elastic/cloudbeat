@@ -1,0 +1,5 @@
+# Infra & devops related
+/deploy/ @davesys911
+/.github/ @davesys911
+Makefile @davesys911
+JUSTFILE @davesys911
