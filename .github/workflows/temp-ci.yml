@@ -1,15 +1,9 @@
-name: OpaBeat-CI
+name: Cloudbeat-CI
 
 on:
   pull_request:
     branches:
       - main
-
-  push:
-    branches:
-      - staging-update-from-upstream
-      - main
-
 
 env:
   OPABEAT_REGISTRY: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com

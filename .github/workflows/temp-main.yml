@@ -1,4 +1,4 @@
-name: Publish Opabeat & Elastic-Agent images from csp main
+name: Publish Cloudbeat from csp main
 
 on:
   push:
