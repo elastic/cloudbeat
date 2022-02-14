@@ -21,18 +21,26 @@ env:
   AWS_ECR_KEY: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
   AWS_ECR_SECRET: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
   AWS_ECR_REGION: ${{ secrets.AWS_ECR_REGION_DEVELOP }}
-  K8S_MANIFEST_DIR: cloudbeat/deploy/k8s
+  K8S_MANIFEST_DIR: deploy/k8s
   DEV: true
   SNAPSHOT: true
   PLATFORMS: linux/amd64
   TYPES: docker
 
 jobs:
-  build_opabeat:
-    name: OpaBeat CI
+  build_cloudbeat:
+    name: Cloudbeat CI
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: add rego repo ssh key
+        uses: shaunco/ssh-agent@git-repo-mapping # this action will configure git to use the right SSH key per each repo.
+        with:
+          ssh-private-key: |
+            ${{ secrets.REGO_LIB_KEY }}
+          repo-mappings: |
+            github.com/elastic/csp-security-policies
+
       - name: Check out the repo
         uses: actions/checkout@v2
 
