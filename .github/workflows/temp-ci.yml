@@ -41,9 +41,9 @@ jobs:
         with:
           go-version: 1.17.2
 
-      - name: Setup Mage
-        run: |
-          make mage
+      # - name: Setup Mage
+      #   run: |
+      #     make mage
 
       - name: Build Opabeat Bin
         working-directory: cloudbeat
@@ -69,29 +69,29 @@ jobs:
           command: |
             echo "Run kubeval"
             kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/cloudbeat-ds.yaml
-  build_elastic_agent:
-    name: Elastic-Agent CI
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
+  # build_elastic_agent:
+  #   name: Elastic-Agent CI
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 45
+  #   steps:
+  #     - name: Check out the repo
+  #       uses: actions/checkout@v2
 
-      - name: Login to ECR
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.OPABEAT_REGISTRY }}
-          username: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
-          password: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
+  #     - name: Login to ECR
+  #       uses: docker/login-action@v1
+  #       with:
+  #         registry: ${{ env.OPABEAT_REGISTRY }}
+  #         username: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
+  #         password: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.17.2
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v2
+  #       with:
+  #         go-version: 1.17.2
 
-      - name: Setup Mage
-        run: |
-          make mage
+  #     - name: Setup Mage
+  #       run: |
+  #         make mage
 
       # - name: Package Elastic-Agent
       #   working-directory: x-pack/elastic-agent
