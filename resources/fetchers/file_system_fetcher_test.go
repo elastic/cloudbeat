@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/elastic/beats/v7/cloudbeat/resources"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,9 +26,10 @@ func TestFileFetcherFetchASingleFile(t *testing.T) {
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
 	assert.Equal(t, 1, len(results))
 
-	result := results[0].Resource.(resources.FileSystemResource)
-	assert.Equal(t, files[0], result.FileName)
-	assert.Equal(t, "600", result.FileMode)
+	fsResource := results[0].(FileSystemResource)
+	assert.Equal(t, files[0], fsResource.FileName)
+	assert.Equal(t, "600", fsResource.FileMode)
+	assert.NotNil(t, fsResource.GetID())
 }
 
 func TestFileFetcherFetchTwoPatterns(t *testing.T) {
@@ -49,13 +48,15 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
 	assert.Equal(t, 2, len(results))
 
-	firstResult := results[0].Resource.(resources.FileSystemResource)
-	assert.Equal(t, outerFiles[0], firstResult.FileName)
-	assert.Equal(t, "600", firstResult.FileMode)
+	firstFSResource := results[0].(FileSystemResource)
+	assert.Equal(t, outerFiles[0], firstFSResource.FileName)
+	assert.Equal(t, "600", firstFSResource.FileMode)
+	assert.NotNil(t, firstFSResource.GetID())
 
-	secResult := results[1].Resource.(resources.FileSystemResource)
-	assert.Equal(t, outerFiles[1], secResult.FileName)
-	assert.Equal(t, "600", secResult.FileMode)
+	secFSResource := results[1].(FileSystemResource)
+	assert.Equal(t, outerFiles[1], secFSResource.FileName)
+	assert.Equal(t, "600", secFSResource.FileMode)
+	assert.NotNil(t, secFSResource.GetID())
 }
 
 func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
@@ -73,10 +74,12 @@ func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
 	assert.Equal(t, 1, len(results))
-	result := results[0].Resource.(resources.FileSystemResource)
+
+	fsResource := results[0].(FileSystemResource)
 
 	expectedResult := filepath.Base(dir)
-	assert.Equal(t, expectedResult, result.FileName)
+	assert.Equal(t, expectedResult, fsResource.FileName)
+	assert.NotNil(t, fsResource.GetID())
 }
 
 func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
@@ -102,8 +105,9 @@ func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
 	//All inner files should exist in the final result
 	expectedResult := []string{"output.txt", filepath.Base(innerDir)}
 	for i := 0; i < len(results); i++ {
-		fileSystemDataResources := results[i].Resource.(resources.FileSystemResource)
+		fileSystemDataResources := results[i].(FileSystemResource)
 		assert.Contains(t, expectedResult, fileSystemDataResources.FileName)
+		assert.NotNil(t, results[i].GetID())
 	}
 }
 
@@ -136,7 +140,8 @@ func TestFileFetcherFetchDirectoryRecursively(t *testing.T) {
 
 	//All inner files should exist in the final result
 	for i := 0; i < len(results); i++ {
-		fileSystemDataResources := results[i].Resource.(resources.FileSystemResource)
+		fileSystemDataResources := results[i].(FileSystemResource)
+		assert.NotNil(t, results[i].GetID())
 		assert.Contains(t, allFilesName, fileSystemDataResources.FileName)
 	}
 }

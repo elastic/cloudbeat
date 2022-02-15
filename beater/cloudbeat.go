@@ -11,13 +11,13 @@ import (
 	"github.com/elastic/beats/v7/cloudbeat/resources"
 	"github.com/elastic/beats/v7/cloudbeat/resources/conditions"
 	"github.com/elastic/beats/v7/cloudbeat/resources/fetchers"
+	"github.com/elastic/beats/v7/cloudbeat/transformer"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
-
 	"github.com/gofrs/uuid"
 )
 
@@ -26,19 +26,17 @@ type cloudbeat struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	config       config.Config
-	client       beat.Client
-	data         *resources.Data
-	eval         *opa.Evaluator
-	resultParser *opa.EvaluationResultParser
-	scheduler    ResourceScheduler
+	config      config.Config
+	client      beat.Client
+	data        *resources.Data
+	eval        *opa.Evaluator
+	transformer transformer.Transformer
 }
 
 const (
 	cycleStatusStart = "start"
 	cycleStatusEnd   = "end"
 	processesDir     = "/hostfs"
-	cycleStatusFail  = "fail"
 )
 
 // New creates an instance of cloudbeat.
@@ -62,7 +60,6 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	scheduler := NewSynchronousScheduler()
 	evaluator, err := opa.NewEvaluator(ctx)
 	if err != nil {
 		return nil, err
@@ -70,19 +67,19 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
-	eventParser, err := opa.NewEvaluationResultParser(resultsIndex)
 	if err != nil {
 		return nil, err
 	}
 
+	transformer := transformer.NewTransformer(ctx, evaluator.Decision, resultsIndex)
+
 	bt := &cloudbeat{
-		ctx:          ctx,
-		cancel:       cancel,
-		config:       c,
-		eval:         evaluator,
-		data:         data,
-		resultParser: eventParser,
-		scheduler:    scheduler,
+		ctx:         ctx,
+		cancel:      cancel,
+		config:      c,
+		eval:        evaluator,
+		data:        data,
+		transformer: transformer,
 	}
 	return bt, nil
 }
@@ -115,17 +112,14 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		select {
 		case <-bt.ctx.Done():
 			return nil
-		case o := <-output:
+		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
 			// update hidden-index that the beat's cycle has started
 			bt.updateCycleStatus(cycleId, cycleStatusStart)
-
-			resourceCallback := func(resource interface{}) {
-				bt.resourceIteration(bt.ctx, resource, cycleId)
-			}
-
-			bt.scheduler.ScheduleResources(o, resourceCallback)
-
+			cycleMetadata := transformer.CycleMetadata{CycleId: cycleId}
+			// TODO: send events through a channel and publish them by a configured threshold & time
+			events := bt.transformer.ProcessAggregatedResources(fetchedResources, cycleMetadata)
+			bt.client.PublishAll(events)
 			// update hidden-index that the beat's cycle has ended
 			bt.updateCycleStatus(cycleId, cycleStatusEnd)
 		}
@@ -152,16 +146,16 @@ func InitRegistry(ctx context.Context, c config.Config) (resources.FetchersRegis
 	leaseProvider := conditions.NewLeaderLeaseProvider(ctx, client)
 	condition := conditions.NewLeaseFetcherCondition(leaseProvider)
 
-	if err = registry.Register("kube_api", kubef, condition); err != nil {
+	if err = registry.Register(fetchers.KubeAPIType, kubef, condition); err != nil {
 		return nil, err
 	}
 
 	procCfg := fetchers.ProcessFetcherConfig{
 		Directory: processesDir,
 	}
-	procf := fetchers.NewProcessesFetcher(procCfg)
 
-	if err = registry.Register("processes", procf); err != nil {
+	procf := fetchers.NewProcessesFetcher(procCfg)
+	if err = registry.Register(fetchers.ProcessType, procf); err != nil {
 		return nil, err
 	}
 
@@ -170,27 +164,11 @@ func InitRegistry(ctx context.Context, c config.Config) (resources.FetchersRegis
 	}
 	filef := fetchers.NewFileFetcher(fileCfg)
 
-	if err = registry.Register("file_system", filef); err != nil {
+	if err = registry.Register(fetchers.FileSystemType, filef); err != nil {
 		return nil, err
 	}
 
 	return registry, nil
-}
-
-func (bt *cloudbeat) resourceIteration(ctx context.Context, resource interface{}, cycleId uuid.UUID) {
-	result, err := bt.eval.Decision(ctx, resource)
-	if err != nil {
-		logp.Error(fmt.Errorf("error running the policy: %w", err))
-		return
-	}
-	events, err := bt.resultParser.ParseResult(result, cycleId)
-
-	if err != nil {
-		logp.Error(fmt.Errorf("error running the policy: %w", err))
-		return
-	}
-
-	bt.client.PublishAll(events)
 }
 
 // Stop stops cloudbeat.

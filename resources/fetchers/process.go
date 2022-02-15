@@ -3,7 +3,6 @@ package fetchers
 import (
 	"context"
 
-	"github.com/elastic/beats/v7/cloudbeat/resources"
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
 )
 
@@ -16,23 +15,23 @@ type ProcessesFetcher struct {
 }
 
 type ProcessFetcherConfig struct {
-	resources.BaseFetcherConfig
+	BaseFetcherConfig
 	Directory string `config:"directory"` // parent directory of target procfs
 }
 
-func NewProcessesFetcher(cfg ProcessFetcherConfig) resources.Fetcher {
+func NewProcessesFetcher(cfg ProcessFetcherConfig) Fetcher {
 	return &ProcessesFetcher{
 		cfg: cfg,
 	}
 }
 
-func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, error) {
+func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]PolicyResource, error) {
 	pids, err := proc.List(f.cfg.Directory)
 	if err != nil {
 		return nil, err
 	}
 
-	ret := make([]resources.FetcherResult, 0)
+	ret := make([]PolicyResource, 0)
 
 	// If errors occur during read, then return what we have till now
 	// without reporting errors.
@@ -47,14 +46,19 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult
 			return ret, nil
 		}
 
-		ret = append(ret, resources.FetcherResult{
-			Type:     ProcessType,
-			Resource: resources.ProcessResource{PID: p, Cmd: cmd, Stat: stat},
-		})
+		ret = append(ret, ProcessResource{PID: p, Cmd: cmd, Stat: stat})
 	}
 
 	return ret, nil
 }
 
 func (f *ProcessesFetcher) Stop() {
+}
+
+func (res ProcessResource) GetID() string {
+	return res.PID
+}
+
+func (res ProcessResource) GetData() interface{} {
+	return res
 }

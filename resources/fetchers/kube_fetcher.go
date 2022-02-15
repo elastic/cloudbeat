@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elastic/beats/v7/cloudbeat/resources"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 
@@ -75,12 +74,12 @@ type KubeFetcher struct {
 }
 
 type KubeApiFetcherConfig struct {
-	resources.BaseFetcherConfig
+	BaseFetcherConfig
 	Interval   time.Duration `config:"interval"`
 	Kubeconfig string        `config:"kubeconfig"`
 }
 
-func NewKubeFetcher(cfg KubeApiFetcherConfig) (resources.Fetcher, error) {
+func NewKubeFetcher(cfg KubeApiFetcherConfig) (Fetcher, error) {
 	f := &KubeFetcher{
 		cfg:      cfg,
 		watchers: make([]kubernetes.Watcher, 0),
@@ -136,7 +135,7 @@ func (f *KubeFetcher) initWatchers() error {
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, error) {
+func (f *KubeFetcher) Fetch(ctx context.Context) ([]PolicyResource, error) {
 	var err error
 	watcherlock.Do(func() {
 		err = f.initWatchers()
