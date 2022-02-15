@@ -43,7 +43,6 @@ const (
 
 // New creates an instance of cloudbeat.
 func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
-
 	ctx, cancel := context.WithCancel(context.Background())
 
 	c := config.DefaultConfig
