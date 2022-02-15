@@ -1,4 +1,4 @@
-module github.com/elastic/beats/v7/cloudbeat
+module github.com/elastic/cloudbeat
 
 go 1.17
 

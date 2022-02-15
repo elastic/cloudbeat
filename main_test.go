@@ -6,7 +6,7 @@ import (
 	"flag"
 	"testing"
 
-	"github.com/elastic/beats/v7/cloudbeat/cmd"
+	"github.com/elastic/cloudbeat/cmd"
 )
 
 var systemTest *bool

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/elastic/beats/v7/cloudbeat/config"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 )
