@@ -1,8 +1,8 @@
 package conditions
 
 import (
+	"github.com/elastic/beats/v7/cloudbeat/resources/fetchers"
 	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/beats/v7/x-pack/cloudbeat/resources/fetchers"
 )
 
 type LeaderLeaseProvider interface {
