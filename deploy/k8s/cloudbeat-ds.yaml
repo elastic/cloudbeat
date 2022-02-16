@@ -1,4 +1,10 @@
 # Deploy a cloudbeat instance per node for cis policy
+docker-host:
+  image: qoomon/docker-host
+  cap_add: [ 'NET_ADMIN', 'NET_RAW' ]
+  restart: on-failure
+  environment:
+    - PORTS=9200
 ---
 apiVersion: apps/v1
 kind: DaemonSet
