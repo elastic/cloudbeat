@@ -34,14 +34,6 @@ jobs:
         with:
           go-version: 1.17.2
 
-      - name: Docker build Cloudbeat
-        run: |
-          GOOS=linux go build -v && docker build -t cloudbeat .
-
-      - name: Unit-Test Cloudbeat
-        run: |
-          GOOS=linux go test ./...
-
       - name: Get diff k8s manifests
         uses: technote-space/get-diff-action@v4
         with:
@@ -73,15 +65,16 @@ jobs:
         run: |
           curl --verbose --show-error http://localhost:9200
 
-      - name: Setup Kind
-        uses: helm/kind-action@v1.2.0
-        with:
-          config: deploy/k8s/kind/kind-config.yaml
-          cluster_name: kind-mono
+      - name: Start minikube
+        uses: medyagh/setup-minikube@master
 
-      - name: Load cloudbeat image
+      - name: Docker build Cloudbeat
         run: |
-          kind load docker-image cloudbeat:latest --name kind-mono
+          eval $(minikube docker-env) && GOOS=linux go build -v && docker build -t cloudbeat .
+
+      - name: Unit-Test Cloudbeat
+        run: |
+          GOOS=linux go test ./...
 
       - name: Deploy cloudbeat
         run: |
