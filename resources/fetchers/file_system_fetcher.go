@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/elastic/beats/v7/cloudbeat/resources"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources"
 )
 
 // FileSystemFetcher implement the resources.Fetcher interface

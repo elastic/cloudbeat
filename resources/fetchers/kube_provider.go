@@ -1,9 +1,9 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/cloudbeat/resources"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources"
 )
 
 func GetKubeData(watchers []kubernetes.Watcher) []resources.FetcherResult {

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/elastic/beats/v7/cloudbeat/resources"
+	"github.com/elastic/cloudbeat/resources"
 
 	"github.com/stretchr/testify/assert"
 )
