@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources"
+	"github.com/aws/aws-sdk-go-v2/service/eks"
 )
 
 const EKSType = "aws-eks"
@@ -15,11 +15,15 @@ type EKSFetcher struct {
 }
 
 type EKSFetcherConfig struct {
-	resources.BaseFetcherConfig
+	BaseFetcherConfig
 	ClusterName string `config:"clusterName"`
 }
 
-func NewEKSFetcher(awsCfg aws.Config, cfg EKSFetcherConfig) (resources.Fetcher, error) {
+type EKSResource struct {
+	*eks.DescribeClusterResponse
+}
+
+func NewEKSFetcher(awsCfg aws.Config, cfg EKSFetcherConfig) (Fetcher, error) {
 	eks := NewEksProvider(awsCfg)
 
 	return &EKSFetcher{
@@ -28,17 +32,23 @@ func NewEKSFetcher(awsCfg aws.Config, cfg EKSFetcherConfig) (resources.Fetcher, 
 	}, nil
 }
 
-func (f EKSFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, error) {
-	results := make([]resources.FetcherResult, 0)
+func (f EKSFetcher) Fetch(ctx context.Context) ([]PolicyResource, error) {
+	results := make([]PolicyResource, 0)
 
 	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)
-	results = append(results, resources.FetcherResult{
-		Type:     EKSType,
-		Resource: result,
-	})
+	results = append(results, EKSResource{result})
 
 	return results, err
 }
 
 func (f EKSFetcher) Stop() {
+}
+
+//TODO: Add resource id logic to all AWS resources
+func (r EKSResource) GetID() string {
+	return ""
+}
+
+func (r EKSResource) GetData() interface{} {
+	return r
 }

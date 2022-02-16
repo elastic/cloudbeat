@@ -33,6 +33,7 @@ require (
 
 require (
 	github.com/open-policy-agent/opa v0.36.1
+	github.com/pkg/errors v0.9.1
 	go.uber.org/goleak v1.1.12
 )
 
@@ -152,7 +153,6 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/miekg/dns v1.1.43 // indirect
 	github.com/mitchellh/hashstructure v0.0.0-20170116052023-ab25296c0f51 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
