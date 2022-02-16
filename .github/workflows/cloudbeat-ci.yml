@@ -107,13 +107,13 @@ jobs:
           kubectl exec $CLOUDBEAT_POD -n kube-system -- ping 172.17.0.1
           kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "172.17.0.1:9200/_cat/indices"
 
-      - name: Ping docker-host
+      - name: Ping 127.0.0.1
         continue-on-error: true
         run: |
           CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
           echo "cloudbeat pod name = ${CLOUDBEAT_POD}"
-          kubectl exec $CLOUDBEAT_POD -n kube-system -- ping docker-host
-          kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "docker-host:9200/_cat/indices"
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- ping 127.0.0.1
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "127.0.0.1/_cat/indices"
 
       - name: Get ES indices
         run: |
