@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"github.com/elastic/beats/v7/cloudbeat/resources/fetchers"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/cloudbeat/resources/fetchers"
 	"sync"
 	"time"
 

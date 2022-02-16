@@ -3,7 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/fetchers"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

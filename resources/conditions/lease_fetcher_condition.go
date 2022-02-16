@@ -1,7 +1,7 @@
 package conditions
 
 import (
-	"github.com/elastic/beats/v7/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/beats/v7/libbeat/logp"
 )
 

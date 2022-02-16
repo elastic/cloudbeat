@@ -3,12 +3,12 @@ package transformer
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/cloudbeat/resources"
-	"github.com/elastic/beats/v7/cloudbeat/resources/fetchers"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources"
+	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/mitchellh/mapstructure"
 	"time"
 )

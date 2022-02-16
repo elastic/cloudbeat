@@ -5,19 +5,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/elastic/beats/v7/cloudbeat/config"
-	"github.com/elastic/beats/v7/cloudbeat/opa"
-	_ "github.com/elastic/beats/v7/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/beats/v7/cloudbeat/resources"
-	"github.com/elastic/beats/v7/cloudbeat/resources/conditions"
-	"github.com/elastic/beats/v7/cloudbeat/resources/fetchers"
-	"github.com/elastic/beats/v7/cloudbeat/transformer"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/opa"
+	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/resources"
+	"github.com/elastic/cloudbeat/transformer"
+	"github.com/elastic/cloudbeat/resources/conditions"
+	"github.com/elastic/cloudbeat/resources/fetchers"
+
 	"github.com/gofrs/uuid"
 )
 

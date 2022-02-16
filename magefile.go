@@ -9,8 +9,8 @@ import (
 
 	"github.com/magefile/mage/mg"
 
-	cloudbeat "github.com/elastic/beats/v7/cloudbeat/scripts/mage"
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
+	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
 	// mage:import
