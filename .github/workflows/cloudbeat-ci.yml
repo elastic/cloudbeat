@@ -81,6 +81,7 @@ jobs:
         run: |
           ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
           echo "elasticsearch host from cloudbeat: $ES_HOST"
+          kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
           echo "kubectl get pods -o wide"
           kubectl get pods -o wide
           echo "kubectl get namespaces"
