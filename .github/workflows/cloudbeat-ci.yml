@@ -79,13 +79,6 @@ jobs:
           config: deploy/k8s/kind/kind-config.yaml
           cluster_name: kind-mono
 
-      - name: Ping host.docker.internal
-        continue-on-error: true
-        run: |
-          CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
-          echo "cloudbeat pod name = ${CLOUDBEAT_POD}"
-          kubectl exec $CLOUDBEAT_POD -n kube-system -- ping host.docker.internal
-
       - name: Load cloudbeat image
         run: |
           kind load docker-image cloudbeat:latest --name kind-mono
@@ -99,6 +92,12 @@ jobs:
           kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
           timeout 45 kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
 
+      - name: Ping host.docker.internal
+        continue-on-error: true
+        run: |
+          CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
+          echo "cloudbeat pod name = ${CLOUDBEAT_POD}"
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- ping host.docker.internal
 
       - name: Get ES indices
         run: |
