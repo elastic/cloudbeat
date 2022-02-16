@@ -86,17 +86,9 @@ jobs:
           ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
           echo "elasticsearch host from cloudbeat: $ES_HOST"
           kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
-          echo "kubectl get pods -o wide"
-          kubectl get pods -o wide
-          echo "kubectl get namespaces"
-          kubectl get namespaces
-          echo "kubectl get pods -o wide -n kube-system"
-          kubectl get pods -o wide -n kube-system
-          echo "kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system"
-          kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system
           CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
-          echo "cloudbeat pod id: CLOUDBEAT_POD"
-          kubectl exec $CLOUDBEAT_POD -n kube-system -- sh -c "echo \"$ES_HOST    host.docker.internal\" >> /etc/hosts"
+          echo "cloudbeat pod id: $CLOUDBEAT_POD"
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- sh -c "echo \"$ES_HOST	host.docker.internal\" >> /etc/hosts"
           echo "updated cloudbeat /etc/hosts"
           kubectl exec $CLOUDBEAT_POD -n kube-system -- cat /etc/hosts
 
@@ -109,4 +101,5 @@ jobs:
         run: |
           ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
           CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
+          echo "cloudbeat pod id: $CLOUDBEAT_POD elasticsearch host: $ES_HOST"
           kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "$ES_HOST:9200/_cat/indices"
