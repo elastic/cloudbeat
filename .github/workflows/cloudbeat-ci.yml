@@ -76,7 +76,7 @@ jobs:
       - name: Setup Kind
         uses: helm/kind-action@v1.2.0
         with:
-          config: cloudbeat/deploy/k8s/kind/kind-config.yaml
+          config: deploy/k8s/kind/kind-config.yaml
           cluster_name: kind-mono
 
       - name: Load cloudbeat image
