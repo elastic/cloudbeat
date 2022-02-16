@@ -76,6 +76,10 @@ jobs:
 #        run: |
 #          GOOS=linux go test ./...
 
+      - name: Deploy cloudbeat
+        run: |
+          kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+
       - name: Update etc/hosts
         continue-on-error: true
         run: |
@@ -95,10 +99,6 @@ jobs:
           kubectl exec $CLOUDBEAT_POD -n kube-system -- sh -c "echo \"$ES_HOST    host.docker.internal\" >> /etc/hosts"
           echo "updated cloudbeat /etc/hosts"
           kubectl exec $CLOUDBEAT_POD -n kube-system -- cat /etc/hosts
-
-      - name: Deploy cloudbeat
-        run: |
-          kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
 
       - name: Get cloudbeat logs
         run: |
