@@ -1,0 +1,126 @@
+name: Cloudbeat-CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  K8S_MANIFEST_DIR: deploy/k8s
+  DEV: true
+  SNAPSHOT: true
+  PLATFORMS: linux/amd64
+  TYPES: docker
+
+jobs:
+  e2e:
+    name: End to End
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Add rego repo ssh key
+        uses: shaunco/ssh-agent@git-repo-mapping # enable private policy repo access
+        with:
+          ssh-private-key: |
+            ${{ secrets.REGO_LIB_KEY }}
+          repo-mappings: |
+            github.com/elastic/csp-security-policies
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.2
+
+      - name: Configure sysctl limits
+        run: |
+          sudo swapoff -a
+          sudo sysctl -w vm.swappiness=1
+          sudo sysctl -w fs.file-max=262144
+          sudo sysctl -w vm.max_map_count=262144
+
+      - name: Spin up Elasticsearch
+        uses: elastic/elastic-github-actions/elasticsearch@master
+        with:
+          stack-version: 8.1.0-SNAPSHOT
+
+      - name: Ensure Elasticsearch is reachable
+        run: |
+          curl --verbose --show-error http://localhost:9200
+
+      - name: Start minikube
+        uses: medyagh/setup-minikube@master
+
+      - name: Docker build Cloudbeat
+        run: |
+          eval $(minikube docker-env) && GOOS=linux go build -v && docker build -t cloudbeat .
+
+      - name: Deploy cloudbeat
+        run: |
+          kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+
+      - name: Update etc/hosts
+        run: |
+          ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
+          echo "===== elasticsearch host from cloudbeat: $ES_HOST"
+          kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
+          CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
+          echo "===== cloudbeat pod id: $CLOUDBEAT_POD"
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- sh -c "echo '${ES_HOST//[$'\t\r\n']}    host.docker.internal' >> /etc/hosts"
+          echo "===== updated cloudbeat /etc/hosts"
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- cat /etc/hosts
+
+      - name: Get cloudbeat logs
+        run: |
+          timeout 45 kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+
+      - name: Get ES indices
+        continue-on-error: false
+        run: |
+          ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
+          CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
+          echo "===== cloudbeat pod id: $CLOUDBEAT_POD elasticsearch host: ${ES_HOST//[$'\t\r\n']}"
+          echo "===== kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET \"${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/?v&s=index&pretty\""
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/?v&s=index&pretty"
+
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Add rego repo ssh key
+        uses: shaunco/ssh-agent@git-repo-mapping # enable private policy repo access
+        with:
+          ssh-private-key: |
+            ${{ secrets.REGO_LIB_KEY }}
+          repo-mappings: |
+            github.com/elastic/csp-security-policies
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.2
+
+      - name: Unit-Test Cloudbeat
+        run: |
+          GOOS=linux go test ./...
+
+      - name: Get diff k8s manifests
+        uses: technote-space/get-diff-action@v4
+        with:
+          PATTERNS: ${{ env.K8S_MANIFEST_DIR }}/**
+
+      - name: Run K8s manifest tests
+        if: env.GIT_DIFF
+        uses: stefanprodan/kube-tools@v1
+        with:
+          kubectl: 1.18.2
+          kubeval: v0.16.1
+          command: |
+            echo "===== run kubeval"
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/cloudbeat-ds.yaml
