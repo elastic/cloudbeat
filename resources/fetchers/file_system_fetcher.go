@@ -2,6 +2,7 @@ package fetchers
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/user"
 	"strconv"
@@ -40,7 +41,7 @@ func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]resources.FetcherResul
 	for _, filePattern := range f.cfg.Patterns {
 		matchedFiles, err := Glob(filePattern)
 		if err != nil {
-			logp.Err("Failed to find matched glob for %s, error - %+v", filePattern, err)
+			logp.Error(fmt.Errorf("failed to find matched glob for %s, error - %w", filePattern, err))
 		}
 		for _, file := range matchedFiles {
 			resource := f.fetchSystemResource(file)
@@ -56,7 +57,7 @@ func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]resources.FetcherResul
 func (f *FileSystemFetcher) fetchSystemResource(filePath string) interface{} {
 	info, err := os.Stat(filePath)
 	if err != nil {
-		logp.Err("Failed to fetch %s, error - %+v", filePath, err)
+		logp.Error(fmt.Errorf("failed to fetch %s, error - %w", filePath, err))
 		return nil
 	}
 	file := FromFileInfo(info, filePath)

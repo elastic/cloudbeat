@@ -2,6 +2,7 @@ package fetchers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
@@ -36,7 +37,7 @@ func (provider ECRProvider) DescribeRepositories(ctx context.Context, repoNames 
 	req := provider.client.DescribeRepositoriesRequest(input)
 	response, err := req.Send(ctx)
 	if err != nil {
-		logp.Err("Failed to fetch repository:%s from ecr, error - %+v", repoNames, err)
+		logp.Error(fmt.Errorf("failed to fetch repository:%s from ecr, error - %w", repoNames, err))
 		return nil, err
 	}
 

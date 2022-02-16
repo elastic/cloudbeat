@@ -46,7 +46,7 @@ func NewECRFetcher(awsConfig resources.AwsFetcherConfig, cfg ECRFetcherConfig) (
 }
 
 // Fetch This function should be called once per cluster (Leader Election)
-func (f ECRFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, error) {
+func (f *ECRFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, error) {
 	var err error
 	f.kubeInitOnce.Do(func() {
 		f.kubeClient, err = kubernetes.GetKubernetesClient(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
@@ -60,7 +60,7 @@ func (f ECRFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, error
 	return f.getData(ctx)
 }
 
-func (f ECRFetcher) getData(ctx context.Context) ([]resources.FetcherResult, error) {
+func (f *ECRFetcher) getData(ctx context.Context) ([]resources.FetcherResult, error) {
 	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
 	if err != nil {
 		return nil, err
@@ -76,10 +76,10 @@ func (f ECRFetcher) getData(ctx context.Context) ([]resources.FetcherResult, err
 	return results, err
 }
 
-func (f ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error) {
+func (f *ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error) {
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
-		logp.Err("Failed to get pods  - %+v", err)
+		logp.Error(fmt.Errorf("Failed to get pods  - %w", err))
 		return nil, err
 	}
 
@@ -100,5 +100,5 @@ func (f ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error)
 	return repositories, nil
 }
 
-func (f ECRFetcher) Stop() {
+func (f *ECRFetcher) Stop() {
 }
