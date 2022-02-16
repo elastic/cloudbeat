@@ -79,7 +79,9 @@ jobs:
       - name: Update etc/hosts
         run: |
           ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
+          echo "elasticsearch host from cloudbeat: $ES_HOST"
           CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
+          echo "cloudbeat pod id: CLOUDBEAT_POD"
           kubectl exec $CLOUDBEAT_POD -n kube-system -- sh -c "echo \"$ES_HOST    host.docker.internal\" >> /etc/hosts"
           echo "updated cloudbeat /etc/hosts"
           kubectl exec $CLOUDBEAT_POD -n kube-system -- cat /etc/hosts
