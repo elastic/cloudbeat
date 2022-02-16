@@ -1,0 +1,99 @@
+name: Cloudbeat-CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  K8S_MANIFEST_DIR: deploy/k8s
+  DEV: true
+  SNAPSHOT: true
+  PLATFORMS: linux/amd64
+  TYPES: docker
+
+jobs:
+  build_cloudbeat:
+    name: Cloudbeat CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Add rego repo ssh key
+        uses: shaunco/ssh-agent@git-repo-mapping # this action will configure git to use the right SSH key per each repo.
+        with:
+          ssh-private-key: |
+            ${{ secrets.REGO_LIB_KEY }}
+          repo-mappings: |
+            github.com/elastic/csp-security-policies
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.2
+
+      - name: Docker build Cloudbeat
+        run: |
+          GOOS=linux go build -v && docker build -t cloudbeat .
+
+      - name: Unit-Test Cloudbeat
+        run: |
+          GOOS=linux go test ./...
+
+      - name: Get diff k8s manifests
+        uses: technote-space/get-diff-action@v4
+        with:
+          PATTERNS: ${{ env.K8S_MANIFEST_DIR }}/**
+
+      - name: Run K8s manifest tests
+        if: env.GIT_DIFF
+        uses: stefanprodan/kube-tools@v1
+        with:
+          kubectl: 1.18.2
+          kubeval: v0.16.1
+          command: |
+            echo "Run kubeval"
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/cloudbeat-ds.yaml
+
+      - name: Configure sysctl limits
+        run: |
+          sudo swapoff -a
+          sudo sysctl -w vm.swappiness=1
+          sudo sysctl -w fs.file-max=262144
+          sudo sysctl -w vm.max_map_count=262144
+
+      - name: Start Elasticsearch
+        uses: elastic/elastic-github-actions/elasticsearch@master
+        with:
+          stack-version: 8.1.0-SNAPSHOT
+
+      - name: Ensure Elasticsearch is reachable
+        run: |
+          curl --verbose --show-error http://localhost:9200
+
+      - name: Setup Kind
+        uses: helm/kind-action@v1.2.0
+        with:
+          config: cloudbeat/deploy/k8s/kind/kind-config.yaml
+          cluster_name: kind-mono
+
+      - name: Load cloudbeat image
+        run: |
+          kind load docker-image cloudbeat:latest --name kind-mono
+
+      - name: Deploy cloudbeat
+        run: |
+          kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+
+      - name: Get cloudbeat logs
+        run: |
+          kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
+          timeout 45 kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+
+
+      - name: Get ES indices
+        run: |
+          curl -X GET "localhost:9200/_cat/indices/?v&s=index&pretty"
+          curl -X GET "localhost:9200/_cat/indices/"
