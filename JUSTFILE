@@ -14,7 +14,7 @@ load-agent-image:
   kind load docker-image docker.elastic.co/beats/elastic-agent:8.1.0-SNAPSHOT --name kind-mono
 
 build-cloudbeat:
-  GOOS=linux go build -v && docker build -t cloudbeat .
+  eval $(minikube docker-env) && GOOS=linux go build -v && docker build -t cloudbeat .
 
 deploy-cloudbeat:
   kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
@@ -31,6 +31,9 @@ build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-
 
 logs-cloudbeat:
   kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system
+
+logs-cloudbeat-file:
+  kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system > cloudbeat-logs.ndjson
 
 package-agent:
   cd ../x-pack/elastic-agent & DEV=true SNAPSHOT=true PLATFORMS=linux/amd64 TYPES=docker mage -v package
@@ -49,3 +52,7 @@ elastic-stack-up:
 elastic-stack-down:
   elastic-package stack down
 
+ssh-cloudbeat:
+    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
+    kubectl exec --stdin --tty $CLOUDBEAT_POD -n kube-system -- /bin/bash
+    kubectl exec --stdin --tty cloudbeat-r6gr9 -n kube-system -- /bin/bash
