@@ -80,7 +80,7 @@ jobs:
         run: |
           ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
           CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
-          kubectl exec $CLOUDBEAT_POD -n kube-system -- echo "$ES_HOST  host.docker.interna" >> /etc/hosts
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- echo "$ES_HOST    host.docker.interna" >> /etc/hosts
           echo "updated cloudbeat /etc/hosts"
           kubectl exec $CLOUDBEAT_POD -n kube-system -- cat /etc/hosts
 
