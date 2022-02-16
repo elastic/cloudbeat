@@ -79,6 +79,13 @@ jobs:
           config: deploy/k8s/kind/kind-config.yaml
           cluster_name: kind-mono
 
+      - name: Ping host.docker.internal
+        continue-on-error: true
+        run: |
+          CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
+          echo "cloudbeat pod name = ${CLOUDBEAT_POD}"
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- ping host.docker.internal
+
       - name: Load cloudbeat image
         run: |
           kind load docker-image cloudbeat:latest --name kind-mono
