@@ -20,7 +20,7 @@ type EKSFetcherConfig struct {
 }
 
 type EKSResource struct {
-	ClusterInfo *eks.DescribeClusterResponse
+	*eks.DescribeClusterResponse
 }
 
 func NewEKSFetcher(awsCfg aws.Config, cfg EKSFetcherConfig) (Fetcher, error) {

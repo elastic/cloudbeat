@@ -21,7 +21,7 @@ type ECRFetcherConfig struct {
 type EcrRepositories []ecr.Repository
 
 type ECRResource struct {
-	repositories EcrRepositories
+	EcrRepositories
 }
 
 func NewECRFetcher(awsCfg aws.Config, cfg ECRFetcherConfig) (Fetcher, error) {
