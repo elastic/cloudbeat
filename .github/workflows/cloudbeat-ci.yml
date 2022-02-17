@@ -83,23 +83,14 @@ jobs:
           echo "===== kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET \"${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*k8s_cis.result*?v&s=index&pretty\""
           kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*k8s_cis.result*?v&s=index&pretty"
 
-      - name: Validate Finding
+      - name: Get latest Finding
         run: |
           FINDING=$( curl -XGET "localhost:9200/*k8s_cis.result*/_search?pretty=true" -H 'Content-Type: application/json' -d'
           {
              "size": 1,
              "sort": { "@timestamp": "desc"},
-             "query": {
-                "match_all": {}
-             },
-             "fields": [
-              "@timestamp",
-              "result.evaluation",
-              "rule.name",
-              "rule.tags"
-            ],
-            "_source": false
-          }' )
+             "query": { "match_all": {} }
+          }' | jq '.hits.hits[0]._source')
           
           # Save Vars for next steps
           echo "finding<<EOF" >> "$GITHUB_ENV"
@@ -107,17 +98,20 @@ jobs:
           echo "EOF" >> "$GITHUB_ENV"
 
       - name: Commnet E2E Result
-        uses: actions/github-script@v5
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `${{env.finding}}`
-            })
-
+          header: Exmaple Finding
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            Success! :trophy: 
+            
+            <details>
+            <summary>Raw Finding</summary>
+            
+            ```json
+            ${{env.finding}}
+            ```
+            </details>
 
   unit_tests:
     name: Unit Tests
