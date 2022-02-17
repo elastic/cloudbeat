@@ -3,19 +3,24 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	"regexp"
 	"sync"
-
-	"github.com/elastic/beats/v7/cloudbeat/resources"
 )
 
 const ECRType = "aws-ecr"
 const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w]+)[:,@]?"
 const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?"
+
+type ecrRepos []ecr.Repository
+type ECRResource struct {
+	ecrRepos
+}
 
 type ECRFetcher struct {
 	cfg               ECRFetcherConfig
@@ -26,11 +31,11 @@ type ECRFetcher struct {
 }
 
 type ECRFetcherConfig struct {
-	resources.BaseFetcherConfig
+	BaseFetcherConfig
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-func NewECRFetcher(awsConfig resources.AwsFetcherConfig, cfg ECRFetcherConfig) (resources.Fetcher, error) {
+func NewECRFetcher(awsConfig resources.AwsFetcherConfig, cfg ECRFetcherConfig) (Fetcher, error) {
 	ecr := NewEcrProvider(awsConfig.Config)
 
 	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *awsConfig.AccountID, awsConfig.Config.Region)
@@ -46,7 +51,7 @@ func NewECRFetcher(awsConfig resources.AwsFetcherConfig, cfg ECRFetcherConfig) (
 }
 
 // Fetch This function should be called once per cluster (Leader Election)
-func (f *ECRFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, error) {
+func (f *ECRFetcher) Fetch(ctx context.Context) ([]PolicyResource, error) {
 	var err error
 	f.kubeInitOnce.Do(func() {
 		f.kubeClient, err = kubernetes.GetKubernetesClient(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
@@ -60,17 +65,16 @@ func (f *ECRFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, erro
 	return f.getData(ctx)
 }
 
-func (f *ECRFetcher) getData(ctx context.Context) ([]resources.FetcherResult, error) {
+func (f *ECRFetcher) getData(ctx context.Context) ([]PolicyResource, error) {
 	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
 	if err != nil {
 		return nil, err
 	}
-	results := make([]resources.FetcherResult, 0)
+	results := make([]PolicyResource, 0)
 
 	ecrRepositories, err := f.ecrProvider.DescribeRepositories(ctx, podsAwsRepositories)
-	results = append(results, resources.FetcherResult{
-		Type:     ECRType,
-		Resource: ecrRepositories,
+	results = append(results, ECRResource{
+		ecrRepositories,
 	})
 
 	return results, err
@@ -101,4 +105,12 @@ func (f *ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error
 }
 
 func (f *ECRFetcher) Stop() {
+}
+
+//TODO: Add resource id logic to all AWS resources
+func (res ECRResource) GetID() string {
+	return ""
+}
+func (res ECRResource) GetData() interface{} {
+	return res
 }

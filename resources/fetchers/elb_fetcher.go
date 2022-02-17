@@ -25,13 +25,14 @@ type ELBFetcher struct {
 }
 
 type ELBFetcherConfig struct {
-	resources.BaseFetcherConfig
+	BaseFetcherConfig
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
 func NewELBFetcher(awsConfig resources.AwsFetcherConfig, cfg ELBFetcherConfig) (resources.Fetcher, error) {
 	elb := NewELBProvider(awsConfig.Config)
 
+	awsConfig
 	elbR := fmt.Sprintf(ELBRegexTemplate, awsConfig.Config.Region)
 
 	return &ELBFetcher{
