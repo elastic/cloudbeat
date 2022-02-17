@@ -19,9 +19,10 @@ type ELBFetcherConfig struct {
 	LoadBalancerNames []string `config:"loadBalancers"`
 }
 
-type ELBDesc []elasticloadbalancing.LoadBalancerDescription
+type LoadBalancerDescription []elasticloadbalancing.LoadBalancerDescription
+
 type ELBResource struct {
-	ELBDesc
+	LoadBalancerDescription
 }
 
 func NewELBFetcher(awsCfg aws.Config, cfg ELBFetcherConfig) (Fetcher, error) {
@@ -33,8 +34,8 @@ func NewELBFetcher(awsCfg aws.Config, cfg ELBFetcherConfig) (Fetcher, error) {
 	}, nil
 }
 
-func (f ELBFetcher) Fetch(ctx context.Context) ([]PolicyResource, error) {
-	results := make([]PolicyResource, 0)
+func (f ELBFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
+	results := make([]FetchedResource, 0)
 
 	result, err := f.elbProvider.DescribeLoadBalancer(ctx, f.cfg.LoadBalancerNames)
 	results = append(results, ELBResource{result})
@@ -46,7 +47,7 @@ func (f ELBFetcher) Stop() {
 }
 
 //TODO: Add resource id logic to all AWS resources
-func (res ELBResource) GetID() string {
+func (r ELBResource) GetID() string {
 	return ""
 }
 

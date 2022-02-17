@@ -10,6 +10,12 @@ const (
 	ProcessType = "process"
 )
 
+type ProcessResource struct {
+	PID  string        `json:"pid"`
+	Cmd  string        `json:"command"`
+	Stat proc.ProcStat `json:"stat"`
+}
+
 type ProcessesFetcher struct {
 	cfg ProcessFetcherConfig
 }
@@ -25,13 +31,13 @@ func NewProcessesFetcher(cfg ProcessFetcherConfig) Fetcher {
 	}
 }
 
-func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]PolicyResource, error) {
+func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
 	pids, err := proc.List(f.cfg.Directory)
 	if err != nil {
 		return nil, err
 	}
 
-	ret := make([]PolicyResource, 0)
+	ret := make([]FetchedResource, 0)
 
 	// If errors occur during read, then return what we have till now
 	// without reporting errors.

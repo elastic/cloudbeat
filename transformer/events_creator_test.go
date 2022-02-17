@@ -42,7 +42,7 @@ var fetcherResult = fetchers.FileSystemResource{
 
 var (
 	opaResults   RuleResult
-	resourcesMap = map[string][]fetchers.PolicyResource{fetchers.FileSystemType: {fetcherResult}}
+	resourcesMap = map[string][]fetchers.FetchedResource{fetchers.FileSystemType: {fetcherResult}}
 	ctx          = context.Background()
 	events       = make([]beat.Event, 0)
 	cycleId      uuid.UUID

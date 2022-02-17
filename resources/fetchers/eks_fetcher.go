@@ -20,7 +20,7 @@ type EKSFetcherConfig struct {
 }
 
 type EKSResource struct {
-	*eks.DescribeClusterResponse
+	ClusterInfo *eks.DescribeClusterResponse
 }
 
 func NewEKSFetcher(awsCfg aws.Config, cfg EKSFetcherConfig) (Fetcher, error) {
@@ -32,8 +32,8 @@ func NewEKSFetcher(awsCfg aws.Config, cfg EKSFetcherConfig) (Fetcher, error) {
 	}, nil
 }
 
-func (f EKSFetcher) Fetch(ctx context.Context) ([]PolicyResource, error) {
-	results := make([]PolicyResource, 0)
+func (f EKSFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
+	results := make([]FetchedResource, 0)
 
 	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)
 	results = append(results, EKSResource{result})

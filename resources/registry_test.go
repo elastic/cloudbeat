@@ -23,7 +23,7 @@ func newNumberFetcher(num int) fetchers.Fetcher {
 	return &numberFetcher{num, false}
 }
 
-func (f *numberFetcher) Fetch(ctx context.Context) ([]fetchers.PolicyResource, error) {
+func (f *numberFetcher) Fetch(ctx context.Context) ([]fetchers.FetchedResource, error) {
 	return fetchValue(f.num), nil
 }
 
@@ -48,8 +48,8 @@ func (c *boolFetcherCondition) Name() string {
 	return c.name
 }
 
-func fetchValue(num int) []fetchers.PolicyResource {
-	return []fetchers.PolicyResource{NumberResource{num}}
+func fetchValue(num int) []fetchers.FetchedResource {
+	return []fetchers.FetchedResource{NumberResource{num}}
 }
 
 func registerNFetchers(t *testing.T, reg FetchersRegistry, n int) {

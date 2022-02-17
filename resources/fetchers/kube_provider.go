@@ -14,8 +14,8 @@ type K8sResource struct {
 
 const k8sObjMetadataField = "ObjectMeta"
 
-func GetKubeData(watchers []kubernetes.Watcher) []PolicyResource {
-	ret := make([]PolicyResource, 0)
+func GetKubeData(watchers []kubernetes.Watcher) []FetchedResource {
+	ret := make([]FetchedResource, 0)
 
 	for _, watcher := range watchers {
 		rs := watcher.Store().List()

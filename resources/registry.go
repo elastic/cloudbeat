@@ -12,7 +12,7 @@ type FetchersRegistry interface {
 	Register(key string, f fetchers.Fetcher, c ...fetchers.FetcherCondition) error
 	Keys() []string
 	ShouldRun(key string) bool
-	Run(ctx context.Context, key string) ([]fetchers.PolicyResource, error)
+	Run(ctx context.Context, key string) ([]fetchers.FetchedResource, error)
 	Stop(ctx context.Context)
 }
 
@@ -70,7 +70,7 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 	return true
 }
 
-func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetchers.PolicyResource, error) {
+func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetchers.FetchedResource, error) {
 	registered, ok := r.reg[key]
 	if !ok {
 		return nil, fmt.Errorf("fetcher %v not found", key)
