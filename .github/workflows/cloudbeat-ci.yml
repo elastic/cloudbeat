@@ -98,8 +98,18 @@ jobs:
           timeout 45 kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
 
       - name: Get ES indices
+        continue-on-error: true
         run: |
           ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
           CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
           echo "cloudbeat pod id: $CLOUDBEAT_POD elasticsearch host: $ES_HOST"
+          echo "kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET \"$ES_HOST:9200/_cat/indices\""
           kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "$ES_HOST:9200/_cat/indices"
+
+      - name: Get ES indices 192.168.49.1
+        continue-on-error: true
+        run: |
+          CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
+          echo "cloudbeat pod id: $CLOUDBEAT_POD"
+          echo "kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET \"192.168.49.1:9200/_cat/indices\""
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "192.168.49.1:9200/_cat/indices"
