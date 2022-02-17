@@ -1,4 +1,3 @@
-# Todo delete before merge to elastic/beats
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yaml
 
@@ -14,7 +13,7 @@ load-agent-image:
   kind load docker-image docker.elastic.co/beats/elastic-agent:8.1.0-SNAPSHOT --name kind-mono
 
 build-cloudbeat:
-  eval $(minikube docker-env) && GOOS=linux go build -v && docker build -t cloudbeat .
+  GOOS=linux go build -v && docker build -t cloudbeat .
 
 deploy-cloudbeat:
   kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
@@ -55,4 +54,3 @@ elastic-stack-down:
 ssh-cloudbeat:
     CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
     kubectl exec --stdin --tty $CLOUDBEAT_POD -n kube-system -- /bin/bash
-    kubectl exec --stdin --tty cloudbeat-r6gr9 -n kube-system -- /bin/bash
