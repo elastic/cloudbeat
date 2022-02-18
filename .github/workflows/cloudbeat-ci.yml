@@ -103,10 +103,10 @@ jobs:
           header: Exmaple Finding
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            Success! :trophy: 
+            End-to-End test completed successfully! :trophy: 
             
             <details>
-            <summary>Raw Finding</summary>
+            <summary><b>Raw Finding</b></summary>
             
             ```json
             ${{env.finding}}
