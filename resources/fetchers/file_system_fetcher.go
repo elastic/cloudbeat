@@ -12,6 +12,15 @@ import (
 	"github.com/elastic/beats/v7/libbeat/logp"
 )
 
+type FileSystemResource struct {
+	FileName string `json:"filename"`
+	FileMode string `json:"mode"`
+	Gid      string `json:"gid"`
+	Uid      string `json:"uid"`
+	Path     string `json:"path"`
+	Inode    string `json:"inode"`
+}
+
 // FileSystemFetcher implement the Fetcher interface
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
@@ -34,8 +43,8 @@ func NewFileFetcher(cfg FileFetcherConfig) Fetcher {
 	}
 }
 
-func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]PolicyResource, error) {
-	results := make([]PolicyResource, 0)
+func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
+	results := make([]FetchedResource, 0)
 
 	// Input files might contain glob pattern
 	for _, filePattern := range f.cfg.Patterns {

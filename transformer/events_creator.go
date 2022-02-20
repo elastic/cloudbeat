@@ -43,7 +43,7 @@ func (c *Transformer) ProcessAggregatedResources(resources resources.ResourceMap
 	return c.events
 }
 
-func (c *Transformer) processEachResource(results []fetchers.PolicyResource, metadata ResourceTypeMetadata) {
+func (c *Transformer) processEachResource(results []fetchers.FetchedResource, metadata ResourceTypeMetadata) {
 	for _, result := range results {
 		resMetadata := ResourceMetadata{ResourceTypeMetadata: metadata, ResourceId: result.GetID()}
 		if err := c.createBeatEvents(result, resMetadata); err != nil {
@@ -53,7 +53,7 @@ func (c *Transformer) processEachResource(results []fetchers.PolicyResource, met
 	}
 }
 
-func (c *Transformer) createBeatEvents(policyResource fetchers.PolicyResource, metadata ResourceMetadata) error {
+func (c *Transformer) createBeatEvents(policyResource fetchers.FetchedResource, metadata ResourceMetadata) error {
 	fetcherResult := fetchers.FetcherResult{Type: metadata.Type, Resource: policyResource.GetData()}
 	result, err := c.callback(c.context, fetcherResult)
 
