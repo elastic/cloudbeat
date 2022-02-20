@@ -88,7 +88,7 @@ func (f *ECRFetcher) getData(ctx context.Context) ([]FetchedResource, error) {
 func (f *ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error) {
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
-		logp.Error(fmt.Errorf("Failed to get pods  - %w", err))
+		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
 		return nil, err
 	}
 
