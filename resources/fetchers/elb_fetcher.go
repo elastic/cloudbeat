@@ -3,13 +3,13 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8s "k8s.io/client-go/kubernetes"
 	"regexp"
 	"sync"
+
+	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/beats/v7/libbeat/logp"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
@@ -36,7 +36,7 @@ type ELBResource struct {
 	LoadBalancerDescription
 }
 
-func NewELBFetcher(awsCfg resources.AwsFetcherConfig, cfg ELBFetcherConfig) (Fetcher, error) {
+func NewELBFetcher(awsCfg AwsFetcherConfig, cfg ELBFetcherConfig) (Fetcher, error) {
 	elb := NewELBProvider(awsCfg.Config)
 
 	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsCfg.Config.Region)

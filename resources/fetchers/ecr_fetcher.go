@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	"regexp"
@@ -37,7 +36,7 @@ type ECRResource struct {
 	EcrRepositories
 }
 
-func NewECRFetcher(awsCfg resources.AwsFetcherConfig, cfg ECRFetcherConfig) (Fetcher, error) {
+func NewECRFetcher(awsCfg AwsFetcherConfig, cfg ECRFetcherConfig) (Fetcher, error) {
 	ecr := NewEcrProvider(awsCfg.Config)
 
 	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *awsCfg.AccountID, awsCfg.Config.Region)
