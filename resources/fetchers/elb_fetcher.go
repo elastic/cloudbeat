@@ -78,6 +78,9 @@ func (f *ELBFetcher) getData(ctx context.Context) ([]FetchedResource, error) {
 func (f *ELBFetcher) GetLoadBalancers() ([]string, error) {
 	ctx := context.Background()
 	services, err := f.kubeClient.CoreV1().Services("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Kuberenetes services:  %w", err)
+	}
 	loadBalancers := make([]string, 0)
 	for _, service := range services.Items {
 		for _, ingress := range service.Status.LoadBalancer.Ingress {
@@ -90,11 +93,6 @@ func (f *ELBFetcher) GetLoadBalancers() ([]string, error) {
 			}
 		}
 	}
-	if err != nil {
-		logp.Error(fmt.Errorf("failed to get all services  - %w", err))
-		return nil, err
-	}
-
 	return loadBalancers, nil
 }
 

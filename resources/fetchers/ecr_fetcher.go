@@ -73,12 +73,12 @@ func (f *ECRFetcher) getData(ctx context.Context) ([]FetchedResource, error) {
 	results := make([]FetchedResource, 0)
 	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 	}
 
 	ecrRepositories, err := f.ecrProvider.DescribeRepositories(ctx, podsAwsRepositories)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could retrieve ECR repositories: %w", err)
 	}
 
 	results = append(results, ECRResource{ecrRepositories})

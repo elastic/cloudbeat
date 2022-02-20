@@ -50,7 +50,7 @@ func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]FetchedResource, error
 	for _, filePattern := range f.cfg.Patterns {
 		matchedFiles, err := Glob(filePattern)
 		if err != nil {
-			logp.Err("Failed to find matched glob for %s, error - %+v", filePattern, err)
+			return nil, fmt.Errorf("failed to find matched glob for %s, error - %w", filePattern, err)
 		}
 		for _, file := range matchedFiles {
 			resource, err := f.fetchSystemResource(file)
