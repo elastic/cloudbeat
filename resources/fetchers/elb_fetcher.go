@@ -9,8 +9,6 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 	"regexp"
 	"sync"
-
-	"github.com/elastic/beats/v7/cloudbeat/resources"
 )
 
 const ELBType = "aws-elb"
@@ -29,7 +27,7 @@ type ELBFetcherConfig struct {
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-func NewELBFetcher(awsConfig resources.AwsFetcherConfig, cfg ELBFetcherConfig) (resources.Fetcher, error) {
+func NewELBFetcher(awsConfig AwsFetcherConfig, cfg ELBFetcherConfig) (Fetcher, error) {
 	elb := NewELBProvider(awsConfig.Config)
 
 	awsConfig
@@ -42,7 +40,7 @@ func NewELBFetcher(awsConfig resources.AwsFetcherConfig, cfg ELBFetcherConfig) (
 	}, nil
 }
 
-func (f *ELBFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, error) {
+func (f *ELBFetcher) Fetch(ctx context.Context) ([]PolicyResource, error) {
 	var err error
 	f.kubeInitOnce.Do(func() {
 		f.kubeClient, err = kubernetes.GetKubernetesClient(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
@@ -56,8 +54,8 @@ func (f *ELBFetcher) Fetch(ctx context.Context) ([]resources.FetcherResult, erro
 	return f.getData(ctx)
 }
 
-func (f *ELBFetcher) getData(ctx context.Context) ([]resources.FetcherResult, error) {
-	results := make([]resources.FetcherResult, 0)
+func (f *ELBFetcher) getData(ctx context.Context) ([]PolicyResource, error) {
+	results := make([]PolicyResource, 0)
 	balancers, err := f.GetLoadBalancers()
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to load balancers from Kubernetes %w", err))
