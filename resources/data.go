@@ -23,7 +23,7 @@ type Data struct {
 	wg       *sync.WaitGroup
 }
 
-type ResourceMap map[string][]fetchers.PolicyResource
+type ResourceMap map[string][]fetchers.FetchedResource
 
 // NewData returns a new Data instance with the given interval.
 func NewData(interval time.Duration, fetchers FetchersRegistry) (*Data, error) {
@@ -68,7 +68,7 @@ func (d *Data) Run(ctx context.Context) error {
 // update is a single update sent from a worker to a manager.
 type update struct {
 	key string
-	val []fetchers.PolicyResource
+	val []fetchers.FetchedResource
 }
 
 func (d *Data) fetchWorker(ctx context.Context, updates chan update, k string) {
