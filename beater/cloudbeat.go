@@ -15,9 +15,9 @@ import (
 	"github.com/elastic/cloudbeat/opa"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources"
-	"github.com/elastic/cloudbeat/transformer"
 	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/gofrs/uuid"
 )

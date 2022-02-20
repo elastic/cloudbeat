@@ -69,12 +69,13 @@ func (f *ECRFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
 
 	return f.getData(ctx)
 }
+
 func (f *ECRFetcher) getData(ctx context.Context) ([]FetchedResource, error) {
+	results := make([]FetchedResource, 0)
 	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
 	if err != nil {
 		return nil, err
 	}
-	results := make([]FetchedResource, 0)
 
 	ecrRepositories, err := f.ecrProvider.DescribeRepositories(ctx, podsAwsRepositories)
 	if err != nil {
