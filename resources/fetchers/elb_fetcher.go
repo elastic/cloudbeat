@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 
@@ -30,10 +29,10 @@ type ELBFetcherConfig struct {
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-type LoadBalancerDescription []elasticloadbalancing.LoadBalancerDescription
+type LoadBalancersDescription []elasticloadbalancing.LoadBalancerDescription
 
 type ELBResource struct {
-	LoadBalancerDescription
+	LoadBalancersDescription
 }
 
 func NewELBFetcher(awsCfg AwsFetcherConfig, cfg ELBFetcherConfig) (Fetcher, error) {
@@ -66,10 +65,12 @@ func (f *ELBFetcher) getData(ctx context.Context) ([]FetchedResource, error) {
 
 	balancers, err := f.GetLoadBalancers()
 	if err != nil {
-		logp.Error(fmt.Errorf("failed to load balancers from Kubernetes %w", err))
-		return nil, err
+		return nil, fmt.Errorf("failed to load balancers from Kubernetes %w", err)
 	}
 	result, err := f.elbProvider.DescribeLoadBalancer(ctx, balancers)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load balancers from ELB %w", err)
+	}
 	results = append(results, ELBResource{result})
 
 	return results, err
