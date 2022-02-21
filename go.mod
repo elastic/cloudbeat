@@ -50,7 +50,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.17.0
-	github.com/elastic/csp-security-policies v0.0.2-go-lib
+	github.com/elastic/csp-security-policies v0.0.5-go-lib-f
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.2 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
