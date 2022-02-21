@@ -14,6 +14,7 @@ import (
 const (
 	PodNameEnvar           = "POD_NAME"
 	DefaultLeaderLeaseName = "elastic-agent-cluster-leader"
+	DefaultLeaderValue     = true
 )
 
 type leaseProvider struct {
@@ -28,7 +29,7 @@ func NewLeaderLeaseProvider(ctx context.Context, client kubernetes.Interface) Le
 func (l *leaseProvider) IsLeader() (bool, error) {
 	leases, err := l.client.CoordinationV1().Leases("kube-system").List(l.ctx, v1.ListOptions{})
 	if err != nil {
-		return false, err
+		return DefaultLeaderValue, err
 	}
 
 	for _, lease := range leases.Items {
@@ -43,7 +44,7 @@ func (l *leaseProvider) IsLeader() (bool, error) {
 		}
 	}
 
-	return false, fmt.Errorf("could not find lease %v in Kube leases", DefaultLeaderLeaseName)
+	return DefaultLeaderValue, fmt.Errorf("could not find lease %v in Kube leases", DefaultLeaderLeaseName)
 }
 
 func (l *leaseProvider) currentPodID() string {
