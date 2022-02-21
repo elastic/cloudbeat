@@ -19,7 +19,6 @@ func NewAWSIdentityProvider(cfg aws.Config) *AWSIdentityProvider {
 
 // GetMyIdentity / This method will return your identity (Arn, user-id...)
 func (provider AWSIdentityProvider) GetMyIdentity(ctx context.Context) (*sts.GetCallerIdentityResponse, error) {
-	/// When repoNames is nil, it will describe all the existing repositories
 	input := &sts.GetCallerIdentityInput{}
 	request := provider.client.GetCallerIdentityRequest(input)
 	response, err := request.Send(ctx)
