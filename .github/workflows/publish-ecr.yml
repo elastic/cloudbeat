@@ -1,0 +1,55 @@
+name: Publish Cloudbeat
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  CLOUDBEAT_REGISTRY: ${{ secrets.AWS_ECR_ID_DEVELOP }}.dkr.ecr.${{ secrets.AWS_ECR_REGION_DEVELOP }}.amazonaws.com
+  AWS_ECR_KEY: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
+  AWS_ECR_SECRET: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
+  AWS_ECR_REGION: ${{ secrets.AWS_ECR_REGION_DEVELOP }}
+
+jobs:
+  publish_image_cloudbeat:
+    name: Push Cloudbeat Docker image to ECR
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: add rego repo ssh key
+        uses: shaunco/ssh-agent@git-repo-mapping # this action will configure git to use the right SSH key per each repo.
+        with:
+          ssh-private-key: |
+                ${{ secrets.REGO_LIB_KEY }}
+          repo-mappings: |
+            github.com/elastic/csp-security-policies
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Login to ECR
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.CLOUDBEAT_REGISTRY }}
+          username: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
+          password: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.2
+
+      - name: Build Cloudbeat
+        run: |
+            GOOS=linux go build -v && docker build -t cloudbeat .
+
+      - name: Push to ECR
+        id: ecr
+        uses: jwalton/gh-ecr-push@v1
+        with:
+          access-key-id: ${{ env.AWS_ECR_KEY }}
+          secret-access-key: ${{ env.AWS_ECR_SECRET }}
+          region: ${{ env.AWS_ECR_REGION }}
+          local-image: cloudbeat:latest
+          image: cloudbeat:${{ github.sha }}, cloudbeat:csp-latest
