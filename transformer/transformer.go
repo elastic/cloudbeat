@@ -1,6 +1,8 @@
 package transformer
 
-import "github.com/gofrs/uuid"
+import (
+	"github.com/gofrs/uuid"
+)
 
 type ResourceTypeMetadata struct {
 	CycleMetadata
@@ -14,14 +16,4 @@ type ResourceMetadata struct {
 
 type CycleMetadata struct {
 	CycleId uuid.UUID
-}
-
-type RuleResult struct {
-	Findings []Finding   `json:"findings"`
-	Resource interface{} `json:"resource"`
-}
-
-type Finding struct {
-	Result interface{} `json:"result"`
-	Rule   interface{} `json:"rule"`
 }

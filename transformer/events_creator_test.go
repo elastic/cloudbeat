@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/cloudbeat/opa"
 	"github.com/elastic/cloudbeat/resources"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/gofrs/uuid"
@@ -41,7 +42,7 @@ var fetcherResult = fetchers.FileSystemResource{
 }
 
 var (
-	opaResults   RuleResult
+	opaResults   opa.RuleResult
 	resourcesMap = map[string][]fetchers.FetchedResource{fetchers.FileSystemType: {fetcherResult}}
 	ctx          = context.Background()
 	events       = make([]beat.Event, 0)

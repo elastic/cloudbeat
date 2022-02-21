@@ -4,18 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/http"
-
 	"github.com/elastic/cloudbeat/beater/bundle"
 	"github.com/open-policy-agent/opa/logging"
 	"github.com/open-policy-agent/opa/sdk"
 	"github.com/sirupsen/logrus"
 )
-
-type Evaluator struct {
-	bundleServer *http.Server
-	opa          *sdk.OPA
-}
 
 func NewEvaluator(ctx context.Context) (*Evaluator, error) {
 	server, err := bundle.StartServer()

@@ -7,6 +7,7 @@ import (
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/opa"
 	"github.com/elastic/cloudbeat/resources"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/mitchellh/mapstructure"
@@ -87,8 +88,8 @@ func (c *Transformer) createBeatEvents(policyResource fetchers.FetchedResource, 
 	return nil
 }
 
-func parseResult(result interface{}) ([]Finding, error) {
-	var opaResult RuleResult
+func parseResult(result interface{}) ([]opa.Finding, error) {
+	var opaResult opa.RuleResult
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &opaResult})
 	if err != nil {
 		return nil, err
