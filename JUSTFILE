@@ -1,4 +1,3 @@
-# Todo delete before merge to elastic/beats
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yaml
 
@@ -32,6 +31,9 @@ build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-
 logs-cloudbeat:
   kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system
 
+logs-cloudbeat-file:
+  kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system > cloudbeat-logs.ndjson
+
 package-agent:
   cd ../x-pack/elastic-agent & DEV=true SNAPSHOT=true PLATFORMS=linux/amd64 TYPES=docker mage -v package
 
@@ -49,3 +51,6 @@ elastic-stack-up:
 elastic-stack-down:
   elastic-package stack down
 
+ssh-cloudbeat:
+    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
+    kubectl exec --stdin --tty $CLOUDBEAT_POD -n kube-system -- /bin/bash
