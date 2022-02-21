@@ -3,12 +3,10 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"regexp"
-	"sync"
-
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
+	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
@@ -19,7 +17,6 @@ const ELBRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
 type ELBFetcher struct {
 	cfg             ELBFetcherConfig
 	elbProvider     *ELBProvider
-	kubeInitOnce    sync.Once
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
 }
@@ -37,30 +34,21 @@ type ELBResource struct {
 
 func NewELBFetcher(awsCfg AwsFetcherConfig, cfg ELBFetcherConfig) (Fetcher, error) {
 	elb := NewELBProvider(awsCfg.Config)
-
 	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsCfg.Config.Region)
+	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)
+	}
 
 	return &ELBFetcher{
 		elbProvider:     elb,
 		cfg:             cfg,
+		kubeClient:      kubeClient,
 		lbRegexMatchers: []*regexp.Regexp{regexp.MustCompile(loadBalancerRegex)},
 	}, nil
 }
 
 func (f *ELBFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
-	var err error
-	f.kubeInitOnce.Do(func() {
-		f.kubeClient, err = kubernetes.GetKubernetesClient(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
-	})
-	if err != nil {
-		// Reset watcherlock if the watchers could not be initiated.
-		watcherlock = sync.Once{}
-		return nil, fmt.Errorf("could not initate Kubernetes watchers: %w", err)
-	}
-	return f.getData(ctx)
-}
-
-func (f *ELBFetcher) getData(ctx context.Context) ([]FetchedResource, error) {
 	results := make([]FetchedResource, 0)
 
 	balancers, err := f.GetLoadBalancers()

@@ -3,14 +3,12 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	"regexp"
-	"sync"
-
-	"github.com/aws/aws-sdk-go-v2/service/ecr"
 )
 
 const ECRType = "aws-ecr"
@@ -21,7 +19,6 @@ type ECRFetcher struct {
 	cfg               ECRFetcherConfig
 	ecrProvider       *ECRProvider
 	kubeClient        k8s.Interface
-	kubeInitOnce      sync.Once
 	repoRegexMatchers []*regexp.Regexp
 }
 
@@ -37,13 +34,18 @@ type ECRResource struct {
 }
 
 func NewECRFetcher(awsCfg AwsFetcherConfig, cfg ECRFetcherConfig) (Fetcher, error) {
-	ecr := NewEcrProvider(awsCfg.Config)
+	ecrProvider := NewEcrProvider(awsCfg.Config)
 
 	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *awsCfg.AccountID, awsCfg.Config.Region)
+	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 
+	if err != nil {
+		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
+	}
 	return &ECRFetcher{
 		cfg:         cfg,
-		ecrProvider: ecr,
+		ecrProvider: ecrProvider,
+		kubeClient:  kubeClient,
 		repoRegexMatchers: []*regexp.Regexp{
 			regexp.MustCompile(privateRepoRegex),
 			regexp.MustCompile(PublicRepoRegex),
@@ -55,27 +57,11 @@ func (f *ECRFetcher) Stop() {
 }
 
 func (f *ECRFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
-
-	var err error
-	f.kubeInitOnce.Do(func() {
-		f.kubeClient, err = kubernetes.GetKubernetesClient(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
-	})
-	if err != nil {
-		// Reset watcherlock if the watchers could not be initiated.
-		watcherlock = sync.Once{}
-		return nil, fmt.Errorf("could not initate Kubernetes watchers: %w", err)
-	}
-
-	return f.getData(ctx)
-}
-
-func (f *ECRFetcher) getData(ctx context.Context) ([]FetchedResource, error) {
 	results := make([]FetchedResource, 0)
 	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 	}
-
 	ecrRepositories, err := f.ecrProvider.DescribeRepositories(ctx, podsAwsRepositories)
 	if err != nil {
 		return nil, fmt.Errorf("could retrieve ECR repositories: %w", err)
