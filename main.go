@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	"github.com/elastic/beats/v7/cloudbeat/cmd"
+	"github.com/elastic/cloudbeat/cmd"
 
-	_ "github.com/elastic/beats/v7/cloudbeat/include"
+	_ "github.com/elastic/cloudbeat/include"
 )
 
 func main() {

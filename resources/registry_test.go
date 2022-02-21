@@ -3,6 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetchers"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,11 +15,15 @@ type numberFetcher struct {
 	stopCalled bool
 }
 
-func newNumberFetcher(num int) Fetcher {
+type NumberResource struct {
+	Num int
+}
+
+func newNumberFetcher(num int) fetchers.Fetcher {
 	return &numberFetcher{num, false}
 }
 
-func (f *numberFetcher) Fetch(ctx context.Context) ([]FetcherResult, error) {
+func (f *numberFetcher) Fetch(ctx context.Context) ([]fetchers.FetchedResource, error) {
 	return fetchValue(f.num), nil
 }
 
@@ -31,7 +36,7 @@ type boolFetcherCondition struct {
 	name string
 }
 
-func newBoolFetcherCondition(val bool, name string) FetcherCondition {
+func newBoolFetcherCondition(val bool, name string) fetchers.FetcherCondition {
 	return &boolFetcherCondition{val, name}
 }
 
@@ -43,13 +48,8 @@ func (c *boolFetcherCondition) Name() string {
 	return c.name
 }
 
-func fetchValue(num int) []FetcherResult {
-	return []FetcherResult{
-		{
-			Type:     "number",
-			Resource: num,
-		},
-	}
+func fetchValue(num int) []fetchers.FetchedResource {
+	return []fetchers.FetchedResource{NumberResource{num}}
 }
 
 func registerNFetchers(t *testing.T, reg FetchersRegistry, n int) {
@@ -142,17 +142,17 @@ func (s *RegistryTestSuite) TestRunRegistered() {
 	s.NoError(err)
 
 	var tests = []struct {
-		key   string
-		value int
+		key string
+		res NumberResource
 	}{
 		{
-			"some-key-1", 1,
+			"some-key-1", NumberResource{1},
 		},
 		{
-			"some-key-2", 2,
+			"some-key-2", NumberResource{2},
 		},
 		{
-			"some-key-3", 3,
+			"some-key-3", NumberResource{3},
 		},
 	}
 
@@ -160,7 +160,7 @@ func (s *RegistryTestSuite) TestRunRegistered() {
 		arr, err := s.registry.Run(context.TODO(), test.key)
 		s.NoError(err)
 		s.Equal(1, len(arr))
-		s.Equal(test.value, arr[0].Resource)
+		s.Equal(test.res, arr[0])
 	}
 }
 
@@ -178,23 +178,23 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	conditionFalse := newBoolFetcherCondition(false, "never-fetcher-condition")
 
 	var tests = []struct {
-		conditions []FetcherCondition
+		conditions []fetchers.FetcherCondition
 		expected   bool
 	}{
 		{
-			[]FetcherCondition{}, true,
+			[]fetchers.FetcherCondition{}, true,
 		},
 		{
-			[]FetcherCondition{conditionTrue}, true,
+			[]fetchers.FetcherCondition{conditionTrue}, true,
 		},
 		{
-			[]FetcherCondition{conditionTrue, conditionTrue}, true,
+			[]fetchers.FetcherCondition{conditionTrue, conditionTrue}, true,
 		},
 		{
-			[]FetcherCondition{conditionTrue, conditionTrue, conditionFalse}, false,
+			[]fetchers.FetcherCondition{conditionTrue, conditionTrue, conditionFalse}, false,
 		},
 		{
-			[]FetcherCondition{conditionFalse, conditionTrue, conditionTrue, conditionTrue, conditionTrue}, false,
+			[]fetchers.FetcherCondition{conditionFalse, conditionTrue, conditionTrue, conditionTrue, conditionTrue}, false,
 		},
 	}
 
@@ -207,4 +207,12 @@ func (s *RegistryTestSuite) TestShouldRun() {
 		should := s.registry.ShouldRun("some-key")
 		s.Equal(test.expected, should)
 	}
+}
+
+func (res NumberResource) GetID() string {
+	return ""
+}
+
+func (res NumberResource) GetData() interface{} {
+	return res.Num
 }

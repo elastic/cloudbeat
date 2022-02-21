@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/cloudbeat/resources/fetchers"
 	"sync"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 )
 
@@ -15,29 +16,28 @@ import (
 // against it. It sends the cache to an output channel at the defined interval.
 type Data struct {
 	interval time.Duration
-	output   chan Map
+	output   chan ResourceMap
 
-	state    Map
+	state    ResourceMap
 	fetchers FetchersRegistry
 	wg       *sync.WaitGroup
 }
 
-type Map map[string][]FetcherResult
+type ResourceMap map[string][]fetchers.FetchedResource
 
 // NewData returns a new Data instance with the given interval.
 func NewData(interval time.Duration, fetchers FetchersRegistry) (*Data, error) {
-
 	return &Data{
 		interval: interval,
-		output:   make(chan Map),
+		output:   make(chan ResourceMap),
 
-		state:    make(Map),
+		state:    make(ResourceMap),
 		fetchers: fetchers,
 	}, nil
 }
 
 // Output returns the output channel.
-func (d *Data) Output() <-chan Map {
+func (d *Data) Output() <-chan ResourceMap {
 	return d.output
 }
 
@@ -68,7 +68,7 @@ func (d *Data) Run(ctx context.Context) error {
 // update is a single update sent from a worker to a manager.
 type update struct {
 	key string
-	val []FetcherResult
+	val []fetchers.FetchedResource
 }
 
 func (d *Data) fetchWorker(ctx context.Context, updates chan update, k string) {
@@ -129,7 +129,7 @@ func (d *Data) Stop(ctx context.Context, cancel context.CancelFunc) {
 }
 
 // copyState makes a copyState of the given map.
-func copyState(m Map) (Map, error) {
+func copyState(m ResourceMap) (ResourceMap, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	dec := gob.NewDecoder(&buf)
@@ -137,7 +137,7 @@ func copyState(m Map) (Map, error) {
 	if err != nil {
 		return nil, err
 	}
-	var newState Map
+	var newState ResourceMap
 	err = dec.Decode(&newState)
 	if err != nil {
 		return nil, err
@@ -147,10 +147,9 @@ func copyState(m Map) (Map, error) {
 
 func init() {
 	gob.Register([]interface{}{})
-	gob.Register(FetcherResult{})
-	gob.Register(ProcessResource{})
-	gob.Register(FileSystemResource{})
-
+	gob.Register(fetchers.ProcessResource{})
+	gob.Register(fetchers.FileSystemResource{})
+	gob.Register(fetchers.K8sResource{})
 	gob.Register(kubernetes.Pod{})
 	gob.Register(kubernetes.Secret{})
 	gob.Register(kubernetes.Role{})
@@ -158,4 +157,5 @@ func init() {
 	gob.Register(kubernetes.ClusterRole{})
 	gob.Register(kubernetes.ClusterRoleBinding{})
 	gob.Register(kubernetes.NetworkPolicy{})
+	gob.Register(kubernetes.PodSecurityPolicy{})
 }
