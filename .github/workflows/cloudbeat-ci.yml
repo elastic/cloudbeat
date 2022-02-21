@@ -9,8 +9,8 @@ env:
   K8S_MANIFEST_DIR: deploy/k8s
 
 jobs:
-  e2e:
-    name: End to End
+  integration-test:
+    name: Integration Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -97,13 +97,14 @@ jobs:
           echo "$FINDING" >> "$GITHUB_ENV"
           echo "EOF" >> "$GITHUB_ENV"
 
-      - name: Commnet E2E Result
+      - name: Commnet test success result
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: Exmaple Finding
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            End-to-End test completed successfully! :trophy: 
+            ## Cloudbeat CI :green_heart:
+            The integration test was completed successfully! :trophy:
             
             <details>
             <summary><b>Raw Finding</b></summary>
