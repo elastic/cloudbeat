@@ -25,6 +25,6 @@ metadata = {
 	"description": "Do not bind the Controller Manager service to non-loopback insecure addresses.",
 	"impact": "None",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.3.7", "Controller Manager"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml on the master node and ensure the correct value for the --bind-address parameter",
 }

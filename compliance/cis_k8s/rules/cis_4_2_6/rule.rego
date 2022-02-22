@@ -26,6 +26,6 @@ metadata = {
 	"description": "Protect tuned kernel parameters from overriding kubelet default kernel parameter values.",
 	"impact": "You would have to re-tune kernel parameters to match kubelet parameters.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 4.2.6", "Kubelet"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "If using a Kubelet config file, edit the file to set protectKernelDefaults: true. If using command line arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable. --protect-kernel-defaults=true Based on your system, restart the kubelet service.",
 }

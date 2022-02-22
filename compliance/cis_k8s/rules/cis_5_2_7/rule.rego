@@ -46,6 +46,6 @@ this should be defined in a separate PSP and you should carefully check RBAC con
 	"impact": "Pods with containers which run with the NET_RAW capability will not be permitted.",
 	"remediation": "Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.requiredDropCapabilities is set to include either NET_RAW or ALL.",
 	"default_value": "By default, PodSecurityPolicies are not defined.",
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 5.2.7", "Pod Security Policies"]),
 }

@@ -2,9 +2,12 @@ package compliance.cis_eks
 
 import data.compliance.cis_eks.rules
 
-default_tags := ["CIS", "CIS v1.0.1", "EKS"]
+default_tags := ["CIS", "EKS"]
 
-benchmark_name := "CIS Amazon Elastic Kubernetes Service (EKS) Benchmark"
+benchmark_metadata := {
+	"name": "CIS Amazon Elastic Kubernetes Service (EKS) Benchmark",
+	"version": "v1.0.1",
+}
 
 findings[finding] {
 	# if activated rules were configured for this benchmark run only them

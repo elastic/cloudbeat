@@ -8,6 +8,8 @@ validate_metadata(metadata) {
 	metadata.impact
 	metadata.tags
 	metadata.benchmark
+	metadata.benchmark.name
+	metadata.benchmark.version
 	metadata.remediation
 } else = false {
 	true

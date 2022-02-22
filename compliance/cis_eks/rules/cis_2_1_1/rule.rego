@@ -41,6 +41,6 @@ To enable or disable control plane logs with the console.
 Open the Amazon EKS console at https://console.aws.amazon.com/eks/home#/clusters.
 Amazon EKS Information in CloudTrail CloudTrail is enabled on your AWS account when you create the account.
 When activity occurs in Amazon EKS, that activity is recorded in a CloudTrail event along with other AWS service events in Event history.`,
-	"benchmark": cis_eks.benchmark_name,
+	"benchmark": cis_eks.benchmark_metadata,
 	"remediation": `aws --region "${REGION_CODE}" eks describe-cluster --name "${CLUSTER_NAME}" --query 'cluster.logging.clusterLogging[?enabled==true].types`,
 }

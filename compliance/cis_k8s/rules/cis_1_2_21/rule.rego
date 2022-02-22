@@ -25,6 +25,6 @@ metadata = {
 	"description": "Profiling allows for the identification of specific performance bottlenecks. It generates a significant amount of program data that could potentially be exploited to uncover system and program details. If you are not experiencing any bottlenecks and do not need the profiler for troubleshooting purposes, it is recommended to turn it off to reduce the potential attack surface.",
 	"impact": "Profiling information would not be available.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.21", "API Server"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set --profiling=false",
 }

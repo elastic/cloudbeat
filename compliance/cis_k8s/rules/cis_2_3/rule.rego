@@ -28,6 +28,6 @@ metadata = {
 	"description": "Do not use self-signed certificates for TLS.",
 	"impact": "Clients will not be able to use self-signed certificates for TLS.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 2.3", "etcd"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the master node and either remove the --auto-tls parameter or set it to false. --auto-tls=false",
 }

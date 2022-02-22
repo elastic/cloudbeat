@@ -40,6 +40,6 @@ this should be defined in a separate PSP and you should carefully check RBAC con
 	"impact": "Pods defined with spec.allowPrivilegeEscalation: true will not be permitted unless they are run under a specific PSP.",
 	"remediation": "Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.allowPrivilegeEscalation field is omitted or set to false.",
 	"default_value": "By default, PodSecurityPolicies are not defined.",
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 5.2.5", "Pod Security Policies"]),
 }

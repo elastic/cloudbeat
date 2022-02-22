@@ -23,6 +23,6 @@ metadata = {
 	"description": "Ensure that the kubelet service file ownership is set to root:root.",
 	"impact": "None",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 4.1.2", "Worker Node Configuration"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Run the below command (based on the file location on your system) on the each worker node. For example, chown root:root /etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
 }

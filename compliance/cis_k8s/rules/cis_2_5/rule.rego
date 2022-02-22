@@ -25,6 +25,6 @@ metadata = {
 	"description": "etcd should be configured for peer authentication.",
 	"impact": "All peers attempting to communicate with the etcd server will require a valid client certificate for authentication.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 2.5", "etcd"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the master node and set to --peer-client-cert-auth=true",
 }

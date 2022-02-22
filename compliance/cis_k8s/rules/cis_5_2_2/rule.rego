@@ -30,6 +30,6 @@ If you need to run containers which require hostPID, this should be defined in a
 	"impact": "Pods defined with spec.hostPID: true will not be permitted unless they are run under a specific PSP.",
 	"remediation": "Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostPID field is omitted or set to false.",
 	"default_value": "By default, PodSecurityPolicies are not defined.",
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 5.2.2", "Pod Security Policies"]),
 }

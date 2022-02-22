@@ -22,6 +22,6 @@ metadata = {
 	"description": "The API server pod specification file controls various parameters that set the behavior of the API server. You should restrict its file permissions to maintain the integrity of the file. The file should be writable by only the administrators on the system.",
 	"impact": "None",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.1.1", "Master Node Configuration"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "chmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml",
 }

@@ -25,6 +25,6 @@ metadata = {
 	"description": "Disable anonymous requests to the Kubelet server.",
 	"impact": "Anonymous requests will be rejected.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 4.2.1", "Kubelet"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "If using a Kubelet config file, edit the file to set authentication: anonymous: enabled to false. If using executable arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and set the below parameter in KUBELET_SYSTEM_PODS_ARGS variable. --anonymous-auth=false Based on your system, restart the kubelet service.",
 }

@@ -6,7 +6,7 @@ test_validate_metadata_invalid_remediation {
 		"description": "rule description",
 		"impact": "rule impact",
 		"tags": ["tag 1", "tag 2"],
-		"benchmark": "benchmark name-version",
+		"benchmark": {"name": "benchmark", "version": "v1.0.0"},
 		"Remediation": "rule remidiation", # <- capitalized. should be "remediation"
 	}
 
@@ -19,7 +19,7 @@ test_validate_metadata_invalid_name {
 		"description": "rule description",
 		"impact": "rule impact",
 		"tags": ["tag 1", "tag 2"],
-		"benchmark": "benchmark name-version",
+		"benchmark": {"name": "benchmark", "version": "v1.0.0"},
 		"remediation": "rule remidiation",
 	}
 
@@ -32,7 +32,7 @@ test_validate_metadata_invalid_desc {
 		"Description": "rule description", # <- capitalized. should be "Description"
 		"impact": "rule impact",
 		"tags": ["tag 1", "tag 2"],
-		"benchmark": "benchmark name-version",
+		"benchmark": {"name": "benchmark", "version": "v1.0.0"},
 		"remediation": "rule remidiation",
 	}
 
@@ -45,7 +45,7 @@ test_validate_metadata_invalid_impact {
 		"description": "rule description",
 		"Impact": "rule impact", # <- capitalized. should be "impact"
 		"tags": ["tag 1", "tag 2"],
-		"benchmark": "benchmark name-version",
+		"benchmark": {"name": "benchmark", "version": "v1.0.0"},
 		"remediation": "rule remidiation",
 	}
 
@@ -58,7 +58,7 @@ test_validate_metadata_invalid_tags {
 		"description": "rule description",
 		"impact": "rule impact",
 		"Tags": ["tag 1", "tag 2"], # <- capitalized. should be "tags"
-		"benchmark": "benchmark name-version",
+		"benchmark": {"name": "benchmark", "version": "v1.0.0"},
 		"remediation": "rule remidiation",
 	}
 
@@ -71,7 +71,7 @@ test_validate_metadata_invalid_benchmark {
 		"description": "rule description",
 		"impact": "rule impact",
 		"tags": ["tag 1", "tag 2"],
-		"Benchmark": "benchmark name-version", # <- capitalized. should be "benchmark"
+		"Benchmark": {"name": "benchmark", "version": "v1.0.0"}, # <- capitalized. should be "benchmark"
 		"remediation": "rule remidiation",
 	}
 
@@ -84,7 +84,7 @@ test_validate_metadata_invalid_remediation {
 		"description": "rule description",
 		"impact": "rule impact",
 		"tags": ["tag 1", "tag 2"],
-		"benchmark": "benchmark name-version",
+		"benchmark": {"name": "benchmark", "version": "v1.0.0"},
 		"Remediation": "rule remidiation", # <- capitalized. should be "remediation"
 	}
 
@@ -97,7 +97,7 @@ test_validate_metadata_valid {
 		"description": "rule description",
 		"impact": "rule impact",
 		"tags": ["tag 1", "tag 2"],
-		"benchmark": "benchmark name-version",
+		"benchmark": {"name": "benchmark", "version": "v1.0.0"},
 		"remediation": "rule remidiation",
 	}
 

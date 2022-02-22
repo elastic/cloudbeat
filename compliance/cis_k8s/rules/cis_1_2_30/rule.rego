@@ -32,6 +32,6 @@ metadata = {
 	"description": "API server communication contains sensitive parameters that should remain encrypted in transit. Configure the API server to serve only HTTPS traffic.",
 	"impact": "TLS and client certificate authentication must be configured for your Kubernetes cluster deployment.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.30", "API Server"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Follow the Kubernetes documentation and set up the TLS connection on the apiserver. Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the TLS certificate and private key file parameters.",
 }

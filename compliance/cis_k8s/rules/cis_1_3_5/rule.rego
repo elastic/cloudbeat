@@ -25,6 +25,6 @@ metadata = {
 	"description": "Processes running within pods that need to contact the API server must verify the API server's serving certificate. Failing to do so could be a subject to man-in-the-middle attacks. Providing the root certificate for the API server's serving certificate to the controller manager with the --root-ca-file argument allows the controller manager to inject the trusted bundle into pods so that they can verify TLS connections to the API server.",
 	"impact": "You need to setup and maintain root certificate authority file.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.3.5", "Controller Manager"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml on the master node and set the --root-ca-file parameter to the certificate bundle file` --root-ca-file=<path/to/file>",
 }

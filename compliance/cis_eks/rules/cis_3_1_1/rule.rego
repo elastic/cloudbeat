@@ -30,6 +30,6 @@ It is possible to run kubelet with the kubeconfig parameters configured as a Kub
 	"impact": "None",
 	"tags": array.concat(cis_eks.default_tags, ["CIS 3.1.1", "Worker Node Configuration"]),
 	"default_value": "See the AWS EKS documentation for the default value.",
-	"benchmark": cis_eks.benchmark_name,
+	"benchmark": cis_eks.benchmark_metadata,
 	"remediation": "chmod 644 /var/lib/kubelet/kubeconfig",
 }

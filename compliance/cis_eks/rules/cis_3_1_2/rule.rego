@@ -29,7 +29,7 @@ You should set its file ownership to maintain the integrity of the file.
 The fileshould be owned by root:root.`,
 	"impact": "None",
 	"tags": array.concat(cis_eks.default_tags, ["CIS 3.1.2", "Worker Node Configuration"]),
-	"benchmark": cis_eks.benchmark_name,
+	"benchmark": cis_eks.benchmark_metadata,
 	"remediation": "chown root:root /var/lib/kubelet/kubeconfig",
 	"default_value": "See the AWS EKS documentation for the default value.",
 }

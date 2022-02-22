@@ -32,6 +32,6 @@ metadata = {
 	"description": "etcd should be configured to make use of TLS encryption for peer connections.",
 	"impact": "etcd cluster peers would need to set up TLS for their communication.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 2.4", "etcd"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Follow the etcd service documentation and configure peer TLS encryption as appropriate for your etcd cluster. Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the master node and set --peer-cert-file=</path/to/peer-cert-file> --peer-key-file=</path/to/peer-key-file>",
 }

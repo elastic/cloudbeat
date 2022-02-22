@@ -22,6 +22,6 @@ metadata = {
 	"description": "The scheduler.conf file is the kubeconfig file for the Scheduler. You should restrict its file permissions to maintain the integrity of the file. The file should be writable by only the administrators on the system.",
 	"impact": "None",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.1.15", "Master Node Configuration"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "chmod 644 /etc/kubernetes/scheduler.conf",
 }

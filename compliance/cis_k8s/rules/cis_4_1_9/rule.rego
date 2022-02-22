@@ -22,6 +22,6 @@ metadata = {
 	"description": "Ensure that if the kubelet refers to a configuration file with the --config argument, that file has permissions of 644 or more restrictive.",
 	"impact": "None",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 4.1.9", "Worker Node Configuration"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "chmod 644 /var/lib/kubelet/config.yaml",
 }

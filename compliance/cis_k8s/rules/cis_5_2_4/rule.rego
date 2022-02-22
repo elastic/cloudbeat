@@ -29,6 +29,6 @@ If you have need to run containers which require hostNetwork, this should be def
 	"impact": "Pods defined with spec.hostNetwork: true will not be permitted unless they are run under a specific PSP.",
 	"remediation": "Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.hostNetwork field is omitted or set to false.",
 	"default_value": "By default, PodSecurityPolicies are not defined.",
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 5.2.4", "Pod Security Policies"]),
 }

@@ -46,6 +46,6 @@ If you need to run root containers, this should be defined in a separate PSP and
 	"impact": "Pods with containers which run as the root user will not be permitted.",
 	"remediation": "Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.runAsUser.rule is set to either MustRunAsNonRoot or MustRunAs with the range of UIDs not including 0.",
 	"default_value": "By default, PodSecurityPolicies are not defined.",
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 5.2.6", "Pod Security Policies"]),
 }

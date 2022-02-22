@@ -28,7 +28,7 @@ If this file is specified you should restrict its file permissions to maintain t
 The file should be writable by only the administrators on the system.`,
 	"impact": "None",
 	"tags": array.concat(cis_eks.default_tags, ["CIS 3.1.3", "Worker Node Configuration"]),
-	"benchmark": cis_eks.benchmark_name,
+	"benchmark": cis_eks.benchmark_metadata,
 	"remediation": "chmod 644 /etc/kubernetes/kubelet/kubelet-config.json",
 	"default_value": "See the AWS EKS documentation for the default value.",
 }

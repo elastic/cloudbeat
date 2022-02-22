@@ -37,6 +37,6 @@ so from the perspective of the principal of least privilege use of capabilities 
 	"remediation": `Review the use of capabilites in applications runnning on your cluster.
 Where a namespace contains applicaions which do not require any Linux capabities to operate consider adding a PSP which forbids the admission of containers which do not drop all capabilities.`,
 	"default_value": "By default, PodSecurityPolicies are not defined.",
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 5.2.9", "Pod Security Policies"]),
 }

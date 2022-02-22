@@ -32,6 +32,6 @@ metadata = {
 	"description": "Configure TLS encryption for the etcd service.",
 	"impact": "Client connections only over TLS would be served.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 2.1", "etcd"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Follow the etcd service documentation and configure TLS encryption. Then, edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the master node and set  --cert-file=</path/to/ca-file> --key-file=</path/to/key-file>",
 }

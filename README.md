@@ -75,7 +75,10 @@ opa eval data.main.findings --format pretty -i input.json -b . > output.json
         }
       },
       "rule": {
-        "benchmark": "CIS Kubernetes",
+        "benchmark": {
+            "name": "CIS Kubernetes V1.20",
+            "version": "v1.0.0"
+        },
         "description": "The API server pod specification file controls various parameters that set the behavior of the API server. You should restrict its file permissions to maintain the integrity of the file. The file should be writable by only the administrators on the system.",
         "impact": "None",
         "name": "Ensure that the API server pod specification file permissions are set to 644 or more restrictive",
@@ -98,16 +101,17 @@ opa eval data.main.findings --format pretty -i input.json -b . > output.json
         }
       },
       "rule": {
-        "benchmark": "CIS Kubernetes",
+        "benchmark": {
+            "name": "CIS Kubernetes V1.20",
+            "version": "v1.0.0"
+        },
         "description": "The API server pod specification file controls various parameters that set the behavior of the API server. You should set its file ownership to maintain the integrity of the file. The file should be owned by root:root.",
         "impact": "None",
         "name": "Ensure that the API server pod specification file ownership is set to root:root",
         "remediation": "chown root:root /etc/kubernetes/manifests/kube-apiserver.yaml",
         "tags": [
           "CIS",
-          "CIS v1.6.0",
           "Kubernetes",
-          "CIS 1.1.2",
           "Master Node Configuration"
         ]
       }

@@ -41,6 +41,6 @@ If you need to run privileged containers, this should be defined in a separate P
 	"impact": "Pods defined with spec.containers[].securityContext.privileged: true will not be permitted.",
 	"remediation": "Create a PSP as described in the Kubernetes documentation, ensuring that the .spec.privileged field is omitted or set to false.",
 	"default_value": "By default, PodSecurityPolicies are not defined.",
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 5.2.1", "Pod Security Policies"]),
 }

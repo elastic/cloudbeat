@@ -25,6 +25,6 @@ metadata = {
 	"description": "Enable client authentication on etcd service.",
 	"impact": "All clients attempting to access the etcd server will require a valid client certificate.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 2.2", "etcd"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the master node and set to --client-cert-auth=true",
 }

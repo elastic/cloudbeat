@@ -37,6 +37,6 @@ metadata = {
 	"description": "Do not allow all requests. Enable explicit authorization.",
 	"impact": "Unauthorized requests will be denied.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 4.2.2", "Kubelet"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "If using a Kubelet config file, edit the file to set authorization: mode to Webhook. If using executable arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and set the below parameter in KUBELET_AUTHZ_ARGS variable. --authorization-mode=Webhook Based on your system, restart the kubelet service",
 }

@@ -32,6 +32,6 @@ If you need to run containers with additional capabilities, this should be defin
 	"impact": "Pods with containers which require capabilities outwith the default set will not be permitted.",
 	"remediation": "Ensure that allowedCapabilities is not present in PSPs for the cluster unless it is set to an empty array.",
 	"default_value": "By default, PodSecurityPolicies are not defined.",
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 5.2.8", "Pod Security Policies"]),
 }

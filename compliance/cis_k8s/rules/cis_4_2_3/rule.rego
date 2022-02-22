@@ -25,6 +25,6 @@ metadata = {
 	"description": "Enable Kubelet authentication using certificates.",
 	"impact": "You require TLS to be configured on apiserver as well as kubelets.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 4.2.3", "Kubelet"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "If using a Kubelet config file, edit the file to set authentication: x509: clientCAFile to the location of the client CA file. If using command line arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and set the below parameter in KUBELET_AUTHZ_ARGS variable. --client-ca-file=<path/to/client-ca-file> Based on your system, restart the kubelet service.",
 }

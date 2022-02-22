@@ -2,9 +2,12 @@ package compliance.cis_k8s
 
 import data.compliance.cis_k8s.rules
 
-default_tags := ["CIS", "CIS v1.6.0", "Kubernetes"]
+default_tags := ["CIS", "Kubernetes"]
 
-benchmark_name := "CIS Kubernetes"
+benchmark_metadata := {
+	"name": "CIS Kubernetes V1.20",
+	"version": "v1.0.0",
+}
 
 findings[finding] {
 	# if activated rules were configured for this benchmark run only them

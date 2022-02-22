@@ -23,6 +23,6 @@ metadata = {
 	"description": "The controller-manager.conf file is the kubeconfig file for the Controller Manager. You should set its file ownership to maintain the integrity of the file. The file should be owned by root:root.",
 	"impact": "None",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.1.18", "Master Node Configuration"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "chown root:root /etc/kubernetes/controller-manager.conf",
 }

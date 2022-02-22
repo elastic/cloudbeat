@@ -26,6 +26,6 @@ metadata = {
 	"description": "The secure port is used to serve https with authentication and authorization. If you disable it, no https traffic is served and all traffic is served unencrypted.",
 	"impact": "You need to set the API Server up with the right TLS certificates.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.20", "API Server"]),
-	"benchmark": cis_k8s.benchmark_name,
+	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and either remove the --secure-port parameter or set it to a different (non-zero) desired port.",
 }
