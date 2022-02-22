@@ -21,7 +21,8 @@ type FetchedResource interface {
 }
 
 type FetcherResult struct {
-	Type     string      `json:"type"`
+	Type string `json:"type"`
+	// Golang 1.18 will introduce generics which will be useful for typing the resource field
 	Resource interface{} `json:"resource"`
 }
 
