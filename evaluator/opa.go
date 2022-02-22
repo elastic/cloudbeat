@@ -17,7 +17,7 @@ type OpaEvaluator struct {
 	bundleServer *http.Server
 }
 
-func NewEvaluator(ctx context.Context) (Evaluator, error) {
+func NewOpaEvaluator(ctx context.Context) (Evaluator, error) {
 	server, err := bundle.StartServer()
 	if err != nil {
 		return nil, err

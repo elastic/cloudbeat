@@ -61,7 +61,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	evaluator, err := evaluator.NewEvaluator(ctx)
+	evaluator, err := evaluator.NewOpaEvaluator(ctx)
 	if err != nil {
 		return nil, err
 	}
