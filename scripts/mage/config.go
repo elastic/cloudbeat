@@ -25,9 +25,6 @@ import (
 func XPackConfigFileParams() devtools.ConfigFileParams {
 	p := devtools.DefaultConfigFileParams()
 	p.Templates = append(p.Templates, devtools.OSSBeatDir("_meta/config/*.tmpl"))
-	p.ExtraVars = map[string]interface{}{
-		"UseAddClusterIdProcessor": true,
-	} // see libbeat/_meta/config/processors.yml.tmpl
 
 	return p
 }
