@@ -51,8 +51,8 @@ func (c *Transformer) processEachResource(results []fetchers.FetchedResource, me
 	}
 }
 
-func (c *Transformer) createBeatEvents(policyResource fetchers.FetchedResource, metadata ResourceMetadata) error {
-	fetcherResult := fetchers.FetcherResult{Type: metadata.Type, Resource: policyResource.GetData()}
+func (c *Transformer) createBeatEvents(fetchedResource fetchers.FetchedResource, metadata ResourceMetadata) error {
+	fetcherResult := fetchers.FetcherResult{Type: metadata.Type, Resource: fetchedResource.GetData()}
 	result, err := c.eval.Decision(c.context, fetcherResult)
 
 	if err != nil {
