@@ -83,18 +83,46 @@ jobs:
           echo "===== kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET \"${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*k8s_cis.result*?v&s=index&pretty\""
           kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*k8s_cis.result*?v&s=index&pretty"
 
-      - name: Get latest Finding
+      - name: Get 'file-system' resource type finding
         run: |
-          FINDING=$( curl -XGET "localhost:9200/*k8s_cis.result*/_search?pretty=true" -H 'Content-Type: application/json' -d'
+          FILE_SYSTEM_FINDING=$( curl -XGET "localhost:9200/*k8s_cis.result*/_search?pretty=true" -H 'Content-Type: application/json' -d'
           {
              "size": 1,
              "sort": { "@timestamp": "desc"},
-             "query": { "match_all": {} }
+             "query": { "match": { "type":  "process" } }
           }' | jq '.hits.hits[0]._source')
           
           # Save Vars for next steps
-          echo "finding<<EOF" >> "$GITHUB_ENV"
-          echo "$FINDING" >> "$GITHUB_ENV"
+          echo "file_system_finding<<EOF" >> "$GITHUB_ENV"
+          echo "$FILE_SYSTEM_FINDING" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+
+      - name: Get 'process' resource type finding
+        run: |
+          PROCESS_FINDING=$( curl -XGET "localhost:9200/*k8s_cis.result*/_search?pretty=true" -H 'Content-Type: application/json' -d'
+          {
+             "size": 1,
+             "sort": { "@timestamp": "desc"},
+             "query": { "match": { "type":  "process" } }
+          }' | jq '.hits.hits[0]._source')
+          
+          # Save Vars for next steps
+          echo "process_finding<<EOF" >> "$GITHUB_ENV"
+          echo "$PROCESS_FINDING" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+
+      - name: Get 'kube-api' resource type finding
+        run: |
+          KUBE_API_FINDING=$( curl -XGET "localhost:9200/*k8s_cis.result*/_search?pretty=true" -H 'Content-Type: application/json' -d'
+          {
+             "size": 1,
+             "sort": { "@timestamp": "desc"},
+             "query": { "match": { "type":  "process" } }
+          }' | jq '.hits.hits[0]._source')
+          
+          # Save Vars for next steps
+          echo "kube_api_finding<<EOF" >> "$GITHUB_ENV"
+          echo "$KUBE_API_FINDING" >> "$GITHUB_ENV"
           echo "EOF" >> "$GITHUB_ENV"
 
       - name: Commnet test success result
@@ -106,11 +134,28 @@ jobs:
             ## Cloudbeat CI :green_heart:
             The integration test was completed successfully! :trophy:
             
+            **Exmaple findings from ES:**
+            
             <details>
-            <summary><b>Raw Finding</b></summary>
+            <summary><b>`file-system`</b></summary>
             
             ```json
-            ${{env.finding}}
+            ${{env.file_system_finding}}
+            ```
+            </details>
+            <details>
+            <summary><b>`process`</b></summary>
+            
+            ```json
+            ${{env.process_finding}}
+            ```
+            </details>
+            
+            <details>
+            <summary><b>`kube-api`</b></summary>
+            
+            ```json
+            ${{env.kube_api_finding}}
             ```
             </details>
 
