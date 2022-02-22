@@ -1,17 +1,15 @@
-package opa
+package evaluator
 
-import (
-	"github.com/open-policy-agent/opa/sdk"
-	"net/http"
-)
+import "context"
 
-type Evaluator struct {
-	bundleServer *http.Server
-	opa          *sdk.OPA
+type Evaluator interface {
+	Decision(context.Context, interface{}) (interface{}, error)
+	Stop(context.Context)
+	Decode(result interface{}) ([]Finding, error)
 }
 
 type Metadata struct {
-	OpaVersion string `json:"opa_version"`
+	Version string `json:"opa_version"`
 }
 
 type RuleResult struct {

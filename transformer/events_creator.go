@@ -7,29 +7,26 @@ import (
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/opa"
+	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources"
 	"github.com/elastic/cloudbeat/resources/fetchers"
-	"github.com/mitchellh/mapstructure"
 	"time"
 )
 
-type CB func(ctx context.Context, input interface{}) (interface{}, error)
-
 type Transformer struct {
 	context       context.Context
-	callback      CB
+	eval          evaluator.Evaluator
 	eventMetadata common.MapStr
 	events        []beat.Event
 }
 
-func NewTransformer(ctx context.Context, cb CB, index string) Transformer {
+func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
 
 	return Transformer{
 		context:       ctx,
-		callback:      cb,
+		eval:          eval,
 		eventMetadata: eventMetadata,
 		events:        events,
 	}
@@ -56,14 +53,14 @@ func (c *Transformer) processEachResource(results []fetchers.FetchedResource, me
 
 func (c *Transformer) createBeatEvents(policyResource fetchers.FetchedResource, metadata ResourceMetadata) error {
 	fetcherResult := fetchers.FetcherResult{Type: metadata.Type, Resource: policyResource.GetData()}
-	result, err := c.callback(c.context, fetcherResult)
+	result, err := c.eval.Decision(c.context, fetcherResult)
 
 	if err != nil {
 		logp.Error(fmt.Errorf("error running the policy: %w", err))
 		return err
 	}
 
-	findings, err := parseResult(result)
+	findings, err := c.eval.Decode(result)
 	if err != nil {
 		return err
 	}
@@ -86,15 +83,4 @@ func (c *Transformer) createBeatEvents(policyResource fetchers.FetchedResource, 
 		c.events = append(c.events, event)
 	}
 	return nil
-}
-
-func parseResult(result interface{}) ([]opa.Finding, error) {
-	var opaResult opa.RuleResult
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &opaResult})
-	if err != nil {
-		return nil, err
-	}
-
-	err = decoder.Decode(result)
-	return opaResult.Findings, err
 }

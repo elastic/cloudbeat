@@ -1,16 +1,23 @@
-package opa
+package evaluator
 
 import (
 	"bytes"
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/beater/bundle"
+	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/logging"
 	"github.com/open-policy-agent/opa/sdk"
 	"github.com/sirupsen/logrus"
+	"net/http"
 )
 
-func NewEvaluator(ctx context.Context) (*Evaluator, error) {
+type OpaEvaluator struct {
+	opa          *sdk.OPA
+	bundleServer *http.Server
+}
+
+func NewEvaluator(ctx context.Context) (Evaluator, error) {
 	server, err := bundle.StartServer()
 	if err != nil {
 		return nil, err
@@ -31,15 +38,15 @@ func NewEvaluator(ctx context.Context) (*Evaluator, error) {
 		return nil, fmt.Errorf("fail to init opa: %s", err.Error())
 	}
 
-	return &Evaluator{
+	return &OpaEvaluator{
 		opa:          opa,
 		bundleServer: server,
 	}, nil
 }
 
-func (e *Evaluator) Decision(ctx context.Context, input interface{}) (interface{}, error) {
+func (o *OpaEvaluator) Decision(ctx context.Context, input interface{}) (interface{}, error) {
 	// get the named policy decision for the specified input
-	result, err := e.opa.Decision(ctx, sdk.DecisionOptions{
+	result, err := o.opa.Decision(ctx, sdk.DecisionOptions{
 		Path:  "main",
 		Input: input,
 	})
@@ -50,9 +57,20 @@ func (e *Evaluator) Decision(ctx context.Context, input interface{}) (interface{
 	return result.Result, nil
 }
 
-func (e *Evaluator) Stop(ctx context.Context) {
-	e.opa.Stop(ctx)
-	e.bundleServer.Shutdown(ctx)
+func (o *OpaEvaluator) Stop(ctx context.Context) {
+	o.opa.Stop(ctx)
+	o.bundleServer.Shutdown(ctx)
+}
+
+func (o *OpaEvaluator) Decode(result interface{}) ([]Finding, error) {
+	var opaResult RuleResult
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &opaResult})
+	if err != nil {
+		return nil, err
+	}
+
+	err = decoder.Decode(result)
+	return opaResult.Findings, err
 }
 
 func newEvaluatorLogger() logging.Logger {

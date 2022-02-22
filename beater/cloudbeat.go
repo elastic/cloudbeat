@@ -3,6 +3,7 @@ package beater
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/evaluator"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -12,12 +13,11 @@ import (
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/opa"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources"
-	"github.com/elastic/cloudbeat/transformer"
 	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/gofrs/uuid"
 )
@@ -30,7 +30,7 @@ type cloudbeat struct {
 	config      config.Config
 	client      beat.Client
 	data        *resources.Data
-	eval        *opa.Evaluator
+	eval        evaluator.Evaluator
 	transformer transformer.Transformer
 }
 
@@ -61,7 +61,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	evaluator, err := opa.NewEvaluator(ctx)
+	evaluator, err := evaluator.NewEvaluator(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	transformer := transformer.NewTransformer(ctx, evaluator.Decision, resultsIndex)
+	transformer := transformer.NewTransformer(ctx, evaluator, resultsIndex)
 
 	bt := &cloudbeat{
 		ctx:         ctx,
