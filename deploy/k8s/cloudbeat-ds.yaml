@@ -251,7 +251,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: cloudbeat
+  name: cloudbeat-role
   # should be the namespace where cloudbeat is running
   namespace: kube-system
   labels:
@@ -281,20 +281,20 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cloudbeat
+  name: cloudbeat-role-binding
 subjects:
 - kind: ServiceAccount
   name: cloudbeat
   namespace: kube-system
 roleRef:
   kind: ClusterRole
-  name: cloudbeat
+  name: cloudbeat-role
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: cloudbeat
+  name: cloudbeat-role-binding
   namespace: kube-system
 subjects:
   - kind: ServiceAccount
@@ -302,7 +302,7 @@ subjects:
     namespace: kube-system
 roleRef:
   kind: Role
-  name: cloudbeat
+  name: cloudbeat-role
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -318,4 +318,17 @@ roleRef:
   kind: Role
   name: cloudbeat-kubeadm-config
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cloudbeat-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cloudbeat-role
+subjects:
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: default
 ---
