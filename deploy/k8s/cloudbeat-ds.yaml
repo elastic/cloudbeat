@@ -167,7 +167,6 @@ data:
     output.elasticsearch:
       # Array of hosts to connect to.
       hosts: ${ES_HOST}
-      allow_older_versions: true
 
       # Protocol - either `http` (default) or `https`.
       #protocol: "https"
@@ -223,11 +222,11 @@ rules:
   #  resources:
   #  - secrets
   #  verbs: ["get"]
-  - apiGroups: ["extensions"]
+  - apiGroups: [ "extensions" ]
     resources:
       - replicasets
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["apps"]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "apps" ]
     resources:
       - statefulsets
       - deployments
@@ -281,15 +280,15 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: cloudbeat-cluster-role-binding
+  name: cloudbeat
 subjects:
   - kind: ServiceAccount
     name: cloudbeat
-    namespace: default
+    namespace: kube-system
 roleRef:
-  kind: ClusterRole
-  name: cloudbeat-role
   apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -319,28 +318,3 @@ roleRef:
   name: cloudbeat-kubeadm-config
   apiGroup: rbac.authorization.k8s.io
 ---
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: default-view
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: view
-subjects:
-  - kind: ServiceAccount
-    name: default
-    namespace: default
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: cloudbeat
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-  - kind: ServiceAccount
-    name: cloudbeat
-    namespace: kube-system
