@@ -89,7 +89,7 @@ jobs:
           {
              "size": 1,
              "sort": { "@timestamp": "desc"},
-             "query": { "match": { "type":  "process" } }
+             "query": { "match": { "type":  "file-system" } }
           }' | jq '.hits.hits[0]._source')
           
           # Save Vars for next steps
@@ -117,7 +117,7 @@ jobs:
           {
              "size": 1,
              "sort": { "@timestamp": "desc"},
-             "query": { "match": { "type":  "process" } }
+             "query": { "match": { "type":  "kube-api" } }
           }' | jq '.hits.hits[0]._source')
           
           # Save Vars for next steps
@@ -131,20 +131,20 @@ jobs:
           header: Exmaple Finding
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ## Cloudbeat CI :green_heart:
+            ## Cloudbeat CI :robot: :green_heart:
             The integration test was completed successfully! :trophy:
             
-            **Exmaple findings from ES:**
+            ### Exmaple findings from ElasticSearch:
             
             <details>
-            <summary><b>`file-system`</b></summary>
+            <summary><b>file-system</b></summary>
             
             ```json
             ${{env.file_system_finding}}
             ```
             </details>
             <details>
-            <summary><b>`process`</b></summary>
+            <summary><b>process</b></summary>
             
             ```json
             ${{env.process_finding}}
@@ -152,7 +152,7 @@ jobs:
             </details>
             
             <details>
-            <summary><b>`kube-api`</b></summary>
+            <summary><b>kube-api</b></summary>
             
             ```json
             ${{env.kube_api_finding}}
