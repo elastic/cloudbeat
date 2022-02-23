@@ -1,5 +1,7 @@
 package compliance.lib.common
 
+import data.compliance.lib.assert
+
 metadata = {"opa_version": opa_version}
 
 # get OPA version
@@ -19,10 +21,30 @@ file_ownership_match(uid, gid, required_uid, required_gid) {
 	true
 }
 
-# todo: compare performance of regex alternatives
 file_permission_match(filemode, user, group, other) {
-	pattern = sprintf("0[0-%d][0-%d][0-%d]", [user, group, other])
-	regex.match(pattern, filemode)
+	permissions = parse_permission(filemode)
+
+	# filemode format {user}{group}{other} e.g. 644
+	check_permissions(permissions, [user, group, other])
+} else = false {
+	true
+}
+
+# in some os filemodes starts with 0 to indicate that the value is Octal (base 8)
+# remove prefix if needed, and return a list of file premission [user, group, other]
+parse_permission(filemode) = permissions {
+	# if prefix exist we should start the substring from 1, else 0
+	start = count(filemode) - 3
+
+	# remove prefix (if needed) and split
+	str_permissions = split(substring(filemode, start, 3), "")
+
+	# cast to numbers
+	permissions := [to_number(p) | p = str_permissions[_]]
+}
+
+check_permissions(permissions, max_permissions) {
+	assert.all_true([r | r = bits.and(permissions[p], bits.negate(max_permissions[p])) == 0])
 } else = false {
 	true
 }
