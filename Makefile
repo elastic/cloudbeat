@@ -135,7 +135,7 @@ go-generate:
 	@$(GO) generate .
 
 notice: NOTICE.txt
-NOTICE.txt: $(PYTHON) go.mod tools/go.mod
+NOTICE.txt: $(PYTHON) go.mod utils/go.mod
 	@$(PYTHON) script/generate_notice.py . ./x-pack/apm-server
 
 .PHONY: add-headers
@@ -253,18 +253,18 @@ $(GOLINT): go.mod
 	$(GO) build -o $@ golang.org/x/lint/golint
 
 $(GOIMPORTS): go.mod
-	$(GO) build -o $@ golang.org/x/tools/cmd/goimports
+	$(GO) build -o $@ golang.org/x/utils/cmd/goimports
 
-$(STATICCHECK): tools/go.mod
-	$(GO) build -o $@ -modfile=$< honnef.co/go/tools/cmd/staticcheck
+$(STATICCHECK): utils/go.mod
+	$(GO) build -o $@ -modfile=$< honnef.co/go/utils/cmd/staticcheck
 
-$(GOLICENSER): tools/go.mod
+$(GOLICENSER): utils/go.mod
 	$(GO) build -o $@ -modfile=$< github.com/elastic/go-licenser
 
-$(REVIEWDOG): tools/go.mod
+$(REVIEWDOG): utils/go.mod
 	$(GO) build -o $@ -modfile=$< github.com/reviewdog/reviewdog/cmd/reviewdog
 
-$(ELASTICPACKAGE): tools/go.mod
+$(ELASTICPACKAGE): utils/go.mod
 	$(GO) build -o $@ -modfile=$< -ldflags '-X github.com/elastic/elastic-package/internal/version.CommitHash=anything' github.com/elastic/elastic-package
 
 $(PYTHON): $(PYTHON_BIN)
