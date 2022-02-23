@@ -36,7 +36,7 @@ type ECRResource struct {
 func NewECRFetcher(awsCfg AwsFetcherConfig, cfg ECRFetcherConfig, ctx context.Context) (Fetcher, error) {
 	ecrProvider := NewEcrProvider(awsCfg.Config)
 	identityProvider := NewAWSIdentityProvider(awsCfg.Config)
-	identity, err := identityProvider.GetMyIdentity(ctx)
+	identity, err := identityProvider.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
 	}

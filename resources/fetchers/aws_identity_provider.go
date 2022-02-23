@@ -23,8 +23,8 @@ func NewAWSIdentityProvider(cfg aws.Config) *AWSIdentityProvider {
 	}
 }
 
-// GetMyIdentity This method will return your identity (Arn, user-id...)
-func (provider *AWSIdentityProvider) GetMyIdentity(ctx context.Context) (*AwsIdentity, error) {
+// GetIdentity This method will return your identity (Arn, user-id...)
+func (provider *AWSIdentityProvider) GetIdentity(ctx context.Context) (*AwsIdentity, error) {
 	input := &sts.GetCallerIdentityInput{}
 	request := provider.client.GetCallerIdentityRequest(input)
 	response, err := request.Send(ctx)
