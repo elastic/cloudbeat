@@ -4,18 +4,18 @@
 pipeline {
   agent { label 'linux && immutable' }
   environment {
-    REPO = 'apm-server'
+    REPO = 'cloudbeat'
     BASE_DIR = "src/github.com/elastic/${env.REPO}"
     NOTIFY_TO = credentials('notify-to')
-    JOB_GCS_BUCKET = credentials('gcs-bucket')
-    JOB_GCS_CREDENTIALS = 'apm-ci-gcs-plugin'
-    CODECOV_SECRET = 'secret/apm-team/ci/apm-server-codecov'
-    ITS_PIPELINE = 'apm-integration-tests-selector-mbp/main'
+    // JOB_GCS_BUCKET = credentials('gcs-bucket')
+    // JOB_GCS_CREDENTIALS = 'apm-ci-gcs-plugin'
+    // CODECOV_SECRET = 'secret/apm-team/ci/cloudbeat-codecov'
+    // ITS_PIPELINE = 'apm-integration-tests-selector-mbp/main'
     DIAGNOSTIC_INTERVAL = "${params.DIAGNOSTIC_INTERVAL}"
     ES_LOG_LEVEL = "${params.ES_LOG_LEVEL}"
-    DOCKER_SECRET = 'secret/apm-team/ci/docker-registry/prod'
-    DOCKER_REGISTRY = 'docker.elastic.co'
-    DOCKER_IMAGE = "${env.DOCKER_REGISTRY}/observability-ci/apm-server"
+    // DOCKER_SECRET = 'secret/apm-team/ci/docker-registry/prod'
+    // DOCKER_REGISTRY = 'docker.elastic.co'
+    // DOCKER_IMAGE = "${env.DOCKER_REGISTRY}/observability-ci/cloudbeat"
     ONLY_DOCS = "false"
   }
   options {
@@ -28,24 +28,24 @@ pipeline {
     rateLimitBuilds(throttle: [count: 60, durationName: 'hour', userBoost: true])
     quietPeriod(10)
   }
-  triggers {
-    issueCommentTrigger("(${obltGitHubComments()}|^run\\W+(?:the\\W+)?(hey-apm|package|arm)\\W+tests|^/test|^/hey-apm|^/package)")
-  }
-  parameters {
-    booleanParam(name: 'Run_As_Main_Branch', defaultValue: false, description: 'Allow to run any steps on a PR, some steps normally only run on main branch.')
-    booleanParam(name: 'arm_ci', defaultValue: true, description: 'Enable ARM build')
-    booleanParam(name: 'linux_ci', defaultValue: true, description: 'Enable Linux build')
-    booleanParam(name: 'osx_ci', defaultValue: true, description: 'Enable OSX CI')
-    booleanParam(name: 'windows_ci', defaultValue: true, description: 'Enable Windows CI')
-    booleanParam(name: 'intake_ci', defaultValue: true, description: 'Enable test')
-    booleanParam(name: 'test_ci', defaultValue: true, description: 'Enable test')
-    booleanParam(name: 'test_sys_env_ci', defaultValue: true, description: 'Enable system and environment test')
-    booleanParam(name: 'bench_ci', defaultValue: true, description: 'Enable benchmarks')
-    booleanParam(name: 'release_ci', defaultValue: true, description: 'Enable build the release packages')
-    booleanParam(name: 'its_ci', defaultValue: true, description: 'Enable async ITs')
-    string(name: 'DIAGNOSTIC_INTERVAL', defaultValue: "0", description: 'Elasticsearch detailed logging every X seconds')
-    string(name: 'ES_LOG_LEVEL', defaultValue: "error", description: 'Elasticsearch error level')
-  }
+  // triggers {
+  //   issueCommentTrigger("(${obltGitHubComments()}|^run\\W+(?:the\\W+)?(hey-apm|package|arm)\\W+tests|^/test|^/hey-apm|^/package)")
+  // }
+  // parameters {
+  //   booleanParam(name: 'Run_As_Main_Branch', defaultValue: false, description: 'Allow to run any steps on a PR, some steps normally only run on main branch.')
+  //   booleanParam(name: 'arm_ci', defaultValue: true, description: 'Enable ARM build')
+  //   booleanParam(name: 'linux_ci', defaultValue: true, description: 'Enable Linux build')
+  //   booleanParam(name: 'osx_ci', defaultValue: true, description: 'Enable OSX CI')
+  //   booleanParam(name: 'windows_ci', defaultValue: true, description: 'Enable Windows CI')
+  //   booleanParam(name: 'intake_ci', defaultValue: true, description: 'Enable test')
+  //   booleanParam(name: 'test_ci', defaultValue: true, description: 'Enable test')
+  //   booleanParam(name: 'test_sys_env_ci', defaultValue: true, description: 'Enable system and environment test')
+  //   booleanParam(name: 'bench_ci', defaultValue: true, description: 'Enable benchmarks')
+  //   booleanParam(name: 'release_ci', defaultValue: true, description: 'Enable build the release packages')
+  //   booleanParam(name: 'its_ci', defaultValue: true, description: 'Enable async ITs')
+  //   string(name: 'DIAGNOSTIC_INTERVAL', defaultValue: "0", description: 'Elasticsearch detailed logging every X seconds')
+  //   string(name: 'ES_LOG_LEVEL', defaultValue: "error", description: 'Elasticsearch error level')
+  // }
   stages {
     /**
      Checkout the code and stash it, to use it on other stages.
@@ -66,8 +66,8 @@ pipeline {
           dir("${BASE_DIR}"){
             def regexps =[
               "^_beats.*",
-              "^apm-server.yml",
-              "^apm-server.docker.yml",
+              "^cloudbeat.yml",
+              "^cloudbeat.docker.yml",
               "^magefile.go",
               "^ingest.*",
               "^packaging.*",
@@ -429,7 +429,7 @@ pipeline {
                   sh(label: 'Package & Push', script: "./.ci/scripts/package-docker-snapshot.sh ${env.GIT_BASE_COMMIT} ${env.DOCKER_IMAGE}")
                 }
               }
-              build(job: 'apm-server/apm-hey-test-benchmark', propagate: true, wait: true,
+              build(job: 'cloudbeat/apm-hey-test-benchmark', propagate: true, wait: true,
                     parameters: [string(name: 'GO_VERSION', value: '1.12.1'),
                                  string(name: 'STACK_VERSION', value: "${env.GIT_BASE_COMMIT}"),
                                  string(name: 'APM_DOCKER_IMAGE', value: "${env.DOCKER_IMAGE}")])
@@ -518,7 +518,7 @@ pipeline {
               script {
                 def buildObject = build(job: env.ITS_PIPELINE, propagate: false, wait: true,
                       parameters: [string(name: 'INTEGRATION_TEST', value: 'All'),
-                                  string(name: 'BUILD_OPTS', value: "--apm-server-build https://github.com/elastic/${env.REPO}@${env.GIT_BASE_COMMIT}")])
+                                  string(name: 'BUILD_OPTS', value: "--cloudbeat-build https://github.com/elastic/${env.REPO}@${env.GIT_BASE_COMMIT}")])
                 copyArtifacts(projectName: env.ITS_PIPELINE, selector: specific(buildNumber: buildObject.number.toString()))
               }
             }
