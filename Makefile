@@ -122,7 +122,8 @@ bench:
 # Rules for updating config files, etc.
 ##############################################################################
 
-update: go-generate add-headers build-package notice $(MAGE)
+#update: go-generate add-headers build-package notice $(MAGE)
+update: go-generate add-headers $(MAGE)
 	@$(MAGE) update
 	@go mod download all # make sure go.sum is complete
 
@@ -141,8 +142,8 @@ NOTICE.txt: $(PYTHON) go.mod utils/go.mod
 .PHONY: add-headers
 add-headers: $(GOLICENSER)
 ifndef CHECK_HEADERS_DISABLED
-	@$(GOLICENSER) -exclude x-pack -exclude internal/otel_collector
-	@$(GOLICENSER) -license Elasticv2 x-pack
+	@$(GOLICENSER)
+#	@$(GOLICENSER) -license Elasticv2 x-pack
 endif
 
 ## get-version : Get the apm server version
