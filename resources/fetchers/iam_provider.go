@@ -23,8 +23,7 @@ func (provider IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName 
 	results := make([]interface{}, 0)
 	policiesIdentifiers, err := provider.getAllRolePolicies(ctx, roleName)
 	if err != nil {
-		logp.Error(fmt.Errorf("failed to list role %s policies - %w", roleName, err))
-		return nil, err
+		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)
 	}
 
 	for _, policyId := range policiesIdentifiers {
@@ -51,8 +50,7 @@ func (provider IAMProvider) getAllRolePolicies(ctx context.Context, roleName str
 	req := provider.client.ListAttachedRolePoliciesRequest(input)
 	allPolicies, err := req.Send(ctx)
 	if err != nil {
-		logp.Error(fmt.Errorf("failed to list role %s policies - %w", roleName, err))
-		return nil, err
+		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)
 	}
 
 	return allPolicies.AttachedPolicies, err
