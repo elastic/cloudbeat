@@ -33,10 +33,15 @@ type ECRResource struct {
 	EcrRepositories
 }
 
-func NewECRFetcher(awsCfg AwsFetcherConfig, cfg ECRFetcherConfig) (Fetcher, error) {
+func NewECRFetcher(awsCfg AwsFetcherConfig, cfg ECRFetcherConfig, ctx context.Context) (Fetcher, error) {
 	ecrProvider := NewEcrProvider(awsCfg.Config)
+	identityProvider := NewAWSIdentityProvider(awsCfg.Config)
+	identity, err := identityProvider.GetMyIdentity(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
+	}
 
-	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *awsCfg.AccountID, awsCfg.Config.Region)
+	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, awsCfg.Config.Region)
 	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 
 	if err != nil {
