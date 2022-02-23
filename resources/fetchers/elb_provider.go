@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
-	"github.com/elastic/beats/v7/libbeat/logp"
 )
 
 type ELBProvider struct {
@@ -30,8 +29,7 @@ func (provider ELBProvider) DescribeLoadBalancer(ctx context.Context, balancersN
 	req := provider.client.DescribeLoadBalancersRequest(input)
 	response, err := req.Send(ctx)
 	if err != nil {
-		logp.Error(fmt.Errorf("failed to describe load balancers %s from elb, error - %w", balancersNames, err))
-		return nil, err
+		return nil, fmt.Errorf("failed to describe load balancers %s from elb, error - %w", balancersNames, err)
 	}
 
 	return response.LoadBalancerDescriptions, err

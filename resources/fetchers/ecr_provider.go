@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
-	"github.com/elastic/beats/v7/libbeat/logp"
 )
 
 type ECRProvider struct {
@@ -37,8 +36,7 @@ func (provider *ECRProvider) DescribeRepositories(ctx context.Context, repoNames
 	req := provider.client.DescribeRepositoriesRequest(input)
 	response, err := req.Send(ctx)
 	if err != nil {
-		logp.Error(fmt.Errorf("failed to fetch repository:%s from ecr, error - %w", repoNames, err))
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch repository:%s from ecr, error - %w", repoNames, err)
 	}
 
 	return response.Repositories, err
