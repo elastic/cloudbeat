@@ -479,6 +479,8 @@ github.com/eclipse/paho.mqtt.golang v1.3.5/go.mod h1:eTzb4gxwwyWpqBUHGQZ4ABAV7+J
 github.com/edsrzf/mmap-go v1.0.0/go.mod h1:YO35OhQPt3KJa3ryjFM5Bs14WD66h8eGKpfaBNrHW5M=
 github.com/elastic/csp-security-policies v0.0.2-go-lib h1:SF8HbBPZHnjiNeoYSc8ZHlFMKlxJaIf/hoJzBEE4Fuk=
 github.com/elastic/csp-security-policies v0.0.2-go-lib/go.mod h1:24NNr0b/5HTGtndJOmhrefb59rd7NjuqI/To39tgn+w=
+github.com/elastic/csp-security-policies v0.0.5-bench-format h1:tM/xNO7uJb7qWrZ5EHY3tkJ5MaJefZ7hfVYRQ9UOrQc=
+github.com/elastic/csp-security-policies v0.0.5-bench-format/go.mod h1:24NNr0b/5HTGtndJOmhrefb59rd7NjuqI/To39tgn+w=
 github.com/elastic/dhcp v0.0.0-20200227161230-57ec251c7eb3/go.mod h1:aPqzac6AYkipvp4hufTyMj5PDIphF3+At8zr7r51xjY=
 github.com/elastic/elastic-agent-client/v7 v7.0.0-20210727140539-f0905d9377f6 h1:nFvXHBjYK3e9+xF0WKDeAKK4aOO51uC28s+L9rBmilo=
 github.com/elastic/elastic-agent-client/v7 v7.0.0-20210727140539-f0905d9377f6/go.mod h1:uh/Gj9a0XEbYoM4NYz4LvaBVARz3QXLmlNjsrKY9fTc=
