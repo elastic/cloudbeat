@@ -14,7 +14,7 @@ import (
 const (
 	PodNameEnvar           = "POD_NAME"
 	DefaultLeaderLeaseName = "elastic-agent-cluster-leader"
-	DefaultLeaderValue     = true
+	DefaultLeaderValue     = false
 )
 
 type leaseProvider struct {
