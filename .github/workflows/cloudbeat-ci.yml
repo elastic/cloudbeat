@@ -80,12 +80,12 @@ jobs:
 
       - name: Get ES indices
         run: |
-          echo "===== kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET \"${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*k8s_cis.result*?v&s=index&pretty\""
-          kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*k8s_cis.result*?v&s=index&pretty"
+          echo "===== kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET \"${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*kubernetes_benchmark.findings*?v&s=index&pretty\""
+          kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*kubernetes_benchmark.findings*?v&s=index&pretty"
 
       - name: Get 'file-system' resource type finding
         run: |
-          FILE_SYSTEM_FINDING=$( curl -XGET "localhost:9200/*k8s_cis.result*/_search?pretty=true" -H 'Content-Type: application/json' -d'
+          FILE_SYSTEM_FINDING=$( curl -XGET "localhost:9200/*kubernetes_benchmark.findings*/_search?pretty=true" -H 'Content-Type: application/json' -d'
           {
              "size": 1,
              "sort": { "@timestamp": "desc"},
@@ -105,7 +105,7 @@ jobs:
 
       - name: Get 'process' resource type finding
         run: |
-          PROCESS_FINDING=$( curl -XGET "localhost:9200/*k8s_cis.result*/_search?pretty=true" -H 'Content-Type: application/json' -d'
+          PROCESS_FINDING=$( curl -XGET "localhost:9200/*kubernetes_benchmark.findings*/_search?pretty=true" -H 'Content-Type: application/json' -d'
           {
              "size": 1,
              "sort": { "@timestamp": "desc"},
@@ -125,7 +125,7 @@ jobs:
 
       - name: Get 'kube-api' resource type finding
         run: |
-          KUBE_API_FINDING=$( curl -XGET "localhost:9200/*k8s_cis.result*/_search?pretty=true" -H 'Content-Type: application/json' -d'
+          KUBE_API_FINDING=$( curl -XGET "localhost:9200/*kubernetes_benchmark.findings*/_search?pretty=true" -H 'Content-Type: application/json' -d'
           {
              "size": 1,
              "sort": { "@timestamp": "desc"},

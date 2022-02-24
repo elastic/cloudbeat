@@ -8,11 +8,10 @@ import (
 	"time"
 )
 
-// Todo add consts as configurable vars from integration package - add datastream struct
 const DefaultNamespace = "default"
 
-const ResultsDatastreamIndexPrefix = "logs-k8s_cis.result"
-const MetadataDatastreamIndexPrefix = ".logs-k8s_cis.metadata"
+const ResultsDatastreamIndexPrefix = "logs-cis_kubernetes_benchmark.findings"
+const MetadataDatastreamIndexPrefix = ".logs-cis_kubernetes_benchmark.metadata"
 
 type Config struct {
 	KubeConfig string                  `config:"kube_config"`

@@ -28,16 +28,16 @@ just build-deploy-cloudbeat
 To validate check the logs:
 
 ```zsh
-kubectl logs -f --selector="k8s-app=cloudbeat"  -n kube-system
+just logs-cloudbeat
 ```
 
-Now go and check out the data on your Kibana! Make sure to add a kibana dataview `logs-k8s_cis.result-*`
+Now go and check out the data on your Kibana! Make sure to add a kibana dataview `logs-cis_kubernetes_benchmark.findings-*`
 
 ### Clean up
 
 To stop this example and clean up the pod, run:
 ```zsh
-kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+just delete-cloudbeat
 ```
 ### Remote Debugging
 
@@ -49,7 +49,7 @@ just build-deploy-cloudbeat-debug
 
 After running the pod, expose the relevant ports:
 ```zsh
-kubectl port-forward ${pod-name} -n kube-system 40000:40000 8080:8080
+just expose-ports
 ```
 
 The app will wait for the debugger to connect before starting
