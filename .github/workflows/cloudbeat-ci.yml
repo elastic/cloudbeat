@@ -96,6 +96,12 @@ jobs:
           echo "file_system_finding<<EOF" >> "$GITHUB_ENV"
           echo "$FILE_SYSTEM_FINDING" >> "$GITHUB_ENV"
           echo "EOF" >> "$GITHUB_ENV"
+          
+          # Save result status
+          if [ -z "$FILE_SYSTEM_FINDING" ]
+          else echo "file_system_status=:broken_heart:" >> "$GITHUB_ENV"
+          else echo "file_system_status=:green_heart:" >> "$GITHUB_ENV"
+          fi
 
       - name: Get 'process' resource type finding
         run: |
@@ -110,6 +116,12 @@ jobs:
           echo "process_finding<<EOF" >> "$GITHUB_ENV"
           echo "$PROCESS_FINDING" >> "$GITHUB_ENV"
           echo "EOF" >> "$GITHUB_ENV"
+          
+          # Save result status
+          if [ -z "$PROCESS_FINDING" ]
+          else echo "process_status=:broken_heart:" >> "$GITHUB_ENV"
+          else echo "process_status=:green_heart:" >> "$GITHUB_ENV"
+          fi
 
       - name: Get 'kube-api' resource type finding
         run: |
@@ -124,6 +136,12 @@ jobs:
           echo "kube_api_finding<<EOF" >> "$GITHUB_ENV"
           echo "$KUBE_API_FINDING" >> "$GITHUB_ENV"
           echo "EOF" >> "$GITHUB_ENV"
+          
+          # Save result status
+          if [ -z "$KUBE_API_FINDING" ]
+          else echo "kube_api_status=:broken_heart:" >> "$GITHUB_ENV"
+          else echo "kube_api_status=:green_heart:" >> "$GITHUB_ENV"
+          fi
 
       - name: Commnet test success result
         uses: marocchino/sticky-pull-request-comment@v2
@@ -131,20 +149,20 @@ jobs:
           header: Exmaple Finding
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ## Cloudbeat CI :robot: :green_heart:
+            ## Cloudbeat CI :robot:
             The integration test was completed successfully! :trophy:
             
             ### Exmaple findings from ElasticSearch:
             
             <details>
-            <summary><b>file-system</b></summary>
+            <summary><b>file-system ${{env.file_system_status}} </b></summary>
             
             ```json
             ${{env.file_system_finding}}
             ```
             </details>
             <details>
-            <summary><b>process</b></summary>
+            <summary><b>process ${{env.process_status}} </b></summary>
             
             ```json
             ${{env.process_finding}}
@@ -152,7 +170,7 @@ jobs:
             </details>
             
             <details>
-            <summary><b>kube-api</b></summary>
+            <summary><b>kube-api ${{env.kube_api_status}} </b></summary>
             
             ```json
             ${{env.kube_api_finding}}
