@@ -98,7 +98,7 @@ jobs:
           echo "EOF" >> "$GITHUB_ENV"
           
           # Save result status
-          if [ -z "$FILE_SYSTEM_FINDING" ]
+          if [[ "$FILE_SYSTEM_FINDING" == null ]]
           then echo "file_system_status=:broken_heart:" >> "$GITHUB_ENV"
           else echo "file_system_status=:green_heart:" >> "$GITHUB_ENV"
           fi
@@ -118,7 +118,7 @@ jobs:
           echo "EOF" >> "$GITHUB_ENV"
           
           # Save result status
-          if [ -z "$PROCESS_FINDING" ]
+          if [[ "$PROCESS_FINDING" == null ]]
           then echo "process_status=:broken_heart:" >> "$GITHUB_ENV"
           else echo "process_status=:green_heart:" >> "$GITHUB_ENV"
           fi
@@ -138,7 +138,7 @@ jobs:
           echo "EOF" >> "$GITHUB_ENV"
           
           # Save result status
-          if [ -z "$KUBE_API_FINDING" ]
+          if [[ "$KUBE_API_FINDING" == null ]]
           then echo "kube_api_status=:broken_heart:" >> "$GITHUB_ENV"
           else echo "kube_api_status=:green_heart:" >> "$GITHUB_ENV"
           fi
