@@ -175,6 +175,8 @@ data:
       #api_key: "id:api_key"
       username: ${ES_USERNAME}
       password: ${ES_PASSWORD}
+    
+      allow_older_versions: true
 
     # ================================= Processors =================================
     processors:

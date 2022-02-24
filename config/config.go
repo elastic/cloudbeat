@@ -10,7 +10,7 @@ import (
 
 const DefaultNamespace = "default"
 
-const ResultsDatastreamIndexPrefix = "logs-cis_kubernetes_benchmark.cis_kubernetes_benchmark"
+const ResultsDatastreamIndexPrefix = "logs-cis_kubernetes_benchmark.findings"
 const MetadataDatastreamIndexPrefix = ".logs-cis_kubernetes_benchmark.metadata"
 
 type Config struct {

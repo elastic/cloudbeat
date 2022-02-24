@@ -31,7 +31,7 @@ To validate check the logs:
 kubectl logs -f --selector="k8s-app=cloudbeat"  -n kube-system
 ```
 
-Now go and check out the data on your Kibana! Make sure to add a kibana dataview `logs-kubernetes_benchmark.findings-*`
+Now go and check out the data on your Kibana! Make sure to add a kibana dataview `logs-cis_kubernetes_benchmark.findings-*`
 
 ### Clean up
 
