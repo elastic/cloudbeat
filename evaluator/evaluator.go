@@ -30,10 +30,15 @@ type Result struct {
 }
 
 type Rule struct {
-	Benchmark   string   `json:"benchmark"`
-	Description string   `json:"description"`
-	Impact      string   `json:"impact"`
-	Name        string   `json:"name"`
-	Remediation string   `json:"remediation"`
-	Tags        []string `json:"tags"`
+	Benchmark   Benchmark `json:"benchmark"`
+	Description string    `json:"description"`
+	Impact      string    `json:"impact"`
+	Name        string    `json:"name"`
+	Remediation string    `json:"remediation"`
+	Tags        []string  `json:"tags"`
+}
+
+type Benchmark struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
 }
