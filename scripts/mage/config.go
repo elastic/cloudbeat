@@ -21,13 +21,10 @@ import (
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
 )
 
-// ConfigFileParams returns the default ConfigFileParams for generating
-// cloudbeat*.yml files.
+// XPackConfigFileParams returns the default ConfigFileParams for generating cloudbeat*.yml files.
 func XPackConfigFileParams() devtools.ConfigFileParams {
 	p := devtools.DefaultConfigFileParams()
 	p.Templates = append(p.Templates, devtools.OSSBeatDir("_meta/config/*.tmpl"))
-	//	p.ExtraVars = map[string]interface{}{}
-	//  used to include extra vars not in _meta/config/*.tmpl
+
 	return p
-	// Todo cloudbeat fill out according to cloudbeats required config.
 }
