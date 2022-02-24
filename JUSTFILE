@@ -15,8 +15,11 @@ load-agent-image:
 build-cloudbeat:
   GOOS=linux go build -v && docker build -t cloudbeat .
 
-deploy-cloudbeat:
-  kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+deploy-cloudbeat: delete-cloudbeat
+  kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+
+delete-cloudbeat:
+  kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
 
 build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
@@ -52,5 +55,9 @@ elastic-stack-down:
   elastic-package stack down
 
 ssh-cloudbeat:
-    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
-    kubectl exec --stdin --tty $CLOUDBEAT_POD -n kube-system -- /bin/bash
+    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
+    kubectl exec --stdin --tty "${CLOUDBEAT_POD}" -n kube-system -- /bin/bash
+
+expose-ports:
+    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
+    kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080

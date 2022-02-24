@@ -177,7 +177,7 @@ data:
       password: ${ES_PASSWORD}
     
       # Enable to allow sending output to older ES versions
-      # allow_older_versions: true
+      #allow_older_versions: true
 
     # ================================= Processors =================================
     processors:
