@@ -15,8 +15,8 @@ load-agent-image:
 build-cloudbeat:
   GOOS=linux go build -v && docker build -t cloudbeat .
 
-deploy-cloudbeat: delete-cloudbeat
-  kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+deploy-cloudbeat:
+  kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
 
 delete-cloudbeat:
   kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
