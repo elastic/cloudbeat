@@ -28,7 +28,7 @@ just build-deploy-cloudbeat
 To validate check the logs:
 
 ```zsh
-kubectl logs -f --selector="k8s-app=cloudbeat"  -n kube-system
+just logs-cloudbeat
 ```
 
 Now go and check out the data on your Kibana! Make sure to add a kibana dataview `logs-cis_kubernetes_benchmark.findings-*`
