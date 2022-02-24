@@ -73,6 +73,11 @@ is_kube_api {
 	input.type == "kube-api"
 }
 
+is_kube_node {
+	is_kube_api
+	input.resource.kind == "Node"
+}
+
 pod = p {
 	input.resource.kind == "Pod"
 	p := input.resource
