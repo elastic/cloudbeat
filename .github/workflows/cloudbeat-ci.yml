@@ -99,7 +99,7 @@ jobs:
           
           # Save result status
           if [ -z "$FILE_SYSTEM_FINDING" ]
-          else echo "file_system_status=:broken_heart:" >> "$GITHUB_ENV"
+          then echo "file_system_status=:broken_heart:" >> "$GITHUB_ENV"
           else echo "file_system_status=:green_heart:" >> "$GITHUB_ENV"
           fi
 
@@ -119,7 +119,7 @@ jobs:
           
           # Save result status
           if [ -z "$PROCESS_FINDING" ]
-          else echo "process_status=:broken_heart:" >> "$GITHUB_ENV"
+          then echo "process_status=:broken_heart:" >> "$GITHUB_ENV"
           else echo "process_status=:green_heart:" >> "$GITHUB_ENV"
           fi
 
@@ -139,7 +139,7 @@ jobs:
           
           # Save result status
           if [ -z "$KUBE_API_FINDING" ]
-          else echo "kube_api_status=:broken_heart:" >> "$GITHUB_ENV"
+          then echo "kube_api_status=:broken_heart:" >> "$GITHUB_ENV"
           else echo "kube_api_status=:green_heart:" >> "$GITHUB_ENV"
           fi
 
