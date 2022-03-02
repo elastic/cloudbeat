@@ -77,11 +77,11 @@ APM_SERVER_VERSION=$(shell grep defaultBeatVersion cmd/version.go | cut -d'=' -f
 # Rules for building and unit-testing apm-server.
 ##############################################################################
 
-.DEFAULT_GOAL := apm-server
+.DEFAULT_GOAL := cloudbeat
 
-.PHONY: apm-server
+.PHONY: build-cloudbeat
 apm-server:
-	@$(GO) build -o $@ ./x-pack/apm-server
+	@$(GO) build -o $@ .
 
 .PHONY: apm-server-oss
 apm-server-oss:

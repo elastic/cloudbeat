@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -108,6 +109,10 @@ func Package() {
 // TestPackages tests the generated packages (i.e. file modes, owners, groups).
 func TestPackages() error {
 	return devtools.TestPackages()
+}
+
+func GoTestUnit(ctx context.Context) error {
+	return devtools.GoTest(ctx, devtools.DefaultGoTestUnitArgs())
 }
 
 func Update() { mg.Deps(cloudbeat.Update.All) }
