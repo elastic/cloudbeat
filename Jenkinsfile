@@ -2,7 +2,7 @@
 @Library('apm@current') _
 
 pipeline {
-  agent { label 'linux && immutable' }
+  agent { label 'mak' }
   environment {
     REPO = 'cloudbeat'
     BASE_DIR = "src/github.com/elastic/${env.REPO}"
