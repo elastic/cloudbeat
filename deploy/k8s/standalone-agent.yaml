@@ -28,7 +28,7 @@ data:
           cluster:
             - monitor    
     inputs:
-      - name: cloudbeat-test
+      - name: cloudbeat
         revision: 1
         type: cloudbeat
         use_output: default

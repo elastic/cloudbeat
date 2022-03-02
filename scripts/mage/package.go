@@ -17,34 +17,44 @@
 
 package mage
 
-// "github.com/elastic/beats/v7/x-pack/osquerybeat/internal/distro"
+import (
+	devtools "github.com/elastic/beats/v7/dev-tools/mage"
+	"github.com/pkg/errors"
+)
 
-// CustomizePackaging modifies the package specs to add the modules and
-// modules.d directory. You must declare a dependency on either
-// PrepareModulePackagingOSS or PrepareModulePackagingXPack.
+// CustomizePackaging modifies the device in the configuration files based on
+// the target OS.
+func CustomizePackaging() {
+	var (
+		configYml = devtools.PackageFile{
+			Mode:   0o600,
+			Source: "{{.PackageDir}}/cloudbeat.yml",
+			Config: true,
+			// todo: add deps to generate this files each build
+		}
+		referenceConfigYml = devtools.PackageFile{
+			Mode:   0o644,
+			Source: "{{.PackageDir}}/cloudbeat.reference.yml",
+			// todo: add deps to generate this files each build
+		}
+	)
 
-// func CustomizePackaging() {
-// 	for _, args := range devtools.Packages {
-// 		distFile := distro.OsquerydDistroPlatformFilename(args.OS)
-
-// 		// The minimal change to fix the issue for 7.13
-// 		// https://github.com/elastic/beats/issues/25762
-// 		// TODO: this could be moved to dev-tools/packaging/packages.yml for the next release
-// 		var mode os.FileMode = 0644
-// 		// If distFile is osqueryd binary then it should be executable
-// 		if distFile == distro.OsquerydFilename() {
-// 			mode = 0750
-// 		}
-// 		arch := defaultArch
-// 		if args.Arch != "" {
-// 			arch = args.Arch
-// 		}
-// 		packFile := devtools.PackageFile{
-// 			Mode:   mode,
-// 			Source: filepath.Join(distro.GetDataInstallDir(distro.OSArch{OS: args.OS, Arch: arch}), distFile),
-// 		}
-// 		args.Spec.Files[distFile] = packFile
-// 	}
-// }
-
-// // Todo cloudbeat write mage script to package beat with agent
+	for _, args := range devtools.Packages {
+		if len(args.Types) == 0 {
+			continue
+		}
+		switch pkgType := args.Types[0]; pkgType {
+		case devtools.TarGz, devtools.Zip:
+			args.Spec.ReplaceFile("{{.BeatName}}.yml", configYml)
+			args.Spec.ReplaceFile("{{.BeatName}}.reference.yml", referenceConfigYml)
+		case devtools.Deb, devtools.RPM:
+			args.Spec.ReplaceFile("/etc/{{.BeatName}}/{{.BeatName}}.yml", configYml)
+			args.Spec.ReplaceFile("/etc/{{.BeatName}}/{{.BeatName}}.reference.yml", referenceConfigYml)
+		case devtools.Docker:
+			args.Spec.ExtraVar("linux_capabilities", "cap_net_raw,cap_net_admin+eip")
+		case devtools.DMG:
+		default:
+			panic(errors.Errorf("unhandled package type: %v, name: %v", pkgType, args.Spec.Name))
+		}
+	}
+}
