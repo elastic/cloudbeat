@@ -1,4 +1,3 @@
-# Todo delete before merge to elastic/beats
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yaml
 
@@ -19,6 +18,9 @@ build-cloudbeat:
 deploy-cloudbeat:
   kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
 
+delete-cloudbeat:
+  kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+
 build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
 build-cloudbeat-debug:
@@ -31,6 +33,9 @@ build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-
 
 logs-cloudbeat:
   kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system
+
+logs-cloudbeat-file:
+  kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system > cloudbeat-logs.ndjson
 
 package-agent:
   cd ../x-pack/elastic-agent & DEV=true SNAPSHOT=true PLATFORMS=linux/amd64 TYPES=docker mage -v package
@@ -49,3 +54,10 @@ elastic-stack-up:
 elastic-stack-down:
   elastic-package stack down
 
+ssh-cloudbeat:
+    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
+    kubectl exec --stdin --tty "${CLOUDBEAT_POD}" -n kube-system -- /bin/bash
+
+expose-ports:
+    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
+    kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
