@@ -2,8 +2,6 @@ package fetchers
 
 import (
 	"context"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
 const IAMType = "aws-iam"
@@ -22,8 +20,8 @@ type IAMResource struct {
 	Data interface{}
 }
 
-func NewIAMFetcher(awsCfg aws.Config, cfg IAMFetcherConfig) (Fetcher, error) {
-	iam := NewIAMProvider(awsCfg)
+func NewIAMFetcher(awsCfg AwsFetcherConfig, cfg IAMFetcherConfig) (Fetcher, error) {
+	iam := NewIAMProvider(awsCfg.Config)
 
 	return &IAMFetcher{
 		cfg:         cfg,

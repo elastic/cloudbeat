@@ -2,7 +2,7 @@ package fetchers
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/beats/v7/libbeat/logp"
@@ -23,8 +23,7 @@ func (provider IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName 
 	results := make([]interface{}, 0)
 	policiesIdentifiers, err := provider.getAllRolePolicies(ctx, roleName)
 	if err != nil {
-		logp.Err("Failed to list role %s policies - %+v", roleName, err)
-		return nil, err
+		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)
 	}
 
 	for _, policyId := range policiesIdentifiers {
@@ -35,7 +34,7 @@ func (provider IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName 
 		req := provider.client.GetRolePolicyRequest(input)
 		policy, err := req.Send(ctx)
 		if err != nil {
-			logp.Err("Failed to get policy %s - %+v", *policyId.PolicyName, err)
+			logp.Error(fmt.Errorf("failed to get policy %s - %w", *policyId.PolicyName, err))
 			continue
 		}
 		results = append(results, policy)
@@ -51,8 +50,7 @@ func (provider IAMProvider) getAllRolePolicies(ctx context.Context, roleName str
 	req := provider.client.ListAttachedRolePoliciesRequest(input)
 	allPolicies, err := req.Send(ctx)
 	if err != nil {
-		logp.Err("Failed to list role %s policies - %+v", roleName, err)
-		return nil, err
+		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)
 	}
 
 	return allPolicies.AttachedPolicies, err

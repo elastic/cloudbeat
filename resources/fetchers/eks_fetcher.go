@@ -3,7 +3,6 @@ package fetchers
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 )
 
@@ -23,8 +22,8 @@ type EKSResource struct {
 	*eks.DescribeClusterResponse
 }
 
-func NewEKSFetcher(awsCfg aws.Config, cfg EKSFetcherConfig) (Fetcher, error) {
-	eks := NewEksProvider(awsCfg)
+func NewEKSFetcher(awsCfg AwsFetcherConfig, cfg EKSFetcherConfig) (Fetcher, error) {
+	eks := NewEksProvider(awsCfg.Config)
 
 	return &EKSFetcher{
 		cfg:         cfg,
