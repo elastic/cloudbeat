@@ -1,0 +1,18 @@
+{
+    "name": "cloudbeat-test",
+    "params": {
+        "Run_As_Main_Branch": "",
+        "arm_ci": true,
+        "linux_ci": true,
+        "osx_ci": true,
+        "windows_ci": true,
+        "intake_ci": true,
+        "test_ci": true,
+        "test_sys_env_ci": true,
+        "bench_ci": true,
+        "release_ci": true,
+        "its_ci": true,
+        "DIAGNOSTIC_INTERVAL": "0",
+        "ES_LOG_LEVEL": "error"
+    }
+}
