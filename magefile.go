@@ -34,7 +34,7 @@ func init() {
 	devtools.BeatDescription = "Cloudbeat collects cloud compliance and sends findings to ElasticSearch"
 	devtools.BeatLicense = "Elastic License"
 	devtools.SetBuildVariableSources(&devtools.BuildVariableSources{
-		BeatVersion: filepath.Join(repo.RootDir, "version.go"),
+		BeatVersion: filepath.Join(repo.RootDir, "cmd/version.go"),
 		GoVersion:   filepath.Join(repo.RootDir, ".go-version"),
 		DocBranch:   filepath.Join(repo.RootDir, "docs/version.asciidoc"),
 	})

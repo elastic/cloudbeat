@@ -45,12 +45,12 @@ func (c *Transformer) processEachResource(results []fetchers.FetchedResource, me
 	for _, result := range results {
 		rid, err := result.GetID()
 		if err != nil {
-			logp.L().Errorf("could not get resource ID, Error: %v", err)
+			logp.Error(fmt.Errorf("could not get resource ID, Error: %v", err))
 			return
 		}
 		resMetadata := ResourceMetadata{ResourceTypeMetadata: metadata, ResourceId: rid}
 		if err := c.createBeatEvents(result, resMetadata); err != nil {
-			logp.L().Errorf("failed to create beat events for, %v, Error: %v", metadata, err)
+			logp.Error(fmt.Errorf("failed to create beat events for, %v, Error: %v", metadata, err))
 		}
 	}
 }

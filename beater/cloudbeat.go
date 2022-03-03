@@ -43,10 +43,10 @@ const (
 // New creates an instance of cloudbeat.
 func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	c := config.DefaultConfig
 	if err := cfg.Unpack(&c); err != nil {
+		cancel()
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
@@ -54,22 +54,26 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 
 	fetchersRegistry, err := InitRegistry(ctx, c)
 	if err != nil {
+		cancel()
 		return nil, err
 	}
 
 	data, err := resources.NewData(c.Period, fetchersRegistry)
 	if err != nil {
+		cancel()
 		return nil, err
 	}
 
 	eval, err := evaluator.NewOpaEvaluator(ctx)
 	if err != nil {
+		cancel()
 		return nil, err
 	}
 
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 	if err != nil {
+		cancel()
 		return nil, err
 	}
 
