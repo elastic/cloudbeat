@@ -30,7 +30,7 @@ type cloudbeat struct {
 	config      config.Config
 	client      beat.Client
 	data        *resources.Data
-	eval        evaluator.Evaluator
+	evaluator   evaluator.Evaluator
 	transformer transformer.Transformer
 }
 
@@ -43,6 +43,7 @@ const (
 // New creates an instance of cloudbeat.
 func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	c := config.DefaultConfig
 	if err := cfg.Unpack(&c); err != nil {
@@ -61,7 +62,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	evaluator, err := evaluator.NewOpaEvaluator(ctx)
+	eval, err := evaluator.NewOpaEvaluator(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -72,15 +73,15 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	transformer := transformer.NewTransformer(ctx, evaluator, resultsIndex)
+	t := transformer.NewTransformer(ctx, eval, resultsIndex)
 
 	bt := &cloudbeat{
 		ctx:         ctx,
 		cancel:      cancel,
 		config:      c,
-		eval:        evaluator,
+		evaluator:   eval,
 		data:        data,
-		transformer: transformer,
+		transformer: t,
 	}
 	return bt, nil
 }
@@ -175,7 +176,7 @@ func InitRegistry(ctx context.Context, c config.Config) (resources.FetchersRegis
 // Stop stops cloudbeat.
 func (bt *cloudbeat) Stop() {
 	bt.data.Stop(bt.ctx, bt.cancel)
-	bt.eval.Stop(bt.ctx)
+	bt.evaluator.Stop(bt.ctx)
 
 	bt.client.Close()
 }

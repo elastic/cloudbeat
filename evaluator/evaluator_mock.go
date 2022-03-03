@@ -14,7 +14,7 @@ type MockedEvaluator struct {
 }
 
 // Decision provides a mock function with given fields: _a0, _a1
-func (_m MockedEvaluator) Decision(_a0 context.Context, _a1 interface{}) (interface{}, error) {
+func (_m *MockedEvaluator) Decision(_a0 context.Context, _a1 interface{}) (interface{}, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 interface{}
@@ -37,7 +37,7 @@ func (_m MockedEvaluator) Decision(_a0 context.Context, _a1 interface{}) (interf
 }
 
 // Decode provides a mock function with given fields: result
-func (_m MockedEvaluator) Decode(result interface{}) ([]Finding, error) {
+func (_m *MockedEvaluator) Decode(result interface{}) ([]Finding, error) {
 	ret := _m.Called(result)
 
 	var r0 []Finding
@@ -60,6 +60,6 @@ func (_m MockedEvaluator) Decode(result interface{}) ([]Finding, error) {
 }
 
 // Stop provides a mock function with given fields: _a0
-func (_m MockedEvaluator) Stop(_a0 context.Context) {
+func (_m *MockedEvaluator) Stop(_a0 context.Context) {
 	_m.Called(_a0)
 }

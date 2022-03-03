@@ -138,7 +138,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.mockedEvaluator.On(methodMock.methodName, methodMock.args...).Return(methodMock.returnArgs...)
 			}
 
-			transformer := NewTransformer(ctx, s.mockedEvaluator, testIndex)
+			transformer := NewTransformer(ctx, &s.mockedEvaluator, testIndex)
 			generatedEvents := transformer.ProcessAggregatedResources(tt.args.resource, tt.args.metadata)
 
 			if tt.wantErr {
@@ -154,7 +154,6 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(event.Fields["resource_id"], "resource id is missing")
 				s.NotEmpty(event.Fields["type"], "resource type is missing")
 			}
-
 		})
 	}
 }

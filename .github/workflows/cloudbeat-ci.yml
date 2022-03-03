@@ -202,6 +202,10 @@ jobs:
         run: |
           GOOS=linux go test ./...
 
+      - name: Mage Check
+        run: |
+          mage check
+
       - name: Get diff k8s manifests
         uses: technote-space/get-diff-action@v4
         with:

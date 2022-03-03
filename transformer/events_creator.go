@@ -43,10 +43,14 @@ func (c *Transformer) ProcessAggregatedResources(resources resources.ResourceMap
 
 func (c *Transformer) processEachResource(results []fetchers.FetchedResource, metadata ResourceTypeMetadata) {
 	for _, result := range results {
-		resMetadata := ResourceMetadata{ResourceTypeMetadata: metadata, ResourceId: result.GetID()}
+		rid, err := result.GetID()
+		if err != nil {
+			logp.L().Errorf("could not resource ID, Error: %v", err)
+			return
+		}
+		resMetadata := ResourceMetadata{ResourceTypeMetadata: metadata, ResourceId: rid}
 		if err := c.createBeatEvents(result, resMetadata); err != nil {
-			fmt.Errorf("failed to create beat events for, %v, Error: %v", metadata, err)
-
+			logp.L().Errorf("failed to create beat events for, %v, Error: %v", metadata, err)
 		}
 	}
 }
