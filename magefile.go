@@ -87,8 +87,6 @@ func Package() {
 	start := time.Now()
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
-	//devtools.MustUsePackaging("cloudbeat", "cloudbeat/dev-tools/packaging/packages.yml")
-
 	devtools.UseElasticBeatOSSPackaging()
 	cloudbeat.CustomizePackaging()
 
@@ -98,7 +96,7 @@ func Package() {
 
 	mg.Deps(Update)
 	mg.Deps(CrossBuild, CrossBuildGoDaemon)
-	mg.SerialDeps(devtools.Package, TestPackages)
+	mg.SerialDeps(devtools.Package)
 }
 
 func keepPackages(types []string) map[devtools.PackageType]struct{} {

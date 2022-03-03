@@ -27,29 +27,39 @@ import (
 func CustomizePackaging() {
 	var (
 		configYml = devtools.PackageFile{
-			Mode:   0o600,
-			Source: "{{.PackageDir}}/cloudbeat.yml",
-			Config: true,
+			Mode:          0o600,
+			Source:        "{{.PackageDir}}/cloudbeat.yml",
+			Config:        true,
+			SkipOnMissing: true,
 			// todo: add deps to generate this files each build
 		}
-		referenceConfigYml = devtools.PackageFile{
-			Mode:   0o644,
-			Source: "{{.PackageDir}}/cloudbeat.reference.yml",
-			// todo: add deps to generate this files each build
-		}
+		//referenceConfigYml = devtools.PackageFile{
+		//	Mode:          0o644,
+		//	Source:        "{{.PackageDir}}/cloudbeat.reference.yml",
+		//	SkipOnMissing: true,
+		//	// todo: add deps to generate this files each build
+		//}
 	)
 
 	for _, args := range devtools.Packages {
 		if len(args.Types) == 0 {
 			continue
 		}
+		// Replace the generic Beats README.md with an cloudbeat specific one, and remove files unused by apm-server.
+		for filename, filespec := range args.Spec.Files {
+			switch filespec.Source {
+			case "_meta/kibana.generated", "fields.yml", "{{.BeatName}}.reference.yml":
+				delete(args.Spec.Files, filename)
+			}
+		}
+
 		switch pkgType := args.Types[0]; pkgType {
 		case devtools.TarGz, devtools.Zip:
 			args.Spec.ReplaceFile("{{.BeatName}}.yml", configYml)
-			args.Spec.ReplaceFile("{{.BeatName}}.reference.yml", referenceConfigYml)
+			//args.Spec.ReplaceFile("{{.BeatName}}.reference.yml", referenceConfigYml)
 		case devtools.Deb, devtools.RPM:
 			args.Spec.ReplaceFile("/etc/{{.BeatName}}/{{.BeatName}}.yml", configYml)
-			args.Spec.ReplaceFile("/etc/{{.BeatName}}/{{.BeatName}}.reference.yml", referenceConfigYml)
+			//args.Spec.ReplaceFile("/etc/{{.BeatName}}/{{.BeatName}}.reference.yml", referenceConfigYml)
 		case devtools.Docker:
 			args.Spec.ExtraVar("linux_capabilities", "cap_net_raw,cap_net_admin+eip")
 		case devtools.DMG:

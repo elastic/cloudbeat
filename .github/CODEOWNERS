@@ -1,5 +1,6 @@
 # Infra & devops related
 /deploy/ @davesys911
 /.github/ @davesys911
+/.github/workflows @davesys911 @oren-zohar
 Makefile @davesys911
 JUSTFILE @davesys911

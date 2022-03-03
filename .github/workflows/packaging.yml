@@ -1,0 +1,39 @@
+name: Packaging
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  GO_VERSION: 1.17.2
+  DEV: true
+  SNAPSHOT: true
+  TYPES: tar.gz
+  PLATFORMS: linux/amd64
+  GOPATH: /home/runner/go
+
+jobs:
+  packaging:
+    name: Packaging
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Mage
+        run: |
+          git clone https://github.com/magefile/mage
+          cd mage
+          go run bootstrap.go
+          mage -version
+
+      - name: Packaging CLI
+        run: |
+          mage -v package
