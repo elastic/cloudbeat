@@ -31,7 +31,7 @@ func init() {
 		panic(err)
 	}
 
-	devtools.BeatDescription = "Cloudbeat collects cloud compliance and sends findings to ElasticSearch"
+	devtools.BeatDescription = "Cloudbeat collects cloud compliance data and sends findings to ElasticSearch"
 	devtools.BeatLicense = "Elastic License"
 	devtools.SetBuildVariableSources(&devtools.BuildVariableSources{
 		BeatVersion: filepath.Join(repo.RootDir, "cmd/version.go"),

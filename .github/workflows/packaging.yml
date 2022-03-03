@@ -9,15 +9,15 @@ env:
   GO_VERSION: 1.17.2
   DEV: true
   SNAPSHOT: true
-  TYPES: tar.gz
+  TYPES: tar.gz,docker
   PLATFORMS: linux/amd64
   GOPATH: /home/runner/go
 
 jobs:
-  packaging:
-    name: Packaging
+  packag_beat:
+    name: Package Cloudbeat
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -34,6 +34,6 @@ jobs:
           go run bootstrap.go
           mage -version
 
-      - name: Packaging CLI
+      - name: Packaging
         run: |
           mage -v package

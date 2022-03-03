@@ -55,7 +55,7 @@ jobs:
           ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
           echo "===== elasticsearch host (from inside cloudbeat): ${ES_HOST}"
           
-          kubectl wait --timeout=120s --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
+          kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
           CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
 
           echo "===== $CLOUDBEAT_POD is ready, updating /etc/hosts"
