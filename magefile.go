@@ -10,8 +10,10 @@ import (
 
 	"github.com/magefile/mage/mg"
 
+	"github.com/elastic/beats/v7/dev-tools/mage"
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
+
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
 	// mage:import
@@ -122,3 +124,9 @@ func Fields() { mg.Deps(cloudbeat.Update.Fields) }
 
 // Config generates both the short/reference/docker configs.
 func Config() { mg.Deps(cloudbeat.Update.Config) }
+
+// PythonEnv ensures the Python venv is up-to-date with the beats requrements.txt.
+func PythonEnv() error {
+	_, err := mage.PythonVirtualenv()
+	return err
+}
