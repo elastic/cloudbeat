@@ -16,7 +16,7 @@ type FetcherCondition interface {
 }
 
 type FetchedResource interface {
-	GetID() string
+	GetID() (string, error)
 	GetData() interface{}
 }
 

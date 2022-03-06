@@ -209,8 +209,8 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	}
 }
 
-func (res NumberResource) GetID() string {
-	return ""
+func (res NumberResource) GetID() (string, error) {
+	return "", nil
 }
 
 func (res NumberResource) GetData() interface{} {

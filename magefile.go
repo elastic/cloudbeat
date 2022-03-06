@@ -5,6 +5,10 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/magefile/mage/mg"
@@ -22,42 +26,30 @@ import (
 )
 
 func init() {
-	devtools.BeatDescription = "kubeat cis k8s benchmark."
-	devtools.BeatLicense = "Elastic License"
-}
+	repo, err := devtools.GetProjectRepoInfo()
+	if err != nil {
+		panic(err)
+	}
 
-// Package packages the Beat for distribution.
-// Use SNAPSHOT=true to build snapshots.
-// Use PLATFORMS to control the target platforms.
-// Use VERSION_QUALIFIER to control the version qualifier.
+	devtools.BeatDescription = "Cloudbeat collects cloud compliance data and sends findings to ElasticSearch"
+	devtools.BeatLicense = "Elastic License"
+	devtools.SetBuildVariableSources(&devtools.BuildVariableSources{
+		BeatVersion: filepath.Join(repo.RootDir, "cmd/version.go"),
+		GoVersion:   filepath.Join(repo.RootDir, ".go-version"),
+		DocBranch:   filepath.Join(repo.RootDir, "docs/version.asciidoc"),
+	})
+}
 
 // Check formats code, updates generated content, check for common errors, and
 // checks for any modified files.
-// func Check() {
-// 	return devtools.Check()
-// }
+func Check() error {
+	return devtools.Check()
+}
 
 // Build builds the Beat binary.
 func Build() error {
-	params := devtools.DefaultBuildArgs()
-
-	// Building cloudbeat
-	err := devtools.Build(params)
-	if err != nil {
-		return err
-	}
-
-	//	params.
-	err = devtools.Build(params)
-	if err != nil {
-		return err
-	}
-
-	return nil
-
+	return devtools.Build(devtools.DefaultBuildArgs())
 }
-
-// Todo write mage build & package functions for cloudbeat
 
 // Clean cleans all generated files and build artifacts.
 func Clean() error {
@@ -79,12 +71,7 @@ func BuildGoDaemon() error {
 
 // CrossBuild cross-builds the beat for all target platforms.
 func CrossBuild() error {
-	//building cloudbeat
-	err := devtools.CrossBuild()
-	if err != nil {
-		return err
-	}
-	return nil
+	return devtools.CrossBuild()
 }
 
 // CrossBuildGoDaemon cross-builds the go-daemon binary using Docker.
@@ -92,17 +79,52 @@ func CrossBuildGoDaemon() error {
 	return devtools.CrossBuildGoDaemon()
 }
 
+// Package packages the Beat for distribution.
+// Use SNAPSHOT=true to build snapshots.
+// Use PLATFORMS to control the target platforms.
+// Use VERSION_QUALIFIER to control the version qualifier.
 func Package() {
 	start := time.Now()
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
-	devtools.MustUsePackaging("cloudbeat", "cloudbeat/dev-tools/packaging/packages.yml")
+	devtools.UseElasticBeatXPackPackaging()
+	cloudbeat.CustomizePackaging()
 
-	// ToDo decide whenther cloudbeat should move to x-pack dir & adjust accordingly
+	if packageTypes := os.Getenv("TYPES"); packageTypes != "" {
+		filterPackages(packageTypes)
+	}
 
 	mg.Deps(Update)
 	mg.Deps(CrossBuild, CrossBuildGoDaemon)
-	mg.SerialDeps(devtools.Package, TestPackages)
+	mg.SerialDeps(devtools.Package)
+}
+
+func keepPackages(types []string) map[devtools.PackageType]struct{} {
+	keep := make(map[devtools.PackageType]struct{})
+	for _, t := range types {
+		var pt devtools.PackageType
+		if err := pt.UnmarshalText([]byte(t)); err != nil {
+			log.Printf("skipped filtering package type %s", t)
+			continue
+		}
+		keep[pt] = struct{}{}
+	}
+	return keep
+}
+
+func filterPackages(types string) {
+	var packages []devtools.OSPackageArgs
+	keep := keepPackages(strings.Split(types, " "))
+	for _, p := range devtools.Packages {
+		for _, t := range p.Types {
+			if _, ok := keep[t]; !ok {
+				continue
+			}
+			packages = append(packages, p)
+			break
+		}
+	}
+	devtools.Packages = packages
 }
 
 // TestPackages tests the generated packages (i.e. file modes, owners, groups).

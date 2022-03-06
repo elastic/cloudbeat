@@ -89,8 +89,8 @@ func (f *ELBFetcher) Stop() {
 }
 
 // GetID TODO: Add resource id logic to all AWS resources
-func (r ELBResource) GetID() string {
-	return ""
+func (r ELBResource) GetID() (string, error) {
+	return "", nil
 }
 
 func (r ELBResource) GetData() interface{} {

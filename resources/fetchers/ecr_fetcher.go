@@ -101,8 +101,8 @@ func (f *ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error
 }
 
 // GetID TODO: Add resource id logic to all AWS resources
-func (res ECRResource) GetID() string {
-	return ""
+func (res ECRResource) GetID() (string, error) {
+	return "", nil
 }
 func (res ECRResource) GetData() interface{} {
 	return res
