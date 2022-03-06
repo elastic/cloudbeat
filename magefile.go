@@ -88,6 +88,7 @@ func Package() {
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
 	devtools.UseElasticBeatOSSPackaging()
+	cloudbeat.CustomizePackaging()
 
 	if packageTypes := os.Getenv("TYPES"); packageTypes != "" {
 		filterPackages(packageTypes)

@@ -19,42 +19,21 @@ package mage
 
 import (
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
-	"github.com/pkg/errors"
 )
 
 // CustomizePackaging modifies the device in the configuration files based on
 // the target OS.
 func CustomizePackaging() {
-	var (
-		configYml = devtools.PackageFile{
-			Mode:   0o600,
-			Source: "{{.PackageDir}}/cloudbeat.yml",
-			Config: true,
-		}
-	)
-
 	for _, args := range devtools.Packages {
 		if len(args.Types) == 0 {
 			continue
 		}
-		// Replace the generic Beats README.md with a cloudbeat specific one, and remove files unused by cloudbeat.
+		// Remove files unused by cloudbeat.
 		for filename, filespec := range args.Spec.Files {
 			switch filespec.Source {
 			case "_meta/kibana.generated", "fields.yml", "{{.BeatName}}.reference.yml":
 				delete(args.Spec.Files, filename)
 			}
-		}
-
-		switch pkgType := args.Types[0]; pkgType {
-		case devtools.TarGz, devtools.Zip:
-			args.Spec.ReplaceFile("{{.BeatName}}.yml", configYml)
-		case devtools.Deb, devtools.RPM:
-			args.Spec.ReplaceFile("/etc/{{.BeatName}}/{{.BeatName}}.yml", configYml)
-		case devtools.Docker:
-			args.Spec.ExtraVar("linux_capabilities", "cap_net_raw,cap_net_admin+eip")
-		case devtools.DMG:
-		default:
-			panic(errors.Errorf("unhandled package type: %v, name: %v", pkgType, args.Spec.Name))
 		}
 	}
 }
