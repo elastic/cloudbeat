@@ -250,4 +250,4 @@ release: $(MAGE) $(PYTHON) build/dependencies.csv
 	$(MAGE) package
 
 build/dependencies.csv: $(PYTHON) go.mod
-	$(PYTHON) script/generate_notice.py --csv $@
+	$(PYTHON) scripts/make/generate_notice.py --csv $@

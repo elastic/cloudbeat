@@ -150,7 +150,7 @@ pipeline {
           Run unit tests and report junit results.
         */
         stage('Unit Test') {
-          // agent { label 'linux && immutable' }
+          agent { label 'linux && immutable' }
           options { skipDefaultCheckout() }
           environment {
             PATH = "${env.PATH}:${env.WORKSPACE}/bin"
@@ -208,7 +208,7 @@ pipeline {
         Packages Artifacts & Publishes release
         */
         stage('Package&Publish') {
-          // agent { label 'linux && immutable' }
+          agent { label 'linux && immutable' }
           options { skipDefaultCheckout() }
           environment {
             PATH = "${env.PATH}:${env.WORKSPACE}/bin"
@@ -236,6 +236,7 @@ pipeline {
                 withGithubNotify(context: 'Package') {
                   deleteDir()
                   unstash 'source'
+                  
                   dir("${BASE_DIR}"){
                     withMageEnv(){
                       sh(label: 'Build packages', script: './.ci/scripts/package.sh')
