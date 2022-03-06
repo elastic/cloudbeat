@@ -245,30 +245,9 @@ release-manager-release: release
 
 .PHONY: release
 
-JAVA_ATTACHER_VERSION:=1.28.4
-JAVA_ATTACHER_JAR:=cloudbeat-attach-cli-$(JAVA_ATTACHER_VERSION)-slim.jar
-JAVA_ATTACHER_SIG:=$(JAVA_ATTACHER_JAR).asc
-JAVA_ATTACHER_BASE_URL:=https://repo1.maven.org/maven2/co/elastic/apm/cloudbeat-attach-cli
-JAVA_ATTACHER_URL:=$(JAVA_ATTACHER_BASE_URL)/$(JAVA_ATTACHER_VERSION)/$(JAVA_ATTACHER_JAR)
-JAVA_ATTACHER_SIG_URL:=$(JAVA_ATTACHER_BASE_URL)/$(JAVA_ATTACHER_VERSION)/$(JAVA_ATTACHER_SIG)
-
-CLOUDBEAT_JAVA_PUB_KEY:=cloudbeat-java-public-key.asc
-
 release: export PATH:=$(dir $(BIN_MAGE)):$(PATH)
-release: $(MAGE) $(PYTHON) build/$(JAVA_ATTACHER_JAR) build/dependencies.csv
+release: $(MAGE) $(PYTHON) build/dependencies.csv
 	$(MAGE) package
 
 build/dependencies.csv: $(PYTHON) go.mod
-	$(PYTHON) script/generate_notice.py . --csv $@
-
-.imported-java-cloudbeat-pubkey:
-	@gpg --import $(CLOUDBEAT_JAVA_PUB_KEY)
-	@touch $@
-
-build/$(JAVA_ATTACHER_SIG):
-	curl -sSL $(JAVA_ATTACHER_SIG_URL) > $@
-
-build/$(JAVA_ATTACHER_JAR): build/$(JAVA_ATTACHER_SIG) .imported-java-cloudbeat-pubkey
-	curl -sSL $(JAVA_ATTACHER_URL) > $@
-	gpg --verify $< $@
-	@cp $@ build/java-attacher.jar
+	$(PYTHON) script/generate_notice.py --csv $@
