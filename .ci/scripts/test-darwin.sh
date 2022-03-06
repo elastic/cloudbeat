@@ -14,7 +14,7 @@ pythonInstallation=$(dirname "$(pyenv which pip)")
 export PATH="${pythonInstallation}:$PATH"
 
 # shellcheck disable=SC1091
-source ./script/common.bash
+source ./scripts/make/common.bash
 
 jenkins_setup
 

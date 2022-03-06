@@ -4,7 +4,7 @@
 source /usr/local/bin/bash_standard_lib.sh
 
 # shellcheck disable=SC1091
-source ./script/common.bash
+source ./scripts/make/common.bash
 
 get_go_version
 

@@ -2,7 +2,7 @@
 set -euox pipefail
 
 # shellcheck disable=SC1091
-source ./script/common.bash
+source ./scripts/make/common.bash
 
 jenkins_setup
 

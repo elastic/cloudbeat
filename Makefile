@@ -1,50 +1,10 @@
-# BEAT_NAME=cloudbeat
-# BEAT_PATH=github.com/elastic/beats/v7/cloudbeat
-# BEAT_GOPATH=$(firstword $(subst :, ,${GOPATH}))
-# SYSTEM_TESTS=false
-# TEST_ENVIRONMENT=false
-# ES_BEATS_IMPORT_PATH=github.com/elastic/beats/v7
-# ES_BEATS?=$(shell go list -m -f '{{.Dir}}' ${ES_BEATS_IMPORT_PATH})
-# LIBBEAT_MAKEFILE=$(ES_BEATS)/libbeat/scripts/Makefile
-# GOPACKAGES=$(shell go list ${BEAT_PATH}/... | grep -v /tools)
-# GOBUILD_FLAGS=-i -ldflags "-X ${ES_BEATS_IMPORT_PATH}/libbeat/version.buildTime=$(NOW) -X ${ES_BEATS_IMPORT_PATH}/libbeat/version.commit=$(COMMIT_ID)"
-# MAGE_IMPORT_PATH=github.com/magefile/mage
-# NO_COLLECT=true
-# CHECK_HEADERS_DISABLED=true
-
-# # Path to the libbeat Makefile
-# -include $(LIBBEAT_MAKEFILE)
-
-# .PHONY: copy-vendor
-# copy-vendor:
-# 	mage vendorUpdate
-
-# delete-pod:
-# 	kubectl delete pod cloudbeat-demo
-
-# build-docker:
-# 	GOOS=linux go build && docker build -t cloudbeat .
-
-# docker-image-load-minikube: build-docker
-# 	minikube image load cloudbeat:latest
-
-# docker-image-load-kind: build-docker
-# 	kind load docker-image docker.elastic.co/beats/elastic-agent:8.1.0-SNAPSHOT --name single-host
-
-# deploy-cloudbeat:
-# 	kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
-
-# deploy-pod: delete-pod build-docker docker-image-load-minikube
-# 	kubectl apply -f pod.yml
-
-# build-deploy-docker: build-docker docker-image-load-kind deploy-cloudbeat
 
 ##############################################################################
 # Variables used for various build targets.
 ##############################################################################
 
 # Ensure the Go version in .go_version is installed and used.
-GOROOT?=$(shell ./script/run_with_go_ver go env GOROOT)
+GOROOT?=$(shell ./scripts/make/run_with_go_ver go env GOROOT)
 GO:=$(GOROOT)/bin/go
 export PATH:=$(GOROOT)/bin:$(PATH)
 
@@ -67,33 +27,25 @@ PYTHON_ENV?=.
 PYTHON_BIN:=$(PYTHON_ENV)/build/ve/$(shell $(GO) env GOOS)/bin
 PYTHON=$(PYTHON_BIN)/python
 
-APM_SERVER_VERSION=$(shell grep defaultBeatVersion cmd/version.go | cut -d'=' -f2 | tr -d '" ')
+CLOUDBEAT_VERSION=$(shell grep defaultBeatVersion cmd/version.go | cut -d'=' -f2 | tr -d '" ')
 
 # Create a local config.mk file to override configuration,
 # e.g. for setting "GOLINT_UPSTREAM".
 -include config.mk
 
 ##############################################################################
-# Rules for building and unit-testing apm-server.
+# Rules for building and unit-testing cloudbeat.
 ##############################################################################
 
 .DEFAULT_GOAL := cloudbeat
 
-.PHONY: build-cloudbeat
-apm-server:
-	@$(GO) build -o $@ .
-
-.PHONY: apm-server-oss
-apm-server-oss:
+.PHONY: cloudbeat
+cloudbeat:
 	@$(GO) build -o $@
 
 .PHONY: test
 test:
 	$(GO) test $(GOTESTFLAGS) ./...
-
-.PHONY: system-test
-system-test:
-	@(cd systemtest; $(GO) test $(GOTESTFLAGS) -timeout=20m ./...)
 
 .PHONY:
 clean: $(MAGE)
@@ -159,7 +111,7 @@ get-version:
 .PHONY: docs
 docs:
 	@rm -rf build/html_docs
-	sh script/build_apm_docs.sh apm-server docs/index.asciidoc build
+	sh script/build_cloudbeat_docs.sh cloudbeat docs/index.asciidoc build
 
 .PHONY: update-beats-docs
 update-beats-docs: $(PYTHON)
@@ -213,7 +165,7 @@ endif
 
 .PHONY: check-docker-compose
 check-docker-compose: $(PYTHON_BIN)
-	@PATH=$(PYTHON_BIN):$(PATH) ./script/check_docker_compose.sh $(BEATS_VERSION)
+	@PATH=$(PYTHON_BIN):$(PATH) ./scripts/make/check_docker_compose.sh $(BEATS_VERSION)
 
 .PHONY: format-package build-package
 format-package: $(ELASTICPACKAGE)
@@ -294,29 +246,29 @@ release-manager-release: release
 .PHONY: release
 
 JAVA_ATTACHER_VERSION:=1.28.4
-JAVA_ATTACHER_JAR:=apm-agent-attach-cli-$(JAVA_ATTACHER_VERSION)-slim.jar
+JAVA_ATTACHER_JAR:=cloudbeat-attach-cli-$(JAVA_ATTACHER_VERSION)-slim.jar
 JAVA_ATTACHER_SIG:=$(JAVA_ATTACHER_JAR).asc
-JAVA_ATTACHER_BASE_URL:=https://repo1.maven.org/maven2/co/elastic/apm/apm-agent-attach-cli
+JAVA_ATTACHER_BASE_URL:=https://repo1.maven.org/maven2/co/elastic/apm/cloudbeat-attach-cli
 JAVA_ATTACHER_URL:=$(JAVA_ATTACHER_BASE_URL)/$(JAVA_ATTACHER_VERSION)/$(JAVA_ATTACHER_JAR)
 JAVA_ATTACHER_SIG_URL:=$(JAVA_ATTACHER_BASE_URL)/$(JAVA_ATTACHER_VERSION)/$(JAVA_ATTACHER_SIG)
 
-APM_AGENT_JAVA_PUB_KEY:=apm-agent-java-public-key.asc
+CLOUDBEAT_JAVA_PUB_KEY:=cloudbeat-java-public-key.asc
 
 release: export PATH:=$(dir $(BIN_MAGE)):$(PATH)
 release: $(MAGE) $(PYTHON) build/$(JAVA_ATTACHER_JAR) build/dependencies.csv
 	$(MAGE) package
 
 build/dependencies.csv: $(PYTHON) go.mod
-	$(PYTHON) script/generate_notice.py ./x-pack/apm-server --csv $@
+	$(PYTHON) script/generate_notice.py . --csv $@
 
-.imported-java-agent-pubkey:
-	@gpg --import $(APM_AGENT_JAVA_PUB_KEY)
+.imported-java-cloudbeat-pubkey:
+	@gpg --import $(CLOUDBEAT_JAVA_PUB_KEY)
 	@touch $@
 
 build/$(JAVA_ATTACHER_SIG):
 	curl -sSL $(JAVA_ATTACHER_SIG_URL) > $@
 
-build/$(JAVA_ATTACHER_JAR): build/$(JAVA_ATTACHER_SIG) .imported-java-agent-pubkey
+build/$(JAVA_ATTACHER_JAR): build/$(JAVA_ATTACHER_SIG) .imported-java-cloudbeat-pubkey
 	curl -sSL $(JAVA_ATTACHER_URL) > $@
 	gpg --verify $< $@
 	@cp $@ build/java-attacher.jar

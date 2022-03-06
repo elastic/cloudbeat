@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build the docker image for the apm-server, retag and push it to the given docker registry
+# Build the docker image for the cloudbeat, retag and push it to the given docker registry
 #
 # Arguments:
 # - NEW_TAG, this is the tag for the docker image to be pushed.
@@ -14,7 +14,7 @@ NEW_IMAGE=${2:?Docker image is not set}
 export PLATFORMS='linux/amd64'
 export TYPE='docker'
 export SNAPSHOT='true'
-export IMAGE="docker.elastic.co/apm/apm-server"
+export IMAGE="docker.elastic.co/beats/cloudbeat"
 
 echo 'INFO: Build docker images'
 make release
