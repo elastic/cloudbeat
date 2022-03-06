@@ -9,7 +9,6 @@ env:
   GO_VERSION: 1.17.2
   DEV: true
   SNAPSHOT: true
-  TYPES: tar.gz,docker
   PLATFORMS: linux/amd64
   GOPATH: /home/runner/go
 
@@ -18,6 +17,9 @@ jobs:
     name: Package Cloudbeat
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      matrix:
+        types: [ tar.gz, docker ]
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -37,3 +39,5 @@ jobs:
       - name: Packaging
         run: |
           mage -v package
+        env:
+          TYPES: ${{ matrix.typs }}
