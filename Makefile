@@ -80,8 +80,7 @@ update: go-generate add-headers $(MAGE)
 	@$(MAGE) update
 	@go mod download all # make sure go.sum is complete
 
-config: apm-server.yml apm-server.docker.yml
-apm-server.yml apm-server.docker.yml: $(MAGE) magefile.go _meta/beat.yml
+config:
 	@$(MAGE) config
 
 .PHONY: go-generate
