@@ -17,7 +17,10 @@ filesystem_input(filename, mode, uid, gid) = {
 # genrates `process` type input data
 process_input(process_name, arguments) = {
 	"type": "process",
-	"resource": {"command": concat(" ", array.concat([process_name], arguments))},
+	"resource": {
+		"command": concat(" ", array.concat([process_name], arguments)),
+		"stat": {"Name": process_name},
+	},
 }
 
 kube_api_input(resource) = {
