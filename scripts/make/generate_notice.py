@@ -25,6 +25,8 @@ BEATS_DIR = subprocess.check_output(
 # notice_overrides holds additional overrides entries for go-licence-detector.
 notice_overrides = [
     {"name": "github.com/elastic/beats/v7", "licenceType": "Elastic"},
+    {"name": "github.com/build-security/beats/v7", "licenceType": "Elastic"},
+    {"name": "github.com/elastic/csp-security-policies", "licenceType": "Elastic"},
     {"name": "github.com/golang/glog", "licenceType": "Apache-2.0"}
 ]
 
@@ -78,7 +80,7 @@ def go_license_detector(notice_out, deps_out, modules):
     beats_overrides = open(beats_overrides_path).read()
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        # Create notice overrides.json by combining the overrides from beats with apm-server specific ones.
+        # Create notice overrides.json by combining the overrides from beats with cloudbeat specific ones.
         overrides_file = open(os.path.join(tmpdir, "overrides.json"), "w")
         overrides_file.write(beats_overrides)
         overrides_file.write("\n")
@@ -87,9 +89,9 @@ def go_license_detector(notice_out, deps_out, modules):
             json.dump(entry, overrides_file)
         overrides_file.close()
 
-        # Replace "Elastic Beats" with "Elastic APM Server" in the NOTICE.txt template.
+        # Replace "Elastic Beats" with "Elastic Cloudbeat" in the NOTICE.txt template.
         notice_template_file = open(os.path.join(tmpdir, "NOTICE.txt.tmpl"), "w")
-        notice_template_file.write(beats_notice_template.replace("Elastic Beats", "Elastic APM Server"))
+        notice_template_file.write(beats_notice_template.replace("Elastic Beats", "Elastic Cloudbeat"))
         notice_template_file.close()
 
         args = [

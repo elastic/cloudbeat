@@ -99,7 +99,7 @@ func Package() {
 	start := time.Now()
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
-	devtools.MustUsePackaging("cloudbeat", "cloudbeat/dev-tools/packaging/packages.yml")
+	// devtools.MustUsePackaging("cloudbeat", "cloudbeat/dev-tools/packaging/packages.yml")
 
 	// ToDo decide whenther cloudbeat should move to x-pack dir & adjust accordingly
 
