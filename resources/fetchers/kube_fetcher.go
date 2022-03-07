@@ -27,10 +27,6 @@ var (
 			allNamespaces,
 		},
 		{
-			&kubernetes.Secret{},
-			allNamespaces,
-		},
-		{
 			&kubernetes.Role{},
 			allNamespaces,
 		},

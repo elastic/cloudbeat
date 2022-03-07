@@ -2,10 +2,10 @@ package fetchers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
-	"github.com/elastic/beats/v7/libbeat/logp"
 )
 
 type ELBProvider struct {
@@ -19,8 +19,8 @@ func NewELBProvider(cfg aws.Config) *ELBProvider {
 	}
 }
 
-/// DescribeLoadBalancer method will return up to 400 results
-/// If we will ever want to increase this number, DescribeLoadBalancers support paginated requests
+// DescribeLoadBalancer method will return up to 400 results
+// If we will ever want to increase this number, DescribeLoadBalancers support paginated requests
 func (provider ELBProvider) DescribeLoadBalancer(ctx context.Context, balancersNames []string) ([]elasticloadbalancing.LoadBalancerDescription, error) {
 	input := &elasticloadbalancing.DescribeLoadBalancersInput{
 		LoadBalancerNames: balancersNames,
@@ -29,8 +29,7 @@ func (provider ELBProvider) DescribeLoadBalancer(ctx context.Context, balancersN
 	req := provider.client.DescribeLoadBalancersRequest(input)
 	response, err := req.Send(ctx)
 	if err != nil {
-		logp.Err("Failed to describe load balancers %s from elb, error - %+v", balancersNames, err)
-		return nil, err
+		return nil, fmt.Errorf("failed to describe load balancers %s from elb, error - %w", balancersNames, err)
 	}
 
 	return response.LoadBalancerDescriptions, err
