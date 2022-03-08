@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 @Library('apm@current') _
 pipeline {
-  agent { label 'linux && immutable' }
+  agent { label 'linux && immutable && debian-11' }
   environment {
     REPO = 'cloudbeat'
     BASE_DIR = "src/github.com/elastic/${env.REPO}"
@@ -150,7 +150,7 @@ pipeline {
           Run unit tests and report junit results.
         */
         stage('Unit Test') {
-          agent { label 'linux && immutable' }
+          agent { label 'linux && immutable && debian-11 && debian-11' }
           options { skipDefaultCheckout() }
           environment {
             PATH = "${env.PATH}:${env.WORKSPACE}/bin"
@@ -208,7 +208,7 @@ pipeline {
         Packages Artifacts & Publishes release
         */
         stage('Package&Publish') {
-          agent { label 'linux && immutable' }
+          agent { label 'linux && immutable && debian-11' }
           options { skipDefaultCheckout() }
           environment {
             PATH = "${env.PATH}:${env.WORKSPACE}/bin"
