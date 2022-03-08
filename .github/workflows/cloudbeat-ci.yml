@@ -8,6 +8,7 @@ on:
 env:
   K8S_MANIFEST_DIR: deploy/k8s
   GO_VERSION: 1.17.2
+  FORK_TEST: ${{ secrets.FORK_TEST }}
 
 jobs:
   integration-test:
@@ -25,4 +26,4 @@ jobs:
 
       - name: Configure sysctl limits
         run: |
-          echo ${{ secrets.FORK_TEST }}
+          echo ${{ env.FORK_TEST }}
