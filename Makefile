@@ -89,7 +89,7 @@ go-generate:
 
 notice: NOTICE.txt
 NOTICE.txt: $(PYTHON) go.mod utils/go.mod
-	@$(PYTHON) script/generate_notice.py . ./x-pack/apm-server
+	@$(PYTHON) scripts/make/generate_notice.py . 
 
 .PHONY: add-headers
 add-headers: $(GOLICENSER)
@@ -98,10 +98,10 @@ ifndef CHECK_HEADERS_DISABLED
 #	@$(GOLICENSER) -license Elasticv2 x-pack
 endif
 
-## get-version : Get the apm server version
+## get-version : Get cloudbeat version
 .PHONY: get-version
 get-version:
-	@echo $(APM_SERVER_VERSION)
+	@echo $(CLOUDBEAT_VERSION)
 
 ##############################################################################
 # Documentation.
@@ -149,7 +149,7 @@ golint: $(GOLINT) $(REVIEWDOG)
 
 .PHONY: staticcheck
 staticcheck: $(STATICCHECK)
-	$(STATICCHECK) github.com/elastic/apm-server/...
+	$(STATICCHECK) github.com/elastic/cloudbeat/...
 
 .PHONY: check-changelogs
 check-changelogs: $(PYTHON)
@@ -165,14 +165,6 @@ endif
 .PHONY: check-docker-compose
 check-docker-compose: $(PYTHON_BIN)
 	@PATH=$(PYTHON_BIN):$(PATH) ./scripts/make/check_docker_compose.sh $(BEATS_VERSION)
-
-.PHONY: format-package build-package
-format-package: $(ELASTICPACKAGE)
-	@(cd apmpackage/apm; $(CURDIR)/$(ELASTICPACKAGE) format)
-build-package: $(ELASTICPACKAGE)
-	@rm -fr ./build/integrations/apm/* ./build/apmpackage
-	@$(GO) run ./apmpackage/cmd/genpackage -o ./build/apmpackage -version=$(APM_SERVER_VERSION)
-	@(cd ./build/apmpackage; $(CURDIR)/$(ELASTICPACKAGE) build && $(CURDIR)/$(ELASTICPACKAGE) check)
 
 .PHONY: check-gofmt check-autopep8 gofmt autopep8
 check-fmt: check-gofmt check-autopep8
@@ -228,7 +220,7 @@ $(PYTHON_BIN)/activate: $(MAGE)
 
 .PHONY: $(APPROVALS)
 $(APPROVALS):
-	@$(GO) build -o $@ github.com/elastic/apm-server/approvaltest/cmd/check-approvals
+	@$(GO) build -o $@ github.com/elastic/cloudbeat/approvaltest/cmd/check-approvals
 
 ##############################################################################
 # Release manager.
