@@ -15,25 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package mage
+package licenses
 
-import (
-	devtools "github.com/elastic/beats/v7/dev-tools/mage"
-)
-
-// CustomizePackaging modifies the device in the configuration files based on
-// the target OS.
-func CustomizePackaging() {
-	for _, args := range devtools.Packages {
-		if len(args.Types) == 0 {
-			continue
-		}
-		// Remove files unused by cloudbeat.
-		for filename, filespec := range args.Spec.Files {
-			switch filespec.Source {
-			case "_meta/kibana.generated", "fields.yml", "{{.BeatName}}.reference.yml":
-				delete(args.Spec.Files, filename)
-			}
-		}
-	}
-}
+//go:generate go run ../dev-tools/cmd/license/license_generate.go

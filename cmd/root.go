@@ -13,4 +13,4 @@ import (
 var Name = "cloudbeat"
 
 // RootCmd to handle beats cli
-var RootCmd = cmd.GenRootCmdWithSettings(beater.New, instance.Settings{Name: Name})
+var RootCmd = cmd.GenRootCmdWithSettings(beater.New, instance.Settings{Name: Name, Version: defaultBeatVersion})

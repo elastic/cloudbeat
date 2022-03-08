@@ -11,7 +11,7 @@ require (
 	github.com/go-ole/go-ole v1.2.5-0.20190920104607-14974a1cf647 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.2+incompatible // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible
-	github.com/magefile/mage v1.11.0
+	github.com/magefile/mage v1.12.1
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mitchellh/gox v1.0.1
 	github.com/mitchellh/mapstructure v1.4.3
@@ -50,7 +50,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.17.0
-	github.com/elastic/csp-security-policies v0.0.5-bench-format
+	github.com/elastic/csp-security-policies v0.0.7-go-lib
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.2 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect

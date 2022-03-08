@@ -42,8 +42,8 @@ func (f IAMFetcher) Stop() {
 }
 
 //TODO: Add resource id logic to all AWS resources
-func (r IAMResource) GetID() string {
-	return ""
+func (r IAMResource) GetID() (string, error) {
+	return "", nil
 }
 
 func (r IAMResource) GetData() interface{} {

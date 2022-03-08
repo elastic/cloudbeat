@@ -44,8 +44,8 @@ func (f EKSFetcher) Stop() {
 }
 
 //TODO: Add resource id logic to all AWS resources
-func (r EKSResource) GetID() string {
-	return ""
+func (r EKSResource) GetID() (string, error) {
+	return "", nil
 }
 
 func (r EKSResource) GetData() interface{} {

@@ -1,0 +1,1330 @@
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:34.979Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 670
+  },
+  "message": "Home path: [/] Config path: [/] Data path: [//data] Logs path: [//logs]",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:34.983Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 678
+  },
+  "message": "Beat ID: d3b8b610-9282-4f7a-9c80-5485e4040fbd",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "warn",
+  "@timestamp": "2022-03-03T22:29:37.987Z",
+  "log.logger": "add_cloud_metadata",
+  "log.origin": {
+    "file.name": "add_cloud_metadata/provider_aws_ec2.go",
+    "file.line": 80
+  },
+  "message": "read token request for getting IMDSv2 token returns empty: Put \"http://169.254.169.254/latest/api/token\": context deadline exceeded (Client.Timeout exceeded while awaiting headers). No token in the metadata request will be used.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:37.992Z",
+  "log.logger": "add_cloud_metadata",
+  "log.origin": {
+    "file.name": "add_cloud_metadata/add_cloud_metadata.go",
+    "file.line": 101
+  },
+  "message": "add_cloud_metadata: hosting provider type not detected.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.009Z",
+  "log.logger": "seccomp",
+  "log.origin": {
+    "file.name": "seccomp/seccomp.go",
+    "file.line": 124
+  },
+  "message": "Syscall filter successfully installed",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.009Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1048
+  },
+  "message": "Beat info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "beat": {
+      "path": {
+        "config": "/",
+        "data": "/data",
+        "home": "/",
+        "logs": "/logs"
+      },
+      "type": "cloudbeat",
+      "uuid": "d3b8b610-9282-4f7a-9c80-5485e4040fbd"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.009Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1057
+  },
+  "message": "Build info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "build": {
+      "commit": "unknown",
+      "libbeat": "8.1.0",
+      "time": "0001-01-01T00:00:00.000Z",
+      "version": "8.1.0"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.009Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1060
+  },
+  "message": "Go runtime info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "go": {
+      "os": "linux",
+      "arch": "arm64",
+      "max_procs": 7,
+      "version": "go1.17.6"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.011Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1064
+  },
+  "message": "Host info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "host": {
+      "architecture": "aarch64",
+      "boot_time": "2022-02-25T04:43:13Z",
+      "containerized": false,
+      "name": "kind-mono-control-plane",
+      "ip": [
+        "127.0.0.1/8",
+        "::1/128",
+        "10.244.0.1/32",
+        "10.244.0.1/32",
+        "10.244.0.1/32",
+        "172.24.0.2/16",
+        "fc00:f853:ccd:e793::2/64",
+        "fe80::42:acff:fe18:2/64"
+      ],
+      "kernel_version": "5.10.76-linuxkit",
+      "mac": [
+        "16:5f:e8:2c:3a:85",
+        "b2:4c:e4:92:a8:98",
+        "e2:48:f6:49:fb:7c",
+        "02:42:ac:18:00:02"
+      ],
+      "os": {
+        "type": "linux",
+        "family": "debian",
+        "platform": "debian",
+        "name": "Debian GNU/Linux",
+        "version": "11 (bullseye)",
+        "major": 11,
+        "minor": 0,
+        "patch": 0,
+        "codename": "bullseye"
+      },
+      "timezone": "UTC",
+      "timezone_offset_sec": 0,
+      "id": "1cc402dd0e11d5ae18db04a6de87223d"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.012Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1093
+  },
+  "message": "Process info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "process": {
+      "capabilities": {
+        "inheritable": [
+          "chown",
+          "dac_override",
+          "fowner",
+          "fsetid",
+          "kill",
+          "setgid",
+          "setuid",
+          "setpcap",
+          "net_bind_service",
+          "net_raw",
+          "sys_chroot",
+          "mknod",
+          "audit_write",
+          "setfcap"
+        ],
+        "permitted": [
+          "chown",
+          "dac_override",
+          "fowner",
+          "fsetid",
+          "kill",
+          "setgid",
+          "setuid",
+          "setpcap",
+          "net_bind_service",
+          "net_raw",
+          "sys_chroot",
+          "mknod",
+          "audit_write",
+          "setfcap"
+        ],
+        "effective": [
+          "chown",
+          "dac_override",
+          "fowner",
+          "fsetid",
+          "kill",
+          "setgid",
+          "setuid",
+          "setpcap",
+          "net_bind_service",
+          "net_raw",
+          "sys_chroot",
+          "mknod",
+          "audit_write",
+          "setfcap"
+        ],
+        "bounding": [
+          "chown",
+          "dac_override",
+          "fowner",
+          "fsetid",
+          "kill",
+          "setgid",
+          "setuid",
+          "setpcap",
+          "net_bind_service",
+          "net_raw",
+          "sys_chroot",
+          "mknod",
+          "audit_write",
+          "setfcap"
+        ],
+        "ambient": null
+      },
+      "cwd": "/",
+      "exe": "/cloudbeat",
+      "name": "cloudbeat",
+      "pid": 14,
+      "ppid": 1,
+      "seccomp": {
+        "mode": "filter",
+        "no_new_privs": true
+      },
+      "start_time": "2022-03-03T22:27:38.860Z"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.012Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 323
+  },
+  "message": "Setup Beat: cloudbeat; Version: 8.1.0",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.013Z",
+  "log.logger": "esclientleg",
+  "log.origin": {
+    "file.name": "eslegclient/connection.go",
+    "file.line": 105
+  },
+  "message": "elasticsearch url: http://host.docker.internal:9200",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.014Z",
+  "log.logger": "publisher",
+  "log.origin": {
+    "file.name": "pipeline/module.go",
+    "file.line": 113
+  },
+  "message": "Beat name: kind-mono-control-plane",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.014Z",
+  "log.origin": {
+    "file.name": "beater/cloudbeat.go",
+    "file.line": 53
+  },
+  "message": "Config initiated.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "goroutine": "opa",
+  "level": "info",
+  "msg": "Starting bundle loader.",
+  "name": "test",
+  "plugin": "bundle",
+  "time": "2022-03-03T22:29:38Z"
+}
+{
+  "goroutine": "opa",
+  "level": "info",
+  "msg": "Starting decision logger.",
+  "plugin": "decision_logs",
+  "time": "2022-03-03T22:29:38Z"
+}
+{
+  "goroutine": "opa",
+  "level": "info",
+  "msg": "Bundle loaded and activated successfully.",
+  "name": "test",
+  "plugin": "bundle",
+  "time": "2022-03-03T22:29:38Z"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.133Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 142
+  },
+  "message": "Starting metrics logging every 30s",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.135Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 489
+  },
+  "message": "cloudbeat start running.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:29:38.135Z",
+  "log.origin": {
+    "file.name": "beater/cloudbeat.go",
+    "file.line": 91
+  },
+  "message": "cloudbeat is running! Hit CTRL-C to stop it.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:30:15.489Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 184
+  },
+  "message": "Non-zero metrics in the last 30s",
+  "service.name": "cloudbeat",
+  "monitoring": {
+    "metrics": {
+      "beat": {
+        "cpu": {
+          "system": {
+            "ticks": 80,
+            "time": {
+              "ms": 87
+            }
+          },
+          "total": {
+            "ticks": 360,
+            "time": {
+              "ms": 375
+            },
+            "value": 360
+          },
+          "user": {
+            "ticks": 280,
+            "time": {
+              "ms": 288
+            }
+          }
+        },
+        "handles": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 12
+        },
+        "info": {
+          "ephemeral_id": "c13ca7f7-7062-40f1-87b9-b4abad63e858",
+          "uptime": {
+            "ms": 34119
+          },
+          "version": "8.1.0"
+        },
+        "memstats": {
+          "gc_next": 17654592,
+          "memory_alloc": 11801960,
+          "memory_sys": 34227208,
+          "memory_total": 40098824,
+          "rss": 73814016
+        },
+        "runtime": {
+          "goroutines": 26
+        }
+      },
+      "libbeat": {
+        "config": {
+          "module": {
+            "running": 0
+          }
+        },
+        "output": {
+          "events": {
+            "active": 0
+          },
+          "type": "elasticsearch"
+        },
+        "pipeline": {
+          "clients": 1,
+          "events": {
+            "active": 0
+          },
+          "queue": {
+            "max_events": 4096
+          }
+        }
+      },
+      "system": {
+        "cpu": {
+          "cores": 7
+        },
+        "load": {
+          "1": 0.4,
+          "15": 0.45,
+          "5": 0.34,
+          "norm": {
+            "1": 0.0571,
+            "15": 0.0643,
+            "5": 0.0486
+          }
+        }
+      }
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:30:15.499Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 192
+  },
+  "message": "Total metrics",
+  "service.name": "cloudbeat",
+  "monitoring": {
+    "metrics": {
+      "beat": {
+        "cpu": {
+          "system": {
+            "ticks": 90,
+            "time": {
+              "ms": 99
+            }
+          },
+          "total": {
+            "ticks": 380,
+            "time": {
+              "ms": 390
+            },
+            "value": 380
+          },
+          "user": {
+            "ticks": 290,
+            "time": {
+              "ms": 291
+            }
+          }
+        },
+        "handles": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 12
+        },
+        "info": {
+          "ephemeral_id": "c13ca7f7-7062-40f1-87b9-b4abad63e858",
+          "uptime": {
+            "ms": 40540
+          },
+          "version": "8.1.0"
+        },
+        "memstats": {
+          "gc_next": 17654592,
+          "memory_alloc": 12326984,
+          "memory_sys": 34227208,
+          "memory_total": 40623848,
+          "rss": 74055680
+        },
+        "runtime": {
+          "goroutines": 26
+        }
+      },
+      "libbeat": {
+        "config": {
+          "module": {
+            "running": 0,
+            "starts": 0,
+            "stops": 0
+          },
+          "reloads": 0,
+          "scans": 0
+        },
+        "output": {
+          "events": {
+            "acked": 0,
+            "active": 0,
+            "batches": 0,
+            "dropped": 0,
+            "duplicates": 0,
+            "failed": 0,
+            "toomany": 0,
+            "total": 0
+          },
+          "read": {
+            "bytes": 0,
+            "errors": 0
+          },
+          "type": "elasticsearch",
+          "write": {
+            "bytes": 0,
+            "errors": 0
+          }
+        },
+        "pipeline": {
+          "clients": 1,
+          "events": {
+            "active": 0,
+            "dropped": 0,
+            "failed": 0,
+            "filtered": 0,
+            "published": 0,
+            "retry": 0,
+            "total": 0
+          },
+          "queue": {
+            "acked": 0,
+            "max_events": 4096
+          }
+        }
+      },
+      "system": {
+        "cpu": {
+          "cores": 7
+        },
+        "load": {
+          "1": 0.41,
+          "15": 0.45,
+          "5": 0.34,
+          "norm": {
+            "1": 0.0586,
+            "15": 0.0643,
+            "5": 0.0486
+          }
+        }
+      }
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:30:15.499Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 193
+  },
+  "message": "Uptime: 40.541834977s",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:30:15.499Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 160
+  },
+  "message": "Stopping metrics logging.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:30:15.499Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 495
+  },
+  "message": "cloudbeat stopped.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+
+___
+
+
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T09:34:14.335Z",
+  "log.logger": "publisher",
+  "log.origin": {
+    "file.name": "pipeline/module.go",
+    "file.line": 113
+  },
+  "message": "Beat name: minikube",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T09:34:14.335Z",
+  "log.origin": {
+    "file.name": "beater/cloudbeat.go",
+    "file.line": 52
+  },
+  "message": "Config initiated.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "goroutine": "opa",
+  "level": "info",
+  "msg": "Starting bundle loader.",
+  "name": "test",
+  "plugin": "bundle",
+  "time": "2022-03-03T09:34:14Z"
+}
+{
+  "goroutine": "opa",
+  "level": "info",
+  "msg": "Starting decision logger.",
+  "plugin": "decision_logs",
+  "time": "2022-03-03T09:34:14Z"
+}
+{
+  "goroutine": "opa",
+  "level": "info",
+  "msg": "Bundle loaded and activated successfully.",
+  "name": "test",
+  "plugin": "bundle",
+  "time": "2022-03-03T09:34:14Z"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T09:34:14.460Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 142
+  },
+  "message": "Starting metrics logging every 30s",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T09:34:14.460Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 489
+  },
+  "message": "cloudbeat start running.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T09:34:14.460Z",
+  "log.origin": {
+    "file.name": "beater/cloudbeat.go",
+    "file.line": 90
+  },
+  "message": "cloudbeat is running! Hit CTRL-C to stop it.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "error",
+  "@timestamp": "2022-03-03T09:34:14.470Z",
+  "log.origin": {
+    "file.name": "conditions/lease_fetcher_condition.go",
+    "file.line": 25
+  },
+  "message": "could not read leader value, using default value false: could not find lease elastic-agent-cluster-leader in Kube leases",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T09:34:14.471Z",
+  "log.origin": {
+    "file.name": "resources/registry.go",
+    "file.line": 65
+  },
+  "message": "Conditional fetcher \"kube-api\" should not run because \"leader_election_conditional_fetcher\"",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "bundles": {
+    "test": {}
+  },
+  "decision_id": "947ef371-e7fa-409d-8bed-19e21b06d1cc",
+  "input": {
+    "resource": {
+      "command": "/sbin/init",
+      "pid": "1",
+      "stat": {
+        "EffectiveGID": "",
+        "EffectiveUID": "",
+        "Group": "1",
+        "Name": "systemd",
+        "Nice": "0",
+        "Parent": "0",
+        "RealGID": "",
+        "RealUID": "",
+        "ResidentSize": "12948000",
+        "SavedGID": "",
+        "SavedUID": "",
+        "StartTime": "20139",
+        "State": "S",
+        "SystemTime": "45",
+        "Threads": "1",
+        "TotalSize": "23920000",
+        "UserTime": "67"
+      }
+    },
+    "type": "process"
+  },
+  "labels": {
+    "id": "03245eca-b531-4fec-ac7c-c9637e8af001",
+    "version": "0.36.1"
+  },
+  "level": "info",
+  "metrics": {
+    "timer_rego_external_resolve_ns": 1900,
+    "timer_rego_query_compile_ns": 134405,
+    "timer_rego_query_eval_ns": 1857575,
+    "timer_rego_query_parse_ns": 72502,
+    "timer_sdk_decision_eval_ns": 2280092
+  },
+  "msg": "Decision Log",
+  "path": "main",
+  "result": {
+    "findings": [],
+    "metadata": {
+      "opa_version": "0.36.1"
+    },
+    "resource": {
+      "command": "/sbin/init",
+      "pid": "1",
+      "stat": {
+        "EffectiveGID": "",
+        "EffectiveUID": "",
+        "Group": "1",
+        "Name": "systemd",
+        "Nice": "0",
+        "Parent": "0",
+        "RealGID": "",
+        "RealUID": "",
+        "ResidentSize": "12948000",
+        "SavedGID": "",
+        "SavedUID": "",
+        "StartTime": "20139",
+        "State": "S",
+        "SystemTime": "45",
+        "Threads": "1",
+        "TotalSize": "23920000",
+        "UserTime": "67"
+      }
+    }
+  },
+  "time": "2022-03-03T09:34:44Z",
+  "timestamp": "2022-03-03T09:34:44.461741505Z",
+  "type": "openpolicyagent.org/decision_logs"
+}
+
+
+{
+  "2nd cloudbeat logs": ""
+}
+
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.940Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 670
+  },
+  "message": "Home path: [/] Config path: [/] Data path: [//data] Logs path: [//logs]",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.946Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 678
+  },
+  "message": "Beat ID: e75ff394-f06b-484b-9f0e-26969791e1e3",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.961Z",
+  "log.logger": "seccomp",
+  "log.origin": {
+    "file.name": "seccomp/seccomp.go",
+    "file.line": 124
+  },
+  "message": "Syscall filter successfully installed",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.961Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1048
+  },
+  "message": "Beat info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "beat": {
+      "path": {
+        "config": "/",
+        "data": "/data",
+        "home": "/",
+        "logs": "/logs"
+      },
+      "type": "cloudbeat",
+      "uuid": "e75ff394-f06b-484b-9f0e-26969791e1e3"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.961Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1057
+  },
+  "message": "Build info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "build": {
+      "commit": "unknown",
+      "libbeat": "8.1.0",
+      "time": "0001-01-01T00:00:00.000Z",
+      "version": "8.1.0"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.961Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1060
+  },
+  "message": "Go runtime info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "go": {
+      "os": "linux",
+      "arch": "arm64",
+      "max_procs": 7,
+      "version": "go1.17.6"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.963Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1064
+  },
+  "message": "Host info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "host": {
+      "architecture": "aarch64",
+      "boot_time": "2022-02-25T04:43:13Z",
+      "containerized": false,
+      "name": "kind-mono-control-plane",
+      "ip": [
+        "127.0.0.1/8",
+        "::1/128",
+        "10.244.0.1/32",
+        "10.244.0.1/32",
+        "10.244.0.1/32",
+        "172.24.0.2/16",
+        "fc00:f853:ccd:e793::2/64",
+        "fe80::42:acff:fe18:2/64"
+      ],
+      "kernel_version": "5.10.76-linuxkit",
+      "mac": [
+        "16:5f:e8:2c:3a:85",
+        "b2:4c:e4:92:a8:98",
+        "e2:48:f6:49:fb:7c",
+        "02:42:ac:18:00:02"
+      ],
+      "os": {
+        "type": "linux",
+        "family": "debian",
+        "platform": "debian",
+        "name": "Debian GNU/Linux",
+        "version": "11 (bullseye)",
+        "major": 11,
+        "minor": 0,
+        "patch": 0,
+        "codename": "bullseye"
+      },
+      "timezone": "UTC",
+      "timezone_offset_sec": 0,
+      "id": "1cc402dd0e11d5ae18db04a6de87223d"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.964Z",
+  "log.logger": "beat",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 1093
+  },
+  "message": "Process info",
+  "service.name": "cloudbeat",
+  "system_info": {
+    "process": {
+      "capabilities": {
+        "inheritable": [
+          "chown",
+          "dac_override",
+          "fowner",
+          "fsetid",
+          "kill",
+          "setgid",
+          "setuid",
+          "setpcap",
+          "net_bind_service",
+          "net_raw",
+          "sys_chroot",
+          "mknod",
+          "audit_write",
+          "setfcap"
+        ],
+        "permitted": [
+          "chown",
+          "dac_override",
+          "fowner",
+          "fsetid",
+          "kill",
+          "setgid",
+          "setuid",
+          "setpcap",
+          "net_bind_service",
+          "net_raw",
+          "sys_chroot",
+          "mknod",
+          "audit_write",
+          "setfcap"
+        ],
+        "effective": [
+          "chown",
+          "dac_override",
+          "fowner",
+          "fsetid",
+          "kill",
+          "setgid",
+          "setuid",
+          "setpcap",
+          "net_bind_service",
+          "net_raw",
+          "sys_chroot",
+          "mknod",
+          "audit_write",
+          "setfcap"
+        ],
+        "bounding": [
+          "chown",
+          "dac_override",
+          "fowner",
+          "fsetid",
+          "kill",
+          "setgid",
+          "setuid",
+          "setpcap",
+          "net_bind_service",
+          "net_raw",
+          "sys_chroot",
+          "mknod",
+          "audit_write",
+          "setfcap"
+        ],
+        "ambient": null
+      },
+      "cwd": "/",
+      "exe": "/cloudbeat",
+      "name": "cloudbeat",
+      "pid": 17,
+      "ppid": 1,
+      "seccomp": {
+        "mode": "filter",
+        "no_new_privs": true
+      },
+      "start_time": "2022-03-03T22:44:28.190Z"
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.964Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 323
+  },
+  "message": "Setup Beat: cloudbeat; Version: 8.1.0",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.965Z",
+  "log.logger": "esclientleg",
+  "log.origin": {
+    "file.name": "eslegclient/connection.go",
+    "file.line": 105
+  },
+  "message": "elasticsearch url: http://host.docker.internal:9200",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.965Z",
+  "log.logger": "publisher",
+  "log.origin": {
+    "file.name": "pipeline/module.go",
+    "file.line": 113
+  },
+  "message": "Beat name: kind-mono-control-plane",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:52.966Z",
+  "log.origin": {
+    "file.name": "beater/cloudbeat.go",
+    "file.line": 53
+  },
+  "message": "Config initiated.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "goroutine": "opa",
+  "level": "info",
+  "msg": "Starting bundle loader.",
+  "name": "test",
+  "plugin": "bundle",
+  "time": "2022-03-03T22:44:52Z"
+}
+{
+  "goroutine": "opa",
+  "level": "info",
+  "msg": "Starting decision logger.",
+  "plugin": "decision_logs",
+  "time": "2022-03-03T22:44:52Z"
+}
+{
+  "goroutine": "opa",
+  "level": "info",
+  "msg": "Bundle loaded and activated successfully.",
+  "name": "test",
+  "plugin": "bundle",
+  "time": "2022-03-03T22:44:53Z"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:53.091Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 142
+  },
+  "message": "Starting metrics logging every 30s",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:53.091Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 489
+  },
+  "message": "cloudbeat start running.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:53.091Z",
+  "log.origin": {
+    "file.name": "beater/cloudbeat.go",
+    "file.line": 91
+  },
+  "message": "cloudbeat is running! Hit CTRL-C to stop it.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:53.095Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 192
+  },
+  "message": "Total metrics",
+  "service.name": "cloudbeat",
+  "monitoring": {
+    "metrics": {
+      "beat": {
+        "cpu": {
+          "system": {
+            "ticks": 70,
+            "time": {
+              "ms": 78
+            }
+          },
+          "total": {
+            "ticks": 370,
+            "time": {
+              "ms": 378
+            },
+            "value": 0
+          },
+          "user": {
+            "ticks": 300,
+            "time": {
+              "ms": 300
+            }
+          }
+        },
+        "handles": {
+          "limit": {
+            "hard": 1048576,
+            "soft": 1048576
+          },
+          "open": 12
+        },
+        "info": {
+          "ephemeral_id": "c1372adb-ab7d-4f19-9bbf-bc71e18c2c0b",
+          "uptime": {
+            "ms": 181
+          },
+          "version": "8.1.0"
+        },
+        "memstats": {
+          "gc_next": 18361328,
+          "memory_alloc": 9700192,
+          "memory_sys": 34227208,
+          "memory_total": 39942672,
+          "rss": 73543680
+        },
+        "runtime": {
+          "goroutines": 26
+        }
+      },
+      "libbeat": {
+        "config": {
+          "module": {
+            "running": 0,
+            "starts": 0,
+            "stops": 0
+          },
+          "reloads": 0,
+          "scans": 0
+        },
+        "output": {
+          "events": {
+            "acked": 0,
+            "active": 0,
+            "batches": 0,
+            "dropped": 0,
+            "duplicates": 0,
+            "failed": 0,
+            "toomany": 0,
+            "total": 0
+          },
+          "read": {
+            "bytes": 0,
+            "errors": 0
+          },
+          "type": "elasticsearch",
+          "write": {
+            "bytes": 0,
+            "errors": 0
+          }
+        },
+        "pipeline": {
+          "clients": 1,
+          "events": {
+            "active": 0,
+            "dropped": 0,
+            "failed": 0,
+            "filtered": 0,
+            "published": 0,
+            "retry": 0,
+            "total": 0
+          },
+          "queue": {
+            "acked": 0,
+            "max_events": 4096
+          }
+        }
+      },
+      "system": {
+        "cpu": {
+          "cores": 7
+        },
+        "load": {
+          "1": 1.67,
+          "15": 0.67,
+          "5": 1.01,
+          "norm": {
+            "1": 0.2386,
+            "15": 0.0957,
+            "5": 0.1443
+          }
+        }
+      }
+    },
+    "ecs.version": "1.6.0"
+  }
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:53.095Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 193
+  },
+  "message": "Uptime: 182.032667ms",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:53.095Z",
+  "log.logger": "monitoring",
+  "log.origin": {
+    "file.name": "log/log.go",
+    "file.line": 160
+  },
+  "message": "Stopping metrics logging.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+{
+  "log.level": "info",
+  "@timestamp": "2022-03-03T22:44:53.095Z",
+  "log.origin": {
+    "file.name": "instance/beat.go",
+    "file.line": 495
+  },
+  "message": "cloudbeat stopped.",
+  "service.name": "cloudbeat",
+  "ecs.version": "1.6.0"
+}
+
+
+
+

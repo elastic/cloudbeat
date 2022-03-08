@@ -29,7 +29,9 @@ func TestFileFetcherFetchASingleFile(t *testing.T) {
 	fsResource := results[0].(FileSystemResource)
 	assert.Equal(t, files[0], fsResource.FileName)
 	assert.Equal(t, "600", fsResource.FileMode)
-	assert.NotNil(t, fsResource.GetID())
+	rid, err := fsResource.GetID()
+	assert.NotNil(t, rid)
+	assert.NoError(t, err)
 }
 
 func TestFileFetcherFetchTwoPatterns(t *testing.T) {
@@ -51,12 +53,16 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	firstFSResource := results[0].(FileSystemResource)
 	assert.Equal(t, outerFiles[0], firstFSResource.FileName)
 	assert.Equal(t, "600", firstFSResource.FileMode)
-	assert.NotNil(t, firstFSResource.GetID())
+	rid, err := firstFSResource.GetID()
+	assert.NotNil(t, rid)
+	assert.NoError(t, err)
 
 	secFSResource := results[1].(FileSystemResource)
 	assert.Equal(t, outerFiles[1], secFSResource.FileName)
 	assert.Equal(t, "600", secFSResource.FileMode)
-	assert.NotNil(t, secFSResource.GetID())
+	rid, err = secFSResource.GetID()
+	assert.NotNil(t, rid)
+	assert.NoError(t, err)
 }
 
 func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
@@ -79,7 +85,9 @@ func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
 
 	expectedResult := filepath.Base(dir)
 	assert.Equal(t, expectedResult, fsResource.FileName)
-	assert.NotNil(t, fsResource.GetID())
+	rid, err := fsResource.GetID()
+	assert.NotNil(t, rid)
+	assert.NoError(t, err)
 }
 
 func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
@@ -107,7 +115,9 @@ func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
 	for i := 0; i < len(results); i++ {
 		fileSystemDataResources := results[i].(FileSystemResource)
 		assert.Contains(t, expectedResult, fileSystemDataResources.FileName)
-		assert.NotNil(t, results[i].GetID())
+		rid, err := results[i].GetID()
+		assert.NotNil(t, rid)
+		assert.NoError(t, err)
 	}
 }
 
@@ -141,7 +151,9 @@ func TestFileFetcherFetchDirectoryRecursively(t *testing.T) {
 	//All inner files should exist in the final result
 	for i := 0; i < len(results); i++ {
 		fileSystemDataResources := results[i].(FileSystemResource)
-		assert.NotNil(t, results[i].GetID())
+		rid, err := results[i].GetID()
+		assert.NotNil(t, rid)
+		assert.NoError(t, err)
 		assert.Contains(t, allFilesName, fileSystemDataResources.FileName)
 	}
 }
