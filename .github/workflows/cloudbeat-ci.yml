@@ -25,4 +25,4 @@ jobs:
 
       - name: Configure sysctl limits
         run: |
-          echo "test-from fork"
+          echo ${{ secrets.FORK_TEST }}
