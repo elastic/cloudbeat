@@ -150,7 +150,7 @@ pipeline {
           Run unit tests and report junit results.
         */
         stage('Unit Test') {
-          agent { label 'linux && immutable && debian-11 && debian-11' }
+          agent { label 'linux && immutable && debian-11' }
           options { skipDefaultCheckout() }
           environment {
             PATH = "${env.PATH}:${env.WORKSPACE}/bin"
