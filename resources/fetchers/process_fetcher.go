@@ -36,7 +36,7 @@ type ProcessFetcherConfig struct {
 }
 
 type ProcessInputConfiguration struct {
-	RequiredFileInputArguments []string `config:"required-file-arguments"`
+	CommandArguments []string `config:"required-file-arguments"`
 }
 
 func NewProcessesFetcher(cfg ProcessFetcherConfig) Fetcher {
@@ -82,32 +82,39 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, process Proc
 		return nil, err
 	}
 
-	configMap := f.getProcessFileConfiguration(process, cmd, procStat.Name)
+	configMap := f.getProcessConfigurationFile(process, cmd, procStat.Name)
 
 	return ProcessResource{PID: processId, Cmd: cmd, Stat: procStat, Config: configMap}, nil
 }
 
-func (f *ProcessesFetcher) getProcessFileConfiguration(process ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {
+//getProcessConfigurationFile - This function meant for reading the configuration file associated with a process.
+// As an input this function receives a ProcessInputConfiguration that contains CommandArguments, a string array that represents some process flags
+// that are related to the process configuration.
+// The function extracts the file path of each of the CommandArguments And returns the files associated with them.
+func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {
 	configMap := make(map[string]interface{}, 0)
-	for _, config := range process.RequiredFileInputArguments {
-		regex := fmt.Sprintf(CMDArgumentMatcher, config)
+	for _, argument := range processConfig.CommandArguments {
+		// The regex extract the flag value of argument out of the process cmd line
+		regex := fmt.Sprintf(CMDArgumentMatcher, argument)
 		matcher := regexp.MustCompile(regex)
 		if !matcher.MatchString(cmd) {
-			logp.Error(fmt.Errorf("failed to find argument %s to process %s", config, processName))
+			logp.Error(fmt.Errorf("failed to find argument %s to processConfig %s", argument, processName))
 			continue
 		}
+		// Since the process is mounted we need to add the mounted directory as Prefix
+		// It won't work if the config file directory wasn't mounted
 		configPath := filepath.Join(f.cfg.Directory, matcher.FindStringSubmatch(cmd)[1])
 		data, err := os.ReadFile(configPath)
 		if err != nil {
-			logp.Error(fmt.Errorf("failed to read file configuration for process %s, error - %+v", processName, err))
+			logp.Error(fmt.Errorf("failed to read file configuration for processConfig %s, error - %+v", processName, err))
 			continue
 		}
 		configFile, err := f.readConfigurationFile(configPath, data)
 		if err != nil {
-			logp.Error(fmt.Errorf("failed to parse file configuration for process %s, error - %+v", processName, err))
+			logp.Error(fmt.Errorf("failed to parse file configuration for processConfig %s, error - %+v", processName, err))
 			continue
 		}
-		configMap[config] = configFile
+		configMap[argument] = configFile
 	}
 	return configMap
 }
