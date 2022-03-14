@@ -13,11 +13,18 @@ const DefaultNamespace = "default"
 const ResultsDatastreamIndexPrefix = "logs-cis_kubernetes_benchmark.findings"
 const MetadataDatastreamIndexPrefix = ".logs-cis_kubernetes_benchmark.metadata"
 
+type ProcessInputConfiguration struct {
+	CommandArguments []string `config:"cmd-arguments"`
+}
+
+type ProcessesConfigMap map[string]ProcessInputConfiguration
+
 type Config struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Files      []string                `config:"files"`
 	Processors processors.PluginConfig `config:"processors"`
+	Processes  ProcessesConfigMap      `config:"processes"`
 }
 
 var DefaultConfig = Config{
@@ -35,6 +42,23 @@ var DefaultConfig = Config{
 		"/hostfs/var/lib/kubelet/config.yaml",
 		"/hostfs/var/lib/etcd/**",
 		"/hostfs/etc/kubernetes/pki/**",
+	},
+	Processes: ProcessesConfigMap{
+		"etcd": ProcessInputConfiguration{
+			CommandArguments: []string{"config"},
+		},
+		"kube-apiserver": ProcessInputConfiguration{
+			CommandArguments: []string{"config"},
+		},
+		"kube-controller-manager": ProcessInputConfiguration{
+			CommandArguments: []string{"config"},
+		},
+		"kube-scheduler": ProcessInputConfiguration{
+			CommandArguments: []string{"config"},
+		},
+		"kubelet": ProcessInputConfiguration{
+			CommandArguments: []string{"config"},
+		},
 	},
 }
 

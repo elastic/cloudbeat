@@ -3,6 +3,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
@@ -53,8 +54,8 @@ func TestFetchWhenFlagExistsButNoFile(t *testing.T) {
 	}
 	createProcess(t, testProcess)
 
-	requiredProcesses := make(map[string]ProcessInputConfiguration)
-	requiredProcesses["kubelet"] = ProcessInputConfiguration{CommandArguments: []string{"config"}}
+	requiredProcesses := make(map[string]config.ProcessInputConfiguration)
+	requiredProcesses["kubelet"] = config.ProcessInputConfiguration{CommandArguments: []string{"config"}}
 
 	config := ProcessFetcherConfig{
 		BaseFetcherConfig: BaseFetcherConfig{},
@@ -90,8 +91,8 @@ func TestFetchWhenProcessDoesNotExist(t *testing.T) {
 	}
 	createProcess(t, testProcess)
 
-	requiredProcesses := make(map[string]ProcessInputConfiguration)
-	requiredProcesses["someProcess"] = ProcessInputConfiguration{CommandArguments: []string{}}
+	requiredProcesses := make(map[string]config.ProcessInputConfiguration)
+	requiredProcesses["someProcess"] = config.ProcessInputConfiguration{CommandArguments: []string{}}
 
 	config := ProcessFetcherConfig{
 		BaseFetcherConfig: BaseFetcherConfig{},
@@ -122,8 +123,8 @@ func TestFetchWhenNoFlagRequired(t *testing.T) {
 	}
 	createProcess(t, testProcess)
 
-	requiredProcesses := make(map[string]ProcessInputConfiguration)
-	requiredProcesses["kubelet"] = ProcessInputConfiguration{CommandArguments: []string{}}
+	requiredProcesses := make(map[string]config.ProcessInputConfiguration)
+	requiredProcesses["kubelet"] = config.ProcessInputConfiguration{CommandArguments: []string{}}
 
 	config := ProcessFetcherConfig{
 		BaseFetcherConfig: BaseFetcherConfig{},
@@ -172,8 +173,8 @@ func TestFetchWhenFlagExistsWithConfigFile(t *testing.T) {
 	err = ioutil.WriteFile(configFilePath, yamlData, 0600)
 	assert.Nil(t, err)
 
-	requiredProcesses := make(map[string]ProcessInputConfiguration)
-	requiredProcesses["kubelet"] = ProcessInputConfiguration{CommandArguments: []string{"config"}}
+	requiredProcesses := make(map[string]config.ProcessInputConfiguration)
+	requiredProcesses["kubelet"] = config.ProcessInputConfiguration{CommandArguments: []string{"config"}}
 
 	config := ProcessFetcherConfig{
 		BaseFetcherConfig: BaseFetcherConfig{},
@@ -245,8 +246,14 @@ func TestFetchWhenFlagExistsWithConfigFileFinal(t *testing.T) {
 			return
 		}
 
-		requiredProcesses := make(map[string]ProcessInputConfiguration)
-		requiredProcesses["kubelet"] = ProcessInputConfiguration{CommandArguments: []string{"config"}}
+		requiredProcesses := make(map[string]config.ProcessInputConfiguration)
+		requiredProcesses["kubelet"] = config.ProcessInputConfiguration{CommandArguments: []string{"config"}}
+
+		to_remove, err := test.marshal(&requiredProcesses)
+		err = ioutil.WriteFile(filepath.Join(dir, hostfsDirectory, "a.yaml"), to_remove, 0600)
+		if err != nil {
+			return
+		}
 
 		config := ProcessFetcherConfig{
 			BaseFetcherConfig: BaseFetcherConfig{},

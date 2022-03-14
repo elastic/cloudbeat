@@ -156,14 +156,9 @@ func InitRegistry(ctx context.Context, c config.Config) (resources.FetchersRegis
 		return nil, err
 	}
 
-	processMap := make(map[string]fetchers.ProcessInputConfiguration, 1)
-	processMap["kubelet"] = fetchers.ProcessInputConfiguration{
-		CommandArguments: []string{"config"},
-	}
-
 	procCfg := fetchers.ProcessFetcherConfig{
 		Directory:         processesDir,
-		RequiredProcesses: processMap,
+		RequiredProcesses: c.Processes,
 	}
 
 	procf := fetchers.NewProcessesFetcher(procCfg)

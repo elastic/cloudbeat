@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
+	"github.com/elastic/cloudbeat/config"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"os"
@@ -19,10 +21,10 @@ const (
 )
 
 type ProcessResource struct {
-	PID    string                 `json:"pid"`
-	Cmd    string                 `json:"command"`
-	Stat   proc.ProcStat          `json:"stat"`
-	Config map[string]interface{} `json:"config"`
+	PID    string        `json:"pid"`
+	Cmd    string        `json:"command"`
+	Stat   proc.ProcStat `json:"stat"`
+	Config common.MapStr `json:"config"`
 }
 
 type ProcessesFetcher struct {
@@ -31,12 +33,8 @@ type ProcessesFetcher struct {
 
 type ProcessFetcherConfig struct {
 	BaseFetcherConfig
-	Directory         string                               `config:"directory"` // parent directory of target procfs
-	RequiredProcesses map[string]ProcessInputConfiguration `config:"required_processes"`
-}
-
-type ProcessInputConfiguration struct {
-	CommandArguments []string `config:"required-file-arguments"`
+	Directory         string                    `config:"directory"` // parent directory of target procfs
+	RequiredProcesses config.ProcessesConfigMap `config:"required_processes"`
 }
 
 func NewProcessesFetcher(cfg ProcessFetcherConfig) Fetcher {
@@ -76,7 +74,7 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]FetchedResource, error)
 	return ret, nil
 }
 
-func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, process ProcessInputConfiguration, processId string) (FetchedResource, error) {
+func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, process config.ProcessInputConfiguration, processId string) (FetchedResource, error) {
 	cmd, err := proc.ReadCmdLine(f.cfg.Directory, processId)
 	if err != nil {
 		return nil, err
@@ -91,7 +89,7 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, process Proc
 // As an input this function receives a ProcessInputConfiguration that contains CommandArguments, a string array that represents some process flags
 // that are related to the process configuration.
 // The function extracts the file path of each of the CommandArguments And returns the files associated with them.
-func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {
+func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig config.ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {
 	configMap := make(map[string]interface{}, 0)
 	for _, argument := range processConfig.CommandArguments {
 		// The regex extract the flag value of argument out of the process cmd line

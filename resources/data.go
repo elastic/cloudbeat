@@ -147,6 +147,7 @@ func copyState(m ResourceMap) (ResourceMap, error) {
 
 func init() {
 	gob.Register([]interface{}{})
+	gob.Register(map[string]interface{}{})
 	gob.Register(fetchers.ProcessResource{})
 	gob.Register(fetchers.FileSystemResource{})
 	gob.Register(fetchers.K8sResource{})
