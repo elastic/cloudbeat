@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/stretchr/testify/suite"
 )
@@ -18,13 +19,13 @@ type numberFetcherFactory struct {
 }
 
 func (n *numberFetcherFactory) Create(c *common.Config) (fetchers.Fetcher, error) {
-	x, _ := c.Int("num", 1)
+	x, _ := c.Int("num", -1)
 	return &numberFetcher{int(x), false}, nil
 }
 
 func numberConfig(number int) *common.Config {
 	c := common.NewConfig()
-	c.SetInt("num", 1, int64(number))
+	c.SetInt("num", -1, int64(number))
 	return c
 }
 
@@ -76,5 +77,48 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 
 		s.Equal(1, len(res))
 		s.Equal(test.value, res[0].GetData())
+	}
+}
+
+func (s *FactoriesTestSuite) TestRegisterFetchers() {
+	var tests = []struct {
+		key   string
+		value int
+	}{
+		{"new_fetcher", 6},
+		{"other_fetcher", 4},
+	}
+
+	for _, test := range tests {
+		s.F = newFactories()
+		s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
+		reg := NewFetcherRegistry()
+		numCfg := numberConfig(test.value)
+		numCfg.SetString("name", -1, test.key)
+		conf := config.DefaultConfig
+		conf.Fetchers = append(conf.Fetchers, numCfg)
+		err := s.F.RegisterFetchers(reg, conf)
+		s.NoError(err)
+		s.Equal(1, len(s.F.m))
+		s.NotNil(s.F.m[test.key])
+	}
+}
+
+func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
+	var tests = []struct {
+		key   string
+		value int
+	}{
+		{"not_found_fetcher", 42},
+	}
+
+	for _, test := range tests {
+		reg := NewFetcherRegistry()
+		numCfg := numberConfig(test.value)
+		numCfg.SetString("name", -1, test.key)
+		conf := config.DefaultConfig
+		conf.Fetchers = append(conf.Fetchers, numCfg)
+		err := s.F.RegisterFetchers(reg, conf)
+		s.Error(err)
 	}
 }

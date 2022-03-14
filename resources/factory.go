@@ -50,8 +50,8 @@ func (fa *factories) CreateFetcher(name string, c *common.Config) (fetchers.Fetc
 	return factory.Create(c)
 }
 
-func (fa *factories) ConfigFetchers(registry FetchersRegistry, cfg config.Config) error {
-	parsedList, err := fa.ParseConfigFetchers(cfg)
+func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Config) error {
+	parsedList, err := fa.parseConfigFetchers(cfg)
 	if err != nil {
 		return err
 	}
@@ -84,10 +84,10 @@ type ParsedFetcher struct {
 	f    fetchers.Fetcher
 }
 
-func (fa *factories) ParseConfigFetchers(cfg config.Config) ([]*ParsedFetcher, error) {
+func (fa *factories) parseConfigFetchers(cfg config.Config) ([]*ParsedFetcher, error) {
 	arr := []*ParsedFetcher{}
 	for _, fcfg := range cfg.Fetchers {
-		p, err := fa.ParseConfigFetcher(fcfg)
+		p, err := fa.parseConfigFetcher(fcfg)
 		if err != nil {
 			return nil, err
 		}
@@ -98,7 +98,7 @@ func (fa *factories) ParseConfigFetchers(cfg config.Config) ([]*ParsedFetcher, e
 	return arr, nil
 }
 
-func (fa *factories) ParseConfigFetcher(fcfg *common.Config) (*ParsedFetcher, error) {
+func (fa *factories) parseConfigFetcher(fcfg *common.Config) (*ParsedFetcher, error) {
 	gen := fetchers.BaseFetcherConfig{}
 	err := fcfg.Unpack(&gen)
 	if err != nil {
