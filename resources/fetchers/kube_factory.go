@@ -8,7 +8,7 @@ import (
 type KubeFactory struct {
 }
 
-func (f *KubeFactory) Create(c common.Config) (Fetcher, error) {
+func (f *KubeFactory) Create(c *common.Config) (Fetcher, error) {
 	cfg := KubeApiFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {

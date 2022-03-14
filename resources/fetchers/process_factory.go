@@ -7,7 +7,7 @@ import (
 type ProcessFactory struct {
 }
 
-func (f *ProcessFactory) Create(c common.Config) (Fetcher, error) {
+func (f *ProcessFactory) Create(c *common.Config) (Fetcher, error) {
 	cfg := ProcessFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {

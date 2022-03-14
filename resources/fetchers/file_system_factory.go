@@ -7,7 +7,7 @@ import (
 type FileSystemFactory struct {
 }
 
-func (f *FileSystemFactory) Create(c common.Config) (Fetcher, error) {
+func (f *FileSystemFactory) Create(c *common.Config) (Fetcher, error) {
 	cfg := FileFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {

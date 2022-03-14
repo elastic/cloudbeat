@@ -17,13 +17,13 @@ type FactoriesTestSuite struct {
 type numberFetcherFactory struct {
 }
 
-func (n *numberFetcherFactory) Create(c common.Config) (fetchers.Fetcher, error) {
+func (n *numberFetcherFactory) Create(c *common.Config) (fetchers.Fetcher, error) {
 	x, _ := c.Int("num", 1)
 	return &numberFetcher{int(x), false}, nil
 }
 
-func numberConfig(number int) common.Config {
-	c := *common.NewConfig()
+func numberConfig(number int) *common.Config {
+	c := common.NewConfig()
 	c.SetInt("num", 1, int64(number))
 	return c
 }

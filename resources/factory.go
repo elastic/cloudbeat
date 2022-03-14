@@ -21,7 +21,7 @@ func init() {
 var Factories = newFactories()
 
 type FetcherFactory interface {
-	Create(common.Config) (fetchers.Fetcher, error)
+	Create(*common.Config) (fetchers.Fetcher, error)
 }
 
 type factories struct {
@@ -41,7 +41,7 @@ func (fa *factories) ListFetcherFactory(name string, f FetcherFactory) {
 	fa.m[name] = f
 }
 
-func (fa *factories) CreateFetcher(name string, c common.Config) (fetchers.Fetcher, error) {
+func (fa *factories) CreateFetcher(name string, c *common.Config) (fetchers.Fetcher, error) {
 	factory, ok := fa.m[name]
 	if !ok {
 		return nil, errors.New("fetcher factory could not be found")
@@ -79,10 +79,6 @@ func (fa *factories) getConditions(name string) []fetchers.FetcherCondition {
 	return c
 }
 
-func registerKubeLeader() bool {
-	return false
-}
-
 type ParsedFetcher struct {
 	name string
 	f    fetchers.Fetcher
@@ -106,7 +102,7 @@ func (fa *factories) ParseConfigFetcher(fcfg *common.Config) *ParsedFetcher {
 		return &ParsedFetcher{gen.Name, nil, err}
 	}
 
-	f, err := fa.CreateFetcher(gen.Name, *fcfg)
+	f, err := fa.CreateFetcher(gen.Name, fcfg)
 	if err != nil {
 		return &ParsedFetcher{gen.Name, f, err}
 	}
