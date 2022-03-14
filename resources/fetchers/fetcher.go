@@ -29,5 +29,5 @@ type FetcherResult struct {
 type ResourceMap map[string][]FetchedResource
 
 type BaseFetcherConfig struct {
-	Fetcher string `config:"fetcher"`
+	Name string `config:"name"`
 }
