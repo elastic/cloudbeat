@@ -13,6 +13,7 @@ cloudbeat:
   fetchers:
   - name: kube-api
   - name: process
+    directory: "/hostfs"
   - name: file-system
     patterns: [
       "/hostfs/etc/kubernetes/scheduler.conf",
