@@ -5,11 +5,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build the stack Elastic stack
+      - name: Deploy the Elastic stack
         run: |
           cd tests/ci_test_env
           docker-compose up -d
-              - name: Ensure Elasticsearch is reachable
+
       - name: Verify connectivity to Elastic
         run: |
           curl --verbose --show-error http://localhost:9200
