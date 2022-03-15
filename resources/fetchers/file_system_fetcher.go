@@ -3,11 +3,12 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"os"
 	"os/user"
 	"strconv"
 	"syscall"
+
+	"github.com/pkg/errors"
 
 	"github.com/elastic/beats/v7/libbeat/logp"
 )
@@ -36,12 +37,6 @@ type FileFetcherConfig struct {
 const (
 	FileSystemType = "file-system"
 )
-
-func NewFileFetcher(cfg FileFetcherConfig) Fetcher {
-	return &FileSystemFetcher{
-		cfg: cfg,
-	}
-}
 
 func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
 	results := make([]FetchedResource, 0)

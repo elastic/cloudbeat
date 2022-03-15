@@ -74,15 +74,6 @@ type KubeApiFetcherConfig struct {
 	Kubeconfig string        `config:"kubeconfig"`
 }
 
-func NewKubeFetcher(cfg KubeApiFetcherConfig) (Fetcher, error) {
-	f := &KubeFetcher{
-		cfg:      cfg,
-		watchers: make([]kubernetes.Watcher, 0),
-	}
-
-	return f, nil
-}
-
 func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) error {
 	watcher, err := kubernetes.NewWatcher(client, r.resource, kubernetes.WatchOptions{
 		SyncTimeout: f.cfg.Interval,

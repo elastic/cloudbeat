@@ -25,12 +25,6 @@ type ProcessFetcherConfig struct {
 	Directory string `config:"directory"` // parent directory of target procfs
 }
 
-func NewProcessesFetcher(cfg ProcessFetcherConfig) Fetcher {
-	return &ProcessesFetcher{
-		cfg: cfg,
-	}
-}
-
 func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
 	pids, err := proc.List(f.cfg.Directory)
 	if err != nil {

@@ -3,20 +3,18 @@ package beater
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/evaluator"
 	"time"
+
+	"github.com/elastic/cloudbeat/evaluator"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/cloudbeat/config"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources"
-	"github.com/elastic/cloudbeat/resources/conditions"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/gofrs/uuid"
@@ -134,46 +132,10 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 
 func InitRegistry(ctx context.Context, c config.Config) (resources.FetchersRegistry, error) {
 	registry := resources.NewFetcherRegistry()
-
-	kubeCfg := fetchers.KubeApiFetcherConfig{
-		Kubeconfig: c.KubeConfig,
-		Interval:   c.Period,
-	}
-	kubef, err := fetchers.NewKubeFetcher(kubeCfg)
+	err := resources.Factories.RegisterFetchers(registry, c)
 	if err != nil {
 		return nil, err
 	}
-
-	client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	leaseProvider := conditions.NewLeaderLeaseProvider(ctx, client)
-	condition := conditions.NewLeaseFetcherCondition(leaseProvider)
-
-	if err = registry.Register(fetchers.KubeAPIType, kubef, condition); err != nil {
-		return nil, err
-	}
-
-	procCfg := fetchers.ProcessFetcherConfig{
-		Directory: processesDir,
-	}
-
-	procf := fetchers.NewProcessesFetcher(procCfg)
-	if err = registry.Register(fetchers.ProcessType, procf); err != nil {
-		return nil, err
-	}
-
-	fileCfg := fetchers.FileFetcherConfig{
-		Patterns: c.Files,
-	}
-	filef := fetchers.NewFileFetcher(fileCfg)
-
-	if err = registry.Register(fetchers.FileSystemType, filef); err != nil {
-		return nil, err
-	}
-
 	return registry, nil
 }
 
