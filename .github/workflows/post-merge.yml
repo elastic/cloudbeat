@@ -1,0 +1,59 @@
+name: Post-Merge Checks
+
+on:
+  push:
+    branches:
+      - main
+      
+env:
+  GO_VERSION: 1.17.2
+  
+jobs:
+  code_coverage:
+    name: Refresh Go Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+          fetch-depth: 0 # otherwise, there would be errors pushing refs to the destination repository.
+
+      - name: Generate Go Report Card
+        uses: creekorful/goreportcard-action@v1.0
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          
+      - name: Run Test
+        run: |
+          go test -v ./... -covermode=count -coverprofile=coverage.out
+          go tool cover -func=coverage.out -o=coverage.out
+
+      - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
+        uses: tj-actions/coverage-badge-go@v1.1
+        with:
+          filename: coverage.out
+
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v8.1
+        id: verify-changed-files
+        with:
+          files: README.md
+
+      - name: Commit changes
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git commit -m "chore: Updated coverage badge."
+
+      - name: Push changes
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ github.token }}
+          branch: ${{ github.head_ref }}
