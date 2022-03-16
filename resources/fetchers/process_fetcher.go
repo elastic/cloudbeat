@@ -33,14 +33,18 @@ type ProcessesFetcher struct {
 
 type ProcessFetcherConfig struct {
 	BaseFetcherConfig
-	Fs                fs.FS                     `config:"required_processes"`
+	Fs                fs.FS
 	RequiredProcesses config.ProcessesConfigMap `config:"required_processes"`
 }
 
-func NewProcessesFetcher(cfg ProcessFetcherConfig) Fetcher {
+func NewProcessesFetcher(cfg ProcessFetcherConfig) (Fetcher, error) {
+	if cfg.Fs == nil {
+		return nil, fmt.Errorf("process fetcher cannot be init without a file-system")
+	}
+
 	return &ProcessesFetcher{
 		cfg: cfg,
-	}
+	}, nil
 }
 
 func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {

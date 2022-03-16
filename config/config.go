@@ -44,18 +44,10 @@ var DefaultConfig = Config{
 		"/hostfs/etc/kubernetes/pki/**",
 	},
 	Processes: ProcessesConfigMap{
-		"etcd": ProcessInputConfiguration{
-			CommandArguments: []string{"config"},
-		},
-		"kube-apiserver": ProcessInputConfiguration{
-			CommandArguments: []string{"config"},
-		},
-		"kube-controller-manager": ProcessInputConfiguration{
-			CommandArguments: []string{"config"},
-		},
-		"kube-scheduler": ProcessInputConfiguration{
-			CommandArguments: []string{"config"},
-		},
+		"etcd":                    ProcessInputConfiguration{},
+		"kube-apiserver":          ProcessInputConfiguration{},
+		"kube-controller-manager": ProcessInputConfiguration{},
+		"kube-scheduler":          ProcessInputConfiguration{},
 		"kubelet": ProcessInputConfiguration{
 			CommandArguments: []string{"config"},
 		},

@@ -32,6 +32,17 @@ type ProcessConfigTestStruct struct {
 var status = `Name:   %s`
 var cmdline = `/usr/bin/%s --kubeconfig=/etc/kubernetes/kubelet.conf --%s=%s`
 
+func TestFetchNoFileSystem(t *testing.T) {
+	fetcherConfig := ProcessFetcherConfig{
+		BaseFetcherConfig: BaseFetcherConfig{},
+		RequiredProcesses: map[string]config.ProcessInputConfiguration{
+			"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
+		Fs: nil,
+	}
+	_, err := NewProcessesFetcher(fetcherConfig)
+	assert.NotNil(t, err)
+}
+
 func TestFetchWhenFlagExistsButNoFile(t *testing.T) {
 	testProcess := TextProcessContext{
 		Pid:               "3",
@@ -47,7 +58,8 @@ func TestFetchWhenFlagExistsButNoFile(t *testing.T) {
 			"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
 		Fs: sysfs,
 	}
-	processesFetcher := NewProcessesFetcher(fetcherConfig)
+	processesFetcher, err := NewProcessesFetcher(fetcherConfig)
+	assert.Nil(t, err)
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	assert.Nil(t, err)
@@ -74,7 +86,8 @@ func TestFetchWhenProcessDoesNotExist(t *testing.T) {
 			"someProcess": {CommandArguments: []string{"fetcherConfig"}}},
 		Fs: fsys,
 	}
-	processesFetcher := NewProcessesFetcher(fetcherConfig)
+	processesFetcher, err := NewProcessesFetcher(fetcherConfig)
+	assert.Nil(t, err)
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	assert.Nil(t, err)
@@ -96,7 +109,8 @@ func TestFetchWhenNoFlagRequired(t *testing.T) {
 			"kubelet": {CommandArguments: []string{}}},
 		Fs: fsys,
 	}
-	processesFetcher := NewProcessesFetcher(fetcherConfig)
+	processesFetcher, err := NewProcessesFetcher(fetcherConfig)
+	assert.Nil(t, err)
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	assert.Nil(t, err)
@@ -146,7 +160,8 @@ func TestFetchWhenFlagExistsWithConfigFile(t *testing.T) {
 				"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
 			Fs: sysfs,
 		}
-		processesFetcher := NewProcessesFetcher(fetcherConfig)
+		processesFetcher, err := NewProcessesFetcher(fetcherConfig)
+		assert.Nil(t, err)
 
 		fetchedResource, err := processesFetcher.Fetch(context.TODO())
 		assert.Nil(t, err)
