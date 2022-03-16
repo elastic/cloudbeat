@@ -8,9 +8,9 @@ import (
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
 	"github.com/elastic/cloudbeat/config"
+	"io/fs"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
-	"os"
 	"path/filepath"
 	"regexp"
 )
@@ -33,7 +33,7 @@ type ProcessesFetcher struct {
 
 type ProcessFetcherConfig struct {
 	BaseFetcherConfig
-	Directory         string                    `config:"directory"` // parent directory of target procfs
+	Fs                fs.FS                     `config:"required_processes"`
 	RequiredProcesses config.ProcessesConfigMap `config:"required_processes"`
 }
 
@@ -44,17 +44,16 @@ func NewProcessesFetcher(cfg ProcessFetcherConfig) Fetcher {
 }
 
 func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
-	pids, err := proc.List(f.cfg.Directory)
+	pids, err := proc.ListFS(f.cfg.Fs)
 	if err != nil {
 		return nil, err
 	}
-
 	ret := make([]FetchedResource, 0)
 
 	// If errors occur during read, then return what we have till now
 	// without reporting errors.
 	for _, p := range pids {
-		stat, err := proc.ReadStat(f.cfg.Directory, p)
+		stat, err := proc.ReadStatFS(f.cfg.Fs, p)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +74,7 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]FetchedResource, error)
 }
 
 func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, process config.ProcessInputConfiguration, processId string) (FetchedResource, error) {
-	cmd, err := proc.ReadCmdLine(f.cfg.Directory, processId)
+	cmd, err := proc.ReadCmdLineFS(f.cfg.Fs, processId)
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +100,8 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig config.Proc
 		}
 		// Since the process is mounted we need to add the mounted directory as Prefix
 		// It won't work if the config file directory wasn't mounted
-		configPath := filepath.Join(f.cfg.Directory, matcher.FindStringSubmatch(cmd)[1])
-		data, err := os.ReadFile(configPath)
+		configPath := matcher.FindStringSubmatch(cmd)[1]
+		data, err := fs.ReadFile(f.cfg.Fs, configPath)
 		if err != nil {
 			logp.Error(fmt.Errorf("failed to read file configuration for processConfig %s, error - %+v", processName, err))
 			continue

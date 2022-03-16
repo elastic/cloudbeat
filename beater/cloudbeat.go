@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/evaluator"
+	"os"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -157,7 +158,7 @@ func InitRegistry(ctx context.Context, c config.Config) (resources.FetchersRegis
 	}
 
 	procCfg := fetchers.ProcessFetcherConfig{
-		Directory:         processesDir,
+		Fs:                os.DirFS(processesDir),
 		RequiredProcesses: c.Processes,
 	}
 
