@@ -2,10 +2,12 @@ package fetchers
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"reflect"
 )
 
 type K8sResource struct {
@@ -14,8 +16,8 @@ type K8sResource struct {
 
 const k8sObjMetadataField = "ObjectMeta"
 
-func GetKubeData(watchers []kubernetes.Watcher) []FetchedResource {
-	ret := make([]FetchedResource, 0)
+func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
+	ret := make([]fetching.Resource, 0)
 
 	for _, watcher := range watchers {
 		rs := watcher.Store().List()

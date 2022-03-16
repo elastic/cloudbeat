@@ -8,13 +8,13 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
 const (
-	KubeAPIType   = "kube-api"
 	allNamespaces = "" // The Kube API treats this as "all namespaces"
 )
 
@@ -69,7 +69,7 @@ type KubeFetcher struct {
 }
 
 type KubeApiFetcherConfig struct {
-	BaseFetcherConfig
+	fetching.BaseFetcherConfig
 	Interval   time.Duration `config:"interval"`
 	Kubeconfig string        `config:"kubeconfig"`
 }
@@ -121,7 +121,7 @@ func (f *KubeFetcher) initWatchers() error {
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
+func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	var err error
 	watcherlock.Do(func() {
 		err = f.initWatchers()

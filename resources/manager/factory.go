@@ -1,4 +1,4 @@
-package resources
+package manager
 
 import (
 	"context"
@@ -9,30 +9,20 @@ import (
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/conditions"
-	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
-
-func init() {
-	Factories.ListFetcherFactory(fetchers.KubeAPIType, &fetchers.KubeFactory{})
-	Factories.ListFetcherFactory(fetchers.ProcessType, &fetchers.ProcessFactory{})
-	Factories.ListFetcherFactory(fetchers.FileSystemType, &fetchers.FileSystemFactory{})
-}
 
 var Factories = newFactories()
 
-type FetcherFactory interface {
-	Create(*common.Config) (fetchers.Fetcher, error)
-}
-
 type factories struct {
-	m map[string]FetcherFactory
+	m map[string]fetching.Factory
 }
 
 func newFactories() factories {
-	return factories{m: make(map[string]FetcherFactory)}
+	return factories{m: make(map[string]fetching.Factory)}
 }
 
-func (fa *factories) ListFetcherFactory(name string, f FetcherFactory) {
+func (fa *factories) ListFetcherFactory(name string, f fetching.Factory) {
 	_, ok := fa.m[name]
 	if ok {
 		logp.L().Warnf("fetcher %q factory method overwritten", name)
@@ -41,7 +31,7 @@ func (fa *factories) ListFetcherFactory(name string, f FetcherFactory) {
 	fa.m[name] = f
 }
 
-func (fa *factories) CreateFetcher(name string, c *common.Config) (fetchers.Fetcher, error) {
+func (fa *factories) CreateFetcher(name string, c *common.Config) (fetching.Fetcher, error) {
 	factory, ok := fa.m[name]
 	if !ok {
 		return nil, errors.New("fetcher factory could not be found")
@@ -64,10 +54,10 @@ func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Conf
 	return nil
 }
 
-func (fa *factories) getConditions(name string) []fetchers.FetcherCondition {
-	c := make([]fetchers.FetcherCondition, 0)
+func (fa *factories) getConditions(name string) []fetching.Condition {
+	c := make([]fetching.Condition, 0)
 	switch name {
-	case fetchers.KubeAPIType:
+	case "kube-api":
 		client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
 		if err != nil {
 			leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
@@ -81,7 +71,7 @@ func (fa *factories) getConditions(name string) []fetchers.FetcherCondition {
 
 type ParsedFetcher struct {
 	name string
-	f    fetchers.Fetcher
+	f    fetching.Fetcher
 }
 
 func (fa *factories) parseConfigFetchers(cfg config.Config) ([]*ParsedFetcher, error) {
@@ -99,7 +89,7 @@ func (fa *factories) parseConfigFetchers(cfg config.Config) ([]*ParsedFetcher, e
 }
 
 func (fa *factories) parseConfigFetcher(fcfg *common.Config) (*ParsedFetcher, error) {
-	gen := fetchers.BaseFetcherConfig{}
+	gen := fetching.BaseFetcherConfig{}
 	err := fcfg.Unpack(&gen)
 	if err != nil {
 		return nil, err

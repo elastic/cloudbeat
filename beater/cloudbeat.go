@@ -14,7 +14,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/cloudbeat/config"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources"
+	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/gofrs/uuid"
@@ -27,7 +27,7 @@ type cloudbeat struct {
 
 	config      config.Config
 	client      beat.Client
-	data        *resources.Data
+	data        *manager.Data
 	evaluator   evaluator.Evaluator
 	transformer transformer.Transformer
 }
@@ -35,7 +35,6 @@ type cloudbeat struct {
 const (
 	cycleStatusStart = "start"
 	cycleStatusEnd   = "end"
-	processesDir     = "/hostfs"
 )
 
 // New creates an instance of cloudbeat.
@@ -56,7 +55,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	data, err := resources.NewData(c.Period, fetchersRegistry)
+	data, err := manager.NewData(c.Period, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -130,9 +129,9 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 }
 
-func InitRegistry(ctx context.Context, c config.Config) (resources.FetchersRegistry, error) {
-	registry := resources.NewFetcherRegistry()
-	err := resources.Factories.RegisterFetchers(registry, c)
+func InitRegistry(ctx context.Context, c config.Config) (manager.FetchersRegistry, error) {
+	registry := manager.NewFetcherRegistry()
+	err := manager.Factories.RegisterFetchers(registry, c)
 	if err != nil {
 		return nil, err
 	}

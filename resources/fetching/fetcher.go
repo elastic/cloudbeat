@@ -1,21 +1,28 @@
-package fetchers
+package fetching
 
 import (
 	"context"
+
+	"github.com/elastic/beats/v7/libbeat/common"
 )
+
+// Factory can create fetcher instances based on configuration
+type Factory interface {
+	Create(*common.Config) (Fetcher, error)
+}
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {
-	Fetch(context.Context) ([]FetchedResource, error)
+	Fetch(context.Context) ([]Resource, error)
 	Stop()
 }
 
-type FetcherCondition interface {
+type Condition interface {
 	Condition() bool
 	Name() string
 }
 
-type FetchedResource interface {
+type Resource interface {
 	GetID() (string, error)
 	GetData() interface{}
 }
@@ -26,7 +33,7 @@ type FetcherResult struct {
 	Resource interface{} `json:"resource"`
 }
 
-type ResourceMap map[string][]FetchedResource
+type ResourceMap map[string][]Resource
 
 type BaseFetcherConfig struct {
 	Name string `config:"name"`

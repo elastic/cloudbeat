@@ -3,14 +3,15 @@ package transformer
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/cloudbeat/resources"
-	"github.com/elastic/cloudbeat/resources/fetchers"
-	"time"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/manager"
 )
 
 type Transformer struct {
@@ -32,7 +33,7 @@ func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string)
 	}
 }
 
-func (c *Transformer) ProcessAggregatedResources(resources resources.ResourceMap, metadata CycleMetadata) []beat.Event {
+func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, metadata CycleMetadata) []beat.Event {
 	c.events = make([]beat.Event, 0)
 	for fetcherType, fetcherResults := range resources {
 		c.processEachResource(fetcherResults, ResourceTypeMetadata{CycleMetadata: metadata, Type: fetcherType})
@@ -41,7 +42,7 @@ func (c *Transformer) ProcessAggregatedResources(resources resources.ResourceMap
 	return c.events
 }
 
-func (c *Transformer) processEachResource(results []fetchers.FetchedResource, metadata ResourceTypeMetadata) {
+func (c *Transformer) processEachResource(results []fetching.Resource, metadata ResourceTypeMetadata) {
 	for _, result := range results {
 		rid, err := result.GetID()
 		if err != nil {
@@ -55,8 +56,8 @@ func (c *Transformer) processEachResource(results []fetchers.FetchedResource, me
 	}
 }
 
-func (c *Transformer) createBeatEvents(fetchedResource fetchers.FetchedResource, metadata ResourceMetadata) error {
-	fetcherResult := fetchers.FetcherResult{Type: metadata.Type, Resource: fetchedResource.GetData()}
+func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metadata ResourceMetadata) error {
+	fetcherResult := fetching.FetcherResult{Type: metadata.Type, Resource: fetchedResource.GetData()}
 	result, err := c.eval.Decision(c.context, fetcherResult)
 
 	if err != nil {

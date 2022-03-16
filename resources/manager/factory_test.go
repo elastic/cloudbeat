@@ -1,4 +1,4 @@
-package resources
+package manager
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -18,7 +18,7 @@ type FactoriesTestSuite struct {
 type numberFetcherFactory struct {
 }
 
-func (n *numberFetcherFactory) Create(c *common.Config) (fetchers.Fetcher, error) {
+func (n *numberFetcherFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
 	return &numberFetcher{int(x), false}, nil
 }
