@@ -162,7 +162,10 @@ func InitRegistry(ctx context.Context, c config.Config) (resources.FetchersRegis
 		RequiredProcesses: c.Processes,
 	}
 
-	procf := fetchers.NewProcessesFetcher(procCfg)
+	procf, err := fetchers.NewProcessesFetcher(procCfg)
+	if err != nil {
+		return nil, err
+	}
 	if err = registry.Register(fetchers.ProcessType, procf); err != nil {
 		return nil, err
 	}

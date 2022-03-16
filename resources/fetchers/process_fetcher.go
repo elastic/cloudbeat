@@ -21,10 +21,10 @@ const (
 )
 
 type ProcessResource struct {
-	PID    string        `json:"pid"`
-	Cmd    string        `json:"command"`
-	Stat   proc.ProcStat `json:"stat"`
-	Config common.MapStr `json:"config"`
+	PID          string        `json:"pid"`
+	Cmd          string        `json:"command"`
+	Stat         proc.ProcStat `json:"stat"`
+	ExternalData common.MapStr `json:"external-data"`
 }
 
 type ProcessesFetcher struct {
@@ -84,7 +84,7 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 	}
 	configMap := f.getProcessConfigurationFile(processConf, cmd, procStat.Name)
 
-	return ProcessResource{PID: processId, Cmd: cmd, Stat: procStat, Config: configMap}, nil
+	return ProcessResource{PID: processId, Cmd: cmd, Stat: procStat, ExternalData: configMap}, nil
 }
 
 //getProcessConfigurationFile - reads the configuration file associated with a process.

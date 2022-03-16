@@ -29,17 +29,9 @@ cloudbeat:
   ]
   processes:
     etcd:
-      cmd-arguments:
-        - config
     kube-apiserver:
-      cmd-arguments:
-        - config
     kube-controller-manager:
-      cmd-arguments:
-        - config
     kube-scheduler:
-      cmd-arguments:
-        - config
     kubelet:
       cmd-arguments:
         - config

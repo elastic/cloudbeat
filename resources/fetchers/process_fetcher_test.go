@@ -172,7 +172,7 @@ func TestFetchWhenFlagExistsWithConfigFile(t *testing.T) {
 		assert.Equal(t, processResource.Stat.Name, "kubelet")
 		assert.Contains(t, processResource.Cmd, "/usr/bin/kubelet")
 
-		configResource := processResource.Config[configFlagKey]
+		configResource := processResource.ExternalData[configFlagKey]
 		var result ProcessConfigTestStruct
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &result})
 		assert.Nil(t, err, "Could not decode process fetcherConfig result from %s type", test.configType)
