@@ -21,72 +21,72 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
-      - name: cloudbeat
-        image: cloudbeat
-        imagePullPolicy: IfNotPresent
-#         args: [
-#           "-e",
-#           "-d",
-#           "'*'"
-#           ]
-        env:
-        - name: ES_HOST
-          value: "host.docker.internal:9200"
-        - name: ES_USERNAME
-          value: elastic
-        - name: ES_PASSWORD
-          value: changeme
-        - name: KIBANA_HOST
-          value: "http://host.docker.internal:5601"
-        - name: ELASTIC_CLOUD_ID
-          value: none
-        - name: ELASTIC_CLOUD_AUTH
-          value: none
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        securityContext:
-          runAsUser: 0
-          # If using Red Hat OpenShift uncomment this:
-          #privileged: true
-        resources:
-          limits:
-            memory: 500Mi
-          requests:
-            cpu: 100m
-            memory: 200Mi
-        volumeMounts:
-        - name: config
-          mountPath: /cloudbeat.yml
-          readOnly: true
-          subPath: cloudbeat.yml
-        - name: proc
-          mountPath: /hostfs/proc
-          readOnly: true
-        - name: etc-kubernetes
-          mountPath: /hostfs/etc/kubernetes
-        - name: var-lib
-          mountPath: /hostfs/var/lib
-          readOnly: true
-        - name: cgroup
-          mountPath: /hostfs/sys/fs/cgroup
-          readOnly: true
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-        - name: varlog
-          mountPath: /var/log
-          readOnly: true
-        - name: passwd
-          mountPath: /hostfs/etc/passwd
-          readOnly: true
-        - name: group
-          mountPath: /hostfs/etc/group
-          readOnly: true
-        - name: etcsysmd
-          mountPath: /hostfs/etc/systemd
-          readOnly: true
+        - name: cloudbeat
+          image: cloudbeat
+          imagePullPolicy: IfNotPresent
+          #         args: [
+          #           "-e",
+          #           "-d",
+          #           "'*'"
+          #           ]
+          env:
+            - name: ES_HOST
+              value: "host.docker.internal:9200"
+            - name: ES_USERNAME
+              value: elastic
+            - name: ES_PASSWORD
+              value: changeme
+            - name: KIBANA_HOST
+              value: "http://host.docker.internal:5601"
+            - name: ELASTIC_CLOUD_ID
+              value: none
+            - name: ELASTIC_CLOUD_AUTH
+              value: none
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            runAsUser: 0
+            # If using Red Hat OpenShift uncomment this:
+            #privileged: true
+          resources:
+            limits:
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+            - name: config
+              mountPath: /cloudbeat.yml
+              readOnly: true
+              subPath: cloudbeat.yml
+            - name: proc
+              mountPath: /hostfs/proc
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+            - name: var-lib
+              mountPath: /hostfs/var/lib
+              readOnly: true
+            - name: cgroup
+              mountPath: /hostfs/sys/fs/cgroup
+              readOnly: true
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+            - name: passwd
+              mountPath: /hostfs/etc/passwd
+              readOnly: true
+            - name: group
+              mountPath: /hostfs/etc/group
+              readOnly: true
+            - name: etcsysmd
+              mountPath: /hostfs/etc/systemd
+              readOnly: true
       volumes:
         - name: proc
           hostPath:

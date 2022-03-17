@@ -237,6 +237,8 @@ github.com/buger/jsonparser v0.0.0-20180808090653-f4dd9f5a6b44/go.mod h1:bbYlZJ7
 github.com/bugsnag/bugsnag-go v0.0.0-20141110184014-b1d153021fcd/go.mod h1:2oa8nejYd4cQ/b0hMIopN0lCRxU0bueqREvZLWFrtK8=
 github.com/bugsnag/osext v0.0.0-20130617224835-0dd3f918b21b/go.mod h1:obH5gd0BsqsP2LwDJ9aOkm/6J86V6lyAXCoQWGw3K50=
 github.com/bugsnag/panicwrap v0.0.0-20151223152923-e2c28503fcd0/go.mod h1:D/8v3kj0zr8ZAKg1AQ6crr+5VwKN5eIywRkfhyM/+dE=
+github.com/build-security/beats/v7 v7.19.0 h1:Cz8xZ6E6Oj3DqgGJnT9TVF3BgC6dwRkyGhtMSbfwUJA=
+github.com/build-security/beats/v7 v7.19.0/go.mod h1:c8DammVonuxertJazEAp0kRB0gTthqiwkSSGQhkR2NQ=
 github.com/bytecodealliance/wasmtime-go v0.32.0 h1:/GsrnJz2bfULAIZygN4vUElLYliQrx/o/1opP9X7Gck=
 github.com/bytecodealliance/wasmtime-go v0.32.0/go.mod h1:q320gUxqyI8yB+ZqRuaJOEnGkAnHh6WtJjMaT2CW4wI=
 github.com/c-bata/go-prompt v0.2.2/go.mod h1:VzqtzE2ksDBcdln8G7mk2RX9QyGjH+OVqOCSiVIqS34=
@@ -1201,8 +1203,6 @@ github.com/ncw/swift v1.0.47/go.mod h1:23YIA4yWVnGwv2dQlN4bB7egfYX6YLn0Yo/S6zZO/
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/nxadm/tail v1.4.4 h1:DQuhQpB1tVlglWS2hLQ5OV6B5r8aGxSrPc5Qo6uTN78=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
-github.com/ofiriro3/beats-1/v7 v7.17.2-cloudbeat-beta h1:b7mx+Aaxd0shnDcYn8whScpdV91tUkX6ZI/t1yVSkd4=
-github.com/ofiriro3/beats-1/v7 v7.17.2-cloudbeat-beta/go.mod h1:jALsIAt/RyzYdUZoWC4I1S/HqEoIIetDCVMXijLJQpg=
 github.com/oklog/oklog v0.3.2/go.mod h1:FCV+B7mhrz4o+ueLpx+KqkyXRGMWOYEvfiXtdGtbWGs=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
 github.com/oklog/run v1.1.0/go.mod h1:sVPdnTZT1zYwAJeCMu2Th4T21pA3FPOQRfWjQlk7DVU=
