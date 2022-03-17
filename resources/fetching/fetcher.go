@@ -38,3 +38,5 @@ type ResourceMap map[string][]Resource
 type BaseFetcherConfig struct {
 	Name string `config:"name"`
 }
+
+const KubeAPIType = "kube-api"

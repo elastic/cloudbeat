@@ -12,10 +12,8 @@ import (
 type KubeFactory struct {
 }
 
-const KubeAPIType = "kube-api"
-
 func init() {
-	manager.Factories.ListFetcherFactory(KubeAPIType, &KubeFactory{})
+	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
 	gob.Register(K8sResource{})
 	gob.Register(ECRResource{})
 	gob.Register(ELBResource{})

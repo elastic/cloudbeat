@@ -57,7 +57,7 @@ func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Conf
 func (fa *factories) getConditions(name string) []fetching.Condition {
 	c := make([]fetching.Condition, 0)
 	switch name {
-	case "kube-api":
+	case fetching.KubeAPIType:
 		client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
 		if err != nil {
 			leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
