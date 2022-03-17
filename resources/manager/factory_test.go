@@ -99,8 +99,12 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		conf.Fetchers = append(conf.Fetchers, numCfg)
 		err := s.F.RegisterFetchers(reg, conf)
 		s.NoError(err)
-		s.Equal(1, len(s.F.m))
-		s.NotNil(s.F.m[test.key])
+		s.Equal(1, len(reg.Keys()))
+
+		res, err := reg.Run(context.Background(), test.key)
+		s.NoError(err)
+		s.Equal(test.value, res[0].GetData())
+
 	}
 }
 
