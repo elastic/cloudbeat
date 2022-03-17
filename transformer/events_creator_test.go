@@ -85,7 +85,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			mocks: []MethodMock{{
 				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("FetcherResult")},
+				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
 				returnArgs: []interface{}{mock.Anything, nil},
 			}, {
 				methodName: "Decode",
@@ -103,7 +103,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			mocks: []MethodMock{{
 				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("FetcherResult")},
+				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
 				returnArgs: []interface{}{mock.Anything, errors.New("policy err")},
 			}, {
 				methodName: "Decode",
@@ -121,7 +121,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			mocks: []MethodMock{{
 				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("FetcherResult")},
+				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
 				returnArgs: []interface{}{mock.Anything, nil},
 			}, {
 				methodName: "Decode",

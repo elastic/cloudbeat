@@ -57,7 +57,7 @@ func (c *Transformer) processEachResource(results []fetching.Resource, metadata 
 }
 
 func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metadata ResourceMetadata) error {
-	fetcherResult := fetching.FetcherResult{Type: metadata.Type, Resource: fetchedResource.GetData()}
+	fetcherResult := fetching.Result{Type: metadata.Type, Resource: fetchedResource.GetData()}
 	result, err := c.eval.Decision(c.context, fetcherResult)
 
 	if err != nil {
