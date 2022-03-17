@@ -24,11 +24,11 @@ spec:
       - name: cloudbeat
         image: cloudbeat
         imagePullPolicy: IfNotPresent
-        #         args: [
-        #           "-e",
-        #           "-d",
-        #           "'*'"
-        #           ]
+#         args: [
+#           "-e",
+#           "-d",
+#           "'*'"
+#           ]
         env:
         - name: ES_HOST
           value: "host.docker.internal:9200"
@@ -88,37 +88,37 @@ spec:
           mountPath: /hostfs/etc/systemd
           readOnly: true
       volumes:
-      - name: proc
-        hostPath:
-          path: /proc
-      - name: etc-kubernetes
-        hostPath:
-          path: /etc/kubernetes
-      - name: var-lib
-        hostPath:
-          path: /var/lib
-      - name: passwd
-        hostPath:
-          path: /etc/passwd
-      - name: group
-        hostPath:
-          path: /etc/group
-      - name: cgroup
-        hostPath:
-          path: /sys/fs/cgroup
-      - name: varlibdockercontainers
-        hostPath:
-          path: /var/lib/docker/containers
-      - name: varlog
-        hostPath:
-          path: /var/log
-      - name: etcsysmd
-        hostPath:
-          path: /etc/systemd
-      - name: config
-        configMap:
-          defaultMode: 0640
-          name: cloudbeat-daemonset-config
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: etc-kubernetes
+          hostPath:
+            path: /etc/kubernetes
+        - name: var-lib
+          hostPath:
+            path: /var/lib
+        - name: passwd
+          hostPath:
+            path: /etc/passwd
+        - name: group
+          hostPath:
+            path: /etc/group
+        - name: cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: etcsysmd
+          hostPath:
+            path: /etc/systemd
+        - name: config
+          configMap:
+            defaultMode: 0640
+            name: cloudbeat-daemonset-config
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -146,16 +146,15 @@ data:
         "/hostfs/var/lib/etcd",
         "/hostfs/etc/kubernetes/pki"
       ]
-      processes:
-        etcd:
-        kube-apiserver:
-        kube-controller-manager:
-        kube-scheduler:
-        kubelet:
-          cmd-arguments:
-          - config
-    
-    
+    processes:
+      etcd:
+      kube-apiserver:
+      kube-controller-manager:
+      kube-scheduler:
+      kubelet:
+        cmd-arguments:
+        - config
+
     # =================================== Kibana ===================================
     setup.kibana:
 
@@ -226,33 +225,33 @@ metadata:
   labels:
     k8s-app: cloudbeat
 rules:
-- apiGroups: [ "" ]
+- apiGroups: [""]
   resources:
   - nodes
   - namespaces
   - events
   - pods
   - services
-  verbs: [ "get", "list", "watch" ]
+  verbs: ["get", "list", "watch"]
 # Enable this rule only if planing to use Kubernetes keystore
 #- apiGroups: [""]
 #  resources:
 #  - secrets
 #  verbs: ["get"]
-- apiGroups: [ "extensions" ]
+- apiGroups: ["extensions"]
   resources:
   - replicasets
-  verbs: [ "get", "list", "watch" ]
-- apiGroups: [ "apps" ]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
   resources:
   - statefulsets
   - deployments
   - replicasets
-  verbs: [ "get", "list", "watch" ]
-- apiGroups: [ "batch" ]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["batch"]
   resources:
   - jobs
-  verbs: [ "get", "list", "watch" ]
+  verbs: ["get", "list", "watch"]
 - apiGroups:
   - ""
   resources:
@@ -273,11 +272,11 @@ metadata:
   labels:
     k8s-app: cloudbeat
 rules:
-- apiGroups:
-  - coordination.k8s.io
-  resources:
-  - leases
-  verbs: [ "get", "create", "update" ]
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs: ["get", "create", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -287,12 +286,12 @@ metadata:
   labels:
     k8s-app: cloudbeat
 rules:
-- apiGroups: [ "" ]
-  resources:
-  - configmaps
-  resourceNames:
-  - kubeadm-config
-  verbs: [ "get" ]
+  - apiGroups: [""]
+    resources:
+      - configmaps
+    resourceNames:
+      - kubeadm-config
+    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -313,9 +312,9 @@ metadata:
   name: cloudbeat
   namespace: kube-system
 subjects:
-- kind: ServiceAccount
-  name: cloudbeat
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
 roleRef:
   kind: Role
   name: cloudbeat
@@ -327,9 +326,9 @@ metadata:
   name: cloudbeat-kubeadm-config
   namespace: kube-system
 subjects:
-- kind: ServiceAccount
-  name: cloudbeat
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
 roleRef:
   kind: Role
   name: cloudbeat-kubeadm-config
