@@ -4,10 +4,7 @@ import (
 	"context"
 
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
-)
-
-const (
-	ProcessType = "process"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type ProcessResource struct {
@@ -21,23 +18,17 @@ type ProcessesFetcher struct {
 }
 
 type ProcessFetcherConfig struct {
-	BaseFetcherConfig
+	fetching.BaseFetcherConfig
 	Directory string `config:"directory"` // parent directory of target procfs
 }
 
-func NewProcessesFetcher(cfg ProcessFetcherConfig) Fetcher {
-	return &ProcessesFetcher{
-		cfg: cfg,
-	}
-}
-
-func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
+func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	pids, err := proc.List(f.cfg.Directory)
 	if err != nil {
 		return nil, err
 	}
 
-	ret := make([]FetchedResource, 0)
+	ret := make([]fetching.Resource, 0)
 
 	// If errors occur during read, then return what we have till now
 	// without reporting errors.
