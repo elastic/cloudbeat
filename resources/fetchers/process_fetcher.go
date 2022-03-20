@@ -17,14 +17,14 @@ import (
 
 const (
 	ProcessType        = "process"
-	CMDArgumentMatcher = "\\b%s=(\\S+)"
+	CMDArgumentMatcher = "\\b%s=\\/?(\\S+)"
 )
 
 type ProcessResource struct {
 	PID          string        `json:"pid"`
 	Cmd          string        `json:"command"`
 	Stat         proc.ProcStat `json:"stat"`
-	ExternalData common.MapStr `json:"external-data"`
+	ExternalData common.MapStr `json:"external_data"`
 }
 
 type ProcessesFetcher struct {
