@@ -3,21 +3,18 @@ package beater
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/evaluator"
-	"os"
 	"time"
+
+	"github.com/elastic/cloudbeat/evaluator"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/cloudbeat/config"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources"
-	"github.com/elastic/cloudbeat/resources/conditions"
-	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/gofrs/uuid"
@@ -30,7 +27,7 @@ type cloudbeat struct {
 
 	config      config.Config
 	client      beat.Client
-	data        *resources.Data
+	data        *manager.Data
 	evaluator   evaluator.Evaluator
 	transformer transformer.Transformer
 }
@@ -38,7 +35,6 @@ type cloudbeat struct {
 const (
 	cycleStatusStart = "start"
 	cycleStatusEnd   = "end"
-	processesDir     = "/hostfs"
 )
 
 // New creates an instance of cloudbeat.
@@ -59,7 +55,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	data, err := resources.NewData(c.Period, fetchersRegistry)
+	data, err := manager.NewData(c.Period, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -133,52 +129,12 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 }
 
-func InitRegistry(ctx context.Context, c config.Config) (resources.FetchersRegistry, error) {
-	registry := resources.NewFetcherRegistry()
-
-	kubeCfg := fetchers.KubeApiFetcherConfig{
-		Kubeconfig: c.KubeConfig,
-		Interval:   c.Period,
-	}
-	kubef, err := fetchers.NewKubeFetcher(kubeCfg)
+func InitRegistry(ctx context.Context, c config.Config) (manager.FetchersRegistry, error) {
+	registry := manager.NewFetcherRegistry()
+	err := manager.Factories.RegisterFetchers(registry, c)
 	if err != nil {
 		return nil, err
 	}
-
-	client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
-	if err != nil {
-		return nil, err
-	}
-
-	leaseProvider := conditions.NewLeaderLeaseProvider(ctx, client)
-	condition := conditions.NewLeaseFetcherCondition(leaseProvider)
-
-	if err = registry.Register(fetchers.KubeAPIType, kubef, condition); err != nil {
-		return nil, err
-	}
-
-	procCfg := fetchers.ProcessFetcherConfig{
-		Fs:                os.DirFS(processesDir),
-		RequiredProcesses: c.Processes,
-	}
-
-	procf, err := fetchers.NewProcessesFetcher(procCfg)
-	if err != nil {
-		return nil, err
-	}
-	if err = registry.Register(fetchers.ProcessType, procf); err != nil {
-		return nil, err
-	}
-
-	fileCfg := fetchers.FileFetcherConfig{
-		Patterns: c.Files,
-	}
-	filef := fetchers.NewFileFetcher(fileCfg)
-
-	if err = registry.Register(fetchers.FileSystemType, filef); err != nil {
-		return nil, err
-	}
-
 	return registry, nil
 }
 

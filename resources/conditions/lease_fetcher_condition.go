@@ -1,8 +1,8 @@
 package conditions
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type LeaderLeaseProvider interface {
@@ -13,7 +13,7 @@ type LeaseFetcherCondition struct {
 	provider LeaderLeaseProvider
 }
 
-func NewLeaseFetcherCondition(provider LeaderLeaseProvider) fetchers.FetcherCondition {
+func NewLeaseFetcherCondition(provider LeaderLeaseProvider) fetching.Condition {
 	return &LeaseFetcherCondition{
 		provider: provider,
 	}

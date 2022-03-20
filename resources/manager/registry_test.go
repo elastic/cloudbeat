@@ -1,11 +1,11 @@
-package resources
+package manager
 
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"testing"
 
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -19,11 +19,11 @@ type NumberResource struct {
 	Num int
 }
 
-func newNumberFetcher(num int) fetchers.Fetcher {
+func newNumberFetcher(num int) fetching.Fetcher {
 	return &numberFetcher{num, false}
 }
 
-func (f *numberFetcher) Fetch(ctx context.Context) ([]fetchers.FetchedResource, error) {
+func (f *numberFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	return fetchValue(f.num), nil
 }
 
@@ -36,7 +36,7 @@ type boolFetcherCondition struct {
 	name string
 }
 
-func newBoolFetcherCondition(val bool, name string) fetchers.FetcherCondition {
+func newBoolFetcherCondition(val bool, name string) fetching.Condition {
 	return &boolFetcherCondition{val, name}
 }
 
@@ -48,8 +48,8 @@ func (c *boolFetcherCondition) Name() string {
 	return c.name
 }
 
-func fetchValue(num int) []fetchers.FetchedResource {
-	return []fetchers.FetchedResource{NumberResource{num}}
+func fetchValue(num int) []fetching.Resource {
+	return []fetching.Resource{NumberResource{num}}
 }
 
 func registerNFetchers(t *testing.T, reg FetchersRegistry, n int) {
@@ -178,23 +178,23 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	conditionFalse := newBoolFetcherCondition(false, "never-fetcher-condition")
 
 	var tests = []struct {
-		conditions []fetchers.FetcherCondition
+		conditions []fetching.Condition
 		expected   bool
 	}{
 		{
-			[]fetchers.FetcherCondition{}, true,
+			[]fetching.Condition{}, true,
 		},
 		{
-			[]fetchers.FetcherCondition{conditionTrue}, true,
+			[]fetching.Condition{conditionTrue}, true,
 		},
 		{
-			[]fetchers.FetcherCondition{conditionTrue, conditionTrue}, true,
+			[]fetching.Condition{conditionTrue, conditionTrue}, true,
 		},
 		{
-			[]fetchers.FetcherCondition{conditionTrue, conditionTrue, conditionFalse}, false,
+			[]fetching.Condition{conditionTrue, conditionTrue, conditionFalse}, false,
 		},
 		{
-			[]fetchers.FetcherCondition{conditionFalse, conditionTrue, conditionTrue, conditionTrue, conditionTrue}, false,
+			[]fetching.Condition{conditionFalse, conditionTrue, conditionTrue, conditionTrue, conditionTrue}, false,
 		},
 	}
 

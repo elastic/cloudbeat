@@ -8,6 +8,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"io/fs"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
@@ -16,7 +17,6 @@ import (
 )
 
 const (
-	ProcessType        = "process"
 	CMDArgumentMatcher = "\\b%s=\\/?(\\S+)"
 )
 
@@ -32,27 +32,28 @@ type ProcessesFetcher struct {
 }
 
 type ProcessFetcherConfig struct {
-	BaseFetcherConfig
+	fetching.BaseFetcherConfig
+	Directory         string `config:"directory"` // parent directory of target procfs
 	Fs                fs.FS
 	RequiredProcesses config.ProcessesConfigMap `config:"required_processes"`
 }
 
-func NewProcessesFetcher(cfg ProcessFetcherConfig) (Fetcher, error) {
-	if cfg.Fs == nil {
-		return nil, fmt.Errorf("process fetcher cannot be init without a file-system")
-	}
+//func NewProcessesFetcher(cfg ProcessFetcherConfig) Fetcher {
+//	if cfg.Fs == nil {
+//		return nil, fmt.Errorf("process fetcher cannot be init without a file-system")
+//	}
+//
+//	return &ProcessesFetcher{
+//		cfg: cfg,
+//	}, nil
+//}
 
-	return &ProcessesFetcher{
-		cfg: cfg,
-	}, nil
-}
-
-func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
-	pids, err := proc.ListFS(f.cfg.Fs)
+func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	pids, err := proc.List(f.cfg.Directory)
 	if err != nil {
 		return nil, err
 	}
-	ret := make([]FetchedResource, 0)
+	ret := make([]fetching.Resource, 0)
 
 	// If errors occur during read, then return what we have till now
 	// without reporting errors.
@@ -77,7 +78,7 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]FetchedResource, error)
 	return ret, nil
 }
 
-func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf config.ProcessInputConfiguration, processId string) (FetchedResource, error) {
+func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf config.ProcessInputConfiguration, processId string) (fetching.Resource, error) {
 	cmd, err := proc.ReadCmdLineFS(f.cfg.Fs, processId)
 	if err != nil {
 		return nil, err

@@ -3,20 +3,22 @@ package transformer
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
+	"os"
+	"testing"
+
 	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/cloudbeat/resources"
 	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"io/ioutil"
-	"os"
-	"testing"
 )
 
 type args struct {
-	resource resources.ResourceMap
+	resource manager.ResourceMap
 	metadata CycleMetadata
 }
 
@@ -50,7 +52,7 @@ var fetcherResult = fetchers.FileSystemResource{
 var (
 	opaResults      evaluator.RuleResult
 	mockedEvaluator = evaluator.MockedEvaluator{}
-	resourcesMap    = map[string][]fetchers.FetchedResource{fetchers.FileSystemType: {fetcherResult}}
+	resourcesMap    = map[string][]fetching.Resource{fetchers.FileSystemType: {fetcherResult}}
 	ctx             = context.Background()
 )
 
@@ -83,7 +85,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			mocks: []MethodMock{{
 				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("FetcherResult")},
+				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
 				returnArgs: []interface{}{mock.Anything, nil},
 			}, {
 				methodName: "Decode",
@@ -101,7 +103,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			mocks: []MethodMock{{
 				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("FetcherResult")},
+				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
 				returnArgs: []interface{}{mock.Anything, errors.New("policy err")},
 			}, {
 				methodName: "Decode",
@@ -119,7 +121,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			mocks: []MethodMock{{
 				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("FetcherResult")},
+				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
 				returnArgs: []interface{}{mock.Anything, nil},
 			}, {
 				methodName: "Decode",

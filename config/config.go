@@ -4,8 +4,10 @@
 package config
 
 import (
-	"github.com/elastic/beats/v7/libbeat/processors"
 	"time"
+
+	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/processors"
 )
 
 const DefaultNamespace = "default"
@@ -22,36 +24,12 @@ type ProcessesConfigMap map[string]ProcessInputConfiguration
 type Config struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
-	Files      []string                `config:"files"`
 	Processors processors.PluginConfig `config:"processors"`
-	Processes  ProcessesConfigMap      `config:"processes"`
+	Fetchers   []*common.Config        `config:"fetchers"`
 }
 
 var DefaultConfig = Config{
 	Period: 10 * time.Second,
-	Files: []string{
-		"/hostfs/etc/kubernetes/scheduler.conf",
-		"/hostfs/etc/kubernetes/controller-manager.conf",
-		"/hostfs/etc/kubernetes/admin.conf",
-		"/hostfs/etc/kubernetes/kubelet.conf",
-		"/hostfs/etc/kubernetes/manifests/etcd.yaml",
-		"/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-		"/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
-		"/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
-		"/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
-		"/hostfs/var/lib/kubelet/config.yaml",
-		"/hostfs/var/lib/etcd/**",
-		"/hostfs/etc/kubernetes/pki/**",
-	},
-	Processes: ProcessesConfigMap{
-		"etcd":                    ProcessInputConfiguration{},
-		"kube-apiserver":          ProcessInputConfiguration{},
-		"kube-controller-manager": ProcessInputConfiguration{},
-		"kube-scheduler":          ProcessInputConfiguration{},
-		"kubelet": ProcessInputConfiguration{
-			CommandArguments: []string{"config"},
-		},
-	},
 }
 
 // Datastream function to generate the datastream value
