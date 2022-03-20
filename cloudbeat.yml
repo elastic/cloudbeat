@@ -13,7 +13,12 @@
 cloudbeat:
   # Defines how often an event is sent to the output
   period: 30s
-  files: [
+  fetchers:
+  - name: kube-api
+  - name: process
+    directory: "/hostfs"
+  - name: file-system
+    patterns: [
       "/hostfs/etc/kubernetes/scheduler.conf",
       "/hostfs/etc/kubernetes/controller-manager.conf",
       "/hostfs/etc/kubernetes/admin.conf",
@@ -26,7 +31,7 @@ cloudbeat:
       "/hostfs/var/lib/kubelet/config.yaml",
       "/hostfs/var/lib/etcd",
       "/hostfs/etc/kubernetes/pki"
-  ]
+    ]
 
 # ================================== General ===================================
 

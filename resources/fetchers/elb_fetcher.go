@@ -3,10 +3,12 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"regexp"
+
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
-	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
@@ -22,7 +24,7 @@ type ELBFetcher struct {
 }
 
 type ELBFetcherConfig struct {
-	BaseFetcherConfig
+	fetching.BaseFetcherConfig
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
@@ -32,7 +34,7 @@ type ELBResource struct {
 	LoadBalancersDescription
 }
 
-func NewELBFetcher(awsCfg AwsFetcherConfig, cfg ELBFetcherConfig) (Fetcher, error) {
+func NewELBFetcher(awsCfg AwsFetcherConfig, cfg ELBFetcherConfig) (fetching.Fetcher, error) {
 	elb := NewELBProvider(awsCfg.Config)
 	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsCfg.Config.Region)
 	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
@@ -48,8 +50,8 @@ func NewELBFetcher(awsCfg AwsFetcherConfig, cfg ELBFetcherConfig) (Fetcher, erro
 	}, nil
 }
 
-func (f *ELBFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
-	results := make([]FetchedResource, 0)
+func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	results := make([]fetching.Resource, 0)
 
 	balancers, err := f.GetLoadBalancers()
 	if err != nil {
