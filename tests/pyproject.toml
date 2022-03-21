@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "tests"
+version = "0.1.0"
+description = "Test project for cloudbeat agent"
+authors = ["Dmitry Gurevich <dmitry.gurevich@elastic.co>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pytest = "^7.1.1"
+munch = "^2.5.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
