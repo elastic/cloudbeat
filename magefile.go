@@ -14,6 +14,7 @@ import (
 	"github.com/magefile/mage/mg"
 
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
+
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
@@ -23,6 +24,9 @@ import (
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/integtest/notests"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
+
+	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
+	"go.uber.org/multierr"
 )
 
 func init() {
@@ -130,6 +134,60 @@ func filterPackages(types string) {
 // TestPackages tests the generated packages (i.e. file modes, owners, groups).
 func TestPackages() error {
 	return devtools.TestPackages()
+}
+
+// Fmt formats code and adds license headers.
+func Fmt() {
+	mg.Deps(devtools.GoImports, devtools.PythonAutopep8)
+	mg.Deps(AddLicenseHeaders)
+}
+
+// AddLicenseHeaders adds ASL2 headers to .go files outside of x-pack and
+// add Elastic headers to .go files in x-pack.
+func AddLicenseHeaders() error {
+	fmt.Println(">> fmt - go-licenser: Adding missing headers")
+
+	mg.Deps(devtools.InstallGoLicenser)
+
+	licenser := gotool.Licenser
+
+	return multierr.Combine(
+		licenser(
+			licenser.License("ASL2"),
+			licenser.Exclude("x-pack"),
+			licenser.Exclude("generator/_templates/beat/{beat}"),
+			licenser.Exclude("generator/_templates/metricbeat/{beat}"),
+		),
+		licenser(
+			licenser.License("Elastic"),
+			licenser.Path("x-pack"),
+		),
+	)
+}
+
+// CheckLicenseHeaders checks ASL2 headers in .go files outside of x-pack and
+// checks Elastic headers in .go files in x-pack.
+func CheckLicenseHeaders() error {
+	fmt.Println(">> fmt - go-licenser: Checking for missing headers")
+
+	mg.Deps(devtools.InstallGoLicenser)
+
+	licenser := gotool.Licenser
+
+	return multierr.Combine(
+		licenser(
+			licenser.Check(),
+			licenser.License("ASL2"),
+			licenser.Exclude("x-pack"),
+			licenser.Exclude("generator/_templates/beat/{beat}"),
+			licenser.Exclude("generator/_templates/metricbeat/{beat}"),
+		),
+		licenser(
+			licenser.Check(),
+			licenser.License("Elastic"),
+			licenser.Path("x-pack"),
+		),
+	)
 }
 
 func Update() { mg.Deps(cloudbeat.Update.All) }
