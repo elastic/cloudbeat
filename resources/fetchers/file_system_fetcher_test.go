@@ -37,7 +37,9 @@ func TestFileFetcherFetchASingleFile(t *testing.T) {
 	cfg := FileFetcherConfig{
 		Patterns: filePaths,
 	}
-	fileFetcher := NewFileFetcher(cfg)
+	factory := FileSystemFactory{}
+	fileFetcher, err := factory.CreateFrom(cfg)
+	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
@@ -61,7 +63,9 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	cfg := FileFetcherConfig{
 		Patterns: path,
 	}
-	fileFetcher := NewFileFetcher(cfg)
+	factory := FileSystemFactory{}
+	fileFetcher, err := factory.CreateFrom(cfg)
+	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
@@ -92,7 +96,9 @@ func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
 	cfg := FileFetcherConfig{
 		Patterns: filePaths,
 	}
-	fileFetcher := NewFileFetcher(cfg)
+	factory := FileSystemFactory{}
+	fileFetcher, err := factory.CreateFrom(cfg)
+	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
@@ -121,7 +127,9 @@ func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
 	cfg := FileFetcherConfig{
 		Patterns: path,
 	}
-	fileFetcher := NewFileFetcher(cfg)
+	factory := FileSystemFactory{}
+	fileFetcher, err := factory.CreateFrom(cfg)
+	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
@@ -156,7 +164,9 @@ func TestFileFetcherFetchDirectoryRecursively(t *testing.T) {
 	cfg := FileFetcherConfig{
 		Patterns: path,
 	}
-	fileFetcher := NewFileFetcher(cfg)
+	factory := FileSystemFactory{}
+	fileFetcher, err := factory.CreateFrom(cfg)
+	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")

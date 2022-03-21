@@ -1,20 +1,3 @@
-// Licensed to Elasticsearch B.V. under one or more contributor
-// license agreements. See the NOTICE file distributed with
-// this work for additional information regarding copyright
-// ownership. Elasticsearch B.V. licenses this file to you under
-// the Apache License, Version 2.0 (the "License"); you may
-// not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-
 package transformer
 
 import (
@@ -24,18 +7,18 @@ import (
 	"os"
 	"testing"
 
+	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-
-	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/cloudbeat/resources"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 )
 
 type args struct {
-	resource resources.ResourceMap
+	resource manager.ResourceMap
 	metadata CycleMetadata
 }
 
@@ -69,7 +52,7 @@ var fetcherResult = fetchers.FileSystemResource{
 var (
 	opaResults      evaluator.RuleResult
 	mockedEvaluator = evaluator.MockedEvaluator{}
-	resourcesMap    = map[string][]fetchers.FetchedResource{fetchers.FileSystemType: {fetcherResult}}
+	resourcesMap    = map[string][]fetching.Resource{fetchers.FileSystemType: {fetcherResult}}
 	ctx             = context.Background()
 )
 
@@ -102,7 +85,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			mocks: []MethodMock{{
 				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("FetcherResult")},
+				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
 				returnArgs: []interface{}{mock.Anything, nil},
 			}, {
 				methodName: "Decode",
@@ -120,7 +103,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			mocks: []MethodMock{{
 				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("FetcherResult")},
+				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
 				returnArgs: []interface{}{mock.Anything, errors.New("policy err")},
 			}, {
 				methodName: "Decode",
@@ -138,7 +121,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			},
 			mocks: []MethodMock{{
 				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("FetcherResult")},
+				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
 				returnArgs: []interface{}{mock.Anything, nil},
 			}, {
 				methodName: "Decode",

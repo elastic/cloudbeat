@@ -19,6 +19,8 @@ package fetchers
 
 import (
 	"context"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 const IAMType = "aws-iam"
@@ -29,7 +31,7 @@ type IAMFetcher struct {
 }
 
 type IAMFetcherConfig struct {
-	BaseFetcherConfig
+	fetching.BaseFetcherConfig
 	RoleName string `config:"roleName"`
 }
 
@@ -37,7 +39,7 @@ type IAMResource struct {
 	Data interface{}
 }
 
-func NewIAMFetcher(awsCfg AwsFetcherConfig, cfg IAMFetcherConfig) (Fetcher, error) {
+func NewIAMFetcher(awsCfg AwsFetcherConfig, cfg IAMFetcherConfig) (fetching.Fetcher, error) {
 	iam := NewIAMProvider(awsCfg.Config)
 
 	return &IAMFetcher{
@@ -46,8 +48,8 @@ func NewIAMFetcher(awsCfg AwsFetcherConfig, cfg IAMFetcherConfig) (Fetcher, erro
 	}, nil
 }
 
-func (f IAMFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
-	results := make([]FetchedResource, 0)
+func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	results := make([]fetching.Resource, 0)
 
 	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
 	results = append(results, IAMResource{result})

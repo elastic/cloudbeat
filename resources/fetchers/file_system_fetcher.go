@@ -28,6 +28,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type FileSystemResource struct {
@@ -47,22 +48,12 @@ type FileSystemFetcher struct {
 }
 
 type FileFetcherConfig struct {
-	BaseFetcherConfig
+	fetching.BaseFetcherConfig
 	Patterns []string `config:"patterns"` // Files and directories paths for the fetcher to extract info from
 }
 
-const (
-	FileSystemType = "file-system"
-)
-
-func NewFileFetcher(cfg FileFetcherConfig) Fetcher {
-	return &FileSystemFetcher{
-		cfg: cfg,
-	}
-}
-
-func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
-	results := make([]FetchedResource, 0)
+func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	results := make([]fetching.Resource, 0)
 
 	// Input files might contain glob pattern
 	for _, filePattern := range f.cfg.Patterns {

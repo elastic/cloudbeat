@@ -1,20 +1,3 @@
-// Licensed to Elasticsearch B.V. under one or more contributor
-// license agreements. See the NOTICE file distributed with
-// this work for additional information regarding copyright
-// ownership. Elasticsearch B.V. licenses this file to you under
-// the Apache License, Version 2.0 (the "License"); you may
-// not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-
 package fetchers
 
 import (
@@ -23,16 +6,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
-
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 )
 
 const (
-	KubeAPIType   = "kube-api"
 	allNamespaces = "" // The Kube API treats this as "all namespaces"
 )
 
@@ -87,18 +69,9 @@ type KubeFetcher struct {
 }
 
 type KubeApiFetcherConfig struct {
-	BaseFetcherConfig
+	fetching.BaseFetcherConfig
 	Interval   time.Duration `config:"interval"`
 	Kubeconfig string        `config:"kubeconfig"`
-}
-
-func NewKubeFetcher(cfg KubeApiFetcherConfig) (Fetcher, error) {
-	f := &KubeFetcher{
-		cfg:      cfg,
-		watchers: make([]kubernetes.Watcher, 0),
-	}
-
-	return f, nil
 }
 
 func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) error {
@@ -148,7 +121,7 @@ func (f *KubeFetcher) initWatchers() error {
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
+func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	var err error
 	watcherlock.Do(func() {
 		err = f.initWatchers()
