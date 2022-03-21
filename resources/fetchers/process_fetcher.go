@@ -7,7 +7,6 @@ import (
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"io/fs"
 	"k8s.io/apimachinery/pkg/util/json"
@@ -35,7 +34,7 @@ type ProcessFetcherConfig struct {
 	fetching.BaseFetcherConfig
 	Directory         string `config:"directory"` // parent directory of target procfs
 	Fs                fs.FS
-	RequiredProcesses config.ProcessesConfigMap `config:"required_processes"`
+	RequiredProcesses ProcessesConfigMap `config:"processes"`
 }
 
 func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
@@ -68,7 +67,7 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, erro
 	return ret, nil
 }
 
-func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf config.ProcessInputConfiguration, processId string) (fetching.Resource, error) {
+func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf ProcessInputConfiguration, processId string) (fetching.Resource, error) {
 	cmd, err := proc.ReadCmdLineFS(f.cfg.Fs, processId)
 	if err != nil {
 		return nil, err
@@ -81,7 +80,7 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 //getProcessConfigurationFile - reads the configuration file associated with a process.
 // As an input this function receives a ProcessInputConfiguration that contains CommandArguments, a string array that represents some process flags
 // The function extracts the configuration file associated with each flag and returns it.
-func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig config.ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {
+func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {
 	configMap := make(map[string]interface{}, 0)
 	for _, argument := range processConfig.CommandArguments {
 		// The regex extracts the cmd line flag(argument) value

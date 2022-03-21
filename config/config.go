@@ -15,12 +15,6 @@ const DefaultNamespace = "default"
 const ResultsDatastreamIndexPrefix = "logs-cis_kubernetes_benchmark.findings"
 const MetadataDatastreamIndexPrefix = ".logs-cis_kubernetes_benchmark.metadata"
 
-type ProcessInputConfiguration struct {
-	CommandArguments []string `config:"cmd-arguments"`
-}
-
-type ProcessesConfigMap map[string]ProcessInputConfiguration
-
 type Config struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`

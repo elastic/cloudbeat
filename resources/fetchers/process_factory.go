@@ -14,12 +14,19 @@ const (
 	ProcessType = "process"
 )
 
+type ProcessInputConfiguration struct {
+	CommandArguments []string `config:"cmd-arguments"`
+}
+
+type ProcessesConfigMap map[string]ProcessInputConfiguration
+
 type ProcessFactory struct {
 }
 
 func init() {
 	manager.Factories.ListFetcherFactory(ProcessType, &ProcessFactory{})
 	gob.Register(ProcessResource{})
+	gob.Register(map[string]interface{}{})
 }
 
 func (f *ProcessFactory) Create(c *common.Config) (fetching.Fetcher, error) {

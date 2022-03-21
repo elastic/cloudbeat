@@ -3,7 +3,6 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +43,7 @@ func TestFetchWhenFlagExistsButNoFile(t *testing.T) {
 
 	fetcherConfig := ProcessFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		RequiredProcesses: map[string]config.ProcessInputConfiguration{
+		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
 		Fs: sysfs,
 	}
@@ -71,7 +70,7 @@ func TestFetchWhenProcessDoesNotExist(t *testing.T) {
 
 	fetcherConfig := ProcessFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		RequiredProcesses: map[string]config.ProcessInputConfiguration{
+		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"someProcess": {CommandArguments: []string{"fetcherConfig"}}},
 		Fs: fsys,
 	}
@@ -93,7 +92,7 @@ func TestFetchWhenNoFlagRequired(t *testing.T) {
 
 	fetcherConfig := ProcessFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		RequiredProcesses: map[string]config.ProcessInputConfiguration{
+		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"kubelet": {CommandArguments: []string{}}},
 		Fs: fsys,
 	}
@@ -143,7 +142,7 @@ func TestFetchWhenFlagExistsWithConfigFile(t *testing.T) {
 
 		fetcherConfig := ProcessFetcherConfig{
 			BaseFetcherConfig: fetching.BaseFetcherConfig{},
-			RequiredProcesses: map[string]config.ProcessInputConfiguration{
+			RequiredProcesses: map[string]ProcessInputConfiguration{
 				"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
 			Fs: sysfs,
 		}
