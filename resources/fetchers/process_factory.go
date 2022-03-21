@@ -2,10 +2,12 @@ package fetchers
 
 import (
 	"encoding/gob"
-
+	"fmt"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	"os"
+	"strings"
 )
 
 const (
@@ -27,6 +29,10 @@ func (f *ProcessFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 		return nil, err
 	}
 
+	if !strings.HasPrefix(cfg.Directory, "/hostfs") {
+		return nil, fmt.Errorf("process fetcher could not start - the directory path should start with `/hostfs`")
+	}
+	cfg.Fs = os.DirFS(cfg.Directory)
 	return f.CreateFrom(cfg)
 }
 

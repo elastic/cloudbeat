@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
@@ -32,17 +33,6 @@ type ProcessConfigTestStruct struct {
 var status = `Name:   %s`
 var cmdline = `/usr/bin/%s --kubeconfig=/etc/kubernetes/kubelet.conf --%s=%s`
 
-func TestFetchNoFileSystem(t *testing.T) {
-	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: BaseFetcherConfig{},
-		RequiredProcesses: map[string]config.ProcessInputConfiguration{
-			"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
-		Fs: nil,
-	}
-	_, err := NewProcessesFetcher(fetcherConfig)
-	assert.NotNil(t, err)
-}
-
 func TestFetchWhenFlagExistsButNoFile(t *testing.T) {
 	testProcess := TextProcessContext{
 		Pid:               "3",
@@ -53,13 +43,12 @@ func TestFetchWhenFlagExistsButNoFile(t *testing.T) {
 	sysfs := createProcess(testProcess)
 
 	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: BaseFetcherConfig{},
+		BaseFetcherConfig: fetching.BaseFetcherConfig{},
 		RequiredProcesses: map[string]config.ProcessInputConfiguration{
 			"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
 		Fs: sysfs,
 	}
-	processesFetcher, err := NewProcessesFetcher(fetcherConfig)
-	assert.Nil(t, err)
+	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	assert.Nil(t, err)
@@ -81,13 +70,12 @@ func TestFetchWhenProcessDoesNotExist(t *testing.T) {
 	fsys := createProcess(testProcess)
 
 	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: BaseFetcherConfig{},
+		BaseFetcherConfig: fetching.BaseFetcherConfig{},
 		RequiredProcesses: map[string]config.ProcessInputConfiguration{
 			"someProcess": {CommandArguments: []string{"fetcherConfig"}}},
 		Fs: fsys,
 	}
-	processesFetcher, err := NewProcessesFetcher(fetcherConfig)
-	assert.Nil(t, err)
+	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	assert.Nil(t, err)
@@ -104,13 +92,12 @@ func TestFetchWhenNoFlagRequired(t *testing.T) {
 	fsys := createProcess(testProcess)
 
 	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: BaseFetcherConfig{},
+		BaseFetcherConfig: fetching.BaseFetcherConfig{},
 		RequiredProcesses: map[string]config.ProcessInputConfiguration{
 			"kubelet": {CommandArguments: []string{}}},
 		Fs: fsys,
 	}
-	processesFetcher, err := NewProcessesFetcher(fetcherConfig)
-	assert.Nil(t, err)
+	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	assert.Nil(t, err)
@@ -155,13 +142,12 @@ func TestFetchWhenFlagExistsWithConfigFile(t *testing.T) {
 		}
 
 		fetcherConfig := ProcessFetcherConfig{
-			BaseFetcherConfig: BaseFetcherConfig{},
+			BaseFetcherConfig: fetching.BaseFetcherConfig{},
 			RequiredProcesses: map[string]config.ProcessInputConfiguration{
 				"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
 			Fs: sysfs,
 		}
-		processesFetcher, err := NewProcessesFetcher(fetcherConfig)
-		assert.Nil(t, err)
+		processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
 
 		fetchedResource, err := processesFetcher.Fetch(context.TODO())
 		assert.Nil(t, err)
