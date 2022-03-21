@@ -5,7 +5,7 @@ VERSION="8.2.0"
 BRANCH="main"
 
 # Allow other users write access to create checksum files
-chmod -R 777 ${BASE_DIR}/build/distributions 
+chmod -R 777 build/distributions 
 
 # The "branch" here selects which "$BRANCH.gradle" file of release manager is used
 # VERSION=$(make get-version)
@@ -26,7 +26,7 @@ docker run --rm \
   -e VAULT_ADDR \
   -e VAULT_ROLE_ID \
   -e VAULT_SECRET_ID \
-  --mount type=bind,readonly=false,src="$PWD/${BASE_DIR}",target=/artifacts \
+  --mount type=bind,readonly=false,src="$PWD",target=/artifacts \
   "$IMAGE" \
     cli collect \
       --project cloudbeat \
