@@ -227,10 +227,11 @@ $(APPROVALS):
 ##############################################################################
 
 # Builds a snapshot release.
+.PHONY: release-manager-snapshot
 release-manager-snapshot: export SNAPSHOT=true
 release-manager-snapshot: release
 
-# Builds a snapshot release.
+# Builds a release.
 .PHONY: release-manager-release
 release-manager-release: release
 

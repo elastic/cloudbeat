@@ -3,6 +3,9 @@
 pipeline {
   agent { label 'linux && immutable && debian-11' }
   environment {
+    VAULT_ADDR=credentials('vault-addr')
+    VAULT_ROLE_ID=credentials('apm-vault-role-id')
+    VAULT_SECRET_ID=credentials('apm-vault-secret-id')
     REPO = 'cloudbeat'
     BASE_DIR = "src/github.com/elastic/${env.REPO}"
     // NOTIFY_TO = credentials('notify-to')
