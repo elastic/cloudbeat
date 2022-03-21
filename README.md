@@ -1,5 +1,5 @@
 # Cloudbeat 
-![Coverage](https://img.shields.io/badge/Coverage-40.3%25-yellow)
+![Coverage](https://img.shields.io/badge/Coverage-46.4%25-yellow)
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 
 ## Table of contents
