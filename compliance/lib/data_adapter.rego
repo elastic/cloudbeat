@@ -49,6 +49,11 @@ process_args = args {
 	args := {arg: value | [arg, value] = common.split_key_value(process_args_list[_])}
 }
 
+process_config = config {
+	is_process
+    config := { key: value | value = input.resource.external_data[key]}
+}
+
 is_kube_apiserver {
 	process_name == "kube-apiserver"
 }

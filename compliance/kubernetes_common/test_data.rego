@@ -15,11 +15,15 @@ filesystem_input(filename, mode, uid, gid) = {
 }
 
 # genrates `process` type input data
-process_input(process_name, arguments) = {
+process_input(process_name, arguments) = process_input_with_external_data(process_name, arguments, {})
+
+# genrates `process` type input data
+process_input_with_external_data(process_name, arguments, external_data) = {
 	"type": "process",
 	"resource": {
 		"command": concat(" ", array.concat([process_name], arguments)),
 		"stat": {"Name": process_name},
+		"external_data": external_data,
 	},
 }
 
