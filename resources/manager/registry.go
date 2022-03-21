@@ -1,18 +1,18 @@
-package resources
+package manager
 
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type FetchersRegistry interface {
-	Register(key string, f fetchers.Fetcher, c ...fetchers.FetcherCondition) error
+	Register(key string, f fetching.Fetcher, c ...fetching.Condition) error
 	Keys() []string
 	ShouldRun(key string) bool
-	Run(ctx context.Context, key string) ([]fetchers.FetchedResource, error)
+	Run(ctx context.Context, key string) ([]fetching.Resource, error)
 	Stop(ctx context.Context)
 }
 
@@ -21,8 +21,8 @@ type fetchersRegistry struct {
 }
 
 type registeredFetcher struct {
-	f fetchers.Fetcher
-	c []fetchers.FetcherCondition
+	f fetching.Fetcher
+	c []fetching.Condition
 }
 
 func NewFetcherRegistry() FetchersRegistry {
@@ -32,7 +32,7 @@ func NewFetcherRegistry() FetchersRegistry {
 }
 
 // Register registers a Fetcher implementation.
-func (r *fetchersRegistry) Register(key string, f fetchers.Fetcher, c ...fetchers.FetcherCondition) error {
+func (r *fetchersRegistry) Register(key string, f fetching.Fetcher, c ...fetching.Condition) error {
 	if _, ok := r.reg[key]; ok {
 		return fmt.Errorf("fetcher key collision: %q is already registered", key)
 	}
@@ -70,7 +70,7 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 	return true
 }
 
-func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetchers.FetchedResource, error) {
+func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetching.Resource, error) {
 	registered, ok := r.reg[key]
 	if !ok {
 		return nil, fmt.Errorf("fetcher %v not found", key)
