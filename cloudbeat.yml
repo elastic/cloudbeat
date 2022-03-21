@@ -39,7 +39,7 @@ cloudbeat:
       "/hostfs/var/lib/kubelet/config.yaml",
       "/hostfs/var/lib/etcd",
       "/hostfs/etc/kubernetes/pki"
-  ]
+    ]
 
 # ================================== General ===================================
 
