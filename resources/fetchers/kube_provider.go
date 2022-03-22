@@ -82,8 +82,6 @@ func nullifyManagedFields(resource interface{}) {
 	switch val := resource.(type) {
 	case *kubernetes.Pod:
 		val.ManagedFields = nil
-	case *kubernetes.Secret:
-		val.ManagedFields = nil
 	case *kubernetes.Role:
 		val.ManagedFields = nil
 	case *kubernetes.RoleBinding:
