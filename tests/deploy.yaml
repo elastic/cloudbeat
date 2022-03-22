@@ -1,0 +1,87 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cloudbeat-test
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      serviceAccountName: cloudbeat-test
+      containers:
+      - name: cloudbeat-test
+        image: cloudbeat-test:0.0.4
+        env:
+          - name: KUBERNETES_IN_CLUSTER
+            value: "true"
+          - name: ES_USER
+            value: "elastic"
+          - name: ES_PASSWORD
+            value: "changeme"
+      restartPolicy: Never
+  backoffLimit: 1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudbeat-test
+  namespace: kube-system
+  labels:
+    k8s-app: cloudbeat-test
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cloudbeat-test
+  labels:
+    k8s-app: cloudbeat-test
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - namespaces
+      - events
+      - pods
+      - services
+    verbs: ["get", "list", "watch"]
+  # Enable this rule only if planing to use Kubernetes keystore
+  #- apiGroups: [""]
+  #  resources:
+  #  - secrets
+  #  verbs: ["get"]
+  - apiGroups: [ "extensions" ]
+    resources:
+      - replicasets
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "apps" ]
+    resources:
+      - statefulsets
+      - deployments
+      - replicasets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+    verbs: ["get", "list", "watch"]
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/stats
+    verbs:
+      - get
+  - nonResourceURLs:
+      - "/metrics"
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cloudbeat-test
+subjects:
+  - kind: ServiceAccount
+    name: cloudbeat-test
+    namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin

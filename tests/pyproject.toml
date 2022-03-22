@@ -8,6 +8,8 @@ authors = ["Dmitry Gurevich <dmitry.gurevich@elastic.co>"]
 python = "^3.9"
 pytest = "^7.1.1"
 munch = "^2.5.0"
+kubernetes = "^23.3.0"
+elasticsearch = "^8.1.0"
 
 [tool.poetry.dev-dependencies]
 
