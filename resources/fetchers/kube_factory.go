@@ -37,7 +37,6 @@ func init() {
 	gob.Register(EKSResource{})
 	gob.Register(IAMResource{})
 	gob.Register(kubernetes.Pod{})
-	gob.Register(kubernetes.Secret{})
 	gob.Register(kubernetes.Role{})
 	gob.Register(kubernetes.RoleBinding{})
 	gob.Register(kubernetes.ClusterRole{})
