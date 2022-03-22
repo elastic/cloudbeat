@@ -9,6 +9,8 @@ def data(k8s, cloudbeat_agent):
     return pods, nodes
 
 
+@pytest.mark.sanity
+@pytest.mark.product
 def test_cloudbeat_pod_exist(data):
     """
     This test verifies that pods count is equal to nodes count
@@ -20,6 +22,8 @@ def test_cloudbeat_pod_exist(data):
     assert len(pods) == len(nodes), f"Pods count is {len(pods)}, and nodes count is {len(nodes)}"
 
 
+@pytest.mark.sanity
+@pytest.mark.product
 def test_cloudbeat_pods_running(data):
     """
     This test verifies that all pods are in status "Running"

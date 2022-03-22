@@ -9,7 +9,7 @@ spec:
       serviceAccountName: cloudbeat-test
       containers:
       - name: cloudbeat-test
-        image: cloudbeat-test:0.0.4
+        image: cloudbeat-test:0.0.5
         env:
           - name: KUBERNETES_IN_CLUSTER
             value: "true"
@@ -17,6 +17,8 @@ spec:
             value: "elastic"
           - name: ES_PASSWORD
             value: "changeme"
+          - name: ES_HOST
+            value: "host.docker.internal"
       restartPolicy: Never
   backoffLimit: 1
 ---
