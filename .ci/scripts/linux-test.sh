@@ -11,7 +11,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-make update apm-server
+make update cloudbeat
 
 # Start docker-compose environment first, so it doesn't count towards the test timeout.
 docker-compose up -d

@@ -38,7 +38,7 @@ def main():
         for v in SUPPORTED_VERSIONS:
             if parsed_version <= parse_version(v):
                 print("checking {} on {}".format(cl, v))
-                url = "https://raw.githubusercontent.com/elastic/apm-server/{}/changelogs/{}".format(v, cl)
+                url = "https://raw.githubusercontent.com/elastic/cloudbeat/{}/changelogs/{}".format(v, cl)
                 rsp = requests.get(url)
                 status = "success"
                 if rsp.status_code == 200:
