@@ -1,7 +1,7 @@
 import pytest
 
-testdata = ['file-system', 'process']
-# testdata = ['file-system', 'process', 'kube-api']
+# testdata = ['file-system', 'process']
+testdata = ['file-system', 'process', 'kube-api']
 
 
 @pytest.mark.integration
@@ -28,4 +28,4 @@ def test_elastic_index_exists(elastic_client, match_type):
     }
     result = elastic_client.get_index_data(index_name=elastic_client.index, query=file_system_query)
 
-    assert len(result.body['hits']['hits']) > 0
+    assert len(result.body['hits']['hits']) > 0, f"The findings of type {match_type} not found"
