@@ -2,7 +2,7 @@
 - job:
     name: cloudbeat/cloudbeat-mbp
     display-name: CloudBeat
-    description: CloudBeat
+    description: Build & package cloudbeat
     project-type: multibranch
     concurrent: true
     script-path: Jenkinsfile
@@ -24,9 +24,19 @@
         - tags:
             ignore-tags-older-than: -1
             ignore-tags-newer-than: -1
+        - named-branches:
+            - exact-name:
+                name: 'main'
+                case-sensitive: true
+            - regex-name:
+                regex: '7\.1[6789]'
+                case-sensitive: true
+            - regex-name:
+                regex: '8\.\d+'
+                case-sensitive: true
         - regular-branches: true
         - change-request:
-            ignore-target-only-changes: false
+            ignore-target-only-changes: true
         clean:
           after: true
           before: true
