@@ -10,6 +10,7 @@ pytest = "^7.1.1"
 munch = "^2.5.0"
 kubernetes = "^23.3.0"
 elasticsearch = "^8.1.0"
+allure-pytest = "^2.9.45"
 
 [tool.poetry.dev-dependencies]
 
