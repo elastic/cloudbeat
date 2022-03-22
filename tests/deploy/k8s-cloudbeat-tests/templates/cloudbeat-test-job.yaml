@@ -12,6 +12,6 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         envFrom:
           - configMapRef:
-              name: {{ .Values.serviceAccount.name }}       
+              name: {{ .Values.serviceAccount.name }}-configmap
       restartPolicy: Never
   backoffLimit: {{ .Values.job.backoffLimit }}
