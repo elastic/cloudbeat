@@ -489,6 +489,7 @@ github.com/elastic/glog v1.0.1-0.20210831205241-7d8b5c89dfc4/go.mod h1:EWib/APOK
 github.com/elastic/go-concert v0.2.0 h1:GAQrhRVXprnNjtvTP9pWJ1d4ToEA4cU5ci7TwTa20xg=
 github.com/elastic/go-concert v0.2.0/go.mod h1:HWjpO3IAEJUxOeaJOWXWEp7imKd27foxz9V5vegC/38=
 github.com/elastic/go-libaudit/v2 v2.2.0/go.mod h1:MM/l/4xV7ilcl+cIblL8Zn448J7RZaDwgNLE4gNKYPg=
+github.com/elastic/go-licenser v0.4.0 h1:jLq6A5SilDS/Iz1ABRkO6BHy91B9jBora8FwGRsDqUI=
 github.com/elastic/go-licenser v0.4.0/go.mod h1:V56wHMpmdURfibNBggaSBfqgPxyT1Tldns1i87iTEvU=
 github.com/elastic/go-lookslike v0.3.0/go.mod h1:AhH+rdJux5RlVjs+6ej4jkvYyoNRkj2crxmqeHlj3hA=
 github.com/elastic/go-lumber v0.1.0 h1:HUjpyg36v2HoKtXlEC53EJ3zDFiDRn65d7B8dBHNius=
