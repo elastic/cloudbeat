@@ -1,7 +1,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ .Values.serviceAccount.name}}
+  name: {{ .Values.serviceAccount.name}}-configmap
 data:
   KUBERNETES_IN_CLUSTER: "true"
   ES_USER: "elastic"
