@@ -30,7 +30,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
 
-const ELBType = "aws-elb"
 const ELBRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
 
 type ELBFetcher struct {

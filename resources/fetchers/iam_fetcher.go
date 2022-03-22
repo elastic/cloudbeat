@@ -23,8 +23,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const IAMType = "aws-iam"
-
 type IAMFetcher struct {
 	iamProvider *IAMProvider
 	cfg         IAMFetcherConfig
@@ -37,15 +35,6 @@ type IAMFetcherConfig struct {
 
 type IAMResource struct {
 	Data interface{}
-}
-
-func NewIAMFetcher(awsCfg AwsFetcherConfig, cfg IAMFetcherConfig) (fetching.Fetcher, error) {
-	iam := NewIAMProvider(awsCfg.Config)
-
-	return &IAMFetcher{
-		cfg:         cfg,
-		iamProvider: iam,
-	}, nil
 }
 
 func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {

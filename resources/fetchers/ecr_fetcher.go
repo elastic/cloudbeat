@@ -23,14 +23,12 @@ import (
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-const ECRType = "aws-ecr"
 const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w]+)[:,@]?"
 const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?"
 
@@ -50,31 +48,6 @@ type EcrRepositories []ecr.Repository
 
 type ECRResource struct {
 	EcrRepositories
-}
-
-func NewECRFetcher(awsCfg AwsFetcherConfig, cfg ECRFetcherConfig, ctx context.Context) (fetching.Fetcher, error) {
-	ecrProvider := NewEcrProvider(awsCfg.Config)
-	identityProvider := NewAWSIdentityProvider(awsCfg.Config)
-	identity, err := identityProvider.GetIdentity(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
-	}
-
-	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, awsCfg.Config.Region)
-	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
-
-	if err != nil {
-		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
-	}
-	return &ECRFetcher{
-		cfg:         cfg,
-		ecrProvider: ecrProvider,
-		kubeClient:  kubeClient,
-		repoRegexMatchers: []*regexp.Regexp{
-			regexp.MustCompile(privateRepoRegex),
-			regexp.MustCompile(PublicRepoRegex),
-		},
-	}, nil
 }
 
 func (f *ECRFetcher) Stop() {

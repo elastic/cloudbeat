@@ -24,8 +24,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const EKSType = "aws-eks"
-
 type EKSFetcher struct {
 	cfg         EKSFetcherConfig
 	eksProvider *EKSProvider
@@ -38,15 +36,6 @@ type EKSFetcherConfig struct {
 
 type EKSResource struct {
 	*eks.DescribeClusterResponse
-}
-
-func NewEKSFetcher(awsCfg AwsFetcherConfig, cfg EKSFetcherConfig) (fetching.Fetcher, error) {
-	eks := NewEksProvider(awsCfg.Config)
-
-	return &EKSFetcher{
-		cfg:         cfg,
-		eksProvider: eks,
-	}, nil
 }
 
 func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
