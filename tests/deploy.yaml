@@ -75,7 +75,7 @@ spec:
       serviceAccountName: cloudbeat-test
       containers:
       - name: cloudbeat-test
-        image: cloudbeat-test:0.0.5
+        image: cloudbeat-test:0.0.6
         env:
           - name: KUBERNETES_IN_CLUSTER
             value: "true"
