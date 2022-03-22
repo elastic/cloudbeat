@@ -1,18 +1,35 @@
-package resources
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+package manager
 
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type FetchersRegistry interface {
-	Register(key string, f fetchers.Fetcher, c ...fetchers.FetcherCondition) error
+	Register(key string, f fetching.Fetcher, c ...fetching.Condition) error
 	Keys() []string
 	ShouldRun(key string) bool
-	Run(ctx context.Context, key string) ([]fetchers.FetchedResource, error)
+	Run(ctx context.Context, key string) ([]fetching.Resource, error)
 	Stop(ctx context.Context)
 }
 
@@ -21,8 +38,8 @@ type fetchersRegistry struct {
 }
 
 type registeredFetcher struct {
-	f fetchers.Fetcher
-	c []fetchers.FetcherCondition
+	f fetching.Fetcher
+	c []fetching.Condition
 }
 
 func NewFetcherRegistry() FetchersRegistry {
@@ -32,7 +49,7 @@ func NewFetcherRegistry() FetchersRegistry {
 }
 
 // Register registers a Fetcher implementation.
-func (r *fetchersRegistry) Register(key string, f fetchers.Fetcher, c ...fetchers.FetcherCondition) error {
+func (r *fetchersRegistry) Register(key string, f fetching.Fetcher, c ...fetching.Condition) error {
 	if _, ok := r.reg[key]; ok {
 		return fmt.Errorf("fetcher key collision: %q is already registered", key)
 	}
@@ -70,7 +87,7 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 	return true
 }
 
-func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetchers.FetchedResource, error) {
+func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetching.Resource, error) {
 	registered, ok := r.reg[key]
 	if !ok {
 		return nil, fmt.Errorf("fetcher %v not found", key)

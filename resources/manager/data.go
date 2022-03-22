@@ -1,13 +1,30 @@
-package resources
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+package manager
 
 import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"sync"
 	"time"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
 
 	"github.com/elastic/beats/v7/libbeat/logp"
 )
@@ -23,7 +40,7 @@ type Data struct {
 	wg       *sync.WaitGroup
 }
 
-type ResourceMap map[string][]fetchers.FetchedResource
+type ResourceMap map[string][]fetching.Resource
 
 // NewData returns a new Data instance with the given interval.
 func NewData(interval time.Duration, fetchers FetchersRegistry) (*Data, error) {
@@ -68,7 +85,7 @@ func (d *Data) Run(ctx context.Context) error {
 // update is a single update sent from a worker to a manager.
 type update struct {
 	key string
-	val []fetchers.FetchedResource
+	val []fetching.Resource
 }
 
 func (d *Data) fetchWorker(ctx context.Context, updates chan update, k string) {
@@ -147,19 +164,4 @@ func copyState(m ResourceMap) (ResourceMap, error) {
 
 func init() {
 	gob.Register([]interface{}{})
-	gob.Register(fetchers.ProcessResource{})
-	gob.Register(fetchers.FileSystemResource{})
-	gob.Register(fetchers.K8sResource{})
-	gob.Register(fetchers.ECRResource{})
-	gob.Register(fetchers.ELBResource{})
-	gob.Register(fetchers.EKSResource{})
-	gob.Register(fetchers.IAMResource{})
-	gob.Register(kubernetes.Pod{})
-	gob.Register(kubernetes.Secret{})
-	gob.Register(kubernetes.Role{})
-	gob.Register(kubernetes.RoleBinding{})
-	gob.Register(kubernetes.ClusterRole{})
-	gob.Register(kubernetes.ClusterRoleBinding{})
-	gob.Register(kubernetes.NetworkPolicy{})
-	gob.Register(kubernetes.PodSecurityPolicy{})
 }

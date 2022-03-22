@@ -1,16 +1,34 @@
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 package transformer
 
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/cloudbeat/resources"
-	"github.com/elastic/cloudbeat/resources/fetchers"
-	"time"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/manager"
 )
 
 type Transformer struct {
@@ -32,7 +50,7 @@ func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string)
 	}
 }
 
-func (c *Transformer) ProcessAggregatedResources(resources resources.ResourceMap, metadata CycleMetadata) []beat.Event {
+func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, metadata CycleMetadata) []beat.Event {
 	c.events = make([]beat.Event, 0)
 	for fetcherType, fetcherResults := range resources {
 		c.processEachResource(fetcherResults, ResourceTypeMetadata{CycleMetadata: metadata, Type: fetcherType})
@@ -41,7 +59,7 @@ func (c *Transformer) ProcessAggregatedResources(resources resources.ResourceMap
 	return c.events
 }
 
-func (c *Transformer) processEachResource(results []fetchers.FetchedResource, metadata ResourceTypeMetadata) {
+func (c *Transformer) processEachResource(results []fetching.Resource, metadata ResourceTypeMetadata) {
 	for _, result := range results {
 		rid, err := result.GetID()
 		if err != nil {
@@ -55,8 +73,8 @@ func (c *Transformer) processEachResource(results []fetchers.FetchedResource, me
 	}
 }
 
-func (c *Transformer) createBeatEvents(fetchedResource fetchers.FetchedResource, metadata ResourceMetadata) error {
-	fetcherResult := fetchers.FetcherResult{Type: metadata.Type, Resource: fetchedResource.GetData()}
+func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metadata ResourceMetadata) error {
+	fetcherResult := fetching.Result{Type: metadata.Type, Resource: fetchedResource.GetData()}
 	result, err := c.eval.Decision(c.context, fetcherResult)
 
 	if err != nil {

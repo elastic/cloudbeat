@@ -1,9 +1,11 @@
 name: Cloudbeat-CI
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
+    types: [assigned, opened, synchronize, reopened]
+
 
 env:
   K8S_MANIFEST_DIR: deploy/k8s
@@ -17,6 +19,10 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
+          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -188,6 +194,11 @@ jobs:
         uses: magefile/mage-action@v1.6.0
         with:
           args: check
+
+      - name: Mage check license headers
+        uses: magefile/mage-action@v1.6.0
+        with:
+          args: checkLicenseHeaders
 
       - name: Unit-Test Cloudbeat
         run: |

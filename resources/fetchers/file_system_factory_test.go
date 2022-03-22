@@ -15,35 +15,56 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package conditions
+package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"testing"
+
+	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/stretchr/testify/suite"
 )
 
-type LeaderLeaseProvider interface {
-	IsLeader() (bool, error)
+type FileFactoryTestSuite struct {
+	suite.Suite
+	factory fetching.Factory
 }
 
-type LeaseFetcherCondition struct {
-	provider LeaderLeaseProvider
+func TestFileFactoryTestSuite(t *testing.T) {
+	suite.Run(t, new(FileFactoryTestSuite))
 }
 
-func NewLeaseFetcherCondition(provider LeaderLeaseProvider) fetching.Condition {
-	return &LeaseFetcherCondition{
-		provider: provider,
+func (s *FileFactoryTestSuite) SetupTest() {
+	s.factory = &FileSystemFactory{}
+}
+
+func (s *FileFactoryTestSuite) TestCreateFetcher() {
+	var tests = []struct {
+		config           string
+		expectedPatterns []string
+	}{
+		{
+			`
+name: file-system
+patterns: [
+  "hello",
+  "world"
+]
+`,
+			[]string{"hello", "world"},
+		},
 	}
-}
 
-func (c *LeaseFetcherCondition) Condition() bool {
-	l, err := c.provider.IsLeader()
-	if err != nil {
-		logp.L().Errorf("could not read leader value, using default value %v: %v", l, err)
+	for _, test := range tests {
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		fetcher, err := s.factory.Create(cfg)
+		s.NoError(err)
+		s.NotNil(fetcher)
+
+		file, ok := fetcher.(*FileSystemFetcher)
+		s.True(ok)
+		s.Equal(test.expectedPatterns, file.cfg.Patterns)
 	}
-	return l
-}
-
-func (c *LeaseFetcherCondition) Name() string {
-	return "leader_election_conditional_fetcher"
 }
