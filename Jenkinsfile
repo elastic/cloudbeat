@@ -196,8 +196,6 @@ pipeline {
 
                   // tmp workaround due to artifact names
                   sh '''
-                    cp ${BASE_DIR}/build/distributions/cloudbeat-8.2.0-SNAPSHOT-linux-aarch64.tar.gz ${BASE_DIR}/build/distributions/cloudbeat-8.2.0-SNAPSHOT-linux-arm64.tar.gz
-                    cp ${BASE_DIR}/build/distributions/cloudbeat-8.2.0-SNAPSHOT-linux-aarch64.tar.gz.sha512 ${BASE_DIR}/build/distributions/cloudbeat-8.2.0-SNAPSHOT-linux-arm64.tar.gz.sha512
                     docker login -u DaveSys911 -p $DOCKER_PASS docker.elastic.co
                   '''
                   
