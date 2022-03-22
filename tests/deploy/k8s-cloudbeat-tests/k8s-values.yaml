@@ -1,0 +1,7 @@
+
+
+image:
+  tag: "0.0.6"
+
+job:
+  backoffLimit: 0
