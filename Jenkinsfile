@@ -184,7 +184,7 @@ pipeline {
               }
               steps {
                 // Login to Docker Registery
-                // dockerLogin(secret: env.DOCKER_SECRET, registry: env.DOCKER_REGISTRY)
+                dockerLogin(secret: env.DOCKER_SECRET, registry: env.DOCKER_REGISTRY)
                 
                 // Upload files to the default location
                 googleStorageUpload(bucket: "${BUCKET_URI}",
@@ -193,11 +193,6 @@ pipeline {
                   pattern: "${BASE_DIR}/build/distributions/**/*",
                   sharedPublicly: true,
                   showInline: true)
-
-                  // tmp workaround due to artifact names
-                  sh '''
-                    docker login -u DaveSys911 -p $DOCKER_PASS docker.elastic.co
-                  '''
                   
                   // Call rm-docker command
                   dir("${BASE_DIR}"){

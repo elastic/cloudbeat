@@ -1,7 +1,7 @@
 ---
 - job:
     name: cloudbeat/cloudbeat-mbp
-    display-name: CloudBeat
+    display-name: CloudBeat-MBP
     description: Build & package cloudbeat
     project-type: multibranch
     concurrent: true
