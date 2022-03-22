@@ -4,6 +4,7 @@ testdata = ['file-system', 'process']
 # testdata = ['file-system', 'process', 'kube-api']
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize("match_type", testdata)
 def test_elastic_index_exists(elastic_client, match_type):
     """
