@@ -21,4 +21,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD [ "pytest", "-v", "-s"]
+CMD [ "pytest", "-v", "-s", "--alluredir=./reports"]
