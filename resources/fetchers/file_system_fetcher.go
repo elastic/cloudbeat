@@ -1,15 +1,34 @@
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 package fetchers
 
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"os"
 	"os/user"
 	"strconv"
 	"syscall"
 
+	"github.com/pkg/errors"
+
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type FileSystemResource struct {
@@ -29,22 +48,12 @@ type FileSystemFetcher struct {
 }
 
 type FileFetcherConfig struct {
-	BaseFetcherConfig
+	fetching.BaseFetcherConfig
 	Patterns []string `config:"patterns"` // Files and directories paths for the fetcher to extract info from
 }
 
-const (
-	FileSystemType = "file-system"
-)
-
-func NewFileFetcher(cfg FileFetcherConfig) Fetcher {
-	return &FileSystemFetcher{
-		cfg: cfg,
-	}
-}
-
-func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]FetchedResource, error) {
-	results := make([]FetchedResource, 0)
+func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	results := make([]fetching.Resource, 0)
 
 	// Input files might contain glob pattern
 	for _, filePattern := range f.cfg.Patterns {

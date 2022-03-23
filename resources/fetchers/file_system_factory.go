@@ -15,20 +15,42 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//go:build tools
-// +build tools
-
-// This package contains the tool dependencies of the project.
-
-package tools
+package fetchers
 
 import (
-	_ "github.com/magefile/mage"
-	_ "github.com/pierrre/gotestcover"
-	_ "github.com/tsg/go-daemon"
-	_ "golang.org/x/tools/cmd/goimports"
-	_ "gotest.tools/gotestsum/cmd"
+	"encoding/gob"
 
-	_ "github.com/mitchellh/gox"
-	_ "golang.org/x/lint/golint"
+	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/manager"
 )
+
+const (
+	FileSystemType = "file-system"
+)
+
+func init() {
+	manager.Factories.ListFetcherFactory(FileSystemType, &FileSystemFactory{})
+	gob.Register(FileSystemResource{})
+}
+
+type FileSystemFactory struct {
+}
+
+func (f *FileSystemFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+	cfg := FileFetcherConfig{}
+	err := c.Unpack(&cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return f.CreateFrom(cfg)
+}
+
+func (f *FileSystemFactory) CreateFrom(cfg FileFetcherConfig) (fetching.Fetcher, error) {
+	fe := &FileSystemFetcher{
+		cfg: cfg,
+	}
+
+	return fe, nil
+}

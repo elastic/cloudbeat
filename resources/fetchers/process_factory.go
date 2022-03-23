@@ -15,20 +15,42 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//go:build tools
-// +build tools
-
-// This package contains the tool dependencies of the project.
-
-package tools
+package fetchers
 
 import (
-	_ "github.com/magefile/mage"
-	_ "github.com/pierrre/gotestcover"
-	_ "github.com/tsg/go-daemon"
-	_ "golang.org/x/tools/cmd/goimports"
-	_ "gotest.tools/gotestsum/cmd"
+	"encoding/gob"
 
-	_ "github.com/mitchellh/gox"
-	_ "golang.org/x/lint/golint"
+	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/manager"
 )
+
+const (
+	ProcessType = "process"
+)
+
+type ProcessFactory struct {
+}
+
+func init() {
+	manager.Factories.ListFetcherFactory(ProcessType, &ProcessFactory{})
+	gob.Register(ProcessResource{})
+}
+
+func (f *ProcessFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+	cfg := ProcessFetcherConfig{}
+	err := c.Unpack(&cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return f.CreateFrom(cfg)
+}
+
+func (f *ProcessFactory) CreateFrom(cfg ProcessFetcherConfig) (fetching.Fetcher, error) {
+	fe := &ProcessesFetcher{
+		cfg: cfg,
+	}
+
+	return fe, nil
+}
