@@ -3,7 +3,7 @@ kind: ClusterRole
 metadata:
   name: {{ .Values.serviceAccount.name }}
   labels:
-    k8s-app: {{ .Values.serviceAccount.name }}
+    {{- include "k8s-cloudbeat-tests.labels" . | indent 4 }}
 rules:
   - apiGroups: [""]
     resources:
