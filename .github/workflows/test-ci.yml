@@ -41,7 +41,7 @@ jobs:
       - name: Deploy test Helm chart
         uses: WyriHaximus/github-action-helm3@v2
         with:
-          exec: helm upgrade --wait --install --values tests/deploy/ES-helm/values.yaml --namespace kube-system es-tests-stack elastic/elasticsearch
+          exec: helm upgrade --wait --install --values tests/deploy/k8s-cloudbeat-tests/k8s-values.yaml --namespace kube-system cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
 
       - name: Helm Test
         uses: WyriHaximus/github-action-helm3@v2
