@@ -1,8 +1,10 @@
+data/*
 tests/.idea
 /.idea
 /build
-cloudbeat-test
 .cloudbeat-test.config.json
+cloudbeat-test
+*ES-helm*
 .DS_Store
 /cloudbeat
 /cloudbeat.test

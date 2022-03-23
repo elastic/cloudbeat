@@ -1,29 +1,49 @@
 name: Deploy Environment Action
-on: push
+
+on: 
+  push:
+    branches:
+      - "ci-actions-testing"
+
+# steps:
+# 1. Checkout repo
+# 2. Setup kind
+# 3. Deploy ES on kind with helm
+# 4. Deploy cloudbeat
+# 5. Build & deploy test docker
+# 6. Save artifacts 
+# 7. Show artifacts(gh pages/bucket)
 jobs:
   elastic-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Deploy the Elastic stack
-        run: |
-          cd tests/ci_test_env
-          docker-compose up -d
-
-      # - name: Verify connectivity to Elastic
-      #   run: |
-      #     curl --verbose --show-error http://localhost:9200
-
-      # - name: Start minikube
-      #   uses: medyagh/setup-minikube@master
-
-      - uses: actions/checkout@master
-      - uses: engineerd/setup-kind@v0.5.0
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
-          version: "v0.11.1"
-      - name: Check Cluster Ready
+          go-version: ${{ env.GO_VERSION }
+
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.2.0
+        with:
+          config: deploy/k8s/kind/kind-config.yaml
+
+      - name: Docker build Cloudbeat
         run: |
-          kubectl cluster-info
-          kubectl get pods -n kube-system
-          echo "current-context:" $(kubectl config current-context)
-          echo "environment-kubeconfig:" ${KUBECONFIG}
+          GOOS=linux go build -v && docker build -t cloudbeat . && kind load docker-image cloudbeat:latest --name kind-mono
+      
+      - name: Docker build tests-container
+        run: |
+          cd tests; docker build -t cloudbeat-test:0.0.6 . && kind load docker-image cloudbeat-test:0.0.6 --name kind-mono
+      
+      - name: Deploy test Helm chart
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm upgrade --wait --install --values tests/deploy/ES-helm/values.yaml --namespace kube-system es-tests-stack elastic/elasticsearch
+
+      - name: Helm Test
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm test cloudbeat-tests --logs

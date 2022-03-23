@@ -2,8 +2,10 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: {{ .Values.serviceAccount.name}}-configmap
+  labels:
+    {{- include "k8s-cloudbeat-tests.labels" . | indent 4 }}
 data:
   KUBERNETES_IN_CLUSTER: "true"
   ES_USER: "elastic"
   ES_PASSWORD: "changeme"
-  ES_HOST: "host.docker.internal"
+  ES_HOST: "elasticsearch-master.kube-system"
