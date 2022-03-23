@@ -39,7 +39,7 @@ jobs:
 
       - name: Docker build Cloudbeat
         run: |
-          GOOS=linux go build -v && docker build -t cloudbeat . && kind load docker-image cloudbeat:latest --name kind-mono
+          GOOS=linux go build -v . && docker build -t cloudbeat . && kind load docker-image cloudbeat:latest --name kind-mono
       
       - name: Docker build tests-container
         run: |
