@@ -12,12 +12,6 @@ const (
 	ProcessType = "process"
 )
 
-type ProcessInputConfiguration struct {
-	CommandArguments []string `config:"cmd-arguments"`
-}
-
-type ProcessesConfigMap map[string]ProcessInputConfiguration
-
 type ProcessFactory struct {
 }
 

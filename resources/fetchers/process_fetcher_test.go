@@ -44,7 +44,7 @@ func TestFetchWhenFlagExistsButNoFile(t *testing.T) {
 	fetcherConfig := ProcessFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
 		RequiredProcesses: map[string]ProcessInputConfiguration{
-			"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
+			"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
 		Fs: sysfs,
 	}
 	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
@@ -71,7 +71,7 @@ func TestFetchWhenProcessDoesNotExist(t *testing.T) {
 	fetcherConfig := ProcessFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
 		RequiredProcesses: map[string]ProcessInputConfiguration{
-			"someProcess": {CommandArguments: []string{"fetcherConfig"}}},
+			"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}}},
 		Fs: fsys,
 	}
 	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
@@ -93,7 +93,7 @@ func TestFetchWhenNoFlagRequired(t *testing.T) {
 	fetcherConfig := ProcessFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
 		RequiredProcesses: map[string]ProcessInputConfiguration{
-			"kubelet": {CommandArguments: []string{}}},
+			"kubelet": {ConfigFileArguments: []string{}}},
 		Fs: fsys,
 	}
 	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
@@ -143,7 +143,7 @@ func TestFetchWhenFlagExistsWithConfigFile(t *testing.T) {
 		fetcherConfig := ProcessFetcherConfig{
 			BaseFetcherConfig: fetching.BaseFetcherConfig{},
 			RequiredProcesses: map[string]ProcessInputConfiguration{
-				"kubelet": {CommandArguments: []string{"fetcherConfig"}}},
+				"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
 			Fs: sysfs,
 		}
 		processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}

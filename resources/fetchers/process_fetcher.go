@@ -2,7 +2,6 @@ package fetchers
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
@@ -16,6 +15,9 @@ import (
 )
 
 const (
+	// CMDArgumentMatcher is a regex pattern that should match a process argument and its value
+	// For example for the following string `--flag=val --config=txt.yaml fl=val2` with an input string of `config`
+	// The regex will match the string `--config=txt.yaml` and will capture `txt.yaml` as a group
 	CMDArgumentMatcher = "\\b%s=\\/?(\\S+)"
 )
 
@@ -29,6 +31,12 @@ type ProcessResource struct {
 type ProcessesFetcher struct {
 	cfg ProcessFetcherConfig
 }
+
+type ProcessInputConfiguration struct {
+	ConfigFileArguments []string `config:"config-file-arguments"`
+}
+
+type ProcessesConfigMap map[string]ProcessInputConfiguration
 
 type ProcessFetcherConfig struct {
 	fetching.BaseFetcherConfig
@@ -78,11 +86,11 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 }
 
 //getProcessConfigurationFile - reads the configuration file associated with a process.
-// As an input this function receives a ProcessInputConfiguration that contains CommandArguments, a string array that represents some process flags
+// As an input this function receives a ProcessInputConfiguration that contains ConfigFileArguments, a string array that represents some process flags
 // The function extracts the configuration file associated with each flag and returns it.
 func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {
 	configMap := make(map[string]interface{}, 0)
-	for _, argument := range processConfig.CommandArguments {
+	for _, argument := range processConfig.ConfigFileArguments {
 		// The regex extracts the cmd line flag(argument) value
 		regex := fmt.Sprintf(CMDArgumentMatcher, argument)
 		matcher := regexp.MustCompile(regex)
@@ -120,7 +128,7 @@ func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (inte
 			return nil, err
 		}
 	default:
-		return nil, errors.New("can't parse data")
+		return nil, fmt.Errorf("%s type is not supported", ext)
 	}
 	return output, nil
 }

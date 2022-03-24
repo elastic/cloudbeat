@@ -38,7 +38,7 @@ directory: /hostfs
 processes:
  etcd:
  kubelet:
-  cmd-arguments:
+  config-file-arguments:
   - config
 `,
 			"/hostfs",
@@ -74,7 +74,7 @@ processes:
 
 		s.Equal(len(test.processValidators), len(process.cfg.RequiredProcesses))
 		for _, validator := range test.processValidators {
-			validator.validate(process.cfg.RequiredProcesses[validator.processName].CommandArguments)
+			validator.validate(process.cfg.RequiredProcesses[validator.processName].ConfigFileArguments)
 		}
 	}
 }
