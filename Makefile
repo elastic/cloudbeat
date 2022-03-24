@@ -95,7 +95,6 @@ NOTICE.txt: $(PYTHON) go.mod utils/go.mod
 add-headers: $(GOLICENSER)
 ifndef CHECK_HEADERS_DISABLED
 	@$(GOLICENSER)
-#	@$(GOLICENSER) -license Elasticv2 x-pack
 endif
 
 ## get-version : Get cloudbeat version
