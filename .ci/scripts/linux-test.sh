@@ -20,7 +20,7 @@ OUTPUT_DIR="$(pwd)/build"
 OUTPUT_JSON_FILE="$OUTPUT_DIR/TEST-go-system_tests.out.json"
 OUTPUT_JUNIT_FILE="$OUTPUT_DIR/TEST-go-system_tests.xml"
 
-# Download systemtest dependencies soo the download time doesn't count towards
+# Download systemtest dependencies so the download time doesn't count towards
 # the test timeout.
 cd systemtest && go mod download && cd -
 
