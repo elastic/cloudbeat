@@ -18,8 +18,6 @@
 package fetchers
 
 import (
-	"encoding/gob"
-
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
@@ -34,7 +32,6 @@ type ProcessFactory struct {
 
 func init() {
 	manager.Factories.ListFetcherFactory(ProcessType, &ProcessFactory{})
-	gob.Register(ProcessResource{})
 }
 
 func (f *ProcessFactory) Create(c *common.Config) (fetching.Fetcher, error) {
