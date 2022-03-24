@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/mitchellh/mapstructure"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v2"
 	"io/fs"
 	"k8s.io/apimachinery/pkg/util/json"
@@ -29,10 +29,18 @@ type ProcessConfigTestStruct struct {
 	B int
 }
 
+type ProcessFetcherTestSuite struct {
+	suite.Suite
+}
+
+func TestProcessFetcherTestSuite(t *testing.T) {
+	suite.Run(t, new(ProcessFetcherTestSuite))
+}
+
 var status = `Name:   %s`
 var cmdline = `/usr/bin/%s --kubeconfig=/etc/kubernetes/kubelet.conf --%s=%s`
 
-func TestFetchWhenFlagExistsButNoFile(t *testing.T) {
+func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	testProcess := TextProcessContext{
 		Pid:               "3",
 		Name:              "kubelet",
@@ -50,16 +58,16 @@ func TestFetchWhenFlagExistsButNoFile(t *testing.T) {
 	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
-	assert.Nil(t, err)
-	assert.Equal(t, len(fetchedResource), 1)
+	t.Nil(err)
+	t.Equal(1, len(fetchedResource))
 
 	processResource := fetchedResource[0].(ProcessResource)
-	assert.Equal(t, processResource.PID, testProcess.Pid)
-	assert.Equal(t, processResource.Stat.Name, "kubelet")
-	assert.Contains(t, processResource.Cmd, "/usr/bin/kubelet")
+	t.Equal(testProcess.Pid, processResource.PID)
+	t.Equal("kubelet", processResource.Stat.Name)
+	t.Contains(processResource.Cmd, "/usr/bin/kubelet")
 }
 
-func TestFetchWhenProcessDoesNotExist(t *testing.T) {
+func (t *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 	testProcess := TextProcessContext{
 		Pid:               "3",
 		Name:              "kubelet",
@@ -77,11 +85,11 @@ func TestFetchWhenProcessDoesNotExist(t *testing.T) {
 	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
-	assert.Nil(t, err)
-	assert.Equal(t, len(fetchedResource), 0)
+	t.Nil(err)
+	t.Equal(0, len(fetchedResource))
 }
 
-func TestFetchWhenNoFlagRequired(t *testing.T) {
+func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 	testProcess := TextProcessContext{
 		Pid:               "3",
 		Name:              "kubelet",
@@ -99,16 +107,16 @@ func TestFetchWhenNoFlagRequired(t *testing.T) {
 	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
-	assert.Nil(t, err)
-	assert.Equal(t, len(fetchedResource), 1)
+	t.Nil(err)
+	t.Equal(1, len(fetchedResource))
 
 	processResource := fetchedResource[0].(ProcessResource)
-	assert.Equal(t, processResource.PID, testProcess.Pid)
-	assert.Equal(t, processResource.Stat.Name, "kubelet")
-	assert.Contains(t, processResource.Cmd, "/usr/bin/kubelet")
+	t.Equal(testProcess.Pid, processResource.PID)
+	t.Equal("kubelet", processResource.Stat.Name)
+	t.Contains(processResource.Cmd, "/usr/bin/kubelet")
 }
 
-func TestFetchWhenFlagExistsWithConfigFile(t *testing.T) {
+func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 
 	testCases := []struct {
 		configFileName string
@@ -149,23 +157,23 @@ func TestFetchWhenFlagExistsWithConfigFile(t *testing.T) {
 		processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
 
 		fetchedResource, err := processesFetcher.Fetch(context.TODO())
-		assert.Nil(t, err)
-		assert.Equal(t, len(fetchedResource), 1)
+		t.Nil(err)
+		t.Equal(1, len(fetchedResource))
 
 		processResource := fetchedResource[0].(ProcessResource)
-		assert.Equal(t, processResource.PID, testProcess.Pid)
-		assert.Equal(t, processResource.Stat.Name, "kubelet")
-		assert.Contains(t, processResource.Cmd, "/usr/bin/kubelet")
+		t.Equal(testProcess.Pid, processResource.PID)
+		t.Equal("kubelet", processResource.Stat.Name)
+		t.Contains(processResource.Cmd, "/usr/bin/kubelet")
 
 		configResource := processResource.ExternalData[configFlagKey]
 		var result ProcessConfigTestStruct
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &result})
-		assert.Nil(t, err, "Could not decode process fetcherConfig result from %s type", test.configType)
+		t.Nil(err, "Could not decode process fetcherConfig result from %s type", test.configType)
 		err = decoder.Decode(configResource)
-		assert.Nil(t, err, "Could not decode process fetcherConfig result from file %s", test.configFileName)
+		t.Nil(err, "Could not decode process fetcherConfig result from file %s", test.configFileName)
 
-		assert.Equal(t, result.A, processConfig.A)
-		assert.Equal(t, result.B, processConfig.B)
+		t.Equal(processConfig.A, result.A)
+		t.Equal(processConfig.B, result.B)
 	}
 }
 
