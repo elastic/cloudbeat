@@ -3,12 +3,14 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 
 ## Table of contents
-- [Prerequisites](#prerequisites)
-- [Running Cloudbeat](#running-cloudbeat)
-  - [Clean up](#clean-up)
-  - [Remote Debugging](#remote-debugging)
+- [Cloudbeat](#cloudbeat)
+  - [Table of contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Running Cloudbeat](#running-cloudbeat)
+    - [Clean up](#clean-up)
+    - [Remote Debugging](#remote-debugging)
 
-
+#test commit
 ## Prerequisites
 1. [Just command runner](https://github.com/casey/just)
 2. Elasticsearch with the default username & password (`elastic` & `changeme`) running on the default port (`http://localhost:9200`)
