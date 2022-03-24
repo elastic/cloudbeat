@@ -62,7 +62,7 @@ func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
 }
 
 func (r K8sResource) GetID() (string, error) {
-	k8sObj := reflect.ValueOf(r.Data)
+	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
 	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
 	if !ok {
 		return "", fmt.Errorf("failed to retrieve object metadata")
