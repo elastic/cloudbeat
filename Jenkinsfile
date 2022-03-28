@@ -6,7 +6,6 @@ pipeline {
     VAULT_ADDR=credentials('vault-addr')
     VAULT_ROLE_ID=credentials('apm-vault-role-id')
     VAULT_SECRET_ID=credentials('apm-vault-secret-id')
-    DOCKER_PASS=credentials('docker-pass-davesys911')
     REPO = 'cloudbeat'
     BASE_DIR = "src/github.com/elastic/${env.REPO}"
     JOB_GCS_BUCKET = 'internal-ci-artifacts'
