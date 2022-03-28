@@ -18,7 +18,7 @@ deploy-cloudbeat:
 build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
 build-cloudbeat-debug:
-  GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
+  GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 deploy-cloudbeat-debug:
   kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system

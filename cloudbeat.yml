@@ -17,6 +17,14 @@ cloudbeat:
   - name: kube-api
   - name: process
     directory: "/hostfs"
+    processes:
+      etcd:
+      kube-apiserver:
+      kube-controller-manager:
+      kube-scheduler:
+      kubelet:
+        config-file-arguments:
+        - config
   - name: file-system
     patterns: [
       "/hostfs/etc/kubernetes/scheduler.conf",
@@ -32,7 +40,6 @@ cloudbeat:
       "/hostfs/var/lib/etcd",
       "/hostfs/etc/kubernetes/pki"
     ]
-
 # ================================== General ===================================
 
 # The name of the shipper that publishes the network data. It can be used to group
