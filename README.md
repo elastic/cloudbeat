@@ -4,10 +4,10 @@
 [![Build Status](https://internal-ci.elastic.co/buildStatus/icon?job=cloudbeat%2Fcloudbeat-mbp%2Fmain)](https://internal-ci.elastic.co/job/cloudbeat/job/cloudbeat-mbp/job/main/)
 
 ## Table of contents
-  - [Prerequisites](#prerequisites)
-  - [Running Cloudbeat](#running-cloudbeat)
-    - [Clean up](#clean-up)
-    - [Remote Debugging](#remote-debugging)
+- [Prerequisites](#prerequisites)
+- [Running Cloudbeat](#running-cloudbeat)
+  - [Clean up](#clean-up)
+  - [Remote Debugging](#remote-debugging)
 
 
 ## Prerequisites
