@@ -37,6 +37,9 @@ func (f *KubeFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 	if err != nil {
 		return nil, err
 	}
+	if cfg.ClientProvider == nil {
+		cfg.ClientProvider = kubernetes.GetKubernetesClient
+	}
 
 	return f.CreateFrom(cfg)
 }
