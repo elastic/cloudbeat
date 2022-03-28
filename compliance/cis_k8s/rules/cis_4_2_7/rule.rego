@@ -15,7 +15,7 @@ rule_evaluation {
 }
 
 # In case both flags and configuration file are specified, the executable argument takes precedence.
-# Checks that the entry for makeIPTablesUtilChains does not set to true.
+# Checks that the entry for makeIPTablesUtilChains is set to true.
 rule_evaluation {
 	not process_args["--make-iptables-util-chains"]
 	data_adapter.process_config.config.makeIPTablesUtilChains

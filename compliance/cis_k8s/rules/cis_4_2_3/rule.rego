@@ -16,7 +16,6 @@ rule_evaluation {
 # Checks that the entry for authentication:x509:clientCAFile: set to a valid path.
 rule_evaluation {
 	data_adapter.process_config.config.authentication.x509.clientCAFile
-	not data_adapter.process_config.config.authentication.x509.clientCAFile == ""
 }
 
 # Ensure that the --client-ca-file argument is set as appropriate (Automated)
