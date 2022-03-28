@@ -115,6 +115,12 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 			logp.L().Infof("couldn't find a configuration file associated with flag %s for process %s", argument, processName)
 			continue
 		}
+
+		groupMatches := matcher.FindStringSubmatch(cmd)
+		if len(groupMatches) < 2 {
+			logp.Error(fmt.Errorf("couldn't find a configuration file associated with flag %s for process %s", argument, processName))
+			continue
+		}
 		argValue := matcher.FindStringSubmatch(cmd)[1]
 		logp.L().Infof("using %s as a configuration file for process %s", argValue, processName)
 
