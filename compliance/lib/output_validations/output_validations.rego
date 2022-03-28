@@ -1,6 +1,8 @@
 package compliance.lib.output_validations
 
 import data.compliance
+import data.compliance.lib.assert
+import future.keywords.every
 
 validate_metadata(metadata) {
 	metadata.name
@@ -17,8 +19,9 @@ validate_metadata(metadata) {
 
 # validate every rule metadata
 test_validate_rule_metadata {
-	all_rules := [rule | compliance[benchmark].rules[rule]]
-	valid_rules := [rule | validate_metadata(compliance[benchmark].rules[rule].metadata)]
+	all_rules := [rule | rule := compliance[benchmark].rules[rule_id]]
 
-	count(valid_rules) == count(all_rules)
+	every rule in all_rules {
+		validate_metadata(rule.metadata)
+	}
 }

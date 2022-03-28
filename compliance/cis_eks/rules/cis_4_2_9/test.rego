@@ -13,7 +13,8 @@ test_pass {
 }
 
 test_not_evaluated {
-	not finding with input as {"type": "no-kube-api"}
+	not finding with input as test_data.not_evaluated_input
+	not finding with input as test_data.not_evaluated_kube_api_input
 }
 
 rule_input(resource) = test_data.kube_api_input(resource)

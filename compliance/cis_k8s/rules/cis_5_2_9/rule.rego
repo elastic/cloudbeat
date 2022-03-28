@@ -18,6 +18,7 @@ rule_evaluation = false {
 finding = result {
 	# filter
 	data_adapter.is_kube_api
+	data_adapter.containers
 
 	# set result
 	result := {
@@ -34,8 +35,8 @@ Capabilities are parts of the rights generally granted on a Linux system to the 
 In many cases applications running in containers do not require any capabilities to operate,
 so from the perspective of the principal of least privilege use of capabilities should be minimized.`,
 	"impact": "Pods with containers require capabilities to operate will not be permitted.",
-	"remediation": `Review the use of capabilites in applications runnning on your cluster.
-Where a namespace contains applicaions which do not require any Linux capabities to operate consider adding a PSP which forbids the admission of containers which do not drop all capabilities.`,
+	"remediation": `Review the use of capabilities in applications running on your cluster.
+Where a namespace contains applications which do not require any Linux capabilities to operate consider adding a PSP which forbids the admission of containers which do not drop all capabilities.`,
 	"default_value": "By default, PodSecurityPolicies are not defined.",
 	"benchmark": cis_k8s.benchmark_metadata,
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 5.2.9", "Pod Security Policies"]),

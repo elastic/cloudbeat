@@ -1,5 +1,9 @@
 package compliance.lib.assert
 
+is_true(value) {
+	not is_false(value)
+}
+
 is_false(value) {
 	value == false
 } else = false {
