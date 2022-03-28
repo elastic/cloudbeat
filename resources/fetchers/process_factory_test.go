@@ -87,7 +87,7 @@ processes:
 		process, ok := fetcher.(*ProcessesFetcher)
 		s.True(ok)
 		s.Equal(test.expectedDirectory, process.cfg.Directory)
-		s.NotNil(process.cfg.Fs)
+		s.NotNil(process.Fs)
 
 		s.Equal(len(test.processValidators), len(process.cfg.RequiredProcesses))
 		for _, validator := range test.processValidators {

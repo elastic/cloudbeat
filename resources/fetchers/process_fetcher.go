@@ -47,6 +47,7 @@ type ProcessResource struct {
 
 type ProcessesFetcher struct {
 	cfg ProcessFetcherConfig
+	Fs  fs.FS
 }
 
 type ProcessInputConfiguration struct {
@@ -57,13 +58,12 @@ type ProcessesConfigMap map[string]ProcessInputConfiguration
 
 type ProcessFetcherConfig struct {
 	fetching.BaseFetcherConfig
-	Directory         string `config:"directory"` // parent directory of target procfs
-	Fs                fs.FS
+	Directory         string             `config:"directory"` // parent directory of target procfs
 	RequiredProcesses ProcessesConfigMap `config:"processes"`
 }
 
 func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	pids, err := proc.ListFS(f.cfg.Fs)
+	pids, err := proc.ListFS(f.Fs)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, erro
 	// If errors occur during read, then return what we have till now
 	// without reporting errors.
 	for _, p := range pids {
-		stat, err := proc.ReadStatFS(f.cfg.Fs, p)
+		stat, err := proc.ReadStatFS(f.Fs, p)
 		if err != nil {
 			return nil, err
 		}
@@ -93,7 +93,7 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, erro
 }
 
 func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf ProcessInputConfiguration, processId string) (fetching.Resource, error) {
-	cmd, err := proc.ReadCmdLineFS(f.cfg.Fs, processId)
+	cmd, err := proc.ReadCmdLineFS(f.Fs, processId)
 	if err != nil {
 		return nil, err
 	}
@@ -112,11 +112,13 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 		regex := fmt.Sprintf(CMDArgumentMatcher, argument)
 		matcher := regexp.MustCompile(regex)
 		if !matcher.MatchString(cmd) {
-			logp.Error(fmt.Errorf("failed to find argument %s in process %s", argument, processName))
+			logp.L().Infof("couldn't find a configuration file associated with flag %s for process %s", argument, processName)
 			continue
 		}
 		argValue := matcher.FindStringSubmatch(cmd)[1]
-		data, err := fs.ReadFile(f.cfg.Fs, argValue)
+		logp.L().Infof("using %s as a configuration file for process %s", argValue, processName)
+
+		data, err := fs.ReadFile(f.Fs, argValue)
 		if err != nil {
 			logp.Error(fmt.Errorf("failed to read file configuration for process %s, error - %+v", processName, err))
 			continue

@@ -42,13 +42,13 @@ func (f *ProcessFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 		return nil, err
 	}
 
-	cfg.Fs = os.DirFS(cfg.Directory)
 	return f.CreateFrom(cfg)
 }
 
 func (f *ProcessFactory) CreateFrom(cfg ProcessFetcherConfig) (fetching.Fetcher, error) {
 	fe := &ProcessesFetcher{
 		cfg: cfg,
+		Fs:  os.DirFS(cfg.Directory),
 	}
 
 	return fe, nil

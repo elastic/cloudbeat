@@ -53,9 +53,8 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
 		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
-		Fs: sysfs,
 	}
-	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
+	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig, Fs: sysfs}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	t.Nil(err)
@@ -80,9 +79,8 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
 		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}}},
-		Fs: fsys,
 	}
-	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
+	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig, Fs: fsys}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	t.Nil(err)
@@ -102,9 +100,8 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
 		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"kubelet": {ConfigFileArguments: []string{}}},
-		Fs: fsys,
 	}
-	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
+	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig, Fs: fsys}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	t.Nil(err)
@@ -152,9 +149,8 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 			BaseFetcherConfig: fetching.BaseFetcherConfig{},
 			RequiredProcesses: map[string]ProcessInputConfiguration{
 				"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
-			Fs: sysfs,
 		}
-		processesFetcher := &ProcessesFetcher{cfg: fetcherConfig}
+		processesFetcher := &ProcessesFetcher{cfg: fetcherConfig, Fs: sysfs}
 
 		fetchedResource, err := processesFetcher.Fetch(context.TODO())
 		t.Nil(err)
