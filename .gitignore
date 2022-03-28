@@ -1,6 +1,7 @@
 /.idea
 /build
-
+cloudbeat-test
+.cloudbeat-test.config.json
 .DS_Store
 /cloudbeat
 /cloudbeat.test

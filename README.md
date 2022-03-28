@@ -1,6 +1,7 @@
 # Cloudbeat 
 ![Coverage](https://img.shields.io/badge/Coverage-46.4%25-yellow)
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
+[![Build Status](https://internal-ci.elastic.co/buildStatus/icon?job=cloudbeat%2Fcloudbeat-mbp%2Fmain)](https://internal-ci.elastic.co/job/cloudbeat/job/cloudbeat-mbp/job/main/)
 
 ## Table of contents
 - [Prerequisites](#prerequisites)
