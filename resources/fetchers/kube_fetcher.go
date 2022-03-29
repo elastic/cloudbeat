@@ -82,14 +82,14 @@ type requiredResource struct {
 type KubeFetcher struct {
 	cfg KubeApiFetcherConfig
 
-	watchers []kubernetes.Watcher
+	watchers       []kubernetes.Watcher
+	clientProvider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)
 }
 
 type KubeApiFetcherConfig struct {
 	fetching.BaseFetcherConfig
-	Interval       time.Duration `config:"interval"`
-	Kubeconfig     string        `config:"kubeconfig"`
-	ClientProvider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)
+	Interval   time.Duration `config:"interval"`
+	Kubeconfig string        `config:"kubeconfig"`
 }
 
 func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) error {
@@ -118,7 +118,7 @@ func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) erro
 }
 
 func (f *KubeFetcher) initWatchers() error {
-	client, err := f.cfg.ClientProvider(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	client, err := f.clientProvider(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return fmt.Errorf("could not get k8s client: %w", err)
 	}

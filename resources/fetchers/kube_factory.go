@@ -22,6 +22,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	k8s "k8s.io/client-go/kubernetes"
 )
 
 type KubeFactory struct {
@@ -37,17 +38,14 @@ func (f *KubeFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 	if err != nil {
 		return nil, err
 	}
-	if cfg.ClientProvider == nil {
-		cfg.ClientProvider = kubernetes.GetKubernetesClient
-	}
-
-	return f.CreateFrom(cfg)
+	return f.CreateFrom(cfg, kubernetes.GetKubernetesClient)
 }
 
-func (f *KubeFactory) CreateFrom(cfg KubeApiFetcherConfig) (fetching.Fetcher, error) {
+func (f *KubeFactory) CreateFrom(cfg KubeApiFetcherConfig, provider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)) (fetching.Fetcher, error) {
 	fe := &KubeFetcher{
-		cfg:      cfg,
-		watchers: make([]kubernetes.Watcher, 0),
+		cfg:            cfg,
+		clientProvider: provider,
+		watchers:       make([]kubernetes.Watcher, 0),
 	}
 
 	return fe, nil
