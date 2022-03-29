@@ -31,22 +31,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func MockProviderProvider(objects ...runtime.Object) func(s string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
+func MockProvider(objects ...runtime.Object) func(s string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
 	return func(s string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
-		return MockClient(objects), nil
+		return k8sfake.NewSimpleClientset(objects...), nil
 	}
-}
-
-func MockClient(objects []runtime.Object) *k8sfake.Clientset {
-	return k8sfake.NewSimpleClientset(objects...)
 }
 
 func TestKubeFetcherFetchNoResources(t *testing.T) {
-	cfg := KubeApiFetcherConfig{
-		ClientProvider: MockProviderProvider(),
-	}
-	factory := KubeFactory{}
-	kubeFetcher, err := factory.CreateFrom(cfg)
+	kubeFetcher, err := (&KubeFactory{}).CreateFrom(KubeApiFetcherConfig{}, MockProvider())
 
 	assert.NoError(t, err)
 
@@ -59,7 +51,7 @@ func TestKubeFetcherFetchNoResources(t *testing.T) {
 }
 
 func TestKubeFetcherFetchASinglePod(t *testing.T) {
-	pod := &v1.Pod{
+	pod := v1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Pod",
 			APIVersion: "v1",
@@ -78,11 +70,7 @@ func TestKubeFetcherFetchASinglePod(t *testing.T) {
 			},
 		},
 	}
-	cfg := KubeApiFetcherConfig{
-		ClientProvider: MockProviderProvider(pod),
-	}
-	factory := KubeFactory{}
-	kubeFetcher, err := factory.CreateFrom(cfg)
+	kubeFetcher, err := (&KubeFactory{}).CreateFrom(KubeApiFetcherConfig{}, MockProvider(&pod))
 
 	assert.NoError(t, err)
 
@@ -90,5 +78,5 @@ func TestKubeFetcherFetchASinglePod(t *testing.T) {
 	assert.Nil(t, err, "Fetcher was not able to fetch kubernetes resources")
 
 	assert.Equal(t, 1, len(results))
-	assert.Equal(t, pod, results[0].GetData())
+	assert.Equal(t, &pod, results[0].GetData())
 }
