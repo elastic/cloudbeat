@@ -19,7 +19,6 @@ package manager
 
 import (
 	"context"
-	"encoding/gob"
 	"fmt"
 	"reflect"
 	"testing"
@@ -34,7 +33,6 @@ const (
 )
 
 func TestDataRun(t *testing.T) {
-	gob.Register(NumberResource{})
 	opts := goleak.IgnoreCurrent()
 
 	// Verify no goroutines are leaking. Safest to keep this on top of the function.

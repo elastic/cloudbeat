@@ -15,37 +15,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+// This file creates dependencies on build/test tools, so we can
+// track them in go.mod. See:
+//     https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module
+
+//go:build tools
+// +build tools
+
+package main
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
+	_ "github.com/reviewdog/reviewdog/cmd/reviewdog" // go.mod/go.sum
+	_ "github.com/t-yuki/gocover-cobertura"          // go.mod/go.sum
+	_ "go.elastic.co/go-licence-detector"            // go.mod/go.sum
+	_ "honnef.co/go/tools/cmd/staticcheck"           // go.mod/go.sum
+
+	_ "github.com/elastic/elastic-package" // go.mod/go.sum
+	_ "github.com/elastic/go-licenser"     // go.mod/go.sum
 )
-
-type KubeFactory struct {
-}
-
-func init() {
-	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
-}
-
-func (f *KubeFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	cfg := KubeApiFetcherConfig{}
-	err := c.Unpack(&cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	return f.CreateFrom(cfg)
-}
-
-func (f *KubeFactory) CreateFrom(cfg KubeApiFetcherConfig) (fetching.Fetcher, error) {
-	fe := &KubeFetcher{
-		cfg:      cfg,
-		watchers: make([]kubernetes.Watcher, 0),
-	}
-
-	return fe, nil
-}

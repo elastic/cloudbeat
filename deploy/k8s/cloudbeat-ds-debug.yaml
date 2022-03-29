@@ -136,6 +136,14 @@ data:
       - name: kube-api
       - name: process
         directory: "/hostfs"
+        processes:
+          etcd:
+          kube-apiserver:
+          kube-controller-manager:
+          kube-scheduler:
+          kubelet:
+            config-file-arguments:
+            - config
       - name: file-system
         patterns: [
           "/hostfs/etc/kubernetes/scheduler.conf",
