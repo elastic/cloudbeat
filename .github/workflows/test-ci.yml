@@ -49,9 +49,10 @@ jobs:
         run: |
           helm upgrade --wait --install --values tests/deploy/k8s-cloudbeat-tests/k8s-values.yaml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
 
+      - name: Sleep for 10s
+        uses: juliangruber/sleep-action@v1
+        with:
+          time: 100s
       - name: run tests
         run: |
-          # Wait until cloudbeat is ready ready
-          kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
-
           helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs
