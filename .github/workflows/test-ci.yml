@@ -1,10 +1,13 @@
 name: pytest integration tests
 
 on:
-  pull_request_target:
+  push:
     branches:
-      - main
-    types: [assigned, opened, synchronize, reopened]
+      - "ci-actions-testing-V2"
+  # pull_request_target:
+  #   branches:
+  #     - main
+  #   types: [assigned, opened, synchronize, reopened]
 
 env:
   K8S_MANIFEST_DIR: deploy/k8s
