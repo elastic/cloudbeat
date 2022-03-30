@@ -5,7 +5,7 @@ name: kind-mono
 nodes:
 - role: control-plane
   extraMounts:
-  - hostPath: ./data
+  - hostPath: ./tests/test_results
     containerPath: /tmp/data
 
 # Todo Enable EphemeralContainers on kind config for debug
