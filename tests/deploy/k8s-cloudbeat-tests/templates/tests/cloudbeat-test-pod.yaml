@@ -4,7 +4,6 @@ metadata:
   name: test-pod-v1
   namespace: {{ .Values.namespace }}
   annotations:
-    # "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded,hook-failed"
     "helm.sh/hook-delete-policy": "before-hook-creation"
     "helm.sh/hook": test
 spec:

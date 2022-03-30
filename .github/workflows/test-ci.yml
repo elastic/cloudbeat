@@ -1,27 +1,26 @@
-name: Deploy Environment Action
+name: pytest integration tests
 
-on: 
-  push:
+on:
+  pull_request_target:
     branches:
-      - "ci-actions-testing-V2"
+      - main
+    types: [assigned, opened, synchronize, reopened]
+
 env:
   K8S_MANIFEST_DIR: deploy/k8s
   GO_VERSION: 1.17.2
 
-# steps:
-# 1. Checkout repo
-# 2. Setup kind
-# 3. Deploy ES on kind with helm
-# 4. Deploy cloudbeat
-# 5. Build & deploy test docker
-# 6. Save artifacts 
-# 7. Show artifacts(gh pages/bucket)
 jobs:
-  pytest-integration:
+  pytest-integration-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
+          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
       
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -53,6 +52,7 @@ jobs:
         uses: juliangruber/sleep-action@v1
         with:
           time: 100s
+
       - name: run tests
         run: |
           helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs

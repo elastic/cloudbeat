@@ -1,5 +1,4 @@
-# Deploy a cloudbeat instance per node for cis policy
----
+{{- if .Values.cloudbeat.deploy -}}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -31,15 +30,15 @@ spec:
             - name: ES_HOST
               value: "elasticsearch-master.kube-system:9200"
             - name: ES_USERNAME
-              value: elastic
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.serviceAccount.name}}-configmap
+                  key: ES_USER
             - name: ES_PASSWORD
-              value: changeme
-            - name: KIBANA_HOST
-              value: "http://host.docker.internal:5601"
-            - name: ELASTIC_CLOUD_ID
-              value: none
-            - name: ELASTIC_CLOUD_AUTH
-              value: none
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.serviceAccount.name}}-configmap
+                  key: ES_PASSWORD
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -49,8 +48,6 @@ spec:
             # If using Red Hat OpenShift uncomment this:
             #privileged: true
           resources:
-            # limits:
-            #   memory: 200Mi
             requests:
               cpu: 100m
               memory: 100Mi
@@ -186,7 +183,7 @@ data:
       hosts: ${ES_HOST}
 
       # Protocol - either `http` (default) or `https`.
-      #protocol: "https"
+      protocol: "http"
 
       # Authentication credentials - either API key or username/password.
       #api_key: "id:api_key"
@@ -338,4 +335,4 @@ roleRef:
   kind: Role
   name: cloudbeat-kubeadm-config
   apiGroup: rbac.authorization.k8s.io
----
+{{- end }}

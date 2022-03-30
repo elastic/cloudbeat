@@ -12,3 +12,5 @@ cloudbeat-test
 *local.yaml
 *local.yml
 fields.yml
+*-container.json 
+*-result.json

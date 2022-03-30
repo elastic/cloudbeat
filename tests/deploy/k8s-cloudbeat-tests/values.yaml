@@ -9,7 +9,7 @@ image:
   repository: cloudbeat-test
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.0.5"
+  tag: "0.0.6"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -90,6 +90,9 @@ affinity: {}
 
 job:
   backoffLimit: 0
+
+cloudbeat:
+  deploy: false
 
 elasticsearch:
   # replicas/masters
