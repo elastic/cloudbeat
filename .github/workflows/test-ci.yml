@@ -17,7 +17,7 @@ env:
 # 6. Save artifacts 
 # 7. Show artifacts(gh pages/bucket)
 jobs:
-  elastic-deploy:
+  pytest-integration:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -51,4 +51,7 @@ jobs:
 
       - name: run tests
         run: |
+          # Wait until cloudbeat is ready ready
+          kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
+
           helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs
