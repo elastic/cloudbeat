@@ -2,6 +2,10 @@ package fetchers
 
 import (
 	"encoding/gob"
+	"fmt"
+	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/cloudbeat/resources/ctxProvider"
+	"regexp"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -31,9 +35,19 @@ func (f *ELBFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *ELBFactory) CreateFrom(cfg ELBFetcherConfig) (fetching.Fetcher, error) {
-	fe := &ELBFetcher{
-		cfg: cfg,
+	awsCredProvider := ctxProvider.AWSCredProvider{}
+	awsCfg := awsCredProvider.GetAwsCredentials()
+	elb := NewELBProvider(awsCfg.Config)
+	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsCfg.Config.Region)
+	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)
 	}
 
-	return fe, nil
+	return &ELBFetcher{
+		elbProvider:     elb,
+		cfg:             cfg,
+		kubeClient:      kubeClient,
+		lbRegexMatchers: []*regexp.Regexp{regexp.MustCompile(loadBalancerRegex)},
+	}, nil
 }

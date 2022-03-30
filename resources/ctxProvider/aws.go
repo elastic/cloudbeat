@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package ctxProvider
 
 import "github.com/aws/aws-sdk-go-v2/aws"
 

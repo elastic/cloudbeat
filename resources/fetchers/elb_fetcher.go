@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
@@ -48,22 +47,6 @@ type LoadBalancersDescription []elasticloadbalancing.LoadBalancerDescription
 
 type ELBResource struct {
 	LoadBalancersDescription
-}
-
-func NewELBFetcher(awsCfg AwsFetcherConfig, cfg ELBFetcherConfig) (fetching.Fetcher, error) {
-	elb := NewELBProvider(awsCfg.Config)
-	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsCfg.Config.Region)
-	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)
-	}
-
-	return &ELBFetcher{
-		elbProvider:     elb,
-		cfg:             cfg,
-		kubeClient:      kubeClient,
-		lbRegexMatchers: []*regexp.Regexp{regexp.MustCompile(loadBalancerRegex)},
-	}, nil
 }
 
 func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
