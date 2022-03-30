@@ -50,7 +50,9 @@ expose-ports:
 
 
 #### TESTS ####
+
 TESTS_RELEASE := "cloudbeat-tests"
+TIMEOUT := "1200s"
 
 build-test-docker:
   cd tests; docker build -t cloudbeat-test:0.0.6 .
@@ -59,25 +61,7 @@ load-tests-image-kind:
   kind load docker-image cloudbeat-test:0.0.6 --name kind-mono
 
 deploy-tests-helm:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/k8s-cloudbeat-tests/k8s-values.yaml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/ 
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/ 
 
 purge-tests:
 	helm del {{TESTS_RELEASE}} -n kube-system
-
-# Deploy ES helm
-
-RELEASE := "es-tests-stack"
-TIMEOUT := "1200s"
-
-install-ES:
-	helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/ES-helm/values.yaml --namespace kube-system {{RELEASE}} elastic/elasticsearch
-
-install-local-path:
-	kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
-	helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/ES-helm/values-local-path.yaml {{RELEASE}} ../../
-
-test-ES: install-ES
-	helm test {{RELEASE}}
-
-purge-ES:
-	helm del {{RELEASE}}
