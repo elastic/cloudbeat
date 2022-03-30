@@ -29,7 +29,7 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: ES_HOST
-              value: "elasticsearch-master.kube-system:9200"
+              value: "host.docker.internal:9200"
             - name: ES_USERNAME
               value: elastic
             - name: ES_PASSWORD
