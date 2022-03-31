@@ -31,4 +31,8 @@ import (
 
 	_ "github.com/mitchellh/gox"
 	_ "golang.org/x/lint/golint"
+
+	_ "go.elastic.co/go-licence-detector"
+
+	_ "github.com/elastic/go-licenser"
 )
