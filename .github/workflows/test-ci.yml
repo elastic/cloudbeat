@@ -58,7 +58,7 @@ jobs:
           tags: cloudbeat:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/dockers-cache/cloudbeat.tar
+          outputs: type=docker,dest=/tmp/cloudbeat.tar
           # load: true
 
       - name: Build pytest-docker
@@ -69,12 +69,12 @@ jobs:
           tags: cloudbeat-test:0.0.6
           cache-from: type=local,mode=max,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/dockers-cache/pytest.tar
+          outputs: type=docker,dest=/tmp/pytest.tar
       
       - name: Cache dockers images
         uses: actions/cache@v2
         with:
-          path: /tmp/dockers-cache
+          path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-dockers-cache-
@@ -100,12 +100,12 @@ jobs:
       - name: Cache dockers images
         uses: actions/cache@v2
         with:
-          path: /tmp/dockers-cache
+          path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-dockers-cache-
       
-      - run: ls /tmp/dockers-cache
+      - run: ls /tmp
       # - name: Download image
       #   uses: ishworkh/docker-image-artifact-download@v1
       #   with:
