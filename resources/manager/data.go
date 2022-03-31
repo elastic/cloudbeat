@@ -18,9 +18,7 @@
 package manager
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
 	"sync"
 	"time"
 
@@ -32,12 +30,17 @@ import (
 // Data maintains a cache that is updated by Fetcher implementations registered
 // against it. It sends the cache to an output channel at the defined interval.
 type Data struct {
-	interval time.Duration
-	output   chan ResourceMap
+	interval  time.Duration
+	output    chan ResourceMap
+	cycleData ResourceMap
+	fetchers  FetchersRegistry
+	wg        *sync.WaitGroup
+}
 
-	state    ResourceMap
-	fetchers FetchersRegistry
-	wg       *sync.WaitGroup
+// update is a single update sent from a worker to a manager.
+type update struct {
+	key string
+	val []fetching.Resource
 }
 
 type ResourceMap map[string][]fetching.Resource
@@ -45,11 +48,10 @@ type ResourceMap map[string][]fetching.Resource
 // NewData returns a new Data instance with the given interval.
 func NewData(interval time.Duration, fetchers FetchersRegistry) (*Data, error) {
 	return &Data{
-		interval: interval,
-		output:   make(chan ResourceMap),
-
-		state:    make(ResourceMap),
-		fetchers: fetchers,
+		interval:  interval,
+		output:    make(chan ResourceMap),
+		cycleData: make(ResourceMap),
+		fetchers:  fetchers,
 	}, nil
 }
 
@@ -82,12 +84,6 @@ func (d *Data) Run(ctx context.Context) error {
 	return nil
 }
 
-// update is a single update sent from a worker to a manager.
-type update struct {
-	key string
-	val []fetching.Resource
-}
-
 func (d *Data) fetchWorker(ctx context.Context, updates chan update, k string) {
 	for {
 		select {
@@ -115,22 +111,18 @@ func (d *Data) fetchManager(ctx context.Context, updates chan update) {
 
 	for {
 		select {
-		case <-ticker.C:
-			// Generate input ID?
-
-			c, err := copyState(d.state)
-			if err != nil {
-				logp.L().Errorf("could not copyState data state: %v", err)
-				continue
-			}
-
-			d.output <- c
-
-		case u := <-updates:
-			d.state[u.key] = u.val
-
 		case <-ctx.Done():
 			return
+
+		case <-ticker.C:
+			// Generate input ID?
+			// Send aggregated data at cycle tick
+			d.output <- d.cycleData
+			d.cycleData = make(ResourceMap)
+
+		// Aggregate fetcher's data into cycle data map
+		case u := <-updates:
+			d.cycleData[u.key] = u.val
 		}
 	}
 }
@@ -143,25 +135,4 @@ func (d *Data) Stop(ctx context.Context, cancel context.CancelFunc) {
 	d.wg.Wait()
 
 	close(d.output)
-}
-
-// copyState makes a copyState of the given map.
-func copyState(m ResourceMap) (ResourceMap, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	dec := gob.NewDecoder(&buf)
-	err := enc.Encode(m)
-	if err != nil {
-		return nil, err
-	}
-	var newState ResourceMap
-	err = dec.Decode(&newState)
-	if err != nil {
-		return nil, err
-	}
-	return newState, nil
-}
-
-func init() {
-	gob.Register([]interface{}{})
 }
