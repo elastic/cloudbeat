@@ -7,3 +7,4 @@ export PLATFORMS="linux/amd64,linux/arm64"
 export TYPES="tar.gz"
 
 make release-manager-snapshot
+cp build/dependencies-*.csv build/distributions/.
