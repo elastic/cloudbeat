@@ -19,7 +19,9 @@ def test_cloudbeat_pod_exist(data):
     """
 
     pods, nodes = data
-    assert len(pods) == len(nodes), f"Pods count is {len(pods)}, and nodes count is {len(nodes)}"
+    pods_count = len(pods)
+    nodes_count = len(nodes)
+    assert pods_count == nodes_count, f"Pods count is {pods_count}, and nodes count is {nodes_count}"
 
 
 @pytest.mark.sanity
@@ -30,5 +32,8 @@ def test_cloudbeat_pods_running(data):
     :param data: (Pods list, Nodes list)
     :return:
     """
+    # Verify that at least 1 pod is running the cluster
+    assert len(data[0]) > 0, "There are no cloudbeat pod instances running in the cluster"
+    # Verify that each pod is in running state
     assert all(pod.status.phase == "Running" for pod in data[0]), "Not all pods are running"
 

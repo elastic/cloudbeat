@@ -2,6 +2,7 @@ import pytest
 import configuration
 from commonlib.kubernetes import KubernetesHelper
 from commonlib.elastic_wrapper import ElasticWrapper
+from commonlib.docker_wrapper import DockerWrapper
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -19,3 +20,10 @@ def elastic_client():
     elastic_config = configuration.elasticsearch
     es_client = ElasticWrapper(elastic_params=elastic_config)
     return es_client
+
+
+@pytest.fixture(scope="session", autouse=True)
+def docker_client():
+    docker_config = configuration.docker
+    docker_client = DockerWrapper(config=docker_config)
+    return docker_client

@@ -10,6 +10,7 @@ from munch import Munch
 agent = Munch()
 agent.name = os.getenv('AGENT_NAME', 'cloudbeat')
 agent.namespace = os.getenv('AGENT_NAMESPACE', 'kube-system')
+agent.findings_timeout = 90
 
 # --- Kubernetes environment definition --------------------
 kubernetes = Munch()
@@ -25,3 +26,6 @@ elasticsearch.port = os.getenv('ES_PORT', 9200)
 elasticsearch.protocol = os.getenv('ES_PROTOCOL', 'http')
 elasticsearch.url = f"{elasticsearch.protocol}://{elasticsearch.hosts}:{elasticsearch.port}"
 elasticsearch.cis_index = os.getenv('CIS_INDEX', "*cis_kubernetes_benchmark.findings*")
+
+docker = Munch()
+docker.base_url = os.getenv('DOCKER_URL', "")
