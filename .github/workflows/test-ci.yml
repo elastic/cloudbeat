@@ -116,7 +116,7 @@ jobs:
 
       - name: Load images to kind
         run: |
-          kind load image-archive /tmp/cloudbeat.tar & kind load image-archive /tmp/pytest.tar
+          kind load image-archive /tmp/cloudbeat.tar --name=kind-mono & kind load image-archive /tmp/pytest.tar --name=kind-mono
 
       - name: Deploy tests Helm chart
         run: |
