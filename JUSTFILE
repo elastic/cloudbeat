@@ -47,3 +47,21 @@ ssh-cloudbeat:
 expose-ports:
     CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
     kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
+
+
+#### TESTS ####
+
+TESTS_RELEASE := "cloudbeat-tests"
+TIMEOUT := "1200s"
+
+build-test-docker:
+  cd tests; docker build -t cloudbeat-test:0.0.6 .
+
+load-tests-image-kind:
+  kind load docker-image cloudbeat-test:0.0.6 --name kind-mono
+
+deploy-tests-helm:
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/ 
+
+purge-tests:
+	helm del {{TESTS_RELEASE}} -n kube-system
