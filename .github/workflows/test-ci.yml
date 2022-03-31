@@ -80,6 +80,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   pytest-integration-test:
+    needs: Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
