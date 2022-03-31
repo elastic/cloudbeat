@@ -1,6 +1,5 @@
 import pytest
 
-# testdata = ['file-system', 'process']
 testdata = ['file-system', 'process', 'kube-api']
 
 

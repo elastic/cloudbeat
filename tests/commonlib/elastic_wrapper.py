@@ -12,5 +12,4 @@ class ElasticWrapper:
 
     def get_index_data(self, index_name: str, query: dict = None):
         result = self.es.search(index=index_name, body=query)
-        # result = self.es.search(index=index_name, query=query)
         return result

@@ -102,10 +102,6 @@ services:
           "CMD-SHELL",
           "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi",
         ]
-    #     [
-    #       "CMD-SHELL",
-    #       "curl -s --cacert config/certs/ca/ca.crt http://localhost:9200 | grep -q 'missing authentication credentials'",
-    #     ]        
       interval: 10s
       timeout: 10s
       retries: 120
@@ -146,10 +142,6 @@ services:
           "CMD-SHELL",
           "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi",
         ]
-    #     [
-    #       "CMD-SHELL",
-    #       "curl -s --cacert config/certs/ca/ca.crt http://localhost:9200 | grep -q 'missing authentication credentials'",
-    #     ]         
       interval: 10s
       timeout: 10s
       retries: 120
@@ -190,10 +182,6 @@ services:
           "CMD-SHELL",
           "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi",
         ]
-    #     [
-    #       "CMD-SHELL",
-    #       "curl -s --cacert config/certs/ca/ca.crt http://localhost:9200 | grep -q 'missing authentication credentials'",
-    #     ]        
       interval: 10s
       timeout: 10s
       retries: 120
