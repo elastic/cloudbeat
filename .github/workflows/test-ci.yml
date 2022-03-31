@@ -58,7 +58,8 @@ jobs:
           tags: cloudbeat:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-          load: true
+          outputs: type=docker,dest=/tmp/dockers-cache/cloudbeat.tar
+          # load: true
 
       - name: Build pytest-docker
         uses: docker/build-push-action@v2
@@ -68,11 +69,20 @@ jobs:
           tags: cloudbeat-test:0.0.6
           cache-from: type=local,mode=max,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-
-      - name: Upload image
-        uses: ishworkh/docker-image-artifact-upload@v1
+          outputs: type=docker,dest=/tmp/dockers-cache/pytest.tar
+      
+      - name: Cache dockers images
+        uses: actions/cache@v2
         with:
-          image: "cloudbeat:latest"
+          path: /tmp/dockers-cache
+          key: ${{ runner.os }}-dockers-cache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-dockers-cache-
+
+      # - name: Upload image
+      #   uses: ishworkh/docker-image-artifact-upload@v1
+      #   with:
+      #     image: "cloudbeat:latest"
 
       - name: Move cache
         run: |
@@ -87,10 +97,19 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Download image
-        uses: ishworkh/docker-image-artifact-download@v1
+      - name: Cache dockers images
+        uses: actions/cache@v2
         with:
-          image: "cloudbeat:latest"
+          path: /tmp/dockers-cache
+          key: ${{ runner.os }}-dockers-cache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-dockers-cache-
+      
+      - run: ls /tmp/dockers-cache
+      # - name: Download image
+      #   uses: ishworkh/docker-image-artifact-download@v1
+      #   with:
+      #     image: "cloudbeat:latest"
   #       with:
   #         token: ${{ secrets.GITHUB_TOKEN }}
   #         repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
