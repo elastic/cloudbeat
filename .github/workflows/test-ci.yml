@@ -1,58 +1,102 @@
 name: pytest integration tests
 
 on:
-  pull_request_target:
+  push:
     branches:
-      - main
-    types: [assigned, opened, synchronize, reopened]
+      - "new-tests-ci"
+  # pull_request_target:
+  #   branches:
+  #     - main
+  #   types: [assigned, opened, synchronize, reopened]
 
 env:
   K8S_MANIFEST_DIR: deploy/k8s
   GO_VERSION: 1.17.2
 
 jobs:
-  pytest-integration-test:
+  build-cloudbeat-testdocker:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
-          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
-      
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.GO_VERSION }}
 
-      - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.2.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      # So now you can use Actions' own caching!
+      - name: Cache Docker layers
+        uses: actions/cache@v2
         with:
-          config: deploy/k8s/kind/kind-config.yaml
-          cluster_name: kind-mono 
-
-      - name: Docker build Cloudbeat
-        run: |
-          GOOS=linux go build -v && docker build -t cloudbeat . && kind load docker-image cloudbeat:latest --name kind-mono
-      
-      - name: Docker build tests-container
-        run: |
-          cd tests; docker build -t cloudbeat-test:0.0.6 . && kind load docker-image cloudbeat-test:0.0.6 --name kind-mono
-      
-      - uses: azure/setup-helm@v1
-        id: install
-      
-      - name: Deploy tests Helm chart
-        run: |
-          helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
-
-      - name: Sleep for 10s
-        uses: juliangruber/sleep-action@v1
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      # And make it available for the builds
+      - name: Build cloudbeat
+        uses: docker/build-push-action@v2
         with:
-          time: 100s
+          context: .
+          push: false
+          tags: cloudbeat:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
 
-      - name: run tests
+      - name: Build pytest-docker
+        uses: docker/build-push-action@v2
+        with:
+          context: ./tests/.
+          push: false
+          tags: cloudbeat-test:0.0.6
+          cache-from: type=local,mode=max,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+
+      - name: Move cache
         run: |
-          helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  # pytest-integration-test:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
+  #   steps:
+  #     - name: Check out the repo
+  #       uses: actions/checkout@v2
+  #       with:
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
+  #         ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
+      
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v2
+  #       with:
+  #         go-version: ${{ env.GO_VERSION }}
+
+  #     - name: Create k8s Kind Cluster
+  #       uses: helm/kind-action@v1.2.0
+  #       with:
+  #         config: deploy/k8s/kind/kind-config.yaml
+  #         cluster_name: kind-mono 
+
+  #     - name: Docker build Cloudbeat
+  #       run: |
+  #         GOOS=linux go build -v && docker build -t cloudbeat . && kind load docker-image cloudbeat:latest --name kind-mono
+      
+  #     - name: Docker build tests-container
+  #       run: |
+  #         cd tests; docker build -t cloudbeat-test:0.0.6 . && kind load docker-image cloudbeat-test:0.0.6 --name kind-mono
+      
+  #     - uses: azure/setup-helm@v1
+  #       id: install
+      
+  #     - name: Deploy tests Helm chart
+  #       run: |
+  #         helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
+
+  #     - name: Sleep for 10s
+  #       uses: juliangruber/sleep-action@v1
+  #       with:
+  #         time: 100s
+
+  #     - name: run tests
+  #       run: |
+  #         helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs
