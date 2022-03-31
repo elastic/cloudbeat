@@ -6,4 +6,4 @@ set -euox pipefail
 export PLATFORMS="linux/amd64,linux/arm64"
 export TYPES="tar.gz"
 
-make release
+make release-manager-snapshot
