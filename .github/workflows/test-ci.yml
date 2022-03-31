@@ -100,7 +100,6 @@ jobs:
       - uses: azure/setup-helm@v1
         id: install
 
-
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
         with:
@@ -110,6 +109,7 @@ jobs:
       - name: Wait for build to succeed
         uses: lewagon/wait-on-check-action@v1.0.0
         with:
+          ref: ${{ github.sha }}
           check-name: Build
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 10
