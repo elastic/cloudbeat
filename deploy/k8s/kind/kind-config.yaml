@@ -5,7 +5,7 @@ name: kind-mono
 nodes:
 - role: control-plane
   extraMounts:
-  - hostPath: ./tests/test_results
+  - hostPath: ./tests/allure/results
     containerPath: /tmp/data
 
 # Todo Enable EphemeralContainers on kind config for debug

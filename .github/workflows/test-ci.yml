@@ -138,26 +138,29 @@ jobs:
       - name: run tests
         run: |
           helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs
-      # - name: Download image
-      #   uses: ishworkh/docker-image-artifact-download@v1
-      #   with:
-      #     image: "cloudbeat:latest"
-  #       with:
-  #         token: ${{ secrets.GITHUB_TOKEN }}
-  #         repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
-  #         ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
-      
-  #     - name: Set up Go
-  #       uses: actions/setup-go@v2
-  #       with:
-  #         go-version: ${{ env.GO_VERSION }}
 
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
 
-  #     - name: Docker build Cloudbeat
-  #       run: |
-  #         GOOS=linux go build -v && docker build -t cloudbeat . && kind load docker-image cloudbeat:latest --name kind-mono
-      
-  #     - name: Docker build tests-container
-  #       run: |
-  #         cd tests; docker build -t cloudbeat-test:0.0.6 . && kind load docker-image cloudbeat-test:0.0.6 --name kind-mono
-      
+      - name: Generate
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          allure_results: tests/allure/results
+          #gh_pages: gh-pages
+          #allure_report: allure-report
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: Deploy report to Github Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v2
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history
