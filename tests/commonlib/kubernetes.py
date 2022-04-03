@@ -1,5 +1,5 @@
 """
-This module provides kubernetes functionality based on original kuberentes python library.
+This module provides kubernetes functionality based on original kubernetes python library.
 """
 
 from kubernetes import client, config, utils
@@ -73,7 +73,7 @@ class KubernetesHelper:
     def stop_agent(self, yaml_objects_list: list):
         """
         This function will delete all cloudbeat kubernetes resources.
-        Currently, there is no ability to remove throug utils due to the following:
+        Currently, there is no ability to remove through utils due to the following:
         https://github.com/kubernetes-client/python/pull/1392
         So below is cloud-security-posture own implementation.
         :return: V1Object - result
@@ -88,9 +88,8 @@ class KubernetesHelper:
         """
         This is internal method for executing delete method depends on resource type.
         Binding is done using dispatch_delete dictionary.
-        :param resource_type: Kubernetes resource to be deleted
-        :param kwargs: Depends on resource type, it may be a name / name and namespace.
-        :return:
+        @param resource_type: Kubernetes resource to be deleted.
+        @param kwargs: Depends on resource type, it may be a name / name and namespace.
+        @return:
         """
         return self.dispatch_delete[resource_type](**kwargs)
-

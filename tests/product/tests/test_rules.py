@@ -18,7 +18,7 @@ def data(k8s, docker_client, cloudbeat_agent):
     file_path = Path(__file__).parent / DEPLOY_YAML
     if k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace):
         k8s.stop_agent(get_k8s_yaml_objects(file_path=file_path))
-    result = k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
+    k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
     time.sleep(5)
     yield k8s, docker_client, cloudbeat_agent
     k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)

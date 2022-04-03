@@ -13,7 +13,6 @@ def get_logs_from_stream(stream: str) -> list[Munch]:
     """
     This function converts logs stream to list of Munch objects (dictionaries)
     @param stream: StringIO stream
-    @param pattern: text to be search in log stream
     @return: List of Munch objects
     """
     logs = io.StringIO(stream)
@@ -34,7 +33,6 @@ def get_k8s_yaml_objects(file_path: Path) -> list[str: dict]:
     if not file_path:
         raise Exception(f'{file_path} is required')
     result_list = []
-    metadata_list = ['name', 'namespace']
     with file_path.open() as yaml_file:
         yaml_objects = yaml.safe_load_all(yaml_file)
         for yml_doc in yaml_objects:
