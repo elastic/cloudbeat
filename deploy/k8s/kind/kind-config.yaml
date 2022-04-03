@@ -2,5 +2,10 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 name: kind-mono
+nodes:
+- role: control-plane
+  extraMounts:
+  - hostPath: ./tests/test_results
+    containerPath: /tmp/data
 
 # Todo Enable EphemeralContainers on kind config for debug
