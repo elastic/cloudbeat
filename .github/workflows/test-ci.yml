@@ -90,7 +90,6 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   pytest-integration-test:
-    # needs: Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -136,6 +135,7 @@ jobs:
           time: 100s
 
       - name: run tests
+        id: test-rusult
         run: |
           helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs
 
@@ -164,3 +164,14 @@ jobs:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: allure-history
+
+      - name: Post the link to the report
+        if: always()
+        uses: Sibz/github-status-action@v1
+        with: 
+            authToken: ${{secrets.GITHUB_TOKEN}}
+            context: 'Integration tests'
+            state: ${{ steps.test-result.outcome }}
+            # description: 
+            sha: ${{ github.event.pull_request.head.sha }}
+            target_url: simple-elf.github.io/github-allure-history/${{ github.run_number }}
