@@ -134,8 +134,8 @@ jobs:
         with:
           time: 100s
 
-      - name: run tests
-        id: test-rusult
+      - name: Run Tests
+        id: run_tests
         run: |
           helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs
 
@@ -171,7 +171,7 @@ jobs:
         with: 
             authToken: ${{secrets.GITHUB_TOKEN}}
             context: 'Integration tests'
-            state: ${{ steps.test-result.outcome }}
+            state: ${{ steps.run_tests.outcome }}
             # description: 
             sha: ${{ github.event.pull_request.head.sha }}
             target_url: simple-elf.github.io/github-allure-history/${{ github.run_number }}
