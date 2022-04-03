@@ -241,4 +241,8 @@ release: $(MAGE) $(PYTHON) build/dependencies.csv
 	$(MAGE) package
 
 build/dependencies.csv: $(PYTHON) go.mod
-	$(PYTHON) scripts/make/generate_notice.py --csv $@
+ifdef SNAPSHOT
+	$(PYTHON) scripts/make/generate_notice.py --csv build/dependencies-${CLOUDBEAT_VERSION}-SNAPSHOT.csv
+else
+	$(PYTHON) scripts/make/generate_notice.py --csv build/dependencies-$CLOUDBEAT_VERSION.csv
+endif
