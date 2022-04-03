@@ -173,5 +173,5 @@ jobs:
             context: 'Integration tests'
             state: ${{ steps.run_tests.outcome }}
             # description: 
-            sha: ${{ github.event.pull_request.head.sha }}
+            sha: ${{github.event.pull_request.head.sha || github.sha}}
             target_url: simple-elf.github.io/github-allure-history/${{ github.run_number }}
