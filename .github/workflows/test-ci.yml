@@ -137,7 +137,8 @@ jobs:
       - name: Run Tests
         id: run_tests
         run: |
-          helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs
+          set -o pipefail
+          helm test cloudbeat-tests --filter name=test-pod-v1 --logs 2>&1 | tee /dev/tty | sed -n '/summary/,/===/p' | read -d '' SUMMARY d
 
       - name: Get Allure history
         uses: actions/checkout@v2
@@ -165,13 +166,21 @@ jobs:
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: allure-history
 
-      - name: Post the link to the report
+      - name: Commnet test success result
+        uses: marocchino/sticky-pull-request-comment@v2
         if: always()
-        uses: Sibz/github-status-action@v1
-        with: 
-            authToken: ${{secrets.GITHUB_TOKEN}}
-            context: 'Integration tests'
-            state: ${{ steps.run_tests.outcome }}
-            # description: 
-            sha: ${{github.event.pull_request.head.sha || github.sha}}
-            target_url: https://${{ github.repository.owner}}.github.io/cloudbeat/${{ github.run_number }}
+        with:
+          header: Test Results
+          delete: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ## Cloudbeat CI :robot:
+            The integration tests status: ${{ steps.run_tests.outcome }}
+
+            <details>
+            <summary><b>Summary & link to detailed report https://${{ github.repository.owner }}.github.io/cloudbeat/${{ github.run_number }} </b></summary>
+            
+            ```zsh
+            ${{env.SUMMARY}}
+            ```
+            </details>
