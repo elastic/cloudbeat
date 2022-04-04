@@ -1,7 +1,6 @@
 package compliance.lib.common
 
 import data.compliance.lib.assert
-import data.compliance.lib.output_validations
 
 test_calculate_result_rule_evaluation_false {
 	rule_evaluation := false

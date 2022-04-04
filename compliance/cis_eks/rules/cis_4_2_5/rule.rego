@@ -1,7 +1,6 @@
 package compliance.cis_eks.rules.cis_4_2_5
 
 import data.compliance.cis_eks
-import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 

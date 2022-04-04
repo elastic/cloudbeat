@@ -2,7 +2,6 @@ package compliance.cis_eks.rules.cis_5_3_1
 
 import data.compliance.cis_eks
 import data.compliance.cis_eks.data_adatper
-import data.compliance.lib.assert
 import data.compliance.lib.common
 
 default rule_evaluation = false

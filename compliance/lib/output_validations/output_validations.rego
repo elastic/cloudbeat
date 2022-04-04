@@ -1,7 +1,6 @@
 package compliance.lib.output_validations
 
 import data.compliance
-import data.compliance.lib.assert
 import future.keywords.every
 
 validate_metadata(metadata) {
