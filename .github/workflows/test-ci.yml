@@ -96,10 +96,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      with:
-        limit-access-to-actor: true
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
 
       - uses: azure/setup-helm@v1
         id: install
