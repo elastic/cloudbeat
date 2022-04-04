@@ -126,25 +126,28 @@ jobs:
         run: |
           kind load image-archive /tmp/cloudbeat.tar --name=kind-mono & kind load image-archive /tmp/pytest.tar --name=kind-mono
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
 
       - name: Deploy tests Helm chart
         run: |
           helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
 
-      - name: Sleep for 100s
-        uses: juliangruber/sleep-action@v1
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: always()
         with:
-          time: 3600s
+          limit-access-to-actor: true
+
+      # - name: Sleep for 100s
+      #   uses: juliangruber/sleep-action@v1
+      #   with:
+      #     time: 100s
 
       - name: Run Tests
         id: run_tests 
         run: |
           set -o pipefail
           helm test cloudbeat-tests --filter name=test-pod-v1 --logs 2>&1 | tee | sed -n '/summary/,/===/p' | read -d '' SUMMARY
+
 
       - name: Get Allure history
         uses: actions/checkout@v2
