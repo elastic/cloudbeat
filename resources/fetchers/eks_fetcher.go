@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"github.com/elastic/beats/v7/libbeat/logp"
 
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -39,6 +40,8 @@ type EKSResource struct {
 }
 
 func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.Info("eks fetcher started")
+
 	results := make([]fetching.Resource, 0)
 
 	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)

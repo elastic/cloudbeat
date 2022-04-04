@@ -35,7 +35,8 @@ const (
 	// CMDArgumentMatcher is a regex pattern that should match a process argument and its value
 	// For example for the following string `--flag=val --config=txt.yaml fl=val2` with an input string of `config`
 	// The regex will match the string `--config=txt.yaml` and will capture `txt.yaml` as a group
-	CMDArgumentMatcher = "\\b%s=\\/?(\\S+)"
+	//CMDArgumentMatcher = "\\b%s[=\\b]\\/?(\\S+)"
+	CMDArgumentMatcher = "\\b%s[\\s=]\\/?(\\S+)"
 )
 
 type ProcessResource struct {
@@ -112,7 +113,7 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 		regex := fmt.Sprintf(CMDArgumentMatcher, argument)
 		matcher := regexp.MustCompile(regex)
 		if !matcher.MatchString(cmd) {
-			logp.L().Infof("couldn't find a configuration file associated with flag %s for process %s", argument, processName)
+			logp.L().Infof("couldn't find a configuration file associated with flag %s for process %s from cmd", argument, processName, cmd)
 			continue
 		}
 

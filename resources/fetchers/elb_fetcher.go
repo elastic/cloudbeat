@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"regexp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -50,6 +51,7 @@ type ELBResource struct {
 }
 
 func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.Info("elb fetcher started")
 	results := make([]fetching.Resource, 0)
 
 	balancers, err := f.GetLoadBalancers()

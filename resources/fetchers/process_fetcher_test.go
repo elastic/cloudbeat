@@ -31,8 +31,13 @@ import (
 )
 
 const (
-	statContent = `1167 (containerd-shim) S 1 1167 198 0 -1 1077952768 223005 9831 39 0 665 1329 8 10 20 0 12 0 76222 730476544 2268 18446744073709551615 1 1 0 0 0 0 1006249984 0 2143420159 0 0 0 17 2 0 0 0 0 0 0 0 0 0 0 0 0 0`
+	statContent             = `1167 (containerd-shim) S 1 1167 198 0 -1 1077952768 223005 9831 39 0 665 1329 8 10 20 0 12 0 76222 730476544 2268 18446744073709551615 1 1 0 0 0 0 1006249984 0 2143420159 0 0 0 17 2 0 0 0 0 0 0 0 0 0 0 0 0 0`
+	VanillaCmdLineDelimiter = "="
+	EksCmdLineDelimiter     = " "
 )
+
+var Status = `Name:   %s`
+var CmdLine = `/usr/bin/%s --kubeconfig=/etc/kubernetes/kubelet.conf --%s%s%s`
 
 type TextProcessContext struct {
 	Pid               string
@@ -54,9 +59,6 @@ func TestProcessFetcherTestSuite(t *testing.T) {
 	suite.Run(t, new(ProcessFetcherTestSuite))
 }
 
-var status = `Name:   %s`
-var cmdline = `/usr/bin/%s --kubeconfig=/etc/kubernetes/kubelet.conf --%s=%s`
-
 func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	testProcess := TextProcessContext{
 		Pid:               "3",
@@ -64,7 +66,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 		ConfigFileFlagKey: "fetcherConfig",
 		ConfigFilePath:    "test/path",
 	}
-	sysfs := createProcess(testProcess)
+	sysfs := createProcess(testProcess, VanillaCmdLineDelimiter)
 
 	fetcherConfig := ProcessFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
@@ -90,7 +92,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 		ConfigFileFlagKey: "fetcherConfig",
 		ConfigFilePath:    "test/path",
 	}
-	fsys := createProcess(testProcess)
+	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
 
 	fetcherConfig := ProcessFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
@@ -111,7 +113,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 		ConfigFileFlagKey: "fetcherConfig",
 		ConfigFilePath:    "test/path",
 	}
-	fsys := createProcess(testProcess)
+	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
 
 	fetcherConfig := ProcessFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
@@ -136,9 +138,12 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 		configFileName string
 		marshal        func(in interface{}) (out []byte, err error)
 		configType     string
+		delimiter      string
 	}{
-		{"kubeletConfig.yaml", yaml.Marshal, "yaml"},
-		{"kubeletConfig.json", json.Marshal, "json"},
+		{"kubeletConfig.yaml", yaml.Marshal, "yaml", EksCmdLineDelimiter},
+		{"kubeletConfig.yaml", yaml.Marshal, "yaml", VanillaCmdLineDelimiter},
+		{"kubeletConfig.json", json.Marshal, "json", EksCmdLineDelimiter},
+		{"kubeletConfig.json", json.Marshal, "json", VanillaCmdLineDelimiter},
 	}
 
 	for _, test := range testCases {
@@ -157,7 +162,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 			ConfigFilePath:    test.configFileName,
 		}
 
-		sysfs := createProcess(testProcess).(fstest.MapFS)
+		sysfs := createProcess(testProcess, test.delimiter).(fstest.MapFS)
 		sysfs[test.configFileName] = &fstest.MapFile{
 			Data: []byte(configData),
 		}
@@ -190,16 +195,16 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 	}
 }
 
-func createProcess(process TextProcessContext) fs.FS {
+func createProcess(process TextProcessContext, cmdDelimiter string) fs.FS {
 	return fstest.MapFS{
 		fmt.Sprintf("proc/%s/stat", process.Pid): {
 			Data: []byte(statContent),
 		},
 		fmt.Sprintf("proc/%s/status", process.Pid): {
-			Data: []byte(fmt.Sprintf(status, process.Name)),
+			Data: []byte(fmt.Sprintf(Status, process.Name)),
 		},
 		fmt.Sprintf("proc/%s/cmdline", process.Pid): {
-			Data: []byte(fmt.Sprintf(cmdline, process.Name, process.ConfigFileFlagKey, process.ConfigFilePath)),
+			Data: []byte(fmt.Sprintf(CmdLine, process.Name, process.ConfigFileFlagKey, cmdDelimiter, process.ConfigFilePath)),
 		},
 	}
 }
