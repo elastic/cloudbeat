@@ -1,4 +1,4 @@
-package ctxProvider
+package aws_providers
 
 import (
 	"github.com/aws/aws-sdk-go-v2/aws/external"

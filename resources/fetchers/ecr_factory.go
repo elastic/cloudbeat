@@ -6,7 +6,7 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/cloudbeat/resources/ctxProvider"
+	"github.com/elastic/cloudbeat/resources/aws_providers"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 	"regexp"
@@ -35,17 +35,17 @@ func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig) (fetching.Fetcher, error) {
-	awsCredProvider := ctxProvider.AWSCredProvider{}
+	awsCredProvider := aws_providers.AWSCredProvider{}
 	awsCfg := awsCredProvider.GetAwsCredentials()
 	ctx := context.Background()
-	identityProvider := ctxProvider.NewAWSIdentityProvider(awsCfg.Config)
+	identityProvider := aws_providers.NewAWSIdentityProvider(awsCfg.Config)
 	identity, err := identityProvider.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
 	}
 
 	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, awsCfg.Config.Region)
-	ecrProvider := NewEcrProvider(awsCfg.Config)
+	ecrProvider := aws_providers.NewEcrProvider(awsCfg.Config)
 	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
@@ -65,7 +65,7 @@ func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig) (fetching.Fetcher, error) 
 
 //
 //func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig) (fetching.Fetcher, error) {
-//	awsCredProvider := ctxProvider.AWSCredProvider{}
+//	awsCredProvider := aws_providers.AWSCredProvider{}
 //	awsCfg := awsCredProvider.GetAwsCredentials()
 //	ctx := context.Background()
 //	ecrProvider := NewEcrProvider(awsCfg.Config)

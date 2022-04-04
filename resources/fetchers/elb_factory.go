@@ -4,7 +4,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/cloudbeat/resources/ctxProvider"
+	"github.com/elastic/cloudbeat/resources/aws_providers"
 	"regexp"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -35,9 +35,9 @@ func (f *ELBFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *ELBFactory) CreateFrom(cfg ELBFetcherConfig) (fetching.Fetcher, error) {
-	awsCredProvider := ctxProvider.AWSCredProvider{}
+	awsCredProvider := aws_providers.AWSCredProvider{}
 	awsCfg := awsCredProvider.GetAwsCredentials()
-	elb := NewELBProvider(awsCfg.Config)
+	elb := aws_providers.NewELBProvider(awsCfg.Config)
 	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsCfg.Config.Region)
 	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {

@@ -19,12 +19,13 @@ package fetchers
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/resources/aws_providers"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type IAMFetcher struct {
-	iamProvider *IAMProvider
+	iamProvider *aws_providers.IAMProvider
 	cfg         IAMFetcherConfig
 }
 

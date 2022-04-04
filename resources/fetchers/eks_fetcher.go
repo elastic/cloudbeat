@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/aws_providers"
 
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -27,7 +28,7 @@ import (
 
 type EKSFetcher struct {
 	cfg         EKSFetcherConfig
-	eksProvider *EKSProvider
+	eksProvider *aws_providers.EKSProvider
 }
 
 type EKSFetcherConfig struct {
