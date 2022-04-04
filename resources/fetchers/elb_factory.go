@@ -1,7 +1,6 @@
 package fetchers
 
 import (
-	"encoding/gob"
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/cloudbeat/resources/aws_providers"
@@ -18,7 +17,6 @@ const (
 
 func init() {
 	manager.Factories.ListFetcherFactory(ELBType, &ELBFactory{})
-	gob.Register(ELBResource{})
 }
 
 type ELBFactory struct {

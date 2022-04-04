@@ -62,30 +62,3 @@ func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig) (fetching.Fetcher, error) 
 	}
 	return fe, nil
 }
-
-//
-//func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig) (fetching.Fetcher, error) {
-//	awsCredProvider := aws_providers.AWSCredProvider{}
-//	awsCfg := awsCredProvider.GetAwsCredentials()
-//	ctx := context.Background()
-//	ecrProvider := NewEcrProvider(awsCfg.Config)
-//	identityProvider := NewAWSIdentityProvider(awsCfg.Config)
-//	identity, err := identityProvider.GetIdentity(ctx)
-//	if err != nil {
-//		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
-//	}
-//
-
-//
-//	fe := &ECRFetcher{
-//		cfg:         cfg,
-//		ecrProvider: ecrProvider,
-//		kubeClient:  kubeClient,
-//		repoRegexMatchers: []*regexp.Regexp{
-//			regexp.MustCompile(privateRepoRegex),
-//			regexp.MustCompile(PublicRepoRegex),
-//		},
-//	}
-//
-//	return fe, nil
-//}

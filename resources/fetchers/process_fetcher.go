@@ -33,9 +33,9 @@ import (
 
 const (
 	// CMDArgumentMatcher is a regex pattern that should match a process argument and its value
-	// For example for the following string `--flag=val --config=txt.yaml fl=val2` with an input string of `config`
-	// The regex will match the string `--config=txt.yaml` and will capture `txt.yaml` as a group
-	//CMDArgumentMatcher = "\\b%s[=\\b]\\/?(\\S+)"
+	// Expects format as the following: --<key><delimiter><value>.
+	// For example: --config=a.json
+	// The regex supports two delimiters "=" and ""
 	CMDArgumentMatcher = "\\b%s[\\s=]\\/?(\\S+)"
 )
 
