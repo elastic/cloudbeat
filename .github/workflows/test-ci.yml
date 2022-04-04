@@ -138,7 +138,7 @@ jobs:
         id: run_tests 
         run: |
           set -o pipefail
-          helm test cloudbeat-tests --filter name=test-pod-v1 --logs 2>&1 | tee | sed -n '/summary/,/===/p' | read -d '' SUMMARY d
+          helm test cloudbeat-tests --filter name=test-pod-v1 --logs 2>&1 | tee | sed -n '/summary/,/===/p' | read -d '' SUMMARY
 
       - name: Get Allure history
         uses: actions/checkout@v2
