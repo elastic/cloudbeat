@@ -113,7 +113,7 @@ jobs:
         uses: lewagon/wait-on-check-action@v1.0.0
         with:
           check-name: Build
-          ref: ${{ github.head.ref }}
+          # ref: ${{ github.head.ref }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           allowed-conclusions: success
           wait-interval: 10
@@ -192,7 +192,7 @@ jobs:
             Integration tests status: ${{ steps.run_tests.outcome }}
 
             <details>
-            <summary><b>Summary & link to detailed report https://${{ github.repository.owner }}.github.io/cloudbeat/${{ github.run_number }} </b></summary>
+            <summary><b>Summary & link to detailed report https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }} </b></summary>
             
             ```zsh
             ${{ steps.run_tests.outputs.summary }}
