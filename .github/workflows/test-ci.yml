@@ -185,7 +185,7 @@ jobs:
         if: always()
         with:
           header: Test Results
-          delete: true
+          recreate: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Cloudbeat CI :robot:
