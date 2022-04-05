@@ -4,12 +4,11 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("--service-account-lookup=false")
+	test.assert_fail(finding) with input as rule_input("")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("")
-	test.assert_pass(finding) with input as rule_input("--service-account-lookup=true")
+	test.assert_pass(finding) with input as rule_input("--service-account-key-file=<filename>")
 }
 
 test_not_evaluated {

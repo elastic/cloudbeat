@@ -8,7 +8,7 @@ test_violation {
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--client-ca-file=<path/to/client-ca-file>")
+	test.assert_pass(finding) with input as rule_input("--etcd-cafile=<path/to/ca-file>")
 }
 
 test_not_evaluated {

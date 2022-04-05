@@ -1,18 +1,17 @@
 package compliance.cis_k8s.rules.cis_1_2_20
 
 import data.compliance.cis_k8s
-import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --secure-port argument is not set to 0 (Automated)
+# Ensure that the --profiling argument is set to false (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
 
 	# evaluate
 	process_args := data_adapter.process_args
-	rule_evaluation = assert.is_false(common.contains_key_with_value(process_args, "--secure-port", "0"))
+	rule_evaluation = common.contains_key_with_value(process_args, "--profiling", "false")
 
 	# set result
 	result := {
@@ -22,10 +21,10 @@ finding = result {
 }
 
 metadata = {
-	"name": "Ensure that the --secure-port argument is not set to 0",
-	"description": "The secure port is used to serve https with authentication and authorization. If you disable it, no https traffic is served and all traffic is served unencrypted.",
-	"impact": "You need to set the API Server up with the right TLS certificates.",
+	"name": "Ensure that the --profiling argument is set to false",
+	"description": "Profiling allows for the identification of specific performance bottlenecks. It generates a significant amount of program data that could potentially be exploited to uncover system and program details. If you are not experiencing any bottlenecks and do not need the profiler for troubleshooting purposes, it is recommended to turn it off to reduce the potential attack surface.",
+	"impact": "Profiling information would not be available.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.20", "API Server"]),
 	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and either remove the --secure-port parameter or set it to a different (non-zero) desired port.",
+	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set --profiling=false",
 }

@@ -4,11 +4,12 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("--insecure-bind-address=")
+	test.assert_fail(finding) with input as rule_input("")
+	test.assert_fail(finding) with input as rule_input("--insecure-port=8080")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("")
+	test.assert_pass(finding) with input as rule_input("--insecure-port=0")
 }
 
 test_not_evaluated {

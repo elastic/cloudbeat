@@ -5,12 +5,13 @@ import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input("")
-	test.assert_fail(finding) with input as rule_input("--enable-admission-plugins=NamespaceLifecycle")
-	test.assert_fail(finding) with input as rule_input("--enable-admission-plugins=LimitRanger,NamespaceLifecycle")
+	test.assert_fail(finding) with input as rule_input("--enable-admission-plugins=AlwaysDeny")
+	test.assert_fail(finding) with input as rule_input("--enable-admission-plugins=NamespaceLifecycle,AlwaysDeny")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--enable-admission-plugins=LimitRanger,PodSecurityPolicy")
+	test.assert_pass(finding) with input as rule_input("--enable-admission-plugins=NodeRestriction")
+	test.assert_pass(finding) with input as rule_input("--enable-admission-plugins=NamespaceLifecycle,NodeRestriction")
 }
 
 test_not_evaluated {

@@ -4,13 +4,13 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("--authorization-mode=AlwaysAllow")
-	test.assert_fail(finding) with input as rule_input("--authorization-mode=RBAC,AlwaysAllow")
+	test.assert_fail(finding) with input as rule_input("")
+	test.assert_fail(finding) with input as rule_input("--authorization-mode=RBAC")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--authorization-mode=RBAC")
-	test.assert_pass(finding) with input as rule_input("")
+	test.assert_pass(finding) with input as rule_input("--authorization-mode=Node")
+	test.assert_pass(finding) with input as rule_input("--authorization-mode=RBAC,Node")
 }
 
 test_not_evaluated {

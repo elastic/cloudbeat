@@ -5,14 +5,14 @@ import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --token-auth-file parameter is not set (Automated)
+# Ensure that the --kubelet-https argument is set to true (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
 
 	# evaluate
 	process_args := data_adapter.process_args
-	rule_evaluation := assert.is_false(common.contains_key(process_args, "--token-auth-file"))
+	rule_evaluation = assert.is_false(common.contains_key_with_value(process_args, "--kubelet-https", "false"))
 
 	# set result
 	result := {
@@ -22,10 +22,10 @@ finding = result {
 }
 
 metadata = {
-	"name": "Ensure that the --token-auth-file parameter is not set",
-	"description": "The token-based authentication utilizes static tokens to authenticate requests to the apiserver. The tokens are stored in clear-text in a file on the apiserver, and cannot be revoked or rotated without restarting the apiserver. Hence, do not use static token-based authentication.",
-	"impact": "You will have to configure and use alternate authentication mechanisms such as tokens and certificates. Username and password for basic authentication could no longer be used.",
+	"name": "Ensure that the --kubelet-https argument is set to true",
+	"description": "Connections from apiserver to kubelets could potentially carry sensitive data such as secrets and keys. It is thus important to use in-transit encryption for any communication between the apiserver and kubelets.",
+	"impact": "You require TLS to be configured on apiserver as well as kubelets.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.3", "API Server"]),
 	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "Follow the documentation and configure alternate mechanisms for authentication. Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and remove the --token-auth-file=<filename> parameter.",
+	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and remove the --kubelet-https parameter.",
 }

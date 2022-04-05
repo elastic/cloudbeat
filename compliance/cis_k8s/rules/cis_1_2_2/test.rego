@@ -4,7 +4,7 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("--basic-auth-file=<path/to/auth/file>")
+	test.assert_fail(finding) with input as rule_input("--token-auth-file=<path/to/token/auth/file>")
 }
 
 test_pass {

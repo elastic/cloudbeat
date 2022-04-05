@@ -4,10 +4,11 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("--token-auth-file=<path/to/token/auth/file>")
+	test.assert_fail(finding) with input as rule_input("--kubelet-https=false")
 }
 
 test_pass {
+	test.assert_pass(finding) with input as rule_input("--kubelet-https=true")
 	test.assert_pass(finding) with input as rule_input("")
 }
 

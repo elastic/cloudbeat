@@ -1,28 +1,17 @@
 package compliance.cis_k8s.rules.cis_1_2_27
 
 import data.compliance.cis_k8s
-import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --service-account-lookup argument is set to true (Automated)
-
-# Verify that if the --service-account-lookup argument exists it is set to true.
-
-# evaluate
-process_args := data_adapter.process_args
-
-default rule_evaluation = false
-
-rule_evaluation {
-	common.contains_key_with_value(process_args, "--service-account-lookup", "true")
-} else {
-	assert.is_false(common.contains_key(process_args, "--service-account-lookup"))
-}
-
+# Ensure that the --service-account-key-file argument is set as appropriate (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
+
+	# evaluate
+	process_args := data_adapter.process_args
+	rule_evaluation := common.contains_key(process_args, "--service-account-key-file")
 
 	# set result
 	result := {
@@ -32,9 +21,9 @@ finding = result {
 }
 
 metadata = {
-	"name": "Ensure that the --service-account-lookup argument is set to true",
-	"description": "If --service-account-lookup is not enabled, the apiserver only verifies that the authentication token is valid, and does not validate that the service account token mentioned in the request is actually present in etcd. This allows using a service account token even after the corresponding service account is deleted. This is an example of time of check to time of use security issue.",
-	"impact": "None",
+	"name": "Ensure that the --service-account-key-file argument is set as appropriate",
+	"description": "By default, if no --service-account-key-file is specified to the apiserver, it uses the private key from the TLS serving certificate to verify service account tokens. To ensure that the keys for service account tokens could be rotated as needed, a separate public/private key pair should be used for signing service account tokens. Hence, the public key should be specified to the apiserver with --service-account-key-file.",
+	"impact": "The corresponding private key must be provided to the controller manager. You would need to securely maintain the key file and rotate the keys based on your organization's key rotation policy.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.27", "API Server"]),
 	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the below parameter. --service-account-lookup=true",

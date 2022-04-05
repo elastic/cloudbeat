@@ -4,7 +4,7 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the API server pod specification file permissions are set to 644 or more restrictive
+# Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive (Automated)
 finding = result {
 	data_adapter.filename == "kube-controller-manager.yaml"
 	filemode := data_adapter.filemode

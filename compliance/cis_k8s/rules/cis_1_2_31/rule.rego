@@ -4,14 +4,14 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --client-ca-file argument is set as appropriate (Automated)
+# Ensure that the --etcd-cafile argument is set as appropriate (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
 
 	# evaluate
 	process_args := data_adapter.process_args
-	rule_evaluation := common.contains_key(process_args, "--client-ca-file")
+	rule_evaluation := common.contains_key(process_args, "--etcd-cafile")
 
 	# set result
 	result := {
@@ -21,9 +21,9 @@ finding = result {
 }
 
 metadata = {
-	"name": "Ensure that the --client-ca-file argument is set as appropriate",
-	"description": "API server communication contains sensitive parameters that should remain encrypted in transit. Configure the API server to serve only HTTPS traffic. If --client-ca-file argument is set, any request presenting a client certificate signed by one of the authorities in the client-ca-file is authenticated with an identity corresponding to the CommonName of the client certificate.",
-	"impact": "TLS and client certificate authentication must be configured for your Kubernetes cluster deployment.",
+	"name": "Ensure that the --etcd-cafile argument is set as appropriate",
+	"description": "etcd is a highly-available key value store used by Kubernetes deployments for persistent storage of all of its REST API objects. These objects are sensitive in nature and should be protected by client authentication. This requires the API server to identify itself to the etcd server using a SSL Certificate Authority file.",
+	"impact": "TLS and client certificate authentication must be configured for etcd.",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.31", "API Server"]),
 	"benchmark": cis_k8s.benchmark_metadata,
 	"remediation": "Follow the Kubernetes documentation and set up the TLS connection on the apiserver. Then, edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the client certificate authority file.",

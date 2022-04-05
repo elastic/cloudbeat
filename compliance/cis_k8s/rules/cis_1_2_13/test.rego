@@ -1,12 +1,12 @@
-package compliance.cis_k8s.rules.cis_1_2_14
+package compliance.cis_k8s.rules.cis_1_2_13
 
 import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input("")
-	test.assert_fail(finding) with input as rule_input("--disable-admission-plugins=NamespaceLifecycle")
-	test.assert_fail(finding) with input as rule_input("--disable-admission-plugins=PodNodeSelector,NamespaceLifecycle")
+	test.assert_fail(finding) with input as rule_input("--disable-admission-plugins=ServiceAccount")
+	test.assert_fail(finding) with input as rule_input("--disable-admission-plugins=PodNodeSelector,ServiceAccount")
 }
 
 test_pass {

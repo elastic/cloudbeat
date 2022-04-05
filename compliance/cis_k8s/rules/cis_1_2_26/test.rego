@@ -4,15 +4,12 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("")
-	test.assert_fail(finding) with input as rule_input("--request-timeout=30s")
-	test.assert_fail(finding) with input as rule_input("--request-timeout=59s")
+	test.assert_fail(finding) with input as rule_input("--service-account-lookup=false")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--request-timeout=61s")
-	test.assert_pass(finding) with input as rule_input("--request-timeout=2m")
-	test.assert_pass(finding) with input as rule_input("--request-timeout=1h35m2s")
+	test.assert_pass(finding) with input as rule_input("")
+	test.assert_pass(finding) with input as rule_input("--service-account-lookup=true")
 }
 
 test_not_evaluated {

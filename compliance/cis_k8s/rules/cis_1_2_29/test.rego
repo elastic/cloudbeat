@@ -5,12 +5,12 @@ import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input([""])
-	test.assert_fail(finding) with input as rule_input(["--etcd-certfile=<path/to/etcd-cert>"])
-	test.assert_fail(finding) with input as rule_input(["--etcd-keyfile=<path/to/etcd-key>"])
+	test.assert_fail(finding) with input as rule_input(["--tls-cert-file=<path/to/tls-cert>"])
+	test.assert_fail(finding) with input as rule_input(["--tls-private-key-file=<path/to/tls-key>"])
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input(["--etcd-certfile=<path/to/etcd-cert>", "--etcd-keyfile=<path/to/etcd-key>"])
+	test.assert_pass(finding) with input as rule_input(["--tls-private-key-file=<path/to/tls-key>", "--tls-cert-file=<path/to/tls-cert>"])
 }
 
 test_not_evaluated {

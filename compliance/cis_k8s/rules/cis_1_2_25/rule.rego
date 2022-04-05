@@ -4,7 +4,7 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate (Automated)
+# Ensure that the --request-timeout argument is set as appropriate (Automated)
 
 # evaluate
 process_args := data_adapter.process_args
@@ -12,8 +12,8 @@ process_args := data_adapter.process_args
 default rule_evaluation = false
 
 rule_evaluation {
-	value := process_args["--audit-log-maxsize"]
-	common.greater_or_equal(value, 100)
+	value := process_args["--request-timeout"]
+	common.duration_gt(value, "60s")
 }
 
 finding = result {
@@ -28,10 +28,10 @@ finding = result {
 }
 
 metadata = {
-	"name": "Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate",
-	"description": "Kubernetes automatically rotates the log files. Retaining old log files ensures that you would have sufficient log data available for carrying out any investigation or correlation. If you have set file size of 100 MB and the number of old log files to keep as 10, you would approximate have 1 GB of log data that you could potentially use for your analysis.",
+	"name": "Ensure that the --request-timeout argument is set as appropriate",
+	"description": "Setting global request timeout allows extending the API server request timeout limit to a duration appropriate to the user's connection speed. By default, it is set to 60 seconds which might be problematic on slower connections making cluster resources inaccessible once the data volume for requests exceeds what can be transmitted in 60 seconds. But, setting this timeout limit to be too large can exhaust the API server resources making it prone to Denial-of-Service attack. Hence, it is recommended to set this limit as appropriate and change the default limit of 60 seconds only if needed.",
 	"impact": "None",
 	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.25", "API Server"]),
 	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the --audit-log-maxsize parameter to an appropriate size in MB. For example, to set it as 100 MB: --audit-log-maxsize=100",
+	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml and set the below parameter as appropriate and if needed. For example: --request-timeout=300s",
 }
