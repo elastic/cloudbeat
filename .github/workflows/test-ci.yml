@@ -1,13 +1,13 @@
 name: pytest integration tests
 
 on:
-  push:
-    branches:
-      - "new-tests-ci"
-  # pull_request_target:
+  # push:
   #   branches:
-  #     - main
-  #   types: [assigned, opened, synchronize, reopened]
+  #     - "new-tests-ci"
+  pull_request_target:
+    branches:
+      - main
+    types: [assigned, opened, synchronize, reopened]
 
 env:
   K8S_MANIFEST_DIR: deploy/k8s
@@ -150,7 +150,6 @@ jobs:
         with:
           limit-access-to-actor: true
 
-
       - name: Get Allure history
         uses: actions/checkout@v2
         if: always()
@@ -177,7 +176,7 @@ jobs:
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: allure-history
 
-      - name: Commnet test success result
+      - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
         if: always()
         with:
@@ -186,7 +185,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Cloudbeat CI :robot:
-            The integration tests status: ${{ steps.run_tests.outcome }}
+            Integration tests status: ${{ steps.run_tests.outcome }}
 
             <details>
             <summary><b>Summary & link to detailed report https://${{ github.repository.owner }}.github.io/cloudbeat/${{ github.run_number }} </b></summary>
