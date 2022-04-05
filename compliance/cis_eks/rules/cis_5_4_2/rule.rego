@@ -1,7 +1,7 @@
 package compliance.cis_eks.rules.cis_5_4_2
 
 import data.compliance.cis_eks
-import data.compliance.cis_eks.data_adatper
+import data.compliance.cis_eks.data_adapter
 import data.compliance.lib.common
 
 default rule_evaluation = false
@@ -15,7 +15,7 @@ rule_evaluation {
 # Ensure there Kuberenetes endpoint private access is enabled
 finding = result {
 	# filter
-	data_adatper.is_aws_eks
+	data_adapter.is_aws_eks
 
 	# set result
 	result := {

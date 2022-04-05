@@ -5,14 +5,14 @@ import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input("")
-	test.assert_fail(finding) with input as rule_input("--protect-kernel-defaults=false")
-	test.assert_fail(finding) with input as rule_input_with_external("--protect-kernel-defaults=false", create_process_config(true))
+	test.assert_fail(finding) with input as rule_input("--protect-kernel-defaults false")
+	test.assert_fail(finding) with input as rule_input_with_external("--protect-kernel-defaults false", create_process_config(true))
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--protect-kernel-defaults=true")
-	test.assert_pass(finding) with input as rule_input_with_external("--protect-kernel-defaults=true", create_process_config(false))
-	test.assert_pass(finding) with input as rule_input_with_external("--protect-kernel-defaults=true", create_process_config(false))
+	test.assert_pass(finding) with input as rule_input("--protect-kernel-defaults true")
+	test.assert_pass(finding) with input as rule_input_with_external("--protect-kernel-defaults true", create_process_config(false))
+	test.assert_pass(finding) with input as rule_input_with_external("--protect-kernel-defaults true", create_process_config(false))
 	test.assert_pass(finding) with input as rule_input_with_external("", create_process_config(true))
 }
 

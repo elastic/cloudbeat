@@ -1,7 +1,7 @@
 package compliance.cis_eks.rules.cis_5_1_1
 
 import data.compliance.cis_eks
-import data.compliance.cis_eks.data_adatper
+import data.compliance.cis_eks.data_adapter
 import data.compliance.lib.assert
 import data.compliance.lib.common
 
@@ -26,7 +26,7 @@ evidence["misconfigured_repositories"] = misconfigured_repo {
 # Check if image ScanOnPush is enabled
 finding = result {
 	# filter
-	data_adatper.is_aws_ecr
+	data_adapter.is_aws_ecr
 
 	# set result
 	result := {

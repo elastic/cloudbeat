@@ -6,7 +6,7 @@ import data.compliance.lib.data_adapter
 
 default rule_evaluation = false
 
-process_args := data_adapter.process_args
+process_args := cis_eks.data_adapter.process_args
 
 rule_evaluation {
 	common.contains_key(process_args, "--client-ca-file")

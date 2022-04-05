@@ -1,14 +1,14 @@
 package compliance.cis_eks.rules.cis_2_1_1
 
 import data.compliance.cis_eks
-import data.compliance.cis_eks.data_adatper
+import data.compliance.cis_eks.data_adapter
 import data.compliance.lib.assert
 import data.compliance.lib.common
 
 # Ensure that all audit logs are enabled
 finding = result {
 	# filter
-	data_adatper.is_aws_eks
+	data_adapter.is_aws_eks
 
 	# evaluate
 	cluster_logging := input.resource.Cluster.Logging.ClusterLogging

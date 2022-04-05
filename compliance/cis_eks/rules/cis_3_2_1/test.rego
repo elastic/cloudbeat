@@ -5,16 +5,16 @@ import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input("")
-	test.assert_fail(finding) with input as rule_input("--anonymous-auth=true")
-	test.assert_fail(finding) with input as rule_input_with_external("--anonymous-auth=true", create_process_config(true))
-	test.assert_fail(finding) with input as rule_input_with_external("--anonymous-auth=true", create_process_config(false))
+	test.assert_fail(finding) with input as rule_input("--anonymous-auth true")
+	test.assert_fail(finding) with input as rule_input_with_external("--anonymous-auth true", create_process_config(true))
+	test.assert_fail(finding) with input as rule_input_with_external("--anonymous-auth true", create_process_config(false))
 	test.assert_fail(finding) with input as rule_input_with_external("", create_process_config(true))
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--anonymous-auth=false")
-	test.assert_pass(finding) with input as rule_input_with_external("--anonymous-auth=false", create_process_config(true))
-	test.assert_pass(finding) with input as rule_input_with_external("--anonymous-auth=false", create_process_config(false))
+	test.assert_pass(finding) with input as rule_input("--anonymous-auth false")
+	test.assert_pass(finding) with input as rule_input_with_external("--anonymous-auth false", create_process_config(true))
+	test.assert_pass(finding) with input as rule_input_with_external("--anonymous-auth false", create_process_config(false))
 	test.assert_pass(finding) with input as rule_input_with_external("", create_process_config(false))
 }
 

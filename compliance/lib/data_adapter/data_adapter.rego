@@ -1,6 +1,5 @@
 package compliance.lib.data_adapter
 
-import data.compliance.lib.common
 import future.keywords.in
 
 is_filesystem {
@@ -43,16 +42,28 @@ process_name = name {
 
 process_args_list = args_list {
 	is_process
-	args_list := split(input.resource.command, " ")
+
+	# Gets all the process arguments of the current process
+	# Expects format as the following: --<key><delimiter><value> for example: --config=a.json
+	# Notice that the first argument is always the process path
+	args_list := split(input.resource.command, " --")
 }
 
-process_args = args {
-	args := {arg: value | [arg, value] = common.split_key_value(process_args_list[_])}
+# This method creates a process args object
+# The object will contain all the process `flags` and their matching values as object key,value accordingly
+process_args(delimiter) = {flag: value | [flag, value] = parse_argument(process_args_list[_], delimiter)}
+
+parse_argument(argument, delimiter) = [flag, value] {
+	splitted_argument = split(argument, delimiter)
+	flag = concat("", ["--", splitted_argument[0]])
+
+	# We would like to take the entire string after the first delimiter
+	value = concat(delimiter, array.slice(splitted_argument, 1, count(splitted_argument) + 1))
 }
 
 process_config = config {
 	is_process
-    config := { key: value | value = input.resource.external_data[key]}
+	config := {key: value | value = input.resource.external_data[key]}
 }
 
 is_kube_apiserver {

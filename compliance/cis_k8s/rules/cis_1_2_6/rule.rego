@@ -11,7 +11,7 @@ finding = result {
 	data_adapter.is_kube_apiserver
 
 	# evaluate
-	process_args := data_adapter.process_args
+	process_args := cis_k8s.data_adapter.process_args
 	rule_evaluation = assert.is_false(common.arg_values_contains(process_args, "--authorization-mode", "AlwaysAllow"))
 
 	# set result

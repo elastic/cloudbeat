@@ -7,7 +7,7 @@ import data.compliance.lib.data_adapter
 
 default rule_evaluation = false
 
-process_args := data_adapter.process_args
+process_args := cis_k8s.data_adapter.process_args
 
 rule_evaluation {
 	common.contains_key_with_value(process_args, "--anonymous-auth", "false")

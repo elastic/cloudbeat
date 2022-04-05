@@ -10,7 +10,7 @@ finding = result {
 	data_adapter.is_kube_apiserver
 
 	# evaluate
-	process_args := data_adapter.process_args
+	process_args := cis_k8s.data_adapter.process_args
 	rule_evaluation := common.contains_key(process_args, "--service-account-key-file")
 
 	# set result

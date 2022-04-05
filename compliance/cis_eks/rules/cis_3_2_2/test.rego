@@ -5,14 +5,14 @@ import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input("")
-	test.assert_fail(finding) with input as rule_input("--authorization-mode=AlwaysAllow")
-	test.assert_fail(finding) with input as rule_input_with_external("--authorization-mode=AlwaysAllow", create_process_config("AlwaysAllow"))
+	test.assert_fail(finding) with input as rule_input("--authorization-mode AlwaysAllow")
+	test.assert_fail(finding) with input as rule_input_with_external("--authorization-mode AlwaysAllow", create_process_config("AlwaysAllow"))
 	test.assert_fail(finding) with input as rule_input_with_external("", create_process_config("AlwaysAllow"))
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--authorization-mode=Webhook")
-	test.assert_pass(finding) with input as rule_input_with_external("--authorization-mode=Webhook", create_process_config("AlwaysAllow"))
+	test.assert_pass(finding) with input as rule_input("--authorization-mode Webhook")
+	test.assert_pass(finding) with input as rule_input_with_external("--authorization-mode Webhook", create_process_config("AlwaysAllow"))
 	test.assert_pass(finding) with input as rule_input_with_external("", create_process_config("Webhook"))
 }
 

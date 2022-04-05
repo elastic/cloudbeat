@@ -10,7 +10,7 @@ import data.compliance.lib.data_adapter
 default rule_evaluation = false
 
 # evaluate
-process_args := data_adapter.process_args
+process_args := cis_k8s.data_adapter.process_args
 
 rule_evaluation {
 	is_authorization_allow_all

@@ -6,7 +6,7 @@ import data.compliance.lib.data_adapter
 
 default rule_evaluation = false
 
-process_args := data_adapter.process_args
+process_args := cis_eks.data_adapter.process_args
 
 is_kernel_protected {
 	common.contains_key_with_value(process_args, "--protect-kernel-defaults", "true")

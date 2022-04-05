@@ -7,7 +7,7 @@ import data.compliance.lib.data_adapter
 # Ensure that the --peer-cert-file and --peer-key-file arguments are set as appropriate (Automated)
 
 # evaluate
-process_args := data_adapter.process_args
+process_args := cis_k8s.data_adapter.process_args
 
 default rule_evaluation = false
 
