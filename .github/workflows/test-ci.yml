@@ -195,6 +195,6 @@ jobs:
             Integration tests status: ${{ steps.run_tests.outcome }}
             Tests Summary:
             ```python
-            ${{env.SUMMARY}}
+            ${{env.summary}}
             ```
             Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
