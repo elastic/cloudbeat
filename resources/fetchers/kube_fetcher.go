@@ -63,6 +63,10 @@ var (
 			&kubernetes.PodSecurityPolicy{},
 			allNamespaces,
 		},
+		{
+			&kubernetes.ServiceAccount{},
+			allNamespaces,
+		},
 		// TODO(yashtewari): Problem: github.com/elastic/beats/vendor/k8s.io/apimachinery/pkg/api/errors/errors.go#401
 		// > "the server could not find the requested resource"
 		// {
