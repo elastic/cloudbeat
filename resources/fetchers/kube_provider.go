@@ -92,6 +92,8 @@ func nullifyManagedFields(resource interface{}) {
 		val.ManagedFields = nil
 	case *kubernetes.PodSecurityPolicy:
 		val.ManagedFields = nil
+	case *kubernetes.ServiceAccount:
+		val.ManagedFields = nil
 	case *kubernetes.NetworkPolicy:
 		val.ManagedFields = nil
 	}
