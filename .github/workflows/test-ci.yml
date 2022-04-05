@@ -131,7 +131,6 @@ jobs:
         run: |
           helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
 
-
       - name: Sleep for 100s
         uses: juliangruber/sleep-action@v1
         with:
@@ -140,14 +139,14 @@ jobs:
       - name: Run Tests
         id: run_tests 
         run: |
-          helm test cloudbeat-tests --filter name=test-pod-v1 --logs 2>&1 | tee test.log
+          helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs 2>&1 | tee test.log
           result_code=${PIPESTATUS[0]}
           echo "::set-output name=summary::$(cat test.log | sed -n '/summary/,/===/p')"
           exit $result_code
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: always()
+        if: failure()
         with:
           limit-access-to-actor: true
 
