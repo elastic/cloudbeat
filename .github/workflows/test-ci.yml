@@ -145,7 +145,10 @@ jobs:
         run: |
           helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs 2>&1 | tee test.log
           result_code=${PIPESTATUS[0]}
-          echo "SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')" >> $GITHUB_ENV
+          SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
+          echo "summary<<EOF" >> "$GITHUB_ENV"
+          echo "$SUMMARY" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
           exit $result_code
 
       - name: Setup tmate session
