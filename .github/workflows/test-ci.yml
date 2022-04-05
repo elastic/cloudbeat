@@ -100,7 +100,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-
       - uses: azure/setup-helm@v1
         id: install
 
@@ -113,9 +112,10 @@ jobs:
       - name: Wait for build to succeed
         uses: lewagon/wait-on-check-action@v1.0.0
         with:
-          ref: ${{ github.sha }}
           check-name: Build
+          ref: ${{ github.head.ref }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+          allowed-conclusions: success
           wait-interval: 10
 
       - name: Cache dockers images
