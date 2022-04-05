@@ -145,7 +145,7 @@ jobs:
         run: |
           helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs 2>&1 | tee test.log
           result_code=${PIPESTATUS[0]}
-          echo "::set-output name=summary::$(cat test.log | sed -n '/summary/,/===/p')"
+          SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
           exit $result_code
 
       - name: Setup tmate session
@@ -192,6 +192,6 @@ jobs:
             Integration tests status: ${{ steps.run_tests.outcome }}
             Tests Summary:
             ```python
-            ${{ steps.run_tests.outputs.summary }}
+            ${{ env.SUMMARY }}
             ```
             Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
