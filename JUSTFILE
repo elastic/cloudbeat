@@ -70,4 +70,4 @@ gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
 run-tests:
-  helm test cloudbeat-tests --filter name=test-pod-v1 --logs
+  helm test cloudbeat-tests --namespace kube-system
