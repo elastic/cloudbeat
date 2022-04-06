@@ -20,14 +20,14 @@ func (_m *MockedAwsCredentialsGetter) EXPECT() *MockedAwsCredentialsGetter_Expec
 }
 
 // GetAwsCredentials provides a mock function with given fields:
-func (_m *MockedAwsCredentialsGetter) GetAwsCredentials() FetcherConfig {
+func (_m *MockedAwsCredentialsGetter) GetAwsCredentials() Config {
 	ret := _m.Called()
 
-	var r0 FetcherConfig
-	if rf, ok := ret.Get(0).(func() FetcherConfig); ok {
+	var r0 Config
+	if rf, ok := ret.Get(0).(func() Config); ok {
 		r0 = rf()
 	} else {
-		r0 = ret.Get(0).(FetcherConfig)
+		r0 = ret.Get(0).(Config)
 	}
 
 	return r0
@@ -50,7 +50,7 @@ func (_c *MockedAwsCredentialsGetter_GetAwsCredentials_Call) Run(run func()) *Mo
 	return _c
 }
 
-func (_c *MockedAwsCredentialsGetter_GetAwsCredentials_Call) Return(_a0 FetcherConfig) *MockedAwsCredentialsGetter_GetAwsCredentials_Call {
+func (_c *MockedAwsCredentialsGetter_GetAwsCredentials_Call) Return(_a0 Config) *MockedAwsCredentialsGetter_GetAwsCredentials_Call {
 	_c.Call.Return(_a0)
 	return _c
 }

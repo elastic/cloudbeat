@@ -19,6 +19,6 @@ package aws
 
 import "github.com/aws/aws-sdk-go-v2/aws"
 
-type FetcherConfig struct {
+type Config struct {
 	Config aws.Config
 }

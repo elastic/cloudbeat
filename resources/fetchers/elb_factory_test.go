@@ -63,17 +63,15 @@ name: aws-elb
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		awsCred := aws.FetcherConfig{Config: awsorg.Config{
+		awsConfig := aws.Config{Config: awsorg.Config{
 			Region: test.region,
 		}}
-		mockedAwsCred := &aws.MockedAwsCredentialsGetter{}
-		mockedAwsCred.EXPECT().GetAwsCredentials().Return(awsCred)
 
 		elbProvider := &aws.MockedELBLoadBalancerDescriber{}
 
 		factory := &ELBFactory{
 			balancerDescriber:      elbProvider,
-			awsCredProvider:        mockedAwsCred,
+			awsConfig:              awsConfig,
 			kubernetesClientGetter: mockedKubernetesClientGetter,
 		}
 

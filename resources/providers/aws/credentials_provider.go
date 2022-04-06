@@ -6,19 +6,19 @@ import (
 )
 
 type AwsCredentialsGetter interface {
-	GetAwsCredentials() FetcherConfig
+	GetAwsCredentials() Config
 }
 
 type AWSCredProvider struct {
 }
 
-func (p AWSCredProvider) GetAwsCredentials() FetcherConfig {
+func (p AWSCredProvider) GetAwsCredentials() Config {
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return FetcherConfig{
+	return Config{
 		Config: cfg,
 	}
 }

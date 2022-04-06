@@ -18,14 +18,14 @@ const (
 
 func init() {
 	awsCredProvider := aws.AWSCredProvider{}
-	awsCred := awsCredProvider.GetAwsCredentials()
-	elb := aws.NewELBProvider(awsCred.Config)
+	config := awsCredProvider.GetAwsCredentials()
+	elb := aws.NewELBProvider(config.Config)
 	kubeGetter := providers.KubernetesProvider{}
 
 	manager.Factories.ListFetcherFactory(ELBType,
 		&ELBFactory{
+			awsConfig:              config,
 			balancerDescriber:      elb,
-			awsCredProvider:        awsCredProvider,
 			kubernetesClientGetter: kubeGetter,
 		},
 	)
@@ -33,7 +33,7 @@ func init() {
 
 type ELBFactory struct {
 	balancerDescriber      aws.ELBLoadBalancerDescriber
-	awsCredProvider        aws.AwsCredentialsGetter
+	awsConfig              aws.Config
 	kubernetesClientGetter providers.KubernetesClientGetter
 }
 
@@ -48,9 +48,8 @@ func (f *ELBFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *ELBFactory) CreateFrom(cfg ELBFetcherConfig) (fetching.Fetcher, error) {
-	awsCfg := f.awsCredProvider.GetAwsCredentials()
 	elb := f.balancerDescriber
-	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsCfg.Config.Region)
+	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, f.awsConfig.Config.Region)
 	kubeClient, err := f.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)

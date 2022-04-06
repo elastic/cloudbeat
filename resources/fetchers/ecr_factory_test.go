@@ -73,7 +73,7 @@ name: aws-ecr
 		}
 		identityProvider := &aws.MockedIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
-		awsCred := aws.FetcherConfig{Config: awsorg.Config{
+		awsCred := aws.Config{Config: awsorg.Config{
 			Region: test.region,
 		}}
 		mockedAwsCred := &aws.MockedAwsCredentialsGetter{}
@@ -82,7 +82,6 @@ name: aws-ecr
 		ecrProvider := &aws.MockedEcrRepositoryDescriber{}
 
 		factory := &ECRFactory{
-			awsCredProvider:        mockedAwsCred,
 			kubernetesClientGetter: mockedKubernetesClientGetter,
 			ecrRepoDescriber:       ecrProvider,
 			identityProviderGetter: identityProvider,

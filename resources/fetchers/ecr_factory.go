@@ -24,15 +24,15 @@ func init() {
 	kubeGetter := providers.KubernetesProvider{}
 
 	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{
-		awsCredProvider:        awsCredProvider,
 		kubernetesClientGetter: kubeGetter,
 		identityProviderGetter: identityProvider,
 		ecrRepoDescriber:       ecr,
+		awsConfig:              awsCred,
 	})
 }
 
 type ECRFactory struct {
-	awsCredProvider        aws.AwsCredentialsGetter
+	awsConfig              aws.Config
 	kubernetesClientGetter providers.KubernetesClientGetter
 	identityProviderGetter aws.IdentityProviderGetter
 	ecrRepoDescriber       aws.EcrRepositoryDescriber
@@ -49,14 +49,13 @@ func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig) (fetching.Fetcher, error) {
-	awsCfg := f.awsCredProvider.GetAwsCredentials()
 	ctx := context.Background()
 	identity, err := f.identityProviderGetter.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
 	}
 
-	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, awsCfg.Config.Region)
+	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, f.awsConfig.Config.Region)
 	kubeClient, err := f.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
