@@ -1,14 +1,14 @@
 package fetchers
 
 import (
-	"encoding/gob"
 	"fmt"
 	"github.com/docker/distribution/context"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/cloudbeat/resources/aws_providers"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers/aws"
 	"regexp"
 )
 
@@ -17,11 +17,25 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{})
-	gob.Register(ECRResource{})
+	awsCredProvider := aws.AWSCredProvider{}
+	awsCred := awsCredProvider.GetAwsCredentials()
+	ecr := aws.NewEcrProvider(awsCred.Config)
+	identityProvider := aws.NewAWSIdentityProvider(awsCred.Config)
+	kubeGetter := providers.KubernetesProvider{}
+
+	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{
+		awsCredProvider:        awsCredProvider,
+		kubernetesClientGetter: kubeGetter,
+		identityProviderGetter: identityProvider,
+		ecrRepoDescriber:       ecr,
+	})
 }
 
 type ECRFactory struct {
+	awsCredProvider        aws.AwsCredentialsGetter
+	kubernetesClientGetter providers.KubernetesClientGetter
+	identityProviderGetter aws.IdentityProviderGetter
+	ecrRepoDescriber       aws.EcrRepositoryDescriber
 }
 
 func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {
@@ -35,25 +49,22 @@ func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig) (fetching.Fetcher, error) {
-	awsCredProvider := aws_providers.AWSCredProvider{}
-	awsCfg := awsCredProvider.GetAwsCredentials()
+	awsCfg := f.awsCredProvider.GetAwsCredentials()
 	ctx := context.Background()
-	identityProvider := aws_providers.NewAWSIdentityProvider(awsCfg.Config)
-	identity, err := identityProvider.GetIdentity(ctx)
+	identity, err := f.identityProviderGetter.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
 	}
 
 	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, awsCfg.Config.Region)
-	ecrProvider := aws_providers.NewEcrProvider(awsCfg.Config)
-	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	kubeClient, err := f.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}
 
 	fe := &ECRFetcher{
 		cfg:         cfg,
-		ecrProvider: ecrProvider,
+		ecrProvider: f.ecrRepoDescriber,
 		kubeClient:  kubeClient,
 		repoRegexMatchers: []*regexp.Regexp{
 			regexp.MustCompile(privateRepoRegex),
