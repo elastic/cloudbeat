@@ -17,17 +17,17 @@ const (
 )
 
 func init() {
-	awsCredProvider := aws.AWSCredProvider{}
-	awsCred := awsCredProvider.GetAwsCredentials()
-	ecr := aws.NewEcrProvider(awsCred.Config)
-	identityProvider := aws.NewAWSIdentityProvider(awsCred.Config)
+	awsConfigProvider := aws.ConfigProvider{}
+	awsConfig := awsConfigProvider.GetConfig()
+	ecr := aws.NewEcrProvider(awsConfig.Config)
+	identityProvider := aws.NewAWSIdentityProvider(awsConfig.Config)
 	kubeGetter := providers.KubernetesProvider{}
 
 	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{
 		kubernetesClientGetter: kubeGetter,
 		identityProviderGetter: identityProvider,
 		ecrRepoDescriber:       ecr,
-		awsConfig:              awsCred,
+		awsConfig:              awsConfig,
 	})
 }
 

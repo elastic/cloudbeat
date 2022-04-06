@@ -5,14 +5,14 @@ import (
 	"log"
 )
 
-type AwsCredentialsGetter interface {
-	GetAwsCredentials() Config
+type ConfigGetter interface {
+	GetConfig() Config
 }
 
-type AWSCredProvider struct {
+type ConfigProvider struct {
 }
 
-func (p AWSCredProvider) GetAwsCredentials() Config {
+func (p ConfigProvider) GetConfig() Config {
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
 		log.Fatal(err)

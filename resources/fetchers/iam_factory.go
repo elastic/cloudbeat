@@ -13,9 +13,9 @@ const (
 )
 
 func init() {
-	awsCredProvider := aws.AWSCredProvider{}
-	awsCred := awsCredProvider.GetAwsCredentials()
-	provider := aws.NewIAMProvider(awsCred.Config)
+	awsConfigProvider := aws.ConfigProvider{}
+	awsConfig := awsConfigProvider.GetConfig()
+	provider := aws.NewIAMProvider(awsConfig.Config)
 
 	manager.Factories.ListFetcherFactory(IAMType, &IAMFactory{
 		iamProvider: provider,

@@ -13,9 +13,9 @@ const (
 )
 
 func init() {
-	awsCredProvider := aws.AWSCredProvider{}
-	awsCred := awsCredProvider.GetAwsCredentials()
-	eks := aws.NewEksProvider(awsCred.Config)
+	awsConfigProvider := aws.ConfigProvider{}
+	awsConfig := awsConfigProvider.GetConfig()
+	eks := aws.NewEksProvider(awsConfig.Config)
 
 	manager.Factories.ListFetcherFactory(EKSType, &EKSFactory{
 		eksProvider: eks,

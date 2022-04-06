@@ -73,11 +73,11 @@ name: aws-ecr
 		}
 		identityProvider := &aws.MockedIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
-		awsCred := aws.Config{Config: awsorg.Config{
+		awsConfig := aws.Config{Config: awsorg.Config{
 			Region: test.region,
 		}}
-		mockedAwsCred := &aws.MockedAwsCredentialsGetter{}
-		mockedAwsCred.EXPECT().GetAwsCredentials().Return(awsCred)
+		awsconfigProvider := &aws.MockConfigGetter{}
+		awsconfigProvider.EXPECT().GetConfig().Return(awsConfig)
 
 		ecrProvider := &aws.MockedEcrRepositoryDescriber{}
 

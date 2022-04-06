@@ -17,8 +17,8 @@ const (
 )
 
 func init() {
-	awsCredProvider := aws.AWSCredProvider{}
-	config := awsCredProvider.GetAwsCredentials()
+	awsConfigProvider := aws.ConfigProvider{}
+	config := awsConfigProvider.GetConfig()
 	elb := aws.NewELBProvider(config.Config)
 	kubeGetter := providers.KubernetesProvider{}
 
