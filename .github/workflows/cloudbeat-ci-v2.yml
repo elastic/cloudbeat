@@ -121,7 +121,7 @@ jobs:
 
       - name: Load images to kind
         run: |
-          kind load image-archive /tmp/cloudbeat${{ github.event.pull_request.head.sha }}.tar --name=kind-mono & kind load image-archive /tmp/pytest${{ github.event.pull_request.head.sha }}.tar --name=kind-mono
+          kind load image-archive /tmp/cloudbeat-${{ github.event.pull_request.head.sha }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.event.pull_request.head.sha }}.tar --name=kind-mono
           rm -rf /tmp/*.tar
 
       - name: Deploy tests Helm chart
