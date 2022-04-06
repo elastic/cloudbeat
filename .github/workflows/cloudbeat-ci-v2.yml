@@ -1,4 +1,4 @@
-name: CloudBeat CI V2
+name: CloudBeat-CI-V2
 
 on:
   # pull_request_target:
@@ -144,11 +144,11 @@ jobs:
           echo "EOF" >> "$GITHUB_ENV"
           exit $result_code
 
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   if: failure()
-      #   with:
-      #     limit-access-to-actor: true
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: always()
+        with:
+          limit-access-to-actor: true
 
       - name: Get Allure history
         uses: actions/checkout@v2
