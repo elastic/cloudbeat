@@ -3,8 +3,8 @@ package fetchers
 import (
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/cloudbeat/resources/aws_providers"
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers/aws"
 	"regexp"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -17,9 +17,9 @@ const (
 )
 
 func init() {
-	awsCredProvider := aws_providers.AWSCredProvider{}
+	awsCredProvider := aws.AWSCredProvider{}
 	awsCred := awsCredProvider.GetAwsCredentials()
-	elb := aws_providers.NewELBProvider(awsCred.Config)
+	elb := aws.NewELBProvider(awsCred.Config)
 	kubeGetter := providers.KubernetesProvider{}
 
 	manager.Factories.ListFetcherFactory(ELBType,
@@ -32,8 +32,8 @@ func init() {
 }
 
 type ELBFactory struct {
-	balancerDescriber      aws_providers.ELBLoadBalancerDescriber
-	awsCredProvider        aws_providers.AwsCredentialsGetter
+	balancerDescriber      aws.ELBLoadBalancerDescriber
+	awsCredProvider        aws.AwsCredentialsGetter
 	kubernetesClientGetter providers.KubernetesClientGetter
 }
 

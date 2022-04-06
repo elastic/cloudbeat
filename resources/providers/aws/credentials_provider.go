@@ -1,4 +1,4 @@
-package aws_providers
+package aws
 
 import (
 	"github.com/aws/aws-sdk-go-v2/aws/external"
@@ -6,19 +6,19 @@ import (
 )
 
 type AwsCredentialsGetter interface {
-	GetAwsCredentials() AwsFetcherConfig
+	GetAwsCredentials() FetcherConfig
 }
 
 type AWSCredProvider struct {
 }
 
-func (p AWSCredProvider) GetAwsCredentials() AwsFetcherConfig {
+func (p AWSCredProvider) GetAwsCredentials() FetcherConfig {
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return AwsFetcherConfig{
+	return FetcherConfig{
 		Config: cfg,
 	}
 }

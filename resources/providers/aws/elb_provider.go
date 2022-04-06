@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws_providers
+package aws
 
 import (
 	"context"

@@ -20,7 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/aws_providers"
+	"github.com/elastic/cloudbeat/resources/providers/aws"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
@@ -35,7 +35,7 @@ const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?"
 
 type ECRFetcher struct {
 	cfg               ECRFetcherConfig
-	ecrProvider       *aws_providers.ECRProvider
+	ecrProvider       aws.EcrRepositoryDescriber
 	kubeClient        k8s.Interface
 	repoRegexMatchers []*regexp.Regexp
 }

@@ -20,7 +20,7 @@ package fetchers
 import (
 	"context"
 	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/aws_providers"
+	"github.com/elastic/cloudbeat/resources/providers/aws"
 
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -28,7 +28,7 @@ import (
 
 type EKSFetcher struct {
 	cfg         EKSFetcherConfig
-	eksProvider *aws_providers.EKSProvider
+	eksProvider *aws.EKSProvider
 }
 
 type EKSFetcherConfig struct {
@@ -54,7 +54,7 @@ func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 func (f EKSFetcher) Stop() {
 }
 
-//TODO: Add resource id logic to all AWS resources
+// GetID TODO: Add resource id logic to all AWS resources
 func (r EKSResource) GetID() (string, error) {
 	return "", nil
 }

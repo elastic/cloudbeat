@@ -19,13 +19,13 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/aws_providers"
+	"github.com/elastic/cloudbeat/resources/providers/aws"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type IAMFetcher struct {
-	iamProvider *aws_providers.IAMProvider
+	iamProvider *aws.IAMProvider
 	cfg         IAMFetcherConfig
 }
 
@@ -50,7 +50,7 @@ func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 func (f IAMFetcher) Stop() {
 }
 
-//TODO: Add resource id logic to all AWS resources
+// GetID TODO: Add resource id logic to all AWS resources
 func (r IAMResource) GetID() (string, error) {
 	return "", nil
 }

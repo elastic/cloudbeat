@@ -15,10 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws_providers
+package aws
 
 import "github.com/aws/aws-sdk-go-v2/aws"
 
-type AwsFetcherConfig struct {
+type FetcherConfig struct {
 	Config aws.Config
 }

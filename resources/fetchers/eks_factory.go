@@ -1,8 +1,7 @@
 package fetchers
 
 import (
-	"encoding/gob"
-	"github.com/elastic/cloudbeat/resources/aws_providers"
+	"github.com/elastic/cloudbeat/resources/providers/aws"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -15,7 +14,6 @@ const (
 
 func init() {
 	manager.Factories.ListFetcherFactory(EKSType, &EKSFactory{})
-	gob.Register(EKSResource{})
 }
 
 type EKSFactory struct {
@@ -32,9 +30,9 @@ func (f *EKSFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *EKSFactory) CreateFrom(cfg EKSFetcherConfig) (fetching.Fetcher, error) {
-	awsCredProvider := aws_providers.AWSCredProvider{}
+	awsCredProvider := aws.AWSCredProvider{}
 	awsCfg := awsCredProvider.GetAwsCredentials()
-	eks := aws_providers.NewEksProvider(awsCfg.Config)
+	eks := aws.NewEksProvider(awsCfg.Config)
 
 	fe := &EKSFetcher{
 		cfg:         cfg,

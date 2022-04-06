@@ -29,31 +29,36 @@ import (
 	"testing"
 )
 
-type ElbFactoryTestSuite struct {
+type EcrFactoryTestSuite struct {
 	suite.Suite
 	factory fetching.Factory
 }
 
-func TestElbFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(ElbFactoryTestSuite))
+func TestEcrFactoryTestSuite(t *testing.T) {
+	suite.Run(t, new(EcrFactoryTestSuite))
 }
 
-func (s *ElbFactoryTestSuite) SetupTest() {
+func (s *EcrFactoryTestSuite) SetupTest() {
 
 }
 
-func (s *ElbFactoryTestSuite) TestCreateFetcher() {
+func (s *EcrFactoryTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		config        string
 		region        string
-		expectedRegex string
+		account       string
+		expectedRegex []string
 	}{
 		{
 			`
-name: aws-elb
+name: aws-ecr
 `,
 			"us1-east",
-			"([\\w-]+)-\\d+\\.us1-east.elb.amazonaws.com",
+			"my-account",
+			[]string{
+				"^my-account\\.dkr\\.ecr\\.us1-east\\.amazonaws\\.com\\/([-\\w]+)[:,@]?",
+				"public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?",
+			},
 		},
 	}
 
@@ -63,18 +68,24 @@ name: aws-elb
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
+		identity := aws.Identity{
+			Account: &test.account,
+		}
+		identityProvider := &aws.MockedIdentityProviderGetter{}
+		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
 		awsCred := aws.FetcherConfig{Config: awsorg.Config{
 			Region: test.region,
 		}}
 		mockedAwsCred := &aws.MockedAwsCredentialsGetter{}
 		mockedAwsCred.EXPECT().GetAwsCredentials().Return(awsCred)
 
-		elbProvider := &aws.MockedELBLoadBalancerDescriber{}
+		ecrProvider := &aws.MockedEcrRepositoryDescriber{}
 
-		factory := &ELBFactory{
-			balancerDescriber:      elbProvider,
+		factory := &ECRFactory{
 			awsCredProvider:        mockedAwsCred,
 			kubernetesClientGetter: mockedKubernetesClientGetter,
+			ecrRepoDescriber:       ecrProvider,
+			identityProviderGetter: identityProvider,
 		}
 
 		cfg, err := common.NewConfigFrom(test.config)
@@ -84,10 +95,11 @@ name: aws-elb
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		elbFetcher, ok := fetcher.(*ELBFetcher)
+		ecrFetcher, ok := fetcher.(*ECRFetcher)
 		s.True(ok)
-		s.Equal(elbProvider, elbFetcher.elbProvider)
-		s.Equal(kubeclient, elbFetcher.kubeClient)
-		s.Equal(test.expectedRegex, elbFetcher.lbRegexMatchers[0].String())
+		s.Equal(ecrProvider, ecrFetcher.ecrProvider)
+		s.Equal(kubeclient, ecrFetcher.kubeClient)
+		s.Equal(test.expectedRegex[0], ecrFetcher.repoRegexMatchers[0].String())
+		s.Equal(test.expectedRegex[1], ecrFetcher.repoRegexMatchers[1].String())
 	}
 }

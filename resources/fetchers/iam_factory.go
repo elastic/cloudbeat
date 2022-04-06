@@ -2,7 +2,7 @@ package fetchers
 
 import (
 	"encoding/gob"
-	"github.com/elastic/cloudbeat/resources/aws_providers"
+	"github.com/elastic/cloudbeat/resources/providers/aws"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -32,9 +32,9 @@ func (f *IAMFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *IAMFactory) CreateFrom(cfg IAMFetcherConfig) (fetching.Fetcher, error) {
-	awsCredProvider := aws_providers.AWSCredProvider{}
+	awsCredProvider := aws.AWSCredProvider{}
 	awsCfg := awsCredProvider.GetAwsCredentials()
-	iam := aws_providers.NewIAMProvider(awsCfg.Config)
+	iam := aws.NewIAMProvider(awsCfg.Config)
 
 	return &IAMFetcher{
 		cfg:         cfg,

@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws_providers
+package aws
 
 import (
 	"context"
@@ -27,6 +27,10 @@ import (
 
 type ECRProvider struct {
 	client *ecr.Client
+}
+
+type EcrRepositoryDescriber interface {
+	DescribeRepositories(ctx context.Context, repoNames []string) ([]ecr.Repository, error)
 }
 
 func NewEcrProvider(cfg aws.Config) *ECRProvider {

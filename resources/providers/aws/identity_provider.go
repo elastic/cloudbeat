@@ -15,36 +15,48 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws_providers
+package aws
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/eks"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
-type EKSProvider struct {
-	client *eks.Client
+type Identity struct {
+	Account *string
+	Arn     *string
+	UserId  *string
 }
 
-func NewEksProvider(cfg aws.Config) *EKSProvider {
-	svc := eks.New(cfg)
-	return &EKSProvider{
+type IdentityProvider struct {
+	client *sts.Client
+}
+
+type IdentityProviderGetter interface {
+	GetIdentity(ctx context.Context) (*Identity, error)
+}
+
+func NewAWSIdentityProvider(cfg aws.Config) *IdentityProvider {
+	svc := sts.New(cfg)
+	return &IdentityProvider{
 		client: svc,
 	}
 }
 
-func (provider EKSProvider) DescribeCluster(ctx context.Context, clusterName string) (*eks.DescribeClusterResponse, error) {
-	input := &eks.DescribeClusterInput{
-		Name: &clusterName,
-	}
-	req := provider.client.DescribeClusterRequest(input)
-	response, err := req.Send(ctx)
+// GetIdentity This method will return your identity (Arn, user-id...)
+func (provider *IdentityProvider) GetIdentity(ctx context.Context) (*Identity, error) {
+	input := &sts.GetCallerIdentityInput{}
+	request := provider.client.GetCallerIdentityRequest(input)
+	response, err := request.Send(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to describe cluster %s from eks , error - %w", clusterName, err)
+		return nil, err
 	}
 
-	return response, err
+	identity := &Identity{
+		Account: response.Account,
+		UserId:  response.UserId,
+		Arn:     response.Arn,
+	}
+	return identity, nil
 }
