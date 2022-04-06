@@ -5,6 +5,10 @@ import (
 	"log"
 )
 
+type AwsCredentialsGetter interface {
+	GetAwsCredentials() AwsFetcherConfig
+}
+
 type AWSCredProvider struct {
 }
 

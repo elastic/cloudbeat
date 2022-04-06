@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/cloudbeat/resources/aws_providers"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"regexp"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -16,10 +17,24 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(ELBType, &ELBFactory{})
+	awsCredProvider := aws_providers.AWSCredProvider{}
+	awsCred := awsCredProvider.GetAwsCredentials()
+	elb := aws_providers.NewELBProvider(awsCred.Config)
+	kubeGetter := providers.KubernetesProvider{}
+
+	manager.Factories.ListFetcherFactory(ELBType,
+		&ELBFactory{
+			balancerDescriber:      elb,
+			awsCredProvider:        awsCredProvider,
+			kubernetesClientGetter: kubeGetter,
+		},
+	)
 }
 
 type ELBFactory struct {
+	balancerDescriber      aws_providers.ELBLoadBalancerDescriber
+	awsCredProvider        aws_providers.AwsCredentialsGetter
+	kubernetesClientGetter providers.KubernetesClientGetter
 }
 
 func (f *ELBFactory) Create(c *common.Config) (fetching.Fetcher, error) {
@@ -33,11 +48,10 @@ func (f *ELBFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *ELBFactory) CreateFrom(cfg ELBFetcherConfig) (fetching.Fetcher, error) {
-	awsCredProvider := aws_providers.AWSCredProvider{}
-	awsCfg := awsCredProvider.GetAwsCredentials()
-	elb := aws_providers.NewELBProvider(awsCfg.Config)
+	awsCfg := f.awsCredProvider.GetAwsCredentials()
+	elb := f.balancerDescriber
 	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsCfg.Config.Region)
-	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	kubeClient, err := f.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)
 	}

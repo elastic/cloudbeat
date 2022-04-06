@@ -26,6 +26,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
 
+type ELBLoadBalancerDescriber interface {
+	DescribeLoadBalancer(ctx context.Context, balancersNames []string) ([]elasticloadbalancing.LoadBalancerDescription, error)
+}
+
 type ELBProvider struct {
 	client *elasticloadbalancing.Client
 }

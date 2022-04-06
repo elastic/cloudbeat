@@ -35,7 +35,7 @@ const ELBRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
 
 type ELBFetcher struct {
 	cfg             ELBFetcherConfig
-	elbProvider     *aws_providers.ELBProvider
+	elbProvider     aws_providers.ELBLoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
 }
