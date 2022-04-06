@@ -1,9 +1,6 @@
-name: CloudBeat CI v2
+name: CloudBeat CI V2
 
 on:
-  # push:
-  #   branches:
-  #     - "new-tests-ci"
   # pull_request_target:
   #   branches:
   #     - main
@@ -63,7 +60,6 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
           outputs: type=docker,dest=/tmp/cloudbeat.tar
-          # load: true
 
       - name: Build pytest-docker
         uses: docker/build-push-action@v2
@@ -83,19 +79,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dockers-cache-
 
-      # - name: Upload image
-      #   uses: ishworkh/docker-image-artifact-upload@v1
-      #   with:
-      #     image: "cloudbeat:latest"
-
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-  pytest-integration-test:
+  Integration_tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -151,11 +142,11 @@ jobs:
           echo "EOF" >> "$GITHUB_ENV"
           exit $result_code
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   if: failure()
+      #   with:
+      #     limit-access-to-actor: true
 
       - name: Get Allure history
         uses: actions/checkout@v2
@@ -170,8 +161,6 @@ jobs:
         if: always()
         with:
           allure_results: tests/allure/results
-          #gh_pages: gh-pages
-          #allure_report: allure-report
           allure_history: allure-history
           keep_reports: 20
 
@@ -198,3 +187,45 @@ jobs:
             ${{env.summary}}
             ```
             Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
+
+  Unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Mage Check
+        uses: magefile/mage-action@v1.6.0
+        with:
+          args: check
+
+      - name: Mage check license headers
+        uses: magefile/mage-action@v1.6.0
+        with:
+          args: checkLicenseHeaders
+
+      - name: Unit-Test Cloudbeat
+        run: |
+          GOOS=linux go test ./...
+
+      - name: Get diff k8s manifests
+        uses: technote-space/get-diff-action@v4
+        with:
+          PATTERNS: ${{ env.K8S_MANIFEST_DIR }}/**
+
+      - name: Run K8s manifest tests
+        if: env.GIT_DIFF
+        uses: stefanprodan/kube-tools@v1
+        with:
+          kubectl: 1.18.2
+          kubeval: v0.16.1
+          command: |
+            echo "===== run kubeval"
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/cloudbeat-ds.yaml
