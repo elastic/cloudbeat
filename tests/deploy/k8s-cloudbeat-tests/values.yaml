@@ -9,7 +9,10 @@ image:
   repository: cloudbeat-test
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "0.0.6"
+  tag: latest
+
+testData:
+  marker: rules
 
 imagePullSecrets: []
 nameOverride: ""
@@ -116,7 +119,7 @@ elasticsearch:
 
   # Request smaller persistent volumes.
   volumeClaimTemplate:
-    accessModes: [ "ReadWriteOnce" ]
+    accessModes: ["ReadWriteOnce"]
     storageClassName: "standard"
     resources:
       requests:
@@ -125,7 +128,7 @@ elasticsearch:
   # Storage settings
   persistence:
     enabled: false
-  
+
   #disable ES tests
   tests:
     enabled: false

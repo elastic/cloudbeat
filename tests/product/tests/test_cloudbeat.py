@@ -36,4 +36,3 @@ def test_cloudbeat_pods_running(data):
     assert len(data[0]) > 0, "There are no cloudbeat pod instances running in the cluster"
     # Verify that each pod is in running state
     assert all(pod.status.phase == "Running" for pod in data[0]), "Not all pods are running"
-

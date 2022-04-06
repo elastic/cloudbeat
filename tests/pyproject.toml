@@ -11,8 +11,8 @@ munch = "^2.5.0"
 kubernetes = "^23.3.0"
 elasticsearch = "^8.1.0"
 allure-pytest = "^2.9.45"
-docker = "^5.0.3"
 pytest-xdist = "^2.5.0"
+docker = "^5.0.3"
 
 [tool.poetry.dev-dependencies]
 

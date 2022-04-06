@@ -61,7 +61,7 @@ load-tests-image-kind:
   kind load docker-image cloudbeat-test:latest --name kind-mono
 
 deploy-tests-helm:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/ 
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 purge-tests:
 	helm del {{TESTS_RELEASE}} -n kube-system

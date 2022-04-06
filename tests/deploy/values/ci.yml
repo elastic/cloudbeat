@@ -1,2 +1,5 @@
 cloudbeat:
   deploy: true
+
+testData:
+  marker: integration
