@@ -18,43 +18,50 @@
 package fetchers
 
 import (
-	"context"
-	"github.com/elastic/cloudbeat/resources/providers/aws"
-
+	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
-type IAMFetcher struct {
-	iamProvider aws.IAMRolePermissionGetter
-	cfg         IAMFetcherConfig
+type IamFactoryTestSuite struct {
+	suite.Suite
+	factory fetching.Factory
 }
 
-type IAMFetcherConfig struct {
-	fetching.BaseFetcherConfig
-	RoleName string `config:"roleName"`
+func TestIamFactoryTestSuite(t *testing.T) {
+	suite.Run(t, new(IamFactoryTestSuite))
 }
 
-type IAMResource struct {
-	Data interface{}
+func (s *IamFactoryTestSuite) SetupTest() {
+
 }
 
-func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	results := make([]fetching.Resource, 0)
+func (s *IamFactoryTestSuite) TestCreateFetcher() {
+	var tests = []struct {
+		config string
+	}{
+		{
+			`
+name: aws-iam
+`,
+		},
+	}
 
-	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
-	results = append(results, IAMResource{result})
+	for _, test := range tests {
+		iamProvider := &aws.MockedIAMRolePermissionGetter{}
+		factory := &IAMFactory{iamProvider: iamProvider}
 
-	return results, err
-}
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
 
-func (f IAMFetcher) Stop() {
-}
+		fetcher, err := factory.Create(cfg)
+		s.NoError(err)
+		s.NotNil(fetcher)
 
-// GetID TODO: Add resource id logic to all AWS resources
-func (r IAMResource) GetID() (string, error) {
-	return "", nil
-}
-
-func (r IAMResource) GetData() interface{} {
-	return r.Data
+		iamFetcher, ok := fetcher.(*IAMFetcher)
+		s.True(ok)
+		s.Equal(iamProvider, iamFetcher.iamProvider)
+	}
 }

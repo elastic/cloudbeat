@@ -28,7 +28,7 @@ import (
 
 type EKSFetcher struct {
 	cfg         EKSFetcherConfig
-	eksProvider *aws.EKSProvider
+	eksProvider aws.EksClusterDescriber
 }
 
 type EKSFetcherConfig struct {

@@ -13,10 +13,17 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(EKSType, &EKSFactory{})
+	awsCredProvider := aws.AWSCredProvider{}
+	awsCred := awsCredProvider.GetAwsCredentials()
+	eks := aws.NewEksProvider(awsCred.Config)
+
+	manager.Factories.ListFetcherFactory(EKSType, &EKSFactory{
+		eksProvider: eks,
+	})
 }
 
 type EKSFactory struct {
+	eksProvider aws.EksClusterDescriber
 }
 
 func (f *EKSFactory) Create(c *common.Config) (fetching.Fetcher, error) {
@@ -30,13 +37,9 @@ func (f *EKSFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *EKSFactory) CreateFrom(cfg EKSFetcherConfig) (fetching.Fetcher, error) {
-	awsCredProvider := aws.AWSCredProvider{}
-	awsCfg := awsCredProvider.GetAwsCredentials()
-	eks := aws.NewEksProvider(awsCfg.Config)
-
 	fe := &EKSFetcher{
 		cfg:         cfg,
-		eksProvider: eks,
+		eksProvider: f.eksProvider,
 	}
 
 	return fe, nil

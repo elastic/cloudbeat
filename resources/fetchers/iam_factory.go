@@ -1,7 +1,6 @@
 package fetchers
 
 import (
-	"encoding/gob"
 	"github.com/elastic/cloudbeat/resources/providers/aws"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -14,11 +13,17 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(IAMType, &IAMFactory{})
-	gob.Register(IAMResource{})
+	awsCredProvider := aws.AWSCredProvider{}
+	awsCred := awsCredProvider.GetAwsCredentials()
+	provider := aws.NewIAMProvider(awsCred.Config)
+
+	manager.Factories.ListFetcherFactory(IAMType, &IAMFactory{
+		iamProvider: provider,
+	})
 }
 
 type IAMFactory struct {
+	iamProvider aws.IAMRolePermissionGetter
 }
 
 func (f *IAMFactory) Create(c *common.Config) (fetching.Fetcher, error) {
@@ -32,13 +37,9 @@ func (f *IAMFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 }
 
 func (f *IAMFactory) CreateFrom(cfg IAMFetcherConfig) (fetching.Fetcher, error) {
-	awsCredProvider := aws.AWSCredProvider{}
-	awsCfg := awsCredProvider.GetAwsCredentials()
-	iam := aws.NewIAMProvider(awsCfg.Config)
-
 	return &IAMFetcher{
 		cfg:         cfg,
-		iamProvider: iam,
+		iamProvider: f.iamProvider,
 	}, nil
 
 }
