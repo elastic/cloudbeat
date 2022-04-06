@@ -13,6 +13,7 @@ cloudbeat-test
 *local.yml
 fields.yml
 tests/allure/results/*
+tests/allure/results/test.dummy
 tests/allure/reports/*
 *-result.json
 *test.dummy
