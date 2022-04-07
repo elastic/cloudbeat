@@ -1,7 +1,11 @@
 name: CloudBeat-CI-V2
 
 on:
-  pull_request_target:
+  # pull_request_target:
+  #   branches:
+  #     - main
+  #   types: [assigned, opened, synchronize, reopened]
+  pull_request:
     branches:
       - main
     types: [assigned, opened, synchronize, reopened]
