@@ -11,11 +11,12 @@ spec:
   containers:
   - name: {{ .Values.image.name }}
     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+    imagePullPolicy: IfNotPresent
     command:
     - /bin/sh
     - -c
     - |
-      pytest -s -v --alluredir=/usr/src/app/tests/report
+      pytest -rA --disable-warnings --alluredir=/usr/src/app/tests/report
     envFrom:
       - configMapRef:
           name: {{ .Values.serviceAccount.name }}-configmap

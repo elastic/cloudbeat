@@ -52,7 +52,7 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220328120630-c721abcf0650
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220404173033-fd138c7bd472
 	github.com/elastic/csp-security-policies v0.0.10-go-lib
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.4 // indirect
@@ -130,6 +130,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/elastic/elastic-agent-client/v7 v7.0.0-20210727140539-f0905d9377f6 // indirect
+	github.com/elastic/elastic-agent-libs v0.1.1 // indirect
 	github.com/elastic/go-concert v0.2.0 // indirect
 	github.com/elastic/go-lumber v0.1.0 // indirect
 	github.com/elastic/go-seccomp-bpf v1.2.0 // indirect
