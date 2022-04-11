@@ -16,13 +16,6 @@ spec:
       labels:
         k8s-app: cloudbeat
     spec:
-      serviceAccountName: cloudbeat
-      terminationGracePeriodSeconds: 30
-      tolerations:
-        - key: node-role.kubernetes.io/master
-          effect: NoSchedule
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: cloudbeat
           image: cloudbeat:latest
@@ -85,6 +78,13 @@ spec:
             - name: etcsysmd
               mountPath: /hostfs/etc/systemd
               readOnly: true
+      serviceAccountName: cloudbeat
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       volumes:
         - name: proc
           hostPath:

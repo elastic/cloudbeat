@@ -8,7 +8,7 @@ on:
 
 
 env:
-  K8S_MANIFEST_DIR: deploy/k8s
+  K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.17.2
 
 jobs:
