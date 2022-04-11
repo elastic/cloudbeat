@@ -1,10 +1,12 @@
 FROM debian
-RUN apt-get update
-RUN apt-get install -y ca-certificates
-RUN apt-get install -y curl
-RUN apt-get install -y iputils-ping
-RUN apt-get install -y jq
+RUN set -x && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates curl iputils-ping jq && \
+      apt-get clean
+
 COPY ./cloudbeat /cloudbeat
 COPY ./cloudbeat.yml /cloudbeat.yml
+
 ENTRYPOINT ["/cloudbeat"]
 CMD ["-e", "-d", "'*'"]
