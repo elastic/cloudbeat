@@ -117,6 +117,15 @@ Since this test project is a standalone project in cloudbeat repo, in pycharm yo
 - In Additional arguments define: -s -v --alluredir=./reports
 - In Python interpreter select Poetry
 
+### Project Structure
+
+The project main folders are:
+- commonlib - contains helper functions used for tests development.
+- deploy -  contains helm charts for deploying ELK, cloudbeat, and tests docker.
+- product - contains cloudbeat tests, for example cloudbeat behavior and functional tests.
+- integration - contains cloudbeat integration tests.
+- project root content - contains project and tests configuration files.
+
 
 ### Building
 
@@ -178,6 +187,15 @@ helm test cloudbeat-test
 ```shell
 allure serve <path to raw result data>
 ```
+
+## CI-CD Workflows
+
+Current usage of test project is in the following ci flows:
+- cloudbeat-ci
+  - build cloudbeat-tests docker image
+  - load cloudbeat-tests docker image to kind cluster
+  - deploy tests helm chart
+  - execute product and integration cloudbeat tests
 
 ## Licensing
 
