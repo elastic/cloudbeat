@@ -9,7 +9,7 @@ image:
   repository: cloudbeat-test
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: latest
+  tag: "latest"
 
 testData:
   marker: rules

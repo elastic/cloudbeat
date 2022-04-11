@@ -1,4 +1,6 @@
 import pytest
+import json
+import allure
 
 testdata = ['file-system', 'process', 'kube-api']
 
@@ -26,5 +28,5 @@ def test_elastic_index_exists(elastic_client, match_type):
         }]
     }
     result = elastic_client.get_index_data(index_name=elastic_client.index, query=file_system_query)
-
+    allure.attach(json.dumps(result['hits']['hits'][0]['_source'], indent=4, sort_keys=True), match_type, attachment_type=allure.attachment_type.JSON)
     assert len(result.body['hits']['hits']) > 0, f"The findings of type {match_type} not found"

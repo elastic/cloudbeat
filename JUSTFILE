@@ -54,10 +54,10 @@ expose-ports:
 TESTS_RELEASE := "cloudbeat-tests"
 TIMEOUT := "1200s"
 
-build-test-docker:
+build-pytest-docker:
   cd tests; docker build -t cloudbeat-test .
 
-load-tests-image-kind:
+load-pytest-kind:
   kind load docker-image cloudbeat-test:latest --name kind-mono
 
 deploy-tests-helm:
@@ -65,3 +65,9 @@ deploy-tests-helm:
 
 purge-tests:
 	helm del {{TESTS_RELEASE}} -n kube-system
+
+gen-report:
+  allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
+
+run-tests:
+  helm test cloudbeat-tests --namespace kube-system
