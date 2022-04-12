@@ -1,5 +1,4 @@
 # Cloudbeat 
-![Coverage](https://img.shields.io/badge/Coverage-48.3%25-yellow)
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 [![Coverage Status](https://coveralls.io/repos/github/oren-zohar/cloudbeat/badge.svg?branch=main)](https://coveralls.io/github/oren-zohar/cloudbeat?branch=main)
 [![Build Status](https://internal-ci.elastic.co/buildStatus/icon?job=cloudbeat%2Fcloudbeat-mbp%2Fmain)](https://internal-ci.elastic.co/job/cloudbeat/job/cloudbeat-mbp/job/main/)
