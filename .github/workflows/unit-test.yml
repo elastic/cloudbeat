@@ -1,0 +1,62 @@
+name: UnitTests
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types: [assigned, opened, synchronize, reopened]
+
+
+env:
+  K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
+  GO_VERSION: 1.17.2
+  
+jobs:
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+     
+      - name: Install goveralls
+        run: go install github.com/mattn/goveralls@latest
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -service=github
+
+      - name: Mage Check
+        uses: magefile/mage-action@v1.6.0
+        with:
+          args: check
+
+      - name: Mage check license headers
+        uses: magefile/mage-action@v1.6.0
+        with:
+          args: checkLicenseHeaders
+
+      - name: Unit-Test Cloudbeat
+        run: |
+          GOOS=linux go test ./...
+
+      - name: Get diff k8s manifests
+        uses: technote-space/get-diff-action@v4
+        with:
+          PATTERNS: ${{ env.K8S_MANIFEST_DIR }}/**
+
+      - name: Run K8s manifest tests
+        if: env.GIT_DIFF
+        uses: stefanprodan/kube-tools@v1
+        with:
+          kubectl: 1.18.2
+          kubeval: v0.16.1
+          command: |
+            echo "===== run kubeval"
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/cloudbeat-ds.yaml
