@@ -13,7 +13,7 @@ build-cloudbeat:
   GOOS=linux go build -v && docker build -t cloudbeat .
 
 deploy-cloudbeat:
-  kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+  kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system & kubectl apply -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
 
 build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
@@ -54,10 +54,13 @@ expose-ports:
 TESTS_RELEASE := "cloudbeat-tests"
 TIMEOUT := "1200s"
 
-build-test-docker:
+patch-cb-yml-tests:
+  kubectl kustomize deploy/k8s/kustomize/test > tests/deploy/cloudbeat-pytest.yml
+
+build-pytest-docker:
   cd tests; docker build -t cloudbeat-test .
 
-load-tests-image-kind:
+load-pytest-kind:
   kind load docker-image cloudbeat-test:latest --name kind-mono
 
 deploy-tests-helm:
@@ -65,3 +68,9 @@ deploy-tests-helm:
 
 purge-tests:
 	helm del {{TESTS_RELEASE}} -n kube-system
+
+gen-report:
+  allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
+
+run-tests:
+  helm test cloudbeat-tests --namespace kube-system

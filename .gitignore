@@ -1,4 +1,5 @@
 data/*
+.vscode*
 tests/.idea
 /.idea
 /build
@@ -12,5 +13,8 @@ cloudbeat-test
 *local.yaml
 *local.yml
 fields.yml
-*-container.json 
+tests/allure/results/*
+tests/allure/results/test.dummy
+tests/allure/reports/*
 *-result.json
+*test.dummy
