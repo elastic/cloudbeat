@@ -55,7 +55,7 @@ func (f *ECRFetcher) Stop() {
 }
 
 func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.Info("ecr fetcher started")
+	logp.L().Debug("ecr fetcher starts to fetch data")
 	results := make([]fetching.Resource, 0)
 	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
 	if err != nil {

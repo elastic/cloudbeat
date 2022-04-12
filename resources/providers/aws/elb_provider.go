@@ -20,8 +20,6 @@ package aws
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/libbeat/logp"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
@@ -44,8 +42,6 @@ func NewELBProvider(cfg aws.Config) *ELBProvider {
 // DescribeLoadBalancer method will return up to 400 results
 // If we will ever want to increase this number, DescribeLoadBalancers support paginated requests
 func (provider ELBProvider) DescribeLoadBalancer(ctx context.Context, balancersNames []string) ([]elasticloadbalancing.LoadBalancerDescription, error) {
-	logp.Info("elb fetcher started")
-
 	input := &elasticloadbalancing.DescribeLoadBalancersInput{
 		LoadBalancerNames: balancersNames,
 	}

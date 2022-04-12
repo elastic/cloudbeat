@@ -64,6 +64,7 @@ type ProcessFetcherConfig struct {
 }
 
 func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.L().Debug("process fetcher starts to fetch data")
 	pids, err := proc.ListFS(f.Fs)
 	if err != nil {
 		return nil, err

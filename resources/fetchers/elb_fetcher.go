@@ -52,7 +52,7 @@ type ELBResource struct {
 }
 
 func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.Info("elb fetcher started")
+	logp.L().Debug("elb fetcher starts to fetch data")
 	results := make([]fetching.Resource, 0)
 
 	balancers, err := f.GetLoadBalancers()

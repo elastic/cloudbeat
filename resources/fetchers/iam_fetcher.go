@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/aws"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -39,6 +40,7 @@ type IAMResource struct {
 }
 
 func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.L().Debug("iam fetcher starts to fetch data")
 	results := make([]fetching.Resource, 0)
 
 	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)

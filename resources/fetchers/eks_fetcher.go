@@ -41,7 +41,7 @@ type EKSResource struct {
 }
 
 func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.Info("eks fetcher started")
+	logp.L().Debug("eks fetcher starts to fetch data")
 
 	results := make([]fetching.Resource, 0)
 
