@@ -15,6 +15,7 @@ finding = result {
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
+		"expected": {"uid": "root", "gid": "root"},
 		"evidence": {"uid": uid, "gid": gid},
 	}
 }
