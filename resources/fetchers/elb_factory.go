@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/cloudbeat/resources/providers"
-	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -17,9 +17,9 @@ const (
 )
 
 func init() {
-	awsConfigProvider := aws.ConfigProvider{}
+	awsConfigProvider := awslib.ConfigProvider{}
 	config := awsConfigProvider.GetConfig()
-	elb := aws.NewELBProvider(config.Config)
+	elb := awslib.NewELBProvider(config.Config)
 	kubeGetter := providers.KubernetesProvider{}
 
 	manager.Factories.ListFetcherFactory(ELBType,
@@ -32,8 +32,8 @@ func init() {
 }
 
 type ELBFactory struct {
-	balancerDescriber      aws.ELBLoadBalancerDescriber
-	awsConfig              aws.Config
+	balancerDescriber      awslib.ELBLoadBalancerDescriber
+	awsConfig              awslib.Config
 	kubernetesClientGetter providers.KubernetesClientGetter
 }
 

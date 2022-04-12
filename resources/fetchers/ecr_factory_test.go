@@ -18,11 +18,11 @@
 package fetchers
 
 import (
-	awsorg "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
-	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
@@ -68,18 +68,18 @@ name: aws-ecr
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		identity := aws.Identity{
+		identity := awslib.Identity{
 			Account: &test.account,
 		}
-		identityProvider := &aws.MockedIdentityProviderGetter{}
+		identityProvider := &awslib.MockedIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
-		awsConfig := aws.Config{Config: awsorg.Config{
+		awsConfig := awslib.Config{Config: aws.Config{
 			Region: test.region,
 		}}
-		awsconfigProvider := &aws.MockConfigGetter{}
+		awsconfigProvider := &awslib.MockConfigGetter{}
 		awsconfigProvider.EXPECT().GetConfig().Return(awsConfig)
 
-		ecrProvider := &aws.MockedEcrRepositoryDescriber{}
+		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
 
 		factory := &ECRFactory{
 			kubernetesClientGetter: mockedKubernetesClientGetter,

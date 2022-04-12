@@ -20,13 +20,13 @@ package fetchers
 import (
 	"context"
 	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type IAMFetcher struct {
-	iamProvider aws.IAMRolePermissionGetter
+	iamProvider awslib.IAMRolePermissionGetter
 	cfg         IAMFetcherConfig
 }
 

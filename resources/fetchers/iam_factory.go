@@ -1,7 +1,7 @@
 package fetchers
 
 import (
-	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -13,9 +13,9 @@ const (
 )
 
 func init() {
-	awsConfigProvider := aws.ConfigProvider{}
+	awsConfigProvider := awslib.ConfigProvider{}
 	awsConfig := awsConfigProvider.GetConfig()
-	provider := aws.NewIAMProvider(awsConfig.Config)
+	provider := awslib.NewIAMProvider(awsConfig.Config)
 
 	manager.Factories.ListFetcherFactory(IAMType, &IAMFactory{
 		iamProvider: provider,
@@ -23,7 +23,7 @@ func init() {
 }
 
 type IAMFactory struct {
-	iamProvider aws.IAMRolePermissionGetter
+	iamProvider awslib.IAMRolePermissionGetter
 }
 
 func (f *IAMFactory) Create(c *common.Config) (fetching.Fetcher, error) {

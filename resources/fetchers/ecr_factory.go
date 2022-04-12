@@ -8,7 +8,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/resources/providers"
-	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 )
 
@@ -17,10 +17,10 @@ const (
 )
 
 func init() {
-	awsConfigProvider := aws.ConfigProvider{}
+	awsConfigProvider := awslib.ConfigProvider{}
 	awsConfig := awsConfigProvider.GetConfig()
-	ecr := aws.NewEcrProvider(awsConfig.Config)
-	identityProvider := aws.NewAWSIdentityProvider(awsConfig.Config)
+	ecr := awslib.NewEcrProvider(awsConfig.Config)
+	identityProvider := awslib.NewAWSIdentityProvider(awsConfig.Config)
 	kubeGetter := providers.KubernetesProvider{}
 
 	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{
@@ -32,10 +32,10 @@ func init() {
 }
 
 type ECRFactory struct {
-	awsConfig              aws.Config
+	awsConfig              awslib.Config
 	kubernetesClientGetter providers.KubernetesClientGetter
-	identityProviderGetter aws.IdentityProviderGetter
-	ecrRepoDescriber       aws.EcrRepositoryDescriber
+	identityProviderGetter awslib.IdentityProviderGetter
+	ecrRepoDescriber       awslib.EcrRepositoryDescriber
 }
 
 func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {

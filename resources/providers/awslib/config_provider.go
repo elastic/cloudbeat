@@ -15,10 +15,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package awslib
 
-import "github.com/aws/aws-sdk-go-v2/aws"
+import (
+	"github.com/aws/aws-sdk-go-v2/aws/external"
+	"log"
+)
 
-type Config struct {
-	Config aws.Config
+type ConfigGetter interface {
+	GetConfig() Config
+}
+
+type ConfigProvider struct {
+}
+
+func (p ConfigProvider) GetConfig() Config {
+	cfg, err := external.LoadDefaultAWSConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return Config{
+		Config: cfg,
+	}
 }

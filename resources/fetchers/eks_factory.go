@@ -1,7 +1,7 @@
 package fetchers
 
 import (
-	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -13,9 +13,9 @@ const (
 )
 
 func init() {
-	awsConfigProvider := aws.ConfigProvider{}
+	awsConfigProvider := awslib.ConfigProvider{}
 	awsConfig := awsConfigProvider.GetConfig()
-	eks := aws.NewEksProvider(awsConfig.Config)
+	eks := awslib.NewEksProvider(awsConfig.Config)
 
 	manager.Factories.ListFetcherFactory(EKSType, &EKSFactory{
 		eksProvider: eks,
@@ -23,7 +23,7 @@ func init() {
 }
 
 type EKSFactory struct {
-	eksProvider aws.EksClusterDescriber
+	eksProvider awslib.EksClusterDescriber
 }
 
 func (f *EKSFactory) Create(c *common.Config) (fetching.Fetcher, error) {

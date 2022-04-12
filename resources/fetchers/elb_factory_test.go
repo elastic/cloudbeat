@@ -18,11 +18,11 @@
 package fetchers
 
 import (
-	awsorg "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
-	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
@@ -63,11 +63,11 @@ name: aws-elb
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		awsConfig := aws.Config{Config: awsorg.Config{
+		awsConfig := awslib.Config{Config: aws.Config{
 			Region: test.region,
 		}}
 
-		elbProvider := &aws.MockedELBLoadBalancerDescriber{}
+		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
 
 		factory := &ELBFactory{
 			balancerDescriber:      elbProvider,

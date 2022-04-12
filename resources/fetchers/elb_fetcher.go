@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -35,7 +35,7 @@ const ELBRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
 
 type ELBFetcher struct {
 	cfg             ELBFetcherConfig
-	elbProvider     aws.ELBLoadBalancerDescriber
+	elbProvider     awslib.ELBLoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
 }

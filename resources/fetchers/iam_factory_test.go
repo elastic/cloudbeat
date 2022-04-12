@@ -20,7 +20,7 @@ package fetchers
 import (
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -50,7 +50,7 @@ name: aws-iam
 	}
 
 	for _, test := range tests {
-		iamProvider := &aws.MockedIAMRolePermissionGetter{}
+		iamProvider := &awslib.MockedIAMRolePermissionGetter{}
 		factory := &IAMFactory{iamProvider: iamProvider}
 
 		cfg, err := common.NewConfigFrom(test.config)
