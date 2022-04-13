@@ -8,6 +8,7 @@
 - [Running Cloudbeat](#running-cloudbeat)
   - [Clean up](#clean-up)
   - [Remote Debugging](#remote-debugging)
+- [Code guidelines](#code-guidelines)
 
 
 ## Prerequisites
@@ -66,3 +67,52 @@ Use your favorite IDE to connect to the debugger on `localhost:40000` (for examp
 Note: Check the jusfile for all available commands for build or deploy `$ just --summary`
 </br>
 
+## Code guidelines
+
+### Testing
+
+Cloudbeat has a various sets of tests. This guide should help to understand how the different test suites work, how they are used and new tests are added.
+
+In general there are two major test suites:
+
+- Tests written in Go
+- Tests written in Python
+
+The tests written in Go use the Go Testing package. The tests written in Python depend on pytest and require a compiled and executable binary from the Go code. The python test run a beat with a specific config and params and either check if the output is as expected or if the correct things show up in the logs.
+
+For both of the above test suites so called integration tests exists. Integration tests in Beats are tests which require an external system like Elasticsearch to test if the integration with this service works as expected. Beats provides in its testsuite docker containers and docker-compose files to start these environments but a developer can run the required services also locally.
+
+#### Mocking
+
+Cloudbeat uses [`mockery`](https://github.com/vektra/mockery) as its mocking test framework.
+`Mockery` provides an easy way to generate mocks for golang interfaces.
+
+Some tests use the new [expecter]((https://github.com/vektra/mockery#expecter-interfaces)) interface the library provides.
+For example, given an interface such as
+
+```go
+type Requester interface {
+	Get(path string) (string, error)
+}
+```
+You can use the type-safe expecter interface as such:
+```go
+requesterMock := Requester{}
+requesterMock.EXPECT().Get("some path").Return("result", nil)
+requesterMock.EXPECT().
+	Get(mock.Anything).
+	Run(func(path string) { fmt.Println(path, "was called") }).
+	// Can still use return functions by getting the embedded mock.Call
+	Call.Return(func(path string) string { return "result for " + path }, nil)
+```
+
+Notes
+- Place the test in the same package as the code it meant to test
+- File name should be aligned with the convention `original_file_mock`. For example: ecr_provider -> ecr_provider_mock
+
+Command example:
+```
+mockery --name=<interface_name> --with-expecter  --case underscore  --inpackage --recursive
+```
+#### General guidelines
+- The test file name should be
