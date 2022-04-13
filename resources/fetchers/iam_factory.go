@@ -13,16 +13,17 @@ const (
 )
 
 func init() {
-	awsConfigProvider := awslib.ConfigProvider{}
-	awsConfig := awsConfigProvider.GetConfig()
-	provider := awslib.NewIAMProvider(awsConfig.Config)
 
 	manager.Factories.ListFetcherFactory(IAMType, &IAMFactory{
-		iamProvider: provider,
+		extraElements: getIamExtraElements,
 	})
 }
 
 type IAMFactory struct {
+	extraElements func() (IAMExtraElements, error)
+}
+
+type IAMExtraElements struct {
 	iamProvider awslib.IAMRolePermissionGetter
 }
 
@@ -32,14 +33,31 @@ func (f *IAMFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 	if err != nil {
 		return nil, err
 	}
+	elements, err := f.extraElements()
+	if err != nil {
+		return nil, err
+	}
 
-	return f.CreateFrom(cfg)
+	return f.CreateFrom(cfg, elements)
 }
 
-func (f *IAMFactory) CreateFrom(cfg IAMFetcherConfig) (fetching.Fetcher, error) {
+func getIamExtraElements() (IAMExtraElements, error) {
+	awsConfigProvider := awslib.ConfigProvider{}
+	awsConfig, err := awsConfigProvider.GetConfig()
+	if err != nil {
+		return IAMExtraElements{}, err
+	}
+	provider := awslib.NewIAMProvider(awsConfig.Config)
+
+	return IAMExtraElements{
+		iamProvider: provider,
+	}, nil
+}
+
+func (f *IAMFactory) CreateFrom(cfg IAMFetcherConfig, elements IAMExtraElements) (fetching.Fetcher, error) {
 	return &IAMFetcher{
 		cfg:         cfg,
-		iamProvider: f.iamProvider,
+		iamProvider: elements.iamProvider,
 	}, nil
 
 }

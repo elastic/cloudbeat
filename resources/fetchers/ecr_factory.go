@@ -17,21 +17,14 @@ const (
 )
 
 func init() {
-	awsConfigProvider := awslib.ConfigProvider{}
-	awsConfig := awsConfigProvider.GetConfig()
-	ecr := awslib.NewEcrProvider(awsConfig.Config)
-	identityProvider := awslib.NewAWSIdentityProvider(awsConfig.Config)
-	kubeGetter := providers.KubernetesProvider{}
-
-	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{
-		kubernetesClientGetter: kubeGetter,
-		identityProviderGetter: identityProvider,
-		ecrRepoDescriber:       ecr,
-		awsConfig:              awsConfig,
-	})
+	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{extraElements: getEcrExtraElements})
 }
 
 type ECRFactory struct {
+	extraElements func() (ecrExtraElements, error)
+}
+
+type ecrExtraElements struct {
 	awsConfig              awslib.Config
 	kubernetesClientGetter providers.KubernetesClientGetter
 	identityProviderGetter awslib.IdentityProviderGetter
@@ -44,26 +37,50 @@ func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 	if err != nil {
 		return nil, err
 	}
+	elements, err := f.extraElements()
+	if err != nil {
+		return nil, err
+	}
 
-	return f.CreateFrom(cfg)
+	return f.CreateFrom(cfg, elements)
 }
 
-func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig) (fetching.Fetcher, error) {
+func getEcrExtraElements() (ecrExtraElements, error) {
+	awsConfigProvider := awslib.ConfigProvider{}
+	awsConfig, err := awsConfigProvider.GetConfig()
+	if err != nil {
+		return ecrExtraElements{}, err
+	}
+	ecr := awslib.NewEcrProvider(awsConfig.Config)
+	identityProvider := awslib.NewAWSIdentityProvider(awsConfig.Config)
+	kubeGetter := providers.KubernetesProvider{}
+
+	extraElements := ecrExtraElements{
+		awsConfig:              awslib.Config{},
+		kubernetesClientGetter: kubeGetter,
+		identityProviderGetter: identityProvider,
+		ecrRepoDescriber:       ecr,
+	}
+
+	return extraElements, nil
+}
+
+func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig, elements ecrExtraElements) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	identity, err := f.identityProviderGetter.GetIdentity(ctx)
+	identity, err := elements.identityProviderGetter.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
 	}
 
-	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, f.awsConfig.Config.Region)
-	kubeClient, err := f.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, elements.awsConfig.Config.Region)
+	kubeClient, err := elements.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}
 
 	fe := &ECRFetcher{
 		cfg:         cfg,
-		ecrProvider: f.ecrRepoDescriber,
+		ecrProvider: elements.ecrRepoDescriber,
 		kubeClient:  kubeClient,
 		repoRegexMatchers: []*regexp.Regexp{
 			regexp.MustCompile(privateRepoRegex),

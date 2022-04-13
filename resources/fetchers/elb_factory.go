@@ -17,21 +17,19 @@ const (
 )
 
 func init() {
-	awsConfigProvider := awslib.ConfigProvider{}
-	config := awsConfigProvider.GetConfig()
-	elb := awslib.NewELBProvider(config.Config)
-	kubeGetter := providers.KubernetesProvider{}
 
 	manager.Factories.ListFetcherFactory(ELBType,
 		&ELBFactory{
-			awsConfig:              config,
-			balancerDescriber:      elb,
-			kubernetesClientGetter: kubeGetter,
+			extraElements: getElbExtraElements,
 		},
 	)
 }
 
 type ELBFactory struct {
+	extraElements func() (elbExtraElements, error)
+}
+
+type elbExtraElements struct {
 	balancerDescriber      awslib.ELBLoadBalancerDescriber
 	awsConfig              awslib.Config
 	kubernetesClientGetter providers.KubernetesClientGetter
@@ -43,20 +41,39 @@ func (f *ELBFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 	if err != nil {
 		return nil, err
 	}
+	elements, err := f.extraElements()
+	if err != nil {
+		return nil, err
+	}
 
-	return f.CreateFrom(cfg)
+	return f.CreateFrom(cfg, elements)
 }
 
-func (f *ELBFactory) CreateFrom(cfg ELBFetcherConfig) (fetching.Fetcher, error) {
-	elb := f.balancerDescriber
-	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, f.awsConfig.Config.Region)
-	kubeClient, err := f.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+func getElbExtraElements() (elbExtraElements, error) {
+	awsConfigProvider := awslib.ConfigProvider{}
+	awsConfig, err := awsConfigProvider.GetConfig()
+	if err != nil {
+		return elbExtraElements{}, err
+	}
+	elb := awslib.NewELBProvider(awsConfig.Config)
+	kubeGetter := providers.KubernetesProvider{}
+
+	return elbExtraElements{
+		balancerDescriber:      elb,
+		awsConfig:              awsConfig,
+		kubernetesClientGetter: kubeGetter,
+	}, err
+}
+
+func (f *ELBFactory) CreateFrom(cfg ELBFetcherConfig, elements elbExtraElements) (fetching.Fetcher, error) {
+	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, elements.awsConfig.Config.Region)
+	kubeClient, err := elements.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)
 	}
 
 	return &ELBFetcher{
-		elbProvider:     elb,
+		elbProvider:     elements.balancerDescriber,
 		cfg:             cfg,
 		kubeClient:      kubeClient,
 		lbRegexMatchers: []*regexp.Regexp{regexp.MustCompile(loadBalancerRegex)},

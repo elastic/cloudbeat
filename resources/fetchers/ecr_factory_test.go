@@ -82,9 +82,14 @@ name: aws-ecr
 		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
 
 		factory := &ECRFactory{
-			kubernetesClientGetter: mockedKubernetesClientGetter,
-			ecrRepoDescriber:       ecrProvider,
-			identityProviderGetter: identityProvider,
+			extraElements: func() (ecrExtraElements, error) {
+				return ecrExtraElements{
+					awsConfig:              awsConfig,
+					kubernetesClientGetter: mockedKubernetesClientGetter,
+					identityProviderGetter: identityProvider,
+					ecrRepoDescriber:       ecrProvider,
+				}, nil
+			},
 		}
 
 		cfg, err := common.NewConfigFrom(test.config)

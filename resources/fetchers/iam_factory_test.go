@@ -51,7 +51,11 @@ name: aws-iam
 
 	for _, test := range tests {
 		iamProvider := &awslib.MockedIAMRolePermissionGetter{}
-		factory := &IAMFactory{iamProvider: iamProvider}
+		factory := &IAMFactory{extraElements: func() (IAMExtraElements, error) {
+			return IAMExtraElements{
+				iamProvider: iamProvider,
+			}, nil
+		}}
 
 		cfg, err := common.NewConfigFrom(test.config)
 		s.NoError(err)

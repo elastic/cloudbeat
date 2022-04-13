@@ -19,7 +19,6 @@ package awslib
 
 import (
 	"github.com/aws/aws-sdk-go-v2/aws/external"
-	"log"
 )
 
 type ConfigGetter interface {
@@ -29,13 +28,13 @@ type ConfigGetter interface {
 type ConfigProvider struct {
 }
 
-func (p ConfigProvider) GetConfig() Config {
+func (p ConfigProvider) GetConfig() (Config, error) {
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
-		log.Fatal(err)
+		return Config{}, err
 	}
 
 	return Config{
 		Config: cfg,
-	}
+	}, nil
 }

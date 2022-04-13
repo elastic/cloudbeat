@@ -51,7 +51,9 @@ name: aws-eks
 
 	for _, test := range tests {
 		eksProvider := &awslib.MockedEksClusterDescriber{}
-		factory := &EKSFactory{eksProvider: eksProvider}
+		factory := &EKSFactory{extraElements: func() (eksExtraElements, error) {
+			return eksExtraElements{eksProvider: eksProvider}, nil
+		}}
 
 		cfg, err := common.NewConfigFrom(test.config)
 		s.NoError(err)

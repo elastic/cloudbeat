@@ -70,9 +70,13 @@ name: aws-elb
 		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
 
 		factory := &ELBFactory{
-			balancerDescriber:      elbProvider,
-			awsConfig:              awsConfig,
-			kubernetesClientGetter: mockedKubernetesClientGetter,
+			extraElements: func() (elbExtraElements, error) {
+				return elbExtraElements{
+					balancerDescriber:      elbProvider,
+					awsConfig:              awsConfig,
+					kubernetesClientGetter: mockedKubernetesClientGetter,
+				}, nil
+			},
 		}
 
 		cfg, err := common.NewConfigFrom(test.config)
