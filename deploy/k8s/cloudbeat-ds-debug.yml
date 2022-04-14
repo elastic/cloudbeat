@@ -21,72 +21,72 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
-      - name: cloudbeat
-        image: cloudbeat
-        imagePullPolicy: IfNotPresent
-#         args: [
-#           "-e",
-#           "-d",
-#           "'*'"
-#           ]
-        env:
-        - name: ES_HOST
-          value: "host.docker.internal:9200"
-        - name: ES_USERNAME
-          value: elastic
-        - name: ES_PASSWORD
-          value: changeme
-        - name: KIBANA_HOST
-          value: "http://host.docker.internal:5601"
-        - name: ELASTIC_CLOUD_ID
-          value: none
-        - name: ELASTIC_CLOUD_AUTH
-          value: none
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        securityContext:
-          runAsUser: 0
-          # If using Red Hat OpenShift uncomment this:
-          #privileged: true
-        resources:
-          limits:
-            memory: 500Mi
-          requests:
-            cpu: 100m
-            memory: 200Mi
-        volumeMounts:
-        - name: config
-          mountPath: /cloudbeat.yml
-          readOnly: true
-          subPath: cloudbeat.yml
-        - name: proc
-          mountPath: /hostfs/proc
-          readOnly: true
-        - name: etc-kubernetes
-          mountPath: /hostfs/etc/kubernetes
-        - name: var-lib
-          mountPath: /hostfs/var/lib
-          readOnly: true
-        - name: cgroup
-          mountPath: /hostfs/sys/fs/cgroup
-          readOnly: true
-        - name: varlibdockercontainers
-          mountPath: /var/lib/docker/containers
-          readOnly: true
-        - name: varlog
-          mountPath: /var/log
-          readOnly: true
-        - name: passwd
-          mountPath: /hostfs/etc/passwd
-          readOnly: true
-        - name: group
-          mountPath: /hostfs/etc/group
-          readOnly: true
-        - name: etcsysmd
-          mountPath: /hostfs/etc/systemd
-          readOnly: true
+        - name: cloudbeat
+          image: cloudbeat
+          imagePullPolicy: IfNotPresent
+          #         args: [
+          #           "-e",
+          #           "-d",
+          #           "'*'"
+          #           ]
+          env:
+            - name: ES_HOST
+              value: "host.docker.internal:9200"
+            - name: ES_USERNAME
+              value: elastic
+            - name: ES_PASSWORD
+              value: changeme
+            - name: KIBANA_HOST
+              value: "http://host.docker.internal:5601"
+            - name: ELASTIC_CLOUD_ID
+              value: none
+            - name: ELASTIC_CLOUD_AUTH
+              value: none
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            runAsUser: 0
+            # If using Red Hat OpenShift uncomment this:
+            #privileged: true
+          resources:
+            limits:
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+            - name: config
+              mountPath: /cloudbeat.yml
+              readOnly: true
+              subPath: cloudbeat.yml
+            - name: proc
+              mountPath: /hostfs/proc
+              readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+            - name: var-lib
+              mountPath: /hostfs/var/lib
+              readOnly: true
+            - name: cgroup
+              mountPath: /hostfs/sys/fs/cgroup
+              readOnly: true
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+            - name: passwd
+              mountPath: /hostfs/etc/passwd
+              readOnly: true
+            - name: group
+              mountPath: /hostfs/etc/group
+              readOnly: true
+            - name: etcsysmd
+              mountPath: /hostfs/etc/systemd
+              readOnly: true
       volumes:
         - name: proc
           hostPath:
@@ -191,7 +191,7 @@ data:
       #api_key: "id:api_key"
       username: ${ES_USERNAME}
       password: ${ES_PASSWORD}
-    
+
       # Enable to allow sending output to older ES versions
       allow_older_versions: true
 
@@ -230,48 +230,48 @@ metadata:
   labels:
     k8s-app: cloudbeat
 rules:
-- apiGroups: [""]
-  resources:
-  - nodes
-  - namespaces
-  - events
-  - pods
-  - services
-  verbs: ["get", "list", "watch"]
-# Enable this rule only if planing to use Kubernetes keystore
-#- apiGroups: [""]
-#  resources:
-#  - secrets
-#  verbs: ["get"]
-- apiGroups: ["extensions"]
-  resources:
-  - replicasets
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["apps"]
-  resources:
-  - statefulsets
-  - deployments
-  - replicasets
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["batch"]
-  resources:
-  - jobs
-  verbs: ["get", "list", "watch"]
-- apiGroups:
-  - ""
-  resources:
-  - nodes/stats
-  verbs:
-  - get
-- nonResourceURLs:
-  - "/metrics"
-  verbs:
-  - get
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - namespaces
+      - events
+      - pods
+      - services
+    verbs: ["get", "list", "watch"]
+  # Enable this rule only if planing to use Kubernetes keystore
+  #- apiGroups: [""]
+  #  resources:
+  #  - secrets
+  #  verbs: ["get"]
+  - apiGroups: ["extensions"]
+    resources:
+      - replicasets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources:
+      - statefulsets
+      - deployments
+      - replicasets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+    verbs: ["get", "list", "watch"]
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/stats
+    verbs:
+      - get
+  - nonResourceURLs:
+      - "/metrics"
+    verbs:
+      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: cloudbeat
+  name: cloudbeat-role
   # should be the namespace where cloudbeat is running
   namespace: kube-system
   labels:
@@ -281,7 +281,7 @@ rules:
       - coordination.k8s.io
     resources:
       - leases
-    verbs: ["get", "create", "update"]
+    verbs: ["get", "create", "update", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -303,18 +303,18 @@ kind: ClusterRoleBinding
 metadata:
   name: cloudbeat
 subjects:
-- kind: ServiceAccount
-  name: cloudbeat
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
-  name: cloudbeat
+  name: cluster-admin
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: cloudbeat
+  name: cloudbeat-role-binding
   namespace: kube-system
 subjects:
   - kind: ServiceAccount
@@ -322,7 +322,7 @@ subjects:
     namespace: kube-system
 roleRef:
   kind: Role
-  name: cloudbeat
+  name: cloudbeat-role
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -339,3 +339,4 @@ roleRef:
   name: cloudbeat-kubeadm-config
   apiGroup: rbac.authorization.k8s.io
 ---
+
