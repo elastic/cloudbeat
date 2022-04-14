@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -72,4 +73,25 @@ func (s *EksFactoryTestSuite) TestEksFetcherFetch() {
 		eksResource := result[0].(EKSResource)
 		s.Equal(expectedResource, eksResource)
 	}
+}
+
+func (s *EksFactoryTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
+	clusterName := "my-cluster"
+	eksConfig := EKSFetcherConfig{
+		BaseFetcherConfig: fetching.BaseFetcherConfig{},
+		ClusterName:       clusterName,
+	}
+	eksProvider := &awslib.MockedEksClusterDescriber{}
+
+	expectedErr := fmt.Errorf("my error")
+	eksProvider.EXPECT().DescribeCluster(mock.Anything, clusterName).Return(nil, expectedErr)
+	eksFetcher := EKSFetcher{
+		cfg:         eksConfig,
+		eksProvider: eksProvider,
+	}
+
+	ctx := context.Background()
+	_, err := eksFetcher.Fetch(ctx)
+	s.NotNil(err)
+	s.Equal(expectedErr, err)
 }
