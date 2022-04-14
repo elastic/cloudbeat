@@ -56,7 +56,7 @@ func getEcrExtraElements() (ecrExtraElements, error) {
 	kubeGetter := providers.KubernetesProvider{}
 
 	extraElements := ecrExtraElements{
-		awsConfig:              awslib.Config{},
+		awsConfig:              awsConfig,
 		kubernetesClientGetter: kubeGetter,
 		identityProviderGetter: identityProvider,
 		ecrRepoDescriber:       ecr,
