@@ -20,12 +20,6 @@ spec:
     envFrom:
       - configMapRef:
           name: {{ .Values.serviceAccount.name }}-configmap
-    env:
-      - name: TEST_MARKER
-        valueFrom:
-          configMapKeyRef:
-            name: {{ .Values.serviceAccount.name }}-configmap
-            key: TEST_MARKER
     volumeMounts:
       - name: cloudbeat-test-pv-storage
         mountPath: /usr/src/app/tests/report

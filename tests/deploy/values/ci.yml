@@ -2,4 +2,4 @@ cloudbeat:
   deploy: true
 
 testData:
-  marker: integration
+  marker: ci_cloudbeat

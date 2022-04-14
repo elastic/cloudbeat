@@ -11,6 +11,7 @@ def data(k8s, cloudbeat_agent):
 
 @pytest.mark.sanity
 @pytest.mark.product
+@pytest.mark.ci_cloudbeat
 def test_cloudbeat_pod_exist(data):
     """
     This test verifies that pods count is equal to nodes count
@@ -26,6 +27,7 @@ def test_cloudbeat_pod_exist(data):
 
 @pytest.mark.sanity
 @pytest.mark.product
+@pytest.mark.ci_cloudbeat
 def test_cloudbeat_pods_running(data):
     """
     This test verifies that all pods are in status "Running"

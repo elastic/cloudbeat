@@ -9,8 +9,7 @@ from commonlib.io_utils import get_logs_from_stream, get_k8s_yaml_objects
 from pathlib import Path
 
 
-# DEPLOY_YAML = "../../deploy/cloudbeat-ds.yaml"
-DEPLOY_YAML = "../../deploy/k8s-cloudbeat-tests/manifests/k8s-cloudbeat-tests/templates/cloudbeat-ds.yaml"
+DEPLOY_YAML = "../../deploy/cloudbeat-pytest.yml"
 
 
 @pytest.fixture(scope='module')
