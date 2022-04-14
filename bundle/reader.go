@@ -35,7 +35,7 @@ func createPolicyMap(fsys fs.FS, filePrefixes []string) (map[string]string, erro
 			return err
 		}
 
-		policies[filePath] = string(data)
+		policies["compliance/" + filePath] = string(data)
 		return nil
 	})
 
