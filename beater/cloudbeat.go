@@ -108,6 +108,13 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 func (bt *cloudbeat) Run(b *beat.Beat) error {
 	logp.Info("cloudbeat is running! Hit CTRL-C to stop it.")
 
+	// Configure the beats Manager to start after all the reloadable hooks are initialized
+	// and shutdown when the function return.
+	if err := b.Manager.Start(); err != nil {
+		return err
+	}
+	defer b.Manager.Stop()
+
 	if err := bt.data.Run(bt.ctx); err != nil {
 		return err
 	}
