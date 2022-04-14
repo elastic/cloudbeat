@@ -30,7 +30,6 @@ import (
 
 type EksFetcherTestSuite struct {
 	suite.Suite
-	factory fetching.Factory
 }
 
 func TestEksFetcherTestSuite(t *testing.T) {
@@ -41,7 +40,7 @@ func (s *EksFetcherTestSuite) SetupTest() {
 
 }
 
-func (s *EksFactoryTestSuite) TestEksFetcherFetch() {
+func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 	var tests = []struct {
 		clusterName     string
 		clusterResponse eks.DescribeClusterResponse
@@ -75,7 +74,7 @@ func (s *EksFactoryTestSuite) TestEksFetcherFetch() {
 	}
 }
 
-func (s *EksFactoryTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
+func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	clusterName := "my-cluster"
 	eksConfig := EKSFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
