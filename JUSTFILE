@@ -13,7 +13,7 @@ build-cloudbeat:
   GOOS=linux go build -v && docker build -t cloudbeat .
 
 deploy-cloudbeat:
-  kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+  kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system & kubectl apply -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
 
 build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
@@ -53,6 +53,9 @@ expose-ports:
 
 TESTS_RELEASE := "cloudbeat-tests"
 TIMEOUT := "1200s"
+
+patch-cb-yml-tests:
+  kubectl kustomize deploy/k8s/kustomize/test > tests/deploy/cloudbeat-pytest.yml
 
 build-pytest-docker:
   cd tests; docker build -t cloudbeat-test .
