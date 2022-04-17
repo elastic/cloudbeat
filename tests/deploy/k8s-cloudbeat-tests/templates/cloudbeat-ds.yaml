@@ -189,7 +189,7 @@ data:
       #api_key: "id:api_key"
       username: ${ES_USERNAME}
       password: ${ES_PASSWORD}
-    
+
       # Enable to allow sending output to older ES versions
       allow_older_versions: true
 
@@ -240,11 +240,11 @@ rules:
   #  resources:
   #  - secrets
   #  verbs: ["get"]
-  - apiGroups: [ "extensions" ]
+  - apiGroups: ["extensions"]
     resources:
       - replicasets
-    verbs: [ "get", "list", "watch" ]
-  - apiGroups: [ "apps" ]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
     resources:
       - statefulsets
       - deployments
