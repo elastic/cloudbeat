@@ -2,26 +2,30 @@ name: Test Coverage
 
 on:
   push:
-    branches: [main]
-    
+    branches: [ main ]
+
 jobs:
   test-coverage:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      
+
       - name: Download OPA Binary
         run: |
           curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
           chmod +x opa
           ./opa -h
-      
+
+      - name: OPA Bundle
+      - run: |
+          build -b . -e ./compliance
+
       - name: OPA test coverage
         run: |
-          coverage=$( ./opa test -c compliance | jq '.coverage' )
+          coverage=$( ./opa test -b . -c | jq '.coverage' )
           echo "COVERAGE=$coverage" >> "$GITHUB_ENV"
-        
+
       - name: Create Coverage Badge
         uses: schneegans/dynamic-badges-action@v1.1.0
         with:

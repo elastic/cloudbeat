@@ -24,6 +24,7 @@ test_process_args_list_when_value_contain_delimiters {
 	some delimiter_index
 	delimiter := supported_delimiters[delimiter_index]
 	arg_value := replace("--arg%0value%0and%0delimiters", "%0", delimiter)
+
 	## Remove the -- from the begining
 	expected_arg_value := trim_prefix(arg_value, "--")
 	expected_result := ["kube-api", "cloud-provider aws", "config /etc/kubernetes/kubelet/kubelet-config.json", expected_arg_value]

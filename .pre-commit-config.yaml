@@ -9,11 +9,19 @@ repos:
         language: system
         files: (\.rego)$
 
+#      - id: opa-bundle
+#        name: OPA bundle
+#        description: Formats Rego policy using opa fmt
+#        entry: opa build
+#        args: [ -b, '.',  -e, './compliance' ]
+#        language: system
+#        files: (\.rego)$
+
       - id: opa-check
         name: OPA check
         description: Check syntax of staged Rego files
         entry: opa check
-        args: [ -S, 'compliance' ]
+        args: [ -S, './compliance' ]
         pass_filenames: false
         language: system
         files: (\.rego)$
@@ -22,6 +30,6 @@ repos:
         name: OPA test
         description: Runs OPA unit tests on rego source files
         entry: opa test
-        args: [ '-v', 'compliance' ]
+        args: [ -b, '.' ]
         pass_filenames: false
         language: system

@@ -25,4 +25,3 @@ rule_input(argument) = test_data.process_input("kubelet", [argument])
 rule_input_with_external(argument, external_data) = test_data.process_input_with_external_data("kubelet", [argument], external_data)
 
 create_process_config(kernel_protection_enabled) = {"config": {"protectKernelDefaults": kernel_protection_enabled}}
-

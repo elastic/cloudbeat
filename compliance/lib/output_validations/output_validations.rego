@@ -8,9 +8,9 @@ validate_k8s_metadata(metadata) {
 	metadata.name
 	metadata.profile_applicability
 	metadata.description
-	metadata.rationale 
-  	metadata.audit 
-  	metadata.remediation
+	metadata.rationale
+	metadata.audit
+	metadata.remediation
 	metadata.impact
 	metadata.default_value
 	metadata.references
