@@ -67,7 +67,7 @@ func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Conf
 		c := fa.getConditions(p.name)
 		err := registry.Register(p.name, p.f, c...)
 		if err != nil {
-			return err
+			logp.L().Errorf("could not read register fetcher: %v", err)
 		}
 	}
 

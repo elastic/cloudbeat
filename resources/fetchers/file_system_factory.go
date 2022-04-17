@@ -50,7 +50,7 @@ func (f *FileSystemFactory) CreateFrom(cfg FileFetcherConfig) (fetching.Fetcher,
 		cfg: cfg,
 	}
 
-	logp.L().Debugf("File-System Fetcher created with the following config:"+
+	logp.L().Infof("File-System Fetcher created with the following config:"+
 		"\n Name: %s\nPatterns: %s", cfg.Name, cfg.Patterns)
 	return fe, nil
 }
