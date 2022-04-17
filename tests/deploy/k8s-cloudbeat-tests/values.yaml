@@ -11,6 +11,9 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
+testData:
+  marker: rules
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -116,7 +119,7 @@ elasticsearch:
 
   # Request smaller persistent volumes.
   volumeClaimTemplate:
-    accessModes: [ "ReadWriteOnce" ]
+    accessModes: ["ReadWriteOnce"]
     storageClassName: "standard"
     resources:
       requests:
@@ -125,7 +128,7 @@ elasticsearch:
   # Storage settings
   persistence:
     enabled: false
-  
+
   #disable ES tests
   tests:
     enabled: false
