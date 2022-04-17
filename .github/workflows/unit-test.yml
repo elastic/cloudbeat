@@ -32,13 +32,6 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
      
-      - name: Install goveralls
-        run: go install github.com/mattn/goveralls@latest
-      - name: Send coverage
-        env:
-          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goveralls -service=github
-
       - name: Mage Check
         uses: magefile/mage-action@v1.6.0
         with:
@@ -53,6 +46,13 @@ jobs:
         run: |
           GOOS=linux go test ./...
 
+      - name: Update coverage
+        run: go install github.com/mattn/goveralls@latest
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -service=github
+        
       - name: Get diff k8s manifests
         uses: technote-space/get-diff-action@v4
         with:
