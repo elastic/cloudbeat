@@ -46,7 +46,7 @@ publish-image-to-ecr:
   aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 704479110758.dkr.ecr.us-east-2.amazonaws.com & docker tag cloudbeat 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:{{image-tag}} & docker push 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:{{image-tag}}
 
 deploy-eks-cloudbeat:
-  kubectl delete -f deploy/eks/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/eks/cloudbeat-ds.yaml -n kube-system
+  kubectl apply -f deploy/eks/cloudbeat-ds.yaml -n kube-system
 
 delete-eks-cloudbeat:
   kubectl delete -f deploy/eks/cloudbeat-ds.yaml -n kube-system
