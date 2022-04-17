@@ -28,12 +28,13 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
+	"reflect"
 	"regexp"
 	"testing"
 )
 
 const (
-	elbRegex = "([\\w-]+)-\\d+\\.us1-east.elb.amazonaws.com"
+	elbRegex = "([\\w-]+)-\\d+\\.us-east-2.elb.amazonaws.com"
 )
 
 type ElbFetcherTestSuite struct {
@@ -54,6 +55,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
 		lbResponse          []elasticloadbalancing.LoadBalancerDescription
+		expectedlbNames     []string
 	}{
 		{
 			"test_namespace",
@@ -65,12 +67,13 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			[]elasticloadbalancing.LoadBalancerDescription{{
 				Instances: []elasticloadbalancing.Instance{},
 			}},
+			[]string{"adda9cdc89b13452e92d48be46858d37"},
 		},
-		{
-			"test_namespace",
-			[]v1.LoadBalancerIngress{},
-			[]elasticloadbalancing.LoadBalancerDescription{},
-		},
+		//{
+		//	"test_namespace",
+		//	[]v1.LoadBalancerIngress{},
+		//	[]elasticloadbalancing.LoadBalancerDescription{},
+		//},
 	}
 	for _, test := range tests {
 		//Need to add services
@@ -98,7 +101,9 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
-		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
+		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.MatchedBy(func(balancers []string) bool {
+			return reflect.DeepEqual(balancers, test.expectedlbNames)
+		})).Return(test.lbResponse, nil)
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 

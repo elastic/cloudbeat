@@ -29,6 +29,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
+	"reflect"
 	"regexp"
 	"testing"
 )
@@ -132,7 +133,9 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 
 		// Needs to use the same services
 		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
-		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything).Return(test.expectedRepository, nil)
+		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.MatchedBy(func(repo []string) bool {
+			return reflect.DeepEqual(test.expectedRepositoryNames, repo)
+		})).Return(test.expectedRepository, nil)
 
 		privateRepoRegex := fmt.Sprintf(privateRepositoryTemplate, test.identityAccount, test.region)
 		//Maybe will need to change this texts
