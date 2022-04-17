@@ -1,3 +1,7 @@
+# Refactor via kustomize https://kustomize.io/
+
+image-tag := `git branch --show-current`
+
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yaml
 
@@ -36,13 +40,10 @@ delete-cloudbeat-debug:
 
 # EKS
 
-build-deploy-eks-cloudbeat: login-aws build-cloudbeat publish-image-to-ecr delete-eks-cloudbeat deploy-eks-cloudbeat
-
-login-aws:
-  aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 704479110758.dkr.ecr.us-east-2.amazonaws.com
+build-deploy-eks-cloudbeat: build-cloudbeat publish-image-to-ecr delete-eks-cloudbeat deploy-eks-cloudbeat
 
 publish-image-to-ecr:
-  docker tag cloudbeat:latest 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest & docker push 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest
+  aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 704479110758.dkr.ecr.us-east-2.amazonaws.com & docker tag cloudbeat 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:{{image-tag}} & docker push 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:{{image-tag}}
 
 deploy-eks-cloudbeat:
   kubectl delete -f deploy/eks/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/eks/cloudbeat-ds.yaml -n kube-system
