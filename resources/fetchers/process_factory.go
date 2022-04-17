@@ -43,7 +43,7 @@ func (f *ProcessFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 		return nil, err
 	}
 
-	logp.L().Infof("File-System Fetcher created with the following config:"+
+	logp.L().Infof("Process Fetcher created with the following config:"+
 		"\n Name: %s\nDirectory: %s\nRequiredProcesses: %s", cfg.Name, cfg.Directory, cfg.RequiredProcesses)
 	return f.CreateFrom(cfg)
 }
