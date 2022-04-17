@@ -161,6 +161,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		tag             string
 		namespace       string
 		containers      []v1.Container
+		error
 	}{
 		{
 			"704479110758",
@@ -173,6 +174,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 					Name:  "cloudbeat",
 				},
 			},
+			fmt.Errorf("ecr error"),
 		},
 	}
 	for _, test := range tests {
@@ -200,7 +202,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 
 		// Needs to use the same services
 		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
-		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("ecr error"))
+		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything).Return(nil, test.error)
 
 		privateRepoRegex := fmt.Sprintf(privateRepositoryTemplate, test.identityAccount, test.region)
 		//Maybe will need to change this texts
@@ -225,7 +227,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		result, err := ecrFetcher.Fetch(ctx)
 		s.Nil(result)
 		s.NotNil(err)
-		s.EqualError(err, "could retrieve ECR repositories: ecr error")
+		s.EqualError(err, fmt.Sprintf("could retrieve ECR repositories: %s", test.error.Error()))
 
 	}
 }

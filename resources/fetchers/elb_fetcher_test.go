@@ -2,7 +2,8 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
@@ -12,6 +13,10 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"regexp"
 	"testing"
+)
+
+const (
+	elbRegex = "([\\w-]+)-\\d+\\.us1-east.elb.amazonaws.com"
 )
 
 type ElbFetcherTestSuite struct {
@@ -28,58 +33,135 @@ func (s *ElbFetcherTestSuite) SetupTest() {
 
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
-	//Need to add services
-	kubeclient := k8sfake.NewSimpleClientset()
-
-	ns := "test_namespace"
-
-	containers := []v1.Container{
+	var tests = []struct {
+		ns                  string
+		loadBalancerIngress []v1.LoadBalancerIngress
+		lbResponse          []elasticloadbalancing.LoadBalancerDescription
+	}{
 		{
-			Image: "nginx:1.120",
-			Name:  "nginx",
+			"test_namespace",
+			[]v1.LoadBalancerIngress{
+				{
+					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.us-east-2.elb.amazonaws.com",
+				},
+			},
+			[]elasticloadbalancing.LoadBalancerDescription{{
+				Instances: []elasticloadbalancing.Instance{},
+			}},
+		},
+		{
+			"test_namespace",
+			[]v1.LoadBalancerIngress{},
+			[]elasticloadbalancing.LoadBalancerDescription{},
 		},
 	}
+	for _, test := range tests {
+		//Need to add services
+		kubeclient := k8sfake.NewSimpleClientset()
 
-	pods := &v1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: "apps/v1beta1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "testing_pod",
-			Namespace: ns,
-		},
-		Spec: kubernetes.PodSpec{
-			NodeName:   "testnode",
-			Containers: containers,
-		},
+		services := &v1.Service{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Service",
+				APIVersion: "apps/v1beta1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "testing_pod",
+				Namespace: test.ns,
+			},
+			Status: v1.ServiceStatus{
+				LoadBalancer: v1.LoadBalancerStatus{
+					Ingress: test.loadBalancerIngress,
+				},
+			},
+			Spec: v1.ServiceSpec{},
+		}
+		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
+
+		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
+		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
+
+		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
+		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
+
+		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
+
+		elbFetcher := ELBFetcher{
+			cfg:             ELBFetcherConfig{},
+			elbProvider:     elbProvider,
+			kubeClient:      kubeclient,
+			lbRegexMatchers: regexMatchers,
+		}
+
+		ctx := context.Background()
+
+		expectedResource := ELBResource{test.lbResponse}
+		result, err := elbFetcher.Fetch(ctx)
+		s.Nil(err)
+		s.Equal(1, len(result))
+
+		elbResource := result[0].(ELBResource)
+		s.Equal(expectedResource, elbResource)
 	}
-	_, err := kubeclient.CoreV1().Pods(ns).Create(context.Background(), pods, metav1.CreateOptions{})
+}
 
-	mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
-	mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
+func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 
-	// Needs to use the same services
-	elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
-
-	regex := "([\\w-]+)-\\d+\\.us1-east.elb.amazonaws.com"
-	regexMatchers := []*regexp.Regexp{regexp.MustCompile(regex)}
-
-	elbFetcher := ELBFetcher{
-		cfg:             ELBFetcherConfig{},
-		elbProvider:     elbProvider,
-		kubeClient:      kubeclient,
-		lbRegexMatchers: regexMatchers,
+	var tests = []struct {
+		ns                  string
+		loadBalancerIngress []v1.LoadBalancerIngress
+		error               error
+	}{
+		{
+			"test_namespace",
+			[]v1.LoadBalancerIngress{
+				{
+					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.us-east-2.elb.amazonaws.com",
+				},
+			},
+			fmt.Errorf("elb error")},
 	}
+	for _, test := range tests {
+		//Need to add services
+		kubeclient := k8sfake.NewSimpleClientset()
 
-	ctx := context.Background()
+		services := &v1.Service{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Service",
+				APIVersion: "apps/v1beta1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "testing_pod",
+				Namespace: test.ns,
+			},
+			Status: v1.ServiceStatus{
+				LoadBalancer: v1.LoadBalancerStatus{
+					Ingress: test.loadBalancerIngress,
+				},
+			},
+			Spec: v1.ServiceSpec{},
+		}
+		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
 
-	expectedResource := ELBResource{}
-	result, err := elbFetcher.Fetch(ctx)
-	s.NotNil(err)
+		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
+		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-	elbResource := result[0].(ELBResource)
+		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
+		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(nil, test.error)
 
-	s.Equal(expectedResource, elbResource)
+		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
+		elbFetcher := ELBFetcher{
+			cfg:             ELBFetcherConfig{},
+			elbProvider:     elbProvider,
+			kubeClient:      kubeclient,
+			lbRegexMatchers: regexMatchers,
+		}
+
+		ctx := context.Background()
+
+		result, err := elbFetcher.Fetch(ctx)
+		s.Nil(result)
+		s.NotNil(err)
+		s.EqualError(err, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))
+	}
 }
