@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 	"os"
@@ -42,6 +43,8 @@ func (f *ProcessFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 		return nil, err
 	}
 
+	logp.L().Debugf("File-System Fetcher created with the following config:"+
+		"\n Name: %s\nDirectory: %s\nRequiredProcesses: %s", cfg.Name, cfg.Directory, cfg.RequiredProcesses)
 	return f.CreateFrom(cfg)
 }
 
