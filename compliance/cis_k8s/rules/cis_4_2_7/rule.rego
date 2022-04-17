@@ -33,13 +33,3 @@ finding = result {
 		},
 	}
 }
-
-metadata = {
-	"name": "Ensure that the --make-iptables-util-chains argument is set to true",
-	"description": "Allow Kubelet to manage iptables.",
-	"impact": "Kubelet would manage the iptables on the system and keep it in sync. If you are using any other iptables management solution, then there might be some conflicts.",
-	"tags": array.concat(cis_k8s.default_tags, ["CIS 4.2.7", "Kubelet"]),
-	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "If using a Kubelet config file, edit the file to set makeIPTablesUtilChains: true. If using command line arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubeadm.conf on each worker node and remove the --make-iptables-util-chains argument from the KUBELET_SYSTEM_PODS_ARGS variable. Based on your system, restart the kubelet service.",
-	"deafult_value": "By default, --make-iptables-util-chains argument is set to true.",
-}

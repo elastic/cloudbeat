@@ -1,0 +1,55 @@
+metadata:
+  id: 2b2a4b02-652d-5398-9571-09b419617bd0
+  name: Ensure that the admission control plugin PodSecurityPolicy is set (Automated)
+  profile_applicability: |
+    * Level 1 - Master Node
+  description: |
+    Reject creating pods that do not match Pod Security Policies.
+  rationale: |
+    A Pod Security Policy is a cluster-level resource that controls the actions
+    that a pod can perform and what it has the ability to access. The
+    `PodSecurityPolicy` objects define a set of conditions that a pod must run
+    with in order to be accepted into the system. Pod Security Policies are
+    comprised of settings and strategies that control the security features a
+    pod has access to and hence this must be used to control pod access
+    permissions.
+    **Note:** When the PodSecurityPolicy admission plugin is in
+    use, there needs to be at least one PodSecurityPolicy in place for ANY pods
+    to be admitted. See section 5.2 for recommendations on PodSecurityPolicy
+    settings.
+  audit: |
+    Run the following command on the master node:
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+    Verify that the `--enable-admission-plugins` argument is set to a value that includes
+    `PodSecurityPolicy`.
+  remediation: |
+    Follow the documentation and create Pod Security Policy objects as per your
+    environment.
+    Then, edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    on the master node and set the --enable-admission-plugins parameter
+    to a value that includes `PodSecurityPolicy`:
+    ```
+    --enable-admission-plugins=...,PodSecurityPolicy,...
+    ```
+    Then restart the API Server.
+  impact: >
+    The policy objects must be created and granted before pod creation would be
+    allowed.
+  default_value: |
+    By default, `PodSecurityPolicy` is not set.
+  references: |
+    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+    2. [https://kubernetes.io/docs/admin/admission-controllers/#podsecuritypolicy](https://kubernetes.io/docs/admin/admission-controllers/#podsecuritypolicy)
+    3. [https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies)
+  section: API Server
+  version: 1.0
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.2.16
+    - API Server
+  benchmark:
+    name: CIS Kubernetes V1.20
+    version: v1.0.0

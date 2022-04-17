@@ -11,12 +11,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: OPA build
+        uses: docker://openpolicyagent/opa
+        with:
+          args: "build -b . -e ./compliance"
       - name: OPA test
         uses: docker://openpolicyagent/opa
         with:
-          args: "test --ignore=*.yaml --ignore=*.json -v compliance"
+          args: "test -b . -v"
       - name: OPA check -strict
         uses: docker://openpolicyagent/opa
         with:
           args: "check --strict --bundle ."
-

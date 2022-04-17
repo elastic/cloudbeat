@@ -19,12 +19,3 @@ finding = result {
 		"evidence": {"process_args": process_args},
 	}
 }
-
-metadata = {
-	"name": "Ensure that the --profiling argument is set to false",
-	"description": "Disable profiling, if not needed.",
-	"impact": "Profiling information would not be available.",
-	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.4.1", "Scheduler"]),
-	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "Edit the Scheduler pod specification file /etc/kubernetes/manifests/kube-scheduler.yaml file on the master node and set to --profiling=false",
-}

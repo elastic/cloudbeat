@@ -19,12 +19,3 @@ finding = result {
 		"evidence": {"process_args": process_args},
 	}
 }
-
-metadata = {
-	"name": "Ensure that the RotateKubeletServerCertificate argument is set to true",
-	"description": "Enable kubelet server certificate rotation on controller-manager.",
-	"impact": "None",
-	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.3.6", "Controller Manager"]),
-	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml on the master node and set the --feature-gates parameter to include RotateKubeletServerCertificate=true. --feature-gates=RotateKubeletServerCertificate=true",
-}

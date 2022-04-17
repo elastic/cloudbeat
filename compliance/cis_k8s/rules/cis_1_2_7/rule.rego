@@ -19,12 +19,3 @@ finding = result {
 		"evidence": {"process_args": process_args},
 	}
 }
-
-metadata = {
-	"name": "Ensure that the --authorization-mode argument includes Node",
-	"description": "The Node authorization mode only allows kubelets to read Secret, ConfigMap, PersistentVolume, and PersistentVolumeClaim objects associated with their nodes.",
-	"impact": "None",
-	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.7", "API Server"]),
-	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the --authorization-mode parameter to a value that includes Node.",
-}

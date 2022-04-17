@@ -1,0 +1,50 @@
+metadata:
+  id: 02ec3af8-bd6d-58a3-857f-39b5744c6428
+  name:
+    Ensure that the etcd pod specification file permissions are set to 644 or
+    more restrictive (Automated)
+  profile_applicability: |
+    * Level 1 - Master Node
+  description: >
+    Ensure that the `/etc/kubernetes/manifests/etcd.yaml` file has permissions
+    of `644` or more restrictive.
+  rationale: >
+    The etcd pod specification file `/etc/kubernetes/manifests/etcd.yaml`
+    controls various parameters that set the behavior of the `etcd` service in
+    the master node. etcd is a highly- available key-value store which
+    Kubernetes uses for persistent storage of all of its REST API object. You
+    should restrict its file permissions to maintain the integrity of the file.
+    The file should be writable by only the administrators on the system.
+  audit: |
+    Run the below command (based on the file location on your system) on the
+    master node.
+    For example,
+    ```
+    stat -c %a /etc/kubernetes/manifests/etcd.yaml
+    ```
+    Verify that the permissions are `644` or more restrictive.
+  remediation: |
+    Run the below command (based on the file location on your system) on the
+    master node.
+    For example,
+    ```
+    chmod 644 /etc/kubernetes/manifests/etcd.yaml
+    ```
+  impact: |
+    None
+  default_value: >
+    By default, `/etc/kubernetes/manifests/etcd.yaml` file has permissions of
+    `640`.
+  references: |
+    1. [https://coreos.com/etcd](https://coreos.com/etcd)
+    2. [https://kubernetes.io/docs/admin/etcd/](https://kubernetes.io/docs/admin/etcd/)
+  section: Master Node Configuration Files
+  version: 1.0
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.1.7
+    - Master Node Configuration Files
+  benchmark:
+    name: CIS Kubernetes V1.20
+    version: v1.0.0

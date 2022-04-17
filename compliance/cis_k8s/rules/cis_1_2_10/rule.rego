@@ -20,12 +20,3 @@ finding = result {
 		"evidence": {"process_args": process_args},
 	}
 }
-
-metadata = {
-	"name": "Ensure that the admission control plugin AlwaysAdmit is not set",
-	"description": "Setting admission control plugin AlwaysAdmit allows all requests and do not filter any requests.",
-	"impact": "Only requests explicitly allowed by the admissions control plugins would be served.",
-	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.10", "API Server"]),
-	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and either remove the --enable-admission-plugins parameter, or set it to a value that does not include AlwaysAdmit.",
-}

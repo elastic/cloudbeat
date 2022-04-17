@@ -1,0 +1,44 @@
+metadata:
+  id: 1aa16467-18ce-5ba6-8e6a-1f6b69acbfa0
+  name: Ensure that the admin.conf file permissions are set to 644 or more
+    restrictive (Automated)
+  profile_applicability: |
+    * Level 1 - Master Node
+  description: >
+    Ensure that the `admin.conf` file has permissions of `644` or more
+    restrictive.
+  rationale: >
+    The `admin.conf` is the administrator kubeconfig file defining various
+    settings for the administration of the cluster. You should restrict its file
+    permissions to maintain the integrity of the file. The file should be
+    writable by only the administrators on the system.
+  audit: |
+    Run the following command (based on the file location on your system) on the master node.
+    For example,
+    ```
+    stat -c %a /etc/kubernetes/admin.conf
+    ```
+    Verify that the permissions are `644` or more restrictive.
+  remediation: |
+    Run the below command (based on the file location on your system) on the
+    master node.
+    For example,
+    ```
+    chmod 644 /etc/kubernetes/admin.conf
+    ```
+  impact: |
+    None.
+  default_value: |
+    By default, `admin.conf` has permissions of `640`.
+  references: |
+    1. [https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
+  section: Master Node Configuration Files
+  version: 1.0
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.1.13
+    - Master Node Configuration Files
+  benchmark:
+    name: CIS Kubernetes V1.20
+    version: v1.0.0

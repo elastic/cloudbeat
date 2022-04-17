@@ -1,0 +1,41 @@
+metadata:
+  id: 40fe9500-a770-533b-9db1-f584385c8c5e
+  name: Ensure that the --insecure-bind-address argument is not set (Automated)
+  profile_applicability: |
+    * Level 1 - Master Node
+  description: |
+    Do not bind the insecure API service.
+  rationale: >
+    If you bind the apiserver to an insecure address, basically anyone who could
+    connect to it over the insecure port, would have unauthenticated and
+    unencrypted access to your master node. The apiserver doesn't do any
+    authentication checking for insecure binds and traffic to the Insecure API
+    port is not encrpyted, allowing attackers to potentially read sensitive data
+    in transit.
+  audit: |
+    Run the following command on the master node:
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+    Verify that the `--insecure-bind-address` argument does not exist.
+  remediation: |
+    Edit the API server pod specification file
+    `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    on the master node and remove the `--insecure-bind-address`
+    parameter.
+  impact: |
+    Connections to the API server will require valid authentication credentials.
+  default_value: |
+    By default, the insecure bind address is not set.
+  references: |
+    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+  section: API Server
+  version: 1.0
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.2.18
+    - API Server
+  benchmark:
+    name: CIS Kubernetes V1.20
+    version: v1.0.0

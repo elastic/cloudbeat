@@ -19,12 +19,3 @@ finding = result {
 		"evidence": {"process_args": process_args},
 	}
 }
-
-metadata = {
-	"name": "Ensure that the --service-account-key-file argument is set as appropriate",
-	"description": "By default, if no --service-account-key-file is specified to the apiserver, it uses the private key from the TLS serving certificate to verify service account tokens. To ensure that the keys for service account tokens could be rotated as needed, a separate public/private key pair should be used for signing service account tokens. Hence, the public key should be specified to the apiserver with --service-account-key-file.",
-	"impact": "The corresponding private key must be provided to the controller manager. You would need to securely maintain the key file and rotate the keys based on your organization's key rotation policy.",
-	"tags": array.concat(cis_k8s.default_tags, ["CIS 1.2.27", "API Server"]),
-	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml on the master node and set the below parameter. --service-account-lookup=true",
-}

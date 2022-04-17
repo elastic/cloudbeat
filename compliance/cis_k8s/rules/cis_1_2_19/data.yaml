@@ -1,0 +1,45 @@
+metadata:
+  id: 4c3550cf-a3f8-5384-8ada-ec7c383c4f36
+  name: Ensure that the --insecure-port argument is set to 0 (Automated)
+  profile_applicability: |
+    * Level 1 - Master Node
+  description: |
+    Do not bind to insecure port.
+  rationale: >
+    Setting up the apiserver to serve on an insecure port would allow
+    unauthenticated and unencrypted access to your master node. This would allow
+    attackers who could access this port, to easily take control of the cluster.
+  audit: |
+    Run the following command on the master node:
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+    Verify that the `--insecure-port` argument is set to `0`.
+  remediation: |
+    Edit the API server pod specification file
+    `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    on the master node and set the below parameter.
+    ```
+    --insecure-port=0
+    ```
+  impact: |
+    All components that use the API must connect via the secured port,
+    authenticate themselves, and be authorized to use the API. This includes: 
+    * kube-controller-manager 
+    * kube-proxy 
+    * kube-scheduler 
+    * kubelets
+  default_value: |
+    By default, the insecure port is set to 8080.
+  references: |
+    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+  section: API Server
+  version: 1.0
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.2.19
+    - API Server
+  benchmark:
+    name: CIS Kubernetes V1.20
+    version: v1.0.0

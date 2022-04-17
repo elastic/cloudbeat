@@ -1,0 +1,44 @@
+metadata:
+  id: ee6dc700-33d2-5799-91cb-fa397106db2d
+  name: Ensure that the --basic-auth-file argument is not set (Automated)
+  profile_applicability: |
+    * Level 1 - Master Node
+  description: |
+    Do not use basic authentication.
+  rationale: >
+    Basic authentication uses plaintext credentials for authentication.
+    Currently, the basic authentication credentials last indefinitely, and the
+    password cannot be changed without restarting the API server. The basic
+    authentication is currently supported for convenience. Hence, basic
+    authentication should not be used.
+  audit: |
+    Run the following command on the master node:
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+    Verify that the `--basic-auth-file` argument does not exist.
+  remediation: |
+    Follow the documentation and configure alternate mechanisms for
+    authentication. Then,
+    edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml`
+    on the master node and remove the `--basic-auth-file=<filename>`
+    parameter.
+  impact: >
+    You will have to configure and use alternate authentication mechanisms such
+    as tokens and certificates. Username and password for basic authentication
+    could no longer be used.
+  default_value: |
+    By default, basic authentication is not set.
+  references: |
+    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+    2. [https://kubernetes.io/docs/admin/authentication/#static-password-file](https://kubernetes.io/docs/admin/authentication/#static-password-file)
+  section: API Server
+  version: 1.0
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.2.2
+    - API Server
+  benchmark:
+    name: CIS Kubernetes V1.20
+    version: v1.0.0

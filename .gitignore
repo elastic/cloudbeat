@@ -1,5 +1,5 @@
-output.json
-data.yaml
-input.json
+/output.json
+/input.json
+/data.yaml
 
 tmpBundles/

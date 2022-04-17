@@ -22,12 +22,3 @@ finding = result {
 		"evidence": {"process_args": process_args},
 	}
 }
-
-metadata = {
-	"name": "Ensure that the --peer-auto-tls argument is not set to true",
-	"description": "Do not use automatically generated self-signed certificates for TLS connections between peers.",
-	"impact": "All peers attempting to communicate with the etcd server will require a valid client certificate for authentication.",
-	"tags": array.concat(cis_k8s.default_tags, ["CIS 2.6", "etcd"]),
-	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "Edit the etcd pod specification file /etc/kubernetes/manifests/etcd.yaml on the master node and either remove the --peer-auto-tls parameter or set it to false.",
-}

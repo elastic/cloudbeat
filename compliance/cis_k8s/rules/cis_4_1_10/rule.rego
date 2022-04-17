@@ -1,6 +1,5 @@
 package compliance.cis_k8s.rules.cis_4_1_10
 
-import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
@@ -17,13 +16,4 @@ finding = result {
 		"expected": {"uid": "root", "gid": "root"},
 		"evidence": {"uid": uid, "gid": gid},
 	}
-}
-
-metadata = {
-	"name": "Ensure that the kubelet --config configuration file ownership is set to root:root",
-	"description": "Ensure that if the kubelet refers to a configuration file with the --config argument, that file is owned by root:root",
-	"impact": "None",
-	"tags": array.concat(cis_k8s.default_tags, ["CIS 4.1.10", "Worker Node Configuration"]),
-	"benchmark": cis_k8s.benchmark_metadata,
-	"remediation": "chown root:root /etc/kubernetes/kubelet.conf",
 }
