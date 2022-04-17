@@ -50,6 +50,7 @@ func NewFetcherRegistry() FetchersRegistry {
 
 // Register registers a Fetcher implementation.
 func (r *fetchersRegistry) Register(key string, f fetching.Fetcher, c ...fetching.Condition) error {
+	logp.L().Debugf("Registering new fetcher: %s", key)
 	if _, ok := r.reg[key]; ok {
 		return fmt.Errorf("fetcher key collision: %q is already registered", key)
 	}

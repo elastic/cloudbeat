@@ -65,7 +65,10 @@ func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Conf
 
 	for _, p := range parsedList {
 		c := fa.getConditions(p.name)
-		registry.Register(p.name, p.f, c...)
+		err := registry.Register(p.name, p.f, c...)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
