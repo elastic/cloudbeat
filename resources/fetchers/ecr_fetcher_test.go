@@ -16,6 +16,11 @@ import (
 	"testing"
 )
 
+const (
+	privateRepositoryTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w]+)[:,@]?"
+	publicRepositoryRegex     = "public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?"
+)
+
 type ECRFetcherTestSuite struct {
 	suite.Suite
 }
@@ -66,6 +71,24 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			}},
 			[]string{firstRepositoryName, secondRepositoryName},
 		},
+		{
+			"704479110758",
+			"us-east-2",
+			"latest",
+			"my-namespace",
+			[]v1.Container{
+				{
+					Image: "cloudbeat",
+					Name:  "cloudbeat",
+				},
+				{
+					Image: "cloudbeat1",
+					Name:  "cloudbeat1",
+				},
+			},
+			[]ecr.Repository{},
+			[]string{},
+		},
 	}
 	for _, test := range tests {
 		//Need to add services
@@ -94,12 +117,11 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything).Return(test.expectedRepository, nil)
 
-		privateRepositoryTemplate := "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w]+)[:,@]?"
 		privateRepoRegex := fmt.Sprintf(privateRepositoryTemplate, test.identityAccount, test.region)
 		//Maybe will need to change this texts
 		regexTexts := []string{
 			privateRepoRegex,
-			"public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?",
+			publicRepositoryRegex,
 		}
 		regexMatchers := []*regexp.Regexp{
 			regexp.MustCompile(regexTexts[0]),
@@ -128,5 +150,82 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		for i, name := range test.expectedRepositoryNames {
 			s.Contains(*elbResource.EcrRepositories[i].RepositoryName, name)
 		}
+	}
+
+}
+
+func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
+	var tests = []struct {
+		identityAccount string
+		region          string
+		tag             string
+		namespace       string
+		containers      []v1.Container
+	}{
+		{
+			"704479110758",
+			"us-east-2",
+			"latest",
+			"my-namespace",
+			[]v1.Container{
+				{
+					Image: "cloudbeat:latest",
+					Name:  "cloudbeat",
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		//Need to add services
+		kubeclient := k8sfake.NewSimpleClientset()
+
+		pods := &v1.Pod{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Pod",
+				APIVersion: "apps/v1beta1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "testing_pod",
+				Namespace: test.namespace,
+			},
+			Spec: kubernetes.PodSpec{
+				NodeName:   "testnode",
+				Containers: test.containers,
+			},
+		}
+		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
+
+		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
+		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
+
+		// Needs to use the same services
+		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
+		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("ecr error"))
+
+		privateRepoRegex := fmt.Sprintf(privateRepositoryTemplate, test.identityAccount, test.region)
+		//Maybe will need to change this texts
+		regexTexts := []string{
+			privateRepoRegex,
+			publicRepositoryRegex,
+		}
+		regexMatchers := []*regexp.Regexp{
+			regexp.MustCompile(regexTexts[0]),
+			regexp.MustCompile(regexTexts[1]),
+		}
+
+		ecrFetcher := ECRFetcher{
+			cfg:               ECRFetcherConfig{},
+			ecrProvider:       ecrProvider,
+			kubeClient:        kubeclient,
+			repoRegexMatchers: regexMatchers,
+		}
+
+		ctx := context.Background()
+
+		result, err := ecrFetcher.Fetch(ctx)
+		s.Nil(result)
+		s.NotNil(err)
+		s.EqualError(err, "could retrieve ECR repositories: ecr error")
+
 	}
 }
