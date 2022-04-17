@@ -5,6 +5,7 @@ import (
 	"github.com/docker/distribution/context"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/resources/providers"
@@ -32,6 +33,7 @@ type ecrExtraElements struct {
 }
 
 func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+	logp.L().Info("ECR factory has started")
 	cfg := ECRFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {

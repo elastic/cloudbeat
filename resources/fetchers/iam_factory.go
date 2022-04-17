@@ -1,6 +1,7 @@
 package fetchers
 
 import (
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -28,6 +29,7 @@ type IAMExtraElements struct {
 }
 
 func (f *IAMFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+	logp.L().Info("IAM factory has started")
 	cfg := IAMFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {

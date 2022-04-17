@@ -71,16 +71,16 @@ Note: Check the jusfile for all available commands for build or deploy `$ just -
 
 ### Testing
 
-Cloudbeat has a various sets of tests. This guide should help to understand how the different test suites work, how they are used and new tests are added.
+Cloudbeat has a various sets of tests. This guide should help to understand how the different test suites work, how they are used and how new tests are added.
 
 In general there are two major test suites:
 
-- Tests written in Go
-- Tests written in Python
+- Unit tests written in Go
+- Integration tests written in Python
 
 The tests written in Go use the Go Testing package. The tests written in Python depend on pytest and require a compiled and executable binary from the Go code. The python test run a beat with a specific config and params and either check if the output is as expected or if the correct things show up in the logs.
 
-For both of the above test suites so called integration tests exists. Integration tests in Beats are tests which require an external system like Elasticsearch to test if the integration with this service works as expected. Beats provides in its testsuite docker containers and docker-compose files to start these environments but a developer can run the required services also locally.
+Integration tests in Beats are tests which require an external system like Elasticsearch to test if the integration with this service works as expected. Beats provides in its testsuite docker containers and docker-compose files to start these environments but a developer can run the required services also locally.
 
 #### Mocking
 
@@ -107,12 +107,10 @@ requesterMock.EXPECT().
 ```
 
 Notes
-- Place the test in the same package as the code it meant to test
-- File name should be aligned with the convention `original_file_mock`. For example: ecr_provider -> ecr_provider_mock
+- Place the test in the same package as the code it meant to test.
+- File name should be aligned with the convention `original_file_mock`. For example: ecr_provider -> ecr_provider_mock.
 
 Command example:
 ```
 mockery --name=<interface_name> --with-expecter  --case underscore  --inpackage --recursive
 ```
-#### General guidelines
-- The test file name should be

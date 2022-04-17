@@ -3,6 +3,7 @@ package fetchers
 import (
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
@@ -36,6 +37,7 @@ type elbExtraElements struct {
 }
 
 func (f *ELBFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+	logp.L().Info("ELB factory has started")
 	cfg := ELBFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {

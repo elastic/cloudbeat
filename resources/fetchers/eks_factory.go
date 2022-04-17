@@ -1,6 +1,7 @@
 package fetchers
 
 import (
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -27,6 +28,7 @@ type eksExtraElements struct {
 }
 
 func (f *EKSFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+	logp.L().Info("EKS factory has started")
 	cfg := EKSFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
