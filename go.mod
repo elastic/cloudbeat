@@ -53,7 +53,11 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220413140705-d101ba1d2ae5
+<<<<<<< HEAD
 	github.com/elastic/csp-security-policies v0.0.13-go-lib
+=======
+	github.com/elastic/csp-security-policies v0.0.12-go-lib
+>>>>>>> 9a2d79f (Bumping version of CSP policies)
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.4 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
