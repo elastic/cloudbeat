@@ -12,7 +12,7 @@ finding = result {
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"expected": {"filemode": 700},
+		"expected": {"filemode": "700"},
 		"evidence": {"filemode": filemode},
 	}
 }
