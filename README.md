@@ -1,5 +1,5 @@
 # Cloudbeat 
-![Coverage](https://img.shields.io/badge/Coverage-48.4%25-yellow)
+[![Coverage Status](https://coveralls.io/repos/github/elastic/cloudbeat/badge.svg?branch=main)](https://coveralls.io/github/elastic/cloudbeat?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 [![Build Status](https://internal-ci.elastic.co/buildStatus/icon?job=cloudbeat%2Fcloudbeat-mbp%2Fmain)](https://internal-ci.elastic.co/job/cloudbeat/job/cloudbeat-mbp/job/main/)
 
@@ -66,3 +66,13 @@ Use your favorite IDE to connect to the debugger on `localhost:40000` (for examp
 Note: Check the jusfile for all available commands for build or deploy `$ just --summary`
 </br>
 
+## Code guidelines
+
+### Testing
+
+Cloudbeat has a various sets of tests. This guide should help to understand how the different test suites work, how they are used and how new tests are added.
+
+In general there are two major test suites:
+
+- Unit tests written in Go
+- Integration tests written in Python
