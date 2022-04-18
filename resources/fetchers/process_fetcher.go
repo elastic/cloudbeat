@@ -33,9 +33,10 @@ import (
 
 const (
 	// CMDArgumentMatcher is a regex pattern that should match a process argument and its value
-	// For example for the following string `--flag=val --config=txt.yaml fl=val2` with an input string of `config`
-	// The regex will match the string `--config=txt.yaml` and will capture `txt.yaml` as a group
-	CMDArgumentMatcher = "\\b%s=\\/?(\\S+)"
+	// Expects format as the following: --<key><delimiter><value>.
+	// For example: --config=a.json
+	// The regex supports two delimiters "=" and ""
+	CMDArgumentMatcher = "\\b%s[\\s=]\\/?(\\S+)"
 )
 
 type ProcessResource struct {
@@ -63,6 +64,7 @@ type ProcessFetcherConfig struct {
 }
 
 func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.L().Debug("process fetcher starts to fetch data")
 	pids, err := proc.ListFS(f.Fs)
 	if err != nil {
 		return nil, err
@@ -112,7 +114,7 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 		regex := fmt.Sprintf(CMDArgumentMatcher, argument)
 		matcher := regexp.MustCompile(regex)
 		if !matcher.MatchString(cmd) {
-			logp.L().Infof("couldn't find a configuration file associated with flag %s for process %s", argument, processName)
+			logp.L().Infof("couldn't find a configuration file associated with flag %s for process %s from cmd", argument, processName, cmd)
 			continue
 		}
 
