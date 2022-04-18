@@ -15,10 +15,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package providers
 
-import "github.com/aws/aws-sdk-go-v2/aws"
+import (
+	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	k8s "k8s.io/client-go/kubernetes"
+)
 
-type AwsFetcherConfig struct {
-	Config aws.Config
+type KubernetesClientGetter interface {
+	GetClient(kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error)
+}
+
+type KubernetesProvider struct {
+}
+
+func (provider KubernetesProvider) GetClient(kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
+	client, err := kubernetes.GetKubernetesClient(kubeConfig, options)
+	return client, err
 }
