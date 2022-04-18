@@ -20,25 +20,36 @@ package fetchers
 import (
 	"context"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
-
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func MockProvider(objects ...runtime.Object) func(s string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
+func MockProvider(client *k8sfake.Clientset) func(s string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
 	return func(s string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
-		return k8sfake.NewSimpleClientset(objects...), nil
+		return client, nil
+	}
+}
+
+func clean(fetcher fetching.Fetcher) func() {
+	return func() {
+		fetcher.Stop()
+		watcherlock = sync.Once{}
 	}
 }
 
 func TestKubeFetcherFetchNoResources(t *testing.T) {
-	kubeFetcher, err := (&KubeFactory{}).CreateFrom(KubeApiFetcherConfig{}, MockProvider())
+	client := k8sfake.NewSimpleClientset()
+	provider := MockProvider(client)
+	kubeFetcher, err := (&KubeFactory{}).CreateFrom(KubeApiFetcherConfig{}, provider)
 
 	assert.NoError(t, err)
 
@@ -47,7 +58,7 @@ func TestKubeFetcherFetchNoResources(t *testing.T) {
 
 	assert.Equal(t, 0, len(results))
 
-	kubeFetcher.Stop()
+	t.Cleanup(clean(kubeFetcher))
 }
 
 func TestKubeFetcherFetchASinglePod(t *testing.T) {
@@ -70,13 +81,134 @@ func TestKubeFetcherFetchASinglePod(t *testing.T) {
 			},
 		},
 	}
-	kubeFetcher, err := (&KubeFactory{}).CreateFrom(KubeApiFetcherConfig{}, MockProvider(&pod))
+	client := k8sfake.NewSimpleClientset(&pod)
+	provider := MockProvider(client)
+	kubeFetcher, err := (&KubeFactory{}).CreateFrom(KubeApiFetcherConfig{}, provider)
 
 	assert.NoError(t, err)
 
 	results, err := kubeFetcher.Fetch(context.TODO())
 	assert.Nil(t, err, "Fetcher was not able to fetch kubernetes resources")
 
-	assert.Equal(t, 1, len(results))
+	require.Equal(t, 1, len(results))
+	//assert.Equal(t, createdPod, results[0].GetData())
 	assert.Equal(t, &pod, results[0].GetData())
+
+	t.Cleanup(clean(kubeFetcher))
+}
+
+func TestKubeFetcherFetchTwoPods(t *testing.T) {
+	pods := v1.PodList{Items: []v1.Pod{
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Pod",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-pod",
+				Namespace: "kube-system",
+			},
+			Spec: v1.PodSpec{
+				Containers: []v1.Container{
+					{
+						Name:            "nginx",
+						Image:           "nginx",
+						ImagePullPolicy: "Always",
+					},
+				},
+			},
+		},
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Pod",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-pod2",
+				Namespace: "kube-system",
+			},
+			Spec: v1.PodSpec{
+				Containers: []v1.Container{
+					{
+						Name:            "nginx",
+						Image:           "nginx",
+						ImagePullPolicy: "Always",
+					},
+				},
+			},
+		},
+	}}
+	client := k8sfake.NewSimpleClientset(&pods)
+	provider := MockProvider(client)
+	kubeFetcher, err := (&KubeFactory{}).CreateFrom(KubeApiFetcherConfig{}, provider)
+
+	assert.NoError(t, err)
+
+	results, err := kubeFetcher.Fetch(context.TODO())
+	assert.Nil(t, err, "Fetcher was not able to fetch kubernetes resources")
+
+	require.Equal(t, 2, len(results))
+	assert.Equal(t, &(pods.Items[0]), results[0].GetData())
+	assert.Equal(t, &(pods.Items[1]), results[1].GetData())
+
+	t.Cleanup(clean(kubeFetcher))
+}
+
+func TestKubeFetcherFetchThreeRoles(t *testing.T) {
+	roles := rbacv1.RoleList{Items: []rbacv1.Role{
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Role",
+				APIVersion: "rbac.authorization.k8s.io/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-role1",
+				Namespace: "default",
+			},
+			Rules: []rbacv1.PolicyRule{
+				{Verbs: []string{"get"}},
+			},
+		},
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Role",
+				APIVersion: "rbac.authorization.k8s.io/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-role2",
+				Namespace: "default",
+			},
+			Rules: []rbacv1.PolicyRule{
+				{Verbs: []string{"list"}},
+			},
+		},
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Role",
+				APIVersion: "rbac.authorization.k8s.io/v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-role3",
+				Namespace: "default",
+			},
+			Rules: []rbacv1.PolicyRule{
+				{Verbs: []string{"create"}},
+			},
+		},
+	}}
+	client := k8sfake.NewSimpleClientset(&roles)
+	provider := MockProvider(client)
+	kubeFetcher, err := (&KubeFactory{}).CreateFrom(KubeApiFetcherConfig{}, provider)
+
+	assert.NoError(t, err)
+
+	results, err := kubeFetcher.Fetch(context.TODO())
+	assert.Nil(t, err, "Fetcher was not able to fetch kubernetes resources")
+
+	require.Equal(t, 3, len(results))
+	assert.Equal(t, &(roles.Items[0]), results[0].GetData())
+	assert.Equal(t, &(roles.Items[1]), results[1].GetData())
+	assert.Equal(t, &(roles.Items[2]), results[2].GetData())
+
+	t.Cleanup(clean(kubeFetcher))
 }
