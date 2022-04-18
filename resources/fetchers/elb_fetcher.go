@@ -20,9 +20,10 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
@@ -30,12 +31,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
 
-const ELBType = "aws-elb"
 const ELBRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
 
 type ELBFetcher struct {
 	cfg             ELBFetcherConfig
-	elbProvider     *ELBProvider
+	elbProvider     awslib.ELBLoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
 }
@@ -51,23 +51,8 @@ type ELBResource struct {
 	LoadBalancersDescription
 }
 
-func NewELBFetcher(awsCfg AwsFetcherConfig, cfg ELBFetcherConfig) (fetching.Fetcher, error) {
-	elb := NewELBProvider(awsCfg.Config)
-	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsCfg.Config.Region)
-	kubeClient, err := kubernetes.GetKubernetesClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)
-	}
-
-	return &ELBFetcher{
-		elbProvider:     elb,
-		cfg:             cfg,
-		kubeClient:      kubeClient,
-		lbRegexMatchers: []*regexp.Regexp{regexp.MustCompile(loadBalancerRegex)},
-	}, nil
-}
-
 func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.L().Debug("elb fetcher starts to fetch data")
 	results := make([]fetching.Resource, 0)
 
 	balancers, err := f.GetLoadBalancers()

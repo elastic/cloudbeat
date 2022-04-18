@@ -21,14 +21,14 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/tools v0.1.7
+	golang.org/x/tools v0.1.9
 	gopkg.in/jcmturner/aescts.v1 v1.0.1 // indirect
 	gopkg.in/jcmturner/dnsutils.v1 v1.0.1 // indirect
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 	gopkg.in/jcmturner/rpc.v1 v1.1.0 // indirect
 	gotest.tools/gotestsum v0.6.0
-	k8s.io/apimachinery v0.23.0
-	k8s.io/client-go v0.23.0
+	k8s.io/apimachinery v0.23.5
+	k8s.io/client-go v0.23.5
 )
 
 require (
@@ -38,7 +38,7 @@ require (
 	go.elastic.co/go-licence-detector v0.4.0
 	go.uber.org/goleak v1.1.12
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.23.0
+	k8s.io/api v0.23.5
 )
 
 require (
@@ -50,10 +50,10 @@ require (
 	github.com/containerd/containerd v1.6.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgraph-io/ristretto v0.1.0 // indirect
-	github.com/docker/distribution v2.8.1+incompatible // indirect
+	github.com/docker/distribution v2.8.1+incompatible
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220328120630-c721abcf0650
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220413140705-d101ba1d2ae5
 	github.com/elastic/csp-security-policies v0.0.10-go-lib
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.4 // indirect
@@ -105,9 +105,9 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	k8s.io/klog/v2 v2.30.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
-	k8s.io/utils v0.0.0-20210930125809-cb0fa318a74b // indirect
+	k8s.io/utils v0.0.0-20211116205334-6203023598ed // indirect
 	sigs.k8s.io/json v0.0.0-20211020170558-c049b76a60c6 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
@@ -155,6 +155,7 @@ require (
 	github.com/h2non/filetype v1.1.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/nomad/api v0.0.0-20201203164818-6318a8ac7bf8 // indirect
+	github.com/jcchavezs/porto v0.1.0 // indirect
 	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/josephspurrier/goversioninfo v0.0.0-20190209210621-63e6d1acd3dd // indirect
@@ -183,9 +184,9 @@ require (
 	github.com/urso/sderr v0.0.0-20210525210834-52b04e8f5c71 // indirect
 	github.com/xdg/scram v1.0.3 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	go.elastic.co/apm v1.11.0 // indirect
-	go.elastic.co/apm/module/apmelasticsearch v1.7.2 // indirect
-	go.elastic.co/apm/module/apmhttp v1.7.2 // indirect
+	go.elastic.co/apm/module/apmelasticsearch/v2 v2.0.0 // indirect
+	go.elastic.co/apm/module/apmhttp/v2 v2.0.0 // indirect
+	go.elastic.co/apm/v2 v2.0.0 // indirect
 	go.elastic.co/ecszap v1.0.0 // indirect
 	go.uber.org/atomic v1.8.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
@@ -203,7 +204,7 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirect
-	howett.net/plist v0.0.0-20181124034731-591f970eefbb // indirect
+	howett.net/plist v1.0.0 // indirect
 )
 
 replace (

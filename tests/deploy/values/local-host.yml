@@ -1,0 +1,5 @@
+cloudbeat:
+  deploy: false
+
+testData:
+  marker: rules

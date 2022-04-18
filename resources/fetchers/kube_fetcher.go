@@ -63,6 +63,10 @@ var (
 			&kubernetes.PodSecurityPolicy{},
 			allNamespaces,
 		},
+		{
+			&kubernetes.ServiceAccount{},
+			allNamespaces,
+		},
 		// TODO(yashtewari): Problem: github.com/elastic/beats/vendor/k8s.io/apimachinery/pkg/api/errors/errors.go#401
 		// > "the server could not find the requested resource"
 		// {
@@ -140,6 +144,7 @@ func (f *KubeFetcher) initWatchers() error {
 }
 
 func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.L().Debug("kube fetcher starts to fetch data")
 	var err error
 	watcherlock.Do(func() {
 		err = f.initWatchers()

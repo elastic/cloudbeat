@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cloudbeat
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      containers:
+        - name: cloudbeat
+          env:
+            - name: ES_HOST
+              value: "elasticsearch-master.kube-system:9200"
+            - name: ES_USERNAME
+              value: elastic
+            - name: ES_PASSWORD
+              value: changeme

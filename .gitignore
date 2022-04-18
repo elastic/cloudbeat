@@ -1,7 +1,11 @@
+data/*
+.vscode*
+tests/.idea
 /.idea
 /build
-cloudbeat-test
 .cloudbeat-test.config.json
+cloudbeat-test
+*ES-helm*
 .DS_Store
 /cloudbeat
 /cloudbeat.test
@@ -9,3 +13,8 @@ cloudbeat-test
 *local.yaml
 *local.yml
 fields.yml
+tests/allure/results/*
+tests/allure/results/test.dummy
+tests/allure/reports/*
+*-result.json
+*test.dummy

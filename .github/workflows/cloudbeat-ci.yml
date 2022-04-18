@@ -8,12 +8,12 @@ on:
 
 
 env:
-  K8S_MANIFEST_DIR: deploy/k8s
+  K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.17.2
 
 jobs:
-  integration-test:
-    name: Integration Test
+  Build:
+    name: Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -29,192 +29,169 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Configure sysctl limits
-        run: |
-          sudo swapoff -a
-          sudo sysctl -w vm.swappiness=1
-          sudo sysctl -w fs.file-max=262144
-          sudo sysctl -w vm.max_map_count=262144
-
-      - name: Spin up Elasticsearch
-        uses: elastic/elastic-github-actions/elasticsearch@master
+      - name: cache go dependencies
+        uses: actions/cache@v2
         with:
-          stack-version: 8.1.0-SNAPSHOT
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
+      
+      - name: build cloudbeat
+        run: make
 
-      - name: Ensure Elasticsearch is reachable
-        run: |
-          curl --verbose --show-error http://localhost:9200
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-      - name: Start minikube
-        uses: medyagh/setup-minikube@master
-
-      - name: Docker build Cloudbeat
-        run: |
-          eval $(minikube docker-env) && GOOS=linux go build -v && docker build -t cloudbeat .
-
-      - name: Deploy cloudbeat
-        run: |
-          kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
-
-      - name: Update etc/hosts
-        run: |
-          ES_HOST=$( minikube ssh 'grep host.minikube.internal /etc/hosts | cut -f1' )
-          echo "===== elasticsearch host (from inside cloudbeat): ${ES_HOST}"
-          
-          kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
-          CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" )
-
-          echo "===== $CLOUDBEAT_POD is ready, updating /etc/hosts"
-          kubectl exec $CLOUDBEAT_POD -n kube-system -- sh -c "echo '${ES_HOST//[$'\t\r\n']}    host.docker.internal' >> /etc/hosts"
-
-          echo "===== updated cloudbeat /etc/hosts"
-          kubectl exec $CLOUDBEAT_POD -n kube-system -- cat /etc/hosts
-          
-          # Save Vars for next steps
-          echo "ES_HOST=$ES_HOST" >> $GITHUB_ENV
-          echo -n "CLOUDBEAT_POD=$CLOUDBEAT_POD" >> $GITHUB_ENV
-
-      - name: Get cloudbeat logs
-        run: |
-          timeout 45 kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
-
-      - name: Get ES indices
-        run: |
-          echo "===== kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET \"${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*kubernetes_benchmark.findings*?v&s=index&pretty\""
-          kubectl exec $CLOUDBEAT_POD -n kube-system -- curl -X GET "${ES_HOST//[$'\t\r\n']}:9200/_cat/indices/*kubernetes_benchmark.findings*?v&s=index&pretty"
-
-      - name: Get 'file-system' resource type finding
-        run: |
-          FILE_SYSTEM_FINDING=$( curl -XGET "localhost:9200/*kubernetes_benchmark.findings*/_search?pretty=true" -H 'Content-Type: application/json' -d'
-          {
-             "size": 1,
-             "sort": { "@timestamp": "desc"},
-             "query": { "match": { "type":  "file-system" } }
-          }' | jq '.hits.hits[0]._source')
-          
-          # Save Vars for next steps
-          echo "file_system_finding<<EOF" >> "$GITHUB_ENV"
-          echo "$FILE_SYSTEM_FINDING" >> "$GITHUB_ENV"
-          echo "EOF" >> "$GITHUB_ENV"
-          
-          # Save result status
-          if [[ "$FILE_SYSTEM_FINDING" == null ]]
-          then echo "file_system_status=:broken_heart:" >> "$GITHUB_ENV"
-          else echo "file_system_status=:green_heart:" >> "$GITHUB_ENV"
-          fi
-
-      - name: Get 'process' resource type finding
-        run: |
-          PROCESS_FINDING=$( curl -XGET "localhost:9200/*kubernetes_benchmark.findings*/_search?pretty=true" -H 'Content-Type: application/json' -d'
-          {
-             "size": 1,
-             "sort": { "@timestamp": "desc"},
-             "query": { "match": { "type":  "process" } }
-          }' | jq '.hits.hits[0]._source')
-          
-          # Save Vars for next steps
-          echo "process_finding<<EOF" >> "$GITHUB_ENV"
-          echo "$PROCESS_FINDING" >> "$GITHUB_ENV"
-          echo "EOF" >> "$GITHUB_ENV"
-          
-          # Save result status
-          if [[ "$PROCESS_FINDING" == null ]]
-          then echo "process_status=:broken_heart:" >> "$GITHUB_ENV"
-          else echo "process_status=:green_heart:" >> "$GITHUB_ENV"
-          fi
-
-      - name: Get 'kube-api' resource type finding
-        run: |
-          KUBE_API_FINDING=$( curl -XGET "localhost:9200/*kubernetes_benchmark.findings*/_search?pretty=true" -H 'Content-Type: application/json' -d'
-          {
-             "size": 1,
-             "sort": { "@timestamp": "desc"},
-             "query": { "match": { "type":  "kube-api" } }
-          }' | jq '.hits.hits[0]._source')
-          
-          # Save Vars for next steps
-          echo "kube_api_finding<<EOF" >> "$GITHUB_ENV"
-          echo "$KUBE_API_FINDING" >> "$GITHUB_ENV"
-          echo "EOF" >> "$GITHUB_ENV"
-          
-          # Save result status
-          if [[ "$KUBE_API_FINDING" == null ]]
-          then echo "kube_api_status=:broken_heart:" >> "$GITHUB_ENV"
-          else echo "kube_api_status=:green_heart:" >> "$GITHUB_ENV"
-          fi
-
-      - name: Commnet test success result
-        uses: marocchino/sticky-pull-request-comment@v2
+      - name: Cache Build dependencies
+        uses: actions/cache@v2
         with:
-          header: Exmaple Finding
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: |
-            ## Cloudbeat CI :robot:
-            The integration test was completed successfully! :trophy:
-            
-            ### Exmaple findings from ElasticSearch:
-            
-            <details>
-            <summary><b>file-system ${{env.file_system_status}} </b></summary>
-            
-            ```json
-            ${{env.file_system_finding}}
-            ```
-            </details>
-            <details>
-            <summary><b>process ${{env.process_status}} </b></summary>
-            
-            ```json
-            ${{env.process_finding}}
-            ```
-            </details>
-            
-            <details>
-            <summary><b>kube-api ${{env.kube_api_status}} </b></summary>
-            
-            ```json
-            ${{env.kube_api_finding}}
-            ```
-            </details>
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.event.pull_request.head.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      
+      - name: Build cloudbeat-docker
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: cloudbeat:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          outputs: type=docker,dest=/tmp/cloudbeat-${{ github.event.pull_request.head.sha }}.tar
 
-  unit_tests:
-    name: Unit Tests
+      - name: Build pytest-docker
+        uses: docker/build-push-action@v2
+        with:
+          context: ./tests/.
+          push: false
+          tags: cloudbeat-test:latest
+          cache-from: type=local,mode=max,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          outputs: type=docker,dest=/tmp/pytest-${{ github.event.pull_request.head.sha }}.tar
+      
+      - name: Cache dockers images
+        uses: actions/cache@v2
+        with:
+          path: /tmp/*.tar
+          key: ${{ runner.os }}-dockers-cache-${{ github.event.pull_request.head.sha }}
+          restore-keys: |
+            ${{ runner.os }}-dockers-cache-
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  Integration_tests:
+    name: Integration Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
         with:
-          go-version: ${{ env.GO_VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
+          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
-      - name: Mage Check
-        uses: magefile/mage-action@v1.6.0
+      - uses: azure/setup-helm@v1
+        id: install
+
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.2.0
         with:
-          args: check
+          config: deploy/k8s/kind/kind-config.yaml
+          cluster_name: kind-mono 
 
-      - name: Mage check license headers
-        uses: magefile/mage-action@v1.6.0
+      - name: Wait for build to succeed
+        uses: lewagon/wait-on-check-action@v1.0.0
         with:
-          args: checkLicenseHeaders
+          check-name: Build
+          ref: ${{ github.event.pull_request.head.sha }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          allowed-conclusions: success
+          wait-interval: 10
 
-      - name: Unit-Test Cloudbeat
+      - name: Cache dockers images
+        uses: actions/cache@v2
+        with:
+          path: /tmp/*.tar
+          key: ${{ runner.os }}-dockers-cache-${{ github.event.pull_request.head.sha }}
+          restore-keys: |
+            ${{ runner.os }}-dockers-cache-
+
+      - name: Load images to kind
         run: |
-          GOOS=linux go test ./...
+          kind load image-archive /tmp/cloudbeat-${{ github.event.pull_request.head.sha }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.event.pull_request.head.sha }}.tar --name=kind-mono
+          rm -rf /tmp/*.tar
 
-      - name: Get diff k8s manifests
-        uses: technote-space/get-diff-action@v4
-        with:
-          PATTERNS: ${{ env.K8S_MANIFEST_DIR }}/**
+      - name: Deploy tests Helm chart
+        run: |
+          helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
 
-      - name: Run K8s manifest tests
-        if: env.GIT_DIFF
-        uses: stefanprodan/kube-tools@v1
+      - name: Sleep for 100s
+        uses: juliangruber/sleep-action@v1
         with:
-          kubectl: 1.18.2
-          kubeval: v0.16.1
-          command: |
-            echo "===== run kubeval"
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/cloudbeat-ds.yaml
+          time: 100s
+
+      - name: Run Tests
+        id: run_tests 
+        run: |
+          helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs 2>&1 | tee test.log
+          result_code=${PIPESTATUS[0]}
+          SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
+          echo "summary<<EOF" >> "$GITHUB_ENV"
+          echo "$SUMMARY" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+          exit $result_code
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
+
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Generate
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          allure_results: tests/allure/results
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: Deploy report to Github Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v2
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history
+
+      - name: Comment test success result
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: always()
+        with:
+          header: Test Results
+          recreate: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ## Cloudbeat CI :robot:
+            Integration tests status: ${{ steps.run_tests.outcome }}
+            Tests Summary:
+            ```python
+            ${{env.summary}}
+            ```
+            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
+
