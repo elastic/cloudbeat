@@ -68,11 +68,11 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			"my-namespace",
 			[]v1.Container{
 				{
-					Image: "123456789123.dkr.ecr.wrong-region.amazonaws.com/cloudbeat:latest",
+					Image: "123456789123.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest",
 					Name:  "cloudbeat",
 				},
 				{
-					Image: "123456789123.dkr.ecr.wrong-region.amazonaws.com/cloudbeat1:latest",
+					Image: "123456789123.dkr.ecr.us-east-2.amazonaws.com/cloudbeat1:latest",
 					Name:  "cloudbeat1",
 				},
 			},
@@ -110,11 +110,11 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			"my-namespace",
 			[]v1.Container{
 				{
-					Image: "123456789123.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest",
+					Image: "123456789123.dkr.ecr.wrong-region.amazonaws.com/cloudbeat:latest",
 					Name:  "cloudbeat",
 				},
 				{
-					Image: "123456789123.dkr.ecr.us-east-2.amazonaws.com/cloudbeat1:latest",
+					Image: "123456789123.dkr.ecr.wrong-region.amazonaws.com/cloudbeat1:latest",
 					Name:  "cloudbeat1",
 				},
 			},
