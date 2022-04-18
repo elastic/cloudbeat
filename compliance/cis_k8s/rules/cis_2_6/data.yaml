@@ -40,7 +40,7 @@ metadata:
     2. [https://kubernetes.io/docs/admin/etcd/](https://kubernetes.io/docs/admin/etcd/)
     3. [https://coreos.com/etcd/docs/latest/op-guide/configuration.html#peer-auto-tls](https://coreos.com/etcd/docs/latest/op-guide/configuration.html#peer-auto-tls)
   section: etcd
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

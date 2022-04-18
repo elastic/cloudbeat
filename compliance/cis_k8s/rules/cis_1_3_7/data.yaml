@@ -28,7 +28,7 @@ metadata:
   references: |
     1. [https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/)
   section: Controller Manager
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

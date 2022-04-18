@@ -31,7 +31,7 @@ metadata:
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
     2. [https://kubernetes.io/docs/admin/admission-controllers/#alwaysadmit](https://kubernetes.io/docs/admin/admission-controllers/#alwaysadmit)
   section: API Server
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

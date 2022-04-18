@@ -45,7 +45,7 @@ metadata:
     2. [https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#44-joining-your-nodes](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#44-joining-your-nodes)
     3. [https://kubernetes.io/docs/admin/kubeadm/#kubelet-drop-in](https://kubernetes.io/docs/admin/kubeadm/#kubelet-drop-in)
   section: Worker Node Configuration Files
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

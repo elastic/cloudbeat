@@ -41,7 +41,7 @@ metadata:
     1. [https://coreos.com/etcd/docs/latest/op-guide/security.html](https://coreos.com/etcd/docs/latest/op-guide/security.html)
     2. [https://kubernetes.io/docs/admin/etcd/](https://kubernetes.io/docs/admin/etcd/)
   section: etcd
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

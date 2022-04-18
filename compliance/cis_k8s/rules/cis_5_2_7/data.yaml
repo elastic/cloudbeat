@@ -39,7 +39,7 @@ metadata:
     1. [https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies)
     2. [https://www.nccgroup.trust/uk/our-research/abusing-privileged-and-unprivileged-linux-containers/](https://www.nccgroup.trust/uk/our-research/abusing-privileged-and-unprivileged-linux-containers/)
   section: Pod Security Policies
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

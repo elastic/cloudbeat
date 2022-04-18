@@ -32,7 +32,7 @@ metadata:
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
     2. [https://kubernetes.io/docs/admin/admission-controllers/#namespacelifecycle](https://kubernetes.io/docs/admin/admission-controllers/#namespacelifecycle)
   section: API Server
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

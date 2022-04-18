@@ -32,7 +32,7 @@ metadata:
     1. [https://kubernetes.io/docs/admin/authentication/#static-token-file](https://kubernetes.io/docs/admin/authentication/#static-token-file)
     2. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
   section: API Server
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

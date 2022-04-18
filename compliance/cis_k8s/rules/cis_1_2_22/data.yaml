@@ -36,7 +36,7 @@ metadata:
     2. [https://kubernetes.io/docs/concepts/cluster-administration/audit/](https://kubernetes.io/docs/concepts/cluster-administration/audit/)
     3. [https://github.com/kubernetes/features/issues/22](https://github.com/kubernetes/features/issues/22)
   section: API Server
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

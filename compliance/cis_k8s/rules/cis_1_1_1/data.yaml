@@ -34,7 +34,7 @@ metadata:
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
   section: Master Node Configuration Files
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

@@ -36,7 +36,7 @@ metadata:
     2. [https://github.com/kubernetes/kubernetes/issues/24167](https://github.com/kubernetes/kubernetes/issues/24167)
     3. [https://en.wikipedia.org/wiki/Time_of_check_to_time_of_use](https://en.wikipedia.org/wiki/Time_of_check_to_time_of_use)
   section: API Server
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

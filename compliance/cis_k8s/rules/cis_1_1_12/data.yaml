@@ -41,7 +41,7 @@ metadata:
     1. [https://coreos.com/etcd/docs/latest/op-guide/configuration.html#data-dir](https://coreos.com/etcd/docs/latest/op-guide/configuration.html#data-dir)
     2. [https://kubernetes.io/docs/admin/etcd/](https://kubernetes.io/docs/admin/etcd/)
   section: Master Node Configuration Files
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

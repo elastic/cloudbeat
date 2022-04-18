@@ -40,7 +40,7 @@ metadata:
   references: |
     1. [https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
   section: RBAC and Service Accounts
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

@@ -31,7 +31,7 @@ metadata:
     1. [https://kubernetes.io/docs/admin/kube-controller-manager/](https://kubernetes.io/docs/admin/kube-controller-manager/)
     2. [https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md](https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md)
   section: Controller Manager
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

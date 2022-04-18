@@ -35,7 +35,7 @@ metadata:
   default_value:
   references:
   section: RBAC and Service Accounts
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

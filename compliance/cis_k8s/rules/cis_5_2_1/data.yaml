@@ -37,7 +37,7 @@ metadata:
   references: |
     1. [https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies)
   section: Pod Security Policies
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

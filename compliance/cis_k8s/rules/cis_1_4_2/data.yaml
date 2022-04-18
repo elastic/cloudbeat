@@ -28,7 +28,7 @@ metadata:
   references: |
     1. [https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/)
   section: Scheduler
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

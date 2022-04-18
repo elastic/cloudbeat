@@ -49,7 +49,7 @@ metadata:
     4. [https://github.com/kubernetes/kubernetes/blob/release-1.6/plugin/pkg/auth/authorizer/rbac/bootstrappolicy/testdata/controller-role-bindings.yaml](https://github.com/kubernetes/kubernetes/blob/release-1.6/plugin/pkg/auth/authorizer/rbac/bootstrappolicy/testdata/controller-role-bindings.yaml)
     5. [https://kubernetes.io/docs/admin/authorization/rbac/#controller-roles](https://kubernetes.io/docs/admin/authorization/rbac/#controller-roles)
   section: Controller Manager
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

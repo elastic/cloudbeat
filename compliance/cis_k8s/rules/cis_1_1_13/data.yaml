@@ -33,7 +33,7 @@ metadata:
   references: |
     1. [https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
   section: Master Node Configuration Files
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

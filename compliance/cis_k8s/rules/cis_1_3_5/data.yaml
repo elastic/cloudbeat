@@ -37,7 +37,7 @@ metadata:
     1. [https://kubernetes.io/docs/admin/kube-controller-manager/](https://kubernetes.io/docs/admin/kube-controller-manager/)
     2. [https://github.com/kubernetes/kubernetes/issues/11000](https://github.com/kubernetes/kubernetes/issues/11000)
   section: Controller Manager
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

@@ -44,7 +44,7 @@ metadata:
   references: |
     1. [https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/](https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/)
   section: Worker Node Configuration Files
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

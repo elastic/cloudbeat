@@ -48,7 +48,7 @@ metadata:
     1. [https://kubernetes.io/docs/admin/kubelet/](https://kubernetes.io/docs/admin/kubelet/)
     2. [https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet-authentication-authorization/](https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet-authentication-authorization/)
   section: Kubelet
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes

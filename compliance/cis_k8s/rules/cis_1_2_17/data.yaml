@@ -37,7 +37,7 @@ metadata:
     3. [https://kubernetes.io/docs/admin/authorization/node/](https://kubernetes.io/docs/admin/authorization/node/)
     4. [https://acotten.com/post/kube17-security](https://acotten.com/post/kube17-security)
   section: API Server
-  version: 1.0
+  version: "1.0"
   tags:
     - CIS
     - Kubernetes
