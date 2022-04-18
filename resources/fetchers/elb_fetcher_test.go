@@ -69,14 +69,18 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			}},
 			[]string{"adda9cdc89b13452e92d48be46858d37"},
 		},
-		//{
-		//	"test_namespace",
-		//	[]v1.LoadBalancerIngress{},
-		//	[]elasticloadbalancing.LoadBalancerDescription{},
-		//},
+		{
+			"test_namespace",
+			[]v1.LoadBalancerIngress{
+				{
+					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.wrong-region.elb.amazonaws.com",
+				},
+			},
+			[]elasticloadbalancing.LoadBalancerDescription{},
+			[]string{},
+		},
 	}
 	for _, test := range tests {
-		//Need to add services
 		kubeclient := k8sfake.NewSimpleClientset()
 
 		services := &v1.Service{

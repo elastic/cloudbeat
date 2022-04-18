@@ -35,8 +35,8 @@ import (
 )
 
 const (
-	privateRepositoryTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w]+)[:,@]?"
-	publicRepositoryRegex     = "public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?"
+	testPrivateRepositoryTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w]+)[:,@]?"
+	testPublicRepositoryRegex     = "public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?"
 )
 
 type ECRFetcherTestSuite struct {
@@ -57,24 +57,22 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		identityAccount         string
 		region                  string
-		tag                     string
 		namespace               string
 		containers              []v1.Container
 		expectedRepository      []ecr.Repository
 		expectedRepositoryNames []string
 	}{
 		{
-			"704479110758",
+			"123456789123",
 			"us-east-2",
-			"latest",
 			"my-namespace",
 			[]v1.Container{
 				{
-					Image: "704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest",
+					Image: "123456789123.dkr.ecr.wrong-region.amazonaws.com/cloudbeat:latest",
 					Name:  "cloudbeat",
 				},
 				{
-					Image: "704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat1:latest",
+					Image: "123456789123.dkr.ecr.wrong-region.amazonaws.com/cloudbeat1:latest",
 					Name:  "cloudbeat1",
 				},
 			},
@@ -90,9 +88,8 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			[]string{firstRepositoryName, secondRepositoryName},
 		},
 		{
-			"704479110758",
+			"123456789123",
 			"us-east-2",
-			"latest",
 			"my-namespace",
 			[]v1.Container{
 				{
@@ -101,6 +98,23 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 				},
 				{
 					Image: "cloudbeat1",
+					Name:  "cloudbeat1",
+				},
+			},
+			[]ecr.Repository{},
+			[]string{},
+		},
+		{
+			"123456789123",
+			"us-east-1",
+			"my-namespace",
+			[]v1.Container{
+				{
+					Image: "123456789123.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest",
+					Name:  "cloudbeat",
+				},
+				{
+					Image: "123456789123.dkr.ecr.us-east-2.amazonaws.com/cloudbeat1:latest",
 					Name:  "cloudbeat1",
 				},
 			},
@@ -137,11 +151,11 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			return reflect.DeepEqual(test.expectedRepositoryNames, repo)
 		})).Return(test.expectedRepository, nil)
 
-		privateRepoRegex := fmt.Sprintf(privateRepositoryTemplate, test.identityAccount, test.region)
+		privateRepoRegex := fmt.Sprintf(testPrivateRepositoryTemplate, test.identityAccount, test.region)
 		//Maybe will need to change this texts
 		regexTexts := []string{
 			privateRepoRegex,
-			publicRepositoryRegex,
+			testPublicRepositoryRegex,
 		}
 		regexMatchers := []*regexp.Regexp{
 			regexp.MustCompile(regexTexts[0]),
@@ -178,7 +192,6 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 	var tests = []struct {
 		identityAccount string
 		region          string
-		tag             string
 		namespace       string
 		containers      []v1.Container
 		error
@@ -186,7 +199,6 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		{
 			"704479110758",
 			"us-east-2",
-			"latest",
 			"my-namespace",
 			[]v1.Container{
 				{
@@ -224,11 +236,11 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything).Return(nil, test.error)
 
-		privateRepoRegex := fmt.Sprintf(privateRepositoryTemplate, test.identityAccount, test.region)
+		privateRepoRegex := fmt.Sprintf(testPrivateRepositoryTemplate, test.identityAccount, test.region)
 		//Maybe will need to change this texts
 		regexTexts := []string{
 			privateRepoRegex,
-			publicRepositoryRegex,
+			testPublicRepositoryRegex,
 		}
 		regexMatchers := []*regexp.Regexp{
 			regexp.MustCompile(regexTexts[0]),
