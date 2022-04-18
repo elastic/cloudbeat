@@ -1,4 +1,5 @@
 # Deploy a cloudbeat instance per node for cis policy
+# Refactor via kustomize https://kustomize.io/
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -25,7 +26,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: cloudbeat
-          image: 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest
+          image: 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:<IMAGE_TAG>
           imagePullPolicy: Always
           env:
             - name: AWS_ACCESS_KEY
@@ -213,50 +214,50 @@ metadata:
   labels:
     k8s-app: cloudbeat
 ---
-#apiVersion: rbac.authorization.k8s.io/v1
-#kind: ClusterRole
-#metadata:
-#  name: cloudbeat
-#  labels:
-#    k8s-app: cloudbeat
-#rules:
-#  - apiGroups: [""]
-#    resources:
-#      - nodes
-#      - namespaces
-#      - events
-#      - pods
-#      - services
-#    verbs: ["get", "list", "watch"]
-#  # Enable this rule only if planing to use Kubernetes keystore
-#  #- apiGroups: [""]
-#  #  resources:
-#  #  - secrets
-#  #  verbs: ["get"]
-#  - apiGroups: [ "extensions" ]
-#    resources:
-#      - replicasets
-#    verbs: [ "get", "list", "watch" ]
-#  - apiGroups: [ "apps" ]
-#    resources:
-#      - statefulsets
-#      - deployments
-#      - replicasets
-#    verbs: ["get", "list", "watch"]
-#  - apiGroups: ["batch"]
-#    resources:
-#      - jobs
-#    verbs: ["get", "list", "watch"]
-#  - apiGroups:
-#      - ""
-#    resources:
-#      - nodes/stats
-#    verbs:
-#      - get
-#  - nonResourceURLs:
-#      - "/metrics"
-#    verbs:
-#      - get
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cloudbeat
+  labels:
+    k8s-app: cloudbeat
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - namespaces
+      - events
+      - pods
+      - services
+    verbs: ["get", "list", "watch"]
+  # Enable this rule only if planing to use Kubernetes keystore
+  #- apiGroups: [""]
+  #  resources:
+  #  - secrets
+  #  verbs: ["get"]
+  - apiGroups: [ "extensions" ]
+    resources:
+      - replicasets
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "apps" ]
+    resources:
+      - statefulsets
+      - deployments
+      - replicasets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+    verbs: ["get", "list", "watch"]
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/stats
+    verbs:
+      - get
+  - nonResourceURLs:
+      - "/metrics"
+    verbs:
+      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -288,18 +289,18 @@ rules:
       - kubeadm-config
     verbs: ["get"]
 ---
-#apiVersion: rbac.authorization.k8s.io/v1
-#kind: ClusterRoleBinding
-#metadata:
-#  name: cloudbeat
-#subjects:
-#  - kind: ServiceAccount
-#    name: cloudbeat
-#    namespace: kube-system
-#roleRef:
-#  apiGroup: rbac.authorization.k8s.io
-#  kind: ClusterRole
-#  name: cluster-admin
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cloudbeat
+subjects:
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

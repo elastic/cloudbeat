@@ -1,3 +1,7 @@
+# Refactor via kustomize https://kustomize.io/
+
+image-tag := `git branch --show-current`
+
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yaml
 
@@ -8,9 +12,9 @@ setup-env: install-kind create-kind-cluster
 
 # Vanilla
 
-build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image delete-cloudbeat deploy-cloudbeat
+build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
-build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image delete-cloudbeat-debug deploy-cloudbeat-debug
+build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat-debug
 
 load-cloudbeat-image:
   kind load docker-image cloudbeat:latest --name kind-mono
@@ -19,13 +23,13 @@ build-cloudbeat:
   GOOS=linux go build -v && docker build -t cloudbeat .
 
 deploy-cloudbeat:
-  kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
+  kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
 
 build-cloudbeat-debug:
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 deploy-cloudbeat-debug:
-   kubectl apply -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system
+   kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system
 
 delete-cloudbeat:
   kubectl delete -f deploy/k8s/cloudbeat-ds.yaml -n kube-system
@@ -36,13 +40,10 @@ delete-cloudbeat-debug:
 
 # EKS
 
-build-deploy-eks-cloudbeat: login-aws build-cloudbeat publish-image-to-ecr delete-eks-cloudbeat deploy-eks-cloudbeat
-
-login-aws:
-  aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 704479110758.dkr.ecr.us-east-2.amazonaws.com
+build-deploy-eks-cloudbeat: build-cloudbeat publish-image-to-ecr deploy-eks-cloudbeat
 
 publish-image-to-ecr:
-  docker tag cloudbeat:latest 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest & docker push 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest
+  aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 704479110758.dkr.ecr.us-east-2.amazonaws.com & docker tag cloudbeat 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:{{image-tag}} & docker push 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:{{image-tag}}
 
 deploy-eks-cloudbeat:
   kubectl delete -f deploy/eks/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/eks/cloudbeat-ds.yaml -n kube-system
@@ -92,7 +93,10 @@ load-pytest-kind:
   kind load docker-image cloudbeat-test:latest --name kind-mono
 
 deploy-tests-helm:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/ 
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+
+deploy-local-tests-helm:
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 purge-tests:
 	helm del {{TESTS_RELEASE}} -n kube-system
