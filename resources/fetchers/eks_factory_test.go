@@ -19,38 +19,51 @@ package fetchers
 
 import (
 	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
-const (
-	FileSystemType = "file-system"
-)
-
-func init() {
-	manager.Factories.ListFetcherFactory(FileSystemType, &FileSystemFactory{})
+type EksFactoryTestSuite struct {
+	suite.Suite
+	factory fetching.Factory
 }
 
-type FileSystemFactory struct {
+func TestEksFactoryTestSuite(t *testing.T) {
+	suite.Run(t, new(EksFactoryTestSuite))
 }
 
-func (f *FileSystemFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	cfg := FileFetcherConfig{}
-	err := c.Unpack(&cfg)
-	if err != nil {
-		return nil, err
+func (s *EksFactoryTestSuite) SetupTest() {
+
+}
+
+func (s *EksFactoryTestSuite) TestCreateFetcher() {
+	var tests = []struct {
+		config string
+	}{
+		{
+			`
+name: aws-eks
+`,
+		},
 	}
 
-	return f.CreateFrom(cfg)
-}
+	for _, test := range tests {
+		eksProvider := &awslib.MockedEksClusterDescriber{}
+		factory := &EKSFactory{extraElements: func() (eksExtraElements, error) {
+			return eksExtraElements{eksProvider: eksProvider}, nil
+		}}
 
-func (f *FileSystemFactory) CreateFrom(cfg FileFetcherConfig) (fetching.Fetcher, error) {
-	fe := &FileSystemFetcher{
-		cfg: cfg,
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		fetcher, err := factory.Create(cfg)
+		s.NoError(err)
+		s.NotNil(fetcher)
+
+		eksFetcher, ok := fetcher.(*EKSFetcher)
+		s.True(ok)
+		s.Equal(eksProvider, eksFetcher.eksProvider)
 	}
-
-	logp.L().Infof("File-System Fetcher created with the following config:"+
-		"\n Name: %s\nPatterns: %s", cfg.Name, cfg.Patterns)
-	return fe, nil
 }

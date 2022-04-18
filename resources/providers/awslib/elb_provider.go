@@ -15,15 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package awslib
 
 import (
 	"context"
 	"fmt"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
+
+type ELBLoadBalancerDescriber interface {
+	DescribeLoadBalancer(ctx context.Context, balancersNames []string) ([]elasticloadbalancing.LoadBalancerDescription, error)
+}
 
 type ELBProvider struct {
 	client *elasticloadbalancing.Client

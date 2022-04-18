@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package awslib
 
 import (
 	"context"
@@ -26,6 +26,10 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/logp"
 )
+
+type IAMRolePermissionGetter interface {
+	GetIAMRolePermissions(ctx context.Context, roleName string) (interface{}, error)
+}
 
 type IAMProvider struct {
 	client *iam.Client

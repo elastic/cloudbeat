@@ -19,38 +19,53 @@ package fetchers
 
 import (
 	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
-const (
-	FileSystemType = "file-system"
-)
-
-func init() {
-	manager.Factories.ListFetcherFactory(FileSystemType, &FileSystemFactory{})
+type IamFactoryTestSuite struct {
+	suite.Suite
+	factory fetching.Factory
 }
 
-type FileSystemFactory struct {
+func TestIamFactoryTestSuite(t *testing.T) {
+	suite.Run(t, new(IamFactoryTestSuite))
 }
 
-func (f *FileSystemFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	cfg := FileFetcherConfig{}
-	err := c.Unpack(&cfg)
-	if err != nil {
-		return nil, err
+func (s *IamFactoryTestSuite) SetupTest() {
+
+}
+
+func (s *IamFactoryTestSuite) TestCreateFetcher() {
+	var tests = []struct {
+		config string
+	}{
+		{
+			`
+name: aws-iam
+`,
+		},
 	}
 
-	return f.CreateFrom(cfg)
-}
+	for _, test := range tests {
+		iamProvider := &awslib.MockedIAMRolePermissionGetter{}
+		factory := &IAMFactory{extraElements: func() (IAMExtraElements, error) {
+			return IAMExtraElements{
+				iamProvider: iamProvider,
+			}, nil
+		}}
 
-func (f *FileSystemFactory) CreateFrom(cfg FileFetcherConfig) (fetching.Fetcher, error) {
-	fe := &FileSystemFetcher{
-		cfg: cfg,
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		fetcher, err := factory.Create(cfg)
+		s.NoError(err)
+		s.NotNil(fetcher)
+
+		iamFetcher, ok := fetcher.(*IAMFetcher)
+		s.True(ok)
+		s.Equal(iamProvider, iamFetcher.iamProvider)
 	}
-
-	logp.L().Infof("File-System Fetcher created with the following config:"+
-		"\n Name: %s\nPatterns: %s", cfg.Name, cfg.Patterns)
-	return fe, nil
 }
