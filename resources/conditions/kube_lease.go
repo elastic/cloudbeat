@@ -44,21 +44,19 @@ func NewLeaderLeaseProvider(ctx context.Context, client kubernetes.Interface) Le
 }
 
 func (l *leaseProvider) IsLeader() (bool, error) {
-	leases, err := l.client.CoordinationV1().Leases("kube-system").List(l.ctx, v1.ListOptions{})
+	lease, err := l.client.CoordinationV1().Leases("kube-system").Get(l.ctx, DefaultLeaderLeaseName, v1.GetOptions{})
 	if err != nil {
 		return DefaultLeaderValue, err
 	}
 
-	for _, lease := range leases.Items {
-		if lease.Name == DefaultLeaderLeaseName {
-			podid := lastPart(*lease.Spec.HolderIdentity)
+	if lease.Name == DefaultLeaderLeaseName {
+		podid := lastPart(*lease.Spec.HolderIdentity)
 
-			if podid == l.currentPodID() {
-				return true, nil
-			}
-
-			return false, nil
+		if podid == l.currentPodID() {
+			return true, nil
 		}
+
+		return false, nil
 	}
 
 	return DefaultLeaderValue, fmt.Errorf("could not find lease %v in Kube leases", DefaultLeaderLeaseName)
