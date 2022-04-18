@@ -19,16 +19,16 @@ package fetchers
 
 import (
 	"context"
+	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const EKSType = "aws-eks"
-
 type EKSFetcher struct {
 	cfg         EKSFetcherConfig
-	eksProvider *EKSProvider
+	eksProvider awslib.EksClusterDescriber
 }
 
 type EKSFetcherConfig struct {
@@ -40,16 +40,9 @@ type EKSResource struct {
 	*eks.DescribeClusterResponse
 }
 
-func NewEKSFetcher(awsCfg AwsFetcherConfig, cfg EKSFetcherConfig) (fetching.Fetcher, error) {
-	eks := NewEksProvider(awsCfg.Config)
-
-	return &EKSFetcher{
-		cfg:         cfg,
-		eksProvider: eks,
-	}, nil
-}
-
 func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.L().Debug("eks fetcher starts to fetch data")
+
 	results := make([]fetching.Resource, 0)
 
 	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)
@@ -61,7 +54,7 @@ func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 func (f EKSFetcher) Stop() {
 }
 
-//TODO: Add resource id logic to all AWS resources
+// GetID TODO: Add resource id logic to all AWS resources
 func (r EKSResource) GetID() (string, error) {
 	return "", nil
 }

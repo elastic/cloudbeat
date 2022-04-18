@@ -53,6 +53,7 @@ type FileFetcherConfig struct {
 }
 
 func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.L().Debug("file fetcher starts to fetch data")
 	results := make([]fetching.Resource, 0)
 
 	// Input files might contain glob pattern

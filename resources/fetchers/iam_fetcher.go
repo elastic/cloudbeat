@@ -19,14 +19,14 @@ package fetchers
 
 import (
 	"context"
+	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const IAMType = "aws-iam"
-
 type IAMFetcher struct {
-	iamProvider *IAMProvider
+	iamProvider awslib.IAMRolePermissionGetter
 	cfg         IAMFetcherConfig
 }
 
@@ -39,16 +39,8 @@ type IAMResource struct {
 	Data interface{}
 }
 
-func NewIAMFetcher(awsCfg AwsFetcherConfig, cfg IAMFetcherConfig) (fetching.Fetcher, error) {
-	iam := NewIAMProvider(awsCfg.Config)
-
-	return &IAMFetcher{
-		cfg:         cfg,
-		iamProvider: iam,
-	}, nil
-}
-
 func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	logp.L().Debug("iam fetcher starts to fetch data")
 	results := make([]fetching.Resource, 0)
 
 	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
@@ -60,7 +52,7 @@ func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 func (f IAMFetcher) Stop() {
 }
 
-//TODO: Add resource id logic to all AWS resources
+// GetID TODO: Add resource id logic to all AWS resources
 func (r IAMResource) GetID() (string, error) {
 	return "", nil
 }
