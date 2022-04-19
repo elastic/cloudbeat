@@ -19,7 +19,7 @@ jobs:
           ./opa -h
 
       - name: OPA Bundle
-      - run: |
+        run: |
           build -b . -e ./compliance
 
       - name: OPA test coverage
