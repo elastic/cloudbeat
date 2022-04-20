@@ -1,7 +1,6 @@
 metadata:
-  id: 4dbe7add-e373-5280-84e4-6fdf80409b8e
-  name: Ensure that the --tls-cert-file and --tls-private-key-file arguments are
-    set as appropriate (Automated)
+  id: 793081ed-18f0-5c3f-a785-0eca54085fb9
+  name: Ensure that the --client-ca-file argument is set as appropriate (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
@@ -9,29 +8,29 @@ metadata:
   rationale: >
     API server communication contains sensitive parameters that should remain
     encrypted in transit. Configure the API server to serve only HTTPS traffic.
+    If `--client-ca-file` argument is set, any request presenting a client
+    certificate signed by one of the authorities in the `client-ca-file` is
+    authenticated with an identity corresponding to the CommonName of the client
+    certificate.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--tls-cert-file` and `--tls-private-key-file` arguments exist and they
-    are set as appropriate.
+    Verify that the `--client-ca-file` argument exists and it is set as appropriate.
   remediation: |
     Follow the Kubernetes documentation and set up the TLS connection on the
     apiserver.
     Then, edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the TLS certificate and private key file
-    parameters.
+    on the master node and set the client certificate authority file.
     ```
-    --tls-cert-file=<path/to/tls-certificate-file>
-    --tls-private-key-file=<path/to/tls-key-file>
+    --client-ca-file=<path/to/client-ca-file>
     ```
   impact: >
     TLS and client certificate authentication must be configured for your
     Kubernetes cluster deployment.
-  default_value: >
-    By default, `--tls-cert-file` and `--tls-private-key-file` arguments are not
-    set.
+  default_value: |
+    By default, `--client-ca-file` argument is not set.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
     2. [http://rootsquash.com/2016/05/10/securing-the-kubernetes-api/](http://rootsquash.com/2016/05/10/securing-the-kubernetes-api/)

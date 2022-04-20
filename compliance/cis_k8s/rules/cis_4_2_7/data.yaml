@@ -1,5 +1,5 @@
 metadata:
-  id: 64762605-406e-5801-8953-77f3447eff31
+  id: 3a597763-43d1-5cd9-824e-ed1e65fd3988
   name: Ensure that the --make-iptables-util-chains argument is set to true
     (Automated)
   profile_applicability: |

@@ -1,30 +1,30 @@
 metadata:
-  id: a8baf73d-849a-56d9-98f9-2bed9cc92875
-  name:
-    Ensure that the --audit-log-maxage argument is set to 30 or as appropriate
-    (Automated)
+  id: d38c12e3-ea42-5104-95be-b02fe0751193
+  name: Ensure that the --audit-log-maxbackup argument is set to 10 or as
+    appropriate (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Retain the logs for at least 30 days or as appropriate.
+    Retain 10 or an appropriate number of old log files.
   rationale: >
-    Retaining logs for at least 30 days ensures that you can go back in time and
-    investigate or
-    correlate any events. Set your audit log retention period to 30 days or as per your business
-    requirements.
+    Kubernetes automatically rotates the log files. Retaining old log files
+    ensures that you would have sufficient log data available for carrying out
+    any investigation or correlation. For example, if you have set file size of
+    100 MB and the number of old log files to keep as 10, you would approximate
+    have 1 GB of log data that you could potentially use for your analysis.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--audit-log-maxage` argument is set to `30` or as appropriate.
+    Verify that the `--audit-log-maxbackup` argument is set to `10` or as appropriate.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the `--audit-log-maxage` parameter to 30 or
-    as an appropriate number of days:
+    on the master node and set the `--audit-log-maxbackup` parameter to 10
+    or to an appropriate value.
     ```
-    --audit-log-maxage=30
+    --audit-log-maxbackup=10
     ```
   impact: |
     None

@@ -1,6 +1,6 @@
 metadata:
-  id: 6e903b52-eeed-5abf-9ead-24b6d309681e
-  name: Minimize the admission of containers with added capabilities (Manual)
+  id: ad6d4076-950a-5349-8951-d7148f886b22
+  name: Minimize the admission of containers with added capabilities (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: >

@@ -1,37 +1,36 @@
 metadata:
-  id: ee6dc700-33d2-5799-91cb-fa397106db2d
-  name: Ensure that the --basic-auth-file argument is not set (Automated)
+  id: 06391584-8964-5a71-9243-55396a3a01e7
+  name: Ensure that the --token-auth-file parameter is not set (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Do not use basic authentication.
+    Do not use token based authentication.
   rationale: >
-    Basic authentication uses plaintext credentials for authentication.
-    Currently, the basic authentication credentials last indefinitely, and the
-    password cannot be changed without restarting the API server. The basic
-    authentication is currently supported for convenience. Hence, basic
-    authentication should not be used.
+    The token-based authentication utilizes static tokens to authenticate
+    requests to the apiserver. The tokens are stored in clear-text in a file on
+    the apiserver, and cannot be revoked or rotated without restarting the
+    apiserver. Hence, do not use static token-based authentication.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--basic-auth-file` argument does not exist.
+    Verify that the `--token-auth-file` argument does not exist.
   remediation: |
     Follow the documentation and configure alternate mechanisms for
     authentication. Then,
-    edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml`
-    on the master node and remove the `--basic-auth-file=<filename>`
+    edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    on the master node and remove the `--token-auth-file=<filename>`
     parameter.
   impact: >
     You will have to configure and use alternate authentication mechanisms such
-    as tokens and certificates. Username and password for basic authentication
-    could no longer be used.
+    as
+    certificates. Static token based authentication could not be used.
   default_value: |
-    By default, basic authentication is not set.
+    By default, `--token-auth-file` argument is not set.
   references: |
-    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://kubernetes.io/docs/admin/authentication/#static-password-file](https://kubernetes.io/docs/admin/authentication/#static-password-file)
+    1. [https://kubernetes.io/docs/admin/authentication/#static-token-file](https://kubernetes.io/docs/admin/authentication/#static-token-file)
+    2. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
   section: API Server
   version: "1.0"
   tags:

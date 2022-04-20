@@ -1,32 +1,36 @@
 metadata:
-  id: 0cda5474-0196-500b-b349-8cddf1c8adea
-  name: Ensure that the --secure-port argument is not set to 0 (Automated)
+  id: c24bf963-7d41-5b4f-9724-c53133a6d495
+  name: Ensure that the --profiling argument is set to false (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Do not disable the secure port.
+    Disable profiling, if not needed.
   rationale: >
-    The secure port is used to serve https with authentication and
-    authorization. If you disable it, no https traffic is served and all traffic
-    is served unencrypted.
+    Profiling allows for the identification of specific performance bottlenecks.
+    It generates a significant amount of program data that could potentially be
+    exploited to uncover system and program details. If you are not experiencing
+    any bottlenecks and do not need the profiler for troubleshooting purposes,
+    it is recommended to turn it off to reduce the potential attack surface.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--secure-port` argument is either not set or is set to an integer value
-    between 1 and 65535.
+    Verify that the `--profiling` argument is set to `false`.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and either remove the `--secure-port` parameter or
-    set it to a different (non-zero) desired port.
+    on the master node and set the below parameter.
+    ```
+    --profiling=false
+    ```
   impact: |
-    You need to set the API Server up with the right TLS certificates.
+    Profiling information would not be available.
   default_value: |
-    By default, port 6443 is used as the secure port.
+    By default, profiling is enabled.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+    2. [https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md](https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md)
   section: API Server
   version: "1.0"
   tags:

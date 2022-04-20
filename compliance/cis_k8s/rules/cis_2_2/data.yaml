@@ -1,5 +1,5 @@
 metadata:
-  id: fe303e19-4f10-5613-88e2-563a40282ea6
+  id: a9eab1dd-a3f4-54e6-af40-7e5d61542ec6
   name: Ensure that the --client-cert-auth argument is set to true (Automated)
   profile_applicability: |
     * Level 1 - Master Node

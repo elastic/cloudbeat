@@ -1,5 +1,5 @@
 metadata:
-  id: 02ec3af8-bd6d-58a3-857f-39b5744c6428
+  id: e04fb8ba-dba6-59d2-b3dc-c4906b37f0a7
   name:
     Ensure that the etcd pod specification file permissions are set to 644 or
     more restrictive (Automated)

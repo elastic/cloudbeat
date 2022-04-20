@@ -1,5 +1,5 @@
 metadata:
-  id: 0667965a-8c0f-5cce-9ba7-9e6e24064802
+  id: b6e29513-63fc-5a5f-9443-e4761b16f484
   name: Ensure that the --service-account-private-key-file argument is set as
     appropriate (Automated)
   profile_applicability: |

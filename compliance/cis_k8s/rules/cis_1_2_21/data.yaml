@@ -1,36 +1,40 @@
 metadata:
-  id: 3a6adba9-dd4d-562c-a861-60eee7309f07
-  name: Ensure that the --profiling argument is set to false (Automated)
+  id: 8c7d61f2-700a-5822-8f6b-e36ad193f83e
+  name: Ensure that the --audit-log-path argument is set (Automated)
   profile_applicability: |
     * Level 1 - Master Node
-  description: |
-    Disable profiling, if not needed.
+  description: >
+    Enable auditing on the Kubernetes API Server and set the desired audit log
+    path.
   rationale: >
-    Profiling allows for the identification of specific performance bottlenecks.
-    It generates a significant amount of program data that could potentially be
-    exploited to uncover system and program details. If you are not experiencing
-    any bottlenecks and do not need the profiler for troubleshooting purposes,
-    it is recommended to turn it off to reduce the potential attack surface.
+    Auditing the Kubernetes API Server provides a security-relevant
+    chronological set of records documenting the sequence of activities that
+    have affected system by individual users, administrators or other components
+    of the system. Even though currently, Kubernetes provides only basic audit
+    capabilities, it should be enabled. You can enable it by setting an
+    appropriate audit log path.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--profiling` argument is set to `false`.
+    Verify that the `--audit-log-path` argument is set as appropriate.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the below parameter.
+    on the master node and set the `--audit-log-path` parameter to a suitable
+    path and file where you would like audit logs to be written, for example:
     ```
-    --profiling=false
+    --audit-log-path=/var/log/apiserver/audit.log
     ```
   impact: |
-    Profiling information would not be available.
+    None
   default_value: |
-    By default, profiling is enabled.
+    By default, auditing is not enabled.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md](https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md)
+    2. [https://kubernetes.io/docs/concepts/cluster-administration/audit/](https://kubernetes.io/docs/concepts/cluster-administration/audit/)
+    3. [https://github.com/kubernetes/features/issues/22](https://github.com/kubernetes/features/issues/22)
   section: API Server
   version: "1.0"
   tags:

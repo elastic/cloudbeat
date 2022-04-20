@@ -1,5 +1,5 @@
 metadata:
-  id: ce7229b5-4d39-5859-89ba-cd5e64a5814b
+  id: 01889b3d-1c3b-5fe6-9a0f-d512016e05e8
   name: Ensure that the --peer-client-cert-auth argument is set to true (Automated)
   profile_applicability: |
     * Level 1 - Master Node

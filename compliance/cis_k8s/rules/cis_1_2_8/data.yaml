@@ -1,37 +1,35 @@
 metadata:
-  id: cf8b515a-8a14-58c7-acee-57d61d3bb7b0
-  name: Ensure that the --authorization-mode argument includes Node (Automated)
+  id: d0711b87-897e-53b0-9cbf-64da523046ad
+  name: Ensure that the --authorization-mode argument includes RBAC (Automated)
   profile_applicability: |
-    * Level 1 - Master Node
+    • Level 1 - Master Node
   description: |
-    Restrict kubelet nodes to reading only objects associated with them.
+    Turn on Role Based Access Control.
   rationale: >
-    The `Node` authorization mode only allows kubelets to read `Secret`,
-    `ConfigMap`, `PersistentVolume`, and `PersistentVolumeClaim` objects
-    associated with their nodes.
+    Role Based Access Control (RBAC) allows fine-grained control over the
+    operations that
+    different entities can perform on different objects in the cluster. It is recommended to use
+    the RBAC authorization mode.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--authorization-mode` argument exists and is set to a value to include `Node`.
+    Verify that the `--authorization-mode` argument exists and is set to a value to include `RBAC`.
   remediation: |
-    Edit the API server pod specification file
-    `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    Edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml
     on the master node and set the `--authorization-mode` parameter to a
-    value that includes `Node`.
+    value that includes `RBAC`, for example:
     ```
     --authorization-mode=Node,RBAC
     ```
-  impact: |
-    None
+  impact: >
+    When RBAC is enabled you will need to ensure that appropriate RBAC settings
+    (including Roles, RoleBindings and ClusterRoleBindings) are configured to allow appropriate access.
   default_value: |
-    By default, `Node` authorization is not enabled.
+    By default, `RBAC` authorization is not enabled.
   references: |
-    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://kubernetes.io/docs/admin/authorization/node/](https://kubernetes.io/docs/admin/authorization/node/)
-    3. [https://github.com/kubernetes/kubernetes/pull/46076](https://github.com/kubernetes/kubernetes/pull/46076)
-    4. [https://acotten.com/post/kube17-security](https://acotten.com/post/kube17-security)
+    1. [https://kubernetes.io/docs/reference/access-authn-authz/rbac/](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
   section: API Server
   version: "1.0"
   tags:

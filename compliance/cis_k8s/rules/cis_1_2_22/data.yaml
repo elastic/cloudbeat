@@ -1,31 +1,30 @@
 metadata:
-  id: dbea59ce-10c6-5cfe-a223-8e8aa5996730
-  name: Ensure that the --audit-log-path argument is set (Automated)
+  id: 26238d57-74fd-52a4-af97-7bb8ff60f0b3
+  name:
+    Ensure that the --audit-log-maxage argument is set to 30 or as appropriate
+    (Automated)
   profile_applicability: |
     * Level 1 - Master Node
-  description: >
-    Enable auditing on the Kubernetes API Server and set the desired audit log
-    path.
+  description: |
+    Retain the logs for at least 30 days or as appropriate.
   rationale: >
-    Auditing the Kubernetes API Server provides a security-relevant
-    chronological set of records documenting the sequence of activities that
-    have affected system by individual users, administrators or other components
-    of the system. Even though currently, Kubernetes provides only basic audit
-    capabilities, it should be enabled. You can enable it by setting an
-    appropriate audit log path.
+    Retaining logs for at least 30 days ensures that you can go back in time and
+    investigate or
+    correlate any events. Set your audit log retention period to 30 days or as per your business
+    requirements.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--audit-log-path` argument is set as appropriate.
+    Verify that the `--audit-log-maxage` argument is set to `30` or as appropriate.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the `--audit-log-path` parameter to a suitable
-    path and file where you would like audit logs to be written, for example:
+    on the master node and set the `--audit-log-maxage` parameter to 30 or
+    as an appropriate number of days:
     ```
-    --audit-log-path=/var/log/apiserver/audit.log
+    --audit-log-maxage=30
     ```
   impact: |
     None

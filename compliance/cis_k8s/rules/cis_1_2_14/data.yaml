@@ -1,36 +1,36 @@
 metadata:
-  id: 554702a0-63bf-500f-ae7a-c73ff746c15f
-  name: Ensure that the admission control plugin ServiceAccount is set (Automated)
+  id: 554a999e-c11a-5c1c-aa53-2badd123c122
+  name: Ensure that the admission control plugin NamespaceLifecycle is set
+    (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Automate service accounts management.
+    Reject creating objects in a namespace that is undergoing termination.
   rationale: >
-    When you create a pod, if you do not specify a service account, it is
-    automatically assigned the default service account in the same namespace.
-    You should create your own service account and let the API server manage its
-    security tokens.
+    Setting admission control policy to `NamespaceLifecycle` ensures that
+    objects cannot be created in non-existent namespaces, and that namespaces
+    undergoing termination are not used for creating the new objects. This is
+    recommended to enforce the integrity of the namespace termination process
+    and also for the availability of the newer objects.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
     Verify that the `--disable-admission-plugins` argument is set to a value that does not
-    includes `ServiceAccount`.
+    include `NamespaceLifecycle`.
   remediation: |
-    Follow the documentation and create `ServiceAccount` objects as per your
-    environment.
-    Then, edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and ensure that the `--disable-admission-plugins`
-    parameter is set to a value that does not include `ServiceAccount`.
+    Edit the API server pod specification file
+    `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    on the master node and set the `--disable-admission-plugins` parameter
+    to ensure it does not include `NamespaceLifecycle`.
   impact: |
-    None.
+    None
   default_value: |
-    By default, `ServiceAccount` is set.
+    By default, `NamespaceLifecycle` is set.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://kubernetes.io/docs/admin/admission-controllers/#serviceaccount](https://kubernetes.io/docs/admin/admission-controllers/#serviceaccount)
-    3. [https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
+    2. [https://kubernetes.io/docs/admin/admission-controllers/#namespacelifecycle](https://kubernetes.io/docs/admin/admission-controllers/#namespacelifecycle)
   section: API Server
   version: "1.0"
   tags:

@@ -1,5 +1,5 @@
 metadata:
-  id: e76bec57-8d79-5222-a764-7b92940a142e
+  id: 9179f7df-2e49-5a05-9a49-0e41d806ce07
   name: Ensure that the scheduler.conf file ownership is set to root:root (Automated)
   profile_applicability: |
     * Level 1 - Master Node

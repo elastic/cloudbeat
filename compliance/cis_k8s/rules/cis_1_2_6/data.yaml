@@ -1,44 +1,35 @@
 metadata:
-  id: 6ad764be-71a5-54cf-92fc-30c4f995fdd6
-  name: Ensure that the --kubelet-certificate-authority argument is set as
-    appropriate (Automated)
+  id: 8590255b-1409-512d-832b-a9d88804bf03
+  name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
+    (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Verify kubelet's certificate before establishing connection.
+    Do not always authorize all requests.
   rationale: >
-    The connections from the apiserver to the kubelet are used for fetching logs
-    for pods, attaching (through kubectl) to running pods, and using the
-    kubelet's port-forwarding functionality. These connections terminate at the
-    kubelet's HTTPS endpoint. By default, the apiserver does not verify the
-    kubelet's serving certificate, which makes the connection subject to
-    man-in-the-middle attacks, and unsafe to run over untrusted and/or public
-    networks.
+    The API Server, can be configured to allow all requests. This mode should
+    not be used on any production cluster.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--kubelet-certificate-authority` argument exists and is set as
-    appropriate.
+    Verify that the `--authorization-mode` argument exists and is not set to `AlwaysAllow`.
   remediation: |
-    Follow the Kubernetes documentation and setup the TLS connection between the
-    apiserver
-    and kubelets. Then, edit the API server pod specification file
-    `/etc/kubernetes/manifests/kube-apiserver.yaml` on the master node and set the 
-    `--kubelet-certificate-authority` parameter to the path to the cert file for the certificate
-    authority.
+    Edit the API server pod specification file
+    `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    on the master node and set the `--authorization-mode` parameter to
+    values other than `AlwaysAllow`. One such example could be as below.
     ```
-    --kubelet-certificate-authority=<ca-string>
+    --authorization-mode=RBAC
     ```
   impact: |
-    You require TLS to be configured on apiserver as well as kubelets.
+    Only authorized requests will be served.
   default_value: |
-    By default, `--kubelet-certificate-authority` argument is not set.
+    By default, `AlwaysAllow` is not enabled.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://kubernetes.io/docs/admin/kubelet-authentication-authorization/](https://kubernetes.io/docs/admin/kubelet-authentication-authorization/)
-    3. [https://kubernetes.io/docs/concepts/cluster-administration/master-node-communication/#apiserver---kubelet](https://kubernetes.io/docs/concepts/cluster-administration/master-node-communication/#apiserver---kubelet)
+    2. [https://kubernetes.io/docs/admin/authorization/](https://kubernetes.io/docs/admin/authorization/)
   section: API Server
   version: "1.0"
   tags:

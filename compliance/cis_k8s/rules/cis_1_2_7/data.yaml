@@ -1,35 +1,37 @@
 metadata:
-  id: ef206c48-d83d-5f01-9fea-019b67724f8f
-  name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
-    (Automated)
+  id: 45028365-2b48-5237-9ece-9804dcf536e8
+  name: Ensure that the --authorization-mode argument includes Node (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Do not always authorize all requests.
+    Restrict kubelet nodes to reading only objects associated with them.
   rationale: >
-    The API Server, can be configured to allow all requests. This mode should
-    not be used on any production cluster.
+    The `Node` authorization mode only allows kubelets to read `Secret`,
+    `ConfigMap`, `PersistentVolume`, and `PersistentVolumeClaim` objects
+    associated with their nodes.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--authorization-mode` argument exists and is not set to `AlwaysAllow`.
+    Verify that the `--authorization-mode` argument exists and is set to a value to include `Node`.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the `--authorization-mode` parameter to
-    values other than `AlwaysAllow`. One such example could be as below.
+    on the master node and set the `--authorization-mode` parameter to a
+    value that includes `Node`.
     ```
-    --authorization-mode=RBAC
+    --authorization-mode=Node,RBAC
     ```
   impact: |
-    Only authorized requests will be served.
+    None
   default_value: |
-    By default, `AlwaysAllow` is not enabled.
+    By default, `Node` authorization is not enabled.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://kubernetes.io/docs/admin/authorization/](https://kubernetes.io/docs/admin/authorization/)
+    2. [https://kubernetes.io/docs/admin/authorization/node/](https://kubernetes.io/docs/admin/authorization/node/)
+    3. [https://github.com/kubernetes/kubernetes/pull/46076](https://github.com/kubernetes/kubernetes/pull/46076)
+    4. [https://acotten.com/post/kube17-security](https://acotten.com/post/kube17-security)
   section: API Server
   version: "1.0"
   tags:

@@ -1,5 +1,5 @@
 metadata:
-  id: d24877cb-9be2-560b-af7f-048e4403f0de
+  id: 905adab5-b2a6-587e-b67f-bb21c7853e9e
   name: Ensure that the Kubernetes PKI directory and file ownership is set to
     root:root (Automated)
   profile_applicability: |

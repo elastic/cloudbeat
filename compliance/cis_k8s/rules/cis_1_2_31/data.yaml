@@ -1,40 +1,38 @@
 metadata:
-  id: dc418fc4-c306-5470-9d0e-f6ea5466a3d2
-  name: Ensure that the --client-ca-file argument is set as appropriate (Automated)
+  id: 5b436829-b78a-5758-964e-7cf1b5db1008
+  name: Ensure that the --etcd-cafile argument is set as appropriate (Automated)
   profile_applicability: |
-    * Level 1 - Master Node
-  description: |
-    Setup TLS connection on the API server.
+    • Level 1 - Master Node
+  description: >
+    etcd should be configured to make use of TLS encryption for client
+    connections.
   rationale: >
-    API server communication contains sensitive parameters that should remain
-    encrypted in transit. Configure the API server to serve only HTTPS traffic.
-    If `--client-ca-file` argument is set, any request presenting a client
-    certificate signed by one of the authorities in the `client-ca-file` is
-    authenticated with an identity corresponding to the CommonName of the client
-    certificate.
+    etcd is a highly-available key value store used by Kubernetes deployments
+    for persistent
+    storage of all of its REST API objects. These objects are sensitive in nature and should be
+    protected by client authentication. This requires the API server to identify itself to the etcd
+    server using a SSL Certificate Authority file.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--client-ca-file` argument exists and it is set as appropriate.
+    Verify that the `--etcd-cafile` argument exists and it is set as appropriate.
   remediation: |
-    Follow the Kubernetes documentation and set up the TLS connection on the
-    apiserver.
-    Then, edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the client certificate authority file.
+    Follow the Kubernetes documentation and set up the TLS connection between
+    the apiserver and etcd. Then, edit the API server pod specification file
+    `/etc/kubernetes/manifests/kube-apiserver.yaml` on the master node and set the etcd
+    certificate authority file parameter.
     ```
-    --client-ca-file=<path/to/client-ca-file>
+    --etcd-cafile=<path/to/ca-file>
     ```
-  impact: >
-    TLS and client certificate authentication must be configured for your
-    Kubernetes cluster deployment.
+  impact: |
+    TLS and client certificate authentication must be configured for etcd.
   default_value: |
-    By default, `--client-ca-file` argument is not set.
+    By default, `--etcd-cafile` is not set.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [http://rootsquash.com/2016/05/10/securing-the-kubernetes-api/](http://rootsquash.com/2016/05/10/securing-the-kubernetes-api/)
-    3. [https://github.com/kelseyhightower/docker-kubernetes-tls-guide](https://github.com/kelseyhightower/docker-kubernetes-tls-guide)
+    2. [https://coreos.com/etcd/docs/latest/op-guide/security.html](https://coreos.com/etcd/docs/latest/op-guide/security.html)
   section: API Server
   version: "1.0"
   tags:

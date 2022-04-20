@@ -1,6 +1,6 @@
 metadata:
-  id: 4bda85d1-1952-5633-a723-ef94f74a0c01
-  name: Minimize the admission of root containers (Manual)
+  id: 7e122766-328d-58f2-94d5-990b1521c366
+  name: Minimize the admission of root containers (Automated)
   profile_applicability: |
     * Level 2 - Master Node
   description: |

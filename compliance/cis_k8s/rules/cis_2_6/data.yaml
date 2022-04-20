@@ -1,5 +1,5 @@
 metadata:
-  id: 768e492d-212e-5714-b4ec-f36349b34d8c
+  id: cef9ccbc-fa05-5fd5-b55b-c8d3ff21ab9b
   name: Ensure that the --peer-auto-tls argument is not set to true (Automated)
   profile_applicability: |
     * Level 1 - Master Node

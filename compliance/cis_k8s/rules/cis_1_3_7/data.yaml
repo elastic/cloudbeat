@@ -1,5 +1,5 @@
 metadata:
-  id: 806841fe-40f7-556c-9589-acc4c62ea075
+  id: 630b0709-ea2a-5cea-8cb3-14fa160be415
   name: Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)
   profile_applicability: |
     * Level 1 - Master Node

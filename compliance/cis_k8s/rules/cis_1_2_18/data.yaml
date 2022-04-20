@@ -1,32 +1,36 @@
 metadata:
-  id: 40fe9500-a770-533b-9db1-f584385c8c5e
-  name: Ensure that the --insecure-bind-address argument is not set (Automated)
+  id: 50ae51db-6bd4-5b20-92c9-fe83fed7efa5
+  name: Ensure that the --insecure-port argument is set to 0 (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Do not bind the insecure API service.
+    Do not bind to insecure port.
   rationale: >
-    If you bind the apiserver to an insecure address, basically anyone who could
-    connect to it over the insecure port, would have unauthenticated and
-    unencrypted access to your master node. The apiserver doesn't do any
-    authentication checking for insecure binds and traffic to the Insecure API
-    port is not encrpyted, allowing attackers to potentially read sensitive data
-    in transit.
+    Setting up the apiserver to serve on an insecure port would allow
+    unauthenticated and unencrypted access to your master node. This would allow
+    attackers who could access this port, to easily take control of the cluster.
   audit: |
     Run the following command on the master node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--insecure-bind-address` argument does not exist.
+    Verify that the `--insecure-port` argument is set to `0`.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and remove the `--insecure-bind-address`
-    parameter.
+    on the master node and set the below parameter.
+    ```
+    --insecure-port=0
+    ```
   impact: |
-    Connections to the API server will require valid authentication credentials.
+    All components that use the API must connect via the secured port,
+    authenticate themselves, and be authorized to use the API. This includes: 
+    * kube-controller-manager 
+    * kube-proxy 
+    * kube-scheduler 
+    * kubelets
   default_value: |
-    By default, the insecure bind address is not set.
+    By default, the insecure port is set to 8080.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
   section: API Server

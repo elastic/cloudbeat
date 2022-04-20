@@ -1,5 +1,5 @@
 metadata:
-  id: 2b17fa8d-8ec5-5f77-9555-f567cf67b317
+  id: ff5979ab-a8a2-59cf-bd5d-9710467cd26d
   name:
     Ensure that the controller-manager.conf file ownership is set to root:root
     (Automated)

@@ -1,5 +1,5 @@
 metadata:
-  id: 1c5bee8d-c2a8-52a5-bdb7-811d84f9fce1
+  id: a7934997-ab5f-5ca0-b33c-3b4cb7d6cdbc
   name:
     Ensure that the controller-manager.conf file permissions are set to 644 or
     more restrictive (Automated)

@@ -1,5 +1,5 @@
 metadata:
-  id: a91b8961-37d1-5759-a84f-45e9986df95c
+  id: 21da5544-410e-5958-9e8d-bb2e9ab02fe5
   name: Minimize the admission of containers with capabilities assigned (Manual)
   profile_applicability: |
     * Level 2 - Master Node

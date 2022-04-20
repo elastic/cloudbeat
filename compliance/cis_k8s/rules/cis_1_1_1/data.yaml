@@ -1,5 +1,5 @@
 metadata:
-  id: 59b5a77b-b090-5630-9a33-73eb805b2d52
+  id: cb037139-0ed6-55e7-a1fe-ef005a98a812
   name: Ensure that the API server pod specification file permissions are set to
     644 or more restrictive (Automated)
   profile_applicability: |

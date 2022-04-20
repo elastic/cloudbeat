@@ -1,5 +1,5 @@
 metadata:
-  id: 7c613860-b592-5dec-aeb7-9ce88958dabd
+  id: adaa6ec8-2099-5161-b776-647155687af0
   name: Ensure that the --root-ca-file argument is set as appropriate (Automated)
   profile_applicability: |
     * Level 1 - Master Node

@@ -1,5 +1,5 @@
 metadata:
-  id: d5ba56e3-b61f-52ad-a37b-de3a2cb90f79
+  id: 809615ab-5628-5f35-8935-96cb7b0be4a2
   name: Ensure that the kubelet service file ownership is set to root:root
     (Automated)
   profile_applicability: |
