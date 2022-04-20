@@ -46,6 +46,32 @@ func clean(fetcher fetching.Fetcher) func() {
 	}
 }
 
+// TODO: use go generics and unify these functions
+func RolesPtrMap(items []rbacv1.Role) []interface{} {
+	vsm := make([]interface{}, len(items))
+	for i, _ := range items {
+		vsm[i] = &items[i]
+	}
+	return vsm
+}
+
+func PodsPtrMap(items []v1.Pod) []interface{} {
+	vsm := make([]interface{}, len(items))
+	for i, _ := range items {
+		vsm[i] = &items[i]
+	}
+	return vsm
+}
+
+func Map(resources []fetching.Resource) []interface{} {
+	vsm := make([]interface{}, len(resources))
+	for i, v := range resources {
+		vsm[i] = v.GetData()
+	}
+	return vsm
+}
+
+// TODO: convert all tests to a single table test and use add more resource types
 func TestKubeFetcherFetchNoResources(t *testing.T) {
 	client := k8sfake.NewSimpleClientset()
 	provider := MockProvider(client)
@@ -91,8 +117,7 @@ func TestKubeFetcherFetchASinglePod(t *testing.T) {
 	assert.Nil(t, err, "Fetcher was not able to fetch kubernetes resources")
 
 	require.Equal(t, 1, len(results))
-	//assert.Equal(t, createdPod, results[0].GetData())
-	assert.Equal(t, &pod, results[0].GetData())
+	require.ElementsMatch(t, PodsPtrMap([]v1.Pod{pod}), Map(results))
 
 	t.Cleanup(clean(kubeFetcher))
 }
@@ -147,9 +172,7 @@ func TestKubeFetcherFetchTwoPods(t *testing.T) {
 	results, err := kubeFetcher.Fetch(context.TODO())
 	assert.Nil(t, err, "Fetcher was not able to fetch kubernetes resources")
 
-	require.Equal(t, 2, len(results))
-	assert.Equal(t, &(pods.Items[0]), results[0].GetData())
-	assert.Equal(t, &(pods.Items[1]), results[1].GetData())
+	require.ElementsMatch(t, PodsPtrMap(pods.Items), Map(results))
 
 	t.Cleanup(clean(kubeFetcher))
 }
@@ -205,10 +228,7 @@ func TestKubeFetcherFetchThreeRoles(t *testing.T) {
 	results, err := kubeFetcher.Fetch(context.TODO())
 	assert.Nil(t, err, "Fetcher was not able to fetch kubernetes resources")
 
-	require.Equal(t, 3, len(results))
-	assert.Equal(t, &(roles.Items[0]), results[0].GetData())
-	assert.Equal(t, &(roles.Items[1]), results[1].GetData())
-	assert.Equal(t, &(roles.Items[2]), results[2].GetData())
+	require.ElementsMatch(t, RolesPtrMap(roles.Items), Map(results))
 
 	t.Cleanup(clean(kubeFetcher))
 }
