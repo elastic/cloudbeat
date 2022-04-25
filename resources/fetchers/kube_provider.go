@@ -34,6 +34,7 @@ type K8sResource struct {
 const k8sObjMetadataField = "ObjectMeta"
 
 func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
+	logp.L().Info("Fetching Kubernetes data")
 	ret := make([]fetching.Resource, 0)
 
 	for _, watcher := range watchers {
@@ -58,6 +59,7 @@ func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
 		}
 	}
 
+	logp.L().Info("Fetched: %v", ret)
 	return ret
 }
 
