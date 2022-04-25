@@ -96,6 +96,8 @@ type KubeApiFetcherConfig struct {
 }
 
 func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) error {
+	f.cfg.Interval = time.Duration(time.Duration.Seconds(30)) // todo: hard coded - need to get from config
+
 	watcher, err := kubernetes.NewWatcher(client, r.resource, kubernetes.WatchOptions{
 		SyncTimeout: f.cfg.Interval,
 		Namespace:   r.namespace,
@@ -126,7 +128,7 @@ func (f *KubeFetcher) initWatchers() error {
 		return fmt.Errorf("could not get k8s client: %w", err)
 	}
 
-	logp.Info("Kubernetes client initiated.")
+	logp.L().Info("Kubernetes client initiated.")
 
 	f.watchers = make([]kubernetes.Watcher, 0)
 
@@ -137,7 +139,7 @@ func (f *KubeFetcher) initWatchers() error {
 		}
 	}
 
-	logp.Info("Kubernetes Watchers initiated.")
+	logp.L().Info("Kubernetes Watchers initiated.")
 
 	return nil
 }
