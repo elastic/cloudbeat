@@ -59,7 +59,6 @@ func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
 		}
 	}
 
-	logp.L().Info("Fetched: %v", ret)
 	return ret
 }
 
