@@ -172,18 +172,18 @@ rules:
       - events
       - pods
       - services
-      - configmaps
+      - serviceaccounts
     verbs: ["get", "list", "watch"]
-  # Enable this rule only if planing to use kubernetes_secrets provider
+  # Enable this rule only if planing to use Kubernetes keystore
   #- apiGroups: [""]
   #  resources:
   #  - secrets
   #  verbs: ["get"]
-  - apiGroups: ["extensions"]
+  - apiGroups: [ "extensions" ]
     resources:
       - replicasets
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["apps"]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "apps" ]
     resources:
       - statefulsets
       - deployments
@@ -199,11 +199,27 @@ rules:
       - nodes/stats
     verbs:
       - get
-  # required for apiserver
   - nonResourceURLs:
       - "/metrics"
     verbs:
       - get
+  - apiGroups: ["rbac.authorization.k8s.io/v1"]
+    resources:
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io/v1"]
+    resources:
+      - ingressclasses
+      - ingresses
+      - networkpolicies
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy/v1beta1"]
+    resources:
+      - podsecuritypolicies
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
