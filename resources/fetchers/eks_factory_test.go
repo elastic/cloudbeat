@@ -19,36 +19,51 @@ package fetchers
 
 import (
 	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
-type KubeFactory struct {
+type EksFactoryTestSuite struct {
+	suite.Suite
+	factory fetching.Factory
 }
 
-func init() {
-	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
+func TestEksFactoryTestSuite(t *testing.T) {
+	suite.Run(t, new(EksFactoryTestSuite))
 }
 
-func (f *KubeFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	cfg := KubeApiFetcherConfig{}
-	err := c.Unpack(&cfg)
-	if err != nil {
-		return nil, err
+func (s *EksFactoryTestSuite) SetupTest() {
+
+}
+
+func (s *EksFactoryTestSuite) TestCreateFetcher() {
+	var tests = []struct {
+		config string
+	}{
+		{
+			`
+name: aws-eks
+`,
+		},
 	}
 
-	return f.CreateFrom(cfg)
-}
+	for _, test := range tests {
+		eksProvider := &awslib.MockedEksClusterDescriber{}
+		factory := &EKSFactory{extraElements: func() (eksExtraElements, error) {
+			return eksExtraElements{eksProvider: eksProvider}, nil
+		}}
 
-func (f *KubeFactory) CreateFrom(cfg KubeApiFetcherConfig) (fetching.Fetcher, error) {
-	fe := &KubeFetcher{
-		cfg:      cfg,
-		watchers: make([]kubernetes.Watcher, 0),
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		fetcher, err := factory.Create(cfg)
+		s.NoError(err)
+		s.NotNil(fetcher)
+
+		eksFetcher, ok := fetcher.(*EKSFetcher)
+		s.True(ok)
+		s.Equal(eksProvider, eksFetcher.eksProvider)
 	}
-
-	logp.L().Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+
-		"Kubeconfig: %s", cfg.Name, cfg.Interval, cfg.Kubeconfig)
-	return fe, nil
 }

@@ -1,4 +1,5 @@
 # Deploy a cloudbeat instance per node for cis policy
+# Refactor via kustomize https://kustomize.io/
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -16,19 +17,30 @@ spec:
       labels:
         k8s-app: cloudbeat
     spec:
+      serviceAccountName: cloudbeat
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: cloudbeat
-          image: cloudbeat:latest
-          imagePullPolicy: IfNotPresent
+          image: 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:<IMAGE_TAG>
+          imagePullPolicy: Always
           env:
+            - name: AWS_ACCESS_KEY
+              value: <AWS_ACCESS_KEY>
+            - name: AWS_SECRET_ACCESS_KEY
+              value: <AWS_SECRET_ACCESS_KEY>
             - name: ES_HOST
-              value: "host.docker.internal:9200"
+              value: <ES_HOST>
             - name: ES_USERNAME
-              value: elastic
+              value: <ES_USERNAME>
             - name: ES_PASSWORD
-              value: changeme
+              value: <ES_PASSWORD>
             - name: KIBANA_HOST
-              value: "http://host.docker.internal:5601"
+              value: <KIBANA_HOST>
             - name: ELASTIC_CLOUD_ID
               value: none
             - name: ELASTIC_CLOUD_AUTH
@@ -78,13 +90,6 @@ spec:
             - name: etcsysmd
               mountPath: /hostfs/etc/systemd
               readOnly: true
-      serviceAccountName: cloudbeat
-      terminationGracePeriodSeconds: 30
-      tolerations:
-        - key: node-role.kubernetes.io/master
-          effect: NoSchedule
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
       volumes:
         - name: proc
           hostPath:
@@ -135,34 +140,24 @@ data:
       - name: process
         directory: "/hostfs"
         processes:
-          etcd:
-          kube-apiserver:
-          kube-controller-manager:
-          kube-scheduler:
           kubelet:
             config-file-arguments:
             - config
+      - name: aws-eks
+        clusterName: "EKS-Elastic-agent-demo"
+      - name: aws-ecr
+      - name: aws-elb
       - name: file-system
         patterns: [
-          "/hostfs/etc/kubernetes/scheduler.conf",
-          "/hostfs/etc/kubernetes/controller-manager.conf",
-          "/hostfs/etc/kubernetes/admin.conf",
-          "/hostfs/etc/kubernetes/kubelet.conf",
-          "/hostfs/etc/kubernetes/manifests/etcd.yaml",
-          "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-          "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
-          "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
-          "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
-          "/hostfs/var/lib/kubelet/config.yaml",
-          "/hostfs/var/lib/etcd",
-          "/hostfs/etc/kubernetes/pki"
+          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
+          "/hostfs/var/lib/kubelet/kubeconfig",
         ]
 
     # =================================== Kibana ===================================
     setup.kibana:
 
       # Kibana Host
-      host: "http://host.docker.internal:5601"
+    # host: "http://host.docker.internal:5601"
     # =============================== Elastic Cloud ================================
 
     # These settings simplify using Cloudbeat with the Elastic Cloud (https://cloud.elastic.co/).
@@ -268,8 +263,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: cloudbeat-role
-  # should be the namespace where cloudbeat is running
   namespace: kube-system
+  # should be the namespace where cloudbeat is running
   labels:
     k8s-app: cloudbeat
 rules:
@@ -277,7 +272,7 @@ rules:
       - coordination.k8s.io
     resources:
       - leases
-    verbs: ["get", "create", "update"]
+    verbs: ["get", "create", "update", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

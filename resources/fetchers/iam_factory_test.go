@@ -19,36 +19,53 @@ package fetchers
 
 import (
 	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
-type KubeFactory struct {
+type IamFactoryTestSuite struct {
+	suite.Suite
+	factory fetching.Factory
 }
 
-func init() {
-	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
+func TestIamFactoryTestSuite(t *testing.T) {
+	suite.Run(t, new(IamFactoryTestSuite))
 }
 
-func (f *KubeFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	cfg := KubeApiFetcherConfig{}
-	err := c.Unpack(&cfg)
-	if err != nil {
-		return nil, err
+func (s *IamFactoryTestSuite) SetupTest() {
+
+}
+
+func (s *IamFactoryTestSuite) TestCreateFetcher() {
+	var tests = []struct {
+		config string
+	}{
+		{
+			`
+name: aws-iam
+`,
+		},
 	}
 
-	return f.CreateFrom(cfg)
-}
+	for _, test := range tests {
+		iamProvider := &awslib.MockedIAMRolePermissionGetter{}
+		factory := &IAMFactory{extraElements: func() (IAMExtraElements, error) {
+			return IAMExtraElements{
+				iamProvider: iamProvider,
+			}, nil
+		}}
 
-func (f *KubeFactory) CreateFrom(cfg KubeApiFetcherConfig) (fetching.Fetcher, error) {
-	fe := &KubeFetcher{
-		cfg:      cfg,
-		watchers: make([]kubernetes.Watcher, 0),
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		fetcher, err := factory.Create(cfg)
+		s.NoError(err)
+		s.NotNil(fetcher)
+
+		iamFetcher, ok := fetcher.(*IAMFetcher)
+		s.True(ok)
+		s.Equal(iamProvider, iamFetcher.iamProvider)
 	}
-
-	logp.L().Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+
-		"Kubeconfig: %s", cfg.Name, cfg.Interval, cfg.Kubeconfig)
-	return fe, nil
 }

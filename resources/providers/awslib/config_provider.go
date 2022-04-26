@@ -15,42 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package awslib
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/aws/aws-sdk-go-v2/aws/external"
 )
 
-const (
-	FileSystemType = "file-system"
-)
-
-func init() {
-	manager.Factories.ListFetcherFactory(FileSystemType, &FileSystemFactory{})
+type ConfigGetter interface {
+	GetConfig() Config
 }
 
-type FileSystemFactory struct {
+type ConfigProvider struct {
 }
 
-func (f *FileSystemFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	cfg := FileFetcherConfig{}
-	err := c.Unpack(&cfg)
+func (p ConfigProvider) GetConfig() (Config, error) {
+	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 
-	return f.CreateFrom(cfg)
-}
-
-func (f *FileSystemFactory) CreateFrom(cfg FileFetcherConfig) (fetching.Fetcher, error) {
-	fe := &FileSystemFetcher{
-		cfg: cfg,
-	}
-
-	logp.L().Infof("File-System Fetcher created with the following config:"+
-		"\n Name: %s\nPatterns: %s", cfg.Name, cfg.Patterns)
-	return fe, nil
+	return Config{
+		Config: cfg,
+	}, nil
 }

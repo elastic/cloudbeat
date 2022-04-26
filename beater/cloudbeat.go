@@ -20,12 +20,9 @@ package beater
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/elastic/cloudbeat/evaluator"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
@@ -47,15 +44,13 @@ type cloudbeat struct {
 	data        *manager.Data
 	evaluator   evaluator.Evaluator
 	transformer transformer.Transformer
+	log         *logp.Logger
 }
-
-const (
-	cycleStatusStart = "start"
-	cycleStatusEnd   = "end"
-)
 
 // New creates an instance of cloudbeat.
 func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
+	log := logp.NewLogger("cloudbeat")
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	c := config.DefaultConfig
@@ -64,9 +59,9 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	logp.Info("Config initiated.")
+	log.Info("Config initiated.")
 
-	fetchersRegistry, err := InitRegistry(ctx, c)
+	fetchersRegistry, err := InitRegistry(c)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -100,13 +95,21 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		evaluator:   eval,
 		data:        data,
 		transformer: t,
+		log:         log,
 	}
 	return bt, nil
 }
 
 // Run starts cloudbeat.
 func (bt *cloudbeat) Run(b *beat.Beat) error {
-	logp.Info("cloudbeat is running! Hit CTRL-C to stop it.")
+	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it.")
+
+	// Configure the beats Manager to start after all the reloadable hooks are initialized
+	// and shutdown when the function return.
+	if err := b.Manager.Start(); err != nil {
+		return err
+	}
+	defer b.Manager.Stop()
 
 	if err := bt.data.Run(bt.ctx); err != nil {
 		return err
@@ -134,19 +137,17 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 			return nil
 		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
-			// update hidden-index that the beat's cycle has started
-			bt.updateCycleStatus(cycleId, cycleStatusStart)
+			bt.log.Debugf("Cycle % has started", cycleId)
 			cycleMetadata := transformer.CycleMetadata{CycleId: cycleId}
 			// TODO: send events through a channel and publish them by a configured threshold & time
 			events := bt.transformer.ProcessAggregatedResources(fetchedResources, cycleMetadata)
 			bt.client.PublishAll(events)
-			// update hidden-index that the beat's cycle has ended
-			bt.updateCycleStatus(cycleId, cycleStatusEnd)
+			bt.log.Debugf("Cycle % has ended", cycleId)
 		}
 	}
 }
 
-func InitRegistry(ctx context.Context, c config.Config) (manager.FetchersRegistry, error) {
+func InitRegistry(c config.Config) (manager.FetchersRegistry, error) {
 	registry := manager.NewFetcherRegistry()
 	err := manager.Factories.RegisterFetchers(registry, c)
 	if err != nil {
@@ -161,20 +162,6 @@ func (bt *cloudbeat) Stop() {
 	bt.evaluator.Stop(bt.ctx)
 
 	bt.client.Close()
-}
-
-// updateCycleStatus updates beat status in metadata ES index.
-func (bt *cloudbeat) updateCycleStatus(cycleId uuid.UUID, status string) {
-	metadataIndex := config.Datastream("", config.MetadataDatastreamIndexPrefix)
-	cycleEndedEvent := beat.Event{
-		Timestamp: time.Now(),
-		Meta:      common.MapStr{libevents.FieldMetaIndex: metadataIndex},
-		Fields: common.MapStr{
-			"cycle_id": cycleId,
-			"status":   status,
-		},
-	}
-	bt.client.Publish(cycleEndedEvent)
 }
 
 // configureProcessors configure processors to be used by the beat
