@@ -31,7 +31,11 @@ type K8sResource struct {
 	Data interface{}
 }
 
-const k8sObjMetadataField = "ObjectMeta"
+const (
+	k8sObjMetadataField  = "ObjectMeta"
+	k8sTypeMetadataField = "TypeMeta"
+	k8sObjType           = "k8s_object"
+)
 
 func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
 	ret := make([]fetching.Resource, 0)
@@ -74,6 +78,20 @@ func (r K8sResource) GetID() (string, error) {
 
 func (r K8sResource) GetData() interface{} {
 	return r.Data
+}
+
+func (r K8sResource) GetType() string {
+	return k8sObjType
+}
+
+func (r K8sResource) GetSubType() (string, error) {
+	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
+	metadata, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
+	if !ok {
+		return "", fmt.Errorf("failed to retrieve type metadata")
+	}
+
+	return metadata.Kind, nil
 }
 
 // nullifyManagedFields ManagedFields field contains fields with dot that prevent from elasticsearch to index

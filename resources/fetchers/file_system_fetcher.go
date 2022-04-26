@@ -31,6 +31,8 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
+const FSResourceType = "file"
+
 type FileSystemResource struct {
 	FileName string `json:"filename"`
 	FileMode string `json:"mode"`
@@ -38,6 +40,7 @@ type FileSystemResource struct {
 	Uid      string `json:"uid"`
 	Path     string `json:"path"`
 	Inode    string `json:"inode"`
+	IsDir    bool   `json:"isdir"`
 }
 
 // FileSystemFetcher implement the Fetcher interface
@@ -113,6 +116,7 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 		Gid:      group.Name,
 		Path:     path,
 		Inode:    inode,
+		IsDir:    info.IsDir(),
 	}
 
 	return data, nil
@@ -127,4 +131,15 @@ func (r FileSystemResource) GetID() (string, error) {
 
 func (r FileSystemResource) GetData() interface{} {
 	return r
+}
+
+func (r FileSystemResource) GetType() string {
+	return FSResourceType
+}
+
+func (r FileSystemResource) GetSubType() (string, error) {
+	if r.IsDir {
+		return "directory", nil
+	}
+	return "file", nil
 }

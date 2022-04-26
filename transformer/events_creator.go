@@ -38,6 +38,13 @@ type Transformer struct {
 	events        []beat.Event
 }
 
+type ResourceFields struct {
+	RawResource interface{}
+	ID          string
+	Type        string
+	SubType     string
+}
+
 func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
@@ -52,21 +59,34 @@ func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string)
 
 func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, metadata CycleMetadata) []beat.Event {
 	c.events = make([]beat.Event, 0)
-	for fetcherType, fetcherResults := range resources {
-		c.processEachResource(fetcherResults, ResourceTypeMetadata{CycleMetadata: metadata, Type: fetcherType})
+	for _, fetcherResults := range resources {
+		c.processEachResource(fetcherResults, metadata)
 	}
 
 	return c.events
 }
 
-func (c *Transformer) processEachResource(results []fetching.Resource, metadata ResourceTypeMetadata) {
+func (c *Transformer) processEachResource(results []fetching.Resource, metadata CycleMetadata) {
 	for _, result := range results {
+		resType := result.GetType()
+		resSubType, err := result.GetSubType()
+		if err != nil {
+			logp.Error(fmt.Errorf("could not get resource sub type, Error: %v", err))
+			return
+		}
+
 		rid, err := result.GetID()
 		if err != nil {
 			logp.Error(fmt.Errorf("could not get resource ID, Error: %v", err))
 			return
 		}
-		resMetadata := ResourceMetadata{ResourceTypeMetadata: metadata, ResourceId: rid}
+		resMetadata := ResourceMetadata{
+			CycleMetadata: metadata,
+			ResourceId:    rid,
+			Type:          resType,
+			SubType:       resSubType,
+		}
+
 		if err := c.createBeatEvents(result, resMetadata); err != nil {
 			logp.Error(fmt.Errorf("failed to create beat events for, %v, Error: %v", metadata, err))
 		}
@@ -93,12 +113,15 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metada
 			Meta:      c.eventMetadata,
 			Timestamp: timestamp,
 			Fields: common.MapStr{
-				"resource_id": metadata.ResourceId,
-				"type":        metadata.Type,
-				"cycle_id":    metadata.CycleId,
-				"result":      finding.Result,
-				"resource":    fetcherResult.Resource,
-				"rule":        finding.Rule,
+				"resource": ResourceFields{
+					RawResource: fetcherResult.Resource,
+					ID:          metadata.ResourceId,
+					Type:        metadata.Type,
+					SubType:     metadata.SubType,
+				},
+				"cycle_id": metadata.CycleId,
+				"result":   finding.Result,
+				"rule":     finding.Rule,
 			},
 		}
 

@@ -62,3 +62,13 @@ func (r EKSResource) GetID() (string, error) {
 func (r EKSResource) GetData() interface{} {
 	return r
 }
+
+func (r EKSResource) GetType() string {
+	//TODO implement me
+	return ""
+}
+
+func (r EKSResource) GetSubType() (string, error) {
+	//TODO implement me
+	return "", nil
+}

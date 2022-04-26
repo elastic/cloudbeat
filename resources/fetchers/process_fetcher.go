@@ -36,7 +36,8 @@ const (
 	// Expects format as the following: --<key><delimiter><value>.
 	// For example: --config=a.json
 	// The regex supports two delimiters "=" and ""
-	CMDArgumentMatcher = "\\b%s[\\s=]\\/?(\\S+)"
+	CMDArgumentMatcher  = "\\b%s[\\s=]\\/?(\\S+)"
+	ProcessResourceType = "process"
 )
 
 type ProcessResource struct {
@@ -169,4 +170,14 @@ func (res ProcessResource) GetID() (string, error) {
 
 func (res ProcessResource) GetData() interface{} {
 	return res
+}
+
+func (res ProcessResource) GetType() string {
+	//TODO implement me
+	return ProcessResourceType
+}
+
+func (res ProcessResource) GetSubType() (string, error) {
+	//TODO implement me
+	return "", nil
 }

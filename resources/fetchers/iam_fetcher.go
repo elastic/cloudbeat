@@ -60,3 +60,13 @@ func (r IAMResource) GetID() (string, error) {
 func (r IAMResource) GetData() interface{} {
 	return r.Data
 }
+
+func (r IAMResource) GetType() string {
+	//TODO implement me
+	return ""
+}
+
+func (r IAMResource) GetSubType() (string, error) {
+	//TODO implement me
+	return "", nil
+}

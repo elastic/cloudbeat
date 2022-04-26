@@ -100,3 +100,13 @@ func (r ELBResource) GetID() (string, error) {
 func (r ELBResource) GetData() interface{} {
 	return r
 }
+
+func (r ELBResource) GetType() string {
+	//TODO implement me
+	return ""
+}
+
+func (r ELBResource) GetSubType() (string, error) {
+	//TODO implement me
+	return "", nil
+}

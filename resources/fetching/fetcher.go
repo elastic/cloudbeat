@@ -41,6 +41,8 @@ type Condition interface {
 
 type Resource interface {
 	GetID() (string, error)
+	GetType() string
+	GetSubType() (string, error)
 	GetData() interface{}
 }
 
