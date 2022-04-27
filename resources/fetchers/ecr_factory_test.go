@@ -38,10 +38,6 @@ func TestEcrFactoryTestSuite(t *testing.T) {
 	suite.Run(t, new(EcrFactoryTestSuite))
 }
 
-func (s *EcrFactoryTestSuite) SetupTest() {
-
-}
-
 func (s *EcrFactoryTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		config        string
