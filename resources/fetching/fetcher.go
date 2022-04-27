@@ -40,10 +40,15 @@ type Condition interface {
 }
 
 type Resource interface {
-	GetID() (string, error)
-	GetType() string
-	GetSubType() (string, error)
+	GetMetadata() ResourceMetadata
 	GetData() interface{}
+}
+
+type ResourceMetadata struct {
+	ResourceId string
+	Type       string
+	SubType    string
+	Name       string
 }
 
 type Result struct {

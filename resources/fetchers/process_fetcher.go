@@ -164,20 +164,34 @@ func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (inte
 func (f *ProcessesFetcher) Stop() {
 }
 
-func (res ProcessResource) GetID() (string, error) {
-	return res.PID, nil
+func (res ProcessResource) GetID() string {
+	return res.PID
 }
 
 func (res ProcessResource) GetData() interface{} {
 	return res
 }
 
-func (res ProcessResource) GetType() string {
-	//TODO implement me
-	return ProcessResourceType
+func (res ProcessResource) GetMetadata() fetching.ResourceMetadata {
+	k8sObjMeta := r.GetK8sObjectMeta()
+	resourceID := k8sObjMeta.UID
+	resourceName := k8sObjMeta.Name
+
+	return fetching.ResourceMetadata{
+		ResourceId: res.GetID(),
+		Type:       ProcessResourceType,
+		SubType:    r.GetSubType(),
+		Name:       resourceName,
+	}
 }
+
+//func (res ProcessResource) GetType() string {
+//	//TODO implement me
+//	return ProcessResourceType
+//}
+//
 
 func (res ProcessResource) GetSubType() (string, error) {
 	//TODO implement me
-	return "", nil
+	return ""
 }

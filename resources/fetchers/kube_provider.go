@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
@@ -65,33 +64,42 @@ func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
 	return ret
 }
 
-func (r K8sResource) GetID() (string, error) {
-	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
-	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
-	if !ok {
-		return "", fmt.Errorf("failed to retrieve object metadata")
-	}
-
-	uid := metadata.UID
-	return string(uid), nil
-}
-
 func (r K8sResource) GetData() interface{} {
 	return r.Data
 }
 
-func (r K8sResource) GetType() string {
-	return k8sObjType
+func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
+	k8sObjMeta := r.GetK8sObjectMeta()
+	resourceID := k8sObjMeta.UID
+	resourceName := k8sObjMeta.Name
+
+	return fetching.ResourceMetadata{
+		ResourceId: string(resourceID),
+		Type:       k8sObjType,
+		SubType:    r.GetSubType(),
+		Name:       resourceName,
+	}
 }
 
-func (r K8sResource) GetSubType() (string, error) {
+func (r K8sResource) GetK8sObjectMeta() metav1.ObjectMeta {
 	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
-	metadata, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
+	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
 	if !ok {
-		return "", fmt.Errorf("failed to retrieve type metadata")
+		logp.L().Errorf("failed to retrieve object metadata, Resource: %#v", r)
+		return metav1.ObjectMeta{}
 	}
 
-	return metadata.Kind, nil
+	return metadata
+}
+
+func (r K8sResource) GetSubType() string {
+	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
+	typeMeta, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
+	if !ok {
+		logp.L().Errorf("failed to retrieve type metadata, Resource: %#v", r)
+	}
+
+	return typeMeta.Kind
 }
 
 // nullifyManagedFields ManagedFields field contains fields with dot that prevent from elasticsearch to index

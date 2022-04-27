@@ -112,3 +112,8 @@ func (res ECRResource) GetSubType() (string, error) {
 	//TODO implement me
 	return "", nil
 }
+
+func (res ECRResource) GetName() string {
+	//TODO implement me
+	return ""
+}

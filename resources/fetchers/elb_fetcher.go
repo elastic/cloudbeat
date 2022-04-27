@@ -110,3 +110,8 @@ func (r ELBResource) GetSubType() (string, error) {
 	//TODO implement me
 	return "", nil
 }
+
+func (r ELBResource) GetName() string {
+	//TODO implement me
+	return ""
+}

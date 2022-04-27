@@ -165,12 +165,14 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			}
 
 			for _, event := range generatedEvents {
+				resource := event.Fields["resource"].(ResourceFields)
 				s.Equal(s.cycleId, event.Fields["cycle_id"], "event cycle_id is not correct")
 				s.NotEmpty(event.Timestamp, `event timestamp is missing`)
 				s.NotEmpty(event.Fields["result"], "event result is missing")
 				s.NotEmpty(event.Fields["rule"], "event rule is missing")
-				s.NotEmpty(event.Fields["resource"], "event resource is missing")
-				s.NotEmpty(event.Fields["resource_id"], "resource id is missing")
+				s.NotEmpty(resource.RawResource, "raw resource is missing")
+				s.NotEmpty(resource.SubType, "raw resource is missing")
+				s.NotEmpty(resource.Type, "raw resource is missing")
 				s.NotEmpty(event.Fields["type"], "resource type is missing")
 			}
 		})

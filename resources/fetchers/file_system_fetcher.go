@@ -143,3 +143,7 @@ func (r FileSystemResource) GetSubType() (string, error) {
 	}
 	return "file", nil
 }
+
+func (r FileSystemResource) GetName() string {
+	return r.Path
+}

@@ -233,3 +233,11 @@ func (res NumberResource) GetID() (string, error) {
 func (res NumberResource) GetData() interface{} {
 	return res.Num
 }
+
+func (res NumberResource) GetType() string {
+	return "number"
+}
+
+func (res NumberResource) GetSubType() (string, error) {
+	return "", nil
+}

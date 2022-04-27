@@ -21,13 +21,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type ResourceMetadata struct {
-	CycleMetadata
-	ResourceId string
-	Type       string
-	SubType    string
-}
-
 type CycleMetadata struct {
 	CycleId uuid.UUID
 }
