@@ -26,6 +26,12 @@ type ResourceTypeMetadata struct {
 	Type string
 }
 
+type ResourceFields struct {
+	ID   string
+	Type string
+	Raw  interface{}
+}
+
 type ResourceMetadata struct {
 	ResourceTypeMetadata
 	ResourceId string
