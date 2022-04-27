@@ -45,10 +45,6 @@ func TestElbFetcherTestSuite(t *testing.T) {
 	suite.Run(t, new(ElbFetcherTestSuite))
 }
 
-func (s *ElbFetcherTestSuite) SetupTest() {
-
-}
-
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
 	var tests = []struct {
@@ -147,7 +143,6 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			fmt.Errorf("elb error")},
 	}
 	for _, test := range tests {
-		//Need to add services
 		kubeclient := k8sfake.NewSimpleClientset()
 
 		services := &v1.Service{

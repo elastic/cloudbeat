@@ -47,10 +47,6 @@ func TestECRFetcherTestSuite(t *testing.T) {
 	suite.Run(t, new(ECRFetcherTestSuite))
 }
 
-func (s *ECRFetcherTestSuite) SetupTest() {
-
-}
-
 func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 	firstRepositoryName := "cloudbeat"
 	secondRepositoryName := "cloudbeat1"
