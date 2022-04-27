@@ -20,6 +20,7 @@ package beater
 import (
 	"context"
 	"fmt"
+
 	"github.com/elastic/cloudbeat/evaluator"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -86,7 +87,11 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t := transformer.NewTransformer(ctx, eval, resultsIndex)
+	t, err := transformer.NewTransformer(ctx, eval, resultsIndex)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
 
 	bt := &cloudbeat{
 		ctx:         ctx,
