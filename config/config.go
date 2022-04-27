@@ -30,7 +30,6 @@ import (
 const DefaultNamespace = "default"
 
 const ResultsDatastreamIndexPrefix = "logs-cis_kubernetes_benchmark.findings"
-const MetadataDatastreamIndexPrefix = ".logs-cis_kubernetes_benchmark.metadata"
 
 type Config struct {
 	KubeConfig string                  `config:"kube_config"`

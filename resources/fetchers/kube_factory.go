@@ -20,6 +20,7 @@ package fetchers
 import (
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 )
@@ -47,5 +48,7 @@ func (f *KubeFactory) CreateFrom(cfg KubeApiFetcherConfig) (fetching.Fetcher, er
 		watchers: make([]kubernetes.Watcher, 0),
 	}
 
+	logp.L().Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+
+		"Kubeconfig: %s", cfg.Name, cfg.Interval, cfg.Kubeconfig)
 	return fe, nil
 }
