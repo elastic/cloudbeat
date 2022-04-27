@@ -29,7 +29,6 @@ import (
 
 const DefaultNamespace = "default"
 
-const ResultsDatastreamIndexPrefix-deprecated = "logs-cis_kubernetes_benchmark.findings"
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 type Config struct {
