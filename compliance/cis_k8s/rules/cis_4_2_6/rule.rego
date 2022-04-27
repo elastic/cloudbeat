@@ -4,6 +4,8 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
+# Ensure that the protectKernelDefaults argument is set to true
+
 default rule_evaluation = false
 
 process_args := cis_k8s.data_adapter.process_args
@@ -18,7 +20,6 @@ rule_evaluation {
 }
 
 # In case both flags and configuration file are specified, the executable argument takes precedence.
-# Ensure that the protectKernelDefaults argument is set to true
 rule_evaluation {
 	not process_args["--protect-kernel-defaults"]
 	data_adapter.process_config.config.protectKernelDefaults

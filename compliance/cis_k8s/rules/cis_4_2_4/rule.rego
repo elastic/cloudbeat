@@ -1,24 +1,23 @@
-package compliance.cis_k8s.rules.cis_4_2_7
+package compliance.cis_k8s.rules.cis_4_2_4
 
 import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --make-iptables-util-chains argument is set to true (Automated)
+# Verify that the --read-only-port argument is set to 0
 
 default rule_evaluation = false
 
 process_args := cis_k8s.data_adapter.process_args
 
 rule_evaluation {
-	common.contains_key_with_value(process_args, "--make-iptables-util-chains", "true")
+	common.contains_key_with_value(process_args, "--read-only-port", "0")
 }
 
 # In case both flags and configuration file are specified, the executable argument takes precedence.
-# Checks that the entry for makeIPTablesUtilChains is set to true.
 rule_evaluation {
-	not process_args["--make-iptables-util-chains"]
-	data_adapter.process_config.config.makeIPTablesUtilChains
+	not process_args["--read-only-port"]
+	data_adapter.process_config.config.readOnlyPort == 0
 }
 
 finding = result {
