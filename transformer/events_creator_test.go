@@ -24,6 +24,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -157,7 +158,10 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.mockedEvaluator.On(methodMock.methodName, methodMock.args...).Return(methodMock.returnArgs...)
 			}
 
-			transformer, _ := NewTransformer(ctx, &s.mockedEvaluator, testIndex)
+			cfg := config.DefaultConfig	
+			transformer, err := NewTransformer(cfg, ctx, &s.mockedEvaluator, testIndex)
+			s.NoError(err)
+		
 			generatedEvents := transformer.ProcessAggregatedResources(tt.args.resource, tt.args.metadata)
 
 			if tt.wantErr {

@@ -26,25 +26,31 @@ import (
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 )
 
 type Transformer struct {
-	context       context.Context
-	eval          evaluator.Evaluator
-	eventMetadata common.MapStr
-	events        []beat.Event
-	cm 			  CommonData
+	context       	   context.Context
+	eval          	   evaluator.Evaluator
+	eventMetadata 	   common.MapStr
+	events        	   []beat.Event
+	commonData 		   CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string) (Transformer, error) {
+func NewTransformer(cfg config.Config, ctx context.Context, eval evaluator.Evaluator, index string) (Transformer, error) {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
-	cm := NewCommonData(ctx)
 
-	err := cm.fetchCommonData()
+	commonDataProvider, err := NewCommonDataProvider(cfg)
+	if err != nil {
+		logp.Error(fmt.Errorf("NewTransformer error in NewCommonDataProvider: %w", err))
+		return Transformer{}, err
+	}
+
+	commonData, err := commonDataProvider.fetchCommonData(ctx)
 	if err != nil {
 		logp.Error(fmt.Errorf("NewTransformer error in fetchCommonData: %w", err))
 		return Transformer{}, err
@@ -55,7 +61,7 @@ func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string)
 		eval:          eval,
 		eventMetadata: eventMetadata,
 		events:        events,
-		cm: 		   cm,
+		commonData:    commonData,
 	}, nil
 }
 
@@ -76,7 +82,7 @@ func (c *Transformer) processEachResource(results []fetching.Resource, metadata 
 			return
 		}
 		// TODO: Will be changed to combined UUID in next PR
-		rid := c.cm.clusterId + c.cm.nodeId + resId
+		rid := c.commonData.getResourceId(resId)
 		resMetadata := ResourceMetadata{ResourceTypeMetadata: metadata, ResourceId: rid}
 		if err := c.createBeatEvents(result, resMetadata); err != nil {
 			logp.Error(fmt.Errorf("failed to create beat events for, %v, Error: %v", metadata, err))
