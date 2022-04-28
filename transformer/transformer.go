@@ -27,9 +27,9 @@ type ResourceTypeMetadata struct {
 }
 
 type ResourceFields struct {
-	ID   string
-	Type string
-	Raw  interface{}
+	ID   string      `json:"id"`
+	Type string      `json:"type"`
+	Raw  interface{} `json:"raw"`
 }
 
 type ResourceMetadata struct {
