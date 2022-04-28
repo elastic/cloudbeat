@@ -18,54 +18,56 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
+	"context"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
 
-type IamFactoryTestSuite struct {
+type IamFetcherTestSuite struct {
 	suite.Suite
-	factory fetching.Factory
 }
 
-func TestIamFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(IamFactoryTestSuite))
+func TestIamFetcherTestSuite(t *testing.T) {
+	suite.Run(t, new(IamFetcherTestSuite))
 }
 
-func (s *IamFactoryTestSuite) SetupTest() {
-
-}
-
-func (s *IamFactoryTestSuite) TestCreateFetcher() {
+func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 	var tests = []struct {
-		config string
+		role        string
+		iamResponse []iam.GetRolePolicyResponse
 	}{
 		{
-			`
-name: aws-iam
-`,
+			"some_role",
+			[]iam.GetRolePolicyResponse{},
 		},
 	}
 
 	for _, test := range tests {
+		eksConfig := IAMFetcherConfig{
+			BaseFetcherConfig: fetching.BaseFetcherConfig{},
+			RoleName:          test.role,
+		}
 		iamProvider := &awslib.MockIAMRolePermissionGetter{}
-		factory := &IAMFactory{extraElements: func() (IAMExtraElements, error) {
-			return IAMExtraElements{
-				iamProvider: iamProvider,
-			}, nil
-		}}
 
-		cfg, err := common.NewConfigFrom(test.config)
-		s.NoError(err)
+		iamProvider.EXPECT().GetIAMRolePermissions(mock.Anything, test.role).
+			Return(test.iamResponse, nil)
 
-		fetcher, err := factory.Create(cfg)
-		s.NoError(err)
-		s.NotNil(fetcher)
+		expectedResource := IAMResource{test.iamResponse}
 
-		iamFetcher, ok := fetcher.(*IAMFetcher)
-		s.True(ok)
-		s.Equal(iamProvider, iamFetcher.iamProvider)
+		eksFetcher := IAMFetcher{
+			cfg:         eksConfig,
+			iamProvider: iamProvider,
+		}
+
+		ctx := context.Background()
+		result, err := eksFetcher.Fetch(ctx)
+		s.Nil(err)
+
+		iamResource := result[0].(IAMResource)
+		s.Equal(expectedResource, iamResource)
 	}
 }
