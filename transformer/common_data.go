@@ -26,16 +26,23 @@ import (
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8s "k8s.io/client-go/kubernetes"
 )
 
 type CommonData struct {
+	context context.Context
+	kubeClient k8s.Interface
 	clusterId string
 	nodeId string
 }
 
+const hostNamePath = "/etc/hostname"
+
 // TODO: Consider moving this layer to be custom for every resource type
-func NewCommonData() CommonData {
+func NewCommonData(ctx context.Context) CommonData {
 	return CommonData{
+		context: ctx,
+		kubeClient: nil,
 		clusterId: "",
 		nodeId: "",
 	}
@@ -43,13 +50,19 @@ func NewCommonData() CommonData {
 
 // TODO: Support environments besides K8S
 func (c *CommonData) fetchCommonData() error {
-	clusterId, err := getClusterId()
+	client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
+	if err != nil {
+		logp.Error(fmt.Errorf("fetchCommonData error in GetKubernetesClient: %w", err))
+		return err
+	}
+	c.kubeClient = client
+	clusterId, err := c.getClusterId()
 	if err != nil {
 		logp.Error(fmt.Errorf("fetchCommonData error in getClusterId: %w", err))
 		return err
 	}
 	c.clusterId = clusterId
-	nodeId, err := getNodeId()
+	nodeId, err := c.getNodeId()
 	if err != nil {
 		logp.Error(fmt.Errorf("fetchCommonData error in getNodeId: %w", err))
 		return err
@@ -58,13 +71,8 @@ func (c *CommonData) fetchCommonData() error {
 	return nil
 }
 
-func getClusterId() (string, error) {
-	client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
-	if err != nil {
-		logp.Error(fmt.Errorf("getClusterId error in GetKubernetesClient: %w", err))
-		return "", err
-	}
-	n, err := client.CoreV1().Namespaces().Get(context.Background(), "kube-system", metav1.GetOptions{})
+func (c *CommonData) getClusterId() (string, error) {
+	n, err := c.kubeClient.CoreV1().Namespaces().Get(c.context, "kube-system", metav1.GetOptions{})
 	if err != nil {
 		logp.Error(fmt.Errorf("getClusterId error in Namespaces get: %w", err))
 		return "", err
@@ -72,18 +80,13 @@ func getClusterId() (string, error) {
 	return string(n.ObjectMeta.UID), nil
 }
 
-func getNodeId() (string, error) {
+func (c *CommonData) getNodeId() (string, error) {
 	hName, err := getHostName()
 	if err != nil {
 		logp.Error(fmt.Errorf("getNodeId error in getHostName: %w", err))
 		return "", err
 	}
-	client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
-	if err != nil {
-		logp.Error(fmt.Errorf("getNodeId error in GetKubernetesClient: %w", err))
-		return "", err
-	}
-	n, err := client.CoreV1().Nodes().Get(context.Background(), hName, metav1.GetOptions{})
+	n, err := c.kubeClient.CoreV1().Nodes().Get(c.context, hName, metav1.GetOptions{})
 	if err != nil {
 		logp.Error(fmt.Errorf("getClusterId error in Nodes get: %w", err))
 		return "", err
@@ -92,7 +95,7 @@ func getNodeId() (string, error) {
 }
 
 func getHostName() (string, error) {
-	hName, err := ioutil.ReadFile("/etc/hostname")
+	hName, err := ioutil.ReadFile(hostNamePath)
 	if err != nil {
 		logp.Error(fmt.Errorf("getHostName error in ReadFile: %w", err))
 		return "", err

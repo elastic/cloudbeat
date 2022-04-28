@@ -42,7 +42,7 @@ type Transformer struct {
 func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string) (Transformer, error) {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
-	cm := NewCommonData()
+	cm := NewCommonData(ctx)
 
 	err := cm.fetchCommonData()
 	if err != nil {

@@ -157,7 +157,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.mockedEvaluator.On(methodMock.methodName, methodMock.args...).Return(methodMock.returnArgs...)
 			}
 
-			transformer := NewTransformer(ctx, &s.mockedEvaluator, testIndex)
+			transformer, _ := NewTransformer(ctx, &s.mockedEvaluator, testIndex)
 			generatedEvents := transformer.ProcessAggregatedResources(tt.args.resource, tt.args.metadata)
 
 			if tt.wantErr {
