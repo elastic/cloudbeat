@@ -28,7 +28,7 @@ import (
 )
 
 type IAMRolePermissionGetter interface {
-	GetIAMRolePermissions(ctx context.Context, roleName string) (interface{}, error)
+	GetIAMRolePermissions(ctx context.Context, roleName string) ([]iam.GetRolePolicyResponse, error)
 }
 
 type IAMProvider struct {
@@ -42,8 +42,8 @@ func NewIAMProvider(cfg aws.Config) *IAMProvider {
 	}
 }
 
-func (provider IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName string) (interface{}, error) {
-	results := make([]interface{}, 0)
+func (provider IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName string) ([]iam.GetRolePolicyResponse, error) {
+	results := make([]iam.GetRolePolicyResponse, 0)
 	policiesIdentifiers, err := provider.getAllRolePolicies(ctx, roleName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)
@@ -60,7 +60,7 @@ func (provider IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName 
 			logp.Error(fmt.Errorf("failed to get policy %s - %w", *policyId.PolicyName, err))
 			continue
 		}
-		results = append(results, policy)
+		results = append(results, *policy)
 	}
 
 	return results, nil

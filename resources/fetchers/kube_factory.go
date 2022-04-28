@@ -48,7 +48,7 @@ func (f *KubeFactory) CreateFrom(cfg KubeApiFetcherConfig) (fetching.Fetcher, er
 		watchers: make([]kubernetes.Watcher, 0),
 	}
 
-	logp.L().Infof("Kube Fetcher created with the following config:"+
-		"\n Name: %s\nInterval: %s\nKubeconfig: %s", cfg.Name, cfg.Kubeconfig, cfg.Interval)
+	logp.L().Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+
+		"Kubeconfig: %s", cfg.Name, cfg.Interval, cfg.Kubeconfig)
 	return fe, nil
 }

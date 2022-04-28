@@ -38,10 +38,6 @@ func TestElbFactoryTestSuite(t *testing.T) {
 	suite.Run(t, new(ElbFactoryTestSuite))
 }
 
-func (s *ElbFactoryTestSuite) SetupTest() {
-
-}
-
 func (s *ElbFactoryTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		config        string
