@@ -35,7 +35,7 @@ To validate check the logs:
 just logs-cloudbeat
 ```
 
-Now go and check out the data on your Kibana! Make sure to add a kibana dataview `logs-cloud_security_posture.findings-*`
+Now go and check out the data on your Kibana!
 
 ### Clean up
 
