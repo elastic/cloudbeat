@@ -26,7 +26,6 @@ import (
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
@@ -40,17 +39,11 @@ type Transformer struct {
 	commonData 		   CommonDataInterface
 }
 
-func NewTransformer(cfg config.Config, ctx context.Context, eval evaluator.Evaluator, index string) (Transformer, error) {
+func NewTransformer(ctx context.Context, eval evaluator.Evaluator, cdProvider CommonDataProvider, index string) (Transformer, error) {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
 
-	commonDataProvider, err := NewCommonDataProvider(cfg)
-	if err != nil {
-		logp.Error(fmt.Errorf("NewTransformer error in NewCommonDataProvider: %w", err))
-		return Transformer{}, err
-	}
-
-	commonData, err := commonDataProvider.fetchCommonData(ctx)
+	commonData, err := cdProvider.fetchCommonData(ctx)
 	if err != nil {
 		logp.Error(fmt.Errorf("NewTransformer error in fetchCommonData: %w", err))
 		return Transformer{}, err

@@ -18,6 +18,8 @@
 package transformer
 
 import (
+	"io/fs"
+
 	"github.com/gofrs/uuid"
 	"k8s.io/client-go/kubernetes"
 )
@@ -43,16 +45,13 @@ type CycleMetadata struct {
 }
 
 type CommonDataProvider struct {
-	KubeClient kubernetes.Interface
-}
-
-type CommonDataProviderConfig struct {
-	Kubeconfig string `config:"Kubeconfig"`
+	kubeClient kubernetes.Interface
+	fsys fs.FS
 }
 
 type CommonData struct {
-	ClusterId string
-	NodeId string
+	clusterId string
+	nodeId string
 }
 
 type CommonDataInterface interface {

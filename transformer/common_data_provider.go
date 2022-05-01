@@ -20,7 +20,8 @@ package transformer
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io/fs"
+	"os"
 	"strings"
 
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
@@ -30,9 +31,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-
-const hostNamePath = "/etc/hostname"
-const namespace = "kube-system"
+const ( 
+	hostNamePath = "/etc/"
+	hostNameFile = "hostname"
+	namespace = "kube-system"
+)
 
 func NewCommonDataProvider(cfg config.Config) (CommonDataProvider, error) {
 	KubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
@@ -42,7 +45,8 @@ func NewCommonDataProvider(cfg config.Config) (CommonDataProvider, error) {
 	}
 
 	return CommonDataProvider{
-		KubeClient: KubeClient,
+		kubeClient: KubeClient,
+		fsys: os.DirFS(hostNamePath),
 	}, nil
 }
 
@@ -54,18 +58,18 @@ func (c CommonDataProvider) fetchCommonData(ctx context.Context) (CommonDataInte
 		logp.Error(fmt.Errorf("fetchCommonData error in getClusterId: %w", err))
 		return CommonData{}, err
 	}
-	cm.ClusterId = ClusterId
+	cm.clusterId = ClusterId
 	NodeId, err := c.getNodeId(ctx)
 	if err != nil {
 		logp.Error(fmt.Errorf("fetchCommonData error in getNodeId: %w", err))
 		return CommonData{}, err
 	}
-	cm.NodeId = NodeId
+	cm.nodeId = NodeId
 	return cm, nil
 }
 
 func (c CommonDataProvider) getClusterId(ctx context.Context) (string, error) {
-	n, err := c.KubeClient.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
+	n, err := c.kubeClient.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 	if err != nil {
 		logp.Error(fmt.Errorf("getClusterId error in Namespaces get: %w", err))
 		return "", err
@@ -79,7 +83,7 @@ func (c CommonDataProvider) getNodeId(ctx context.Context) (string, error) {
 		logp.Error(fmt.Errorf("getNodeId error in getHostName: %w", err))
 		return "", err
 	}
-	n, err := c.KubeClient.CoreV1().Nodes().Get(ctx, hName, metav1.GetOptions{})
+	n, err := c.kubeClient.CoreV1().Nodes().Get(ctx, hName, metav1.GetOptions{})
 	if err != nil {
 		logp.Error(fmt.Errorf("getClusterId error in Nodes get: %w", err))
 		return "", err
@@ -88,7 +92,7 @@ func (c CommonDataProvider) getNodeId(ctx context.Context) (string, error) {
 }
 
 func (c CommonDataProvider) getHostName() (string, error) {
-	hName, err := ioutil.ReadFile(hostNamePath)
+    hName, err := fs.ReadFile(c.fsys, hostNameFile)
 	if err != nil {
 		logp.Error(fmt.Errorf("getHostName error in ReadFile: %w", err))
 		return "", err
