@@ -54,21 +54,16 @@ func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 func (f EKSFetcher) Stop() {
 }
 
-// GetID TODO: Add resource id logic to all AWS resources
-func (r EKSResource) GetID() (string, error) {
-	return "", nil
-}
-
 func (r EKSResource) GetData() interface{} {
 	return r
 }
 
-func (r EKSResource) GetType() string {
+func (r EKSResource) GetMetadata() fetching.ResourceMetadata {
 	//TODO implement me
-	return ""
-}
-
-func (r EKSResource) GetSubType() (string, error) {
-	//TODO implement me
-	return "", nil
+	return fetching.ResourceMetadata{
+		ResourceId: "",
+		Type:       "",
+		SubType:    "",
+		Name:       "",
+	}
 }

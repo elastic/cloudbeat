@@ -92,26 +92,16 @@ func (f *ELBFetcher) GetLoadBalancers() ([]string, error) {
 func (f *ELBFetcher) Stop() {
 }
 
-// GetID TODO: Add resource id logic to all AWS resources
-func (r ELBResource) GetID() (string, error) {
-	return "", nil
-}
-
 func (r ELBResource) GetData() interface{} {
 	return r
 }
 
-func (r ELBResource) GetType() string {
+func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
 	//TODO implement me
-	return ""
-}
-
-func (r ELBResource) GetSubType() (string, error) {
-	//TODO implement me
-	return "", nil
-}
-
-func (r ELBResource) GetName() string {
-	//TODO implement me
-	return ""
+	return fetching.ResourceMetadata{
+		ResourceId: "",
+		Type:       "",
+		SubType:    "",
+		Name:       "",
+	}
 }

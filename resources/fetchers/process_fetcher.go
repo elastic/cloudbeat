@@ -38,6 +38,7 @@ const (
 	// The regex supports two delimiters "=" and ""
 	CMDArgumentMatcher  = "\\b%s[\\s=]\\/?(\\S+)"
 	ProcessResourceType = "process"
+	ProcessSubType      = "process"
 )
 
 type ProcessResource struct {
@@ -164,34 +165,15 @@ func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (inte
 func (f *ProcessesFetcher) Stop() {
 }
 
-func (res ProcessResource) GetID() string {
-	return res.PID
-}
-
 func (res ProcessResource) GetData() interface{} {
 	return res
 }
 
 func (res ProcessResource) GetMetadata() fetching.ResourceMetadata {
-	k8sObjMeta := r.GetK8sObjectMeta()
-	resourceID := k8sObjMeta.UID
-	resourceName := k8sObjMeta.Name
-
 	return fetching.ResourceMetadata{
-		ResourceId: res.GetID(),
+		ResourceId: res.PID,
 		Type:       ProcessResourceType,
-		SubType:    r.GetSubType(),
-		Name:       resourceName,
+		SubType:    ProcessSubType,
+		Name:       res.Stat.Name,
 	}
-}
-
-//func (res ProcessResource) GetType() string {
-//	//TODO implement me
-//	return ProcessResourceType
-//}
-//
-
-func (res ProcessResource) GetSubType() (string, error) {
-	//TODO implement me
-	return ""
 }

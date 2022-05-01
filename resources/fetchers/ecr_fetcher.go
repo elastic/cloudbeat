@@ -94,26 +94,17 @@ func (f *ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error
 	return repositories, nil
 }
 
-// TODO: Add resource id logic to all AWS resources
-func (res ECRResource) GetID() (string, error) {
-	//TODO implement me
-	return "", nil
-}
 func (res ECRResource) GetData() interface{} {
 	//TODO implement me
 	return res
 }
-func (res ECRResource) GetType() string {
-	//TODO implement me
-	return ""
-}
 
-func (res ECRResource) GetSubType() (string, error) {
+func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
 	//TODO implement me
-	return "", nil
-}
-
-func (res ECRResource) GetName() string {
-	//TODO implement me
-	return ""
+	return fetching.ResourceMetadata{
+		ResourceId: "",
+		Type:       "",
+		SubType:    "",
+		Name:       "",
+	}
 }

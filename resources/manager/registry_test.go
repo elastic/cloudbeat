@@ -226,18 +226,15 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	}
 }
 
-func (res NumberResource) GetID() (string, error) {
-	return "", nil
-}
-
 func (res NumberResource) GetData() interface{} {
 	return res.Num
 }
 
-func (res NumberResource) GetType() string {
-	return "number"
-}
-
-func (res NumberResource) GetSubType() (string, error) {
-	return "", nil
+func (res NumberResource) GetMetadata() fetching.ResourceMetadata {
+	return fetching.ResourceMetadata{
+		ResourceId: "",
+		Type:       "number",
+		SubType:    "number",
+		Name:       "number",
+	}
 }

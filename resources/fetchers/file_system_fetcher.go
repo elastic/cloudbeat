@@ -107,7 +107,7 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 	usr, _ := user.LookupId(u)
 	group, _ := user.LookupGroupId(g)
 	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
-	inode := strconv.FormatUint(uint64(stat.Ino), 10)
+	inode := strconv.FormatUint(stat.Ino, 10)
 
 	data := FileSystemResource{
 		FileName: info.Name(),
@@ -125,25 +125,26 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 func (f *FileSystemFetcher) Stop() {
 }
 
-func (r FileSystemResource) GetID() (string, error) {
-	return r.Inode, nil
-}
-
 func (r FileSystemResource) GetData() interface{} {
 	return r
 }
 
-func (r FileSystemResource) GetType() string {
-	return FSResourceType
-}
-
-func (r FileSystemResource) GetSubType() (string, error) {
+func (r FileSystemResource) GetSubType() string {
 	if r.IsDir {
-		return "directory", nil
+		return "directory"
 	}
-	return "file", nil
+	return "file"
 }
 
 func (r FileSystemResource) GetName() string {
 	return r.Path
+}
+
+func (r FileSystemResource) GetMetadata() fetching.ResourceMetadata {
+	return fetching.ResourceMetadata{
+		ResourceId: r.Inode,
+		Type:       FSResourceType,
+		SubType:    r.GetSubType(),
+		Name:       r.Path,
+	}
 }

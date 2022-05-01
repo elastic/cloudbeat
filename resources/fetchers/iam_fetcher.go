@@ -61,12 +61,12 @@ func (r IAMResource) GetData() interface{} {
 	return r.Data
 }
 
-func (r IAMResource) GetType() string {
+func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
 	//TODO implement me
-	return ""
-}
-
-func (r IAMResource) GetSubType() (string, error) {
-	//TODO implement me
-	return "", nil
+	return fetching.ResourceMetadata{
+		ResourceId: "",
+		Type:       "",
+		SubType:    "",
+		Name:       "",
+	}
 }
