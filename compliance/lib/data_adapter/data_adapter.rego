@@ -3,7 +3,7 @@ package compliance.lib.data_adapter
 import future.keywords.in
 
 is_filesystem {
-	input.type == "file-system"
+	input.type == "file"
 }
 
 filename = file_name {

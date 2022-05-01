@@ -14,9 +14,9 @@ not_evaluated_kube_api_input = {
 	"resource": {"kind": "some_kind"},
 }
 
-# genrates `file-system` type input data
+# genrates `file` type input data
 filesystem_input(filename, mode, uid, gid) = {
-	"type": "file-system",
+	"type": "file",
 	"resource": {
 		"path": sprintf("file/path/%s", [filename]),
 		"filename": filename,

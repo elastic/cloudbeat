@@ -8,7 +8,7 @@
       "command": "kube-apiserver --disable-admission-plugins=PodNodeSelector,NamespaceLifecycle"
     },
     {
-      "type": "file-system",
+      "type": "file",
       "mode": "0700",
       "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
       "uid": "root",
@@ -49,7 +49,7 @@
       "title": "The second anyOf schema",
       "examples": [
         {
-          "type": "file-system",
+          "type": "file",
           "mode": "0700",
           "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
           "uid": "root",
@@ -68,7 +68,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "const": "file-system",
+          "const": "file",
           "title": "The type schema"
         },
         "mode": {
