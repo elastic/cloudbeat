@@ -99,9 +99,9 @@ func (r ELBResource) GetData() interface{} {
 func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
 	//TODO implement me
 	return fetching.ResourceMetadata{
-		ResourceId: "",
-		Type:       "",
-		SubType:    "",
-		Name:       "",
+		ID:      "",
+		Type:    "",
+		SubType: "",
+		Name:    "",
 	}
 }

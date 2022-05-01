@@ -102,9 +102,9 @@ func (res ECRResource) GetData() interface{} {
 func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
 	//TODO implement me
 	return fetching.ResourceMetadata{
-		ResourceId: "",
-		Type:       "",
-		SubType:    "",
-		Name:       "",
+		ID:      "",
+		Type:    "",
+		SubType: "",
+		Name:    "",
 	}
 }

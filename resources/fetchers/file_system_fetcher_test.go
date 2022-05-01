@@ -48,9 +48,12 @@ func TestFileFetcherFetchASingleFile(t *testing.T) {
 	fsResource := results[0].(FileSystemResource)
 	assert.Equal(t, files[0], fsResource.FileName)
 	assert.Equal(t, "600", fsResource.FileMode)
-	rid, err := fsResource.GetID()
-	assert.NotNil(t, rid)
-	assert.NoError(t, err)
+
+	rMetadata := fsResource.GetMetadata()
+	assert.NotNil(t, rMetadata.ID)
+	assert.Equal(t, filePaths[0], rMetadata.Name)
+	assert.Equal(t, "file", rMetadata.SubType)
+	assert.Equal(t, FSResourceType, rMetadata.Type)
 }
 
 func TestFileFetcherFetchTwoPatterns(t *testing.T) {
@@ -59,9 +62,9 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	outerDir := createDirectoriesWithFiles(t, "", outerDirectoryName, outerFiles)
 	defer os.RemoveAll(outerDir)
 
-	path := []string{filepath.Join(outerDir, outerFiles[0]), filepath.Join(outerDir, outerFiles[1])}
+	paths := []string{filepath.Join(outerDir, outerFiles[0]), filepath.Join(outerDir, outerFiles[1])}
 	cfg := FileFetcherConfig{
-		Patterns: path,
+		Patterns: paths,
 	}
 	factory := FileSystemFactory{}
 	fileFetcher, err := factory.CreateFrom(cfg)
@@ -74,16 +77,22 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	firstFSResource := results[0].(FileSystemResource)
 	assert.Equal(t, outerFiles[0], firstFSResource.FileName)
 	assert.Equal(t, "600", firstFSResource.FileMode)
-	rid, err := firstFSResource.GetID()
-	assert.NotNil(t, rid)
-	assert.NoError(t, err)
+
+	rMetadata := firstFSResource.GetMetadata()
+	assert.NotNil(t, rMetadata.ID)
+	assert.Equal(t, paths[0], rMetadata.Name)
+	assert.Equal(t, "file", rMetadata.SubType)
+	assert.Equal(t, FSResourceType, rMetadata.Type)
 
 	secFSResource := results[1].(FileSystemResource)
 	assert.Equal(t, outerFiles[1], secFSResource.FileName)
 	assert.Equal(t, "600", secFSResource.FileMode)
-	rid, err = secFSResource.GetID()
-	assert.NotNil(t, rid)
-	assert.NoError(t, err)
+
+	SecResMetadata := secFSResource.GetMetadata()
+	assert.NotNil(t, SecResMetadata.ID)
+	assert.Equal(t, paths[1], SecResMetadata.Name)
+	assert.Equal(t, "file", SecResMetadata.SubType)
+	assert.Equal(t, FSResourceType, SecResMetadata.Type)
 }
 
 func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
@@ -105,12 +114,14 @@ func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
 	assert.Equal(t, 1, len(results))
 
 	fsResource := results[0].(FileSystemResource)
-
 	expectedResult := filepath.Base(dir)
+	rMetadata := fsResource.GetMetadata()
+
 	assert.Equal(t, expectedResult, fsResource.FileName)
-	rid, err := fsResource.GetID()
-	assert.NotNil(t, rid)
-	assert.NoError(t, err)
+	assert.NotNil(t, rMetadata.ID)
+	assert.NotNil(t, rMetadata.Name)
+	assert.Equal(t, "directory", rMetadata.SubType)
+	assert.Equal(t, FSResourceType, rMetadata.Type)
 }
 
 func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
@@ -138,10 +149,13 @@ func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
 	//All inner files should exist in the final result
 	expectedResult := []string{"output.txt", filepath.Base(innerDir)}
 	for i := 0; i < len(results); i++ {
+		rMetadata := results[i].GetMetadata()
 		fileSystemDataResources := results[i].(FileSystemResource)
 		assert.Contains(t, expectedResult, fileSystemDataResources.FileName)
-		rid, err := results[i].GetID()
-		assert.NotNil(t, rid)
+		assert.NotNil(t, rMetadata.SubType)
+		assert.NotNil(t, rMetadata.Name)
+		assert.NotNil(t, rMetadata.ID)
+		assert.Equal(t, FSResourceType, rMetadata.Type)
 		assert.NoError(t, err)
 	}
 }
@@ -178,8 +192,11 @@ func TestFileFetcherFetchDirectoryRecursively(t *testing.T) {
 	//All inner files should exist in the final result
 	for i := 0; i < len(results); i++ {
 		fileSystemDataResources := results[i].(FileSystemResource)
-		rid, err := results[i].GetID()
-		assert.NotNil(t, rid)
+		rMetadata := results[i].GetMetadata()
+		assert.NotNil(t, rMetadata.SubType)
+		assert.NotNil(t, rMetadata.Name)
+		assert.NotNil(t, rMetadata.ID)
+		assert.Equal(t, FSResourceType, rMetadata.Type)
 		assert.NoError(t, err)
 		assert.Contains(t, allFilesName, fileSystemDataResources.FileName)
 	}

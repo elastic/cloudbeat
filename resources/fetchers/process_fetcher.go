@@ -171,9 +171,9 @@ func (res ProcessResource) GetData() interface{} {
 
 func (res ProcessResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
-		ResourceId: res.PID,
-		Type:       ProcessResourceType,
-		SubType:    ProcessSubType,
-		Name:       res.Stat.Name,
+		ID:      res.PID,
+		Type:    ProcessResourceType,
+		SubType: ProcessSubType,
+		Name:    res.Stat.Name,
 	}
 }

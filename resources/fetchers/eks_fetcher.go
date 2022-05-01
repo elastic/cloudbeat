@@ -61,9 +61,9 @@ func (r EKSResource) GetData() interface{} {
 func (r EKSResource) GetMetadata() fetching.ResourceMetadata {
 	//TODO implement me
 	return fetching.ResourceMetadata{
-		ResourceId: "",
-		Type:       "",
-		SubType:    "",
-		Name:       "",
+		ID:      "",
+		Type:    "",
+		SubType: "",
+		Name:    "",
 	}
 }

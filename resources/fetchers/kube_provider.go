@@ -75,10 +75,10 @@ func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
 	resourceName := k8sObjMeta.Name
 
 	return fetching.ResourceMetadata{
-		ResourceId: string(resourceID),
-		Type:       k8sObjType,
-		SubType:    r.GetSubType(),
-		Name:       resourceName,
+		ID:      string(resourceID),
+		Type:    k8sObjType,
+		SubType: r.GetSubType(),
+		Name:    resourceName,
 	}
 }
 

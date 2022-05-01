@@ -44,13 +44,17 @@ type Resource interface {
 	GetData() interface{}
 }
 
-type ResourceMetadata struct {
-	ResourceId string
-	Type       string
-	SubType    string
-	Name       string
+type ResourceFields struct {
+	ResourceMetadata
+	Raw interface{} `json:"raw"`
 }
 
+type ResourceMetadata struct {
+	ID      string `json:"id"`
+	Type    string `json:"type"`
+	SubType string `json:"sub_type"`
+	Name    string `json:"name"`
+}
 type Result struct {
 	Type string `json:"type"`
 	// Golang 1.18 will introduce generics which will be useful for typing the resource field

@@ -40,7 +40,7 @@ type FileSystemResource struct {
 	Uid      string `json:"uid"`
 	Path     string `json:"path"`
 	Inode    string `json:"inode"`
-	IsDir    bool   `json:"isdir"`
+	SubType  string `json:"sub_type"`
 }
 
 // FileSystemFetcher implement the Fetcher interface
@@ -116,7 +116,7 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 		Gid:      group.Name,
 		Path:     path,
 		Inode:    inode,
-		IsDir:    info.IsDir(),
+		SubType:  getSubType(info.IsDir()),
 	}
 
 	return data, nil
@@ -129,22 +129,18 @@ func (r FileSystemResource) GetData() interface{} {
 	return r
 }
 
-func (r FileSystemResource) GetSubType() string {
-	if r.IsDir {
+func (r FileSystemResource) GetMetadata() fetching.ResourceMetadata {
+	return fetching.ResourceMetadata{
+		ID:      r.Inode,
+		Type:    FSResourceType,
+		SubType: r.SubType,
+		Name:    r.Path,
+	}
+}
+
+func getSubType(isDir bool) string {
+	if isDir {
 		return "directory"
 	}
 	return "file"
-}
-
-func (r FileSystemResource) GetName() string {
-	return r.Path
-}
-
-func (r FileSystemResource) GetMetadata() fetching.ResourceMetadata {
-	return fetching.ResourceMetadata{
-		ResourceId: r.Inode,
-		Type:       FSResourceType,
-		SubType:    r.GetSubType(),
-		Name:       r.Path,
-	}
 }

@@ -64,9 +64,9 @@ func (r IAMResource) GetData() interface{} {
 func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
 	//TODO implement me
 	return fetching.ResourceMetadata{
-		ResourceId: "",
-		Type:       "",
-		SubType:    "",
-		Name:       "",
+		ID:      "",
+		Type:    "",
+		SubType: "",
+		Name:    "",
 	}
 }

@@ -232,9 +232,9 @@ func (res NumberResource) GetData() interface{} {
 
 func (res NumberResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
-		ResourceId: "",
-		Type:       "number",
-		SubType:    "number",
-		Name:       "number",
+		ID:      "",
+		Type:    "number",
+		SubType: "number",
+		Name:    "number",
 	}
 }

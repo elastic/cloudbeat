@@ -83,10 +83,9 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metada
 	}
 
 	timestamp := time.Now()
-	resource := ResourceFields{
-		ID:   metadata.ResourceId,
-		Type: metadata.Type,
-		Raw:  fetcherResult.Resource,
+	resource := fetching.ResourceFields{
+		ResourceMetadata: metadata,
+		Raw:              fetcherResult.Resource,
 	}
 
 	for _, finding := range findings {
@@ -95,9 +94,9 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metada
 			Timestamp: timestamp,
 			Fields: common.MapStr{
 				"resource":    resource,
-				"resource_id": metadata.ResourceId, // Deprecated - kept for BC
-				"type":        metadata.Type,       // Deprecated - kept for BC
-				"cycle_id":    cycleMetadata,
+				"resource_id": metadata.ID,   // Deprecated - kept for BC
+				"type":        metadata.Type, // Deprecated - kept for BC
+				"cycle_id":    cycleMetadata.CycleId,
 				"result":      finding.Result,
 				"rule":        finding.Rule,
 			},
