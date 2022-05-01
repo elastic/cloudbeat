@@ -175,6 +175,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: tt.args.namespace,
+					UID: "testing_namespace_uid",
 				},
 			}
 
@@ -204,8 +205,13 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				},
 			}
 
-			transformer, err := NewTransformer(ctx, &s.mockedEvaluator, cdp, testIndex)
+			commonData, err := cdp.FetchCommonData(ctx)
 			s.NoError(err)
+
+			s.Equal(commonData.GetData().clusterId, "testing_namespace_uid", "commonData clusterId is not correct")
+			s.Equal(commonData.GetData().nodeId, "testing_node_uid", "commonData nodeId is not correct")
+
+			transformer := NewTransformer(ctx, &s.mockedEvaluator, commonData, testIndex)
 		
 			generatedEvents := transformer.ProcessAggregatedResources(tt.args.resource, tt.args.metadata)
 

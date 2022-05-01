@@ -50,8 +50,8 @@ func NewCommonDataProvider(cfg config.Config) (CommonDataProvider, error) {
 	}, nil
 }
 
-// TODO: Support environments besides K8S
-func (c CommonDataProvider) fetchCommonData(ctx context.Context) (CommonDataInterface, error) {
+// Note: As of today Kubernetes is the only environment supported by CommonDataProvider
+func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInterface, error) {
 	cm := CommonData{}
 	ClusterId, err := c.getClusterId(ctx)
 	if err != nil {
@@ -98,4 +98,12 @@ func (c CommonDataProvider) getHostName() (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(string(hName)), nil
+}
+
+func (cd CommonData) GetResourceId(rid string) string {
+	return cd.clusterId + cd.nodeId + rid
+}
+
+func (cd CommonData) GetData() CommonData {
+	return cd
 }

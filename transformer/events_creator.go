@@ -32,22 +32,16 @@ import (
 )
 
 type Transformer struct {
-	context       	   context.Context
-	eval          	   evaluator.Evaluator
-	eventMetadata 	   common.MapStr
-	events        	   []beat.Event
-	commonData 		   CommonDataInterface
+	context            context.Context
+	eval               evaluator.Evaluator
+	eventMetadata      common.MapStr
+	events             []beat.Event
+	commonData         CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, eval evaluator.Evaluator, cdProvider CommonDataProvider, index string) (Transformer, error) {
+func NewTransformer(ctx context.Context, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
-
-	commonData, err := cdProvider.fetchCommonData(ctx)
-	if err != nil {
-		logp.Error(fmt.Errorf("NewTransformer error in fetchCommonData: %w", err))
-		return Transformer{}, err
-	}
 
 	return Transformer{
 		context:       ctx,
@@ -55,7 +49,7 @@ func NewTransformer(ctx context.Context, eval evaluator.Evaluator, cdProvider Co
 		eventMetadata: eventMetadata,
 		events:        events,
 		commonData:    commonData,
-	}, nil
+	}
 }
 
 func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, metadata CycleMetadata) []beat.Event {
@@ -75,7 +69,7 @@ func (c *Transformer) processEachResource(results []fetching.Resource, metadata 
 			return
 		}
 		// TODO: Will be changed to combined UUID in next PR
-		rid := c.commonData.getResourceId(resId)
+		rid := c.commonData.GetResourceId(resId)
 		resMetadata := ResourceMetadata{ResourceTypeMetadata: metadata, ResourceId: rid}
 		if err := c.createBeatEvents(result, resMetadata); err != nil {
 			logp.Error(fmt.Errorf("failed to create beat events for, %v, Error: %v", metadata, err))

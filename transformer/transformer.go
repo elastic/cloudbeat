@@ -55,5 +55,6 @@ type CommonData struct {
 }
 
 type CommonDataInterface interface {
-	getResourceId(string) string
+	GetData() CommonData
+	GetResourceId(string) string
 }
