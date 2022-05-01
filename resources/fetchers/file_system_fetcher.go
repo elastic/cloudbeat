@@ -31,7 +31,11 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const FSResourceType = "file"
+const (
+	FSResourceType = "file"
+	FileSubType    = "file"
+	DirSubType     = "directory"
+)
 
 type FileSystemResource struct {
 	FileName string `json:"filename"`
@@ -140,7 +144,7 @@ func (r FileSystemResource) GetMetadata() fetching.ResourceMetadata {
 
 func getSubType(isDir bool) string {
 	if isDir {
-		return "directory"
+		return DirSubType
 	}
-	return "file"
+	return FileSubType
 }

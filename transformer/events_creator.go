@@ -50,10 +50,10 @@ func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string)
 	}
 }
 
-func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, metadata CycleMetadata) []beat.Event {
+func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, cycleMetadata CycleMetadata) []beat.Event {
 	c.events = make([]beat.Event, 0)
 	for _, fetcherResults := range resources {
-		c.processEachResource(fetcherResults, metadata)
+		c.processEachResource(fetcherResults, cycleMetadata)
 	}
 
 	return c.events
@@ -63,7 +63,8 @@ func (c *Transformer) processEachResource(results []fetching.Resource, cycleMeta
 	for _, result := range results {
 		resourceMetadata := result.GetMetadata()
 		if err := c.createBeatEvents(result, resourceMetadata, cycleMetadata); err != nil {
-			logp.Error(fmt.Errorf("failed to create beat events for Cycle ID: %v, Error: %v", cycleMetadata.CycleId, err))
+			logp.Error(fmt.Errorf("failed to create beat events for Cycle ID: %v, Resource Metadata: %v, Error: %v",
+				cycleMetadata.CycleId, resourceMetadata, err))
 		}
 	}
 }

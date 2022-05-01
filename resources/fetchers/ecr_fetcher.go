@@ -95,7 +95,6 @@ func (f *ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error
 }
 
 func (res ECRResource) GetData() interface{} {
-	//TODO implement me
 	return res
 }
 

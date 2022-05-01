@@ -52,7 +52,7 @@ func TestFileFetcherFetchASingleFile(t *testing.T) {
 	rMetadata := fsResource.GetMetadata()
 	assert.NotNil(t, rMetadata.ID)
 	assert.Equal(t, filePaths[0], rMetadata.Name)
-	assert.Equal(t, "file", rMetadata.SubType)
+	assert.Equal(t, FileSubType, rMetadata.SubType)
 	assert.Equal(t, FSResourceType, rMetadata.Type)
 }
 
@@ -81,7 +81,7 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	rMetadata := firstFSResource.GetMetadata()
 	assert.NotNil(t, rMetadata.ID)
 	assert.Equal(t, paths[0], rMetadata.Name)
-	assert.Equal(t, "file", rMetadata.SubType)
+	assert.Equal(t, FileSubType, rMetadata.SubType)
 	assert.Equal(t, FSResourceType, rMetadata.Type)
 
 	secFSResource := results[1].(FileSystemResource)
@@ -91,7 +91,7 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	SecResMetadata := secFSResource.GetMetadata()
 	assert.NotNil(t, SecResMetadata.ID)
 	assert.Equal(t, paths[1], SecResMetadata.Name)
-	assert.Equal(t, "file", SecResMetadata.SubType)
+	assert.Equal(t, FileSubType, SecResMetadata.SubType)
 	assert.Equal(t, FSResourceType, SecResMetadata.Type)
 }
 
@@ -120,7 +120,7 @@ func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
 	assert.Equal(t, expectedResult, fsResource.FileName)
 	assert.NotNil(t, rMetadata.ID)
 	assert.NotNil(t, rMetadata.Name)
-	assert.Equal(t, "directory", rMetadata.SubType)
+	assert.Equal(t, DirSubType, rMetadata.SubType)
 	assert.Equal(t, FSResourceType, rMetadata.Type)
 }
 

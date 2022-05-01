@@ -98,6 +98,7 @@ func (r K8sResource) GetSubType() string {
 	typeMeta, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
 	if !ok {
 		logp.L().Errorf("failed to retrieve type metadata, Resource: %#v", r)
+		return ""
 	}
 
 	return typeMeta.Kind
