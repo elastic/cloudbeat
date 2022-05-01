@@ -4,3 +4,8 @@
 /.github/workflows @davesys911 @oren-zohar
 Makefile @davesys911
 JUSTFILE @davesys911
+
+# Beats related
+*.go @elastic/cloudbeat
+go.mod @elastic/cloudbeat
+go.sum @elastic/cloudbeat
