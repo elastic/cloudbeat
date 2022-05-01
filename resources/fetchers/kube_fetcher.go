@@ -97,6 +97,8 @@ type KubeApiFetcherConfig struct {
 }
 
 func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) error {
+	f.cfg.Interval = time.Duration(time.Duration.Seconds(30)) // todo: hard coded - need to get from config
+
 	watcher, err := kubernetes.NewWatcher(client, r.resource, kubernetes.WatchOptions{
 		SyncTimeout: f.cfg.Interval,
 		Namespace:   r.namespace,
@@ -109,7 +111,7 @@ func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) erro
 	// if the configured Client's Role does not have the necessary permissions to list the Resource
 	// being watched. This needs to be handled.
 	//
-	// When such a failure happens, cloudbeat won't shut down gracefuly, i.e. Stop will not work. This
+	// When such a failure happens, cloudbeat won't shut down gracefully, i.e. Stop will not work. This
 	// happens due to a context.TODO present in the libbeat dependency. It needs to accept context
 	// from the caller instead.
 	if err := watcher.Start(); err != nil {
@@ -127,7 +129,7 @@ func (f *KubeFetcher) initWatchers() error {
 		return fmt.Errorf("could not get k8s client: %w", err)
 	}
 
-	logp.Info("Kubernetes client initiated.")
+	logp.L().Info("Kubernetes client initiated.")
 
 	f.watchers = make([]kubernetes.Watcher, 0)
 
@@ -138,13 +140,13 @@ func (f *KubeFetcher) initWatchers() error {
 		}
 	}
 
-	logp.Info("Kubernetes Watchers initiated.")
+	logp.L().Info("Kubernetes Watchers initiated.")
 
 	return nil
 }
 
 func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("kube fetcher starts to fetch data")
+	logp.L().Info("kube fetcher starts to fetch data")
 	var err error
 	watcherlock.Do(func() {
 		err = f.initWatchers()
