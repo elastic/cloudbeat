@@ -61,16 +61,16 @@ func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, 
 
 func (c *Transformer) processEachResource(results []fetching.Resource, cycleMetadata CycleMetadata) {
 	for _, result := range results {
-		resourceMetadata := result.GetMetadata()
-		if err := c.createBeatEvents(result, resourceMetadata, cycleMetadata); err != nil {
-			logp.Error(fmt.Errorf("failed to create beat events for Cycle ID: %v, Resource Metadata: %v, Error: %v",
-				cycleMetadata.CycleId, resourceMetadata, err))
+		if err := c.createBeatEvents(result, cycleMetadata); err != nil {
+			logp.Error(fmt.Errorf("failed to create beat events for Cycle ID: %v, Error: %v",
+				cycleMetadata.CycleId, err))
 		}
 	}
 }
 
-func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metadata fetching.ResourceMetadata, cycleMetadata CycleMetadata) error {
-	fetcherResult := fetching.Result{Type: metadata.Type, Resource: fetchedResource.GetData()}
+func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleMetadata CycleMetadata) error {
+	resMetadata := fetchedResource.GetMetadata()
+	fetcherResult := fetching.Result{Type: resMetadata.Type, Resource: fetchedResource.GetData()}
 	result, err := c.eval.Decision(c.context, fetcherResult)
 
 	if err != nil {
@@ -85,7 +85,7 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metada
 
 	timestamp := time.Now()
 	resource := fetching.ResourceFields{
-		ResourceMetadata: metadata,
+		ResourceMetadata: resMetadata,
 		Raw:              fetcherResult.Resource,
 	}
 
@@ -95,8 +95,8 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metada
 			Timestamp: timestamp,
 			Fields: common.MapStr{
 				"resource":    resource,
-				"resource_id": metadata.ID,   // Deprecated - kept for BC
-				"type":        metadata.Type, // Deprecated - kept for BC
+				"resource_id": resMetadata.ID,   // Deprecated - kept for BC
+				"type":        resMetadata.Type, // Deprecated - kept for BC
 				"cycle_id":    cycleMetadata.CycleId,
 				"result":      finding.Result,
 				"rule":        finding.Rule,

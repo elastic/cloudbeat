@@ -70,34 +70,33 @@ func (r K8sResource) GetData() interface{} {
 }
 
 func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
-	k8sObjMeta := r.GetK8sObjectMeta()
+	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
+	k8sObjMeta := getK8sObjectMeta(k8sObj)
 	resourceID := k8sObjMeta.UID
 	resourceName := k8sObjMeta.Name
 
 	return fetching.ResourceMetadata{
 		ID:      string(resourceID),
 		Type:    k8sObjType,
-		SubType: r.GetSubType(),
+		SubType: getK8sSubType(k8sObj),
 		Name:    resourceName,
 	}
 }
 
-func (r K8sResource) GetK8sObjectMeta() metav1.ObjectMeta {
-	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
+func getK8sObjectMeta(k8sObj reflect.Value) metav1.ObjectMeta {
 	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
 	if !ok {
-		logp.L().Errorf("failed to retrieve object metadata, Resource: %#v", r)
+		logp.L().Errorf("failed to retrieve object metadata, Resource: %#v", k8sObj)
 		return metav1.ObjectMeta{}
 	}
 
 	return metadata
 }
 
-func (r K8sResource) GetSubType() string {
-	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
+func getK8sSubType(k8sObj reflect.Value) string {
 	typeMeta, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
 	if !ok {
-		logp.L().Errorf("failed to retrieve type metadata, Resource: %#v", r)
+		logp.L().Errorf("failed to retrieve type metadata, Resource: %#v", k8sObj)
 		return ""
 	}
 

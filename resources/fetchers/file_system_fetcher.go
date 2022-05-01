@@ -120,7 +120,7 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 		Gid:      group.Name,
 		Path:     path,
 		Inode:    inode,
-		SubType:  getSubType(info.IsDir()),
+		SubType:  getFSSubType(info),
 	}
 
 	return data, nil
@@ -138,12 +138,12 @@ func (r FileSystemResource) GetMetadata() fetching.ResourceMetadata {
 		ID:      r.Inode,
 		Type:    FSResourceType,
 		SubType: r.SubType,
-		Name:    r.Path,
+		Name:    r.Path, // The Path from the container and not from the host
 	}
 }
 
-func getSubType(isDir bool) string {
-	if isDir {
+func getFSSubType(fileInfo os.FileInfo) string {
+	if fileInfo.IsDir() {
 		return DirSubType
 	}
 	return FileSubType
