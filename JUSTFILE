@@ -29,13 +29,13 @@ build-cloudbeat-debug:
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 deploy-cloudbeat-debug:
-   kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system
+   kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system
 
 delete-cloudbeat:
   kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
 
 delete-cloudbeat-debug:
-  kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system
+  kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system
 
 
 # EKS
