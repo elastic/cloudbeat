@@ -37,6 +37,7 @@ const (
 )
 
 func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
+	logp.L().Info("Fetching Kubernetes data")
 	ret := make([]fetching.Resource, 0)
 
 	for _, watcher := range watchers {

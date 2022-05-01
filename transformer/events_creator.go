@@ -38,11 +38,6 @@ type Transformer struct {
 	events        []beat.Event
 }
 
-type ResourceFields struct {
-	Raw interface{}
-	fetching.ResourceMetadata
-}
-
 func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
@@ -88,20 +83,23 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metada
 	}
 
 	timestamp := time.Now()
+	resource := ResourceFields{
+		ID:   metadata.ResourceId,
+		Type: metadata.Type,
+		Raw:  fetcherResult.Resource,
+	}
+
 	for _, finding := range findings {
 		event := beat.Event{
 			Meta:      c.eventMetadata,
 			Timestamp: timestamp,
 			Fields: common.MapStr{
-				"resource": ResourceFields{
-					Raw:              fetcherResult.Resource,
-					ResourceMetadata: metadata,
-				},
-				"cycle_id": cycleMetadata.CycleId,
-				"result":   finding.Result,
-				"rule":     finding.Rule,
-				// for backward compatability sake
-				"type": metadata.Type,
+				"resource":    resource,
+				"resource_id": metadata.ResourceId, // Deprecated - kept for BC
+				"type":        metadata.Type,       // Deprecated - kept for BC
+				"cycle_id":    cycleMetadata,
+				"result":      finding.Result,
+				"rule":        finding.Rule,
 			},
 		}
 

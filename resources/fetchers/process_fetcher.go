@@ -106,7 +106,7 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 	return ProcessResource{PID: processId, Cmd: cmd, Stat: procStat, ExternalData: configMap}, nil
 }
 
-//getProcessConfigurationFile - reads the configuration file associated with a process.
+// getProcessConfigurationFile - reads the configuration file associated with a process.
 // As an input this function receives a ProcessInputConfiguration that contains ConfigFileArguments, a string array that represents some process flags
 // The function extracts the configuration file associated with each flag and returns it.
 func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {

@@ -34,10 +34,6 @@ func TestEksFactoryTestSuite(t *testing.T) {
 	suite.Run(t, new(EksFactoryTestSuite))
 }
 
-func (s *EksFactoryTestSuite) SetupTest() {
-
-}
-
 func (s *EksFactoryTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		config string
