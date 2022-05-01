@@ -87,7 +87,13 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t, err := transformer.NewTransformer(c, ctx, eval, resultsIndex)
+	cdp, err := transformer.NewCommonDataProvider(c)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+
+	t, err := transformer.NewTransformer(ctx, eval, cdp, resultsIndex)
 	if err != nil {
 		cancel()
 		return nil, err

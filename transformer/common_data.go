@@ -18,5 +18,5 @@
 package transformer
 
 func (c CommonData) getResourceId(rid string) string {
-	return c.ClusterId + c.NodeId + rid
+	return c.clusterId + c.nodeId + rid
 }
