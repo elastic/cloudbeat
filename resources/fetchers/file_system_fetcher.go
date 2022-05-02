@@ -31,6 +31,12 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
+const (
+	FSResourceType = "file"
+	FileSubType    = "file"
+	DirSubType     = "directory"
+)
+
 type FileSystemResource struct {
 	FileName string `json:"filename"`
 	FileMode string `json:"mode"`
@@ -38,6 +44,7 @@ type FileSystemResource struct {
 	Uid      string `json:"uid"`
 	Path     string `json:"path"`
 	Inode    string `json:"inode"`
+	SubType  string `json:"sub_type"`
 }
 
 // FileSystemFetcher implement the Fetcher interface
@@ -104,7 +111,7 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 	usr, _ := user.LookupId(u)
 	group, _ := user.LookupGroupId(g)
 	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
-	inode := strconv.FormatUint(uint64(stat.Ino), 10)
+	inode := strconv.FormatUint(stat.Ino, 10)
 
 	data := FileSystemResource{
 		FileName: info.Name(),
@@ -113,6 +120,7 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 		Gid:      group.Name,
 		Path:     path,
 		Inode:    inode,
+		SubType:  getFSSubType(info),
 	}
 
 	return data, nil
@@ -121,10 +129,22 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 func (f *FileSystemFetcher) Stop() {
 }
 
-func (r FileSystemResource) GetID() (string, error) {
-	return r.Inode, nil
-}
-
 func (r FileSystemResource) GetData() interface{} {
 	return r
+}
+
+func (r FileSystemResource) GetMetadata() fetching.ResourceMetadata {
+	return fetching.ResourceMetadata{
+		ID:      r.Inode,
+		Type:    FSResourceType,
+		SubType: r.SubType,
+		Name:    r.Path, // The Path from the container and not from the host
+	}
+}
+
+func getFSSubType(fileInfo os.FileInfo) string {
+	if fileInfo.IsDir() {
+		return DirSubType
+	}
+	return FileSubType
 }

@@ -32,11 +32,11 @@ import (
 )
 
 type Transformer struct {
-	context            context.Context
-	eval               evaluator.Evaluator
-	eventMetadata      common.MapStr
-	events             []beat.Event
-	commonData         CommonDataInterface
+	context       context.Context
+	eval          evaluator.Evaluator
+	eventMetadata common.MapStr
+	events        []beat.Event
+	commonData    CommonDataInterface
 }
 
 func NewTransformer(ctx context.Context, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
@@ -52,33 +52,30 @@ func NewTransformer(ctx context.Context, eval evaluator.Evaluator, commonData Co
 	}
 }
 
-func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, metadata CycleMetadata) []beat.Event {
+func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, cycleMetadata CycleMetadata) []beat.Event {
 	c.events = make([]beat.Event, 0)
-	for fetcherType, fetcherResults := range resources {
-		c.processEachResource(fetcherResults, ResourceTypeMetadata{CycleMetadata: metadata, Type: fetcherType})
+	for _, fetcherResults := range resources {
+		c.processEachResource(fetcherResults, cycleMetadata)
 	}
 
 	return c.events
 }
 
-func (c *Transformer) processEachResource(results []fetching.Resource, metadata ResourceTypeMetadata) {
+func (c *Transformer) processEachResource(results []fetching.Resource, cycleMetadata CycleMetadata) {
 	for _, result := range results {
-		resId, err := result.GetID()
-		if err != nil {
-			logp.Error(fmt.Errorf("could not get resource ID, Error: %v", err))
-			return
-		}
-		// TODO: Will be changed to combined UUID in next PR
-		rid := c.commonData.GetResourceId(resId)
-		resMetadata := ResourceMetadata{ResourceTypeMetadata: metadata, ResourceId: rid}
-		if err := c.createBeatEvents(result, resMetadata); err != nil {
-			logp.Error(fmt.Errorf("failed to create beat events for, %v, Error: %v", metadata, err))
+		if err := c.createBeatEvents(result, cycleMetadata); err != nil {
+			logp.Error(fmt.Errorf("failed to create beat events for Cycle ID: %v, Error: %v",
+				cycleMetadata.CycleId, err))
 		}
 	}
 }
 
-func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metadata ResourceMetadata) error {
-	fetcherResult := fetching.Result{Type: metadata.Type, Resource: fetchedResource.GetData()}
+func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleMetadata CycleMetadata) error {
+	resMetadata := fetchedResource.GetMetadata()
+	// TODO: Will be changed to combined UUID in next PR
+	resMetadata.ID = c.commonData.GetResourceId(resMetadata.ID)
+	fetcherResult := fetching.Result{Type: resMetadata.Type, Resource: fetchedResource.GetData()}
+
 	result, err := c.eval.Decision(c.context, fetcherResult)
 
 	if err != nil {
@@ -92,10 +89,9 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metada
 	}
 
 	timestamp := time.Now()
-	resource := ResourceFields{
-		ID:   metadata.ResourceId,
-		Type: metadata.Type,
-		Raw:  fetcherResult.Resource,
+	resource := fetching.ResourceFields{
+		ResourceMetadata: resMetadata,
+		Raw:              fetcherResult.Resource,
 	}
 
 	for _, finding := range findings {
@@ -104,9 +100,9 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metada
 			Timestamp: timestamp,
 			Fields: common.MapStr{
 				"resource":    resource,
-				"resource_id": metadata.ResourceId, // Deprecated - kept for BC
-				"type":        metadata.Type,       // Deprecated - kept for BC
-				"cycle_id":    metadata.CycleId,
+				"resource_id": resMetadata.ID,   // Deprecated - kept for BC
+				"type":        resMetadata.Type, // Deprecated - kept for BC
+				"cycle_id":    cycleMetadata.CycleId,
 				"result":      finding.Result,
 				"rule":        finding.Rule,
 			},

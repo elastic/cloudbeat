@@ -52,6 +52,7 @@
         "mode": "700",
         "path": "/hostfs/etc/kubernetes/scheduler.conf",
         "type": "file-system",
-        "uid": "root"
+        "uid": "root",
+        "sub_type": "file"
     }
 }

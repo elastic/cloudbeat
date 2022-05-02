@@ -29,17 +29,6 @@ type ResourceTypeMetadata struct {
 	Type string
 }
 
-type ResourceFields struct {
-	ID   string      `json:"id"`
-	Type string      `json:"type"`
-	Raw  interface{} `json:"raw"`
-}
-
-type ResourceMetadata struct {
-	ResourceTypeMetadata
-	ResourceId string
-}
-
 type CycleMetadata struct {
 	CycleId uuid.UUID
 }

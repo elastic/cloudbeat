@@ -36,7 +36,9 @@ const (
 	// Expects format as the following: --<key><delimiter><value>.
 	// For example: --config=a.json
 	// The regex supports two delimiters "=" and ""
-	CMDArgumentMatcher = "\\b%s[\\s=]\\/?(\\S+)"
+	CMDArgumentMatcher  = "\\b%s[\\s=]\\/?(\\S+)"
+	ProcessResourceType = "process"
+	ProcessSubType      = "process"
 )
 
 type ProcessResource struct {
@@ -163,10 +165,15 @@ func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (inte
 func (f *ProcessesFetcher) Stop() {
 }
 
-func (res ProcessResource) GetID() (string, error) {
-	return res.PID, nil
-}
-
 func (res ProcessResource) GetData() interface{} {
 	return res
+}
+
+func (res ProcessResource) GetMetadata() fetching.ResourceMetadata {
+	return fetching.ResourceMetadata{
+		ID:      res.PID,
+		Type:    ProcessResourceType,
+		SubType: ProcessSubType,
+		Name:    res.Stat.Name,
+	}
 }
