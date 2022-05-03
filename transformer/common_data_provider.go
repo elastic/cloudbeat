@@ -24,6 +24,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gofrs/uuid"
+
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/config"
@@ -36,6 +38,7 @@ const (
 	hostNameFile = "hostname"
 	namespace = "kube-system"
 )
+var uuid_namespace uuid.UUID = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
 
 func NewCommonDataProvider(cfg config.Config) (CommonDataProvider, error) {
 	KubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
@@ -100,8 +103,9 @@ func (c CommonDataProvider) getHostName() (string, error) {
 	return strings.TrimSpace(string(hName)), nil
 }
 
-func (cd CommonData) GetResourceId(rid string) string {
-	return cd.clusterId + cd.nodeId + rid
+func (cd CommonData) GetResourceId(id string) string {
+	rid := cd.clusterId + cd.nodeId + id
+	return uuid.NewV5(uuid_namespace, rid).String()
 }
 
 func (cd CommonData) GetData() CommonData {
