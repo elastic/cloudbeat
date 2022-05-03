@@ -32,4 +32,5 @@ docker run --rm \
       --branch "$BRANCH" \
       --commit `git rev-parse HEAD` \
       --workflow "$WORKFLOW" \
+      --version "$VERSION" \
       --artifact-set main
