@@ -135,7 +135,7 @@ func (r FileSystemResource) GetData() interface{} {
 
 func (r FileSystemResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
-		ID:      r.Inode,
+		ID:      r.Path,
 		Type:    FSResourceType,
 		SubType: r.SubType,
 		Name:    r.Path, // The Path from the container and not from the host
