@@ -20,15 +20,16 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"io/fs"
+	"path/filepath"
+	"regexp"
+
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"io/fs"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
-	"path/filepath"
-	"regexp"
 )
 
 const (
@@ -171,7 +172,7 @@ func (res ProcessResource) GetData() interface{} {
 
 func (res ProcessResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
-		ID:      res.PID,
+		ID:      res.PID + res.Stat.StartTime,
 		Type:    ProcessResourceType,
 		SubType: ProcessSubType,
 		Name:    res.Stat.Name,
