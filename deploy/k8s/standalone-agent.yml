@@ -7,15 +7,15 @@ metadata:
     k8s-app: elastic-agent
 data:
   agent.yml: |-
-    id: 27c6c5f0-c570-11ec-b813-e96f93aa68d5
+    id: c6d31f60-cae1-11ec-888f-d3279d61d919
     revision: 2
     outputs:
       default:
         type: elasticsearch
         hosts:
-          - '${ES_HOST}'
-        username: '${ES_USERNAME}'
-        password: '${ES_PASSWORD}'
+          - 'https://elasticsearch-csp-demo-es-http.csp-elk.svc:9200'
+        username: '{ES_USERNAME}'
+        password: '{ES_PASSWORD}'
     output_permissions:
       default:
         _elastic_agent_monitoring:
@@ -205,10 +205,10 @@ data:
               privileges:
                 - auto_configure
                 - create_doc
-        cis_kubernetes_benchmark-1:
+        cloud_security_posture-1:
           indices:
             - names:
-                - logs-cis_kubernetes_benchmark.findings-default
+                - logs-cloud_security_posture.findings-default
               privileges:
                 - auto_configure
                 - create_doc
@@ -219,9 +219,8 @@ data:
         namespace: default
         logs: true
         metrics: true
-        logging.level: debug
     inputs:
-      - id: logfile-system-095fd5f7-6aaf-4611-b527-640348d24457
+      - id: logfile-system-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
         name: system-2
         revision: 1
         type: logfile
@@ -229,11 +228,11 @@ data:
         meta:
           package:
             name: system
-            version: 1.12.1
+            version: 1.13.0
         data_stream:
           namespace: default
         streams:
-          - id: logfile-system.auth-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: logfile-system.auth-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.auth
               type: logs
@@ -247,7 +246,7 @@ data:
               match: after
             processors:
               - add_locale: null
-          - id: logfile-system.syslog-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: logfile-system.syslog-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.syslog
               type: logs
@@ -261,7 +260,7 @@ data:
               match: after
             processors:
               - add_locale: null
-      - id: winlog-system-095fd5f7-6aaf-4611-b527-640348d24457
+      - id: winlog-system-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
         name: system-2
         revision: 1
         type: winlog
@@ -269,32 +268,32 @@ data:
         meta:
           package:
             name: system
-            version: 1.12.1
+            version: 1.13.0
         data_stream:
           namespace: default
         streams:
-          - id: winlog-system.application-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: winlog-system.application-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             name: Application
             data_stream:
               dataset: system.application
               type: logs
             condition: '${host.platform} == ''windows'''
             ignore_older: 72h
-          - id: winlog-system.security-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: winlog-system.security-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             name: Security
             data_stream:
               dataset: system.security
               type: logs
             condition: '${host.platform} == ''windows'''
             ignore_older: 72h
-          - id: winlog-system.system-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: winlog-system.system-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             name: System
             data_stream:
               dataset: system.system
               type: logs
             condition: '${host.platform} == ''windows'''
             ignore_older: 72h
-      - id: system/metrics-system-095fd5f7-6aaf-4611-b527-640348d24457
+      - id: system/metrics-system-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
         name: system-2
         revision: 1
         type: system/metrics
@@ -302,11 +301,11 @@ data:
         meta:
           package:
             name: system
-            version: 1.12.1
+            version: 1.13.0
         data_stream:
           namespace: default
         streams:
-          - id: system/metrics-system.cpu-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: system/metrics-system.cpu-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.cpu
               type: metrics
@@ -316,7 +315,7 @@ data:
               - percentages
               - normalized_percentages
             period: 10s
-          - id: system/metrics-system.diskio-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: system/metrics-system.diskio-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.diskio
               type: metrics
@@ -324,7 +323,7 @@ data:
               - diskio
             diskio.include_devices: null
             period: 10s
-          - id: system/metrics-system.filesystem-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: system/metrics-system.filesystem-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.filesystem
               type: metrics
@@ -334,7 +333,7 @@ data:
             processors:
               - drop_event.when.regexp:
                   system.filesystem.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
-          - id: system/metrics-system.fsstat-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: system/metrics-system.fsstat-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.fsstat
               type: metrics
@@ -344,7 +343,7 @@ data:
             processors:
               - drop_event.when.regexp:
                   system.fsstat.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
-          - id: system/metrics-system.load-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: system/metrics-system.load-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.load
               type: metrics
@@ -352,14 +351,14 @@ data:
               - load
             condition: '${host.platform} != ''windows'''
             period: 10s
-          - id: system/metrics-system.memory-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: system/metrics-system.memory-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.memory
               type: metrics
             metricsets:
               - memory
             period: 10s
-          - id: system/metrics-system.network-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: system/metrics-system.network-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.network
               type: metrics
@@ -367,7 +366,7 @@ data:
               - network
             period: 10s
             network.interfaces: null
-          - id: system/metrics-system.process-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: system/metrics-system.process-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.process
               type: metrics
@@ -382,7 +381,7 @@ data:
             processes:
               - .*
           - id: >-
-              system/metrics-system.process.summary-095fd5f7-6aaf-4611-b527-640348d24457
+              system/metrics-system.process.summary-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.process.summary
               type: metrics
@@ -390,36 +389,36 @@ data:
               - process_summary
             period: 10s
           - id: >-
-              system/metrics-system.socket_summary-095fd5f7-6aaf-4611-b527-640348d24457
+              system/metrics-system.socket_summary-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.socket_summary
               type: metrics
             metricsets:
               - socket_summary
             period: 10s
-          - id: system/metrics-system.uptime-095fd5f7-6aaf-4611-b527-640348d24457
+          - id: system/metrics-system.uptime-c94bfeb3-2d63-44cf-a94d-aaf3d9430013
             data_stream:
               dataset: system.uptime
               type: metrics
             metricsets:
               - uptime
             period: 10s
-      - id: e7db4bd9-4085-4775-aff6-7e6a46a23b88
-        name: cis_kubernetes_benchmark-1
+      - id: 7f6d4150-f360-4fba-96f1-eb09d3063e47
+        name: cloud_security_posture-1
         revision: 1
         type: cloudbeat
         use_output: default
         meta:
           package:
-            name: cis_kubernetes_benchmark
-            version: 0.0.1
+            name: cloud_security_posture
+            version: 0.0.5
         data_stream:
           namespace: default
         streams:
           - id: >-
-              cloudbeat-cis_kubernetes_benchmark.findings-e7db4bd9-4085-4775-aff6-7e6a46a23b88
+              cloudbeat-cloud_security_posture.findings-7f6d4150-f360-4fba-96f1-eb09d3063e47
             data_stream:
-              dataset: cis_kubernetes_benchmark.findings
+              dataset: cloud_security_posture.findings
               type: logs
             processors:
               - add_cluster_id: null
@@ -629,20 +628,20 @@ rules:
       - "/metrics"
     verbs:
       - get
-  - apiGroups: ["rbac.authorization.k8s.io/v1"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
     resources:
       - clusterrolebindings
       - clusterroles
       - rolebindings
       - roles
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["networking.k8s.io/v1"]
+  - apiGroups: ["networking.k8s.io"]
     resources:
       - ingressclasses
       - ingresses
       - networkpolicies
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["policy/v1beta1"]
+  - apiGroups: ["policy"]
     resources:
       - podsecuritypolicies
     verbs: ["get", "list", "watch"]
