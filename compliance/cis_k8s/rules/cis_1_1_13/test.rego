@@ -7,8 +7,12 @@ test_violation {
 	test.assert_fail(finding) with input as rule_input("admin.conf", "0700")
 }
 
+test_violation_too {
+	test.assert_fail(finding) with input as rule_input("admin.conf", "0644")
+}
+
 test_pass {
-	test.assert_pass(finding) with input as rule_input("admin.conf", "0644")
+	test.assert_pass(finding) with input as rule_input("admin.conf", "0600")
 }
 
 test_not_evaluated {

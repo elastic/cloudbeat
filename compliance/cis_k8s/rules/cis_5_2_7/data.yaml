@@ -1,50 +1,41 @@
 metadata:
-  id: e479b6a8-1594-5904-8206-19a8f03de9c0
-  name: Minimize the admission of containers with the NET_RAW capability (Automated)
+  id: b2d85ce5-e820-580d-98ba-a7e3ac83eeb3
+  name: Minimize the admission of root containers (Automated)
   profile_applicability: |
-    * Level 1 - Master Node
-  description: >
-    Do not generally permit containers with the potentially dangerous NET_RAW
-    capability.
+    * Level 2 - Master Node
+  description: |
+    Do not generally permit containers to be run as the root user.
   rationale: >
-    Containers run with a default set of capabilities as assigned by the
-    Container Runtime. By default this can include potentially dangerous
-    capabilities. With Docker as the container runtime the NET_RAW capability is
-    enabled which may be misused by malicious containers. Ideally, all
-    containers should drop this capability. There should be at least one
-    PodSecurityPolicy (PSP) defined which prevents containers with the NET_RAW
-    capability from launching. If you need to run containers with this
-    capability, this should be defined in a separate PSP and you should
-    carefully check RBAC controls to ensure that only limited service accounts
-    and users are given permission to access that PSP.
+    Containers may run as any Linux user. Containers which run as the root user,
+    whilst constrained by Container Runtime security features still have a
+    escalated likelihood of container breakout. Ideally, all containers should
+    run as a defined non-UID 0 user. There should be at least one
+    admission control policy defined which does not permit root
+    containers. If you need to run root containers, this should be defined in a
+    separate policy and you should carefully check to ensure that
+    only limited service accounts and users are given permission to use that
+    policy.
   audit: |
-    Get the set of PSPs with the following command:
-    ```
-    kubectl get psp
-    ```
-    For each PSP, check whether NET_RAW is disabled:
-    ```
-    kubectl get psp <name> -o=jsonpath='{.spec.requiredDropCapabilities}'
-    ```
-    Verify that there is at least one PSP which returns NET_RAW or ALL.
+    List the policies in use for each namespace in the cluster, ensure that each policy restricts 
+    the use of root containers by setting `MustRunAsNonRoot` or `MustRunAs` with the range of
+    UIDs not including 0.
   remediation: |
-    Create a PSP as described in the Kubernetes documentation, ensuring that the
-    `.spec.requiredDropCapabilities` is set to include either `NET_RAW` or `ALL`.
-  impact: >
-    Pods with containers which run with the NET_RAW capability will not be
-    permitted.
+    Create a policy for each namespace in the cluster, ensuring that either `MustRunAsNonRoot` 
+    or `MustRunAs` with the range of UIDs not including 0, is set.
+  impact: |
+    Pods with containers which run as the root user will not be permitted.
   default_value: |
-    By default, PodSecurityPolicies are not defined.
+    By default, there are no restrictions on the use of root containers and if a User is not 
+    specified in the image, the container will run as root.
   references: |
-    1. [https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies)
-    2. [https://www.nccgroup.trust/uk/our-research/abusing-privileged-and-unprivileged-linux-containers/](https://www.nccgroup.trust/uk/our-research/abusing-privileged-and-unprivileged-linux-containers/)
-  section: Pod Security Policies
+    1. [https://kubernetes.io/docs/concepts/security/pod-security-standards/](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+  section: Pod Security Standards
   version: "1.0"
   tags:
     - CIS
     - Kubernetes
     - CIS 5.2.7
-    - Pod Security Policies
+    - Pod Security Standards
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

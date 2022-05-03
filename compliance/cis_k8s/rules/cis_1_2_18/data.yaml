@@ -1,38 +1,36 @@
 metadata:
-  id: 50ae51db-6bd4-5b20-92c9-fe83fed7efa5
-  name: Ensure that the --insecure-port argument is set to 0 (Automated)
+  id: 0434fc0b-4b72-5a73-8bee-8c8c40345165
+  name: Ensure that the --profiling argument is set to false (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Do not bind to insecure port.
+    Disable profiling, if not needed.
   rationale: >
-    Setting up the apiserver to serve on an insecure port would allow
-    unauthenticated and unencrypted access to your master node. This would allow
-    attackers who could access this port, to easily take control of the cluster.
+    Profiling allows for the identification of specific performance bottlenecks.
+    It generates a significant amount of program data that could potentially be
+    exploited to uncover system and program details. If you are not experiencing
+    any bottlenecks and do not need the profiler for troubleshooting purposes,
+    it is recommended to turn it off to reduce the potential attack surface.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--insecure-port` argument is set to `0`.
+    Verify that the `--profiling` argument is set to `false`.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the below parameter.
+    on the control plane node and set the below parameter.
     ```
-    --insecure-port=0
+    --profiling=false
     ```
   impact: |
-    All components that use the API must connect via the secured port,
-    authenticate themselves, and be authorized to use the API. This includes: 
-    * kube-controller-manager 
-    * kube-proxy 
-    * kube-scheduler 
-    * kubelets
+    Profiling information would not be available.
   default_value: |
-    By default, the insecure port is set to 8080.
+    By default, profiling is enabled.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+    2. [https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md](https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md)
   section: API Server
   version: "1.0"
   tags:
@@ -41,5 +39,5 @@ metadata:
     - CIS 1.2.18
     - API Server
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

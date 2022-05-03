@@ -1,5 +1,5 @@
 metadata:
-  id: 66ce739b-235a-5715-be8b-402f403ad6ae
+  id: 307e747c-5998-5bf8-a8e3-d24aab71e558
   name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
     (Automated)
   profile_applicability: |
@@ -51,5 +51,5 @@ metadata:
     - CIS 4.2.2
     - Kubelet
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

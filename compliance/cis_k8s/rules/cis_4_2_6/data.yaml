@@ -1,5 +1,5 @@
 metadata:
-  id: 3e13b894-3ebe-554f-9808-c1a5b041d524
+  id: 1727f238-cf56-52bb-86ed-ddf0c141eebc
   name: Ensure that the --protect-kernel-defaults argument is set to true (Automated)
   profile_applicability: |
     * Level 1 - Worker Node
@@ -49,5 +49,5 @@ metadata:
     - CIS 4.2.6
     - Kubelet
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

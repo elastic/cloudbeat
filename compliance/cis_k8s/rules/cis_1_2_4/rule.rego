@@ -1,24 +1,18 @@
 package compliance.cis_k8s.rules.cis_1_2_4
 
 import data.compliance.cis_k8s
+import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)
-
-# evaluate
-process_args := cis_k8s.data_adapter.process_args
-
-default rule_evaluation = false
-
-rule_evaluation {
-	process_args["--kubelet-client-certificate"]
-	process_args["--kubelet-client-key"]
-}
-
+# Ensure that the --kubelet-https argument is set to true (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
+
+	# evaluate
+	process_args := cis_k8s.data_adapter.process_args
+	rule_evaluation = assert.is_false(common.contains_key_with_value(process_args, "--kubelet-https", "false"))
 
 	# set result
 	result := {

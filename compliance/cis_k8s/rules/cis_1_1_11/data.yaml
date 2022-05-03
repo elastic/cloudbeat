@@ -1,5 +1,5 @@
 metadata:
-  id: 564839fa-e3e8-52f3-b8db-b7f8ad9b4a59
+  id: 3e07507c-31ba-5d01-800f-cfb8c0a09787
   name: Ensure that the etcd data directory permissions are set to 700 or more
     restrictive (Automated)
   profile_applicability: |
@@ -42,13 +42,13 @@ metadata:
   references: |
     1. [https://coreos.com/etcd/docs/latest/op-guide/configuration.html#data-dir](https://coreos.com/etcd/docs/latest/op-guide/configuration.html#data-dir)
     2. [https://kubernetes.io/docs/admin/etcd/](https://kubernetes.io/docs/admin/etcd/)
-  section: Master Node Configuration Files
+  section: Control Plane Node Configuration Files
   version: "1.0"
   tags:
     - CIS
     - Kubernetes
     - CIS 1.1.11
-    - Master Node Configuration Files
+    - Control Plane Node Configuration Files
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

@@ -1,17 +1,18 @@
-package compliance.cis_k8s.rules.cis_1_2_31
+package compliance.cis_k8s.rules.cis_1_2_11
 
 import data.compliance.cis_k8s
+import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --etcd-cafile argument is set as appropriate (Automated)
+# Ensure that the admission control plugin AlwaysAdmit is not set (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
 
 	# evaluate
 	process_args := cis_k8s.data_adapter.process_args
-	rule_evaluation := common.contains_key(process_args, "--etcd-cafile")
+	rule_evaluation := assert.is_false(common.arg_values_contains(process_args, "--enable-admission-plugins", "AlwaysAdmit"))
 
 	# set result
 	result := {

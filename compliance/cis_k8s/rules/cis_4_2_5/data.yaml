@@ -1,5 +1,5 @@
 metadata:
-  id: 4cc5aa32-a062-5d5a-b1aa-04b21ed36fbe
+  id: db3446ed-5542-59b0-a9e3-499814d5bde3
   name: Ensure that the --streaming-connection-idle-timeout argument is not set to 0 (Manual)
   profile_applicability: |
     * Level 1 - Worker Node
@@ -51,5 +51,5 @@ metadata:
   - CIS 4.2.5
   - Kubelet
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

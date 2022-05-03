@@ -4,14 +4,21 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --kubelet-certificate-authority argument is set as appropriate (Automated)
+# Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate (Automated)
+
+# evaluate
+process_args := cis_k8s.data_adapter.process_args
+
+default rule_evaluation = false
+
+rule_evaluation {
+	process_args["--kubelet-client-certificate"]
+	process_args["--kubelet-client-key"]
+}
+
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
-
-	# evaluate
-	process_args := cis_k8s.data_adapter.process_args
-	rule_evaluation := common.contains_key(process_args, "--kubelet-certificate-authority")
 
 	# set result
 	result := {

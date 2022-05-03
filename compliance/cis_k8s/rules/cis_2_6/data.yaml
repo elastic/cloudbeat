@@ -1,5 +1,5 @@
 metadata:
-  id: cef9ccbc-fa05-5fd5-b55b-c8d3ff21ab9b
+  id: 59f978f4-c825-578a-bc21-ab5f395c5cd9
   name: Ensure that the --peer-auto-tls argument is not set to true (Automated)
   profile_applicability: |
     * Level 1 - Master Node
@@ -23,7 +23,7 @@ metadata:
   remediation: |
     Edit the etcd pod specification file `/etc/kubernetes/manifests/etcd.yaml`
     on
-    the master
+    the control plane
     node and either remove the `--peer-auto-tls` parameter or set it to `false`.
     ```
     --peer-auto-tls=false
@@ -47,5 +47,5 @@ metadata:
     - CIS 2.6
     - etcd
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

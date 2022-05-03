@@ -1,36 +1,39 @@
 metadata:
-  id: c24bf963-7d41-5b4f-9724-c53133a6d495
-  name: Ensure that the --profiling argument is set to false (Automated)
+  id: 058dd742-d183-57c8-9115-16ab34615037
+  name:
+    Ensure that the --audit-log-maxage argument is set to 30 or as appropriate
+    (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Disable profiling, if not needed.
+    Retain the logs for at least 30 days or as appropriate.
   rationale: >
-    Profiling allows for the identification of specific performance bottlenecks.
-    It generates a significant amount of program data that could potentially be
-    exploited to uncover system and program details. If you are not experiencing
-    any bottlenecks and do not need the profiler for troubleshooting purposes,
-    it is recommended to turn it off to reduce the potential attack surface.
+    Retaining logs for at least 30 days ensures that you can go back in time and
+    investigate or
+    correlate any events. Set your audit log retention period to 30 days or as per your business
+    requirements.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--profiling` argument is set to `false`.
+    Verify that the `--audit-log-maxage` argument is set to `30` or as appropriate.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the below parameter.
+    on the control plane node and set the `--audit-log-maxage` parameter to 30 or
+    as an appropriate number of days:
     ```
-    --profiling=false
+    --audit-log-maxage=30
     ```
   impact: |
-    Profiling information would not be available.
+    None
   default_value: |
-    By default, profiling is enabled.
+    By default, auditing is not enabled.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md](https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md)
+    2. [https://kubernetes.io/docs/concepts/cluster-administration/audit/](https://kubernetes.io/docs/concepts/cluster-administration/audit/)
+    3. [https://github.com/kubernetes/features/issues/22](https://github.com/kubernetes/features/issues/22)
   section: API Server
   version: "1.0"
   tags:
@@ -39,5 +42,5 @@ metadata:
     - CIS 1.2.20
     - API Server
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

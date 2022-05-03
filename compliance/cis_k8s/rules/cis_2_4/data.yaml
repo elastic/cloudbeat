@@ -1,5 +1,5 @@
 metadata:
-  id: f594f927-576a-5a07-9e1f-a65b8bfadfda
+  id: 7295eff3-3d9d-5032-8552-bcce9cba8a26
   name:
     Ensure that the --peer-cert-file and --peer-key-file arguments are set as
     appropriate (Automated)
@@ -25,7 +25,7 @@ metadata:
     appropriate
     for your etcd cluster.
     Then, edit the etcd pod specification file `/etc/kubernetes/manifests/etcd.yaml` on the
-    master node and set the below parameters.
+    control plane node and set the below parameters.
     ```
     --peer-client-file=</path/to/peer-cert-file>
     --peer-key-file=</path/to/peer-key-file>
@@ -48,5 +48,5 @@ metadata:
     - CIS 2.4
     - etcd
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

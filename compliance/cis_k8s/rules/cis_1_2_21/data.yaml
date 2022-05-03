@@ -1,31 +1,30 @@
 metadata:
-  id: 8c7d61f2-700a-5822-8f6b-e36ad193f83e
-  name: Ensure that the --audit-log-path argument is set (Automated)
+  id: 861cb7eb-4db7-58c2-b849-19c2437c97f2
+  name: Ensure that the --audit-log-maxbackup argument is set to 10 or as
+    appropriate (Automated)
   profile_applicability: |
     * Level 1 - Master Node
-  description: >
-    Enable auditing on the Kubernetes API Server and set the desired audit log
-    path.
+  description: |
+    Retain 10 or an appropriate number of old log files.
   rationale: >
-    Auditing the Kubernetes API Server provides a security-relevant
-    chronological set of records documenting the sequence of activities that
-    have affected system by individual users, administrators or other components
-    of the system. Even though currently, Kubernetes provides only basic audit
-    capabilities, it should be enabled. You can enable it by setting an
-    appropriate audit log path.
+    Kubernetes automatically rotates the log files. Retaining old log files
+    ensures that you would have sufficient log data available for carrying out
+    any investigation or correlation. For example, if you have set file size of
+    100 MB and the number of old log files to keep as 10, you would approximate
+    have 1 GB of log data that you could potentially use for your analysis.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--audit-log-path` argument is set as appropriate.
+    Verify that the `--audit-log-maxbackup` argument is set to `10` or as appropriate.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the `--audit-log-path` parameter to a suitable
-    path and file where you would like audit logs to be written, for example:
+    on the control plane node and set the `--audit-log-maxbackup` parameter to 10
+    or to an appropriate value.
     ```
-    --audit-log-path=/var/log/apiserver/audit.log
+    --audit-log-maxbackup=10
     ```
   impact: |
     None
@@ -43,5 +42,5 @@ metadata:
     - CIS 1.2.21
     - API Server
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

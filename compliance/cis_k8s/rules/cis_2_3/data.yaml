@@ -1,5 +1,5 @@
 metadata:
-  id: 7aaeeea4-1aa8-54e3-9e8d-2d59e97abebf
+  id: 43af3bd9-c0b8-5f06-b1c0-8a1295983524
   name: Ensure that the --auto-tls argument is not set to true (Automated)
   profile_applicability: |
     * Level 1 - Master Node
@@ -20,7 +20,7 @@ metadata:
   remediation: |
     Edit the etcd pod specification file `/etc/kubernetes/manifests/etcd.yaml`
     on
-    the master
+    the control plane
     node and either remove the `--auto-tls` parameter or set it to `false`.
     ```
     --auto-tls=false
@@ -41,5 +41,5 @@ metadata:
     - CIS 2.3
     - etcd
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

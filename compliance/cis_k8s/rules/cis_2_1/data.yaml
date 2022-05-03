@@ -1,5 +1,5 @@
 metadata:
-  id: e8447fcf-6b1e-5d40-a0ee-dfe83e3424bf
+  id: 670e64f4-c52c-5efa-b0dd-6dce8175e4c0
   name: Ensure that the --cert-file and --key-file arguments are set as
     appropriate (Automated)
   profile_applicability: |
@@ -19,7 +19,7 @@ metadata:
   remediation: |
     Follow the etcd service documentation and configure TLS encryption.
     Then, edit the etcd pod specification file `/etc/kubernetes/manifests/etcd.yaml` on the
-    master node and set the below parameters.
+    control plane node and set the below parameters.
     ```
     --cert-file=</path/to/ca-file>
     --key-file=</path/to/key-file>
@@ -39,5 +39,5 @@ metadata:
     - CIS 2.1
     - etcd
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

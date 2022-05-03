@@ -1,5 +1,5 @@
 metadata:
-  id: 9b25ec98-5118-5a2b-9f00-06daa6c7c4b3
+  id: 54fabe1f-8eb5-5015-82b5-30db926064c0
   name: Ensure that the --bind-address argument is set to 127.0.0.1 (Automated)
   profile_applicability: |
     * Level 1 - Master Node
@@ -11,7 +11,7 @@ metadata:
     or encryption. As such it should only be bound to a localhost interface, to
     minimize the cluster's attack surface
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-scheduler
     ```
@@ -19,7 +19,7 @@ metadata:
   remediation: |
     Edit the Scheduler pod specification file
     `/etc/kubernetes/manifests/kube-scheduler.yaml` 
-    on the master node and ensure the correct value for the `--bind-address`
+    on the control plane node and ensure the correct value for the `--bind-address`
     parameter
   impact: |
     None
@@ -35,5 +35,5 @@ metadata:
     - CIS 1.4.2
     - Scheduler
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

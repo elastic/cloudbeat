@@ -1,5 +1,5 @@
 metadata:
-  id: 87c7fdfd-c1f8-5794-a089-36125435bf1e
+  id: 46d69440-3946-50f6-83b3-a0987551afa2
   name: Verify that the RotateKubeletServerCertificate argument is set to true (Manual)
   profile_applicability: |
     * Level 1 - Worker Node
@@ -50,5 +50,5 @@ metadata:
   - CIS 4.2.12
   - Kubelet
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

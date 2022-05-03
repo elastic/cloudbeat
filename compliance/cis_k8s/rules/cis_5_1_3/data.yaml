@@ -1,5 +1,5 @@
 metadata:
-  id: 23459689-f7ad-5011-bb00-68bce4ded4af
+  id: 8c46796a-9b8d-585b-8c01-48cde4eff2ec
   name: Minimize wildcard use in Roles and ClusterRoles (Manual)
   profile_applicability: |
     * Level 1 - Worker Node
@@ -42,5 +42,5 @@ metadata:
     - CIS 5.1.3
     - RBAC and Service Accounts
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

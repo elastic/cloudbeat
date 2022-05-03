@@ -4,14 +4,22 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the admission control plugin PodSecurityPolicy is set (Automated)
+# Ensure that the admission control plugin NamespaceLifecycle is set (Automated)
+
+# evaluate
+process_args := cis_k8s.data_adapter.process_args
+
+default rule_evaluation = false
+
+rule_evaluation {
+	# Verify that the --disable-admission-plugins argument is set to a value that does not include NamespaceLifecycle.
+	process_args["--disable-admission-plugins"]
+	not common.arg_values_contains(process_args, "--disable-admission-plugins", "NamespaceLifecycle")
+}
+
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
-
-	# evaluate
-	process_args := cis_k8s.data_adapter.process_args
-	rule_evaluation := common.arg_values_contains(process_args, "--enable-admission-plugins", "PodSecurityPolicy")
 
 	# set result
 	result := {

@@ -1,35 +1,37 @@
 metadata:
-  id: d0711b87-897e-53b0-9cbf-64da523046ad
-  name: Ensure that the --authorization-mode argument includes RBAC (Automated)
+  id: d4942f42-b0b7-5fab-9d43-bfcf3373ac57
+  name: Ensure that the --authorization-mode argument includes Node (Automated)
   profile_applicability: |
-    • Level 1 - Master Node
+    * Level 1 - Master Node
   description: |
-    Turn on Role Based Access Control.
+    Restrict kubelet nodes to reading only objects associated with them.
   rationale: >
-    Role Based Access Control (RBAC) allows fine-grained control over the
-    operations that
-    different entities can perform on different objects in the cluster. It is recommended to use
-    the RBAC authorization mode.
+    The `Node` authorization mode only allows kubelets to read `Secret`,
+    `ConfigMap`, `PersistentVolume`, and `PersistentVolumeClaim` objects
+    associated with their nodes.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--authorization-mode` argument exists and is set to a value to include `RBAC`.
+    Verify that the `--authorization-mode` argument exists and is set to a value to include `Node`.
   remediation: |
-    Edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml
-    on the master node and set the `--authorization-mode` parameter to a
-    value that includes `RBAC`, for example:
+    Edit the API server pod specification file
+    `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    on the control plane node and set the `--authorization-mode` parameter to a
+    value that includes `Node`.
     ```
     --authorization-mode=Node,RBAC
     ```
-  impact: >
-    When RBAC is enabled you will need to ensure that appropriate RBAC settings
-    (including Roles, RoleBindings and ClusterRoleBindings) are configured to allow appropriate access.
+  impact: |
+    None
   default_value: |
-    By default, `RBAC` authorization is not enabled.
+    By default, `Node` authorization is not enabled.
   references: |
-    1. [https://kubernetes.io/docs/reference/access-authn-authz/rbac/](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+    2. [https://kubernetes.io/docs/admin/authorization/node/](https://kubernetes.io/docs/admin/authorization/node/)
+    3. [https://github.com/kubernetes/kubernetes/pull/46076](https://github.com/kubernetes/kubernetes/pull/46076)
+    4. [https://acotten.com/post/kube17-security](https://acotten.com/post/kube17-security)
   section: API Server
   version: "1.0"
   tags:
@@ -38,5 +40,5 @@ metadata:
     - CIS 1.2.8
     - API Server
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

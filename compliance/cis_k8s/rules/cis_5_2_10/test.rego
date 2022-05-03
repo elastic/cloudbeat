@@ -1,4 +1,4 @@
-package compliance.cis_k8s.rules.cis_5_2_9
+package compliance.cis_k8s.rules.cis_5_2_10
 
 import data.kubernetes_common.test_data
 import data.lib.test
@@ -13,7 +13,8 @@ test_pass {
 }
 
 test_not_evaluated {
-	not finding with input as {"type": "no-kube-api"}
+	not finding with input as test_data.not_evaluated_input
+	not finding with input as test_data.not_evaluated_kube_api_input
 }
 
 rule_input(resource) = test_data.kube_api_input(resource)
@@ -21,17 +22,17 @@ rule_input(resource) = test_data.kube_api_input(resource)
 violating_psp = {
 	"kind": "Pod",
 	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
-	"spec": {"allowedCapabilities": ["ALL"]},
+	"spec": {"containers": [{"securityContext": {"capabilities": ["NET_RAW"]}}]},
 }
 
 non_violating_psp = {
 	"kind": "Pod",
 	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
-	"spec": {},
+	"spec": {"containers": [{"securityContext": {}}]},
 }
 
 non_violating_psp2 = {
 	"kind": "Pod",
 	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
-	"spec": {"allowedCapabilities": []},
+	"spec": {"containers": [{"securityContext": {"capabilities": []}}]},
 }

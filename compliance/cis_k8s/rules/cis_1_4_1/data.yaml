@@ -1,5 +1,5 @@
 metadata:
-  id: 16f3d090-fe9c-5011-8be7-428c53009a26
+  id: 63ea14ed-b605-5fe1-b35d-6b254f16d8ab
   name: Ensure that the --profiling argument is set to false (Automated)
   profile_applicability: |
     * Level 1 - Master Node
@@ -12,7 +12,7 @@ metadata:
     any bottlenecks and do not need the profiler for troubleshooting purposes,
     it is recommended to turn it off to reduce the potential attack surface.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-scheduler
     ```
@@ -20,7 +20,7 @@ metadata:
   remediation: |
     Edit the Scheduler pod specification file
     `/etc/kubernetes/manifests/kube-scheduler.yaml` 
-    file on the master node and set the below parameter.
+    file on the control plane node and set the below parameter.
     ```
     --profiling=false
     ```
@@ -39,5 +39,5 @@ metadata:
     - CIS 1.4.1
     - Scheduler
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

@@ -1,5 +1,5 @@
 metadata:
-  id: 3a597763-43d1-5cd9-824e-ed1e65fd3988
+  id: ddf0a2b1-5b54-5960-a749-89f351dcc04b
   name: Ensure that the --make-iptables-util-chains argument is set to true
     (Automated)
   profile_applicability: |
@@ -51,5 +51,5 @@ metadata:
     - CIS 4.2.7
     - Kubelet
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

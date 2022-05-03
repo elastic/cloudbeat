@@ -1,18 +1,17 @@
 package compliance.cis_k8s.rules.cis_1_2_19
 
 import data.compliance.cis_k8s
-import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --secure-port argument is not set to 0 (Automated)
+# Ensure that the --audit-log-path argument is set (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
 
 	# evaluate
 	process_args := cis_k8s.data_adapter.process_args
-	rule_evaluation = assert.is_false(common.contains_key_with_value(process_args, "--secure-port", "0"))
+	rule_evaluation := common.contains_key(process_args, "--audit-log-path")
 
 	# set result
 	result := {

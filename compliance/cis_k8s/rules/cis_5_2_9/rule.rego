@@ -4,24 +4,19 @@ import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Minimize the admission of containers with capabilities assigned (Manual)
-# evaluate
-default rule_evaluation = true
-
-rule_evaluation = false {
-	container := data_adapter.containers[_]
-	capabilities := object.get(container.securityContext, "capabilities", [])
-	not assert.array_is_empty(capabilities)
-}
+# Minimize the admission of containers with added capabilities (Automated)
 
 finding = result {
 	# filter
 	data_adapter.is_kube_api
-	data_adapter.containers
+
+	# evaluate
+	allowedCapabilities := object.get(data_adapter.pod.spec, "allowedCapabilities", [])
+	rule_evaluation := assert.array_is_empty(allowedCapabilities)
 
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"containers": {json.filter(c, ["name", "securityContext/capabilities"]) | c := data_adapter.containers[_]},
+		"evidence": json.filter(data_adapter.pod, ["uid", "spec/allowedCapabilities"]),
 	}
 }

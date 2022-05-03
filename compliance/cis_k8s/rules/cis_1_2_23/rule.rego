@@ -4,7 +4,7 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate (Automated)
+# Ensure that the --request-timeout argument is set as appropriate (Automated)
 
 # evaluate
 process_args := cis_k8s.data_adapter.process_args
@@ -12,8 +12,8 @@ process_args := cis_k8s.data_adapter.process_args
 default rule_evaluation = false
 
 rule_evaluation {
-	value := process_args["--audit-log-maxbackup"]
-	common.greater_or_equal(value, 10)
+	value := process_args["--request-timeout"]
+	common.duration_gt(value, "60s")
 }
 
 finding = result {

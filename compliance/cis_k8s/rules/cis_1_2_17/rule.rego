@@ -5,14 +5,14 @@ import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --insecure-bind-address argument is not set (Automated)
+# Ensure that the --secure-port argument is not set to 0 (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
 
 	# evaluate
 	process_args := cis_k8s.data_adapter.process_args
-	rule_evaluation := assert.is_false(common.contains_key(process_args, "--insecure-bind-address"))
+	rule_evaluation = assert.is_false(common.contains_key_with_value(process_args, "--secure-port", "0"))
 
 	# set result
 	result := {

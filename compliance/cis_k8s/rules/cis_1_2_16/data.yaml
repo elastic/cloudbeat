@@ -1,5 +1,5 @@
 metadata:
-  id: f9863b0b-a309-58e5-b882-a462cb4b9731
+  id: 0cd77c44-7420-5cac-a366-821b44bf819e
   name: Ensure that the admission control plugin NodeRestriction is set (Automated)
   profile_applicability: |
     * Level 1 - Master Node
@@ -11,7 +11,7 @@ metadata:
     will only be allowed to modify their own `Node` API object, and only modify
     `Pod` API objects that are bound to their node.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-apiserver
     ```
@@ -22,7 +22,7 @@ metadata:
     on
     kubelets.
     Then, edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the `--enable-admission-plugins` parameter
+    on the control plane node and set the `--enable-admission-plugins` parameter
     to a value that includes `NodeRestriction`.
     ```
     --enable-admission-plugins=...,NodeRestriction,...
@@ -44,5 +44,5 @@ metadata:
     - CIS 1.2.16
     - API Server
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

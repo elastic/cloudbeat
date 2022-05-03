@@ -4,13 +4,11 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("--secure-port=0")
+	test.assert_fail(finding) with input as rule_input("")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--secure-port=1")
-	test.assert_pass(finding) with input as rule_input("--secure-port=65535")
-	test.assert_pass(finding) with input as rule_input("")
+	test.assert_pass(finding) with input as rule_input("--audit-log-path=/var/log/apiserver/audit.log")
 }
 
 test_not_evaluated {

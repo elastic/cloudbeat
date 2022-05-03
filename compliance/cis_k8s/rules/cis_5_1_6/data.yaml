@@ -1,5 +1,5 @@
 metadata:
-  id: 621c2ef4-683e-510f-9fba-8632fa186025
+  id: 7037cf42-1f9b-5064-afde-e74a69cf96eb
   name: Ensure that Service Account Tokens are only mounted where necessary (Manual)
   profile_applicability: |
     * Level 1 - Master Node
@@ -39,5 +39,5 @@ metadata:
     - CIS 5.1.6
     - RBAC and Service Accounts
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

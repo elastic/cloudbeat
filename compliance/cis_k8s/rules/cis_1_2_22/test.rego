@@ -5,12 +5,12 @@ import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input("")
-	test.assert_fail(finding) with input as rule_input("--audit-log-maxage=29")
+	test.assert_fail(finding) with input as rule_input("--audit-log-maxsize=99")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--audit-log-maxage=30")
-	test.assert_pass(finding) with input as rule_input("--audit-log-maxage=60")
+	test.assert_pass(finding) with input as rule_input("--audit-log-maxsize=100")
+	test.assert_pass(finding) with input as rule_input("--audit-log-maxsize=200")
 }
 
 test_not_evaluated {

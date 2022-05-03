@@ -5,8 +5,8 @@ import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input("")
-	test.assert_fail(finding) with input as rule_input("--disable-admission-plugins=NamespaceLifecycle")
-	test.assert_fail(finding) with input as rule_input("--disable-admission-plugins=PodNodeSelector,NamespaceLifecycle")
+	test.assert_fail(finding) with input as rule_input("--disable-admission-plugins=ServiceAccount")
+	test.assert_fail(finding) with input as rule_input("--disable-admission-plugins=PodNodeSelector,ServiceAccount")
 }
 
 test_pass {

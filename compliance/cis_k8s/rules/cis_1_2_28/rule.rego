@@ -4,21 +4,14 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate (Automated)
-
-# evaluate
-process_args := cis_k8s.data_adapter.process_args
-
-default rule_evaluation = false
-
-rule_evaluation {
-	process_args["--etcd-certfile"]
-	process_args["--etcd-keyfile"]
-}
-
+# Ensure that the --client-ca-file argument is set as appropriate (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
+
+	# evaluate
+	process_args := cis_k8s.data_adapter.process_args
+	rule_evaluation := common.contains_key(process_args, "--client-ca-file")
 
 	# set result
 	result := {

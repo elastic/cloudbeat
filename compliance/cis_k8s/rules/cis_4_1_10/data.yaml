@@ -1,5 +1,5 @@
 metadata:
-  id: 602aba24-f893-5506-b98a-2d15ac61a35b
+  id: 192af64f-4521-584c-ae84-5c7ad8a11597
   name: Ensure that the kubelet --config configuration file ownership is set to
     root:root (Automated)
   profile_applicability: |
@@ -51,5 +51,5 @@ metadata:
     - CIS 4.1.10
     - Worker Node Configuration Files
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

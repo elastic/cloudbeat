@@ -1,5 +1,5 @@
 metadata:
-  id: a9eab1dd-a3f4-54e6-af40-7e5d61542ec6
+  id: a6194f98-6534-5308-9683-1adb4914cc46
   name: Ensure that the --client-cert-auth argument is set to true (Automated)
   profile_applicability: |
     * Level 1 - Master Node
@@ -20,7 +20,7 @@ metadata:
   remediation: |
     Edit the etcd pod specification file `/etc/kubernetes/manifests/etcd.yaml`
     on
-    the master
+    the control plane
     node and set the below parameter.
     ```
     --client-cert-auth="true"
@@ -42,5 +42,5 @@ metadata:
     - CIS 2.2
     - etcd
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

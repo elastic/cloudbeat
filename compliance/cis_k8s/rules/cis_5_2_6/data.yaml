@@ -1,48 +1,46 @@
 metadata:
-  id: 7e122766-328d-58f2-94d5-990b1521c366
-  name: Minimize the admission of root containers (Automated)
+  id: bbe88e70-e917-5e9d-8993-3b5dd61a56c9
+  name: Minimize the admission of containers with allowPrivilegeEscalation (Automated)
   profile_applicability: |
-    * Level 2 - Master Node
-  description: |
-    Do not generally permit containers to be run as the root user.
+    * Level 1 - Master Node
+  description: >
+    Do not generally permit containers to be run with the
+    `allowPrivilegeEscalation` flag set to true.
+    Allowing this right can lead to a process running a container getting more rights 
+    than it started with. 
+    It's important to note that these rights are still constrained by the overall container 
+    sandbox, and this setting does not relate to the use of privileged containers.
   rationale: >
-    Containers may run as any Linux user. Containers which run as the root user,
-    whilst constrained by Container Runtime security features still have a
-    escalated likelihood of container breakout. Ideally, all containers should
-    run as a defined non-UID 0 user. There should be at least one
-    PodSecurityPolicy (PSP) defined which does not permit root users in a
-    container. If you need to run root containers, this should be defined in a
-    separate PSP and you should carefully check RBAC controls to ensure that
-    only limited service accounts and users are given permission to access that
-    PSP.
+    A container running with the `allowPrivilegeEscalation` flag set to `true`
+    may have processes that can gain more privileges than their parent. There
+    should be at least one admission control policy defined which does not permit
+    containers to allow privilege escalation. The option exists (and is
+    defaulted to true) to permit setuid binaries to run. If you have need to run
+    containers which use setuid binaries or require privilege escalation, this
+    should be defined in a separate policy and you should carefully check 
+    to ensure that only limited service accounts and users are given
+    permission to use that policy.
   audit: |
-    Get the set of PSPs with the following command:
-    ```
-    kubectl get psp
-    ```
-    For each PSP, check whether running containers as root is enabled:
-    ```
-    kubectl get psp <name> -o=jsonpath='{.spec.runAsUser.rule}'
-    ```
-    Verify that there is at least one PSP which returns `MustRunAsNonRoot` or `MustRunAs` with the
-    range of UIDs not including 0.
+    List the policies in use for each namespace in the cluster, ensure that each policy disallows 
+    the admission of containers which allow privilege escalation.
   remediation: |
-    Create a PSP as described in the Kubernetes documentation, ensuring that the
-    `.spec.runAsUser.rule` is set to either `MustRunAsNonRoot` or `MustRunAs` with the range of
-    UIDs not including 0.
-  impact: |
-    Pods with containers which run as the root user will not be permitted.
+    Add policies to each namespace in the cluster which has user workloads to restrict the 
+    admission of conatiners with `.spec.allowPrivilegeEscalation` set to `true`.
+  impact: >
+    Pods defined with `spec.allowPrivilegeEscalation: true` will not be
+    permitted unless they are run under a specific policy.
   default_value: |
-    By default, PodSecurityPolicies are not defined.
+    By default, there are no restrictions on contained process ability to escalate privileges, 
+    within the context of the container.
   references: |
-    1. [https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies)
-  section: Pod Security Policies
+    1. [https://kubernetes.io/docs/concepts/security/pod-security-standards/](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+  section: Pod Security Standards
   version: "1.0"
   tags:
     - CIS
     - Kubernetes
     - CIS 5.2.6
-    - Pod Security Policies
+    - Pod Security Standards
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

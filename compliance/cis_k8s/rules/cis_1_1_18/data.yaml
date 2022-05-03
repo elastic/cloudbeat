@@ -1,5 +1,5 @@
 metadata:
-  id: ff5979ab-a8a2-59cf-bd5d-9710467cd26d
+  id: 5867e0c0-71c5-5f21-8c9c-621a160bfbd9
   name:
     Ensure that the controller-manager.conf file ownership is set to root:root
     (Automated)
@@ -14,7 +14,7 @@ metadata:
     file. The file should be owned by `root:root`.
   audit: |
     Run the below command (based on the file location on your system) on the
-    master node.
+    control plane node.
     For example,
     ```
     stat -c %U:%G /etc/kubernetes/controller-manager.conf
@@ -22,7 +22,7 @@ metadata:
     Verify that the ownership is set to `root:root`.
   remediation: |
     Run the below command (based on the file location on your system) on the
-    master node.
+    control plane node.
     For example,
     ```
     chown root:root /etc/kubernetes/controller-manager.conf
@@ -33,13 +33,13 @@ metadata:
     By default, `controller-manager.conf` file ownership is set to `root:root`.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-controller-manager/](https://kubernetes.io/docs/admin/kube-controller-manager/)
-  section: Master Node Configuration Files
+  section: Control Plane Node Configuration Files
   version: "1.0"
   tags:
     - CIS
     - Kubernetes
     - CIS 1.1.18
-    - Master Node Configuration Files
+    - Control Plane Node Configuration Files
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

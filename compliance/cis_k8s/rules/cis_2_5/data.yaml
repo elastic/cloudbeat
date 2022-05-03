@@ -1,5 +1,5 @@
 metadata:
-  id: 01889b3d-1c3b-5fe6-9a0f-d512016e05e8
+  id: b26d85f5-ac08-535f-8b5d-8e461a0cf679
   name: Ensure that the --peer-client-cert-auth argument is set to true (Automated)
   profile_applicability: |
     * Level 1 - Master Node
@@ -21,7 +21,7 @@ metadata:
   remediation: |
     Edit the etcd pod specification file `/etc/kubernetes/manifests/etcd.yaml`
     on
-    the master
+    the control plane
     node and set the below parameter.
     ```
     --peer-client-cert-auth=true
@@ -46,5 +46,5 @@ metadata:
     - CIS 2.5
     - etcd
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

@@ -1,14 +1,16 @@
-package compliance.cis_k8s.rules.cis_1_2_30
+package compliance.cis_k8s.rules.cis_1_2_9
 
 import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input("")
+	test.assert_fail(finding) with input as rule_input("--authorization-mode=Node")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--client-ca-file=<path/to/client-ca-file>")
+	test.assert_pass(finding) with input as rule_input("--authorization-mode=RBAC")
+	test.assert_pass(finding) with input as rule_input("--authorization-mode=Node,RBAC")
 }
 
 test_not_evaluated {

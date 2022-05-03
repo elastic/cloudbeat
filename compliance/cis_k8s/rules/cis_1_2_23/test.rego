@@ -5,12 +5,14 @@ import data.lib.test
 
 test_violation {
 	test.assert_fail(finding) with input as rule_input("")
-	test.assert_fail(finding) with input as rule_input("--audit-log-maxbackup=9")
+	test.assert_fail(finding) with input as rule_input("--request-timeout=30s")
+	test.assert_fail(finding) with input as rule_input("--request-timeout=59s")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--audit-log-maxbackup=10")
-	test.assert_pass(finding) with input as rule_input("--audit-log-maxbackup=20")
+	test.assert_pass(finding) with input as rule_input("--request-timeout=61s")
+	test.assert_pass(finding) with input as rule_input("--request-timeout=2m")
+	test.assert_pass(finding) with input as rule_input("--request-timeout=1h35m2s")
 }
 
 test_not_evaluated {

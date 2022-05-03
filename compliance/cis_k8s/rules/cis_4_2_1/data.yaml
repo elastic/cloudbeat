@@ -1,5 +1,5 @@
 metadata:
-  id: 5d2b0fb4-32fc-565f-bf70-93700f144da0
+  id: a082f4e6-67d7-56c4-9764-42db2030a552
   name: Ensure that the --anonymous-auth argument is set to false (Automated)
   profile_applicability: |
     * Level 1 - Worker Node
@@ -51,5 +51,5 @@ metadata:
     - CIS 4.2.1
     - Kubelet
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

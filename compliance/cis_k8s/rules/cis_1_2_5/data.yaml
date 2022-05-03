@@ -1,40 +1,37 @@
 metadata:
-  id: 8fce5a41-142d-5077-ad4e-fc2815b40b2e
-  name: Ensure that the --kubelet-certificate-authority argument is set as
-    appropriate (Automated)
+  id: 5c060a65-bbc5-5af4-9a42-338717937ec4
+  name: Ensure that the --kubelet-client-certificate and
+    --kubelet-client-keyarguments are set as appropriate (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Verify kubelet's certificate before establishing connection.
+    Enable certificate based kubelet authentication.
   rationale: >
-    The connections from the apiserver to the kubelet are used for fetching logs
-    for pods, attaching (through kubectl) to running pods, and using the
-    kubelet's port-forwarding functionality. These connections terminate at the
-    kubelet's HTTPS endpoint. By default, the apiserver does not verify the
-    kubelet's serving certificate, which makes the connection subject to
-    man-in-the-middle attacks, and unsafe to run over untrusted and/or public
-    networks.
+    The apiserver, by default, does not authenticate itself to the kubelet's
+    HTTPS endpoints. The requests from the apiserver are treated anonymously.
+    You should set up certificate- based kubelet authentication to ensure that
+    the apiserver authenticates itself to kubelets when submitting requests.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--kubelet-certificate-authority` argument exists and is set as
-    appropriate.
+    Verify that the `--kubelet-client-certificate` and `--kubelet-client-key` arguments
+    exist and they are set as appropriate.
   remediation: |
-    Follow the Kubernetes documentation and setup the TLS connection between the
-    apiserver
-    and kubelets. Then, edit the API server pod specification file
-    `/etc/kubernetes/manifests/kube-apiserver.yaml` on the master node and set the 
-    `--kubelet-certificate-authority` parameter to the path to the cert file for the certificate
-    authority.
+    Follow the Kubernetes documentation and set up the TLS connection between
+    the
+    apiserver and kubelets. Then, edit API server pod specification file
+    `/etc/kubernetes/manifests/kube-apiserver.yaml` on the control plane node and set the
+    kubelet client certificate and key parameters as below.
     ```
-    --kubelet-certificate-authority=<ca-string>
+    --kubelet-client-certificate=<path/to/client-certificate-file>
+    --kubelet-client-key=<path/to/client-key-file>
     ```
   impact: |
     You require TLS to be configured on apiserver as well as kubelets.
   default_value: |
-    By default, `--kubelet-certificate-authority` argument is not set.
+    By default, certificate-based kubelet authentication is not set.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
     2. [https://kubernetes.io/docs/admin/kubelet-authentication-authorization/](https://kubernetes.io/docs/admin/kubelet-authentication-authorization/)
@@ -47,5 +44,5 @@ metadata:
     - CIS 1.2.5
     - API Server
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

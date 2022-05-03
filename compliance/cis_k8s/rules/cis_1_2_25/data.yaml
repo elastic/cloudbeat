@@ -1,41 +1,43 @@
 metadata:
-  id: fcd7d8c6-5ef3-591d-81cf-8f37cf1e75c3
-  name: Ensure that the --request-timeout argument is set as appropriate (Manual)
+  id: 4caf31ec-2fe2-5337-b1e1-9cbf498de17f
+  name:
+    Ensure that the --service-account-key-file argument is set as appropriate
+    (Automated)
   profile_applicability: |
     * Level 1 - Master Node
-  description: |
-    Set global request timeout for API server requests as appropriate.
+  description: >
+    Explicitly set a service account public key file for service accounts on the
+    apiserver.
   rationale: >
-    Setting global request timeout allows extending the API server request
-    timeout limit to a duration appropriate to the user's connection speed. By
-    default, it is set to 60 seconds which might be problematic on slower
-    connections making cluster resources inaccessible once the data volume for
-    requests exceeds what can be transmitted in 60 seconds. But, setting this
-    timeout limit to be too large can exhaust the API server resources making it
-    prone to Denial-of-Service attack. Hence, it is recommended to set this
-    limit as appropriate and change the default limit of 60 seconds only if
-    needed.
+    By default, if no `--service-account-key-file` is specified to the
+    apiserver, it uses the private key from the TLS serving certificate to
+    verify service account tokens. To ensure that the keys for service account
+    tokens could be rotated as needed, a separate public/private key pair should
+    be used for signing service account tokens. Hence, the public key should be
+    specified to the apiserver with `--service-account-key-file`.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--request-timeout` argument is either not set or set to an appropriate
-    value.
+    Verify that the `--service-account-key-file` argument exists and is set as appropriate.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    and set the below parameter as appropriate and if needed. For example,
+    on the control plane node and set the `--service-account-key-file` parameter
+    to the public key file for service accounts:
     ```
-    --request-timeout=300s
+    --service-account-key-file=<filename>
     ```
-  impact: |
-    None
+  impact: >
+    The corresponding private key must be provided to the controller manager.
+    You would need to securely maintain the key file and rotate the keys based
+    on your organization's key rotation policy.
   default_value: |
-    By default, `--request-timeout` is set to 60 seconds.
+    By default, `--service-account-key-file` argument is not set.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://github.com/kubernetes/kubernetes/pull/51415](https://github.com/kubernetes/kubernetes/pull/51415)
+    2. [https://github.com/kubernetes/kubernetes/issues/24167](https://github.com/kubernetes/kubernetes/issues/24167)
   section: API Server
   version: "1.0"
   tags:
@@ -44,5 +46,5 @@ metadata:
     - CIS 1.2.25
     - API Server
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

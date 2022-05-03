@@ -1,5 +1,5 @@
 metadata:
-  id: 905adab5-b2a6-587e-b67f-bb21c7853e9e
+  id: 780ac02f-e0f5-537c-98ba-354ae5873a81
   name: Ensure that the Kubernetes PKI directory and file ownership is set to
     root:root (Automated)
   profile_applicability: |
@@ -14,7 +14,7 @@ metadata:
     and files should be owned by root:root.
   audit: |
     Run the below command (based on the file location on your system) on the
-    master node.
+    control plane node.
     For example,
     ```
     ls -laR /etc/kubernetes/pki/
@@ -22,7 +22,7 @@ metadata:
     Verify that the ownership of all files and directories in this hierarchy is set to `root:root`.
   remediation: |
     Run the below command (based on the file location on your system) on the
-    master node.
+    control plane node.
     For example,
     ```
     chown -R root:root /etc/kubernetes/pki/
@@ -34,13 +34,13 @@ metadata:
     directories contained within it, are set to be owned by the root user.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-  section: Master Node Configuration Files
+  section: Control Plane Node Configuration Files
   version: "1.0"
   tags:
     - CIS
     - Kubernetes
     - CIS 1.1.19
-    - Master Node Configuration Files
+    - Control Plane Node Configuration Files
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

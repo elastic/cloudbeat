@@ -1,37 +1,35 @@
 metadata:
-  id: 45028365-2b48-5237-9ece-9804dcf536e8
-  name: Ensure that the --authorization-mode argument includes Node (Automated)
+  id: 811f3dd3-7fbc-5141-83b7-724730ec158d
+  name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
+    (Automated)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Restrict kubelet nodes to reading only objects associated with them.
+    Do not always authorize all requests.
   rationale: >
-    The `Node` authorization mode only allows kubelets to read `Secret`,
-    `ConfigMap`, `PersistentVolume`, and `PersistentVolumeClaim` objects
-    associated with their nodes.
+    The API Server, can be configured to allow all requests. This mode should
+    not be used on any production cluster.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--authorization-mode` argument exists and is set to a value to include `Node`.
+    Verify that the `--authorization-mode` argument exists and is not set to `AlwaysAllow`.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the `--authorization-mode` parameter to a
-    value that includes `Node`.
+    on the control plane node and set the `--authorization-mode` parameter to
+    values other than `AlwaysAllow`. One such example could be as below.
     ```
-    --authorization-mode=Node,RBAC
+    --authorization-mode=RBAC
     ```
   impact: |
-    None
+    Only authorized requests will be served.
   default_value: |
-    By default, `Node` authorization is not enabled.
+    By default, `AlwaysAllow` is not enabled.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://kubernetes.io/docs/admin/authorization/node/](https://kubernetes.io/docs/admin/authorization/node/)
-    3. [https://github.com/kubernetes/kubernetes/pull/46076](https://github.com/kubernetes/kubernetes/pull/46076)
-    4. [https://acotten.com/post/kube17-security](https://acotten.com/post/kube17-security)
+    2. [https://kubernetes.io/docs/admin/authorization/](https://kubernetes.io/docs/admin/authorization/)
   section: API Server
   version: "1.0"
   tags:
@@ -40,5 +38,5 @@ metadata:
     - CIS 1.2.7
     - API Server
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

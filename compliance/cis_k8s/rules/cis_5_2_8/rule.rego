@@ -1,22 +1,32 @@
 package compliance.cis_k8s.rules.cis_5_2_8
 
-import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Minimize the admission of containers with added capabilities (Automated)
+# Minimize the admission of containers with the NET_RAW capability (Automated)
+
+# evaluate
+default rule_evaluation = false
+
+# Verify that there is at least one PSP which returns NET_RAW or ALL.
+rule_evaluation {
+	# Verify that there is at least one PSP which returns NET_RAW.
+	data_adapter.pod.spec.requiredDropCapabilities[_] == "NET_RAW"
+}
+
+# or 
+rule_evaluation {
+	# Verify that there is at least one PSP which returns ALL.
+	data_adapter.pod.spec.requiredDropCapabilities[_] == "ALL"
+}
 
 finding = result {
 	# filter
 	data_adapter.is_kube_api
 
-	# evaluate
-	allowedCapabilities := object.get(data_adapter.pod.spec, "allowedCapabilities", [])
-	rule_evaluation := assert.array_is_empty(allowedCapabilities)
-
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": json.filter(data_adapter.pod, ["uid", "spec/allowedCapabilities"]),
+		"evidence": json.filter(data_adapter.pod, ["uid", "spec/requiredDropCapabilities"]),
 	}
 }

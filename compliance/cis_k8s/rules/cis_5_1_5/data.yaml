@@ -1,5 +1,5 @@
 metadata:
-  id: 823f5e65-6aa3-5248-a099-f7da1d54ab97
+  id: 2b399496-f79d-5533-8a86-4ea00b95e3bd
   name: Ensure that default service accounts are not actively used. (Manual)
   profile_applicability: |
     * Level 1 - Master Node
@@ -47,5 +47,5 @@ metadata:
     - CIS 5.1.5
     - RBAC and Service Accounts
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

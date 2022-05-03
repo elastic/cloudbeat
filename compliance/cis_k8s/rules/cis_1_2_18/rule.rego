@@ -4,14 +4,14 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --insecure-port argument is set to 0 (Automated)
+# Ensure that the --profiling argument is set to false (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
 
 	# evaluate
 	process_args := cis_k8s.data_adapter.process_args
-	rule_evaluation := common.contains_key_with_value(process_args, "--insecure-port", "0")
+	rule_evaluation = common.contains_key_with_value(process_args, "--profiling", "false")
 
 	# set result
 	result := {

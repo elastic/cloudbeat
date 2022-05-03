@@ -1,39 +1,41 @@
 metadata:
-  id: d38c12e3-ea42-5104-95be-b02fe0751193
-  name: Ensure that the --audit-log-maxbackup argument is set to 10 or as
-    appropriate (Automated)
+  id: c03358d0-05d0-54a9-b079-7c6991b2bc41
+  name: Ensure that the --request-timeout argument is set as appropriate (Manual)
   profile_applicability: |
     * Level 1 - Master Node
   description: |
-    Retain 10 or an appropriate number of old log files.
+    Set global request timeout for API server requests as appropriate.
   rationale: >
-    Kubernetes automatically rotates the log files. Retaining old log files
-    ensures that you would have sufficient log data available for carrying out
-    any investigation or correlation. For example, if you have set file size of
-    100 MB and the number of old log files to keep as 10, you would approximate
-    have 1 GB of log data that you could potentially use for your analysis.
+    Setting global request timeout allows extending the API server request
+    timeout limit to a duration appropriate to the user's connection speed. By
+    default, it is set to 60 seconds which might be problematic on slower
+    connections making cluster resources inaccessible once the data volume for
+    requests exceeds what can be transmitted in 60 seconds. But, setting this
+    timeout limit to be too large can exhaust the API server resources making it
+    prone to Denial-of-Service attack. Hence, it is recommended to set this
+    limit as appropriate and change the default limit of 60 seconds only if
+    needed.
   audit: |
-    Run the following command on the master node:
+    Run the following command on the control plane node:
     ```
     ps -ef | grep kube-apiserver
     ```
-    Verify that the `--audit-log-maxbackup` argument is set to `10` or as appropriate.
+    Verify that the `--request-timeout` argument is either not set or set to an appropriate
+    value.
   remediation: |
     Edit the API server pod specification file
     `/etc/kubernetes/manifests/kube-apiserver.yaml` 
-    on the master node and set the `--audit-log-maxbackup` parameter to 10
-    or to an appropriate value.
+    and set the below parameter as appropriate and if needed. For example,
     ```
-    --audit-log-maxbackup=10
+    --request-timeout=300s
     ```
   impact: |
     None
   default_value: |
-    By default, auditing is not enabled.
+    By default, `--request-timeout` is set to 60 seconds.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
-    2. [https://kubernetes.io/docs/concepts/cluster-administration/audit/](https://kubernetes.io/docs/concepts/cluster-administration/audit/)
-    3. [https://github.com/kubernetes/features/issues/22](https://github.com/kubernetes/features/issues/22)
+    2. [https://github.com/kubernetes/kubernetes/pull/51415](https://github.com/kubernetes/kubernetes/pull/51415)
   section: API Server
   version: "1.0"
   tags:
@@ -42,5 +44,5 @@ metadata:
     - CIS 1.2.23
     - API Server
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0

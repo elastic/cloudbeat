@@ -4,14 +4,14 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --authorization-mode argument includes RBAC (Automated)
+# Ensure that the --authorization-mode argument includes Node (Automated)
 finding = result {
 	# filter
 	data_adapter.is_kube_apiserver
 
 	# evaluate
 	process_args := cis_k8s.data_adapter.process_args
-	rule_evaluation = common.arg_values_contains(process_args, "--authorization-mode", "RBAC")
+	rule_evaluation = common.arg_values_contains(process_args, "--authorization-mode", "Node")
 
 	# set result
 	result := {

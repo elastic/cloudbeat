@@ -1,5 +1,5 @@
 metadata:
-  id: 307f370a-30f5-5174-a12e-387e4273e0c1
+  id: 58b41542-b102-5c9a-81fb-89aa5bc0fcb8
   name: Ensure that the --hostname-override argument is not set (Manual)
   profile_applicability: |
     * Level 1 - Worker Node
@@ -45,5 +45,5 @@ metadata:
   - CIS 4.2.8
   - Kubelet
   benchmark:
-    name: CIS Kubernetes V1.20
+    name: CIS Kubernetes V1.23
     version: v1.0.0
