@@ -33,23 +33,3 @@ finding = result {
 		},
 	}
 }
-
-metadata = {
-	"name": "Ensure that the --make-iptables-util-chains argument is set to true",
-	"description": "Allow Kubelet to manage iptables.",
-	"impact": `Kubelet would manage the iptables on the system and keep it in sync.
-If you are using any other iptables management solution, then there might be some conflicts.`,
-	"tags": array.concat(cis_eks.default_tags, ["CIS 3.2.7", "Kubelet"]),
-	"benchmark": cis_eks.benchmark_metadata,
-	"remediation": `If modifying the Kubelet config file, edit the kubelet-config.json file /etc/kubernetes/kubelet/kubelet-config.json and set the below parameter to false
-"makeIPTablesUtilChains": true
-If using executable arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each worker node and add the below parameter at the end of the KUBELET_ARGS variable string.
---make-iptables-util-chains:true
-If using the api configz endpoint consider searching for the status of "makeIPTablesUtilChains": true by extracting the live configuration from the nodes running kubelet.`,
-	"default_value": "See the Amazon EKS documentation for the default value.",
-	"rationale": `Kubelets can automatically manage the required changes to iptables based on how you choose your networking options for the pods.
-It is recommended to let kubelets manage the changes to iptables.
-This ensures that the iptables configuration remains in sync with pods networking configuration.
-Manually configuring iptables with dynamic pod network configuration changes might hamper the communication between pods/containers and to the outside world.
-You might have iptables rules too restrictive or too open.`,
-}

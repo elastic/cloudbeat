@@ -1,6 +1,5 @@
 package compliance.cis_eks.rules.cis_5_4_5
 
-import data.compliance.cis_eks
 import data.compliance.cis_eks.data_adapter
 import data.compliance.lib.common
 
@@ -41,15 +40,4 @@ finding = result {
 		"evaluation": common.calculate_result(rule_evaluation),
 		"evidence": evidence,
 	}
-}
-
-metadata = {
-	"name": "Encrypt traffic to HTTPS load balancers with TLS certificates",
-	"description": "Encrypt traffic to HTTPS load balancers using TLS certificates.",
-	"rationale": `Encrypting traffic between users and your Kubernetes workload is fundamental to protecting data sent over the web.`,
-	"remediation": "",
-	"tags": array.concat(cis_eks.default_tags, ["CIS 5.4.5", "Cluster Networking"]),
-	"default_value": "",
-	"benchmark": cis_eks.benchmark_metadata,
-	"impact": "",
 }

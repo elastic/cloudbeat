@@ -34,17 +34,3 @@ finding = result {
 		},
 	}
 }
-
-metadata = {
-	"name": "Ensure that the --anonymous-auth argument is set to false",
-	"description": "Disable anonymous requests to the Kubelet server.",
-	"impact": "Anonymous requests will be rejected.",
-	"tags": array.concat(cis_eks.default_tags, ["CIS 3.2.1", "Kubelet"]),
-	"benchmark": cis_eks.benchmark_metadata,
-	"default_value": "By default, anonymous access is enabled.",
-	"remediation": `If modifying the Kubelet config file, edit the kubelet-config.json file /etc/kubernetes/kubelet/kubelet-config.json and set the below parameter to false.
-"authentication": { "anonymous": { "enabled": false}}.
-If using executable arguments, edit the kubelet service file /etc/systemd/system/kubelet.service.d/10-kubelet-args.conf on each worker node and add the below parameter at the end of the KUBELET_ARGS variable string.
---anonymous-auth=false.
-If using the api configz endpoint consider searching for the status of "authentication.*anonymous":{"enabled":false}" by extracting the live configuration from the nodes running kubelet.`,
-}
