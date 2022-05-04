@@ -52,11 +52,16 @@ func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 func (f IAMFetcher) Stop() {
 }
 
-// GetID TODO: Add resource id logic to all AWS resources
-func (r IAMResource) GetID() (string, error) {
-	return "", nil
-}
-
 func (r IAMResource) GetData() interface{} {
 	return r.Data
+}
+
+func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
+	//TODO implement me
+	return fetching.ResourceMetadata{
+		ID:      "",
+		Type:    "",
+		SubType: "",
+		Name:    "",
+	}
 }

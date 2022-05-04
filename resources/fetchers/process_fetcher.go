@@ -20,15 +20,16 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"io/fs"
+	"path/filepath"
+	"regexp"
+
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"io/fs"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
-	"path/filepath"
-	"regexp"
 )
 
 const (
@@ -36,7 +37,9 @@ const (
 	// Expects format as the following: --<key><delimiter><value>.
 	// For example: --config=a.json
 	// The regex supports two delimiters "=" and ""
-	CMDArgumentMatcher = "\\b%s[\\s=]\\/?(\\S+)"
+	CMDArgumentMatcher  = "\\b%s[\\s=]\\/?(\\S+)"
+	ProcessResourceType = "process"
+	ProcessSubType      = "process"
 )
 
 type ProcessResource struct {
@@ -163,10 +166,15 @@ func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (inte
 func (f *ProcessesFetcher) Stop() {
 }
 
-func (res ProcessResource) GetID() (string, error) {
-	return res.PID, nil
-}
-
 func (res ProcessResource) GetData() interface{} {
 	return res
+}
+
+func (res ProcessResource) GetMetadata() fetching.ResourceMetadata {
+	return fetching.ResourceMetadata{
+		ID:      res.PID + res.Stat.StartTime,
+		Type:    ProcessResourceType,
+		SubType: ProcessSubType,
+		Name:    res.Stat.Name,
+	}
 }
