@@ -1,0 +1,72 @@
+metadata:
+  id: 98524674-3de3-5424-9afa-ca763edca62a
+  name: Ensure that the --hostname-override argument is not set (Manual)
+  profile_applicability: |
+    * Level 1
+  description: |
+    Do not override node hostnames.
+  rationale: >
+    Overriding hostnames could potentially break TLS setup between the kubelet
+    and the apiserver. 
+    Additionally, with overridden hostnames, it becomes increasingly difficult to
+    associate logs with a particular node and process them for security analytics. Hence, you
+    should setup your kubelet nodes with resolvable FQDNs and avoid overriding the
+    hostnames with IPs.
+  audit: |
+    **Audit Method 1:**
+    If using a Kubelet configuration file, check that there is an entry for `--hostname-override`
+    is not set or does not exist.
+    First, SSH to the relevant node:
+    Run the following command on each node to find the appropriate Kubelet config file:
+    ```
+    ps -ef | grep kubelet
+    ```
+    The output of the above command should return something similar to `--config`
+    `/etc/kubernetes/kubelet/kubelet-config.json` which is the location of the Kubelet
+    config file.
+    Open the Kubelet config file:
+    ```
+    cat /etc/kubernetes/kubelet/kubelet-config.json
+    ```
+    Verify that `--hostname-override` argument does not exist.
+    **Note** This setting is not configurable via the Kubelet config file.
+  remediation: |
+    **Remediation Method 1:**
+    If modifying the Kubelet config file, edit the kubelet-config.json file
+    `/etc/kubernetes/kubelet/kubelet-config.json` and set the below parameter to null
+    ```
+    "hostname-override"
+    ```
+    **Remediation Method 2:**
+    If using executable arguments, edit the kubelet service file
+    `/etc/systemd/system/kubelet.service.d/10-kubelet-args.conf` on each worker node
+    and add the below parameter at the end of the `KUBELET_ARGS` variable string.
+    ```
+    --hostname-override
+    ```
+    **For all remediations:**
+    Based on your system, restart the `kubelet` service and check status
+    ```
+    systemctl daemon-reload
+    systemctl restart kubelet.service
+    systemctl status kubelet -l
+    ```
+  impact: >
+    Some cloud providers may require this flag to ensure that hostname matches
+    names issued
+    by the cloud provider. In these environments, this recommendation should not apply.
+  default_value: |
+    See the Amazon EKS documentation for the default value.
+  references: |
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://github.com/kubernetes/kubernetes/issues/22063
+    3. https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
+  section: Kubelet
+  tags:
+    - CIS
+    - EKS
+    - CIS 3.2.8
+    - Kubelet
+  benchmark:
+    name: CIS Amazon Elastic Kubernetes Service (EKS) Benchmark
+    version: v1.0.1
