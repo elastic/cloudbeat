@@ -38,7 +38,7 @@ metadata:
   impact: |
     None
   default_value: |
-    By default, kubelet server certificate rotation is disabled.
+    By default, kubelet server certificate rotation is enabled.
   references: |
     1. [https://github.com/kubernetes/kubernetes/pull/45059](https://github.com/kubernetes/kubernetes/pull/45059)
     2. [https://kubernetes.io/docs/admin/kubelet-tls-bootstrapping/#kubelet-configuration](https://kubernetes.io/docs/admin/kubelet-tls-bootstrapping/#kubelet-configuration)

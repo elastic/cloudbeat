@@ -4,15 +4,15 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("")
 	test.assert_fail(finding) with input as rule_input("--feature-gates=RotateKubeletServerCertificate=false")
-	test.assert_fail(finding) with input as rule_input_with_external("", create_process_config(false, false))
 	test.assert_fail(finding) with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=false", create_process_config(false, false))
 	test.assert_fail(finding) with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=false", create_process_config(true, false))
 	test.assert_fail(finding) with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=false", create_process_config(true, false))
 }
 
 test_pass {
+	test.assert_pass(finding) with input as rule_input("")
+	test.assert_pass(finding) with input as rule_input_with_external("", create_process_config(false, false))
 	test.assert_pass(finding) with input as rule_input("--feature-gates=RotateKubeletServerCertificate=true")
 	test.assert_pass(finding) with input as rule_input("--rotate-server-certificates=true")
 	test.assert_pass(finding) with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=true", create_process_config(true, false))

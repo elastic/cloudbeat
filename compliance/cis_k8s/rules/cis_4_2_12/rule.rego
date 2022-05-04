@@ -11,7 +11,7 @@ default rule_evaluation = false
 process_args := cis_k8s.data_adapter.process_args
 
 rule_evaluation {
-	common.contains_key_with_value(process_args, "--feature-gates", "RotateKubeletServerCertificate=true")
+	not common.contains_key_with_value(process_args, "--feature-gates", "RotateKubeletServerCertificate=false")
 }
 
 # In case both flags and configuration file are specified, the executable argument takes precedence.
