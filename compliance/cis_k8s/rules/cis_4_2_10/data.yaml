@@ -1,0 +1,49 @@
+metadata:
+  id: dc91f4c4-4f0e-59ba-a0e1-96e996736787,
+  name: Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)
+  profile_applicability: |
+    * Level 1 - Worker Node
+  description: | 
+    Setup TLS connection on the Kubelets.
+  rationale: |
+    The connections from the apiserver to the kubelet are used for fetching logs for pods,
+    attaching (through kubectl) to running pods, and using the kubelet’s port-forwarding
+    functionality. These connections terminate at the kubelet’s HTTPS endpoint. By default, the
+    apiserver does not verify the kubelet’s serving certificate, which makes the connection
+    subject to man-in-the-middle attacks, and unsafe to run over untrusted and/or public
+    networks.
+  audit: | 
+    Run the following command on each node:
+    ```
+    ps -ef | grep kubelet
+    ```
+    Verify that the `--tls-cert-file` and `--tls-private-key-file` arguments exist and they are set as
+    appropriate.
+    If these arguments are not present, check that there is a Kubelet config specified by `--config`
+    and that it contains appropriate settings for tlsCertFile and tlsPrivateKeyFile.
+  remediation: | 
+    If using a Kubelet config file, edit the file to set tlsCertFile to the location of the certificate
+    file to use to identify this Kubelet, and tlsPrivateKeyFile to the location of the
+    corresponding private key file.
+    If using command line arguments, edit the kubelet service file
+    `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` on each worker node and set
+    the below parameters in KUBELET_CERTIFICATE_ARGS variable.
+    --tls-cert-file=<path/to/tls-certificate-file> --tls-private-key-file=<path/to/tls-key-file>
+    Based on your system, restart the kubelet service. For example:
+    ```
+    systemctl daemon-reload
+    systemctl restart kubelet.service
+    ```
+  impact:
+  default_value:
+  references:
+  section: Kubelet
+  version: "1.0"
+  tags:
+  - CIS
+  - Kubernetes
+  - CIS 4.2.10
+  - Kubelet
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.0
