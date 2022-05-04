@@ -19,3 +19,52 @@
 // +build !integration
 
 package config
+
+import (
+	"testing"
+
+	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/stretchr/testify/suite"
+)
+
+type ConfigTestSuite struct {
+	suite.Suite
+}
+
+func TestConfigTestSuite(t *testing.T) {
+	suite.Run(t, new(ConfigTestSuite))
+}
+
+func (s *ConfigTestSuite) SetupTest() {
+}
+
+func (s *ConfigTestSuite) TestNew() {
+	var tests = []struct {
+		config           string
+		expectedPatterns []string
+	}{
+		{
+			`
+  streams:
+    - data_yaml:
+        activated_rules:
+          cis_k8s:
+            - a
+            - b
+            - c
+            - d
+`,
+			[]string{"a", "b", "c", "d"},
+		},
+	}
+
+	for _, test := range tests {
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		c, err := New(cfg)
+		s.NoError(err)
+
+		s.Equal(test.expectedPatterns, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+	}
+}
