@@ -10,7 +10,7 @@ on:
       - main
 
 env:
-  K8S_MANIFEST_DIR: deploy/k8s/
+  K8S_MANIFEST_DIR: deploy
   GO_VERSION: 1.17.2
 
 jobs:
@@ -76,6 +76,6 @@ jobs:
           kubectl: 1.18.2
           kubeval: v0.16.1
           command: |
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/*.yaml
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/kustomize/base/cloudbeat*.yaml
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/test/cloudbeat*.yaml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/*.yaml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/kustomize/base/cloudbeat*.yaml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/eks/cloudbeat*.yaml
