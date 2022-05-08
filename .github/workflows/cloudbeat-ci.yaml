@@ -131,7 +131,7 @@ jobs:
 
       - name: Deploy tests Helm chart
         run: |
-          helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
+          helm upgrade --wait --install --values tests/deploy/values/ci.yaml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
 
       - name: Sleep for 100s
         uses: juliangruber/sleep-action@v1
@@ -181,17 +181,44 @@ jobs:
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
-        if: always()
+        if: ${{ steps.run_tests.outcome }} == "passed"
         with:
           header: Test Results
           recreate: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Cloudbeat CI :robot:
-            Integration tests status: ${{ steps.run_tests.outcome }}
+            Integration tests passed! :green_heart:
             Tests Summary:
             ```python
             ${{env.summary}}
             ```
-            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
+            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
+
+      - name: Comment test skipped result
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ steps.run_tests.outcome }} == "failed"
+        with:
+          header: Test Results
+          recreate: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ## Cloudbeat CI :robot:
+            Integration tests failed! :broken_heart:
+            Tests Summary:
+            ```python
+            ${{env.summary}}
+            ```
+            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
+
+      - name: Comment test failed result
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ steps.run_tests.outcome }} == "skipped"
+        with:
+          header: Test Results
+          recreate: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ## Cloudbeat CI :robot:
+            Integration tests skipped!
 

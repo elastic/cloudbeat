@@ -4,16 +4,15 @@ on:
   pull_request_target:
     branches:
       - main
-    types: [assigned, opened, synchronize, reopened]
+    types: [ assigned, opened, synchronize, reopened ]
   push:
     branches:
       - main
 
-
 env:
-  K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
+  K8S_MANIFEST_DIR: deploy/k8s/
   GO_VERSION: 1.17.2
-  
+
 jobs:
   unit_tests:
     name: Unit Tests
@@ -31,7 +30,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO_VERSION }}
-     
+
       - name: Mage Check
         uses: magefile/mage-action@v1.6.0
         with:
@@ -52,7 +51,19 @@ jobs:
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: goveralls -service=github
-        
+
+  manidest_tests:
+    name: Manifest Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
+          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
+
       - name: Get diff k8s manifests
         uses: technote-space/get-diff-action@v4
         with:
@@ -65,5 +76,6 @@ jobs:
           kubectl: 1.18.2
           kubeval: v0.16.1
           command: |
-            echo "===== run kubeval"
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/cloudbeat-ds.yaml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/*.yaml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/kustomize/base/cloudbeat*.yaml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/test/cloudbeat*.yaml
