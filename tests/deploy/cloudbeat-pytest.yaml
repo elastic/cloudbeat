@@ -140,7 +140,7 @@ subjects:
 ---
 apiVersion: v1
 data:
-  cloudbeat.yml: |-
+  cloudbeat.yaml: |-
     cloudbeat:
       # Defines how often an event is sent to the output
       period: 30s
@@ -275,10 +275,10 @@ spec:
         securityContext:
           runAsUser: 0
         volumeMounts:
-        - mountPath: /cloudbeat.yml
+        - mountPath: /cloudbeat.yaml
           name: config
           readOnly: true
-          subPath: cloudbeat.yml
+          subPath: cloudbeat.yaml
         - mountPath: /hostfs/proc
           name: proc
           readOnly: true

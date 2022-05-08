@@ -6,7 +6,7 @@ RUN set -x && \
       apt-get clean
 
 COPY ./cloudbeat /cloudbeat
-COPY ./cloudbeat.yml /cloudbeat.yml
+COPY cloudbeat.yaml /cloudbeat.yaml
 
 ENTRYPOINT ["/cloudbeat"]
 CMD ["-e", "-d", "'*'"]

@@ -1,13 +1,13 @@
 ###################### Cloudbeat Configuration Example #########################
 
 # This file is an example configuration file highlighting only the most common
-# options. The cloudbeat.reference.yml file from the same directory contains all the
+# options. The cloudbeat.reference.yaml file from the same directory contains all the
 # supported options with more comments. You can use it as a reference.
 #
 # You can find the full configuration reference here:
 # https://www.elastic.co/guide/en/beats/cloudbeat/index.html
 
-# For more available modules and options, please see the cloudbeat.reference.yml sample
+# For more available modules and options, please see the cloudbeat.reference.yaml sample
 # configuration file.
 
 cloudbeat:
@@ -15,6 +15,7 @@ cloudbeat:
   period: 30s
   fetchers:
   - name: kube-api
+      interval: 25s
   - name: process
     directory: "/hostfs"
     processes:

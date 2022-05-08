@@ -131,7 +131,7 @@ jobs:
 
       - name: Deploy tests Helm chart
         run: |
-          helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
+          helm upgrade --wait --install --values tests/deploy/values/ci.yaml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
 
       - name: Sleep for 100s
         uses: juliangruber/sleep-action@v1

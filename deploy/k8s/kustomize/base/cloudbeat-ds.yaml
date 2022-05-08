@@ -49,9 +49,9 @@ spec:
               memory: 100Mi
           volumeMounts:
             - name: config
-              mountPath: /cloudbeat.yml
+              mountPath: /cloudbeat.yaml
               readOnly: true
-              subPath: cloudbeat.yml
+              subPath: cloudbeat.yaml
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
@@ -126,7 +126,7 @@ metadata:
   labels:
     k8s-app: cloudbeat
 data:
-  cloudbeat.yml: |-
+  cloudbeat.yaml: |-
     cloudbeat:
       # Defines how often an event is sent to the output
       period: 30s
