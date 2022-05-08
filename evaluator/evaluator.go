@@ -43,16 +43,25 @@ type Finding struct {
 
 type Result struct {
 	Evaluation string      `json:"evaluation"`
+	Expected   interface{} `json:"expected"`
 	Evidence   interface{} `json:"evidence"`
 }
 
 type Rule struct {
-	Benchmark   Benchmark `json:"benchmark"`
-	Description string    `json:"description"`
-	Impact      string    `json:"impact"`
-	Name        string    `json:"name"`
-	Remediation string    `json:"remediation"`
-	Tags        []string  `json:"tags"`
+	Id                    string    `json:"id"`
+	Name                  string    `json:"name"`
+	Profile_Applicability string    `json:"profile_applicability"`
+	Description           string    `json:"description"`
+	Rationale             string    `json:"rationale"`
+	Audit                 string    `json:"audit"`
+	Remediation           string    `json:"remediation"`
+	Impact                string    `json:"impact"`
+	Default_Value         string    `json:"default_value"`
+	References            string    `json:"references"`
+	Section               string    `json:"section"`
+	Version               string    `json:"version"`
+	Tags                  []string  `json:"tags"`
+	Benchmark             Benchmark `json:"benchmark"`
 }
 
 type Benchmark struct {

@@ -29,18 +29,45 @@ import (
 
 const DefaultNamespace = "default"
 
-const ResultsDatastreamIndexPrefix = "logs-cis_kubernetes_benchmark.findings"
-const MetadataDatastreamIndexPrefix = ".logs-cis_kubernetes_benchmark.metadata"
+const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 type Config struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
 	Fetchers   []*common.Config        `config:"fetchers"`
+
+	Streams []Stream `config:"streams"`
+}
+
+type Stream struct {
+	DataYaml struct {
+		ActivatedRules struct {
+			CISK8S []string `config:"cis_k8s"`
+		} `config:"activated_rules"`
+	} `config:"data_yaml"`
 }
 
 var DefaultConfig = Config{
 	Period: 10 * time.Second,
+}
+
+func New(cfg *common.Config) (Config, error) {
+	c := DefaultConfig
+
+	if err := cfg.Unpack(&c); err != nil {
+		return c, err
+	}
+
+	return c, nil
+}
+
+func (c *Config) Update(cfg *common.Config) error {
+	if err := cfg.Unpack(&c); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Datastream function to generate the datastream value

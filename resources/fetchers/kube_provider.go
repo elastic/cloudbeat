@@ -18,7 +18,6 @@
 package fetchers
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
@@ -31,9 +30,14 @@ type K8sResource struct {
 	Data interface{}
 }
 
-const k8sObjMetadataField = "ObjectMeta"
+const (
+	k8sObjMetadataField  = "ObjectMeta"
+	k8sTypeMetadataField = "TypeMeta"
+	k8sObjType           = "k8s_object"
+)
 
 func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
+	logp.L().Info("Fetching Kubernetes data")
 	ret := make([]fetching.Resource, 0)
 
 	for _, watcher := range watchers {
@@ -61,19 +65,42 @@ func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
 	return ret
 }
 
-func (r K8sResource) GetID() (string, error) {
-	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
-	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
-	if !ok {
-		return "", fmt.Errorf("failed to retrieve object metadata")
-	}
-
-	uid := metadata.UID
-	return string(uid), nil
-}
-
 func (r K8sResource) GetData() interface{} {
 	return r.Data
+}
+
+func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
+	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
+	k8sObjMeta := getK8sObjectMeta(k8sObj)
+	resourceID := k8sObjMeta.UID
+	resourceName := k8sObjMeta.Name
+
+	return fetching.ResourceMetadata{
+		ID:      string(resourceID),
+		Type:    k8sObjType,
+		SubType: getK8sSubType(k8sObj),
+		Name:    resourceName,
+	}
+}
+
+func getK8sObjectMeta(k8sObj reflect.Value) metav1.ObjectMeta {
+	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
+	if !ok {
+		logp.L().Errorf("failed to retrieve object metadata, Resource: %#v", k8sObj)
+		return metav1.ObjectMeta{}
+	}
+
+	return metadata
+}
+
+func getK8sSubType(k8sObj reflect.Value) string {
+	typeMeta, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
+	if !ok {
+		logp.L().Errorf("failed to retrieve type metadata, Resource: %#v", k8sObj)
+		return ""
+	}
+
+	return typeMeta.Kind
 }
 
 // nullifyManagedFields ManagedFields field contains fields with dot that prevent from elasticsearch to index

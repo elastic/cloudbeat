@@ -15,40 +15,50 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+// Config is put into a different package to prevent cyclic imports in case
+// it is needed in several locations
+
+package config
 
 import (
+	"context"
+
 	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
 )
 
-type KubeFactory struct {
+type reloader struct {
+	ctx context.Context
+	ch  chan<- *common.Config
 }
 
-func init() {
-	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
-}
-
-func (f *KubeFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	cfg := KubeApiFetcherConfig{}
-	err := c.Unpack(&cfg)
-	if err != nil {
-		return nil, err
+func (r *reloader) Reload(configs []*reload.ConfigWithMeta) error {
+	if len(configs) == 0 {
+		return nil
 	}
 
-	return f.CreateFrom(cfg)
-}
+	logp.L().Infof("Received %v new configs for reload.", len(configs))
 
-func (f *KubeFactory) CreateFrom(cfg KubeApiFetcherConfig) (fetching.Fetcher, error) {
-	fe := &KubeFetcher{
-		cfg:      cfg,
-		watchers: make([]kubernetes.Watcher, 0),
+	select {
+	case <-r.ctx.Done():
+	default:
+		// TODO(yashtewari): Based on limitations elsewhere, such as the CSP integration,
+		// don't think we should receive more than one Config here. Need to confirm and handle.
+		r.ch <- configs[len(configs)-1].Config
 	}
 
-	logp.L().Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+
-		"Kubeconfig: %s", cfg.Name, cfg.Interval, cfg.Kubeconfig)
-	return fe, nil
+	return nil
+}
+
+func Updates(ctx context.Context) <-chan *common.Config {
+	ch := make(chan *common.Config)
+	r := &reloader{
+		ctx: ctx,
+		ch:  ch,
+	}
+
+	reload.Register.MustRegisterList("inputs", r)
+
+	return ch
 }
