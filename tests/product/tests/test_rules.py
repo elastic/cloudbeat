@@ -25,6 +25,45 @@ def data(k8s, api_client, cloudbeat_agent):
     k8s.stop_agent(yaml_objects_list=k8s_yaml_list)
 
 
+def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected) -> bool:
+    """
+    This function retrieves pod logs and verifies if evaluation result is equal to expected result.
+    @param k8s: Kubernetes wrapper instance
+    @param timeout: Exit timeout
+    @param pod_name: Name of pod the logs shall be retrieved from
+    @param namespace: Kubernetes namespace
+    @param rule_tag: Log rule tag
+    @param expected: Expected result
+    @return: bool True / False
+    """
+    start_time = time.time()
+    iteration = 0
+    while time.time() - start_time < timeout:
+        try:
+            logs = get_logs_from_stream(k8s.get_pod_logs(pod_name=pod_name,
+                                                         namespace=namespace,
+                                                         since_seconds=1))
+        except:
+            continue
+        iteration += 1
+        for log in logs:
+            if not log.get('result'):
+                print(f"{iteration}: no result")
+                continue
+            findings = log.get('result').get('findings')
+            if findings:
+                for finding in findings:
+                    if rule_tag in finding.get('rule').get('tags'):
+                        print(f"{iteration}: expected:"
+                              f"{expected} tags:"
+                              f"{finding.get('rule').get('tags')}, "
+                              f"evaluation: {finding.get('result').get('evaluation')}")
+                        agent_evaluation = finding.get('result').get('evaluation')
+                        if agent_evaluation == expected:
+                            return True
+    return False
+
+
 @pytest.mark.rules
 @pytest.mark.parametrize(
     ("rule_tag", "command", "param_value", "resource", "expected"),
@@ -32,12 +71,16 @@ def data(k8s, api_client, cloudbeat_agent):
         ('CIS 1.1.1', 'chmod', '700', '/etc/kubernetes/manifests/kube-apiserver.yaml', 'failed'),
         ('CIS 1.1.1', 'chmod', '644', '/etc/kubernetes/manifests/kube-apiserver.yaml', 'passed'),
         ('CIS 1.1.2', 'chown', 'daemon:daemon', '/etc/kubernetes/manifests/kube-apiserver.yaml', 'failed'),
-        ('CIS 1.1.2', 'chown', 'root:root', '/etc/kubernetes/manifests/kube-apiserver.yaml', 'passed')
+        ('CIS 1.1.2', 'chown', 'root:root', '/etc/kubernetes/manifests/kube-apiserver.yaml', 'passed'),
+        ('CIS 1.1.3', 'chmod', '744', '/etc/kubernetes/manifests/kube-controller-manager.yaml', 'failed'),
+        ('CIS 1.1.3', 'chmod', '644', '/etc/kubernetes/manifests/kube-controller-manager.yaml', 'passed')
     ],
     ids=['CIS 1.1.1 mode 700',
          'CIS 1.1.1 mode 644',
          'CIS 1.1.2 daemon:daemon',
-         'CIS 1.1.2 root:root'
+         'CIS 1.1.2 root:root',
+         'CIS 1.1.3 mode 744',
+         'CIS 1.1.3 mode 644',
          ]
 )
 def test_master_node_configuration(data,
@@ -77,39 +120,3 @@ def test_master_node_configuration(data,
                                      timeout=agent_config.findings_timeout)
 
     assert verification_result, f"Rule {rule_tag} verification failed."
-
-
-def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected) -> bool:
-    """
-    This function retrieves pod logs and verifies if evaluation result is equal to expected result.
-    @param k8s: Kubernetes wrapper instance
-    @param timeout: Exit timeout
-    @param pod_name: Name of pod the logs shall be retrieved from
-    @param namespace: Kubernetes namespace
-    @param rule_tag: Log rule tag
-    @param expected: Expected result
-    @return: bool True / False
-    """
-    start_time = time.time()
-    iteration = 0
-    while time.time() - start_time < timeout:
-        logs = get_logs_from_stream(k8s.get_pod_logs(pod_name=pod_name,
-                                                     namespace=namespace,
-                                                     since_seconds=1))
-        iteration += 1
-        for log in logs:
-            if not log.get('result'):
-                print(f"{iteration}: no result")
-                continue
-            findings = log.get('result').get('findings')
-            if findings:
-                for finding in findings:
-                    if rule_tag in finding.get('rule').get('tags'):
-                        print(f"{iteration}: expected:"
-                              f"{expected} tags:"
-                              f"{finding.get('rule').get('tags')}, "
-                              f"evaluation: {finding.get('result').get('evaluation')}")
-                        agent_evaluation = finding.get('result').get('evaluation')
-                        if agent_evaluation == expected:
-                            return True
-    return False
