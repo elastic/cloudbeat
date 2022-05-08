@@ -181,10 +181,9 @@ jobs:
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
-        if: ${{ steps.run_tests.outcome }} == "passed"
+        if: ${{ steps.run_tests.outcome }} == "success"
         with:
           header: Test Results
-          recreate: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Cloudbeat CI :robot:
@@ -197,10 +196,9 @@ jobs:
 
       - name: Comment test skipped result
         uses: marocchino/sticky-pull-request-comment@v2
-        if: ${{ steps.run_tests.outcome }} == "failed"
+        if: ${{ steps.run_tests.outcome }} == "failure"
         with:
           header: Test Results
-          recreate: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Cloudbeat CI :robot:
@@ -213,12 +211,11 @@ jobs:
 
       - name: Comment test failed result
         uses: marocchino/sticky-pull-request-comment@v2
-        if: ${{ steps.run_tests.outcome }} == "skipped"
+        if: ( ${{ steps.run_tests.outcome }} == "skipped" | ${{ steps.run_tests.outcome }} == "cancelled" )
         with:
           header: Test Results
-          recreate: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Cloudbeat CI :robot:
-            Integration tests skipped!
+            Integration tests ${{ steps.run_tests.outcome }}!
 
