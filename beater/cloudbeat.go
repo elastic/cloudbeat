@@ -40,12 +40,13 @@ type cloudbeat struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	config      config.Config
-	client      beat.Client
-	data        *manager.Data
-	evaluator   evaluator.Evaluator
-	transformer transformer.Transformer
-	log         *logp.Logger
+	config        config.Config
+	configUpdates <-chan *common.Config
+	client        beat.Client
+	data          *manager.Data
+	evaluator     evaluator.Evaluator
+	transformer   transformer.Transformer
+	log           *logp.Logger
 }
 
 // New creates an instance of cloudbeat.
@@ -54,8 +55,8 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	c := config.DefaultConfig
-	if err := cfg.Unpack(&c); err != nil {
+	c, err := config.New(cfg)
+	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
@@ -102,13 +103,14 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 	t := transformer.NewTransformer(ctx, eval, commonData, resultsIndex)
 
 	bt := &cloudbeat{
-		ctx:         ctx,
-		cancel:      cancel,
-		config:      c,
-		evaluator:   eval,
-		data:        data,
-		transformer: t,
-		log:         log,
+		ctx:           ctx,
+		cancel:        cancel,
+		config:        c,
+		configUpdates: config.Updates(ctx),
+		evaluator:     eval,
+		data:          data,
+		transformer:   t,
+		log:           log,
 	}
 	return bt, nil
 }
@@ -148,6 +150,12 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		select {
 		case <-bt.ctx.Done():
 			return nil
+
+		case update := <-bt.configUpdates:
+			if err := bt.config.Update(update); err != nil {
+				logp.L().Errorf("could not update cloudbeat config: %v", err)
+			}
+
 		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
 			bt.log.Debugf("Cycle % has started", cycleId)
