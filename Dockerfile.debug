@@ -5,6 +5,6 @@ RUN apt-get install -y ca-certificates
 EXPOSE 40000
 EXPOSE 8080
 COPY ./cloudbeat /cloudbeat
-COPY ./cloudbeat.yaml /cloudbeat.yaml
+COPY ./cloudbeat.yml /cloudbeat.yml
 ENTRYPOINT ["/go/bin/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--wd=/", "exec", "/cloudbeat"]
 CMD ["--", "-e", "-d", "'*'"]
