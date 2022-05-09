@@ -153,7 +153,7 @@ func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (inte
 		if err := json.Unmarshal(data, &output); err != nil {
 			return nil, err
 		}
-	case ".yml":
+	case ".yaml":
 		if err := yaml.Unmarshal(data, &output); err != nil {
 			return nil, err
 		}
