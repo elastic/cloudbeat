@@ -21,18 +21,20 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
+	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
-	"github.com/elastic/cloudbeat/config"
-	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources/manager"
-	"github.com/elastic/cloudbeat/transformer"
+	csppolicies "github.com/elastic/csp-security-policies/bundle"
 
 	"github.com/gofrs/uuid"
+	"gopkg.in/yaml.v3"
 )
 
 // cloudbeat configuration.
@@ -153,8 +155,38 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 
 		case update := <-bt.configUpdates:
 			if err := bt.config.Update(update); err != nil {
-				logp.L().Errorf("could not update cloudbeat config: %v", err)
+				logp.L().Errorf("Could not update cloudbeat config: %v", err)
+				break
 			}
+
+			policies, err := csppolicies.CISKubernetes()
+			if err != nil {
+				logp.L().Errorf("Could not load CIS Kubernetes policies: %v", err)
+				break
+			}
+
+			if len(bt.config.Streams) == 0 {
+				logp.L().Infof("Did not receive any input stream, skipping.")
+				break
+			}
+
+			// TODO(yashtewari): Figure out the scenarios in which the integration sends
+			// multiple input streams. Since only one instance of our integration is allowed per
+			// agent policy, is it even possible that multiple input streams are received?
+			y, err := yaml.Marshal(bt.config.Streams[0].DataYaml)
+			if err != nil {
+				logp.L().Errorf("Could not marshal to YAML: %v", err)
+				break
+			}
+
+			s := string(y)
+
+			if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, s); err != nil {
+				logp.L().Errorf("Could not update bundle with dataYaml: %v", err)
+				break
+			}
+
+			logp.L().Infof("Bundle updated with dataYaml: %s", s)
 
 		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
