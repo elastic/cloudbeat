@@ -26,5 +26,5 @@ class DockerWrapper:
         command_f = f"{command} {param_value} {resource}"
         exit_code, output = container.exec_run(cmd=command_f)
         if exit_code > 0:
-            return ''
+            return 'error'
         return output.decode().strip()

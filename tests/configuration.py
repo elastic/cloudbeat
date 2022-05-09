@@ -10,7 +10,7 @@ from munch import Munch
 agent = Munch()
 agent.name = os.getenv('AGENT_NAME', 'cloudbeat')
 agent.namespace = os.getenv('AGENT_NAMESPACE', 'kube-system')
-agent.findings_timeout = 90
+agent.findings_timeout = 30
 
 # --- Kubernetes environment definition --------------------
 kubernetes = Munch()
