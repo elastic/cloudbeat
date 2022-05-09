@@ -6,7 +6,7 @@ metadata:
   labels:
     k8s-app: elastic-agent
 data:
-  agent.yaml: |-
+  agent.yml: |-
     id: c6d31f60-cae1-11ec-888f-d3279d61d919
     revision: 2
     outputs:
@@ -450,7 +450,7 @@ spec:
           image: docker.elastic.co/beats/elastic-agent:8.3.0-SNAPSHOT
           imagePullPolicy: IfNotPresent
           args: [
-            "-c", "/etc/agent.yaml",
+            "-c", "/etc/agent.yml",
             "-e",
           ]
           env:
@@ -478,9 +478,9 @@ spec:
               memory: 200Mi
           volumeMounts:
             - name: datastreams
-              mountPath: /etc/agent.yaml
+              mountPath: /etc/agent.yml
               readOnly: true
-              subPath: agent.yaml
+              subPath: agent.yml
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true

@@ -198,7 +198,7 @@ func CheckLicenseHeaders() error {
 
 func Update() { mg.Deps(cloudbeat.Update.All) }
 
-// Fields generates a fields.yaml for the Beat.
+// Fields generates a fields.yml for the Beat.
 func Fields() { mg.Deps(cloudbeat.Update.Fields) }
 
 // Config generates both the short/reference/docker configs.

@@ -34,11 +34,11 @@ shared:
       content: >
         {{ commit }}
       mode: 0644
-    '{{.BeatName}}.reference.yaml':
-      source: '{{.BeatName}}.reference.yaml'
+    '{{.BeatName}}.reference.yml':
+      source: '{{.BeatName}}.reference.yml'
       mode: 0644
-    '{{.BeatName}}.yaml':
-      source: '{{.BeatName}}.yaml'
+    '{{.BeatName}}.yml':
+      source: '{{.BeatName}}.yml'
       mode: 0600
       config: true
 

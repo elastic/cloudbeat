@@ -2,4 +2,4 @@ resources:
   - ../base
 
 patchesStrategicMerge:
-  - cloudbeat-ds.yaml
+  - cloudbeat-ds.yml

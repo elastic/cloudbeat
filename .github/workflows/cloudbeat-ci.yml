@@ -104,7 +104,7 @@ jobs:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
         with:
-          config: deploy/k8s/kind/kind-config.yaml
+          config: deploy/k8s/kind/kind-config.yml
           cluster_name: kind-mono 
 
       - name: Wait for build to succeed
@@ -131,7 +131,7 @@ jobs:
 
       - name: Deploy tests Helm chart
         run: |
-          helm upgrade --wait --install --values tests/deploy/values/ci.yaml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
+          helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
 
       - name: Sleep for 100s
         uses: juliangruber/sleep-action@v1
@@ -194,7 +194,7 @@ jobs:
             ```
             Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
 
-      - name: Comment test skipped result
+      - name: Comment test failed result
         uses: marocchino/sticky-pull-request-comment@v2
         if: steps.run_tests.outcome == 'failure'
         with:
@@ -209,7 +209,7 @@ jobs:
             ```
             Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
 
-      - name: Comment test failed result
+      - name: Comment test skipped result
         uses: marocchino/sticky-pull-request-comment@v2
         if: (steps.run_tests.outcome == 'skipped' || steps.run_tests.outcome == 'cancelled')
         with:

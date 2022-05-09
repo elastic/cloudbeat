@@ -76,6 +76,6 @@ jobs:
           kubectl: 1.18.2
           kubeval: v0.16.1
           command: |
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/*.yaml
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/kustomize/base/cloudbeat*.yaml
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/eks/cloudbeat*.yaml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/*.yml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/kustomize/base/cloudbeat*.yml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/eks/cloudbeat*.yml

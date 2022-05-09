@@ -17,7 +17,7 @@ WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/requirements.txt .
 
-COPY deploy/cloudbeat-pytest.yaml .
+COPY deploy/cloudbeat-pytest.yml .
 
 RUN pip install -r requirements.txt
 
