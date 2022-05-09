@@ -13,16 +13,16 @@ func TestServer(t *testing.T) {
 	assert := assert.New(t)
 
 	handler := NewServer()
-	err := handler.HostBundle("empty", map[string]string{})
+	err := HostBundle("empty", map[string]string{})
 	assert.NoError(err)
 
-	err = handler.HostBundle("otherBundle", map[string]string{"a.txt": "some text"})
+	err = HostBundle("otherBundle", map[string]string{"a.txt": "some text"})
 	assert.NoError(err)
 
-	err = handler.HostBundle("overridenBundle", map[string]string{})
+	err = HostBundle("overridenBundle", map[string]string{})
 	assert.NoError(err)
 
-	err = handler.HostBundle("overridenBundle", map[string]string{})
+	err = HostBundle("overridenBundle", map[string]string{})
 	assert.NoError(err)
 
 	server := httptest.NewServer(handler)

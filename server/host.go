@@ -13,7 +13,7 @@ func HostCISKubernetes(path string) (http.Handler, error) {
 	}
 
 	server := bundle.NewServer()
-	err = server.HostBundle(path, policies)
+	err = bundle.HostBundle(path, policies)
 	if err != nil {
 		return nil, err
 	}
