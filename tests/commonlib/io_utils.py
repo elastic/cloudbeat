@@ -25,7 +25,15 @@ def get_logs_from_stream(stream: str) -> list[Munch]:
     for log in logs:
         # current_log = log.split(sep="Z ")[1]
         if log and "bundles" in log:
-            result.append(Munch(json.loads(log)))
+            try:
+                result.append(Munch(json.loads(log)))
+            except:
+                try:
+                    result.append(Munch(json.loads(log.replace("'", '"'))))
+                except Exception as e:
+                    print(e)
+                    continue
+
     return result
 
 

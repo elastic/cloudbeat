@@ -2,6 +2,7 @@
 Kubernetes CIS rules verification.
 This module verifies correctness of retrieved findings by manipulating audit and remediation actions
 """
+import datetime
 import time
 
 import pytest
@@ -24,8 +25,7 @@ def data(k8s, api_client, cloudbeat_agent):
     k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
     k8s.stop_agent(yaml_objects_list=k8s_yaml_list)
 
-
-def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected) -> bool:
+def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected, exec_timestamp) -> bool:
     """
     This function retrieves pod logs and verifies if evaluation result is equal to expected result.
     @param k8s: Kubernetes wrapper instance
@@ -34,6 +34,7 @@ def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected) -> bool:
     @param namespace: Kubernetes namespace
     @param rule_tag: Log rule tag
     @param expected: Expected result
+    @:param exec_timestamp: the timestamp the command executed
     @return: bool True / False
     """
     start_time = time.time()
@@ -48,9 +49,12 @@ def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected) -> bool:
         iteration += 1
         for log in logs:
             if not log.get('result'):
-                print(f"{iteration}: no result")
                 continue
             findings = log.get('result').get('findings')
+            log_timestamp = datetime.datetime.strptime(log["time"], '%Y-%m-%dT%H:%M:%Sz')
+            if (log_timestamp - exec_timestamp).total_seconds() < 0:
+                continue
+
             if findings:
                 for finding in findings:
                     if rule_tag in finding.get('rule').get('tags'):
@@ -93,11 +97,13 @@ def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected) -> bool:
         ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd', 'passed'),
         ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd/somefile', 'passed'),
         ('CIS 1.1.12', 'chown', 'root:root', '/var/lib/etcd', 'failed'),
-        ('CIS 1.1.12', 'chown', 'daemon:root', '/var/lib/etcd', 'failed'),
-        ('CIS 1.1.12', 'chown', 'root:daemon', '/var/lib/etcd', 'failed'),
-        ('CIS 1.1.12', 'chown', 'root:daemon', '/var/lib/etcd/some_file.txt', 'failed'),
-        ('CIS 1.1.12', 'chown', 'daemon:daemon', '/var/lib/etcd/', 'passed'),
-        ('CIS 1.1.12', 'chown', 'daemon:daemon', '/var/lib/etcd/some_file.txt', 'passed'),
+        ('CIS 1.1.12', 'chown', 'etcd:root', '/var/lib/etcd/', 'failed'),
+        ('CIS 1.1.12', 'chown', 'root:etcd', '/var/lib/etcd', 'failed'),
+        ('CIS 1.1.12', 'chown', 'root:etcd', '/var/lib/etcd/some_file.txt', 'failed'),
+        # todo:
+        ('CIS 1.1.12', 'chown', 'etcd:etcd', '/var/lib/etcd', 'passed'),
+        # todo:
+        ('CIS 1.1.12', 'chown', 'etcd:etcd', '/var/lib/etcd/some_file.txt', 'passed'),
         ('CIS 1.1.13', 'chmod', '0700', '/etc/kubernetes/admin.conf', 'failed'),
         ('CIS 1.1.13', 'chmod', '0644', '/etc/kubernetes/admin.conf', 'failed'),
         ('CIS 1.1.13', 'chmod', '0600', '/etc/kubernetes/admin.conf', 'passed'),
@@ -234,17 +240,28 @@ def test_file_system_configuration(data,
     # Currently, single node is used, in the future may be extended for all nodes.
     node = k8s_client.get_cluster_nodes()[0]
     pods = k8s_client.get_agent_pod_instances(agent_name=agent_config.name, namespace=agent_config.namespace)
+    api_client.exec_command(container_name=node.metadata.name,
+                                  command='useradd',
+                                  param_value='-g etcd etcd',
+                                  resource='')
+    api_client.exec_command(container_name=node.metadata.name,
+                            command='touch',
+                            param_value='var/lib/etcd/some_file.txt',
+                            resource='')
+
     res = api_client.exec_command(container_name=node.metadata.name,
                             command=command,
                             param_value=param_value,
                             resource=resource)
-    time.sleep(10)
+
+    exec_ts = datetime.datetime.utcnow()
     print(f'exec command output: {res}')
     verification_result = check_logs(k8s=k8s_client,
                                      pod_name=pods[0].metadata.name,
                                      namespace=agent_config.namespace,
                                      rule_tag=rule_tag,
                                      expected=expected,
-                                     timeout=agent_config.findings_timeout)
+                                     timeout=agent_config.findings_timeout,
+                                     exec_timestamp=exec_ts)
 
     assert verification_result, f"Rule {rule_tag} verification failed."
