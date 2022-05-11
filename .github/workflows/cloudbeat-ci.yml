@@ -1,7 +1,7 @@
 name: Cloudbeat-CI
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
     types: [assigned, opened, synchronize, reopened]
@@ -130,6 +130,7 @@ jobs:
           rm -rf /tmp/*.tar
 
       - name: Deploy tests Helm chart
+        id: deploy_helm
         run: |
           helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
 
@@ -151,13 +152,13 @@ jobs:
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: failure()
+        if: steps.deploy_helm.outcome == 'failure'
         with:
           limit-access-to-actor: true
 
       - name: Get Allure history
         uses: actions/checkout@v2
-        if: always()
+        if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
         continue-on-error: true
         with:
           ref: gh-pages
@@ -165,14 +166,14 @@ jobs:
 
       - name: Generate
         uses: simple-elf/allure-report-action@master
-        if: always()
+        if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
         with:
           allure_results: tests/allure/results
           allure_history: allure-history
           keep_reports: 20
 
       - name: Deploy report to Github Pages
-        if: always()
+        if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
         uses: peaceiris/actions-gh-pages@v2
         env:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
