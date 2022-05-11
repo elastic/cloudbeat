@@ -30,7 +30,7 @@ metadata:
     By default, profiling is enabled.
   references: |
     1. [https://kubernetes.io/docs/admin/kube-scheduler/](https://kubernetes.io/docs/admin/kube-scheduler/)
-    2. [https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md](https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md)
+    2. [https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scalability/profiling.md](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scalability/profiling.md)
   section: Scheduler
   version: "1.0"
   tags:
