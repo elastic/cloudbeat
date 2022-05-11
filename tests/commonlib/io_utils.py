@@ -9,6 +9,7 @@ import yaml
 import shutil
 from pathlib import Path
 from munch import Munch, munchify
+import time
 
 
 def get_logs_from_stream(stream: str) -> list[Munch]:
@@ -100,14 +101,53 @@ class FsClient:
 
         current_resource = Path(resource)
         if not current_resource.is_file():
-            raise Exception(f"File {resource} does not exist or mount missing.")
+            raise Exception(
+                f"File {resource} does not exist or mount missing.")
 
         if command == 'chmod':
             os.chmod(path=resource, mode=int(param_value))
         elif command == 'chown':
             uid_gid = param_value.split(':')
             if len(uid_gid) != 2:
-                raise Exception("User and group parameter shall be separated by ':' ")
+                raise Exception(
+                    "User and group parameter shall be separated by ':' ")
             shutil.chown(path=resource, user=uid_gid[0], group=uid_gid[1])
         else:
-            raise Exception(f"Command '{command}' still not implemented in test framework")
+            raise Exception(
+                f"Command '{command}' still not implemented in test framework")
+
+    @staticmethod
+    def edit_process_file(container_name: str, dictionary, resource: str):
+        if container_name == '':
+            raise Exception(f"Unknown {container_name} is sent")
+
+        current_resource = Path(resource)
+        if not current_resource.is_file():
+            raise Exception(
+                f"File {resource} does not exist or mount missing.")
+
+        with current_resource.open() as f:
+            r_file = yaml.safe_load(f)
+
+        command = r_file["spec"]["containers"][0]["command"]
+        set_dict = dictionary.get("set", {})
+        unset_list = dictionary.get("unset", [])
+
+        for skey, svalue in set_dict.items():
+            if any(skey == x.split("=")[0] for x in command):
+                command = list(map(lambda x: x.replace(
+                    x, skey + "=" + svalue) if skey == x.split("=")[0] else x, command))
+            else:
+                command.append(skey + "=" + svalue)
+
+        for uskey in unset_list:
+            command = [x for x in command if uskey != x.split("=")[0]]
+
+        r_file["spec"]["containers"][0]["command"] = command
+
+        with current_resource.open(mode="w") as f:
+            yaml.dump(r_file, f)
+
+        # Wait for process reboot
+        # TODO: Implement a more optimal way of waiting
+        time.sleep(60)
