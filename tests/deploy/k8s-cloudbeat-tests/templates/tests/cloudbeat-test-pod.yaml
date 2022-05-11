@@ -26,9 +26,9 @@ spec:
       - name: etc-kubernetes
         mountPath: /etc/kubernetes/manifests
         readOnly: false
-      - name: etcd
-        mountPath: /var/lib/etcd
-        readOnly: false
+#      - name: etcd
+#        mountPath: /var/lib/etcd
+#        readOnly: false
   restartPolicy: Never
   volumes:
     - name: cloudbeat-test-pv-storage
@@ -37,6 +37,6 @@ spec:
     - name: etc-kubernetes
       hostPath:
         path: /etc/kubernetes/manifests
-    - name: etcd
-        hostPath:
-          path: /var/lib/etcd
+#    - name: etcd
+#        hostPath:
+#          path: /var/lib/etcd
