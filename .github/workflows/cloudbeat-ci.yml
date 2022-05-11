@@ -104,7 +104,7 @@ jobs:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
         with:
-          config: deploy/k8s/kind/kind-config.yaml
+          config: deploy/k8s/kind/kind-config.yml
           cluster_name: kind-mono 
 
       - name: Wait for build to succeed
@@ -181,17 +181,41 @@ jobs:
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
-        if: always()
+        if: steps.run_tests.outcome == 'success'
         with:
           header: Test Results
-          recreate: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Cloudbeat CI :robot:
-            Integration tests status: ${{ steps.run_tests.outcome }}
+            Integration tests passed! :green_heart:
             Tests Summary:
             ```python
             ${{env.summary}}
             ```
-            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
+            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
+
+      - name: Comment test failed result
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: steps.run_tests.outcome == 'failure'
+        with:
+          header: Test Results
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ## Cloudbeat CI :robot:
+            Integration tests failed! :broken_heart:
+            Tests Summary:
+            ```python
+            ${{env.summary}}
+            ```
+            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
+
+      - name: Comment test skipped result
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: (steps.run_tests.outcome == 'skipped' || steps.run_tests.outcome == 'cancelled')
+        with:
+          header: Test Results
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ## Cloudbeat CI :robot:
+            Integration tests status: ${{ steps.run_tests.outcome }}
 

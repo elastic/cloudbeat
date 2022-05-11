@@ -2,7 +2,7 @@ import pytest
 import json
 import allure
 
-testdata = ['file-system', 'process', 'kube-api']
+testdata = ['file', 'process', 'k8s_object']
 
 
 @pytest.mark.integration

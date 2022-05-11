@@ -6,13 +6,16 @@ This project provides an ability to develop component and integration tests for 
 
 ## Getting started
 
-All installations below (except of docker desktop) are available via [Homebrew](https://brew.sh/).
-If you have a different OS, in order to install, please go forward through instructions provided in links. 
+This guide provides installations for macOS users via [Homebrew](https://brew.sh/).
+For other platforms, please go forward through instructions provided in links and select relevant installation:
 
-1. Install [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
+1. Install [Python 3](https://www.python.org/downloads/)
 
 
-2. Install [JUST](https://github.com/casey/just) command runner
+2. Install [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
+
+
+3. Install [JUST](https://github.com/casey/just) command runner
 
 ```shell
 brew install just
@@ -20,21 +23,21 @@ brew install just
 
 After installing just you will be able to execute commands defined in **JUSTFILE** located in the project root folder.
 
-2. Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start)
+4. Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start)
 
 ```shell
 brew install kind
 ```
 After installing kind you will be able to create and run local Kubernetes clusters using Docker container.
 
-3. Install [Helm](https://helm.sh/docs/intro/install/)
+5. Install [Helm](https://helm.sh/docs/intro/install/)
 
 ```
 brew install helm
 ```
 Helm is a package manager for Kubernetes.
 
-4. Install [Allure](https://docs.qameta.io/allure/#_installing_a_commandline) commandline tool
+6. Install [Allure](https://docs.qameta.io/allure/#_installing_a_commandline) commandline tool
 
 ```shell
 brew install allure
@@ -54,13 +57,13 @@ In order to verify that cluster installed you can execute:
 kind get clusters
 ```
 
-3. Build cloudbeat and upload docker image to kind
+2. Build cloudbeat and upload docker image to kind
 ```shell
 just build-cloudbeat
 just load-cloudbeat-image
 ```
 
-4. Install elasticsearch and start cloudbeat
+3. Install elasticsearch and start cloudbeat
 ```shell
 just deploy-tests-helm
 ```
@@ -95,7 +98,7 @@ poetry install
 ```
 ### Configuring IDE
 
-Tests development may be done using any IDE like [visual studio code](https://code.visualstudio.com/) or [pycharm](https://www.jetbrains.com/pycharm/promo/?source=google&medium=cpc&campaign=14124132918&gclid=CjwKCAjw9LSSBhBsEiwAKtf0n1GGB55o_rxfYFVmBzRYUqbz_g5YhZdP8Th1iKXFsaRl43rEz_h7ehoCl2wQAvD_BwE).
+Tests development may be done using any IDE like [visual studio code](https://code.visualstudio.com/) or [pycharm](https://www.jetbrains.com/pycharm/).
 #### Configure Interpreter
 Pycharm has integration with poetry therefore in order to use it as interpreter perform the following:
 - Navigate to PyCharm -> Preferences...
@@ -126,6 +129,23 @@ The project main folders are:
 - integration - contains cloudbeat integration tests.
 - project root content - contains project and tests configuration files.
 
+### Adding New Tests
+
+#### Conventions
+
+- Test file shall start with **test_** prefix, for example test_login.py.
+- Test method shall start with **test_** prefix, for example test_login_success().
+- Add test marker for a test method. Framework markers are defined in **pyproject.toml** file, section **[tool.pytest.ini_options] markers**
+- SetUp and TearDown actions for a test method are defined using pytest.fixture.
+- Global SetUp and TearDown actions are defined in **conftest.py** file.
+
+
+#### Test Folders
+
+- Product tests folder is **product/tests**.</br>
+- Integration tests folder is **intergration/tests**.
+
+
 
 ### Building
 
@@ -153,7 +173,7 @@ Tests execution depends on the developers needs and currently this framework sup
 ### Dev Mode
 
 Before running tests verify that **System Under Test (SUT) Setup** is done and running.
-Since elasticsearch is deployed inside cluster, in order to reach it from outside, execute the following command
+Since elasticsearch is deployed inside cluster, for reaching it from outside execute the following command:
 ```shell
 kubectl port-forward svc/elasticsearch-master -n kube-system 9200
 ```
@@ -164,7 +184,7 @@ kubectl port-forward svc/kibana-kibana -n kube-system 5601
 IDE: Execute tests by IDE runner (assume run/debug setup done before) -> click on play/debug button
 Terminal: Ensure that virtualenv is activated and then execute
 ```shell
-poetry run pytest -s -v --allure-dir=./reports
+poetry run pytest -s -v -m ci_cloudbeat --alluredir=./reports
 allure serve ./reports
 ```
 

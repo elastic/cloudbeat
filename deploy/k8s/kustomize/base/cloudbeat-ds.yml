@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: cloudbeat
-          image: cloudbeat:latest
+          image: cloudbeat:latest 
           imagePullPolicy: IfNotPresent
           env:
             - name: ES_HOST
@@ -233,6 +233,8 @@ rules:
       - events
       - pods
       - services
+      - configmaps
+      - serviceaccounts
     verbs: ["get", "list", "watch"]
   # Enable this rule only if planing to use Kubernetes keystore
   #- apiGroups: [""]
@@ -263,6 +265,23 @@ rules:
       - "/metrics"
     verbs:
       - get
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - ingressclasses
+      - ingresses
+      - networkpolicies
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources:
+      - podsecuritypolicies
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

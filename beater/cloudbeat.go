@@ -20,18 +20,21 @@ package beater
 import (
 	"context"
 	"fmt"
+
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
+	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
-	"github.com/elastic/cloudbeat/config"
-	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources/manager"
-	"github.com/elastic/cloudbeat/transformer"
+	csppolicies "github.com/elastic/csp-security-policies/bundle"
 
 	"github.com/gofrs/uuid"
+	"gopkg.in/yaml.v3"
 )
 
 // cloudbeat configuration.
@@ -39,12 +42,13 @@ type cloudbeat struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	config      config.Config
-	client      beat.Client
-	data        *manager.Data
-	evaluator   evaluator.Evaluator
-	transformer transformer.Transformer
-	log         *logp.Logger
+	config        config.Config
+	configUpdates <-chan *common.Config
+	client        beat.Client
+	data          *manager.Data
+	evaluator     evaluator.Evaluator
+	transformer   transformer.Transformer
+	log           *logp.Logger
 }
 
 // New creates an instance of cloudbeat.
@@ -53,8 +57,8 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	c := config.DefaultConfig
-	if err := cfg.Unpack(&c); err != nil {
+	c, err := config.New(cfg)
+	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
@@ -86,16 +90,29 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t := transformer.NewTransformer(ctx, eval, resultsIndex)
+	cdp, err := transformer.NewCommonDataProvider(c)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+
+	commonData, err := cdp.FetchCommonData(ctx)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+
+	t := transformer.NewTransformer(ctx, eval, commonData, resultsIndex)
 
 	bt := &cloudbeat{
-		ctx:         ctx,
-		cancel:      cancel,
-		config:      c,
-		evaluator:   eval,
-		data:        data,
-		transformer: t,
-		log:         log,
+		ctx:           ctx,
+		cancel:        cancel,
+		config:        c,
+		configUpdates: config.Updates(ctx),
+		evaluator:     eval,
+		data:          data,
+		transformer:   t,
+		log:           log,
 	}
 	return bt, nil
 }
@@ -135,6 +152,42 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		select {
 		case <-bt.ctx.Done():
 			return nil
+
+		case update := <-bt.configUpdates:
+			if err := bt.config.Update(update); err != nil {
+				logp.L().Errorf("Could not update cloudbeat config: %v", err)
+				break
+			}
+
+			policies, err := csppolicies.CISKubernetes()
+			if err != nil {
+				logp.L().Errorf("Could not load CIS Kubernetes policies: %v", err)
+				break
+			}
+
+			if len(bt.config.Streams) == 0 {
+				logp.L().Infof("Did not receive any input stream, skipping.")
+				break
+			}
+
+			// TODO(yashtewari): Figure out the scenarios in which the integration sends
+			// multiple input streams. Since only one instance of our integration is allowed per
+			// agent policy, is it even possible that multiple input streams are received?
+			y, err := yaml.Marshal(bt.config.Streams[0].DataYaml)
+			if err != nil {
+				logp.L().Errorf("Could not marshal to YAML: %v", err)
+				break
+			}
+
+			s := string(y)
+
+			if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, s); err != nil {
+				logp.L().Errorf("Could not update bundle with dataYaml: %v", err)
+				break
+			}
+
+			logp.L().Infof("Bundle updated with dataYaml: %s", s)
+
 		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
 			bt.log.Debugf("Cycle % has started", cycleId)

@@ -18,7 +18,10 @@
 package transformer
 
 import (
+	"io/fs"
+
 	"github.com/gofrs/uuid"
+	"k8s.io/client-go/kubernetes"
 )
 
 type ResourceTypeMetadata struct {
@@ -26,11 +29,21 @@ type ResourceTypeMetadata struct {
 	Type string
 }
 
-type ResourceMetadata struct {
-	ResourceTypeMetadata
-	ResourceId string
-}
-
 type CycleMetadata struct {
 	CycleId uuid.UUID
+}
+
+type CommonDataProvider struct {
+	kubeClient kubernetes.Interface
+	fsys fs.FS
+}
+
+type CommonData struct {
+	clusterId string
+	nodeId string
+}
+
+type CommonDataInterface interface {
+	GetData() CommonData
+	GetResourceId(string) string
 }
