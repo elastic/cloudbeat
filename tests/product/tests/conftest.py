@@ -26,16 +26,16 @@ def config_node_pre_test(data):
     node = k8s_client.get_cluster_nodes()[0]
 
     # add etcd group if not exists
-    groups = api_client.exec_command(container_name=node.metadata.name, command='getent', param_value='group etcd',
+    groups = api_client.exec_command(container_name=node.metadata.name, command='getent', param_value='group',
                                      resource='')
 
-    if not groups:
+    if 'etcd' not in groups:
         api_client.exec_command(container_name=node.metadata.name, command='groupadd',
                                 param_value='etcd',
                                 resource='')
 
     # add etcd user if not exists
-    users = api_client.exec_command(container_name=node.metadata.name, command='getent', param_value='passwd etcd',
+    users = api_client.exec_command(container_name=node.metadata.name, command='getent', param_value='passwd',
                                     resource='')
     if 'etcd' not in users:
         api_client.exec_command(container_name=node.metadata.name,
