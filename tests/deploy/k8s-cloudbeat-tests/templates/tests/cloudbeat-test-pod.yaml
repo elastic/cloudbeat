@@ -24,11 +24,18 @@ spec:
       - name: cloudbeat-test-pv-storage
         mountPath: /usr/src/app/tests/report
       - name: etc-kubernetes
-        mountPath: /etc/kubernetes/manifests
+        mountPath: /etc/kubernetes/
         readOnly: false
-#      - name: etcd
-#        mountPath: /var/lib/etcd
-#        readOnly: false
+      - name: var-lib-etcd
+        mountPath: /var/lib/etcd
+        readOnly: false
+      - name: kubelet-service
+        mountPath: /etc/systemd/system/kubelet.service.d
+        readOnly: false
+      - name: var-lib-kubelet
+        mountPath: /var/lib/kubelet
+        readOnly: false
+
   restartPolicy: Never
   volumes:
     - name: cloudbeat-test-pv-storage
@@ -36,7 +43,15 @@ spec:
         path: /tmp/data
     - name: etc-kubernetes
       hostPath:
-        path: /etc/kubernetes/manifests
-#    - name: etcd
-#        hostPath:
-#          path: /var/lib/etcd
+        path: /etc/kubernetes/
+    - name: var-lib-etcd
+      hostPath:
+        path: /var/lib/etcd
+    - name: kubelet-service
+      hostPath:
+        path: /etc/systemd/system/kubelet.service.d
+    - name: var-lib-kubelet
+      hostPath:
+        path: /var/lib/kubelet
+
+
