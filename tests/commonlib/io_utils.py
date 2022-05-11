@@ -27,12 +27,11 @@ def get_logs_from_stream(stream: str) -> list[Munch]:
         if log and "bundles" in log:
             try:
                 result.append(Munch(json.loads(log)))
-            except:
-                try:
-                    result.append(Munch(json.loads(log.replace("'", '"'))))
-                except Exception as e:
-                    print(e)
-                    continue
+            except json.decoder.JSONDecodeError:
+                result.append(Munch(json.loads(log.replace("'", '"'))))
+            except Exception as e:
+                print(e)
+                continue
 
     return result
 

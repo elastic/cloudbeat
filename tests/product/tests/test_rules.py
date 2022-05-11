@@ -33,22 +33,26 @@ def config_node_pre_test(data):
     node = k8s_client.get_cluster_nodes()[0]
 
     # add etcd group if not exists
-    groups = api_client.exec_command(container_name=node.metadata.name,  command='getent', param_value='group etcd', resource='')
+    groups = api_client.exec_command(container_name=node.metadata.name, command='getent', param_value='group etcd',
+                                     resource='')
 
     if not groups:
-        api_client.exec_command(container_name=node.metadata.name,  command='groupadd',
+        api_client.exec_command(container_name=node.metadata.name, command='groupadd',
                                 param_value='etcd',
                                 resource='')
 
     # add etcd user if not exists
-    users = api_client.exec_command(container_name=node.metadata.name, command='getent',  param_value='passwd etcd', resource='')
+    users = api_client.exec_command(container_name=node.metadata.name, command='getent', param_value='passwd etcd',
+                                    resource='')
     if 'etcd' not in users:
         api_client.exec_command(container_name=node.metadata.name,
                                 command='useradd',
-                                param_value='-g etcd etcd')
+                                param_value='-g etcd etcd',
+                                resource='')
 
     # create stub file
-    etcd_content = api_client.exec_command(container_name=node.metadata.name, command='ls', param_value='/var/lib/etcd/', resource='')
+    etcd_content = api_client.exec_command(container_name=node.metadata.name, command='ls',
+                                           param_value='/var/lib/etcd/', resource='')
     if 'some_file.txt' not in etcd_content:
         api_client.exec_command(container_name=node.metadata.name,
                                 command='touch',
@@ -107,29 +111,28 @@ def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected, exec_times
 @pytest.mark.rules
 @pytest.mark.parametrize(
     ("rule_tag", "command", "param_value", "resource", "expected"),
-    [
-        *cis_1_1_1,
-        *cis_1_1_2,
-        *cis_1_1_3,
-        *cis_1_1_4,
-        *cis_1_1_5,
-        *cis_1_1_6,
-        *cis_1_1_7,
-        *cis_1_1_8,
-        *cis_1_1_11,
-        # *cis_1_1_12, uncomment after fix https://github.com/elastic/cloudbeat/issues/118
-        *cis_1_1_13,
-        *cis_1_1_14,
-        *cis_1_1_15,
-        *cis_1_1_16,
-        *cis_1_1_17,
-        *cis_1_1_18,
-        *cis_4_1_1,
-        *cis_4_1_2,
-        *cis_4_1_5,
-        *cis_4_1_9,
-        *cis_4_1_10
-    ],
+    [*cis_1_1_1,
+     *cis_1_1_2,
+     *cis_1_1_3,
+     *cis_1_1_4,
+     *cis_1_1_5,
+     *cis_1_1_6,
+     *cis_1_1_7,
+     *cis_1_1_8,
+     *cis_1_1_11,
+     # *cis_1_1_12, uncomment after fix https://github.com/elastic/cloudbeat/issues/118
+     *cis_1_1_13,
+     *cis_1_1_14,
+     *cis_1_1_15,
+     *cis_1_1_16,
+     *cis_1_1_17,
+     *cis_1_1_18,
+     *cis_4_1_1,
+     *cis_4_1_2,
+     *cis_4_1_5,
+     *cis_4_1_9,
+     *cis_4_1_10
+     ],
 )
 def test_file_system_configuration(config_node_pre_test,
                                    rule_tag,
@@ -157,9 +160,9 @@ def test_file_system_configuration(config_node_pre_test,
     pods = k8s_client.get_agent_pod_instances(agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace)
 
     api_client.exec_command(container_name=node.metadata.name,
-                                  command=command,
-                                  param_value=param_value,
-                                  resource=resource)
+                            command=command,
+                            param_value=param_value,
+                            resource=resource)
 
     exec_ts = datetime.datetime.utcnow()
 
