@@ -19,7 +19,6 @@ def data(k8s, api_client, cloudbeat_agent):
     if k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace):
         k8s.stop_agent(get_k8s_yaml_objects(file_path=file_path))
     k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
-    # config_node_pre_test(k8s_client=k8s, api_client=api_client)
     time.sleep(5)
 
     yield k8s, api_client, cloudbeat_agent
