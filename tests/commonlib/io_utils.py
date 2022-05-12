@@ -9,6 +9,7 @@ import yaml
 import shutil
 from pathlib import Path
 from munch import Munch
+# import grp, pwd
 
 
 def get_logs_from_stream(stream: str) -> list[Munch]:
@@ -70,6 +71,34 @@ class FsClient:
         @param resource: File / Resource path
         @return: None
         """
+
+        if command == 'touch':
+            if os.path.exists(param_value):
+                return
+            else:
+                open(param_value, "a+")
+                return
+
+        # if command == 'getent' and param_value == 'group':
+        #     try:
+        #         grp.getgrnam(param_value)
+        #         return ['etcd']
+        #     except KeyError:
+        #         return []
+        #
+        # if command == 'getent' and param_value == 'passwd':
+        #     try:
+        #         pwd.getpwnam(param_value)
+        #         return ['etcd']
+        #     except KeyError:
+        #         return []
+        #
+        # if command == 'groupadd' and param_value == 'etcd':
+        #     try:
+        #         grp.getgrnam(param_value)
+        #         return ['etcd']
+        #     except KeyError:
+        #         return []
 
         if container_name == '':
             raise Exception(f"Unknown {container_name} is sent")
