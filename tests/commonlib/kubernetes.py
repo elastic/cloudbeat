@@ -3,12 +3,12 @@ This module provides kubernetes functionality based on original kubernetes pytho
 """
 
 from kubernetes import client, config, utils
+from kubernetes.client import ApiException
 
 
 class KubernetesHelper:
 
     def __init__(self, is_in_cluster_config: bool = False):
-
         if is_in_cluster_config:
             self.config = config.load_incluster_config()
         else:
@@ -18,7 +18,20 @@ class KubernetesHelper:
         self.app_api = client.AppsV1Api()
         self.rbac_api = client.RbacAuthorizationV1Api()
         self.api_client = client.api_client.ApiClient(configuration=self.config)
+
+        self.dispatch_list = {
+            'Pod': self.core_v1_client.list_namespaced_pod,
+            'ConfigMap': self.core_v1_client.list_namespaced_config_map,
+            'ServiceAccount': self.core_v1_client.list_namespaced_service_account,
+            'DaemonSet': self.app_api.list_namespaced_daemon_set,
+            'Role': self.rbac_api.list_namespaced_role,
+            'RoleBinding': self.rbac_api.list_namespaced_role_binding,
+            'ClusterRoleBinding': self.rbac_api.list_cluster_role_binding,
+            'ClusterRole': self.rbac_api.list_cluster_role
+        }
+
         self.dispatch_delete = {
+            'Pod': self.core_v1_client.delete_namespaced_pod,
             'ConfigMap': self.core_v1_client.delete_namespaced_config_map,
             'ServiceAccount': self.core_v1_client.delete_namespaced_service_account,
             'DaemonSet': self.app_api.delete_namespaced_daemon_set,
@@ -26,6 +39,39 @@ class KubernetesHelper:
             'RoleBinding': self.rbac_api.delete_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.delete_cluster_role_binding,
             'ClusterRole': self.rbac_api.delete_cluster_role
+        }
+
+        self.dispatch_patch = {
+            'Pod': self.core_v1_client.patch_namespaced_pod,
+            'ConfigMap': self.core_v1_client.patch_namespaced_config_map,
+            'ServiceAccount': self.core_v1_client.patch_namespaced_service_account,
+            'DaemonSet': self.app_api.patch_namespaced_daemon_set,
+            'Role': self.rbac_api.patch_namespaced_role,
+            'RoleBinding': self.rbac_api.patch_namespaced_role_binding,
+            'ClusterRoleBinding': self.rbac_api.patch_cluster_role_binding,
+            'ClusterRole': self.rbac_api.patch_cluster_role
+        }
+
+        self.dispatch_create = {
+            'Pod': self.core_v1_client.create_namespaced_pod,
+            'ConfigMap': self.core_v1_client.create_namespaced_config_map,
+            'ServiceAccount': self.core_v1_client.create_namespaced_service_account,
+            'DaemonSet': self.app_api.create_namespaced_daemon_set,
+            'Role': self.rbac_api.create_namespaced_role,
+            'RoleBinding': self.rbac_api.create_namespaced_role_binding,
+            'ClusterRoleBinding': self.rbac_api.create_cluster_role_binding,
+            'ClusterRole': self.rbac_api.create_cluster_role
+        }
+
+        self.dispatch_get = {
+            'Pod': self.core_v1_client.read_namespaced_pod,
+            'ConfigMap': self.core_v1_client.read_namespaced_config_map,
+            'ServiceAccount': self.core_v1_client.read_namespaced_service_account,
+            'DaemonSet': self.app_api.read_namespaced_daemon_set,
+            'Role': self.rbac_api.read_namespaced_role,
+            'RoleBinding': self.rbac_api.read_namespaced_role_binding,
+            'ClusterRoleBinding': self.rbac_api.read_cluster_role_binding,
+            'ClusterRole': self.rbac_api.read_cluster_role
         }
 
     def get_agent_pod_instances(self, agent_name: str, namespace: str):
@@ -43,6 +89,10 @@ class KubernetesHelper:
             if pod.metadata.name.startswith(agent_name) and "test" not in pod.metadata.name:
                 pods.append(pod)
         return pods
+
+    def get_service_accounts(self, namespace: str):
+        service_accounts = self.core_v1_client.list_namespaced_service_account(namespace=namespace)
+        return service_accounts
 
     def get_cluster_nodes(self):
         nodes = self.core_v1_client.list_node()
@@ -64,13 +114,18 @@ class KubernetesHelper:
         This function deploys cloudbeat agent from yaml file
         :return:
         """
-
         return utils.create_from_yaml(k8s_client=self.api_client,
                                       yaml_file=yaml_file,
                                       namespace=namespace,
                                       verbose=True)
 
-    def stop_agent(self, yaml_objects_list: list):
+    def create_from_yaml(self, yaml_file: str, namespace: str, verbose: bool = False):
+        return utils.create_from_yaml(k8s_client=self.api_client,
+                                      yaml_file=yaml_file,
+                                      namespace=namespace,
+                                      verbose=verbose)
+
+    def delete_from_yaml(self, yaml_objects_list: list):
         """
         This function will delete all cloudbeat kubernetes resources.
         Currently, there is no ability to remove through utils due to the following:
@@ -81,15 +136,35 @@ class KubernetesHelper:
         result_list = []
         for yaml_object in yaml_objects_list:
             for dict_key in yaml_object:
-                result_list.append(self._delete_resources(resource_type=dict_key, **yaml_object[dict_key]))
+                if self.get_resource(resource_type=dict_key, **yaml_object[dict_key]):
+                    result_list.append(self.delete_resources(resource_type=dict_key, **yaml_object[dict_key]))
         return result_list
 
-    def _delete_resources(self, resource_type: str, **kwargs):
+    def delete_resources(self, resource_type: str, **kwargs):
         """
-        This is internal method for executing delete method depends on resource type.
-        Binding is done using dispatch_delete dictionary.
-        @param resource_type: Kubernetes resource to be deleted.
-        @param kwargs: Depends on resource type, it may be a name / name and namespace.
-        @return:
         """
         return self.dispatch_delete[resource_type](**kwargs)
+
+    def patch_resources(self, resource_type: str, **kwargs):
+        """
+        """
+        return self.dispatch_patch[resource_type](**kwargs)
+
+    def list_resources(self, resource_type: str, **kwargs):
+        """
+        """
+        return self.dispatch_list[resource_type](**kwargs)
+
+    def create_resources(self, resource_type: str, **kwargs):
+        """
+        """
+        return self.dispatch_create[resource_type](**kwargs)
+
+    def get_resource(self, resource_type: str, name: str, **kwargs):
+        """
+        """
+        try:
+            return self.dispatch_get[resource_type](name, **kwargs)
+        except ApiException as e:
+            print(f"Resource not found: {e.reason}")
+

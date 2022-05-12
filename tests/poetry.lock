@@ -100,7 +100,7 @@ tls = ["pyOpenSSL (>=17.5.0)", "cryptography (>=3.4.7)", "idna (>=2.0.0)"]
 
 [[package]]
 name = "elastic-transport"
-version = "8.1.1"
+version = "8.1.2"
 description = "Transport classes and utilities shared among Python Elastic client libraries"
 category = "main"
 optional = false
@@ -111,11 +111,11 @@ certifi = "*"
 urllib3 = ">=1.26.2,<2"
 
 [package.extras]
-develop = ["pytest", "pytest-cov", "pytest-mock", "pytest-asyncio", "mock", "requests", "aiohttp"]
+develop = ["pytest", "pytest-cov", "pytest-mock", "pytest-asyncio", "pytest-httpserver", "trustme", "mock", "requests", "aiohttp"]
 
 [[package]]
 name = "elasticsearch"
-version = "8.1.2"
+version = "8.2.0"
 description = "Python client for Elasticsearch"
 category = "main"
 optional = false
@@ -141,7 +141,7 @@ testing = ["pre-commit"]
 
 [[package]]
 name = "google-auth"
-version = "2.6.4"
+version = "2.6.6"
 description = "Google Authentication Library"
 category = "main"
 optional = false
@@ -176,7 +176,7 @@ python-versions = "*"
 
 [[package]]
 name = "kubernetes"
-version = "23.3.0"
+version = "23.6.0"
 description = "Kubernetes python client"
 category = "main"
 optional = false
@@ -276,7 +276,7 @@ pyasn1 = ">=0.4.6,<0.5.0"
 
 [[package]]
 name = "pyparsing"
-version = "3.0.8"
+version = "3.0.9"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
 category = "main"
 optional = false
@@ -287,7 +287,7 @@ diagrams = ["railroad-diagrams", "jinja2"]
 
 [[package]]
 name = "pytest"
-version = "7.1.1"
+version = "7.1.2"
 description = "pytest: simple powerful testing with Python"
 category = "main"
 optional = false
@@ -452,7 +452,7 @@ test = ["websockets"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "5a0b7d54bdabdeaeebb3ab2977e5b9f46ec36243cc23a7359db805a2f044d462"
+content-hash = "c945ceff9d389e84470ee9bff725acc6c481adfa8c54e7cdcebea4852d6f2375"
 
 [metadata.files]
 allure-pytest = [
@@ -492,20 +492,20 @@ docker = [
     {file = "docker-5.0.3.tar.gz", hash = "sha256:d916a26b62970e7c2f554110ed6af04c7ccff8e9f81ad17d0d40c75637e227fb"},
 ]
 elastic-transport = [
-    {file = "elastic-transport-8.1.1.tar.gz", hash = "sha256:f1a5274e1eb1831f73947fbc4ae9aba142f739e600e0cf47ad5ed08cd04e401e"},
-    {file = "elastic_transport-8.1.1-py3-none-any.whl", hash = "sha256:2ee1ec56ccfad1354a36056fa942af726510fffba46b267292ba7d584a1bd406"},
+    {file = "elastic-transport-8.1.2.tar.gz", hash = "sha256:869f7d668fb7738776639053fc87499caacbd1bdc7819f0de8025ac0e6cb29ce"},
+    {file = "elastic_transport-8.1.2-py3-none-any.whl", hash = "sha256:10914d0c5c268d9dcfee02cfbef861382d098309ba4eedab820062841bd214b3"},
 ]
 elasticsearch = [
-    {file = "elasticsearch-8.1.2-py3-none-any.whl", hash = "sha256:2fd3c88bc5fef259ab936538287404b2c3c5956630944563722d5b16a4edc550"},
-    {file = "elasticsearch-8.1.2.tar.gz", hash = "sha256:bf031b44c483f6dc40d607186103d8a152ce4ade96e4ed4c656f2421f794e123"},
+    {file = "elasticsearch-8.2.0-py3-none-any.whl", hash = "sha256:b7d119911e5bf4286cd3155aa93ad0e6b001f637e05f8ec4bf18ee585c1cacfb"},
+    {file = "elasticsearch-8.2.0.tar.gz", hash = "sha256:1ca41710ed460acfe3d1724a5a2aefbda24564abb10c03e38e71575183d390fb"},
 ]
 execnet = [
     {file = "execnet-1.9.0-py2.py3-none-any.whl", hash = "sha256:a295f7cc774947aac58dde7fdc85f4aa00c42adf5d8f5468fc630c1acf30a142"},
     {file = "execnet-1.9.0.tar.gz", hash = "sha256:8f694f3ba9cc92cab508b152dcfe322153975c29bda272e2fd7f3f00f36e47c5"},
 ]
 google-auth = [
-    {file = "google-auth-2.6.4.tar.gz", hash = "sha256:1a8c2c70c070b72fe038e2eb20072e5b4f0fd8ca1875e8fafe7f71b689a8d572"},
-    {file = "google_auth-2.6.4-py2.py3-none-any.whl", hash = "sha256:4dacb91d8a15b7755fc08688576481bd9c37cfac9842289469cf000d557f8962"},
+    {file = "google-auth-2.6.6.tar.gz", hash = "sha256:1ba4938e032b73deb51e59c4656a00e0939cf0b1112575099f136babb4563312"},
+    {file = "google_auth-2.6.6-py2.py3-none-any.whl", hash = "sha256:349ac49b18b01019453cc99c11c92ed772739778c92f184002b7ab3a5b7ac77d"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
@@ -516,8 +516,8 @@ iniconfig = [
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
 ]
 kubernetes = [
-    {file = "kubernetes-23.3.0-py2.py3-none-any.whl", hash = "sha256:223ff8f0ece5bc20fb65545f09a2308c5e1e9c0be83ae68504c1b1c6baa38f5b"},
-    {file = "kubernetes-23.3.0.tar.gz", hash = "sha256:05c98e4bd92f7091fa0fa58f594490e712c9151144d5f458235663a8909e342a"},
+    {file = "kubernetes-23.6.0-py2.py3-none-any.whl", hash = "sha256:dd58e286a53071bc8e32041f07f3c2236b3ed8ca5b9f57794a5077358f7ccb06"},
+    {file = "kubernetes-23.6.0.tar.gz", hash = "sha256:cadb1cd7c44eae5b39b50316313343c0f2aff94529f067ec2ba44d38411158e3"},
 ]
 munch = [
     {file = "munch-2.5.0-py2.py3-none-any.whl", hash = "sha256:6f44af89a2ce4ed04ff8de41f70b226b984db10a91dcc7b9ac2efc1c77022fdd"},
@@ -570,12 +570,12 @@ pyasn1-modules = [
     {file = "pyasn1_modules-0.2.8-py3.7.egg", hash = "sha256:c29a5e5cc7a3f05926aff34e097e84f8589cd790ce0ed41b67aed6857b26aafd"},
 ]
 pyparsing = [
-    {file = "pyparsing-3.0.8-py3-none-any.whl", hash = "sha256:ef7b523f6356f763771559412c0d7134753f037822dad1b16945b7b846f7ad06"},
-    {file = "pyparsing-3.0.8.tar.gz", hash = "sha256:7bf433498c016c4314268d95df76c81b842a4cb2b276fa3312cfb1e1d85f6954"},
+    {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
+    {file = "pyparsing-3.0.9.tar.gz", hash = "sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb"},
 ]
 pytest = [
-    {file = "pytest-7.1.1-py3-none-any.whl", hash = "sha256:92f723789a8fdd7180b6b06483874feca4c48a5c76968e03bb3e7f806a1869ea"},
-    {file = "pytest-7.1.1.tar.gz", hash = "sha256:841132caef6b1ad17a9afde46dc4f6cfa59a05f9555aae5151f73bdf2820ca63"},
+    {file = "pytest-7.1.2-py3-none-any.whl", hash = "sha256:13d0e3ccfc2b6e26be000cb6568c832ba67ba32e719443bfe725814d3c42433c"},
+    {file = "pytest-7.1.2.tar.gz", hash = "sha256:a06a0425453864a270bc45e71f783330a7428defb4230fb5e6a731fde06ecd45"},
 ]
 pytest-forked = [
     {file = "pytest-forked-1.4.0.tar.gz", hash = "sha256:8b67587c8f98cbbadfdd804539ed5455b6ed03802203485dd2f53c1422d7440e"},
