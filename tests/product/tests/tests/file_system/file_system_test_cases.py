@@ -56,12 +56,12 @@ cis_1_1_12 = [
     ('CIS 1.1.12', 'chown', 'root:etcd', '/var/lib/etcd/some_file.txt', 'failed'),
     ('CIS 1.1.12', 'chown', 'etcd:etcd', '/var/lib/etcd', 'passed'),
     ('CIS 1.1.12', 'chown', 'etcd:etcd', '/var/lib/etcd/some_file.txt', 'passed'),
-
 ]
 
 cis_1_1_13 = [
     ('CIS 1.1.13', 'chmod', '0700', '/etc/kubernetes/admin.conf', 'failed'),
     ('CIS 1.1.13', 'chmod', '0644', '/etc/kubernetes/admin.conf', 'failed'),
+    # todo:
     ('CIS 1.1.13', 'chmod', '0600', '/etc/kubernetes/admin.conf', 'passed'),
 ]
 

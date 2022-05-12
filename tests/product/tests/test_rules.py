@@ -35,8 +35,8 @@ def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected, exec_times
             if not log.get('result'):
                 continue
             findings = log.get('result').get('findings')
-            log_timestamp = datetime.datetime.strptime(log["time"], '%Y-%m-%dT%H:%M:%Sz')
-            if (log_timestamp - exec_timestamp).total_seconds() < 0:
+            findings_timestamp = datetime.datetime.strptime(log["time"], '%Y-%m-%dT%H:%M:%Sz')
+            if (findings_timestamp - exec_timestamp).total_seconds() < 0:
                 continue
 
             if findings:

@@ -1,6 +1,0 @@
-cloudbeat:
-  deploy: true
-
-testData:
-#  marker: ci_cloudbeat
-  marker: rules
