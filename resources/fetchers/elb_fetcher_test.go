@@ -96,6 +96,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			Spec: v1.ServiceSpec{},
 		}
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
+		s.Nil(err)
 
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
@@ -162,6 +163,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			Spec: v1.ServiceSpec{},
 		}
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
+		s.Nil(err)
 
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)

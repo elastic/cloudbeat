@@ -52,7 +52,7 @@ jobs:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: goveralls -service=github
 
-  manidest_tests:
+  manifest_tests:
     name: Manifest Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -79,3 +79,21 @@ jobs:
             kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/*.yml
             kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/kustomize/base/cloudbeat*.yml
             kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/eks/cloudbeat*.yml
+
+  golangci:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
+          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
+
+      - name: Run K8s manifest tests
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --whole-files
