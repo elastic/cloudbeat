@@ -92,7 +92,12 @@ jobs:
           repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
           ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
-      - name: Run K8s manifest tests
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Go linter
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
