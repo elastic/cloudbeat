@@ -127,8 +127,7 @@ func (d *Data) fetchSingle(ctx context.Context, k string) ([]fetching.Resource, 
 
 	select {
 	case <-ctx.Done():
-		// return nil, fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
-		return nil, ctx.Err()
+		return nil, fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
 	case res := <-result:
 		return res.resources, res.err
 	}
@@ -146,7 +145,7 @@ func (d *Data) fetchProtected(ctx context.Context, k string) (val []fetching.Res
 }
 
 // Stop cleans up Data resources gracefully.
-func (d *Data) Stop(ctx context.Context, cancel context.CancelFunc) {
+func (d *Data) Stop(ctx context.Context) {
 	d.fetchers.Stop(ctx)
 	close(d.stop)
 	d.wg.Wait()
