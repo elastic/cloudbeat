@@ -121,11 +121,11 @@ func (d *Data) fetchSingle(ctx context.Context, k string) ([]fetching.Resource, 
 	defer cancel()
 
 	result := make(chan fetcherResult, 1)
-	defer close(result)
 
 	go func() {
 		val, err := d.fetchProtected(ctx, k)
 		result <- fetcherResult{val, err}
+		close(result)
 	}()
 
 	select {
