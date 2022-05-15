@@ -134,9 +134,10 @@ jobs:
         run: |
           helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/
 
-      - name: Wait for deployment
-        run: |
-          kubectl wait --for=condition=ready pod --selector="k8s-app=cloudbeat" -n kube-system
+      - name: Sleep for 100s
+        uses: juliangruber/sleep-action@v1
+        with:
+          time: 100s
 
       - name: Run Tests
         id: run_tests 
