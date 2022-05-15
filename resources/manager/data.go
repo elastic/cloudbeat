@@ -38,12 +38,6 @@ type Data struct {
 	stop     chan struct{}
 }
 
-// update is a single update sent from a worker to a manager.
-type update struct {
-	key string
-	val []fetching.Resource
-}
-
 type fetcherResult struct {
 	resources []fetching.Resource
 	err       error
@@ -51,7 +45,9 @@ type fetcherResult struct {
 
 type ResourceMap map[string][]fetching.Resource
 
-// NewData returns a new Data instance with the given interval.
+// NewData returns a new Data instance.
+// interval is the duration the manager wait between two consequtive cycles.
+// timeout is the maximum duration the manager wait for a single fetcher to return results.
 func NewData(interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
 	return &Data{
 		timeout:  timeout,
@@ -74,6 +70,7 @@ func (d *Data) Run(ctx context.Context) error {
 }
 
 func (d *Data) fetchAndSleep(ctx context.Context) {
+	// Happens once in a lifetime of cloudbeat and then enters the loop
 	d.fetchIteration(ctx)
 	for {
 		select {
@@ -90,17 +87,21 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 }
 
 func (d *Data) fetchIteration(ctx context.Context) {
+	logp.L().Infof("manager trigger fetching using %d fetchers", len(d.fetchers.Keys()))
 	d.wg = &sync.WaitGroup{}
 	mu := sync.Mutex{}
 	cycleData := make(ResourceMap)
+	start := time.Now()
+
 	for _, key := range d.fetchers.Keys() {
 		d.wg.Add(1)
 		go func(k string) {
 			defer d.wg.Done()
 			val, err := d.fetchSingle(ctx, k)
 			if err != nil {
-				logp.L().Errorf("error running fetcher for key %q: %v", k, err)
+				logp.L().Errorf("error running fetcher for key %s: %v", k, err)
 			} else {
+				logp.L().Debugf("fetcher %s finished and found %d values", k, len(val))
 				mu.Lock()
 				defer mu.Unlock()
 				cycleData[k] = val
@@ -109,6 +110,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 	}
 
 	d.wg.Wait()
+	logp.L().Infof("manager finished waiting and sending data after %d msecs", time.Since(start).Milliseconds())
 	d.output <- cycleData
 }
 
@@ -136,6 +138,7 @@ func (d *Data) fetchSingle(ctx context.Context, k string) ([]fetching.Resource, 
 	}
 }
 
+// fetchProtected protect the fetching goroutine from getting panic
 func (d *Data) fetchProtected(ctx context.Context, k string) (val []fetching.Resource, err error) {
 	defer func() {
 		if r := recover(); r != nil {
