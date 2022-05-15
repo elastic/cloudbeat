@@ -174,11 +174,11 @@ jobs:
 
       - name: Deploy report to Github Pages
         if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-          publish_branch: gh-pages
-          publish_dir: allure-history
+        uses: peaceiris/actions-gh-pages@v2
+        env:
+          ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
