@@ -240,3 +240,25 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 	s.Error(err)
 	s.Nil(res)
 }
+
+func (s *DataTestSuite) TestDataRunShouldNotRun() {
+	fetcherVal := 4
+	interval := 5 * time.Second
+	fetcherName := "not_run_fetcher"
+	fetcherConditionName := "false_condition"
+
+	f := newNumberFetcher(fetcherVal)
+	c := newBoolFetcherCondition(false, fetcherConditionName)
+	err := s.registry.Register(fetcherName, f, c)
+	s.NoError(err)
+
+	d, err := NewData(interval, timeout, s.registry)
+	s.NoError(err)
+
+	err = d.Run(s.ctx)
+	s.NoError(err)
+	defer d.Stop(s.ctx)
+
+	result := <-d.Output()
+	s.Empty(result)
+}

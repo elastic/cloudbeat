@@ -75,10 +75,10 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 	for {
 		select {
 		case <-d.stop:
-			logp.L().Errorf("fetchers manager stopped")
+			logp.L().Info("fetchers manager stopped")
 			return
 		case <-ctx.Done():
-			logp.L().Errorf("fetchers manager canceled")
+			logp.L().Info("fetchers manager canceled")
 			return
 		case <-time.After(d.interval):
 			d.fetchIteration(ctx)
@@ -86,6 +86,8 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 	}
 }
 
+// fetchIteration waits for all the registered fetchers and send it outside on the output channel.
+// The function should not get called in parallel.
 func (d *Data) fetchIteration(ctx context.Context) {
 	logp.L().Infof("manager trigger fetching using %d fetchers", len(d.fetchers.Keys()))
 	d.wg = &sync.WaitGroup{}
@@ -100,7 +102,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 			val, err := d.fetchSingle(ctx, k)
 			if err != nil {
 				logp.L().Errorf("error running fetcher for key %s: %v", k, err)
-			} else {
+			} else if val != nil {
 				logp.L().Debugf("fetcher %s finished and found %d values", k, len(val))
 				mu.Lock()
 				defer mu.Unlock()
@@ -122,6 +124,7 @@ func (d *Data) fetchSingle(ctx context.Context, k string) ([]fetching.Resource, 
 	ctx, cancel := context.WithTimeout(ctx, d.timeout)
 	defer cancel()
 
+	// The buffer is required to avoid go-routine leaks in a case a fetcher timed out
 	result := make(chan fetcherResult, 1)
 
 	go func() {
