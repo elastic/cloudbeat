@@ -176,9 +176,8 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-        env:
-          PUBLISH_BRANCH: gh-pages
-          PUBLISH_DIR: allure-history
+          publish_branch: gh-pages
+          publish_dir: allure-history
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
