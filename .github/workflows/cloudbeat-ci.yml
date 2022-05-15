@@ -175,7 +175,7 @@ jobs:
       - name: Deploy report to Github Pages
         if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
         uses: peaceiris/actions-gh-pages@v3.7.3
-        env:
+        with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           publish_branch: gh-pages
           publish_dir: allure-history
