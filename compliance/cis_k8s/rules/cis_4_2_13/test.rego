@@ -7,7 +7,7 @@ test_violation {
 	test.assert_fail(finding) with input as rule_input("--tls-cipher-suites=SOME_CIPHER")
 	test.assert_fail(finding) with input as rule_input("--tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,SOME_CIPHER")
 	test.assert_fail(finding) with input as rule_input_with_external("", create_process_config(["SOME_CIPHER"]))
-	test.assert_fail(finding) with input as rule_input_with_external("", create_process_config(["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,SOME_CIPHER","SOME_CIPHER"]))
+	test.assert_fail(finding) with input as rule_input_with_external("", create_process_config(["TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,SOME_CIPHER", "SOME_CIPHER"]))
 }
 
 test_pass {

@@ -83,6 +83,26 @@ greater_or_equal(value, minimum) {
 	true
 }
 
+# checks if duration is less than some maximum value
+# duration: string (https://pkg.go.dev/time#ParseDuration)
+duration_lt(duration, max_duration) {
+	duration_ns := time.parse_duration_ns(duration)
+	max_duration_ns := time.parse_duration_ns(max_duration)
+	duration_ns < max_duration_ns
+} else = false {
+	true
+}
+
+# checks if duration is less than some maximum value
+# duration: string (https://pkg.go.dev/time#ParseDuration)
+duration_lte(duration, max_duration) {
+	duration_ns := time.parse_duration_ns(duration)
+	max_duration_ns := time.parse_duration_ns(max_duration)
+	duration_ns <= max_duration_ns
+} else = false {
+	true
+}
+
 # checks if duration is greater than some minimum value
 # duration: string (https://pkg.go.dev/time#ParseDuration)
 duration_gt(duration, min_duration) {

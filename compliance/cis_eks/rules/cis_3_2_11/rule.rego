@@ -26,11 +26,11 @@ rule_evaluation {
 }
 
 rule_evaluation {
-    common.contains_key_with_value(process_args,"--rotate-server-certificates", "true")
+	common.contains_key_with_value(process_args, "--rotate-server-certificates", "true")
 }
 
 rule_evaluation {
-    data_adapter.process_config.config.serverTLSBootstrap
+	data_adapter.process_config.config.serverTLSBootstrap
 }
 
 finding = result {
