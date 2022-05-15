@@ -11,14 +11,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: OPA format
+        uses: docker://openpolicyagent/opa
+        with:
+          args: "fmt . --fail=true --diff"
+
+      - name: OPA format list failed files
+        uses: docker://openpolicyagent/opa
+        if: always()
+        with:
+          args: "fmt . --list"
+
       - name: OPA build
         uses: docker://openpolicyagent/opa
         with:
           args: "build -b . -e ./compliance"
+
       - name: OPA test
         uses: docker://openpolicyagent/opa
         with:
           args: "test -b . -v"
+
       - name: OPA check -strict
         uses: docker://openpolicyagent/opa
         with:
