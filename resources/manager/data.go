@@ -78,7 +78,10 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 	for {
 		select {
 		case <-d.stop:
+			logp.L().Errorf("fetchers manager stopped")
+			return
 		case <-ctx.Done():
+			logp.L().Errorf("fetcher manager canceled")
 			return
 		case <-time.After(d.interval):
 			d.fetchIteration(ctx)
