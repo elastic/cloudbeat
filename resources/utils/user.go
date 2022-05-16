@@ -27,6 +27,8 @@ import (
 	"strings"
 )
 
+// The util implementation is based on Go "os/user" native pkg
+
 // User represents a user account.
 type User struct {
 	// Uid is the user ID.
@@ -223,7 +225,10 @@ func matchUserIndexValue(value string, idx int) lineFunc {
 		// say: "It is expected to be a comma separated list of
 		// personal data where the first item is the full name of the
 		// user."
-		u.Name, _, _ = strings.Cut(u.Name, ",")
+		if i := strings.Index(u.Name, ","); i >= 0 {
+			u.Name = u.Name[:i]
+		}
+
 		return u, nil
 	}
 }
