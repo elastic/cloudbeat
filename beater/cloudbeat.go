@@ -20,6 +20,7 @@ package beater
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
@@ -34,7 +35,6 @@ import (
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
 
 	"github.com/gofrs/uuid"
-	"gopkg.in/yaml.v3"
 )
 
 // cloudbeat configuration.
@@ -71,7 +71,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	data, err := manager.NewData(c.Period, fetchersRegistry)
+	data, err := manager.NewData(c.Period, time.Minute, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -170,23 +170,18 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 				break
 			}
 
-			// TODO(yashtewari): Figure out the scenarios in which the integration sends
-			// multiple input streams. Since only one instance of our integration is allowed per
-			// agent policy, is it even possible that multiple input streams are received?
-			y, err := yaml.Marshal(bt.config.Streams[0].DataYaml)
+			y, err := bt.config.DataYaml()
 			if err != nil {
 				logp.L().Errorf("Could not marshal to YAML: %v", err)
 				break
 			}
 
-			s := string(y)
-
-			if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, s); err != nil {
+			if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, y); err != nil {
 				logp.L().Errorf("Could not update bundle with dataYaml: %v", err)
 				break
 			}
 
-			logp.L().Infof("Bundle updated with dataYaml: %s", s)
+			logp.L().Infof("Bundle updated with dataYaml: %s", y)
 
 		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
@@ -211,7 +206,8 @@ func InitRegistry(c config.Config) (manager.FetchersRegistry, error) {
 
 // Stop stops cloudbeat.
 func (bt *cloudbeat) Stop() {
-	bt.data.Stop(bt.ctx, bt.cancel)
+	bt.cancel()
+	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
 
 	bt.client.Close()

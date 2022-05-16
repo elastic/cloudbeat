@@ -20,12 +20,13 @@ package transformer
 import (
 	"context"
 	"encoding/json"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"io/ioutil"
 	"os"
 	"testing"
-	"testing/fstest"
 
+	"github.com/elastic/beats/v7/libbeat/logp"
+
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -203,12 +204,11 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 
 			cdp := CommonDataProvider{
 				kubeClient: kc,
-				fsys: fstest.MapFS{
-					"hostname": {
-						Data: []byte("testing_node"),
-					},
-				},
+				cfg: config.Config{},
 			}
+
+			// libbeat DiscoverKubernetesNode performs a fallback to environment variable NODE_NAME
+			os.Setenv("NODE_NAME", "testing_node")
 
 			commonData, err := cdp.FetchCommonData(ctx)
 			s.NoError(err)
