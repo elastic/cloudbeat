@@ -151,7 +151,7 @@ func getFSSubType(fileInfo os.FileInfo) string {
 func getUserNameFromID(uid uint32) string {
 	u := strconv.FormatUint(uint64(uid), 10)
 	usr, err := utils.LookupUserId(u, UserFile)
-	if err != nil {
+	if err != nil || usr == nil {
 		return ""
 	}
 
@@ -161,7 +161,7 @@ func getUserNameFromID(uid uint32) string {
 func getGroupNameFromID(gid uint32) string {
 	g := strconv.FormatUint(uint64(gid), 10)
 	group, err := utils.LookupGroupId(g, GroupFile)
-	if err != nil {
+	if err != nil || group == nil {
 		return ""
 	}
 
