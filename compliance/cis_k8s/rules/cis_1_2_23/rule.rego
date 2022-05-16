@@ -11,7 +11,7 @@ process_args := cis_k8s.data_adapter.process_args
 
 default rule_evaluation = true
 
-rule_evaluation = false{
+rule_evaluation = false {
 	value := process_args["--request-timeout"]
 	common.duration_lte(value, "60s")
 }
