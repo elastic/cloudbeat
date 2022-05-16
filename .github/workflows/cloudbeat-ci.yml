@@ -1,7 +1,7 @@
 name: Cloudbeat-CI
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
     types: [assigned, opened, synchronize, reopened]
@@ -174,9 +174,9 @@ jobs:
 
       - name: Deploy report to Github Pages
         if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
-        uses: peaceiris/actions-gh-pages@v3.7.3
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
 
