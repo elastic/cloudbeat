@@ -213,7 +213,7 @@ func InitRegistry(c config.Config) (manager.FetchersRegistry, error) {
 // Stop stops cloudbeat.
 func (bt *cloudbeat) Stop() {
 	bt.cancel()
-	bt.data.Stop(bt.ctx)
+	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
 
 	bt.client.Close()

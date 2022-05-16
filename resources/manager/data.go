@@ -154,8 +154,8 @@ func (d *Data) fetchProtected(ctx context.Context, k string) (val []fetching.Res
 }
 
 // Stop cleans up Data resources gracefully.
-func (d *Data) Stop(ctx context.Context) {
-	d.fetchers.Stop(ctx)
+func (d *Data) Stop() {
+	d.fetchers.Stop()
 	close(d.stop)
 	d.wg.Wait()
 	close(d.output)

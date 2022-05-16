@@ -103,7 +103,7 @@ func (s *DataTestSuite) TestDataRun() {
 	err = d.Run(s.ctx)
 	s.NoError(err)
 
-	defer d.Stop(s.ctx)
+	defer d.Stop()
 
 	o := d.Output()
 	state := <-o
@@ -142,7 +142,7 @@ func (s *DataTestSuite) TestDataRunNotSync() {
 
 	err = d.Run(s.ctx)
 	s.NoError(err)
-	defer d.Stop(s.ctx)
+	defer d.Stop()
 
 	aggregated := make([]ResourceMap, iterations)
 	for i := 0; i < iterations; i++ {
@@ -181,7 +181,7 @@ func (s *DataTestSuite) TestDataRunPanic() {
 
 	err = d.Run(s.ctx)
 	s.NoError(err)
-	defer d.Stop(s.ctx)
+	defer d.Stop()
 
 	result := <-d.Output()
 	s.Empty(result)
@@ -218,7 +218,7 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 
 	err = d.Run(s.ctx)
 	s.NoError(err)
-	defer d.Stop(s.ctx)
+	defer d.Stop()
 
 	result := <-d.Output()
 	s.Empty(result)
@@ -257,7 +257,7 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 
 	err = d.Run(s.ctx)
 	s.NoError(err)
-	defer d.Stop(s.ctx)
+	defer d.Stop()
 
 	result := <-d.Output()
 	s.Empty(result)
