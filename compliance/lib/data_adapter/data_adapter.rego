@@ -70,8 +70,8 @@ is_kube_apiserver {
 	process_name == "kube-apiserver"
 }
 
-is_kube_controller_manger {
-	process_name == "kube-controller-manager"
+is_kube_controller_manager {
+	process_name == "kube-controller"
 }
 
 is_kube_scheduler {

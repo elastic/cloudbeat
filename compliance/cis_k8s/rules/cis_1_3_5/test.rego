@@ -15,4 +15,4 @@ test_not_evaluated {
 	not finding with input as test_data.process_input("some_process", [])
 }
 
-rule_input(argument) = test_data.process_input("kube-controller-manager", [argument])
+rule_input(argument) = test_data.process_input("kube-controller", [argument])

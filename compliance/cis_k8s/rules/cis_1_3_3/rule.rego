@@ -7,7 +7,7 @@ import data.compliance.lib.data_adapter
 # Ensure that the --use-service-account-credentials argument is set to true (Automated)
 finding = result {
 	# filter
-	data_adapter.is_kube_controller_manger
+	data_adapter.is_kube_controller_manager
 
 	# evaluate
 	process_args := cis_k8s.data_adapter.process_args
