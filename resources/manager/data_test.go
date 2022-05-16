@@ -24,15 +24,57 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/goleak"
 )
 
+type DelayFetcher struct {
+	delay      time.Duration
+	stopCalled bool
+}
+
+func newDelayFetcher(delay time.Duration) fetching.Fetcher {
+	return &DelayFetcher{delay, false}
+}
+
+func (f *DelayFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	select {
+	case <-ctx.Done():
+		return nil, fmt.Errorf("reached timeout")
+	case <-time.After(f.delay):
+		return fetchValue(int(f.delay.Seconds())), nil
+	}
+}
+
+func (f *DelayFetcher) Stop() {
+	f.stopCalled = true
+}
+
+type PanicFetcher struct {
+	message    string
+	stopCalled bool
+}
+
+func newPanicFetcher(message string) fetching.Fetcher {
+	return &PanicFetcher{message, false}
+}
+
+func (f *PanicFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+	panic(f.message)
+}
+
+func (f *PanicFetcher) Stop() {
+	f.stopCalled = true
+}
+
 const (
-	duration     = 10 * time.Second
 	fetcherCount = 10
 )
 
 func TestDataRun(t *testing.T) {
+	timeout := time.Minute
+	interval := 10 * time.Second
 	opts := goleak.IgnoreCurrent()
 
 	// Verify no goroutines are leaking. Safest to keep this on top of the function.
@@ -41,7 +83,7 @@ func TestDataRun(t *testing.T) {
 
 	reg := NewFetcherRegistry()
 	registerNFetchers(t, reg, fetcherCount)
-	d, err := NewData(duration, reg)
+	d, err := NewData(interval, timeout, reg)
 	if err != nil {
 		t.Error(err)
 	}
@@ -74,4 +116,116 @@ func TestDataRun(t *testing.T) {
 			t.Errorf("expected key %s to have value %v but got %v", key, fetchValue(i), val)
 		}
 	}
+}
+
+func TestDataRunNotSync(t *testing.T) {
+	iterations := 4
+	timeout := time.Minute
+	interval := 3 * time.Second
+	fetcherDelay := 1 * time.Second
+	fetcherName := "delay_fetcher"
+	opts := goleak.IgnoreCurrent()
+
+	// Verify no goroutines are leaking. Safest to keep this on top of the function.
+	// Go defers are implemented as a LIFO stack. This should be the last one to run.
+	defer goleak.VerifyNone(t, opts)
+	f := newDelayFetcher(fetcherDelay)
+	reg := NewFetcherRegistry()
+	err := reg.Register(fetcherName, f)
+	assert.NoError(t, err)
+
+	d, err := NewData(interval, timeout, reg)
+	assert.NoError(t, err)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	err = d.Run(ctx)
+	assert.NoError(t, err)
+	defer d.Stop(ctx, cancel)
+
+	aggregated := make([]ResourceMap, iterations)
+	for i := 0; i < iterations; i++ {
+		aggregated[i] = <-d.Output()
+	}
+
+	assert.Equal(t, iterations, len(aggregated))
+
+	for i := 0; i < iterations; i++ {
+		iterationResources := aggregated[i]
+		assert.NotEmpty(t, iterationResources, "iteration %d failed", i)
+
+		fetcherResources, ok := iterationResources[fetcherName]
+		assert.True(t, ok, "iteration %d failed", i)
+
+		assert.Equal(t, fetcherResources, fetchValue(int(fetcherDelay.Seconds())), "iteration %d failed", i)
+	}
+}
+
+func TestDataRunPanic(t *testing.T) {
+	iterations := 2
+	timeout := time.Minute
+	interval := 3 * time.Second
+	fetcherMessage := "fetcher got panic"
+	fetcherName := "panic_fetcher"
+	opts := goleak.IgnoreCurrent()
+
+	// Verify no goroutines are leaking. Safest to keep this on top of the function.
+	// Go defers are implemented as a LIFO stack. This should be the last one to run.
+	defer goleak.VerifyNone(t, opts)
+	f := newPanicFetcher(fetcherMessage)
+	reg := NewFetcherRegistry()
+	err := reg.Register(fetcherName, f)
+	assert.NoError(t, err)
+
+	d, err := NewData(interval, timeout, reg)
+	assert.NoError(t, err)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	err = d.Run(ctx)
+	assert.NoError(t, err)
+	defer d.Stop(ctx, cancel)
+
+	aggregated := make([]ResourceMap, iterations)
+	for i := 0; i < iterations; i++ {
+		aggregated[i] = <-d.Output()
+	}
+
+	assert.Equal(t, iterations, len(aggregated))
+
+	for i := 0; i < iterations; i++ {
+		iterationResources := aggregated[i]
+		assert.Empty(t, iterationResources, "iteration %d failed", i)
+	}
+}
+
+func TestDataRunFetchTimeout(t *testing.T) {
+	timeout := 2 * time.Second
+	fetcherDelay := 4 * time.Second
+	interval := 5 * time.Second
+	fetcherName := "delay_fetcher"
+	opts := goleak.IgnoreCurrent()
+
+	// Verify no goroutines are leaking. Safest to keep this on top of the function.
+	// Go defers are implemented as a LIFO stack. This should be the last one to run.
+	defer goleak.VerifyNone(t, opts)
+	f := newDelayFetcher(fetcherDelay)
+	reg := NewFetcherRegistry()
+	err := reg.Register(fetcherName, f)
+	assert.NoError(t, err)
+
+	d, err := NewData(interval, timeout, reg)
+	assert.NoError(t, err)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	err = d.Run(ctx)
+	assert.NoError(t, err)
+	defer d.Stop(ctx, cancel)
+
+	result := <-d.Output()
+	assert.Empty(t, result)
 }

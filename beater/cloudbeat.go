@@ -20,6 +20,7 @@ package beater
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
@@ -71,7 +72,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	data, err := manager.NewData(c.Period, fetchersRegistry)
+	data, err := manager.NewData(c.Period, time.Minute, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
