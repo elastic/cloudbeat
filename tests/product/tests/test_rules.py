@@ -68,7 +68,7 @@ def check_logs(k8s, timeout, pod_name, namespace, rule_tag, expected, exec_times
      *cis_1_1_7,
      *cis_1_1_8,
      *cis_1_1_11,
-     # *cis_1_1_12, uncomment after fix https://github.com/elastic/cloudbeat/issues/118
+     *cis_1_1_12,
      *cis_1_1_13,
      *cis_1_1_14,
      *cis_1_1_15,

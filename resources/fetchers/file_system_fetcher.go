@@ -20,8 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/utils"
 	"os"
-	"os/user"
 	"strconv"
 	"syscall"
 
@@ -35,6 +35,8 @@ const (
 	FSResourceType = "file"
 	FileSubType    = "file"
 	DirSubType     = "directory"
+	UserFile       = "/hostfs/etc/passwd"
+	GroupFile      = "/hostfs/etc/group"
 )
 
 type FileSystemResource struct {
@@ -106,18 +108,15 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 
 	uid := stat.Uid
 	gid := stat.Gid
-	u := strconv.FormatUint(uint64(uid), 10)
-	g := strconv.FormatUint(uint64(gid), 10)
-	usr, _ := user.LookupId(u)
-	group, _ := user.LookupGroupId(g)
+
 	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
 	inode := strconv.FormatUint(stat.Ino, 10)
 
 	data := FileSystemResource{
 		FileName: info.Name(),
 		FileMode: mod,
-		Uid:      usr.Name,
-		Gid:      group.Name,
+		Uid:      getUserNameFromID(uid),
+		Gid:      getGroupNameFromID(gid),
 		Path:     path,
 		Inode:    inode,
 		SubType:  getFSSubType(info),
@@ -147,4 +146,24 @@ func getFSSubType(fileInfo os.FileInfo) string {
 		return DirSubType
 	}
 	return FileSubType
+}
+
+func getUserNameFromID(uid uint32) string {
+	u := strconv.FormatUint(uint64(uid), 10)
+	usr, err := utils.LookupUserId(u, UserFile)
+	if err != nil {
+		return ""
+	}
+
+	return usr.Name
+}
+
+func getGroupNameFromID(gid uint32) string {
+	g := strconv.FormatUint(uint64(gid), 10)
+	group, err := utils.LookupGroupId(g, GroupFile)
+	if err != nil {
+		return ""
+	}
+
+	return group.Name
 }
