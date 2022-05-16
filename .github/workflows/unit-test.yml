@@ -1,7 +1,7 @@
 name: UnitTests
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
     types: [ assigned, opened, synchronize, reopened ]
@@ -92,8 +92,8 @@ jobs:
           repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
           ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
-      - name: Run K8s manifest tests
+      - name: Go linter
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          args: --whole-files
+          args: --timeout=10m --whole-files
