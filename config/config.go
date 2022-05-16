@@ -63,10 +63,32 @@ func New(cfg *common.Config) (Config, error) {
 	return c, nil
 }
 
+// Update replaces values of those keys in the current config which are
+// present in the incoming config.
+//
+// NOTE(yashtewari): This will be removed with the planned update to restart the
+// beat with the new config.
 func (c *Config) Update(cfg *common.Config) error {
 	if err := cfg.Unpack(&c); err != nil {
 		return err
 	}
+
+	// Check if the incoming config has streams.
+	m := make(map[string]interface{})
+	if err := cfg.Unpack(&m); err != nil {
+		return err
+	}
+
+	if _, ok := m["streams"]; !ok {
+		return nil
+	}
+
+	uc, err := New(cfg)
+	if err != nil {
+		return err
+	}
+
+	c.Streams = uc.Streams
 
 	return nil
 }
