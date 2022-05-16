@@ -2,10 +2,12 @@
 Kubernetes CIS rules verification.
 This module verifies correctness of retrieved findings by manipulating audit and remediation actions
 """
+from datetime import datetime
+
 import pytest
 
-from commonlib.utils import *
-from kube_rules import *
+from commonlib.utils import get_evaluation, get_resource_identifier
+from product.tests.kube_rules import cis_5_1_5
 
 
 @pytest.mark.rules
@@ -19,6 +21,14 @@ from kube_rules import *
     ]
 )
 def test_kube_resource_patch(setup_busybox_pod, rule_tag, resource_type, resource_body, expected):
+    """
+    Test kube resource
+    @param setup_busybox_pod: pre step that set-ups a busybox pod to test on
+    @param rule_tag: rule tag in the CIS benchmark
+    @param resource_type: kube resource type, e.g., Pod, ServiceAccount, etc.
+    @param resource_body: a dict to represent the relevant properties of the resource
+    @param expected: "failed" or "passed"
+    """
     k8s_client, _, agent_config = setup_busybox_pod
 
     # make sure resource exists
@@ -48,6 +58,7 @@ def test_kube_resource_patch(setup_busybox_pod, rule_tag, resource_type, resourc
         pod_name=pods[0].metadata.name,
         namespace=agent_config.namespace,
         rule_tag=rule_tag,
+        exec_timestamp=datetime.utcnow(),
         resource_identifier=get_resource_identifier(resource_body)
     )
 

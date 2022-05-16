@@ -4,6 +4,7 @@ This module provides kubernetes functionality based on original kubernetes pytho
 
 from kubernetes import client, config, utils
 from kubernetes.client import ApiException
+from kubernetes.watch import watch
 
 
 class KubernetesHelper:
@@ -167,4 +168,23 @@ class KubernetesHelper:
             return self.dispatch_get[resource_type](name, **kwargs)
         except ApiException as e:
             print(f"Resource not found: {e.reason}")
+            raise e
 
+    def wait_for_resource(self, resource_type: str, name: str, namespace: str, status: str, timeout: int = 120) -> bool:
+        """
+        watches a resources for a status change
+        @param resource_type: the resource type
+        @param name: resource name
+        @param namespace: namespace to look for
+        @param status: RUNNING, DELETED, MODIFIED
+        @param timeout: until wait
+        @return: True if status reached
+        """
+        w = watch.Watch()
+        for event in w.stream(func=self.dispatch_list[resource_type],
+                              namespace=namespace,
+                              timeout_seconds=timeout):
+            if event["object"].metadata.name == name and event["type"] == status:
+                w.stop()
+                return True
+        return False

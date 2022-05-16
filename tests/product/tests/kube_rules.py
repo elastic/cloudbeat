@@ -1,19 +1,4 @@
-from dataclasses import dataclass, astuple
-
-
-@dataclass
-class KubeTestCase:
-    rule_tag: str
-    resource_type: str
-    resource_body: dict
-    expected: str
-
-    def __iter__(self):
-        return iter(astuple(self))
-
-    def __len__(self):
-        return len(astuple(self))
-
+from product.tests.kube_test_case import KubeTestCase
 
 cis_5_1_5_pod_serviceAccount = KubeTestCase(
     rule_tag='CIS 5.1.5',
