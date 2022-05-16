@@ -108,7 +108,8 @@ func (s *RegistryTestSuite) TestKeys() {
 
 	for i, test := range tests {
 		f := newNumberFetcher(test.value)
-		s.registry.Register(test.key, f)
+		err := s.registry.Register(test.key, f)
+		s.Nil(err)
 
 		s.Equal(i+1, len(s.registry.Keys()))
 	}

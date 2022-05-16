@@ -20,7 +20,6 @@ package fetchers
 import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
@@ -31,7 +30,6 @@ import (
 
 type ElbFactoryTestSuite struct {
 	suite.Suite
-	factory fetching.Factory
 }
 
 func TestElbFactoryTestSuite(t *testing.T) {
