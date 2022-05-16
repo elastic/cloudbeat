@@ -25,6 +25,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"gopkg.in/yaml.v3"
 )
 
 const DefaultNamespace = "default"
@@ -43,9 +44,9 @@ type Config struct {
 type Stream struct {
 	DataYaml struct {
 		ActivatedRules struct {
-			CISK8S []string `config:"cis_k8s"`
-		} `config:"activated_rules"`
-	} `config:"data_yaml"`
+			CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
+		} `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
+	} `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
 }
 
 var DefaultConfig = Config{
@@ -68,6 +69,18 @@ func (c *Config) Update(cfg *common.Config) error {
 	}
 
 	return nil
+}
+
+func (c *Config) DataYaml() (string, error) {
+	// TODO(yashtewari): Figure out the scenarios in which the integration sends
+	// multiple input streams. Since only one instance of our integration is allowed per
+	// agent policy, is it even possible that multiple input streams are received?
+	y, err := yaml.Marshal(c.Streams[0].DataYaml)
+	if err != nil {
+		return "", err
+	}
+
+	return string(y), nil
 }
 
 // Datastream function to generate the datastream value

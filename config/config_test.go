@@ -21,6 +21,7 @@
 package config
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -66,5 +67,46 @@ func (s *ConfigTestSuite) TestNew() {
 		s.NoError(err)
 
 		s.Equal(test.expectedPatterns, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+	}
+}
+
+func (s *ConfigTestSuite) TestDataYaml() {
+	var tests = []struct {
+		config       string
+		expectedYaml string
+	}{
+		{
+			`
+  streams:
+    - data_yaml:
+        activated_rules:
+          cis_k8s:
+            - a
+            - b
+            - c
+            - d
+`,
+			`
+activated_rules:
+    cis_k8s:
+        - a
+        - b
+        - c
+        - d
+`,
+		},
+	}
+
+	for _, test := range tests {
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		c, err := New(cfg)
+		s.NoError(err)
+
+		dy, err := c.DataYaml()
+		s.NoError(err)
+
+		s.Equal(strings.TrimSpace(test.expectedYaml), strings.TrimSpace(dy))
 	}
 }
