@@ -86,8 +86,8 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 	}
 }
 
-// fetchIteration waits for all the registered fetchers and send it outside on the output channel.
-// The function should not get called in parallel.
+// fetchIteration waits for all the registered fetchers and sends all the resources on the output channel.
+// The function must not get called in parallel.
 func (d *Data) fetchIteration(ctx context.Context) {
 	logp.L().Infof("manager trigger fetching using %d fetchers", len(d.fetchers.Keys()))
 	d.wg = &sync.WaitGroup{}
@@ -150,7 +150,7 @@ func (d *Data) fetchProtected(ctx context.Context, k string) (val []fetching.Res
 	}()
 
 	val, err = d.fetchers.Run(ctx, k)
-	return
+	return val, err
 }
 
 // Stop cleans up Data resources gracefully.
