@@ -137,7 +137,7 @@ data:
         processes:
           etcd:
           kube-apiserver:
-          kube-controller-manager:
+          kube-controller:
           kube-scheduler:
           kubelet:
             config-file-arguments:
