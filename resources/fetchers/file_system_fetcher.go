@@ -115,8 +115,8 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 	data := FileSystemResource{
 		FileName: info.Name(),
 		FileMode: mod,
-		Uid:      getUserNameFromID(uid),
-		Gid:      getGroupNameFromID(gid),
+		Uid:      utils.GetUserNameFromID(uid, UserFile),
+		Gid:      utils.GetGroupNameFromID(gid, GroupFile),
 		Path:     path,
 		Inode:    inode,
 		SubType:  getFSSubType(info),
@@ -146,24 +146,4 @@ func getFSSubType(fileInfo os.FileInfo) string {
 		return DirSubType
 	}
 	return FileSubType
-}
-
-func getUserNameFromID(uid uint32) string {
-	u := strconv.FormatUint(uint64(uid), 10)
-	usr, err := utils.LookupUserId(u, UserFile)
-	if err != nil || usr == nil {
-		return ""
-	}
-
-	return usr.Name
-}
-
-func getGroupNameFromID(gid uint32) string {
-	g := strconv.FormatUint(uint64(gid), 10)
-	group, err := utils.LookupGroupId(g, GroupFile)
-	if err != nil || group == nil {
-		return ""
-	}
-
-	return group.Name
 }
