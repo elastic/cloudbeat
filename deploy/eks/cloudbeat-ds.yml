@@ -49,6 +49,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            # This is done for leader election on local env
+            # TODO: Support local env clusters with multiple cloudbeats
+            - name: POD_NAME
+              value: cloudbeat-leader
+                # fieldRef:
+                #   fieldPath: metadata.name
           securityContext:
             runAsUser: 0
             # If using Red Hat OpenShift uncomment this:
@@ -329,4 +335,13 @@ roleRef:
   kind: Role
   name: cloudbeat-kubeadm-config
   apiGroup: rbac.authorization.k8s.io
+---
+# TODO: Support local env clusters with multiple cloudbeats
+apiVersion: coordination.k8s.io/v1
+kind: Lease
+metadata:
+  name: elastic-agent-cluster-leader
+  namespace: kube-system
+spec:
+  holderIdentity: cloudbeat-leader
 ---

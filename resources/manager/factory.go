@@ -74,16 +74,22 @@ func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Conf
 	return nil
 }
 
+// TODO: Move conditions to factories and implement inside every factory
 func (fa *factories) getConditions(name string) []fetching.Condition {
 	c := make([]fetching.Condition, 0)
 	switch name {
 	case fetching.KubeAPIType:
+		var condition fetching.Condition
+		// TODO: Use fetcher's kubeconfig configuration
 		client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
 		if err != nil {
+			logp.L().Error("getConditions error in GetKubernetesClient: %v", err)
+			condition = conditions.NewErrorCondition(fetching.KubeAPIType, err)
+		} else {
 			leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
-			condition := conditions.NewLeaseFetcherCondition(leaseProvider)
-			c = append(c, condition)
+			condition = conditions.NewLeaseFetcherCondition(leaseProvider)
 		}
+		c = append(c, condition)
 	}
 
 	return c
