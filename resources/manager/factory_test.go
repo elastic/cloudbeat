@@ -19,6 +19,7 @@ package manager
 
 import (
 	"context"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -42,7 +43,11 @@ func (n *numberFetcherFactory) Create(c *common.Config) (fetching.Fetcher, error
 
 func numberConfig(number int) *common.Config {
 	c := common.NewConfig()
-	c.SetInt("num", -1, int64(number))
+	err := c.SetInt("num", -1, int64(number))
+	if err != nil {
+		logp.L().Errorf("Could not set number config: %v", err)
+		return nil
+	}
 	return c
 }
 
@@ -111,10 +116,14 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
 		reg := NewFetcherRegistry()
 		numCfg := numberConfig(test.value)
-		numCfg.SetString("name", -1, test.key)
+		err := numCfg.SetString("name", -1, test.key)
+		if err != nil {
+			logp.L().Errorf("Could not set name: %v", err)
+			return
+		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err := s.F.RegisterFetchers(reg, conf)
+		err = s.F.RegisterFetchers(reg, conf)
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
@@ -136,10 +145,14 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 	for _, test := range tests {
 		reg := NewFetcherRegistry()
 		numCfg := numberConfig(test.value)
-		numCfg.SetString("name", -1, test.key)
+		err := numCfg.SetString("name", -1, test.key)
+		if err != nil {
+			logp.L().Errorf("Could not set name: %v", err)
+			return
+		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err := s.F.RegisterFetchers(reg, conf)
+		err = s.F.RegisterFetchers(reg, conf)
 		s.Error(err)
 	}
 }

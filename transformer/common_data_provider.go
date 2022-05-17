@@ -20,9 +20,8 @@ package transformer
 import (
 	"context"
 	"fmt"
-	"io/fs"
-	"os"
-	"strings"
+
+	"github.com/gofrs/uuid"
 
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
@@ -32,10 +31,9 @@ import (
 )
 
 const ( 
-	hostNamePath = "/etc/"
-	hostNameFile = "hostname"
 	namespace = "kube-system"
 )
+var uuid_namespace uuid.UUID = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
 
 func NewCommonDataProvider(cfg config.Config) (CommonDataProvider, error) {
 	KubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
@@ -46,7 +44,7 @@ func NewCommonDataProvider(cfg config.Config) (CommonDataProvider, error) {
 
 	return CommonDataProvider{
 		kubeClient: KubeClient,
-		fsys: os.DirFS(hostNamePath),
+		cfg: cfg,
 	}, nil
 }
 
@@ -78,12 +76,12 @@ func (c CommonDataProvider) getClusterId(ctx context.Context) (string, error) {
 }
 
 func (c CommonDataProvider) getNodeId(ctx context.Context) (string, error) {
-	hName, err := c.getHostName()
+	nName, err := c.getNodeName()
 	if err != nil {
-		logp.Error(fmt.Errorf("getNodeId error in getHostName: %w", err))
+		logp.Error(fmt.Errorf("getNodeId error in getNodeName: %w", err))
 		return "", err
 	}
-	n, err := c.kubeClient.CoreV1().Nodes().Get(ctx, hName, metav1.GetOptions{})
+	n, err := c.kubeClient.CoreV1().Nodes().Get(ctx, nName, metav1.GetOptions{})
 	if err != nil {
 		logp.Error(fmt.Errorf("getClusterId error in Nodes get: %w", err))
 		return "", err
@@ -91,17 +89,27 @@ func (c CommonDataProvider) getNodeId(ctx context.Context) (string, error) {
 	return string(n.ObjectMeta.UID), nil
 }
 
-func (c CommonDataProvider) getHostName() (string, error) {
-    hName, err := fs.ReadFile(c.fsys, hostNameFile)
+func (c CommonDataProvider) getNodeName() (string, error) {
+	nd := &kubernetes.DiscoverKubernetesNodeParams{
+		// TODO: Add Host capability to Config
+		ConfigHost:  "",
+		Client:      c.kubeClient,
+		IsInCluster: kubernetes.IsInCluster(c.cfg.KubeConfig),
+		HostUtils:   &kubernetes.DefaultDiscoveryUtils{},
+	}
+
+	nName, err := kubernetes.DiscoverKubernetesNode(logp.L(), nd)
 	if err != nil {
-		logp.Error(fmt.Errorf("getHostName error in ReadFile: %w", err))
+		logp.Error(fmt.Errorf("getNodeName error in DiscoverKubernetesNode: %w", err))
 		return "", err
 	}
-	return strings.TrimSpace(string(hName)), nil
+
+	return nName, nil
 }
 
-func (cd CommonData) GetResourceId(rid string) string {
-	return cd.clusterId + cd.nodeId + rid
+func (cd CommonData) GetResourceId(id string) string {
+	rid := cd.clusterId + cd.nodeId + id
+	return uuid.NewV5(uuid_namespace, rid).String()
 }
 
 func (cd CommonData) GetData() CommonData {

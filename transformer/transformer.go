@@ -18,8 +18,7 @@
 package transformer
 
 import (
-	"io/fs"
-
+	"github.com/elastic/cloudbeat/config"
 	"github.com/gofrs/uuid"
 	"k8s.io/client-go/kubernetes"
 )
@@ -35,7 +34,7 @@ type CycleMetadata struct {
 
 type CommonDataProvider struct {
 	kubeClient kubernetes.Interface
-	fsys fs.FS
+	cfg config.Config
 }
 
 type CommonData struct {

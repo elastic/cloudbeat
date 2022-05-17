@@ -3,7 +3,7 @@
 image-tag := `git branch --show-current`
 
 create-kind-cluster:
-  kind create cluster --config deploy/k8s/kind/kind-config.yaml
+  kind create cluster --config deploy/k8s/kind/kind-config.yml
 
 install-kind:
   brew install kind
@@ -29,13 +29,13 @@ build-cloudbeat-debug:
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 deploy-cloudbeat-debug:
-   kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system
+   kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system
 
 delete-cloudbeat:
   kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
 
 delete-cloudbeat-debug:
-  kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yaml -n kube-system
+  kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system
 
 
 # EKS
@@ -46,10 +46,10 @@ publish-image-to-ecr:
   aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 704479110758.dkr.ecr.us-east-2.amazonaws.com & docker tag cloudbeat 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:{{image-tag}} & docker push 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:{{image-tag}}
 
 deploy-eks-cloudbeat:
-  kubectl delete -f deploy/eks/cloudbeat-ds.yaml -n kube-system & kubectl apply -f deploy/eks/cloudbeat-ds.yaml -n kube-system
+  kubectl delete -f deploy/eks/cloudbeat-ds.yml -n kube-system & kubectl apply -f deploy/eks/cloudbeat-ds.yml -n kube-system
 
 delete-eks-cloudbeat:
-  kubectl delete -f deploy/eks/cloudbeat-ds.yaml -n kube-system
+  kubectl delete -f deploy/eks/cloudbeat-ds.yml -n kube-system
 
 
 #General

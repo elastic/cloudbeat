@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"net/http"
 
 	"github.com/mitchellh/mapstructure"
@@ -78,7 +79,10 @@ func (o *OpaEvaluator) Decision(ctx context.Context, input interface{}) (interfa
 
 func (o *OpaEvaluator) Stop(ctx context.Context) {
 	o.opa.Stop(ctx)
-	o.bundleServer.Shutdown(ctx)
+	err := o.bundleServer.Shutdown(ctx)
+	if err != nil {
+		logp.L().Errorf("Could not stop OPA evaluator: %v", err)
+	}
 }
 
 func (o *OpaEvaluator) Decode(result interface{}) ([]Finding, error) {

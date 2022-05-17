@@ -23,8 +23,10 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
-	"testing/fstest"
 
+	"github.com/elastic/beats/v7/libbeat/logp"
+
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -39,8 +41,8 @@ import (
 )
 
 type args struct {
-	resource manager.ResourceMap
-	metadata CycleMetadata
+	resource  manager.ResourceMap
+	metadata  CycleMetadata
 	namespace string
 }
 
@@ -73,10 +75,9 @@ var fetcherResult = fetchers.FileSystemResource{
 }
 
 var (
-	opaResults      evaluator.RuleResult
-	mockedEvaluator = evaluator.MockedEvaluator{}
-	resourcesMap    = map[string][]fetching.Resource{fetchers.FileSystemType: {fetcherResult}}
-	ctx             = context.Background()
+	opaResults   evaluator.RuleResult
+	resourcesMap = map[string][]fetching.Resource{fetchers.FileSystemType: {fetcherResult}}
+	ctx          = context.Background()
 )
 
 type EventsCreatorTestSuite struct {
@@ -90,7 +91,11 @@ func TestSuite(t *testing.T) {
 }
 
 func (s *EventsCreatorTestSuite) SetupSuite() {
-	parseJsonfile(opaResultsFileName, &opaResults)
+	err := parseJsonfile(opaResultsFileName, &opaResults)
+	if err != nil {
+		logp.L().Errorf("Could not parse Json file: %v", err)
+		return
+	}
 	s.cycleId, _ = uuid.NewV4()
 }
 
@@ -103,8 +108,8 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 		{
 			name: "All events propagated as expected",
 			args: args{
-				resource: resourcesMap,
-				metadata: CycleMetadata{CycleId: s.cycleId},
+				resource:  resourcesMap,
+				metadata:  CycleMetadata{CycleId: s.cycleId},
 				namespace: "kube-system",
 			},
 			mocks: []MethodMock{{
@@ -122,8 +127,8 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 		{
 			name: "Events should not be created due to a policy error",
 			args: args{
-				resource: resourcesMap,
-				metadata: CycleMetadata{CycleId: s.cycleId},
+				resource:  resourcesMap,
+				metadata:  CycleMetadata{CycleId: s.cycleId},
 				namespace: "kube-system",
 			},
 			mocks: []MethodMock{{
@@ -141,8 +146,8 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 		{
 			name: "Events should not be created due to a parse error",
 			args: args{
-				resource: resourcesMap,
-				metadata: CycleMetadata{CycleId: s.cycleId},
+				resource:  resourcesMap,
+				metadata:  CycleMetadata{CycleId: s.cycleId},
 				namespace: "kube-system",
 			},
 			mocks: []MethodMock{{
@@ -171,23 +176,23 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 
 			namespace := &v1.Namespace{
 				TypeMeta: metav1.TypeMeta{
-					Kind: "Namespace",
+					Kind:       "Namespace",
 					APIVersion: "apps/v1beta1",
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: tt.args.namespace,
-					UID: "testing_namespace_uid",
+					UID:  "testing_namespace_uid",
 				},
 			}
 
 			node := &v1.Node{
 				TypeMeta: metav1.TypeMeta{
-					Kind: "Node",
+					Kind:       "Node",
 					APIVersion: "apps/v1beta1",
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "testing_node",
-					UID: "testing_node_uid",
+					UID:  "testing_node_uid",
 				},
 			}
 
@@ -199,12 +204,11 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 
 			cdp := CommonDataProvider{
 				kubeClient: kc,
-				fsys: fstest.MapFS{
-					"hostname": {
-						Data: []byte("testing_node"),
-					},
-				},
+				cfg: config.Config{},
 			}
+
+			// libbeat DiscoverKubernetesNode performs a fallback to environment variable NODE_NAME
+			os.Setenv("NODE_NAME", "testing_node")
 
 			commonData, err := cdp.FetchCommonData(ctx)
 			s.NoError(err)
@@ -213,7 +217,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			s.Equal(commonData.GetData().nodeId, "testing_node_uid", "commonData nodeId is not correct")
 
 			transformer := NewTransformer(ctx, &s.mockedEvaluator, commonData, testIndex)
-		
+
 			generatedEvents := transformer.ProcessAggregatedResources(tt.args.resource, tt.args.metadata)
 
 			if tt.wantErr {
@@ -248,6 +252,9 @@ func parseJsonfile(filename string, data interface{}) error {
 		return err
 	}
 
-	json.Unmarshal(byteValue, data)
+	err = json.Unmarshal(byteValue, data)
+	if err != nil {
+		return err
+	}
 	return nil
 }

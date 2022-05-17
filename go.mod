@@ -38,6 +38,7 @@ require (
 	go.elastic.co/go-licence-detector v0.4.0
 	go.uber.org/goleak v1.1.12
 	gopkg.in/yaml.v2 v2.4.0
+	k8s.io/api v0.23.5
 )
 
 require (
@@ -53,7 +54,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220413140705-d101ba1d2ae5
-	github.com/elastic/csp-security-policies v0.0.15-go-lib
+	github.com/elastic/csp-security-policies v1.0.1
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.4 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
@@ -101,7 +102,7 @@ require (
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	k8s.io/klog/v2 v2.30.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
 	k8s.io/utils v0.0.0-20211116205334-6203023598ed // indirect
@@ -204,7 +205,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirect
 	howett.net/plist v1.0.0 // indirect
-	k8s.io/api v0.23.5 // indirect
 )
 
 replace (

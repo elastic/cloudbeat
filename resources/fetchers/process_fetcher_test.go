@@ -154,6 +154,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 			B: 2,
 		}
 		configData, err := test.marshal(&processConfig)
+		t.Nil(err)
 
 		testProcess := TextProcessContext{
 			Pid:               "3",

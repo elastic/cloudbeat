@@ -17,7 +17,7 @@ cloudbeat:
     processes:
       etcd:
       kube-apiserver:
-      kube-controller-manager:
+      kube-controller:
       kube-scheduler:
       kubelet:
         config-file-arguments:
@@ -1121,6 +1121,9 @@ output.elasticsearch:
 
 # Name under which the template is stored in Elasticsearch
 #setup.template.json.name: ""
+
+# Set this option if the JSON template is a data stream.
+#setup.template.json.data_stream: false
 
 # Overwrite existing template
 # Do not enable this option for more than one instance of cloudbeat as it might
