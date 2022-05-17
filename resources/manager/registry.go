@@ -30,7 +30,7 @@ type FetchersRegistry interface {
 	Keys() []string
 	ShouldRun(key string) bool
 	Run(ctx context.Context, key string) ([]fetching.Resource, error)
-	Stop(ctx context.Context)
+	Stop()
 }
 
 type fetchersRegistry struct {
@@ -97,7 +97,7 @@ func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetching.Reso
 	return registered.f.Fetch(ctx)
 }
 
-func (r *fetchersRegistry) Stop(ctx context.Context) {
+func (r *fetchersRegistry) Stop() {
 	for key, rfetcher := range r.reg {
 		rfetcher.f.Stop()
 		logp.L().Infof("Fetcher for key %q stopped", key)
