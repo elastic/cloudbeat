@@ -48,14 +48,14 @@ func (s UserTestSuite) TearDownTest() {}
 func (s UserTestSuite) TestGetUserNameFromID() {
 	var userTests = []testAttr{
 		{
-			name:     "Should return System Administrator as a username",
+			name:     "Should return root as a username",
 			id:       0,
-			expected: "System Administrator",
+			expected: "root",
 		},
 		{
-			name:     "Should return System Services as a username",
+			name:     "Should return daemon as a username",
 			id:       1,
-			expected: "System Services",
+			expected: "daemon",
 		},
 		{
 			name:     "Should return Proxy as a username - no friendly name exists",

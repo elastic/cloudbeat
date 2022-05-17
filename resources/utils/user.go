@@ -72,10 +72,6 @@ func GetUserNameFromID(uid uint32, userFilePath string) string {
 		return ""
 	}
 
-	if usr.Name != "" {
-		return usr.Name
-	}
-
 	return usr.Username
 }
 
