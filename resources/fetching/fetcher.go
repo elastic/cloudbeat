@@ -20,12 +20,12 @@ package fetching
 import (
 	"context"
 
-	"github.com/elastic/beats/v7/libbeat/common"
+	common "github.com/elastic/elastic-agent-libs/config"
 )
 
 // Factory can create fetcher instances based on configuration
 type Factory interface {
-	Create(*common.Config) (Fetcher, error)
+	Create(*common.C) (Fetcher, error)
 }
 
 // Fetcher represents a data fetcher.

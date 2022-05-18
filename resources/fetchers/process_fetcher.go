@@ -24,10 +24,10 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -46,7 +46,7 @@ type ProcessResource struct {
 	PID          string        `json:"pid"`
 	Cmd          string        `json:"command"`
 	Stat         proc.ProcStat `json:"stat"`
-	ExternalData common.MapStr `json:"external_data"`
+	ExternalData mapstr.M      `json:"external_data"`
 }
 
 type ProcessesFetcher struct {

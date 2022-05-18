@@ -23,14 +23,14 @@ package config
 import (
 	"context"
 
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/reload"
-	"github.com/elastic/beats/v7/libbeat/logp"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type reloader struct {
 	ctx context.Context
-	ch  chan<- *common.Config
+	ch  chan<- *common.C
 }
 
 func (r *reloader) Reload(configs []*reload.ConfigWithMeta) error {
@@ -51,8 +51,8 @@ func (r *reloader) Reload(configs []*reload.ConfigWithMeta) error {
 	return nil
 }
 
-func Updates(ctx context.Context) <-chan *common.Config {
-	ch := make(chan *common.Config)
+func Updates(ctx context.Context) <-chan *common.C {
+	ch := make(chan *common.C)
 	r := &reloader{
 		ctx: ctx,
 		ch:  ch,

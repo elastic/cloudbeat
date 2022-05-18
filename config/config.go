@@ -23,8 +23,8 @@ package config
 import (
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/processors"
+	common "github.com/elastic/elastic-agent-libs/config"
 	"gopkg.in/yaml.v3"
 )
 
@@ -36,7 +36,7 @@ type Config struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
-	Fetchers   []*common.Config        `config:"fetchers"`
+	Fetchers   []*common.C             `config:"fetchers"`
 
 	Streams []Stream `config:"streams"`
 }
@@ -53,7 +53,7 @@ var DefaultConfig = Config{
 	Period: 10 * time.Second,
 }
 
-func New(cfg *common.Config) (Config, error) {
+func New(cfg *common.C) (Config, error) {
 	c := DefaultConfig
 
 	if err := cfg.Unpack(&c); err != nil {
@@ -68,7 +68,7 @@ func New(cfg *common.Config) (Config, error) {
 //
 // NOTE(yashtewari): This will be removed with the planned update to restart the
 // beat with the new config.
-func (c *Config) Update(cfg *common.Config) error {
+func (c *Config) Update(cfg *common.C) error {
 	if err := cfg.Unpack(&c); err != nil {
 		return err
 	}

@@ -18,10 +18,10 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 )
@@ -44,7 +44,7 @@ type eksExtraElements struct {
 	eksProvider awslib.EksClusterDescriber
 }
 
-func (f *EKSFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+func (f *EKSFactory) Create(c *common.C) (fetching.Fetcher, error) {
 	logp.L().Info("EKS factory has started")
 	cfg := EKSFetcherConfig{}
 	err := c.Unpack(&cfg)

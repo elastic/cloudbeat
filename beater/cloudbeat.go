@@ -29,10 +29,10 @@ import (
 	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/gofrs/uuid"
 )
@@ -43,7 +43,7 @@ type cloudbeat struct {
 	cancel context.CancelFunc
 
 	config        config.Config
-	configUpdates <-chan *common.Config
+	configUpdates <-chan *common.C
 	client        beat.Client
 	data          *manager.Data
 	evaluator     evaluator.Evaluator
@@ -52,7 +52,7 @@ type cloudbeat struct {
 }
 
 // New creates an instance of cloudbeat.
-func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
+func New(b *beat.Beat, cfg *common.C) (beat.Beater, error) {
 	log := logp.NewLogger("cloudbeat")
 
 	ctx, cancel := context.WithCancel(context.Background())

@@ -18,10 +18,11 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/stretchr/testify/suite"
 )
 
 type IamFactoryTestSuite struct {

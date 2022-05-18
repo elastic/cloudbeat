@@ -24,7 +24,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
@@ -204,7 +204,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 
 			cdp := CommonDataProvider{
 				kubeClient: kc,
-				cfg: config.Config{},
+				cfg:        config.Config{},
 			}
 
 			// libbeat DiscoverKubernetesNode performs a fallback to environment variable NODE_NAME

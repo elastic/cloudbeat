@@ -24,23 +24,23 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 )
 
 type Transformer struct {
 	context       context.Context
 	eval          evaluator.Evaluator
-	eventMetadata common.MapStr
+	eventMetadata mapstr.M
 	events        []beat.Event
 	commonData    CommonDataInterface
 }
 
 func NewTransformer(ctx context.Context, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
-	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
+	eventMetadata := mapstr.M{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
 
 	return Transformer{
@@ -98,7 +98,7 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleM
 		event := beat.Event{
 			Meta:      c.eventMetadata,
 			Timestamp: timestamp,
-			Fields: common.MapStr{
+			Fields: mapstr.M{
 				"resource":    resource,
 				"resource_id": resMetadata.ID,   // Deprecated - kept for BC
 				"type":        resMetadata.Type, // Deprecated - kept for BC

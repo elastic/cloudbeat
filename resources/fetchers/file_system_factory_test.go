@@ -20,8 +20,8 @@ package fetchers
 import (
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	common "github.com/elastic/elastic-agent-libs/config"
 	"github.com/stretchr/testify/suite"
 )
 

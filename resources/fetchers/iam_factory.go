@@ -18,10 +18,10 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 )
@@ -45,7 +45,7 @@ type IAMExtraElements struct {
 	iamProvider awslib.IAMRolePermissionGetter
 }
 
-func (f *IAMFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+func (f *IAMFactory) Create(c *common.C) (fetching.Fetcher, error) {
 	logp.L().Info("IAM factory has started")
 	cfg := IAMFetcherConfig{}
 	err := c.Unpack(&cfg)

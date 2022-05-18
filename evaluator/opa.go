@@ -21,8 +21,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"net/http"
+
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/logging"

@@ -18,10 +18,10 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
@@ -35,7 +35,7 @@ func init() {
 type FileSystemFactory struct {
 }
 
-func (f *FileSystemFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+func (f *FileSystemFactory) Create(c *common.C) (fetching.Fetcher, error) {
 	cfg := FileFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {

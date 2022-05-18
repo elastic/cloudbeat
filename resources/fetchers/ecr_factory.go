@@ -19,15 +19,16 @@ package fetchers
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/docker/distribution/context"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"regexp"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
@@ -49,7 +50,7 @@ type ecrExtraElements struct {
 	ecrRepoDescriber       awslib.EcrRepositoryDescriber
 }
 
-func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+func (f *ECRFactory) Create(c *common.C) (fetching.Fetcher, error) {
 	logp.L().Info("ECR factory has started")
 	cfg := ECRFetcherConfig{}
 	err := c.Unpack(&cfg)
