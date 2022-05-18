@@ -19,6 +19,7 @@ package transformer
 
 import (
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/gofrs/uuid"
 	"k8s.io/client-go/kubernetes"
 )
@@ -34,15 +35,15 @@ type CycleMetadata struct {
 
 type CommonDataProvider struct {
 	kubeClient kubernetes.Interface
-	cfg config.Config
+	cfg        config.Config
 }
 
 type CommonData struct {
 	clusterId string
-	nodeId string
+	nodeId    string
 }
 
 type CommonDataInterface interface {
 	GetData() CommonData
-	GetResourceId(string) string
+	GetResourceId(fetching.ResourceMetadata) string
 }
