@@ -23,14 +23,19 @@ import (
 )
 
 type testAttr struct {
-	name     string
-	id       uint32
-	expected string
+	name   string
+	id     uint32
+	result ExpectedResult
+}
+
+type ExpectedResult struct {
+	name string
+	err  bool
 }
 
 const (
-	UserFile  = "./mocked_psswd_file.txt"
-	GroupFile = "./mocked_group_file.txt"
+	UserFile  = "./mock/psswd_file.txt"
+	GroupFile = "./mock/group_file.txt"
 )
 
 type UserTestSuite struct {
@@ -48,60 +53,89 @@ func (s UserTestSuite) TearDownTest() {}
 func (s UserTestSuite) TestGetUserNameFromID() {
 	var userTests = []testAttr{
 		{
-			name:     "Should return root as a username",
-			id:       0,
-			expected: "root",
+			name: "Should return root as a username",
+			id:   0,
+			result: ExpectedResult{
+				name: "root",
+				err:  false,
+			},
 		},
 		{
-			name:     "Should return daemon as a username",
-			id:       1,
-			expected: "daemon",
+			name: "Should return daemon as a username",
+			id:   1,
+			result: ExpectedResult{
+				name: "daemon",
+				err:  false,
+			},
 		},
 		{
-			name:     "Should return Proxy as a username - no friendly name exists",
-			id:       13,
-			expected: "proxy",
+			name: "Should return Proxy as a username - no friendly name exists",
+			id:   13,
+			result: ExpectedResult{
+				name: "proxy",
+				err:  false,
+			},
 		},
 		{
-			name:     "Should not return a username",
-			id:       6666,
-			expected: "",
+			name: "Should not return a username",
+			id:   6666,
+			result: ExpectedResult{
+				name: "",
+				err:  true,
+			},
 		},
 	}
 
 	for _, tt := range userTests {
 		s.SetupTest()
 		s.Run(tt.name, func() {
-			username := GetUserNameFromID(tt.id, UserFile)
-			s.Equal(tt.expected, username)
+			username, err := GetUserNameFromID(tt.id, UserFile)
+			s.Equal(tt.result.name, username)
+
+			if tt.result.err {
+				s.NotNil(err)
+			}
 		})
 	}
 }
 
 func (s UserTestSuite) TestGetGroupNameFromID() {
-	var userTests = []testAttr{
+	var groupTests = []testAttr{
 		{
-			name:     "Should return wheel as group name",
-			id:       0,
-			expected: "wheel",
+			name: "Should return wheel as group name",
+			id:   0,
+			result: ExpectedResult{
+				name: "wheel",
+				err:  false,
+			},
 		},
 		{
-			name:     "Should return daemon as group name",
-			id:       1,
-			expected: "daemon",
+			name: "Should return daemon as group name",
+			id:   1,
+			result: ExpectedResult{
+				name: "daemon",
+				err:  false,
+			},
 		},
 		{
-			name:     "Should not return group name",
-			id:       1000,
-			expected: "",
+			name: "Should not return group name",
+			id:   1000,
+			result: ExpectedResult{
+				name: "",
+				err:  true,
+			},
 		},
 	}
 
-	for _, tt := range userTests {
+	for _, tt := range groupTests {
 		s.SetupTest()
 		s.Run(tt.name, func() {
-			username := GetGroupNameFromID(tt.id, GroupFile)
-			s.Equal(tt.expected, username)
+			groupName, err := GetGroupNameFromID(tt.id, GroupFile)
+			s.Equal(tt.result.name, groupName)
+
+			if tt.result.err {
+				s.NotNil(err)
+			}
 		})
 	}
 }

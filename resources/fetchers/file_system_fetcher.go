@@ -106,17 +106,26 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 		return FileSystemResource{}, errors.New("Not a syscall.Stat_t")
 	}
 
-	uid := stat.Uid
-	gid := stat.Gid
-
 	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
 	inode := strconv.FormatUint(stat.Ino, 10)
+
+	uid := stat.Uid
+	gid := stat.Gid
+	username, err := utils.GetUserNameFromID(uid, UserFile)
+	if err != nil {
+		logp.Error(fmt.Errorf("failed to find username for uid %d, error - %+v", uid, err))
+	}
+
+	groupName, err := utils.GetGroupNameFromID(gid, GroupFile)
+	if err != nil {
+		logp.Error(fmt.Errorf("failed to find groupname for gid %d, error - %+v", gid, err))
+	}
 
 	data := FileSystemResource{
 		FileName: info.Name(),
 		FileMode: mod,
-		Uid:      utils.GetUserNameFromID(uid, UserFile),
-		Gid:      utils.GetGroupNameFromID(gid, GroupFile),
+		Uid:      username,
+		Gid:      groupName,
 		Path:     path,
 		Inode:    inode,
 		SubType:  getFSSubType(info),
