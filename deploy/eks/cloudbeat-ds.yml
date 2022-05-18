@@ -344,4 +344,6 @@ metadata:
   namespace: kube-system
 spec:
   holderIdentity: cloudbeat-leader
+  leaseDurationSeconds: 15
+  renewTime: "1992-04-26T00:00:00.000000Z"
 ---
