@@ -1,7 +1,7 @@
 name: Cloudbeat-CI
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
     types: [assigned, opened, synchronize, reopened]
@@ -155,68 +155,3 @@ jobs:
         if: steps.deploy_helm.outcome == 'failure'
         with:
           limit-access-to-actor: true
-
-      - name: Get Allure history
-        uses: actions/checkout@v2
-        if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
-        continue-on-error: true
-        with:
-          ref: gh-pages
-          path: gh-pages
-
-      - name: Generate
-        uses: simple-elf/allure-report-action@master
-        if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
-        with:
-          allure_results: tests/allure/results
-          allure_history: allure-history
-          keep_reports: 20
-
-      - name: Deploy report to Github Pages
-        if: steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: allure-history
-
-      - name: Comment test success result
-        uses: marocchino/sticky-pull-request-comment@v2
-        if: steps.run_tests.outcome == 'success'
-        with:
-          header: Test Results
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: |
-            ## Cloudbeat CI :robot:
-            Integration tests passed! :green_heart:
-            Tests Summary:
-            ```python
-            ${{env.summary}}
-            ```
-            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
-
-      - name: Comment test failed result
-        uses: marocchino/sticky-pull-request-comment@v2
-        if: steps.run_tests.outcome == 'failure'
-        with:
-          header: Test Results
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: |
-            ## Cloudbeat CI :robot:
-            Integration tests failed! :broken_heart:
-            Tests Summary:
-            ```python
-            ${{env.summary}}
-            ```
-            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
-
-      - name: Comment test skipped result
-        uses: marocchino/sticky-pull-request-comment@v2
-        if: (steps.run_tests.outcome == 'skipped' || steps.run_tests.outcome == 'cancelled')
-        with:
-          header: Test Results
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: |
-            ## Cloudbeat CI :robot:
-            Integration tests status: ${{ steps.run_tests.outcome }}
-
