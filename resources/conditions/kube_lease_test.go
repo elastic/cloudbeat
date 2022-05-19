@@ -125,7 +125,6 @@ func TestKubeLeaseNoLeader(t *testing.T) {
 }
 
 func TestKubeLeaseEmptyLeader(t *testing.T) {
-	holder := ""
 	t.Setenv("POD_NAME", "my_cloudbeat")
 
 	leases := v1.LeaseList{Items: []v1.Lease{
@@ -138,9 +137,7 @@ func TestKubeLeaseEmptyLeader(t *testing.T) {
 				Name:      "elastic-agent-cluster-leader",
 				Namespace: "kube-system",
 			},
-			Spec: v1.LeaseSpec{
-				HolderIdentity: &holder,
-			},
+			Spec: v1.LeaseSpec{},
 		},
 	}}
 
