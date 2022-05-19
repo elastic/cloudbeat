@@ -47,7 +47,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             # This is done for leader election on local env
-            # TODO: Support local env clusters with multiple cloudbeats
+            # GAP: https://github.com/elastic/cloudbeat/issues/162
             - name: POD_NAME
               value: cloudbeat-leader
                 # fieldRef:
@@ -365,7 +365,7 @@ roleRef:
   name: cloudbeat-kubeadm-config
   apiGroup: rbac.authorization.k8s.io
 ---
-# TODO: Support local env clusters with multiple cloudbeats
+# GAP: https://github.com/elastic/cloudbeat/issues/162
 apiVersion: coordination.k8s.io/v1
 kind: Lease
 metadata:

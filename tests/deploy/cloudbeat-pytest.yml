@@ -6,7 +6,7 @@ metadata:
   name: cloudbeat
   namespace: kube-system
 ---
-# TODO: Support local env clusters with multiple cloudbeats
+# GAP: https://github.com/elastic/cloudbeat/issues/162
 apiVersion: coordination.k8s.io/v1
 kind: Lease
 metadata:
@@ -277,7 +277,7 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         # This is done for leader election on local env
-        # TODO: Support local env clusters with multiple cloudbeats
+        # GAP: https://github.com/elastic/cloudbeat/issues/162
         - name: POD_NAME
           value: cloudbeat-leader
             # fieldRef:
