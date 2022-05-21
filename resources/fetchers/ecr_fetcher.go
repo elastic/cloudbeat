@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/google/uuid"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
@@ -99,11 +100,12 @@ func (res ECRResource) GetData() interface{} {
 }
 
 func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
-	//TODO implement me
+	uid := uuid.New()
+
 	return fetching.ResourceMetadata{
-		ID:      "",
-		Type:    "",
-		SubType: "",
-		Name:    "",
+		ID:      uid.String(),
+		Type:    ECRType,
+		SubType: ECRType,
+		Name:    "AWS repositories",
 	}
 }

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/google/uuid"
 	"regexp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -97,11 +98,11 @@ func (r ELBResource) GetData() interface{} {
 }
 
 func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
-	//TODO implement me
+	uid := uuid.New()
 	return fetching.ResourceMetadata{
-		ID:      "",
-		Type:    "",
-		SubType: "",
+		ID:      uid.String(),
+		Type:    ELBType,
+		SubType: ELBType,
 		Name:    "",
 	}
 }

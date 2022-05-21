@@ -21,6 +21,7 @@ import (
 	"context"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/google/uuid"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
@@ -58,10 +59,11 @@ func (r IAMResource) GetData() interface{} {
 
 func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
 	//TODO implement me
+	uid := uuid.New()
 	return fetching.ResourceMetadata{
-		ID:      "",
-		Type:    "",
-		SubType: "",
+		ID:      uid.String(),
+		Type:    IAMType,
+		SubType: IAMType,
 		Name:    "",
 	}
 }
