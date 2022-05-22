@@ -20,6 +20,8 @@ package transformer
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/fetching"
 
 	"github.com/gofrs/uuid"
 
@@ -30,9 +32,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const ( 
+const (
 	namespace = "kube-system"
 )
+
 var uuid_namespace uuid.UUID = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
 
 func NewCommonDataProvider(cfg config.Config) (CommonDataProvider, error) {
@@ -44,7 +47,7 @@ func NewCommonDataProvider(cfg config.Config) (CommonDataProvider, error) {
 
 	return CommonDataProvider{
 		kubeClient: KubeClient,
-		cfg: cfg,
+		cfg:        cfg,
 	}, nil
 }
 
@@ -107,8 +110,13 @@ func (c CommonDataProvider) getNodeName() (string, error) {
 	return nName, nil
 }
 
-func (cd CommonData) GetResourceId(id string) string {
-	rid := cd.clusterId + cd.nodeId + id
+func (cd CommonData) GetResourceId(metadata fetching.ResourceMetadata) string {
+	// kube-api resource id is the original k8s object metadata.uuid
+	if metadata.Type == fetchers.K8sObjType {
+		return metadata.ID
+	}
+
+	rid := cd.clusterId + cd.nodeId + metadata.ID
 	return uuid.NewV5(uuid_namespace, rid).String()
 }
 

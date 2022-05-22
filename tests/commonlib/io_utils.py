@@ -8,8 +8,7 @@ import json
 import yaml
 import shutil
 from pathlib import Path
-from munch import Munch
-# import grp, pwd
+from munch import Munch, munchify
 
 
 def get_logs_from_stream(stream: str) -> list[Munch]:
@@ -18,18 +17,14 @@ def get_logs_from_stream(stream: str) -> list[Munch]:
     @param stream: StringIO stream
     @return: List of Munch objects
     """
-
     logs = io.StringIO(stream)
     result = []
-    # with open("pod_logs.log", 'a') as pod_log_file:
-    #     pod_log_file.writelines(logs)
     for log in logs:
-        # current_log = log.split(sep="Z ")[1]
         if log and "bundles" in log:
             try:
-                result.append(Munch(json.loads(log)))
+                result.append(munchify(json.loads(log)))
             except json.decoder.JSONDecodeError:
-                result.append(Munch(json.loads(log.replace("'", '"'))))
+                result.append(munchify(json.loads(log.replace("'", '"'))))
             except Exception as e:
                 print(e)
                 continue

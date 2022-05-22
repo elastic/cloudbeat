@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: cloudbeat
-          image: cloudbeat:latest 
+          image: cloudbeat:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: ES_HOST
@@ -37,6 +37,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            # This is done for leader election on local env
+            # GAP: https://github.com/elastic/cloudbeat/issues/162
+            - name: POD_NAME
+              value: cloudbeat-leader
+                # fieldRef:
+                #   fieldPath: metadata.name
           securityContext:
             runAsUser: 0
             # If using Red Hat OpenShift uncomment this:
@@ -137,7 +143,7 @@ data:
         processes:
           etcd:
           kube-apiserver:
-          kube-controller-manager:
+          kube-controller:
           kube-scheduler:
           kubelet:
             config-file-arguments:
@@ -188,7 +194,7 @@ data:
       #api_key: "id:api_key"
       username: ${ES_USERNAME}
       password: ${ES_PASSWORD}
-    
+
       # Enable to allow sending output to older ES versions
       allow_older_versions: true
 
@@ -241,11 +247,11 @@ rules:
   #  resources:
   #  - secrets
   #  verbs: ["get"]
-  - apiGroups: [ "extensions" ]
+  - apiGroups: ["extensions"]
     resources:
       - replicasets
-    verbs: [ "get", "list", "watch" ]
-  - apiGroups: [ "apps" ]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
     resources:
       - statefulsets
       - deployments
@@ -353,4 +359,15 @@ roleRef:
   kind: Role
   name: cloudbeat-kubeadm-config
   apiGroup: rbac.authorization.k8s.io
+---
+# GAP: https://github.com/elastic/cloudbeat/issues/162
+apiVersion: coordination.k8s.io/v1
+kind: Lease
+metadata:
+  name: elastic-agent-cluster-leader
+  namespace: kube-system
+spec:
+  holderIdentity: cloudbeat-leader
+  leaseDurationSeconds: 15
+  renewTime: "1992-04-26T00:00:00.000000Z"
 ---
