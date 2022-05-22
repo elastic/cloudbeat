@@ -6,7 +6,6 @@ on:
       - main
     types: [assigned, opened, synchronize, reopened]
 
-
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.17.2
