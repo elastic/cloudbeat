@@ -11,7 +11,7 @@ on:
 
 env:
   K8S_MANIFEST_DIR: deploy
-  GO_VERSION: 1.17.2
+  GO_VERSION: 1.18.2
 
 jobs:
   unit_tests:

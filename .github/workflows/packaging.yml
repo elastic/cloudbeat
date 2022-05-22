@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  GO_VERSION: 1.17.2
+  GO_VERSION: 1.18.2
   DEV: true
   SNAPSHOT: true
   PLATFORMS: linux/amd64
