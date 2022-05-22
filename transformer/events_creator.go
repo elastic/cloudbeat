@@ -72,8 +72,7 @@ func (c *Transformer) processEachResource(results []fetching.Resource, cycleMeta
 
 func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleMetadata CycleMetadata) error {
 	resMetadata := fetchedResource.GetMetadata()
-	// TODO: Will be changed to combined UUID in next PR
-	resMetadata.ID = c.commonData.GetResourceId(resMetadata.ID)
+	resMetadata.ID = c.commonData.GetResourceId(resMetadata)
 	fetcherResult := fetching.Result{Type: resMetadata.Type, Resource: fetchedResource.GetData()}
 
 	result, err := c.eval.Decision(c.context, fetcherResult)
