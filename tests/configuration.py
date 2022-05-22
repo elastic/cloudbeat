@@ -22,7 +22,7 @@ elasticsearch.hosts = os.getenv('ES_HOST', "localhost")
 elasticsearch.user = os.getenv('ES_USER', 'elastic')
 elasticsearch.password = os.getenv('ES_PASSWORD', 'changeme')
 elasticsearch.basic_auth = (elasticsearch.user, elasticsearch.password)
-elasticsearch.port = os.getenv('ES_PORT', 9200)
+elasticsearch.port = os.getenv('ES_PORT', '9200')
 elasticsearch.protocol = os.getenv('ES_PROTOCOL', 'http')
 elasticsearch.url = f"{elasticsearch.protocol}://{elasticsearch.hosts}:{elasticsearch.port}"
 elasticsearch.cis_index = os.getenv('CIS_INDEX', "*cloud_security_posture.findings*")
@@ -34,4 +34,4 @@ docker.use_docker = bool(strtobool(os.getenv('USE_DOCKER', 'True')))
 
 # Printing all environment keys
 for key, value in sorted(os.environ.items()):
-    print('{}: {}'.format(key, value))
+    print(f'{key}: {value}')
