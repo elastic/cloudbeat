@@ -101,7 +101,6 @@ func (res ECRResource) GetData() interface{} {
 
 func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
 	uid, _ := uuid.NewV4()
-
 	return fetching.ResourceMetadata{
 		ID:      uid.String(),
 		Type:    ECRType,

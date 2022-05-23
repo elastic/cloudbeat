@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -35,8 +36,10 @@ type IAMFetcherConfig struct {
 	RoleName string `config:"roleName"`
 }
 
+type IAMRolePermissionsResponse []iam.GetRolePolicyResponse
+
 type IAMResource struct {
-	Data interface{}
+	IAMRolePermissionsResponse
 }
 
 func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
@@ -53,7 +56,7 @@ func (f IAMFetcher) Stop() {
 }
 
 func (r IAMResource) GetData() interface{} {
-	return r.Data
+	return r
 }
 
 func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
