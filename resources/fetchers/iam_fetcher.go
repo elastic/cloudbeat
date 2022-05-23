@@ -20,10 +20,9 @@ package fetchers
 import (
 	"context"
 	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/google/uuid"
-
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/gofrs/uuid"
 )
 
 type IAMFetcher struct {
@@ -58,8 +57,7 @@ func (r IAMResource) GetData() interface{} {
 }
 
 func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
-	//TODO implement me
-	uid := uuid.New()
+	uid, _ := uuid.NewV4()
 	return fetching.ResourceMetadata{
 		ID:      uid.String(),
 		Type:    IAMType,
