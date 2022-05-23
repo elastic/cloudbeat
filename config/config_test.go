@@ -300,3 +300,25 @@ activated_rules:
 		s.Equal(strings.TrimSpace(test.expected), strings.TrimSpace(dy))
 	}
 }
+
+func (s *ConfigTestSuite) TestConfigPeriod() {
+	var tests = []struct {
+		config         string
+		expectedPeriod time.Duration
+	}{
+		{"", 4 * time.Hour},
+		{"period: 50s", 50 * time.Second},
+		{"period: 5m", 5 * time.Minute},
+		{"period: 2h", 2 * time.Hour},
+	}
+
+	for _, test := range tests {
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		c, err := New(cfg)
+		s.NoError(err)
+
+		s.Equal(test.expectedPeriod, c.Period)
+	}
+}
