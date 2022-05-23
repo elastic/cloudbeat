@@ -18,7 +18,6 @@ def test_cloudbeat_pod_exist(data):
     :param data: (Pods list, Nodes list)
     :return:
     """
-
     pods, nodes = data
     pods_count = len(pods)
     nodes_count = len(nodes)

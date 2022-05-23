@@ -33,7 +33,7 @@ type K8sResource struct {
 const (
 	k8sObjMetadataField  = "ObjectMeta"
 	k8sTypeMetadataField = "TypeMeta"
-	k8sObjType           = "k8s_object"
+	K8sObjType           = "k8s_object"
 )
 
 func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
@@ -77,7 +77,7 @@ func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
 
 	return fetching.ResourceMetadata{
 		ID:      string(resourceID),
-		Type:    k8sObjType,
+		Type:    K8sObjType,
 		SubType: getK8sSubType(k8sObj),
 		Name:    resourceName,
 	}
