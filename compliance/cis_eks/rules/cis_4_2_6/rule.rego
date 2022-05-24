@@ -26,7 +26,11 @@ finding = result {
 	data_adapter.is_kube_api
 
 	# set result
-	pod := json.filter(data_adapter.pod, ["uid", "spec/runAsUser"])
+	pod := json.filter(data_adapter.pod, [
+		"metadata/uid",
+		"spec/runAsUser",
+	])
+
 	containers := {"containers": json.filter(c, ["name", "securityContext/runAsUser"]) | c := data_adapter.containers[_]}
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),

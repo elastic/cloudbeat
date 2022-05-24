@@ -4,8 +4,7 @@ import data.compliance.cis_k8s
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
-# Ensure that the --event-qps argument is set to 0 or a level which
-# ensures appropriate event capture 
+# Ensure that the --event-qps argument is set to 0 or a level which ensures appropriate event capture
 
 default rule_evaluation = false
 

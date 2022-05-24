@@ -22,7 +22,7 @@ finding = result {
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
 		"evidence": {
-			"uid": data_adapter.pod.uid,
+			"uid": data_adapter.pod.metadata.uid,
 			"containers": {json.filter(c, ["name", "securityContext/allowPrivilegeEscalation"]) | c := data_adapter.containers[_]},
 		},
 	}

@@ -23,13 +23,13 @@ rule_input(resource) = test_data.kube_api_input(resource)
 
 violating_psp = {
 	"kind": "Pod",
-	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [{"name": "container_1", "securityContext": {"allowPrivilegeEscalation": true}}]},
 }
 
 violating_psp2 = {
 	"kind": "Pod",
-	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [
 		{"name": "container_1", "securityContext": {"allowPrivilegeEscalation": true}},
 		{"name": "container_2", "securityContext": {"allowPrivilegeEscalation": false}},
@@ -38,7 +38,7 @@ violating_psp2 = {
 
 violating_psp3 = {
 	"kind": "Pod",
-	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [
 		{"name": "container_1", "securityContext": {"allowPrivilegeEscalation": true}},
 		{"name": "container_2", "securityContext": {}},
@@ -47,7 +47,7 @@ violating_psp3 = {
 
 violating_psp4 = {
 	"kind": "Pod",
-	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [
 		{"name": "container_1", "securityContext": {"allowPrivilegeEscalation": true}},
 		{"name": "container_2", "securityContext": {}},
@@ -57,12 +57,12 @@ violating_psp4 = {
 
 non_violating_psp = {
 	"kind": "Pod",
-	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [{"name": "container_1", "securityContext": {"allowPrivilegeEscalation": false}}]},
 }
 
 non_violating_psp2 = {
 	"kind": "Pod",
-	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"containers": [{"name": "container_1", "securityContext": {}}]},
 }

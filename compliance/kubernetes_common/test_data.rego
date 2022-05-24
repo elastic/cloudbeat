@@ -59,15 +59,24 @@ kube_api_role_input(kind, rules) = {
 	},
 }
 
-kube_api_service_account_input(kind, name, automount_setting) = {
+kube_api_pod_input(pod_name, service_account, automount_setting) = {
 	"type": "kube-api",
 	"resource": {
-		"kind": kind,
-		"automountServiceAccountToken": automount_setting,
-		"metadata": {"name": name},
+		"kind": "Pod",
+		"metadata": {"name": pod_name},
 		"spec": {
-			"serviceAccount": name,
+			"serviceAccount": service_account,
+			"serviceAccountName": service_account,
 			"automountServiceAccountToken": automount_setting,
 		},
+	},
+}
+
+kube_api_service_account_input(name, automount_setting) = {
+	"type": "kube-api",
+	"resource": {
+		"kind": "ServiceAccount",
+		"metadata": {"name": name},
+		"automountServiceAccountToken": automount_setting,
 	},
 }

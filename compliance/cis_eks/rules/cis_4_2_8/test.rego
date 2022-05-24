@@ -20,18 +20,18 @@ rule_input(resource) = test_data.kube_api_input(resource)
 
 violating_psp = {
 	"kind": "Pod",
-	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"allowedCapabilities": ["ALL"]},
 }
 
 non_violating_psp = {
 	"kind": "Pod",
-	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {},
 }
 
 non_violating_psp2 = {
 	"kind": "Pod",
-	"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
 	"spec": {"allowedCapabilities": []},
 }

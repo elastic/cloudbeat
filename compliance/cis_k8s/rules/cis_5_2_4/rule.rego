@@ -15,6 +15,9 @@ finding = result {
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": json.filter(data_adapter.pod, ["uid", "spec/hostIPC"]),
+		"evidence": json.filter(data_adapter.pod, [
+			"metadata/uid",
+			"spec/hostIPC",
+		]),
 	}
 }
