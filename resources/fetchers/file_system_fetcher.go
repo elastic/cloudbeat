@@ -20,8 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/utils"
 	"os"
-	"os/user"
 	"strconv"
 	"syscall"
 
@@ -35,6 +35,8 @@ const (
 	FSResourceType = "file"
 	FileSubType    = "file"
 	DirSubType     = "directory"
+	UserFile       = "/hostfs/etc/passwd"
+	GroupFile      = "/hostfs/etc/group"
 )
 
 type FileSystemResource struct {
@@ -104,20 +106,26 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 		return FileSystemResource{}, errors.New("Not a syscall.Stat_t")
 	}
 
-	uid := stat.Uid
-	gid := stat.Gid
-	u := strconv.FormatUint(uint64(uid), 10)
-	g := strconv.FormatUint(uint64(gid), 10)
-	usr, _ := user.LookupId(u)
-	group, _ := user.LookupGroupId(g)
 	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
 	inode := strconv.FormatUint(stat.Ino, 10)
+
+	uid := stat.Uid
+	gid := stat.Gid
+	username, err := utils.GetUserNameFromID(uid, UserFile)
+	if err != nil {
+		logp.Error(fmt.Errorf("failed to find username for uid %d, error - %+v", uid, err))
+	}
+
+	groupName, err := utils.GetGroupNameFromID(gid, GroupFile)
+	if err != nil {
+		logp.Error(fmt.Errorf("failed to find groupname for gid %d, error - %+v", gid, err))
+	}
 
 	data := FileSystemResource{
 		FileName: info.Name(),
 		FileMode: mod,
-		Uid:      usr.Name,
-		Gid:      group.Name,
+		Uid:      username,
+		Gid:      groupName,
 		Path:     path,
 		Inode:    inode,
 		SubType:  getFSSubType(info),

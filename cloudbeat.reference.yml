@@ -9,7 +9,7 @@
 
 cloudbeat:
   # Defines how often an event is sent to the output
-  period: 30s
+  period: 4h
   fetchers:
   - name: kube-api
   - name: process
