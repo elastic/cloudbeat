@@ -123,3 +123,28 @@ func TestKubeLeaseNoLeader(t *testing.T) {
 	assert.Error(t, err)
 	assert.False(t, result)
 }
+
+func TestKubeLeaseEmptyLeader(t *testing.T) {
+	t.Setenv("POD_NAME", "my_cloudbeat")
+
+	leases := v1.LeaseList{Items: []v1.Lease{
+		{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Lease",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "elastic-agent-cluster-leader",
+				Namespace: "kube-system",
+			},
+			Spec: v1.LeaseSpec{},
+		},
+	}}
+
+	client := k8sfake.NewSimpleClientset(&leases)
+	provider := NewLeaderLeaseProvider(context.TODO(), client)
+
+	result, err := provider.IsLeader()
+	assert.NotNil(t, err, "IsLeader disregards empty holder")
+	assert.False(t, result)
+}

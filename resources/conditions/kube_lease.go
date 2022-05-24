@@ -49,6 +49,10 @@ func (l *leaseProvider) IsLeader() (bool, error) {
 		return DefaultLeaderValue, fmt.Errorf("could not find lease %v: %s", DefaultLeaderLeaseName, err.Error())
 	}
 
+	if (lease.Spec.HolderIdentity == nil) {
+		return DefaultLeaderValue, fmt.Errorf("lease %v HolderIdentity is empty", DefaultLeaderLeaseName)
+	}
+
 	podId := lastPart(*lease.Spec.HolderIdentity)
 
 	return podId == l.currentPodID(), nil

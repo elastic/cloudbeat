@@ -64,8 +64,13 @@ func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Conf
 	}
 
 	for _, p := range parsedList {
-		c := fa.getConditions(p.name)
-		err := registry.Register(p.name, p.f, c...)
+		c, err := fa.getConditions(p.name)
+		if err != nil {
+			logp.L().Error("RegisterFetchers error in getConditions for factory %s skipping Register due to: %v", p.name, err)
+			continue
+		}
+
+		err = registry.Register(p.name, p.f, c...)
 		if err != nil {
 			logp.L().Errorf("could not read register fetcher: %v", err)
 		}
@@ -74,19 +79,23 @@ func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Conf
 	return nil
 }
 
-func (fa *factories) getConditions(name string) []fetching.Condition {
+// TODO: Move conditions to factories and implement inside every factory
+func (fa *factories) getConditions(name string) ([]fetching.Condition, error) {
 	c := make([]fetching.Condition, 0)
 	switch name {
 	case fetching.KubeAPIType:
+		// TODO: Use fetcher's kubeconfig configuration
 		client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
 		if err != nil {
+			logp.L().Error("getConditions error in GetKubernetesClient: %v", err)
+			return nil, err
+		} else {
 			leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
-			condition := conditions.NewLeaseFetcherCondition(leaseProvider)
-			c = append(c, condition)
+			c = append(c, conditions.NewLeaseFetcherCondition(leaseProvider))
 		}
 	}
 
-	return c
+	return c, nil
 }
 
 type ParsedFetcher struct {
