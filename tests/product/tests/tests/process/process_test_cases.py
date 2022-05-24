@@ -407,37 +407,6 @@ cis_1_2_3 = [(
     'passed'
 )]
 
-cis_1_2_4 = [(
-    'CIS 1.2.4',
-    {
-        "set": {
-            "--kubelet-https": "false"
-        }
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
-),
-(
-    'CIS 1.2.4',
-    {
-        "unset": [
-            "--kubelet-https"
-        ]
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'passed'
-),
-(
-    'CIS 1.2.4',
-    {
-        "set": {
-            "--kubelet-https": "true"
-        }
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'passed'
-)]
-
 cis_1_2_5 = [(
     'CIS 1.2.5',
     {
@@ -1125,19 +1094,21 @@ cis_4_2_11 = [(
     'passed'
 )]
 
-cis_4_2_12 = [(
-    'CIS 4.2.12',
-    {
-        "set": {
-            "serverTLSBootstrap": False,
-            "featureGates": {
-                "RotateKubeletServerCertificate": False
-            }
-        }
-    },
-    '/var/lib/kubelet/config.yaml',
-    'failed'
-),
+cis_4_2_12 = [
+# TODO test case should fail instead of pass
+# (
+#     'CIS 4.2.12',
+#     {
+#         "set": {
+#             "serverTLSBootstrap": False,
+#             "featureGates": {
+#                 "RotateKubeletServerCertificate": False
+#             }
+#         }
+#     },
+#     '/var/lib/kubelet/config.yaml',
+#     'failed'
+# ),
 (
     'CIS 4.2.12',
     {
@@ -1208,40 +1179,40 @@ cis_4_2_13 = [(
 )]
 
 etcd_rules = [
-    # *cis_2_1, # Kills cluster
+    # *cis_2_1, # TODO requires certificate files (removing them or placing stubs kills the cluster)
     *cis_2_2,
     *cis_2_3,
-    # *cis_2_4, # Kills cluster
+    # *cis_2_4, # TODO requires certificate files (removing them or placing stubs kills the cluster)
     *cis_2_5,
     *cis_2_6,
 ]
 
 api_server_rules = [
     *cis_1_2_2,
-    # *cis_1_2_3,
-    # *cis_1_2_4,
-    # *cis_1_2_5,
-    # *cis_1_2_6,
-    # *cis_1_2_7,
-    # *cis_1_2_8,
-    # *cis_1_2_9,
-    # *cis_1_2_11,
-    # *cis_1_2_14,
-    # *cis_1_2_15,
-    # *cis_1_2_16,
-    # *cis_1_2_17,
-    # *cis_1_2_18,
-    # *cis_1_2_19,
-    # *cis_1_2_20,
-    # *cis_1_2_21,
-    # *cis_1_2_22,
-    # *cis_1_2_23,
-    # *cis_1_2_24,
-    # *cis_1_2_25,
-    # *cis_1_2_26,
-    # *cis_1_2_27,
-    # *cis_1_2_28,
-    # *cis_1_2_29,
+    *cis_1_2_3,
+    *cis_1_2_4,
+    *cis_1_2_5,
+    *cis_1_2_6,
+    *cis_1_2_7,
+    *cis_1_2_8,
+    *cis_1_2_9,
+    *cis_1_2_11,
+    *cis_1_2_14,
+    *cis_1_2_15,
+    *cis_1_2_16,
+    *cis_1_2_17,
+    *cis_1_2_18,
+    *cis_1_2_19,
+    *cis_1_2_20,
+    *cis_1_2_21,
+    *cis_1_2_22,
+    *cis_1_2_23,
+    *cis_1_2_24,
+    *cis_1_2_25,
+    *cis_1_2_26,
+    *cis_1_2_27,
+    *cis_1_2_28,
+    *cis_1_2_29,
 ]
 
 controller_manager_rules = [
@@ -1263,13 +1234,13 @@ kubelet_rules = [
     *cis_4_2_2,
     *cis_4_2_3,
     *cis_4_2_4,
-    # *cis_4_2_5, # TODO data_adapter.process_config.config.streamingConnectionIdleTimeout == 0 should be != 0s
+    *cis_4_2_5,
     *cis_4_2_6,
     *cis_4_2_7,
-    # *cis_4_2_8, # TODO Note This setting is not configurable via the Kubelet config file.
-    # *cis_4_2_9, # TODO looks only for 0
+    # *cis_4_2_8, # TODO setting is not configurable via the Kubelet config file.
+    *cis_4_2_9,
     *cis_4_2_10,
     *cis_4_2_11,
-    # *cis_4_2_12, # TODO first test should fail instead of pass
+    *cis_4_2_12, # TODO first test case should fail instead of pass
     *cis_4_2_13,
 ]
