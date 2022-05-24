@@ -94,7 +94,7 @@ def test_kube_resource_patch(test_env, rule_tag, resource_type, resource_body, e
 
     evaluation = get_evaluation(
         k8s=k8s_client,
-        timeout=120,
+        timeout=agent_config.findings_timeout,
         pod_name=pods[0].metadata.name,
         namespace=agent_config.namespace,
         rule_tag=rule_tag,

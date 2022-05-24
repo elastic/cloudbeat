@@ -106,3 +106,9 @@ gen-report:
 
 run-tests:
   helm test cloudbeat-tests --namespace kube-system
+
+deploy-test-suite:
+    create-kind-cluster build-cloudbeat load-cloudbeat-image deploy-tests-helm
+
+deploy-test-suite-no-build:
+    create-kind-cluster load-cloudbeat-image deploy-tests-helm
