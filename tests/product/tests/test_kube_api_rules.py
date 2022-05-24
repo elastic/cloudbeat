@@ -10,22 +10,6 @@ from commonlib.utils import get_evaluation, get_resource_identifier
 from product.tests.kube_rules import *
 
 
-def todict(obj):
-    if hasattr(obj, 'attribute_map'):
-        result = {}
-        for k, v in getattr(obj, 'attribute_map').items():
-            val = getattr(obj, k)
-            if val is not None:
-                result[v] = todict(val)
-        return result
-    elif type(obj) == list:
-        return [todict(x) for x in obj]
-    elif type(obj) == datetime:
-        return str(obj)
-    else:
-        return obj
-
-
 @pytest.mark.rules
 @pytest.mark.parametrize(
     ("rule_tag", "resource_type", "resource_body", "expected"),
