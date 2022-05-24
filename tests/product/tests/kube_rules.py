@@ -1,18 +1,91 @@
 from product.tests.kube_test_case import KubeTestCase
 
-RULE_FAIL_STATUS = "failed"
-RULE_PASS_STATUS = "passed"
-TEST_POD_NAME = "busybox-pod"
-TEST_CONTAINER_NAME = "busybox"
-TEST_SERVICE_ACCOUNT_NAME = "test-service-account"
+RULE_FAIL_STATUS = 'failed'
+RULE_PASS_STATUS = 'passed'
+TEST_POD_NAME = 'busybox-pod'
+TEST_CONTAINER_NAME = 'busybox'
+TEST_ROLE_NAME = 'test-role'
+TEST_SERVICE_ACCOUNT_NAME = 'test-service-account'
+
+# CIS 5.1.3
+cis_5_1_3_role_fail = KubeTestCase(
+    rule_tag='CIS 5.1.3',
+    resource_type='Role',
+    resource_body={
+        'metadata': {'name': TEST_ROLE_NAME},
+        'rules': [
+            {
+                "apiGroups": ["*"],
+                "resources": ["*"],
+                "verbs": ["*"]
+            }
+        ]
+    },
+    expected=RULE_FAIL_STATUS
+)
+
+cis_5_1_3_role_pass = KubeTestCase(
+    rule_tag='CIS 5.1.3',
+    resource_type='Role',
+    resource_body={
+        'metadata': {'name': TEST_ROLE_NAME},
+        'rules': [
+            {
+                'apiGroups': [''],
+                'resources': ['pods'],
+                'verbs': ['get', 'watch', 'list']
+            }
+        ]
+    },
+    expected=RULE_PASS_STATUS
+)
+
+cis_5_1_3_cluster_role_fail = KubeTestCase(
+    rule_tag='CIS 5.1.3',
+    resource_type='ClusterRole',
+    resource_body={
+        'metadata': {'name': TEST_ROLE_NAME},
+        'rules': [
+            {
+                "apiGroups": ["*"],
+                "resources": ["*"],
+                "verbs": ["*"]
+            }
+        ]
+    },
+    expected=RULE_FAIL_STATUS
+)
+
+cis_5_1_3_cluster_role_pass = KubeTestCase(
+    rule_tag='CIS 5.1.3',
+    resource_type='ClusterRole',
+    resource_body={
+        'metadata': {'name': TEST_ROLE_NAME},
+        'rules': [
+            {
+                'apiGroups': [''],
+                'resources': ['pods'],
+                'verbs': ['get', 'watch', 'list']
+            }
+        ]
+    },
+    expected=RULE_PASS_STATUS
+)
+
+cis_5_1_3 = {
+    '5.1.3 Role with wildcards': cis_5_1_3_role_fail,
+    '5.1.3 Role with no wildcards': cis_5_1_3_role_pass,
+    '5.1.3 ClusterRole with wildcards': cis_5_1_3_cluster_role_fail,
+    '5.1.3 ClusterRole with no wildcards': cis_5_1_3_cluster_role_pass,
+}
 
 # CIS 5.1.5
 cis_5_1_5_pod_serviceAccount = KubeTestCase(
     rule_tag='CIS 5.1.5',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"serviceAccount": "default"}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'serviceAccount': 'default'}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -21,8 +94,8 @@ cis_5_1_5_pod_serviceAccountName = KubeTestCase(
     rule_tag='CIS 5.1.5',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"serviceAccountName": "default"}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'serviceAccountName': 'default'}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -31,8 +104,8 @@ cis_5_1_5_service_account = KubeTestCase(
     rule_tag='CIS 5.1.5',
     resource_type='ServiceAccount',
     resource_body={
-        "metadata": {"name": "default"},
-        "automountServiceAccountToken": True
+        'metadata': {'name': 'default'},
+        'automountServiceAccountToken': True
     },
     expected=RULE_FAIL_STATUS
 )
@@ -48,8 +121,8 @@ cis_5_1_6_pod_fail = KubeTestCase(
     rule_tag='CIS 5.1.6',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"automountServiceAccountToken": True}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'automountServiceAccountToken': True}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -58,8 +131,8 @@ cis_5_1_6_pod_pass = KubeTestCase(
     rule_tag='CIS 5.1.6',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"automountServiceAccountToken": False}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'automountServiceAccountToken': False}
     },
     expected=RULE_PASS_STATUS
 )
@@ -68,8 +141,8 @@ cis_5_1_6_service_account_fail = KubeTestCase(
     rule_tag='CIS 5.1.6',
     resource_type='ServiceAccount',
     resource_body={
-        "metadata": {"name": TEST_SERVICE_ACCOUNT_NAME},
-        "automountServiceAccountToken": True
+        'metadata': {'name': TEST_SERVICE_ACCOUNT_NAME},
+        'automountServiceAccountToken': True
     },
     expected=RULE_FAIL_STATUS
 )
@@ -78,8 +151,8 @@ cis_5_1_6_service_account_pass = KubeTestCase(
     rule_tag='CIS 5.1.6',
     resource_type='ServiceAccount',
     resource_body={
-        "metadata": {"name": TEST_SERVICE_ACCOUNT_NAME},
-        "automountServiceAccountToken": False
+        'metadata': {'name': TEST_SERVICE_ACCOUNT_NAME},
+        'automountServiceAccountToken': False
     },
     expected=RULE_PASS_STATUS
 )
@@ -96,8 +169,8 @@ cis_5_2_2_pod_fail = KubeTestCase(
     rule_tag='CIS 5.2.3',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"containers": [{"name": TEST_CONTAINER_NAME, "securityContext": {"privileged": True}}]}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'containers': [{'name': TEST_CONTAINER_NAME, 'securityContext': {'privileged': True}}]}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -106,8 +179,8 @@ cis_5_2_2_pod_pass = KubeTestCase(
     rule_tag='CIS 5.2.3',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"containers": [{"name": TEST_CONTAINER_NAME, "securityContext": {"privileged": False}}]}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'containers': [{'name': TEST_CONTAINER_NAME, 'securityContext': {'privileged': False}}]}
     },
     expected=RULE_PASS_STATUS
 )
@@ -122,8 +195,8 @@ cis_5_2_3_pod_fail = KubeTestCase(
     rule_tag='CIS 5.2.3',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"hostPID": True}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'hostPID': True}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -132,8 +205,8 @@ cis_5_2_3_pod_pass = KubeTestCase(
     rule_tag='CIS 5.2.3',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"hostPID": False}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'hostPID': False}
     },
     expected=RULE_PASS_STATUS
 )
@@ -148,8 +221,8 @@ cis_5_2_4_pod_fail = KubeTestCase(
     rule_tag='CIS 5.2.4',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"hostIPC": True}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'hostIPC': True}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -158,8 +231,8 @@ cis_5_2_4_pod_pass = KubeTestCase(
     rule_tag='CIS 5.2.4',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"hostIPC": False}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'hostIPC': False}
     },
     expected=RULE_PASS_STATUS
 )
@@ -174,8 +247,8 @@ cis_5_2_5_pod_fail = KubeTestCase(
     rule_tag='CIS 5.2.5',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"hostNetwork": True}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'hostNetwork': True}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -184,8 +257,8 @@ cis_5_2_5_pod_pass = KubeTestCase(
     rule_tag='CIS 5.2.5',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"hostNetwork": False}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'hostNetwork': False}
     },
     expected=RULE_PASS_STATUS
 )
@@ -200,8 +273,8 @@ cis_5_2_6_pod_fail = KubeTestCase(
     rule_tag='CIS 5.2.6',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"containers": [{"name": TEST_CONTAINER_NAME, "securityContext": {"allowPrivilegeEscalation": True}}]}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'containers': [{'name': TEST_CONTAINER_NAME, 'securityContext': {'allowPrivilegeEscalation': True}}]}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -210,8 +283,8 @@ cis_5_2_6_pod_pass = KubeTestCase(
     rule_tag='CIS 5.2.6',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"containers": [{"name": TEST_CONTAINER_NAME, "securityContext": {"allowPrivilegeEscalation": False}}]}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'containers': [{'name': TEST_CONTAINER_NAME, 'securityContext': {'allowPrivilegeEscalation': False}}]}
     },
     expected=RULE_PASS_STATUS
 )
@@ -226,8 +299,8 @@ cis_5_2_7_pod_fail = KubeTestCase(
     rule_tag='CIS 5.2.7',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"runAsUser": {"rule": "MustRunAs", "ranges": [{"min": 0, "max": 65535}]}}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'runAsUser': {'rule': 'MustRunAs', 'ranges': [{'min': 0, 'max': 65535}]}}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -236,8 +309,8 @@ cis_5_2_7_pod_pass = KubeTestCase(
     rule_tag='CIS 5.2.7',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"runAsUser": {"rule": "MustRunAs", "ranges": [{"min": 1, "max": 65535}]}}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'runAsUser': {'rule': 'MustRunAs', 'ranges': [{'min': 1, 'max': 65535}]}}
     },
     expected=RULE_PASS_STATUS
 )
@@ -246,8 +319,8 @@ cis_5_2_7_pod_container_fail = KubeTestCase(
     rule_tag='CIS 5.2.7',
     resource_type='Pod',
     resource_body={
-        "metadata": {"name": TEST_POD_NAME},
-        "spec": {"containers": [{"name": TEST_CONTAINER_NAME, "securityContext": {"runAsUser": 0}}]}
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'containers': [{'name': TEST_CONTAINER_NAME, 'securityContext': {'runAsUser': 0}}]}
     },
     expected=RULE_FAIL_STATUS
 )
@@ -256,4 +329,19 @@ cis_5_2_7 = {
     '5.2.7 Pod.spec.runAsUser allows root': cis_5_2_7_pod_fail,
     '5.2.7 Pod.spec.runAsUser forbids root': cis_5_2_7_pod_pass,
     '5.2.7 Pod.container.spec.securityContext.runAsUser == root': cis_5_2_7_pod_container_fail,
+}
+
+# CIS 5.2.8
+cis_5_2_8_pod_container_fail = KubeTestCase(
+    rule_tag='CIS 5.2.8',
+    resource_type='Pod',
+    resource_body={
+        'metadata': {'name': TEST_POD_NAME},
+        'spec': {'containers': [{'name': TEST_CONTAINER_NAME, 'securityContext': {'runAsUser': 0}}]}
+    },
+    expected=RULE_FAIL_STATUS
+)
+
+cis_5_2_8 = {
+    '5.2.8 Pod.container.spec.securityContext.runAsUser == root': cis_5_2_7_pod_container_fail,
 }
