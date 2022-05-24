@@ -9,7 +9,6 @@ import yaml
 import shutil
 from pathlib import Path
 from munch import Munch, munchify
-import time
 
 
 def get_logs_from_stream(stream: str) -> list[Munch]:
@@ -148,6 +147,32 @@ class FsClient:
         with current_resource.open(mode="w") as f:
             yaml.dump(r_file, f)
 
-        # Wait for process reboot
-        # TODO: Implement a more optimal way of waiting
-        time.sleep(60)
+    @staticmethod
+    def edit_config_file(container_name: str, dictionary, resource: str):
+        if container_name == '':
+            raise Exception(f"Unknown {container_name} is sent")
+
+        current_resource = Path(resource)
+        if not current_resource.is_file():
+            raise Exception(
+                f"File {resource} does not exist or mount missing.")
+
+        with current_resource.open() as f:
+            r_file = yaml.safe_load(f)
+
+        set_dict = dictionary.get("set", {})
+        unset_list = dictionary.get("unset", [])
+
+        r_file = { **r_file, **set_dict }
+        for uskey in unset_list:
+            keys = uskey.split('.')
+            key_to_del = keys.pop()
+            p = r_file
+            for key in keys:
+                p = p.get(key, None)
+                if p is None:
+                    break
+            if p:
+                del p[key_to_del]
+        with current_resource.open(mode="w") as f:
+            yaml.dump(r_file, f)
