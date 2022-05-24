@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,8 +38,10 @@ func TestFileFetcherFetchASingleFile(t *testing.T) {
 	cfg := FileFetcherConfig{
 		Patterns: filePaths,
 	}
+
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
+	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 
@@ -67,7 +70,9 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 		Patterns: paths,
 	}
 	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
+
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 
@@ -106,7 +111,9 @@ func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
 		Patterns: filePaths,
 	}
 	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
+
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 
@@ -139,7 +146,9 @@ func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
 		Patterns: path,
 	}
 	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
+
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 
@@ -179,7 +188,9 @@ func TestFileFetcherFetchDirectoryRecursively(t *testing.T) {
 		Patterns: path,
 	}
 	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
+
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
 	results, err := fileFetcher.Fetch(context.TODO())
 

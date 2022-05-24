@@ -65,19 +65,19 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 
 	log.Info("Config initiated.")
 
-	fetchersRegistry, err := InitRegistry(c)
+	fetchersRegistry, err := InitRegistry(log, c)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	data, err := manager.NewData(c.Period, time.Minute, fetchersRegistry)
+	data, err := manager.NewData(log, c.Period, time.Minute, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	eval, err := evaluator.NewOpaEvaluator(ctx)
+	eval, err := evaluator.NewOpaEvaluator(ctx, log)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -90,7 +90,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	cdp, err := transformer.NewCommonDataProvider(c)
+	cdp, err := transformer.NewCommonDataProvider(log, c)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -102,13 +102,13 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t := transformer.NewTransformer(ctx, eval, commonData, resultsIndex)
+	t := transformer.NewTransformer(ctx, log, eval, commonData, resultsIndex)
 
 	bt := &cloudbeat{
 		ctx:           ctx,
 		cancel:        cancel,
 		config:        c,
-		configUpdates: config.Updates(ctx),
+		configUpdates: config.Updates(ctx, log),
 		evaluator:     eval,
 		data:          data,
 		transformer:   t,
@@ -155,33 +155,33 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 
 		case update := <-bt.configUpdates:
 			if err := bt.config.Update(update); err != nil {
-				logp.L().Errorf("Could not update cloudbeat config: %v", err)
+				bt.log.Errorf("Could not update cloudbeat config: %v", err)
 				break
 			}
 
 			policies, err := csppolicies.CISKubernetes()
 			if err != nil {
-				logp.L().Errorf("Could not load CIS Kubernetes policies: %v", err)
+				bt.log.Errorf("Could not load CIS Kubernetes policies: %v", err)
 				break
 			}
 
 			if len(bt.config.Streams) == 0 {
-				logp.L().Infof("Did not receive any input stream, skipping.")
+				bt.log.Infof("Did not receive any input stream, skipping.")
 				break
 			}
 
 			y, err := bt.config.DataYaml()
 			if err != nil {
-				logp.L().Errorf("Could not marshal to YAML: %v", err)
+				bt.log.Errorf("Could not marshal to YAML: %v", err)
 				break
 			}
 
 			if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, y); err != nil {
-				logp.L().Errorf("Could not update bundle with dataYaml: %v", err)
+				bt.log.Errorf("Could not update bundle with dataYaml: %v", err)
 				break
 			}
 
-			logp.L().Infof("Bundle updated with dataYaml: %s", y)
+			bt.log.Infof("Bundle updated with dataYaml: %s", y)
 
 		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
@@ -195,12 +195,13 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 }
 
-func InitRegistry(c config.Config) (manager.FetchersRegistry, error) {
-	registry := manager.NewFetcherRegistry()
-	err := manager.Factories.RegisterFetchers(registry, c)
-	if err != nil {
+func InitRegistry(log *logp.Logger, c config.Config) (manager.FetchersRegistry, error) {
+	registry := manager.NewFetcherRegistry(log)
+
+	if err := manager.Factories.RegisterFetchers(log, registry, c); err != nil {
 		return nil, err
 	}
+
 	return registry, nil
 }
 

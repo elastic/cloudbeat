@@ -32,19 +32,21 @@ type IAMRolePermissionGetter interface {
 }
 
 type IAMProvider struct {
+	log    *logp.Logger
 	client *iam.Client
 }
 
-func NewIAMProvider(cfg aws.Config) *IAMProvider {
+func NewIAMProvider(log *logp.Logger, cfg aws.Config) *IAMProvider {
 	svc := iam.New(cfg)
 	return &IAMProvider{
+		log:    log,
 		client: svc,
 	}
 }
 
-func (provider IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName string) ([]iam.GetRolePolicyResponse, error) {
+func (p IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName string) ([]iam.GetRolePolicyResponse, error) {
 	results := make([]iam.GetRolePolicyResponse, 0)
-	policiesIdentifiers, err := provider.getAllRolePolicies(ctx, roleName)
+	policiesIdentifiers, err := p.getAllRolePolicies(ctx, roleName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)
 	}
@@ -54,10 +56,10 @@ func (provider IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName 
 			PolicyName: policyId.PolicyName,
 			RoleName:   &roleName,
 		}
-		req := provider.client.GetRolePolicyRequest(input)
+		req := p.client.GetRolePolicyRequest(input)
 		policy, err := req.Send(ctx)
 		if err != nil {
-			logp.Error(fmt.Errorf("failed to get policy %s - %w", *policyId.PolicyName, err))
+			p.log.Errorf("Failed to get policy %s: %v", *policyId.PolicyName, err)
 			continue
 		}
 		results = append(results, *policy)
@@ -66,11 +68,11 @@ func (provider IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName 
 	return results, nil
 }
 
-func (provider IAMProvider) getAllRolePolicies(ctx context.Context, roleName string) ([]iam.AttachedPolicy, error) {
+func (p IAMProvider) getAllRolePolicies(ctx context.Context, roleName string) ([]iam.AttachedPolicy, error) {
 	input := &iam.ListAttachedRolePoliciesInput{
 		RoleName: &roleName,
 	}
-	req := provider.client.ListAttachedRolePoliciesRequest(input)
+	req := p.client.ListAttachedRolePoliciesRequest(input)
 	allPolicies, err := req.Send(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)

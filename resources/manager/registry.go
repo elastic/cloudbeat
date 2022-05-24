@@ -34,6 +34,7 @@ type FetchersRegistry interface {
 }
 
 type fetchersRegistry struct {
+	log *logp.Logger
 	reg map[string]registeredFetcher
 }
 
@@ -42,15 +43,16 @@ type registeredFetcher struct {
 	c []fetching.Condition
 }
 
-func NewFetcherRegistry() FetchersRegistry {
+func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
 	return &fetchersRegistry{
+		log: log,
 		reg: make(map[string]registeredFetcher),
 	}
 }
 
 // Register registers a Fetcher implementation.
 func (r *fetchersRegistry) Register(key string, f fetching.Fetcher, c ...fetching.Condition) error {
-	logp.L().Infof("Registering new fetcher: %s", key)
+	r.log.Infof("Registering new fetcher: %s", key)
 	if _, ok := r.reg[key]; ok {
 		return fmt.Errorf("fetcher key collision: %q is already registered", key)
 	}
@@ -80,7 +82,7 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 
 	for _, condition := range registered.c {
 		if !condition.Condition() {
-			logp.L().Infof("Conditional fetcher %q should not run because %q", key, condition.Name())
+			r.log.Infof("Conditional fetcher %q should not run because %q", key, condition.Name())
 			return false
 		}
 	}
@@ -100,6 +102,6 @@ func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetching.Reso
 func (r *fetchersRegistry) Stop() {
 	for key, rfetcher := range r.reg {
 		rfetcher.f.Stop()
-		logp.L().Infof("Fetcher for key %q stopped", key)
+		r.log.Infof("Fetcher for key %q stopped", key)
 	}
 }

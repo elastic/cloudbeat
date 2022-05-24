@@ -21,8 +21,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"net/http"
+
+	"github.com/elastic/beats/v7/libbeat/logp"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/logging"
@@ -33,11 +34,12 @@ import (
 )
 
 type OpaEvaluator struct {
+	log          *logp.Logger
 	opa          *sdk.OPA
 	bundleServer *http.Server
 }
 
-func NewOpaEvaluator(ctx context.Context) (Evaluator, error) {
+func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
 	server, err := bundle.StartServer()
 	if err != nil {
 		return nil, err
@@ -59,6 +61,7 @@ func NewOpaEvaluator(ctx context.Context) (Evaluator, error) {
 	}
 
 	return &OpaEvaluator{
+		log:          log,
 		opa:          opa,
 		bundleServer: server,
 	}, nil
@@ -81,7 +84,7 @@ func (o *OpaEvaluator) Stop(ctx context.Context) {
 	o.opa.Stop(ctx)
 	err := o.bundleServer.Shutdown(ctx)
 	if err != nil {
-		logp.L().Errorf("Could not stop OPA evaluator: %v", err)
+		o.log.Errorf("Could not stop OPA evaluator: %v", err)
 	}
 }
 

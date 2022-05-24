@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -34,6 +35,10 @@ type ConfigTestSuite struct {
 }
 
 func TestConfigTestSuite(t *testing.T) {
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
 	suite.Run(t, new(ConfigTestSuite))
 }
 

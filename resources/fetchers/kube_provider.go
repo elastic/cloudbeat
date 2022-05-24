@@ -27,6 +27,7 @@ import (
 )
 
 type K8sResource struct {
+	log  *logp.Logger
 	Data interface{}
 }
 
@@ -36,8 +37,9 @@ const (
 	K8sObjType           = "k8s_object"
 )
 
-func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
-	logp.L().Info("Fetching Kubernetes data")
+func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher) []fetching.Resource {
+	log.Debug("Starting getKubeData")
+
 	ret := make([]fetching.Resource, 0)
 
 	for _, watcher := range watchers {
@@ -48,17 +50,17 @@ func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
 			resource, ok := r.(kubernetes.Resource)
 
 			if !ok {
-				logp.L().Errorf("Bad resource: %#v does not implement kubernetes.Resource", r)
+				log.Errorf("Bad resource: %#v does not implement kubernetes.Resource", r)
 				continue
 			}
 
 			err := addTypeInformationToKubeResource(resource)
 			if err != nil {
-				logp.L().Errorf("Bad resource: %w", err)
+				log.Errorf("Bad resource: %v", err)
 				continue
 			} // See https://github.com/kubernetes/kubernetes/issues/3030
 
-			ret = append(ret, K8sResource{resource})
+			ret = append(ret, K8sResource{log, resource})
 		}
 	}
 
@@ -71,32 +73,32 @@ func (r K8sResource) GetData() interface{} {
 
 func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
 	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
-	k8sObjMeta := getK8sObjectMeta(k8sObj)
+	k8sObjMeta := getK8sObjectMeta(r.log, k8sObj)
 	resourceID := k8sObjMeta.UID
 	resourceName := k8sObjMeta.Name
 
 	return fetching.ResourceMetadata{
 		ID:      string(resourceID),
 		Type:    K8sObjType,
-		SubType: getK8sSubType(k8sObj),
+		SubType: getK8sSubType(r.log, k8sObj),
 		Name:    resourceName,
 	}
 }
 
-func getK8sObjectMeta(k8sObj reflect.Value) metav1.ObjectMeta {
+func getK8sObjectMeta(log *logp.Logger, k8sObj reflect.Value) metav1.ObjectMeta {
 	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
 	if !ok {
-		logp.L().Errorf("failed to retrieve object metadata, Resource: %#v", k8sObj)
+		log.Errorf("Failed to retrieve object metadata, Resource: %#v", k8sObj)
 		return metav1.ObjectMeta{}
 	}
 
 	return metadata
 }
 
-func getK8sSubType(k8sObj reflect.Value) string {
+func getK8sSubType(log *logp.Logger, k8sObj reflect.Value) string {
 	typeMeta, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
 	if !ok {
-		logp.L().Errorf("failed to retrieve type metadata, Resource: %#v", k8sObj)
+		log.Errorf("Failed to retrieve type metadata, Resource: %#v", k8sObj)
 		return ""
 	}
 

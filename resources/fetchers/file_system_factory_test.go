@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/stretchr/testify/suite"
 )
@@ -28,10 +29,19 @@ import (
 type FileFactoryTestSuite struct {
 	suite.Suite
 	factory fetching.Factory
+
+	log *logp.Logger
 }
 
 func TestFileFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(FileFactoryTestSuite))
+	s := new(FileFactoryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_file_factory_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *FileFactoryTestSuite) SetupTest() {
@@ -59,7 +69,7 @@ patterns: [
 		cfg, err := common.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := s.factory.Create(cfg)
+		fetcher, err := s.factory.Create(s.log, cfg)
 		s.NoError(err)
 		s.NotNil(fetcher)
 
