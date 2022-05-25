@@ -30,6 +30,7 @@ import (
 // Data maintains a cache that is updated by Fetcher implementations registered
 // against it. It sends the cache to an output channel at the defined interval.
 type Data struct {
+	log      *logp.Logger
 	timeout  time.Duration
 	interval time.Duration
 	output   chan ResourceMap
@@ -48,8 +49,9 @@ type ResourceMap map[string][]fetching.Resource
 // NewData returns a new Data instance.
 // interval is the duration the manager wait between two consequtive cycles.
 // timeout is the maximum duration the manager wait for a single fetcher to return results.
-func NewData(interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
+func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
 	return &Data{
+		log:      log,
 		timeout:  timeout,
 		interval: interval,
 		fetchers: fetchers,
@@ -75,10 +77,10 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 	for {
 		select {
 		case <-d.stop:
-			logp.L().Info("fetchers manager stopped")
+			d.log.Info("Fetchers manager stopped.")
 			return
 		case <-ctx.Done():
-			logp.L().Info("fetchers manager canceled")
+			d.log.Info("Fetchers manager canceled.")
 			return
 		case <-time.After(d.interval):
 			d.fetchIteration(ctx)
@@ -89,7 +91,8 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 // fetchIteration waits for all the registered fetchers and sends all the resources on the output channel.
 // The function must not get called in parallel.
 func (d *Data) fetchIteration(ctx context.Context) {
-	logp.L().Infof("manager trigger fetching using %d fetchers", len(d.fetchers.Keys()))
+	d.log.Infof("Manager triggered fetching for %d fetchers", len(d.fetchers.Keys()))
+
 	d.wg = &sync.WaitGroup{}
 	mu := sync.Mutex{}
 	cycleData := make(ResourceMap)
@@ -101,9 +104,9 @@ func (d *Data) fetchIteration(ctx context.Context) {
 			defer d.wg.Done()
 			val, err := d.fetchSingle(ctx, k)
 			if err != nil {
-				logp.L().Errorf("error running fetcher for key %s: %v", k, err)
+				d.log.Errorf("Error running fetcher for key %s: %v", k, err)
 			} else if val != nil {
-				logp.L().Debugf("fetcher %s finished and found %d values", k, len(val))
+				d.log.Debugf("Fetcher %s finished and found %d values", k, len(val))
 				mu.Lock()
 				defer mu.Unlock()
 				cycleData[k] = val
@@ -112,7 +115,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 	}
 
 	d.wg.Wait()
-	logp.L().Infof("manager finished waiting and sending data after %d msecs", time.Since(start).Milliseconds())
+	d.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
 	d.output <- cycleData
 }
 

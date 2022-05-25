@@ -18,6 +18,7 @@
 package transformer
 
 import (
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -34,14 +35,16 @@ import (
 )
 
 var (
-	bgCtx      = context.Background()
-	cdProvider = CommonDataProvider{
-		kubeClient: k8sFake.NewSimpleClientset(),
-		cfg:        config.Config{},
-	}
+	bgCtx = context.Background()
 )
 
 func TestCommonDataProvider_FetchCommonData(t *testing.T) {
+	cdProvider := CommonDataProvider{
+		log:        logp.NewLogger("cloudbeat_common_data_provider_test"),
+		kubeClient: k8sFake.NewSimpleClientset(),
+		cfg:        config.Config{},
+	}
+
 	type args struct {
 		ctx context.Context
 	}
@@ -63,7 +66,7 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	adjustK8sCluster(t)
+	adjustK8sCluster(t, &cdProvider)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := cdProvider.FetchCommonData(tt.args.ctx)
@@ -137,7 +140,7 @@ func TestCommonData_GetResourceId(t *testing.T) {
 	}
 }
 
-func adjustK8sCluster(t *testing.T) {
+func adjustK8sCluster(t *testing.T, cdProvider *CommonDataProvider) {
 	// libbeat DiscoverKubernetesNode performs a fallback to environment variable NODE_NAME
 	os.Setenv("NODE_NAME", "testing_node")
 	//Need to add services

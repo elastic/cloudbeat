@@ -20,20 +20,31 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/service/eks"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type EksFetcherTestSuite struct {
 	suite.Suite
+
+	log *logp.Logger
 }
 
 func TestEksFetcherTestSuite(t *testing.T) {
-	suite.Run(t, new(EksFetcherTestSuite))
+	s := new(EksFetcherTestSuite)
+	s.log = logp.NewLogger("cloudbeat_eks_fetcher_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *EksFetcherTestSuite) SetupTest() {
@@ -61,6 +72,7 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 
 		eksProvider.EXPECT().DescribeCluster(mock.Anything, test.clusterName).Return(&test.clusterResponse, nil)
 		eksFetcher := EKSFetcher{
+			log:         s.log,
 			cfg:         eksConfig,
 			eksProvider: eksProvider,
 		}
@@ -85,6 +97,7 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	expectedErr := fmt.Errorf("my error")
 	eksProvider.EXPECT().DescribeCluster(mock.Anything, clusterName).Return(nil, expectedErr)
 	eksFetcher := EKSFetcher{
+		log:         s.log,
 		cfg:         eksConfig,
 		eksProvider: eksProvider,
 	}

@@ -19,7 +19,7 @@ package transformer
 
 import (
 	"context"
-	"fmt"
+
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
 
@@ -38,14 +38,15 @@ const (
 
 var uuid_namespace uuid.UUID = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
 
-func NewCommonDataProvider(cfg config.Config) (CommonDataProvider, error) {
+func NewCommonDataProvider(log *logp.Logger, cfg config.Config) (CommonDataProvider, error) {
 	KubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
-		logp.Error(fmt.Errorf("NewCommonDataProvider error in GetClient: %w", err))
+		log.Errorf("NewCommonDataProvider error in GetClient: %v", err)
 		return CommonDataProvider{}, err
 	}
 
 	return CommonDataProvider{
+		log:        log,
 		kubeClient: KubeClient,
 		cfg:        cfg,
 	}, nil
@@ -56,13 +57,13 @@ func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInte
 	cm := CommonData{}
 	ClusterId, err := c.getClusterId(ctx)
 	if err != nil {
-		logp.Error(fmt.Errorf("fetchCommonData error in getClusterId: %w", err))
+		c.log.Errorf("fetchCommonData error in getClusterId: %v", err)
 		return CommonData{}, err
 	}
 	cm.clusterId = ClusterId
 	NodeId, err := c.getNodeId(ctx)
 	if err != nil {
-		logp.Error(fmt.Errorf("fetchCommonData error in getNodeId: %w", err))
+		c.log.Errorf("fetchCommonData error in getNodeId: %v", err)
 		return CommonData{}, err
 	}
 	cm.nodeId = NodeId
@@ -72,7 +73,7 @@ func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInte
 func (c CommonDataProvider) getClusterId(ctx context.Context) (string, error) {
 	n, err := c.kubeClient.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 	if err != nil {
-		logp.Error(fmt.Errorf("getClusterId error in Namespaces get: %w", err))
+		c.log.Errorf("getClusterId error in Namespaces get: %v", err)
 		return "", err
 	}
 	return string(n.ObjectMeta.UID), nil
@@ -81,12 +82,12 @@ func (c CommonDataProvider) getClusterId(ctx context.Context) (string, error) {
 func (c CommonDataProvider) getNodeId(ctx context.Context) (string, error) {
 	nName, err := c.getNodeName()
 	if err != nil {
-		logp.Error(fmt.Errorf("getNodeId error in getNodeName: %w", err))
+		c.log.Errorf("getNodeId error in getNodeName: %v", err)
 		return "", err
 	}
 	n, err := c.kubeClient.CoreV1().Nodes().Get(ctx, nName, metav1.GetOptions{})
 	if err != nil {
-		logp.Error(fmt.Errorf("getClusterId error in Nodes get: %w", err))
+		c.log.Errorf("getClusterId error in Nodes get: %v", err)
 		return "", err
 	}
 	return string(n.ObjectMeta.UID), nil
@@ -101,9 +102,9 @@ func (c CommonDataProvider) getNodeName() (string, error) {
 		HostUtils:   &kubernetes.DefaultDiscoveryUtils{},
 	}
 
-	nName, err := kubernetes.DiscoverKubernetesNode(logp.L(), nd)
+	nName, err := kubernetes.DiscoverKubernetesNode(c.log, nd)
 	if err != nil {
-		logp.Error(fmt.Errorf("getNodeName error in DiscoverKubernetesNode: %w", err))
+		c.log.Errorf("getNodeName error in DiscoverKubernetesNode: %v", err)
 		return "", err
 	}
 
