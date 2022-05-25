@@ -32,13 +32,13 @@ cis_1_2_4 = [(
 cis_2_1 = [(
     'CIS 2.1',
     {
-        "unset": [
-            "--cert-file",
-            "--key-file"
-        ]
+        "set": {
+            "--cert-file": "/etc/kubernetes/pki/etcd/server.crt",
+            "--key-file": "/etc/kubernetes/pki/etcd/server.key"
+        }
     },
     '/etc/kubernetes/manifests/etcd.yaml',
-    'failed'
+    'passed'
 )]
 
 cis_2_2 = [(
@@ -106,13 +106,13 @@ cis_2_3 = [(
 cis_2_4 = [(
     'CIS 2.4',
     {
-        "unset": [
-            "--peer-cert-file",
-            "--peer-key-file"
-        ]
+        "set": {
+            "--peer-cert-file": "/etc/kubernetes/pki/etcd/peer.crt",
+            "--peer-key-file": "/etc/kubernetes/pki/etcd/peer.key"
+        }
     },
     '/etc/kubernetes/manifests/etcd.yaml',
-    'failed'
+    'passed'
 )]
 
 cis_2_5 = [(
@@ -1189,10 +1189,10 @@ cis_4_2_13 = [(
 )]
 
 etcd_rules = [
-    # *cis_2_1, # TODO requires certificate files (removing them or placing stubs kills the cluster)
+    *cis_2_1,
     *cis_2_2,
     *cis_2_3,
-    # *cis_2_4, # TODO requires certificate files (removing them or placing stubs kills the cluster)
+    *cis_2_4,
     *cis_2_5,
     *cis_2_6,
 ]
