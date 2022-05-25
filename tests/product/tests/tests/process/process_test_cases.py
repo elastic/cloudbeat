@@ -410,10 +410,10 @@ cis_1_2_3 = [(
 cis_1_2_5 = [(
     'CIS 1.2.5',
     {
-        "unset": [
-            "--kubelet-client-certificate",
-            "--kubelet-client-key",
-        ]
+        "set": {
+            "--kubelet-client-certificate": "/etc/kubernetes/pki/apiserver-kubelet-client.crt ",
+            "--kubelet-client-key": "/etc/kubernetes/pki/apiserver-kubelet-client.key"
+        }
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'passed'
@@ -443,38 +443,28 @@ cis_1_2_7 = [(
 (
     'CIS 1.2.7',
     {
-        "set": {
-            "--authorization-mode": "RBAC"
-        }
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'passed'
-),
-(
-    'CIS 1.2.7',
-    {
         "unset": [
             "--authorization-mode"
         ]
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
+),
+(
+    'CIS 1.2.7',
+    {
+        "set": {
+            "--authorization-mode": "Node,RBAC"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
 )]
 
 cis_1_2_8 = [(
     'CIS 1.2.8',
     {
         "set": {
-            "--authorization-mode": "Node,RBAC"
-        }
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'passed'
-),
-(
-    'CIS 1.2.8',
-    {
-        "set": {
             "--authorization-mode": "RBAC"
         }
     },
@@ -490,10 +480,9 @@ cis_1_2_8 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
-)]
-
-cis_1_2_9 = [(
-    'CIS 1.2.9',
+),
+(
+    'CIS 1.2.8',
     {
         "set": {
             "--authorization-mode": "Node,RBAC"
@@ -501,8 +490,9 @@ cis_1_2_9 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'passed'
-),
-(
+)]
+
+cis_1_2_9 = [(
     'CIS 1.2.9',
     {
         "set": {
@@ -521,6 +511,16 @@ cis_1_2_9 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
+),
+(
+    'CIS 1.2.9',
+    {
+        "set": {
+            "--authorization-mode": "Node,RBAC"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
 )]
 
 cis_1_2_11 = [(
@@ -542,19 +542,19 @@ cis_1_2_11 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'passed'
+),
+(
+    'CIS 1.2.11',
+    {
+        "set": {
+            "--enable-admission-plugins": "NodeRestriction"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
 )]
 
 cis_1_2_14 = [(
-    'CIS 1.2.14',
-    {
-        "unset": [
-            "--disable-admission-plugins"
-        ]
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
-),
-(
     'CIS 1.2.14',
     {
         "set": {
@@ -563,10 +563,9 @@ cis_1_2_14 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
-)]
-
-cis_1_2_15 = [(
-    'CIS 1.2.15',
+),
+(
+    'CIS 1.2.14',
     {
         "unset": [
             "--disable-admission-plugins"
@@ -574,13 +573,24 @@ cis_1_2_15 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
-),
-(
+)]
+
+cis_1_2_15 = [(
     'CIS 1.2.15',
     {
         "set": {
             "--disable-admission-plugins": "NamespaceLifecycle"
         }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'failed'
+),
+(
+    'CIS 1.2.15',
+    {
+        "unset": [
+            "--disable-admission-plugins"
+        ]
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
@@ -651,22 +661,22 @@ cis_1_2_18 = [(
 (
     'CIS 1.2.18',
     {
-        "unset": [
-            "--profiling"
-        ]
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
-),
-(
-    'CIS 1.2.18',
-    {
         "set": {
             "--profiling": "false"
         }
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'passed'
+),
+(
+    'CIS 1.2.18',
+    {
+        "unset": [
+            "--profiling"
+        ]
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'failed'
 )]
 
 cis_1_2_19 = [(
@@ -681,16 +691,6 @@ cis_1_2_19 = [(
 )]
 
 cis_1_2_20 = [(
-    'CIS 1.2.20',
-    {
-        "unset": [
-            "--audit-log-maxage"
-        ]
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
-),
-(
     'CIS 1.2.20',
     {
         "set": {
@@ -709,19 +709,19 @@ cis_1_2_20 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'passed'
-)]
-
-cis_1_2_21 = [(
-    'CIS 1.2.21',
+),
+(
+    'CIS 1.2.20',
     {
         "unset": [
-            "--audit-log-maxbackup"
+            "--audit-log-maxage"
         ]
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
-),
-(
+)]
+
+cis_1_2_21 = [(
     'CIS 1.2.21',
     {
         "set": {
@@ -740,19 +740,19 @@ cis_1_2_21 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'passed'
-)]
-
-cis_1_2_22 = [(
-    'CIS 1.2.22',
+),
+(
+    'CIS 1.2.21',
     {
         "unset": [
-            "--audit-log-maxsize"
+            "--audit-log-maxbackup"
         ]
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
-),
-(
+)]
+
+cis_1_2_22 = [(
     'CIS 1.2.22',
     {
         "set": {
@@ -771,6 +771,16 @@ cis_1_2_22 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'passed'
+),
+(
+    'CIS 1.2.22',
+    {
+        "unset": [
+            "--audit-log-maxsize"
+        ]
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'failed'
 )]
 
 cis_1_2_23 = [(
@@ -838,58 +848,58 @@ cis_1_2_24 = [(
 cis_1_2_25 = [(
     'CIS 1.2.25',
     {
-        "unset": [
-            "--service-account-key-file"
-        ]
+        "set": {
+            "--service-account-key-file": "/etc/kubernetes/pki/sa.pub"
+        }
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
+    'passed'
 )]
 
 cis_1_2_26 = [(
     'CIS 1.2.26',
     {
-        "unset": [
-            "--etcd-certfile",
-            "--etcd-keyfile"
-        ]
+        "set": {
+            "--etcd-certfile": "/etc/kubernetes/pki/apiserver-etcd-client.crt",
+            "--etcd-keyfile": "/etc/kubernetes/pki/apiserver-etcd-client.key"
+        }
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
+    'passed'
 )]
 
 cis_1_2_27 = [(
     'CIS 1.2.27',
     {
-        "unset": [
-            "--tls-cert-file",
-            "--tls-private-key-file"
-        ]
+        "set": {
+            "--tls-cert-file": "/etc/kubernetes/pki/apiserver.crt",
+            "--tls-private-key-file": "/etc/kubernetes/pki/apiserver.key"
+        }
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
+    'passed'
 )]
 
 cis_1_2_28 = [(
     'CIS 1.2.28',
     {
-        "unset": [
-            "--client-ca-file"
-        ]
+        "set": {
+            "--client-ca-file": "/etc/kubernetes/pki/ca.crt"
+        }
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
+    'passed'
 )]
 
 cis_1_2_29 = [(
     'CIS 1.2.29',
     {
-        "unset": [
-            "--etcd-cafile"
-        ]
+        "set": {
+            "--etcd-cafile": "/etc/kubernetes/pki/etcd/ca.crt"
+        }
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
+    'passed'
 )]
 
 cis_4_2_1 = [(
