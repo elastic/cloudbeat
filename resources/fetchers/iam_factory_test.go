@@ -18,18 +18,29 @@
 package fetchers
 
 import (
+	"testing"
+
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type IamFactoryTestSuite struct {
 	suite.Suite
+
+	log *logp.Logger
 }
 
 func TestIamFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(IamFactoryTestSuite))
+	s := new(IamFactoryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_iam_factory_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *IamFactoryTestSuite) SetupTest() {
@@ -49,7 +60,7 @@ name: aws-iam
 
 	for _, test := range tests {
 		iamProvider := &awslib.MockIAMRolePermissionGetter{}
-		factory := &IAMFactory{extraElements: func() (IAMExtraElements, error) {
+		factory := &IAMFactory{extraElements: func(log *logp.Logger) (IAMExtraElements, error) {
 			return IAMExtraElements{
 				iamProvider: iamProvider,
 			}, nil
@@ -58,7 +69,7 @@ name: aws-iam
 		cfg, err := common.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := factory.Create(cfg)
+		fetcher, err := factory.Create(s.log, cfg)
 		s.NoError(err)
 		s.NotNil(fetcher)
 

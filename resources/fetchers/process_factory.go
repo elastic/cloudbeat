@@ -18,11 +18,12 @@
 package fetchers
 
 import (
+	"os"
+
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
-	"os"
 )
 
 const (
@@ -36,20 +37,23 @@ func init() {
 	manager.Factories.ListFetcherFactory(ProcessType, &ProcessFactory{})
 }
 
-func (f *ProcessFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+func (f *ProcessFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+	log.Debug("Starting ProcessFactory.Create")
+
 	cfg := ProcessFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	logp.L().Infof("Process Fetcher created with the following config:"+
+	log.Infof("Process Fetcher created with the following config:"+
 		"\n Name: %s\nDirectory: %s\nRequiredProcesses: %s", cfg.Name, cfg.Directory, cfg.RequiredProcesses)
-	return f.CreateFrom(cfg)
+	return f.CreateFrom(log, cfg)
 }
 
-func (f *ProcessFactory) CreateFrom(cfg ProcessFetcherConfig) (fetching.Fetcher, error) {
+func (f *ProcessFactory) CreateFrom(log *logp.Logger, cfg ProcessFetcherConfig) (fetching.Fetcher, error) {
 	fe := &ProcessesFetcher{
+		log: log,
 		cfg: cfg,
 		Fs:  os.DirFS(cfg.Directory),
 	}

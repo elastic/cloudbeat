@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -79,15 +80,24 @@ func registerNFetchers(t *testing.T, reg FetchersRegistry, n int) {
 
 type RegistryTestSuite struct {
 	suite.Suite
+
+	log      *logp.Logger
 	registry FetchersRegistry
 }
 
-func TestExampleTestSuite(t *testing.T) {
-	suite.Run(t, new(RegistryTestSuite))
+func TestRegistryTestSuite(t *testing.T) {
+	s := new(RegistryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_registry_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *RegistryTestSuite) SetupTest() {
-	s.registry = NewFetcherRegistry()
+	s.registry = NewFetcherRegistry(s.log)
 }
 
 func (s *RegistryTestSuite) TestKeys() {
@@ -217,7 +227,7 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	}
 
 	for _, test := range tests {
-		s.registry = NewFetcherRegistry()
+		s.registry = NewFetcherRegistry(s.log)
 		f := newNumberFetcher(1)
 		err := s.registry.Register("some-key", f, test.conditions...)
 		s.NoError(err)

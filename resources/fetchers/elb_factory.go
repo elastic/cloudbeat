@@ -19,11 +19,12 @@ package fetchers
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"regexp"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -53,8 +54,9 @@ type elbExtraElements struct {
 	kubernetesClientGetter providers.KubernetesClientGetter
 }
 
-func (f *ELBFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	logp.L().Info("ELB factory has started")
+func (f *ELBFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+	log.Debug("Starting ELBFactory.Create")
+
 	cfg := ELBFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
@@ -65,7 +67,7 @@ func (f *ELBFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 		return nil, err
 	}
 
-	return f.CreateFrom(cfg, elements)
+	return f.CreateFrom(log, cfg, elements)
 }
 
 func getElbExtraElements() (elbExtraElements, error) {
@@ -84,7 +86,7 @@ func getElbExtraElements() (elbExtraElements, error) {
 	}, err
 }
 
-func (f *ELBFactory) CreateFrom(cfg ELBFetcherConfig, elements elbExtraElements) (fetching.Fetcher, error) {
+func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, elements elbExtraElements) (fetching.Fetcher, error) {
 	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, elements.awsConfig.Config.Region)
 	kubeClient, err := elements.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
@@ -92,6 +94,7 @@ func (f *ELBFactory) CreateFrom(cfg ELBFetcherConfig, elements elbExtraElements)
 	}
 
 	return &ELBFetcher{
+		log:             log,
 		elbProvider:     elements.balancerDescriber,
 		cfg:             cfg,
 		kubeClient:      kubeClient,

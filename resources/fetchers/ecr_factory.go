@@ -19,6 +19,8 @@ package fetchers
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/docker/distribution/context"
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
@@ -27,7 +29,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"regexp"
 )
 
 const (
@@ -49,8 +50,9 @@ type ecrExtraElements struct {
 	ecrRepoDescriber       awslib.EcrRepositoryDescriber
 }
 
-func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	logp.L().Info("ECR factory has started")
+func (f *ECRFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+	log.Debug("Starting ECRFactory.Create")
+
 	cfg := ECRFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
@@ -61,7 +63,7 @@ func (f *ECRFactory) Create(c *common.Config) (fetching.Fetcher, error) {
 		return nil, err
 	}
 
-	return f.CreateFrom(cfg, elements)
+	return f.CreateFrom(log, cfg, elements)
 }
 
 func getEcrExtraElements() (ecrExtraElements, error) {
@@ -84,7 +86,7 @@ func getEcrExtraElements() (ecrExtraElements, error) {
 	return extraElements, nil
 }
 
-func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig, elements ecrExtraElements) (fetching.Fetcher, error) {
+func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, elements ecrExtraElements) (fetching.Fetcher, error) {
 	ctx := context.Background()
 	identity, err := elements.identityProviderGetter.GetIdentity(ctx)
 	if err != nil {
@@ -98,6 +100,7 @@ func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig, elements ecrExtraElements)
 	}
 
 	fe := &ECRFetcher{
+		log:         log,
 		cfg:         cfg,
 		ecrProvider: elements.ecrRepoDescriber,
 		kubeClient:  kubeClient,

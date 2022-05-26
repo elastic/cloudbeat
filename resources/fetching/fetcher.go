@@ -21,11 +21,12 @@ import (
 	"context"
 
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/logp"
 )
 
 // Factory can create fetcher instances based on configuration
 type Factory interface {
-	Create(*common.Config) (Fetcher, error)
+	Create(*logp.Logger, *common.Config) (Fetcher, error)
 }
 
 // Fetcher represents a data fetcher.
