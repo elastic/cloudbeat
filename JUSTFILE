@@ -105,4 +105,8 @@ gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
 run-tests:
-  helm test cloudbeat-tests --namespace kube-system
+  helm test cloudbeat-tests --namespace kube-system --logs
+
+build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
+
+prepare-local-helm-cluster: create-kind-cluster build-cloudbeat load-cloudbeat-image deploy-local-tests-helm
