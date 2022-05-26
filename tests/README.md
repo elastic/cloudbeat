@@ -217,6 +217,10 @@ Current usage of test project is in the following ci flows:
   - deploy tests helm chart
   - execute product and integration cloudbeat tests
 
+<<<<<<< HEAD
 ## Licensing
+=======
+#### Licensing
+>>>>>>> e4e0c00 (Backport-example-1 (#183))
 
 Will be defined later.
