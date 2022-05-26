@@ -2,7 +2,7 @@ queue_rules:
   - name: default
     conditions:
       - check-success=Cloudbeat-CI / Integration Tests (pull_request)
-      - check-success=Cloudbeat-CI / Build (pull_request
+      - check-success=Cloudbeat-CI / Build (pull_request)
       - check-success=UnitTests / Unit Tests (pull_request)
 pull_request_rules:
   - name: self-assign PRs
@@ -70,7 +70,7 @@ pull_request_rules:
     conditions:
       - author=mergify[bot]
       - check-success=Cloudbeat-CI / Integration Tests (pull_request)
-      - check-success=Cloudbeat-CI / Build (pull_request
+      - check-success=Cloudbeat-CI / Build (pull_request)
       - check-success=UnitTests / Unit Tests (pull_request)
       - label=automation
       - files~=^\.mergify\.yml$
@@ -82,7 +82,7 @@ pull_request_rules:
   - name: automatic squash and merge with success checks and the files matching the regex ^.mergify.yml is modified.
     conditions:
       - check-success=Cloudbeat-CI / Integration Tests (pull_request)
-      - check-success=Cloudbeat-CI / Build (pull_request
+      - check-success=Cloudbeat-CI / Build (pull_request)
       - check-success=UnitTests / Unit Tests (pull_request)
       - label=automation
       - files~=^\.mergify\.yml$
