@@ -50,7 +50,7 @@ type Stream struct {
 }
 
 var DefaultConfig = Config{
-	Period: 10 * time.Second,
+	Period: 4 * time.Hour,
 }
 
 func New(cfg *common.Config) (Config, error) {

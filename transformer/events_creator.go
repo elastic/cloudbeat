@@ -19,7 +19,6 @@ package transformer
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -33,18 +32,20 @@ import (
 
 type Transformer struct {
 	context       context.Context
+	log           *logp.Logger
 	eval          evaluator.Evaluator
 	eventMetadata common.MapStr
 	events        []beat.Event
 	commonData    CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
+func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
 
 	return Transformer{
 		context:       ctx,
+		log:           log,
 		eval:          eval,
 		eventMetadata: eventMetadata,
 		events:        events,
@@ -64,8 +65,8 @@ func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, 
 func (c *Transformer) processEachResource(results []fetching.Resource, cycleMetadata CycleMetadata) {
 	for _, result := range results {
 		if err := c.createBeatEvents(result, cycleMetadata); err != nil {
-			logp.Error(fmt.Errorf("failed to create beat events for Cycle ID: %v, Error: %v",
-				cycleMetadata.CycleId, err))
+			c.log.Errorf("Failed to create beat events for Cycle ID: %v, error: %v",
+				cycleMetadata.CycleId, err)
 		}
 	}
 }
@@ -78,7 +79,7 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleM
 	result, err := c.eval.Decision(c.context, fetcherResult)
 
 	if err != nil {
-		logp.Error(fmt.Errorf("error running the policy: %w", err))
+		c.log.Errorf("Error running the policy: %v", err)
 		return err
 	}
 

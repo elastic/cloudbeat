@@ -20,8 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/utils"
 	"os"
-	"os/user"
 	"strconv"
 	"syscall"
 
@@ -35,6 +35,8 @@ const (
 	FSResourceType = "file"
 	FileSubType    = "file"
 	DirSubType     = "directory"
+	UserFile       = "/hostfs/etc/passwd"
+	GroupFile      = "/hostfs/etc/group"
 )
 
 type FileSystemResource struct {
@@ -51,6 +53,7 @@ type FileSystemResource struct {
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
 type FileSystemFetcher struct {
+	log *logp.Logger
 	cfg FileFetcherConfig
 }
 
@@ -60,19 +63,20 @@ type FileFetcherConfig struct {
 }
 
 func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("file fetcher starts to fetch data")
+	f.log.Debug("Starting FileSystemFetcher.Fetch")
+
 	results := make([]fetching.Resource, 0)
 
 	// Input files might contain glob pattern
 	for _, filePattern := range f.cfg.Patterns {
 		matchedFiles, err := Glob(filePattern)
 		if err != nil {
-			logp.Error(fmt.Errorf("failed to find matched glob for %s, error - %+v", filePattern, err))
+			f.log.Errorf("Failed to find matched glob for %s, error: %+v", filePattern, err)
 		}
 		for _, file := range matchedFiles {
 			resource, err := f.fetchSystemResource(file)
 			if err != nil {
-				logp.Err("Unable to fetch fileSystemResource for file: %v", file)
+				f.log.Errorf("Unable to fetch fileSystemResource for file %v", file)
 				continue
 			}
 			results = append(results, resource)
@@ -85,8 +89,7 @@ func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FileSystemReso
 
 	info, err := os.Stat(filePath)
 	if err != nil {
-		err := fmt.Errorf("failed to fetch %s, error - %+v", filePath, err)
-		return FileSystemResource{}, err
+		return FileSystemResource{}, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
 	}
 	resourceInfo, _ := FromFileInfo(info, filePath)
 
@@ -104,20 +107,26 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 		return FileSystemResource{}, errors.New("Not a syscall.Stat_t")
 	}
 
-	uid := stat.Uid
-	gid := stat.Gid
-	u := strconv.FormatUint(uint64(uid), 10)
-	g := strconv.FormatUint(uint64(gid), 10)
-	usr, _ := user.LookupId(u)
-	group, _ := user.LookupGroupId(g)
 	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
 	inode := strconv.FormatUint(stat.Ino, 10)
+
+	uid := stat.Uid
+	gid := stat.Gid
+	username, err := utils.GetUserNameFromID(uid, UserFile)
+	if err != nil {
+		logp.Error(fmt.Errorf("failed to find username for uid %d, error - %+v", uid, err))
+	}
+
+	groupName, err := utils.GetGroupNameFromID(gid, GroupFile)
+	if err != nil {
+		logp.Error(fmt.Errorf("failed to find groupname for gid %d, error - %+v", gid, err))
+	}
 
 	data := FileSystemResource{
 		FileName: info.Name(),
 		FileMode: mod,
-		Uid:      usr.Name,
-		Gid:      group.Name,
+		Uid:      username,
+		Gid:      groupName,
 		Path:     path,
 		Inode:    inode,
 		SubType:  getFSSubType(info),

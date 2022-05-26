@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -34,6 +35,10 @@ type ConfigTestSuite struct {
 }
 
 func TestConfigTestSuite(t *testing.T) {
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
 	suite.Run(t, new(ConfigTestSuite))
 }
 
@@ -298,5 +303,27 @@ activated_rules:
 		s.NoError(err)
 
 		s.Equal(strings.TrimSpace(test.expected), strings.TrimSpace(dy))
+	}
+}
+
+func (s *ConfigTestSuite) TestConfigPeriod() {
+	var tests = []struct {
+		config         string
+		expectedPeriod time.Duration
+	}{
+		{"", 4 * time.Hour},
+		{"period: 50s", 50 * time.Second},
+		{"period: 5m", 5 * time.Minute},
+		{"period: 2h", 2 * time.Hour},
+	}
+
+	for _, test := range tests {
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		c, err := New(cfg)
+		s.NoError(err)
+
+		s.Equal(test.expectedPeriod, c.Period)
 	}
 }

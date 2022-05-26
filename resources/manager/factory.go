@@ -20,6 +20,7 @@ package manager
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
@@ -42,37 +43,37 @@ func newFactories() factories {
 func (fa *factories) ListFetcherFactory(name string, f fetching.Factory) {
 	_, ok := fa.m[name]
 	if ok {
-		logp.L().Warnf("fetcher %q factory method overwritten", name)
+		panic(fmt.Errorf("fetcher factory with name %q listed more than once", name))
 	}
 
 	fa.m[name] = f
 }
 
-func (fa *factories) CreateFetcher(name string, c *common.Config) (fetching.Fetcher, error) {
+func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *common.Config) (fetching.Fetcher, error) {
 	factory, ok := fa.m[name]
 	if !ok {
 		return nil, errors.New("fetcher factory could not be found")
 	}
 
-	return factory.Create(c)
+	return factory.Create(log, c)
 }
 
-func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Config) error {
-	parsedList, err := fa.parseConfigFetchers(cfg)
+func (fa *factories) RegisterFetchers(log *logp.Logger, registry FetchersRegistry, cfg config.Config) error {
+	parsedList, err := fa.parseConfigFetchers(log, cfg)
 	if err != nil {
 		return err
 	}
 
 	for _, p := range parsedList {
-		c, err := fa.getConditions(p.name)
+		c, err := fa.getConditions(log, p.name)
 		if err != nil {
-			logp.L().Error("RegisterFetchers error in getConditions for factory %s skipping Register due to: %v", p.name, err)
+			log.Errorf("RegisterFetchers error in getConditions for factory %s skipping Register due to: %v", p.name, err)
 			continue
 		}
 
 		err = registry.Register(p.name, p.f, c...)
 		if err != nil {
-			logp.L().Errorf("could not read register fetcher: %v", err)
+			log.Errorf("Could not read register fetcher: %v", err)
 		}
 	}
 
@@ -80,18 +81,18 @@ func (fa *factories) RegisterFetchers(registry FetchersRegistry, cfg config.Conf
 }
 
 // TODO: Move conditions to factories and implement inside every factory
-func (fa *factories) getConditions(name string) ([]fetching.Condition, error) {
+func (fa *factories) getConditions(log *logp.Logger, name string) ([]fetching.Condition, error) {
 	c := make([]fetching.Condition, 0)
 	switch name {
 	case fetching.KubeAPIType:
 		// TODO: Use fetcher's kubeconfig configuration
 		client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
 		if err != nil {
-			logp.L().Error("getConditions error in GetKubernetesClient: %v", err)
+			log.Errorf("getConditions error in GetKubernetesClient: %v", err)
 			return nil, err
 		} else {
 			leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
-			c = append(c, conditions.NewLeaseFetcherCondition(leaseProvider))
+			c = append(c, conditions.NewLeaseFetcherCondition(log, leaseProvider))
 		}
 	}
 
@@ -103,10 +104,10 @@ type ParsedFetcher struct {
 	f    fetching.Fetcher
 }
 
-func (fa *factories) parseConfigFetchers(cfg config.Config) ([]*ParsedFetcher, error) {
+func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg config.Config) ([]*ParsedFetcher, error) {
 	arr := []*ParsedFetcher{}
 	for _, fcfg := range cfg.Fetchers {
-		p, err := fa.parseConfigFetcher(fcfg)
+		p, err := fa.parseConfigFetcher(log, fcfg)
 		if err != nil {
 			return nil, err
 		}
@@ -117,14 +118,14 @@ func (fa *factories) parseConfigFetchers(cfg config.Config) ([]*ParsedFetcher, e
 	return arr, nil
 }
 
-func (fa *factories) parseConfigFetcher(fcfg *common.Config) (*ParsedFetcher, error) {
+func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *common.Config) (*ParsedFetcher, error) {
 	gen := fetching.BaseFetcherConfig{}
 	err := fcfg.Unpack(&gen)
 	if err != nil {
 		return nil, err
 	}
 
-	f, err := fa.CreateFetcher(gen.Name, fcfg)
+	f, err := fa.CreateFetcher(log, gen.Name, fcfg)
 	if err != nil {
 		return nil, err
 	}
