@@ -29,6 +29,7 @@ from product.tests.tests.file_system.file_system_test_cases import *
      *cis_1_1_16,
      *cis_1_1_17,
      *cis_1_1_18,
+     *cis_1_1_19,
      *cis_4_1_1,
      *cis_4_1_2,
      *cis_4_1_5,
