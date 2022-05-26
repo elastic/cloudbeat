@@ -1,4 +1,4 @@
-# Cloudbeat Automated Tests Framework (C-ATF)
+## Cloudbeat Automated Tests Framework (C-ATF)
 > 
 
 This project provides an ability to develop component and integration tests for Cloudbeat.
