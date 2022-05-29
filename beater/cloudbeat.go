@@ -185,12 +185,16 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 
 		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
-			bt.log.Debugf("Cycle % has started", cycleId)
+			bt.log.Infof("Cycle %v has started", cycleId)
+
 			cycleMetadata := transformer.CycleMetadata{CycleId: cycleId}
 			// TODO: send events through a channel and publish them by a configured threshold & time
 			events := bt.transformer.ProcessAggregatedResources(fetchedResources, cycleMetadata)
+
+			bt.log.Infof("Publishing %d events to index", len(events))
 			bt.client.PublishAll(events)
-			bt.log.Debugf("Cycle % has ended", cycleId)
+
+			bt.log.Infof("Cycle %v has ended", cycleId)
 		}
 	}
 }
