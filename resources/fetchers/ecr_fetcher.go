@@ -20,24 +20,24 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"regexp"
-
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w]+)[:,@]?"
-const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?"
+//const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/)[:,@]?"
+
+const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
+const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
 
 type ECRFetcher struct {
-	cfg               ECRFetcherConfig
-	ecrProvider       awslib.EcrRepositoryDescriber
-	kubeClient        k8s.Interface
-	repoRegexMatchers []*regexp.Regexp
+	cfg                      ECRFetcherConfig
+	ecrProvider              awslib.EcrRepositoryDescriber
+	kubeClient               k8s.Interface
+	ECRRepositoriesExecutors []ECRExecutor
 }
 
 type ECRFetcherConfig struct {
@@ -56,42 +56,50 @@ func (f *ECRFetcher) Stop() {
 
 func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	logp.L().Debug("ecr fetcher starts to fetch data")
-	results := make([]fetching.Resource, 0)
-	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
+	podsAwsImages, err := f.getAwsPodImages(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 	}
-	ecrRepositories, err := f.ecrProvider.DescribeRepositories(ctx, podsAwsRepositories)
-	if err != nil {
-		return nil, fmt.Errorf("could retrieve ECR repositories: %w", err)
-	}
-
-	results = append(results, ECRResource{ecrRepositories})
-	return results, err
+	return f.GetRepositoriesEcrDescription(ctx, podsAwsImages), nil
 }
 
-func (f *ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error) {
+func (f *ECRFetcher) GetRepositoriesEcrDescription(ctx context.Context, podsAwsImages []string) []fetching.Resource {
+	results := make([]fetching.Resource, 0)
+	repositories := make([]ecr.Repository, 0)
+	for _, repositoriesExecutor := range f.ECRRepositoriesExecutors {
+		ecrRepositories, err := repositoriesExecutor.Execute(ctx, podsAwsImages)
+		if err != nil {
+			logp.Error(fmt.Errorf("could retrieve ECR repositories: %w", err))
+			continue
+		}
+		repositories = append(repositories, ecrRepositories...)
+	}
+	results = append(results, ECRResource{repositories})
+
+	return results
+}
+
+func (f *ECRFetcher) getAwsPodImages(ctx context.Context) ([]string, error) {
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
 		return nil, err
 	}
 
-	repositories := make([]string, 0)
+	images := make([]string, 0)
 	for _, pod := range podsList.Items {
 		for _, container := range pod.Spec.Containers {
 			image := container.Image
 			// Takes only aws images
-			for _, matcher := range f.repoRegexMatchers {
-				if matcher.MatchString(image) {
-					// Extract the repository name out of the image name
-					repository := matcher.FindStringSubmatch(image)[1]
-					repositories = append(repositories, repository)
+			for _, matcher := range f.ECRRepositoriesExecutors {
+				if matcher.IsValid(image) {
+					images = append(images, image)
+					break
 				}
 			}
 		}
 	}
-	return repositories, nil
+	return images, nil
 }
 
 func (res ECRResource) GetData() interface{} {
