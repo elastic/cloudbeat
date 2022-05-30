@@ -14,6 +14,7 @@ pipeline {
     ES_LOG_LEVEL = "${params.ES_LOG_LEVEL}"
     DOCKER_SECRET = 'secret/apm-team/ci/docker-registry/prod'
     DOCKER_REGISTRY = 'docker.elastic.co'
+    WORKFLOW = "${params.build_type}"
   }
   options {
     timeout(time: 2, unit: 'HOURS')
@@ -32,6 +33,7 @@ pipeline {
     booleanParam(name: 'test_ci', defaultValue: false, description: 'Enable test')
     booleanParam(name: 'release_ci', defaultValue: true, description: 'Enable build the release packages')
     booleanParam(name: 'its_ci', defaultValue: true, description: 'Enable async ITs')
+    choice(name: 'build_type', choices: ['snapshot', 'staging'], description: 'Choose Snapshot or Staging Build type(Default: Snapshot)')
     string(name: 'DIAGNOSTIC_INTERVAL', defaultValue: "0", description: 'Elasticsearch detailed logging every X seconds')
     string(name: 'ES_LOG_LEVEL', defaultValue: "error", description: 'Elasticsearch error level')
   }
@@ -148,7 +150,6 @@ pipeline {
           environment {
             PATH = "${env.PATH}:${env.WORKSPACE}/bin"
             HOME = "${env.WORKSPACE}"
-            SNAPSHOT = "true"
           }
           when {
             beforeAgent true
