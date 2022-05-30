@@ -55,7 +55,8 @@ func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evalua
 
 func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, cycleMetadata CycleMetadata) []beat.Event {
 	c.events = make([]beat.Event, 0)
-	for _, fetcherResults := range resources {
+	for key, fetcherResults := range resources {
+		c.log.Infof("Processing fetched data for resource key %s with %d resources", key, len(fetcherResults))
 		c.processEachResource(fetcherResults, cycleMetadata)
 	}
 
@@ -77,16 +78,19 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleM
 	fetcherResult := fetching.Result{Type: resMetadata.Type, Resource: fetchedResource.GetData()}
 
 	result, err := c.eval.Decision(c.context, fetcherResult)
-
 	if err != nil {
 		c.log.Errorf("Error running the policy: %v", err)
 		return err
 	}
 
+	c.log.Debugf("Eval decision for input: %v -- %v", fetcherResult, result)
+
 	findings, err := c.eval.Decode(result)
 	if err != nil {
 		return err
 	}
+
+	c.log.Debugf("Created %d findings for input: %v", len(findings), fetcherResult)
 
 	timestamp := time.Now()
 	resource := fetching.ResourceFields{
@@ -110,5 +114,7 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleM
 
 		c.events = append(c.events, event)
 	}
+
+	c.log.Debugf("Created %d events for input: %v", len(c.events), fetcherResult)
 	return nil
 }
