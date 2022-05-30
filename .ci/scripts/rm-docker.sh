@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 IMAGE="docker.elastic.co/infra/release-manager:latest"
-WORKFLOW="snapshot"
-# Hardcoded until we determine on our release candidate/release branch structure.
-
 # Allow other users write access to create checksum files
 chmod -R 777 build/distributions 
 
