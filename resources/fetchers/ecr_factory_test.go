@@ -50,8 +50,8 @@ name: aws-ecr
 			"us1-east",
 			"my-account",
 			[]string{
-				"^my-account\\.dkr\\.ecr\\.us1-east\\.amazonaws\\.com\\/([-\\w]+)[:,@]?",
-				"public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?",
+				"^my-account\\.dkr\\.ecr\\.us1-east\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?",
+				"public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?",
 			},
 		},
 	}
@@ -74,14 +74,16 @@ name: aws-ecr
 		awsconfigProvider.EXPECT().GetConfig().Return(awsConfig)
 
 		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
+		ecrPublicProvider := &awslib.MockedEcrRepositoryDescriber{}
 
 		factory := &ECRFactory{
 			extraElements: func() (ecrExtraElements, error) {
 				return ecrExtraElements{
-					awsConfig:              awsConfig,
-					kubernetesClientGetter: mockedKubernetesClientGetter,
-					identityProviderGetter: identityProvider,
-					ecrRepoDescriber:       ecrProvider,
+					awsConfig:               awsConfig,
+					kubernetesClientGetter:  mockedKubernetesClientGetter,
+					identityProviderGetter:  identityProvider,
+					ecrPrivateRepoDescriber: ecrProvider,
+					ecrPublicRepoDescriber:  ecrPublicProvider,
 				}, nil
 			},
 		}
@@ -95,9 +97,10 @@ name: aws-ecr
 
 		ecrFetcher, ok := fetcher.(*ECRFetcher)
 		s.True(ok)
-		s.Equal(ecrProvider, ecrFetcher.ecrProvider)
+		s.Equal(ecrProvider, ecrFetcher.ECRRepositoriesExecutors[0].handler)
+		s.Equal(ecrPublicProvider, ecrFetcher.ECRRepositoriesExecutors[1].handler)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
-		s.Equal(test.expectedRegex[0], ecrFetcher.repoRegexMatchers[0].String())
-		s.Equal(test.expectedRegex[1], ecrFetcher.repoRegexMatchers[1].String())
+		s.Equal(test.expectedRegex[0], ecrFetcher.ECRRepositoriesExecutors[0].regexValidator.String())
+		s.Equal(test.expectedRegex[1], ecrFetcher.ECRRepositoriesExecutors[1].regexValidator.String())
 	}
 }

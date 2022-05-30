@@ -228,7 +228,6 @@ func (s *ECRFetcherTestSuite) TestFetcherFetch() {
 
 		ecrFetcher := ECRFetcher{
 			cfg:                      ECRFetcherConfig{},
-			ecrProvider:              ecrProvider,
 			kubeClient:               kubeclient,
 			ECRRepositoriesExecutors: []ECRExecutor{privateEcrExecutor, publicEcrExecutor},
 		}
@@ -316,7 +315,6 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 
 		ecrFetcher := ECRFetcher{
 			cfg:                      ECRFetcherConfig{},
-			ecrProvider:              ecrProvider,
 			kubeClient:               kubeclient,
 			ECRRepositoriesExecutors: []ECRExecutor{privateEcrExecutor, publicEcrExecutor},
 		}

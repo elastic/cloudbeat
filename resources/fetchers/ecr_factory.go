@@ -110,9 +110,8 @@ func (f *ECRFactory) CreateFrom(cfg ECRFetcherConfig, elements ecrExtraElements)
 	}
 
 	fe := &ECRFetcher{
-		cfg:         cfg,
-		ecrProvider: elements.ecrPrivateRepoDescriber,
-		kubeClient:  kubeClient,
+		cfg:        cfg,
+		kubeClient: kubeClient,
 		ECRRepositoriesExecutors: []ECRExecutor{
 			privateECRExecutor,
 			publicECRExecutor,
