@@ -150,7 +150,6 @@ pipeline {
           environment {
             PATH = "${env.PATH}:${env.WORKSPACE}/bin"
             HOME = "${env.WORKSPACE}"
-            // SNAPSHOT = "true"
           }
           when {
             beforeAgent true
