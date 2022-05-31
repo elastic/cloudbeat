@@ -132,6 +132,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 	defer b.Manager.Stop()
 
+	// Wait for Fleet-side reconfiguration only if cloudbeat is running in Agent-managed mode.
 	if b.Manager.Enabled() {
 		bt.log.Infof("Waiting for initial reconfiguration from Fleet server...")
 		update, err := bt.reconfigureWait(reconfigureWaitTimeout)
@@ -176,7 +177,8 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 
 		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
-			bt.log.Infof("Cycle %v has started", cycleId)
+			cycleStart := time.Now()
+			bt.log.Infof("Eval cycle %v has started", cycleId)
 
 			cycleMetadata := transformer.CycleMetadata{CycleId: cycleId}
 			// TODO: send events through a channel and publish them by a configured threshold & time
@@ -185,7 +187,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 			bt.log.Infof("Publishing %d events to index", len(events))
 			bt.client.PublishAll(events)
 
-			bt.log.Infof("Cycle %v has ended", cycleId)
+			bt.log.Infof("Eval cycle %v published %d events after %s", cycleId, len(events), time.Since(cycleStart))
 		}
 	}
 }
@@ -194,13 +196,16 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 // discarding them until the incoming config contains the necessary information to start cloudbeat
 // properly, thereafter returning the valid config.
 func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*common.Config, error) {
-	rctx, cancel := context.WithTimeout(bt.ctx, timeout)
-	defer cancel()
+	start := time.Now()
+	timer := time.After(timeout)
 
 	for {
 		select {
-		case <-rctx.Done():
+		case <-bt.ctx.Done():
 			return nil, fmt.Errorf("cancelled via context")
+
+		case <-timer:
+			return nil, fmt.Errorf("timed out waiting for reconfiguration")
 
 		case update, ok := <-bt.configUpdates:
 			if !ok {
@@ -223,6 +228,7 @@ func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*common.Config, err
 				continue
 			}
 
+			bt.log.Infof("Received valid reconfiguration after waiting for %s", time.Since(start))
 			return update, nil
 		}
 	}
