@@ -8,7 +8,8 @@ export TYPES="tar.gz"
 
 if [ $WORKFLOW = "staging" ] ; then
     make release-manager-release
-else 
+else
+    export SNAPSHOT="true"
     make release-manager-snapshot
 fi
 
