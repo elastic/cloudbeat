@@ -28,6 +28,7 @@ import (
 )
 
 type IAMFetcher struct {
+	log         *logp.Logger
 	iamProvider awslib.IAMRolePermissionGetter
 	cfg         IAMFetcherConfig
 }
