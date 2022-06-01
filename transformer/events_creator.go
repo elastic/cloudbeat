@@ -34,18 +34,18 @@ type Transformer struct {
 	log           *logp.Logger
 	eval          evaluator.Evaluator
 	eventMetadata common.MapStr
-	events        Events
+	events        chan beat.Event
 	commonData    CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evaluator, events Events, commonData CommonDataInterface, index string) Transformer {
+func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evaluator, eventsCh chan beat.Event, commonData CommonDataInterface, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 
 	return Transformer{
 		context:       ctx,
 		log:           log,
 		eval:          eval,
-		events:        events,
+		events:        eventsCh,
 		eventMetadata: eventMetadata,
 		commonData:    commonData,
 	}
@@ -112,7 +112,7 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleM
 			},
 		}
 
-		c.events.Data <- event
+		c.events <- event
 	}
 
 	return nil

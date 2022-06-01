@@ -97,6 +97,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 	start := time.Now()
 
 	cycleId, _ := uuid.NewV4()
+	cycleMetadata := fetching.CycleMetadata{CycleId: cycleId}
 	d.log.Infof("Cycle % has started", cycleId)
 
 	for _, key := range d.fetchers.Keys() {
@@ -112,10 +113,8 @@ func (d *Data) fetchIteration(ctx context.Context) {
 				defer mu.Unlock()
 
 				resInfo := fetching.ResourcesInfo{
-					Resources: vals,
-					CycleMetadata: fetching.CycleMetadata{
-						CycleId: cycleId,
-					},
+					Resources:     vals,
+					CycleMetadata: cycleMetadata,
 				}
 
 				d.output <- resInfo
