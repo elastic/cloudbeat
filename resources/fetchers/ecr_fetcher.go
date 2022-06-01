@@ -27,8 +27,6 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-//const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/)[:,@]?"
-
 const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
 const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
 
