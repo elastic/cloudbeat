@@ -1,0 +1,59 @@
+metadata:
+  id: d44fc5e7-7275-5d07-88a7-f1f8fc2f73c2
+  name: Ensure that the admission control plugin EventRateLimit is set (Manual)
+  profile_applicability: |
+    • Level 1 - Master Node
+  description: |
+    Limit the rate at which the API server accepts requests.
+  rationale: >
+    Using `EventRateLimit` admission control enforces a limit on the number of events that the
+
+    API Server will accept in a given time slice. A misbehaving workload could overwhelm and
+
+    DoS the API Server, making it unavailable. This particularly applies to a multi-tenant
+
+    cluster, where there might be a small percentage of misbehaving tenants which could have
+
+    a significant impact on the performance of the cluster overall. Hence, it is recommended to
+
+    limit the rate of events that the API server will accept.
+
+    Note: This is an Alpha feature in the Kubernetes 1.15 release.
+  audit: >
+    Run the following command on the Control Plane node:
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+    Verify that the `--enable-admission-plugins` argument is set to a value that includes `EventRateLimit`.
+  remediation: >
+    Follow the Kubernetes documentation and set the desired limits in a
+    configuration file.
+
+    Then, edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    
+    and set the below parameters.
+    ```
+    --enable-admission-plugins=...,EventRateLimit,...
+
+    --admission-control-config-file=<path/to/configuration/file>
+    ```
+  impact: |
+    You need to carefully tune in limits as per your environment.
+  default_value: |
+    By default, `EventRateLimit` is not set.
+  references: |
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/admission-controllers/#eventratelimit
+    3. https://github.com/staebler/community/blob/9873b632f4d99b5d99c38c9b15fe2f
+    8b93d0a746/contributors/design-
+    proposals/admission_control_event_rate_limit.md
+  section: API Server
+  version: "1.0"
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.2.10
+    - API Server
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.0
