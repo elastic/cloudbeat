@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/gofrs/uuid"
 )
 
 type IAMFetcher struct {
@@ -60,11 +61,11 @@ func (r IAMResource) GetData() interface{} {
 }
 
 func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
-	//TODO implement me
+	uid, _ := uuid.NewV4()
 	return fetching.ResourceMetadata{
-		ID:      "",
-		Type:    "",
-		SubType: "",
+		ID:      uid.String(),
+		Type:    IAMType,
+		SubType: IAMType,
 		Name:    "",
 	}
 }
