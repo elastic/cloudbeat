@@ -181,13 +181,15 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 			}
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
 		case <-time.Tick(flushInterval * time.Second):
-			logp.L().Infof("Publish cloudbeat events to elasticsearch after %d seconds", flushInterval)
-			bt.client.PublishAll(eventsToSend)
-			eventsToSend = nil
+			if len(eventsToSend) > 0 {
+				logp.L().Infof("Publish cloudbeat events to elasticsearch after %d seconds", flushInterval)
+				bt.client.PublishAll(eventsToSend)
+				eventsToSend = nil
+			}
 		// Flush events to ES when reaching a certain limit
 		case event := <-bt.eventsCh:
 			eventsToSend = append(eventsToSend, event)
-			if len(eventsToSend) == eventsThreshold {
+			if len(eventsToSend) >= eventsThreshold {
 				logp.L().Infof("Publish to elasticsearch - capacity reached to %d events", eventsThreshold)
 				bt.client.PublishAll(eventsToSend)
 				eventsToSend = nil

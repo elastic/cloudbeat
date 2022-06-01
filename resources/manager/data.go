@@ -34,7 +34,7 @@ type Data struct {
 	log      *logp.Logger
 	timeout  time.Duration
 	interval time.Duration
-	output   chan fetching.ResourcesInfo
+	output   chan fetching.ResourceInfo
 	fetchers FetchersRegistry
 	wg       *sync.WaitGroup
 	stop     chan struct{}
@@ -54,13 +54,13 @@ func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fe
 		timeout:  timeout,
 		interval: interval,
 		fetchers: fetchers,
-		output:   make(chan fetching.ResourcesInfo),
+		output:   make(chan fetching.ResourceInfo),
 		stop:     make(chan struct{}),
 	}, nil
 }
 
 // Output returns the output channel.
-func (d *Data) Output() <-chan fetching.ResourcesInfo {
+func (d *Data) Output() <-chan fetching.ResourceInfo {
 	return d.output
 }
 
@@ -93,75 +93,61 @@ func (d *Data) fetchIteration(ctx context.Context) {
 	d.log.Infof("Manager triggered fetching for %d fetchers", len(d.fetchers.Keys()))
 
 	d.wg = &sync.WaitGroup{}
-	mu := sync.Mutex{}
 	start := time.Now()
 
 	cycleId, _ := uuid.NewV4()
 	cycleMetadata := fetching.CycleMetadata{CycleId: cycleId}
-	d.log.Infof("Cycle % has started", cycleId)
+	d.log.Infof("Cycle %s has started", cycleId.String())
 
 	for _, key := range d.fetchers.Keys() {
 		d.wg.Add(1)
 		go func(k string) {
 			defer d.wg.Done()
-			vals, err := d.fetchSingle(ctx, k)
+			err := d.fetchSingle(ctx, k, cycleMetadata)
 			if err != nil {
 				d.log.Errorf("Error running fetcher for key %s: %v", k, err)
-			} else if vals != nil {
-				d.log.Debugf("Fetcher %s finished and found %d values", k, len(vals))
-				mu.Lock()
-				defer mu.Unlock()
-
-				resInfo := fetching.ResourcesInfo{
-					Resources:     vals,
-					CycleMetadata: cycleMetadata,
-				}
-
-				d.output <- resInfo
 			}
 		}(key)
 	}
 
 	d.wg.Wait()
 	d.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
-	d.log.Infof("Cycle % has ended", cycleId)
+	d.log.Infof("Cycle %s has ended", cycleId.String())
 }
 
-func (d *Data) fetchSingle(ctx context.Context, k string) ([]fetching.Resource, error) {
+func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching.CycleMetadata) error {
 	if !d.fetchers.ShouldRun(k) {
-		return nil, nil
+		return nil
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, d.timeout)
 	defer cancel()
 
 	// The buffer is required to avoid go-routine leaks in a case a fetcher timed out
-	result := make(chan fetcherResult, 1)
+	errCh := make(chan error, 1)
 
 	go func() {
-		val, err := d.fetchProtected(ctx, k)
-		result <- fetcherResult{val, err}
-		close(result)
+		errCh <- d.fetchProtected(ctx, k, cycleMetadata)
+		close(errCh)
 	}()
 
 	select {
 	case <-ctx.Done():
-		return nil, fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
-	case res := <-result:
-		return res.resources, res.err
+		return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
+	case err := <-errCh:
+		return err
 	}
 }
 
 // fetchProtected protect the fetching goroutine from getting panic
-func (d *Data) fetchProtected(ctx context.Context, k string) (val []fetching.Resource, err error) {
+func (d *Data) fetchProtected(ctx context.Context, k string, metadata fetching.CycleMetadata) error {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("fetcher %s recovered from panic: %v", k, r)
+			fmt.Errorf("fetcher %s recovered from panic: %v", k, r)
 		}
 	}()
 
-	val, err = d.fetchers.Run(ctx, k)
-	return val, err
+	return d.fetchers.Run(ctx, k, d.output, metadata)
 }
 
 // Stop cleans up Data resources gracefully.

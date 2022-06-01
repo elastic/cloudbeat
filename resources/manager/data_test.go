@@ -38,7 +38,7 @@ func newDelayFetcher(delay time.Duration) fetching.Fetcher {
 	return &DelayFetcher{delay, false}
 }
 
-func (f *DelayFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *DelayFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
 	select {
 	case <-ctx.Done():
 		return nil, fmt.Errorf("reached timeout")
@@ -60,7 +60,7 @@ func newPanicFetcher(message string) fetching.Fetcher {
 	return &PanicFetcher{message, false}
 }
 
-func (f *PanicFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *PanicFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
 	panic(f.message)
 }
 

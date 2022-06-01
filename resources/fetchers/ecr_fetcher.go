@@ -56,21 +56,24 @@ type ECRResource struct {
 func (f *ECRFetcher) Stop() {
 }
 
-func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *ECRFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ECRFetcher.Fetch")
 
-	results := make([]fetching.Resource, 0)
 	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
+		return fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 	}
 	ecrRepositories, err := f.ecrProvider.DescribeRepositories(ctx, podsAwsRepositories)
 	if err != nil {
-		return nil, fmt.Errorf("could retrieve ECR repositories: %w", err)
+		return fmt.Errorf("could retrieve ECR repositories: %w", err)
 	}
 
-	results = append(results, ECRResource{ecrRepositories})
-	return results, err
+	resCh <- fetching.ResourceInfo{
+		Resource:      ECRResource{ecrRepositories},
+		CycleMetadata: cMetadata,
+	}
+
+	return err
 }
 
 func (f *ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error) {

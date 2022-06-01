@@ -41,7 +41,7 @@ func newNumberFetcher(num int) fetching.Fetcher {
 	return &numberFetcher{num, false}
 }
 
-func (f *numberFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *numberFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
 	return fetchValue(f.num), nil
 }
 
@@ -151,7 +151,7 @@ func (s *RegistryTestSuite) TestRunNotRegistered() {
 	err := s.registry.Register("some-key", f)
 	s.NoError(err)
 
-	arr, err := s.registry.Run(context.TODO(), "unknown")
+	arr, err := s.registry.Run(context.TODO(), "unknown", nil)
 	s.Error(err)
 	s.Empty(arr)
 }
@@ -185,7 +185,7 @@ func (s *RegistryTestSuite) TestRunRegistered() {
 	}
 
 	for _, test := range tests {
-		arr, err := s.registry.Run(context.TODO(), test.key)
+		arr, err := s.registry.Run(context.TODO(), test.key, nil)
 		s.NoError(err)
 		s.Equal(1, len(arr))
 		s.Equal(test.res, arr[0])

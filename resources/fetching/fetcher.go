@@ -32,7 +32,7 @@ type Factory interface {
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {
-	Fetch(context.Context) ([]Resource, error)
+	Fetch(context.Context, chan<- ResourceInfo, CycleMetadata) error
 	Stop()
 }
 
@@ -41,8 +41,8 @@ type Condition interface {
 	Name() string
 }
 
-type ResourcesInfo struct {
-	Resources []Resource
+type ResourceInfo struct {
+	Resource
 	CycleMetadata
 }
 

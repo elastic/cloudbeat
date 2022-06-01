@@ -43,7 +43,7 @@ func TestFileFetcherFetchASingleFile(t *testing.T) {
 	factory := FileSystemFactory{}
 	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
+	_ := fileFetcher.Fetch(context.TODO(), nil)
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
 	assert.Equal(t, 1, len(results))
@@ -74,7 +74,7 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
+	_ := fileFetcher.Fetch(context.TODO(), nil)
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
 	assert.Equal(t, 2, len(results))
@@ -115,7 +115,7 @@ func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
+	_ := fileFetcher.Fetch(context.TODO(), nil)
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
 	assert.Equal(t, 1, len(results))
@@ -150,7 +150,7 @@ func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
+	_ := fileFetcher.Fetch(context.TODO(), nil)
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
 	assert.Equal(t, 2, len(results))
@@ -192,7 +192,7 @@ func TestFileFetcherFetchDirectoryRecursively(t *testing.T) {
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher, err := factory.CreateFrom(log, cfg)
 	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
+	_ := fileFetcher.Fetch(context.TODO(), nil)
 
 	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
 	assert.Equal(t, 6, len(results))

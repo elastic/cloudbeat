@@ -62,10 +62,8 @@ type FileFetcherConfig struct {
 	Patterns []string `config:"patterns"` // Files and directories paths for the fetcher to extract info from
 }
 
-func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *FileSystemFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting FileSystemFetcher.Fetch")
-
-	results := make([]fetching.Resource, 0)
 
 	// Input files might contain glob pattern
 	for _, filePattern := range f.cfg.Patterns {
@@ -73,16 +71,19 @@ func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, err
 		if err != nil {
 			f.log.Errorf("Failed to find matched glob for %s, error: %+v", filePattern, err)
 		}
+
 		for _, file := range matchedFiles {
 			resource, err := f.fetchSystemResource(file)
 			if err != nil {
 				f.log.Errorf("Unable to fetch fileSystemResource for file %v", file)
 				continue
 			}
-			results = append(results, resource)
+
+			resCh <- fetching.ResourceInfo{Resource: resource, CycleMetadata: cMetadata}
 		}
 	}
-	return results, nil
+
+	return nil
 }
 
 func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FileSystemResource, error) {

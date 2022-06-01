@@ -102,7 +102,7 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 		c := numberConfig(test.value)
 		f, err := s.F.CreateFetcher(s.log, test.key, c)
 		s.NoError(err)
-		res, err := f.Fetch(context.TODO())
+		_ := f.Fetch(context.TODO(), nil)
 		s.NoError(err)
 
 		s.Equal(1, len(res))
@@ -150,7 +150,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
-		res, err := reg.Run(context.Background(), test.key)
+		res, err := reg.Run(context.Background(), test.key, nil)
 		s.NoError(err)
 		s.Equal(test.value, res[0].GetData())
 

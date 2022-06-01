@@ -86,7 +86,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	}
 	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs}
 
-	fetchedResource, err := processesFetcher.Fetch(context.TODO())
+	fetchedResource, err := processesFetcher.Fetch(context.TODO(), nil)
 	t.Nil(err)
 	t.Equal(1, len(fetchedResource))
 
@@ -112,7 +112,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 	}
 	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys}
 
-	fetchedResource, err := processesFetcher.Fetch(context.TODO())
+	fetchedResource, err := processesFetcher.Fetch(context.TODO(), nil)
 	t.Nil(err)
 	t.Equal(0, len(fetchedResource))
 }
@@ -133,7 +133,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 	}
 	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys}
 
-	fetchedResource, err := processesFetcher.Fetch(context.TODO())
+	fetchedResource, err := processesFetcher.Fetch(context.TODO(), nil)
 	t.Nil(err)
 	t.Equal(1, len(fetchedResource))
 
@@ -186,7 +186,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 		}
 		processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs}
 
-		fetchedResource, err := processesFetcher.Fetch(context.TODO())
+		fetchedResource, err := processesFetcher.Fetch(context.TODO(), nil)
 		t.Nil(err)
 		t.Equal(1, len(fetchedResource))
 

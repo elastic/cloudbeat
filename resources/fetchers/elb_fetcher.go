@@ -53,22 +53,23 @@ type ELBResource struct {
 	LoadBalancersDescription
 }
 
-func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *ELBFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ELBFetcher.Fetch")
-
-	results := make([]fetching.Resource, 0)
 
 	balancers, err := f.GetLoadBalancers()
 	if err != nil {
-		return nil, fmt.Errorf("failed to load balancers from Kubernetes %w", err)
+		return fmt.Errorf("failed to load balancers from Kubernetes %w", err)
 	}
 	result, err := f.elbProvider.DescribeLoadBalancer(ctx, balancers)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load balancers from ELB %w", err)
+		return fmt.Errorf("failed to load balancers from ELB %w", err)
 	}
-	results = append(results, ELBResource{result})
+	resCh <- fetching.ResourceInfo{
+		Resource:      ELBResource{result},
+		CycleMetadata: cMetadata,
+	}
 
-	return results, err
+	return err
 }
 
 func (f *ELBFetcher) GetLoadBalancers() ([]string, error) {

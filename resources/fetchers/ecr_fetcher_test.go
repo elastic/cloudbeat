@@ -181,7 +181,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 
 		ctx := context.Background()
 
-		result, err := ecrFetcher.Fetch(ctx)
+		result, err := ecrFetcher.Fetch(ctx, nil)
 		s.Nil(err)
 		s.Equal(1, len(result))
 
@@ -266,7 +266,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 
 		ctx := context.Background()
 
-		result, err := ecrFetcher.Fetch(ctx)
+		result, err := ecrFetcher.Fetch(ctx, nil)
 		s.Nil(result)
 		s.NotNil(err)
 		s.EqualError(err, fmt.Sprintf("could retrieve ECR repositories: %s", test.error.Error()))

@@ -42,15 +42,16 @@ type EKSResource struct {
 	*eks.DescribeClusterResponse
 }
 
-func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f EKSFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting EKSFetcher.Fetch")
 
-	results := make([]fetching.Resource, 0)
-
 	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)
-	results = append(results, EKSResource{result})
+	resCh <- fetching.ResourceInfo{
+		Resource:      EKSResource{result},
+		CycleMetadata: cMetadata,
+	}
 
-	return results, err
+	return err
 }
 
 func (f EKSFetcher) Stop() {

@@ -51,30 +51,21 @@ func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evalua
 	}
 }
 
-func (c *Transformer) ProcessAggregatedResources(ctx context.Context, resourceChan <-chan fetching.ResourcesInfo) {
+func (c *Transformer) ProcessAggregatedResources(ctx context.Context, resourceChan <-chan fetching.ResourceInfo) {
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case resourcesInfo := <-resourceChan:
-			c.processEachResource(resourcesInfo)
+			c.createBeatEvents(resourcesInfo)
 		}
 	}
 }
 
-func (c *Transformer) processEachResource(results fetching.ResourcesInfo) {
-	for _, resource := range results.Resources {
-		if err := c.createBeatEvents(resource, results.CycleMetadata); err != nil {
-			c.log.Errorf("Failed to create beat events for Cycle ID: %v, error: %v",
-				results.CycleMetadata.CycleId, err)
-		}
-	}
-}
-
-func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleMetadata fetching.CycleMetadata) error {
-	resMetadata := fetchedResource.GetMetadata()
+func (c *Transformer) createBeatEvents(resourceInfo fetching.ResourceInfo) error {
+	resMetadata := resourceInfo.GetMetadata()
 	resMetadata.ID = c.commonData.GetResourceId(resMetadata)
-	fetcherResult := fetching.Result{Type: resMetadata.Type, Resource: fetchedResource.GetData()}
+	fetcherResult := fetching.Result{Type: resMetadata.Type, Resource: resourceInfo.GetData()}
 
 	result, err := c.eval.Decision(c.context, fetcherResult)
 
@@ -106,7 +97,7 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleM
 				"resource":    resource,
 				"resource_id": resMetadata.ID,   // Deprecated - kept for BC
 				"type":        resMetadata.Type, // Deprecated - kept for BC
-				"cycle_id":    cycleMetadata.CycleId,
+				"cycle_id":    resourceInfo.CycleId,
 				"result":      finding.Result,
 				"rule":        finding.Rule,
 			},

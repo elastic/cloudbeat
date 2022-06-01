@@ -145,7 +145,7 @@ func (f *KubeFetcher) initWatchers() error {
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *KubeFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting KubeFetcher.Fetch")
 
 	var err error
@@ -155,10 +155,11 @@ func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	if err != nil {
 		// Reset watcherlock if the watchers could not be initiated.
 		watcherlock = sync.Once{}
-		return nil, fmt.Errorf("could not initate Kubernetes watchers: %w", err)
+		return fmt.Errorf("could not initate Kubernetes watchers: %w", err)
 	}
 
-	return getKubeData(f.log, f.watchers), nil
+	getKubeData(f.log, f.watchers, resCh, cMetadata)
+	return nil
 }
 
 func (f *KubeFetcher) Stop() {

@@ -76,7 +76,7 @@ func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 		}
 
 		ctx := context.Background()
-		result, err := eksFetcher.Fetch(ctx)
+		result, err := eksFetcher.Fetch(ctx, nil)
 		s.Nil(err)
 
 		iamResource := result[0].(IAMResource)

@@ -41,15 +41,16 @@ type IAMResource struct {
 	Data interface{}
 }
 
-func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f IAMFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
 
-	results := make([]fetching.Resource, 0)
-
 	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
-	results = append(results, IAMResource{result})
+	resCh <- fetching.ResourceInfo{
+		Resource:      IAMResource{result},
+		CycleMetadata: cMetadata,
+	}
 
-	return results, err
+	return err
 }
 
 func (f IAMFetcher) Stop() {

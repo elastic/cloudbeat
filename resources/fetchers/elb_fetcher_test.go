@@ -130,7 +130,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		ctx := context.Background()
 
 		expectedResource := ELBResource{test.lbResponse}
-		result, err := elbFetcher.Fetch(ctx)
+		result, err := elbFetcher.Fetch(ctx, nil)
 		s.Nil(err)
 		s.Equal(1, len(result))
 
@@ -195,7 +195,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 
 		ctx := context.Background()
 
-		result, err := elbFetcher.Fetch(ctx)
+		result, err := elbFetcher.Fetch(ctx, nil)
 		s.Nil(result)
 		s.NotNil(err)
 		s.EqualError(err, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))

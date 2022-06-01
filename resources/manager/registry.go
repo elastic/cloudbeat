@@ -20,7 +20,6 @@ package manager
 import (
 	"context"
 	"fmt"
-
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
@@ -29,7 +28,7 @@ type FetchersRegistry interface {
 	Register(key string, f fetching.Fetcher, c ...fetching.Condition) error
 	Keys() []string
 	ShouldRun(key string) bool
-	Run(ctx context.Context, key string) ([]fetching.Resource, error)
+	Run(ctx context.Context, key string, resCh chan<- fetching.ResourceInfo, metadata fetching.CycleMetadata) error
 	Stop()
 }
 
@@ -43,7 +42,7 @@ type registeredFetcher struct {
 	c []fetching.Condition
 }
 
-func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
+func NewFetcherRegistry(log *logp.Logger) *fetchersRegistry {
 	return &fetchersRegistry{
 		log: log,
 		reg: make(map[string]registeredFetcher),
@@ -90,13 +89,13 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 	return true
 }
 
-func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetching.Resource, error) {
+func (r *fetchersRegistry) Run(ctx context.Context, key string, resCh chan<- fetching.ResourceInfo, cycleMetadata fetching.CycleMetadata) error {
 	registered, ok := r.reg[key]
 	if !ok {
-		return nil, fmt.Errorf("fetcher %v not found", key)
+		return fmt.Errorf("fetcher %v not found", key)
 	}
 
-	return registered.f.Fetch(ctx)
+	return registered.f.Fetch(ctx, resCh, cycleMetadata)
 }
 
 func (r *fetchersRegistry) Stop() {

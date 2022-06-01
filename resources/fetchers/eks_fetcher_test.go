@@ -78,7 +78,7 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 		}
 
 		ctx := context.Background()
-		result, err := eksFetcher.Fetch(ctx)
+		result, err := eksFetcher.Fetch(ctx, nil)
 		s.Nil(err)
 
 		eksResource := result[0].(EKSResource)
@@ -103,7 +103,7 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	}
 
 	ctx := context.Background()
-	_, err := eksFetcher.Fetch(ctx)
+	_, err := eksFetcher.Fetch(ctx, nil)
 	s.NotNil(err)
 	s.Equal(expectedErr, err)
 }
