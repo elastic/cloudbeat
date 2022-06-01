@@ -35,22 +35,25 @@ func init() {
 type FileSystemFactory struct {
 }
 
-func (f *FileSystemFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+func (f *FileSystemFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+	log.Debug("Starting FileSystemFactory.Create")
+
 	cfg := FileFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	return f.CreateFrom(cfg)
+	return f.CreateFrom(log, cfg)
 }
 
-func (f *FileSystemFactory) CreateFrom(cfg FileFetcherConfig) (fetching.Fetcher, error) {
+func (f *FileSystemFactory) CreateFrom(log *logp.Logger, cfg FileFetcherConfig) (fetching.Fetcher, error) {
 	fe := &FileSystemFetcher{
+		log: log,
 		cfg: cfg,
 	}
 
-	logp.L().Infof("File-System Fetcher created with the following config:"+
+	log.Infof("File-System Fetcher created with the following config:"+
 		"\n Name: %s\nPatterns: %s", cfg.Name, cfg.Patterns)
 	return fe, nil
 }

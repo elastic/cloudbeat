@@ -84,6 +84,7 @@ type requiredResource struct {
 }
 
 type KubeFetcher struct {
+	log *logp.Logger
 	cfg KubeApiFetcherConfig
 
 	watchers []kubernetes.Watcher
@@ -128,7 +129,7 @@ func (f *KubeFetcher) initWatchers() error {
 		return fmt.Errorf("could not get k8s client: %w", err)
 	}
 
-	logp.L().Info("Kubernetes client initiated.")
+	f.log.Info("Kubernetes client initiated.")
 
 	f.watchers = make([]kubernetes.Watcher, 0)
 
@@ -139,13 +140,14 @@ func (f *KubeFetcher) initWatchers() error {
 		}
 	}
 
-	logp.L().Info("Kubernetes Watchers initiated.")
+	f.log.Info("Kubernetes Watchers initiated.")
 
 	return nil
 }
 
 func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Info("kube fetcher starts to fetch data")
+	f.log.Debug("Starting KubeFetcher.Fetch")
+
 	var err error
 	watcherlock.Do(func() {
 		err = f.initWatchers()
@@ -156,7 +158,7 @@ func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 		return nil, fmt.Errorf("could not initate Kubernetes watchers: %w", err)
 	}
 
-	return GetKubeData(f.watchers), nil
+	return getKubeData(f.log, f.watchers), nil
 }
 
 func (f *KubeFetcher) Stop() {

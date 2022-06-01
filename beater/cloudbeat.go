@@ -37,6 +37,10 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+const (
+	reconfigureWaitTimeout = 5 * time.Minute
+)
+
 // cloudbeat configuration.
 type cloudbeat struct {
 	ctx    context.Context
@@ -65,19 +69,19 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 
 	log.Info("Config initiated.")
 
-	fetchersRegistry, err := InitRegistry(c)
+	fetchersRegistry, err := InitRegistry(log, c)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	data, err := manager.NewData(c.Period, time.Minute, fetchersRegistry)
+	data, err := manager.NewData(log, c.Period, time.Minute, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	eval, err := evaluator.NewOpaEvaluator(ctx)
+	eval, err := evaluator.NewOpaEvaluator(ctx, log)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -90,7 +94,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	cdp, err := transformer.NewCommonDataProvider(c)
+	cdp, err := transformer.NewCommonDataProvider(log, c)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -102,13 +106,13 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t := transformer.NewTransformer(ctx, eval, commonData, resultsIndex)
+	t := transformer.NewTransformer(ctx, log, eval, commonData, resultsIndex)
 
 	bt := &cloudbeat{
 		ctx:           ctx,
 		cancel:        cancel,
 		config:        c,
-		configUpdates: config.Updates(ctx),
+		configUpdates: config.Updates(ctx, log),
 		evaluator:     eval,
 		data:          data,
 		transformer:   t,
@@ -122,11 +126,24 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it.")
 
 	// Configure the beats Manager to start after all the reloadable hooks are initialized
-	// and shutdown when the function return.
+	// and shutdown when the function returns.
 	if err := b.Manager.Start(); err != nil {
 		return err
 	}
 	defer b.Manager.Stop()
+
+	// Wait for Fleet-side reconfiguration only if cloudbeat is running in Agent-managed mode.
+	if b.Manager.Enabled() {
+		bt.log.Infof("Waiting for initial reconfiguration from Fleet server...")
+		update, err := bt.reconfigureWait(reconfigureWaitTimeout)
+		if err != nil {
+			return err
+		}
+
+		if err := bt.configUpdate(update); err != nil {
+			return fmt.Errorf("failed to update with initial reconfiguration from Fleet server: %w", err)
+		}
+	}
 
 	if err := bt.data.Run(bt.ctx); err != nil {
 		return err
@@ -154,53 +171,106 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 			return nil
 
 		case update := <-bt.configUpdates:
-			if err := bt.config.Update(update); err != nil {
-				logp.L().Errorf("Could not update cloudbeat config: %v", err)
-				break
+			if err := bt.configUpdate(update); err != nil {
+				bt.log.Errorf("Failed to update cloudbeat config: %v", err)
 			}
-
-			policies, err := csppolicies.CISKubernetes()
-			if err != nil {
-				logp.L().Errorf("Could not load CIS Kubernetes policies: %v", err)
-				break
-			}
-
-			if len(bt.config.Streams) == 0 {
-				logp.L().Infof("Did not receive any input stream, skipping.")
-				break
-			}
-
-			y, err := bt.config.DataYaml()
-			if err != nil {
-				logp.L().Errorf("Could not marshal to YAML: %v", err)
-				break
-			}
-
-			if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, y); err != nil {
-				logp.L().Errorf("Could not update bundle with dataYaml: %v", err)
-				break
-			}
-
-			logp.L().Infof("Bundle updated with dataYaml: %s", y)
 
 		case fetchedResources := <-output:
 			cycleId, _ := uuid.NewV4()
-			bt.log.Debugf("Cycle % has started", cycleId)
+			cycleStart := time.Now()
+			bt.log.Infof("Eval cycle %v has started", cycleId)
+
 			cycleMetadata := transformer.CycleMetadata{CycleId: cycleId}
 			// TODO: send events through a channel and publish them by a configured threshold & time
 			events := bt.transformer.ProcessAggregatedResources(fetchedResources, cycleMetadata)
+
+			bt.log.Infof("Publishing %d events to index", len(events))
 			bt.client.PublishAll(events)
-			bt.log.Debugf("Cycle % has ended", cycleId)
+
+			bt.log.Infof("Eval cycle %v published %d events after %s", cycleId, len(events), time.Since(cycleStart))
 		}
 	}
 }
 
-func InitRegistry(c config.Config) (manager.FetchersRegistry, error) {
-	registry := manager.NewFetcherRegistry()
-	err := manager.Factories.RegisterFetchers(registry, c)
+// reconfigureWait will wait for and consume incoming reconfuration from the Fleet server, and keep
+// discarding them until the incoming config contains the necessary information to start cloudbeat
+// properly, thereafter returning the valid config.
+func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*common.Config, error) {
+	start := time.Now()
+	timer := time.After(timeout)
+
+	for {
+		select {
+		case <-bt.ctx.Done():
+			return nil, fmt.Errorf("cancelled via context")
+
+		case <-timer:
+			return nil, fmt.Errorf("timed out waiting for reconfiguration")
+
+		case update, ok := <-bt.configUpdates:
+			if !ok {
+				return nil, fmt.Errorf("reconfiguration channel is closed")
+			}
+
+			c, err := config.New(update)
+			if err != nil {
+				bt.log.Errorf("Could not parse reconfiguration %v, skipping with error: %v", update.FlattenedKeys(), err)
+				continue
+			}
+
+			if len(c.Streams) == 0 {
+				bt.log.Infof("No streams received in reconfiguration %v", update.FlattenedKeys())
+				continue
+			}
+
+			if c.Streams[0].DataYaml == nil {
+				bt.log.Infof("data_yaml not present in reconfiguration %v", update.FlattenedKeys())
+				continue
+			}
+
+			bt.log.Infof("Received valid reconfiguration after waiting for %s", time.Since(start))
+			return update, nil
+		}
+	}
+}
+
+// configUpdate applies incoming reconfiguration from the Fleet server to the cloudbeat config,
+// and updates the hosted bundle with the new values.
+func (bt *cloudbeat) configUpdate(update *common.Config) error {
+	if err := bt.config.Update(bt.log, update); err != nil {
+		return err
+	}
+
+	policies, err := csppolicies.CISKubernetes()
 	if err != nil {
+		return fmt.Errorf("could not load CIS Kubernetes policies: %w", err)
+	}
+
+	if len(bt.config.Streams) == 0 {
+		bt.log.Infof("Did not receive any input stream from incoming config, skipping.")
+		return nil
+	}
+
+	y, err := bt.config.DataYaml()
+	if err != nil {
+		return fmt.Errorf("could not marshal to YAML: %w", err)
+	}
+
+	if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, y); err != nil {
+		return fmt.Errorf("could not update bundle with dataYaml: %w", err)
+	}
+
+	bt.log.Infof("Bundle updated with dataYaml: %s", y)
+	return nil
+}
+
+func InitRegistry(log *logp.Logger, c config.Config) (manager.FetchersRegistry, error) {
+	registry := manager.NewFetcherRegistry(log)
+
+	if err := manager.Factories.RegisterFetchers(log, registry, c); err != nil {
 		return nil, err
 	}
+
 	return registry, nil
 }
 

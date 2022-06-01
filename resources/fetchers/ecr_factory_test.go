@@ -18,22 +18,33 @@
 package fetchers
 
 import (
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-	"testing"
 )
 
 type EcrFactoryTestSuite struct {
 	suite.Suite
+
+	log *logp.Logger
 }
 
 func TestEcrFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(EcrFactoryTestSuite))
+	s := new(EcrFactoryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_ecr_factory_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *EcrFactoryTestSuite) TestCreateFetcher() {
@@ -91,7 +102,7 @@ name: aws-ecr
 		cfg, err := common.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := factory.Create(cfg)
+		fetcher, err := factory.Create(s.log, cfg)
 		s.NoError(err)
 		s.NotNil(fetcher)
 

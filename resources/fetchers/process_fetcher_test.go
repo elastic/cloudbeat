@@ -20,14 +20,16 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"io/fs"
+	"testing"
+	"testing/fstest"
+
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v2"
-	"io/fs"
 	"k8s.io/apimachinery/pkg/util/json"
-	"testing"
-	"testing/fstest"
 )
 
 const (
@@ -53,10 +55,19 @@ type ProcessConfigTestStruct struct {
 
 type ProcessFetcherTestSuite struct {
 	suite.Suite
+
+	log *logp.Logger
 }
 
 func TestProcessFetcherTestSuite(t *testing.T) {
-	suite.Run(t, new(ProcessFetcherTestSuite))
+	s := new(ProcessFetcherTestSuite)
+	s.log = logp.NewLogger("cloudbeat_process_fetcher_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
@@ -73,7 +84,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
 	}
-	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig, Fs: sysfs}
+	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	t.Nil(err)
@@ -99,7 +110,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}}},
 	}
-	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig, Fs: fsys}
+	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	t.Nil(err)
@@ -120,7 +131,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"kubelet": {ConfigFileArguments: []string{}}},
 	}
-	processesFetcher := &ProcessesFetcher{cfg: fetcherConfig, Fs: fsys}
+	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys}
 
 	fetchedResource, err := processesFetcher.Fetch(context.TODO())
 	t.Nil(err)
@@ -173,7 +184,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 			RequiredProcesses: map[string]ProcessInputConfiguration{
 				"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
 		}
-		processesFetcher := &ProcessesFetcher{cfg: fetcherConfig, Fs: sysfs}
+		processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs}
 
 		fetchedResource, err := processesFetcher.Fetch(context.TODO())
 		t.Nil(err)

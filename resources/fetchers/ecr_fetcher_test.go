@@ -20,8 +20,13 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"regexp"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
@@ -29,17 +34,21 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-	"reflect"
-	"regexp"
-	"testing"
 )
 
 type ECRFetcherTestSuite struct {
 	suite.Suite
+	log *logp.Logger
 }
 
 func TestECRFetcherTestSuite(t *testing.T) {
-	suite.Run(t, new(ECRFetcherTestSuite))
+	s := new(ECRFetcherTestSuite)
+	s.log = logp.NewLogger("cloudbeat_ecr_fetcher_test_suite")
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *ECRFetcherTestSuite) TestFetcherFetch() {
@@ -227,6 +236,7 @@ func (s *ECRFetcherTestSuite) TestFetcherFetch() {
 		expectedResource := ECRResource{expectedRepositories}
 
 		ecrFetcher := ECRFetcher{
+			log:                      s.log,
 			cfg:                      ECRFetcherConfig{},
 			kubeClient:               kubeclient,
 			ECRRepositoriesExecutors: []ECRExecutor{privateEcrExecutor, publicEcrExecutor},
@@ -314,6 +324,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		}
 
 		ecrFetcher := ECRFetcher{
+			log:                      s.log,
 			cfg:                      ECRFetcherConfig{},
 			kubeClient:               kubeclient,
 			ECRRepositoriesExecutors: []ECRExecutor{privateEcrExecutor, publicEcrExecutor},
