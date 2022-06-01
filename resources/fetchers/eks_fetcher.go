@@ -62,11 +62,10 @@ func (r EKSResource) GetData() interface{} {
 }
 
 func (r EKSResource) GetMetadata() fetching.ResourceMetadata {
-	//TODO implement me
 	return fetching.ResourceMetadata{
-		ID:      "",
-		Type:    "",
-		SubType: "",
-		Name:    "",
+		ID:      *r.Cluster.Arn,
+		Type:    EKSType,
+		SubType: EKSType,
+		Name:    *r.Cluster.Name,
 	}
 }
