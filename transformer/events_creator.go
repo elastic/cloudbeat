@@ -27,7 +27,6 @@ import (
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
 )
 
 type Transformer struct {
@@ -35,49 +34,50 @@ type Transformer struct {
 	log           *logp.Logger
 	eval          evaluator.Evaluator
 	eventMetadata common.MapStr
-	events        []beat.Event
+	events        Events
 	commonData    CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
+func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evaluator, events Events, commonData CommonDataInterface, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
-	events := make([]beat.Event, 0)
 
 	return Transformer{
 		context:       ctx,
 		log:           log,
 		eval:          eval,
-		eventMetadata: eventMetadata,
 		events:        events,
+		eventMetadata: eventMetadata,
 		commonData:    commonData,
 	}
 }
 
-func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, cycleMetadata CycleMetadata) []beat.Event {
-	c.events = make([]beat.Event, 0)
-	for key, fetcherResults := range resources {
-		c.log.Infof("Processing fetched data for resource key %s with %d resources", key, len(fetcherResults))
-		c.processEachResource(fetcherResults, cycleMetadata)
-	}
-
-	return c.events
-}
-
-func (c *Transformer) processEachResource(results []fetching.Resource, cycleMetadata CycleMetadata) {
-	for _, result := range results {
-		if err := c.createBeatEvents(result, cycleMetadata); err != nil {
-			c.log.Errorf("Failed to create beat events for Cycle ID: %v, error: %v",
-				cycleMetadata.CycleId, err)
+func (c *Transformer) ProcessAggregatedResources(ctx context.Context, resourceChan <-chan fetching.ResourcesInfo) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case resourcesInfo := <-resourceChan:
+			c.processEachResource(resourcesInfo)
 		}
 	}
 }
 
-func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleMetadata CycleMetadata) error {
+func (c *Transformer) processEachResource(results fetching.ResourcesInfo) {
+	for _, resource := range results.Resources {
+		if err := c.createBeatEvents(resource, results.CycleMetadata); err != nil {
+			c.log.Errorf("Failed to create beat events for Cycle ID: %v, error: %v",
+				results.CycleMetadata.CycleId, err)
+		}
+	}
+}
+
+func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleMetadata fetching.CycleMetadata) error {
 	resMetadata := fetchedResource.GetMetadata()
 	resMetadata.ID = c.commonData.GetResourceId(resMetadata)
 	fetcherResult := fetching.Result{Type: resMetadata.Type, Resource: fetchedResource.GetData()}
 
 	result, err := c.eval.Decision(c.context, fetcherResult)
+
 	if err != nil {
 		c.log.Errorf("Error running the policy: %v", err)
 		return err
@@ -112,9 +112,8 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleM
 			},
 		}
 
-		c.events = append(c.events, event)
+		c.events.Data <- event
 	}
 
-	c.log.Debugf("Created %d events for input: %v", len(c.events), fetcherResult)
 	return nil
 }

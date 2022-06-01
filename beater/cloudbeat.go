@@ -33,12 +33,12 @@ import (
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
-
-	"github.com/gofrs/uuid"
 )
 
 const (
 	reconfigureWaitTimeout = 5 * time.Minute
+	eventsThreshold        = 75
+	flushInterval          = 10
 )
 
 // cloudbeat configuration.
@@ -53,6 +53,7 @@ type cloudbeat struct {
 	evaluator     evaluator.Evaluator
 	transformer   transformer.Transformer
 	log           *logp.Logger
+	eventsCh      chan beat.Event
 }
 
 // New creates an instance of cloudbeat.
@@ -106,7 +107,8 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t := transformer.NewTransformer(ctx, log, eval, commonData, resultsIndex)
+	eventsCh := make(chan beat.Event)
+	t := transformer.NewTransformer(ctx, log, eval, eventsCh, commonData, resultsIndex)
 
 	bt := &cloudbeat{
 		ctx:           ctx,
@@ -117,6 +119,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		data:          data,
 		transformer:   t,
 		log:           log,
+		eventsCh:      eventsCh,
 	}
 	return bt, nil
 }
@@ -164,7 +167,9 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 
 	output := bt.data.Output()
+	go bt.transformer.ProcessAggregatedResources(bt.ctx, output)
 
+	var eventsToSend []beat.Event
 	for {
 		select {
 		case <-bt.ctx.Done():
@@ -174,20 +179,19 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 			if err := bt.configUpdate(update); err != nil {
 				bt.log.Errorf("Failed to update cloudbeat config: %v", err)
 			}
-
-		case fetchedResources := <-output:
-			cycleId, _ := uuid.NewV4()
-			cycleStart := time.Now()
-			bt.log.Infof("Eval cycle %v has started", cycleId)
-
-			cycleMetadata := transformer.CycleMetadata{CycleId: cycleId}
-			// TODO: send events through a channel and publish them by a configured threshold & time
-			events := bt.transformer.ProcessAggregatedResources(fetchedResources, cycleMetadata)
-
-			bt.log.Infof("Publishing %d events to index", len(events))
-			bt.client.PublishAll(events)
-
-			bt.log.Infof("Eval cycle %v published %d events after %s", cycleId, len(events), time.Since(cycleStart))
+		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
+		case <-time.Tick(flushInterval * time.Second):
+			logp.L().Infof("Publish cloudbeat events to elasticsearch after 10 seconds")
+			bt.client.PublishAll(eventsToSend)
+			eventsToSend = nil
+		// Flush events to ES when reaching "EventsThreshold" limit
+		case event := <-bt.eventsCh:
+			eventsToSend = append(eventsToSend, event)
+			if len(eventsToSend) == eventsThreshold {
+				logp.L().Infof("Publish to elasticsearch - capacity reached to %d events", eventsThreshold)
+				bt.client.PublishAll(eventsToSend)
+				eventsToSend = nil
+			}
 		}
 	}
 }
@@ -276,6 +280,7 @@ func InitRegistry(log *logp.Logger, c config.Config) (manager.FetchersRegistry, 
 
 // Stop stops cloudbeat.
 func (bt *cloudbeat) Stop() {
+	close(bt.eventsCh)
 	bt.cancel()
 	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)

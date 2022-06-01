@@ -20,6 +20,7 @@ package manager
 import (
 	"context"
 	"fmt"
+	"github.com/gofrs/uuid"
 	"sync"
 	"time"
 
@@ -33,7 +34,7 @@ type Data struct {
 	log      *logp.Logger
 	timeout  time.Duration
 	interval time.Duration
-	output   chan ResourceMap
+	output   chan fetching.ResourcesInfo
 	fetchers FetchersRegistry
 	wg       *sync.WaitGroup
 	stop     chan struct{}
@@ -44,10 +45,8 @@ type fetcherResult struct {
 	err       error
 }
 
-type ResourceMap map[string][]fetching.Resource
-
 // NewData returns a new Data instance.
-// interval is the duration the manager wait between two consequtive cycles.
+// interval is the duration the manager wait between two consecutive cycles.
 // timeout is the maximum duration the manager wait for a single fetcher to return results.
 func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
 	return &Data{
@@ -55,13 +54,13 @@ func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fe
 		timeout:  timeout,
 		interval: interval,
 		fetchers: fetchers,
-		output:   make(chan ResourceMap),
+		output:   make(chan fetching.ResourcesInfo),
 		stop:     make(chan struct{}),
 	}, nil
 }
 
 // Output returns the output channel.
-func (d *Data) Output() <-chan ResourceMap {
+func (d *Data) Output() <-chan fetching.ResourcesInfo {
 	return d.output
 }
 
@@ -95,28 +94,38 @@ func (d *Data) fetchIteration(ctx context.Context) {
 
 	d.wg = &sync.WaitGroup{}
 	mu := sync.Mutex{}
-	cycleData := make(ResourceMap)
 	start := time.Now()
+
+	cycleId, _ := uuid.NewV4()
+	d.log.Infof("Cycle % has started", cycleId)
 
 	for _, key := range d.fetchers.Keys() {
 		d.wg.Add(1)
 		go func(k string) {
 			defer d.wg.Done()
-			val, err := d.fetchSingle(ctx, k)
+			vals, err := d.fetchSingle(ctx, k)
 			if err != nil {
 				d.log.Errorf("Error running fetcher for key %s: %v", k, err)
-			} else if val != nil {
-				d.log.Debugf("Fetcher %s finished and found %d values", k, len(val))
+			} else if vals != nil {
+				d.log.Debugf("Fetcher %s finished and found %d values", k, len(vals))
 				mu.Lock()
 				defer mu.Unlock()
-				cycleData[k] = val
+
+				resInfo := fetching.ResourcesInfo{
+					Resources: vals,
+					CycleMetadata: fetching.CycleMetadata{
+						CycleId: cycleId,
+					},
+				}
+
+				d.output <- resInfo
 			}
 		}(key)
 	}
 
 	d.wg.Wait()
 	d.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
-	d.output <- cycleData
+	d.log.Infof("Cycle % has ended", cycleId)
 }
 
 func (d *Data) fetchSingle(ctx context.Context, k string) ([]fetching.Resource, error) {

@@ -19,6 +19,7 @@ package fetching
 
 import (
 	"context"
+	"github.com/gofrs/uuid"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/logp"
@@ -38,6 +39,15 @@ type Fetcher interface {
 type Condition interface {
 	Condition() bool
 	Name() string
+}
+
+type ResourcesInfo struct {
+	Resources []Resource
+	CycleMetadata
+}
+
+type CycleMetadata struct {
+	CycleId uuid.UUID
 }
 
 type Resource interface {
