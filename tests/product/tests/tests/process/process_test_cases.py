@@ -533,15 +533,15 @@ cis_1_2_10 = [(
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
 ),
-    (
-        'CIS 1.2.10',
-        {
-            "set": {
-                "--enable-admission-plugins": "EventRateLimit"
-            }
-        },
-        '/etc/kubernetes/manifests/kube-apiserver.yaml',
-        'passed'
+(
+    'CIS 1.2.10',
+    {
+        "set": {
+            "--enable-admission-plugins": "EventRateLimit"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
 )]
 
 cis_1_2_11 = [(
