@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"gopkg.in/yaml.v3"
 )
@@ -42,7 +43,7 @@ type Config struct {
 }
 
 type Stream struct {
-	DataYaml struct {
+	DataYaml *struct {
 		ActivatedRules struct {
 			CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
 		} `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
@@ -50,7 +51,7 @@ type Stream struct {
 }
 
 var DefaultConfig = Config{
-	Period: 10 * time.Second,
+	Period: 4 * time.Hour,
 }
 
 func New(cfg *common.Config) (Config, error) {
@@ -68,27 +69,22 @@ func New(cfg *common.Config) (Config, error) {
 //
 // NOTE(yashtewari): This will be removed with the planned update to restart the
 // beat with the new config.
-func (c *Config) Update(cfg *common.Config) error {
+func (c *Config) Update(log *logp.Logger, cfg *common.Config) error {
+	log.Infof("Updating config with the following keys: %v", cfg.FlattenedKeys())
+
 	if err := cfg.Unpack(&c); err != nil {
 		return err
 	}
 
 	// Check if the incoming config has streams.
-	m := make(map[string]interface{})
-	if err := cfg.Unpack(&m); err != nil {
-		return err
-	}
+	if cfg.HasField("streams") {
+		uc, err := New(cfg)
+		if err != nil {
+			return err
+		}
 
-	if _, ok := m["streams"]; !ok {
-		return nil
+		c.Streams = uc.Streams
 	}
-
-	uc, err := New(cfg)
-	if err != nil {
-		return err
-	}
-
-	c.Streams = uc.Streams
 
 	return nil
 }

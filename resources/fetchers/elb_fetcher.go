@@ -35,6 +35,7 @@ import (
 const ELBRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
 
 type ELBFetcher struct {
+	log             *logp.Logger
 	cfg             ELBFetcherConfig
 	elbProvider     awslib.ELBLoadBalancerDescriber
 	kubeClient      k8s.Interface
@@ -53,7 +54,8 @@ type ELBResource struct {
 }
 
 func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("elb fetcher starts to fetch data")
+	f.log.Debug("Starting ELBFetcher.Fetch")
+
 	results := make([]fetching.Resource, 0)
 
 	balancers, err := f.GetLoadBalancers()

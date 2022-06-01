@@ -19,7 +19,6 @@ package transformer
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -33,18 +32,20 @@ import (
 
 type Transformer struct {
 	context       context.Context
+	log           *logp.Logger
 	eval          evaluator.Evaluator
 	eventMetadata common.MapStr
 	events        []beat.Event
 	commonData    CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
+func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 	events := make([]beat.Event, 0)
 
 	return Transformer{
 		context:       ctx,
+		log:           log,
 		eval:          eval,
 		eventMetadata: eventMetadata,
 		events:        events,
@@ -54,7 +55,8 @@ func NewTransformer(ctx context.Context, eval evaluator.Evaluator, commonData Co
 
 func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, cycleMetadata CycleMetadata) []beat.Event {
 	c.events = make([]beat.Event, 0)
-	for _, fetcherResults := range resources {
+	for key, fetcherResults := range resources {
+		c.log.Infof("Processing fetched data for resource key %s with %d resources", key, len(fetcherResults))
 		c.processEachResource(fetcherResults, cycleMetadata)
 	}
 
@@ -64,8 +66,8 @@ func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, 
 func (c *Transformer) processEachResource(results []fetching.Resource, cycleMetadata CycleMetadata) {
 	for _, result := range results {
 		if err := c.createBeatEvents(result, cycleMetadata); err != nil {
-			logp.Error(fmt.Errorf("failed to create beat events for Cycle ID: %v, Error: %v",
-				cycleMetadata.CycleId, err))
+			c.log.Errorf("Failed to create beat events for Cycle ID: %v, error: %v",
+				cycleMetadata.CycleId, err)
 		}
 	}
 }
@@ -76,16 +78,19 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleM
 	fetcherResult := fetching.Result{Type: resMetadata.Type, Resource: fetchedResource.GetData()}
 
 	result, err := c.eval.Decision(c.context, fetcherResult)
-
 	if err != nil {
-		logp.Error(fmt.Errorf("error running the policy: %w", err))
+		c.log.Errorf("Error running the policy: %v", err)
 		return err
 	}
+
+	c.log.Debugf("Eval decision for input: %v -- %v", fetcherResult, result)
 
 	findings, err := c.eval.Decode(result)
 	if err != nil {
 		return err
 	}
+
+	c.log.Debugf("Created %d findings for input: %v", len(findings), fetcherResult)
 
 	timestamp := time.Now()
 	resource := fetching.ResourceFields{
@@ -109,5 +114,7 @@ func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, cycleM
 
 		c.events = append(c.events, event)
 	}
+
+	c.log.Debugf("Created %d events for input: %v", len(c.events), fetcherResult)
 	return nil
 }
