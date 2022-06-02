@@ -17,12 +17,14 @@
 
 package evaluator
 
-import "context"
+import (
+	"context"
+	"github.com/elastic/cloudbeat/resources/fetching"
+)
 
 type Evaluator interface {
-	Decision(context.Context, interface{}) (interface{}, error)
+	Evaluate(ctx context.Context, resourceInfo fetching.ResourceInfo) EventData
 	Stop(context.Context)
-	Decode(result interface{}) ([]Finding, error)
 }
 
 type Metadata struct {
@@ -39,6 +41,11 @@ type RuleResult struct {
 type Finding struct {
 	Result Result `json:"result"`
 	Rule   Rule   `json:"rule"`
+}
+
+type EventData struct {
+	RuleResult
+	fetching.ResourceInfo
 }
 
 type Result struct {

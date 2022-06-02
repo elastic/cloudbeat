@@ -32,86 +32,54 @@ import (
 type Transformer struct {
 	context       context.Context
 	log           *logp.Logger
-	eval          evaluator.Evaluator
 	eventMetadata common.MapStr
 	events        chan beat.Event
 	commonData    CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
+func NewTransformer(ctx context.Context, log *logp.Logger, cd CommonDataInterface, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 
 	return Transformer{
 		context:       ctx,
 		log:           log,
-		eval:          eval,
 		events:        nil,
 		eventMetadata: eventMetadata,
-		commonData:    commonData,
+		commonData:    cd,
 	}
 }
 
-func (c *Transformer) ProcessAggregatedResources(ctx context.Context, resourceChan <-chan fetching.ResourceInfo) chan beat.Event {
-	c.events = make(chan beat.Event)
-
-	go func() {
-		defer close(c.events)
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case resourcesInfo := <-resourceChan:
-				c.createBeatEvents(resourcesInfo)
-			}
-		}
-	}()
-
-	return c.events
-}
-
-func (c *Transformer) createBeatEvents(resourceInfo fetching.ResourceInfo) error {
-	resMetadata := resourceInfo.GetMetadata()
-	resMetadata.ID = c.commonData.GetResourceId(resMetadata)
-	fetcherResult := fetching.Result{Type: resMetadata.Type, Resource: resourceInfo.GetData()}
-
-	result, err := c.eval.Decision(c.context, fetcherResult)
-
-	if err != nil {
-		c.log.Errorf("Error running the policy: %v", err)
-		return err
+func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.EventData) []beat.Event {
+	if len(eventData.Findings) == 0 {
+		return nil
 	}
 
-	c.log.Debugf("Eval decision for input: %v -- %v", fetcherResult, result)
-
-	findings, err := c.eval.Decode(result)
-	if err != nil {
-		return err
-	}
-
-	c.log.Debugf("Created %d findings for input: %v", len(findings), fetcherResult)
+	events := make([]beat.Event, 0)
+	resMetadata := eventData.GetMetadata()
+	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
 
 	timestamp := time.Now()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
-		Raw:              fetcherResult.Resource,
+		Raw:              eventData.RuleResult.Resource,
 	}
 
-	for _, finding := range findings {
+	for _, finding := range eventData.Findings {
 		event := beat.Event{
-			Meta:      c.eventMetadata,
+			Meta:      t.eventMetadata,
 			Timestamp: timestamp,
 			Fields: common.MapStr{
 				"resource":    resource,
 				"resource_id": resMetadata.ID,   // Deprecated - kept for BC
 				"type":        resMetadata.Type, // Deprecated - kept for BC
-				"cycle_id":    resourceInfo.CycleId,
+				"cycle_id":    eventData.CycleId,
 				"result":      finding.Result,
 				"rule":        finding.Rule,
 			},
 		}
 
-		c.events <- event
+		events = append(events, event)
 	}
 
-	return nil
+	return events
 }

@@ -106,7 +106,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t := transformer.NewTransformer(ctx, log, eval, commonData, resultsIndex)
+	t := transformer.NewTransformer(ctx, log, commonData, resultsIndex)
 
 	bt := &cloudbeat{
 		ctx:           ctx,
@@ -164,7 +164,8 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 
 	resourceCh := bt.data.Output()
-	eventsCh := bt.transformer.ProcessAggregatedResources(bt.ctx, resourceCh)
+	findingsCh := pipelineStep(bt.ctx, resourceCh, bt.evaluator.Evaluate)
+	eventsCh := pipelineStep(bt.ctx, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event
 	for {
@@ -176,21 +177,30 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 			if err := bt.configUpdate(update); err != nil {
 				bt.log.Errorf("Failed to update cloudbeat config: %v", err)
 			}
+
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
 		case <-time.Tick(flushInterval):
-			if len(eventsToSend) > 0 {
-				logp.L().Infof("Publish cloudbeat events to elasticsearch periodically", flushInterval)
-				bt.client.PublishAll(eventsToSend)
-				eventsToSend = nil
+			if len(eventsToSend) == 0 {
+				continue
 			}
-		// Flush events to ES when reaching a certain limit
-		case event := <-eventsCh:
-			eventsToSend = append(eventsToSend, event)
-			if len(eventsToSend) >= eventsThreshold {
-				logp.L().Infof("Publish to elasticsearch - capacity reached to %d events", eventsThreshold)
-				bt.client.PublishAll(eventsToSend)
-				eventsToSend = nil
+
+			logp.L().Infof("Publish cloudbeat events to elasticsearch periodically")
+			bt.client.PublishAll(eventsToSend)
+			eventsToSend = nil
+
+		// Flush events to ES when reaching a certain threshold
+		case events := <-eventsCh:
+			for _, event := range events {
+				eventsToSend = append(eventsToSend, event)
 			}
+
+			if len(eventsToSend) < eventsThreshold {
+				continue
+			}
+
+			logp.L().Infof("Publish to elasticsearch - capacity reached to %d events", eventsThreshold)
+			bt.client.PublishAll(eventsToSend)
+			eventsToSend = nil
 		}
 	}
 }
@@ -289,4 +299,26 @@ func (bt *cloudbeat) Stop() {
 // configureProcessors configure processors to be used by the beat
 func (bt *cloudbeat) configureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
 	return processors.New(processorsList)
+}
+
+func pipelineStep[In any, Out any](ctx context.Context, inputChannel chan In, fn func(context.Context, In) Out) chan Out {
+	outputCh := make(chan Out)
+
+	go func() {
+		defer close(outputCh)
+
+		for s := range inputChannel {
+			select {
+			case <-ctx.Done():
+				break
+			default:
+			}
+
+			go func(ctx context.Context, s In) {
+				outputCh <- fn(ctx, s)
+			}(ctx, s)
+		}
+	}()
+
+	return outputCh
 }

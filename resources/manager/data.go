@@ -60,7 +60,7 @@ func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fe
 }
 
 // Output returns the output channel.
-func (d *Data) Output() <-chan fetching.ResourceInfo {
+func (d *Data) Output() chan fetching.ResourceInfo {
 	return d.output
 }
 
