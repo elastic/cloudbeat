@@ -53,7 +53,6 @@ type cloudbeat struct {
 	evaluator     evaluator.Evaluator
 	transformer   transformer.Transformer
 	log           *logp.Logger
-	eventsCh      chan beat.Event
 }
 
 // New creates an instance of cloudbeat.
@@ -107,8 +106,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	eventsCh := make(chan beat.Event)
-	t := transformer.NewTransformer(ctx, log, eval, eventsCh, commonData, resultsIndex)
+	t := transformer.NewTransformer(ctx, log, eval, commonData, resultsIndex)
 
 	bt := &cloudbeat{
 		ctx:           ctx,
@@ -119,7 +117,6 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		data:          data,
 		transformer:   t,
 		log:           log,
-		eventsCh:      eventsCh,
 	}
 	return bt, nil
 }
@@ -166,8 +163,8 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		return err
 	}
 
-	output := bt.data.Output()
-	go bt.transformer.ProcessAggregatedResources(bt.ctx, output)
+	resourceCh := bt.data.Output()
+	eventsCh := bt.transformer.ProcessAggregatedResources(bt.ctx, resourceCh)
 
 	var eventsToSend []beat.Event
 	for {
@@ -182,12 +179,12 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
 		case <-time.Tick(flushInterval):
 			if len(eventsToSend) > 0 {
-				logp.L().Infof("Publish cloudbeat events to elasticsearch after %d seconds", flushInterval)
+				logp.L().Infof("Publish cloudbeat events to elasticsearch periodically", flushInterval)
 				bt.client.PublishAll(eventsToSend)
 				eventsToSend = nil
 			}
 		// Flush events to ES when reaching a certain limit
-		case event := <-bt.eventsCh:
+		case event := <-eventsCh:
 			eventsToSend = append(eventsToSend, event)
 			if len(eventsToSend) >= eventsThreshold {
 				logp.L().Infof("Publish to elasticsearch - capacity reached to %d events", eventsThreshold)
@@ -282,7 +279,6 @@ func InitRegistry(log *logp.Logger, c config.Config) (manager.FetchersRegistry, 
 
 // Stop stops cloudbeat.
 func (bt *cloudbeat) Stop() {
-	close(bt.eventsCh)
 	bt.cancel()
 	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)

@@ -38,28 +38,35 @@ type Transformer struct {
 	commonData    CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evaluator, eventsCh chan beat.Event, commonData CommonDataInterface, index string) Transformer {
+func NewTransformer(ctx context.Context, log *logp.Logger, eval evaluator.Evaluator, commonData CommonDataInterface, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 
 	return Transformer{
 		context:       ctx,
 		log:           log,
 		eval:          eval,
-		events:        eventsCh,
+		events:        nil,
 		eventMetadata: eventMetadata,
 		commonData:    commonData,
 	}
 }
 
-func (c *Transformer) ProcessAggregatedResources(ctx context.Context, resourceChan <-chan fetching.ResourceInfo) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case resourcesInfo := <-resourceChan:
-			c.createBeatEvents(resourcesInfo)
+func (c *Transformer) ProcessAggregatedResources(ctx context.Context, resourceChan <-chan fetching.ResourceInfo) chan beat.Event {
+	c.events = make(chan beat.Event)
+
+	go func() {
+		defer close(c.events)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case resourcesInfo := <-resourceChan:
+				c.createBeatEvents(resourcesInfo)
+			}
 		}
-	}
+	}()
+
+	return c.events
 }
 
 func (c *Transformer) createBeatEvents(resourceInfo fetching.ResourceInfo) error {
