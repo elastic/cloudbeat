@@ -163,8 +163,9 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		return err
 	}
 
+	// Creating the data pipeline
 	resourceCh := bt.data.Output()
-	findingsCh := pipelineStep(bt.ctx, resourceCh, bt.evaluator.Evaluate)
+	findingsCh := pipelineStep(bt.ctx, resourceCh, bt.evaluator.Eval)
 	eventsCh := pipelineStep(bt.ctx, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event

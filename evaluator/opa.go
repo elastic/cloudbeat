@@ -68,7 +68,7 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
 	}, nil
 }
 
-func (o *OpaEvaluator) Evaluate(ctx context.Context, resourceInfo fetching.ResourceInfo) EventData {
+func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceInfo) EventData {
 	fetcherResult := fetching.Result{
 		Type:     resourceInfo.GetMetadata().Type,
 		Resource: resourceInfo.GetData(),

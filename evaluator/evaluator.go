@@ -23,7 +23,7 @@ import (
 )
 
 type Evaluator interface {
-	Evaluate(ctx context.Context, resourceInfo fetching.ResourceInfo) EventData
+	Eval(ctx context.Context, resourceInfo fetching.ResourceInfo) EventData
 	Stop(context.Context)
 }
 

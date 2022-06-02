@@ -33,7 +33,6 @@ type Transformer struct {
 	context       context.Context
 	log           *logp.Logger
 	eventMetadata common.MapStr
-	events        chan beat.Event
 	commonData    CommonDataInterface
 }
 
@@ -43,7 +42,6 @@ func NewTransformer(ctx context.Context, log *logp.Logger, cd CommonDataInterfac
 	return Transformer{
 		context:       ctx,
 		log:           log,
-		events:        nil,
 		eventMetadata: eventMetadata,
 		commonData:    cd,
 	}
