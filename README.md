@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 [![Build Status](https://internal-ci.elastic.co/buildStatus/icon?job=cloudbeat%2Fcloudbeat-mbp%2Fmain)](https://internal-ci.elastic.co/job/cloudbeat/job/cloudbeat-mbp/job/main/)
 
-The beta software program product licensed hereunder is still in its testing phase and is provided on an "as is" and "as available" basis
+**WARNING: Cloudbeat is currently still in an experimental phase and under heavy development.**
 
 ## Table of contents
 - [Prerequisites](#prerequisites)
