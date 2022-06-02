@@ -37,8 +37,8 @@ import (
 
 const (
 	reconfigureWaitTimeout = 5 * time.Minute
+	flushInterval          = 10 * time.Second
 	eventsThreshold        = 75
-	flushInterval          = 10
 )
 
 // cloudbeat configuration.
@@ -180,7 +180,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 				bt.log.Errorf("Failed to update cloudbeat config: %v", err)
 			}
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
-		case <-time.Tick(flushInterval * time.Second):
+		case <-time.Tick(flushInterval):
 			if len(eventsToSend) > 0 {
 				logp.L().Infof("Publish cloudbeat events to elasticsearch after %d seconds", flushInterval)
 				bt.client.PublishAll(eventsToSend)
