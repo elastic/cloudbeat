@@ -38,7 +38,7 @@ import (
 )
 
 const (
-	reconfigureWaitTimeout = 5 * time.Minute
+	reconfigureWaitTimeout = 10 * time.Minute
 )
 
 // cloudbeat configuration.
@@ -137,6 +137,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		bt.log.Infof("Waiting for initial reconfiguration from Fleet server...")
 		update, err := bt.reconfigureWait(reconfigureWaitTimeout)
 		if err != nil {
+			bt.log.Errorf("Failed while waiting for initial reconfiguraiton from Fleet server: %v", err)
 			return err
 		}
 
@@ -205,7 +206,7 @@ func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*common.Config, err
 			return nil, fmt.Errorf("cancelled via context")
 
 		case <-timer:
-			return nil, fmt.Errorf("timed out waiting for reconfiguration")
+			return nil, fmt.Errorf("timed out waiting for reconfiguration after %s", time.Since(start))
 
 		case update, ok := <-bt.configUpdates:
 			if !ok {
@@ -219,12 +220,12 @@ func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*common.Config, err
 			}
 
 			if len(c.Streams) == 0 {
-				bt.log.Infof("No streams received in reconfiguration %v", update.FlattenedKeys())
+				bt.log.Warnf("No streams received in reconfiguration %v", update.FlattenedKeys())
 				continue
 			}
 
 			if c.Streams[0].DataYaml == nil {
-				bt.log.Infof("data_yaml not present in reconfiguration %v", update.FlattenedKeys())
+				bt.log.Warnf("data_yaml not present in reconfiguration %v", update.FlattenedKeys())
 				continue
 			}
 
