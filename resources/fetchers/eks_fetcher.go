@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
@@ -27,6 +28,7 @@ import (
 )
 
 type EKSFetcher struct {
+	log         *logp.Logger
 	cfg         EKSFetcherConfig
 	eksProvider awslib.EksClusterDescriber
 }
@@ -41,7 +43,7 @@ type EKSResource struct {
 }
 
 func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("eks fetcher starts to fetch data")
+	f.log.Debug("Starting EKSFetcher.Fetch")
 
 	results := make([]fetching.Resource, 0)
 
@@ -59,11 +61,10 @@ func (r EKSResource) GetData() interface{} {
 }
 
 func (r EKSResource) GetMetadata() fetching.ResourceMetadata {
-	//TODO implement me
 	return fetching.ResourceMetadata{
-		ID:      "",
-		Type:    "",
-		SubType: "",
-		Name:    "",
+		ID:      *r.Cluster.Arn,
+		Type:    EKSType,
+		SubType: EKSType,
+		Name:    *r.Cluster.Name,
 	}
 }

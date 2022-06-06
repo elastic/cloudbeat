@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/stretchr/testify/suite"
 )
@@ -29,10 +30,19 @@ import (
 type KubeFactoryTestSuite struct {
 	suite.Suite
 	factory fetching.Factory
+
+	log *logp.Logger
 }
 
 func TestKubeFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(KubeFactoryTestSuite))
+	s := new(KubeFactoryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_kube_factory_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *KubeFactoryTestSuite) SetupTest() {
@@ -57,7 +67,7 @@ interval: 500
 		cfg, err := common.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := s.factory.Create(cfg)
+		fetcher, err := s.factory.Create(s.log, cfg)
 		s.NoError(err)
 		s.NotNil(fetcher)
 

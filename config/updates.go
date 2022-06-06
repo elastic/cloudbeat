@@ -30,6 +30,7 @@ import (
 
 type reloader struct {
 	ctx context.Context
+	log *logp.Logger
 	ch  chan<- *common.Config
 }
 
@@ -38,7 +39,7 @@ func (r *reloader) Reload(configs []*reload.ConfigWithMeta) error {
 		return nil
 	}
 
-	logp.L().Infof("Received %v new configs for reload.", len(configs))
+	r.log.Infof("Received %v new configs for reload.", len(configs))
 
 	select {
 	case <-r.ctx.Done():
@@ -51,10 +52,11 @@ func (r *reloader) Reload(configs []*reload.ConfigWithMeta) error {
 	return nil
 }
 
-func Updates(ctx context.Context) <-chan *common.Config {
+func Updates(ctx context.Context, log *logp.Logger) <-chan *common.Config {
 	ch := make(chan *common.Config)
 	r := &reloader{
 		ctx: ctx,
+		log: log,
 		ch:  ch,
 	}
 

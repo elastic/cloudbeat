@@ -66,9 +66,11 @@ func StartServer() (*http.Server, error) {
 		Handler:      h,
 	}
 
+	log := logp.NewLogger("cloudbeat_bundle_server")
+
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			logp.L().Errorf("bundle server closed: %v", err)
+			log.Errorf("Bundle server closed: %v", err)
 		}
 	}()
 

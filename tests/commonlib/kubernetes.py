@@ -19,6 +19,7 @@ class KubernetesHelper:
         self.core_v1_client = client.CoreV1Api()
         self.app_api = client.AppsV1Api()
         self.rbac_api = client.RbacAuthorizationV1Api()
+        self.coordination_v1_api = client.CoordinationV1Api()
         self.api_client = client.api_client.ApiClient(configuration=self.config)
 
         self.dispatch_list = {
@@ -29,8 +30,9 @@ class KubernetesHelper:
             'Role': self.rbac_api.list_namespaced_role,
             'RoleBinding': self.rbac_api.list_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.list_cluster_role_binding,
-            'ClusterRole': self.rbac_api.list_cluster_role,
             'PodSecurityPolicy': self.policy_c1_api.list_pod_security_policy
+            'ClusterRole': self.rbac_api.list_cluster_role,
+            'Lease': self.coordination_v1_api.list_namespaced_lease,
         }
 
         self.dispatch_delete = {
@@ -41,8 +43,9 @@ class KubernetesHelper:
             'Role': self.rbac_api.delete_namespaced_role,
             'RoleBinding': self.rbac_api.delete_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.delete_cluster_role_binding,
-            'ClusterRole': self.rbac_api.delete_cluster_role,
             'PodSecurityPolicy': self.policy_c1_api.delete_pod_security_policy
+            'ClusterRole': self.rbac_api.delete_cluster_role,
+            'Lease': self.coordination_v1_api.delete_namespaced_lease
         }
 
         self.dispatch_patch = {
@@ -53,8 +56,9 @@ class KubernetesHelper:
             'Role': self.rbac_api.patch_namespaced_role,
             'RoleBinding': self.rbac_api.patch_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.patch_cluster_role_binding,
-            'ClusterRole': self.rbac_api.patch_cluster_role,
             'PodSecurityPolicy': self.policy_c1_api.patch_pod_security_policy
+            'ClusterRole': self.rbac_api.patch_cluster_role,
+            'Lease': self.coordination_v1_api.patch_namespaced_lease
         }
 
         self.dispatch_create = {
@@ -65,8 +69,9 @@ class KubernetesHelper:
             'Role': self.rbac_api.create_namespaced_role,
             'RoleBinding': self.rbac_api.create_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.create_cluster_role_binding,
-            'ClusterRole': self.rbac_api.create_cluster_role,
             'PodSecurityPolicy': self.policy_c1_api.create_pod_security_policy
+            'ClusterRole': self.rbac_api.create_cluster_role,
+            'Lease': self.coordination_v1_api.create_namespaced_lease
         }
 
         self.dispatch_get = {
@@ -77,8 +82,9 @@ class KubernetesHelper:
             'Role': self.rbac_api.read_namespaced_role,
             'RoleBinding': self.rbac_api.read_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.read_cluster_role_binding,
-            'ClusterRole': self.rbac_api.read_cluster_role,
             'PodSecurityPolicy': self.policy_c1_api.read_pod_security_policy
+            'ClusterRole': self.rbac_api.read_cluster_role,
+            'Lease': self.coordination_v1_api.read_namespaced_lease
         }
 
     def get_agent_pod_instances(self, agent_name: str, namespace: str):

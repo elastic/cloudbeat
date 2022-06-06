@@ -34,6 +34,10 @@ def config_node_pre_test(data):
                             param_value='/var/lib/etcd/some_file.txt',
                             resource='')
 
+    api_client.exec_command(container_name=node.metadata.name,
+                            command='touch',
+                            param_value='/etc/kubernetes/pki/some_file.txt',
+                            resource='')
     yield k8s_client, api_client, cloudbeat_agent
 
 

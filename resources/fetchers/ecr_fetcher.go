@@ -20,12 +20,13 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 )
@@ -34,6 +35,7 @@ const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\
 const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?"
 
 type ECRFetcher struct {
+	log               *logp.Logger
 	cfg               ECRFetcherConfig
 	ecrProvider       awslib.EcrRepositoryDescriber
 	kubeClient        k8s.Interface
@@ -55,7 +57,8 @@ func (f *ECRFetcher) Stop() {
 }
 
 func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("ecr fetcher starts to fetch data")
+	f.log.Debug("Starting ECRFetcher.Fetch")
+
 	results := make([]fetching.Resource, 0)
 	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
 	if err != nil {
@@ -99,11 +102,11 @@ func (res ECRResource) GetData() interface{} {
 }
 
 func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
-	//TODO implement me
+	uid, _ := uuid.NewV4()
 	return fetching.ResourceMetadata{
-		ID:      "",
-		Type:    "",
-		SubType: "",
-		Name:    "",
+		ID:      uid.String(),
+		Type:    ECRType,
+		SubType: ECRType,
+		Name:    "AWS repositories",
 	}
 }

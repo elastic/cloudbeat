@@ -87,18 +87,121 @@ class FsClient:
         #         return []
 
         if container_name == '':
-            raise Exception(f"Unknown {container_name} is sent")
+            raise Exception("Unknown container name is sent")
 
         current_resource = Path(resource)
         if not current_resource.is_file():
-            raise Exception(f"File {resource} does not exist or mount missing.")
+            raise Exception(
+                f"File {resource} does not exist or mount missing.")
 
         if command == 'chmod':
             os.chmod(path=resource, mode=int(param_value))
         elif command == 'chown':
             uid_gid = param_value.split(':')
             if len(uid_gid) != 2:
-                raise Exception("User and group parameter shall be separated by ':' ")
+                raise Exception(
+                    "User and group parameter shall be separated by ':' ")
             shutil.chown(path=resource, user=uid_gid[0], group=uid_gid[1])
         else:
-            raise Exception(f"Command '{command}' still not implemented in test framework")
+            raise Exception(
+                f"Command '{command}' still not implemented in test framework")
+
+    @staticmethod
+    def edit_process_file(container_name: str, dictionary, resource: str):
+        """
+        This function edits a process file
+        @param container_name: Container node
+        @param dictionary: Process parameters to set/unset
+        @param resource: File / Resource path
+        @return: None
+        """
+        if container_name == '':
+            raise Exception(f"Unknown container name is sent")
+
+        current_resource = Path(resource)
+        if not current_resource.is_file():
+            raise Exception(
+                f"File {resource} does not exist or mount missing.")
+
+        # Open and load the YAML into variable
+        with current_resource.open() as f:
+            r_file = yaml.safe_load(f)
+
+        # Get process configuration arguments
+        command = r_file["spec"]["containers"][0]["command"]
+
+        # Collect set/unset keys and values from the dictionary
+        set_dict = dictionary.get("set", {})
+        unset_list = dictionary.get("unset", [])
+
+        # Cycle across set items from the dictionary
+        for skey, svalue in set_dict.items():
+            # Find if set key exists already in the configuration arguments 
+            if any(skey == x.split("=")[0] for x in command):
+                # Replace the value of the key with the new value from the set items
+                command = list(map(lambda x: x.replace(
+                    x, skey + "=" + svalue) if skey == x.split("=")[0] else x, command))
+            else:
+                # In case of non existing key in the configuration arguments, append the key/value from set items
+                command.append(skey + "=" + svalue)
+
+        # Cycle across unset items from the dictionary
+        for uskey in unset_list:
+            # Filter out the unset keys from the configuration arguments 
+            command = [x for x in command if uskey != x.split("=")[0]]
+
+        # Override the the configuration arguments with the newly built configuration arguments
+        r_file["spec"]["containers"][0]["command"] = command
+
+        # Write the newly build configuration arguments
+        with current_resource.open(mode="w") as f:
+            yaml.dump(r_file, f)
+
+    @staticmethod
+    def edit_config_file(container_name: str, dictionary, resource: str):
+        """
+        This function edits a config file
+        @param container_name: Container node
+        @param dictionary: Config parameters to set/unset
+        @param resource: Config path
+        @return: None
+        """
+        if container_name == '':
+            raise Exception("Unknown container name is sent")
+
+        current_resource = Path(resource)
+        if not current_resource.is_file():
+            raise Exception(
+                f"File {resource} does not exist or mount missing.")
+
+        # Open and load the YAML into variable
+        with current_resource.open() as f:
+            r_file = yaml.safe_load(f)
+
+        # Collect set/unset keys and values from the dictionary
+        set_dict = dictionary.get("set", {})
+        unset_list = dictionary.get("unset", [])
+
+        # Merge two dictionaries with priority for the set items
+        r_file = { **r_file, **set_dict }
+
+        # Cycle across unset items from the dictionary
+        for uskey in unset_list:
+            # Parsed dot separated key values
+            keys = uskey.split('.')
+            key_to_del = keys.pop()
+            p = r_file
+
+            # Advance inside the dictionary for nested keys
+            for key in keys:
+                p = p.get(key, None)
+                if p is None:
+                    # Non existing nested key
+                    break
+            # Remove nested keys when all path exists
+            if p:
+                del p[key_to_del]
+        
+        # Write the newly build config
+        with current_resource.open(mode="w") as f:
+            yaml.dump(r_file, f)

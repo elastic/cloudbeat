@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
@@ -69,21 +70,30 @@ func (f *PanicFetcher) Stop() {
 
 type DataTestSuite struct {
 	suite.Suite
+
+	ctx      context.Context
+	log      *logp.Logger
 	registry FetchersRegistry
 	opts     goleak.Option
-	ctx      context.Context
 }
 
 const timeout = 2 * time.Second
 
 func TestDataTestSuite(t *testing.T) {
-	suite.Run(t, new(DataTestSuite))
+	s := new(DataTestSuite)
+	s.log = logp.NewLogger("cloudbeat_data_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *DataTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.opts = goleak.IgnoreCurrent()
-	s.registry = NewFetcherRegistry()
+	s.registry = NewFetcherRegistry(s.log)
 }
 
 func (s *DataTestSuite) TearDownTest() {
@@ -97,7 +107,7 @@ func (s *DataTestSuite) TestDataRun() {
 	interval := 10 * time.Second
 
 	registerNFetchers(s.T(), s.registry, fetcherCount)
-	d, err := NewData(interval, timeout, s.registry)
+	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = d.Run(s.ctx)
@@ -137,7 +147,7 @@ func (s *DataTestSuite) TestDataRunNotSync() {
 	err = s.registry.Register(fetcher2Name, f2)
 	s.NoError(err)
 
-	d, err := NewData(interval, timeout, s.registry)
+	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = d.Run(s.ctx)
@@ -176,7 +186,7 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
-	d, err := NewData(interval, timeout, s.registry)
+	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = d.Run(s.ctx)
@@ -196,7 +206,7 @@ func (s *DataTestSuite) TestDataFetchSinglePanic() {
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
-	d, err := NewData(interval, timeout, s.registry)
+	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	res, err := d.fetchSingle(s.ctx, fetcherName)
@@ -213,7 +223,7 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
-	d, err := NewData(interval, timeout, s.registry)
+	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = d.Run(s.ctx)
@@ -233,7 +243,7 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
-	d, err := NewData(interval, timeout, s.registry)
+	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	res, err := d.fetchSingle(s.ctx, fetcherName)
@@ -252,7 +262,7 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	err := s.registry.Register(fetcherName, f, c)
 	s.NoError(err)
 
-	d, err := NewData(interval, timeout, s.registry)
+	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = d.Run(s.ctx)
