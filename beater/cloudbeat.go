@@ -20,6 +20,7 @@ package beater
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/pipeline"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
@@ -165,8 +166,8 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 
 	// Creating the data pipeline
 	resourceCh := bt.data.Output()
-	findingsCh := pipelineStep(bt.ctx, resourceCh, bt.evaluator.Eval)
-	eventsCh := pipelineStep(bt.ctx, findingsCh, bt.transformer.CreateBeatEvents)
+	findingsCh := pipeline.Step(bt.ctx, resourceCh, bt.evaluator.Eval)
+	eventsCh := pipeline.Step(bt.ctx, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event
 	for {
@@ -185,21 +186,18 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 				continue
 			}
 
-			logp.L().Infof("Publish cloudbeat events to elasticsearch periodically")
+			logp.L().Infof("Flushing %d cloudbeat events to elasticsearch", len(eventsToSend))
 			bt.client.PublishAll(eventsToSend)
 			eventsToSend = nil
 
 		// Flush events to ES when reaching a certain threshold
 		case events := <-eventsCh:
-			for _, event := range events {
-				eventsToSend = append(eventsToSend, event)
-			}
-
+			eventsToSend = append(eventsToSend, events...)
 			if len(eventsToSend) < eventsThreshold {
 				continue
 			}
 
-			logp.L().Infof("Publish to elasticsearch - capacity reached to %d events", eventsThreshold)
+			logp.L().Infof("Publish %d cloudbeat events to elasticsearch", len(eventsToSend))
 			bt.client.PublishAll(eventsToSend)
 			eventsToSend = nil
 		}
@@ -300,26 +298,4 @@ func (bt *cloudbeat) Stop() {
 // configureProcessors configure processors to be used by the beat
 func (bt *cloudbeat) configureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
 	return processors.New(processorsList)
-}
-
-func pipelineStep[In any, Out any](ctx context.Context, inputChannel chan In, fn func(context.Context, In) Out) chan Out {
-	outputCh := make(chan Out)
-
-	go func() {
-		defer close(outputCh)
-
-		for s := range inputChannel {
-			select {
-			case <-ctx.Done():
-				break
-			default:
-			}
-
-			go func(ctx context.Context, s In) {
-				outputCh <- fn(ctx, s)
-			}(ctx, s)
-		}
-	}()
-
-	return outputCh
 }
