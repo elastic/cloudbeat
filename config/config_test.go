@@ -32,14 +32,19 @@ import (
 
 type ConfigTestSuite struct {
 	suite.Suite
+
+	log *logp.Logger
 }
 
 func TestConfigTestSuite(t *testing.T) {
+	s := new(ConfigTestSuite)
+	s.log = logp.NewLogger("cloudbeat_config_test_suite")
+
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
 	}
 
-	suite.Run(t, new(ConfigTestSuite))
+	suite.Run(t, s)
 }
 
 func (s *ConfigTestSuite) SetupTest() {
@@ -74,6 +79,46 @@ func (s *ConfigTestSuite) TestNew() {
 		s.NoError(err)
 
 		s.Equal(test.expected, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+	}
+}
+
+func (s *ConfigTestSuite) TestDataYamlExists() {
+	var tests = []struct {
+		config   string
+		expected bool
+	}{
+		{
+			`
+  streams:
+    - data_yaml:
+        activated_rules:
+          cis_k8s:
+            - a
+            - b
+            - c
+            - d
+            - e
+`,
+			true,
+		},
+		{
+			`
+  streams:
+    - not_data_yaml:
+        something: true
+`,
+			false,
+		},
+	}
+
+	for _, test := range tests {
+		cfg, err := common.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		c, err := New(cfg)
+		s.NoError(err)
+
+		s.Equal(test.expected, c.Streams[0].DataYaml != nil)
 	}
 }
 
@@ -178,7 +223,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		cfg, err := common.NewConfigFrom(test.update)
 		s.NoError(err)
 
-		err = c.Update(cfg)
+		err = c.Update(s.log, cfg)
 		s.NoError(err)
 
 		s.Equal(test.expected, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
@@ -256,7 +301,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 		cfg, err := common.NewConfigFrom(test.update)
 		s.NoError(err)
 
-		err = c.Update(cfg)
+		err = c.Update(s.log, cfg)
 		s.NoError(err)
 
 		s.Equal(test.expectedPeriod, c.Period)

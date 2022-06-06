@@ -523,6 +523,27 @@ cis_1_2_9 = [(
     'passed'
 )]
 
+cis_1_2_10 = [(
+    'CIS 1.2.10',
+    {
+        "unset": [
+            "--enable-admission-plugins"
+        ]
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'failed'
+),
+(
+    'CIS 1.2.10',
+    {
+        "set": {
+            "--enable-admission-plugins": "EventRateLimit"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
+)]
+
 cis_1_2_11 = [(
     'CIS 1.2.11',
     {
@@ -548,6 +569,58 @@ cis_1_2_11 = [(
     {
         "set": {
             "--enable-admission-plugins": "NodeRestriction"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
+)]
+
+cis_1_2_12 = [(
+    'CIS 1.2.12',
+    {
+        "unset": [
+            "--enable-admission-plugins"
+        ]
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'failed'
+),
+(
+    'CIS 1.2.12',
+    {
+        "set": {
+            "--enable-admission-plugins": "AlwaysPullImages"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
+)]
+
+cis_1_2_13 = [(
+    'CIS 1.2.13',
+    {
+        "set": {
+            "--enable-admission-plugins": "AlwaysDeny"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'failed'
+),
+(
+    'CIS 1.2.13',
+    {
+        "set": {
+            "--enable-admission-plugins": "SecurityContextDeny"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
+),
+(
+    'CIS 1.2.13',
+    {
+        "set": {
+            "--enable-admission-plugins": "PodSecurityPolicy"
         }
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
@@ -902,6 +975,38 @@ cis_1_2_29 = [(
     'passed'
 )]
 
+cis_1_2_32 = [(
+    'CIS 1_2_32',
+    {
+        "set": {
+            "--tls-cipher-suites": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_DUMMY"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'failed'
+),
+(
+    'CIS 1_2_32',
+    {
+        "set": {
+            "--tls-cipher-suites": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
+),
+(
+    'CIS 1_2_32',
+    {
+        "set": {
+            "--tls-cipher-suites":
+                "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+        }
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'passed'
+)]
+
 cis_4_2_1 = [(
     'CIS 4.2.1',
     {
@@ -1206,7 +1311,10 @@ api_server_rules = [
     *cis_1_2_7,
     *cis_1_2_8,
     *cis_1_2_9,
+    *cis_1_2_10,
     *cis_1_2_11,
+    *cis_1_2_12,
+    *cis_1_2_13,
     *cis_1_2_14,
     *cis_1_2_15,
     *cis_1_2_16,
@@ -1223,6 +1331,7 @@ api_server_rules = [
     *cis_1_2_27,
     *cis_1_2_28,
     *cis_1_2_29,
+    *cis_1_2_32,
 ]
 
 controller_manager_rules = [
