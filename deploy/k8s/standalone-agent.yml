@@ -508,9 +508,6 @@ spec:
             - name: etcsysmd
               mountPath: /hostfs/etc/systemd
               readOnly: true
-            - name: certs
-              mountPath: /hostfs/etc/kubernetes/pki
-              readOnly: true
       volumes:
         - name: datastreams
           configMap:
@@ -543,9 +540,6 @@ spec:
         - name: etcsysmd
           hostPath:
             path: /etc/systemd
-        - name: certs
-          hostPath:
-            path: /etc/kubernetes/pki
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

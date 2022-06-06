@@ -93,9 +93,6 @@ spec:
             - name: etcsysmd
               mountPath: /hostfs/etc/systemd
               readOnly: true
-            - name: certs
-              mountPath: /hostfs/etc/kubernetes/pki
-              readOnly: true
       volumes:
         - name: proc
           hostPath:
@@ -124,9 +121,6 @@ spec:
         - name: etcsysmd
           hostPath:
             path: /etc/systemd
-        - name: certs
-          hostPath:
-            path: /etc/kubernetes/pki
         - name: config
           configMap:
             defaultMode: 0640
@@ -169,6 +163,7 @@ data:
           "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
           "/hostfs/var/lib/kubelet/config.yaml",
           "/hostfs/etc/kubernetes/pki/*.crt",
+          "/hostfs/etc/kubernetes/pki/*.key"
           "/hostfs/var/lib/etcd",
           "/hostfs/etc/kubernetes/pki"
         ]
