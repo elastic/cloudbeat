@@ -108,10 +108,10 @@ name: aws-ecr
 
 		ecrFetcher, ok := fetcher.(*ECRFetcher)
 		s.True(ok)
-		s.Equal(ecrProvider, ecrFetcher.ECRRepositoriesExecutors[0].handler)
-		s.Equal(ecrPublicProvider, ecrFetcher.ECRRepositoriesExecutors[1].handler)
+		s.Equal(ecrProvider, ecrFetcher.PodDescribers[0].Provider)
+		s.Equal(ecrPublicProvider, ecrFetcher.PodDescribers[1].Provider)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
-		s.Equal(test.expectedRegex[0], ecrFetcher.ECRRepositoriesExecutors[0].regexValidator.String())
-		s.Equal(test.expectedRegex[1], ecrFetcher.ECRRepositoriesExecutors[1].regexValidator.String())
+		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].DescriberRegex.String())
+		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].DescriberRegex.String())
 	}
 }

@@ -102,20 +102,20 @@ func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, elements
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}
 
-	privateECRExecutor := ECRExecutor{
-		regexValidator: regexp.MustCompile(privateRepoRegex),
-		handler:        elements.ecrPrivateRepoDescriber,
+	privateECRExecutor := PodDescriber{
+		DescriberRegex: regexp.MustCompile(privateRepoRegex),
+		Provider:       elements.ecrPrivateRepoDescriber,
 	}
-	publicECRExecutor := ECRExecutor{
-		regexValidator: regexp.MustCompile(PublicRepoRegex),
-		handler:        elements.ecrPublicRepoDescriber,
+	publicECRExecutor := PodDescriber{
+		DescriberRegex: regexp.MustCompile(PublicRepoRegex),
+		Provider:       elements.ecrPublicRepoDescriber,
 	}
 
 	fe := &ECRFetcher{
 		log:        log,
 		cfg:        cfg,
 		kubeClient: kubeClient,
-		ECRRepositoriesExecutors: []ECRExecutor{
+		PodDescribers: []PodDescriber{
 			privateECRExecutor,
 			publicECRExecutor,
 		},

@@ -222,24 +222,24 @@ func (s *ECRFetcherTestSuite) TestFetcherFetch() {
 
 		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount, test.region)
 
-		privateEcrExecutor := ECRExecutor{
-			regexValidator: regexp.MustCompile(privateRepoRegex),
-			handler:        ecrProvider,
+		privateEcrExecutor := PodDescriber{
+			DescriberRegex: regexp.MustCompile(privateRepoRegex),
+			Provider:       ecrProvider,
 		}
 
-		publicEcrExecutor := ECRExecutor{
-			regexValidator: regexp.MustCompile(PublicRepoRegex),
-			handler:        ecrPublicProvider,
+		publicEcrExecutor := PodDescriber{
+			DescriberRegex: regexp.MustCompile(PublicRepoRegex),
+			Provider:       ecrPublicProvider,
 		}
 
 		expectedRepositories := append(test.expectedRepositories, test.expectedPublicRepositories...)
 		expectedResource := ECRResource{expectedRepositories}
 
 		ecrFetcher := ECRFetcher{
-			log:                      s.log,
-			cfg:                      ECRFetcherConfig{},
-			kubeClient:               kubeclient,
-			ECRRepositoriesExecutors: []ECRExecutor{privateEcrExecutor, publicEcrExecutor},
+			log:           s.log,
+			cfg:           ECRFetcherConfig{},
+			kubeClient:    kubeclient,
+			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
 		}
 
 		ctx := context.Background()
@@ -313,21 +313,21 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 
 		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount, test.region)
 
-		privateEcrExecutor := ECRExecutor{
-			regexValidator: regexp.MustCompile(privateRepoRegex),
-			handler:        ecrProvider,
+		privateEcrExecutor := PodDescriber{
+			DescriberRegex: regexp.MustCompile(privateRepoRegex),
+			Provider:       ecrProvider,
 		}
 
-		publicEcrExecutor := ECRExecutor{
-			regexValidator: regexp.MustCompile(PublicRepoRegex),
-			handler:        ecrPublicProvider,
+		publicEcrExecutor := PodDescriber{
+			DescriberRegex: regexp.MustCompile(PublicRepoRegex),
+			Provider:       ecrPublicProvider,
 		}
 
 		ecrFetcher := ECRFetcher{
-			log:                      s.log,
-			cfg:                      ECRFetcherConfig{},
-			kubeClient:               kubeclient,
-			ECRRepositoriesExecutors: []ECRExecutor{privateEcrExecutor, publicEcrExecutor},
+			log:           s.log,
+			cfg:           ECRFetcherConfig{},
+			kubeClient:    kubeclient,
+			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
 		}
 
 		ctx := context.Background()
