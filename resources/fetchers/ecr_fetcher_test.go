@@ -20,7 +20,6 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"reflect"
 	"regexp"
 	"testing"
 
@@ -212,12 +211,12 @@ func (s *ECRFetcherTestSuite) TestFetcherFetch() {
 		// Needs to use the same services
 		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.MatchedBy(func(repo []string) bool {
-			return reflect.DeepEqual(test.expectedRepositoriesNames, repo)
+			return s.Equal(test.expectedRepositoriesNames, repo)
 		})).Return(test.expectedRepositories, nil)
 
 		ecrPublicProvider := &awslib.MockedEcrRepositoryDescriber{}
 		ecrPublicProvider.EXPECT().DescribeRepositories(mock.Anything, mock.MatchedBy(func(repo []string) bool {
-			return reflect.DeepEqual(test.expectedPublicRepositoriesNames, repo)
+			return s.Equal(test.expectedPublicRepositoriesNames, repo)
 		})).Return(test.expectedPublicRepositories, nil)
 
 		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount, test.region)

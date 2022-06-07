@@ -63,20 +63,20 @@ func (f *ECRFetcher) Stop() {
 func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	f.log.Debug("Starting ECRFetcher.Fetch")
 	results := make([]fetching.Resource, 0)
-	repositories := make([]ecr.Repository, 0)
+	ecrRepositories := make([]ecr.Repository, 0)
 	for _, podDescriber := range f.PodDescribers {
-		repo, err := f.getAwsRepositories(ctx, podDescriber)
+		ecrDescribedRepositories, err := f.describeAwsRepositories(ctx, podDescriber)
 		if err != nil {
 			return nil, fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 		}
-		repositories = append(repositories, repo...)
+		ecrRepositories = append(ecrRepositories, ecrDescribedRepositories...)
 	}
-	results = append(results, ECRResource{repositories})
+	results = append(results, ECRResource{ecrRepositories})
 
 	return results, nil
 }
 
-func (f *ECRFetcher) getAwsRepositories(ctx context.Context, describer PodDescriber) ([]ecr.Repository, error) {
+func (f *ECRFetcher) describeAwsRepositories(ctx context.Context, describer PodDescriber) ([]ecr.Repository, error) {
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
