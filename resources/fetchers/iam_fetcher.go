@@ -31,6 +31,7 @@ type IAMFetcher struct {
 	log         *logp.Logger
 	iamProvider awslib.IAMRolePermissionGetter
 	cfg         IAMFetcherConfig
+	resourceCh  chan fetching.ResourceInfo
 }
 
 type IAMFetcherConfig struct {
@@ -42,11 +43,11 @@ type IAMResource struct {
 	Data interface{}
 }
 
-func (f IAMFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
+func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
 
 	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
-	resCh <- fetching.ResourceInfo{
+	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      IAMResource{result},
 		CycleMetadata: cMetadata,
 	}

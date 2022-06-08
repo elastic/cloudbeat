@@ -38,7 +38,7 @@ func newDelayFetcher(delay time.Duration) fetching.Fetcher {
 	return &DelayFetcher{delay, false}
 }
 
-func (f *DelayFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
+func (f *DelayFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	select {
 	case <-ctx.Done():
 		return nil, fmt.Errorf("reached timeout")
@@ -60,7 +60,7 @@ func newPanicFetcher(message string) fetching.Fetcher {
 	return &PanicFetcher{message, false}
 }
 
-func (f *PanicFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
+func (f *PanicFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	panic(f.message)
 }
 
@@ -140,11 +140,11 @@ func (s *DataTestSuite) TestDataRunNotSync() {
 	fetcher2Value := 1
 
 	f1 := newDelayFetcher(fetcher1Delay)
-	err := s.registry.Register(fetcher1Name, f1)
+	err := s.registry.Register(fetcher1Name, f1, nil)
 	s.NoError(err)
 
 	f2 := newNumberFetcher(fetcher2Value)
-	err = s.registry.Register(fetcher2Name, f2)
+	err = s.registry.Register(fetcher2Name, f2, nil)
 	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
@@ -183,7 +183,7 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	fetcherName := "panic_fetcher"
 
 	f := newPanicFetcher(fetcherMessage)
-	err := s.registry.Register(fetcherName, f)
+	err := s.registry.Register(fetcherName, f, nil)
 	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
@@ -203,7 +203,7 @@ func (s *DataTestSuite) TestDataFetchSinglePanic() {
 	fetcherName := "panic_fetcher"
 
 	f := newPanicFetcher(fetcherMessage)
-	err := s.registry.Register(fetcherName, f)
+	err := s.registry.Register(fetcherName, f, nil)
 	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
@@ -220,7 +220,7 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	fetcherName := "delay_fetcher"
 
 	f := newDelayFetcher(fetcherDelay)
-	err := s.registry.Register(fetcherName, f)
+	err := s.registry.Register(fetcherName, f, nil)
 	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
@@ -240,7 +240,7 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 	fetcherName := "timeout_fetcher"
 
 	f := newDelayFetcher(fetcherDelay)
-	err := s.registry.Register(fetcherName, f)
+	err := s.registry.Register(fetcherName, f, nil)
 	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)

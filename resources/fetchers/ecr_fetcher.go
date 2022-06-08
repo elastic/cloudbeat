@@ -40,6 +40,7 @@ type ECRFetcher struct {
 	ecrProvider       awslib.EcrRepositoryDescriber
 	kubeClient        k8s.Interface
 	repoRegexMatchers []*regexp.Regexp
+	resourceCh        chan fetching.ResourceInfo
 }
 
 type ECRFetcherConfig struct {
@@ -56,7 +57,7 @@ type ECRResource struct {
 func (f *ECRFetcher) Stop() {
 }
 
-func (f *ECRFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
+func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ECRFetcher.Fetch")
 
 	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
@@ -68,7 +69,7 @@ func (f *ECRFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceIn
 		return fmt.Errorf("could retrieve ECR repositories: %w", err)
 	}
 
-	resCh <- fetching.ResourceInfo{
+	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      ECRResource{ecrRepositories},
 		CycleMetadata: cMetadata,
 	}

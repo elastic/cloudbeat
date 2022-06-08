@@ -53,8 +53,9 @@ type FileSystemResource struct {
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
 type FileSystemFetcher struct {
-	log *logp.Logger
-	cfg FileFetcherConfig
+	log        *logp.Logger
+	cfg        FileFetcherConfig
+	resourceCh chan fetching.ResourceInfo
 }
 
 type FileFetcherConfig struct {
@@ -62,7 +63,7 @@ type FileFetcherConfig struct {
 	Patterns []string `config:"patterns"` // Files and directories paths for the fetcher to extract info from
 }
 
-func (f *FileSystemFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
+func (f *FileSystemFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting FileSystemFetcher.Fetch")
 
 	// Input files might contain glob pattern
@@ -79,7 +80,7 @@ func (f *FileSystemFetcher) Fetch(ctx context.Context, resCh chan<- fetching.Res
 				continue
 			}
 
-			resCh <- fetching.ResourceInfo{Resource: resource, CycleMetadata: cMetadata}
+			f.resourceCh <- fetching.ResourceInfo{Resource: resource, CycleMetadata: cMetadata}
 		}
 	}
 

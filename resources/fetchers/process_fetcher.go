@@ -50,9 +50,10 @@ type ProcessResource struct {
 }
 
 type ProcessesFetcher struct {
-	log *logp.Logger
-	cfg ProcessFetcherConfig
-	Fs  fs.FS
+	log        *logp.Logger
+	cfg        ProcessFetcherConfig
+	Fs         fs.FS
+	resourceCh chan fetching.ResourceInfo
 }
 
 type ProcessInputConfiguration struct {
@@ -67,7 +68,7 @@ type ProcessFetcherConfig struct {
 	RequiredProcesses ProcessesConfigMap `config:"processes"`
 }
 
-func (f *ProcessesFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
+func (f *ProcessesFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ProcessesFetcher.Fetch")
 
 	pids, err := proc.ListFS(f.Fs)
@@ -92,7 +93,7 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context, resCh chan<- fetching.Reso
 			f.log.Error(err)
 			continue
 		}
-		resCh <- fetching.ResourceInfo{Resource: fetchedResource, CycleMetadata: cMetadata}
+		f.resourceCh <- fetching.ResourceInfo{Resource: fetchedResource, CycleMetadata: cMetadata}
 	}
 
 	return nil

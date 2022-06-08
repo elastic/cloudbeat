@@ -39,7 +39,7 @@ type FactoriesTestSuite struct {
 type numberFetcherFactory struct {
 }
 
-func (n *numberFetcherFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (n *numberFetcherFactory) Create(log *logp.Logger, c *common.Config, infos chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
 	return &numberFetcher{int(x), false}, nil
 }
@@ -100,7 +100,7 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 	for _, test := range tests {
 		s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
 		c := numberConfig(test.value)
-		f, err := s.F.CreateFetcher(s.log, test.key, c)
+		f, err := s.F.CreateFetcher(s.log, test.key, c, nil)
 		s.NoError(err)
 		_ := f.Fetch(context.TODO(), nil)
 		s.NoError(err)
@@ -146,7 +146,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err = s.F.RegisterFetchers(s.log, reg, conf)
+		err = s.F.RegisterFetchers(s.log, reg, conf, nil)
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
@@ -175,7 +175,7 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err = s.F.RegisterFetchers(s.log, reg, conf)
+		err = s.F.RegisterFetchers(s.log, reg, conf, nil)
 		s.Error(err)
 	}
 }

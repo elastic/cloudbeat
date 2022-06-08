@@ -50,7 +50,7 @@ type ecrExtraElements struct {
 	ecrRepoDescriber       awslib.EcrRepositoryDescriber
 }
 
-func (f *ECRFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (f *ECRFactory) Create(log *logp.Logger, c *common.Config, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting ECRFactory.Create")
 
 	cfg := ECRFetcherConfig{}
@@ -63,7 +63,7 @@ func (f *ECRFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetche
 		return nil, err
 	}
 
-	return f.CreateFrom(log, cfg, elements)
+	return f.CreateFrom(log, cfg, elements, ch)
 }
 
 func getEcrExtraElements() (ecrExtraElements, error) {
@@ -86,7 +86,7 @@ func getEcrExtraElements() (ecrExtraElements, error) {
 	return extraElements, nil
 }
 
-func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, elements ecrExtraElements) (fetching.Fetcher, error) {
+func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, elements ecrExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
 	identity, err := elements.identityProviderGetter.GetIdentity(ctx)
 	if err != nil {
@@ -108,6 +108,7 @@ func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, elements
 			regexp.MustCompile(privateRepoRegex),
 			regexp.MustCompile(PublicRepoRegex),
 		},
+		resourceCh: ch,
 	}
 	return fe, nil
 }

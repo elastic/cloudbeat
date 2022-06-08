@@ -41,7 +41,7 @@ func TestFileFetcherFetchASingleFile(t *testing.T) {
 
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(log, cfg)
+	fileFetcher, err := factory.CreateFrom(log, cfg, nil)
 	assert.NoError(t, err)
 	_ := fileFetcher.Fetch(context.TODO(), nil)
 
@@ -72,7 +72,7 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	factory := FileSystemFactory{}
 
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
-	fileFetcher, err := factory.CreateFrom(log, cfg)
+	fileFetcher, err := factory.CreateFrom(log, cfg, nil)
 	assert.NoError(t, err)
 	_ := fileFetcher.Fetch(context.TODO(), nil)
 
@@ -113,7 +113,7 @@ func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
 	factory := FileSystemFactory{}
 
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
-	fileFetcher, err := factory.CreateFrom(log, cfg)
+	fileFetcher, err := factory.CreateFrom(log, cfg, nil)
 	assert.NoError(t, err)
 	_ := fileFetcher.Fetch(context.TODO(), nil)
 
@@ -148,7 +148,7 @@ func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
 	factory := FileSystemFactory{}
 
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
-	fileFetcher, err := factory.CreateFrom(log, cfg)
+	fileFetcher, err := factory.CreateFrom(log, cfg, nil)
 	assert.NoError(t, err)
 	_ := fileFetcher.Fetch(context.TODO(), nil)
 
@@ -190,7 +190,7 @@ func TestFileFetcherFetchDirectoryRecursively(t *testing.T) {
 	factory := FileSystemFactory{}
 
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
-	fileFetcher, err := factory.CreateFrom(log, cfg)
+	fileFetcher, err := factory.CreateFrom(log, cfg, nil)
 	assert.NoError(t, err)
 	_ := fileFetcher.Fetch(context.TODO(), nil)
 

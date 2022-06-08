@@ -45,7 +45,7 @@ type IAMExtraElements struct {
 	iamProvider awslib.IAMRolePermissionGetter
 }
 
-func (f *IAMFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (f *IAMFactory) Create(log *logp.Logger, c *common.Config, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting IAMFactory.Create")
 
 	cfg := IAMFetcherConfig{}
@@ -58,7 +58,7 @@ func (f *IAMFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetche
 		return nil, err
 	}
 
-	return f.CreateFrom(log, cfg, elements)
+	return f.CreateFrom(log, cfg, elements, ch)
 }
 
 func getIamExtraElements(log *logp.Logger) (IAMExtraElements, error) {
@@ -74,11 +74,12 @@ func getIamExtraElements(log *logp.Logger) (IAMExtraElements, error) {
 	}, nil
 }
 
-func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, elements IAMExtraElements) (fetching.Fetcher, error) {
+func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, elements IAMExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	return &IAMFetcher{
 		log:         log,
 		cfg:         cfg,
 		iamProvider: elements.iamProvider,
+		resourceCh:  ch,
 	}, nil
 
 }

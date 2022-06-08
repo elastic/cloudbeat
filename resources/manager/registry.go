@@ -28,7 +28,7 @@ type FetchersRegistry interface {
 	Register(key string, f fetching.Fetcher, c ...fetching.Condition) error
 	Keys() []string
 	ShouldRun(key string) bool
-	Run(ctx context.Context, key string, resCh chan<- fetching.ResourceInfo, metadata fetching.CycleMetadata) error
+	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
 	Stop()
 }
 
@@ -89,13 +89,13 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 	return true
 }
 
-func (r *fetchersRegistry) Run(ctx context.Context, key string, resCh chan<- fetching.ResourceInfo, cycleMetadata fetching.CycleMetadata) error {
+func (r *fetchersRegistry) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
 	registered, ok := r.reg[key]
 	if !ok {
 		return fmt.Errorf("fetcher %v not found", key)
 	}
 
-	return registered.f.Fetch(ctx, resCh, cycleMetadata)
+	return registered.f.Fetch(ctx, metadata)
 }
 
 func (r *fetchersRegistry) Stop() {

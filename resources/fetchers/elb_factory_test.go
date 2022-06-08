@@ -87,7 +87,7 @@ name: aws-elb
 		cfg, err := common.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := factory.Create(s.log, cfg)
+		fetcher, err := factory.Create(s.log, cfg, nil)
 		s.NoError(err)
 		s.NotNil(fetcher)
 

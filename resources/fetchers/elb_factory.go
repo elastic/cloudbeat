@@ -54,7 +54,7 @@ type elbExtraElements struct {
 	kubernetesClientGetter providers.KubernetesClientGetter
 }
 
-func (f *ELBFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (f *ELBFactory) Create(log *logp.Logger, c *common.Config, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting ELBFactory.Create")
 
 	cfg := ELBFetcherConfig{}
@@ -67,7 +67,7 @@ func (f *ELBFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetche
 		return nil, err
 	}
 
-	return f.CreateFrom(log, cfg, elements)
+	return f.CreateFrom(log, cfg, elements, ch)
 }
 
 func getElbExtraElements() (elbExtraElements, error) {
@@ -86,7 +86,7 @@ func getElbExtraElements() (elbExtraElements, error) {
 	}, err
 }
 
-func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, elements elbExtraElements) (fetching.Fetcher, error) {
+func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, elements elbExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, elements.awsConfig.Config.Region)
 	kubeClient, err := elements.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
@@ -99,5 +99,6 @@ func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, elements
 		cfg:             cfg,
 		kubeClient:      kubeClient,
 		lbRegexMatchers: []*regexp.Regexp{regexp.MustCompile(loadBalancerRegex)},
+		resourceCh:      ch,
 	}, nil
 }

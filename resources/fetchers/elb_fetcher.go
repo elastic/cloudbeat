@@ -40,6 +40,7 @@ type ELBFetcher struct {
 	elbProvider     awslib.ELBLoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
+	resourceCh      chan fetching.ResourceInfo
 }
 
 type ELBFetcherConfig struct {
@@ -53,7 +54,7 @@ type ELBResource struct {
 	LoadBalancersDescription
 }
 
-func (f *ELBFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
+func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ELBFetcher.Fetch")
 
 	balancers, err := f.GetLoadBalancers()
@@ -64,7 +65,7 @@ func (f *ELBFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceIn
 	if err != nil {
 		return fmt.Errorf("failed to load balancers from ELB %w", err)
 	}
-	resCh <- fetching.ResourceInfo{
+	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      ELBResource{result},
 		CycleMetadata: cMetadata,
 	}

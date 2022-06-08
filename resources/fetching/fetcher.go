@@ -27,12 +27,12 @@ import (
 
 // Factory can create fetcher instances based on configuration
 type Factory interface {
-	Create(*logp.Logger, *common.Config) (Fetcher, error)
+	Create(*logp.Logger, *common.Config, chan ResourceInfo) (Fetcher, error)
 }
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {
-	Fetch(context.Context, chan<- ResourceInfo, CycleMetadata) error
+	Fetch(context.Context, CycleMetadata) error
 	Stop()
 }
 

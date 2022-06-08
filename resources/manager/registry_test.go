@@ -41,7 +41,7 @@ func newNumberFetcher(num int) fetching.Fetcher {
 	return &numberFetcher{num, false}
 }
 
-func (f *numberFetcher) Fetch(ctx context.Context, resCh chan<- fetching.ResourceInfo, cMetadata fetching.CycleMetadata) error {
+func (f *numberFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	return fetchValue(f.num), nil
 }
 
@@ -73,7 +73,7 @@ func fetchValue(num int) []fetching.Resource {
 func registerNFetchers(t *testing.T, reg FetchersRegistry, n int) {
 	for i := 0; i < n; i++ {
 		key := fmt.Sprint(i)
-		err := reg.Register(key, newNumberFetcher(i))
+		err := reg.Register(key, newNumberFetcher(i), nil)
 		assert.NoError(t, err)
 	}
 }
@@ -118,7 +118,7 @@ func (s *RegistryTestSuite) TestKeys() {
 
 	for i, test := range tests {
 		f := newNumberFetcher(test.value)
-		err := s.registry.Register(test.key, f)
+		err := s.registry.Register(test.key, f, nil)
 		s.Nil(err)
 
 		s.Equal(i+1, len(s.registry.Keys()))
@@ -133,10 +133,10 @@ func (s *RegistryTestSuite) TestKeys() {
 
 func (s *RegistryTestSuite) TestRegisterDuplicateKey() {
 	f := newNumberFetcher(1)
-	err := s.registry.Register("some-key", f)
+	err := s.registry.Register("some-key", f, nil)
 	s.NoError(err)
 
-	err = s.registry.Register("some-key", f)
+	err = s.registry.Register("some-key", f, nil)
 	s.Error(err)
 }
 
@@ -148,7 +148,7 @@ func (s *RegistryTestSuite) TestRegister10() {
 
 func (s *RegistryTestSuite) TestRunNotRegistered() {
 	f := newNumberFetcher(1)
-	err := s.registry.Register("some-key", f)
+	err := s.registry.Register("some-key", f, nil)
 	s.NoError(err)
 
 	arr, err := s.registry.Run(context.TODO(), "unknown", nil)
@@ -158,15 +158,15 @@ func (s *RegistryTestSuite) TestRunNotRegistered() {
 
 func (s *RegistryTestSuite) TestRunRegistered() {
 	f1 := newNumberFetcher(1)
-	err := s.registry.Register("some-key-1", f1)
+	err := s.registry.Register("some-key-1", f1, nil)
 	s.NoError(err)
 
 	f2 := newNumberFetcher(2)
-	err = s.registry.Register("some-key-2", f2)
+	err = s.registry.Register("some-key-2", f2, nil)
 	s.NoError(err)
 
 	f3 := newNumberFetcher(3)
-	err = s.registry.Register("some-key-3", f3)
+	err = s.registry.Register("some-key-3", f3, nil)
 	s.NoError(err)
 
 	var tests = []struct {
@@ -194,7 +194,7 @@ func (s *RegistryTestSuite) TestRunRegistered() {
 
 func (s *RegistryTestSuite) TestShouldRunNotRegistered() {
 	f := newNumberFetcher(1)
-	err := s.registry.Register("some-key", f)
+	err := s.registry.Register("some-key", f, nil)
 	s.NoError(err)
 
 	res := s.registry.ShouldRun("unknown")

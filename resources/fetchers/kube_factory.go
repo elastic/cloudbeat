@@ -32,7 +32,7 @@ func init() {
 	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
 }
 
-func (f *KubeFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (f *KubeFactory) Create(log *logp.Logger, c *common.Config, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting KubeFactory.Create")
 
 	cfg := KubeApiFetcherConfig{}
@@ -41,14 +41,15 @@ func (f *KubeFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetch
 		return nil, err
 	}
 
-	return f.CreateFrom(log, cfg)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *KubeFactory) CreateFrom(log *logp.Logger, cfg KubeApiFetcherConfig) (fetching.Fetcher, error) {
+func (f *KubeFactory) CreateFrom(log *logp.Logger, cfg KubeApiFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	fe := &KubeFetcher{
-		log:      log,
-		cfg:      cfg,
-		watchers: make([]kubernetes.Watcher, 0),
+		log:        log,
+		cfg:        cfg,
+		watchers:   make([]kubernetes.Watcher, 0),
+		resourceCh: ch,
 	}
 
 	log.Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+

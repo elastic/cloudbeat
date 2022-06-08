@@ -35,7 +35,7 @@ func init() {
 type FileSystemFactory struct {
 }
 
-func (f *FileSystemFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (f *FileSystemFactory) Create(log *logp.Logger, c *common.Config, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting FileSystemFactory.Create")
 
 	cfg := FileFetcherConfig{}
@@ -44,13 +44,14 @@ func (f *FileSystemFactory) Create(log *logp.Logger, c *common.Config) (fetching
 		return nil, err
 	}
 
-	return f.CreateFrom(log, cfg)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *FileSystemFactory) CreateFrom(log *logp.Logger, cfg FileFetcherConfig) (fetching.Fetcher, error) {
+func (f *FileSystemFactory) CreateFrom(log *logp.Logger, cfg FileFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	fe := &FileSystemFetcher{
-		log: log,
-		cfg: cfg,
+		log:        log,
+		cfg:        cfg,
+		resourceCh: ch,
 	}
 
 	log.Infof("File-System Fetcher created with the following config:"+

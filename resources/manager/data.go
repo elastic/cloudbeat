@@ -59,11 +59,6 @@ func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fe
 	}, nil
 }
 
-// Output returns the output channel.
-func (d *Data) Output() chan fetching.ResourceInfo {
-	return d.output
-}
-
 // Run updates the cache using Fetcher implementations.
 func (d *Data) Run(ctx context.Context) error {
 	go d.fetchAndSleep(ctx)
@@ -147,7 +142,7 @@ func (d *Data) fetchProtected(ctx context.Context, k string, metadata fetching.C
 		}
 	}()
 
-	return d.fetchers.Run(ctx, k, d.output, metadata)
+	return d.fetchers.Run(ctx, k, metadata)
 }
 
 // Stop cleans up Data resources gracefully.
