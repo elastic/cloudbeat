@@ -332,7 +332,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		ctx := context.Background()
 
 		result, err := ecrFetcher.Fetch(ctx)
-		s.Equal(1, len(result))
-		s.Nil(err)
+		s.Equal(0, len(result))
+		s.EqualError(err, "could not retrieve pod's aws repositories: ecr error")
 	}
 }

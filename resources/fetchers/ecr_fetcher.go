@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	v1 "k8s.io/api/core/v1"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
@@ -64,8 +65,14 @@ func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	f.log.Debug("Starting ECRFetcher.Fetch")
 	results := make([]fetching.Resource, 0)
 	ecrRepositories := make([]ecr.Repository, 0)
+	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
+		return nil, err
+	}
+
 	for _, podDescriber := range f.PodDescribers {
-		ecrDescribedRepositories, err := f.describeAwsRepositories(ctx, podDescriber)
+		ecrDescribedRepositories, err := f.describeAwsRepositories(ctx, podsList, podDescriber)
 		if err != nil {
 			return nil, fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 		}
@@ -76,12 +83,8 @@ func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	return results, nil
 }
 
-func (f *ECRFetcher) describeAwsRepositories(ctx context.Context, describer PodDescriber) ([]ecr.Repository, error) {
-	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
-	if err != nil {
-		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
-		return nil, err
-	}
+func (f *ECRFetcher) describeAwsRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) ([]ecr.Repository, error) {
+
 	repositories := make([]string, 0)
 
 	for _, pod := range podsList.Items {
