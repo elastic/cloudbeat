@@ -12,3 +12,6 @@ JUSTFILE @davesys911
 *.go @elastic/cloudbeat
 go.mod @elastic/cloudbeat
 go.sum @elastic/cloudbeat
+
+# Automation tests
+tests/* @elastic/csp-automation
