@@ -259,11 +259,6 @@ func (bt *cloudbeat) configUpdate(update *agentconfig.C) error {
 		return err
 	}
 
-	policies, err := csppolicies.CISKubernetes()
-	if err != nil {
-		return fmt.Errorf("could not load CIS Kubernetes policies: %w", err)
-	}
-
 	if len(bt.config.Streams) == 0 {
 		bt.log.Infof("Did not receive any input stream from incoming config, skipping.")
 		return nil
@@ -274,7 +269,9 @@ func (bt *cloudbeat) configUpdate(update *agentconfig.C) error {
 		return fmt.Errorf("could not marshal to YAML: %w", err)
 	}
 
-	if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, y); err != nil {
+	fs := csppolicies.MergedFSWithDataYaml(csppolicies.CISKubernetesFS(), y)
+
+	if err := csppolicies.HostBundle("bundle.tar.gz", fs); err != nil {
 		return fmt.Errorf("could not update bundle with dataYaml: %w", err)
 	}
 

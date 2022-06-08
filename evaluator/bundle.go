@@ -33,13 +33,9 @@ var (
 )
 
 func StartServer() (*http.Server, error) {
-	policies, err := csppolicies.CISKubernetes()
-	if err != nil {
-		return nil, err
-	}
 
 	h := csppolicies.NewServer()
-	if err := csppolicies.HostBundle("bundle.tar.gz", policies); err != nil {
+	if err := csppolicies.HostBundle("bundle.tar.gz", csppolicies.CISKubernetesFS()); err != nil {
 		return nil, err
 	}
 
