@@ -30,6 +30,8 @@ from product.tests.tests.file_system.file_system_test_cases import *
      *cis_1_1_17,
      *cis_1_1_18,
      *cis_1_1_19,
+     *cis_1_1_20,
+     *cis_1_1_21,
      *cis_4_1_1,
      *cis_4_1_2,
      *cis_4_1_5,
@@ -67,13 +69,18 @@ def test_file_system_configuration(config_node_pre_test,
                             param_value=param_value,
                             resource=resource)
 
+    def identifier(res):
+        return res.filename in resource
+
     evaluation = get_evaluation(
         k8s=k8s_client,
         timeout=cloudbeat_agent.findings_timeout,
         pod_name=pods[0].metadata.name,
         namespace=cloudbeat_agent.namespace,
         rule_tag=rule_tag,
-        exec_timestamp=datetime.utcnow()
+        exec_timestamp=datetime.utcnow(),
+        resource_identifier=identifier
     )
 
     assert evaluation == expected, f"Rule {rule_tag} verification failed."
+
