@@ -111,7 +111,7 @@ name: aws-ecr
 		s.Equal(ecrProvider, ecrFetcher.PodDescribers[0].Provider)
 		s.Equal(ecrPublicProvider, ecrFetcher.PodDescribers[1].Provider)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
-		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].DescriberRegex.String())
-		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].DescriberRegex.String())
+		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].FilterRegex.String())
+		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].FilterRegex.String())
 	}
 }

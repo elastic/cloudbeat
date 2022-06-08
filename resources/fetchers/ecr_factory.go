@@ -103,12 +103,12 @@ func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, elements
 	}
 
 	privateECRExecutor := PodDescriber{
-		DescriberRegex: regexp.MustCompile(privateRepoRegex),
-		Provider:       elements.ecrPrivateRepoDescriber,
+		FilterRegex: regexp.MustCompile(privateRepoRegex),
+		Provider:    elements.ecrPrivateRepoDescriber,
 	}
 	publicECRExecutor := PodDescriber{
-		DescriberRegex: regexp.MustCompile(PublicRepoRegex),
-		Provider:       elements.ecrPublicRepoDescriber,
+		FilterRegex: regexp.MustCompile(PublicRepoRegex),
+		Provider:    elements.ecrPublicRepoDescriber,
 	}
 
 	fe := &ECRFetcher{

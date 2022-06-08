@@ -222,13 +222,13 @@ func (s *ECRFetcherTestSuite) TestFetcherFetch() {
 		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount, test.region)
 
 		privateEcrExecutor := PodDescriber{
-			DescriberRegex: regexp.MustCompile(privateRepoRegex),
-			Provider:       ecrProvider,
+			FilterRegex: regexp.MustCompile(privateRepoRegex),
+			Provider:    ecrProvider,
 		}
 
 		publicEcrExecutor := PodDescriber{
-			DescriberRegex: regexp.MustCompile(PublicRepoRegex),
-			Provider:       ecrPublicProvider,
+			FilterRegex: regexp.MustCompile(PublicRepoRegex),
+			Provider:    ecrPublicProvider,
 		}
 
 		expectedRepositories := append(test.expectedRepositories, test.expectedPublicRepositories...)
@@ -313,13 +313,13 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount, test.region)
 
 		privateEcrExecutor := PodDescriber{
-			DescriberRegex: regexp.MustCompile(privateRepoRegex),
-			Provider:       ecrProvider,
+			FilterRegex: regexp.MustCompile(privateRepoRegex),
+			Provider:    ecrProvider,
 		}
 
 		publicEcrExecutor := PodDescriber{
-			DescriberRegex: regexp.MustCompile(PublicRepoRegex),
-			Provider:       ecrPublicProvider,
+			FilterRegex: regexp.MustCompile(PublicRepoRegex),
+			Provider:    ecrPublicProvider,
 		}
 
 		ecrFetcher := ECRFetcher{

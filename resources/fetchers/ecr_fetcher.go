@@ -43,8 +43,8 @@ type ECRFetcher struct {
 }
 
 type PodDescriber struct {
-	DescriberRegex *regexp.Regexp
-	Provider       awslib.EcrRepositoryDescriber
+	FilterRegex *regexp.Regexp
+	Provider    awslib.EcrRepositoryDescriber
 }
 
 type ECRFetcherConfig struct {
@@ -72,7 +72,7 @@ func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	}
 
 	for _, podDescriber := range f.PodDescribers {
-		ecrDescribedRepositories, err := f.describeAwsRepositories(ctx, podsList, podDescriber)
+		ecrDescribedRepositories, err := f.describePodImagesRepositories(ctx, podsList, podDescriber)
 		if err != nil {
 			return nil, fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 		}
@@ -83,7 +83,7 @@ func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	return results, nil
 }
 
-func (f *ECRFetcher) describeAwsRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) ([]ecr.Repository, error) {
+func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) ([]ecr.Repository, error) {
 
 	repositories := make([]string, 0)
 
@@ -91,7 +91,7 @@ func (f *ECRFetcher) describeAwsRepositories(ctx context.Context, podsList *v1.P
 		for _, container := range pod.Spec.Containers {
 			image := container.Image
 			// Takes only aws images
-			regexMatcher := describer.DescriberRegex.FindStringSubmatch(image)
+			regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
 			{
 				if regexMatcher != nil {
 					repository := regexMatcher[1]
