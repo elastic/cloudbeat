@@ -20,6 +20,7 @@ package manager
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/elastic/beats/v7/libbeat/logp"
 
@@ -32,16 +33,17 @@ import (
 type FactoriesTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
-	F   factories
+	log        *logp.Logger
+	F          factories
+	resourceCh chan fetching.ResourceInfo
 }
 
 type numberFetcherFactory struct {
 }
 
-func (n *numberFetcherFactory) Create(log *logp.Logger, c *common.Config, infos chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (n *numberFetcherFactory) Create(log *logp.Logger, c *common.Config, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
-	return &numberFetcher{int(x), false}, nil
+	return &numberFetcher{int(x), false, ch}, nil
 }
 
 func numberConfig(number int) *common.Config {
@@ -67,6 +69,7 @@ func TestFactoriesTestSuite(t *testing.T) {
 
 func (s *FactoriesTestSuite) SetupTest() {
 	s.F = newFactories()
+	s.resourceCh = make(chan fetching.ResourceInfo)
 }
 
 func (s *FactoriesTestSuite) TestListFetcher() {
@@ -100,13 +103,23 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 	for _, test := range tests {
 		s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
 		c := numberConfig(test.value)
-		f, err := s.F.CreateFetcher(s.log, test.key, c, nil)
-		s.NoError(err)
-		_ := f.Fetch(context.TODO(), nil)
+		resourceCh := make(chan fetching.ResourceInfo)
+		defer close(resourceCh)
+		f, err := s.F.CreateFetcher(s.log, test.key, c, resourceCh)
 		s.NoError(err)
 
-		s.Equal(1, len(res))
-		s.Equal(test.value, res[0].GetData())
+		go f.Fetch(context.TODO(), fetching.CycleMetadata{})
+
+		var results []fetching.ResourceInfo
+		select {
+		case result := <-resourceCh:
+			results = append(results, result)
+		case <-time.Tick(2 * time.Second):
+			break
+		}
+
+		s.Equal(1, len(results))
+		s.Equal(test.value, results[0].GetData())
 	}
 }
 
@@ -146,14 +159,23 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err = s.F.RegisterFetchers(s.log, reg, conf, nil)
+		err = s.F.RegisterFetchers(s.log, reg, conf, s.resourceCh)
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
-		res, err := reg.Run(context.Background(), test.key, nil)
-		s.NoError(err)
-		s.Equal(test.value, res[0].GetData())
+		go func(err error) {
+			err = reg.Run(context.Background(), test.key, fetching.CycleMetadata{})
+		}(err)
 
+		var result fetching.ResourceInfo
+		select {
+		case result = <-s.resourceCh:
+		case <-time.Tick(2 * time.Second):
+			break
+		}
+
+		s.NoError(err)
+		s.Equal(test.value, result.Resource.GetData())
 	}
 }
 

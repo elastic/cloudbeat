@@ -59,7 +59,7 @@ func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fe
 	}, nil
 }
 
-// Run updates the cache using Fetcher implementations.
+// Run starts all configured fetchers to collect resources.
 func (d *Data) Run(ctx context.Context) error {
 	go d.fetchAndSleep(ctx)
 	return nil
@@ -135,10 +135,10 @@ func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching
 }
 
 // fetchProtected protect the fetching goroutine from getting panic
-func (d *Data) fetchProtected(ctx context.Context, k string, metadata fetching.CycleMetadata) error {
+func (d *Data) fetchProtected(ctx context.Context, k string, metadata fetching.CycleMetadata) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Errorf("fetcher %s recovered from panic: %v", k, r)
+			err = fmt.Errorf("fetcher %s recovered from panic: %v", k, r)
 		}
 	}()
 
