@@ -41,6 +41,7 @@ const (
 	reconfigureWaitTimeout = 10 * time.Minute
 	flushInterval          = 10 * time.Second
 	eventsThreshold        = 75
+	resourceChBuffer       = 50
 )
 
 // cloudbeat configuration.
@@ -72,7 +73,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 
 	log.Info("Config initiated.")
 
-	resourceCh := make(chan fetching.ResourceInfo)
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 	fetchersRegistry, err := initRegistry(log, c, resourceCh)
 	if err != nil {
 		cancel()
