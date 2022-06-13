@@ -71,11 +71,11 @@ Note: Check the jusfile for all available commands for build or deploy `$ just -
 
 ## Running Agent & Cloudbeat
 Cloudbeat is only supported on managed elastic-agents. It means, that in order to run the setup, you will be required to have a Kibana running.
-Create an agent policy and install the CSP integration. Now, when adding a new agent, you will get the K8s deployment instructions.
+Create an agent policy and install the CSP integration. Now, when adding a new agent, you will get the K8s deployment instructions of elastic-agent.
 
 ### Update settings
-Update cloudbeat settings on a runnign elastic-agent can be done using the [script](/scripts/remote_edit_config.sh)
-The script require a second step of trigerring the agent to re-run cloudbeat.
+Update cloudbeat settings on a runnign elastic-agent can be done by running the [script](/scripts/remote_edit_config.sh).
+The script still requires a second step of trigerring the agent to re-run cloudbeat.
 This can be done on Fleet UI by renaming the integration or even changing the agent log level.
 
 
