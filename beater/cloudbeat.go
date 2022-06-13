@@ -269,9 +269,10 @@ func (bt *cloudbeat) configUpdate(update *agentconfig.C) error {
 		return fmt.Errorf("could not marshal to YAML: %w", err)
 	}
 
-	fs := csppolicies.MergedFSWithDataYaml(csppolicies.CISKubernetesFS(), y)
+	bundle := csppolicies.CISKubernetesBundle()
+	bundle.With("data.yaml", y)
 
-	if err := csppolicies.HostBundle("bundle.tar.gz", fs); err != nil {
+	if err := csppolicies.HostBundle("bundle.tar.gz", bundle); err != nil {
 		return fmt.Errorf("could not update bundle with dataYaml: %w", err)
 	}
 

@@ -35,7 +35,7 @@ var (
 func StartServer() (*http.Server, error) {
 
 	h := csppolicies.NewServer()
-	if err := csppolicies.HostBundle("bundle.tar.gz", csppolicies.CISKubernetesFS()); err != nil {
+	if err := csppolicies.HostBundle("bundle.tar.gz", csppolicies.CISKubernetesBundle()); err != nil {
 		return nil, err
 	}
 
