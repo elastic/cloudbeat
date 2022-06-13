@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -32,7 +33,9 @@ import (
 type IamFetcherTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
+	log        *logp.Logger
+	resourceCh chan fetching.ResourceInfo
+	errorCh    chan error
 }
 
 func TestIamFetcherTestSuite(t *testing.T) {
@@ -44,6 +47,16 @@ func TestIamFetcherTestSuite(t *testing.T) {
 	}
 
 	suite.Run(t, s)
+}
+
+func (s *IamFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo)
+	s.errorCh = make(chan error, 1)
+}
+
+func (s *IamFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
+	close(s.errorCh)
 }
 
 func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
@@ -73,13 +86,17 @@ func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 			log:         s.log,
 			cfg:         eksConfig,
 			iamProvider: iamProvider,
+			resourceCh:  s.resourceCh,
 		}
 
 		ctx := context.Background()
-		result, err := eksFetcher.Fetch(ctx, nil)
-		s.Nil(err)
+		go func(ch chan error) {
+			ch <- eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		}(s.errorCh)
+		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+		iamResource := results[0].Resource.(IAMResource)
 
-		iamResource := result[0].(IAMResource)
 		s.Equal(expectedResource, iamResource)
+		s.Nil(<-s.errorCh)
 	}
 }

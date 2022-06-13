@@ -110,7 +110,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t := transformer.NewTransformer(ctx, log, commonData, resultsIndex)
+	t := transformer.NewTransformer(log, commonData, resultsIndex)
 
 	bt := &cloudbeat{
 		ctx:           ctx,

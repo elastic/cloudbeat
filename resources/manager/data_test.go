@@ -20,6 +20,7 @@ package manager
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"testing"
 	"time"
 
@@ -119,19 +120,10 @@ func (s *DataTestSuite) TestDataRun() {
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
-	err = d.Run(s.ctx)
-	s.NoError(err)
-
+	d.Run(s.ctx)
 	defer d.Stop()
 
-	var results []fetching.ResourceInfo
-	for i := 0; i < fetcherCount; i++ {
-		select {
-		case result := <-s.resourceCh:
-			results = append(results, result)
-		}
-	}
-
+	results := testhelper.WaitForResources(s.resourceCh, fetcherCount, 2)
 	s.Equal(fetcherCount, len(results))
 }
 
@@ -151,13 +143,7 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	s.NoError(err)
 	defer d.Stop()
 
-	var results []fetching.ResourceInfo
-	select {
-	case result := <-s.resourceCh:
-		results = append(results, result)
-	case <-time.Tick(2 * time.Second):
-		return
-	}
+	results := testhelper.WaitForResources(s.resourceCh, 1, 2)
 
 	s.Empty(results)
 }
@@ -194,13 +180,7 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	s.NoError(err)
 	defer d.Stop()
 
-	var results []fetching.ResourceInfo
-	select {
-	case result := <-s.resourceCh:
-		results = append(results, result)
-	case <-time.Tick(2 * time.Second):
-		return
-	}
+	results := testhelper.WaitForResources(s.resourceCh, 1, 3 /* timeout + 1 second */)
 
 	s.Empty(results)
 }
@@ -244,13 +224,7 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	s.NoError(err)
 	defer d.Stop()
 
-	var results []fetching.ResourceInfo
-	select {
-	case result := <-s.resourceCh:
-		results = append(results, result)
-	case <-time.Tick(2 * time.Second):
-		return
-	}
-
+	results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+	
 	s.Empty(results)
 }

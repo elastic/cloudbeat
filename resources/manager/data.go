@@ -34,15 +34,9 @@ type Data struct {
 	log      *logp.Logger
 	timeout  time.Duration
 	interval time.Duration
-	output   chan fetching.ResourceInfo
 	fetchers FetchersRegistry
 	wg       *sync.WaitGroup
 	stop     chan struct{}
-}
-
-type fetcherResult struct {
-	resources []fetching.Resource
-	err       error
 }
 
 // NewData returns a new Data instance.
@@ -54,7 +48,6 @@ func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fe
 		timeout:  timeout,
 		interval: interval,
 		fetchers: fetchers,
-		output:   make(chan fetching.ResourceInfo),
 		stop:     make(chan struct{}),
 	}, nil
 }
@@ -82,7 +75,7 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 	}
 }
 
-// fetchIteration waits for all the registered fetchers and sends all the resources on the output channel.
+// fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
 func (d *Data) fetchIteration(ctx context.Context) {
 	d.log.Infof("Manager triggered fetching for %d fetchers", len(d.fetchers.Keys()))
@@ -120,10 +113,10 @@ func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching
 
 	// The buffer is required to avoid go-routine leaks in a case a fetcher timed out
 	errCh := make(chan error, 1)
+	defer close(errCh)
 
 	go func() {
 		errCh <- d.fetchProtected(ctx, k, cycleMetadata)
-		close(errCh)
 	}()
 
 	select {
@@ -150,5 +143,4 @@ func (d *Data) Stop() {
 	d.fetchers.Stop()
 	close(d.stop)
 	d.wg.Wait()
-	close(d.output)
 }

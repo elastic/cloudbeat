@@ -20,6 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"reflect"
 	"regexp"
 	"testing"
@@ -42,7 +44,9 @@ const (
 type ElbFetcherTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
+	log        *logp.Logger
+	resourceCh chan fetching.ResourceInfo
+	errorCh    chan error
 }
 
 func TestElbFetcherTestSuite(t *testing.T) {
@@ -54,6 +58,16 @@ func TestElbFetcherTestSuite(t *testing.T) {
 	}
 
 	suite.Run(t, s)
+}
+
+func (s *ElbFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo)
+	s.errorCh = make(chan error)
+}
+
+func (s *ElbFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
+	close(s.errorCh)
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
@@ -125,17 +139,22 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
+			resourceCh:      s.resourceCh,
 		}
 
 		ctx := context.Background()
 
 		expectedResource := ELBResource{test.lbResponse}
-		result, err := elbFetcher.Fetch(ctx, nil)
-		s.Nil(err)
-		s.Equal(1, len(result))
+		go func(ch chan error) {
+			ch <- elbFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		}(s.errorCh)
 
-		elbResource := result[0].(ELBResource)
+		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+		elbResource := results[0].Resource.(ELBResource)
+
+		s.Equal(1, len(results))
 		s.Equal(expectedResource, elbResource)
+		s.Nil(<-s.errorCh)
 	}
 }
 
@@ -191,13 +210,17 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
+			resourceCh:      s.resourceCh,
 		}
 
 		ctx := context.Background()
+		go func(ch chan error) {
+			ch <- elbFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		}(s.errorCh)
 
-		result, err := elbFetcher.Fetch(ctx, nil)
-		s.Nil(result)
-		s.NotNil(err)
-		s.EqualError(err, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))
+		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+
+		s.Nil(results)
+		s.EqualError(<-s.errorCh, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))
 	}
 }

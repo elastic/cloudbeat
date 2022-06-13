@@ -20,20 +20,21 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"reflect"
-	"regexp"
-	"testing"
-
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
+	"reflect"
+	"regexp"
+	"testing"
 )
 
 const (
@@ -44,7 +45,9 @@ const (
 type ECRFetcherTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
+	log        *logp.Logger
+	resourceCh chan fetching.ResourceInfo
+	errorCh    chan error
 }
 
 func TestECRFetcherTestSuite(t *testing.T) {
@@ -55,6 +58,16 @@ func TestECRFetcherTestSuite(t *testing.T) {
 	}
 
 	suite.Run(t, s)
+}
+
+func (s *ECRFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo)
+	s.errorCh = make(chan error, 1)
+}
+
+func (s *ECRFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
+	close(s.errorCh)
 }
 
 func (s *ECRFetcherTestSuite) TestCreateFetcher() {
@@ -169,25 +182,26 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			regexp.MustCompile(regexTexts[1]),
 		}
 
-		expectedResource := ECRResource{test.expectedRepository}
-
 		ecrFetcher := ECRFetcher{
 			log:               s.log,
 			cfg:               ECRFetcherConfig{},
 			ecrProvider:       ecrProvider,
 			kubeClient:        kubeclient,
 			repoRegexMatchers: regexMatchers,
+			resourceCh:        s.resourceCh,
 		}
 
 		ctx := context.Background()
+		go func(ch chan error) {
+			ch <- ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		}(s.errorCh)
 
-		result, err := ecrFetcher.Fetch(ctx, nil)
-		s.Nil(err)
-		s.Equal(1, len(result))
+		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+		elbResource := results[0].Resource.(ECRResource)
 
-		elbResource := result[0].(ECRResource)
-		s.Equal(expectedResource, elbResource)
+		s.Equal(ECRResource{test.expectedRepository}, elbResource)
 		s.Equal(len(test.expectedRepositoryNames), len(elbResource.EcrRepositories))
+		s.Nil(<-s.errorCh)
 
 		for i, name := range test.expectedRepositoryNames {
 			s.Contains(*elbResource.EcrRepositories[i].RepositoryName, name)
@@ -262,14 +276,16 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 			ecrProvider:       ecrProvider,
 			kubeClient:        kubeclient,
 			repoRegexMatchers: regexMatchers,
+			resourceCh:        s.resourceCh,
 		}
 
 		ctx := context.Background()
+		go func(ch chan error) {
+			ch <- ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		}(s.errorCh)
 
-		result, err := ecrFetcher.Fetch(ctx, nil)
-		s.Nil(result)
-		s.NotNil(err)
-		s.EqualError(err, fmt.Sprintf("could retrieve ECR repositories: %s", test.error.Error()))
-
+		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+		s.Nil(results)
+		s.EqualError(<-s.errorCh, fmt.Sprintf("could retrieve ECR repositories: %s", test.error.Error()))
 	}
 }

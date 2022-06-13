@@ -20,7 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/utils"
+	"github.com/elastic/cloudbeat/resources/utils/user"
 	"os"
 	"strconv"
 	"syscall"
@@ -114,12 +114,12 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 
 	uid := stat.Uid
 	gid := stat.Gid
-	username, err := utils.GetUserNameFromID(uid, UserFile)
+	username, err := user.GetUserNameFromID(uid, UserFile)
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to find username for uid %d, error - %+v", uid, err))
 	}
 
-	groupName, err := utils.GetGroupNameFromID(gid, GroupFile)
+	groupName, err := user.GetGroupNameFromID(gid, GroupFile)
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to find groupname for gid %d, error - %+v", gid, err))
 	}

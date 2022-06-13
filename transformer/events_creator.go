@@ -30,17 +30,15 @@ import (
 )
 
 type Transformer struct {
-	context       context.Context
 	log           *logp.Logger
 	eventMetadata common.MapStr
 	commonData    CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, log *logp.Logger, cd CommonDataInterface, index string) Transformer {
+func NewTransformer(log *logp.Logger, cd CommonDataInterface, index string) Transformer {
 	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
 
 	return Transformer{
-		context:       ctx,
 		log:           log,
 		eventMetadata: eventMetadata,
 		commonData:    cd,

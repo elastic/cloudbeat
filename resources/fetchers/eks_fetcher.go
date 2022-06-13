@@ -47,12 +47,16 @@ func (f EKSFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 	f.log.Debug("Starting EKSFetcher.Fetch")
 
 	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)
+	if err != nil {
+		return err
+	}
+
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      EKSResource{result},
 		CycleMetadata: cMetadata,
 	}
 
-	return err
+	return nil
 }
 
 func (f EKSFetcher) Stop() {

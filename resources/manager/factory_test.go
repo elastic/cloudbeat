@@ -19,10 +19,9 @@ package manager
 
 import (
 	"context"
-	"testing"
-	"time"
-
 	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/config"
@@ -103,20 +102,12 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 	for _, test := range tests {
 		s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
 		c := numberConfig(test.value)
-		resourceCh := make(chan fetching.ResourceInfo)
-		defer close(resourceCh)
-		f, err := s.F.CreateFetcher(s.log, test.key, c, resourceCh)
+
+		f, err := s.F.CreateFetcher(s.log, test.key, c, s.resourceCh)
 		s.NoError(err)
 
 		go f.Fetch(context.TODO(), fetching.CycleMetadata{})
-
-		var results []fetching.ResourceInfo
-		select {
-		case result := <-resourceCh:
-			results = append(results, result)
-		case <-time.Tick(2 * time.Second):
-			break
-		}
+		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
 
 		s.Equal(1, len(results))
 		s.Equal(test.value, results[0].GetData())
@@ -167,15 +158,9 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 			err = reg.Run(context.Background(), test.key, fetching.CycleMetadata{})
 		}(err)
 
-		var result fetching.ResourceInfo
-		select {
-		case result = <-s.resourceCh:
-		case <-time.Tick(2 * time.Second):
-			break
-		}
-
+		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
 		s.NoError(err)
-		s.Equal(test.value, result.Resource.GetData())
+		s.Equal(test.value, results[0].Resource.GetData())
 	}
 }
 

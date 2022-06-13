@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"io/fs"
 	"testing"
 	"testing/fstest"
@@ -56,7 +57,9 @@ type ProcessConfigTestStruct struct {
 type ProcessFetcherTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
+	log        *logp.Logger
+	resourceCh chan fetching.ResourceInfo
+	errorCh    chan error
 }
 
 func TestProcessFetcherTestSuite(t *testing.T) {
@@ -68,6 +71,16 @@ func TestProcessFetcherTestSuite(t *testing.T) {
 	}
 
 	suite.Run(t, s)
+}
+
+func (s *ProcessFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo)
+	s.errorCh = make(chan error, 1)
+}
+
+func (s *ProcessFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
+	close(s.errorCh)
 }
 
 func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
@@ -84,13 +97,18 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
 	}
-	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs}
+	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs, resourceCh: t.resourceCh}
 
-	fetchedResource, err := processesFetcher.Fetch(context.TODO(), nil)
-	t.Nil(err)
-	t.Equal(1, len(fetchedResource))
+	go func(ch chan error) {
+		ch <- processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	}(t.errorCh)
+	results := testhelper.WaitForResources(t.resourceCh, 1, 2)
 
-	processResource := fetchedResource[0].(ProcessResource)
+	t.Equal(1, len(results))
+	t.Nil(<-t.errorCh)
+
+	processResource := results[0].Resource.(ProcessResource)
+
 	t.Equal(testProcess.Pid, processResource.PID)
 	t.Equal("kubelet", processResource.Stat.Name)
 	t.Contains(processResource.Cmd, "/usr/bin/kubelet")
@@ -110,11 +128,15 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}}},
 	}
-	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys}
+	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys, resourceCh: t.resourceCh}
 
-	fetchedResource, err := processesFetcher.Fetch(context.TODO(), nil)
-	t.Nil(err)
-	t.Equal(0, len(fetchedResource))
+	go func(ch chan error) {
+		ch <- processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	}(t.errorCh)
+	results := testhelper.WaitForResources(t.resourceCh, 1, 2)
+
+	t.Equal(0, len(results))
+	t.Nil(<-t.errorCh)
 }
 
 func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
@@ -131,13 +153,17 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 		RequiredProcesses: map[string]ProcessInputConfiguration{
 			"kubelet": {ConfigFileArguments: []string{}}},
 	}
-	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys}
+	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys, resourceCh: t.resourceCh}
 
-	fetchedResource, err := processesFetcher.Fetch(context.TODO(), nil)
-	t.Nil(err)
-	t.Equal(1, len(fetchedResource))
+	go func(ch chan error) {
+		ch <- processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	}(t.errorCh)
 
-	processResource := fetchedResource[0].(ProcessResource)
+	results := testhelper.WaitForResources(t.resourceCh, 1, 2)
+	t.Equal(1, len(results))
+	t.Nil(<-t.errorCh)
+
+	processResource := results[0].Resource.(ProcessResource)
 	t.Equal(testProcess.Pid, processResource.PID)
 	t.Equal("kubelet", processResource.Stat.Name)
 	t.Contains(processResource.Cmd, "/usr/bin/kubelet")
@@ -176,7 +202,7 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 
 		sysfs := createProcess(testProcess, test.delimiter).(fstest.MapFS)
 		sysfs[test.configFileName] = &fstest.MapFile{
-			Data: []byte(configData),
+			Data: configData,
 		}
 
 		fetcherConfig := ProcessFetcherConfig{
@@ -184,13 +210,17 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 			RequiredProcesses: map[string]ProcessInputConfiguration{
 				"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
 		}
-		processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs}
+		processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs, resourceCh: t.resourceCh}
 
-		fetchedResource, err := processesFetcher.Fetch(context.TODO(), nil)
-		t.Nil(err)
-		t.Equal(1, len(fetchedResource))
+		go func(ch chan error) {
+			ch <- processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+		}(t.errorCh)
+		results := testhelper.WaitForResources(t.resourceCh, 1, 2)
 
-		processResource := fetchedResource[0].(ProcessResource)
+		t.Equal(1, len(results))
+		t.Nil(<-t.errorCh)
+
+		processResource := results[0].Resource.(ProcessResource)
 		t.Equal(testProcess.Pid, processResource.PID)
 		t.Equal("kubelet", processResource.Stat.Name)
 		t.Contains(processResource.Cmd, "/usr/bin/kubelet")
