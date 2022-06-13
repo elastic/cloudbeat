@@ -64,9 +64,11 @@ func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, 
 func (c *Transformer) processEachResource(results []fetching.Resource, cycleMetadata CycleMetadata) []beat.Event {
 	events := make([]beat.Event, 0)
 	for _, result := range results {
-		if arr, err := c.createResourceEvents(result, cycleMetadata); err != nil {
+		arr, err := c.createResourceEvents(result, cycleMetadata)
+		if err != nil {
 			c.log.Errorf("Failed to create beat events for Cycle ID: %v, error: %v",
 				cycleMetadata.CycleId, err)
+		} else {
 			events = append(events, arr...)
 		}
 	}
