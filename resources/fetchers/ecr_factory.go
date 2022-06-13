@@ -44,10 +44,11 @@ type ECRFactory struct {
 }
 
 type ecrExtraElements struct {
-	awsConfig              awslib.Config
-	kubernetesClientGetter providers.KubernetesClientGetter
-	identityProviderGetter awslib.IdentityProviderGetter
-	ecrRepoDescriber       awslib.EcrRepositoryDescriber
+	awsConfig               awslib.Config
+	kubernetesClientGetter  providers.KubernetesClientGetter
+	identityProviderGetter  awslib.IdentityProviderGetter
+	ecrPrivateRepoDescriber awslib.EcrRepositoryDescriber
+	ecrPublicRepoDescriber  awslib.EcrRepositoryDescriber
 }
 
 func (f *ECRFactory) Create(log *logp.Logger, c *common.Config, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -72,15 +73,17 @@ func getEcrExtraElements() (ecrExtraElements, error) {
 	if err != nil {
 		return ecrExtraElements{}, err
 	}
-	ecr := awslib.NewEcrProvider(awsConfig.Config)
+	ecrPrivateProvider := awslib.NewEcrProvider(awsConfig.Config)
+	ecrPublicProvider := awslib.NewEcrPublicProvider()
 	identityProvider := awslib.NewAWSIdentityProvider(awsConfig.Config)
 	kubeGetter := providers.KubernetesProvider{}
 
 	extraElements := ecrExtraElements{
-		awsConfig:              awsConfig,
-		kubernetesClientGetter: kubeGetter,
-		identityProviderGetter: identityProvider,
-		ecrRepoDescriber:       ecr,
+		awsConfig:               awsConfig,
+		kubernetesClientGetter:  kubeGetter,
+		identityProviderGetter:  identityProvider,
+		ecrPrivateRepoDescriber: ecrPrivateProvider,
+		ecrPublicRepoDescriber:  ecrPublicProvider,
 	}
 
 	return extraElements, nil
@@ -99,14 +102,22 @@ func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, elements
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}
 
+	privateECRExecutor := PodDescriber{
+		FilterRegex: regexp.MustCompile(privateRepoRegex),
+		Provider:    elements.ecrPrivateRepoDescriber,
+	}
+	publicECRExecutor := PodDescriber{
+		FilterRegex: regexp.MustCompile(PublicRepoRegex),
+		Provider:    elements.ecrPublicRepoDescriber,
+	}
+
 	fe := &ECRFetcher{
-		log:         log,
-		cfg:         cfg,
-		ecrProvider: elements.ecrRepoDescriber,
-		kubeClient:  kubeClient,
-		repoRegexMatchers: []*regexp.Regexp{
-			regexp.MustCompile(privateRepoRegex),
-			regexp.MustCompile(PublicRepoRegex),
+		log:        log,
+		cfg:        cfg,
+		kubeClient: kubeClient,
+		PodDescribers: []PodDescriber{
+			privateECRExecutor,
+			publicECRExecutor,
 		},
 		resourceCh: ch,
 	}

@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"reflect"
 	"regexp"
 	"testing"
 
@@ -128,7 +127,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
 		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.MatchedBy(func(balancers []string) bool {
-			return reflect.DeepEqual(balancers, test.expectedlbNames)
+			return s.Equal(balancers, test.expectedlbNames)
 		})).Return(test.lbResponse, nil)
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}

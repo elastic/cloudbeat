@@ -20,27 +20,32 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	v1 "k8s.io/api/core/v1"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w]+)[:,@]?"
-const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?"
+const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
+const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
 
 type ECRFetcher struct {
-	log               *logp.Logger
-	cfg               ECRFetcherConfig
-	ecrProvider       awslib.EcrRepositoryDescriber
-	kubeClient        k8s.Interface
-	repoRegexMatchers []*regexp.Regexp
-	resourceCh        chan fetching.ResourceInfo
+	log           *logp.Logger
+	cfg           ECRFetcherConfig
+	kubeClient    k8s.Interface
+	PodDescribers []PodDescriber
+	resourceCh    chan fetching.ResourceInfo
+}
+
+type PodDescriber struct {
+	FilterRegex *regexp.Regexp
+	Provider    awslib.EcrRepositoryDescriber
 }
 
 type ECRFetcherConfig struct {
@@ -59,14 +64,19 @@ func (f *ECRFetcher) Stop() {
 
 func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ECRFetcher.Fetch")
-
-	podsAwsRepositories, err := f.getAwsPodRepositories(ctx)
+	ecrRepositories := make([]ecr.Repository, 0)
+	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
+		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
+		return err
 	}
-	ecrRepositories, err := f.ecrProvider.DescribeRepositories(ctx, podsAwsRepositories)
-	if err != nil {
-		return fmt.Errorf("could retrieve ECR repositories: %w", err)
+
+	for _, podDescriber := range f.PodDescribers {
+		ecrDescribedRepositories, err := f.describePodImagesRepositories(ctx, podsList, podDescriber)
+		if err != nil {
+			return fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
+		}
+		ecrRepositories = append(ecrRepositories, ecrDescribedRepositories...)
 	}
 
 	f.resourceCh <- fetching.ResourceInfo{
@@ -74,31 +84,27 @@ func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 		CycleMetadata: cMetadata,
 	}
 
-	return err
+	return nil
 }
 
-func (f *ECRFetcher) getAwsPodRepositories(ctx context.Context) ([]string, error) {
-	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
-	if err != nil {
-		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
-		return nil, err
-	}
+func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) ([]ecr.Repository, error) {
 
 	repositories := make([]string, 0)
+
 	for _, pod := range podsList.Items {
 		for _, container := range pod.Spec.Containers {
 			image := container.Image
 			// Takes only aws images
-			for _, matcher := range f.repoRegexMatchers {
-				if matcher.MatchString(image) {
-					// Extract the repository name out of the image name
-					repository := matcher.FindStringSubmatch(image)[1]
+			regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
+			{
+				if regexMatcher != nil {
+					repository := regexMatcher[1]
 					repositories = append(repositories, repository)
 				}
 			}
 		}
 	}
-	return repositories, nil
+	return describer.Provider.DescribeRepositories(ctx, repositories)
 }
 
 func (res ECRResource) GetData() interface{} {
