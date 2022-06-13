@@ -20,13 +20,12 @@ package manager
 import (
 	"context"
 	"fmt"
-	"testing"
-	"time"
-
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
 type numberFetcher struct {
@@ -197,13 +196,7 @@ func (s *RegistryTestSuite) TestRunRegistered() {
 			err = s.registry.Run(context.TODO(), test.key, fetching.CycleMetadata{})
 		}(err)
 
-		var results []fetching.ResourceInfo
-		select {
-		case result := <-s.resourceCh:
-			results = append(results, result)
-		case <-time.Tick(2 * time.Second):
-			return
-		}
+		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
 
 		s.NoError(err)
 		s.Equal(1, len(results))
