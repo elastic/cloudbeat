@@ -35,6 +35,7 @@ type FactoriesTestSuite struct {
 	log        *logp.Logger
 	F          factories
 	resourceCh chan fetching.ResourceInfo
+	errCh      chan error
 }
 
 type numberFetcherFactory struct {
@@ -69,6 +70,12 @@ func TestFactoriesTestSuite(t *testing.T) {
 func (s *FactoriesTestSuite) SetupTest() {
 	s.F = newFactories()
 	s.resourceCh = make(chan fetching.ResourceInfo)
+	s.errCh = make(chan error)
+}
+
+func (s *FactoriesTestSuite) TearDownTest() {
+	close(s.resourceCh)
+	close(s.errCh)
 }
 
 func (s *FactoriesTestSuite) TestListFetcher() {
@@ -105,11 +112,13 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 
 		f, err := s.F.CreateFetcher(s.log, test.key, c, s.resourceCh)
 		s.NoError(err)
-
-		go f.Fetch(context.TODO(), fetching.CycleMetadata{})
+		go func(ch chan error) {
+			ch <- f.Fetch(context.TODO(), fetching.CycleMetadata{})
+		}(s.errCh)
 		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
 
 		s.Equal(1, len(results))
+		s.Nil(<-s.errCh)
 		s.Equal(test.value, results[0].GetData())
 	}
 }
@@ -154,12 +163,12 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
-		go func(err error) {
-			err = reg.Run(context.Background(), test.key, fetching.CycleMetadata{})
-		}(err)
+		go func(ch chan error) {
+			ch <- reg.Run(context.Background(), test.key, fetching.CycleMetadata{})
+		}(s.errCh)
 
 		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
-		s.NoError(err)
+		s.NoError(<-s.errCh)
 		s.Equal(test.value, results[0].Resource.GetData())
 	}
 }
@@ -182,7 +191,7 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err = s.F.RegisterFetchers(s.log, reg, conf, nil)
+		err = s.F.RegisterFetchers(s.log, reg, conf, s.resourceCh)
 		s.Error(err)
 	}
 }

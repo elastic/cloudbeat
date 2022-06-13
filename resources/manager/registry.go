@@ -42,7 +42,7 @@ type registeredFetcher struct {
 	c []fetching.Condition
 }
 
-func NewFetcherRegistry(log *logp.Logger) *fetchersRegistry {
+func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
 	return &fetchersRegistry{
 		log: log,
 		reg: make(map[string]registeredFetcher),
