@@ -20,6 +20,7 @@ package transformer
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -32,7 +33,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/manager"
 
 	"github.com/gofrs/uuid"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
@@ -82,18 +82,27 @@ var (
 
 type EventsCreatorTestSuite struct {
 	suite.Suite
+
+	log             *logp.Logger
 	cycleId         uuid.UUID
 	mockedEvaluator evaluator.MockedEvaluator
 }
 
 func TestSuite(t *testing.T) {
-	suite.Run(t, new(EventsCreatorTestSuite))
+	s := new(EventsCreatorTestSuite)
+	s.log = logp.NewLogger("cloudbeat_events_creator_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *EventsCreatorTestSuite) SetupSuite() {
 	err := parseJsonfile(opaResultsFileName, &opaResults)
 	if err != nil {
-		logp.L().Errorf("Could not parse Json file: %v", err)
+		s.log.Errorf("Could not parse JSON file: %v", err)
 		return
 	}
 	s.cycleId, _ = uuid.NewV4()
@@ -164,11 +173,13 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.mockedEvaluator.On(methodMock.methodName, methodMock.args...).Return(methodMock.returnArgs...)
 			}
 
-			transformer := NewTransformer(ctx, &s.mockedEvaluator, cd, testIndex)
+			transformer := NewTransformer(ctx, s.log, &s.mockedEvaluator, cd, testIndex)
 			generatedEvents := transformer.ProcessAggregatedResources(tt.args.resource, tt.args.metadata)
 
 			if tt.wantErr {
 				s.Equal(0, len(generatedEvents))
+			} else {
+				s.NotEqual(0, len(generatedEvents))
 			}
 
 			for _, event := range generatedEvents {

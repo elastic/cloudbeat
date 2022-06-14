@@ -53,6 +53,7 @@ type FileSystemResource struct {
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
 type FileSystemFetcher struct {
+	log *logp.Logger
 	cfg FileFetcherConfig
 }
 
@@ -62,19 +63,20 @@ type FileFetcherConfig struct {
 }
 
 func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("file fetcher starts to fetch data")
+	f.log.Debug("Starting FileSystemFetcher.Fetch")
+
 	results := make([]fetching.Resource, 0)
 
 	// Input files might contain glob pattern
 	for _, filePattern := range f.cfg.Patterns {
 		matchedFiles, err := Glob(filePattern)
 		if err != nil {
-			logp.Error(fmt.Errorf("failed to find matched glob for %s, error - %+v", filePattern, err))
+			f.log.Errorf("Failed to find matched glob for %s, error: %+v", filePattern, err)
 		}
 		for _, file := range matchedFiles {
 			resource, err := f.fetchSystemResource(file)
 			if err != nil {
-				logp.Err("Unable to fetch fileSystemResource for file: %v", file)
+				f.log.Errorf("Unable to fetch fileSystemResource for file %v", file)
 				continue
 			}
 			results = append(results, resource)
@@ -87,8 +89,7 @@ func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FileSystemReso
 
 	info, err := os.Stat(filePath)
 	if err != nil {
-		err := fmt.Errorf("failed to fetch %s, error - %+v", filePath, err)
-		return FileSystemResource{}, err
+		return FileSystemResource{}, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
 	}
 	resourceInfo, _ := FromFileInfo(info, filePath)
 

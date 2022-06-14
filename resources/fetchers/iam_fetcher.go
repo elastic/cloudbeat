@@ -19,13 +19,16 @@ package fetchers
 
 import (
 	"context"
+
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/gofrs/uuid"
 )
 
 type IAMFetcher struct {
+	log         *logp.Logger
 	iamProvider awslib.IAMRolePermissionGetter
 	cfg         IAMFetcherConfig
 }
@@ -40,7 +43,8 @@ type IAMResource struct {
 }
 
 func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("iam fetcher starts to fetch data")
+	f.log.Debug("Starting IAMFetcher.Fetch")
+
 	results := make([]fetching.Resource, 0)
 
 	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
@@ -57,11 +61,11 @@ func (r IAMResource) GetData() interface{} {
 }
 
 func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
-	//TODO implement me
+	uid, _ := uuid.NewV4()
 	return fetching.ResourceMetadata{
-		ID:      "",
-		Type:    "",
-		SubType: "",
+		ID:      uid.String(),
+		Type:    IAMType,
+		SubType: IAMType,
 		Name:    "",
 	}
 }
