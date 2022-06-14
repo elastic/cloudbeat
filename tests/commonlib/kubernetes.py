@@ -15,6 +15,7 @@ class KubernetesHelper:
         else:
             self.config = config.load_kube_config()
 
+        self.policy_c1_api = client.PolicyV1beta1Api()
         self.core_v1_client = client.CoreV1Api()
         self.app_api = client.AppsV1Api()
         self.rbac_api = client.RbacAuthorizationV1Api()
@@ -30,6 +31,7 @@ class KubernetesHelper:
             'RoleBinding': self.rbac_api.list_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.list_cluster_role_binding,
             'ClusterRole': self.rbac_api.list_cluster_role,
+            'PodSecurityPolicy': self.policy_c1_api.list_pod_security_policy,
             'Lease': self.coordination_v1_api.list_namespaced_lease,
         }
 
@@ -41,6 +43,7 @@ class KubernetesHelper:
             'Role': self.rbac_api.delete_namespaced_role,
             'RoleBinding': self.rbac_api.delete_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.delete_cluster_role_binding,
+            'PodSecurityPolicy': self.policy_c1_api.delete_pod_security_policy,
             'ClusterRole': self.rbac_api.delete_cluster_role,
             'Lease': self.coordination_v1_api.delete_namespaced_lease
         }
@@ -53,6 +56,7 @@ class KubernetesHelper:
             'Role': self.rbac_api.patch_namespaced_role,
             'RoleBinding': self.rbac_api.patch_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.patch_cluster_role_binding,
+            'PodSecurityPolicy': self.policy_c1_api.patch_pod_security_policy,
             'ClusterRole': self.rbac_api.patch_cluster_role,
             'Lease': self.coordination_v1_api.patch_namespaced_lease
         }
@@ -65,6 +69,7 @@ class KubernetesHelper:
             'Role': self.rbac_api.create_namespaced_role,
             'RoleBinding': self.rbac_api.create_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.create_cluster_role_binding,
+            'PodSecurityPolicy': self.policy_c1_api.create_pod_security_policy,
             'ClusterRole': self.rbac_api.create_cluster_role,
             'Lease': self.coordination_v1_api.create_namespaced_lease
         }
@@ -77,6 +82,7 @@ class KubernetesHelper:
             'Role': self.rbac_api.read_namespaced_role,
             'RoleBinding': self.rbac_api.read_namespaced_role_binding,
             'ClusterRoleBinding': self.rbac_api.read_cluster_role_binding,
+            'PodSecurityPolicy': self.policy_c1_api.read_pod_security_policy,
             'ClusterRole': self.rbac_api.read_cluster_role,
             'Lease': self.coordination_v1_api.read_namespaced_lease
         }
@@ -121,16 +127,23 @@ class KubernetesHelper:
         This function deploys cloudbeat agent from yaml file
         :return:
         """
-        return utils.create_from_yaml(k8s_client=self.api_client,
-                                      yaml_file=yaml_file,
-                                      namespace=namespace,
-                                      verbose=True)
+        return self.create_from_yaml(yaml_file=yaml_file, namespace=namespace)
 
-    def create_from_yaml(self, yaml_file: str, namespace: str, verbose: bool = False):
-        return utils.create_from_yaml(k8s_client=self.api_client,
-                                      yaml_file=yaml_file,
-                                      namespace=namespace,
-                                      verbose=verbose)
+    def create_from_yaml(self, yaml_file: str, namespace: str, verbose: bool = True):
+        return utils.create_from_yaml(
+            k8s_client=self.api_client,
+            yaml_file=yaml_file,
+            namespace=namespace,
+            verbose=verbose
+        )
+
+    def create_from_dict(self, data: dict, namespace: str, verbose: bool = True, **_):
+        return utils.create_from_dict(
+            k8s_client=self.api_client,
+            data=data,
+            namespace=namespace,
+            verbose=verbose
+        )
 
     def delete_from_yaml(self, yaml_objects_list: list):
         """
@@ -142,9 +155,20 @@ class KubernetesHelper:
         """
         result_list = []
         for yaml_object in yaml_objects_list:
-            for dict_key in yaml_object:
-                if self.get_resource(resource_type=dict_key, **yaml_object[dict_key]):
-                    result_list.append(self.delete_resources(resource_type=dict_key, **yaml_object[dict_key]))
+            metadata = yaml_object['metadata']
+            relevant_metadata = {k: metadata[k] for k in ('name', 'namespace') if k in metadata}
+            try:
+                self.get_resource(
+                    resource_type=yaml_object['kind'],
+                    **relevant_metadata
+                )
+                result_list.append(self.delete_resources(
+                    resource_type=yaml_object['kind'],
+                    **relevant_metadata
+                ))
+            except ApiException as notFound:
+                print(f"{relevant_metadata['name']} not found {notFound.status}")
+
         return result_list
 
     def delete_resources(self, resource_type: str, **kwargs):
@@ -176,21 +200,21 @@ class KubernetesHelper:
             print(f"Resource not found: {e.reason}")
             raise e
 
-    def wait_for_resource(self, resource_type: str, name: str, namespace: str, status: str, timeout: int = 120) -> bool:
+    def wait_for_resource(self, resource_type: str, name: str, status_list: list,
+                          timeout: int = 120, **kwargs) -> bool:
         """
         watches a resources for a status change
         @param resource_type: the resource type
         @param name: resource name
-        @param namespace: namespace to look for
-        @param status: RUNNING, DELETED, MODIFIED
+        @param status_list: excepted statuses e.g., RUNNING, DELETED, MODIFIED, ADDED
         @param timeout: until wait
         @return: True if status reached
         """
         w = watch.Watch()
         for event in w.stream(func=self.dispatch_list[resource_type],
-                              namespace=namespace,
-                              timeout_seconds=timeout):
-            if event["object"].metadata.name == name and event["type"] == status:
+                              timeout_seconds=timeout,
+                              **kwargs):
+            if event["object"].metadata.name == name and event["type"] in status_list:
                 w.stop()
                 return True
         return False
