@@ -109,6 +109,17 @@ cis_1_1_19 = [
 
 ]
 
+cis_1_1_20 = [
+    ('CIS 1.1.20', 'chmod', '0700', '/etc/kubernetes/pki/apiserver.crt', 'failed'),
+    ('CIS 1.1.20', 'chmod', '0666', '/etc/kubernetes/pki/apiserver.crt', 'failed'),
+    ('CIS 1.1.20', 'chmod', '0644', '/etc/kubernetes/pki/apiserver.crt', 'passed'),
+]
+
+cis_1_1_21 = [
+    ('CIS 1.1.21', 'chmod', '0644', '/etc/kubernetes/pki/apiserver.key', 'failed'),
+    ('CIS 1.1.21', 'chmod', '0600', '/etc/kubernetes/pki/apiserver.key', 'passed'),
+]
+
 cis_4_1_1 = [
     ('CIS 4.1.1', 'chmod', '0700', '/etc/systemd/system/kubelet.service.d/10-kubeadm.conf', 'failed'),
     ('CIS 4.1.1', 'chmod', '0644', '/etc/systemd/system/kubelet.service.d/10-kubeadm.conf', 'passed'),
@@ -125,7 +136,6 @@ cis_4_1_2 = [
 cis_4_1_5 = [
     ('CIS 4.1.5', 'chmod', '0700', '/etc/kubernetes/kubelet.conf', 'failed'),
     ('CIS 4.1.5', 'chmod', '0644', '/etc/kubernetes/kubelet.conf', 'passed'),
-
 ]
 
 cis_4_1_6 = [

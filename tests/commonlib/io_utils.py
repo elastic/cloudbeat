@@ -95,7 +95,7 @@ class FsClient:
                 f"File {resource} does not exist or mount missing.")
 
         if command == 'chmod':
-            os.chmod(path=resource, mode=int(param_value))
+            os.chmod(path=resource, mode=int(param_value, base=8))
         elif command == 'chown':
             uid_gid = param_value.split(':')
             if len(uid_gid) != 2:
