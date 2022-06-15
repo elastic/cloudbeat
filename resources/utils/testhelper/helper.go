@@ -18,12 +18,11 @@
 package testhelper
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"time"
 )
 
-func WaitForResources(ch chan fetching.ResourceInfo, times int, wait int) []fetching.ResourceInfo {
-	var results []fetching.ResourceInfo
+func WaitForResources[T any](ch chan T, times int, wait int) []T {
+	var results []T
 
 	for i := 0; i < times; i++ {
 		select {

@@ -2,72 +2,55 @@ package pipeline
 
 import (
 	"context"
+	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 var (
-	ctx, cancel = context.WithCancel(context.Background())
-	inCh        = make(chan int)
+	inCh = make(chan int, 1)
+	log  = logp.NewLogger("cloudbeat_config_test_suite")
 )
 
 func TestStep(t *testing.T) {
 	type args struct {
-		ctx          context.Context
 		inputChannel chan int
-		fn           func(context.Context, int) float64
+		fn           func(context.Context, int) (float64, error)
 		val          int
 	}
 	tests := []struct {
-		name         string
-		args         args
-		want         float64
-		shouldCancel bool
+		name string
+		args args
+		want int
 	}{
 		{
 			name: "Should receive value from output channel",
 			args: args{
-				ctx:          ctx,
 				inputChannel: inCh,
-				fn:           intToFloat,
+				fn:           func(context context.Context, i int) (float64, error) { return float64(i), nil },
 				val:          1,
 			},
-			want:         1,
-			shouldCancel: false,
+			want: 1,
 		},
 		{
-			name: "Context is canceled - no value received",
+			name: "Pipeline function returns error - no value received",
 			args: args{
-				ctx:          ctx,
 				inputChannel: inCh,
-				fn:           intToFloat,
+				fn:           func(context context.Context, i int) (float64, error) { return 0, errors.New("") },
 				val:          1,
 			},
-			want:         0,
-			shouldCancel: true,
+			want: 0,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			outCh := Step(tt.args.ctx, tt.args.inputChannel, tt.args.fn)
+			outCh := Step(log, tt.args.inputChannel, tt.args.fn)
 			tt.args.inputChannel <- tt.args.val
+			results := testhelper.WaitForResources(outCh, 1, 2)
 
-			if tt.shouldCancel {
-				cancel()
-			}
-
-			var result float64
-			select {
-			case result = <-outCh:
-			case <-ctx.Done():
-				break
-			}
-
-			assert.Equal(t, tt.want, result)
+			assert.Equal(t, tt.want, len(results))
 		})
 	}
-}
-
-func intToFloat(ctx context.Context, num int) float64 {
-	return float64(num)
 }
