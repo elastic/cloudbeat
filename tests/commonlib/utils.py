@@ -33,7 +33,7 @@ def get_evaluation(k8s, timeout, pod_name, namespace, rule_tag, exec_timestamp,
                     resource = log.result.resource
                     if resource_identifier(resource):
                         return finding.result.evaluation
-    return "Unknown"
+    return "unknown"
 
 
 def dict_contains(small, big):

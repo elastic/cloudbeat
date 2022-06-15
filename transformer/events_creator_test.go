@@ -119,7 +119,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
 			transformer := NewTransformer(s.log, cd, testIndex)
-			generatedEvents := transformer.CreateBeatEvents(ctx, tt.input)
+			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
 				resource := event.Fields["resource"].(fetching.ResourceFields)
