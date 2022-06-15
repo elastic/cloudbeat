@@ -203,7 +203,8 @@ require (
 	google.golang.org/grpc v1.44.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirect
+	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirectresources/manager/data.go
+
 	howett.net/plist v1.0.0 // indirect
 )
 

@@ -68,26 +68,25 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
 	}, nil
 }
 
-func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceInfo) EventData {
+func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceInfo) (EventData, error) {
 	fetcherResult := fetching.Result{
 		Type:     resourceInfo.GetMetadata().Type,
 		Resource: resourceInfo.GetData(),
 	}
 
 	result, err := o.decision(ctx, fetcherResult)
-
 	if err != nil {
-		o.log.Errorf("Error running the policy: %v", err)
+		return EventData{}, fmt.Errorf("error running the policy: %v", err)
 	}
 
 	o.log.Debugf("Eval decision for input: %v -- %v", fetcherResult, result)
 	ruleResults, err := o.decode(result)
 	if err != nil {
-		o.log.Errorf("Error decoding findings: %v", err)
+		return EventData{}, fmt.Errorf("error decoding findings: %v", err)
 	}
 
 	o.log.Debugf("Created %d findings for input: %v", len(ruleResults.Findings), fetcherResult)
-	return EventData{ruleResults, resourceInfo}
+	return EventData{ruleResults, resourceInfo}, nil
 }
 
 func (o *OpaEvaluator) Stop(ctx context.Context) {

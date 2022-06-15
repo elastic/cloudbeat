@@ -171,8 +171,8 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 
 	// Creating the data pipeline
-	findingsCh := pipeline.Step(bt.ctx, bt.resourceCh, bt.evaluator.Eval)
-	eventsCh := pipeline.Step(bt.ctx, findingsCh, bt.transformer.CreateBeatEvents)
+	findingsCh := pipeline.Step(bt.log, bt.resourceCh, bt.evaluator.Eval)
+	eventsCh := pipeline.Step(bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event
 	for {
@@ -191,7 +191,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 				continue
 			}
 
-			bt.log.Infof("Flushing %d cloudbeat events to elasticsearch", len(eventsToSend))
+			bt.log.Infof("Publishing %d cloudbeat events to elasticsearch, time interval reached", len(eventsToSend))
 			bt.client.PublishAll(eventsToSend)
 			eventsToSend = nil
 
@@ -202,7 +202,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 				continue
 			}
 
-			bt.log.Infof("Publish %d cloudbeat events to elasticsearch", len(eventsToSend))
+			bt.log.Infof("Publishing %d cloudbeat events to elasticsearch, buffer threshold reached", len(eventsToSend))
 			bt.client.PublishAll(eventsToSend)
 			eventsToSend = nil
 		}

@@ -45,9 +45,9 @@ func NewTransformer(log *logp.Logger, cd CommonDataInterface, index string) Tran
 	}
 }
 
-func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.EventData) []beat.Event {
+func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.EventData) ([]beat.Event, error) {
 	if len(eventData.Findings) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	events := make([]beat.Event, 0)
@@ -77,5 +77,5 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 		events = append(events, event)
 	}
 
-	return events
+	return events, nil
 }

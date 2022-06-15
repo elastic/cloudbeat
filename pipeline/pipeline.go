@@ -17,24 +17,30 @@
 
 package pipeline
 
-import "context"
+import (
+	"context"
+	"github.com/elastic/beats/v7/libbeat/logp"
+)
 
-func Step[In any, Out any](ctx context.Context, inputChannel chan In, fn func(context.Context, In) Out) chan Out {
-	outputCh := make(chan Out)
+const (
+	chBuffer = 10
+)
+
+func Step[In any, Out any](log *logp.Logger, inputChannel chan In, fn func(context.Context, In) (Out, error)) chan Out {
+	outputCh := make(chan Out, chBuffer)
+	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
 		defer close(outputCh)
+		defer cancel()
 
 		for s := range inputChannel {
-			select {
-			case <-ctx.Done():
-				break
-			default:
+			val, err := fn(ctx, s)
+			if err != nil {
+				log.Error(err)
+				continue
 			}
-
-			go func(ctx context.Context, s In) {
-				outputCh <- fn(ctx, s)
-			}(ctx, s)
+			outputCh <- val
 		}
 	}()
 

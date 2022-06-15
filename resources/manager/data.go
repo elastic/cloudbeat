@@ -100,7 +100,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 
 	d.wg.Wait()
 	d.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
-	d.log.Infof("Cycle %s has ended", cycleId.String())
+	d.log.Infof("Cycle %s resource fetching has ended", cycleId.String())
 }
 
 func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching.CycleMetadata) error {
