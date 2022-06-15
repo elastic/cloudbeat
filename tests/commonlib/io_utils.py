@@ -41,17 +41,8 @@ def get_k8s_yaml_objects(file_path: Path) -> list[str: dict]:
     """
     if not file_path:
         raise Exception(f'{file_path} is required')
-    result_list = []
     with file_path.open() as yaml_file:
-        yaml_objects = yaml.safe_load_all(yaml_file)
-        for yml_doc in yaml_objects:
-            if yml_doc:
-                doc = Munch(yml_doc)
-                result_list.append({
-                    doc.get('kind'): {key: value for key, value in doc.get('metadata').items()
-                                      if key in ['name', 'namespace']}
-                })
-    return result_list
+        return [resource for resource in yaml.safe_load_all(yaml_file)]
 
 
 class FsClient:
