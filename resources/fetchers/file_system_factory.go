@@ -52,7 +52,7 @@ func (f *FileSystemFactory) CreateFrom(log *logp.Logger, cfg FileFetcherConfig) 
 	fe := &FileSystemFetcher{
 		log:    log,
 		cfg:    cfg,
-		OSUser: utils.NewOSUserUtil(),
+		osUser: utils.NewOSUserUtil(),
 	}
 
 	log.Infof("File-System Fetcher created with the following config:"+

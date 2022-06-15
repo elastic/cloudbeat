@@ -50,7 +50,7 @@ func TestFileFetcherFetchASingleFile(t *testing.T) {
 	fileFetcher := FileSystemFetcher{
 		log:    log,
 		cfg:    cfg,
-		OSUser: osUserMock,
+		osUser: osUserMock,
 	}
 
 	results, err := fileFetcher.Fetch(context.TODO())
@@ -92,7 +92,7 @@ func TestFileFetcherFetchTwoPatterns(t *testing.T) {
 	fileFetcher := FileSystemFetcher{
 		log:    log,
 		cfg:    cfg,
-		OSUser: osUserMock,
+		osUser: osUserMock,
 	}
 	results, err := fileFetcher.Fetch(context.TODO())
 
@@ -143,7 +143,7 @@ func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
 	fileFetcher := FileSystemFetcher{
 		log:    log,
 		cfg:    cfg,
-		OSUser: osUserMock,
+		osUser: osUserMock,
 	}
 	results, err := fileFetcher.Fetch(context.TODO())
 
@@ -186,7 +186,7 @@ func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
 	fileFetcher := FileSystemFetcher{
 		log:    log,
 		cfg:    cfg,
-		OSUser: osUserMock,
+		osUser: osUserMock,
 	}
 	results, err := fileFetcher.Fetch(context.TODO())
 
@@ -235,7 +235,7 @@ func TestFileFetcherFetchDirectoryRecursively(t *testing.T) {
 	fileFetcher := FileSystemFetcher{
 		log:    log,
 		cfg:    cfg,
-		OSUser: osUserMock,
+		osUser: osUserMock,
 	}
 	results, err := fileFetcher.Fetch(context.TODO())
 

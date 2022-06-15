@@ -57,7 +57,7 @@ type FileSystemResource struct {
 type FileSystemFetcher struct {
 	log    *logp.Logger
 	cfg    FileFetcherConfig
-	OSUser utils.OSUser
+	osUser utils.OSUser
 }
 
 type FileFetcherConfig struct {
@@ -115,12 +115,12 @@ func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FileSys
 
 	uid := stat.Uid
 	gid := stat.Gid
-	username, err := f.OSUser.GetUserNameFromID(uid, UserFile)
+	username, err := f.osUser.GetUserNameFromID(uid, UserFile)
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to find username for uid %d, error - %+v", uid, err))
 	}
 
-	groupName, err := f.OSUser.GetGroupNameFromID(gid, GroupFile)
+	groupName, err := f.osUser.GetGroupNameFromID(gid, GroupFile)
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to find groupname for gid %d, error - %+v", gid, err))
 	}
