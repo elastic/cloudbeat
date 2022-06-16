@@ -49,7 +49,6 @@ def api_client():
     @return: Client (docker / FsClient).
     """
     docker_config = configuration.docker
-    # print(f"Config use_docker value: {docker_config.use_docker}")
     if docker_config.use_docker:
         client = DockerWrapper(config=docker_config)
     else:

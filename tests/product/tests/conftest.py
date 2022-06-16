@@ -46,8 +46,7 @@ def clean_test_env(data):
             # try getting the resource before deleting it - will raise exception if not found
             k8s_client.get_resource(resource_type=resource_type, **relevant_metadata)
             k8s_client.delete_resources(resource_type=resource_type, **relevant_metadata)
-            deleted = k8s_client.wait_for_resource(resource_type=resource_type, status_list=["DELETED"], **relevant_metadata)
-            # print(f"{resource_type} deleted: {deleted}")
+            k8s_client.wait_for_resource(resource_type=resource_type, status_list=["DELETED"], **relevant_metadata)
         except ApiException as notFound:
             print(f"no {relevant_metadata['name']} online - setting up a new one: {notFound}")
             # create resource
