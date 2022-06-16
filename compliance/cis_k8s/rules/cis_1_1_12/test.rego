@@ -21,7 +21,7 @@ test_not_evaluated {
 	not finding with input as rule_input("var/lib/etcdd/some_file.txt", "root", "root")
 }
 
-rule_input(filename, uid, gid) = filesystem_input {
+rule_input(filename, user, group) = filesystem_input {
 	filemode := "0644"
-	filesystem_input = test_data.filesystem_input(filename, filemode, uid, gid)
+	filesystem_input = test_data.filesystem_input(filename, filemode, user, group)
 }

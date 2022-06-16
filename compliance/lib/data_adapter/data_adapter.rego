@@ -8,7 +8,7 @@ is_filesystem {
 
 filename = file_name {
 	is_filesystem
-	file_name := input.resource.filename
+	file_name := input.resource.name
 }
 
 filemode = file_mode {
@@ -21,14 +21,14 @@ file_path = path {
 	path := input.resource.path
 }
 
-owner_user_id = uid {
+owner_user = owner {
 	is_filesystem
-	uid := input.resource.uid
+	owner := input.resource.owner
 }
 
-owner_group_id = gid {
+owner_group = group {
 	is_filesystem
-	gid := input.resource.gid
+	group := input.resource.group
 }
 
 is_process {

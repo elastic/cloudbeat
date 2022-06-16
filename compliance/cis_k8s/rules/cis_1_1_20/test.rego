@@ -16,7 +16,7 @@ test_not_evaluated {
 }
 
 rule_input(filename, filemode) = filesystem_input {
-	uid := "root"
-	gid := "root"
-	filesystem_input = test_data.filesystem_input(filename, filemode, uid, gid)
+	user := "root"
+	group := "root"
+	filesystem_input = test_data.filesystem_input(filename, filemode, user, group)
 }

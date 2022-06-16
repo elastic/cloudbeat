@@ -15,14 +15,14 @@ not_evaluated_kube_api_input = {
 }
 
 # genrates `file` type input data
-filesystem_input(filename, mode, uid, gid) = {
+filesystem_input(filename, mode, user, group) = {
 	"type": "file",
 	"resource": {
 		"path": sprintf("file/path/%s", [filename]),
-		"filename": filename,
+		"name": filename,
 		"mode": mode,
-		"uid": uid,
-		"gid": gid,
+		"owner": user,
+		"group": group,
 	},
 }
 

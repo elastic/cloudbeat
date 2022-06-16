@@ -11,9 +11,9 @@
       "type": "file",
       "mode": "0700",
       "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-      "uid": "root",
+      "owner": "root",
       "filename": "kube-apiserver.yaml",
-      "gid": "root"
+      "group": "root"
     }
   ],
   "anyOf": [
@@ -52,18 +52,18 @@
           "type": "file",
           "mode": "0700",
           "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-          "uid": "root",
-          "filename": "kube-apiserver.yaml",
-          "gid": "root"
+          "owner": "root",
+          "name": "kube-apiserver.yaml",
+          "group": "root"
         }
       ],
       "required": [
         "type",
         "mode",
         "path",
-        "uid",
-        "filename",
-        "gid"
+        "owner",
+        "name",
+        "group"
       ],
       "properties": {
         "type": {
@@ -85,23 +85,23 @@
             "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml"
           ]
         },
-        "uid": {
+        "owner": {
           "type": "string",
-          "title": "The uid schema",
+          "title": "The user schema",
           "examples": [
             "root"
           ]
         },
-        "filename": {
+        "name": {
           "type": "string",
           "title": "The filename schema",
           "examples": [
             "kube-apiserver.yaml"
           ]
         },
-        "gid": {
+        "group": {
           "type": "string",
-          "title": "The gid schema",
+          "title": "The group owner schema",
           "examples": [
             "root"
           ]

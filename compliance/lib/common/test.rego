@@ -13,35 +13,35 @@ test_calculate_result_rule_evaluation_true {
 }
 
 test_file_ownership_match_match {
-	uid := "root"
-	gid := "root"
-	requierd_uid := "root"
-	requierd_gid := "root"
-	file_ownership_match(uid, gid, requierd_uid, requierd_gid)
+	user := "root"
+	group := "root"
+	requierd_user := "root"
+	requierd_group := "root"
+	file_ownership_match(user, group, requierd_user, requierd_group)
 }
 
-test_file_ownership_match_uid_mismatch {
-	uid := "user"
-	gid := "root"
-	requierd_uid := "root"
-	requierd_gid := "root"
-	assert.is_false(file_ownership_match(uid, gid, requierd_uid, requierd_gid))
+test_file_ownership_match_user_mismatch {
+	user := "owner"
+	group := "root"
+	requierd_user := "root"
+	requierd_group := "root"
+	assert.is_false(file_ownership_match(user, group, requierd_user, requierd_group))
 }
 
 test_file_ownership_match_gid_mismatch {
-	uid := "root"
-	gid := "user"
-	requierd_uid := "root"
-	requierd_gid := "root"
-	assert.is_false(file_ownership_match(uid, gid, requierd_uid, requierd_gid))
+	user := "root"
+	group := "owner"
+	requierd_user := "root"
+	requierd_group := "root"
+	assert.is_false(file_ownership_match(user, group, requierd_user, requierd_group))
 }
 
-test_file_ownership_match_uid_gid_mismatch {
-	uid := "user"
-	gid := "user"
-	requierd_uid := "root"
-	requierd_gid := "root"
-	assert.is_false(file_ownership_match(uid, gid, requierd_uid, requierd_gid))
+test_file_ownership_match_user_gid_mismatch {
+	user := "owner"
+	group := "owner"
+	requierd_user := "root"
+	requierd_group := "root"
+	assert.is_false(file_ownership_match(user, group, requierd_user, requierd_group))
 }
 
 test_file_permission_match {

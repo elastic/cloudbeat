@@ -9,13 +9,13 @@ finding = result {
 	data_adapter.filename == "kubelet-config.json"
 
 	# evaluate
-	uid = data_adapter.owner_user_id
-	gid = data_adapter.owner_group_id
-	rule_evaluation := common.file_ownership_match(uid, gid, "root", "root")
+	user = data_adapter.owner_user
+	group = data_adapter.owner_group
+	rule_evaluation := common.file_ownership_match(user, group, "root", "root")
 
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {"uid": uid, "gid": gid},
+		"evidence": {"owner": user, "group": group},
 	}
 }

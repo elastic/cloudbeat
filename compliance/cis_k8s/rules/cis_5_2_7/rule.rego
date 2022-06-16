@@ -8,7 +8,7 @@ import data.compliance.lib.data_adapter
 # evaluate
 default rule_evaluation = true
 
-# Verify that there is at least one PSP which returns MustRunAsNonRoot or MustRunAs with the range of UIDs not including 0.
+# Verify that there is at least one PSP which returns MustRunAsNonRoot or MustRunAs with the range of users not including 0.
 rule_evaluation = false {
 	not common.contains_key_with_value(data_adapter.pod.spec.runAsUser, "rule", "MustRunAsNonRoot")
 	common.contains_key_with_value(data_adapter.pod.spec.runAsUser, "rule", "MustRunAs")

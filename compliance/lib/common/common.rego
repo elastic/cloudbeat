@@ -14,9 +14,9 @@ calculate_result(evaluation) = "passed" {
 	true
 }
 
-file_ownership_match(uid, gid, required_uid, required_gid) {
-	uid == required_uid
-	gid == required_gid
+file_ownership_match(user, group, required_user, required_group) {
+	user == required_user
+	group == required_group
 } else = false {
 	true
 }
