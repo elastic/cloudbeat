@@ -25,14 +25,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
 
 	"github.com/elastic/beats/v7/dev-tools/mage"
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
+	"github.com/elastic/e2e-testing/pkg/downloads"
 
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
 
@@ -46,6 +49,16 @@ import (
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
 
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
+)
+
+const (
+	buildDir          = "build"
+	metaDir           = "_meta"
+	snapshotEnv       = "SNAPSHOT"
+	devEnv            = "DEV"
+	externalArtifacts = "EXTERNAL"
+	configFile        = "cloudbeat.yml"
+	agentDropPath     = "AGENT_DROP_PATH"
 )
 
 func init() {
@@ -197,6 +210,116 @@ func CheckLicenseHeaders() error {
 }
 
 func Update() { mg.Deps(cloudbeat.Update.All) }
+
+func bundleAgent() {
+	pwd, err := filepath.Abs("../elastic-agent")
+	if err != nil {
+		panic(err)
+	}
+	cmd := exec.Command("mage", "dev:package")
+	cmd.Dir = pwd
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Env = append(os.Environ(), fmt.Sprintf("PWD=%s", pwd), "TYPES=docker")
+	if err := cmd.Run(); err != nil {
+		panic(err)
+	}
+}
+
+func PackageAgent() {
+	version, found := os.LookupEnv("BEAT_VERSION")
+	if !found {
+		version, _ = devtools.BeatQualifiedVersion()
+	}
+	// prepare new drop
+	dropPath := filepath.Join("build", "elastic-agent-drop")
+	dropPath, err := filepath.Abs(dropPath)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := os.MkdirAll(dropPath, 0755); err != nil {
+		panic(err)
+	}
+
+	os.Setenv(agentDropPath, dropPath)
+
+	platformPackages := []struct {
+		platform string
+		packages string
+	}{
+		{"darwin/amd64", "darwin-x86_64.tar.gz"},
+		{"darwin/arm64", "darwin-aarch64.tar.gz"},
+		{"linux/amd64", "linux-x86_64.tar.gz"},
+		{"linux/arm64", "linux-arm64.tar.gz"},
+		{"windows/amd64", "windows-x86_64.zip"},
+	}
+
+	var requiredPackages []string
+	for _, p := range platformPackages {
+		if _, enabled := devtools.Platforms.Get(p.platform); enabled {
+			requiredPackages = append(requiredPackages, p.packages)
+		}
+	}
+
+	packedBeats := []string{"filebeat", "heartbeat", "metricbeat", "osquerybeat"}
+	ctx := context.Background()
+	for _, beat := range packedBeats {
+		for _, reqPackage := range requiredPackages {
+			newVersion, packageName := getPackageName(beat, version, reqPackage)
+			err := fetchBinaryFromArtifactsApi(ctx, packageName, beat, newVersion, dropPath)
+			if err != nil {
+				panic(fmt.Sprintf("fetchBinaryFromArtifactsApi failed: %v", err))
+			}
+		}
+	}
+	mg.Deps(Package)
+
+	// copy to new drop
+	sourcePath := filepath.Join("build", "distributions")
+	if err := copyAll(sourcePath, dropPath); err != nil {
+		panic(err)
+	}
+	mg.Deps(bundleAgent)
+}
+
+func getPackageName(beat, version, pkg string) (string, string) {
+	if _, ok := os.LookupEnv(snapshotEnv); ok {
+		version += "-SNAPSHOT"
+	}
+	return version, fmt.Sprintf("%s-%s-%s", beat, version, pkg)
+}
+
+func fetchBinaryFromArtifactsApi(ctx context.Context, packageName, artifact, version, downloadPath string) error {
+	location, err := downloads.FetchBeatsBinary(
+		ctx,
+		packageName,
+		artifact,
+		version,
+		3,
+		false,
+		downloadPath,
+		true)
+	fmt.Println("downloaded binaries on location:", location)
+	return err
+}
+
+func copyAll(from, to string) error {
+	return filepath.Walk(from, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		targetFile := filepath.Join(to, info.Name())
+
+		// overwrites with current build
+		return sh.Copy(targetFile, path)
+	})
+}
 
 // Fields generates a fields.yml for the Beat.
 func Fields() { mg.Deps(cloudbeat.Update.Fields) }
