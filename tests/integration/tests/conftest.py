@@ -1,7 +1,6 @@
 """
 Integration tests setup configurations and fixtures
 """
-import time
 from pathlib import Path
 import pytest
 from commonlib.io_utils import get_k8s_yaml_objects
@@ -24,8 +23,15 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     if k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
                                    namespace=cloudbeat_agent.namespace):
         k8s.delete_from_yaml(get_k8s_yaml_objects(file_path=file_path))
+        k8s.wait_for_resource(resource_type='Pod',
+                              name=cloudbeat_agent.name,
+                              status_list=['DELETED'],
+                              namespace=cloudbeat_agent.namespace)
     k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
-    time.sleep(5)
+    k8s.wait_for_resource(resource_type='Pod',
+                          name=cloudbeat_agent.name,
+                          status_list=['ADDED', 'MODIFIED'],
+                          namespace=cloudbeat_agent.namespace)
     yield k8s, api_client, cloudbeat_agent
     k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
     k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
