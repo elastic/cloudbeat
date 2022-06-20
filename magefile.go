@@ -52,13 +52,8 @@ import (
 )
 
 const (
-	buildDir          = "build"
-	metaDir           = "_meta"
-	snapshotEnv       = "SNAPSHOT"
-	devEnv            = "DEV"
-	externalArtifacts = "EXTERNAL"
-	configFile        = "cloudbeat.yml"
-	agentDropPath     = "AGENT_DROP_PATH"
+	snapshotEnv   = "SNAPSHOT"
+	agentDropPath = "AGENT_DROP_PATH"
 )
 
 func init() {
@@ -246,6 +241,10 @@ func PackageAgent() {
 	}
 
 	os.Setenv(agentDropPath, dropPath)
+
+	// cleanup after build
+	defer os.RemoveAll(dropPath)
+	defer os.Unsetenv(agentDropPath)
 
 	platformPackages := []struct {
 		platform string
