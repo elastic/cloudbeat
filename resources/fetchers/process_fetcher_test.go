@@ -59,7 +59,6 @@ type ProcessFetcherTestSuite struct {
 
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	errorCh    chan error
 }
 
 func TestProcessFetcherTestSuite(t *testing.T) {
@@ -74,13 +73,11 @@ func TestProcessFetcherTestSuite(t *testing.T) {
 }
 
 func (s *ProcessFetcherTestSuite) SetupTest() {
-	s.resourceCh = make(chan fetching.ResourceInfo)
-	s.errorCh = make(chan error, 1)
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
 func (s *ProcessFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
-	close(s.errorCh)
 }
 
 func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
@@ -99,13 +96,11 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	}
 	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs, resourceCh: t.resourceCh}
 
-	go func(ch chan error) {
-		ch <- processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	}(t.errorCh)
-	results := testhelper.WaitForResources(t.resourceCh, 1, 2)
+	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(t.resourceCh)
 
 	t.Equal(1, len(results))
-	t.Nil(<-t.errorCh)
+	t.Nil(err)
 
 	processResource := results[0].Resource.(ProcessResource)
 
@@ -130,13 +125,11 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 	}
 	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys, resourceCh: t.resourceCh}
 
-	go func(ch chan error) {
-		ch <- processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	}(t.errorCh)
-	results := testhelper.WaitForResources(t.resourceCh, 1, 2)
+	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(t.resourceCh)
 
 	t.Equal(0, len(results))
-	t.Nil(<-t.errorCh)
+	t.Nil(err)
 }
 
 func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
@@ -154,14 +147,11 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 			"kubelet": {ConfigFileArguments: []string{}}},
 	}
 	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys, resourceCh: t.resourceCh}
+	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 
-	go func(ch chan error) {
-		ch <- processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	}(t.errorCh)
-
-	results := testhelper.WaitForResources(t.resourceCh, 1, 2)
+	results := testhelper.CollectResources(t.resourceCh)
 	t.Equal(1, len(results))
-	t.Nil(<-t.errorCh)
+	t.Nil(err)
 
 	processResource := results[0].Resource.(ProcessResource)
 	t.Equal(testProcess.Pid, processResource.PID)
@@ -212,13 +202,11 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 		}
 		processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs, resourceCh: t.resourceCh}
 
-		go func(ch chan error) {
-			ch <- processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-		}(t.errorCh)
-		results := testhelper.WaitForResources(t.resourceCh, 1, 2)
+		err = processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+		results := testhelper.CollectResources(t.resourceCh)
 
 		t.Equal(1, len(results))
-		t.Nil(<-t.errorCh)
+		t.Nil(err)
 
 		processResource := results[0].Resource.(ProcessResource)
 		t.Equal(testProcess.Pid, processResource.PID)

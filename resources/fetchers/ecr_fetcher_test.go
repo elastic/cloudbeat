@@ -55,13 +55,11 @@ func TestECRFetcherTestSuite(t *testing.T) {
 }
 
 func (s *ECRFetcherTestSuite) SetupTest() {
-	s.resourceCh = make(chan fetching.ResourceInfo)
-	s.errorCh = make(chan error, 1)
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
 func (s *ECRFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
-	close(s.errorCh)
 }
 
 func (s *ECRFetcherTestSuite) TestCreateFetcher() {
@@ -257,16 +255,14 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		}
 
 		ctx := context.Background()
-		go func(ch chan error) {
-			ch <- ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		}(s.errorCh)
+		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
 
-		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+		results := testhelper.CollectResources(s.resourceCh)
 		elbResource := results[0].Resource.(ECRResource)
 
 		s.Equal(expectedResource, elbResource)
 		s.Equal(len(expectedRepositories), len(elbResource.EcrRepositories))
-		s.Nil(<-s.errorCh)
+		s.Nil(err)
 
 		for i, name := range test.expectedRepositoriesNames {
 			s.Contains(*elbResource.EcrRepositories[i].RepositoryName, name)
@@ -348,12 +344,10 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		}
 
 		ctx := context.Background()
-		go func(ch chan error) {
-			ch <- ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		}(s.errorCh)
+		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
 
-		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+		results := testhelper.CollectResources(s.resourceCh)
 		s.Equal(0, len(results))
-		s.EqualError(<-s.errorCh, "could not retrieve pod's aws repositories: ecr error")
+		s.EqualError(err, "could not retrieve pod's aws repositories: ecr error")
 	}
 }

@@ -113,9 +113,9 @@ func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching
 
 	// The buffer is required to avoid go-routine leaks in a case a fetcher timed out
 	errCh := make(chan error, 1)
-	defer close(errCh)
 
 	go func() {
+		defer close(errCh)
 		errCh <- d.fetchProtected(ctx, k, cycleMetadata)
 	}()
 

@@ -21,6 +21,7 @@ import (
 	"context"
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"sync"
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/common"
@@ -35,7 +36,6 @@ type FactoriesTestSuite struct {
 	log        *logp.Logger
 	F          factories
 	resourceCh chan fetching.ResourceInfo
-	errCh      chan error
 }
 
 type numberFetcherFactory struct {
@@ -43,7 +43,7 @@ type numberFetcherFactory struct {
 
 func (n *numberFetcherFactory) Create(log *logp.Logger, c *common.Config, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
-	return &numberFetcher{int(x), false, ch}, nil
+	return &numberFetcher{int(x), false, ch, &sync.WaitGroup{}}, nil
 }
 
 func numberConfig(number int) *common.Config {
@@ -69,13 +69,11 @@ func TestFactoriesTestSuite(t *testing.T) {
 
 func (s *FactoriesTestSuite) SetupTest() {
 	s.F = newFactories()
-	s.resourceCh = make(chan fetching.ResourceInfo)
-	s.errCh = make(chan error)
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
 func (s *FactoriesTestSuite) TearDownTest() {
 	close(s.resourceCh)
-	close(s.errCh)
 }
 
 func (s *FactoriesTestSuite) TestListFetcher() {
@@ -112,13 +110,11 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 
 		f, err := s.F.CreateFetcher(s.log, test.key, c, s.resourceCh)
 		s.NoError(err)
-		go func(ch chan error) {
-			ch <- f.Fetch(context.TODO(), fetching.CycleMetadata{})
-		}(s.errCh)
-		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+		err = f.Fetch(context.TODO(), fetching.CycleMetadata{})
+		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(1, len(results))
-		s.Nil(<-s.errCh)
+		s.Nil(err)
 		s.Equal(test.value, results[0].GetData())
 	}
 }
@@ -163,12 +159,10 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
-		go func(ch chan error) {
-			ch <- reg.Run(context.Background(), test.key, fetching.CycleMetadata{})
-		}(s.errCh)
+		err = reg.Run(context.Background(), test.key, fetching.CycleMetadata{})
 
-		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
-		s.NoError(<-s.errCh)
+		results := testhelper.CollectResources(s.resourceCh)
+		s.NoError(err)
 		s.Equal(test.value, results[0].Resource.GetData())
 	}
 }

@@ -45,7 +45,6 @@ type ElbFetcherTestSuite struct {
 
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	errorCh    chan error
 }
 
 func TestElbFetcherTestSuite(t *testing.T) {
@@ -60,13 +59,11 @@ func TestElbFetcherTestSuite(t *testing.T) {
 }
 
 func (s *ElbFetcherTestSuite) SetupTest() {
-	s.resourceCh = make(chan fetching.ResourceInfo)
-	s.errorCh = make(chan error)
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
 func (s *ElbFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
-	close(s.errorCh)
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
@@ -144,16 +141,14 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		ctx := context.Background()
 
 		expectedResource := ELBResource{test.lbResponse}
-		go func(ch chan error) {
-			ch <- elbFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		}(s.errorCh)
+		err = elbFetcher.Fetch(ctx, fetching.CycleMetadata{})
 
-		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+		results := testhelper.CollectResources(s.resourceCh)
 		elbResource := results[0].Resource.(ELBResource)
 
 		s.Equal(1, len(results))
 		s.Equal(expectedResource, elbResource)
-		s.Nil(<-s.errorCh)
+		s.Nil(err)
 	}
 }
 
@@ -213,13 +208,11 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		}
 
 		ctx := context.Background()
-		go func(ch chan error) {
-			ch <- elbFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		}(s.errorCh)
 
-		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+		err = elbFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Nil(results)
-		s.EqualError(<-s.errorCh, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))
+		s.EqualError(err, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))
 	}
 }

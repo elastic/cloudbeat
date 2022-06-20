@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"sync"
 	"testing"
 	"time"
 
@@ -84,6 +85,7 @@ type DataTestSuite struct {
 	registry   FetchersRegistry
 	opts       goleak.Option
 	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
 }
 
 const timeout = 2 * time.Second
@@ -103,7 +105,8 @@ func (s *DataTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.opts = goleak.IgnoreCurrent()
 	s.registry = NewFetcherRegistry(s.log)
-	s.resourceCh = make(chan fetching.ResourceInfo)
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+	s.wg = &sync.WaitGroup{}
 }
 
 func (s *DataTestSuite) TearDownTest() {
@@ -116,14 +119,17 @@ func (s *DataTestSuite) TestDataRun() {
 	fetcherCount := 10
 	interval := 10 * time.Second
 
-	registerNFetchers(s.T(), s.registry, fetcherCount, s.resourceCh)
+	s.wg.Add(fetcherCount)
+
+	registerNFetchers(s.T(), s.registry, fetcherCount, s.resourceCh, s.wg)
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	d.Run(s.ctx)
 	defer d.Stop()
+	s.wg.Wait() // waiting for all fetchers to complete
 
-	results := testhelper.WaitForResources(s.resourceCh, fetcherCount, 2)
+	results := testhelper.CollectResources(s.resourceCh)
 	s.Equal(fetcherCount, len(results))
 }
 
@@ -143,7 +149,7 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	s.NoError(err)
 	defer d.Stop()
 
-	results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Empty(results)
 }
@@ -180,7 +186,7 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	s.NoError(err)
 	defer d.Stop()
 
-	results := testhelper.WaitForResources(s.resourceCh, 1, 3 /* timeout + 1 second */)
+	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Empty(results)
 }
@@ -197,13 +203,8 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
-	errCh := make(chan error)
-	defer close(errCh)
-	go func() {
-		errCh <- d.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
-	}()
-
-	s.Error(<-errCh)
+	err = d.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
+	s.Error(err)
 }
 
 func (s *DataTestSuite) TestDataRunShouldNotRun() {
@@ -212,7 +213,8 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	fetcherName := "not_run_fetcher"
 	fetcherConditionName := "false_condition"
 
-	f := newNumberFetcher(fetcherVal, s.resourceCh)
+	s.wg.Add(1)
+	f := newNumberFetcher(fetcherVal, s.resourceCh, s.wg)
 	c := newBoolFetcherCondition(false, fetcherConditionName)
 	err := s.registry.Register(fetcherName, f, c)
 	s.NoError(err)
@@ -224,7 +226,13 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	s.NoError(err)
 	defer d.Stop()
 
-	results := testhelper.WaitForResources(s.resourceCh, 1, 2)
-	
+	var results []fetching.ResourceInfo
+	select {
+	case result := <-s.resourceCh:
+		results = append(results, result)
+	case <-time.Tick(2 * time.Second):
+		s.wg.Done()
+	}
+
 	s.Empty(results)
 }

@@ -10,8 +10,7 @@ import (
 )
 
 var (
-	inCh = make(chan int, 1)
-	log  = logp.NewLogger("cloudbeat_config_test_suite")
+	log = logp.NewLogger("cloudbeat_config_test_suite")
 )
 
 func TestStep(t *testing.T) {
@@ -28,7 +27,7 @@ func TestStep(t *testing.T) {
 		{
 			name: "Should receive value from output channel",
 			args: args{
-				inputChannel: inCh,
+				inputChannel: make(chan int),
 				fn:           func(context context.Context, i int) (float64, error) { return float64(i), nil },
 				val:          1,
 			},
@@ -37,7 +36,7 @@ func TestStep(t *testing.T) {
 		{
 			name: "Pipeline function returns error - no value received",
 			args: args{
-				inputChannel: inCh,
+				inputChannel: make(chan int),
 				fn:           func(context context.Context, i int) (float64, error) { return 0, errors.New("") },
 				val:          1,
 			},
@@ -48,7 +47,7 @@ func TestStep(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			outCh := Step(log, tt.args.inputChannel, tt.args.fn)
 			tt.args.inputChannel <- tt.args.val
-			results := testhelper.WaitForResources(outCh, 1, 2)
+			results := testhelper.CollectResources(outCh)
 
 			assert.Equal(t, tt.want, len(results))
 		})

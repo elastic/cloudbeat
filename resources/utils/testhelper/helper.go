@@ -17,20 +17,11 @@
 
 package testhelper
 
-import (
-	"time"
-)
-
-func WaitForResources[T any](ch chan T, times int, wait int) []T {
+func CollectResources[T any](ch chan T) []T {
+	var numResources = len(ch)
 	var results []T
-
-	for i := 0; i < times; i++ {
-		select {
-		case result := <-ch:
-			results = append(results, result)
-		case <-time.Tick(time.Duration(wait) * time.Second):
-			return results
-		}
+	for i := 0; i < numResources; i++ {
+		results = append(results, <-ch)
 	}
 
 	return results

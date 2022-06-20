@@ -50,7 +50,7 @@ func TestIamFetcherTestSuite(t *testing.T) {
 }
 
 func (s *IamFetcherTestSuite) SetupTest() {
-	s.resourceCh = make(chan fetching.ResourceInfo)
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.errorCh = make(chan error, 1)
 }
 
@@ -90,13 +90,12 @@ func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 		}
 
 		ctx := context.Background()
-		go func(ch chan error) {
-			ch <- eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		}(s.errorCh)
-		results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+
+		err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		results := testhelper.CollectResources(s.resourceCh)
 		iamResource := results[0].Resource.(IAMResource)
 
 		s.Equal(expectedResource, iamResource)
-		s.Nil(<-s.errorCh)
+		s.Nil(err)
 	}
 }

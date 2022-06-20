@@ -35,7 +35,6 @@ type FSFetcherTestSuite struct {
 
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	errorCh    chan error
 }
 
 func TestFSFetcherTestSuite(t *testing.T) {
@@ -50,13 +49,11 @@ func TestFSFetcherTestSuite(t *testing.T) {
 }
 
 func (s *FSFetcherTestSuite) SetupTest() {
-	s.resourceCh = make(chan fetching.ResourceInfo)
-	s.errorCh = make(chan error)
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
 func (s *FSFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
-	close(s.errorCh)
 }
 
 func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
@@ -73,12 +70,12 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	factory := FileSystemFactory{}
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
-	go func(ch chan error) {
-		ch <- fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	}(s.errorCh)
-	results := testhelper.WaitForResources(s.resourceCh, 1, 2)
 
-	s.Nil(<-s.errorCh, "Fetcher was not able to fetch files from FS")
+	var results []fetching.ResourceInfo
+	err = fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results = testhelper.CollectResources(s.resourceCh)
+
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
 	s.Equal(1, len(results))
 
 	fsResource := results[0].Resource.(FileSystemResource)
@@ -106,12 +103,11 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
-	go func(ch chan error) {
-		ch <- fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	}(s.errorCh)
-	results := testhelper.WaitForResources(s.resourceCh, 2, 2)
 
-	s.Nil(<-s.errorCh, "Fetcher was not able to fetch files from FS")
+	err = fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
 	s.Equal(2, len(results))
 
 	firstFSResource := results[0].Resource.(FileSystemResource)
@@ -149,12 +145,10 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
-	go func(ch chan error) {
-		ch <- fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	}(s.errorCh)
-	results := testhelper.WaitForResources(s.resourceCh, 1, 2)
+	err = fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Nil(<-s.errorCh, "Fetcher was not able to fetch files from FS")
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
 	s.Equal(1, len(results))
 
 	fsResource := results[0].Resource.(FileSystemResource)
@@ -186,12 +180,10 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
-	go func(ch chan error) {
-		ch <- fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	}(s.errorCh)
-	results := testhelper.WaitForResources(s.resourceCh, 2, 2)
+	err = fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Nil(<-s.errorCh, "Fetcher was not able to fetch files from FS")
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
 	s.Equal(2, len(results))
 
 	//All inner files should exist in the final result
@@ -231,12 +223,10 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
 
-	go func(ch chan error) {
-		ch <- fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	}(s.errorCh)
-	results := testhelper.WaitForResources(s.resourceCh, 6, 2)
+	err = fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Nil(<-s.errorCh, "Fetcher was not able to fetch files from FS")
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
 	s.Equal(6, len(results))
 
 	directories := []string{filepath.Base(outerDir), filepath.Base(innerDir), filepath.Base(innerInnerDir)}
