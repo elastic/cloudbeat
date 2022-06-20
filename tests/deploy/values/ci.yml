@@ -1,5 +1,5 @@
 cloudbeat:
-  deploy: true
+  deploy: false
 
 testData:
-  marker: ci_cloudbeat
+  marker: pre_merge

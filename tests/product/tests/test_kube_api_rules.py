@@ -10,7 +10,6 @@ from commonlib.utils import get_evaluation, get_resource_identifier
 from product.tests.kube_rules import *
 
 
-@pytest.mark.rules
 @pytest.mark.parametrize(
     ("rule_tag", "resource_type", "resource_body", "expected"),
     [
