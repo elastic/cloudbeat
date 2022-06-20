@@ -11,7 +11,6 @@ from commonlib.utils import get_evaluation
 from product.tests.tests.process.process_test_cases import *
 
 
-@pytest.mark.rules
 @pytest.mark.parametrize(
     ("rule_tag", "dictionary", "resource", "expected"),
     scheduler_rules,

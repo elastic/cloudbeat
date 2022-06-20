@@ -10,7 +10,6 @@ from commonlib.utils import get_evaluation
 from product.tests.tests.file_system.file_system_test_cases import *
 
 
-@pytest.mark.rules
 @pytest.mark.parametrize(
     ("rule_tag", "command", "param_value", "resource", "expected"),
     [*cis_1_1_1,

@@ -1,5 +1,6 @@
 """
-This module provides common configuration of the test project, and also mapping environment variables
+This module provides common configuration of the test project,
+and also mapping environment variables
 
 """
 import os
@@ -31,7 +32,3 @@ elasticsearch.cis_index = os.getenv('CIS_INDEX', "*cloud_security_posture.findin
 docker = Munch()
 docker.base_url = os.getenv('DOCKER_URL', "")
 docker.use_docker = bool(strtobool(os.getenv('USE_DOCKER', 'True')))
-
-# Printing all environment keys
-for key, value in sorted(os.environ.items()):
-    print(f'{key}: {value}')

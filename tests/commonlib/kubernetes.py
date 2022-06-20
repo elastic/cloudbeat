@@ -214,7 +214,10 @@ class KubernetesHelper:
         for event in w.stream(func=self.dispatch_list[resource_type],
                               timeout_seconds=timeout,
                               **kwargs):
-            if event["object"].metadata.name == name and event["type"] in status_list:
+            if name in event["object"].metadata.name and event["type"] in status_list:
+                if event['object'].status.phase == 'Pending':
+                    continue
                 w.stop()
                 return True
+
         return False
