@@ -34,7 +34,7 @@ type clusterHelper struct {
 	client    k8s.Interface
 }
 
-func newClusterHelper(client k8s.Interface) (*clusterHelper, error) {
+func newClusterHelper(client k8s.Interface) (ClusterHelper, error) {
 	clusterId, err := getClusterIdFromClient(client)
 	if err != nil {
 		return nil, err
