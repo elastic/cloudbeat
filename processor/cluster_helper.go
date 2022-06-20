@@ -22,30 +22,30 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	k8s "k8s.io/client-go/kubernetes"
 )
 
-type ClusterHelper struct {
+type ClusterHelper interface {
+	ClusterId() string
+}
+
+type clusterHelper struct {
 	clusterId string
 }
 
-func newClusterHelper() (*ClusterHelper, error) {
-	clusterId, err := getClusterIdFromClient()
+func newClusterHelper(client k8s.Interface) (ClusterHelper, error) {
+	clusterId, err := getClusterIdFromClient(client)
 	if err != nil {
 		return nil, err
 	}
-	return &ClusterHelper{clusterId: clusterId}, nil
+	return &clusterHelper{clusterId: clusterId}, nil
 }
 
-func (c ClusterHelper) ClusterId() string {
+func (c *clusterHelper) ClusterId() string {
 	return c.clusterId
 }
 
-func getClusterIdFromClient() (string, error) {
-	client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
-	if err != nil {
-		return "", err
-	}
+func getClusterIdFromClient(client k8s.Interface) (string, error) {
 	n, err := client.CoreV1().Namespaces().Get(context.Background(), "kube-system", metav1.GetOptions{})
 	if err != nil {
 		return "", err
