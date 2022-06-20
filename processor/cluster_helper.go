@@ -31,7 +31,6 @@ type ClusterHelper interface {
 
 type clusterHelper struct {
 	clusterId string
-	client    k8s.Interface
 }
 
 func newClusterHelper(client k8s.Interface) (ClusterHelper, error) {
