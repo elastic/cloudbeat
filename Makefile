@@ -52,7 +52,7 @@ clean: $(MAGE)
 	@$(MAGE) clean
 
 .PHONY: PackageAgent
-agent:
+PackageAgent:
 	SNAPSHOT=TRUE PLATFORMS=$(shell $(GO) env GOOS)/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
 
 ##############################################################################
