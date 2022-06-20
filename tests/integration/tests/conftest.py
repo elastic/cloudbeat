@@ -12,7 +12,7 @@ DEPLOY_YML = "../../deploy/cloudbeat-pytest.yml"
 @pytest.fixture(scope='module', name='start_stop_cloudbeat')
 def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     """
-    This fixture starts cloudbeat/agent on test module setup and
+    This fixture starts cloudbeat on test module setup and
     stops on teardown of the test module
     @param k8s: Kubernetes client object
     @param api_client: Docker api / FileSystem api
