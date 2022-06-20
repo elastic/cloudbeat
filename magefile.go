@@ -209,7 +209,10 @@ func CheckLicenseHeaders() error {
 	)
 }
 
-func Update() { mg.Deps(cloudbeat.Update.All) }
+func Update() {
+	mg.Deps(cloudbeat.Update.All)
+	mg.Deps(AddLicenseHeaders)
+}
 
 func bundleAgent() {
 	pwd, err := filepath.Abs("../elastic-agent")
