@@ -77,6 +77,7 @@ func (o *OpaEvaluator) Decision(ctx context.Context, input interface{}) (interfa
 		return nil, err
 	}
 
+	o.log.Debug(result)
 	return result.Result, nil
 }
 
@@ -110,6 +111,7 @@ func newEvaluatorLogger() logging.Logger {
 		},
 	})
 	return opaLogger.WithFields(map[string]interface{}{
-		"log.logger": "opa",
+		"log.logger":   "opa",
+		"service.name": "cloudbeat",
 	})
 }
