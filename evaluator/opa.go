@@ -77,7 +77,6 @@ func (o *OpaEvaluator) Decision(ctx context.Context, input interface{}) (interfa
 		return nil, err
 	}
 
-	o.log.Debug(result)
 	return result.Result, nil
 }
 
