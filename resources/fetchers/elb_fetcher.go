@@ -47,7 +47,7 @@ type ELBFetcherConfig struct {
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-type LoadBalancersDescription []elasticloadbalancing.LoadBalancerDescription
+type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription
 
 type ELBResource struct {
 	LoadBalancersDescription
@@ -57,7 +57,6 @@ func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	f.log.Debug("Starting ELBFetcher.Fetch")
 
 	results := make([]fetching.Resource, 0)
-
 	balancers, err := f.GetLoadBalancers()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load balancers from Kubernetes %w", err)
@@ -66,8 +65,10 @@ func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load balancers from ELB %w", err)
 	}
-	results = append(results, ELBResource{result})
 
+	for _, loadBalancer := range result {
+		results = append(results, ELBResource{LoadBalancersDescription(loadBalancer)})
+	}
 	return results, err
 }
 
