@@ -101,7 +101,6 @@ func (o *OpaEvaluator) Decode(result interface{}) ([]Finding, error) {
 
 func newEvaluatorLogger() logging.Logger {
 	opaLogger := logging.New()
-	opaLogger.SetLevel(logging.Debug)
 	opaLogger.SetFormatter(&logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
 			logrus.FieldKeyTime:  "@timestamp",
