@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -97,13 +97,13 @@ func (s *BeaterTestSuite) TestReconfigureWait() {
 
 	type incomingConfigs []struct {
 		after  time.Duration
-		config *common.Config
+		config *common.C
 	}
 
 	testcases := []struct {
 		timeout  time.Duration
 		configs  incomingConfigs
-		expected *common.Config
+		expected *common.C
 	}{
 		{
 			5 * time.Millisecond,
@@ -175,7 +175,7 @@ func (s *BeaterTestSuite) TestReconfigureWait() {
 	}
 
 	for _, tcase := range testcases {
-		cu := make(chan *common.Config)
+		cu := make(chan *common.C)
 		beat.configUpdates = cu
 
 		go func(ic incomingConfigs) {

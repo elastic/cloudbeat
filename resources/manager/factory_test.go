@@ -21,11 +21,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	common "github.com/elastic/elastic-agent-libs/config"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -39,12 +39,12 @@ type FactoriesTestSuite struct {
 type numberFetcherFactory struct {
 }
 
-func (n *numberFetcherFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (n *numberFetcherFactory) Create(log *logp.Logger, c *common.C) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
 	return &numberFetcher{int(x), false}, nil
 }
 
-func numberConfig(number int) *common.Config {
+func numberConfig(number int) *common.C {
 	c := common.NewConfig()
 	err := c.SetInt("num", -1, int64(number))
 	if err != nil {

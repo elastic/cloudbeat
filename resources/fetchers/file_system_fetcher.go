@@ -20,15 +20,16 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/utils"
 	"os"
 	"strconv"
 	"syscall"
 
+	"github.com/elastic/cloudbeat/resources/utils"
+
 	"github.com/pkg/errors"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (

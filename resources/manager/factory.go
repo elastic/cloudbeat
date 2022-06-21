@@ -22,12 +22,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 var Factories = newFactories()
@@ -49,7 +49,7 @@ func (fa *factories) ListFetcherFactory(name string, f fetching.Factory) {
 	fa.m[name] = f
 }
 
-func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *common.Config) (fetching.Fetcher, error) {
+func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *common.C) (fetching.Fetcher, error) {
 	factory, ok := fa.m[name]
 	if !ok {
 		return nil, errors.New("fetcher factory could not be found")
@@ -118,7 +118,7 @@ func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg config.Config) ([
 	return arr, nil
 }
 
-func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *common.Config) (*ParsedFetcher, error) {
+func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *common.C) (*ParsedFetcher, error) {
 	gen := fetching.BaseFetcherConfig{}
 	err := fcfg.Unpack(&gen)
 	if err != nil {

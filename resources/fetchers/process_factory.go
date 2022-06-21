@@ -20,10 +20,10 @@ package fetchers
 import (
 	"os"
 
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
@@ -37,7 +37,7 @@ func init() {
 	manager.Factories.ListFetcherFactory(ProcessType, &ProcessFactory{})
 }
 
-func (f *ProcessFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (f *ProcessFactory) Create(log *logp.Logger, c *common.C) (fetching.Fetcher, error) {
 	log.Debug("Starting ProcessFactory.Create")
 
 	cfg := ProcessFetcherConfig{}

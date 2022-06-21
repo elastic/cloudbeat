@@ -21,14 +21,14 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	common "github.com/elastic/elastic-agent-libs/config"
 )
 
 const (
@@ -54,7 +54,7 @@ type elbExtraElements struct {
 	kubernetesClientGetter providers.KubernetesClientGetter
 }
 
-func (f *ELBFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (f *ELBFactory) Create(log *logp.Logger, c *common.C) (fetching.Fetcher, error) {
 	log.Debug("Starting ELBFactory.Create")
 
 	cfg := ELBFetcherConfig{}
