@@ -23,6 +23,7 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/conf"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/stretchr/testify/suite"
@@ -143,7 +144,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 			logp.L().Errorf("Could not set name: %v", err)
 			return
 		}
-		conf := beater.DefaultConfig
+		conf := conf.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
 		err = s.F.RegisterFetchers(s.log, reg, conf)
 		s.NoError(err)
@@ -172,7 +173,7 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 			logp.L().Errorf("Could not set name: %v", err)
 			return
 		}
-		conf := beater.DefaultConfig
+		conf := conf.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
 		err = s.F.RegisterFetchers(s.log, reg, conf)
 		s.Error(err)
