@@ -75,7 +75,7 @@ func (s *ConfigTestSuite) TestNew() {
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		c, err := NewConfig(cfg)
+		c, err := New(cfg)
 		s.NoError(err)
 
 		s.Equal(test.expected, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
@@ -115,7 +115,7 @@ func (s *ConfigTestSuite) TestDataYamlExists() {
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		c, err := NewConfig(cfg)
+		c, err := New(cfg)
 		s.NoError(err)
 
 		s.Equal(test.expected, c.Streams[0].DataYaml != nil)
@@ -216,7 +216,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 	cfg, err := config.NewConfigFrom(configYml)
 	s.NoError(err)
 
-	c, err := NewConfig(cfg)
+	c, err := New(cfg)
 	s.NoError(err)
 
 	for _, test := range tests {
@@ -294,7 +294,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 	cfg, err := config.NewConfigFrom(configYml)
 	s.NoError(err)
 
-	c, err := NewConfig(cfg)
+	c, err := New(cfg)
 	s.NoError(err)
 
 	for _, test := range tests {
@@ -341,7 +341,7 @@ activated_rules:
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		c, err := NewConfig(cfg)
+		c, err := New(cfg)
 		s.NoError(err)
 
 		dy, err := c.DataYaml()
@@ -366,7 +366,7 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		c, err := NewConfig(cfg)
+		c, err := New(cfg)
 		s.NoError(err)
 
 		s.Equal(test.expectedPeriod, c.Period)

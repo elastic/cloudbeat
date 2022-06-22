@@ -61,7 +61,7 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	c, err := config.NewConfig(cfg)
+	c, err := config.New(cfg)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("error reading config file: %w", err)
@@ -213,7 +213,7 @@ func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*agentconfig.C, err
 				return nil, fmt.Errorf("reconfiguration channel is closed")
 			}
 
-			c, err := config.NewConfig(update)
+			c, err := config.New(update)
 			if err != nil {
 				bt.log.Errorf("Could not parse reconfiguration %v, skipping with error: %v", update.FlattenedKeys(), err)
 				continue

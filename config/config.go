@@ -54,7 +54,7 @@ var DefaultConfig = Config{
 	Period: 4 * time.Hour,
 }
 
-func NewConfig(cfg *config.C) (Config, error) {
+func New(cfg *config.C) (Config, error) {
 	c := DefaultConfig
 
 	if err := cfg.Unpack(&c); err != nil {
@@ -78,7 +78,7 @@ func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
 
 	// Check if the incoming config has streams.
 	if cfg.HasField("streams") {
-		uc, err := NewConfig(cfg)
+		uc, err := New(cfg)
 		if err != nil {
 			return err
 		}
