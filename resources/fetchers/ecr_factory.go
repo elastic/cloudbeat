@@ -22,13 +22,13 @@ import (
 	"regexp"
 
 	"github.com/docker/distribution/context"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
@@ -51,7 +51,7 @@ type ecrExtraElements struct {
 	ecrPublicRepoDescriber  awslib.EcrRepositoryDescriber
 }
 
-func (f *ECRFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (f *ECRFactory) Create(log *logp.Logger, c *config.C) (fetching.Fetcher, error) {
 	log.Debug("Starting ECRFactory.Create")
 
 	cfg := ECRFetcherConfig{}

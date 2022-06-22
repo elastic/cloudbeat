@@ -25,8 +25,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -72,7 +72,7 @@ func (s *ConfigTestSuite) TestNew() {
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		c, err := New(cfg)
@@ -112,7 +112,7 @@ func (s *ConfigTestSuite) TestDataYamlExists() {
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		c, err := New(cfg)
@@ -123,7 +123,7 @@ func (s *ConfigTestSuite) TestDataYamlExists() {
 }
 
 func (s *ConfigTestSuite) TestConfigUpdate() {
-	config := `
+	configYml := `
     streams:
       - data_yaml:
           activated_rules:
@@ -213,14 +213,14 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		},
 	}
 
-	cfg, err := common.NewConfigFrom(config)
+	cfg, err := config.NewConfigFrom(configYml)
 	s.NoError(err)
 
 	c, err := New(cfg)
 	s.NoError(err)
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.update)
+		cfg, err := config.NewConfigFrom(test.update)
 		s.NoError(err)
 
 		err = c.Update(s.log, cfg)
@@ -234,7 +234,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 // are isolated; only those parts of the config specified in the incoming
 // config should get updated.
 func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
-	config := `
+	configYml := `
     period: 10s
     kube_config: some_path
     streams:
@@ -291,14 +291,14 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 		},
 	}
 
-	cfg, err := common.NewConfigFrom(config)
+	cfg, err := config.NewConfigFrom(configYml)
 	s.NoError(err)
 
 	c, err := New(cfg)
 	s.NoError(err)
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.update)
+		cfg, err := config.NewConfigFrom(test.update)
 		s.NoError(err)
 
 		err = c.Update(s.log, cfg)
@@ -338,7 +338,7 @@ activated_rules:
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		c, err := New(cfg)
@@ -363,7 +363,7 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		c, err := New(cfg)
