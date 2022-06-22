@@ -22,6 +22,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/resources/utils"
 )
 
 const (
@@ -49,8 +50,9 @@ func (f *FileSystemFactory) Create(log *logp.Logger, c *common.Config) (fetching
 
 func (f *FileSystemFactory) CreateFrom(log *logp.Logger, cfg FileFetcherConfig) (fetching.Fetcher, error) {
 	fe := &FileSystemFetcher{
-		log: log,
-		cfg: cfg,
+		log:    log,
+		cfg:    cfg,
+		osUser: utils.NewOSUserUtil(),
 	}
 
 	log.Infof("File-System Fetcher created with the following config:"+

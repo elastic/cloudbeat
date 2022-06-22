@@ -561,8 +561,8 @@ github.com/eclipse/paho.mqtt.golang v1.3.5/go.mod h1:eTzb4gxwwyWpqBUHGQZ4ABAV7+J
 github.com/edsrzf/mmap-go v1.0.0/go.mod h1:YO35OhQPt3KJa3ryjFM5Bs14WD66h8eGKpfaBNrHW5M=
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220413140705-d101ba1d2ae5 h1:kINUJJmzJyws37K/4TXyUI9Odv/2vTjHlg8BXTXCtBA=
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220413140705-d101ba1d2ae5/go.mod h1:PhsCH91qJN33+rN/L8q2jWILmswlezJ6T+MMM6EDc8g=
-github.com/elastic/csp-security-policies v1.0.3 h1:dEV6TRPMQWaCGM3euskgpD1qU10b1y0lgsI3dmO9WA4=
-github.com/elastic/csp-security-policies v1.0.3/go.mod h1:24NNr0b/5HTGtndJOmhrefb59rd7NjuqI/To39tgn+w=
+github.com/elastic/csp-security-policies v1.0.4 h1:H8U1zVzOPy6eAV130qykrjsRQuAYPgS8R/7CZVS3Eq0=
+github.com/elastic/csp-security-policies v1.0.4/go.mod h1:24NNr0b/5HTGtndJOmhrefb59rd7NjuqI/To39tgn+w=
 github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4 h1:uYT+Krd8dsvnhnLK9pe/JHZkYtXEGPfbV4Wt1JPPol0=
 github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4/go.mod h1:UcNuf4pX/qDVNQr0zybm1NL2YoWik+jKBaINZqQCA40=
 github.com/elastic/elastic-agent-client/v7 v7.0.0-20210727140539-f0905d9377f6 h1:nFvXHBjYK3e9+xF0WKDeAKK4aOO51uC28s+L9rBmilo=
