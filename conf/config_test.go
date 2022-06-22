@@ -123,7 +123,7 @@ func (s *ConfigTestSuite) TestDataYamlExists() {
 }
 
 func (s *ConfigTestSuite) TestConfigUpdate() {
-	config := `
+	configYml := `
     streams:
       - data_yaml:
           activated_rules:
@@ -213,7 +213,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		},
 	}
 
-	cfg, err := config.NewConfigFrom(config)
+	cfg, err := config.NewConfigFrom(configYml)
 	s.NoError(err)
 
 	c, err := NewConfig(cfg)
@@ -234,7 +234,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 // are isolated; only those parts of the config specified in the incoming
 // config should get updated.
 func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
-	config := `
+	configYml := `
     period: 10s
     kube_config: some_path
     streams:
@@ -291,7 +291,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 		},
 	}
 
-	cfg, err := config.NewConfigFrom(config)
+	cfg, err := config.NewConfigFrom(configYml)
 	s.NoError(err)
 
 	c, err := NewConfig(cfg)
