@@ -42,7 +42,7 @@ var (
             }
         },
         "decision_logs": {
-            "console": true
+            "console": false
         }
     }`
 )

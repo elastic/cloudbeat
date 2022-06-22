@@ -87,14 +87,14 @@ func (c *Transformer) createResourceEvents(fetchedResource fetching.Resource, cy
 		return nil, err
 	}
 
-	c.log.Debugf("Eval decision for input: %v -- %v", fetcherResult, result)
+	c.log.Debugf("Eval decision for input: %+v -- %+v", fetcherResult, result)
 
 	findings, err := c.eval.Decode(result)
 	if err != nil {
 		return nil, err
 	}
 
-	c.log.Debugf("Created %d findings for input: %v", len(findings), fetcherResult)
+	c.log.Debugf("Created %d findings for input: %+v", len(findings), fetcherResult)
 
 	timestamp := time.Now()
 	resource := fetching.ResourceFields{
