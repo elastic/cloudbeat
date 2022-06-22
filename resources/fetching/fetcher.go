@@ -20,13 +20,13 @@ package fetching
 import (
 	"context"
 
-	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 // Factory can create fetcher instances based on configuration
 type Factory interface {
-	Create(*logp.Logger, *common.C) (Fetcher, error)
+	Create(*logp.Logger, *config.C) (Fetcher, error)
 }
 
 // Fetcher represents a data fetcher.

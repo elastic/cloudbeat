@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
@@ -60,7 +60,7 @@ name: aws-eks
 			return eksExtraElements{eksProvider: eksProvider}, nil
 		}}
 
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		fetcher, err := factory.Create(s.log, cfg)

@@ -18,7 +18,7 @@
 package transformer
 
 import (
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/conf"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
@@ -37,7 +37,7 @@ type CycleMetadata struct {
 type CommonDataProvider struct {
 	log        *logp.Logger
 	kubeClient kubernetes.Interface
-	cfg        config.Config
+	cfg        conf.Config
 }
 
 type CommonData struct {

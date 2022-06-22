@@ -21,8 +21,8 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	common "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -60,7 +60,7 @@ func (s *AddClusterIdTestSuite) TestClusterIdProcessor() {
 		}
 
 		e := beat.Event{
-			Fields: make(common.MapStr),
+			Fields: make(mapstr.M),
 		}
 		event, err := processor.Run(&e)
 		s.NoError(err)

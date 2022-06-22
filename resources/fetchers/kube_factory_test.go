@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
@@ -64,7 +64,7 @@ interval: 500
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		fetcher, err := s.factory.Create(s.log, cfg)

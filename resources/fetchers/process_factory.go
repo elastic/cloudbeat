@@ -22,7 +22,7 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
-	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -37,7 +37,7 @@ func init() {
 	manager.Factories.ListFetcherFactory(ProcessType, &ProcessFactory{})
 }
 
-func (f *ProcessFactory) Create(log *logp.Logger, c *common.C) (fetching.Fetcher, error) {
+func (f *ProcessFactory) Create(log *logp.Logger, c *config.C) (fetching.Fetcher, error) {
 	log.Debug("Starting ProcessFactory.Create")
 
 	cfg := ProcessFetcherConfig{}

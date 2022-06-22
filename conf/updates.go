@@ -18,20 +18,20 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package config
+package conf
 
 import (
 	"context"
 
 	"github.com/elastic/beats/v7/libbeat/common/reload"
-	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type reloader struct {
 	ctx context.Context
 	log *logp.Logger
-	ch  chan<- *common.C
+	ch  chan<- *config.C
 }
 
 func (r *reloader) Reload(configs []*reload.ConfigWithMeta) error {
@@ -52,8 +52,8 @@ func (r *reloader) Reload(configs []*reload.ConfigWithMeta) error {
 	return nil
 }
 
-func Updates(ctx context.Context, log *logp.Logger) <-chan *common.C {
-	ch := make(chan *common.C)
+func Updates(ctx context.Context, log *logp.Logger) <-chan *config.C {
+	ch := make(chan *config.C)
 	r := &reloader{
 		ctx: ctx,
 		log: log,

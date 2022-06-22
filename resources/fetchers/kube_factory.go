@@ -21,7 +21,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -32,7 +32,7 @@ func init() {
 	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
 }
 
-func (f *KubeFactory) Create(log *logp.Logger, c *common.C) (fetching.Fetcher, error) {
+func (f *KubeFactory) Create(log *logp.Logger, c *config.C) (fetching.Fetcher, error) {
 	log.Debug("Starting KubeFactory.Create")
 
 	cfg := KubeApiFetcherConfig{}

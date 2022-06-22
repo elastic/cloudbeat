@@ -23,9 +23,8 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -39,13 +38,13 @@ type FactoriesTestSuite struct {
 type numberFetcherFactory struct {
 }
 
-func (n *numberFetcherFactory) Create(log *logp.Logger, c *common.C) (fetching.Fetcher, error) {
+func (n *numberFetcherFactory) Create(log *logp.Logger, c *config.C) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
 	return &numberFetcher{int(x), false}, nil
 }
 
-func numberConfig(number int) *common.C {
-	c := common.NewConfig()
+func numberConfig(number int) *config.C {
+	c := config.NewConfig()
 	err := c.SetInt("num", -1, int64(number))
 	if err != nil {
 		logp.L().Errorf("Could not set number config: %v", err)
@@ -144,7 +143,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 			logp.L().Errorf("Could not set name: %v", err)
 			return
 		}
-		conf := config.DefaultConfig
+		conf := beater.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
 		err = s.F.RegisterFetchers(s.log, reg, conf)
 		s.NoError(err)
@@ -173,7 +172,7 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 			logp.L().Errorf("Could not set name: %v", err)
 			return
 		}
-		conf := config.DefaultConfig
+		conf := beater.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
 		err = s.F.RegisterFetchers(s.log, reg, conf)
 		s.Error(err)

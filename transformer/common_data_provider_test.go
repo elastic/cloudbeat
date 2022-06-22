@@ -18,7 +18,7 @@
 package transformer
 
 import (
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/conf"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -42,7 +42,7 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 	cdProvider := CommonDataProvider{
 		log:        logp.NewLogger("cloudbeat_common_data_provider_test"),
 		kubeClient: k8sFake.NewSimpleClientset(),
-		cfg:        config.Config{},
+		cfg:        conf.Config{},
 	}
 
 	type args struct {

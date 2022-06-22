@@ -18,14 +18,14 @@
 //go:build !integration
 // +build !integration
 
-package config
+package conf
 
 import (
 	"strings"
 	"testing"
 	"time"
 
-	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
@@ -72,10 +72,10 @@ func (s *ConfigTestSuite) TestNew() {
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		c, err := New(cfg)
+		c, err := NewConfig(cfg)
 		s.NoError(err)
 
 		s.Equal(test.expected, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
@@ -112,10 +112,10 @@ func (s *ConfigTestSuite) TestDataYamlExists() {
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		c, err := New(cfg)
+		c, err := NewConfig(cfg)
 		s.NoError(err)
 
 		s.Equal(test.expected, c.Streams[0].DataYaml != nil)
@@ -213,14 +213,14 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		},
 	}
 
-	cfg, err := common.NewConfigFrom(config)
+	cfg, err := config.NewConfigFrom(config)
 	s.NoError(err)
 
-	c, err := New(cfg)
+	c, err := NewConfig(cfg)
 	s.NoError(err)
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.update)
+		cfg, err := config.NewConfigFrom(test.update)
 		s.NoError(err)
 
 		err = c.Update(s.log, cfg)
@@ -291,14 +291,14 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 		},
 	}
 
-	cfg, err := common.NewConfigFrom(config)
+	cfg, err := config.NewConfigFrom(config)
 	s.NoError(err)
 
-	c, err := New(cfg)
+	c, err := NewConfig(cfg)
 	s.NoError(err)
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.update)
+		cfg, err := config.NewConfigFrom(test.update)
 		s.NoError(err)
 
 		err = c.Update(s.log, cfg)
@@ -338,10 +338,10 @@ activated_rules:
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		c, err := New(cfg)
+		c, err := NewConfig(cfg)
 		s.NoError(err)
 
 		dy, err := c.DataYaml()
@@ -363,10 +363,10 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		c, err := New(cfg)
+		c, err := NewConfig(cfg)
 		s.NoError(err)
 
 		s.Equal(test.expectedPeriod, c.Period)

@@ -27,7 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	common "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -51,7 +51,7 @@ type ecrExtraElements struct {
 	ecrPublicRepoDescriber  awslib.EcrRepositoryDescriber
 }
 
-func (f *ECRFactory) Create(log *logp.Logger, c *common.C) (fetching.Fetcher, error) {
+func (f *ECRFactory) Create(log *logp.Logger, c *config.C) (fetching.Fetcher, error) {
 	log.Debug("Starting ECRFactory.Create")
 
 	cfg := ECRFetcherConfig{}
