@@ -19,8 +19,9 @@ package manager
 
 import (
 	"context"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"testing"
+
+	"github.com/elastic/beats/v7/libbeat/logp"
 
 	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/config"
@@ -30,13 +31,15 @@ import (
 
 type FactoriesTestSuite struct {
 	suite.Suite
-	F factories
+
+	log *logp.Logger
+	F   factories
 }
 
 type numberFetcherFactory struct {
 }
 
-func (n *numberFetcherFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+func (n *numberFetcherFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
 	return &numberFetcher{int(x), false}, nil
 }
@@ -52,7 +55,14 @@ func numberConfig(number int) *common.Config {
 }
 
 func TestFactoriesTestSuite(t *testing.T) {
-	suite.Run(t, new(FactoriesTestSuite))
+	s := new(FactoriesTestSuite)
+	s.log = logp.NewLogger("cloudbeat_factories_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *FactoriesTestSuite) SetupTest() {
@@ -63,8 +73,7 @@ func (s *FactoriesTestSuite) TestListFetcher() {
 	var tests = []struct {
 		key string
 	}{
-		{"duplicate_fetcher"},
-		{"duplicate_fetcher"},
+		{"some_fetcher"},
 		{"other_fetcher"},
 		{"new_fetcher"},
 	}
@@ -73,7 +82,7 @@ func (s *FactoriesTestSuite) TestListFetcher() {
 		s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
 	}
 
-	s.Contains(s.F.m, "duplicate_fetcher")
+	s.Contains(s.F.m, "some_fetcher")
 	s.Contains(s.F.m, "other_fetcher")
 	s.Contains(s.F.m, "new_fetcher")
 }
@@ -83,8 +92,7 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 		key   string
 		value int
 	}{
-		{"duplicate_fetcher", 1},
-		{"duplicate_fetcher", 2},
+		{"some_fetcher", 1},
 		{"other_fetcher", 4},
 		{"new_fetcher", 6},
 	}
@@ -92,7 +100,7 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 	for _, test := range tests {
 		s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
 		c := numberConfig(test.value)
-		f, err := s.F.CreateFetcher(test.key, c)
+		f, err := s.F.CreateFetcher(s.log, test.key, c)
 		s.NoError(err)
 		res, err := f.Fetch(context.TODO())
 		s.NoError(err)
@@ -100,6 +108,21 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 		s.Equal(1, len(res))
 		s.Equal(test.value, res[0].GetData())
 	}
+}
+
+func (s *FactoriesTestSuite) TestCreateFetcherCollision() {
+	var tests = []struct {
+		key string
+	}{
+		{"some_fetcher"},
+		{"some_fetcher"},
+	}
+
+	s.Panics(func() {
+		for _, test := range tests {
+			s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
+		}
+	})
 }
 
 func (s *FactoriesTestSuite) TestRegisterFetchers() {
@@ -114,7 +137,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 	for _, test := range tests {
 		s.F = newFactories()
 		s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
-		reg := NewFetcherRegistry()
+		reg := NewFetcherRegistry(s.log)
 		numCfg := numberConfig(test.value)
 		err := numCfg.SetString("name", -1, test.key)
 		if err != nil {
@@ -123,7 +146,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err = s.F.RegisterFetchers(reg, conf)
+		err = s.F.RegisterFetchers(s.log, reg, conf)
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
@@ -143,7 +166,7 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 	}
 
 	for _, test := range tests {
-		reg := NewFetcherRegistry()
+		reg := NewFetcherRegistry(s.log)
 		numCfg := numberConfig(test.value)
 		err := numCfg.SetString("name", -1, test.key)
 		if err != nil {
@@ -152,7 +175,7 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err = s.F.RegisterFetchers(reg, conf)
+		err = s.F.RegisterFetchers(s.log, reg, conf)
 		s.Error(err)
 	}
 }

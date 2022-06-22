@@ -26,12 +26,13 @@ require (
 	gopkg.in/jcmturner/dnsutils.v1 v1.0.1 // indirect
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 	gopkg.in/jcmturner/rpc.v1 v1.1.0 // indirect
-	gotest.tools/gotestsum v0.6.0
+	gotest.tools/gotestsum v1.7.0
 	k8s.io/apimachinery v0.23.5
 	k8s.io/client-go v0.23.5
 )
 
 require (
+	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
 	github.com/elastic/go-licenser v0.4.0
 	github.com/open-policy-agent/opa v0.38.1
 	github.com/pkg/errors v0.9.1
@@ -54,7 +55,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220413140705-d101ba1d2ae5
-	github.com/elastic/csp-security-policies v1.0.1
+	github.com/elastic/csp-security-policies v1.0.4
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.4 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
@@ -113,16 +114,19 @@ require (
 
 require (
 	code.cloudfoundry.org/go-loggregator v7.4.0+incompatible // indirect
-	github.com/Masterminds/semver v1.4.2 // indirect
+	github.com/Jeffail/gabs/v2 v2.6.0 // indirect
+	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/Shopify/sarama v1.27.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cloudfoundry-community/go-cfclient v0.0.0-20190808214049-35bcce23fc5f // indirect
 	github.com/cloudfoundry/noaa v2.1.0+incompatible // indirect
 	github.com/cloudfoundry/sonde-go v0.0.0-20171206171820-b33733203bb4 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/dgraph-io/badger/v3 v3.2103.2 // indirect
+	github.com/dnephin/pflag v1.0.7 // indirect
 	github.com/docker/docker v20.10.7+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
@@ -151,6 +155,7 @@ require (
 	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/google/licenseclassifier v0.0.0-20200402202327-879cb1424de0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/h2non/filetype v1.1.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -159,7 +164,7 @@ require (
 	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/josephspurrier/goversioninfo v0.0.0-20190209210621-63e6d1acd3dd // indirect
-	github.com/karrick/godirwalk v1.15.6 // indirect
+	github.com/karrick/godirwalk v1.15.8 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/markbates/pkger v0.17.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
@@ -184,6 +189,7 @@ require (
 	github.com/urso/sderr v0.0.0-20210525210834-52b04e8f5c71 // indirect
 	github.com/xdg/scram v1.0.3 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
+	go.elastic.co/apm v1.13.0 // indirect
 	go.elastic.co/apm/module/apmelasticsearch/v2 v2.0.0 // indirect
 	go.elastic.co/apm/module/apmhttp/v2 v2.0.0 // indirect
 	go.elastic.co/apm/v2 v2.0.0 // indirect

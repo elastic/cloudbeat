@@ -20,7 +20,11 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
@@ -28,9 +32,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-	"reflect"
-	"regexp"
-	"testing"
 )
 
 const (
@@ -39,10 +40,19 @@ const (
 
 type ElbFetcherTestSuite struct {
 	suite.Suite
+
+	log *logp.Logger
 }
 
 func TestElbFetcherTestSuite(t *testing.T) {
-	suite.Run(t, new(ElbFetcherTestSuite))
+	s := new(ElbFetcherTestSuite)
+	s.log = logp.NewLogger("cloudbeat_elb_fetcher_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
@@ -103,12 +113,13 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
 		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.MatchedBy(func(balancers []string) bool {
-			return reflect.DeepEqual(balancers, test.expectedlbNames)
+			return s.Equal(balancers, test.expectedlbNames)
 		})).Return(test.lbResponse, nil)
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
 		elbFetcher := ELBFetcher{
+			log:             s.log,
 			cfg:             ELBFetcherConfig{},
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
@@ -174,6 +185,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
 		elbFetcher := ELBFetcher{
+			log:             s.log,
 			cfg:             ELBFetcherConfig{},
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,

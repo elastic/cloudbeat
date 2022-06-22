@@ -19,20 +19,31 @@ package fetchers
 
 import (
 	"context"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type IamFetcherTestSuite struct {
 	suite.Suite
+
+	log *logp.Logger
 }
 
 func TestIamFetcherTestSuite(t *testing.T) {
-	suite.Run(t, new(IamFetcherTestSuite))
+	s := new(IamFetcherTestSuite)
+	s.log = logp.NewLogger("cloudbeat_iam_fetcher_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
@@ -59,6 +70,7 @@ func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 		expectedResource := IAMResource{test.iamResponse}
 
 		eksFetcher := IAMFetcher{
+			log:         s.log,
 			cfg:         eksConfig,
 			iamProvider: iamProvider,
 		}
