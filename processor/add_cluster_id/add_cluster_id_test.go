@@ -56,7 +56,7 @@ func (s *AddClusterIdTestSuite) TestClusterIdProcessor() {
 
 		processor := &addClusterID{
 			helper: mock,
-			config: defaultConfig(),
+			config: config{},
 		}
 
 		e := beat.Event{

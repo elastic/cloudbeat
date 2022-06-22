@@ -19,7 +19,6 @@ package add_cluster_id
 
 import (
 	"fmt"
-
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	jsprocessor "github.com/elastic/beats/v7/libbeat/processors/script/javascript/module/processor"
@@ -27,12 +26,15 @@ import (
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 )
 
+const (
+	processorName = "add_cluster_id"
+	clusterIdKey  = "cluster_id"
+)
+
 func init() {
-	processors.RegisterPlugin("add_cluster_id", New)
+	processors.RegisterPlugin(processorName, New)
 	jsprocessor.RegisterPlugin("AddClusterID", New)
 }
-
-const processorName = "add_cluster_id"
 
 type addClusterID struct {
 	config config
@@ -41,7 +43,7 @@ type addClusterID struct {
 
 // New constructs a new Add ID processor.
 func New(cfg *agentconfig.C) (processors.Processor, error) {
-	config := defaultConfig()
+	config := config{}
 	if err := cfg.Unpack(&config); err != nil {
 		return nil, makeErrConfigUnpack(err)
 	}
@@ -67,7 +69,7 @@ func New(cfg *agentconfig.C) (processors.Processor, error) {
 func (p *addClusterID) Run(event *beat.Event) (*beat.Event, error) {
 	clusterId := p.helper.ClusterId()
 
-	if _, err := event.PutValue(p.config.TargetField, clusterId); err != nil {
+	if _, err := event.PutValue(clusterIdKey, clusterId); err != nil {
 		return nil, makeErrComputeID(err)
 	}
 
@@ -75,5 +77,5 @@ func (p *addClusterID) Run(event *beat.Event) (*beat.Event, error) {
 }
 
 func (p *addClusterID) String() string {
-	return fmt.Sprintf("%v=[target_field=[%v]]", processorName, p.config.TargetField)
+	return fmt.Sprintf("%v=", processorName)
 }
