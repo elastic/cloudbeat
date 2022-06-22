@@ -18,7 +18,7 @@
 //go:build !integration
 // +build !integration
 
-package conf
+package config
 
 import (
 	"strings"

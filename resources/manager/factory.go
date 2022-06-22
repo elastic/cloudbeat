@@ -22,11 +22,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/elastic/cloudbeat/conf"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -49,7 +49,7 @@ func (fa *factories) ListFetcherFactory(name string, f fetching.Factory) {
 	fa.m[name] = f
 }
 
-func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *config.C) (fetching.Fetcher, error) {
+func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig.C) (fetching.Fetcher, error) {
 	factory, ok := fa.m[name]
 	if !ok {
 		return nil, errors.New("fetcher factory could not be found")
@@ -58,7 +58,7 @@ func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *config.C) (
 	return factory.Create(log, c)
 }
 
-func (fa *factories) RegisterFetchers(log *logp.Logger, registry FetchersRegistry, cfg conf.Config) error {
+func (fa *factories) RegisterFetchers(log *logp.Logger, registry FetchersRegistry, cfg config.Config) error {
 	parsedList, err := fa.parseConfigFetchers(log, cfg)
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ type ParsedFetcher struct {
 	f    fetching.Fetcher
 }
 
-func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg conf.Config) ([]*ParsedFetcher, error) {
+func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg config.Config) ([]*ParsedFetcher, error) {
 	arr := []*ParsedFetcher{}
 	for _, fcfg := range cfg.Fetchers {
 		p, err := fa.parseConfigFetcher(log, fcfg)
@@ -118,7 +118,7 @@ func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg conf.Config) ([]*
 	return arr, nil
 }
 
-func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *config.C) (*ParsedFetcher, error) {
+func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C) (*ParsedFetcher, error) {
 	gen := fetching.BaseFetcherConfig{}
 	err := fcfg.Unpack(&gen)
 	if err != nil {

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/elastic/cloudbeat/conf"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources/manager"
@@ -31,7 +31,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/gofrs/uuid"
@@ -46,8 +46,8 @@ type cloudbeat struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	config        conf.Config
-	configUpdates <-chan *config.C
+	config        config.Config
+	configUpdates <-chan *agentconfig.C
 	client        beat.Client
 	data          *manager.Data
 	evaluator     evaluator.Evaluator
@@ -56,12 +56,12 @@ type cloudbeat struct {
 }
 
 // New creates an instance of cloudbeat.
-func New(b *beat.Beat, cfg *config.C) (beat.Beater, error) {
+func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("cloudbeat")
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	c, err := conf.NewConfig(cfg)
+	c, err := config.NewConfig(cfg)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("error reading config file: %w", err)
@@ -88,7 +88,7 @@ func New(b *beat.Beat, cfg *config.C) (beat.Beater, error) {
 	}
 
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
-	resultsIndex := conf.Datastream("", conf.ResultsDatastreamIndexPrefix)
+	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -112,7 +112,7 @@ func New(b *beat.Beat, cfg *config.C) (beat.Beater, error) {
 		ctx:           ctx,
 		cancel:        cancel,
 		config:        c,
-		configUpdates: conf.Updates(ctx, log),
+		configUpdates: config.Updates(ctx, log),
 		evaluator:     eval,
 		data:          data,
 		transformer:   t,
@@ -196,7 +196,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 // reconfigureWait will wait for and consume incoming reconfuration from the Fleet server, and keep
 // discarding them until the incoming config contains the necessary information to start cloudbeat
 // properly, thereafter returning the valid config.
-func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*config.C, error) {
+func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*agentconfig.C, error) {
 	start := time.Now()
 	timer := time.After(timeout)
 
@@ -213,7 +213,7 @@ func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*config.C, error) {
 				return nil, fmt.Errorf("reconfiguration channel is closed")
 			}
 
-			c, err := conf.NewConfig(update)
+			c, err := config.NewConfig(update)
 			if err != nil {
 				bt.log.Errorf("Could not parse reconfiguration %v, skipping with error: %v", update.FlattenedKeys(), err)
 				continue
@@ -237,7 +237,7 @@ func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*config.C, error) {
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the cloudbeat config,
 // and updates the hosted bundle with the new values.
-func (bt *cloudbeat) configUpdate(update *config.C) error {
+func (bt *cloudbeat) configUpdate(update *agentconfig.C) error {
 	if err := bt.config.Update(bt.log, update); err != nil {
 		return err
 	}
@@ -265,7 +265,7 @@ func (bt *cloudbeat) configUpdate(update *config.C) error {
 	return nil
 }
 
-func InitRegistry(log *logp.Logger, c conf.Config) (manager.FetchersRegistry, error) {
+func InitRegistry(log *logp.Logger, c config.Config) (manager.FetchersRegistry, error) {
 	registry := manager.NewFetcherRegistry(log)
 
 	if err := manager.Factories.RegisterFetchers(log, registry, c); err != nil {

@@ -20,7 +20,7 @@ package transformer
 import (
 	"context"
 
-	"github.com/elastic/cloudbeat/conf"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
 
@@ -38,7 +38,7 @@ const (
 
 var uuid_namespace uuid.UUID = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
 
-func NewCommonDataProvider(log *logp.Logger, cfg conf.Config) (CommonDataProvider, error) {
+func NewCommonDataProvider(log *logp.Logger, cfg config.Config) (CommonDataProvider, error) {
 	KubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		log.Errorf("NewCommonDataProvider error in GetClient: %v", err)
