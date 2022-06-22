@@ -24,11 +24,11 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils"
 
 	"github.com/pkg/errors"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
