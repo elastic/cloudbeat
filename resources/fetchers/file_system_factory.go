@@ -20,6 +20,7 @@ package fetchers
 import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/resources/utils"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -49,8 +50,9 @@ func (f *FileSystemFactory) Create(log *logp.Logger, c *config.C) (fetching.Fetc
 
 func (f *FileSystemFactory) CreateFrom(log *logp.Logger, cfg FileFetcherConfig) (fetching.Fetcher, error) {
 	fe := &FileSystemFetcher{
-		log: log,
-		cfg: cfg,
+		log:    log,
+		cfg:    cfg,
+		osUser: utils.NewOSUserUtil(),
 	}
 
 	log.Infof("File-System Fetcher created with the following config:"+
