@@ -18,16 +18,16 @@
 package add_cluster_id
 
 // configuration for Add ID processor.
-type procConfig struct {
+type config struct {
 	TargetField string `config:"target_field"` // Target field for the Cluster ID
 }
 
-func defaultConfig() procConfig {
-	return procConfig{
+func defaultConfig() config {
+	return config{
 		TargetField: "cluster_id",
 	}
 }
 
-func (c *procConfig) Validate() error {
+func (c *config) Validate() error {
 	return nil
 }

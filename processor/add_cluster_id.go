@@ -24,7 +24,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/processors"
 	jsprocessor "github.com/elastic/beats/v7/libbeat/processors/script/javascript/module/processor"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 )
 
 func init() {
@@ -35,12 +35,12 @@ func init() {
 const processorName = "add_cluster_id"
 
 type addClusterID struct {
-	config procConfig
+	config config
 	helper ClusterHelper
 }
 
 // New constructs a new Add ID processor.
-func New(cfg *config.C) (processors.Processor, error) {
+func New(cfg *agentconfig.C) (processors.Processor, error) {
 	config := defaultConfig()
 	if err := cfg.Unpack(&config); err != nil {
 		return nil, makeErrConfigUnpack(err)
