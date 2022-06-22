@@ -41,11 +41,12 @@ type NumberResource struct {
 }
 
 func newNumberFetcher(num int, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
-	defer wg.Done()
 	return &numberFetcher{num, false, ch, wg}
 }
 
 func (f *numberFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	defer f.wg.Done()
+
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      fetchValue(f.num),
 		CycleMetadata: cMetadata,
@@ -110,7 +111,7 @@ func TestRegistryTestSuite(t *testing.T) {
 func (s *RegistryTestSuite) SetupTest() {
 	s.registry = NewFetcherRegistry(s.log)
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
-	s.wg = s.wg
+	s.wg = &sync.WaitGroup{}
 }
 
 func (s *RegistryTestSuite) TestKeys() {

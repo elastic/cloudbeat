@@ -63,13 +63,38 @@ type PanicFetcher struct {
 	message    string
 	stopCalled bool
 	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
 }
 
-func newPanicFetcher(message string, ch chan fetching.ResourceInfo) fetching.Fetcher {
-	return &PanicFetcher{message, false, ch}
+type PanicFetcher struct {
+	message    string
+	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
+}
+
+type DataFetcher struct {
+	message    string
+	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
+}
+
+func newPanicFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
+	return &PanicFetcher{message, false, ch, wg}
+}
+
+func newDataFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
+	return &DataFetcher{message, false, ch, wg}
 }
 
 func (f *PanicFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	defer f.wg.Done()
+	panic(f.message)
+}
+
+func (f *PanicFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	defer f.wg.Done()
 	panic(f.message)
 }
 
@@ -138,7 +163,8 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	fetcherMessage := "fetcher got panic"
 	fetcherName := "panic_fetcher"
 
-	f := newPanicFetcher(fetcherMessage, s.resourceCh)
+	s.wg.Add(1)
+	f := newPanicFetcher(fetcherMessage, s.resourceCh, s.wg)
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
@@ -149,6 +175,7 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	s.NoError(err)
 	defer d.Stop()
 
+	s.wg.Wait()
 	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Empty(results)
@@ -159,7 +186,7 @@ func (s *DataTestSuite) TestDataFetchSinglePanic() {
 	fetcherMessage := "fetcher got panic"
 	fetcherName := "panic_fetcher"
 
-	f := newPanicFetcher(fetcherMessage, s.resourceCh)
+	f := newPanicFetcher(fetcherMessage, s.resourceCh, nil)
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
