@@ -101,6 +101,16 @@ func (o *OpaEvaluator) Decode(result interface{}) ([]Finding, error) {
 
 func newEvaluatorLogger() logging.Logger {
 	opaLogger := logging.New()
-	opaLogger.SetFormatter(&logrus.JSONFormatter{})
-	return opaLogger.WithFields(map[string]interface{}{"goroutine": "opa"})
+	opaLogger.SetFormatter(&logrus.JSONFormatter{
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime:  "@timestamp",
+			logrus.FieldKeyLevel: "log.level",
+			logrus.FieldKeyMsg:   "message",
+			logrus.FieldKeyFile:  "log.origin",
+		},
+	})
+	return opaLogger.WithFields(map[string]interface{}{
+		"log.logger":   "opa",
+		"service.name": "cloudbeat",
+	})
 }
