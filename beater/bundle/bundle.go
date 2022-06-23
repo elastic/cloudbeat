@@ -30,21 +30,6 @@ var (
 	address = "127.0.0.1:18080"
 
 	ServerAddress = fmt.Sprintf("http://%s", address)
-	Config        = `{
-        "services": {
-            "test": {
-                "url": %q
-            }
-        },
-        "bundles": {
-            "test": {
-                "resource": "/bundles/bundle.tar.gz"
-            }
-        },
-        "decision_logs": {
-            "console": false
-        }
-    }`
 )
 
 func StartServer() (*http.Server, error) {

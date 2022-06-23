@@ -39,6 +39,19 @@ type OpaEvaluator struct {
 	bundleServer *http.Server
 }
 
+var opaConfig = `{
+	"services": {
+		"CSP": {
+			"url": %q
+		}
+	},
+	"bundles": {
+		"CSP": {
+			"resource": "/bundles/bundle.tar.gz"
+		}
+	},
+}`
+
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
 	server, err := bundle.StartServer()
 	if err != nil {
@@ -48,7 +61,7 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
 	// provide the OPA configuration which specifies
 	// fetching policy bundles from the mock bundleServer
 	// and logging decisions locally to the console
-	config := []byte(fmt.Sprintf(bundle.Config, bundle.ServerAddress))
+	config := []byte(fmt.Sprintf(opaConfig, bundle.ServerAddress))
 
 	// create an instance of the OPA object
 	opaLogger := newEvaluatorLogger()
