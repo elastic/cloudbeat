@@ -53,10 +53,10 @@ type ECRFetcherConfig struct {
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-type EcrRepositories ecr.Repository
+type EcrRepository ecr.Repository
 
 type ECRResource struct {
-	EcrRepositories
+	EcrRepository
 }
 
 func (f *ECRFetcher) Stop() {
@@ -77,7 +77,7 @@ func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 			return nil, fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 		}
 		for _, repository := range ecrDescribedRepositories {
-			results = append(results, ECRResource{EcrRepositories(repository)})
+			results = append(results, ECRResource{EcrRepository(repository)})
 		}
 	}
 
