@@ -49,7 +49,7 @@ deploy-eks-cloudbeat:
   kubectl delete -f deploy/eks/cloudbeat-ds.yml -n kube-system & kubectl apply -f deploy/eks/cloudbeat-ds.yml -n kube-system
 
 delete-eks-cloudbeat:
-  kubectl delete -f deploy/eks/cloudbeat-dss.yml -n kube-system
+  kubectl delete -f deploy/eks/cloudbeat-ds.yml -n kube-system
 
 
 #General
