@@ -10,7 +10,7 @@ not_evaluated_input = {
 
 # kube-api input data that should not get evaluated
 not_evaluated_kube_api_input = {
-	"type": "kube-api",
+	"type": "k8s_object",
 	"resource": {"kind": "some_kind"},
 }
 
@@ -40,7 +40,7 @@ process_input_with_external_data(process_name, arguments, external_data) = {
 }
 
 kube_api_input(resource) = {
-	"type": "kube-api",
+	"type": "k8s_object",
 	"resource": resource,
 }
 
@@ -51,7 +51,7 @@ kube_api_role_rule(api_group, resource, verb) = {
 }
 
 kube_api_role_input(kind, rules) = {
-	"type": "kube-api",
+	"type": "k8s_object",
 	"resource": {
 		"kind": kind,
 		"metadata": {"name": "role-name"},
@@ -60,7 +60,7 @@ kube_api_role_input(kind, rules) = {
 }
 
 kube_api_pod_input(pod_name, service_account, automount_setting) = {
-	"type": "kube-api",
+	"type": "k8s_object",
 	"resource": {
 		"kind": "Pod",
 		"metadata": {"name": pod_name},
@@ -73,7 +73,7 @@ kube_api_pod_input(pod_name, service_account, automount_setting) = {
 }
 
 kube_api_service_account_input(name, automount_setting) = {
-	"type": "kube-api",
+	"type": "k8s_object",
 	"resource": {
 		"kind": "ServiceAccount",
 		"metadata": {"name": name},
