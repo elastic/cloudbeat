@@ -53,56 +53,29 @@ generate_eks_input_with_vpc_config(endpoint_private_access, endpoint_public_acce
 }
 
 generate_ecr_input_with_one_repo(image_scan_on_push) = {
-	"type": "aws-ecr",
-	"resource": {"EcrRepositories": [{
-		"kind": "Pod",
-		"CreatedAt": "2020-07-29T11:44:18Z",
+	"resource": {
+		"CreatedAt": "2022-03-31T11:56:19Z",
 		"ImageScanningConfiguration": {"ScanOnPush": image_scan_on_push},
 		"ImageTagMutability": "MUTABLE",
-		"RegistryId": "704479110758",
-		"RepositoryArn": "arn:aws:ecr:us-east-2:704479110758:repository/build.security.management",
-		"RepositoryName": "build.security.management",
-		"RepositoryUri": "704479110758.dkr.ecr.us-east-2.amazonaws.com/build.security.management",
-	}]},
-}
-
-generate_ecr_input_with_two_repo(first_image_scan_on_push, second_image_scan_on_push) = {
+		"RegistryId": "704479111111",
+		"RepositoryArn": "arn:aws:ecr:us-east-2:704479110758:repository/blabla",
+		"RepositoryName": "cloudbeat",
+		"RepositoryUri": "704479111111.dkr.ecr.us-east-2.amazonaws.com/blabla",
+	},
 	"type": "aws-ecr",
-	"resource": {"EcrRepositories": [
-		{
-			"kind": "Pod",
-			"CreatedAt": "2020-07-29T11:44:18Z",
-			"ImageScanningConfiguration": {"ScanOnPush": first_image_scan_on_push},
-			"ImageTagMutability": "MUTABLE",
-			"RegistryId": "704479110758",
-			"RepositoryArn": "arn:aws:ecr:us-east-2:704479110758:repository/build.security.management",
-			"RepositoryName": "build.security.management",
-			"RepositoryUri": "704479110758.dkr.ecr.us-east-2.amazonaws.com/build.security.management",
-		},
-		{
-			"CreatedAt": "2020-07-29T11:44:18Z",
-			"ImageScanningConfiguration": {"ScanOnPush": second_image_scan_on_push},
-			"ImageTagMutability": "MUTABLE",
-			"RegistryId": "704479110758",
-			"RepositoryArn": "arn:aws:ecr:us-east-2:704479110758:repository/build.security.management",
-			"RepositoryName": "build.security.management2",
-			"RepositoryUri": "704479110758.dkr.ecr.us-east-2.amazonaws.com/build.security.management",
-		},
-	]},
 }
 
 generate_elb_input_with_two_load_balancers(first_instance_protocol, first_instance_ssl_cert, sec_instance_protocol, sec_instance_ssl_cert) = {
-	"type": "aws-elb",
-	"resource": {"LoadBalancersDescription": [{
+	"resource": {
 		"AvailabilityZones": [
 			"us-east-2b",
 			"us-east-2a",
 		],
 		"BackendServerDescriptions": null,
-		"CanonicalHostedZoneName": "adda9cdc89b13452e92d48be46858d37-1423035038.us-east-2.elb.amazonaws.com",
+		"CanonicalHostedZoneName": "adda9cdc89b13412e02d48be46858d37-1423011111.us-west-1.elb.amazonaws.com",
 		"CanonicalHostedZoneNameID": "Z3AADJGX6KTTL2",
 		"CreatedTime": "2021-12-06T15:42:09.55Z",
-		"DNSName": "adda9cdc89b13452e92d48be46858d37-1423035038.us-east-2.elb.amazonaws.com",
+		"DNSName": "adda9cdc89b13452e92d48be4682013d93-1423035038.us-east-2.elb.amazonaws.com",
 		"HealthCheck": {
 			"HealthyThreshold": 2,
 			"Interval": 10,
@@ -111,8 +84,8 @@ generate_elb_input_with_two_load_balancers(first_instance_protocol, first_instan
 			"UnhealthyThreshold": 6,
 		},
 		"Instances": [
-			{"InstanceId": "i-0b81bd277b144e5e9"},
-			{"InstanceId": "i-00e02dbffa8e2c54b"},
+			{"InstanceId": "i-03d9f29028ead864e"},
+			{"InstanceId": "i-016b72c7857120f97"},
 		],
 		"ListenerDescriptions": [
 			{
@@ -136,7 +109,7 @@ generate_elb_input_with_two_load_balancers(first_instance_protocol, first_instan
 				"PolicyNames": null,
 			},
 		],
-		"LoadBalancerName": "adda9cdc89b13452e92d48be46858d37",
+		"LoadBalancerName": "adda9cdc89b13452e92d48be432131d37",
 		"Policies": {
 			"AppCookieStickinessPolicies": null,
 			"LBCookieStickinessPolicies": null,
@@ -153,7 +126,8 @@ generate_elb_input_with_two_load_balancers(first_instance_protocol, first_instan
 			"subnet-09b8d7fdb5776ab47",
 		],
 		"VPCId": "vpc-09b1bd8bbf4508a52",
-	}]},
+	},
+	"type": "aws-elb",
 }
 
 not_evaluated_input = {

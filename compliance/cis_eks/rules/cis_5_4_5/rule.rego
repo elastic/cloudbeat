@@ -5,29 +5,14 @@ import data.compliance.lib.common
 
 default rule_evaluation = true
 
-# Verify that all listeners has SSL Certificate
+# Verify that all listeners has an SSL Certificate
 rule_evaluation = false {
-	input.resource.LoadBalancersDescription[_].ListenerDescriptions[_].Listener.SSLCertificateId == null
+	input.resource.ListenerDescriptions[_].Listener.SSLCertificateId == null
 }
 
 # Verify that all listeners use https protocoal
 rule_evaluation = false {
-	input.resource.LoadBalancersDescription[_].ListenerDescriptions[_].Listener.InstanceProtocol != "HTTPS"
-}
-
-# Verify that all listeners use https protocoal
-evidence["none_https_protocol"] = {"instances:": result} {
-	result = [elb_name |
-		elb_name = input.resource.LoadBalancersDescription[index].LoadBalancerName
-		input.resource.LoadBalancersDescription[index].ListenerDescriptions[_].Listener.InstanceProtocol != "HTTPS"
-	]
-}
-
-evidence["ssl_certificate_missing"] = {"instances:": result} {
-	result = [elb_name |
-		elb_name = input.resource.LoadBalancersDescription[index].LoadBalancerName
-		input.resource.LoadBalancersDescription[index].ListenerDescriptions[_].Listener.SSLCertificateId == null
-	]
+	input.resource.ListenerDescriptions[_].Listener.InstanceProtocol != "HTTPS"
 }
 
 # Ensure there Kuberenetes endpoint private access is enabled
@@ -38,6 +23,9 @@ finding = result {
 	# set result
 	result := {
 		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": evidence,
+		"evidence": {
+			"load_balancer_name": input.resource.LoadBalancerName,
+			"listener_descriptions": input.resource.ListenerDescriptions,
+		},
 	}
 }
