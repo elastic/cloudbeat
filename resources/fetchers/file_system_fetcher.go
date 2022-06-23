@@ -25,10 +25,12 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils"
+
 	"github.com/pkg/errors"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
@@ -40,21 +42,24 @@ const (
 )
 
 type FileSystemResource struct {
-	FileName string `json:"filename"`
-	FileMode string `json:"mode"`
-	Gid      string `json:"gid"`
-	Uid      string `json:"uid"`
-	Path     string `json:"path"`
-	Inode    string `json:"inode"`
-	SubType  string `json:"sub_type"`
+	Name    string `json:"name"`
+	Mode    string `json:"mode"`
+	Gid     uint32 `json:"gid"`
+	Uid     uint32 `json:"uid"`
+	Owner   string `json:"owner"`
+	Group   string `json:"group"`
+	Path    string `json:"path"`
+	Inode   string `json:"inode"`
+	SubType string `json:"sub_type"`
 }
 
 // FileSystemFetcher implement the Fetcher interface
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
 type FileSystemFetcher struct {
-	log        *logp.Logger
-	cfg        FileFetcherConfig
+	log    *logp.Logger
+	cfg    FileFetcherConfig
+	osUser utils.OSUser
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -93,12 +98,12 @@ func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FileSystemReso
 	if err != nil {
 		return FileSystemResource{}, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
 	}
-	resourceInfo, _ := FromFileInfo(info, filePath)
+	resourceInfo, _ := f.fromFileInfo(info, filePath)
 
 	return resourceInfo, nil
 }
 
-func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
+func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 
 	if info == nil {
 		return FileSystemResource{}, nil
@@ -114,24 +119,26 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 
 	uid := stat.Uid
 	gid := stat.Gid
-	username, err := user.GetUserNameFromID(uid, UserFile)
+	username, err := f.osUser.GetUserNameFromID(uid, UserFile)
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to find username for uid %d, error - %+v", uid, err))
 	}
 
-	groupName, err := user.GetGroupNameFromID(gid, GroupFile)
+	groupName, err := f.osUser.GetGroupNameFromID(gid, GroupFile)
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to find groupname for gid %d, error - %+v", gid, err))
 	}
 
 	data := FileSystemResource{
-		FileName: info.Name(),
-		FileMode: mod,
-		Uid:      username,
-		Gid:      groupName,
-		Path:     path,
-		Inode:    inode,
-		SubType:  getFSSubType(info),
+		Name:    info.Name(),
+		Mode:    mod,
+		Gid:     gid,
+		Uid:     uid,
+		Owner:   username,
+		Group:   groupName,
+		Path:    path,
+		Inode:   inode,
+		SubType: getFSSubType(info),
 	}
 
 	return data, nil

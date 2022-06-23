@@ -24,11 +24,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"

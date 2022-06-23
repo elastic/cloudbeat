@@ -22,12 +22,16 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/stretchr/testify/suite"
+	"github.com/elastic/cloudbeat/resources/utils"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/assert"
 )
 
 type FSFetcherTestSuite struct {
@@ -45,7 +49,7 @@ func TestFSFetcherTestSuite(t *testing.T) {
 		t.Error(err)
 	}
 
-	suite.Run(t, s)
+	suite.Run(s)
 }
 
 func (s *FSFetcherTestSuite) SetupTest() {
@@ -67,6 +71,18 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 		Patterns: filePaths,
 	}
 
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher := FileSystemFetcher{
+		log:    log,
+		cfg:    cfg,
+		osUser: osUserMock,
+	}
+
+	results, err := fileFetcher.Fetch(context.TODO())
 	factory := FileSystemFactory{}
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
@@ -80,7 +96,11 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 
 	fsResource := results[0].Resource.(FileSystemResource)
 	s.Equal(files[0], fsResource.FileName)
-	s.Equal("600", fsResource.FileMode)
+	fsResource := results[0].(FileSystemResource)
+	s.Equal(files[0], fsResource.Name)
+	s.Equal("600", fsResource.Mode)
+	s.Equal("root", fsResource.Owner)
+	s.Equal("root", fsResource.Group)
 
 	rMetadata := fsResource.GetMetadata()
 	s.NotNil(rMetadata.ID)
@@ -99,10 +119,22 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	cfg := FileFetcherConfig{
 		Patterns: paths,
 	}
-	factory := FileSystemFactory{}
+
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil).Once()
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("etcd", nil).Once()
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil).Once()
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("etcd", nil).Once()
 
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher := FileSystemFetcher{
+		log:    log,
+		cfg:    cfg,
+		osUser: osUserMock,
+	}
+	results, err := fileFetcher.Fetch(context.TODO())
 
 	err = fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
@@ -112,7 +144,12 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 
 	firstFSResource := results[0].Resource.(FileSystemResource)
 	s.Equal(outerFiles[0], firstFSResource.FileName)
-	s.Equal("600", firstFSResource.FileMode)
+
+	firstFSResource := results[0].(FileSystemResource)
+	s.Equal(outerFiles[0], firstFSResource.Name)
+	s.Equal("600", firstFSResource.Mode)
+	s.Equal("root", firstFSResource.Owner)
+	s.Equal("root", firstFSResource.Group)
 
 	rMetadata := firstFSResource.GetMetadata()
 	s.NotNil(rMetadata.ID)
@@ -120,9 +157,13 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Equal(FileSubType, rMetadata.SubType)
 	s.Equal(FSResourceType, rMetadata.Type)
 
+	secFSResource := results[1].(FileSystemResource)
+	s.Equal(outerFiles[1], secFSResource.Name)
+	s.Equal("600", secFSResource.Mode)
+	s.Equal("etcd", secFSResource.Owner)
+	s.Equal("etcd", secFSResource.Group)
 	secFSResource := results[1].Resource.(FileSystemResource)
 	s.Equal(outerFiles[1], secFSResource.FileName)
-	s.Equal("600", secFSResource.FileMode)
 
 	SecResMetadata := secFSResource.GetMetadata()
 	s.NotNil(SecResMetadata.ID)
@@ -141,12 +182,22 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	cfg := FileFetcherConfig{
 		Patterns: filePaths,
 	}
-	factory := FileSystemFactory{}
+
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
 
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
 	err = fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher := FileSystemFetcher{
+		log:    log,
+		cfg:    cfg,
+		osUser: osUserMock,
+	}
+	results, err := fileFetcher.Fetch(context.TODO())
 
 	s.Nil(err, "Fetcher was not able to fetch files from FS")
 	s.Equal(1, len(results))
@@ -158,6 +209,13 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	s.Equal(expectedResult, fsResource.FileName)
 	s.NotNil(rMetadata.ID)
 	s.NotNil(rMetadata.Name)
+	s.Equal(DirSubType, rMetadata.SubType)
+	s.Equal(FSResourceType, rMetadata.Type)
+	s.Equal(expectedResult, fsResource.Name)
+	s.Equal("", fsResource.Owner)
+	s.Equal("", fsResource.Group)
+	assert.NotNil(rMetadata.ID)
+	assert.NotNil(rMetadata.Name)
 	s.Equal(DirSubType, rMetadata.SubType)
 	s.Equal(FSResourceType, rMetadata.Type)
 }
@@ -176,8 +234,18 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	cfg := FileFetcherConfig{
 		Patterns: path,
 	}
-	factory := FileSystemFactory{}
 
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher := FileSystemFetcher{
+		log:    log,
+		cfg:    cfg,
+		osUser: osUserMock,
+	}
+	results, err := fileFetcher.Fetch(context.TODO())
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
 	err = fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
@@ -197,6 +265,15 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 		s.NotNil(rMetadata.ID)
 		s.Equal(FSResourceType, rMetadata.Type)
 		s.NoError(err)
+		fileSystemDataResources := results[i].(FileSystemResource)
+		assert.Contains(expectedResult, fileSystemDataResources.Name)
+		s.Equal("root", fileSystemDataResources.Owner)
+		s.Equal("root", fileSystemDataResources.Group)
+		assert.NotNil(rMetadata.SubType)
+		assert.NotNil(rMetadata.Name)
+		assert.NotNil(rMetadata.ID)
+		s.Equal(FSResourceType, rMetadata.Type)
+		assert.NoError(err)
 	}
 }
 
@@ -218,10 +295,19 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	cfg := FileFetcherConfig{
 		Patterns: path,
 	}
-	factory := FileSystemFactory{}
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
 	fileFetcher, err := factory.CreateFrom(s.log, cfg, s.resourceCh)
 	s.NoError(err)
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher := FileSystemFetcher{
+		log:    log,
+		cfg:    cfg,
+		osUser: osUserMock,
+	}
+	results, err := fileFetcher.Fetch(context.TODO())
 
 	err = fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
@@ -242,6 +328,14 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 		s.Equal(FSResourceType, rMetadata.Type)
 		s.NoError(err)
 		s.Contains(allFilesName, fileSystemDataResources.FileName)
+		assert.NotNil(rMetadata.SubType)
+		assert.NotNil(rMetadata.Name)
+		assert.NotNil(rMetadata.ID)
+		s.Equal(FSResourceType, rMetadata.Type)
+		assert.NoError(err)
+		assert.Contains(allFilesName, fileSystemDataResources.Name)
+		s.Equal("root", fileSystemDataResources.Owner)
+		s.Equal("root", fileSystemDataResources.Group)
 	}
 }
 

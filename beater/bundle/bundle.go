@@ -22,8 +22,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 var (
@@ -42,7 +42,7 @@ var (
             }
         },
         "decision_logs": {
-            "console": true
+            "console": false
         }
     }`
 )

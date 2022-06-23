@@ -21,13 +21,13 @@ import (
 	"context"
 	"github.com/gofrs/uuid"
 
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 // Factory can create fetcher instances based on configuration
 type Factory interface {
-	Create(*logp.Logger, *common.Config, chan ResourceInfo) (Fetcher, error)
+	Create(*logp.Logger, *config.C, chan ResourceInfo) (Fetcher, error)
 }
 
 // Fetcher represents a data fetcher.

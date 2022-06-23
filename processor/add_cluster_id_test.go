@@ -15,26 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package add_cluster_id
 
 import (
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/suite"
 )
 
-type EksFactoryTestSuite struct {
+type AddClusterIdTestSuite struct {
 	suite.Suite
 
 	log *logp.Logger
 }
 
-func TestEksFactoryTestSuite(t *testing.T) {
-	s := new(EksFactoryTestSuite)
-	s.log = logp.NewLogger("cloudbeat_eks_factory_test_suite")
+func TestAddClusterIdTestSuite(t *testing.T) {
+	s := new(AddClusterIdTestSuite)
+	s.log = logp.NewLogger("cloudbeat_add_cluster_id_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -43,32 +43,38 @@ func TestEksFactoryTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *EksFactoryTestSuite) TestCreateFetcher() {
-	var tests = []struct {
-		config string
-	}{
-		{
-			`
-name: aws-eks
-`,
-		},
+func (s *AddClusterIdTestSuite) TestClusterIdProcessor() {
+	tests := []string{
+		"abc",
+		"some-cluster-id",
 	}
 
-	for _, test := range tests {
-		eksProvider := &awslib.MockedEksClusterDescriber{}
-		factory := &EKSFactory{extraElements: func() (eksExtraElements, error) {
-			return eksExtraElements{eksProvider: eksProvider}, nil
-		}}
+	for _, t := range tests {
+		mock := &clusterHelperMock{
+			id: t,
+		}
 
-		cfg, err := config.NewConfigFrom(test.config)
+		processor := &addClusterID{
+			helper: mock,
+			config: defaultConfig(),
+		}
+
+		e := beat.Event{
+			Fields: make(mapstr.M),
+		}
+		event, err := processor.Run(&e)
 		s.NoError(err)
 
-		fetcher, err := factory.Create(s.log, cfg, nil)
+		res, err := event.GetValue("cluster_id")
 		s.NoError(err)
-		s.NotNil(fetcher)
-
-		eksFetcher, ok := fetcher.(*EKSFetcher)
-		s.True(ok)
-		s.Equal(eksProvider, eksFetcher.eksProvider)
+		s.Equal(t, res)
 	}
+}
+
+type clusterHelperMock struct {
+	id string
+}
+
+func (m *clusterHelperMock) ClusterId() string {
+	return m.id
 }

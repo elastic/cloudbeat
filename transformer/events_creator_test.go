@@ -24,8 +24,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -44,13 +44,15 @@ const (
 )
 
 var fetcherResult = fetchers.FileSystemResource{
-	FileName: "scheduler.conf",
-	FileMode: "700",
-	Gid:      "root",
-	Uid:      "root",
-	Path:     "/hostfs/etc/kubernetes/scheduler.conf",
-	Inode:    "8901",
-	SubType:  "file",
+	Name:    "scheduler.conf",
+	Mode:    "700",
+	Gid:     20,
+	Uid:     501,
+	Owner:   "root",
+	Group:   "root",
+	Path:    "/hostfs/etc/kubernetes/scheduler.conf",
+	Inode:   "8901",
+	SubType: "file",
 }
 
 var (

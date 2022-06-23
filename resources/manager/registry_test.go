@@ -20,9 +20,11 @@ package manager
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"testing"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"sync"

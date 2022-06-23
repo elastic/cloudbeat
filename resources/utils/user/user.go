@@ -65,7 +65,18 @@ type Group struct {
 // lineFunc returns a value, an error, or (nil, nil) to skip the row.
 type lineFunc func(line []byte) (v interface{}, err error)
 
-func GetUserNameFromID(uid uint32, userFilePath string) (string, error) {
+type OSUser interface {
+	GetUserNameFromID(uid uint32, userFilePath string) (string, error)
+	GetGroupNameFromID(gid uint32, groupFilePath string) (string, error)
+}
+
+type OSUserUtil struct{}
+
+func NewOSUserUtil() OSUser {
+	return &OSUserUtil{}
+}
+
+func (*OSUserUtil) GetUserNameFromID(uid uint32, userFilePath string) (string, error) {
 	u := strconv.FormatUint(uint64(uid), 10)
 	usr, err := lookupUserId(u, userFilePath)
 	if err != nil || usr == nil {
@@ -75,7 +86,7 @@ func GetUserNameFromID(uid uint32, userFilePath string) (string, error) {
 	return usr.Username, nil
 }
 
-func GetGroupNameFromID(gid uint32, groupFilePath string) (string, error) {
+func (*OSUserUtil) GetGroupNameFromID(gid uint32, groupFilePath string) (string, error) {
 	g := strconv.FormatUint(uint64(gid), 10)
 	group, err := lookupGroupId(g, groupFilePath)
 	if err != nil || group == nil {

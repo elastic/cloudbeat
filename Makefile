@@ -51,6 +51,10 @@ test:
 clean: $(MAGE)
 	@$(MAGE) clean
 
+.PHONY: PackageAgent
+PackageAgent:
+	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
+
 ##############################################################################
 # Checks/tests.
 ##############################################################################
