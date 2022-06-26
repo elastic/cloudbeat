@@ -24,9 +24,9 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
@@ -56,7 +56,7 @@ func TestElbFetcherTestSuite(t *testing.T) {
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
-
+	lbName := "adda9cdc89b13452e92d48be46858d37"
 	var tests = []struct {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
@@ -71,9 +71,10 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 				},
 			},
 			[]elasticloadbalancing.LoadBalancerDescription{{
-				Instances: []elasticloadbalancing.Instance{},
+				Instances:        []elasticloadbalancing.Instance{},
+				LoadBalancerName: &lbName,
 			}},
-			[]string{"adda9cdc89b13452e92d48be46858d37"},
+			[]string{lbName},
 		},
 		{
 			"test_namespace",
@@ -112,9 +113,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
-		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.MatchedBy(func(balancers []string) bool {
-			return s.Equal(balancers, test.expectedlbNames)
-		})).Return(test.lbResponse, nil)
+		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
@@ -128,13 +127,14 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
 		ctx := context.Background()
 
-		expectedResource := ELBResource{test.lbResponse}
 		result, err := elbFetcher.Fetch(ctx)
 		s.Nil(err)
-		s.Equal(1, len(result))
+		s.Equal(len(test.expectedlbNames), len(result))
 
-		elbResource := result[0].(ELBResource)
-		s.Equal(expectedResource, elbResource)
+		for i, expectedLbName := range test.expectedlbNames {
+			elbResource := result[i].(ELBResource)
+			s.Equal(expectedLbName, *elbResource.LoadBalancerName)
+		}
 	}
 }
 

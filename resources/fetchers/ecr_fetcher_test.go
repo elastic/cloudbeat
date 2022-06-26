@@ -24,10 +24,10 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
@@ -232,8 +232,6 @@ func (s *ECRFetcherTestSuite) TestFetcherFetch() {
 		}
 
 		expectedRepositories := append(test.expectedRepositories, test.expectedPublicRepositories...)
-		expectedResource := ECRResource{expectedRepositories}
-
 		ecrFetcher := ECRFetcher{
 			log:           s.log,
 			cfg:           ECRFetcherConfig{},
@@ -245,14 +243,11 @@ func (s *ECRFetcherTestSuite) TestFetcherFetch() {
 
 		result, err := ecrFetcher.Fetch(ctx)
 		s.Nil(err)
-		s.Equal(1, len(result))
-
-		elbResource := result[0].(ECRResource)
-		s.Equal(expectedResource, elbResource)
-		s.Equal(len(expectedRepositories), len(elbResource.EcrRepositories))
+		s.Equal(len(expectedRepositories), len(result))
 
 		for i, name := range test.expectedRepositoriesNames {
-			s.Contains(*elbResource.EcrRepositories[i].RepositoryName, name)
+			ecrResource := result[i].(ECRResource)
+			s.Equal(name, *ecrResource.RepositoryName)
 		}
 	}
 

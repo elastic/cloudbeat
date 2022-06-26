@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -56,7 +56,7 @@ func (s *BeaterTestSuite) TestReconfigureWait() {
 		log:    s.log,
 	}
 
-	configNoStreams, err := common.NewConfigFrom(`
+	configNoStreams, err := config.NewConfigFrom(`
     not_streams:
       - data_yaml:
           activated_rules:
@@ -69,7 +69,7 @@ func (s *BeaterTestSuite) TestReconfigureWait() {
 `)
 	s.NoError(err)
 
-	configNoDataYaml, err := common.NewConfigFrom(`
+	configNoDataYaml, err := config.NewConfigFrom(`
     streams:
       - not_data_yaml:
           activated_rules:
@@ -82,7 +82,7 @@ func (s *BeaterTestSuite) TestReconfigureWait() {
 `)
 	s.NoError(err)
 
-	configWithDataYaml, err := common.NewConfigFrom(`
+	configWithDataYaml, err := config.NewConfigFrom(`
     streams:
       - data_yaml:
           activated_rules:
@@ -97,13 +97,13 @@ func (s *BeaterTestSuite) TestReconfigureWait() {
 
 	type incomingConfigs []struct {
 		after  time.Duration
-		config *common.Config
+		config *config.C
 	}
 
 	testcases := []struct {
 		timeout  time.Duration
 		configs  incomingConfigs
-		expected *common.Config
+		expected *config.C
 	}{
 		{
 			5 * time.Millisecond,
@@ -175,7 +175,7 @@ func (s *BeaterTestSuite) TestReconfigureWait() {
 	}
 
 	for _, tcase := range testcases {
-		cu := make(chan *common.Config)
+		cu := make(chan *config.C)
 		beat.configUpdates = cu
 
 		go func(ic incomingConfigs) {

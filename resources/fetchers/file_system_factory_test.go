@@ -20,9 +20,9 @@ package fetchers
 import (
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -66,7 +66,7 @@ patterns: [
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		fetcher, err := s.factory.Create(s.log, cfg)

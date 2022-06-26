@@ -20,13 +20,14 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	v1 "k8s.io/api/core/v1"
 	"regexp"
 
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	v1 "k8s.io/api/core/v1"
+
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
@@ -52,10 +53,10 @@ type ECRFetcherConfig struct {
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-type EcrRepositories []ecr.Repository
+type EcrRepository ecr.Repository
 
 type ECRResource struct {
-	EcrRepositories
+	EcrRepository
 }
 
 func (f *ECRFetcher) Stop() {
@@ -64,7 +65,6 @@ func (f *ECRFetcher) Stop() {
 func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	f.log.Debug("Starting ECRFetcher.Fetch")
 	results := make([]fetching.Resource, 0)
-	ecrRepositories := make([]ecr.Repository, 0)
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
@@ -76,9 +76,10 @@ func (f *ECRFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 		if err != nil {
 			return nil, fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 		}
-		ecrRepositories = append(ecrRepositories, ecrDescribedRepositories...)
+		for _, repository := range ecrDescribedRepositories {
+			results = append(results, ECRResource{EcrRepository(repository)})
+		}
 	}
-	results = append(results, ECRResource{ecrRepositories})
 
 	return results, nil
 }
