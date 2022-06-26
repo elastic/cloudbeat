@@ -47,7 +47,7 @@ func (f *DelayFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetada
 
 	select {
 	case <-ctx.Done():
-		fmt.Errorf("reached timeout")
+		return fmt.Errorf("reached timeout")
 	case <-time.After(f.delay):
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      fetchValue(int(f.delay.Seconds())),
@@ -130,7 +130,8 @@ func (s *DataTestSuite) TestDataRun() {
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
-	d.Run(s.ctx)
+	err = d.Run(s.ctx)
+	s.NoError(err)
 	defer d.Stop()
 	s.wg.Wait() // waiting for all fetchers to complete
 
