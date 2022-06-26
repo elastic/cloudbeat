@@ -67,7 +67,7 @@ func (s *ElbFetcherTestSuite) TearDownTest() {
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
-
+	lbName := "adda9cdc89b13452e92d48be46858d37"
 	var tests = []struct {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
@@ -82,9 +82,10 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 				},
 			},
 			[]elasticloadbalancing.LoadBalancerDescription{{
-				Instances: []elasticloadbalancing.Instance{},
+				Instances:        []elasticloadbalancing.Instance{},
+				LoadBalancerName: &lbName,
 			}},
-			[]string{"adda9cdc89b13452e92d48be46858d37"},
+			[]string{lbName},
 		},
 		{
 			"test_namespace",
@@ -123,9 +124,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
-		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.MatchedBy(func(balancers []string) bool {
-			return s.Equal(balancers, test.expectedlbNames)
-		})).Return(test.lbResponse, nil)
+		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
@@ -138,17 +137,16 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			resourceCh:      s.resourceCh,
 		}
 
-		ctx := context.Background()
-
-		expectedResource := ELBResource{test.lbResponse}
-		err = elbFetcher.Fetch(ctx, fetching.CycleMetadata{})
-
+		err = elbFetcher.Fetch(context.Background(), fetching.CycleMetadata{})
 		results := testhelper.CollectResources(s.resourceCh)
-		elbResource := results[0].Resource.(ELBResource)
 
-		s.Equal(1, len(results))
-		s.Equal(expectedResource, elbResource)
+		s.Equal(len(test.expectedlbNames), len(results))
 		s.Nil(err)
+
+		for i, expectedLbName := range test.expectedlbNames {
+			elbResource := results[i].Resource.(ELBResource)
+			s.Equal(expectedLbName, *elbResource.LoadBalancerName)
+		}
 	}
 }
 

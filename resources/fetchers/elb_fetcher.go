@@ -48,7 +48,7 @@ type ELBFetcherConfig struct {
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-type LoadBalancersDescription []elasticloadbalancing.LoadBalancerDescription
+type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription
 
 type ELBResource struct {
 	LoadBalancersDescription
@@ -65,11 +65,13 @@ func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 	if err != nil {
 		return fmt.Errorf("failed to load balancers from ELB %w", err)
 	}
-	f.resourceCh <- fetching.ResourceInfo{
-		Resource:      ELBResource{result},
-		CycleMetadata: cMetadata,
+	
+	for _, loadBalancer := range result {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      ELBResource{LoadBalancersDescription(loadBalancer)},
+			CycleMetadata: cMetadata,
+		}
 	}
-
 	return err
 }
 

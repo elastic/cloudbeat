@@ -244,8 +244,6 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		}
 
 		expectedRepositories := append(test.expectedRepositories, test.expectedPublicRepositories...)
-		expectedResource := ECRResource{expectedRepositories}
-
 		ecrFetcher := ECRFetcher{
 			log:           s.log,
 			cfg:           ECRFetcherConfig{},
@@ -256,16 +254,14 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 
 		ctx := context.Background()
 		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
-
 		results := testhelper.CollectResources(s.resourceCh)
-		elbResource := results[0].Resource.(ECRResource)
 
-		s.Equal(expectedResource, elbResource)
-		s.Equal(len(expectedRepositories), len(elbResource.EcrRepositories))
+		s.Equal(len(expectedRepositories), len(results))
 		s.Nil(err)
 
 		for i, name := range test.expectedRepositoriesNames {
-			s.Contains(*elbResource.EcrRepositories[i].RepositoryName, name)
+			ecrResource := results[i].Resource.(ECRResource)
+			s.Equal(name, *ecrResource.RepositoryName)
 		}
 	}
 

@@ -54,10 +54,10 @@ type ECRFetcherConfig struct {
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-type EcrRepositories []ecr.Repository
+type EcrRepository ecr.Repository
 
 type ECRResource struct {
-	EcrRepositories
+	EcrRepository
 }
 
 func (f *ECRFetcher) Stop() {
@@ -65,7 +65,7 @@ func (f *ECRFetcher) Stop() {
 
 func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ECRFetcher.Fetch")
-	ecrRepositories := make([]ecr.Repository, 0)
+
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
@@ -77,12 +77,12 @@ func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 		if err != nil {
 			return fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
 		}
-		ecrRepositories = append(ecrRepositories, ecrDescribedRepositories...)
-	}
-
-	f.resourceCh <- fetching.ResourceInfo{
-		Resource:      ECRResource{ecrRepositories},
-		CycleMetadata: cMetadata,
+		for _, repository := range ecrDescribedRepositories {
+			f.resourceCh <- fetching.ResourceInfo{
+				Resource:      ECRResource{EcrRepository(repository)},
+				CycleMetadata: cMetadata,
+			}
+		}
 	}
 
 	return nil
