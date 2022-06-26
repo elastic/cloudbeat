@@ -2,8 +2,8 @@ package pipeline
 
 import (
 	"context"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"testing"

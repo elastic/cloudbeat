@@ -20,13 +20,12 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/utils/user"
 	"os"
 	"strconv"
 	"syscall"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils"
+	"github.com/elastic/cloudbeat/resources/utils/user"
 
 	"github.com/pkg/errors"
 
@@ -57,9 +56,9 @@ type FileSystemResource struct {
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
 type FileSystemFetcher struct {
-	log    *logp.Logger
-	cfg    FileFetcherConfig
-	osUser utils.OSUser
+	log        *logp.Logger
+	cfg        FileFetcherConfig
+	osUser     user.OSUser
 	resourceCh chan fetching.ResourceInfo
 }
 

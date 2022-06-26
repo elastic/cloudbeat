@@ -35,8 +35,6 @@ import (
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/gofrs/uuid"
 )
 
 const (

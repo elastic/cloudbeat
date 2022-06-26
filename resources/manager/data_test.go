@@ -35,13 +35,16 @@ type DelayFetcher struct {
 	delay      time.Duration
 	stopCalled bool
 	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
 }
 
-func newDelayFetcher(delay time.Duration, ch chan fetching.ResourceInfo) fetching.Fetcher {
-	return &DelayFetcher{delay, false, ch}
+func newDelayFetcher(delay time.Duration, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
+	return &DelayFetcher{delay, false, ch, wg}
 }
 
 func (f *DelayFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	defer f.wg.Done()
+
 	select {
 	case <-ctx.Done():
 		fmt.Errorf("reached timeout")
@@ -66,37 +69,35 @@ type PanicFetcher struct {
 	wg         *sync.WaitGroup
 }
 
-type PanicFetcher struct {
-	message    string
-	stopCalled bool
-	resourceCh chan fetching.ResourceInfo
-	wg         *sync.WaitGroup
-}
-
-type DataFetcher struct {
-	message    string
-	stopCalled bool
-	resourceCh chan fetching.ResourceInfo
-	wg         *sync.WaitGroup
-}
+//type DataFetcher struct {
+//	message    string
+//	stopCalled bool
+//	resourceCh chan fetching.ResourceInfo
+//	wg         *sync.WaitGroup
+//}
 
 func newPanicFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
 	return &PanicFetcher{message, false, ch, wg}
 }
 
-func newDataFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
-	return &DataFetcher{message, false, ch, wg}
-}
+//
+//func newDataFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
+//	return &DataFetcher{message, false, ch, wg}
+//}
 
 func (f *PanicFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	defer f.wg.Done()
 	panic(f.message)
 }
 
-func (f *PanicFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	defer f.wg.Done()
-	panic(f.message)
-}
+//
+//func (f *DataFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+//	defer f.wg.Done()
+//	f.resourceCh <- fetching.ResourceInfo{
+//		Resource: 1,
+//		CycleMetadata: cMetadata,
+//	}
+//}
 
 func (f *PanicFetcher) Stop() {
 	f.stopCalled = true
@@ -202,7 +203,8 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	interval := 5 * time.Second
 	fetcherName := "delay_fetcher"
 
-	f := newDelayFetcher(fetcherDelay, s.resourceCh)
+	s.wg.Add(1)
+	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
@@ -213,6 +215,7 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	s.NoError(err)
 	defer d.Stop()
 
+	s.wg.Wait()
 	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Empty(results)
@@ -223,7 +226,8 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 	interval := 3 * time.Second
 	fetcherName := "timeout_fetcher"
 
-	f := newDelayFetcher(fetcherDelay, s.resourceCh)
+	s.wg.Add(1)
+	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
@@ -240,7 +244,6 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	fetcherName := "not_run_fetcher"
 	fetcherConditionName := "false_condition"
 
-	s.wg.Add(1)
 	f := newNumberFetcher(fetcherVal, s.resourceCh, s.wg)
 	c := newBoolFetcherCondition(false, fetcherConditionName)
 	err := s.registry.Register(fetcherName, f, c)
@@ -253,12 +256,13 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	s.NoError(err)
 	defer d.Stop()
 
+	// Fetcher did not run, we can not wait for sync.done() to be called.
 	var results []fetching.ResourceInfo
 	select {
 	case result := <-s.resourceCh:
 		results = append(results, result)
-	case <-time.Tick(2 * time.Second):
-		s.wg.Done()
+	case <-time.Tick(interval):
+		break
 	}
 
 	s.Empty(results)

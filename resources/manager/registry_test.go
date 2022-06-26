@@ -28,7 +28,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"sync"
-	"testing"
 )
 
 type numberFetcher struct {
@@ -172,15 +171,15 @@ func (s *RegistryTestSuite) TestRunNotRegistered() {
 }
 
 func (s *RegistryTestSuite) TestRunRegistered() {
-	f1 := newNumberFetcher(1, s.resourceCh, s.wg)
+	f1 := newSyncNumberFetcher(1, s.resourceCh)
 	err := s.registry.Register("some-key-1", f1, nil)
 	s.NoError(err)
 
-	f2 := newNumberFetcher(2, s.resourceCh, s.wg)
+	f2 := newSyncNumberFetcher(2, s.resourceCh)
 	err = s.registry.Register("some-key-2", f2, nil)
 	s.NoError(err)
 
-	f3 := newNumberFetcher(3, s.resourceCh, s.wg)
+	f3 := newSyncNumberFetcher(3, s.resourceCh)
 	err = s.registry.Register("some-key-3", f3, nil)
 	s.NoError(err)
 

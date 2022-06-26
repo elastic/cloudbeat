@@ -19,15 +19,38 @@ package manager
 
 import (
 	"context"
-	"testing"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"testing"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/stretchr/testify/suite"
 )
+
+type syncNumberFetcher struct {
+	num        int
+	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+}
+
+func newSyncNumberFetcher(num int, ch chan fetching.ResourceInfo) fetching.Fetcher {
+	return &syncNumberFetcher{num, false, ch}
+}
+
+func (f *syncNumberFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      fetchValue(f.num),
+		CycleMetadata: cMetadata,
+	}
+
+	return nil
+}
+
+func (f *syncNumberFetcher) Stop() {
+	f.stopCalled = true
+}
 
 type FactoriesTestSuite struct {
 	suite.Suite
@@ -37,12 +60,11 @@ type FactoriesTestSuite struct {
 	resourceCh chan fetching.ResourceInfo
 }
 
-type numberFetcherFactory struct {
-}
+type numberFetcherFactory struct{}
 
-func (n *numberFetcherFactory) Create(log *logp.Logger, c c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (n *numberFetcherFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
-	return &numberFetcher{int(x), false, ch, &sync.WaitGroup{}}, nil
+	return &syncNumberFetcher{int(x), false, ch}, nil
 }
 
 func numberConfig(number int) *agentconfig.C {
@@ -155,12 +177,13 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
 		err = s.F.RegisterFetchers(s.log, reg, conf, s.resourceCh)
+
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
 		err = reg.Run(context.Background(), test.key, fetching.CycleMetadata{})
-
 		results := testhelper.CollectResources(s.resourceCh)
+
 		s.NoError(err)
 		s.Equal(test.value, results[0].Resource.GetData())
 	}
