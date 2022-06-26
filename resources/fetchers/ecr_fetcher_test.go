@@ -41,7 +41,6 @@ type ECRFetcherTestSuite struct {
 	suite.Suite
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	errorCh    chan error
 }
 
 func TestECRFetcherTestSuite(t *testing.T) {

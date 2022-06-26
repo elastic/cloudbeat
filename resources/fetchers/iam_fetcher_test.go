@@ -35,7 +35,6 @@ type IamFetcherTestSuite struct {
 
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	errorCh    chan error
 }
 
 func TestIamFetcherTestSuite(t *testing.T) {
@@ -51,12 +50,10 @@ func TestIamFetcherTestSuite(t *testing.T) {
 
 func (s *IamFetcherTestSuite) SetupTest() {
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
-	s.errorCh = make(chan error, 1)
 }
 
 func (s *IamFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
-	close(s.errorCh)
 }
 
 func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
