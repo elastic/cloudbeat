@@ -175,6 +175,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	eventsCh := pipeline.Step(bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event
+	var ticker = time.NewTicker(flushInterval)
 	for {
 		select {
 		case <-bt.ctx.Done():
@@ -186,7 +187,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 			}
 
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
-		case <-time.Tick(flushInterval):
+		case <-ticker.C:
 			if len(eventsToSend) == 0 {
 				continue
 			}
