@@ -1,6 +1,6 @@
 module github.com/elastic/cloudbeat
 
-go 1.17
+go 1.18
 
 require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
