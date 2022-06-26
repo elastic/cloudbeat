@@ -41,7 +41,7 @@ const (
 	reconfigureWaitTimeout = 10 * time.Minute
 	flushInterval          = 10 * time.Second
 	eventsThreshold        = 75
-	resourceChBuffer       = 50
+	resourceChBuffer       = 10000
 )
 
 // cloudbeat configuration.

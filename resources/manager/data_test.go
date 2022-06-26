@@ -69,35 +69,14 @@ type PanicFetcher struct {
 	wg         *sync.WaitGroup
 }
 
-//type DataFetcher struct {
-//	message    string
-//	stopCalled bool
-//	resourceCh chan fetching.ResourceInfo
-//	wg         *sync.WaitGroup
-//}
-
 func newPanicFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
 	return &PanicFetcher{message, false, ch, wg}
 }
-
-//
-//func newDataFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
-//	return &DataFetcher{message, false, ch, wg}
-//}
 
 func (f *PanicFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	defer f.wg.Done()
 	panic(f.message)
 }
-
-//
-//func (f *DataFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-//	defer f.wg.Done()
-//	f.resourceCh <- fetching.ResourceInfo{
-//		Resource: 1,
-//		CycleMetadata: cMetadata,
-//	}
-//}
 
 func (f *PanicFetcher) Stop() {
 	f.stopCalled = true
