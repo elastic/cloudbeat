@@ -18,10 +18,10 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 )
@@ -38,45 +38,48 @@ func init() {
 }
 
 type IAMFactory struct {
-	extraElements func() (IAMExtraElements, error)
+	extraElements func(*logp.Logger) (IAMExtraElements, error)
 }
 
 type IAMExtraElements struct {
 	iamProvider awslib.IAMRolePermissionGetter
 }
 
-func (f *IAMFactory) Create(c *common.Config) (fetching.Fetcher, error) {
-	logp.L().Info("IAM factory has started")
+func (f *IAMFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting IAMFactory.Create")
+
 	cfg := IAMFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
 	}
-	elements, err := f.extraElements()
+	elements, err := f.extraElements(log)
 	if err != nil {
 		return nil, err
 	}
 
-	return f.CreateFrom(cfg, elements)
+	return f.CreateFrom(log, cfg, elements, ch)
 }
 
-func getIamExtraElements() (IAMExtraElements, error) {
+func getIamExtraElements(log *logp.Logger) (IAMExtraElements, error) {
 	awsConfigProvider := awslib.ConfigProvider{}
 	awsConfig, err := awsConfigProvider.GetConfig()
 	if err != nil {
 		return IAMExtraElements{}, err
 	}
-	provider := awslib.NewIAMProvider(awsConfig.Config)
+	provider := awslib.NewIAMProvider(log, awsConfig.Config)
 
 	return IAMExtraElements{
 		iamProvider: provider,
 	}, nil
 }
 
-func (f *IAMFactory) CreateFrom(cfg IAMFetcherConfig, elements IAMExtraElements) (fetching.Fetcher, error) {
+func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, elements IAMExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	return &IAMFetcher{
+		log:         log,
 		cfg:         cfg,
 		iamProvider: elements.iamProvider,
+		resourceCh:  ch,
 	}, nil
 
 }

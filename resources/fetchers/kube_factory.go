@@ -18,12 +18,12 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 	k8s "k8s.io/client-go/kubernetes"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type KubeFactory struct {
@@ -33,23 +33,27 @@ func init() {
 	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
 }
 
-func (f *KubeFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+func (f *KubeFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting KubeFactory.Create")
+
 	cfg := KubeApiFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
 	}
-	return f.CreateFrom(cfg, kubernetes.GetKubernetesClient)
+  return f.CreateFrom(log, cfg, ch, kubernetes.GetKubernetesClient)
 }
 
-func (f *KubeFactory) CreateFrom(cfg KubeApiFetcherConfig, provider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)) (fetching.Fetcher, error) {
+func (f *KubeFactory) CreateFrom(log *logp.Logger, cfg KubeApiFetcherConfig, ch chan fetching.ResourceInfo, provider func(string, kubernetes.KubeClientOptions) (fetching.Fetcher, error) {
 	fe := &KubeFetcher{
-		cfg:            cfg,
-		clientProvider: provider,
-		watchers:       make([]kubernetes.Watcher, 0),
+		log:        log,
+		cfg:        cfg,
+    clientProvider: provider,
+		watchers:   make([]kubernetes.Watcher, 0),
+		resourceCh: ch,
 	}
 
-	logp.L().Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+
+	log.Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+
 		"Kubeconfig: %s", cfg.Name, cfg.Interval, cfg.Kubeconfig)
 	return fe, nil
 }

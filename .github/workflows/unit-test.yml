@@ -1,19 +1,19 @@
 name: UnitTests
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
-    types: [assigned, opened, synchronize, reopened]
+      - '[0-9]+.[0-9]+'
+    types: [ assigned, opened, synchronize, reopened ]
   push:
     branches:
       - main
 
-
 env:
-  K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
-  GO_VERSION: 1.17.2
-  
+  K8S_MANIFEST_DIR: deploy
+  GO_VERSION: 1.18.2
+
 jobs:
   unit_tests:
     name: Unit Tests
@@ -22,16 +22,12 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
-          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO_VERSION }}
-     
+
       - name: Mage Check
         uses: magefile/mage-action@v1.6.0
         with:
@@ -52,7 +48,15 @@ jobs:
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: goveralls -service=github
-        
+
+  manifest_tests:
+    name: Manifest Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
       - name: Get diff k8s manifests
         uses: technote-space/get-diff-action@v4
         with:
@@ -65,5 +69,24 @@ jobs:
           kubectl: 1.18.2
           kubeval: v0.16.1
           command: |
-            echo "===== run kubeval"
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/cloudbeat-ds.yaml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/*.yml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/kustomize/base/cloudbeat*.yml
+            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/eks/cloudbeat*.yml
+
+  golangci:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
+          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
+
+      - name: Go linter
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=10m --whole-files

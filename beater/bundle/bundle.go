@@ -18,18 +18,19 @@
 package bundle
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-var address = "127.0.0.1:18080"
+var (
+	address = "127.0.0.1:18080"
 
-var ServerAddress = "http://" + address
-
-var Config = `{
+	ServerAddress = fmt.Sprintf("http://%s", address)
+	Config        = `{
         "services": {
             "test": {
                 "url": %q
@@ -41,9 +42,10 @@ var Config = `{
             }
         },
         "decision_logs": {
-            "console": true
+            "console": false
         }
     }`
+)
 
 func StartServer() (*http.Server, error) {
 	policies, err := csppolicies.CISKubernetes()
@@ -51,9 +53,8 @@ func StartServer() (*http.Server, error) {
 		return nil, err
 	}
 
-	bundleServer := csppolicies.NewServer()
-	err = bundleServer.HostBundle("bundle.tar.gz", policies)
-	if err != nil {
+	h := csppolicies.NewServer()
+	if err := csppolicies.HostBundle("bundle.tar.gz", policies); err != nil {
 		return nil, err
 	}
 
@@ -62,12 +63,14 @@ func StartServer() (*http.Server, error) {
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler:      bundleServer,
+		Handler:      h,
 	}
+
+	log := logp.NewLogger("cloudbeat_bundle_server")
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			logp.L().Errorf("bundle server closed: %v", err)
+			log.Errorf("Bundle server closed: %v", err)
 		}
 	}()
 

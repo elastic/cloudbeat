@@ -18,20 +18,29 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/stretchr/testify/suite"
 	"testing"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/suite"
 )
 
 type EksFactoryTestSuite struct {
 	suite.Suite
-	factory fetching.Factory
+
+	log *logp.Logger
 }
 
 func TestEksFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(EksFactoryTestSuite))
+	s := new(EksFactoryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_eks_factory_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *EksFactoryTestSuite) TestCreateFetcher() {
@@ -51,10 +60,10 @@ name: aws-eks
 			return eksExtraElements{eksProvider: eksProvider}, nil
 		}}
 
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := factory.Create(cfg)
+		fetcher, err := factory.Create(s.log, cfg, nil)
 		s.NoError(err)
 		s.NotNil(fetcher)
 

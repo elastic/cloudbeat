@@ -18,8 +18,8 @@
 package conditions
 
 import (
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type LeaderLeaseProvider interface {
@@ -27,11 +27,13 @@ type LeaderLeaseProvider interface {
 }
 
 type LeaseFetcherCondition struct {
+	log      *logp.Logger
 	provider LeaderLeaseProvider
 }
 
-func NewLeaseFetcherCondition(provider LeaderLeaseProvider) fetching.Condition {
+func NewLeaseFetcherCondition(log *logp.Logger, provider LeaderLeaseProvider) fetching.Condition {
 	return &LeaseFetcherCondition{
+		log:      log,
 		provider: provider,
 	}
 }
@@ -39,7 +41,7 @@ func NewLeaseFetcherCondition(provider LeaderLeaseProvider) fetching.Condition {
 func (c *LeaseFetcherCondition) Condition() bool {
 	l, err := c.provider.IsLeader()
 	if err != nil {
-		logp.L().Errorf("could not read leader value, using default value %v: %v", l, err)
+		c.log.Errorf("Could not read leader value, using default value %v: %v", l, err)
 	}
 	return l
 }

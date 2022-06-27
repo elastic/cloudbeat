@@ -51,6 +51,10 @@ test:
 clean: $(MAGE)
 	@$(MAGE) clean
 
+.PHONY: PackageAgent
+PackageAgent:
+	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
+
 ##############################################################################
 # Checks/tests.
 ##############################################################################
@@ -244,5 +248,5 @@ build/dependencies.csv: $(PYTHON) go.mod
 ifdef SNAPSHOT
 	$(PYTHON) scripts/make/generate_notice.py --csv build/dependencies-${CLOUDBEAT_VERSION}-SNAPSHOT.csv
 else
-	$(PYTHON) scripts/make/generate_notice.py --csv build/dependencies-$CLOUDBEAT_VERSION.csv
+	$(PYTHON) scripts/make/generate_notice.py --csv build/dependencies-${CLOUDBEAT_VERSION}.csv
 endif

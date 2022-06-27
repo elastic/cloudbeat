@@ -1,15 +1,15 @@
 name: Cloudbeat-CI
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - main
+      - '[0-9]+.[0-9]+'
     types: [assigned, opened, synchronize, reopened]
-
 
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
-  GO_VERSION: 1.17.2
+  GO_VERSION: 1.18.2
 
 jobs:
   Build:
@@ -19,10 +19,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
-          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -93,10 +89,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
-          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
       - uses: azure/setup-helm@v1
         id: install
@@ -104,7 +96,7 @@ jobs:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
         with:
-          config: deploy/k8s/kind/kind-config.yaml
+          config: deploy/k8s/kind/kind-config.yml
           cluster_name: kind-mono 
 
       - name: Wait for build to succeed
@@ -130,13 +122,9 @@ jobs:
           rm -rf /tmp/*.tar
 
       - name: Deploy tests Helm chart
+        id: deploy_helm
         run: |
-          helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/ 
-
-      - name: Sleep for 100s
-        uses: juliangruber/sleep-action@v1
-        with:
-          time: 100s
+          helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/
 
       - name: Run Tests
         id: run_tests 
@@ -151,47 +139,6 @@ jobs:
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: failure()
+        if: steps.deploy_helm.outcome == 'failure'
         with:
           limit-access-to-actor: true
-
-      - name: Get Allure history
-        uses: actions/checkout@v2
-        if: always()
-        continue-on-error: true
-        with:
-          ref: gh-pages
-          path: gh-pages
-
-      - name: Generate
-        uses: simple-elf/allure-report-action@master
-        if: always()
-        with:
-          allure_results: tests/allure/results
-          allure_history: allure-history
-          keep_reports: 20
-
-      - name: Deploy report to Github Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v2
-        env:
-          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISH_BRANCH: gh-pages
-          PUBLISH_DIR: allure-history
-
-      - name: Comment test success result
-        uses: marocchino/sticky-pull-request-comment@v2
-        if: always()
-        with:
-          header: Test Results
-          recreate: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          message: |
-            ## Cloudbeat CI :robot:
-            Integration tests status: ${{ steps.run_tests.outcome }}
-            Tests Summary:
-            ```python
-            ${{env.summary}}
-            ```
-            Link to detailed report: https://${{ github.repository_owner }}.github.io/cloudbeat/${{ github.run_number }}
-

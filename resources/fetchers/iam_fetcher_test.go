@@ -19,20 +19,41 @@ package fetchers
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type IamFetcherTestSuite struct {
 	suite.Suite
+
+	log        *logp.Logger
+	resourceCh chan fetching.ResourceInfo
 }
 
 func TestIamFetcherTestSuite(t *testing.T) {
-	suite.Run(t, new(IamFetcherTestSuite))
+	s := new(IamFetcherTestSuite)
+	s.log = logp.NewLogger("cloudbeat_iam_fetcher_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
+}
+
+func (s *IamFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+}
+
+func (s *IamFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
 }
 
 func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
@@ -59,15 +80,19 @@ func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 		expectedResource := IAMResource{test.iamResponse}
 
 		eksFetcher := IAMFetcher{
+			log:         s.log,
 			cfg:         eksConfig,
 			iamProvider: iamProvider,
+			resourceCh:  s.resourceCh,
 		}
 
 		ctx := context.Background()
-		result, err := eksFetcher.Fetch(ctx)
-		s.Nil(err)
 
-		iamResource := result[0].(IAMResource)
+		err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		results := testhelper.CollectResources(s.resourceCh)
+		iamResource := results[0].Resource.(IAMResource)
+
 		s.Equal(expectedResource, iamResource)
+		s.Nil(err)
 	}
 }

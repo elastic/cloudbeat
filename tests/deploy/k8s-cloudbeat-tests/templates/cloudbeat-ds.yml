@@ -43,6 +43,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            # This is done for leader election on local env
+            # GAP: https://github.com/elastic/cloudbeat/issues/162
+            - name: POD_NAME
+              value: cloudbeat-leader
+                # fieldRef:
+                #   fieldPath: metadata.name
           securityContext:
             runAsUser: 0
             # If using Red Hat OpenShift uncomment this:
@@ -138,7 +144,7 @@ data:
         processes:
           etcd:
           kube-apiserver:
-          kube-controller-manager:
+          kube-controller:
           kube-scheduler:
           kubelet:
             config-file-arguments:
@@ -155,6 +161,8 @@ data:
           "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
           "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
           "/hostfs/var/lib/kubelet/config.yaml",
+          "/hostfs/etc/kubernetes/pki/*.crt",
+          "/hostfs/etc/kubernetes/pki/*.key",
           "/hostfs/var/lib/etcd",
           "/hostfs/etc/kubernetes/pki"
         ]
@@ -321,6 +329,17 @@ roleRef:
   kind: Role
   name: cloudbeat-role
   apiGroup: rbac.authorization.k8s.io
+---
+# GAP: https://github.com/elastic/cloudbeat/issues/162
+apiVersion: coordination.k8s.io/v1
+kind: Lease
+metadata:
+  name: elastic-agent-cluster-leader
+  namespace: kube-system
+spec:
+  holderIdentity: cloudbeat-leader
+  leaseDurationSeconds: 15
+  renewTime: "1992-04-26T00:00:00.000000Z"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

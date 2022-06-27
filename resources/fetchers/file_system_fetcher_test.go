@@ -19,181 +19,298 @@ package fetchers
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-func TestFileFetcherFetchASingleFile(t *testing.T) {
+type FSFetcherTestSuite struct {
+	suite.Suite
+
+	log        *logp.Logger
+	resourceCh chan fetching.ResourceInfo
+}
+
+func TestFSFetcherTestSuite(t *testing.T) {
+	s := new(FSFetcherTestSuite)
+	s.log = logp.NewLogger("cloudbeat_fs_fetcher_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
+}
+
+func (s *FSFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+}
+
+func (s *FSFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
+}
+
+func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	directoryName := "test-outer-dir"
 	files := []string{"file.txt"}
-	dir := createDirectoriesWithFiles(t, "", directoryName, files)
+	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, files)
 	defer os.RemoveAll(dir)
 
 	filePaths := []string{filepath.Join(dir, files[0])}
 	cfg := FileFetcherConfig{
 		Patterns: filePaths,
 	}
-	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
-	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
 
-	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
-	assert.Equal(t, 1, len(results))
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
-	fsResource := results[0].(FileSystemResource)
-	assert.Equal(t, files[0], fsResource.FileName)
-	assert.Equal(t, "600", fsResource.FileMode)
-	rid, err := fsResource.GetID()
-	assert.NotNil(t, rid)
-	assert.NoError(t, err)
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher := FileSystemFetcher{
+		log:        log,
+		cfg:        cfg,
+		osUser:     osUserMock,
+		resourceCh: s.resourceCh,
+	}
+
+	var results []fetching.ResourceInfo
+	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results = testhelper.CollectResources(s.resourceCh)
+
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
+	s.Equal(1, len(results))
+
+	fsResource := results[0].Resource.(FileSystemResource)
+	s.Equal(files[0], fsResource.Name)
+	s.Equal("600", fsResource.Mode)
+	s.Equal("root", fsResource.Owner)
+	s.Equal("root", fsResource.Group)
+
+	rMetadata := fsResource.GetMetadata()
+	s.NotNil(rMetadata.ID)
+	s.Equal(filePaths[0], rMetadata.Name)
+	s.Equal(FileSubType, rMetadata.SubType)
+	s.Equal(FSResourceType, rMetadata.Type)
 }
 
-func TestFileFetcherFetchTwoPatterns(t *testing.T) {
+func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt", "output1.txt"}
-	outerDir := createDirectoriesWithFiles(t, "", outerDirectoryName, outerFiles)
+	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
 	defer os.RemoveAll(outerDir)
 
-	path := []string{filepath.Join(outerDir, outerFiles[0]), filepath.Join(outerDir, outerFiles[1])}
+	paths := []string{filepath.Join(outerDir, outerFiles[0]), filepath.Join(outerDir, outerFiles[1])}
 	cfg := FileFetcherConfig{
-		Patterns: path,
+		Patterns: paths,
 	}
-	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
-	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
 
-	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
-	assert.Equal(t, 2, len(results))
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil).Once()
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("etcd", nil).Once()
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil).Once()
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("etcd", nil).Once()
 
-	firstFSResource := results[0].(FileSystemResource)
-	assert.Equal(t, outerFiles[0], firstFSResource.FileName)
-	assert.Equal(t, "600", firstFSResource.FileMode)
-	rid, err := firstFSResource.GetID()
-	assert.NotNil(t, rid)
-	assert.NoError(t, err)
+	fileFetcher := FileSystemFetcher{
+		log:        s.log,
+		cfg:        cfg,
+		osUser:     osUserMock,
+		resourceCh: s.resourceCh,
+	}
 
-	secFSResource := results[1].(FileSystemResource)
-	assert.Equal(t, outerFiles[1], secFSResource.FileName)
-	assert.Equal(t, "600", secFSResource.FileMode)
-	rid, err = secFSResource.GetID()
-	assert.NotNil(t, rid)
-	assert.NoError(t, err)
+	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
+	s.Equal(2, len(results))
+
+	firstFSResource := results[0].Resource.(FileSystemResource)
+	s.Equal(outerFiles[0], firstFSResource.Name)
+	s.Equal("600", firstFSResource.Mode)
+	s.Equal("root", firstFSResource.Owner)
+	s.Equal("root", firstFSResource.Group)
+
+	rMetadata := firstFSResource.GetMetadata()
+	s.NotNil(rMetadata.ID)
+	s.Equal(paths[0], rMetadata.Name)
+	s.Equal(FileSubType, rMetadata.SubType)
+	s.Equal(FSResourceType, rMetadata.Type)
+
+	secFSResource := results[1].Resource.(FileSystemResource)
+	s.Equal(outerFiles[1], secFSResource.Name)
+	s.Equal("600", secFSResource.Mode)
+	s.Equal("etcd", secFSResource.Owner)
+	s.Equal("etcd", secFSResource.Group)
+
+	SecResMetadata := secFSResource.GetMetadata()
+	s.NotNil(SecResMetadata.ID)
+	s.Equal(paths[1], SecResMetadata.Name)
+	s.Equal(FileSubType, SecResMetadata.SubType)
+	s.Equal(FSResourceType, SecResMetadata.Type)
 }
 
-func TestFileFetcherFetchDirectoryOnly(t *testing.T) {
+func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	directoryName := "test-outer-dir"
 	files := []string{"file.txt"}
-	dir := createDirectoriesWithFiles(t, "", directoryName, files)
+	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, files)
 	defer os.RemoveAll(dir)
 
 	filePaths := []string{filepath.Join(dir)}
 	cfg := FileFetcherConfig{
 		Patterns: filePaths,
 	}
-	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
-	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
 
-	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
-	assert.Equal(t, 1, len(results))
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
 
-	fsResource := results[0].(FileSystemResource)
+	fileFetcher := FileSystemFetcher{
+		log:        s.log,
+		cfg:        cfg,
+		osUser:     osUserMock,
+		resourceCh: s.resourceCh,
+	}
+	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(s.resourceCh)
 
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
+	s.Equal(1, len(results))
+
+	fsResource := results[0].Resource.(FileSystemResource)
 	expectedResult := filepath.Base(dir)
-	assert.Equal(t, expectedResult, fsResource.FileName)
-	rid, err := fsResource.GetID()
-	assert.NotNil(t, rid)
-	assert.NoError(t, err)
+	rMetadata := fsResource.GetMetadata()
+
+	s.NotNil(rMetadata.ID)
+	s.NotNil(rMetadata.Name)
+	s.Equal(DirSubType, rMetadata.SubType)
+	s.Equal(FSResourceType, rMetadata.Type)
+	s.Equal(expectedResult, fsResource.Name)
+	s.Equal("", fsResource.Owner)
+	s.Equal("", fsResource.Group)
+	s.NotNil(rMetadata.ID)
+	s.NotNil(rMetadata.Name)
 }
 
-func TestFileFetcherFetchOuterDirectoryOnly(t *testing.T) {
+func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt"}
-	outerDir := createDirectoriesWithFiles(t, "", outerDirectoryName, outerFiles)
+	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
 	defer os.RemoveAll(outerDir)
 
 	innerDirectoryName := "test-inner-dir"
 	innerFiles := []string{"innerFolderFile.txt"}
-	innerDir := createDirectoriesWithFiles(t, outerDir, innerDirectoryName, innerFiles)
+	innerDir := createDirectoriesWithFiles(s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	path := []string{outerDir + "/*"}
 	cfg := FileFetcherConfig{
 		Patterns: path,
 	}
-	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
-	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
 
-	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
-	assert.Equal(t, 2, len(results))
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher := FileSystemFetcher{
+		log:        log,
+		cfg:        cfg,
+		osUser:     osUserMock,
+		resourceCh: s.resourceCh,
+	}
+
+	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
+	s.Equal(2, len(results))
 
 	//All inner files should exist in the final result
 	expectedResult := []string{"output.txt", filepath.Base(innerDir)}
 	for i := 0; i < len(results); i++ {
-		fileSystemDataResources := results[i].(FileSystemResource)
-		assert.Contains(t, expectedResult, fileSystemDataResources.FileName)
-		rid, err := results[i].GetID()
-		assert.NotNil(t, rid)
-		assert.NoError(t, err)
+		rMetadata := results[i].GetMetadata()
+		fileSystemDataResources := results[i].Resource.(FileSystemResource)
+		s.Contains(expectedResult, fileSystemDataResources.Name)
+		s.NotNil(rMetadata.SubType)
+		s.NotNil(rMetadata.Name)
+		s.NotNil(rMetadata.ID)
+		s.Equal("root", fileSystemDataResources.Group)
+		s.Equal("root", fileSystemDataResources.Owner)
+		s.Equal(FSResourceType, rMetadata.Type)
+		s.NoError(err)
 	}
 }
 
-func TestFileFetcherFetchDirectoryRecursively(t *testing.T) {
+func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt"}
-	outerDir := createDirectoriesWithFiles(t, "", outerDirectoryName, outerFiles)
+	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
 	defer os.RemoveAll(outerDir)
 
 	innerDirectoryName := "test-inner-dir"
 	innerFiles := []string{"innerFolderFile.txt"}
-	innerDir := createDirectoriesWithFiles(t, outerDir, innerDirectoryName, innerFiles)
+	innerDir := createDirectoriesWithFiles(s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	innerInnerDirectoryName := "test-inner-inner-dir"
 	innerInnerFiles := []string{"innerInnerFolderFile.txt"}
-	innerInnerDir := createDirectoriesWithFiles(t, innerDir, innerInnerDirectoryName, innerInnerFiles)
+	innerInnerDir := createDirectoriesWithFiles(s.Suite, innerDir, innerInnerDirectoryName, innerInnerFiles)
 
 	path := []string{outerDir + "/**"}
 	cfg := FileFetcherConfig{
 		Patterns: path,
 	}
-	factory := FileSystemFactory{}
-	fileFetcher, err := factory.CreateFrom(cfg)
-	assert.NoError(t, err)
-	results, err := fileFetcher.Fetch(context.TODO())
+	osUserMock := &utils.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
-	assert.Nil(t, err, "Fetcher was not able to fetch files from FS")
-	assert.Equal(t, 6, len(results))
+	fileFetcher := FileSystemFetcher{
+		log:        s.log,
+		cfg:        cfg,
+		osUser:     osUserMock,
+		resourceCh: s.resourceCh,
+	}
+
+	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
+	s.Equal(6, len(results))
 
 	directories := []string{filepath.Base(outerDir), filepath.Base(innerDir), filepath.Base(innerInnerDir)}
 	allFilesName := append(append(append(innerFiles, directories...), outerFiles...), innerInnerFiles...)
 
 	//All inner files should exist in the final result
 	for i := 0; i < len(results); i++ {
-		fileSystemDataResources := results[i].(FileSystemResource)
-		rid, err := results[i].GetID()
-		assert.NotNil(t, rid)
-		assert.NoError(t, err)
-		assert.Contains(t, allFilesName, fileSystemDataResources.FileName)
+		fileSystemDataResources := results[i].Resource.(FileSystemResource)
+		rMetadata := results[i].GetMetadata()
+		s.NotNil(rMetadata.SubType)
+		s.NotNil(rMetadata.Name)
+		s.NotNil(rMetadata.ID)
+		s.Contains(allFilesName, fileSystemDataResources.Name)
+		s.Equal(FSResourceType, rMetadata.Type)
+
+		s.NoError(err)
+		s.Equal("root", fileSystemDataResources.Owner)
+		s.Equal("root", fileSystemDataResources.Group)
 	}
 }
 
 // This function creates a new directory with files inside and returns the path of the new directory
-func createDirectoriesWithFiles(t *testing.T, dirPath string, dirName string, filesToWriteInDirectory []string) string {
+func createDirectoriesWithFiles(s suite.Suite, dirPath string, dirName string, filesToWriteInDirectory []string) string {
 	dirPath, err := ioutil.TempDir(dirPath, dirName)
 	if err != nil {
-		t.Fatal(err)
+		s.FailNow(err.Error())
 	}
 	for _, fileName := range filesToWriteInDirectory {
 		file := filepath.Join(dirPath, fileName)
-		assert.Nil(t, ioutil.WriteFile(file, []byte("test txt\n"), 0600), "Could not able to write a new file")
+		s.Nil(ioutil.WriteFile(file, []byte("test txt\n"), 0600), "Could not able to write a new file")
 	}
 	return dirPath
 }

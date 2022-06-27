@@ -18,24 +18,33 @@
 package fetchers
 
 import (
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-	"testing"
 )
 
 type EcrFactoryTestSuite struct {
 	suite.Suite
-	factory fetching.Factory
+
+	log *logp.Logger
 }
 
 func TestEcrFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(EcrFactoryTestSuite))
+	s := new(EcrFactoryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_ecr_factory_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *EcrFactoryTestSuite) TestCreateFetcher() {
@@ -52,8 +61,8 @@ name: aws-ecr
 			"us1-east",
 			"my-account",
 			[]string{
-				"^my-account\\.dkr\\.ecr\\.us1-east\\.amazonaws\\.com\\/([-\\w]+)[:,@]?",
-				"public\\.ecr\\.aws\\/\\w+\\/([\\w-]+)\\:?",
+				"^my-account\\.dkr\\.ecr\\.us1-east\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?",
+				"public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?",
 			},
 		},
 	}
@@ -76,30 +85,33 @@ name: aws-ecr
 		awsconfigProvider.EXPECT().GetConfig().Return(awsConfig)
 
 		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
+		ecrPublicProvider := &awslib.MockedEcrRepositoryDescriber{}
 
 		factory := &ECRFactory{
 			extraElements: func() (ecrExtraElements, error) {
 				return ecrExtraElements{
-					awsConfig:              awsConfig,
-					kubernetesClientGetter: mockedKubernetesClientGetter,
-					identityProviderGetter: identityProvider,
-					ecrRepoDescriber:       ecrProvider,
+					awsConfig:               awsConfig,
+					kubernetesClientGetter:  mockedKubernetesClientGetter,
+					identityProviderGetter:  identityProvider,
+					ecrPrivateRepoDescriber: ecrProvider,
+					ecrPublicRepoDescriber:  ecrPublicProvider,
 				}, nil
 			},
 		}
 
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := factory.Create(cfg)
+		fetcher, err := factory.Create(s.log, cfg, nil)
 		s.NoError(err)
 		s.NotNil(fetcher)
 
 		ecrFetcher, ok := fetcher.(*ECRFetcher)
 		s.True(ok)
-		s.Equal(ecrProvider, ecrFetcher.ecrProvider)
+		s.Equal(ecrProvider, ecrFetcher.PodDescribers[0].Provider)
+		s.Equal(ecrPublicProvider, ecrFetcher.PodDescribers[1].Provider)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
-		s.Equal(test.expectedRegex[0], ecrFetcher.repoRegexMatchers[0].String())
-		s.Equal(test.expectedRegex[1], ecrFetcher.repoRegexMatchers[1].String())
+		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].FilterRegex.String())
+		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].FilterRegex.String())
 	}
 }

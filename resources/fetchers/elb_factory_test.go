@@ -18,24 +18,33 @@
 package fetchers
 
 import (
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-	"testing"
 )
 
 type ElbFactoryTestSuite struct {
 	suite.Suite
-	factory fetching.Factory
+
+	log *logp.Logger
 }
 
 func TestElbFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(ElbFactoryTestSuite))
+	s := new(ElbFactoryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_elb_factory_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *ElbFactoryTestSuite) TestCreateFetcher() {
@@ -75,10 +84,10 @@ name: aws-elb
 			},
 		}
 
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := factory.Create(cfg)
+		fetcher, err := factory.Create(s.log, cfg, nil)
 		s.NoError(err)
 		s.NotNil(fetcher)
 

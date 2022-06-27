@@ -19,18 +19,20 @@ package fetching
 
 import (
 	"context"
+	"github.com/gofrs/uuid"
 
-	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 // Factory can create fetcher instances based on configuration
 type Factory interface {
-	Create(*common.Config) (Fetcher, error)
+	Create(*logp.Logger, *config.C, chan ResourceInfo) (Fetcher, error)
 }
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {
-	Fetch(context.Context) ([]Resource, error)
+	Fetch(context.Context, CycleMetadata) error
 	Stop()
 }
 
@@ -39,11 +41,31 @@ type Condition interface {
 	Name() string
 }
 
+type ResourceInfo struct {
+	Resource
+	CycleMetadata
+}
+
+type CycleMetadata struct {
+	CycleId uuid.UUID
+}
+
 type Resource interface {
-	GetID() (string, error)
+	GetMetadata() ResourceMetadata
 	GetData() interface{}
 }
 
+type ResourceFields struct {
+	ResourceMetadata
+	Raw interface{} `json:"raw"`
+}
+
+type ResourceMetadata struct {
+	ID      string `json:"id"`
+	Type    string `json:"type"`
+	SubType string `json:"sub_type"`
+	Name    string `json:"name"`
+}
 type Result struct {
 	Type string `json:"type"`
 	// Golang 1.18 will introduce generics which will be useful for typing the resource field

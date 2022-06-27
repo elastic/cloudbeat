@@ -24,7 +24,6 @@ import (
 type (
 	errConfigUnpack struct{ cause error }
 	errComputeID    struct{ cause error }
-	errUnknownType  struct{ typ string }
 )
 
 func makeErrConfigUnpack(cause error) errConfigUnpack {
@@ -45,11 +44,4 @@ func (e errComputeID) Error() string {
 }
 func (e errComputeID) Unwrap() error {
 	return e.cause
-}
-
-func makeErrUnknownType(typ string) errUnknownType {
-	return errUnknownType{typ}
-}
-func (e errUnknownType) Error() string {
-	return fmt.Sprintf("invalid type [%s]", e.typ)
 }

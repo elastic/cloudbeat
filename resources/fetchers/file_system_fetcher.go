@@ -21,30 +21,45 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/user"
 	"strconv"
 	"syscall"
 
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/user"
+
 	"github.com/pkg/errors"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
+)
+
+const (
+	FSResourceType = "file"
+	FileSubType    = "file"
+	DirSubType     = "directory"
+	UserFile       = "/hostfs/etc/passwd"
+	GroupFile      = "/hostfs/etc/group"
 )
 
 type FileSystemResource struct {
-	FileName string `json:"filename"`
-	FileMode string `json:"mode"`
-	Gid      string `json:"gid"`
-	Uid      string `json:"uid"`
-	Path     string `json:"path"`
-	Inode    string `json:"inode"`
+	Name    string `json:"name"`
+	Mode    string `json:"mode"`
+	Gid     uint32 `json:"gid"`
+	Uid     uint32 `json:"uid"`
+	Owner   string `json:"owner"`
+	Group   string `json:"group"`
+	Path    string `json:"path"`
+	Inode   string `json:"inode"`
+	SubType string `json:"sub_type"`
 }
 
 // FileSystemFetcher implement the Fetcher interface
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
 type FileSystemFetcher struct {
-	cfg FileFetcherConfig
+	log        *logp.Logger
+	cfg        FileFetcherConfig
+	osUser     user.OSUser
+	resourceCh chan fetching.ResourceInfo
 }
 
 type FileFetcherConfig struct {
@@ -52,41 +67,42 @@ type FileFetcherConfig struct {
 	Patterns []string `config:"patterns"` // Files and directories paths for the fetcher to extract info from
 }
 
-func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("file fetcher starts to fetch data")
-	results := make([]fetching.Resource, 0)
+func (f *FileSystemFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting FileSystemFetcher.Fetch")
 
 	// Input files might contain glob pattern
 	for _, filePattern := range f.cfg.Patterns {
 		matchedFiles, err := Glob(filePattern)
 		if err != nil {
-			logp.Error(fmt.Errorf("failed to find matched glob for %s, error - %+v", filePattern, err))
+			f.log.Errorf("Failed to find matched glob for %s, error: %+v", filePattern, err)
 		}
+
 		for _, file := range matchedFiles {
 			resource, err := f.fetchSystemResource(file)
 			if err != nil {
-				logp.Err("Unable to fetch fileSystemResource for file: %v", file)
+				f.log.Errorf("Unable to fetch fileSystemResource for file %v", file)
 				continue
 			}
-			results = append(results, resource)
+
+			f.resourceCh <- fetching.ResourceInfo{Resource: resource, CycleMetadata: cMetadata}
 		}
 	}
-	return results, nil
+
+	return nil
 }
 
 func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FileSystemResource, error) {
 
 	info, err := os.Stat(filePath)
 	if err != nil {
-		err := fmt.Errorf("failed to fetch %s, error - %+v", filePath, err)
-		return FileSystemResource{}, err
+		return FileSystemResource{}, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
 	}
-	resourceInfo, _ := FromFileInfo(info, filePath)
+	resourceInfo, _ := f.fromFileInfo(info, filePath)
 
 	return resourceInfo, nil
 }
 
-func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
+func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 
 	if info == nil {
 		return FileSystemResource{}, nil
@@ -97,22 +113,31 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 		return FileSystemResource{}, errors.New("Not a syscall.Stat_t")
 	}
 
+	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
+	inode := strconv.FormatUint(stat.Ino, 10)
+
 	uid := stat.Uid
 	gid := stat.Gid
-	u := strconv.FormatUint(uint64(uid), 10)
-	g := strconv.FormatUint(uint64(gid), 10)
-	usr, _ := user.LookupId(u)
-	group, _ := user.LookupGroupId(g)
-	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
-	inode := strconv.FormatUint(uint64(stat.Ino), 10)
+	username, err := f.osUser.GetUserNameFromID(uid, UserFile)
+	if err != nil {
+		logp.Error(fmt.Errorf("failed to find username for uid %d, error - %+v", uid, err))
+	}
+
+	groupName, err := f.osUser.GetGroupNameFromID(gid, GroupFile)
+	if err != nil {
+		logp.Error(fmt.Errorf("failed to find groupname for gid %d, error - %+v", gid, err))
+	}
 
 	data := FileSystemResource{
-		FileName: info.Name(),
-		FileMode: mod,
-		Uid:      usr.Name,
-		Gid:      group.Name,
-		Path:     path,
-		Inode:    inode,
+		Name:    info.Name(),
+		Mode:    mod,
+		Gid:     gid,
+		Uid:     uid,
+		Owner:   username,
+		Group:   groupName,
+		Path:    path,
+		Inode:   inode,
+		SubType: getFSSubType(info),
 	}
 
 	return data, nil
@@ -121,10 +146,22 @@ func FromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
 func (f *FileSystemFetcher) Stop() {
 }
 
-func (r FileSystemResource) GetID() (string, error) {
-	return r.Inode, nil
-}
-
 func (r FileSystemResource) GetData() interface{} {
 	return r
+}
+
+func (r FileSystemResource) GetMetadata() fetching.ResourceMetadata {
+	return fetching.ResourceMetadata{
+		ID:      r.Path,
+		Type:    FSResourceType,
+		SubType: r.SubType,
+		Name:    r.Path, // The Path from the container and not from the host
+	}
+}
+
+func getFSSubType(fileInfo os.FileInfo) string {
+	if fileInfo.IsDir() {
+		return DirSubType
+	}
+	return FileSubType
 }

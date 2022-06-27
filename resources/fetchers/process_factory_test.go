@@ -18,8 +18,10 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
 	"testing"
+
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/stretchr/testify/suite"
@@ -28,6 +30,8 @@ import (
 type ProcessFactoryTestSuite struct {
 	suite.Suite
 	factory fetching.Factory
+
+	log *logp.Logger
 }
 type ProcessConfigTestValidator struct {
 	processName string
@@ -35,7 +39,14 @@ type ProcessConfigTestValidator struct {
 }
 
 func TestProcessFactoryTestSuite(t *testing.T) {
-	suite.Run(t, new(ProcessFactoryTestSuite))
+	s := new(ProcessFactoryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_process_factory_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *ProcessFactoryTestSuite) SetupTest() {
@@ -77,10 +88,10 @@ processes:
 	}
 
 	for _, test := range tests {
-		cfg, err := common.NewConfigFrom(test.config)
+		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := s.factory.Create(cfg)
+		fetcher, err := s.factory.Create(s.log, cfg, nil)
 		s.NoError(err)
 		s.NotNil(fetcher)
 

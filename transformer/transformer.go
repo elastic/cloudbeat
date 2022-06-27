@@ -18,25 +18,29 @@
 package transformer
 
 import (
-	"github.com/gofrs/uuid"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"k8s.io/client-go/kubernetes"
 )
 
 type ResourceTypeMetadata struct {
-	CycleMetadata
+	fetching.CycleMetadata
 	Type string
 }
 
-type ResourceFields struct {
-	ID   string      `json:"id"`
-	Type string      `json:"type"`
-	Raw  interface{} `json:"raw"`
+type CommonDataProvider struct {
+	log        *logp.Logger
+	kubeClient kubernetes.Interface
+	cfg        config.Config
 }
 
-type ResourceMetadata struct {
-	ResourceTypeMetadata
-	ResourceId string
+type CommonData struct {
+	clusterId string
+	nodeId    string
 }
 
-type CycleMetadata struct {
-	CycleId uuid.UUID
+type CommonDataInterface interface {
+	GetData() CommonData
+	GetResourceId(fetching.ResourceMetadata) string
 }

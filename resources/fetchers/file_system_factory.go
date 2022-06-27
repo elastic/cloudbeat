@@ -18,10 +18,11 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/resources/utils/user"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
@@ -35,22 +36,27 @@ func init() {
 type FileSystemFactory struct {
 }
 
-func (f *FileSystemFactory) Create(c *common.Config) (fetching.Fetcher, error) {
+func (f *FileSystemFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting FileSystemFactory.Create")
+
 	cfg := FileFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	return f.CreateFrom(cfg)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *FileSystemFactory) CreateFrom(cfg FileFetcherConfig) (fetching.Fetcher, error) {
+func (f *FileSystemFactory) CreateFrom(log *logp.Logger, cfg FileFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	fe := &FileSystemFetcher{
-		cfg: cfg,
+		log:        log,
+		cfg:        cfg,
+		resourceCh: ch,
+		osUser:     user.NewOSUserUtil(),
 	}
 
-	logp.L().Infof("File-System Fetcher created with the following config:"+
+	log.Infof("File-System Fetcher created with the following config:"+
 		"\n Name: %s\nPatterns: %s", cfg.Name, cfg.Patterns)
 	return fe, nil
 }

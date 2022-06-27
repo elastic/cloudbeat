@@ -21,7 +21,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"net/http"
+
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/logging"
@@ -32,11 +35,12 @@ import (
 )
 
 type OpaEvaluator struct {
+	log          *logp.Logger
 	opa          *sdk.OPA
 	bundleServer *http.Server
 }
 
-func NewOpaEvaluator(ctx context.Context) (Evaluator, error) {
+func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
 	server, err := bundle.StartServer()
 	if err != nil {
 		return nil, err
@@ -58,12 +62,42 @@ func NewOpaEvaluator(ctx context.Context) (Evaluator, error) {
 	}
 
 	return &OpaEvaluator{
+		log:          log,
 		opa:          opa,
 		bundleServer: server,
 	}, nil
 }
 
-func (o *OpaEvaluator) Decision(ctx context.Context, input interface{}) (interface{}, error) {
+func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceInfo) (EventData, error) {
+	fetcherResult := fetching.Result{
+		Type:     resourceInfo.GetMetadata().Type,
+		Resource: resourceInfo.GetData(),
+	}
+
+	result, err := o.decision(ctx, fetcherResult)
+	if err != nil {
+		return EventData{}, fmt.Errorf("error running the policy: %v", err)
+	}
+
+	o.log.Debugf("Eval decision for input: %v -- %v", fetcherResult, result)
+	ruleResults, err := o.decode(result)
+	if err != nil {
+		return EventData{}, fmt.Errorf("error decoding findings: %v", err)
+	}
+
+	o.log.Debugf("Created %d findings for input: %v", len(ruleResults.Findings), fetcherResult)
+	return EventData{ruleResults, resourceInfo}, nil
+}
+
+func (o *OpaEvaluator) Stop(ctx context.Context) {
+	o.opa.Stop(ctx)
+	err := o.bundleServer.Shutdown(ctx)
+	if err != nil {
+		o.log.Errorf("Could not stop OPA evaluator: %v", err)
+	}
+}
+
+func (o *OpaEvaluator) decision(ctx context.Context, input interface{}) (interface{}, error) {
 	// get the named policy decision for the specified input
 	result, err := o.opa.Decision(ctx, sdk.DecisionOptions{
 		Path:  "main",
@@ -76,24 +110,29 @@ func (o *OpaEvaluator) Decision(ctx context.Context, input interface{}) (interfa
 	return result.Result, nil
 }
 
-func (o *OpaEvaluator) Stop(ctx context.Context) {
-	o.opa.Stop(ctx)
-	o.bundleServer.Shutdown(ctx)
-}
-
-func (o *OpaEvaluator) Decode(result interface{}) ([]Finding, error) {
+func (o *OpaEvaluator) decode(result interface{}) (RuleResult, error) {
 	var opaResult RuleResult
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &opaResult})
 	if err != nil {
-		return nil, err
+		return RuleResult{}, err
 	}
 
 	err = decoder.Decode(result)
-	return opaResult.Findings, err
+	return opaResult, err
 }
 
 func newEvaluatorLogger() logging.Logger {
 	opaLogger := logging.New()
-	opaLogger.SetFormatter(&logrus.JSONFormatter{})
-	return opaLogger.WithFields(map[string]interface{}{"goroutine": "opa"})
+	opaLogger.SetFormatter(&logrus.JSONFormatter{
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime:  "@timestamp",
+			logrus.FieldKeyLevel: "log.level",
+			logrus.FieldKeyMsg:   "message",
+			logrus.FieldKeyFile:  "log.origin",
+		},
+	})
+	return opaLogger.WithFields(map[string]interface{}{
+		"log.logger":   "opa",
+		"service.name": "cloudbeat",
+	})
 }

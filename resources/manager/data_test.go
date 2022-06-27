@@ -20,58 +20,230 @@ package manager
 import (
 	"context"
 	"fmt"
-	"reflect"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 )
 
-const (
-	duration     = 10 * time.Second
-	fetcherCount = 10
-)
+type DelayFetcher struct {
+	delay      time.Duration
+	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
+}
 
-func TestDataRun(t *testing.T) {
-	opts := goleak.IgnoreCurrent()
+func newDelayFetcher(delay time.Duration, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
+	return &DelayFetcher{delay, false, ch, wg}
+}
 
-	// Verify no goroutines are leaking. Safest to keep this on top of the function.
-	// Go defers are implemented as a LIFO stack. This should be the last one to run.
-	defer goleak.VerifyNone(t, opts)
+func (f *DelayFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	defer f.wg.Done()
 
-	reg := NewFetcherRegistry()
-	registerNFetchers(t, reg, fetcherCount)
-	d, err := NewData(duration, reg)
-	if err != nil {
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("reached timeout")
+	case <-time.After(f.delay):
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      fetchValue(int(f.delay.Seconds())),
+			CycleMetadata: cMetadata,
+		}
+	}
+
+	return nil
+}
+
+func (f *DelayFetcher) Stop() {
+	f.stopCalled = true
+}
+
+type PanicFetcher struct {
+	message    string
+	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
+}
+
+func newPanicFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
+	return &PanicFetcher{message, false, ch, wg}
+}
+
+func (f *PanicFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	defer f.wg.Done()
+	panic(f.message)
+}
+
+func (f *PanicFetcher) Stop() {
+	f.stopCalled = true
+}
+
+type DataTestSuite struct {
+	suite.Suite
+
+	ctx        context.Context
+	log        *logp.Logger
+	registry   FetchersRegistry
+	opts       goleak.Option
+	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
+}
+
+const timeout = 2 * time.Second
+
+func TestDataTestSuite(t *testing.T) {
+	s := new(DataTestSuite)
+	s.log = logp.NewLogger("cloudbeat_data_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	suite.Run(t, s)
+}
 
-	err = d.Run(ctx)
-	if err != nil {
-		return
+func (s *DataTestSuite) SetupTest() {
+	s.ctx = context.Background()
+	s.opts = goleak.IgnoreCurrent()
+	s.registry = NewFetcherRegistry(s.log)
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+	s.wg = &sync.WaitGroup{}
+}
+
+func (s *DataTestSuite) TearDownTest() {
+	// Verify no goroutines are leaking. Safest to keep this on top of the function.
+	// Go defers are implemented as a LIFO stack. This should be the last one to run.
+	goleak.VerifyNone(s.T(), s.opts)
+}
+
+func (s *DataTestSuite) TestDataRun() {
+	fetcherCount := 10
+	interval := 10 * time.Second
+
+	s.wg.Add(fetcherCount)
+
+	registerNFetchers(s.T(), s.registry, fetcherCount, s.resourceCh, s.wg)
+	d, err := NewData(s.log, interval, timeout, s.registry)
+	s.NoError(err)
+
+	err = d.Run(s.ctx)
+	s.NoError(err)
+	defer d.Stop()
+	s.wg.Wait() // waiting for all fetchers to complete
+
+	results := testhelper.CollectResources(s.resourceCh)
+	s.Equal(fetcherCount, len(results))
+}
+
+func (s *DataTestSuite) TestDataRunPanic() {
+	interval := 3 * time.Second
+	fetcherMessage := "fetcher got panic"
+	fetcherName := "panic_fetcher"
+
+	s.wg.Add(1)
+	f := newPanicFetcher(fetcherMessage, s.resourceCh, s.wg)
+	err := s.registry.Register(fetcherName, f)
+	s.NoError(err)
+
+	d, err := NewData(s.log, interval, timeout, s.registry)
+	s.NoError(err)
+
+	err = d.Run(s.ctx)
+	s.NoError(err)
+	defer d.Stop()
+
+	s.wg.Wait()
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Empty(results)
+}
+
+func (s *DataTestSuite) TestDataFetchSinglePanic() {
+	interval := 3 * time.Second
+	fetcherMessage := "fetcher got panic"
+	fetcherName := "panic_fetcher"
+
+	f := newPanicFetcher(fetcherMessage, s.resourceCh, nil)
+	err := s.registry.Register(fetcherName, f)
+	s.NoError(err)
+
+	d, err := NewData(s.log, interval, timeout, s.registry)
+	s.NoError(err)
+
+	err = d.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
+	s.Error(err)
+}
+
+func (s *DataTestSuite) TestDataRunTimeout() {
+	fetcherDelay := 4 * time.Second
+	interval := 5 * time.Second
+	fetcherName := "delay_fetcher"
+
+	s.wg.Add(1)
+	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
+	err := s.registry.Register(fetcherName, f)
+	s.NoError(err)
+
+	d, err := NewData(s.log, interval, timeout, s.registry)
+	s.NoError(err)
+
+	err = d.Run(s.ctx)
+	s.NoError(err)
+	defer d.Stop()
+
+	s.wg.Wait()
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Empty(results)
+}
+
+func (s *DataTestSuite) TestDataFetchSingleTimeout() {
+	fetcherDelay := 4 * time.Second
+	interval := 3 * time.Second
+	fetcherName := "timeout_fetcher"
+
+	s.wg.Add(1)
+	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
+	err := s.registry.Register(fetcherName, f)
+	s.NoError(err)
+
+	d, err := NewData(s.log, interval, timeout, s.registry)
+	s.NoError(err)
+
+	err = d.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
+	s.Error(err)
+}
+
+func (s *DataTestSuite) TestDataRunShouldNotRun() {
+	fetcherVal := 4
+	interval := 5 * time.Second
+	fetcherName := "not_run_fetcher"
+	fetcherConditionName := "false_condition"
+
+	f := newNumberFetcher(fetcherVal, s.resourceCh, s.wg)
+	c := newBoolFetcherCondition(false, fetcherConditionName)
+	err := s.registry.Register(fetcherName, f, c)
+	s.NoError(err)
+
+	d, err := NewData(s.log, interval, timeout, s.registry)
+	s.NoError(err)
+
+	err = d.Run(s.ctx)
+	s.NoError(err)
+	defer d.Stop()
+
+	// Fetcher did not run, we can not wait for sync.done() to be called.
+	var results []fetching.ResourceInfo
+	select {
+	case result := <-s.resourceCh:
+		results = append(results, result)
+	case <-time.Tick(interval):
+		break
 	}
-	defer d.Stop(ctx, cancel)
 
-	o := d.Output()
-	state := <-o
-
-	if len(state) < fetcherCount {
-		t.Errorf("expected %d keys but got %d", fetcherCount, len(state))
-	}
-
-	for i := 0; i < fetcherCount; i++ {
-		key := fmt.Sprint(i)
-
-		val, ok := state[key]
-		if !ok {
-			t.Errorf("expected key %s but not found", key)
-		}
-
-		if !reflect.DeepEqual(val, fetchValue(i)) {
-			t.Errorf("expected key %s to have value %v but got %v", key, fetchValue(i), val)
-		}
-	}
+	s.Empty(results)
 }

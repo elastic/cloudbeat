@@ -18,24 +18,27 @@
 package fetchers
 
 import (
-	"fmt"
 	"reflect"
 
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type K8sResource struct {
+	log  *logp.Logger
 	Data interface{}
 }
 
-const k8sObjMetadataField = "ObjectMeta"
+const (
+	k8sObjMetadataField  = "ObjectMeta"
+	k8sTypeMetadataField = "TypeMeta"
+	K8sObjType           = "k8s_object"
+)
 
-func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
-	logp.L().Info("Fetching Kubernetes data")
-	ret := make([]fetching.Resource, 0)
+func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cMetadata fetching.CycleMetadata) {
+	log.Debug("Starting getKubeData")
 
 	for _, watcher := range watchers {
 		rs := watcher.Store().List()
@@ -45,36 +48,56 @@ func GetKubeData(watchers []kubernetes.Watcher) []fetching.Resource {
 			resource, ok := r.(kubernetes.Resource)
 
 			if !ok {
-				logp.L().Errorf("Bad resource: %#v does not implement kubernetes.Resource", r)
+				log.Errorf("Bad resource: %#v does not implement kubernetes.Resource", r)
 				continue
 			}
 
 			err := addTypeInformationToKubeResource(resource)
 			if err != nil {
-				logp.L().Errorf("Bad resource: %w", err)
+				log.Errorf("Bad resource: %v", err)
 				continue
 			} // See https://github.com/kubernetes/kubernetes/issues/3030
-
-			ret = append(ret, K8sResource{resource})
+			resCh <- fetching.ResourceInfo{Resource: K8sResource{log, resource}, CycleMetadata: cMetadata}
 		}
 	}
-
-	return ret
-}
-
-func (r K8sResource) GetID() (string, error) {
-	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
-	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
-	if !ok {
-		return "", fmt.Errorf("failed to retrieve object metadata")
-	}
-
-	uid := metadata.UID
-	return string(uid), nil
 }
 
 func (r K8sResource) GetData() interface{} {
 	return r.Data
+}
+
+func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
+	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
+	k8sObjMeta := getK8sObjectMeta(r.log, k8sObj)
+	resourceID := k8sObjMeta.UID
+	resourceName := k8sObjMeta.Name
+
+	return fetching.ResourceMetadata{
+		ID:      string(resourceID),
+		Type:    K8sObjType,
+		SubType: getK8sSubType(r.log, k8sObj),
+		Name:    resourceName,
+	}
+}
+
+func getK8sObjectMeta(log *logp.Logger, k8sObj reflect.Value) metav1.ObjectMeta {
+	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
+	if !ok {
+		log.Errorf("Failed to retrieve object metadata, Resource: %#v", k8sObj)
+		return metav1.ObjectMeta{}
+	}
+
+	return metadata
+}
+
+func getK8sSubType(log *logp.Logger, k8sObj reflect.Value) string {
+	typeMeta, ok := k8sObj.FieldByName(k8sTypeMetadataField).Interface().(metav1.TypeMeta)
+	if !ok {
+		log.Errorf("Failed to retrieve type metadata, Resource: %#v", k8sObj)
+		return ""
+	}
+
+	return typeMeta.Kind
 }
 
 // nullifyManagedFields ManagedFields field contains fields with dot that prevent from elasticsearch to index

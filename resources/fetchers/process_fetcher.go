@@ -20,15 +20,16 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"io/fs"
-	"k8s.io/apimachinery/pkg/util/json"
-	"k8s.io/apimachinery/pkg/util/yaml"
 	"path/filepath"
 	"regexp"
+
+	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
+	"k8s.io/apimachinery/pkg/util/json"
+	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 const (
@@ -36,19 +37,23 @@ const (
 	// Expects format as the following: --<key><delimiter><value>.
 	// For example: --config=a.json
 	// The regex supports two delimiters "=" and ""
-	CMDArgumentMatcher = "\\b%s[\\s=]\\/?(\\S+)"
+	CMDArgumentMatcher  = "\\b%s[\\s=]\\/?(\\S+)"
+	ProcessResourceType = "process"
+	ProcessSubType      = "process"
 )
 
 type ProcessResource struct {
 	PID          string        `json:"pid"`
 	Cmd          string        `json:"command"`
 	Stat         proc.ProcStat `json:"stat"`
-	ExternalData common.MapStr `json:"external_data"`
+	ExternalData mapstr.M      `json:"external_data"`
 }
 
 type ProcessesFetcher struct {
-	cfg ProcessFetcherConfig
-	Fs  fs.FS
+	log        *logp.Logger
+	cfg        ProcessFetcherConfig
+	Fs         fs.FS
+	resourceCh chan fetching.ResourceInfo
 }
 
 type ProcessInputConfiguration struct {
@@ -63,20 +68,20 @@ type ProcessFetcherConfig struct {
 	RequiredProcesses ProcessesConfigMap `config:"processes"`
 }
 
-func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("process fetcher starts to fetch data")
+func (f *ProcessesFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting ProcessesFetcher.Fetch")
+
 	pids, err := proc.ListFS(f.Fs)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	ret := make([]fetching.Resource, 0)
 
 	// If errors occur during read, then return what we have till now
 	// without reporting errors.
 	for _, p := range pids {
 		stat, err := proc.ReadStatFS(f.Fs, p)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		processConfig, isProcessRequired := f.cfg.RequiredProcesses[stat.Name]
 		if !isProcessRequired {
@@ -85,13 +90,13 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, erro
 
 		fetchedResource, err := f.fetchProcessData(stat, processConfig, p)
 		if err != nil {
-			logp.Error(fmt.Errorf("%+v", err))
+			f.log.Error(err)
 			continue
 		}
-		ret = append(ret, fetchedResource)
+		f.resourceCh <- fetching.ResourceInfo{Resource: fetchedResource, CycleMetadata: cMetadata}
 	}
 
-	return ret, nil
+	return nil
 }
 
 func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf ProcessInputConfiguration, processId string) (fetching.Resource, error) {
@@ -108,32 +113,32 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 // As an input this function receives a ProcessInputConfiguration that contains ConfigFileArguments, a string array that represents some process flags
 // The function extracts the configuration file associated with each flag and returns it.
 func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInputConfiguration, cmd string, processName string) map[string]interface{} {
-	configMap := make(map[string]interface{}, 0)
+	configMap := make(map[string]interface{})
 	for _, argument := range processConfig.ConfigFileArguments {
 		// The regex extracts the cmd line flag(argument) value
 		regex := fmt.Sprintf(CMDArgumentMatcher, argument)
 		matcher := regexp.MustCompile(regex)
 		if !matcher.MatchString(cmd) {
-			logp.L().Infof("couldn't find a configuration file associated with flag %s for process %s from cmd", argument, processName, cmd)
+			f.log.Infof("Couldn't find a configuration file associated with flag %s for process %s from cmd", argument, processName, cmd)
 			continue
 		}
 
 		groupMatches := matcher.FindStringSubmatch(cmd)
 		if len(groupMatches) < 2 {
-			logp.Error(fmt.Errorf("couldn't find a configuration file associated with flag %s for process %s", argument, processName))
+			f.log.Errorf("Couldn't find a configuration file associated with flag %s for process %s", argument, processName)
 			continue
 		}
 		argValue := matcher.FindStringSubmatch(cmd)[1]
-		logp.L().Infof("using %s as a configuration file for process %s", argValue, processName)
+		f.log.Infof("Using %s as a configuration file for process %s", argValue, processName)
 
 		data, err := fs.ReadFile(f.Fs, argValue)
 		if err != nil {
-			logp.Error(fmt.Errorf("failed to read file configuration for process %s, error - %+v", processName, err))
+			f.log.Errorf("Failed to read file configuration for process %s, error - %+v", processName, err)
 			continue
 		}
 		configFile, err := f.readConfigurationFile(argValue, data)
 		if err != nil {
-			logp.Error(fmt.Errorf("failed to parse file configuration for process %s, error - %+v", processName, err))
+			f.log.Errorf("Failed to parse file configuration for process %s, error - %+v", processName, err)
 			continue
 		}
 		configMap[argument] = configFile
@@ -163,10 +168,15 @@ func (f *ProcessesFetcher) readConfigurationFile(path string, data []byte) (inte
 func (f *ProcessesFetcher) Stop() {
 }
 
-func (res ProcessResource) GetID() (string, error) {
-	return res.PID, nil
-}
-
 func (res ProcessResource) GetData() interface{} {
 	return res
+}
+
+func (res ProcessResource) GetMetadata() fetching.ResourceMetadata {
+	return fetching.ResourceMetadata{
+		ID:      res.PID + res.Stat.StartTime,
+		Type:    ProcessResourceType,
+		SubType: ProcessSubType,
+		Name:    res.Stat.Name,
+	}
 }

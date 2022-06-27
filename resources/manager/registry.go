@@ -20,20 +20,20 @@ package manager
 import (
 	"context"
 	"fmt"
-
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type FetchersRegistry interface {
 	Register(key string, f fetching.Fetcher, c ...fetching.Condition) error
 	Keys() []string
 	ShouldRun(key string) bool
-	Run(ctx context.Context, key string) ([]fetching.Resource, error)
-	Stop(ctx context.Context)
+	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
+	Stop()
 }
 
 type fetchersRegistry struct {
+	log *logp.Logger
 	reg map[string]registeredFetcher
 }
 
@@ -42,15 +42,16 @@ type registeredFetcher struct {
 	c []fetching.Condition
 }
 
-func NewFetcherRegistry() FetchersRegistry {
+func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
 	return &fetchersRegistry{
+		log: log,
 		reg: make(map[string]registeredFetcher),
 	}
 }
 
 // Register registers a Fetcher implementation.
 func (r *fetchersRegistry) Register(key string, f fetching.Fetcher, c ...fetching.Condition) error {
-	logp.L().Infof("Registering new fetcher: %s", key)
+	r.log.Infof("Registering new fetcher: %s", key)
 	if _, ok := r.reg[key]; ok {
 		return fmt.Errorf("fetcher key collision: %q is already registered", key)
 	}
@@ -80,7 +81,7 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 
 	for _, condition := range registered.c {
 		if !condition.Condition() {
-			logp.L().Infof("Conditional fetcher %q should not run because %q", key, condition.Name())
+			r.log.Infof("Conditional fetcher %q should not run because %q", key, condition.Name())
 			return false
 		}
 	}
@@ -88,18 +89,18 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 	return true
 }
 
-func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetching.Resource, error) {
+func (r *fetchersRegistry) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
 	registered, ok := r.reg[key]
 	if !ok {
-		return nil, fmt.Errorf("fetcher %v not found", key)
+		return fmt.Errorf("fetcher %v not found", key)
 	}
 
-	return registered.f.Fetch(ctx)
+	return registered.f.Fetch(ctx, metadata)
 }
 
-func (r *fetchersRegistry) Stop(ctx context.Context) {
+func (r *fetchersRegistry) Stop() {
 	for key, rfetcher := range r.reg {
 		rfetcher.f.Stop()
-		logp.L().Infof("Fetcher for key %q stopped", key)
+		r.log.Infof("Fetcher for key %q stopped", key)
 	}
 }

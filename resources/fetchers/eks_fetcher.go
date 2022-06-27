@@ -19,16 +19,19 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/beats/v7/libbeat/logp"
+
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type EKSFetcher struct {
+	log         *logp.Logger
 	cfg         EKSFetcherConfig
 	eksProvider awslib.EksClusterDescriber
+	resourceCh  chan fetching.ResourceInfo
 }
 
 type EKSFetcherConfig struct {
@@ -40,25 +43,34 @@ type EKSResource struct {
 	*eks.DescribeClusterResponse
 }
 
-func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("eks fetcher starts to fetch data")
-
-	results := make([]fetching.Resource, 0)
+func (f EKSFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting EKSFetcher.Fetch")
 
 	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)
-	results = append(results, EKSResource{result})
+	if err != nil {
+		return err
+	}
 
-	return results, err
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      EKSResource{result},
+		CycleMetadata: cMetadata,
+	}
+
+	return nil
 }
 
 func (f EKSFetcher) Stop() {
 }
 
-// GetID TODO: Add resource id logic to all AWS resources
-func (r EKSResource) GetID() (string, error) {
-	return "", nil
-}
-
 func (r EKSResource) GetData() interface{} {
 	return r
+}
+
+func (r EKSResource) GetMetadata() fetching.ResourceMetadata {
+	return fetching.ResourceMetadata{
+		ID:      *r.Cluster.Arn,
+		Type:    EKSType,
+		SubType: EKSType,
+		Name:    *r.Cluster.Name,
+	}
 }

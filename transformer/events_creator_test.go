@@ -25,31 +25,17 @@ import (
 	"testing"
 
 	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/elastic-agent-libs/logp"
+
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/gofrs/uuid"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
-type args struct {
-	resource manager.ResourceMap
-	metadata CycleMetadata
-}
-
 type testAttr struct {
-	name    string
-	args    args
-	wantErr bool
-	mocks   []MethodMock
-}
-
-type MethodMock struct {
-	methodName string
-	args       []interface{}
-	returnArgs []interface{}
+	name  string
+	input evaluator.EventData
 }
 
 const (
@@ -58,123 +44,100 @@ const (
 )
 
 var fetcherResult = fetchers.FileSystemResource{
-	FileName: "scheduler.conf",
-	FileMode: "700",
-	Gid:      "root",
-	Uid:      "root",
-	Path:     "/hostfs/etc/kubernetes/scheduler.conf",
-	Inode:    "8901",
+	Name:    "scheduler.conf",
+	Mode:    "700",
+	Gid:     20,
+	Uid:     501,
+	Owner:   "root",
+	Group:   "root",
+	Path:    "/hostfs/etc/kubernetes/scheduler.conf",
+	Inode:   "8901",
+	SubType: "file",
 }
 
 var (
-	opaResults      evaluator.RuleResult
-	mockedEvaluator = evaluator.MockedEvaluator{}
-	resourcesMap    = map[string][]fetching.Resource{fetchers.FileSystemType: {fetcherResult}}
-	ctx             = context.Background()
+	opaResults evaluator.RuleResult
+	ctx        = context.Background()
+	cd         = CommonData{
+		clusterId: "test-cluster-id",
+		nodeId:    "test-node-id",
+	}
 )
 
 type EventsCreatorTestSuite struct {
 	suite.Suite
-	cycleId         uuid.UUID
-	mockedEvaluator evaluator.MockedEvaluator
+
+	log     *logp.Logger
+	cycleId uuid.UUID
 }
 
 func TestSuite(t *testing.T) {
-	suite.Run(t, new(EventsCreatorTestSuite))
+	s := new(EventsCreatorTestSuite)
+	s.log = logp.NewLogger("cloudbeat_events_creator_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
 }
 
 func (s *EventsCreatorTestSuite) SetupSuite() {
-	parseJsonfile(opaResultsFileName, &opaResults)
-	s.cycleId, _ = uuid.NewV4()
-}
-
-func (s *EventsCreatorTestSuite) SetupTest() {
-	s.mockedEvaluator = evaluator.MockedEvaluator{}
+	err := parseJsonfile(opaResultsFileName, &opaResults)
+	if err != nil {
+		s.log.Errorf("Could not parse JSON file: %v", err)
+		return
+	}
 }
 
 func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
-	var tests = []testAttr{
+	tests := []testAttr{
 		{
 			name: "All events propagated as expected",
-			args: args{
-				resource: resourcesMap,
-				metadata: CycleMetadata{CycleId: s.cycleId},
+			input: evaluator.EventData{
+				RuleResult: opaResults,
+				ResourceInfo: fetching.ResourceInfo{
+					Resource:      fetcherResult,
+					CycleMetadata: fetching.CycleMetadata{CycleId: s.cycleId},
+				},
 			},
-			mocks: []MethodMock{{
-				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
-				returnArgs: []interface{}{mock.Anything, nil},
-			}, {
-				methodName: "Decode",
-				args:       []interface{}{ctx, mock.Anything},
-				returnArgs: []interface{}{opaResults.Findings, nil},
-			},
-			},
-			wantErr: false,
 		},
 		{
-			name: "Events should not be created due to a policy error",
-			args: args{
-				resource: resourcesMap,
-				metadata: CycleMetadata{CycleId: s.cycleId},
+			name: "Events should not be created due zero findings",
+			input: evaluator.EventData{
+				RuleResult: evaluator.RuleResult{
+					Findings: []evaluator.Finding{},
+					Metadata: evaluator.Metadata{},
+					Resource: nil,
+				},
+				ResourceInfo: fetching.ResourceInfo{
+					Resource:      fetcherResult,
+					CycleMetadata: fetching.CycleMetadata{CycleId: s.cycleId},
+				},
 			},
-			mocks: []MethodMock{{
-				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
-				returnArgs: []interface{}{mock.Anything, errors.New("policy err")},
-			}, {
-				methodName: "Decode",
-				args:       []interface{}{ctx, mock.Anything},
-				returnArgs: []interface{}{opaResults.Findings, nil},
-			},
-			},
-			wantErr: true,
-		},
-		{
-			name: "Events should not be created due to a parse error",
-			args: args{
-				resource: resourcesMap,
-				metadata: CycleMetadata{CycleId: s.cycleId},
-			},
-			mocks: []MethodMock{{
-				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
-				returnArgs: []interface{}{mock.Anything, nil},
-			}, {
-				methodName: "Decode",
-				args:       []interface{}{ctx, mock.Anything},
-				returnArgs: []interface{}{nil, errors.New("parse err")},
-			},
-			},
-			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
-		s.SetupTest()
 		s.Run(tt.name, func() {
-			for _, methodMock := range tt.mocks {
-				s.mockedEvaluator.On(methodMock.methodName, methodMock.args...).Return(methodMock.returnArgs...)
-			}
-
-			transformer := NewTransformer(ctx, &s.mockedEvaluator, testIndex)
-			generatedEvents := transformer.ProcessAggregatedResources(tt.args.resource, tt.args.metadata)
-
-			if tt.wantErr {
-				s.Equal(0, len(generatedEvents))
-			}
+			transformer := NewTransformer(s.log, cd, testIndex)
+			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
+				resource := event.Fields["resource"].(fetching.ResourceFields)
 				s.Equal(s.cycleId, event.Fields["cycle_id"], "event cycle_id is not correct")
 				s.NotEmpty(event.Timestamp, `event timestamp is missing`)
 				s.NotEmpty(event.Fields["result"], "event result is missing")
 				s.NotEmpty(event.Fields["rule"], "event rule is missing")
-				s.NotEmpty(event.Fields["resource"], "event resource is missing")
-				s.NotEmpty(event.Fields["resource_id"], "resource id is missing")
-				s.NotEmpty(event.Fields["type"], "resource type is missing")
+				s.NotEmpty(resource.Raw, "raw resource is missing")
+				s.NotEmpty(resource.SubType, "resource sub type is missing")
+				s.NotEmpty(resource.ID, "resource ID is missing")
+				s.NotEmpty(resource.Type, "resource  type is missing")
+				s.NotEmpty(event.Fields["type"], "resource type is missing") // for BC sake
 			}
 		})
 	}
+
 }
 
 func parseJsonfile(filename string, data interface{}) error {
@@ -189,6 +152,9 @@ func parseJsonfile(filename string, data interface{}) error {
 		return err
 	}
 
-	json.Unmarshal(byteValue, data)
+	err = json.Unmarshal(byteValue, data)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -4,9 +4,11 @@ on:
   pull_request:
     branches:
       - main
+      - '[0-9]+.[0-9]+'
+    types: [assigned, opened, synchronize, reopened]
 
 env:
-  GO_VERSION: 1.17.2
+  GO_VERSION: 1.18.2
   DEV: true
   SNAPSHOT: true
   PLATFORMS: linux/amd64

@@ -20,11 +20,12 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 
@@ -34,10 +35,12 @@ import (
 const ELBRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
 
 type ELBFetcher struct {
+	log             *logp.Logger
 	cfg             ELBFetcherConfig
 	elbProvider     awslib.ELBLoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
+	resourceCh      chan fetching.ResourceInfo
 }
 
 type ELBFetcherConfig struct {
@@ -45,27 +48,31 @@ type ELBFetcherConfig struct {
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-type LoadBalancersDescription []elasticloadbalancing.LoadBalancerDescription
+type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription
 
 type ELBResource struct {
 	LoadBalancersDescription
 }
 
-func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("elb fetcher starts to fetch data")
-	results := make([]fetching.Resource, 0)
+func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting ELBFetcher.Fetch")
 
 	balancers, err := f.GetLoadBalancers()
 	if err != nil {
-		return nil, fmt.Errorf("failed to load balancers from Kubernetes %w", err)
+		return fmt.Errorf("failed to load balancers from Kubernetes %w", err)
 	}
 	result, err := f.elbProvider.DescribeLoadBalancer(ctx, balancers)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load balancers from ELB %w", err)
+		return fmt.Errorf("failed to load balancers from ELB %w", err)
 	}
-	results = append(results, ELBResource{result})
 
-	return results, err
+	for _, loadBalancer := range result {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      ELBResource{LoadBalancersDescription(loadBalancer)},
+			CycleMetadata: cMetadata,
+		}
+	}
+	return nil
 }
 
 func (f *ELBFetcher) GetLoadBalancers() ([]string, error) {
@@ -92,11 +99,16 @@ func (f *ELBFetcher) GetLoadBalancers() ([]string, error) {
 func (f *ELBFetcher) Stop() {
 }
 
-// GetID TODO: Add resource id logic to all AWS resources
-func (r ELBResource) GetID() (string, error) {
-	return "", nil
-}
-
 func (r ELBResource) GetData() interface{} {
 	return r
+}
+
+func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
+	uid, _ := uuid.NewV4()
+	return fetching.ResourceMetadata{
+		ID:      uid.String(),
+		Type:    ELBType,
+		SubType: ELBType,
+		Name:    "",
+	}
 }

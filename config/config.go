@@ -23,23 +23,82 @@ package config
 import (
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"gopkg.in/yaml.v3"
 )
 
 const DefaultNamespace = "default"
 
-const ResultsDatastreamIndexPrefix = "logs-cis_kubernetes_benchmark.findings"
+const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 type Config struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
-	Fetchers   []*common.Config        `config:"fetchers"`
+	Fetchers   []*config.C             `config:"fetchers"`
+
+	Streams []Stream `config:"streams"`
+}
+
+type Stream struct {
+	DataYaml *struct {
+		ActivatedRules struct {
+			CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
+		} `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
+	} `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
 }
 
 var DefaultConfig = Config{
-	Period: 10 * time.Second,
+	Period: 4 * time.Hour,
+}
+
+func New(cfg *config.C) (Config, error) {
+	c := DefaultConfig
+
+	if err := cfg.Unpack(&c); err != nil {
+		return c, err
+	}
+
+	return c, nil
+}
+
+// Update replaces values of those keys in the current config which are
+// present in the incoming config.
+//
+// NOTE(yashtewari): This will be removed with the planned update to restart the
+// beat with the new config.
+func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
+	log.Infof("Updating config with the following keys: %v", cfg.FlattenedKeys())
+
+	if err := cfg.Unpack(&c); err != nil {
+		return err
+	}
+
+	// Check if the incoming config has streams.
+	if cfg.HasField("streams") {
+		uc, err := New(cfg)
+		if err != nil {
+			return err
+		}
+
+		c.Streams = uc.Streams
+	}
+
+	return nil
+}
+
+func (c *Config) DataYaml() (string, error) {
+	// TODO(yashtewari): Figure out the scenarios in which the integration sends
+	// multiple input streams. Since only one instance of our integration is allowed per
+	// agent policy, is it even possible that multiple input streams are received?
+	y, err := yaml.Marshal(c.Streams[0].DataYaml)
+	if err != nil {
+		return "", err
+	}
+
+	return string(y), nil
 }
 
 // Datastream function to generate the datastream value

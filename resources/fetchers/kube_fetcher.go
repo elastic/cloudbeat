@@ -23,9 +23,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -84,7 +84,9 @@ type requiredResource struct {
 }
 
 type KubeFetcher struct {
-	cfg KubeApiFetcherConfig
+	log        *logp.Logger
+	cfg        KubeApiFetcherConfig
+	resourceCh chan fetching.ResourceInfo
 
 	watchers       []kubernetes.Watcher
 	clientProvider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)
@@ -129,7 +131,7 @@ func (f *KubeFetcher) initWatchers() error {
 		return fmt.Errorf("could not get k8s client: %w", err)
 	}
 
-	logp.L().Info("Kubernetes client initiated.")
+	f.log.Info("Kubernetes client initiated.")
 
 	f.watchers = make([]kubernetes.Watcher, 0)
 
@@ -140,13 +142,14 @@ func (f *KubeFetcher) initWatchers() error {
 		}
 	}
 
-	logp.L().Info("Kubernetes Watchers initiated.")
+	f.log.Info("Kubernetes Watchers initiated.")
 
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Info("kube fetcher starts to fetch data")
+func (f *KubeFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting KubeFetcher.Fetch")
+
 	var err error
 	watcherlock.Do(func() {
 		err = f.initWatchers()
@@ -154,10 +157,11 @@ func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	if err != nil {
 		// Reset watcherlock if the watchers could not be initiated.
 		watcherlock = sync.Once{}
-		return nil, fmt.Errorf("could not initate Kubernetes watchers: %w", err)
+		return fmt.Errorf("could not initate Kubernetes watchers: %w", err)
 	}
 
-	return GetKubeData(f.watchers), nil
+	getKubeData(f.log, f.watchers, f.resourceCh, cMetadata)
+	return nil
 }
 
 func (f *KubeFetcher) Stop() {

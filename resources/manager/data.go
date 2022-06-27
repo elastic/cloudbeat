@@ -19,120 +19,128 @@ package manager
 
 import (
 	"context"
+	"fmt"
+	"github.com/gofrs/uuid"
 	"sync"
 	"time"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 // Data maintains a cache that is updated by Fetcher implementations registered
 // against it. It sends the cache to an output channel at the defined interval.
 type Data struct {
-	interval  time.Duration
-	output    chan ResourceMap
-	cycleData ResourceMap
-	fetchers  FetchersRegistry
-	wg        *sync.WaitGroup
+	log      *logp.Logger
+	timeout  time.Duration
+	interval time.Duration
+	fetchers FetchersRegistry
+	wg       *sync.WaitGroup
+	stop     chan struct{}
 }
 
-// update is a single update sent from a worker to a manager.
-type update struct {
-	key string
-	val []fetching.Resource
-}
-
-type ResourceMap map[string][]fetching.Resource
-
-// NewData returns a new Data instance with the given interval.
-func NewData(interval time.Duration, fetchers FetchersRegistry) (*Data, error) {
+// NewData returns a new Data instance.
+// interval is the duration the manager wait between two consecutive cycles.
+// timeout is the maximum duration the manager wait for a single fetcher to return results.
+func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
 	return &Data{
-		interval:  interval,
-		output:    make(chan ResourceMap),
-		cycleData: make(ResourceMap),
-		fetchers:  fetchers,
+		log:      log,
+		timeout:  timeout,
+		interval: interval,
+		fetchers: fetchers,
+		stop:     make(chan struct{}),
 	}, nil
 }
 
-// Output returns the output channel.
-func (d *Data) Output() <-chan ResourceMap {
-	return d.output
-}
-
-// Run updates the cache using Fetcher implementations.
+// Run starts all configured fetchers to collect resources.
 func (d *Data) Run(ctx context.Context) error {
-	updates := make(chan update)
-
-	var wg sync.WaitGroup
-	d.wg = &wg
-
-	for _, key := range d.fetchers.Keys() {
-		wg.Add(1)
-		go func(k string) {
-			defer wg.Done()
-			d.fetchWorker(ctx, updates, k)
-		}(key)
-	}
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		d.fetchManager(ctx, updates)
-	}()
-
+	go d.fetchAndSleep(ctx)
 	return nil
 }
 
-func (d *Data) fetchWorker(ctx context.Context, updates chan update, k string) {
+func (d *Data) fetchAndSleep(ctx context.Context) {
+	// Happens once in a lifetime of cloudbeat and then enters the loop
+	d.fetchIteration(ctx)
 	for {
 		select {
-		case <-ctx.Done():
+		case <-d.stop:
+			d.log.Info("Fetchers manager stopped.")
 			return
-		default:
-			if !d.fetchers.ShouldRun(k) {
-				break
-			}
-
-			val, err := d.fetchers.Run(ctx, k)
-			if err != nil {
-				logp.L().Errorf("error running fetcher for key %q: %v", k, err)
-			}
-
-			updates <- update{k, val}
+		case <-ctx.Done():
+			d.log.Info("Fetchers manager canceled.")
+			return
+		case <-time.After(d.interval):
+			d.fetchIteration(ctx)
 		}
-		// Go to sleep in each iteration.
-		time.Sleep(d.interval)
 	}
 }
 
-func (d *Data) fetchManager(ctx context.Context, updates chan update) {
-	ticker := time.NewTicker(d.interval)
+// fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
+// The function must not get called in parallel.
+func (d *Data) fetchIteration(ctx context.Context) {
+	d.log.Infof("Manager triggered fetching for %d fetchers", len(d.fetchers.Keys()))
 
-	for {
-		select {
-		case <-ctx.Done():
-			return
+	d.wg = &sync.WaitGroup{}
+	start := time.Now()
 
-		case <-ticker.C:
-			// Generate input ID?
-			// Send aggregated data at cycle tick
-			d.output <- d.cycleData
-			d.cycleData = make(ResourceMap)
+	cycleId, _ := uuid.NewV4()
+	cycleMetadata := fetching.CycleMetadata{CycleId: cycleId}
+	d.log.Infof("Cycle %s has started", cycleId.String())
 
-		// Aggregate fetcher's data into cycle data map
-		case u := <-updates:
-			d.cycleData[u.key] = u.val
-		}
+	for _, key := range d.fetchers.Keys() {
+		d.wg.Add(1)
+		go func(k string) {
+			defer d.wg.Done()
+			err := d.fetchSingle(ctx, k, cycleMetadata)
+			if err != nil {
+				d.log.Errorf("Error running fetcher for key %s: %v", k, err)
+			}
+		}(key)
 	}
+
+	d.wg.Wait()
+	d.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
+	d.log.Infof("Cycle %s resource fetching has ended", cycleId.String())
+}
+
+func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching.CycleMetadata) error {
+	if !d.fetchers.ShouldRun(k) {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, d.timeout)
+	defer cancel()
+
+	// The buffer is required to avoid go-routine leaks in a case a fetcher timed out
+	errCh := make(chan error, 1)
+
+	go func() {
+		defer close(errCh)
+		errCh <- d.fetchProtected(ctx, k, cycleMetadata)
+	}()
+
+	select {
+	case <-ctx.Done():
+		return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
+	case err := <-errCh:
+		return err
+	}
+}
+
+// fetchProtected protect the fetching goroutine from getting panic
+func (d *Data) fetchProtected(ctx context.Context, k string, metadata fetching.CycleMetadata) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("fetcher %s recovered from panic: %v", k, r)
+		}
+	}()
+
+	return d.fetchers.Run(ctx, k, metadata)
 }
 
 // Stop cleans up Data resources gracefully.
-func (d *Data) Stop(ctx context.Context, cancel context.CancelFunc) {
-	cancel()
-
-	d.fetchers.Stop(ctx)
+func (d *Data) Stop() {
+	d.fetchers.Stop()
+	close(d.stop)
 	d.wg.Wait()
-
-	close(d.output)
 }

@@ -19,96 +19,63 @@ package transformer
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 )
 
 type Transformer struct {
-	context       context.Context
-	eval          evaluator.Evaluator
-	eventMetadata common.MapStr
-	events        []beat.Event
+	log           *logp.Logger
+	eventMetadata mapstr.M
+	commonData    CommonDataInterface
 }
 
-func NewTransformer(ctx context.Context, eval evaluator.Evaluator, index string) Transformer {
-	eventMetadata := common.MapStr{libevents.FieldMetaIndex: index}
-	events := make([]beat.Event, 0)
+func NewTransformer(log *logp.Logger, cd CommonDataInterface, index string) Transformer {
+	eventMetadata := mapstr.M{libevents.FieldMetaIndex: index}
 
 	return Transformer{
-		context:       ctx,
-		eval:          eval,
+		log:           log,
 		eventMetadata: eventMetadata,
-		events:        events,
+		commonData:    cd,
 	}
 }
 
-func (c *Transformer) ProcessAggregatedResources(resources manager.ResourceMap, metadata CycleMetadata) []beat.Event {
-	c.events = make([]beat.Event, 0)
-	for fetcherType, fetcherResults := range resources {
-		c.processEachResource(fetcherResults, ResourceTypeMetadata{CycleMetadata: metadata, Type: fetcherType})
+func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.EventData) ([]beat.Event, error) {
+	if len(eventData.Findings) == 0 {
+		return nil, nil
 	}
 
-	return c.events
-}
-
-func (c *Transformer) processEachResource(results []fetching.Resource, metadata ResourceTypeMetadata) {
-	for _, result := range results {
-		rid, err := result.GetID()
-		if err != nil {
-			logp.Error(fmt.Errorf("could not get resource ID, Error: %v", err))
-			return
-		}
-		resMetadata := ResourceMetadata{ResourceTypeMetadata: metadata, ResourceId: rid}
-		if err := c.createBeatEvents(result, resMetadata); err != nil {
-			logp.Error(fmt.Errorf("failed to create beat events for, %v, Error: %v", metadata, err))
-		}
-	}
-}
-
-func (c *Transformer) createBeatEvents(fetchedResource fetching.Resource, metadata ResourceMetadata) error {
-	fetcherResult := fetching.Result{Type: metadata.Type, Resource: fetchedResource.GetData()}
-	result, err := c.eval.Decision(c.context, fetcherResult)
-
-	if err != nil {
-		logp.Error(fmt.Errorf("error running the policy: %w", err))
-		return err
-	}
-
-	findings, err := c.eval.Decode(result)
-	if err != nil {
-		return err
-	}
+	events := make([]beat.Event, 0)
+	resMetadata := eventData.GetMetadata()
+	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
 
 	timestamp := time.Now()
-	resource := ResourceFields{
-		ID:   metadata.ResourceId,
-		Type: metadata.Type,
-		Raw:  fetcherResult.Resource,
+	resource := fetching.ResourceFields{
+		ResourceMetadata: resMetadata,
+		Raw:              eventData.RuleResult.Resource,
 	}
 
-	for _, finding := range findings {
+	for _, finding := range eventData.Findings {
 		event := beat.Event{
-			Meta:      c.eventMetadata,
+			Meta:      t.eventMetadata,
 			Timestamp: timestamp,
-			Fields: common.MapStr{
+			Fields: mapstr.M{
 				"resource":    resource,
-				"resource_id": metadata.ResourceId, // Deprecated - kept for BC
-				"type":        metadata.Type,       // Deprecated - kept for BC
-				"cycle_id":    metadata.CycleId,
+				"resource_id": resMetadata.ID,   // Deprecated - kept for BC
+				"type":        resMetadata.Type, // Deprecated - kept for BC
+				"cycle_id":    eventData.CycleId,
 				"result":      finding.Result,
 				"rule":        finding.Rule,
 			},
 		}
 
-		c.events = append(c.events, event)
+		events = append(events, event)
 	}
-	return nil
+
+	return events, nil
 }

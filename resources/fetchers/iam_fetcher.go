@@ -19,15 +19,19 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/beats/v7/libbeat/logp"
+
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/gofrs/uuid"
 )
 
 type IAMFetcher struct {
+	log         *logp.Logger
 	iamProvider awslib.IAMRolePermissionGetter
 	cfg         IAMFetcherConfig
+	resourceCh  chan fetching.ResourceInfo
 }
 
 type IAMFetcherConfig struct {
@@ -39,24 +43,31 @@ type IAMResource struct {
 	Data interface{}
 }
 
-func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
-	logp.L().Debug("iam fetcher starts to fetch data")
-	results := make([]fetching.Resource, 0)
+func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting IAMFetcher.Fetch")
 
 	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
-	results = append(results, IAMResource{result})
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      IAMResource{result},
+		CycleMetadata: cMetadata,
+	}
 
-	return results, err
+	return err
 }
 
 func (f IAMFetcher) Stop() {
 }
 
-// GetID TODO: Add resource id logic to all AWS resources
-func (r IAMResource) GetID() (string, error) {
-	return "", nil
-}
-
 func (r IAMResource) GetData() interface{} {
 	return r.Data
+}
+
+func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
+	uid, _ := uuid.NewV4()
+	return fetching.ResourceMetadata{
+		ID:      uid.String(),
+		Type:    IAMType,
+		SubType: IAMType,
+		Name:    "",
+	}
 }
