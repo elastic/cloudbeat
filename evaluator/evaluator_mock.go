@@ -80,5 +80,3 @@ func (_m *MockedEvaluator) Decode(result interface{}) ([]Finding, error) {
 func (_m *MockedEvaluator) Stop(_a0 context.Context) {
 	_m.Called(_a0)
 }
-
-// test
