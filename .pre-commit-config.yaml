@@ -13,7 +13,7 @@ repos:
 #        name: OPA bundle
 #        description: Formats Rego policy using opa fmt
 #        entry: opa build
-#        args: [ -b, '.',  -e, './compliance' ]
+#        args: [ -b, './bundle',  -e, './bundle/compliance' ]
 #        language: system
 #        files: (\.rego)$
 
@@ -21,7 +21,7 @@ repos:
         name: OPA check
         description: Check syntax of staged Rego files
         entry: opa check
-        args: [ -S, './compliance' ]
+        args: [ -S, './bundle/compliance' ]
         pass_filenames: false
         language: system
         files: (\.rego)$
@@ -30,6 +30,6 @@ repos:
         name: OPA test
         description: Runs OPA unit tests on rego source files
         entry: opa test
-        args: [ -b, '.' ]
+        args: [ -b, './bundle' ]
         pass_filenames: false
         language: system

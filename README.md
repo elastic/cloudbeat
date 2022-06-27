@@ -3,24 +3,52 @@
 # Cloud Security Posture - Rego policies
 
     .
-    ├── compliance                         # Compliance policies
-    │   ├── lib
-    │   │   ├── common.rego                # Common functions
-    │   │   ├── common_tests.rego          # Common functions tests
-    │   │   ├── data_adapter.rego          # Input data adapter
-    │   │   └── test.rego                  # Common Test functions
-    │   ├── cis_k8s
-    │   │   ├── cis_k8s.rego               # Handles all Kubernetes CIS rules evalutations
-    │   │   ├── test_data.rego             # CIS Test data generators
-    │   │   ├── schemas                    # Benchmark's schemas
-    │   │   │   └── input_scehma.rego
-    │   │   ├── rules
-    │   │   │   ├── cis_1_1_1              # CIS 1.1.1 rule package
-    │   │   │   │   ├── rule.rego
-    │   │   │   │   └── test.rego
-    │   │   │   │   └── data.yaml          # Rule's metadata
-    │   │   │   └── ...
-    └── main.rego                          # Evaluates all policies and returns the findings
+    ├── README.md
+    ├── bundle
+    │   ├── builder.go                            # Bundle building code
+    │   ├── compliance                            # Compliance policies
+    │   │   ├── cis_eks
+    │   │   │   ├── cis_eks.rego                  # Handles all EKS CIS rules evalutations
+    │   │   │   ├── data_adapter.rego
+    │   │   │   ├── rules
+    │   │   │   │   ├── cis_2_1_1                 # CIS EKS 2.1.1 rule package
+    │   │   │   │   │   ├── data.yaml             # Rule's metadata
+    │   │   │   │   │   ├── rule.rego             # Rule's rego
+    │   │   │   │   │   └── test.rego             # Rule's test
+    |   |   |   |   ├── ...
+    │   │   │   └── test_data.rego                # CIS EKS Test data generators
+    │   │   ├── cis_k8s
+    │   │   │   ├── cis_k8s.rego                  # Handles all Kubernetes CIS rules evalutations
+    │   │   │   ├── data_adapter.rego
+    │   │   │   ├── rules
+    │   │   │   │   ├── cis_1_1_1
+    │   │   │   │   │   ├── data.yaml
+    │   │   │   │   │   ├── rule.rego
+    │   │   │   │   │   └── test.rego
+    |   |   |   |   ├── ...
+    │   │   │   └── schemas                       # Benchmark's schemas
+    │   │   │   └── input_schema.json
+    │   │   ├── kubernetes_common
+    │   │   │   └── test_data.rego
+    │   │   ├── lib
+    │   │   │   ├── assert.rego
+    │   │   │   ├── common                        # Common functions and tests
+    │   │   │   │   ├── common.rego
+    │   │   │   │   └── test.rego
+    │   │   │   ├── data_adapter                  # Input data adapter and tests
+    │   │   │   │   ├── data_adapter.rego
+    │   │   │   │   └── test.rego
+    │   │   │   ├── output_validations            # Output validations for tests
+    │   │   │   │   ├── output_validations.rego
+    │   │   │   │   └── test.rego
+    │   │   │   └── test.rego
+    │   │   └── main.rego                         # Evaluates all policies and returns the findings
+    │   ├── embed.go                              # Embed of benchmarks
+    │   ├── server.go                             # Hosting and creation of bundle server functions
+    │   └── server_test.go
+    ├── main.go
+    └── server
+    └── host.go                                   # Hosting and creation of bundle server for benchmarks
 
 ## Local Evaluation
 
@@ -62,13 +90,13 @@ should contain an beat/agent output, e.g. filesystem data
 ### Evaluate entire policy into output.json
 
 ```console
-opa eval data.main --format pretty -i input.json -b . > output.json
+opa eval data.main --format pretty -i input.json -b ./bundle > output.json
 ```
 
 ### Evaluate findings only
 
 ```console
-opa eval data.main.findings --format pretty -i input.json -b . > output.json
+opa eval data.main.findings --format pretty -i input.json -b ./bundle > output.json
 ```
 
 <details>
@@ -168,8 +196,8 @@ opa eval data.main.findings --format pretty -i input.json -b . > output.json
 ### Evaluate with input schema
 
 ```console
-❯ opa eval data.main --format pretty -i input.json -b . -s compliance/cis_k8s/schemas/input_schema.json
-1 error occurred: compliance/lib/data_adapter.rego:11: rego_type_error: undefined ref: input.filenames
+❯ opa eval data.main --format pretty -i input.json -b ./bundle -s bundle/compliance/cis_k8s/schemas/input_schema.json
+1 error occurred: bundle/compliance/lib/data_adapter.rego:11: rego_type_error: undefined ref: input.filenames
         input.filenames
               ^
               have: "filenames"
@@ -182,7 +210,7 @@ opa eval data.main.findings --format pretty -i input.json -b . > output.json
 ### Test entire policy
 
 ```console
-opa build -b ./ -e ./compliance
+opa build -b ./bundle -e ./bundle/compliance
 ```
 
 ```console
@@ -192,7 +220,7 @@ opa test -b bundle.tar.gz -v
 ### Test specific rule
 
 ```console
-opa test -v compliance/lib compliance/cis_k8s/test_data.rego compliance/cis_k8s/rules/cis_1_1_2 --ignore="common_tests.rego"
+opa test -v bundle/compliance/kubernetes_common bundle/compliance/lib bundle/compliance/cis_k8s/test_data.rego bundle/compliance/cis_k8s/rules/cis_1_1_2 --ignore="common_tests.rego"
 ```
 
 ### Pre-commit hooks

@@ -1,8 +1,10 @@
 package bundle
 
 import (
+	"context"
 	"net/http/httptest"
 	"testing"
+	"testing/fstest"
 
 	"net/http"
 
@@ -13,16 +15,33 @@ func TestServer(t *testing.T) {
 	assert := assert.New(t)
 
 	handler := NewServer()
-	err := HostBundle("empty", map[string]string{})
+
+	ctx := context.Background()
+
+	eksBundle := CISEksBundle()
+	err := HostBundle("eks", eksBundle, ctx)
 	assert.NoError(err)
 
-	err = HostBundle("otherBundle", map[string]string{"a.txt": "some text"})
+	kubernetesBundle := CISKubernetesBundle()
+	err = HostBundle("kubernetes", kubernetesBundle, ctx)
 	assert.NoError(err)
 
-	err = HostBundle("overridenBundle", map[string]string{})
+	emptyBundle := Bundle{fs: fstest.MapFS{}}
+	err = HostBundle("empty", emptyBundle, ctx)
 	assert.NoError(err)
 
-	err = HostBundle("overridenBundle", map[string]string{})
+	otherBundleFS := Bundle{fs: fstest.MapFS{
+		"a.txt": {
+			Data: []byte("some text"),
+		},
+	}}
+	err = HostBundle("otherBundle", otherBundleFS, ctx)
+	assert.NoError(err)
+
+	err = HostBundle("overridenBundle", emptyBundle, ctx)
+	assert.NoError(err)
+
+	err = HostBundle("overridenBundle", emptyBundle, ctx)
 	assert.NoError(err)
 
 	server := httptest.NewServer(handler)
@@ -31,6 +50,12 @@ func TestServer(t *testing.T) {
 		path               string
 		expectedStatusCode string
 	}{
+		{
+			"/bundles/eks", "200 OK",
+		},
+		{
+			"/bundles/kubernetes", "200 OK",
+		},
 		{
 			"/bundles/empty", "200 OK",
 		},
