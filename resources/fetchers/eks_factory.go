@@ -44,7 +44,7 @@ type eksExtraElements struct {
 	eksProvider awslib.EksClusterDescriber
 }
 
-func (f *EKSFactory) Create(log *logp.Logger, c *config.C) (fetching.Fetcher, error) {
+func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting EKSFactory.Create")
 
 	cfg := EKSFetcherConfig{}
@@ -57,7 +57,7 @@ func (f *EKSFactory) Create(log *logp.Logger, c *config.C) (fetching.Fetcher, er
 	if err != nil {
 		return nil, err
 	}
-	return f.CreateFrom(log, cfg, elements)
+	return f.CreateFrom(log, cfg, elements, ch)
 }
 
 func getEksExtraElements() (eksExtraElements, error) {
@@ -72,11 +72,12 @@ func getEksExtraElements() (eksExtraElements, error) {
 	return eksExtraElements{eksProvider: eks}, nil
 }
 
-func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, elements eksExtraElements) (fetching.Fetcher, error) {
+func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, elements eksExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	fe := &EKSFetcher{
 		log:         log,
 		cfg:         cfg,
 		eksProvider: elements.eksProvider,
+		resourceCh:  ch,
 	}
 
 	return fe, nil

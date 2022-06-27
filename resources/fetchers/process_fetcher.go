@@ -50,9 +50,10 @@ type ProcessResource struct {
 }
 
 type ProcessesFetcher struct {
-	log *logp.Logger
-	cfg ProcessFetcherConfig
-	Fs  fs.FS
+	log        *logp.Logger
+	cfg        ProcessFetcherConfig
+	Fs         fs.FS
+	resourceCh chan fetching.ResourceInfo
 }
 
 type ProcessInputConfiguration struct {
@@ -67,21 +68,20 @@ type ProcessFetcherConfig struct {
 	RequiredProcesses ProcessesConfigMap `config:"processes"`
 }
 
-func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *ProcessesFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ProcessesFetcher.Fetch")
 
 	pids, err := proc.ListFS(f.Fs)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	ret := make([]fetching.Resource, 0)
 
 	// If errors occur during read, then return what we have till now
 	// without reporting errors.
 	for _, p := range pids {
 		stat, err := proc.ReadStatFS(f.Fs, p)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		processConfig, isProcessRequired := f.cfg.RequiredProcesses[stat.Name]
 		if !isProcessRequired {
@@ -93,10 +93,10 @@ func (f *ProcessesFetcher) Fetch(ctx context.Context) ([]fetching.Resource, erro
 			f.log.Error(err)
 			continue
 		}
-		ret = append(ret, fetchedResource)
+		f.resourceCh <- fetching.ResourceInfo{Resource: fetchedResource, CycleMetadata: cMetadata}
 	}
 
-	return ret, nil
+	return nil
 }
 
 func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf ProcessInputConfiguration, processId string) (fetching.Resource, error) {

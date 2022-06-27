@@ -19,6 +19,7 @@ package fetching
 
 import (
 	"context"
+	"github.com/gofrs/uuid"
 
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -26,18 +27,27 @@ import (
 
 // Factory can create fetcher instances based on configuration
 type Factory interface {
-	Create(*logp.Logger, *config.C) (Fetcher, error)
+	Create(*logp.Logger, *config.C, chan ResourceInfo) (Fetcher, error)
 }
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {
-	Fetch(context.Context) ([]Resource, error)
+	Fetch(context.Context, CycleMetadata) error
 	Stop()
 }
 
 type Condition interface {
 	Condition() bool
 	Name() string
+}
+
+type ResourceInfo struct {
+	Resource
+	CycleMetadata
+}
+
+type CycleMetadata struct {
+	CycleId uuid.UUID
 }
 
 type Resource interface {

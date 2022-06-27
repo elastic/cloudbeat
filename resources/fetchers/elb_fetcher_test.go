@@ -20,6 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"regexp"
 	"testing"
 
@@ -41,7 +43,8 @@ const (
 type ElbFetcherTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
+	log        *logp.Logger
+	resourceCh chan fetching.ResourceInfo
 }
 
 func TestElbFetcherTestSuite(t *testing.T) {
@@ -53,6 +56,14 @@ func TestElbFetcherTestSuite(t *testing.T) {
 	}
 
 	suite.Run(t, s)
+}
+
+func (s *ElbFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+}
+
+func (s *ElbFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
@@ -123,16 +134,17 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
+			resourceCh:      s.resourceCh,
 		}
 
-		ctx := context.Background()
+		err = elbFetcher.Fetch(context.Background(), fetching.CycleMetadata{})
+		results := testhelper.CollectResources(s.resourceCh)
 
-		result, err := elbFetcher.Fetch(ctx)
+		s.Equal(len(test.expectedlbNames), len(results))
 		s.Nil(err)
-		s.Equal(len(test.expectedlbNames), len(result))
 
 		for i, expectedLbName := range test.expectedlbNames {
-			elbResource := result[i].(ELBResource)
+			elbResource := results[i].Resource.(ELBResource)
 			s.Equal(expectedLbName, *elbResource.LoadBalancerName)
 		}
 	}
@@ -190,13 +202,15 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
+			resourceCh:      s.resourceCh,
 		}
 
 		ctx := context.Background()
 
-		result, err := elbFetcher.Fetch(ctx)
-		s.Nil(result)
-		s.NotNil(err)
+		err = elbFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		results := testhelper.CollectResources(s.resourceCh)
+
+		s.Nil(results)
 		s.EqualError(err, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))
 	}
 }
