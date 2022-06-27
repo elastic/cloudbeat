@@ -1,12 +1,14 @@
 # All
 * @elastic/cloudbeat
 
-# Infra & devops related
-/deploy/ @davesys911
-/.github/ @davesys911
-/.github/workflows @davesys911 @oren-zohar
-Makefile @davesys911
-JUSTFILE @davesys911
+# Infra & ops related
+/deploy/ @elastic/csp-ops 
+/.github/workflows  @elastic/csp-ops @elastic/csp-automation
+.ci/  @elastic/csp-ops
+/scripts/ @elastic/csp-ops
+Makefile  @elastic/csp-ops @elastic/csp-automation
+JUSTFILE  @elastic/csp-ops @elastic/csp-automation
+Jenkinsfile  @elastic/csp-ops
 
 # Beats related
 *.go @elastic/cloudbeat
@@ -14,4 +16,4 @@ go.mod @elastic/cloudbeat
 go.sum @elastic/cloudbeat
 
 # Automation tests
-tests/* @elastic/csp-automation
+/tests/ @elastic/csp-automation
