@@ -21,8 +21,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"net/http"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -30,8 +31,6 @@ import (
 	"github.com/open-policy-agent/opa/logging"
 	"github.com/open-policy-agent/opa/sdk"
 	"github.com/sirupsen/logrus"
-
-	"github.com/elastic/cloudbeat/beater/bundle"
 )
 
 type OpaEvaluator struct {
@@ -54,7 +53,7 @@ var opaConfig = `{
 }`
 
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
-	server, err := bundle.StartServer()
+	server, err := StartServer()
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +61,7 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
 	// provide the OPA configuration which specifies
 	// fetching policy bundles from the mock bundleServer
 	// and logging decisions locally to the console
-	config := []byte(fmt.Sprintf(opaConfig, bundle.ServerAddress))
+	config := []byte(fmt.Sprintf(opaConfig, ServerAddress))
 
 	// create an instance of the OPA object
 	opaLogger := newEvaluatorLogger()

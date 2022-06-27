@@ -15,49 +15,44 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package bundle
+package evaluator
 
 import (
-	"fmt"
 	"net/http"
+	"testing"
 	"time"
 
-	csppolicies "github.com/elastic/csp-security-policies/bundle"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/assert"
 )
 
-var (
-	address = "127.0.0.1:18080"
+func TestCreateServer(t *testing.T) {
+	assert := assert.New(t)
 
-	ServerAddress = fmt.Sprintf("http://%s", address)
-)
+	_, err := StartServer()
+	assert.NoError(err)
 
-func StartServer() (*http.Server, error) {
-	policies, err := csppolicies.CISKubernetes()
-	if err != nil {
-		return nil, err
+	var tests = []struct {
+		path               string
+		expectedStatusCode string
+	}{
+		{
+			"/bundles/bundle.tar.gz", "200 OK",
+		},
+		{
+			"/bundles/notExistBundle.tar.gz", "404 Not Found",
+		},
+		{
+			"/bundles/notExistBundle", "404 Not Found",
+		},
 	}
 
-	h := csppolicies.NewServer()
-	if err := csppolicies.HostBundle("bundle.tar.gz", policies); err != nil {
-		return nil, err
+	time.Sleep(time.Second * 2)
+	for _, test := range tests {
+		target := ServerAddress + test.path
+		client := &http.Client{}
+		res, err := client.Get(target)
+
+		assert.NoError(err)
+		assert.Equal(test.expectedStatusCode, res.Status)
 	}
-
-	srv := &http.Server{
-		Addr:         address,
-		WriteTimeout: time.Second * 15,
-		ReadTimeout:  time.Second * 15,
-		IdleTimeout:  time.Second * 60,
-		Handler:      h,
-	}
-
-	log := logp.NewLogger("cloudbeat_bundle_server")
-
-	go func() {
-		if err := srv.ListenAndServe(); err != nil {
-			log.Errorf("Bundle server closed: %v", err)
-		}
-	}()
-
-	return srv, nil
 }
