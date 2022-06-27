@@ -1,6 +1,6 @@
 module github.com/elastic/cloudbeat
 
-go 1.17
+go 1.18
 
 require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
@@ -57,7 +57,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220622083326-cab8871124af
-	github.com/elastic/csp-security-policies v1.0.4
+	github.com/elastic/csp-security-policies v1.0.5-0.20220623145033-85979044b4b5
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.6 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -227,7 +227,7 @@ require (
 	google.golang.org/grpc v1.47.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirect
+	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirect; indirectresources/manager/data.go
 	howett.net/plist v1.0.0 // indirect
 	oras.land/oras-go v1.1.1 // indirect
 )

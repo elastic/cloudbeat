@@ -20,7 +20,6 @@ package transformer
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -30,29 +29,13 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
-
 	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
-type args struct {
-	resource manager.ResourceMap
-	metadata CycleMetadata
-}
-
 type testAttr struct {
-	name    string
-	args    args
-	wantErr bool
-	mocks   []MethodMock
-}
-
-type MethodMock struct {
-	methodName string
-	args       []interface{}
-	returnArgs []interface{}
+	name  string
+	input evaluator.EventData
 }
 
 const (
@@ -73,10 +56,9 @@ var fetcherResult = fetchers.FileSystemResource{
 }
 
 var (
-	opaResults   evaluator.RuleResult
-	resourcesMap = map[string][]fetching.Resource{fetchers.FileSystemType: {fetcherResult}}
-	ctx          = context.Background()
-	cd           = CommonData{
+	opaResults evaluator.RuleResult
+	ctx        = context.Background()
+	cd         = CommonData{
 		clusterId: "test-cluster-id",
 		nodeId:    "test-node-id",
 	}
@@ -85,9 +67,8 @@ var (
 type EventsCreatorTestSuite struct {
 	suite.Suite
 
-	log             *logp.Logger
-	cycleId         uuid.UUID
-	mockedEvaluator evaluator.MockedEvaluator
+	log     *logp.Logger
+	cycleId uuid.UUID
 }
 
 func TestSuite(t *testing.T) {
@@ -107,82 +88,40 @@ func (s *EventsCreatorTestSuite) SetupSuite() {
 		s.log.Errorf("Could not parse JSON file: %v", err)
 		return
 	}
-	s.cycleId, _ = uuid.NewV4()
 }
 
 func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
-	var tests = []testAttr{
+	tests := []testAttr{
 		{
 			name: "All events propagated as expected",
-			args: args{
-				resource: resourcesMap,
-				metadata: CycleMetadata{CycleId: s.cycleId},
+			input: evaluator.EventData{
+				RuleResult: opaResults,
+				ResourceInfo: fetching.ResourceInfo{
+					Resource:      fetcherResult,
+					CycleMetadata: fetching.CycleMetadata{CycleId: s.cycleId},
+				},
 			},
-			mocks: []MethodMock{{
-				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
-				returnArgs: []interface{}{mock.Anything, nil},
-			}, {
-				methodName: "Decode",
-				args:       []interface{}{mock.Anything},
-				returnArgs: []interface{}{opaResults.Findings, nil},
-			},
-			},
-			wantErr: false,
 		},
 		{
-			name: "Events should not be created due to a policy error",
-			args: args{
-				resource: resourcesMap,
-				metadata: CycleMetadata{CycleId: s.cycleId},
+			name: "Events should not be created due zero findings",
+			input: evaluator.EventData{
+				RuleResult: evaluator.RuleResult{
+					Findings: []evaluator.Finding{},
+					Metadata: evaluator.Metadata{},
+					Resource: nil,
+				},
+				ResourceInfo: fetching.ResourceInfo{
+					Resource:      fetcherResult,
+					CycleMetadata: fetching.CycleMetadata{CycleId: s.cycleId},
+				},
 			},
-			mocks: []MethodMock{{
-				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
-				returnArgs: []interface{}{mock.Anything, errors.New("policy err")},
-			}, {
-				methodName: "Decode",
-				args:       []interface{}{mock.Anything},
-				returnArgs: []interface{}{opaResults.Findings, nil},
-			},
-			},
-			wantErr: true,
-		},
-		{
-			name: "Events should not be created due to a parse error",
-			args: args{
-				resource: resourcesMap,
-				metadata: CycleMetadata{CycleId: s.cycleId},
-			},
-			mocks: []MethodMock{{
-				methodName: "Decision",
-				args:       []interface{}{ctx, mock.AnythingOfType("Result")},
-				returnArgs: []interface{}{mock.Anything, nil},
-			}, {
-				methodName: "Decode",
-				args:       []interface{}{mock.Anything},
-				returnArgs: []interface{}{nil, errors.New("parse err")},
-			},
-			},
-			wantErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
-			resetMocks(s)
-			for _, methodMock := range tt.mocks {
-				s.mockedEvaluator.On(methodMock.methodName, methodMock.args...).Return(methodMock.returnArgs...)
-			}
-
-			transformer := NewTransformer(ctx, s.log, &s.mockedEvaluator, cd, testIndex)
-			generatedEvents := transformer.ProcessAggregatedResources(tt.args.resource, tt.args.metadata)
-
-			if tt.wantErr {
-				s.Equal(0, len(generatedEvents))
-			} else {
-				s.NotEqual(0, len(generatedEvents))
-			}
+			transformer := NewTransformer(s.log, cd, testIndex)
+			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
 				resource := event.Fields["resource"].(fetching.ResourceFields)
@@ -198,6 +137,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			}
 		})
 	}
+
 }
 
 func parseJsonfile(filename string, data interface{}) error {
@@ -217,8 +157,4 @@ func parseJsonfile(filename string, data interface{}) error {
 		return err
 	}
 	return nil
-}
-
-func resetMocks(s *EventsCreatorTestSuite) {
-	s.mockedEvaluator = evaluator.MockedEvaluator{}
 }

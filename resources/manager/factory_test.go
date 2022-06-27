@@ -19,9 +19,9 @@ package manager
 
 import (
 	"context"
-	"testing"
-
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"testing"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -29,19 +29,42 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+type syncNumberFetcher struct {
+	num        int
+	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+}
+
+func newSyncNumberFetcher(num int, ch chan fetching.ResourceInfo) fetching.Fetcher {
+	return &syncNumberFetcher{num, false, ch}
+}
+
+func (f *syncNumberFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      fetchValue(f.num),
+		CycleMetadata: cMetadata,
+	}
+
+	return nil
+}
+
+func (f *syncNumberFetcher) Stop() {
+	f.stopCalled = true
+}
+
 type FactoriesTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
-	F   factories
+	log        *logp.Logger
+	F          factories
+	resourceCh chan fetching.ResourceInfo
 }
 
-type numberFetcherFactory struct {
-}
+type numberFetcherFactory struct{}
 
-func (n *numberFetcherFactory) Create(log *logp.Logger, c *agentconfig.C) (fetching.Fetcher, error) {
+func (n *numberFetcherFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
-	return &numberFetcher{int(x), false}, nil
+	return &syncNumberFetcher{int(x), false, ch}, nil
 }
 
 func numberConfig(number int) *agentconfig.C {
@@ -67,6 +90,11 @@ func TestFactoriesTestSuite(t *testing.T) {
 
 func (s *FactoriesTestSuite) SetupTest() {
 	s.F = newFactories()
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+}
+
+func (s *FactoriesTestSuite) TearDownTest() {
+	close(s.resourceCh)
 }
 
 func (s *FactoriesTestSuite) TestListFetcher() {
@@ -100,13 +128,15 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 	for _, test := range tests {
 		s.F.ListFetcherFactory(test.key, &numberFetcherFactory{})
 		c := numberConfig(test.value)
-		f, err := s.F.CreateFetcher(s.log, test.key, c)
-		s.NoError(err)
-		res, err := f.Fetch(context.TODO())
-		s.NoError(err)
 
-		s.Equal(1, len(res))
-		s.Equal(test.value, res[0].GetData())
+		f, err := s.F.CreateFetcher(s.log, test.key, c, s.resourceCh)
+		s.NoError(err)
+		err = f.Fetch(context.TODO(), fetching.CycleMetadata{})
+		results := testhelper.CollectResources(s.resourceCh)
+
+		s.Equal(1, len(results))
+		s.Nil(err)
+		s.Equal(test.value, results[0].GetData())
 	}
 }
 
@@ -146,14 +176,16 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err = s.F.RegisterFetchers(s.log, reg, conf)
+		err = s.F.RegisterFetchers(s.log, reg, conf, s.resourceCh)
+
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
-		res, err := reg.Run(context.Background(), test.key)
-		s.NoError(err)
-		s.Equal(test.value, res[0].GetData())
+		err = reg.Run(context.Background(), test.key, fetching.CycleMetadata{})
+		results := testhelper.CollectResources(s.resourceCh)
 
+		s.NoError(err)
+		s.Equal(test.value, results[0].Resource.GetData())
 	}
 }
 
@@ -175,7 +207,7 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 		}
 		conf := config.DefaultConfig
 		conf.Fetchers = append(conf.Fetchers, numCfg)
-		err = s.F.RegisterFetchers(s.log, reg, conf)
+		err = s.F.RegisterFetchers(s.log, reg, conf, s.resourceCh)
 		s.Error(err)
 	}
 }

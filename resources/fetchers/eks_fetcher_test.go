@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/eks"
@@ -33,7 +34,8 @@ import (
 type EksFetcherTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
+	log        *logp.Logger
+	resourceCh chan fetching.ResourceInfo
 }
 
 func TestEksFetcherTestSuite(t *testing.T) {
@@ -48,7 +50,11 @@ func TestEksFetcherTestSuite(t *testing.T) {
 }
 
 func (s *EksFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+}
 
+func (s *EksFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
 }
 
 func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
@@ -75,14 +81,18 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 			log:         s.log,
 			cfg:         eksConfig,
 			eksProvider: eksProvider,
+			resourceCh:  s.resourceCh,
 		}
 
 		ctx := context.Background()
-		result, err := eksFetcher.Fetch(ctx)
+		err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
+
+		results := testhelper.CollectResources(s.resourceCh)
+		eksResource := results[0].Resource.(EKSResource)
+
+		s.Equal(expectedResource, eksResource)
 		s.Nil(err)
 
-		eksResource := result[0].(EKSResource)
-		s.Equal(expectedResource, eksResource)
 	}
 }
 
@@ -100,10 +110,13 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 		log:         s.log,
 		cfg:         eksConfig,
 		eksProvider: eksProvider,
+		resourceCh:  s.resourceCh,
 	}
 
 	ctx := context.Background()
-	_, err := eksFetcher.Fetch(ctx)
-	s.NotNil(err)
+	err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Equal(0, len(results))
 	s.Equal(expectedErr, err)
 }

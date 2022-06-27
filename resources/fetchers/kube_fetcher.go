@@ -84,8 +84,9 @@ type requiredResource struct {
 }
 
 type KubeFetcher struct {
-	log *logp.Logger
-	cfg KubeApiFetcherConfig
+	log        *logp.Logger
+	cfg        KubeApiFetcherConfig
+	resourceCh chan fetching.ResourceInfo
 
 	watchers []kubernetes.Watcher
 }
@@ -145,7 +146,7 @@ func (f *KubeFetcher) initWatchers() error {
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *KubeFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting KubeFetcher.Fetch")
 
 	var err error
@@ -155,10 +156,11 @@ func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	if err != nil {
 		// Reset watcherlock if the watchers could not be initiated.
 		watcherlock = sync.Once{}
-		return nil, fmt.Errorf("could not initate Kubernetes watchers: %w", err)
+		return fmt.Errorf("could not initate Kubernetes watchers: %w", err)
 	}
 
-	return getKubeData(f.log, f.watchers), nil
+	getKubeData(f.log, f.watchers, f.resourceCh, cMetadata)
+	return nil
 }
 
 func (f *KubeFetcher) Stop() {

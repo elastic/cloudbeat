@@ -91,7 +91,7 @@ processes:
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
 
-		fetcher, err := s.factory.Create(s.log, cfg)
+		fetcher, err := s.factory.Create(s.log, cfg, nil)
 		s.NoError(err)
 		s.NotNil(fetcher)
 
