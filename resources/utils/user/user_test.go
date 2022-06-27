@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package utils
+package user
 
 import (
 	"github.com/stretchr/testify/suite"
@@ -39,18 +39,23 @@ const (
 )
 
 type UserTestSuite struct {
+	osUserUtil OSUser
+
 	suite.Suite
 }
 
 func TestUserTestSuite(t *testing.T) {
-	suite.Run(t, new(UserTestSuite))
+	s := &UserTestSuite{
+		osUserUtil: NewOSUserUtil(),
+	}
+	suite.Run(t, s)
 }
 
-func (s UserTestSuite) SetupTest() {}
+func (s *UserTestSuite) SetupTest() {}
 
-func (s UserTestSuite) TearDownTest() {}
+func (s *UserTestSuite) TearDownTest() {}
 
-func (s UserTestSuite) TestGetUserNameFromID() {
+func (s *UserTestSuite) TestGetUserNameFromID() {
 	var userTests = []testAttr{
 		{
 			name: "Should return root as a username",
@@ -89,7 +94,7 @@ func (s UserTestSuite) TestGetUserNameFromID() {
 	for _, tt := range userTests {
 		s.SetupTest()
 		s.Run(tt.name, func() {
-			username, err := GetUserNameFromID(tt.id, UserFile)
+			username, err := s.osUserUtil.GetUserNameFromID(tt.id, UserFile)
 			s.Equal(tt.result.name, username)
 
 			if tt.result.err {
@@ -99,7 +104,7 @@ func (s UserTestSuite) TestGetUserNameFromID() {
 	}
 }
 
-func (s UserTestSuite) TestGetGroupNameFromID() {
+func (s *UserTestSuite) TestGetGroupNameFromID() {
 	var groupTests = []testAttr{
 		{
 			name: "Should return wheel as group name",
@@ -130,7 +135,7 @@ func (s UserTestSuite) TestGetGroupNameFromID() {
 	for _, tt := range groupTests {
 		s.SetupTest()
 		s.Run(tt.name, func() {
-			groupName, err := GetGroupNameFromID(tt.id, GroupFile)
+			groupName, err := s.osUserUtil.GetGroupNameFromID(tt.id, GroupFile)
 			s.Equal(tt.result.name, groupName)
 
 			if tt.result.err {

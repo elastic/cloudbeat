@@ -20,11 +20,13 @@ package manager
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"sync"
 	"testing"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 )
@@ -32,19 +34,28 @@ import (
 type DelayFetcher struct {
 	delay      time.Duration
 	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
 }
 
-func newDelayFetcher(delay time.Duration) fetching.Fetcher {
-	return &DelayFetcher{delay, false}
+func newDelayFetcher(delay time.Duration, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
+	return &DelayFetcher{delay, false, ch, wg}
 }
 
-func (f *DelayFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *DelayFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	defer f.wg.Done()
+
 	select {
 	case <-ctx.Done():
-		return nil, fmt.Errorf("reached timeout")
+		return fmt.Errorf("reached timeout")
 	case <-time.After(f.delay):
-		return fetchValue(int(f.delay.Seconds())), nil
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      fetchValue(int(f.delay.Seconds())),
+			CycleMetadata: cMetadata,
+		}
 	}
+
+	return nil
 }
 
 func (f *DelayFetcher) Stop() {
@@ -54,13 +65,16 @@ func (f *DelayFetcher) Stop() {
 type PanicFetcher struct {
 	message    string
 	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
 }
 
-func newPanicFetcher(message string) fetching.Fetcher {
-	return &PanicFetcher{message, false}
+func newPanicFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
+	return &PanicFetcher{message, false, ch, wg}
 }
 
-func (f *PanicFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *PanicFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	defer f.wg.Done()
 	panic(f.message)
 }
 
@@ -71,10 +85,12 @@ func (f *PanicFetcher) Stop() {
 type DataTestSuite struct {
 	suite.Suite
 
-	ctx      context.Context
-	log      *logp.Logger
-	registry FetchersRegistry
-	opts     goleak.Option
+	ctx        context.Context
+	log        *logp.Logger
+	registry   FetchersRegistry
+	opts       goleak.Option
+	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
 }
 
 const timeout = 2 * time.Second
@@ -94,6 +110,8 @@ func (s *DataTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.opts = goleak.IgnoreCurrent()
 	s.registry = NewFetcherRegistry(s.log)
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+	s.wg = &sync.WaitGroup{}
 }
 
 func (s *DataTestSuite) TearDownTest() {
@@ -106,75 +124,19 @@ func (s *DataTestSuite) TestDataRun() {
 	fetcherCount := 10
 	interval := 10 * time.Second
 
-	registerNFetchers(s.T(), s.registry, fetcherCount)
-	d, err := NewData(s.log, interval, timeout, s.registry)
-	s.NoError(err)
+	s.wg.Add(fetcherCount)
 
-	err = d.Run(s.ctx)
-	s.NoError(err)
-
-	defer d.Stop()
-
-	o := d.Output()
-	state := <-o
-
-	s.Equal(fetcherCount, len(state))
-
-	for i := 0; i < fetcherCount; i++ {
-		key := fmt.Sprint(i)
-
-		val, ok := state[key]
-		s.True(ok)
-		s.Equal(fetchValue(i), val)
-	}
-}
-
-func (s *DataTestSuite) TestDataRunNotSync() {
-	iterations := 4
-	interval := 2 * time.Second
-
-	fetcher1Name := "delay_fetcher"
-	fetcher1Delay := 1 * time.Second
-
-	fetcher2Name := "num_fetcher"
-	fetcher2Value := 1
-
-	f1 := newDelayFetcher(fetcher1Delay)
-	err := s.registry.Register(fetcher1Name, f1)
-	s.NoError(err)
-
-	f2 := newNumberFetcher(fetcher2Value)
-	err = s.registry.Register(fetcher2Name, f2)
-	s.NoError(err)
-
+	registerNFetchers(s.T(), s.registry, fetcherCount, s.resourceCh, s.wg)
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = d.Run(s.ctx)
 	s.NoError(err)
 	defer d.Stop()
+	s.wg.Wait() // waiting for all fetchers to complete
 
-	aggregated := make([]ResourceMap, iterations)
-	for i := 0; i < iterations; i++ {
-		aggregated[i] = <-d.Output()
-	}
-
-	s.Equal(iterations, len(aggregated))
-
-	for i := 0; i < iterations; i++ {
-		iterationResources := aggregated[i]
-		s.NotEmpty(iterationResources, "iteration %d failed", i)
-
-		fetcherResources, ok := iterationResources[fetcher1Name]
-		s.True(ok, "iteration %d failed", i)
-
-		s.Equal(fetchValue(int(fetcher1Delay.Seconds())), fetcherResources, "iteration %d failed", i)
-
-		fetcherResources, ok = iterationResources[fetcher2Name]
-		s.True(ok, "iteration %d failed", i)
-
-		s.Equal(fetchValue(fetcher2Value), fetcherResources, "iteration %d failed", i)
-	}
+	results := testhelper.CollectResources(s.resourceCh)
+	s.Equal(fetcherCount, len(results))
 }
 
 func (s *DataTestSuite) TestDataRunPanic() {
@@ -182,7 +144,8 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	fetcherMessage := "fetcher got panic"
 	fetcherName := "panic_fetcher"
 
-	f := newPanicFetcher(fetcherMessage)
+	s.wg.Add(1)
+	f := newPanicFetcher(fetcherMessage, s.resourceCh, s.wg)
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
@@ -193,8 +156,10 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	s.NoError(err)
 	defer d.Stop()
 
-	result := <-d.Output()
-	s.Empty(result)
+	s.wg.Wait()
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Empty(results)
 }
 
 func (s *DataTestSuite) TestDataFetchSinglePanic() {
@@ -202,16 +167,15 @@ func (s *DataTestSuite) TestDataFetchSinglePanic() {
 	fetcherMessage := "fetcher got panic"
 	fetcherName := "panic_fetcher"
 
-	f := newPanicFetcher(fetcherMessage)
+	f := newPanicFetcher(fetcherMessage, s.resourceCh, nil)
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
-	res, err := d.fetchSingle(s.ctx, fetcherName)
+	err = d.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
 	s.Error(err)
-	s.Nil(res)
 }
 
 func (s *DataTestSuite) TestDataRunTimeout() {
@@ -219,7 +183,8 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	interval := 5 * time.Second
 	fetcherName := "delay_fetcher"
 
-	f := newDelayFetcher(fetcherDelay)
+	s.wg.Add(1)
+	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
@@ -230,8 +195,10 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	s.NoError(err)
 	defer d.Stop()
 
-	result := <-d.Output()
-	s.Empty(result)
+	s.wg.Wait()
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Empty(results)
 }
 
 func (s *DataTestSuite) TestDataFetchSingleTimeout() {
@@ -239,16 +206,16 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 	interval := 3 * time.Second
 	fetcherName := "timeout_fetcher"
 
-	f := newDelayFetcher(fetcherDelay)
+	s.wg.Add(1)
+	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
-	res, err := d.fetchSingle(s.ctx, fetcherName)
+	err = d.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
 	s.Error(err)
-	s.Nil(res)
 }
 
 func (s *DataTestSuite) TestDataRunShouldNotRun() {
@@ -257,7 +224,7 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	fetcherName := "not_run_fetcher"
 	fetcherConditionName := "false_condition"
 
-	f := newNumberFetcher(fetcherVal)
+	f := newNumberFetcher(fetcherVal, s.resourceCh, s.wg)
 	c := newBoolFetcherCondition(false, fetcherConditionName)
 	err := s.registry.Register(fetcherName, f, c)
 	s.NoError(err)
@@ -269,6 +236,14 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	s.NoError(err)
 	defer d.Stop()
 
-	result := <-d.Output()
-	s.Empty(result)
+	// Fetcher did not run, we can not wait for sync.done() to be called.
+	var results []fetching.ResourceInfo
+	select {
+	case result := <-s.resourceCh:
+		results = append(results, result)
+	case <-time.Tick(interval):
+		break
+	}
+
+	s.Empty(results)
 }

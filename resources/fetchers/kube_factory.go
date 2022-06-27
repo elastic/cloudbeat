@@ -18,11 +18,11 @@
 package fetchers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type KubeFactory struct {
@@ -32,7 +32,7 @@ func init() {
 	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
 }
 
-func (f *KubeFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetcher, error) {
+func (f *KubeFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting KubeFactory.Create")
 
 	cfg := KubeApiFetcherConfig{}
@@ -41,14 +41,15 @@ func (f *KubeFactory) Create(log *logp.Logger, c *common.Config) (fetching.Fetch
 		return nil, err
 	}
 
-	return f.CreateFrom(log, cfg)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *KubeFactory) CreateFrom(log *logp.Logger, cfg KubeApiFetcherConfig) (fetching.Fetcher, error) {
+func (f *KubeFactory) CreateFrom(log *logp.Logger, cfg KubeApiFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	fe := &KubeFetcher{
-		log:      log,
-		cfg:      cfg,
-		watchers: make([]kubernetes.Watcher, 0),
+		log:        log,
+		cfg:        cfg,
+		watchers:   make([]kubernetes.Watcher, 0),
+		resourceCh: ch,
 	}
 
 	log.Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+

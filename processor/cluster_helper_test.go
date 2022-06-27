@@ -15,26 +15,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package add_cluster_id
 
 import (
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
-type EksFactoryTestSuite struct {
+type ClusterHelperTestSuite struct {
 	suite.Suite
 
 	log *logp.Logger
 }
 
-func TestEksFactoryTestSuite(t *testing.T) {
-	s := new(EksFactoryTestSuite)
-	s.log = logp.NewLogger("cloudbeat_eks_factory_test_suite")
+func TestClusterHelperTestSuite(t *testing.T) {
+	s := new(ClusterHelperTestSuite)
+	s.log = logp.NewLogger("cloudbeat_cluster_helper_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -43,32 +45,30 @@ func TestEksFactoryTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *EksFactoryTestSuite) TestCreateFetcher() {
-	var tests = []struct {
-		config string
-	}{
-		{
-			`
-name: aws-eks
-`,
+func (s *ClusterHelperTestSuite) TestClusterId() {
+	kubeSystemNamespaceId := "123"
+	ns := &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "kube-system",
+			UID:  types.UID(kubeSystemNamespaceId),
 		},
 	}
+	client := fake.NewSimpleClientset(ns)
+	sut, err := newClusterHelper(client)
+	s.NoError(err)
 
-	for _, test := range tests {
-		eksProvider := &awslib.MockedEksClusterDescriber{}
-		factory := &EKSFactory{extraElements: func() (eksExtraElements, error) {
-			return eksExtraElements{eksProvider: eksProvider}, nil
-		}}
+	s.Equal(kubeSystemNamespaceId, sut.ClusterId())
+}
 
-		cfg, err := config.NewConfigFrom(test.config)
-		s.NoError(err)
-
-		fetcher, err := factory.Create(s.log, cfg, nil)
-		s.NoError(err)
-		s.NotNil(fetcher)
-
-		eksFetcher, ok := fetcher.(*EKSFetcher)
-		s.True(ok)
-		s.Equal(eksProvider, eksFetcher.eksProvider)
+func (s *ClusterHelperTestSuite) TestClusterIdNotFound() {
+	kubeSystemNamespaceId := "123"
+	ns := &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "kube-sys",
+			UID:  types.UID(kubeSystemNamespaceId),
+		},
 	}
+	client := fake.NewSimpleClientset(ns)
+	_, err := newClusterHelper(client)
+	s.Error(err)
 }

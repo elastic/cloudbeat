@@ -15,32 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package transformer
+package testhelper
 
-import (
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"k8s.io/client-go/kubernetes"
-)
+func CollectResources[T any](ch chan T) []T {
+	var numResources = len(ch)
+	var results []T
+	for i := 0; i < numResources; i++ {
+		results = append(results, <-ch)
+	}
 
-type ResourceTypeMetadata struct {
-	fetching.CycleMetadata
-	Type string
-}
-
-type CommonDataProvider struct {
-	log        *logp.Logger
-	kubeClient kubernetes.Interface
-	cfg        config.Config
-}
-
-type CommonData struct {
-	clusterId string
-	nodeId    string
-}
-
-type CommonDataInterface interface {
-	GetData() CommonData
-	GetResourceId(fetching.ResourceMetadata) string
+	return results
 }

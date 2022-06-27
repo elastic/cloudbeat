@@ -20,8 +20,8 @@ package fetchers
 import (
 	"context"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/gofrs/uuid"
@@ -31,6 +31,7 @@ type IAMFetcher struct {
 	log         *logp.Logger
 	iamProvider awslib.IAMRolePermissionGetter
 	cfg         IAMFetcherConfig
+	resourceCh  chan fetching.ResourceInfo
 }
 
 type IAMFetcherConfig struct {
@@ -42,15 +43,16 @@ type IAMResource struct {
 	Data interface{}
 }
 
-func (f IAMFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
 
-	results := make([]fetching.Resource, 0)
-
 	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
-	results = append(results, IAMResource{result})
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      IAMResource{result},
+		CycleMetadata: cMetadata,
+	}
 
-	return results, err
+	return err
 }
 
 func (f IAMFetcher) Stop() {

@@ -20,6 +20,8 @@ package beater
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/pipeline" //nolint: typecheck
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
@@ -29,16 +31,17 @@ import (
 	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
-
-	"github.com/gofrs/uuid"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
 	reconfigureWaitTimeout = 10 * time.Minute
+	flushInterval          = 10 * time.Second
+	eventsThreshold        = 75
+	resourceChBuffer       = 10000
 )
 
 // cloudbeat configuration.
@@ -47,16 +50,17 @@ type cloudbeat struct {
 	cancel context.CancelFunc
 
 	config        config.Config
-	configUpdates <-chan *common.Config
+	configUpdates <-chan *agentconfig.C
 	client        beat.Client
 	data          *manager.Data
 	evaluator     evaluator.Evaluator
 	transformer   transformer.Transformer
 	log           *logp.Logger
+	resourceCh    chan fetching.ResourceInfo
 }
 
 // New creates an instance of cloudbeat.
-func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
+func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("cloudbeat")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -69,7 +73,8 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 
 	log.Info("Config initiated.")
 
-	fetchersRegistry, err := InitRegistry(log, c)
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
+	fetchersRegistry, err := initRegistry(log, c, resourceCh)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -106,7 +111,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t := transformer.NewTransformer(ctx, log, eval, commonData, resultsIndex)
+	t := transformer.NewTransformer(log, commonData, resultsIndex)
 
 	bt := &cloudbeat{
 		ctx:           ctx,
@@ -117,6 +122,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		data:          data,
 		transformer:   t,
 		log:           log,
+		resourceCh:    resourceCh,
 	}
 	return bt, nil
 }
@@ -164,8 +170,12 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		return err
 	}
 
-	output := bt.data.Output()
+	// Creating the data pipeline
+	findingsCh := pipeline.Step(bt.log, bt.resourceCh, bt.evaluator.Eval)
+	eventsCh := pipeline.Step(bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
+	var eventsToSend []beat.Event
+	var ticker = time.NewTicker(flushInterval)
 	for {
 		select {
 		case <-bt.ctx.Done():
@@ -176,19 +186,26 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 				bt.log.Errorf("Failed to update cloudbeat config: %v", err)
 			}
 
-		case fetchedResources := <-output:
-			cycleId, _ := uuid.NewV4()
-			cycleStart := time.Now()
-			bt.log.Infof("Eval cycle %v has started", cycleId)
+		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
+		case <-ticker.C:
+			if len(eventsToSend) == 0 {
+				continue
+			}
 
-			cycleMetadata := transformer.CycleMetadata{CycleId: cycleId}
-			// TODO: send events through a channel and publish them by a configured threshold & time
-			events := bt.transformer.ProcessAggregatedResources(fetchedResources, cycleMetadata)
+			bt.log.Infof("Publishing %d cloudbeat events to elasticsearch, time interval reached", len(eventsToSend))
+			bt.client.PublishAll(eventsToSend)
+			eventsToSend = nil
 
-			bt.log.Infof("Publishing %d events to index", len(events))
-			bt.client.PublishAll(events)
+		// Flush events to ES when reaching a certain threshold
+		case events := <-eventsCh:
+			eventsToSend = append(eventsToSend, events...)
+			if len(eventsToSend) < eventsThreshold {
+				continue
+			}
 
-			bt.log.Infof("Eval cycle %v published %d events after %s", cycleId, len(events), time.Since(cycleStart))
+			bt.log.Infof("Publishing %d cloudbeat events to elasticsearch, buffer threshold reached", len(eventsToSend))
+			bt.client.PublishAll(eventsToSend)
+			eventsToSend = nil
 		}
 	}
 }
@@ -196,7 +213,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 // reconfigureWait will wait for and consume incoming reconfuration from the Fleet server, and keep
 // discarding them until the incoming config contains the necessary information to start cloudbeat
 // properly, thereafter returning the valid config.
-func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*common.Config, error) {
+func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*agentconfig.C, error) {
 	start := time.Now()
 	timer := time.After(timeout)
 
@@ -237,7 +254,7 @@ func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*common.Config, err
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the cloudbeat config,
 // and updates the hosted bundle with the new values.
-func (bt *cloudbeat) configUpdate(update *common.Config) error {
+func (bt *cloudbeat) configUpdate(update *agentconfig.C) error {
 	if err := bt.config.Update(bt.log, update); err != nil {
 		return err
 	}
@@ -265,10 +282,10 @@ func (bt *cloudbeat) configUpdate(update *common.Config) error {
 	return nil
 }
 
-func InitRegistry(log *logp.Logger, c config.Config) (manager.FetchersRegistry, error) {
+func initRegistry(log *logp.Logger, c config.Config, ch chan fetching.ResourceInfo) (manager.FetchersRegistry, error) {
 	registry := manager.NewFetcherRegistry(log)
 
-	if err := manager.Factories.RegisterFetchers(log, registry, c); err != nil {
+	if err := manager.Factories.RegisterFetchers(log, registry, c, ch); err != nil {
 		return nil, err
 	}
 
@@ -280,6 +297,7 @@ func (bt *cloudbeat) Stop() {
 	bt.cancel()
 	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
+	close(bt.resourceCh)
 
 	bt.client.Close()
 }

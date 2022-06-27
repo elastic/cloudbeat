@@ -21,9 +21,10 @@ import (
 	"fmt"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/common"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	jsprocessor "github.com/elastic/beats/v7/libbeat/processors/script/javascript/module/processor"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 )
 
 func init() {
@@ -34,24 +35,29 @@ func init() {
 const processorName = "add_cluster_id"
 
 type addClusterID struct {
-	config        config
-	clusterHelper *ClusterHelper
+	config config
+	helper ClusterHelper
 }
 
 // New constructs a new Add ID processor.
-func New(cfg *common.Config) (processors.Processor, error) {
+func New(cfg *agentconfig.C) (processors.Processor, error) {
 	config := defaultConfig()
 	if err := cfg.Unpack(&config); err != nil {
 		return nil, makeErrConfigUnpack(err)
 	}
 
-	clusterHelper, err := newClusterHelper()
+	client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	helper, err := newClusterHelper(client)
 	if err != nil {
 		return nil, err
 	}
 	p := &addClusterID{
 		config,
-		clusterHelper,
+		helper,
 	}
 
 	return p, nil
@@ -59,7 +65,7 @@ func New(cfg *common.Config) (processors.Processor, error) {
 
 // Run enriches the given event with an ID
 func (p *addClusterID) Run(event *beat.Event) (*beat.Event, error) {
-	clusterId := p.clusterHelper.ClusterId()
+	clusterId := p.helper.ClusterId()
 
 	if _, err := event.PutValue(p.config.TargetField, clusterId); err != nil {
 		return nil, makeErrComputeID(err)

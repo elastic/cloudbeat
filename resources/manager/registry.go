@@ -20,16 +20,15 @@ package manager
 import (
 	"context"
 	"fmt"
-
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type FetchersRegistry interface {
 	Register(key string, f fetching.Fetcher, c ...fetching.Condition) error
 	Keys() []string
 	ShouldRun(key string) bool
-	Run(ctx context.Context, key string) ([]fetching.Resource, error)
+	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
 	Stop()
 }
 
@@ -90,13 +89,13 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 	return true
 }
 
-func (r *fetchersRegistry) Run(ctx context.Context, key string) ([]fetching.Resource, error) {
+func (r *fetchersRegistry) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
 	registered, ok := r.reg[key]
 	if !ok {
-		return nil, fmt.Errorf("fetcher %v not found", key)
+		return fmt.Errorf("fetcher %v not found", key)
 	}
 
-	return registered.f.Fetch(ctx)
+	return registered.f.Fetch(ctx, metadata)
 }
 
 func (r *fetchersRegistry) Stop() {
