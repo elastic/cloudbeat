@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"fmt"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
@@ -28,8 +29,10 @@ import (
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
+	"reflect"
 	"sync"
 	"testing"
 )
@@ -73,9 +76,26 @@ func clean(fetcher fetching.Fetcher) func() {
 	}
 }
 
+func MapItems(resources runtime.Object) []interface{} {
+	r := reflect.ValueOf(resources)
+	f := reflect.Indirect(r).FieldByName("Items")
+	items := f.Interface()
+	// Finding a way to avoid this switch case could be nice
+	switch items.(type) {
+	case []v1.Pod:
+		typedItems := items.([]v1.Pod)
+		return PtrMap(typedItems)
+	case []rbacv1.Role:
+		typedItems := items.([]rbacv1.Role)
+		return PtrMap(typedItems)
+	default:
+		return nil
+	}
+}
+
 func PtrMap[In any](items []In) []interface{} {
 	vsm := make([]interface{}, len(items))
-	for i, _ := range items {
+	for i := range items {
 		vsm[i] = &items[i]
 	}
 	return vsm
@@ -89,25 +109,9 @@ func Map[In fetching.Resource](resources []In) []interface{} {
 	return vsm
 }
 
-// TODO: convert all tests to a single table test and use add more resource types
-func (s *KubeFetcherTestSuite) TestKubeFetcherFetchNoResources() {
-	client := k8sfake.NewSimpleClientset()
-	provider := MockProvider(client)
-	kubeFetcher, err := (&KubeFactory{}).CreateFrom(s.log, KubeApiFetcherConfig{}, s.resourceCh, provider)
-
-	s.NoError(err)
-
-	err = kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	results := testhelper.CollectResources(s.resourceCh)
-
-	s.Nil(err, "Fetcher was not able to fetch resources from kube api")
-	s.Equal(0, len(results))
-
-	s.T().Cleanup(clean(kubeFetcher))
-}
-
-func (s *KubeFetcherTestSuite) TestKubeFetcherFetchASinglePod() {
-	pod := v1.Pod{
+func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
+	empty := v1.PodList{}
+	pod := v1.PodList{Items: []v1.Pod{{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Pod",
 			APIVersion: "v1",
@@ -125,24 +129,7 @@ func (s *KubeFetcherTestSuite) TestKubeFetcherFetchASinglePod() {
 				},
 			},
 		},
-	}
-	client := k8sfake.NewSimpleClientset(&pod)
-	provider := MockProvider(client)
-	kubeFetcher, err := (&KubeFactory{}).CreateFrom(s.log, KubeApiFetcherConfig{}, s.resourceCh, provider)
-
-	s.NoError(err)
-
-	err = kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	results := testhelper.CollectResources(s.resourceCh)
-
-	s.Nil(err, "Fetcher was not able to fetch resources from kube api")
-	s.Equal(1, len(results))
-	require.ElementsMatch(s.T(), PtrMap([]v1.Pod{pod}), Map(results))
-
-	s.T().Cleanup(clean(kubeFetcher))
-}
-
-func (s *KubeFetcherTestSuite) TestKubeFetcherFetchTwoPods() {
+	}}}
 	pods := v1.PodList{Items: []v1.Pod{
 		{
 			TypeMeta: metav1.TypeMeta{
@@ -183,23 +170,6 @@ func (s *KubeFetcherTestSuite) TestKubeFetcherFetchTwoPods() {
 			},
 		},
 	}}
-	client := k8sfake.NewSimpleClientset(&pods)
-	provider := MockProvider(client)
-	kubeFetcher, err := (&KubeFactory{}).CreateFrom(s.log, KubeApiFetcherConfig{}, s.resourceCh, provider)
-
-	s.NoError(err)
-
-	err = kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	results := testhelper.CollectResources(s.resourceCh)
-
-	s.Nil(err, "Fetcher was not able to fetch resources from kube api")
-	s.Equal(2, len(results))
-	require.ElementsMatch(s.T(), PtrMap(pods.Items), Map(results))
-
-	s.T().Cleanup(clean(kubeFetcher))
-}
-
-func (s *KubeFetcherTestSuite) TestKubeFetcherFetchThreeRoles() {
 	roles := rbacv1.RoleList{Items: []rbacv1.Role{
 		{
 			TypeMeta: metav1.TypeMeta{
@@ -241,19 +211,29 @@ func (s *KubeFetcherTestSuite) TestKubeFetcherFetchThreeRoles() {
 			},
 		},
 	}}
-	client := k8sfake.NewSimpleClientset(&roles)
-	provider := MockProvider(client)
+	tests := []runtime.Object{
+		&empty,
+		&pod,
+		&pods,
+		&roles,
+	}
 
-	kubeFetcher, err := (&KubeFactory{}).CreateFrom(s.log, KubeApiFetcherConfig{}, s.resourceCh, provider)
+	for i, tt := range tests {
+		s.Run(fmt.Sprintf("Kube api test %v", i), func() {
+			client := k8sfake.NewSimpleClientset(tt)
+			provider := MockProvider(client)
 
-	s.NoError(err)
+			kubeFetcher, err := (&KubeFactory{}).CreateFrom(s.log, KubeApiFetcherConfig{}, s.resourceCh, provider)
 
-	err = kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
-	results := testhelper.CollectResources(s.resourceCh)
+			s.NoError(err)
 
-	s.Nil(err, "Fetcher was not able to fetch resources from kube api")
-	s.Equal(3, len(results))
-	require.ElementsMatch(s.T(), PtrMap(roles.Items), Map(results))
+			err = kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+			results := testhelper.CollectResources(s.resourceCh)
 
-	s.T().Cleanup(clean(kubeFetcher))
+			s.Nil(err, "Fetcher was not able to fetch resources from kube api")
+			require.ElementsMatch(s.T(), MapItems(tests[i]), Map(results))
+
+			s.T().Cleanup(clean(kubeFetcher))
+		})
+	}
 }
