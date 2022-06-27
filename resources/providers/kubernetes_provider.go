@@ -18,7 +18,7 @@
 package providers
 
 import (
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	k8s "k8s.io/client-go/kubernetes"
 )
 

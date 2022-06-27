@@ -15,32 +15,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package transformer
+package pipeline
 
 import (
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"context"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"k8s.io/client-go/kubernetes"
 )
 
-type ResourceTypeMetadata struct {
-	fetching.CycleMetadata
-	Type string
-}
+const (
+	chBuffer = 10
+)
 
-type CommonDataProvider struct {
-	log        *logp.Logger
-	kubeClient kubernetes.Interface
-	cfg        config.Config
-}
+func Step[In any, Out any](log *logp.Logger, inputChannel chan In, fn func(context.Context, In) (Out, error)) chan Out {
+	outputCh := make(chan Out, chBuffer)
+	ctx, cancel := context.WithCancel(context.Background())
 
-type CommonData struct {
-	clusterId string
-	nodeId    string
-}
+	go func() {
+		defer close(outputCh)
+		defer cancel()
 
-type CommonDataInterface interface {
-	GetData() CommonData
-	GetResourceId(fetching.ResourceMetadata) string
+		for s := range inputChannel {
+			val, err := fn(ctx, s)
+			if err != nil {
+				log.Error(err)
+				continue
+			}
+			outputCh <- val
+		}
+	}()
+
+	return outputCh
 }

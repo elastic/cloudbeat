@@ -24,11 +24,12 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/user"
+
 	"github.com/pkg/errors"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
@@ -55,9 +56,10 @@ type FileSystemResource struct {
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
 type FileSystemFetcher struct {
-	log    *logp.Logger
-	cfg    FileFetcherConfig
-	osUser utils.OSUser
+	log        *logp.Logger
+	cfg        FileFetcherConfig
+	osUser     user.OSUser
+	resourceCh chan fetching.ResourceInfo
 }
 
 type FileFetcherConfig struct {
@@ -65,10 +67,8 @@ type FileFetcherConfig struct {
 	Patterns []string `config:"patterns"` // Files and directories paths for the fetcher to extract info from
 }
 
-func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *FileSystemFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting FileSystemFetcher.Fetch")
-
-	results := make([]fetching.Resource, 0)
 
 	// Input files might contain glob pattern
 	for _, filePattern := range f.cfg.Patterns {
@@ -76,16 +76,19 @@ func (f *FileSystemFetcher) Fetch(ctx context.Context) ([]fetching.Resource, err
 		if err != nil {
 			f.log.Errorf("Failed to find matched glob for %s, error: %+v", filePattern, err)
 		}
+
 		for _, file := range matchedFiles {
 			resource, err := f.fetchSystemResource(file)
 			if err != nil {
 				f.log.Errorf("Unable to fetch fileSystemResource for file %v", file)
 				continue
 			}
-			results = append(results, resource)
+
+			f.resourceCh <- fetching.ResourceInfo{Resource: resource, CycleMetadata: cMetadata}
 		}
 	}
-	return results, nil
+
+	return nil
 }
 
 func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FileSystemResource, error) {

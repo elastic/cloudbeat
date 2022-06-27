@@ -19,7 +19,7 @@
 package providers
 
 import (
-	kubernetes "github.com/elastic/beats/v7/libbeat/common/kubernetes"
+	kubernetes "github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	client_gokubernetes "k8s.io/client-go/kubernetes"
 
 	mock "github.com/stretchr/testify/mock"

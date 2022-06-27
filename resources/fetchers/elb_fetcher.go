@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
@@ -40,6 +40,7 @@ type ELBFetcher struct {
 	elbProvider     awslib.ELBLoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
+	resourceCh      chan fetching.ResourceInfo
 }
 
 type ELBFetcherConfig struct {
@@ -47,28 +48,31 @@ type ELBFetcherConfig struct {
 	Kubeconfig string `config:"Kubeconfig"`
 }
 
-type LoadBalancersDescription []elasticloadbalancing.LoadBalancerDescription
+type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription
 
 type ELBResource struct {
 	LoadBalancersDescription
 }
 
-func (f *ELBFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ELBFetcher.Fetch")
-
-	results := make([]fetching.Resource, 0)
 
 	balancers, err := f.GetLoadBalancers()
 	if err != nil {
-		return nil, fmt.Errorf("failed to load balancers from Kubernetes %w", err)
+		return fmt.Errorf("failed to load balancers from Kubernetes %w", err)
 	}
 	result, err := f.elbProvider.DescribeLoadBalancer(ctx, balancers)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load balancers from ELB %w", err)
+		return fmt.Errorf("failed to load balancers from ELB %w", err)
 	}
-	results = append(results, ELBResource{result})
 
-	return results, err
+	for _, loadBalancer := range result {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      ELBResource{LoadBalancersDescription(loadBalancer)},
+			CycleMetadata: cMetadata,
+		}
+	}
+	return nil
 }
 
 func (f *ELBFetcher) GetLoadBalancers() ([]string, error) {
