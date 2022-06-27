@@ -6,7 +6,7 @@ build:
   artifacts:
   - image: cloudbeat
     custom:
-      buildCommand: just build-cloudbeat
+      buildCommand: GOOS=linux go build -v && docker build --tag=$IMAGE .
       dependencies:
         paths:
         - "**/*.go"
@@ -18,7 +18,7 @@ deploy:
 profiles:
   - name: eks
     activation:
-      - env: CB_EKS="TRUE"
+      - env: SKF_MODE="CB_EKS"
     build:
       artifacts:
         - image: 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat
