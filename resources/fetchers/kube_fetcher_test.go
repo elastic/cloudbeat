@@ -81,13 +81,11 @@ func MapItems(resources runtime.Object) []interface{} {
 	f := reflect.Indirect(r).FieldByName("Items")
 	items := f.Interface()
 	// Finding a way to avoid this switch case could be nice
-	switch items.(type) {
+	switch items := items.(type) {
 	case []v1.Pod:
-		typedItems := items.([]v1.Pod)
-		return PtrMap(typedItems)
+		return PtrMap(items)
 	case []rbacv1.Role:
-		typedItems := items.([]rbacv1.Role)
-		return PtrMap(typedItems)
+		return PtrMap(items)
 	default:
 		return nil
 	}
