@@ -1,0 +1,10 @@
+# $COMMUNITY/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+components:
+  - ../../components/cb_leader_lease
+  - ../../components/cb_configmap

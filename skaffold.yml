@@ -1,0 +1,33 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+build:
+  tagPolicy:
+    gitCommit: {}
+  artifacts:
+  - image: cloudbeat
+    custom:
+      buildCommand: just build-cloudbeat
+      dependencies:
+        paths:
+        - "**/*.go"
+        - "*.go"
+deploy:
+  kustomize:
+    paths:
+      - "deploy/k8s/kustomize/overlays/cloudbeat-vanilla"
+profiles:
+  - name: eks
+    activation:
+      - env: CB_EKS="TRUE"
+    build:
+      artifacts:
+        - image: 704479110758.dkr.ecr.us-east-2.amazonaws.com/cloudbeat
+    deploy:
+      kustomize:
+        paths:
+          - "deploy/k8s/kustomize/overlays/cloudbeat-eks"
+        hooks:
+          before:
+            - host:
+                command: ["sh", "-c", "scripts/make/aws_creds_env.sh"]
+                os: [darwin, linux]
