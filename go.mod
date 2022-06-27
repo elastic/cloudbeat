@@ -41,7 +41,7 @@ require (
 	go.elastic.co/go-licence-detector v0.5.0
 	go.uber.org/goleak v1.1.12
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.23.5
+	k8s.io/api v0.24.2
 )
 
 require (
