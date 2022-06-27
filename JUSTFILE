@@ -20,7 +20,7 @@ load-cloudbeat-image:
   kind load docker-image cloudbeat:latest --name kind-mono
 
 build-cloudbeat:
-  GOOS=linux go build -v && docker build --tag=$IMAGE .
+  GOOS=linux go build -v && docker build -t cloudbeat .
 
 deploy-cloudbeat:
   kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system & kubectl apply -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
