@@ -1,3 +1,4 @@
+*env.aws 
 data/*
 .vscode*
 tests/.idea
