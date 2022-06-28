@@ -88,7 +88,8 @@ type KubeFetcher struct {
 	cfg        KubeApiFetcherConfig
 	resourceCh chan fetching.ResourceInfo
 
-	watchers []kubernetes.Watcher
+	watchers       []kubernetes.Watcher
+	clientProvider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)
 }
 
 type KubeApiFetcherConfig struct {
@@ -125,7 +126,7 @@ func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) erro
 }
 
 func (f *KubeFetcher) initWatchers() error {
-	client, err := kubernetes.GetKubernetesClient(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	client, err := f.clientProvider(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return fmt.Errorf("could not get k8s client: %w", err)
 	}
