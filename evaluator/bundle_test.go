@@ -18,18 +18,37 @@
 package evaluator
 
 import (
+	"context"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/elastic/cloudbeat/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestCreateServer(t *testing.T) {
-	assert := assert.New(t)
+type BundleTestSuite struct {
+	suite.Suite
 
-	_, err := StartServer()
-	assert.NoError(err)
+	log *logp.Logger
+}
+
+func TestBundleTestSuite(t *testing.T) {
+	s := new(BundleTestSuite)
+	s.log = logp.NewLogger("cloudbeat_bundle_test_suite")
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
+}
+
+func (s *BundleTestSuite) TestCreateServer() {
+	_, err := StartServer(config.DefaultConfig)
+	s.NoError(err)
 
 	var tests = []struct {
 		path               string
@@ -52,7 +71,100 @@ func TestCreateServer(t *testing.T) {
 		client := &http.Client{}
 		res, err := client.Get(target)
 
-		assert.NoError(err)
-		assert.Equal(test.expectedStatusCode, res.Status)
+		s.NoError(err)
+		s.Equal(test.expectedStatusCode, res.Status)
+	}
+}
+
+func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
+	invalidStreams, err := agentconfig.NewConfigFrom(`
+    not_streams:
+      - data_yaml:
+          activated_rules:
+            cis_k8s:
+              - a
+              - b
+              - c
+              - d
+              - e
+`)
+	s.NoError(err)
+
+	configNoStreams, err := config.New(invalidStreams)
+	s.NoError(err)
+
+	invalidDataYaml, err := agentconfig.NewConfigFrom(`
+    streams:
+      - not_data_yaml:
+          activated_rules:
+            cis_k8s:
+              - a
+              - b
+              - c
+              - d
+              - e
+`)
+	s.NoError(err)
+	configNoDataYaml, err := config.New(invalidDataYaml)
+	s.NoError(err)
+
+	validStreams, err := agentconfig.NewConfigFrom(`
+    streams:
+      - data_yaml:
+          activated_rules:
+            cis_k8s:
+              - a
+              - b
+              - c
+              - d
+              - e
+`)
+	s.NoError(err)
+	configWithDataYaml, err := config.New(validStreams)
+
+	var tests = []struct {
+		path               string
+		expectedStatusCode string
+		cfg                config.Config
+	}{
+		{
+			"/bundles/bundle.tar.gz", "200 OK", configNoDataYaml,
+		},
+		{
+			"/bundles/bundle.tar.gz", "200 OK", configNoStreams,
+		},
+		{
+			"/bundles/bundle.tar.gz", "200 OK", configWithDataYaml,
+		},
+		{
+			"/bundles/bundle.tar.gz", "200 OK", config.Config{
+				Streams: []config.Stream{
+					{
+						DataYaml: &config.DataYaml{
+							ActivatedRules: &config.Benchmarks{
+								CISK8S: []string{
+									"invalid: - format -invalid",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	time.Sleep(time.Second * 2)
+	for _, test := range tests {
+		server, err := StartServer(test.cfg)
+		s.NoError(err)
+
+		target := ServerAddress + test.path
+		client := &http.Client{}
+		res, err := client.Get(target)
+
+		s.NoError(err)
+		s.Equal(test.expectedStatusCode, res.Status)
+		server.Shutdown(context.Background())
+		time.Sleep(100 * time.Millisecond)
 	}
 }

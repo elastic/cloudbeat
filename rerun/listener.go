@@ -18,7 +18,7 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package config
+package rerun
 
 import (
 	"context"
@@ -28,39 +28,40 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type reloader struct {
+type Listener struct {
 	ctx context.Context
 	log *logp.Logger
-	ch  chan<- *config.C
+	ch  chan *config.C
 }
 
-func (r *reloader) Reload(configs []*reload.ConfigWithMeta) error {
+func (r *Listener) Reload(configs []*reload.ConfigWithMeta) error {
 	if len(configs) == 0 {
 		return nil
 	}
 
 	r.log.Infof("Received %v new configs for reload.", len(configs))
 
+	// TODO(yashtewari): Based on limitations elsewhere, such as the CSP integration,
+	// don't think we should receive more than one Config here. Need to confirm and handle.
+	data := configs[len(configs)-1].Config
+
 	select {
 	case <-r.ctx.Done():
-	default:
-		// TODO(yashtewari): Based on limitations elsewhere, such as the CSP integration,
-		// don't think we should receive more than one Config here. Need to confirm and handle.
-		r.ch <- configs[len(configs)-1].Config
+	case r.ch <- data:
 	}
 
 	return nil
 }
 
-func Updates(ctx context.Context, log *logp.Logger) <-chan *config.C {
+func (r *Listener) Channel() <-chan *config.C {
+	return r.ch
+}
+
+func NewListener(ctx context.Context, log *logp.Logger) *Listener {
 	ch := make(chan *config.C)
-	r := &reloader{
+	return &Listener{
 		ctx: ctx,
 		log: log,
 		ch:  ch,
 	}
-
-	reload.Register.MustRegisterList("inputs", r)
-
-	return ch
 }
