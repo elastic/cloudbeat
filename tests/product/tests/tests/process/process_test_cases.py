@@ -448,7 +448,7 @@ cis_1_2_7 = [(
         ]
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
+    'passed'
 ),
 (
     'CIS 1.2.7',
@@ -771,7 +771,7 @@ cis_1_2_20 = [(
         }
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
+    'passed'
 ),
 (
     'CIS 1.2.20',
