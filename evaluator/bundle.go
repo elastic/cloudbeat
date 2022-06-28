@@ -18,6 +18,7 @@
 package evaluator
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -33,22 +34,20 @@ var (
 	ServerAddress = fmt.Sprintf("http://%s", address)
 )
 
-func StartServer(cfg config.Config) (*http.Server, error) {
-	policies, err := csppolicies.CISKubernetes()
-	if err != nil {
-		return nil, err
-	}
+func StartServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
+	bundle := csppolicies.CISKubernetesBundle()
 
-	dataYml := "streams:\n"
 	if len(cfg.Streams) > 0 {
-		dataYml, err = cfg.DataYaml()
+		dataYml, err := cfg.DataYaml()
 		if err != nil {
 			return nil, fmt.Errorf("could not marshal to YAML: %w", err)
 		}
+
+		bundle.With("data.yaml", dataYml)
 	}
 
 	h := csppolicies.NewServer()
-	if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, dataYml); err != nil {
+	if err := csppolicies.HostBundle("bundle.tar.gz", bundle, ctx); err != nil {
 		return nil, fmt.Errorf("could not update bundle with dataYaml: %w", err)
 	}
 

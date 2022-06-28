@@ -1,0 +1,15 @@
+# $cb_configmap/daemonset_patch
+- op: add
+  path: /spec/template/spec/volumes/0
+  value:
+    name: config
+    configMap:
+      defaultMode: 0640
+      name: cloudbeat-daemonset-config
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/0
+  value:
+    mountPath: /cloudbeat.yml
+    subPath: cloudbeat.yml
+    readOnly: true
+    name: config

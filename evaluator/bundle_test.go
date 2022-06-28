@@ -47,7 +47,7 @@ func TestBundleTestSuite(t *testing.T) {
 }
 
 func (s *BundleTestSuite) TestCreateServer() {
-	_, err := StartServer(config.DefaultConfig)
+	_, err := StartServer(context.Background(), config.DefaultConfig)
 	s.NoError(err)
 
 	var tests = []struct {
@@ -155,7 +155,7 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 
 	time.Sleep(time.Second * 2)
 	for _, test := range tests {
-		server, err := StartServer(test.cfg)
+		server, err := StartServer(context.Background(), test.cfg)
 		s.NoError(err)
 
 		target := ServerAddress + test.path
