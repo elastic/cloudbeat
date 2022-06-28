@@ -20,9 +20,10 @@ package beater
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/elastic/cloudbeat/pipeline" //nolint: typecheck
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"time"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
@@ -147,7 +148,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 			return err
 		}
 
-		if err := bt.configUpdate(update); err != nil {
+		if err := bt.configUpdate(update, bt.ctx); err != nil {
 			return fmt.Errorf("failed to update with initial reconfiguration from Fleet server: %w", err)
 		}
 	}
@@ -182,7 +183,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 			return nil
 
 		case update := <-bt.configUpdates:
-			if err := bt.configUpdate(update); err != nil {
+			if err := bt.configUpdate(update, bt.ctx); err != nil {
 				bt.log.Errorf("Failed to update cloudbeat config: %v", err)
 			}
 
@@ -254,14 +255,9 @@ func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*agentconfig.C, err
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the cloudbeat config,
 // and updates the hosted bundle with the new values.
-func (bt *cloudbeat) configUpdate(update *agentconfig.C) error {
+func (bt *cloudbeat) configUpdate(update *agentconfig.C, ctx context.Context) error {
 	if err := bt.config.Update(bt.log, update); err != nil {
 		return err
-	}
-
-	policies, err := csppolicies.CISKubernetes()
-	if err != nil {
-		return fmt.Errorf("could not load CIS Kubernetes policies: %w", err)
 	}
 
 	if len(bt.config.Streams) == 0 {
@@ -274,7 +270,10 @@ func (bt *cloudbeat) configUpdate(update *agentconfig.C) error {
 		return fmt.Errorf("could not marshal to YAML: %w", err)
 	}
 
-	if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, y); err != nil {
+	bundle := csppolicies.CISKubernetesBundle()
+	bundle.With("data.yaml", y)
+
+	if err := csppolicies.HostBundle("bundle.tar.gz", bundle, ctx); err != nil {
 		return fmt.Errorf("could not update bundle with dataYaml: %w", err)
 	}
 

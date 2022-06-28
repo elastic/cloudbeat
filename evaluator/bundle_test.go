@@ -18,6 +18,7 @@
 package evaluator
 
 import (
+	"context"
 	"net/http"
 	"testing"
 	"time"
@@ -28,7 +29,7 @@ import (
 func TestCreateServer(t *testing.T) {
 	assert := assert.New(t)
 
-	_, err := StartServer()
+	_, err := StartServer(context.Background())
 	assert.NoError(err)
 
 	var tests = []struct {
