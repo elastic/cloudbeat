@@ -163,7 +163,7 @@ data:
           "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
           "/hostfs/var/lib/kubelet/config.yaml",
           "/hostfs/etc/kubernetes/pki/*.crt",
-          "/hostfs/etc/kubernetes/pki/*.key"
+          "/hostfs/etc/kubernetes/pki/*.key",
           "/hostfs/var/lib/etcd",
           "/hostfs/etc/kubernetes/pki"
         ]
