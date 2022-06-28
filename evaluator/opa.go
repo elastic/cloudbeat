@@ -53,7 +53,7 @@ var opaConfig = `{
 }`
 
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
-	server, err := bundle.StartServer(ctx)
+	server, err := StartServer(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -255,7 +255,7 @@ func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*agentconfig.C, err
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the cloudbeat config,
 // and updates the hosted bundle with the new values.
-func (bt *cloudbeat) configUpdate(update *common.Config, ctx context.Context) error {
+func (bt *cloudbeat) configUpdate(update *agentconfig.C, ctx context.Context) error {
 	if err := bt.config.Update(bt.log, update); err != nil {
 		return err
 	}
