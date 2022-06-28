@@ -44,6 +44,8 @@ require (
 	k8s.io/api v0.24.2
 )
 
+require github.com/dschmidt/go-layerfs v0.1.0 // indirect
+
 require (
 	code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f // indirect
 	github.com/OneOfOne/xxhash v1.2.8 // indirect
@@ -57,7 +59,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220622083326-cab8871124af
-	github.com/elastic/csp-security-policies v1.0.5-0.20220623145033-85979044b4b5
+	github.com/elastic/csp-security-policies v1.0.5
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.6 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
