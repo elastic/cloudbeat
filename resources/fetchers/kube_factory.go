@@ -29,6 +29,8 @@ import (
 type KubeFactory struct {
 }
 
+type KubeClientProvider func(kubeconfig string, opt kubernetes.KubeClientOptions) (k8s.Interface, error)
+
 func init() {
 	manager.Factories.ListFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
 }
@@ -44,7 +46,7 @@ func (f *KubeFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Res
 	return f.CreateFrom(log, cfg, ch, kubernetes.GetKubernetesClient)
 }
 
-func (f *KubeFactory) CreateFrom(log *logp.Logger, cfg KubeApiFetcherConfig, ch chan fetching.ResourceInfo, provider func(kubeconfig string, opt kubernetes.KubeClientOptions) (k8s.Interface, error)) (fetching.Fetcher, error) {
+func (f *KubeFactory) CreateFrom(log *logp.Logger, cfg KubeApiFetcherConfig, ch chan fetching.ResourceInfo, provider KubeClientProvider) (fetching.Fetcher, error) {
 	fe := &KubeFetcher{
 		log:            log,
 		cfg:            cfg,
