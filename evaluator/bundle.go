@@ -18,6 +18,7 @@
 package evaluator
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -32,14 +33,10 @@ var (
 	ServerAddress = fmt.Sprintf("http://%s", address)
 )
 
-func StartServer() (*http.Server, error) {
-	policies, err := csppolicies.CISKubernetes()
-	if err != nil {
-		return nil, err
-	}
+func StartServer(ctx context.Context) (*http.Server, error) {
 
 	h := csppolicies.NewServer()
-	if err := csppolicies.HostBundle("bundle.tar.gz", policies); err != nil {
+	if err := csppolicies.HostBundle("bundle.tar.gz", csppolicies.CISKubernetesBundle(), ctx); err != nil {
 		return nil, err
 	}
 
