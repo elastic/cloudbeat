@@ -1,0 +1,46 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+build:
+  tagPolicy:
+    gitCommit: {}
+  artifacts:
+  - image: cloudbeat
+    custom:
+      buildCommand: GOOS=linux go build -v && docker build --tag=$IMAGE .
+      dependencies:
+        paths:
+        - "**/*.go"
+        - "*.go"
+deploy:
+  kustomize:
+    paths:
+      - "deploy/k8s/kustomize/overlays/cloudbeat-vanilla"
+profiles:
+  - name: eks
+    activation:
+      - env: SKF_MODE="CB_EKS"
+    build:
+      artifacts:
+        - image: 704479110758.dkr.ecr.eu-west-1.amazonaws.com/cloudbeat
+          hooks:
+            before:
+            - command: ["sh", "-c", "aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 704479110758.dkr.ecr.eu-west-1.amazonaws.com"]
+              os: [darwin, linux]
+              dir: "deploy/k8s/kustomize/overlays/cloudbeat-eks"
+    deploy:
+      kustomize:
+        paths:
+          - "deploy/k8s/kustomize/overlays/cloudbeat-eks"
+        hooks:
+          before:
+            - host:
+                command: ["sh", "-c", "scripts/make/aws_creds_env.sh"]
+                os: [darwin, linux]
+            - host:
+                command: ["sh", "-c", "kustomize edit set image cloudbeat=704479110758.dkr.ecr.eu-west-1.amazonaws.com/cloudbeat:$(git rev-parse --short HEAD)$([[ ! -z \"$(git status --porcelain)\" ]] && echo \"-dirty\")"]
+                os: [darwin, linux]
+                dir: "deploy/k8s/kustomize/overlays/cloudbeat-eks"
+          after:
+            - host:
+                command: ["sh", "-c", "git restore deploy/k8s/kustomize/overlays/cloudbeat-eks/kustomization.yml"]
+                os: [darwin, linux]
