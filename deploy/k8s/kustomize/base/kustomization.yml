@@ -1,2 +1,5 @@
 resources:
-- cloudbeat-ds.yml
+- daemonset.yml
+- role-binding.yml
+- role.yml
+- service-account.yml
