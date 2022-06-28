@@ -50,7 +50,8 @@ def clean_test_env(data):
         except ApiException as notFound:
             print(f"no {relevant_metadata['name']} online - setting up a new one: {notFound}")
             # create resource
-            k8s_client.create_from_dict(data=yml_resource, **relevant_metadata)
+        
+        k8s_client.create_from_dict(data=yml_resource, **relevant_metadata)
 
     yield k8s_client, api_client, cloudbeat_agent
     # teardown

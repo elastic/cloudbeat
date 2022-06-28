@@ -10,6 +10,7 @@ from commonlib.utils import get_evaluation, get_resource_identifier
 from product.tests.kube_rules import *
 
 
+@pytest.mark.k8s_object_rules
 @pytest.mark.parametrize(
     ("rule_tag", "resource_type", "resource_body", "expected"),
     [
@@ -66,11 +67,13 @@ def test_kube_resource_patch(test_env, rule_tag, resource_type, resource_body, e
     assert resource, f"Resource {resource_type} not found"
 
     # patch resource
-    k8s_client.patch_resources(
+    resource = k8s_client.patch_resources(
         resource_type=resource_type,
         body=resource_body,
         **relevant_metadata
     )
+    if resource is None:
+        raise ValueError(f'Could not patch resource type {resource_type}: {relevant_metadata} with patch {resource_body}')
 
     # check resource evaluation
     pods = k8s_client.get_agent_pod_instances(agent_name=agent_config.name, namespace=agent_config.namespace)
@@ -82,7 +85,8 @@ def test_kube_resource_patch(test_env, rule_tag, resource_type, resource_body, e
         namespace=agent_config.namespace,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
-        resource_identifier=get_resource_identifier(resource_body)
+        resource_identifier=get_resource_identifier(resource_body),
     )
 
-    assert evaluation == expected, f"Rule {rule_tag} verification failed. expected: {expected} actual: {evaluation}"
+    assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
+    assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected} actual: {evaluation}"

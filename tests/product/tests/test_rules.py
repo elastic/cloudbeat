@@ -10,6 +10,7 @@ from commonlib.utils import get_evaluation
 from product.tests.tests.file_system.file_system_test_cases import *
 
 
+@pytest.mark.file_system_rules
 @pytest.mark.parametrize(
     ("rule_tag", "command", "param_value", "resource", "expected"),
     [*cis_1_1_1,
@@ -81,5 +82,5 @@ def test_file_system_configuration(config_node_pre_test,
         resource_identifier=identifier
     )
 
-    assert evaluation == expected, f"Rule {rule_tag} verification failed."
-
+    assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
+    assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected}, got: {evaluation}"
