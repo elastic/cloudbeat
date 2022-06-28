@@ -108,8 +108,7 @@ func Map[In fetching.Resource](resources []In) []interface{} {
 }
 
 func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
-	empty := v1.PodList{}
-	pod := v1.PodList{Items: []v1.Pod{{
+	myPod := v1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Pod",
 			APIVersion: "v1",
@@ -127,27 +126,9 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 				},
 			},
 		},
-	}}}
-	pods := v1.PodList{Items: []v1.Pod{
-		{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Pod",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-pod",
-				Namespace: "kube-system",
-			},
-			Spec: v1.PodSpec{
-				Containers: []v1.Container{
-					{
-						Name:            "nginx",
-						Image:           "nginx",
-						ImagePullPolicy: "Always",
-					},
-				},
-			},
-		},
+	}
+	threePods := v1.PodList{Items: []v1.Pod{
+		myPod,
 		{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Pod",
@@ -168,7 +149,7 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 			},
 		},
 	}}
-	roles := rbacv1.RoleList{Items: []rbacv1.Role{
+	threeRoles := rbacv1.RoleList{Items: []rbacv1.Role{
 		{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "Role",
@@ -210,10 +191,10 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 		},
 	}}
 	tests := []runtime.Object{
-		&empty,
-		&pod,
-		&pods,
-		&roles,
+		&v1.PodList{},
+		&v1.PodList{Items: []v1.Pod{myPod}},
+		&threePods,
+		&threeRoles,
 	}
 
 	for i, tt := range tests {
