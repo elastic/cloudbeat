@@ -63,7 +63,7 @@ func (s *KubeFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func MockProvider(client *k8sfake.Clientset) func(s string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
+func MockProvider(client *k8sfake.Clientset) KubeClientProvider {
 	return func(s string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
 		return client, nil
 	}
