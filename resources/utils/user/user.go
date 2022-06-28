@@ -66,8 +66,8 @@ type Group struct {
 type lineFunc func(line []byte) (v interface{}, err error)
 
 type OSUser interface {
-	GetUserNameFromID(uid uint32, userFilePath string) (string, error)
-	GetGroupNameFromID(gid uint32, groupFilePath string) (string, error)
+	GetUserNameFromID(uid string, userFilePath string) (string, error)
+	GetGroupNameFromID(gid string, groupFilePath string) (string, error)
 }
 
 type OSUserUtil struct{}
@@ -76,9 +76,8 @@ func NewOSUserUtil() OSUser {
 	return &OSUserUtil{}
 }
 
-func (*OSUserUtil) GetUserNameFromID(uid uint32, userFilePath string) (string, error) {
-	u := strconv.FormatUint(uint64(uid), 10)
-	usr, err := lookupUserId(u, userFilePath)
+func (*OSUserUtil) GetUserNameFromID(uid string, userFilePath string) (string, error) {
+	usr, err := lookupUserId(uid, userFilePath)
 	if err != nil || usr == nil {
 		return "", err
 	}
@@ -86,9 +85,8 @@ func (*OSUserUtil) GetUserNameFromID(uid uint32, userFilePath string) (string, e
 	return usr.Username, nil
 }
 
-func (*OSUserUtil) GetGroupNameFromID(gid uint32, groupFilePath string) (string, error) {
-	g := strconv.FormatUint(uint64(gid), 10)
-	group, err := lookupGroupId(g, groupFilePath)
+func (*OSUserUtil) GetGroupNameFromID(gid string, groupFilePath string) (string, error) {
+	group, err := lookupGroupId(gid, groupFilePath)
 	if err != nil || group == nil {
 		return "", err
 	}

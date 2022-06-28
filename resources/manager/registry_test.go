@@ -265,3 +265,7 @@ func (res NumberResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    "number",
 	}
 }
+
+func (res NumberResource) GetElasticCommonData() interface{} {
+	return nil
+}

@@ -52,7 +52,8 @@ type CycleMetadata struct {
 
 type Resource interface {
 	GetMetadata() ResourceMetadata
-	GetData() interface{}
+	GetData() any
+	GetElasticCommonData() any
 }
 
 type ResourceFields struct {

@@ -20,14 +20,16 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"os"
-	"strconv"
-	"syscall"
-
+	"github.com/djherbis/times"
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/user"
-
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+	"os"
+	"path/filepath"
+	"strconv"
+	"syscall"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -40,16 +42,21 @@ const (
 	GroupFile      = "/hostfs/etc/group"
 )
 
-type FileSystemResource struct {
+type EvalFSResource struct {
 	Name    string `json:"name"`
 	Mode    string `json:"mode"`
-	Gid     uint32 `json:"gid"`
-	Uid     uint32 `json:"uid"`
+	Gid     string `json:"gid"`
+	Uid     string `json:"uid"`
 	Owner   string `json:"owner"`
 	Group   string `json:"group"`
 	Path    string `json:"path"`
 	Inode   string `json:"inode"`
 	SubType string `json:"sub_type"`
+}
+
+type FSResource struct {
+	EvalResource  EvalFSResource
+	ElasticCommon *ecs.File
 }
 
 // FileSystemFetcher implement the Fetcher interface
@@ -91,44 +98,44 @@ func (f *FileSystemFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleM
 	return nil
 }
 
-func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FileSystemResource, error) {
+func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FSResource, error) {
 
 	info, err := os.Stat(filePath)
 	if err != nil {
-		return FileSystemResource{}, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
+		return FSResource{}, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
 	}
 	resourceInfo, _ := f.fromFileInfo(info, filePath)
 
 	return resourceInfo, nil
 }
 
-func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FileSystemResource, error) {
+func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FSResource, error) {
 
 	if info == nil {
-		return FileSystemResource{}, nil
+		return FSResource{}, nil
 	}
 
 	stat, ok := info.Sys().(*syscall.Stat_t)
 	if !ok {
-		return FileSystemResource{}, errors.New("Not a syscall.Stat_t")
+		return FSResource{}, errors.New("Not a syscall.Stat_t")
 	}
 
 	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
+	uid := strconv.FormatUint(uint64(stat.Uid), 10)
+	gid := strconv.FormatUint(uint64(stat.Gid), 10)
 	inode := strconv.FormatUint(stat.Ino, 10)
 
-	uid := stat.Uid
-	gid := stat.Gid
 	username, err := f.osUser.GetUserNameFromID(uid, UserFile)
 	if err != nil {
-		logp.Error(fmt.Errorf("failed to find username for uid %d, error - %+v", uid, err))
+		logp.Error(fmt.Errorf("failed to find username for uid %s, error - %+v", uid, err))
 	}
 
 	groupName, err := f.osUser.GetGroupNameFromID(gid, GroupFile)
 	if err != nil {
-		logp.Error(fmt.Errorf("failed to find groupname for gid %d, error - %+v", gid, err))
+		logp.Error(fmt.Errorf("failed to find groupname for gid %s, error - %+v", gid, err))
 	}
 
-	data := FileSystemResource{
+	data := EvalFSResource{
 		Name:    info.Name(),
 		Mode:    mod,
 		Gid:     gid,
@@ -140,22 +147,29 @@ func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FileSys
 		SubType: getFSSubType(info),
 	}
 
-	return data, nil
+	return FSResource{
+		EvalResource:  data,
+		ElasticCommon: enrichElasticCommonData(stat, data, path),
+	}, nil
 }
 
 func (f *FileSystemFetcher) Stop() {
 }
 
-func (r FileSystemResource) GetData() interface{} {
-	return r
+func (r FSResource) GetData() any {
+	return r.EvalResource
 }
 
-func (r FileSystemResource) GetMetadata() fetching.ResourceMetadata {
+func (r FSResource) GetElasticCommonData() any {
+	return *r.ElasticCommon
+}
+
+func (r FSResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
-		ID:      r.Path,
+		ID:      r.EvalResource.Path,
 		Type:    FSResourceType,
-		SubType: r.SubType,
-		Name:    r.Path, // The Path from the container and not from the host
+		SubType: r.EvalResource.SubType,
+		Name:    r.EvalResource.Path, // The Path from the container and not from the host
 	}
 }
 
@@ -164,4 +178,40 @@ func getFSSubType(fileInfo os.FileInfo) string {
 		return DirSubType
 	}
 	return FileSubType
+}
+
+func enrichElasticCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) *ecs.File {
+	cd := &ecs.File{}
+
+	// Fill the relevant fields from the generated data
+	if err := mapstructure.Decode(data, cd); err != nil {
+		logp.Error(fmt.Errorf("failed to fill common data with fileInfo, error - %+v", err))
+	}
+
+	if err := enrichFileTimeData(cd, path); err != nil {
+		logp.Error(err)
+	}
+
+	cd.Directory = filepath.Dir(path)
+	cd.Extension = filepath.Ext(path)
+	cd.Size = stat.Size
+	cd.Type = data.SubType
+
+	return cd
+}
+
+func enrichFileTimeData(cd *ecs.File, filepath string) error {
+	t, err := times.Stat(filepath)
+	if err != nil {
+		return fmt.Errorf("failed to get file time data, error - %+v", err)
+	}
+
+	cd.Accessed = t.AccessTime()
+	cd.Mtime = t.ModTime()
+
+	if t.HasChangeTime() {
+		cd.Ctime = t.ChangeTime()
+	}
+
+	return nil
 }

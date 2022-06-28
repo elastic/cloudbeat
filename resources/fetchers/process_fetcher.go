@@ -180,3 +180,5 @@ func (res ProcessResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    res.Stat.Name,
 	}
 }
+
+func (res ProcessResource) GetElasticCommonData() any { return nil }
