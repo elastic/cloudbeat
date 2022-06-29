@@ -18,7 +18,7 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package rerun
+package launcher
 
 import (
 	"context"
@@ -58,7 +58,7 @@ type Validator interface {
 	Validate(*config.C) error
 }
 
-func NewLauncher(ctx context.Context,
+func New(ctx context.Context,
 	log *logp.Logger,
 	reloader Reloader,
 	validator Validator,

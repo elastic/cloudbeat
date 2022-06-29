@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/elastic/cloudbeat/launcher"
 	"github.com/elastic/cloudbeat/pipeline" //nolint: typecheck
 	"github.com/elastic/cloudbeat/resources/fetching"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/rerun"
 	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/transformer"
 
@@ -61,10 +61,10 @@ type cloudbeat struct {
 func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("starter")
 	ctx := context.Background()
-	reloader := rerun.NewListener(ctx, log)
+	reloader := launcher.NewListener(ctx, log)
 	validator := &validator{}
 
-	s, err := rerun.NewLauncher(ctx, log, reloader, validator, b, NewCloudbeat, cfg)
+	s, err := launcher.New(ctx, log, reloader, validator, b, NewCloudbeat, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -152,6 +152,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	if err != nil {
 		return err
 	}
+	bt.log.Debugf("cloudbeat configured %d processors", len(bt.config.Processors))
 
 	// Connect publisher (with beat's processors)
 	if bt.client, err = b.Publisher.ConnectWith(beat.ClientConfig{
@@ -171,6 +172,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	for {
 		select {
 		case <-bt.ctx.Done():
+			bt.log.Warn("cloudbeat context is done")
 			return nil
 
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
