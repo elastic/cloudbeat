@@ -65,7 +65,7 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	reloader := rerun.NewListener(ctx, log)
 	validator := &validator{}
 
-	s, err := rerun.NewStarter(ctx, log, reloader, validator, b, NewCloudbeat, cfg)
+	s, err := rerun.NewLauncher(ctx, log, reloader, validator, b, NewCloudbeat, cfg)
 	if err != nil {
 		return nil, err
 	}

@@ -253,7 +253,7 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 	for _, tcase := range testcases {
 		s.Run(tcase.name, func() {
 			mocks := s.InitMocks()
-			sut, err := NewStarter(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
+			sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
 
 			go func(ic incomingConfigs) {
@@ -280,14 +280,14 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 
 func (s *StarterTestSuite) TestStarterErrorBeater() {
 	mocks := s.InitMocks()
-	sut, err := NewStarter(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterMockCreator, config.NewConfig())
+	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterMockCreator, config.NewConfig())
 	err = sut.run()
 	s.Error(err)
 }
 
 func (s *StarterTestSuite) TestStarterCancelBeater() {
 	mocks := s.InitMocks()
-	sut, err := NewStarter(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
+	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		mocks.cancel()
@@ -377,7 +377,7 @@ func (s *StarterTestSuite) TestStarterValidator() {
 	for _, tcase := range testcases {
 		s.Run(tcase.name, func() {
 			mocks := s.InitMocks()
-			sut, err := NewStarter(mocks.ctx, s.log, mocks.reloader, mocks.validator, mocks.beat, beaterMockCreator, config.NewConfig())
+			sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, mocks.validator, mocks.beat, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
 
 			mocks.reloader.ch = make(chan *agentconfig.C, len(tcase.configs))

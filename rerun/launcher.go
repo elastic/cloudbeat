@@ -17,7 +17,7 @@ const (
 	reconfigureWaitTimeout = 10 * time.Minute
 )
 
-type starter struct {
+type launcher struct {
 	wg        sync.WaitGroup
 	beater    beat.Beater
 	beaterErr chan error
@@ -38,14 +38,14 @@ type Validator interface {
 	Validate(*config.C) error
 }
 
-func NewStarter(ctx context.Context,
+func NewLauncher(ctx context.Context,
 	log *logp.Logger,
 	reloader Reloader,
 	validator Validator,
 	bt *beat.Beat,
 	creator beat.Creator,
-	cfg *config.C) (*starter, error) {
-	s := &starter{
+	cfg *config.C) (*launcher, error) {
+	s := &launcher{
 		wg:        sync.WaitGroup{},
 		ctx:       ctx,
 		log:       log,
@@ -59,7 +59,7 @@ func NewStarter(ctx context.Context,
 	return s, nil
 }
 
-func (s *starter) Run(b *beat.Beat) error {
+func (s *launcher) Run(b *beat.Beat) error {
 	// Configure the beats Manager to start after all the reloadable hooks are initialized
 	// and shutdown when the function returns.
 	if err := b.Manager.Start(); err != nil {
@@ -84,7 +84,7 @@ func (s *starter) Run(b *beat.Beat) error {
 	return s.run()
 }
 
-func (s *starter) run() error {
+func (s *launcher) run() error {
 	err := s.runBeater()
 	if err != nil {
 		return err
@@ -95,11 +95,11 @@ func (s *starter) run() error {
 	return err
 }
 
-func (s *starter) Stop() {
+func (s *launcher) Stop() {
 	s.stopBeater()
 }
 
-func (s *starter) runBeater() error {
+func (s *launcher) runBeater() error {
 	beater, err := s.creator(s.beat, s.latest)
 	if err != nil {
 		return fmt.Errorf("Could not create beater: %w", err)
@@ -115,12 +115,12 @@ func (s *starter) runBeater() error {
 	return nil
 }
 
-func (s *starter) stopBeater() {
+func (s *launcher) stopBeater() {
 	s.beater.Stop()
 	s.wg.Wait()
 }
 
-func (s *starter) waitForUpdates() error {
+func (s *launcher) waitForUpdates() error {
 	for {
 		select {
 		case <-s.ctx.Done():
@@ -148,7 +148,7 @@ func (s *starter) waitForUpdates() error {
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the beater config,
 // and recreate the beater with the new values.
-func (s *starter) configUpdate(update *config.C) error {
+func (s *launcher) configUpdate(update *config.C) error {
 	s.log.Info("Got config update")
 
 	err := s.latest.MergeWithOpts(update, ucfg.ReplaceArrValues)
@@ -163,7 +163,7 @@ func (s *starter) configUpdate(update *config.C) error {
 // reconfigureWait will wait for and consume incoming reconfuration from the Fleet server, and keep
 // discarding them until the incoming config contains the necessary information to start beater
 // properly, thereafter returning the valid config.
-func (s *starter) reconfigureWait(timeout time.Duration) (*config.C, error) {
+func (s *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 	start := time.Now()
 	timer := time.After(timeout)
 
