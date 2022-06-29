@@ -3,10 +3,15 @@ package rerun
 import (
 	"context"
 	"errors"
+	"fmt"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/beats/v7/libbeat/cmd/instance"
+	"github.com/elastic/beats/v7/libbeat/common/reload"
+	"github.com/elastic/beats/v7/libbeat/management"
 	"github.com/elastic/elastic-agent-libs/config"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -64,6 +69,19 @@ func (m *reloaderMock) Channel() <-chan *agentconfig.C {
 	return m.ch
 }
 
+type validatorMock struct {
+	expected *agentconfig.C
+}
+
+func (v *validatorMock) Validate(cfg *agentconfig.C) error {
+	var err error
+	if !reflect.DeepEqual(cfg, v.expected) {
+		err = fmt.Errorf("mock validation failed")
+	}
+
+	return err
+}
+
 type StarterTestSuite struct {
 	suite.Suite
 
@@ -72,10 +90,11 @@ type StarterTestSuite struct {
 }
 
 type starterMocks struct {
-	ctx      context.Context
-	cancel   context.CancelFunc
-	reloader *reloaderMock
-	beat     *beat.Beat
+	ctx       context.Context
+	cancel    context.CancelFunc
+	reloader  *reloaderMock
+	beat      *beat.Beat
+	validator Validator
 }
 
 func TestStarterTestSuite(t *testing.T) {
@@ -95,8 +114,24 @@ func (s *StarterTestSuite) InitMocks() *starterMocks {
 	mocks.reloader = &reloaderMock{
 		ch: make(chan *agentconfig.C),
 	}
+	mocks.validator = &validatorMock{
+		expected: agentconfig.MustNewConfigFrom(mapstr.M{"a": 1}),
+	}
 	mocks.beat = &beat.Beat{}
 	return &mocks
+}
+
+func (s *StarterTestSuite) MockBeatManager(mocks *starterMocks) {
+	settings := instance.Settings{
+		Name:                  "some-beater",
+		Version:               "version",
+		DisableConfigResolver: true,
+	}
+	b, err := instance.NewInitializedBeat(settings)
+	s.NoError(err)
+	b.Manager, err = management.Factory(b.Config.Management)(b.Config.Management, reload.Register, b.Beat.Info.ID)
+	s.NoError(err)
+	mocks.beat = &b.Beat
 }
 
 func (s *StarterTestSuite) TearDownTest() {
@@ -106,60 +141,53 @@ func (s *StarterTestSuite) TearDownTest() {
 }
 
 func (s *StarterTestSuite) TestWaitForUpdates() {
-	configA, err := config.NewConfigFrom(mapstr.M{
+	configA := config.MustNewConfigFrom(mapstr.M{
 		"common":    "A",
 		"specificA": "a",
 		"commonArr": []string{"a"},
 	})
-	s.NoError(err)
 
-	configB, err := config.NewConfigFrom(mapstr.M{
+	configB := config.MustNewConfigFrom(mapstr.M{
 		"common":    "B",
 		"specificB": "b",
 		"commonArr": []string{"b", "b"},
 	})
-	s.NoError(err)
 
-	configC, err := config.NewConfigFrom(mapstr.M{
+	configC := config.MustNewConfigFrom(mapstr.M{
 		"common":    "C",
 		"specificC": "c",
 		"commonArr": []string{"c", "c", "c"},
 	})
-	s.NoError(err)
 
-	expected1, err := config.NewConfigFrom(mapstr.M{
+	expected1 := config.MustNewConfigFrom(mapstr.M{
 		"common":    "C",
 		"specificA": "a",
 		"specificB": "b",
 		"specificC": "c",
 		"commonArr": []string{"c", "c", "c"},
 	})
-	s.NoError(err)
 
-	expected2, err := config.NewConfigFrom(mapstr.M{
+	expected2 := config.MustNewConfigFrom(mapstr.M{
 		"common":    "A",
 		"specificA": "a",
 		"specificB": "b",
 		"commonArr": []string{"a"},
 	})
-	s.NoError(err)
 
-	expected3, err := config.NewConfigFrom(mapstr.M{
+	expected3 := config.MustNewConfigFrom(mapstr.M{
 		"common":    "B",
 		"specificA": "a",
 		"specificB": "b",
 		"specificC": "c",
 		"commonArr": []string{"b", "b"},
 	})
-	s.NoError(err)
 
-	expected4, err := config.NewConfigFrom(mapstr.M{
+	expected4 := config.MustNewConfigFrom(mapstr.M{
 		"common":    "A",
 		"specificA": "a",
 		"specificC": "c",
 		"commonArr": []string{"a"},
 	})
-	s.NoError(err)
 
 	type incomingConfigs []struct {
 		after  time.Duration
@@ -167,24 +195,24 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 	}
 
 	testcases := []struct {
-		timeout  time.Duration
+		name     string
 		configs  incomingConfigs
 		expected *config.C
 	}{
 		{
-			5 * time.Millisecond,
+			"no updates",
 			incomingConfigs{},
 			agentconfig.NewConfig(),
 		},
 		{
-			40 * time.Millisecond,
+			"single update",
 			incomingConfigs{
 				{40 * time.Millisecond, configC},
 			},
 			configC,
 		},
 		{
-			40 * time.Millisecond,
+			"multiple updates A B A C",
 			incomingConfigs{
 				{1 * time.Millisecond, configA},
 				{1 * time.Millisecond, configB},
@@ -194,7 +222,7 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 			expected1,
 		},
 		{
-			40 * time.Millisecond,
+			"multiple updates A B A",
 			incomingConfigs{
 				{1 * time.Millisecond, configA},
 				{40 * time.Millisecond, configB},
@@ -203,7 +231,7 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 			expected2,
 		},
 		{
-			40 * time.Millisecond,
+			"multiple updates A C B",
 			incomingConfigs{
 				{1 * time.Millisecond, configA},
 				{1 * time.Millisecond, configC},
@@ -212,7 +240,7 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 			expected3,
 		},
 		{
-			40 * time.Millisecond,
+			"multiple updates C C A",
 			incomingConfigs{
 				{1 * time.Millisecond, configC},
 				{1 * time.Millisecond, configC},
@@ -223,28 +251,30 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 	}
 
 	for _, tcase := range testcases {
-		mocks := s.InitMocks()
-		sut, err := NewStarter(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
-		s.NoError(err)
+		s.Run(tcase.name, func() {
+			mocks := s.InitMocks()
+			sut, err := NewStarter(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
+			s.NoError(err)
 
-		go func(ic incomingConfigs) {
-			defer close(mocks.reloader.ch)
+			go func(ic incomingConfigs) {
+				defer close(mocks.reloader.ch)
 
-			for _, c := range ic {
-				time.Sleep(c.after)
-				mocks.reloader.ch <- c.config
-			}
+				for _, c := range ic {
+					time.Sleep(c.after)
+					mocks.reloader.ch <- c.config
+				}
 
-			time.Sleep(100 * time.Millisecond)
-		}(tcase.configs)
+				time.Sleep(100 * time.Millisecond)
+			}(tcase.configs)
 
-		err = sut.run()
-		s.Error(err)
-		beater, ok := sut.beater.(*beaterMock)
-		s.True(ok)
-		s.Equal(tcase.expected, beater.cfg)
-		sut.Stop()
-		sut.wg.Wait()
+			err = sut.run()
+			s.Error(err)
+			beater, ok := sut.beater.(*beaterMock)
+			s.True(ok)
+			s.Equal(tcase.expected, beater.cfg)
+			sut.Stop()
+			sut.wg.Wait()
+		})
 	}
 }
 
@@ -264,4 +294,109 @@ func (s *StarterTestSuite) TestStarterCancelBeater() {
 	}()
 	err = sut.run()
 	s.NoError(err)
+}
+
+func (s *StarterTestSuite) TestStarterValidator() {
+	validConfig := config.MustNewConfigFrom(mapstr.M{"a": 1})
+	invalidConfig := config.MustNewConfigFrom(mapstr.M{"a": 2})
+
+	type incomingConfigs []struct {
+		after  time.Duration
+		config *config.C
+	}
+
+	testcases := []struct {
+		name     string
+		timeout  time.Duration
+		configs  incomingConfigs
+		expected *config.C
+	}{
+		{
+			"no updates",
+			5 * time.Millisecond,
+			incomingConfigs{},
+			nil,
+		},
+		{
+			"valid update after timeout",
+			5 * time.Millisecond,
+			incomingConfigs{
+				{10 * time.Millisecond, validConfig},
+			},
+			nil,
+		},
+		{
+			"invalid update on time",
+			10 * time.Millisecond,
+			incomingConfigs{
+				{5 * time.Millisecond, invalidConfig},
+			},
+			nil,
+		},
+		{
+			"valid update on time",
+			10 * time.Millisecond,
+			incomingConfigs{
+				{5 * time.Millisecond, validConfig},
+			},
+			validConfig,
+		},
+		{
+			"invalid and later valid after timeout",
+			40 * time.Millisecond,
+			incomingConfigs{
+				{1 * time.Millisecond, invalidConfig},
+				{1 * time.Millisecond, invalidConfig},
+				{1 * time.Millisecond, invalidConfig},
+				{40 * time.Millisecond, validConfig},
+			},
+			nil,
+		},
+		{
+			"valid and then more updates",
+			40 * time.Millisecond,
+			incomingConfigs{
+				{1 * time.Millisecond, validConfig},
+				{40 * time.Millisecond, invalidConfig},
+				{1 * time.Millisecond, validConfig},
+			},
+			validConfig,
+		},
+		{
+			"third update is valid on time",
+			40 * time.Millisecond,
+			incomingConfigs{
+				{1 * time.Millisecond, invalidConfig},
+				{1 * time.Millisecond, invalidConfig},
+				{1 * time.Millisecond, validConfig},
+			},
+			validConfig,
+		},
+	}
+
+	for _, tcase := range testcases {
+		s.Run(tcase.name, func() {
+			mocks := s.InitMocks()
+			sut, err := NewStarter(mocks.ctx, s.log, mocks.reloader, mocks.validator, mocks.beat, beaterMockCreator, config.NewConfig())
+			s.NoError(err)
+
+			mocks.reloader.ch = make(chan *agentconfig.C, len(tcase.configs))
+			go func(ic incomingConfigs) {
+				defer close(mocks.reloader.ch)
+
+				for _, c := range ic {
+					time.Sleep(c.after)
+					mocks.reloader.ch <- c.config
+				}
+			}(tcase.configs)
+
+			cfg, err := sut.reconfigureWait(tcase.timeout)
+			if tcase.expected == nil {
+				s.Error(err)
+			} else {
+				s.NoError(err)
+				s.Equal(tcase.expected, cfg)
+			}
+		})
+	}
 }
