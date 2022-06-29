@@ -136,9 +136,12 @@ func (l *launcher) runBeater() error {
 	return nil
 }
 
-func (s *launcher) stopBeater() {
-	s.beater.Stop()
-	s.wg.Wait()
+// stopBeater only returns after the beater truely stopped running
+func (l *launcher) stopBeater() {
+	l.beater.Stop()
+
+	// By waiting to the wait group, it make sure that the old beater has really stopped
+	l.wg.Wait()
 }
 
 func (l *launcher) waitForUpdates() error {
