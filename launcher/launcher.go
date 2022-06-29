@@ -112,7 +112,11 @@ func (l *launcher) run() error {
 	}
 
 	err = l.waitForUpdates()
-	l.log.Error("Beater starter is stopping: %w", err)
+	if err != nil {
+		l.log.Errorf("Beater launcher is stopping: %w", err)
+	} else {
+		l.log.Info("Beater launcher is shutting down gracefully")
+	}
 	return err
 }
 
