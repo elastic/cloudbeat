@@ -81,6 +81,10 @@ type starterMocks struct {
 func TestStarterTestSuite(t *testing.T) {
 	s := new(StarterTestSuite)
 	s.log = logp.NewLogger("cloudbeat_starter_test_suite")
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
 	s.opts = goleak.IgnoreCurrent()
 	suite.Run(t, s)
 }
@@ -92,10 +96,6 @@ func (s *StarterTestSuite) InitMocks() *starterMocks {
 		ch: make(chan *agentconfig.C),
 	}
 	mocks.beat = &beat.Beat{}
-	// b, err := instance.NewInitializedBeat(instance.Settings{})
-	// s.NoError(err)
-	// mocks.beat = &b.Beat
-
 	return &mocks
 }
 
@@ -238,9 +238,7 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 			time.Sleep(100 * time.Millisecond)
 		}(tcase.configs)
 
-		err = sut.runBeater()
-		s.NoError(err)
-		err = sut.waitForUpdates()
+		err = sut.run()
 		s.Error(err)
 		beater, ok := sut.beater.(*beaterMock)
 		s.True(ok)
@@ -253,20 +251,17 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 func (s *StarterTestSuite) TestStarterErrorBeater() {
 	mocks := s.InitMocks()
 	sut, err := NewStarter(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterMockCreator, config.NewConfig())
-	err = sut.runBeater()
-	s.NoError(err)
-
-	err = sut.waitForUpdates()
+	err = sut.run()
 	s.Error(err)
 }
 
 func (s *StarterTestSuite) TestStarterCancelBeater() {
 	mocks := s.InitMocks()
 	sut, err := NewStarter(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
-	err = sut.runBeater()
-	s.NoError(err)
-
-	mocks.cancel()
-	err = sut.waitForUpdates()
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		mocks.cancel()
+	}()
+	err = sut.run()
 	s.NoError(err)
 }

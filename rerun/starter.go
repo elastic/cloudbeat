@@ -80,6 +80,10 @@ func (s *starter) Run(b *beat.Beat) error {
 		}
 	}
 
+	return s.run()
+}
+
+func (s *starter) run() error {
 	err := s.runBeater()
 	if err != nil {
 		return err
@@ -102,7 +106,7 @@ func (s *starter) runBeater() error {
 
 	s.wg.Add(1)
 	go func() {
-		s.wg.Done()
+		defer s.wg.Done()
 		s.beaterErr <- beater.Run(s.beat)
 	}()
 
