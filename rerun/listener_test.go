@@ -64,7 +64,8 @@ func (s *ResoladerTestSuite) TearDownTest() {
 
 func (s *ResoladerTestSuite) TestEmptyReload() {
 	go func() {
-		s.sut.Reload([]*reload.ConfigWithMeta{})
+		err := s.sut.Reload([]*reload.ConfigWithMeta{})
+		s.NoError(err)
 	}()
 	var re *config.C
 	select {
@@ -84,12 +85,13 @@ func (s *ResoladerTestSuite) TestCancelBeforeReload() {
 
 	s.cancel()
 	go func() {
-		s.sut.Reload([]*reload.ConfigWithMeta{
+		err := s.sut.Reload([]*reload.ConfigWithMeta{
 			{
 				Config: conf,
 				Meta:   &meta,
 			},
 		})
+		s.NoError(err)
 	}()
 }
 
@@ -101,12 +103,13 @@ func (s *ResoladerTestSuite) TestCancelAfterReload() {
 	s.NoError(err)
 
 	go func() {
-		s.sut.Reload([]*reload.ConfigWithMeta{
+		err := s.sut.Reload([]*reload.ConfigWithMeta{
 			{
 				Config: conf,
 				Meta:   &meta,
 			},
 		})
+		s.NoError(err)
 	}()
 	s.cancel()
 }
@@ -125,7 +128,8 @@ func (s *ResoladerTestSuite) TestSingleReload() {
 		},
 	}
 	go func() {
-		s.sut.Reload(values)
+		err := s.sut.Reload(values)
+		s.NoError(err)
 	}()
 
 	re := <-s.sut.Channel()
