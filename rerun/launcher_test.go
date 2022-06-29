@@ -56,10 +56,8 @@ func beaterMockCreator(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 }
 
 func (m *beaterMock) Run(b *beat.Beat) error {
-	select {
-	case <-m.ctx.Done():
-		return nil
-	}
+	<-m.ctx.Done()
+	return nil
 }
 
 func (m *beaterMock) Stop() {
@@ -409,6 +407,7 @@ func (s *StarterTestSuite) TestStarterValidator() {
 func (s *StarterTestSuite) TestStarterErrorBeater() {
 	mocks := s.InitMocks()
 	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterMockCreator, config.NewConfig())
+	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
 }
@@ -416,6 +415,7 @@ func (s *StarterTestSuite) TestStarterErrorBeater() {
 func (s *StarterTestSuite) TestStarterCancelBeater() {
 	mocks := s.InitMocks()
 	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
+	s.NoError(err)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		mocks.cancel()
@@ -427,6 +427,7 @@ func (s *StarterTestSuite) TestStarterCancelBeater() {
 func (s *StarterTestSuite) TestStarterErrorBeaterCreation() {
 	mocks := s.InitMocks()
 	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterCreator, config.NewConfig())
+	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
 }
