@@ -74,7 +74,12 @@ func errorBeaterMockCreator(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, erro
 	return &errorBeaterMock{}, nil
 }
 
+func errorBeaterCreator(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+	return nil, errors.New("beater creation error")
+}
+
 func (m *errorBeaterMock) Run(b *beat.Beat) error {
+	time.Sleep(10 * time.Millisecond)
 	return errors.New("some error")
 }
 
@@ -298,24 +303,6 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 	}
 }
 
-func (s *StarterTestSuite) TestStarterErrorBeater() {
-	mocks := s.InitMocks()
-	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterMockCreator, config.NewConfig())
-	err = sut.run()
-	s.Error(err)
-}
-
-func (s *StarterTestSuite) TestStarterCancelBeater() {
-	mocks := s.InitMocks()
-	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
-	go func() {
-		time.Sleep(100 * time.Millisecond)
-		mocks.cancel()
-	}()
-	err = sut.run()
-	s.NoError(err)
-}
-
 func (s *StarterTestSuite) TestStarterValidator() {
 	validConfig := config.MustNewConfigFrom(mapstr.M{"a": 1})
 	invalidConfig := config.MustNewConfigFrom(mapstr.M{"a": 2})
@@ -419,4 +406,29 @@ func (s *StarterTestSuite) TestStarterValidator() {
 			}
 		})
 	}
+}
+
+func (s *StarterTestSuite) TestStarterErrorBeater() {
+	mocks := s.InitMocks()
+	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterMockCreator, config.NewConfig())
+	err = sut.run()
+	s.Error(err)
+}
+
+func (s *StarterTestSuite) TestStarterCancelBeater() {
+	mocks := s.InitMocks()
+	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		mocks.cancel()
+	}()
+	err = sut.run()
+	s.NoError(err)
+}
+
+func (s *StarterTestSuite) TestStarterErrorBeaterCreation() {
+	mocks := s.InitMocks()
+	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterCreator, config.NewConfig())
+	err = sut.run()
+	s.Error(err)
 }

@@ -77,24 +77,8 @@ func (s *BundleTestSuite) TestCreateServer() {
 }
 
 func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
-	invalidStreams, err := agentconfig.NewConfigFrom(`
+	invalidStreams := agentconfig.MustNewConfigFrom(`
     not_streams:
-      - data_yaml:
-          activated_rules:
-            cis_k8s:
-              - a
-              - b
-              - c
-              - d
-              - e
-`)
-	s.NoError(err)
-
-	configNoStreams, err := config.New(invalidStreams)
-	s.NoError(err)
-
-	invalidDataYaml, err := agentconfig.NewConfigFrom(`
-    streams:
       - not_data_yaml:
           activated_rules:
             cis_k8s:
@@ -104,11 +88,11 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
               - d
               - e
 `)
-	s.NoError(err)
-	configNoDataYaml, err := config.New(invalidDataYaml)
+
+	configNoStreams, err := config.New(invalidStreams)
 	s.NoError(err)
 
-	validStreams, err := agentconfig.NewConfigFrom(`
+	invalidDataYaml := agentconfig.MustNewConfigFrom(`
     streams:
       - data_yaml:
           activated_rules:
@@ -119,25 +103,40 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
               - d
               - e
 `)
+	configNoDataYaml, err := config.New(invalidDataYaml)
 	s.NoError(err)
+
+	validStreams := agentconfig.MustNewConfigFrom(`
+    streams:
+      - data_yaml:
+          activated_rules:
+            cis_k8s:
+              - a
+              - b
+              - c
+              - d
+              - e
+`)
 	configWithDataYaml, err := config.New(validStreams)
+	s.NoError(err)
 
 	var tests = []struct {
+		name               string
 		path               string
 		expectedStatusCode string
 		cfg                config.Config
 	}{
 		{
-			"/bundles/bundle.tar.gz", "200 OK", configNoDataYaml,
+			"config missing data yaml", "/bundles/bundle.tar.gz", "200 OK", configNoDataYaml,
 		},
 		{
-			"/bundles/bundle.tar.gz", "200 OK", configNoStreams,
+			"config missing streams", "/bundles/bundle.tar.gz", "200 OK", configNoStreams,
 		},
 		{
-			"/bundles/bundle.tar.gz", "200 OK", configWithDataYaml,
+			"valid config from string", "/bundles/bundle.tar.gz", "200 OK", configWithDataYaml,
 		},
 		{
-			"/bundles/bundle.tar.gz", "200 OK", config.Config{
+			"valid config struct", "/bundles/bundle.tar.gz", "200 OK", config.Config{
 				Streams: []config.Stream{
 					{
 						DataYaml: &config.DataYaml{
@@ -155,16 +154,18 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 
 	time.Sleep(time.Second * 2)
 	for _, test := range tests {
-		server, err := StartServer(context.Background(), test.cfg)
-		s.NoError(err)
+		s.Run(test.name, func() {
+			server, err := StartServer(context.Background(), test.cfg)
+			s.NoError(err)
 
-		target := ServerAddress + test.path
-		client := &http.Client{}
-		res, err := client.Get(target)
+			target := ServerAddress + test.path
+			client := &http.Client{}
+			res, err := client.Get(target)
 
-		s.NoError(err)
-		s.Equal(test.expectedStatusCode, res.Status)
-		server.Shutdown(context.Background())
-		time.Sleep(100 * time.Millisecond)
+			s.NoError(err)
+			s.Equal(test.expectedStatusCode, res.Status)
+			server.Shutdown(context.Background())
+			time.Sleep(100 * time.Millisecond)
+		})
 	}
 }
