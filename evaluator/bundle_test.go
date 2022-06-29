@@ -161,10 +161,11 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 			target := ServerAddress + test.path
 			client := &http.Client{}
 			res, err := client.Get(target)
-
 			s.NoError(err)
 			s.Equal(test.expectedStatusCode, res.Status)
-			server.Shutdown(context.Background())
+
+			err = server.Shutdown(context.Background())
+			s.NoError(err)
 			time.Sleep(100 * time.Millisecond)
 		})
 	}

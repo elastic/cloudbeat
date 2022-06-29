@@ -45,7 +45,7 @@ func TestValidatorTestSuite(t *testing.T) {
 }
 
 func (s *ValidatorTestSuite) TestConfig() {
-	configNoStreams, err := config.NewConfigFrom(`
+	configNoStreams := config.MustNewConfigFrom(`
 not_streams:
   - data_yaml:
       activated_rules:
@@ -56,9 +56,8 @@ not_streams:
           - d
           - e
 `)
-	s.NoError(err)
 
-	configNoDataYaml, err := config.NewConfigFrom(`
+	configNoDataYaml := config.MustNewConfigFrom(`
 streams:
   - not_data_yaml:
       activated_rules:
@@ -69,8 +68,7 @@ streams:
           - d
           - e
 `)
-	s.NoError(err)
-	configWithDataYaml, err := config.NewConfigFrom(`
+	configWithDataYaml := config.MustNewConfigFrom(`
 streams:
   - data_yaml:
       activated_rules:

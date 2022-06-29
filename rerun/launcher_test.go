@@ -56,11 +56,9 @@ func beaterMockCreator(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 }
 
 func (m *beaterMock) Run(b *beat.Beat) error {
-	for {
-		select {
-		case <-m.ctx.Done():
-			return nil
-		}
+	select {
+	case <-m.ctx.Done():
+		return nil
 	}
 }
 
