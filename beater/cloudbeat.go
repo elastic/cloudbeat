@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/elastic/cloudbeat/pipeline" //nolint: typecheck
+	"github.com/elastic/cloudbeat/pipeline"
 	"github.com/elastic/cloudbeat/resources/fetching"
 
 	"github.com/elastic/cloudbeat/config"
