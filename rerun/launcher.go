@@ -79,10 +79,10 @@ func NewLauncher(ctx context.Context,
 	return s, nil
 }
 
-func (s *launcher) Run(b *beat.Beat) error {
+func (l *launcher) Run(b *beat.Beat) error {
 	// Configure the beats Manager to start after all the reloadable hooks are initialized
 	// and shutdown when the function returns.
-	s.beat = b
+	l.beat = b
 	if err := b.Manager.Start(); err != nil {
 		return err
 	}
@@ -90,49 +90,49 @@ func (s *launcher) Run(b *beat.Beat) error {
 
 	// Wait for Fleet-side reconfiguration only if beater is running in Agent-managed mode.
 	if b.Manager.Enabled() {
-		s.log.Infof("Waiting for initial reconfiguration from Fleet server...")
-		update, err := s.reconfigureWait(reconfigureWaitTimeout)
+		l.log.Infof("Waiting for initial reconfiguration from Fleet server...")
+		update, err := l.reconfigureWait(reconfigureWaitTimeout)
 		if err != nil {
-			s.log.Errorf("Failed while waiting for initial reconfiguraiton from Fleet server: %v", err)
+			l.log.Errorf("Failed while waiting for initial reconfiguraiton from Fleet server: %v", err)
 			return err
 		}
 
-		if err := s.configUpdate(update); err != nil {
+		if err := l.configUpdate(update); err != nil {
 			return fmt.Errorf("failed to update with initial reconfiguration from Fleet server: %w", err)
 		}
 	}
 
-	return s.run()
+	return l.run()
 }
 
-func (s *launcher) run() error {
-	err := s.runBeater()
+func (l *launcher) run() error {
+	err := l.runBeater()
 	if err != nil {
 		return err
 	}
 
-	err = s.waitForUpdates()
-	s.log.Error("Beater starter is stopping: %w", err)
+	err = l.waitForUpdates()
+	l.log.Error("Beater starter is stopping: %w", err)
 	return err
 }
 
-func (s *launcher) Stop() {
-	s.stopBeater()
+func (l *launcher) Stop() {
+	l.stopBeater()
 }
 
-func (s *launcher) runBeater() error {
-	beater, err := s.creator(s.beat, s.latest)
+func (l *launcher) runBeater() error {
+	beater, err := l.creator(l.beat, l.latest)
 	if err != nil {
 		return fmt.Errorf("Could not create beater: %w", err)
 	}
 
-	s.wg.Add(1)
+	l.wg.Add(1)
 	go func() {
-		defer s.wg.Done()
-		s.beaterErr <- beater.Run(s.beat)
+		defer l.wg.Done()
+		l.beaterErr <- beater.Run(l.beat)
 	}()
 
-	s.beater = beater
+	l.beater = beater
 	return nil
 }
 
@@ -141,26 +141,26 @@ func (s *launcher) stopBeater() {
 	s.wg.Wait()
 }
 
-func (s *launcher) waitForUpdates() error {
+func (l *launcher) waitForUpdates() error {
 	for {
 		select {
-		case <-s.ctx.Done():
-			s.stopBeater()
+		case <-l.ctx.Done():
+			l.stopBeater()
 			return nil
 
-		case err := <-s.beaterErr:
+		case err := <-l.beaterErr:
 			if err != nil {
 				return fmt.Errorf("Beater returned an error:  %w", err)
 			}
 
-		case update, ok := <-s.reloader.Channel():
+		case update, ok := <-l.reloader.Channel():
 			if !ok {
 				return errors.New("Reloader channel closed")
 			}
 
 			go func() {
-				if err := s.configUpdate(update); err != nil {
-					s.log.Errorf("Failed to update beater config: %v", err)
+				if err := l.configUpdate(update); err != nil {
+					l.log.Errorf("Failed to update beater config: %v", err)
 				}
 			}()
 		}
@@ -169,47 +169,47 @@ func (s *launcher) waitForUpdates() error {
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the beater config,
 // and recreate the beater with the new values.
-func (s *launcher) configUpdate(update *config.C) error {
-	s.log.Info("Got config update")
+func (l *launcher) configUpdate(update *config.C) error {
+	l.log.Info("Got config update")
 
-	err := s.latest.MergeWithOpts(update, ucfg.ReplaceArrValues)
+	err := l.latest.MergeWithOpts(update, ucfg.ReplaceArrValues)
 	if err != nil {
 		return err
 	}
 
-	s.stopBeater()
-	return s.runBeater()
+	l.stopBeater()
+	return l.runBeater()
 }
 
 // reconfigureWait will wait for and consume incoming reconfuration from the Fleet server, and keep
 // discarding them until the incoming config contains the necessary information to start beater
 // properly, thereafter returning the valid config.
-func (s *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
+func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 	start := time.Now()
 	timer := time.After(timeout)
 
 	for {
 		select {
-		case <-s.ctx.Done():
+		case <-l.ctx.Done():
 			return nil, fmt.Errorf("cancelled via context")
 
 		case <-timer:
 			return nil, fmt.Errorf("timed out waiting for reconfiguration after %s", time.Since(start))
 
-		case update, ok := <-s.reloader.Channel():
+		case update, ok := <-l.reloader.Channel():
 			if !ok {
 				return nil, fmt.Errorf("reconfiguration channel is closed")
 			}
 
-			if s.validator != nil {
-				err := s.validator.Validate(update)
+			if l.validator != nil {
+				err := l.validator.Validate(update)
 				if err != nil {
-					s.log.Errorf("Config update validation failed: %w", err)
+					l.log.Errorf("Config update validation failed: %w", err)
 					continue
 				}
 			}
 
-			s.log.Infof("Received valid reconfiguration after waiting for %s", time.Since(start))
+			l.log.Infof("Received valid reconfiguration after waiting for %s", time.Since(start))
 			return update, nil
 		}
 	}

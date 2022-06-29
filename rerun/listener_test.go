@@ -33,7 +33,7 @@ import (
 	"go.uber.org/goleak"
 )
 
-type ResoladerTestSuite struct {
+type ListenerTestSuite struct {
 	suite.Suite
 
 	log    *logp.Logger
@@ -43,12 +43,12 @@ type ResoladerTestSuite struct {
 	opts   goleak.Option
 }
 
-func TestResoladerTestSuite(t *testing.T) {
-	s := new(ResoladerTestSuite)
+func TestListenerTestSuite(t *testing.T) {
+	s := new(ListenerTestSuite)
 	suite.Run(t, s)
 }
 
-func (s *ResoladerTestSuite) SetupTest() {
+func (s *ListenerTestSuite) SetupTest() {
 	s.log = logp.NewLogger("cloudbeat_listener_test_suite")
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 	s.opts = goleak.IgnoreCurrent()
@@ -56,13 +56,13 @@ func (s *ResoladerTestSuite) SetupTest() {
 	s.sut = NewListener(s.ctx, s.log)
 }
 
-func (s *ResoladerTestSuite) TearDownTest() {
+func (s *ListenerTestSuite) TearDownTest() {
 	// Verify no goroutines are leaking. Safest to keep this on top of the function.
 	// Go defers are implemented as a LIFO stack. This should be the last one to run.
 	goleak.VerifyNone(s.T(), s.opts)
 }
 
-func (s *ResoladerTestSuite) TestEmptyReload() {
+func (s *ListenerTestSuite) TestEmptyReload() {
 	go func() {
 		err := s.sut.Reload([]*reload.ConfigWithMeta{})
 		s.NoError(err)
@@ -76,7 +76,7 @@ func (s *ResoladerTestSuite) TestEmptyReload() {
 	s.Nil(re)
 }
 
-func (s *ResoladerTestSuite) TestCancelBeforeReload() {
+func (s *ListenerTestSuite) TestCancelBeforeReload() {
 	meta := mapstr.NewPointer(mapstr.M{})
 	conf, err := config.NewConfigFrom(map[string]string{
 		"test": "test",
@@ -95,7 +95,7 @@ func (s *ResoladerTestSuite) TestCancelBeforeReload() {
 	}()
 }
 
-func (s *ResoladerTestSuite) TestCancelAfterReload() {
+func (s *ListenerTestSuite) TestCancelAfterReload() {
 	meta := mapstr.NewPointer(mapstr.M{})
 	conf, err := config.NewConfigFrom(map[string]string{
 		"test": "test",
@@ -114,7 +114,7 @@ func (s *ResoladerTestSuite) TestCancelAfterReload() {
 	s.cancel()
 }
 
-func (s *ResoladerTestSuite) TestSingleReload() {
+func (s *ListenerTestSuite) TestSingleReload() {
 	meta := mapstr.NewPointer(mapstr.M{})
 	conf, err := config.NewConfigFrom(map[string]string{
 		"test": "test",

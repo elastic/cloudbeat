@@ -103,14 +103,14 @@ func (v *validatorMock) Validate(cfg *agentconfig.C) error {
 	return err
 }
 
-type StarterTestSuite struct {
+type LauncherTestSuite struct {
 	suite.Suite
 
 	log  *logp.Logger
 	opts goleak.Option
 }
 
-type starterMocks struct {
+type launcherMocks struct {
 	ctx       context.Context
 	cancel    context.CancelFunc
 	reloader  *reloaderMock
@@ -118,8 +118,8 @@ type starterMocks struct {
 	validator Validator
 }
 
-func TestStarterTestSuite(t *testing.T) {
-	s := new(StarterTestSuite)
+func TestLauncherTestSuite(t *testing.T) {
+	s := new(LauncherTestSuite)
 	s.log = logp.NewLogger("cloudbeat_starter_test_suite")
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -129,8 +129,8 @@ func TestStarterTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *StarterTestSuite) InitMocks() *starterMocks {
-	mocks := starterMocks{}
+func (s *LauncherTestSuite) InitMocks() *launcherMocks {
+	mocks := launcherMocks{}
 	mocks.ctx, mocks.cancel = context.WithCancel(context.Background())
 	mocks.reloader = &reloaderMock{
 		ch: make(chan *agentconfig.C),
@@ -142,7 +142,7 @@ func (s *StarterTestSuite) InitMocks() *starterMocks {
 	return &mocks
 }
 
-func (s *StarterTestSuite) MockBeatManager(mocks *starterMocks) {
+func (s *LauncherTestSuite) MockBeatManager(mocks *launcherMocks) {
 	settings := instance.Settings{
 		Name:                  "some-beater",
 		Version:               "version",
@@ -155,13 +155,13 @@ func (s *StarterTestSuite) MockBeatManager(mocks *starterMocks) {
 	mocks.beat = &b.Beat
 }
 
-func (s *StarterTestSuite) TearDownTest() {
+func (s *LauncherTestSuite) TearDownTest() {
 	// Verify no goroutines are leaking. Safest to keep this on top of the function.
 	// Go defers are implemented as a LIFO stack. This should be the last one to run.
 	goleak.VerifyNone(s.T(), s.opts)
 }
 
-func (s *StarterTestSuite) TestWaitForUpdates() {
+func (s *LauncherTestSuite) TestWaitForUpdates() {
 	configA := config.MustNewConfigFrom(mapstr.M{
 		"common":    "A",
 		"specificA": "a",
@@ -299,7 +299,7 @@ func (s *StarterTestSuite) TestWaitForUpdates() {
 	}
 }
 
-func (s *StarterTestSuite) TestStarterValidator() {
+func (s *LauncherTestSuite) TestStarterValidator() {
 	validConfig := config.MustNewConfigFrom(mapstr.M{"a": 1})
 	invalidConfig := config.MustNewConfigFrom(mapstr.M{"a": 2})
 
@@ -404,7 +404,7 @@ func (s *StarterTestSuite) TestStarterValidator() {
 	}
 }
 
-func (s *StarterTestSuite) TestStarterErrorBeater() {
+func (s *LauncherTestSuite) TestStarterErrorBeater() {
 	mocks := s.InitMocks()
 	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterMockCreator, config.NewConfig())
 	s.NoError(err)
@@ -412,7 +412,7 @@ func (s *StarterTestSuite) TestStarterErrorBeater() {
 	s.Error(err)
 }
 
-func (s *StarterTestSuite) TestStarterCancelBeater() {
+func (s *LauncherTestSuite) TestStarterCancelBeater() {
 	mocks := s.InitMocks()
 	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
@@ -424,7 +424,7 @@ func (s *StarterTestSuite) TestStarterCancelBeater() {
 	s.NoError(err)
 }
 
-func (s *StarterTestSuite) TestStarterErrorBeaterCreation() {
+func (s *LauncherTestSuite) TestStarterErrorBeaterCreation() {
 	mocks := s.InitMocks()
 	sut, err := NewLauncher(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterCreator, config.NewConfig())
 	s.NoError(err)

@@ -34,27 +34,27 @@ type Listener struct {
 	ch  chan *config.C
 }
 
-func (r *Listener) Reload(configs []*reload.ConfigWithMeta) error {
+func (l *Listener) Reload(configs []*reload.ConfigWithMeta) error {
 	if len(configs) == 0 {
 		return nil
 	}
 
-	r.log.Infof("Received %v new configs for reload.", len(configs))
+	l.log.Infof("Received %v new configs for reload.", len(configs))
 
 	// TODO(yashtewari): Based on limitations elsewhere, such as the CSP integration,
 	// don't think we should receive more than one Config here. Need to confirm and handle.
 	data := configs[len(configs)-1].Config
 
 	select {
-	case <-r.ctx.Done():
-	case r.ch <- data:
+	case <-l.ctx.Done():
+	case l.ch <- data:
 	}
 
 	return nil
 }
 
-func (r *Listener) Channel() <-chan *config.C {
-	return r.ch
+func (l *Listener) Channel() <-chan *config.C {
+	return l.ch
 }
 
 func NewListener(ctx context.Context, log *logp.Logger) *Listener {
