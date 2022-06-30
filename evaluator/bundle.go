@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/elastic/cloudbeat/config"
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -33,11 +34,21 @@ var (
 	ServerAddress = fmt.Sprintf("http://%s", address)
 )
 
-func StartServer(ctx context.Context) (*http.Server, error) {
+func StartServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
+	bundle := csppolicies.CISKubernetesBundle()
+
+	if len(cfg.Streams) > 0 {
+		dataYml, err := cfg.DataYaml()
+		if err != nil {
+			return nil, fmt.Errorf("could not marshal to YAML: %w", err)
+		}
+
+		bundle.With("data.yaml", dataYml)
+	}
 
 	h := csppolicies.NewServer()
-	if err := csppolicies.HostBundle("bundle.tar.gz", csppolicies.CISKubernetesBundle(), ctx); err != nil {
-		return nil, err
+	if err := csppolicies.HostBundle("bundle.tar.gz", bundle, ctx); err != nil {
+		return nil, fmt.Errorf("could not update bundle with dataYaml: %w", err)
 	}
 
 	srv := &http.Server{
