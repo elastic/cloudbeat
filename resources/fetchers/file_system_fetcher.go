@@ -185,10 +185,11 @@ func (r FSResource) GetElasticCommonData() any {
 
 func (r FSResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
-		ID:      r.EvalResource.Path,
-		Type:    FSResourceType,
-		SubType: r.EvalResource.SubType,
-		Name:    r.EvalResource.Path, // The Path from the container and not from the host
+		ID:        r.EvalResource.Path,
+		Type:      FSResourceType,
+		SubType:   r.EvalResource.SubType,
+		Name:      r.EvalResource.Path, // The Path from the container and not from the host
+		ECSFormat: FSResourceType,
 	}
 }
 

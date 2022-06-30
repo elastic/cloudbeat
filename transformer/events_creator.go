@@ -19,7 +19,6 @@ package transformer
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -66,17 +65,14 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 			Meta:      t.eventMetadata,
 			Timestamp: timestamp,
 			Fields: mapstr.M{
-				"resource":    resource,
-				"resource_id": resMetadata.ID,   // Deprecated - kept for BC
-				"type":        resMetadata.Type, // Deprecated - kept for BC
-				"cycle_id":    eventData.CycleId,
-				"result":      finding.Result,
-				"rule":        finding.Rule,
+				resMetadata.ECSFormat: eventData.GetElasticCommonData(),
+				"resource":            resource,
+				"resource_id":         resMetadata.ID,   // Deprecated - kept for BC
+				"type":                resMetadata.Type, // Deprecated - kept for BC
+				"cycle_id":            eventData.CycleId,
+				"result":              finding.Result,
+				"rule":                finding.Rule,
 			},
-		}
-
-		if resMetadata.Type == fetchers.FSResourceType {
-			event.Fields.Put("file", eventData.GetElasticCommonData())
 		}
 
 		events = append(events, event)
