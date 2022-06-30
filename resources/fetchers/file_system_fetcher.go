@@ -200,7 +200,7 @@ func getFSSubType(fileInfo os.FileInfo) string {
 }
 
 func enrichElasticCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) ElasticCommonData {
-	cd := ElasticCommonData{} // All fields must follows https://www.elastic.co/guide/en/ecs/current/ecs-file.html
+	cd := ElasticCommonData{}
 	if err := enrichFromFileResource(&cd, data); err != nil {
 		logp.Error(fmt.Errorf("failed to decode data, Error: %v", err))
 	}
