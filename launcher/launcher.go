@@ -108,6 +108,7 @@ func (l *launcher) Run(b *beat.Beat) error {
 func (l *launcher) run() error {
 	err := l.runBeater()
 	if err != nil {
+		l.log.Errorf("Could not run Beater: %w", err)
 		return err
 	}
 
@@ -177,7 +178,7 @@ func (l *launcher) waitForUpdates() error {
 // configUpdate applies incoming reconfiguration from the Fleet server to the beater config,
 // and recreate the beater with the new values.
 func (l *launcher) configUpdate(update *config.C) error {
-	l.log.Info("Got config update")
+	l.log.Infof("Got config update from fleet with %d keys", len(update.FlattenedKeys()))
 
 	err := l.latest.MergeWithOpts(update, ucfg.ReplaceArrValues)
 	if err != nil {
