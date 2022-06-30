@@ -23,14 +23,15 @@ import (
 	"github.com/djherbis/times"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/user"
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/elastic/elastic-agent-libs/mapstr"
 )
 
 const (
@@ -53,9 +54,28 @@ type EvalFSResource struct {
 	SubType string `json:"sub_type"`
 }
 
+// ElasticCommonData According to https://www.elastic.co/guide/en/ecs/current/ecs-file.html
+type ElasticCommonData struct {
+	Name      string    `json:"name,omitempty"`
+	Mode      string    `json:"mode,omitempty"`
+	Gid       string    `json:"gid,omitempty"`
+	Uid       string    `json:"uid,omitempty"`
+	Owner     string    `json:"owner,omitempty"`
+	Group     string    `json:"group,omitempty"`
+	Path      string    `json:"path,omitempty"`
+	Inode     string    `json:"inode,omitempty"`
+	Extension string    `json:"extension,omitempty"`
+	Size      int64     `json:"size"`
+	Type      string    `json:"type,omitempty"`
+	Directory string    `json:"directory,omitempty"`
+	Accessed  time.Time `json:"accessed"`
+	Mtime     time.Time `json:"mtime"`
+	Ctime     time.Time `json:"ctime"`
+}
+
 type FSResource struct {
 	EvalResource  EvalFSResource
-	ElasticCommon mapstr.M //Follows https://www.elastic.co/guide/en/ecs/current/ecs-file.html
+	ElasticCommon ElasticCommonData
 }
 
 // FileSystemFetcher implement the Fetcher interface
@@ -179,46 +199,40 @@ func getFSSubType(fileInfo os.FileInfo) string {
 	return FileSubType
 }
 
-func enrichElasticCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) mapstr.M {
-	cd := mapstr.M{} // All fields must follows https://www.elastic.co/guide/en/ecs/current/ecs-file.html
-	enrichFromFileResource(cd, data)
-	if err := enrichFileTimes(cd, path); err != nil {
+func enrichElasticCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) ElasticCommonData {
+	cd := ElasticCommonData{} // All fields must follows https://www.elastic.co/guide/en/ecs/current/ecs-file.html
+	if err := enrichFromFileResource(&cd, data); err != nil {
+		logp.Error(fmt.Errorf("failed to decode data, Error: %v", err))
+	}
+
+	if err := enrichFileTimes(&cd, path); err != nil {
 		logp.Error(err)
 	}
 
-	if data.SubType != DirSubType {
-		cd["Extension"] = filepath.Ext(path)
-	}
-
-	cd["Directory"] = filepath.Dir(path)
-	cd["Size"] = stat.Size
-	cd["Type"] = data.SubType
+	cd.Extension = filepath.Ext(path)
+	cd.Directory = filepath.Dir(path)
+	cd.Size = stat.Size
+	cd.Type = data.SubType
 
 	return cd
 }
 
-func enrichFileTimes(cd mapstr.M, filepath string) error {
+func enrichFileTimes(cd *ElasticCommonData, filepath string) error {
 	t, err := times.Stat(filepath)
 	if err != nil {
 		return fmt.Errorf("failed to get file time data, error - %+v", err)
 	}
-	cd["Accessed"] = t.AccessTime()
-	cd["Mtime"] = t.ModTime()
+
+	cd.Accessed = t.AccessTime()
+	cd.Mtime = t.ModTime()
 
 	if t.HasChangeTime() {
-		cd["Ctime"] = t.ChangeTime()
+		cd.Ctime = t.ChangeTime()
 	}
 
 	return nil
 }
 
-func enrichFromFileResource(cd mapstr.M, data EvalFSResource) {
-	cd["UID"] = data.Uid
-	cd["GID"] = data.Uid
-	cd["Name"] = data.Name
-	cd["Path"] = data.Path
-	cd["Inode"] = data.Inode
-	cd["Mode"] = data.Mode
-	cd["Owner"] = data.Owner
-	cd["Group"] = data.Group
+func enrichFromFileResource(cd *ElasticCommonData, data EvalFSResource) error {
+	return mapstructure.Decode(data, cd)
 }

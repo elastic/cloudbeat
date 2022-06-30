@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/elastic/elastic-agent-libs/mapstr"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -55,8 +54,8 @@ var fetcherResult = fetchers.FSResource{
 		Inode:   "8901",
 		SubType: "file",
 	},
-	ElasticCommon: mapstr.M{
-		"Name": "scheduler.conf",
+	ElasticCommon: fetchers.ElasticCommonData{
+		Name: "scheduler.conf",
 	},
 }
 

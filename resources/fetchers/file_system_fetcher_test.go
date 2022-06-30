@@ -315,6 +315,53 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	}
 }
 
+func (s *FSFetcherTestSuite) TestElasticCommonData() {
+	directoryName := "test-outer-dir"
+	files := []string{"file.txt"}
+	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, files)
+	defer os.RemoveAll(dir)
+
+	filePaths := []string{filepath.Join(dir, files[0])}
+	cfg := FileFetcherConfig{
+		Patterns: filePaths,
+	}
+
+	osUserMock := &user.MockOSUser{}
+	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
+
+	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
+	fileFetcher := FileSystemFetcher{
+		log:        log,
+		cfg:        cfg,
+		osUser:     osUserMock,
+		resourceCh: s.resourceCh,
+	}
+
+	var results []fetching.ResourceInfo
+	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	results = testhelper.CollectResources(s.resourceCh)
+
+	s.Nil(err, "Fetcher was not able to fetch files from FS")
+	s.Equal(1, len(results))
+
+	fsResource := results[0].Resource
+	fileInfo := fsResource.GetData().(EvalFSResource)
+	cd := fsResource.GetElasticCommonData().(ElasticCommonData)
+
+	s.NotNil(cd)
+	s.Equal(fileInfo.Name, cd.Name)
+	s.Equal(fileInfo.Owner, cd.Owner)
+	s.Equal(fileInfo.Mode, cd.Mode)
+	s.Equal(fileInfo.Group, cd.Group)
+	s.Equal(fileInfo.Gid, cd.Gid)
+	s.Equal(fileInfo.Uid, cd.Uid)
+	s.Equal(fileInfo.Path, cd.Path)
+	s.Equal(fileInfo.Inode, cd.Inode)
+	s.Equal(filepath.Ext(files[0]), cd.Extension)
+	s.Contains(cd.Directory, directoryName)
+}
+
 // This function creates a new directory with files inside and returns the path of the new directory
 func createDirectoriesWithFiles(s suite.Suite, dirPath string, dirName string, filesToWriteInDirectory []string) string {
 	dirPath, err := ioutil.TempDir(dirPath, dirName)
