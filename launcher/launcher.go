@@ -117,27 +117,30 @@ func (l *launcher) run() error {
 	if err != nil {
 		l.log.Errorf("Beater launcher is stopping: %w", err)
 	} else {
-		l.log.Info("Beater launcher is shutting down gracefully")
+		l.log.Info("Beater launcher was shutted down gracefully")
 	}
 	return err
 }
 
 func (l *launcher) Stop() {
-	l.log.Info("Launcher is shutting down gracefully")
+	l.log.Info("Beater launcher is about to shut down gracefully")
 	l.stopBeater()
 }
 
 func (l *launcher) runBeater() error {
+	l.log.Info("Launcher is creating a new Beater")
 	beater, err := l.creator(l.beat, l.latest)
 	if err != nil {
 		return fmt.Errorf("Could not create beater: %w", err)
 	}
 
 	l.wg.Add(1)
-	go func() {
+	go func(beater beat.Beater) {
+		l.log.Info("Launcher is running the new created Beater")
 		defer l.wg.Done()
 		l.beaterErr <- beater.Run(l.beat)
-	}()
+		l.log.Info("Beater has run has finished")
+	}(beater)
 
 	l.beater = beater
 	return nil
@@ -145,6 +148,7 @@ func (l *launcher) runBeater() error {
 
 // stopBeater only returns after the beater truely stopped running
 func (l *launcher) stopBeater() {
+	l.log.Info("Launcher is shutting the Beater down gracefully")
 	l.beater.Stop()
 
 	// By waiting to the wait group, it make sure that the old beater has really stopped
@@ -170,7 +174,7 @@ func (l *launcher) waitForUpdates() error {
 
 			go func() {
 				if err := l.configUpdate(update); err != nil {
-					l.log.Errorf("Failed to update beater config: %v", err)
+					l.log.Errorf("Failed to update Beater config: %v", err)
 				}
 			}()
 		}
@@ -187,6 +191,7 @@ func (l *launcher) configUpdate(update *config.C) error {
 		return err
 	}
 
+	l.log.Infof("Creating a new Beater with the new configuration of %d keys", len(l.latest.FlattenedKeys()))
 	l.stopBeater()
 	return l.runBeater()
 }
