@@ -102,7 +102,8 @@ func (l *launcher) Run(b *beat.Beat) error {
 		}
 	}
 
-	return l.run()
+	err := l.run()
+	return err
 }
 
 func (l *launcher) run() error {
@@ -122,6 +123,7 @@ func (l *launcher) run() error {
 }
 
 func (l *launcher) Stop() {
+	l.log.Info("Launcher is shutting down gracefully")
 	l.stopBeater()
 }
 
