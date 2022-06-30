@@ -140,7 +140,7 @@ func (l *launcher) runBeater() error {
 		l.log.Info("Launcher is running the new created Beater")
 		defer l.wg.Done()
 		l.beaterErr <- beater.Run(l.beat)
-		l.log.Info("Beater has run has finished")
+		l.log.Info("Beater run has finished")
 	}(beater)
 
 	l.beater = beater
