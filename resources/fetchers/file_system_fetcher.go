@@ -181,19 +181,18 @@ func getFSSubType(fileInfo os.FileInfo) string {
 
 func enrichElasticCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) mapstr.M {
 	cd := mapstr.M{} // All fields must follows https://www.elastic.co/guide/en/ecs/current/ecs-file.html
-
 	enrichFromFileResource(cd, data)
 	if err := enrichFileTimes(cd, path); err != nil {
 		logp.Error(err)
 	}
 
 	if data.SubType != DirSubType {
-		cd.Put("Extension", filepath.Ext(path))
+		cd["Extension"] = filepath.Ext(path)
 	}
 
-	cd.Put("Directory", filepath.Dir(path))
-	cd.Put("Size", stat.Size)
-	cd.Put("Type", data.SubType)
+	cd["Directory"] = filepath.Dir(path)
+	cd["Size"] = stat.Size
+	cd["Type"] = data.SubType
 
 	return cd
 }
@@ -203,23 +202,23 @@ func enrichFileTimes(cd mapstr.M, filepath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to get file time data, error - %+v", err)
 	}
-	cd.Put("Accessed", t.AccessTime())
-	cd.Put("Mtime", t.ModTime())
+	cd["Accessed"] = t.AccessTime()
+	cd["Mtime"] = t.ModTime()
 
 	if t.HasChangeTime() {
-		cd.Put("Ctime", t.ChangeTime())
+		cd["Ctime"] = t.ChangeTime()
 	}
 
 	return nil
 }
 
 func enrichFromFileResource(cd mapstr.M, data EvalFSResource) {
-	cd.Put("UID", data.Uid)
-	cd.Put("GID", data.Uid)
-	cd.Put("Name", data.Name)
-	cd.Put("Path", data.Path)
-	cd.Put("Inode", data.Inode)
-	cd.Put("Mode", data.Mode)
-	cd.Put("Owner", data.Owner)
-	cd.Put("Group", data.Group)
+	cd["UID"] = data.Uid
+	cd["GID"] = data.Uid
+	cd["Name"] = data.Name
+	cd["Path"] = data.Path
+	cd["Inode"] = data.Inode
+	cd["Mode"] = data.Mode
+	cd["Owner"] = data.Owner
+	cd["Group"] = data.Group
 }
