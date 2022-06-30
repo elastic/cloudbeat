@@ -97,7 +97,7 @@ func (l *launcher) Run(b *beat.Beat) error {
 			return err
 		}
 
-		if err := l.configUpdate(update); err != nil {
+		if err := l.mergeConfig(update); err != nil {
 			return fmt.Errorf("failed to update with initial reconfiguration from Fleet server: %w", err)
 		}
 	}
@@ -107,6 +107,7 @@ func (l *launcher) Run(b *beat.Beat) error {
 }
 
 func (l *launcher) run() error {
+	l.log.Info("Beater launcher is running")
 	err := l.runBeater()
 	if err != nil {
 		l.log.Errorf("Could not run Beater: %w", err)
@@ -186,7 +187,7 @@ func (l *launcher) waitForUpdates() error {
 func (l *launcher) configUpdate(update *config.C) error {
 	l.log.Infof("Got config update from fleet with %d keys", len(update.FlattenedKeys()))
 
-	err := l.latest.MergeWithOpts(update, ucfg.ReplaceArrValues)
+	err := l.mergeConfig(update)
 	if err != nil {
 		return err
 	}
@@ -194,6 +195,10 @@ func (l *launcher) configUpdate(update *config.C) error {
 	l.log.Infof("Creating a new Beater with the new configuration of %d keys", len(l.latest.FlattenedKeys()))
 	l.stopBeater()
 	return l.runBeater()
+}
+
+func (l *launcher) mergeConfig(update *config.C) error {
+	return l.latest.MergeWithOpts(update, ucfg.ReplaceArrValues)
 }
 
 // reconfigureWait will wait for and consume incoming reconfuration from the Fleet server, and keep
