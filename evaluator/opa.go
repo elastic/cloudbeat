@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -52,8 +53,8 @@ var opaConfig = `{
 	},
 }`
 
-func NewOpaEvaluator(ctx context.Context, log *logp.Logger) (Evaluator, error) {
-	server, err := StartServer(ctx)
+func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (Evaluator, error) {
+	server, err := StartServer(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
