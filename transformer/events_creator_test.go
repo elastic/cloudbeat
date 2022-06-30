@@ -20,9 +20,9 @@ package transformer
 import (
 	"context"
 	"encoding/json"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -55,8 +55,8 @@ var fetcherResult = fetchers.FSResource{
 		Inode:   "8901",
 		SubType: "file",
 	},
-	ElasticCommon: &ecs.File{
-		Name: "scheduler.conf",
+	ElasticCommon: mapstr.M{
+		"Name": "scheduler.conf",
 	},
 }
 
@@ -134,7 +134,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(event.Timestamp, `event timestamp is missing`)
 				s.NotEmpty(event.Fields["result"], "event result is missing")
 				s.NotEmpty(event.Fields["rule"], "event rule is missing")
-				s.NotEmpty(event.Fields["file"], "event elastic common data is missing")
+				s.NotEmpty(event.Fields["file"], "elastic common data is missing")
 				s.NotEmpty(resource.Raw, "raw resource is missing")
 				s.NotEmpty(resource.SubType, "resource sub type is missing")
 				s.NotEmpty(resource.ID, "resource ID is missing")

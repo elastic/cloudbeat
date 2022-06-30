@@ -21,10 +21,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/djherbis/times"
-	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/user"
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
@@ -32,6 +30,7 @@ import (
 	"syscall"
 
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 )
 
 const (
@@ -56,7 +55,7 @@ type EvalFSResource struct {
 
 type FSResource struct {
 	EvalResource  EvalFSResource
-	ElasticCommon *ecs.File
+	ElasticCommon mapstr.M //Follows https://www.elastic.co/guide/en/ecs/current/ecs-file.html
 }
 
 // FileSystemFetcher implement the Fetcher interface
@@ -161,7 +160,7 @@ func (r FSResource) GetData() any {
 }
 
 func (r FSResource) GetElasticCommonData() any {
-	return *r.ElasticCommon
+	return r.ElasticCommon
 }
 
 func (r FSResource) GetMetadata() fetching.ResourceMetadata {
@@ -180,38 +179,47 @@ func getFSSubType(fileInfo os.FileInfo) string {
 	return FileSubType
 }
 
-func enrichElasticCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) *ecs.File {
-	cd := &ecs.File{}
+func enrichElasticCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) mapstr.M {
+	cd := mapstr.M{} // All fields must follows https://www.elastic.co/guide/en/ecs/current/ecs-file.html
 
-	// Fill the relevant fields from the generated data
-	if err := mapstructure.Decode(data, cd); err != nil {
-		logp.Error(fmt.Errorf("failed to fill common data with fileInfo, error - %+v", err))
-	}
-
-	if err := enrichFileTimeData(cd, path); err != nil {
+	enrichFromFileResource(cd, data)
+	if err := enrichFileTimes(cd, path); err != nil {
 		logp.Error(err)
 	}
 
-	cd.Directory = filepath.Dir(path)
-	cd.Extension = filepath.Ext(path)
-	cd.Size = stat.Size
-	cd.Type = data.SubType
+	if data.SubType != DirSubType {
+		cd.Put("Extension", filepath.Ext(path))
+	}
+
+	cd.Put("Directory", filepath.Dir(path))
+	cd.Put("Size", stat.Size)
+	cd.Put("Type", data.SubType)
 
 	return cd
 }
 
-func enrichFileTimeData(cd *ecs.File, filepath string) error {
+func enrichFileTimes(cd mapstr.M, filepath string) error {
 	t, err := times.Stat(filepath)
 	if err != nil {
 		return fmt.Errorf("failed to get file time data, error - %+v", err)
 	}
-
-	cd.Accessed = t.AccessTime()
-	cd.Mtime = t.ModTime()
+	cd.Put("Accessed", t.AccessTime())
+	cd.Put("Mtime", t.ModTime())
 
 	if t.HasChangeTime() {
-		cd.Ctime = t.ChangeTime()
+		cd.Put("Ctime", t.ChangeTime())
 	}
 
 	return nil
+}
+
+func enrichFromFileResource(cd mapstr.M, data EvalFSResource) {
+	cd.Put("UID", data.Uid)
+	cd.Put("GID", data.Uid)
+	cd.Put("Name", data.Name)
+	cd.Put("Path", data.Path)
+	cd.Put("Inode", data.Inode)
+	cd.Put("Mode", data.Mode)
+	cd.Put("Owner", data.Owner)
+	cd.Put("Group", data.Group)
 }
