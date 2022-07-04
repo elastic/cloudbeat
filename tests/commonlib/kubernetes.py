@@ -13,6 +13,7 @@ from commonlib.io_utils import get_k8s_yaml_objects
 
 
 RESOURCE_POD = 'Pod'
+RESOURCE_SERVICE_ACCOUNT = 'ServiceAccount'
 
 class KubernetesHelper:
 
@@ -32,7 +33,7 @@ class KubernetesHelper:
         self.dispatch_list = {
             RESOURCE_POD: self.core_v1_client.list_namespaced_pod,
             'ConfigMap': self.core_v1_client.list_namespaced_config_map,
-            'ServiceAccount': self.core_v1_client.list_namespaced_service_account,
+            RESOURCE_SERVICE_ACCOUNT: self.core_v1_client.list_namespaced_service_account,
             'DaemonSet': self.app_api.list_namespaced_daemon_set,
             'Role': self.rbac_api.list_namespaced_role,
             'RoleBinding': self.rbac_api.list_namespaced_role_binding,
@@ -43,9 +44,9 @@ class KubernetesHelper:
         }
 
         self.dispatch_delete = {
-            'Pod': self.core_v1_client.delete_namespaced_pod,
+            RESOURCE_POD: self.core_v1_client.delete_namespaced_pod,
             'ConfigMap': self.core_v1_client.delete_namespaced_config_map,
-            'ServiceAccount': self.core_v1_client.delete_namespaced_service_account,
+            RESOURCE_SERVICE_ACCOUNT: self.core_v1_client.delete_namespaced_service_account,
             'DaemonSet': self.app_api.delete_namespaced_daemon_set,
             'Role': self.rbac_api.delete_namespaced_role,
             'RoleBinding': self.rbac_api.delete_namespaced_role_binding,
@@ -218,14 +219,14 @@ class KubernetesHelper:
 
             if resource_type != patch_resource_type or relevant_metadata != patch_relevant_metadata:
                 continue
-            
+
             patched_body = self.patch_resource_body(yml_resource, patch_body)
             created_resource = self.create_from_dict(patched_body, **relevant_metadata)
 
             done = self.wait_for_resource(resource_type=resource_type, status_list=["RUNNING", "ADDED"], **relevant_metadata)
             if done:
                 patched_resource = created_resource
-
+            
             break
         
         return patched_resource
@@ -298,8 +299,6 @@ class KubernetesHelper:
                               timeout_seconds=timeout,
                               **kwargs):
             if name in event["object"].metadata.name and event["type"] in status_list:
-                if event['object'].status.phase == 'Pending':
-                    continue
                 w.stop()
                 return True
 

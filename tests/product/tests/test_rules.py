@@ -82,5 +82,5 @@ def test_file_system_configuration(config_node_pre_test,
         resource_identifier=identifier
     )
 
-    assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
+    assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found" 
     assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected}, got: {evaluation}"
