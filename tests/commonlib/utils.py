@@ -31,11 +31,17 @@ def get_evaluation(k8s, timeout, pod_name, namespace, rule_tag, exec_timestamp,
             findings_timestamp = datetime.datetime.strptime(log.time, '%Y-%m-%dT%H:%M:%Sz')
             if (findings_timestamp - exec_timestamp).total_seconds() < 0:
                 continue
-            for finding in log.result.findings:
-                if rule_tag in finding.rule.tags:
-                    resource = log.result.resource
-                    if resource_identifier(resource):
-                        return finding.result.evaluation
+            
+            try:
+                findings = log.result.findings
+            except AttributeError:
+                pass
+
+                for finding in findings:
+                    if rule_tag in finding.rule.tags:
+                        resource = log.result.resource
+                        if resource_identifier(resource):
+                            return finding.result.evaluation
     return None
 
 

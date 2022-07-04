@@ -51,6 +51,9 @@ var opaConfig = `{
 			"resource": "/bundles/bundle.tar.gz"
 		}
 	},
+	"decision_logs": {
+		"console": true
+	}
 }`
 
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (Evaluator, error) {
