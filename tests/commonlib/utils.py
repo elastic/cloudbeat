@@ -34,14 +34,14 @@ def get_evaluation(k8s, timeout, pod_name, namespace, rule_tag, exec_timestamp,
             
             try:
                 findings = log.result.findings
+                resource = log.result.resource
             except AttributeError:
-                pass
+                continue
 
-                for finding in findings:
-                    if rule_tag in finding.rule.tags:
-                        resource = log.result.resource
-                        if resource_identifier(resource):
-                            return finding.result.evaluation
+            for finding in findings:
+                if rule_tag in finding.rule.tags:
+                    if resource_identifier(resource):
+                        return finding.result.evaluation
     return None
 
 

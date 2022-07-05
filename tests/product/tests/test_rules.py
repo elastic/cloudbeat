@@ -70,7 +70,7 @@ def test_file_system_configuration(config_node_pre_test,
                             resource=resource)
 
     def identifier(res):
-        return res.filename in resource
+        return res.name in resource
 
     evaluation = get_evaluation(
         k8s=k8s_client,

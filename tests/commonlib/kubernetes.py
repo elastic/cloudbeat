@@ -187,24 +187,23 @@ class KubernetesHelper:
     def patch_resources(self, resource_type: str, **kwargs):
         """
         """
-        if resource_type == RESOURCE_POD:
-            patch_body = kwargs.pop('body')
-
-            pod = self.get_resource(resource_type, **kwargs)
-            self.delete_resources(resource_type=resource_type, **kwargs)
-            deleted = self.wait_for_resource(resource_type=resource_type, status_list=['DELETED'], **kwargs)
-
-            if not deleted:
-                raise ValueError(f'could not delete Pod: {kwargs}')
-
-            pod = self.create_patched_resource(resource_type, patch_body)
-
-            return pod
-
-        else:
+        if resource_type != RESOURCE_POD:
             return self.dispatch_patch[resource_type](**kwargs)
+
+        patch_body = kwargs.pop('body')
+
+        pod = self.get_resource(resource_type, **kwargs)
+        self.delete_resources(resource_type=resource_type, **kwargs)
+        deleted = self.wait_for_resource(resource_type=resource_type, status_list=['DELETED'], **kwargs)
+
+        if not deleted:
+            raise ValueError(f'could not delete Pod: {kwargs}')
+
+        return self.create_patched_resource(resource_type, patch_body)
     
     def create_patched_resource(self, patch_resource_type, patch_body):
+        """
+        """
         file_path = Path(__file__).parent / '../deploy/mock-pod.yml'
         k8s_resources = get_k8s_yaml_objects(file_path=file_path)
 
@@ -290,15 +289,22 @@ class KubernetesHelper:
         watches a resources for a status change
         @param resource_type: the resource type
         @param name: resource name
-        @param status_list: excepted statuses e.g., RUNNING, DELETED, MODIFIED, ADDED
+        @param status_list: accepted statuses e.g., RUNNING, DELETED, MODIFIED, ADDED
         @param timeout: until wait
         @return: True if status reached
         """
+        # When pods are being created, MODIFIED events are also of interest to check if
+        # they successfully transition from ContainerCreating to Running state.
+        if (resource_type == RESOURCE_POD) and ('ADDED' in status_list) and ('MODIFIED' not in status_list):
+            status_list.append('MODIFIED')
+
         w = watch.Watch()
         for event in w.stream(func=self.dispatch_list[resource_type],
                               timeout_seconds=timeout,
                               **kwargs):
             if name in event["object"].metadata.name and event["type"] in status_list:
+                if (resource_type == RESOURCE_POD) and ('ADDED' in status_list) and (event['object'].status.phase == 'Pending'):
+                    continue
                 w.stop()
                 return True
 
