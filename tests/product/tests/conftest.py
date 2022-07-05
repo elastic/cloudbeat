@@ -1,4 +1,5 @@
 from pathlib import Path
+import time
 import pytest
 from kubernetes.client import ApiException
 from kubernetes.utils import FailToCreateError
@@ -6,9 +7,21 @@ import json
 from commonlib.io_utils import get_k8s_yaml_objects
 
 
+DEPLOY_YML = "../../deploy/cloudbeat-pytest.yml"
 KUBE_RULES_ENV_YML = "../../deploy/mock-pod.yml"
 POD_RESOURCE_TYPE = "Pod"
 
+
+@pytest.fixture(scope='module')
+def data(k8s, api_client, cloudbeat_agent):
+    file_path = Path(__file__).parent / DEPLOY_YML
+    if k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace):
+        k8s.delete_from_yaml(get_k8s_yaml_objects(file_path=file_path))
+    k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
+    time.sleep(5)
+    yield k8s, api_client, cloudbeat_agent
+    k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
+    k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
 
 @pytest.fixture(scope='module')
 def config_node_pre_test(data):
@@ -50,7 +63,8 @@ def clean_test_env(data):
         except ApiException as notFound:
             print(f"no {relevant_metadata['name']} online - setting up a new one: {notFound}")
             # create resource
-            k8s_client.create_from_dict(data=yml_resource, **relevant_metadata)
+        
+        k8s_client.create_from_dict(data=yml_resource, **relevant_metadata)
 
     yield k8s_client, api_client, cloudbeat_agent
     # teardown
