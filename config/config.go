@@ -21,11 +21,12 @@
 package config
 
 import (
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"gopkg.in/yaml.v3"
 )
 
@@ -34,16 +35,17 @@ const DefaultNamespace = "default"
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 type Config struct {
+	Fetchers   []*config.C             `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
-	Fetchers   []*config.C             `config:"fetchers"`
-
-	Streams []Stream `config:"streams"`
+	Streams    []Stream                `config:"streams"`
+	Type       string                  `config:"type"`
 }
 
 type Stream struct {
-	DataYaml *struct {
+	AWSConfig aws.ConfigAWS `config:",inline"`
+	DataYaml  *struct {
 		ActivatedRules struct {
 			CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
 		} `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
