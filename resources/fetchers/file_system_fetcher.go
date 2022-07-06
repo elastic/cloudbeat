@@ -54,8 +54,8 @@ type EvalFSResource struct {
 	SubType string `json:"sub_type"`
 }
 
-// ElasticCommonData According to https://www.elastic.co/guide/en/ecs/current/ecs-file.html
-type ElasticCommonData struct {
+// FileCommonData According to https://www.elastic.co/guide/en/ecs/current/ecs-file.html
+type FileCommonData struct {
 	Name      string    `json:"name,omitempty"`
 	Mode      string    `json:"mode,omitempty"`
 	Gid       string    `json:"gid,omitempty"`
@@ -75,7 +75,7 @@ type ElasticCommonData struct {
 
 type FSResource struct {
 	EvalResource  EvalFSResource
-	ElasticCommon ElasticCommonData
+	ElasticCommon FileCommonData
 }
 
 // FileSystemFetcher implement the Fetcher interface
@@ -168,7 +168,7 @@ func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FSResou
 
 	return FSResource{
 		EvalResource:  data,
-		ElasticCommon: enrichElasticCommonData(stat, data, path),
+		ElasticCommon: enrichFileCommonData(stat, data, path),
 	}, nil
 }
 
@@ -200,8 +200,8 @@ func getFSSubType(fileInfo os.FileInfo) string {
 	return FileSubType
 }
 
-func enrichElasticCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) ElasticCommonData {
-	cd := ElasticCommonData{}
+func enrichFileCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) FileCommonData {
+	cd := FileCommonData{}
 	if err := enrichFromFileResource(&cd, data); err != nil {
 		logp.Error(fmt.Errorf("failed to decode data, Error: %v", err))
 	}
@@ -218,7 +218,7 @@ func enrichElasticCommonData(stat *syscall.Stat_t, data EvalFSResource, path str
 	return cd
 }
 
-func enrichFileTimes(cd *ElasticCommonData, filepath string) error {
+func enrichFileTimes(cd *FileCommonData, filepath string) error {
 	t, err := times.Stat(filepath)
 	if err != nil {
 		return fmt.Errorf("failed to get file time data, error - %+v", err)
@@ -234,6 +234,6 @@ func enrichFileTimes(cd *ElasticCommonData, filepath string) error {
 	return nil
 }
 
-func enrichFromFileResource(cd *ElasticCommonData, data EvalFSResource) error {
+func enrichFromFileResource(cd *FileCommonData, data EvalFSResource) error {
 	return mapstructure.Decode(data, cd)
 }

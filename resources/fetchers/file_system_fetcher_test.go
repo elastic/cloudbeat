@@ -347,7 +347,7 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 
 	fsResource := results[0].Resource
 	fileInfo := fsResource.GetData().(EvalFSResource)
-	cd := fsResource.GetElasticCommonData().(ElasticCommonData)
+	cd := fsResource.GetElasticCommonData().(FileCommonData)
 
 	s.NotNil(cd)
 	s.Equal(fileInfo.Name, cd.Name)

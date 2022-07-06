@@ -54,7 +54,7 @@ var fetcherResult = fetchers.FSResource{
 		Inode:   "8901",
 		SubType: "file",
 	},
-	ElasticCommon: fetchers.ElasticCommonData{
+	ElasticCommon: fetchers.FileCommonData{
 		Name: "scheduler.conf",
 	},
 }

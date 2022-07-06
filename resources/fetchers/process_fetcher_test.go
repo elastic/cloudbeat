@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"io/fs"
+	"strconv"
 	"testing"
 	"testing/fstest"
 
@@ -102,11 +103,12 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	t.Equal(1, len(results))
 	t.Nil(err)
 
-	processResource := results[0].Resource.(ProcessResource)
+	processResource := results[0].Resource
+	evalRes := processResource.GetData().(EvalProcResource)
 
-	t.Equal(testProcess.Pid, processResource.PID)
-	t.Equal("kubelet", processResource.Stat.Name)
-	t.Contains(processResource.Cmd, "/usr/bin/kubelet")
+	t.Equal(testProcess.Pid, evalRes.PID)
+	t.Equal("kubelet", evalRes.Stat.Name)
+	t.Contains(evalRes.Cmd, "/usr/bin/kubelet")
 }
 
 func (t *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
@@ -153,10 +155,12 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 	t.Equal(1, len(results))
 	t.Nil(err)
 
-	processResource := results[0].Resource.(ProcessResource)
-	t.Equal(testProcess.Pid, processResource.PID)
-	t.Equal("kubelet", processResource.Stat.Name)
-	t.Contains(processResource.Cmd, "/usr/bin/kubelet")
+	processResource := results[0].Resource
+	evalRes := processResource.GetData().(EvalProcResource)
+
+	t.Equal(testProcess.Pid, evalRes.PID)
+	t.Equal("kubelet", evalRes.Stat.Name)
+	t.Contains(evalRes.Cmd, "/usr/bin/kubelet")
 }
 
 func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
@@ -208,12 +212,20 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 		t.Equal(1, len(results))
 		t.Nil(err)
 
-		processResource := results[0].Resource.(ProcessResource)
-		t.Equal(testProcess.Pid, processResource.PID)
-		t.Equal("kubelet", processResource.Stat.Name)
-		t.Contains(processResource.Cmd, "/usr/bin/kubelet")
+		processResource := results[0].Resource
+		evalRes := processResource.GetData().(EvalProcResource)
+		procCD := processResource.GetElasticCommonData().(ProcCommonData)
 
-		configResource := processResource.ExternalData[configFlagKey]
+		t.Equal(testProcess.Pid, evalRes.PID)
+		t.Equal("kubelet", evalRes.Stat.Name)
+		t.Contains(evalRes.Cmd, "/usr/bin/kubelet")
+
+		t.Equal(testProcess.Pid, strconv.FormatInt(procCD.PID, 10))
+		t.True(procCD.ArgsCount > 0)
+		t.Contains(procCD.CommandLine, "/usr/bin/kubelet")
+		t.Equal("kubelet", procCD.Name)
+
+		configResource := evalRes.ExternalData[configFlagKey]
 		var result ProcessConfigTestStruct
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &result})
 		t.Nil(err, "Could not decode process fetcherConfig result from %s type", test.configType)
