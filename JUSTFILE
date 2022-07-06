@@ -98,8 +98,8 @@ build-pytest-docker:
 load-pytest-kind:
   kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
 
-deploy-tests-helm:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+deploy-tests-helm-ci target:
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-local-tests-helm target:
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
@@ -112,6 +112,9 @@ gen-report:
 
 run-tests:
   helm test {{TESTS_RELEASE}} --namespace kube-system
+
+run-tests:
+  helm test {{TESTS_RELEASE}} --namespace kube-system --kube-context kind-kind-mono --logs 2>&1 | tee test.log
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 
