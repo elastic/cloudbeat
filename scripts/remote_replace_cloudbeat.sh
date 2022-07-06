@@ -1,7 +1,8 @@
-# This script will stop any Cloudbeat process within an agent and will replace the Cloudbeat artifacts with your local version
+# This script will stop any Cloudbeat process within an agent and will replace the Cloudbeat artifacts with your local built artifacts
+
 # Prerequisites:
 # a. Create the Cloudbeat artifacts using the mage command (for example - "DEV=true PLATFORMS=linux/amd64 SNAPSHOT=true mage -v package")
-# b. The running elastic agents must be complied with "DEV=TRUE"
+# b. The running elastic-agents were built with "DEV=TRUE" flag (https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/Onboarding/cloudbeat-ec2.md#:~:text=Build%20the%20agent%20(We%20are%20building%20with%20DEV%3Dtrue%2C%20so%20we%20can%20load%20cloudbeat.tar.gz%20without%20signature%20verification))
 
 #!/bin/bash
 ARCH=`uname -a | rev | cut -d " " -f 1 | rev` # This should return arm64 on m1 and x86_64 on regular mac
@@ -27,8 +28,8 @@ done
 
 # After the script finishes its work, you need to make Cloudbeat run again.
 # This can be achieved by:
-# a. Press the menu button on the top left of the screen
-# b. Press on "Fleet"
-# c. Press the "agent policies" tab and select the relevant policy
-# d. Press the "..." next to the CIS Kubernetes benchmark integration and select `edit integration`
-# e. Change the `integration name` and press on `save integration`
+# a. Open Kibana and press the menu button on the top left of the screen.
+# b. Select "Fleet".
+# c. Press the "agent policies" tab and select the relevant policy.
+# d. Select the "..." next to the CIS Kubernetes benchmark integration and select `edit integration`.
+# e. Change the `integration name` and press on `save integration`.
