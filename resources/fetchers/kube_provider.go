@@ -20,9 +20,9 @@ package fetchers
 import (
 	"reflect"
 
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -37,10 +37,8 @@ const (
 	K8sObjType           = "k8s_object"
 )
 
-func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher) []fetching.Resource {
+func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cMetadata fetching.CycleMetadata) {
 	log.Debug("Starting getKubeData")
-
-	ret := make([]fetching.Resource, 0)
 
 	for _, watcher := range watchers {
 		rs := watcher.Store().List()
@@ -59,12 +57,9 @@ func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher) []fetching.Res
 				log.Errorf("Bad resource: %v", err)
 				continue
 			} // See https://github.com/kubernetes/kubernetes/issues/3030
-
-			ret = append(ret, K8sResource{log, resource})
+			resCh <- fetching.ResourceInfo{Resource: K8sResource{log, resource}, CycleMetadata: cMetadata}
 		}
 	}
-
-	return ret
 }
 
 func (r K8sResource) GetData() interface{} {

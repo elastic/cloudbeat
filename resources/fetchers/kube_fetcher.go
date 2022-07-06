@@ -23,9 +23,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common/kubernetes"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -84,10 +84,12 @@ type requiredResource struct {
 }
 
 type KubeFetcher struct {
-	log *logp.Logger
-	cfg KubeApiFetcherConfig
+	log        *logp.Logger
+	cfg        KubeApiFetcherConfig
+	resourceCh chan fetching.ResourceInfo
 
-	watchers []kubernetes.Watcher
+	watchers       []kubernetes.Watcher
+	clientProvider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)
 }
 
 type KubeApiFetcherConfig struct {
@@ -124,7 +126,7 @@ func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) erro
 }
 
 func (f *KubeFetcher) initWatchers() error {
-	client, err := kubernetes.GetKubernetesClient(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	client, err := f.clientProvider(f.cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return fmt.Errorf("could not get k8s client: %w", err)
 	}
@@ -145,7 +147,7 @@ func (f *KubeFetcher) initWatchers() error {
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f *KubeFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting KubeFetcher.Fetch")
 
 	var err error
@@ -155,10 +157,11 @@ func (f *KubeFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
 	if err != nil {
 		// Reset watcherlock if the watchers could not be initiated.
 		watcherlock = sync.Once{}
-		return nil, fmt.Errorf("could not initate Kubernetes watchers: %w", err)
+		return fmt.Errorf("could not initate Kubernetes watchers: %w", err)
 	}
 
-	return getKubeData(f.log, f.watchers), nil
+	getKubeData(f.log, f.watchers, f.resourceCh, cMetadata)
+	return nil
 }
 
 func (f *KubeFetcher) Stop() {

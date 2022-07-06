@@ -13,6 +13,9 @@ elasticsearch = "^8.1.0"
 allure-pytest = "^2.9.45"
 pytest-xdist = "^2.5.0"
 docker = "^5.0.3"
+pytest-order = "^1.0.1"
+pytest-dependency = "^0.5.1"
+pylint = "^2.14.2"
 
 [tool.poetry.dev-dependencies]
 
@@ -21,16 +24,16 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-addopts = "-s -v --alluredir=tests/allure/results"
+addopts = "-p no:warnings -s -v --alluredir=tests/allure/results"
 markers = [
-    # execute tests from product folder
-    "product",
-    # execute tests from integration folder
-    "integration",
-    # tests defined for sanity
-    "sanity",
-    # rules tests only
-    "rules",
     # tests used in cloudbeat CI
-    "ci_cloudbeat"
+    "pre_merge",
+    # test target markers
+    "file_system_rules",
+    "k8s_object_rules",
+    "process_api_server_rules",
+    "process_controller_manager_rules",
+    "process_etcd_rules",
+    "process_kubelet_rules",
+    "process_scheduler_rules"
 ]

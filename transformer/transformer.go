@@ -18,20 +18,15 @@
 package transformer
 
 import (
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/gofrs/uuid"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"k8s.io/client-go/kubernetes"
 )
 
 type ResourceTypeMetadata struct {
-	CycleMetadata
+	fetching.CycleMetadata
 	Type string
-}
-
-type CycleMetadata struct {
-	CycleId uuid.UUID
 }
 
 type CommonDataProvider struct {

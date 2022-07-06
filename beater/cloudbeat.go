@@ -22,6 +22,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/elastic/cloudbeat/launcher"
+	"github.com/elastic/cloudbeat/pipeline" //nolint: typecheck
+	"github.com/elastic/cloudbeat/resources/fetching"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
@@ -29,34 +33,48 @@ import (
 	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/beats/v7/libbeat/processors"
-	csppolicies "github.com/elastic/csp-security-policies/bundle"
-
-	"github.com/gofrs/uuid"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
-	reconfigureWaitTimeout = 10 * time.Minute
+	flushInterval    = 10 * time.Second
+	eventsThreshold  = 75
+	resourceChBuffer = 10000
 )
 
 // cloudbeat configuration.
 type cloudbeat struct {
-	ctx    context.Context
-	cancel context.CancelFunc
+	ctx         context.Context
+	cancel      context.CancelFunc
+	config      config.Config
+	client      beat.Client
+	data        *manager.Data
+	evaluator   evaluator.Evaluator
+	transformer transformer.Transformer
+	log         *logp.Logger
+	resourceCh  chan fetching.ResourceInfo
+}
 
-	config        config.Config
-	configUpdates <-chan *common.Config
-	client        beat.Client
-	data          *manager.Data
-	evaluator     evaluator.Evaluator
-	transformer   transformer.Transformer
-	log           *logp.Logger
+func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+	log := logp.NewLogger("starter")
+	ctx := context.Background()
+	reloader := launcher.NewListener(ctx, log)
+	validator := &validator{}
+
+	s, err := launcher.New(ctx, log, reloader, validator, b, NewCloudbeat, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	reload.Register.MustRegisterList("inputs", reloader)
+	return s, nil
 }
 
 // New creates an instance of cloudbeat.
-func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
+func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("cloudbeat")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -69,7 +87,8 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 
 	log.Info("Config initiated.")
 
-	fetchersRegistry, err := InitRegistry(log, c)
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
+	fetchersRegistry, err := initRegistry(log, c, resourceCh)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -81,7 +100,7 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	eval, err := evaluator.NewOpaEvaluator(ctx, log)
+	eval, err := evaluator.NewOpaEvaluator(ctx, log, c)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -106,17 +125,17 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 		return nil, err
 	}
 
-	t := transformer.NewTransformer(ctx, log, eval, commonData, resultsIndex)
+	t := transformer.NewTransformer(log, commonData, resultsIndex)
 
 	bt := &cloudbeat{
-		ctx:           ctx,
-		cancel:        cancel,
-		config:        c,
-		configUpdates: config.Updates(ctx, log),
-		evaluator:     eval,
-		data:          data,
-		transformer:   t,
-		log:           log,
+		ctx:         ctx,
+		cancel:      cancel,
+		config:      c,
+		evaluator:   eval,
+		data:        data,
+		transformer: t,
+		log:         log,
+		resourceCh:  resourceCh,
 	}
 	return bt, nil
 }
@@ -124,27 +143,6 @@ func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
 // Run starts cloudbeat.
 func (bt *cloudbeat) Run(b *beat.Beat) error {
 	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it.")
-
-	// Configure the beats Manager to start after all the reloadable hooks are initialized
-	// and shutdown when the function returns.
-	if err := b.Manager.Start(); err != nil {
-		return err
-	}
-	defer b.Manager.Stop()
-
-	// Wait for Fleet-side reconfiguration only if cloudbeat is running in Agent-managed mode.
-	if b.Manager.Enabled() {
-		bt.log.Infof("Waiting for initial reconfiguration from Fleet server...")
-		update, err := bt.reconfigureWait(reconfigureWaitTimeout)
-		if err != nil {
-			bt.log.Errorf("Failed while waiting for initial reconfiguraiton from Fleet server: %v", err)
-			return err
-		}
-
-		if err := bt.configUpdate(update); err != nil {
-			return fmt.Errorf("failed to update with initial reconfiguration from Fleet server: %w", err)
-		}
-	}
 
 	if err := bt.data.Run(bt.ctx); err != nil {
 		return err
@@ -154,6 +152,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	if err != nil {
 		return err
 	}
+	bt.log.Debugf("cloudbeat configured %d processors", len(bt.config.Processors))
 
 	// Connect publisher (with beat's processors)
 	if bt.client, err = b.Publisher.ConnectWith(beat.ClientConfig{
@@ -164,111 +163,46 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		return err
 	}
 
-	output := bt.data.Output()
+	// Creating the data pipeline
+	findingsCh := pipeline.Step(bt.log, bt.resourceCh, bt.evaluator.Eval)
+	eventsCh := pipeline.Step(bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
+	var eventsToSend []beat.Event
+	var ticker = time.NewTicker(flushInterval)
 	for {
 		select {
 		case <-bt.ctx.Done():
+			bt.log.Warn("cloudbeat context is done")
 			return nil
 
-		case update := <-bt.configUpdates:
-			if err := bt.configUpdate(update); err != nil {
-				bt.log.Errorf("Failed to update cloudbeat config: %v", err)
+		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
+		case <-ticker.C:
+			if len(eventsToSend) == 0 {
+				continue
 			}
 
-		case fetchedResources := <-output:
-			cycleId, _ := uuid.NewV4()
-			cycleStart := time.Now()
-			bt.log.Infof("Eval cycle %v has started", cycleId)
+			bt.log.Infof("Publishing %d cloudbeat events to elasticsearch, time interval reached", len(eventsToSend))
+			bt.client.PublishAll(eventsToSend)
+			eventsToSend = nil
 
-			cycleMetadata := transformer.CycleMetadata{CycleId: cycleId}
-			// TODO: send events through a channel and publish them by a configured threshold & time
-			events := bt.transformer.ProcessAggregatedResources(fetchedResources, cycleMetadata)
+		// Flush events to ES when reaching a certain threshold
+		case events := <-eventsCh:
+			eventsToSend = append(eventsToSend, events...)
+			if len(eventsToSend) < eventsThreshold {
+				continue
+			}
 
-			bt.log.Infof("Publishing %d events to index", len(events))
-			bt.client.PublishAll(events)
-
-			bt.log.Infof("Eval cycle %v published %d events after %s", cycleId, len(events), time.Since(cycleStart))
+			bt.log.Infof("Publishing %d cloudbeat events to elasticsearch, buffer threshold reached", len(eventsToSend))
+			bt.client.PublishAll(eventsToSend)
+			eventsToSend = nil
 		}
 	}
 }
 
-// reconfigureWait will wait for and consume incoming reconfuration from the Fleet server, and keep
-// discarding them until the incoming config contains the necessary information to start cloudbeat
-// properly, thereafter returning the valid config.
-func (bt *cloudbeat) reconfigureWait(timeout time.Duration) (*common.Config, error) {
-	start := time.Now()
-	timer := time.After(timeout)
-
-	for {
-		select {
-		case <-bt.ctx.Done():
-			return nil, fmt.Errorf("cancelled via context")
-
-		case <-timer:
-			return nil, fmt.Errorf("timed out waiting for reconfiguration after %s", time.Since(start))
-
-		case update, ok := <-bt.configUpdates:
-			if !ok {
-				return nil, fmt.Errorf("reconfiguration channel is closed")
-			}
-
-			c, err := config.New(update)
-			if err != nil {
-				bt.log.Errorf("Could not parse reconfiguration %v, skipping with error: %v", update.FlattenedKeys(), err)
-				continue
-			}
-
-			if len(c.Streams) == 0 {
-				bt.log.Warnf("No streams received in reconfiguration %v", update.FlattenedKeys())
-				continue
-			}
-
-			if c.Streams[0].DataYaml == nil {
-				bt.log.Warnf("data_yaml not present in reconfiguration %v", update.FlattenedKeys())
-				continue
-			}
-
-			bt.log.Infof("Received valid reconfiguration after waiting for %s", time.Since(start))
-			return update, nil
-		}
-	}
-}
-
-// configUpdate applies incoming reconfiguration from the Fleet server to the cloudbeat config,
-// and updates the hosted bundle with the new values.
-func (bt *cloudbeat) configUpdate(update *common.Config) error {
-	if err := bt.config.Update(bt.log, update); err != nil {
-		return err
-	}
-
-	policies, err := csppolicies.CISKubernetes()
-	if err != nil {
-		return fmt.Errorf("could not load CIS Kubernetes policies: %w", err)
-	}
-
-	if len(bt.config.Streams) == 0 {
-		bt.log.Infof("Did not receive any input stream from incoming config, skipping.")
-		return nil
-	}
-
-	y, err := bt.config.DataYaml()
-	if err != nil {
-		return fmt.Errorf("could not marshal to YAML: %w", err)
-	}
-
-	if err := csppolicies.HostBundleWithDataYaml("bundle.tar.gz", policies, y); err != nil {
-		return fmt.Errorf("could not update bundle with dataYaml: %w", err)
-	}
-
-	bt.log.Infof("Bundle updated with dataYaml: %s", y)
-	return nil
-}
-
-func InitRegistry(log *logp.Logger, c config.Config) (manager.FetchersRegistry, error) {
+func initRegistry(log *logp.Logger, c config.Config, ch chan fetching.ResourceInfo) (manager.FetchersRegistry, error) {
 	registry := manager.NewFetcherRegistry(log)
 
-	if err := manager.Factories.RegisterFetchers(log, registry, c); err != nil {
+	if err := manager.Factories.RegisterFetchers(log, registry, c, ch); err != nil {
 		return nil, err
 	}
 
@@ -280,6 +214,7 @@ func (bt *cloudbeat) Stop() {
 	bt.cancel()
 	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
+	close(bt.resourceCh)
 
 	bt.client.Close()
 }

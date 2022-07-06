@@ -23,9 +23,9 @@ package config
 import (
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"gopkg.in/yaml.v3"
 )
 
@@ -37,24 +37,28 @@ type Config struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
-	Fetchers   []*common.Config        `config:"fetchers"`
+	Fetchers   []*config.C             `config:"fetchers"`
 
 	Streams []Stream `config:"streams"`
 }
 
 type Stream struct {
-	DataYaml *struct {
-		ActivatedRules struct {
-			CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
-		} `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
-	} `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
+	DataYaml *DataYaml `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
+}
+
+type DataYaml struct {
+	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
+}
+
+type Benchmarks struct {
+	CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
 }
 
 var DefaultConfig = Config{
 	Period: 4 * time.Hour,
 }
 
-func New(cfg *common.Config) (Config, error) {
+func New(cfg *config.C) (Config, error) {
 	c := DefaultConfig
 
 	if err := cfg.Unpack(&c); err != nil {
@@ -69,7 +73,7 @@ func New(cfg *common.Config) (Config, error) {
 //
 // NOTE(yashtewari): This will be removed with the planned update to restart the
 // beat with the new config.
-func (c *Config) Update(log *logp.Logger, cfg *common.Config) error {
+func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
 	log.Infof("Updating config with the following keys: %v", cfg.FlattenedKeys())
 
 	if err := cfg.Unpack(&c); err != nil {

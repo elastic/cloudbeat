@@ -2,10 +2,18 @@
 This module provides kubernetes functionality based on original kubernetes python library.
 """
 
+from typing import Union
+from pathlib import Path
+
 from kubernetes import client, config, utils
 from kubernetes.client import ApiException
 from kubernetes.watch import watch
 
+from commonlib.io_utils import get_k8s_yaml_objects
+
+
+RESOURCE_POD = 'Pod'
+RESOURCE_SERVICE_ACCOUNT = 'ServiceAccount'
 
 class KubernetesHelper:
 
@@ -23,9 +31,9 @@ class KubernetesHelper:
         self.api_client = client.api_client.ApiClient(configuration=self.config)
 
         self.dispatch_list = {
-            'Pod': self.core_v1_client.list_namespaced_pod,
+            RESOURCE_POD: self.core_v1_client.list_namespaced_pod,
             'ConfigMap': self.core_v1_client.list_namespaced_config_map,
-            'ServiceAccount': self.core_v1_client.list_namespaced_service_account,
+            RESOURCE_SERVICE_ACCOUNT: self.core_v1_client.list_namespaced_service_account,
             'DaemonSet': self.app_api.list_namespaced_daemon_set,
             'Role': self.rbac_api.list_namespaced_role,
             'RoleBinding': self.rbac_api.list_namespaced_role_binding,
@@ -36,9 +44,9 @@ class KubernetesHelper:
         }
 
         self.dispatch_delete = {
-            'Pod': self.core_v1_client.delete_namespaced_pod,
+            RESOURCE_POD: self.core_v1_client.delete_namespaced_pod,
             'ConfigMap': self.core_v1_client.delete_namespaced_config_map,
-            'ServiceAccount': self.core_v1_client.delete_namespaced_service_account,
+            RESOURCE_SERVICE_ACCOUNT: self.core_v1_client.delete_namespaced_service_account,
             'DaemonSet': self.app_api.delete_namespaced_daemon_set,
             'Role': self.rbac_api.delete_namespaced_role,
             'RoleBinding': self.rbac_api.delete_namespaced_role_binding,
@@ -179,7 +187,82 @@ class KubernetesHelper:
     def patch_resources(self, resource_type: str, **kwargs):
         """
         """
-        return self.dispatch_patch[resource_type](**kwargs)
+        if resource_type != RESOURCE_POD:
+            return self.dispatch_patch[resource_type](**kwargs)
+
+        patch_body = kwargs.pop('body')
+
+        pod = self.get_resource(resource_type, **kwargs)
+        self.delete_resources(resource_type=resource_type, **kwargs)
+        deleted = self.wait_for_resource(resource_type=resource_type, status_list=['DELETED'], **kwargs)
+
+        if not deleted:
+            raise ValueError(f'could not delete Pod: {kwargs}')
+
+        return self.create_patched_resource(resource_type, patch_body)
+    
+    def create_patched_resource(self, patch_resource_type, patch_body):
+        """
+        """
+        file_path = Path(__file__).parent / '../deploy/mock-pod.yml'
+        k8s_resources = get_k8s_yaml_objects(file_path=file_path)
+
+        patch_metadata = patch_body['metadata']
+        patch_relevant_metadata = {k: patch_metadata[k] for k in ('name', 'namespace') if k in patch_metadata}
+
+        patched_resource = None
+
+        for yml_resource in k8s_resources:
+            resource_type, metadata = yml_resource['kind'], yml_resource['metadata']
+            relevant_metadata = {k: metadata[k] for k in ('name', 'namespace') if k in metadata}
+
+            if resource_type != patch_resource_type or relevant_metadata != patch_relevant_metadata:
+                continue
+
+            patched_body = self.patch_resource_body(yml_resource, patch_body)
+            created_resource = self.create_from_dict(patched_body, **relevant_metadata)
+
+            done = self.wait_for_resource(resource_type=resource_type, status_list=["RUNNING", "ADDED"], **relevant_metadata)
+            if done:
+                patched_resource = created_resource
+            
+            break
+        
+        return patched_resource
+    
+    def patch_resource_body(self, body: Union[list,dict], patch: Union[list,dict]) -> Union[list,dict]:
+        """
+        """
+        if type(body) != type(patch):
+            raise ValueError(f'Cannot compare {type(body)}: {body} with {type(patch)}: {patch}')
+        
+        if isinstance(body, dict):
+            for key, val in patch.items():
+                if key not in body:
+                    body[key] = val
+                else:
+                    if isinstance(val, list) or isinstance(val, dict):
+                        body[key] = self.patch_resource_body(body[key], val)
+                    else:
+                        body[key] = val
+        
+        elif isinstance(body, list):
+            for i, val in enumerate(body):
+                if i >= len(patch):
+                    break
+
+                if isinstance(val, list) or isinstance(val, dict):
+                    body[i] = self.patch_resource_body(body[i], val)
+                else:
+                    body[i] = val
+            
+            if len(patch) > len(body):
+                body += val[len(patch):]
+                
+        else:
+            raise ValueError(f'Invalid body {body} of type {type(body)}')
+        
+        return body
 
     def list_resources(self, resource_type: str, **kwargs):
         """
@@ -206,15 +289,23 @@ class KubernetesHelper:
         watches a resources for a status change
         @param resource_type: the resource type
         @param name: resource name
-        @param status_list: excepted statuses e.g., RUNNING, DELETED, MODIFIED, ADDED
+        @param status_list: accepted statuses e.g., RUNNING, DELETED, MODIFIED, ADDED
         @param timeout: until wait
         @return: True if status reached
         """
+        # When pods are being created, MODIFIED events are also of interest to check if
+        # they successfully transition from ContainerCreating to Running state.
+        if (resource_type == RESOURCE_POD) and ('ADDED' in status_list) and ('MODIFIED' not in status_list):
+            status_list.append('MODIFIED')
+
         w = watch.Watch()
         for event in w.stream(func=self.dispatch_list[resource_type],
                               timeout_seconds=timeout,
                               **kwargs):
-            if event["object"].metadata.name == name and event["type"] in status_list:
+            if name in event["object"].metadata.name and event["type"] in status_list:
+                if (resource_type == RESOURCE_POD) and ('ADDED' in status_list) and (event['object'].status.phase == 'Pending'):
+                    continue
                 w.stop()
                 return True
+
         return False

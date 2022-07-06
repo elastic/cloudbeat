@@ -18,10 +18,10 @@
 package transformer
 
 import (
-	"github.com/elastic/beats/v7/libbeat/logp"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 

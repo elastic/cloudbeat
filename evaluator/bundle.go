@@ -15,47 +15,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package bundle
+package evaluator
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/logp"
+	"github.com/elastic/cloudbeat/config"
 	csppolicies "github.com/elastic/csp-security-policies/bundle"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 var (
 	address = "127.0.0.1:18080"
 
 	ServerAddress = fmt.Sprintf("http://%s", address)
-	Config        = `{
-        "services": {
-            "test": {
-                "url": %q
-            }
-        },
-        "bundles": {
-            "test": {
-                "resource": "/bundles/bundle.tar.gz"
-            }
-        },
-        "decision_logs": {
-            "console": true
-        }
-    }`
 )
 
-func StartServer() (*http.Server, error) {
-	policies, err := csppolicies.CISKubernetes()
-	if err != nil {
-		return nil, err
+func StartServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
+	bundle := csppolicies.CISKubernetesBundle()
+
+	if len(cfg.Streams) > 0 {
+		dataYml, err := cfg.DataYaml()
+		if err != nil {
+			return nil, fmt.Errorf("could not marshal to YAML: %w", err)
+		}
+
+		bundle.With("data.yaml", dataYml)
 	}
 
 	h := csppolicies.NewServer()
-	if err := csppolicies.HostBundle("bundle.tar.gz", policies); err != nil {
-		return nil, err
+	if err := csppolicies.HostBundle("bundle.tar.gz", bundle, ctx); err != nil {
+		return nil, fmt.Errorf("could not update bundle with dataYaml: %w", err)
 	}
 
 	srv := &http.Server{
