@@ -31,6 +31,7 @@ type EKSFetcher struct {
 	log         *logp.Logger
 	cfg         EKSFetcherConfig
 	eksProvider awslib.EksClusterDescriber
+	resourceCh  chan fetching.ResourceInfo
 }
 
 type EKSFetcherConfig struct {
@@ -42,15 +43,20 @@ type EKSResource struct {
 	*eks.DescribeClusterResponse
 }
 
-func (f EKSFetcher) Fetch(ctx context.Context) ([]fetching.Resource, error) {
+func (f EKSFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting EKSFetcher.Fetch")
 
-	results := make([]fetching.Resource, 0)
-
 	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)
-	results = append(results, EKSResource{result})
+	if err != nil {
+		return err
+	}
 
-	return results, err
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      EKSResource{result},
+		CycleMetadata: cMetadata,
+	}
+
+	return nil
 }
 
 func (f EKSFetcher) Stop() {

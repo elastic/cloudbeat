@@ -18,110 +18,119 @@
 package fetchers
 
 import (
+	"github.com/stretchr/testify/suite"
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 // Based on https://github.com/yargevad/filepathx/blob/master/filepathx.go
 
-func TestGlobMatchingNonExistingPattern(t *testing.T) {
+type GlobMatcherTestSuite struct {
+	suite.Suite
+}
+
+func TestGlobMatcherTestSuite(t *testing.T) {
+	s := new(GlobMatcherTestSuite)
+
+	suite.Run(t, s)
+}
+
+func (s *GlobMatcherTestSuite) TestGlobMatchingNonExistingPattern() {
 	directoryName := "test-outer-dir"
 	fileName := "file.txt"
-	dir := createDirectoriesWithFiles(t, "", directoryName, []string{fileName})
+	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, []string{fileName})
 	defer os.RemoveAll(dir)
 
 	filePath := filepath.Join(dir, fileName)
 	matchedFiles, err := Glob(filePath + "/***")
 
-	assert.Nil(t, err)
-	assert.Nil(t, matchedFiles)
+	s.Nil(err)
+	s.Nil(matchedFiles)
 }
 
-func TestGlobMatchingPathDoesNotExist(t *testing.T) {
+func (s *GlobMatcherTestSuite) TestGlobMatchingPathDoesNotExist() {
 	directoryName := "test-outer-dir"
 	fileName := "file.txt"
-	dir := createDirectoriesWithFiles(t, "", directoryName, []string{fileName})
+	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, []string{fileName})
 	defer os.RemoveAll(dir)
 
 	filePath := filepath.Join(dir, fileName)
 	matchedFiles, err := Glob(filePath + "/abc")
 
-	assert.Nil(t, err)
-	assert.Nil(t, matchedFiles)
+	s.Nil(err)
+	s.Nil(matchedFiles)
 }
 
-func TestGlobMatchingSingleFile(t *testing.T) {
+func (s *GlobMatcherTestSuite) TestGlobMatchingSingleFile() {
 	directoryName := "test-outer-dir"
 	fileName := "file.txt"
-	dir := createDirectoriesWithFiles(t, "", directoryName, []string{fileName})
+	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, []string{fileName})
 	defer os.RemoveAll(dir)
 
 	filePath := filepath.Join(dir, fileName)
 	matchedFiles, err := Glob(filePath)
 
-	assert.Nil(t, err, "Glob could not fetch results")
-	assert.Equal(t, 1, len(matchedFiles))
-	assert.Equal(t, matchedFiles[0], filePath)
+	s.Nil(err, "Glob could not fetch results")
+	s.Equal(1, len(matchedFiles))
+	s.Equal(matchedFiles[0], filePath)
 }
 
-func TestGlobDirectoryOnly(t *testing.T) {
+func (s *GlobMatcherTestSuite) TestGlobDirectoryOnly() {
 	directoryName := "test-outer-dir"
 	fileName := "file.txt"
-	dir := createDirectoriesWithFiles(t, "", directoryName, []string{fileName})
+	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, []string{fileName})
 	defer os.RemoveAll(dir)
 
 	matchedFiles, err := Glob(dir)
 
-	assert.Nil(t, err, "Glob could not fetch results")
-	assert.Equal(t, 1, len(matchedFiles))
-	assert.Equal(t, matchedFiles[0], dir)
+	s.Nil(err, "Glob could not fetch results")
+	s.Equal(1, len(matchedFiles))
+	s.Equal(matchedFiles[0], dir)
 }
 
-func TestGlobOuterDirectoryOnly(t *testing.T) {
+func (s *GlobMatcherTestSuite) TestGlobOuterDirectoryOnly() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt"}
-	outerDir := createDirectoriesWithFiles(t, "", outerDirectoryName, outerFiles)
+	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
 	defer os.RemoveAll(outerDir)
 
 	innerDirectoryName := "test-inner-dir"
 	innerFiles := []string{"innerFolderFile.txt"}
-	innerDir := createDirectoriesWithFiles(t, outerDir, innerDirectoryName, innerFiles)
+	innerDir := createDirectoriesWithFiles(s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	matchedFiles, err := Glob(outerDir + "/*")
 
-	assert.Nil(t, err, "Glob could not fetch results")
-	assert.Equal(t, 2, len(matchedFiles))
-	assert.Equal(t, matchedFiles[0], filepath.Join(outerDir, outerFiles[0]))
-	assert.Equal(t, matchedFiles[1], innerDir)
+	s.Nil(err, "Glob could not fetch results")
+	s.Equal(2, len(matchedFiles))
+	s.Equal(matchedFiles[0], filepath.Join(outerDir, outerFiles[0]))
+	s.Equal(matchedFiles[1], innerDir)
 }
 
-func TestGlobDirectoryRecursively(t *testing.T) {
+func (s *GlobMatcherTestSuite) TestGlobDirectoryRecursively() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt"}
-	outerDir := createDirectoriesWithFiles(t, "", outerDirectoryName, outerFiles)
+	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
 	defer os.RemoveAll(outerDir)
 
 	innerDirectoryName := "test-inner-dir"
 	innerFiles := []string{"innerFolderFile.txt"}
-	innerDir := createDirectoriesWithFiles(t, outerDir, innerDirectoryName, innerFiles)
+	innerDir := createDirectoriesWithFiles(s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	innerInnerDirectoryName := "test-inner-inner-dir"
 	innerInnerFiles := []string{"innerInnerFolderFile.txt"}
-	innerInnerDir := createDirectoriesWithFiles(t, innerDir, innerInnerDirectoryName, innerInnerFiles)
+	innerInnerDir := createDirectoriesWithFiles(s.Suite, innerDir, innerInnerDirectoryName, innerInnerFiles)
 
 	matchedFiles, err := Glob(outerDir + "/**")
 
-	assert.Nil(t, err, "Glob could not fetch results")
-	assert.Equal(t, 6, len(matchedFiles))
+	s.Nil(err, "Glob could not fetch results")
+	s.Equal(6, len(matchedFiles))
 
 	//When using glob matching recursively the first outer folder is being sent without a '/'
-	assert.Equal(t, matchedFiles[0], outerDir+"/")
-	assert.Equal(t, matchedFiles[1], filepath.Join(outerDir, outerFiles[0]))
-	assert.Equal(t, matchedFiles[2], innerDir)
-	assert.Equal(t, matchedFiles[3], filepath.Join(innerDir, innerFiles[0]))
-	assert.Equal(t, matchedFiles[4], innerInnerDir)
-	assert.Equal(t, matchedFiles[5], filepath.Join(innerInnerDir, innerInnerFiles[0]))
+	s.Equal(matchedFiles[0], outerDir+"/")
+	s.Equal(matchedFiles[1], filepath.Join(outerDir, outerFiles[0]))
+	s.Equal(matchedFiles[2], innerDir)
+	s.Equal(matchedFiles[3], filepath.Join(innerDir, innerFiles[0]))
+	s.Equal(matchedFiles[4], innerInnerDir)
+	s.Equal(matchedFiles[5], filepath.Join(innerInnerDir, innerInnerFiles[0]))
 }

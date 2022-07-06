@@ -20,12 +20,14 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"regexp"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
@@ -37,7 +39,8 @@ import (
 
 type ECRFetcherTestSuite struct {
 	suite.Suite
-	log *logp.Logger
+	log        *logp.Logger
+	resourceCh chan fetching.ResourceInfo
 }
 
 func TestECRFetcherTestSuite(t *testing.T) {
@@ -50,7 +53,15 @@ func TestECRFetcherTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *ECRFetcherTestSuite) TestFetcherFetch() {
+func (s *ECRFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+}
+
+func (s *ECRFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
+}
+
+func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 	firstRepositoryName := "cloudbeat"
 	secondRepositoryName := "cloudbeat1"
 	publicRepoName := "build.security/citools"
@@ -237,16 +248,18 @@ func (s *ECRFetcherTestSuite) TestFetcherFetch() {
 			cfg:           ECRFetcherConfig{},
 			kubeClient:    kubeclient,
 			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
+			resourceCh:    s.resourceCh,
 		}
 
 		ctx := context.Background()
+		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		results := testhelper.CollectResources(s.resourceCh)
 
-		result, err := ecrFetcher.Fetch(ctx)
+		s.Equal(len(expectedRepositories), len(results))
 		s.Nil(err)
-		s.Equal(len(expectedRepositories), len(result))
 
 		for i, name := range test.expectedRepositoriesNames {
-			ecrResource := result[i].(ECRResource)
+			ecrResource := results[i].Resource.(ECRResource)
 			s.Equal(name, *ecrResource.RepositoryName)
 		}
 	}
@@ -322,12 +335,14 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 			cfg:           ECRFetcherConfig{},
 			kubeClient:    kubeclient,
 			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
+			resourceCh:    s.resourceCh,
 		}
 
 		ctx := context.Background()
+		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
 
-		result, err := ecrFetcher.Fetch(ctx)
-		s.Equal(0, len(result))
+		results := testhelper.CollectResources(s.resourceCh)
+		s.Equal(0, len(results))
 		s.EqualError(err, "could not retrieve pod's aws repositories: ecr error")
 	}
 }

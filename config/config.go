@@ -45,11 +45,15 @@ type Config struct {
 
 type Stream struct {
 	AWSConfig aws.ConfigAWS `config:",inline"`
-	DataYaml  *struct {
-		ActivatedRules struct {
-			CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
-		} `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
-	} `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
+	DataYaml  *DataYaml     `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
+}
+
+type DataYaml struct {
+	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
+}
+
+type Benchmarks struct {
+	CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
 }
 
 var DefaultConfig = Config{

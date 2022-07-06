@@ -21,17 +21,12 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/gofrs/uuid"
 	"k8s.io/client-go/kubernetes"
 )
 
 type ResourceTypeMetadata struct {
-	CycleMetadata
+	fetching.CycleMetadata
 	Type string
-}
-
-type CycleMetadata struct {
-	CycleId uuid.UUID
 }
 
 type CommonDataProvider struct {

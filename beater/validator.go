@@ -18,49 +18,31 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package config
+package beater
 
 import (
-	"context"
+	"fmt"
 
-	"github.com/elastic/beats/v7/libbeat/common/reload"
-	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 )
 
-type reloader struct {
-	ctx context.Context
-	log *logp.Logger
-	ch  chan<- *config.C
+type validator struct {
 }
 
-func (r *reloader) Reload(configs []*reload.ConfigWithMeta) error {
-	if len(configs) == 0 {
-		return nil
+func (v *validator) Validate(cfg *agentconfig.C) error {
+	c, err := config.New(cfg)
+	if err != nil {
+		return fmt.Errorf("Could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
 	}
 
-	r.log.Infof("Received %v new configs for reload.", len(configs))
+	if len(c.Streams) == 0 {
+		return fmt.Errorf("No streams received in reconfiguration %v", cfg.FlattenedKeys())
+	}
 
-	select {
-	case <-r.ctx.Done():
-	default:
-		// TODO(yashtewari): Based on limitations elsewhere, such as the CSP integration,
-		// don't think we should receive more than one Config here. Need to confirm and handle.
-		r.ch <- configs[len(configs)-1].Config
+	if c.Streams[0].DataYaml == nil {
+		return fmt.Errorf("data_yaml not present in reconfiguration %v", cfg.FlattenedKeys())
 	}
 
 	return nil
-}
-
-func Updates(ctx context.Context, log *logp.Logger) <-chan *config.C {
-	ch := make(chan *config.C)
-	r := &reloader{
-		ctx: ctx,
-		log: log,
-		ch:  ch,
-	}
-
-	reload.Register.MustRegisterList("inputs", r)
-
-	return ch
 }
