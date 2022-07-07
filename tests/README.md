@@ -172,6 +172,16 @@ Tests execution depends on the developers needs and currently this framework sup
 
 ### Dev Mode
 
+To run all test targets with just cloudbeat, without testing against Kibana or Elasticsearch, run
+
+```
+just run-test-targets
+```
+
+Note that this will create and destroy the test cluster several times. Logs can be found in the `test-logs` directory and test results can be found in `tests/allure/results`.
+
+----
+
 Before running tests verify that **System Under Test (SUT) Setup** is done and running.
 Since elasticsearch is deployed inside cluster, for reaching it from outside execute the following command:
 ```shell
