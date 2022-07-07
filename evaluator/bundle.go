@@ -35,15 +35,19 @@ var (
 )
 
 func StartServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
-	bundle := csppolicies.CISKubernetesBundle()
+	log := logp.NewLogger("cloudbeat_bundle_server")
 
+	bundle := loadBundle(cfg, log)
+
+	// if no config is provided, all rules will be activated
 	if len(cfg.Streams) > 0 {
-		dataYml, err := cfg.DataYaml()
+		activatedRules, err := cfg.GetActivatedRules()
 		if err != nil {
 			return nil, fmt.Errorf("could not marshal to YAML: %w", err)
 		}
 
-		bundle.With("data.yaml", dataYml)
+		// activated rules are in YAML format
+		bundle.With("data.yaml", activatedRules)
 	}
 
 	h := csppolicies.NewServer()
@@ -59,8 +63,6 @@ func StartServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
 		Handler:      h,
 	}
 
-	log := logp.NewLogger("cloudbeat_bundle_server")
-
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
 			log.Errorf("Bundle server closed: %v", err)
@@ -68,4 +70,19 @@ func StartServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
 	}()
 
 	return srv, nil
+}
+
+// loadBundle loads the relevant bundle based on the config.
+func loadBundle(cfg config.Config, log *logp.Logger) csppolicies.Bundle {
+	bundle := csppolicies.Bundle{}
+
+	if cfg.Type == config.InputTypeEKS {
+		bundle = csppolicies.CISEksBundle()
+		log.Info("Loaded CIS EKS bundle successfully")
+	} else {
+		bundle = csppolicies.CISKubernetesBundle()
+		log.Info("Loaded CIS Vanilla bundle successfully")
+	}
+
+	return bundle
 }
