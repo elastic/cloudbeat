@@ -94,17 +94,10 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 
 	invalidDataYaml := agentconfig.MustNewConfigFrom(`
     streams:
-      - data_yaml:
-          activated_rules:
-            cis_k8s:
-              - a
-              - b
-              - c
-              - d
-              - e
+      - data_yaml
 `)
 	configNoDataYaml, err := config.New(invalidDataYaml)
-	s.NoError(err)
+	s.Error(err)
 
 	validStreams := agentconfig.MustNewConfigFrom(`
     streams:
@@ -134,6 +127,80 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 		},
 		{
 			"valid config from string", "/bundles/bundle.tar.gz", "200 OK", configWithDataYaml,
+		},
+		{
+			"valid config struct", "/bundles/bundle.tar.gz", "200 OK", config.Config{
+				Streams: []config.Stream{
+					{
+						DataYaml: &config.DataYaml{
+							ActivatedRules: &config.Benchmarks{
+								CISK8S: []string{
+									"invalid: - format -invalid",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	time.Sleep(time.Second * 2)
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			server, err := StartServer(context.Background(), test.cfg)
+			s.NoError(err)
+
+			target := ServerAddress + test.path
+			client := &http.Client{}
+			res, err := client.Get(target)
+			s.NoError(err)
+			s.Equal(test.expectedStatusCode, res.Status)
+
+			err = server.Shutdown(context.Background())
+			s.NoError(err)
+			time.Sleep(100 * time.Millisecond)
+		})
+	}
+}
+
+// TestCreateServerWithDataYaml tests the creation of a server with a valid config
+func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
+	validStreamsVanilla := agentconfig.MustNewConfigFrom(`
+    type: cloudbeat/vanilla
+    streams:
+      - data_yaml:
+          activated_rules:
+            cis_k8s:
+              - a
+              - b
+`)
+	configWithVanillaType, err := config.New(validStreamsVanilla)
+	s.NoError(err)
+
+	validStreamsEKS := agentconfig.MustNewConfigFrom(`
+    type: cloudbeat/eks
+    streams:
+      - data_yaml:
+          activated_rules:
+            cis_k8s:
+              - a
+              - b
+`)
+	configWithEksType, err := config.New(validStreamsEKS)
+	s.NoError(err)
+
+	var tests = []struct {
+		name               string
+		path               string
+		expectedStatusCode string
+		cfg                config.Config
+	}{
+		{
+			"valid config struct (Vanilla)", "/bundles/bundle.tar.gz", "200 OK", configWithVanillaType,
+		},
+		{
+			"valid config struct (EKS)", "/bundles/bundle.tar.gz", "200 OK", configWithEksType,
 		},
 		{
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK", config.Config{

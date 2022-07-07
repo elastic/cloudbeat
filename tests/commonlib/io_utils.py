@@ -5,9 +5,9 @@ This module provides input / output manipulations on streams / files
 import os
 import io
 import json
-import yaml
 import shutil
 from pathlib import Path
+import yaml
 from munch import Munch, munchify
 
 
@@ -25,8 +25,8 @@ def get_logs_from_stream(stream: str) -> list[Munch]:
                 result.append(munchify(json.loads(log)))
             except json.decoder.JSONDecodeError:
                 result.append(munchify(json.loads(log.replace("'", '"'))))
-            except Exception as e:
-                print(e)
+            except Exception as ex:
+                print(ex)
                 continue
 
     return result
@@ -46,6 +46,10 @@ def get_k8s_yaml_objects(file_path: Path) -> list[str: dict]:
 
 
 class FsClient:
+    """
+    This class provides functionality for working with
+    file system operations
+    """
 
     @staticmethod
     def exec_command(container_name: str, command: str, param_value: str, resource: str):
@@ -61,36 +65,14 @@ class FsClient:
         if command == 'touch':
             if os.path.exists(param_value):
                 return
-            else:
-                open(param_value, "a+")
-                return
-
-        # if command == 'getent' and param_value == 'group':
-        #     try:
-        #         grp.getgrnam(param_value)
-        #         return ['etcd']
-        #     except KeyError:
-        #         return []
-        #
-        # if command == 'getent' and param_value == 'passwd':
-        #     try:
-        #         pwd.getpwnam(param_value)
-        #         return ['etcd']
-        #     except KeyError:
-        #         return []
-        #
-        # if command == 'groupadd' and param_value == 'etcd':
-        #     try:
-        #         grp.getgrnam(param_value)
-        #         return ['etcd']
-        #     except KeyError:
-        #         return []
+            open(param_value, "a+").close()
+            return
 
         if container_name == '':
             raise Exception("Unknown container name is sent")
 
         current_resource = Path(resource)
-        if not current_resource.is_file():
+        if not (current_resource.is_file() or current_resource.is_dir()):
             raise Exception(
                 f"File {resource} does not exist or mount missing.")
 
@@ -102,6 +84,9 @@ class FsClient:
                 raise Exception(
                     "User and group parameter shall be separated by ':' ")
             shutil.chown(path=resource, user=uid_gid[0], group=uid_gid[1])
+        elif command == 'unlink':
+            if not Path(param_value).is_dir():
+                Path(param_value).unlink()
         else:
             raise Exception(
                 f"Command '{command}' still not implemented in test framework")
@@ -135,25 +120,26 @@ class FsClient:
         unset_list = dictionary.get("unset", [])
 
         # Cycle across set items from the dictionary
-        for skey, svalue in set_dict.items():
-            # Find if set key exists already in the configuration arguments 
+        for skey, s_value in set_dict.items():
+            # Find if set key exists already in the configuration arguments
             if any(skey == x.split("=")[0] for x in command):
                 # Replace the value of the key with the new value from the set items
                 command = list(map(lambda x: x.replace(
-                    x, skey + "=" + svalue) if skey == x.split("=")[0] else x, command))
+                    x, skey + "=" + s_value) if skey == x.split("=")[0] else x, command))
             else:
-                # In case of non existing key in the configuration arguments, append the key/value from set items
-                command.append(skey + "=" + svalue)
+                # In case of non-existing key in the configuration arguments,
+                # append the key/value from set items
+                command.append(skey + "=" + s_value)
 
         # Cycle across unset items from the dictionary
-        for uskey in unset_list:
-            # Filter out the unset keys from the configuration arguments 
-            command = [x for x in command if uskey != x.split("=")[0]]
+        for us_key in unset_list:
+            # Filter out the unset keys from the configuration arguments
+            command = [x for x in command if us_key != x.split("=")[0]]
 
-        # Override the the configuration arguments with the newly built configuration arguments
+        # Override the configuration arguments with the newly built configuration arguments
         r_file["spec"]["containers"][0]["command"] = command
 
-        # Write the newly build configuration arguments
+        # Write the newly built configuration arguments
         with current_resource.open(mode="w") as f:
             yaml.dump(r_file, f)
 
@@ -183,12 +169,12 @@ class FsClient:
         unset_list = dictionary.get("unset", [])
 
         # Merge two dictionaries with priority for the set items
-        r_file = { **r_file, **set_dict }
+        r_file = {**r_file, **set_dict}
 
         # Cycle across unset items from the dictionary
-        for uskey in unset_list:
+        for us_key in unset_list:
             # Parsed dot separated key values
-            keys = uskey.split('.')
+            keys = us_key.split('.')
             key_to_del = keys.pop()
             p = r_file
 
@@ -196,12 +182,11 @@ class FsClient:
             for key in keys:
                 p = p.get(key, None)
                 if p is None:
-                    # Non existing nested key
+                    # Non-existing nested key
                     break
             # Remove nested keys when all path exists
             if p:
                 del p[key_to_del]
-        
-        # Write the newly build config
+        # Write the newly built config
         with current_resource.open(mode="w") as f:
             yaml.dump(r_file, f)
