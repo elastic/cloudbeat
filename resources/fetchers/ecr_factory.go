@@ -68,7 +68,7 @@ func (f *ECRFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 }
 
 func getEcrExtraElements() (ecrExtraElements, error) {
-	awsConfigProvider := awslib.GetInstance()
+	awsConfigProvider := awslib.ConfigProvider{}
 	awsConfig, err := awsConfigProvider.GetConfig()
 	if err != nil {
 		return ecrExtraElements{}, err
