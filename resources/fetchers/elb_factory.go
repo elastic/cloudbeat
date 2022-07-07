@@ -71,7 +71,7 @@ func (f *ELBFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 }
 
 func getElbExtraElements() (elbExtraElements, error) {
-	awsConfigProvider := awslib.GetInstance()
+	awsConfigProvider := awslib.ConfigProvider{}
 	awsConfig, err := awsConfigProvider.GetConfig()
 	if err != nil {
 		return elbExtraElements{}, err

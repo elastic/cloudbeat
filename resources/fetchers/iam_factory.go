@@ -62,7 +62,7 @@ func (f *IAMFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 }
 
 func getIamExtraElements(log *logp.Logger) (IAMExtraElements, error) {
-	awsConfigProvider := awslib.GetInstance()
+	awsConfigProvider := awslib.ConfigProvider{}
 	awsConfig, err := awsConfigProvider.GetConfig()
 	if err != nil {
 		return IAMExtraElements{}, err

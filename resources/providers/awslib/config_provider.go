@@ -18,48 +18,23 @@
 package awslib
 
 import (
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
-	awscommon "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"sync"
-)
-
-var (
-	singletonLock  sync.Once
-	singleInstance *configProvider
-	writeLock      sync.RWMutex
 )
 
 type ConfigGetter interface {
 	GetConfig() Config
 }
 
-type configProvider struct {
-	config Config
+type ConfigProvider struct {
 }
 
-func GetInstance() *configProvider {
-	singletonLock.Do(func() {
-		singleInstance = &configProvider{}
-	})
-	return singleInstance
-}
-
-func (p configProvider) GetConfig() (Config, error) {
-	return p.config, nil
-}
-
-func (p configProvider) SetConfig(awsConf awscommon.ConfigAWS) error {
-	writeLock.Lock()
-	defer writeLock.Unlock()
+func (p ConfigProvider) GetConfig() (Config, error) {
 	cfg, err := external.LoadDefaultAWSConfig()
-	awsConf.DefaultRegion = cfg.Region
-	awsConfig, err := awscommon.InitializeAWSConfig(awsConf)
 	if err != nil {
-		return fmt.Errorf("failed to get aws credentials, please check AWS credential in config: %w", err)
+		return Config{}, err
 	}
 
-	p.config = Config{Config: awsConfig}
-
-	return nil
+	return Config{
+		Config: cfg,
+	}, nil
 }
