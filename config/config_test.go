@@ -50,6 +50,7 @@ func (s *ConfigTestSuite) TestNew() {
 	var tests = []struct {
 		config                    string
 		expectedActivatedK8sRules []string
+		expectedType              string
 		expectedAccessKey         string
 		expectedSecret            string
 		expectedSessionToken      string
@@ -71,6 +72,7 @@ func (s *ConfigTestSuite) TestNew() {
       session_token: session
 `,
 			[]string{"a", "b", "c", "d", "e"},
+			"cloudbeat/vanilla",
 			"key",
 			"secret",
 			"session",
@@ -84,6 +86,7 @@ func (s *ConfigTestSuite) TestNew() {
 		c, err := New(cfg)
 		s.NoError(err)
 
+		s.Equal(test.expectedType, c.Type)
 		s.Equal(test.expectedActivatedK8sRules, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
 		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
 		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
