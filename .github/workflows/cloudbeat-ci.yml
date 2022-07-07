@@ -109,7 +109,7 @@ jobs:
         uses: lewagon/wait-on-check-action@v1.0.0
         with:
           check-name: Build
-          ref: ${{ github.ref }}
+          ref: ${{ github.sha }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           allowed-conclusions: success
           wait-interval: 10
