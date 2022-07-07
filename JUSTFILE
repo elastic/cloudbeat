@@ -99,7 +99,7 @@ load-pytest-kind:
   kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
 
 deploy-tests-helm-ci target:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-local-tests-helm target:
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
@@ -173,7 +173,8 @@ run-test-target target:
   just build-load-run-tests &
 
 
-run-test-targets +targets='file_system_rules k8s_object_rules process_api_server_rules process_controller_manager_rules process_etcd_rules process_kubelet_rules process_scheduler_rules':
+# run-test-targets +targets='file_system_rules k8s_object_rules process_api_server_rules process_controller_manager_rules process_etcd_rules process_kubelet_rules process_scheduler_rules':
+run-test-targets +targets='process_kubelet_rules':
   #!/usr/bin/env sh
 
   echo 'Running tests: {{targets}}'
