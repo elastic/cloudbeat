@@ -11,6 +11,7 @@ from commonlib.utils import get_evaluation
 from product.tests.tests.process.process_test_cases import *
 
 
+@pytest.mark.process_api_server_rules
 @pytest.mark.parametrize(
     ("rule_tag", "dictionary", "resource", "expected"),
     api_server_rules,
@@ -55,7 +56,8 @@ def test_process_api_server(config_node_pre_test,
         pod_name=pods[0].metadata.name,
         namespace=cloudbeat_agent.namespace,
         rule_tag=rule_tag,
-        exec_timestamp=datetime.utcnow()
+        exec_timestamp=datetime.utcnow(),
     )
 
-    assert evaluation == expected, f"Rule {rule_tag} verification failed."
+    assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
+    assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected} actual: {evaluation}"
