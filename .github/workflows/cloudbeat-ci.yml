@@ -47,9 +47,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${GITHUB_SHA}
+          key: ${{ runner.os }}-buildx-${{ github.sha }}-${{ github.run_number }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-${{ github.sha }}
       
       - name: Build cloudbeat-docker
         uses: docker/build-push-action@v2
@@ -91,7 +91,7 @@ jobs:
     strategy:
       matrix:
         test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules process_kubelet_rules, process_scheduler_rules]
-      fail-fast: true
+      fail-fast: false
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -109,7 +109,7 @@ jobs:
         uses: lewagon/wait-on-check-action@v1.0.0
         with:
           check-name: Build
-          ref: ${{ github.sha }}
+          ref: ${{ github.ref }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           allowed-conclusions: success
           wait-interval: 10
@@ -118,13 +118,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/*.tar
-          key: ${{ runner.os }}-dockers-cache-${GITHUB_SHA}
+          key: ${{ runner.os }}-buildx-${{ github.sha }}-${{ github.run_number }}
           restore-keys: |
-            ${{ runner.os }}-dockers-cache-
+            ${{ runner.os }}-buildx-${{ github.sha }}
 
       - name: Load images to kind
         run: |
-          kind load image-archive /tmp/cloudbeat-${GITHUB_SHA}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${GITHUB_SHA}.tar --name=kind-mono
+          kind load image-archive /tmp/cloudbeat${{ github.sha }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.sha }}.tar --name=kind-mono
 
 #          rm -rf /tmp/*.tar
 
