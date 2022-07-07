@@ -15,6 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+//go:build !integration
+// +build !integration
+
 package config
 
 import (
@@ -49,12 +52,16 @@ func (s *ConfigTestSuite) SetupTest() {
 
 func (s *ConfigTestSuite) TestNew() {
 	var tests = []struct {
-		config   string
-		expected []string
+		config                    string
+		expectedActivatedK8sRules []string
+		expectedAccessKey         string
+		expectedSecret            string
+		expectedSessionToken      string
 	}{
 		{
 			`
-  streams:
+   type : cloudbeat/vanilla
+   streams:
     - data_yaml:
         activated_rules:
           cis_k8s:
@@ -63,8 +70,14 @@ func (s *ConfigTestSuite) TestNew() {
             - c
             - d
             - e
+      access_key_id: key
+      secret_access_key: secret
+      session_token: session
 `,
 			[]string{"a", "b", "c", "d", "e"},
+			"key",
+			"secret",
+			"session",
 		},
 	}
 
@@ -75,7 +88,10 @@ func (s *ConfigTestSuite) TestNew() {
 		c, err := New(cfg)
 		s.NoError(err)
 
-		s.Equal(test.expected, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+		s.Equal(test.expectedActivatedK8sRules, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
+		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
+		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
 	}
 }
 
@@ -341,7 +357,7 @@ activated_rules:
 		c, err := New(cfg)
 		s.NoError(err)
 
-		dy, err := c.GetActivatedRules()
+		dy, err := c.DataYaml()
 		s.NoError(err)
 
 		s.Equal(strings.TrimSpace(test.expected), strings.TrimSpace(dy))
