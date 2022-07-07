@@ -75,7 +75,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/*.tar
-          key: ${{ runner.os }}-dockers-cache-${GITHUB_SHA}
+          key: ${{ runner.os }}-buildx-${{ github.sha }}-${{ github.run_number }}
           restore-keys: |
             ${{ runner.os }}-dockers-cache-
 
