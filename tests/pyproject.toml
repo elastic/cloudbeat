@@ -27,5 +27,13 @@ build-backend = "poetry.core.masonry.api"
 addopts = "-p no:warnings -s -v --alluredir=tests/allure/results"
 markers = [
     # tests used in cloudbeat CI
-    "pre_merge"
+    "pre_merge",
+    # test target markers
+    "file_system_rules",
+    "k8s_object_rules",
+    "process_api_server_rules",
+    "process_controller_manager_rules",
+    "process_etcd_rules",
+    "process_kubelet_rules",
+    "process_scheduler_rules"
 ]
