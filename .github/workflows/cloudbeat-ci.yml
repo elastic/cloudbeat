@@ -98,6 +98,8 @@ jobs:
 
       - uses: azure/setup-helm@v1
         id: install
+      
+      - uses: extractions/setup-just@v1
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
