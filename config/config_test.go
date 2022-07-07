@@ -15,9 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//go:build !integration
-// +build !integration
-
 package config
 
 import (
@@ -39,7 +36,6 @@ type ConfigTestSuite struct {
 func TestConfigTestSuite(t *testing.T) {
 	s := new(ConfigTestSuite)
 	s.log = logp.NewLogger("cloudbeat_config_test_suite")
-
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
 	}
@@ -145,11 +141,17 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
               - b
               - c
               - d
-              - e`
+              - e
+        access_key_id: old_key
+        secret_access_key: old_secret
+        session_token: old_session`
 
 	var tests = []struct {
-		update   string
-		expected []string
+		update                 string
+		expectedActivatedRules []string
+		expectedAccessKey      string
+		expectedSecret         string
+		expectedSessionToken   string
 	}{
 		{
 			`
@@ -157,12 +159,18 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
             - data_yaml:
                 activated_rules:
                   cis_k8s:
-                    - a
+                    - a	
                     - b
                     - c
                     - d
+              access_key_id: new_key
+              secret_access_key: new_secret
+              session_token: new_session
         `,
 			[]string{"a", "b", "c", "d"},
+			"new_key",
+			"new_secret",
+			"new_session",
 		},
 		{
 			`
@@ -170,13 +178,19 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
             - data_yaml:
                 activated_rules:
                   cis_k8s:
-                    - b
+                    - b	
                     - c
                     - d
                     - e
                     - f
+              access_key_id: new_key1
+              secret_access_key: new_secret1
+              session_token: new_session1
         `,
 			[]string{"b", "c", "d", "e", "f"},
+			"new_key1",
+			"new_secret1",
+			"new_session1",
 		},
 		{
 			`
@@ -184,45 +198,46 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
             - data_yaml:
                 activated_rules:
                   cis_k8s: []
+              access_key_id: 
+              secret_access_key:
+              session_token:
         `,
 			[]string{},
+			"",
+			"",
+			"",
 		},
+		//We're not currently aware of a scenario where we receive
+		//multiple input streams, but still to make sure that it doesn't
+		//break for this scenario.
 		{
 			`
           streams:
             - data_yaml:
                 activated_rules:
                   cis_k8s:
-                    - a
-                    - b
-                    - c
-                    - d
-                    - e
-        `,
-			[]string{"a", "b", "c", "d", "e"},
-		},
-		// We're not currently aware of a scenario where we receive
-		// multiple input streams, but still to make sure that it doesn't
-		// break for this scenario.
-		{
-			`
-          streams:
-            - data_yaml:
-                activated_rules:
-                  cis_k8s:
-                    - x
-                    - "y" # Just YAML 1.1 things
+                    - x	
+                    -  "y" # Just YAML 1.1 things
                     - z
+              access_key_id: first_stream_key
+              secret_access_key: first_stream_secret
+              session_token: first_stream_session  
             - data_yaml:
                 activated_rules:
-                    - f
+                  cis_k8s:
+                    - f	
                     - g
                     - h
                     - i
                     - j
-                    - k
+              access_key_id: second_stream_key
+              secret_access_key: second_stream_secret
+              session_token: second_stream_session
         `,
 			[]string{"x", "y", "z"},
+			"first_stream_key",
+			"first_stream_secret",
+			"first_stream_session",
 		},
 	}
 
@@ -239,7 +254,10 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		err = c.Update(s.log, cfg)
 		s.NoError(err)
 
-		s.Equal(test.expected, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+		s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
+		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
+		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
 	}
 }
 
@@ -258,49 +276,67 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
               - b
               - c
               - d
-              - e`
+              - e
+        access_key_id: old_key
+        secret_access_key: old_secret
+        session_token: old_session`
 
 	var tests = []struct {
-		update             string
-		expectedPeriod     time.Duration
-		expectedKubeConfig string
-		expectedCISK8S     []string
+		update               string
+		expectedPeriod       time.Duration
+		expectedKubeConfig   string
+		expectedCISK8S       []string
+		expectedAccessKey    string
+		expectedSecret       string
+		expectedSessionToken string
 	}{
 		{
 			update: `
-            streams:
-              - data_yaml:
-                  activated_rules:
-                    cis_k8s:
-                      - a
-                      - b
-                      - c
-                      - d`,
-			expectedPeriod:     10 * time.Second,
-			expectedKubeConfig: "some_path",
-			expectedCISK8S:     []string{"a", "b", "c", "d"},
+           streams:
+             - data_yaml:
+                 activated_rules:
+                   cis_k8s:
+                     - a
+                     - b
+                     - c
+                     - d
+               access_key_id: new_key
+               secret_access_key: new_secret
+               session_token: new_session`,
+			expectedPeriod:       10 * time.Second,
+			expectedKubeConfig:   "some_path",
+			expectedCISK8S:       []string{"a", "b", "c", "d"},
+			expectedAccessKey:    "new_key",
+			expectedSecret:       "new_secret",
+			expectedSessionToken: "new_session",
 		},
 		{
-			update:             `period: 4h`,
-			expectedPeriod:     4 * time.Hour,
-			expectedKubeConfig: "some_path",
-			expectedCISK8S:     []string{"a", "b", "c", "d"},
+			update:               `period: 4h`,
+			expectedPeriod:       4 * time.Hour,
+			expectedKubeConfig:   "some_path",
+			expectedCISK8S:       []string{"a", "b", "c", "d"},
+			expectedAccessKey:    "new_key",
+			expectedSecret:       "new_secret",
+			expectedSessionToken: "new_session",
 		},
 		{
 			update: `
-            kube_config: some_other_path
-            streams:
-              - data_yaml:
-                  activated_rules:
-                    cis_k8s:
-                      - a
-                      - b
-                      - c
-                      - d
-                      - e`,
-			expectedPeriod:     4 * time.Hour,
-			expectedKubeConfig: "some_other_path",
-			expectedCISK8S:     []string{"a", "b", "c", "d", "e"},
+           kube_config: some_other_path
+           streams:
+             - data_yaml:
+                 activated_rules:
+                   cis_k8s:
+                     - a
+                     - b
+                     - c
+                     - d
+                     - e`,
+			expectedPeriod:       4 * time.Hour,
+			expectedKubeConfig:   "some_other_path",
+			expectedCISK8S:       []string{"a", "b", "c", "d", "e"},
+			expectedAccessKey:    "",
+			expectedSecret:       "",
+			expectedSessionToken: "",
 		},
 	}
 
@@ -320,6 +356,9 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 		s.Equal(test.expectedPeriod, c.Period)
 		s.Equal(test.expectedKubeConfig, c.KubeConfig)
 		s.Equal(test.expectedCISK8S, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
+		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
+		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
 	}
 }
 
@@ -357,7 +396,7 @@ activated_rules:
 		c, err := New(cfg)
 		s.NoError(err)
 
-		dy, err := c.DataYaml()
+		dy, err := c.GetActivatedRules()
 		s.NoError(err)
 
 		s.Equal(strings.TrimSpace(test.expected), strings.TrimSpace(dy))

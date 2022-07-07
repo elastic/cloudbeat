@@ -21,13 +21,12 @@
 package config
 
 import (
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"time"
-
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"gopkg.in/yaml.v3"
+	"time"
 )
 
 const DefaultNamespace = "default"
