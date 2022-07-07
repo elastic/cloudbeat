@@ -100,11 +100,14 @@ func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 		return nil, err
 	}
 
+	//TODO - Ofir Set bundle
 	eval, err := evaluator.NewOpaEvaluator(ctx, log, c)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
+
+	//TODO - Ofir Set AWS configuration
 
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
