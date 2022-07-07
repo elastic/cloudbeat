@@ -113,7 +113,7 @@ gen-report:
 run-tests:
   helm test {{TESTS_RELEASE}} --namespace kube-system
 
-run-tests:
+run-tests-ci:
   helm test {{TESTS_RELEASE}} --namespace kube-system --kube-context kind-kind-mono --logs 2>&1 | tee test.log
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests

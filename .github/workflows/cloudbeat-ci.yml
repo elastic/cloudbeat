@@ -59,7 +59,7 @@ jobs:
           tags: cloudbeat:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/cloudbeat-${GITHUB_SHA}.tar
+          outputs: type=docker,dest=/tmp/cloudbeat-${{ github.sha }}-${{ github.run_number }}.tar
 
       - name: Build pytest-docker
         uses: docker/build-push-action@v2
@@ -69,7 +69,7 @@ jobs:
           tags: cloudbeat-test:latest
           cache-from: type=local,mode=max,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/pytest-${GITHUB_SHA}.tar
+          outputs: type=docker,dest=/tmp/pytest-${{ github.sha }}-${{ github.run_number }}.tar
       
       - name: Cache docker images
         uses: actions/cache@v2
@@ -124,7 +124,7 @@ jobs:
 
       - name: Load images to kind
         run: |
-          kind load image-archive /tmp/cloudbeat${{ github.sha }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.sha }}.tar --name=kind-mono
+          kind load image-archive /tmp/cloudbeat-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono
 
 #          rm -rf /tmp/*.tar
 
