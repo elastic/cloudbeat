@@ -61,7 +61,7 @@ func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 }
 
 func getEksExtraElements() (eksExtraElements, error) {
-	awsConfigProvider := awslib.ConfigProvider{}
+	awsConfigProvider := awslib.GetInstance()
 	awsConfig, err := awsConfigProvider.GetConfig()
 	if err != nil {
 		return eksExtraElements{}, err
