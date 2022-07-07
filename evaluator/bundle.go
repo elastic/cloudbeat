@@ -74,7 +74,7 @@ func StartServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
 
 // loadBundle loads the relevant bundle based on the config.
 func loadBundle(cfg config.Config, log *logp.Logger) csppolicies.Bundle {
-	bundle := csppolicies.Bundle{}
+	var bundle csppolicies.Bundle
 
 	if cfg.Type == config.InputTypeEKS {
 		bundle = csppolicies.CISEksBundle()
