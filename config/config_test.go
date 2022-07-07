@@ -15,9 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//go:build !integration
-// +build !integration
-
 package config
 
 import (
@@ -344,7 +341,7 @@ activated_rules:
 		c, err := New(cfg)
 		s.NoError(err)
 
-		dy, err := c.DataYaml()
+		dy, err := c.GetActivatedRules()
 		s.NoError(err)
 
 		s.Equal(strings.TrimSpace(test.expected), strings.TrimSpace(dy))
