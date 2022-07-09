@@ -91,11 +91,11 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    strategy:
-      matrix:
+    # strategy:
+    #   matrix:
         # test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
-        test-target: [file_system_rules]
-      fail-fast: false
+        # test-target: [file_system_rules]
+      # fail-fast: false
 
     steps:
       - name: Check out the repo
@@ -137,8 +137,8 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm-ci ${{ matrix.test-target }}
-
+          just deploy-tests-helm-ci pre_merge
+#          just deploy-tests-helm-ci ${{ matrix.test-target }}
       - name: Run Tests
         id: run_tests 
         run: |
