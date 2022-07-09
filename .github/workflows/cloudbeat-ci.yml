@@ -91,7 +91,6 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
     strategy:
       matrix:
         # test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
