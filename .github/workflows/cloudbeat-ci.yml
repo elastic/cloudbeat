@@ -12,7 +12,6 @@ on:
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.2
-
 jobs:
   Build:
     name: Build
@@ -92,12 +91,11 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    # strategy:
-    #   matrix:
+    strategy:
+      matrix:
         # test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
-        # test-target: [file_system_rules]
+        test-target: [pre_merge]
       # fail-fast: false
-
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -134,12 +132,11 @@ jobs:
         run: |
           kind load image-archive /tmp/cloudbeat-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono
 #          rm -rf /tmp/*.tar
-
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm-ci pre_merge
-#          just deploy-tests-helm-ci ${{ matrix.test-target }}
+          just deploy-tests-helm-ci ${{ matrix.test-target }}
+
       - name: Run Tests
         id: run_tests 
         run: |
@@ -151,20 +148,41 @@ jobs:
           echo "EOF" >> "$GITHUB_ENV"
           exit $result_code
 
-      - name: Publish allure report
+      - name: Upload Test Results
         if: always()
-        uses: andrcuns/allure-publish-action@v1.0.1
+        uses: actions/upload-artifact@v2
         with:
-          storageType: s3
-          resultsGlob: "tests/allure/results/*"
-          updatePr: actions
-          collapseSummary: false
-          summary: suites
-          summaryTableType: markdown
-          copyLatest: true
-          bucket: csp-allure-reports
-          prefix: allure_reports/cloudbeat/${GITHUB_REF}
-          ignoreMissingResults: true
+          name: allure_results-${{ matrix.test-target}}
+          path: tests/allure/results/
+
+  publish_results:
+    name: Publish Results
+    needs: Integration_tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: tests/allure/results
+
+      # - name: Publish allure report
+      #   if: always()
+      #   uses: andrcuns/allure-publish-action@v1.0.1
+      #   with:
+      #     storageType: s3
+      #     resultsGlob: "tests/allure/results/*"
+      #     updatePr: actions
+      #     collapseSummary: false
+      #     summary: suites
+      #     summaryTableType: markdown
+      #     copyLatest: true
+      #     bucket: csp-allure-reports
+      #     prefix: allure_reports/cloudbeat/${GITHUB_REF}
+      #     ignoreMissingResults: true
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: tests/allure/artifacts
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
