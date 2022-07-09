@@ -153,7 +153,7 @@ jobs:
       - name: Publish allure report
         uses: andrcuns/allure-publish-action@v1.0.1
         with:
-          storageType: aws
+          storageType: s3
           resultsGlob: "tests/allure/results/*"
           bucket: csp-allure-reports
           prefix: allure_reports/cloudbeat/${GITHUB_REF}
