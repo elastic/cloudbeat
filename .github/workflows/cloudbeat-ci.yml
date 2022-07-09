@@ -16,12 +16,12 @@ env:
 jobs:
   Build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: []
     timeout-minutes: 15
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-
+            
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -157,7 +157,7 @@ jobs:
           resultsGlob: "tests/allure/results/*"
           bucket: csp-allure-reports
           prefix: allure_reports/cloudbeat/${GITHUB_REF}
-          copyLatest: true
+          copyLatest: false
           ignoreMissingResults: true
 
       - name: Setup tmate session
