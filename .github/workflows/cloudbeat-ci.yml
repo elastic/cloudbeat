@@ -152,14 +152,18 @@ jobs:
           exit $result_code
 
       - name: Publish allure report
+        if: always()
         uses: andrcuns/allure-publish-action@v1.0.1
         with:
           storageType: s3
           resultsGlob: "tests/allure/results/*"
-          updatePr: actions 
+          updatePr: actions
+          collapseSummary: false
+          summary: suites
+          summaryTableType: markdown
+          copyLatest: true
           bucket: csp-allure-reports
           prefix: allure_reports/cloudbeat/${GITHUB_REF}
-          copyLatest: false
           ignoreMissingResults: true
 
       - name: Setup tmate session
