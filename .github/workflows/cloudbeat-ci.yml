@@ -88,10 +88,14 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     strategy:
       matrix:
-        test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules process_kubelet_rules, process_scheduler_rules]
+        test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
       fail-fast: false
+
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -127,7 +131,6 @@ jobs:
       - name: Load images to kind
         run: |
           kind load image-archive /tmp/cloudbeat-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono
-
 #          rm -rf /tmp/*.tar
 
       - name: Deploy tests Helm chart
@@ -145,6 +148,16 @@ jobs:
           echo "$SUMMARY" >> "$GITHUB_ENV"
           echo "EOF" >> "$GITHUB_ENV"
           exit $result_code
+
+      - name: Publish allure report
+        uses: andrcuns/allure-publish-action@v1.0.1
+        with:
+          storageType: gcs
+          resultsGlob: "tests/allure/results/*"
+          bucket: csp-allure-reports
+          prefix: allure_reports/cloudbeat/${GITHUB_REF}
+          copyLatest: true
+          ignoreMissingResults: true
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
