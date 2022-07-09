@@ -12,6 +12,10 @@ on:
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.2
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   Build:
     name: Build
@@ -88,9 +92,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
         # test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
