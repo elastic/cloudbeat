@@ -1,8 +1,9 @@
-name: Publish-test-results
+name: Publish-Test-Results
 
 on:
   workflow_run:
     workflows: ["Cloudbeat-CI", "Nightly-CI"]
+
 jobs:    
   publish_results:
     name: Publish Results
