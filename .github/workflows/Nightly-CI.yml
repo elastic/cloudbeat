@@ -85,6 +85,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   Functional_Tests:
+    needs: Build
     name: Functional Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -108,15 +109,15 @@ jobs:
           config: deploy/k8s/kind/kind-config.yml
           cluster_name: kind-mono 
 
-      - name: Wait for build to succeed
-        uses: lewagon/wait-on-check-action@v1.0.0
-        with:
-          check-name: Build
-          running-workflow-name: ${{ github.workflow }}
-          ref: ${{ github.ref }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          allowed-conclusions: success
-          wait-interval: 10
+      # - name: Wait for build to succeed
+      #   uses: lewagon/wait-on-check-action@v1.0.0
+      #   with:
+      #     check-name: Build
+      #     running-workflow-name: ${{ github.workflow }}
+      #     ref: ${{ github.ref }}
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
+      #     allowed-conclusions: success
+      #     wait-interval: 10
 
       - name: Cache docker images
         uses: actions/cache@v2
