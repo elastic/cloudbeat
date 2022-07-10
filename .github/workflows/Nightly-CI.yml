@@ -64,11 +64,11 @@ jobs:
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> GITHUB_ENV
     - id: set-matrix
       env: 
-        TEST: "[\"pre_merge\", \"file_system_rules\"]"
+        TEST: '[\"pre_merge\", \"file_system_rules\"]'
         # TEST_TARGETS: >-
         #   ["pre_merge", "file_system_rules"]
-      # run: echo "::set-output name=matrix::${TEST_MATRIX}"
-      run: echo "::set-output name=matrix::[\"pre_merge\", \"file_system_rules\"]"
+      run: echo "::set-output name=matrix::${{ env.TEST }}"
+      # run: echo "::set-output name=matrix::[\"pre_merge\", \"file_system_rules\"]"
 
   Build:
     name: Build
@@ -186,7 +186,7 @@ jobs:
 
       - name: Load images to kind
         run: |
-          kind load image-archive /tmp/cloudbeat-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono
+          kind load image-archive /tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono
 
       - name: Deploy tests Helm chart
         id: deploy_helm
