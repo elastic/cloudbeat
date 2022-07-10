@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package manager
+package fetchersManager
 
 import (
 	"context"
@@ -40,7 +40,7 @@ func newFactories() factories {
 	return factories{m: make(map[string]fetching.Factory)}
 }
 
-func (fa *factories) ListFetcherFactory(name string, f fetching.Factory) {
+func (fa *factories) SetFetcherFactory(name string, f fetching.Factory) {
 	_, ok := fa.m[name]
 	if ok {
 		panic(fmt.Errorf("fetcher factory with name %q listed more than once", name))
@@ -58,28 +58,6 @@ func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig
 	return factory.Create(log, c, ch)
 }
 
-func (fa *factories) RegisterFetchers(log *logp.Logger, registry FetchersRegistry, cfg config.Config, ch chan fetching.ResourceInfo) error {
-	parsedList, err := fa.parseConfigFetchers(log, cfg, ch)
-	if err != nil {
-		return err
-	}
-
-	for _, p := range parsedList {
-		c, err := fa.getConditions(log, p.name)
-		if err != nil {
-			log.Errorf("RegisterFetchers error in getConditions for factory %s skipping Register due to: %v", p.name, err)
-			continue
-		}
-
-		err = registry.Register(p.name, p.f, c...)
-		if err != nil {
-			log.Errorf("Could not read register fetcher: %v", err)
-		}
-	}
-
-	return nil
-}
-
 // TODO: Move conditions to factories and implement inside every factory
 func (fa *factories) getConditions(log *logp.Logger, name string) ([]fetching.Condition, error) {
 	c := make([]fetching.Condition, 0)
@@ -90,10 +68,9 @@ func (fa *factories) getConditions(log *logp.Logger, name string) ([]fetching.Co
 		if err != nil {
 			log.Errorf("getConditions error in GetKubernetesClient: %v", err)
 			return nil, err
-		} else {
-			leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
-			c = append(c, conditions.NewLeaseFetcherCondition(log, leaseProvider))
 		}
+		leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
+		c = append(c, conditions.NewLeaseFetcherCondition(log, leaseProvider))
 	}
 
 	return c, nil
@@ -104,8 +81,8 @@ type ParsedFetcher struct {
 	f    fetching.Fetcher
 }
 
-func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
-	arr := []*ParsedFetcher{}
+func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
+	var arr []*ParsedFetcher
 	for _, fcfg := range cfg.Fetchers {
 		p, err := fa.parseConfigFetcher(log, fcfg, ch)
 		if err != nil {

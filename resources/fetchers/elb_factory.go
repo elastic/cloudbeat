@@ -27,8 +27,8 @@ import (
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
 )
 
 const (
@@ -36,8 +36,7 @@ const (
 )
 
 func init() {
-
-	manager.Factories.ListFetcherFactory(ELBType,
+	fetchersManager.Factories.SetFetcherFactory(ELBType,
 		&ELBFactory{
 			extraElements: getElbExtraElements,
 		},

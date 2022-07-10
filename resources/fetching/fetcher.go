@@ -79,3 +79,9 @@ type BaseFetcherConfig struct {
 }
 
 const KubeAPIType = "kube-api"
+const FileSystemType = "file-system"
+const ProcessType = "process"
+const ECRType = "aws-ecr"
+const EKSType = "aws-eks"
+const ELBType = "aws-elb"
+const IAMType = "aws-iam"

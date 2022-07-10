@@ -19,11 +19,11 @@ package fetchers
 
 import (
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"regexp"
 
 	"github.com/docker/distribution/context"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
@@ -36,7 +36,7 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{extraElements: getEcrExtraElements})
+	fetchersManager.Factories.SetFetcherFactory(ECRType, &ECRFactory{extraElements: getEcrExtraElements})
 }
 
 type ECRFactory struct {

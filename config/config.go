@@ -37,6 +37,10 @@ const (
 	InputTypeEKS = "cloudbeat/eks"
 )
 
+type Fetcher struct {
+	Name string `config:"name"` // Name of the fetcher
+}
+
 type Config struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`

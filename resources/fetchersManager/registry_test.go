@@ -15,11 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package manager
+package fetchersManager
 
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/config"
 	"testing"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -110,7 +111,7 @@ func TestRegistryTestSuite(t *testing.T) {
 }
 
 func (s *RegistryTestSuite) SetupTest() {
-	s.registry = NewFetcherRegistry(s.log)
+	s.registry = NewFetcherRegistry(s.log, config.DefaultConfig)
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
@@ -243,7 +244,7 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	}
 
 	for _, test := range tests {
-		s.registry = NewFetcherRegistry(s.log)
+		s.registry = NewFetcherRegistry(s.log, config.DefaultConfig)
 		f := newNumberFetcher(1, nil, s.wg)
 		err := s.registry.Register("some-key", f, test.conditions...)
 		s.NoError(err)

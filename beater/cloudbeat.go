@@ -29,7 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources/manager"
+	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -51,7 +51,7 @@ type cloudbeat struct {
 	cancel      context.CancelFunc
 	config      config.Config
 	client      beat.Client
-	data        *manager.Data
+	data        *fetchersManager.Data
 	evaluator   evaluator.Evaluator
 	transformer transformer.Transformer
 	log         *logp.Logger
@@ -64,7 +64,7 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	reloader := launcher.NewListener(ctx, log)
 	validator := &validator{}
 
-	s, err := launcher.New(ctx, log, reloader, validator, b, NewCloudbeat, cfg)
+	s, err := launcher.New(ctx, log, reloader, validator, NewCloudbeat, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +73,8 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	return s, nil
 }
 
-// New creates an instance of cloudbeat.
-func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+// NewCloudbeat creates an instance of cloudbeat.
+func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("cloudbeat")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -94,7 +94,7 @@ func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 		return nil, err
 	}
 
-	data, err := manager.NewData(log, c.Period, time.Minute, fetchersRegistry)
+	data, err := fetchersManager.NewData(log, c.Period, time.Minute, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -199,10 +199,15 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(log *logp.Logger, c config.Config, ch chan fetching.ResourceInfo) (manager.FetchersRegistry, error) {
-	registry := manager.NewFetcherRegistry(log)
+func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) (fetchersManager.FetchersRegistry, error) {
+	registry := fetchersManager.NewFetcherRegistry(log, cfg)
 
-	if err := manager.Factories.RegisterFetchers(log, registry, c, ch); err != nil {
+	parsedList, err := fetchersManager.Factories.ParseConfigFetchers(log, cfg, ch)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := registry.RegisterFetchers(parsedList); err != nil {
 		return nil, err
 	}
 

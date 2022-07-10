@@ -15,11 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package manager
+package fetchersManager
 
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"sync"
 	"testing"
@@ -109,7 +110,7 @@ func TestDataTestSuite(t *testing.T) {
 func (s *DataTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.opts = goleak.IgnoreCurrent()
-	s.registry = NewFetcherRegistry(s.log)
+	s.registry = NewFetcherRegistry(s.log, config.DefaultConfig) // todo: how do we load config from test?
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
@@ -168,8 +169,8 @@ func (s *DataTestSuite) TestDataFetchSinglePanic() {
 	fetcherName := "panic_fetcher"
 
 	f := newPanicFetcher(fetcherMessage, s.resourceCh, nil)
-	err := s.registry.Register(fetcherName, f)
-	s.NoError(err)
+	s.registry.Register(fetcherName, f)
+	//s.NoError(err) // todo: dp we want to return an error here
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
@@ -185,8 +186,8 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 
 	s.wg.Add(1)
 	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
-	err := s.registry.Register(fetcherName, f)
-	s.NoError(err)
+	s.registry.Register(fetcherName, f)
+	//s.NoError(err)// todo: dp we want to return an error here
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
@@ -208,8 +209,8 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 
 	s.wg.Add(1)
 	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
-	err := s.registry.Register(fetcherName, f)
-	s.NoError(err)
+	s.registry.Register(fetcherName, f)
+	//s.NoError(err)// todo: dp we want to return an error here
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
@@ -226,8 +227,8 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 
 	f := newNumberFetcher(fetcherVal, s.resourceCh, s.wg)
 	c := newBoolFetcherCondition(false, fetcherConditionName)
-	err := s.registry.Register(fetcherName, f, c)
-	s.NoError(err)
+	s.registry.Register(fetcherName, f, c)
+	//s.NoError(err) // todo: dp we want to return an error here
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
