@@ -50,10 +50,11 @@ jobs:
     - id: Push
       # if: github.event_name == 'push'
       env:
-        TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
+        TEST_TARGETS: >-
+          ["pre_merge", "file_system_rules"]
+        # TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
       run: |
         echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
-        echo ${{ env.TEST_MATRIX }}
     # - id: Dispatch
     #   if: github.event_name == 'workflow_dispatch'
     #   env:
