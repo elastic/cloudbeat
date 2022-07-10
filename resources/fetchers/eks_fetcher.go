@@ -35,7 +35,7 @@ type EKSFetcher struct {
 }
 
 type EKSFetcherConfig struct {
-	fetching.BaseFetcherConfig
+	fetching.AwsBaseFetcherConfig
 	ClusterName string `config:"clusterName"`
 }
 

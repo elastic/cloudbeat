@@ -20,7 +20,6 @@ package fetchers
 import (
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
@@ -55,10 +54,7 @@ name: aws-eks
 	}
 
 	for _, test := range tests {
-		eksProvider := &awslib.MockedEksClusterDescriber{}
-		factory := &EKSFactory{extraElements: func() (eksExtraElements, error) {
-			return eksExtraElements{eksProvider: eksProvider}, nil
-		}}
+		factory := &EKSFactory{}
 
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
@@ -67,8 +63,8 @@ name: aws-eks
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		eksFetcher, ok := fetcher.(*EKSFetcher)
+		_, ok := fetcher.(*EKSFetcher)
 		s.True(ok)
-		s.Equal(eksProvider, eksFetcher.eksProvider)
+		//s.Equal(eksProvider, eksFetcher.eksProvider)
 	}
 }
