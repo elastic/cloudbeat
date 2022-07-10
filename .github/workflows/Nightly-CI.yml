@@ -64,11 +64,11 @@ jobs:
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> GITHUB_ENV
     - id: set-matrix
       env: 
-        # TEST: '[\"pre_merge\", \"file_system_rules\"]'
-        TEST_TARGETS: >-
-          ["pre_merge", "file_system_rules"]
+        TEST: "[\"pre_merge\", \"file_system_rules\"]"
+        # TEST_TARGETS: >-
+        #   ["pre_merge", "file_system_rules"]
       # run: echo "::set-output name=matrix::${TEST_MATRIX}"
-      run: echo "::set-output name=matrix::${{ env.TEST_TARGETS }}"
+      run: echo "::set-output name=matrix::[\"pre_merge\", \"file_system_rules\"]"
 
   Build:
     name: Build
