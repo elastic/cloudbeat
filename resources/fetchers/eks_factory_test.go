@@ -49,6 +49,10 @@ func (s *EksFactoryTestSuite) TestCreateFetcher() {
 		{
 			`
 name: aws-eks
+clusterName: my-cluster
+access_key_id: key
+secret_access_key: secret
+session_token: session
 `,
 		},
 	}
@@ -63,8 +67,10 @@ name: aws-eks
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		_, ok := fetcher.(*EKSFetcher)
+		eksFetcher, ok := fetcher.(*EKSFetcher)
 		s.True(ok)
-		//s.Equal(eksProvider, eksFetcher.eksProvider)
+		s.Equal("key", eksFetcher.cfg.AwsConfig.AccessKeyID)
+		s.Equal("secret", eksFetcher.cfg.AwsConfig.SecretAccessKey)
+		s.Equal("session", eksFetcher.cfg.AwsConfig.SessionToken)
 	}
 }

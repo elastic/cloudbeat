@@ -80,8 +80,8 @@ type BaseFetcherConfig struct {
 }
 
 type AwsBaseFetcherConfig struct {
-	BaseFetcherConfig
-	AwsConfig aws.ConfigAWS
+	BaseFetcherConfig `config:",inline"`
+	AwsConfig         aws.ConfigAWS `config:",inline"`
 }
 
 const KubeAPIType = "kube-api"
