@@ -5,9 +5,6 @@ on:
 
   schedule:
     - cron: '00 02 * * *'
-  push:
-    branches:
-    - "tests-ci-v2"
 
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
@@ -94,7 +91,7 @@ jobs:
     strategy:
       matrix:
         # test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
-        test-target: [pre_merge,file_system_rules ]
+        test-target: [pre_merge, file_system_rules ]
       # fail-fast: false
     steps:
       - name: Check out the repo
@@ -115,6 +112,7 @@ jobs:
         uses: lewagon/wait-on-check-action@v1.0.0
         with:
           check-name: Build
+          running-workflow-name: ${{ github.workflow }}
           ref: ${{ github.ref }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           allowed-conclusions: success
