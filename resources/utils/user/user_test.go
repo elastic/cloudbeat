@@ -24,7 +24,7 @@ import (
 
 type testAttr struct {
 	name   string
-	id     uint32
+	id     string
 	result ExpectedResult
 }
 
@@ -59,7 +59,7 @@ func (s *UserTestSuite) TestGetUserNameFromID() {
 	var userTests = []testAttr{
 		{
 			name: "Should return root as a username",
-			id:   0,
+			id:   "0",
 			result: ExpectedResult{
 				name: "root",
 				err:  false,
@@ -67,7 +67,7 @@ func (s *UserTestSuite) TestGetUserNameFromID() {
 		},
 		{
 			name: "Should return daemon as a username",
-			id:   1,
+			id:   "1",
 			result: ExpectedResult{
 				name: "daemon",
 				err:  false,
@@ -75,7 +75,7 @@ func (s *UserTestSuite) TestGetUserNameFromID() {
 		},
 		{
 			name: "Should return Proxy as a username - no friendly name exists",
-			id:   13,
+			id:   "13",
 			result: ExpectedResult{
 				name: "proxy",
 				err:  false,
@@ -83,7 +83,7 @@ func (s *UserTestSuite) TestGetUserNameFromID() {
 		},
 		{
 			name: "Should not return a username",
-			id:   6666,
+			id:   "6666",
 			result: ExpectedResult{
 				name: "",
 				err:  true,
@@ -108,7 +108,7 @@ func (s *UserTestSuite) TestGetGroupNameFromID() {
 	var groupTests = []testAttr{
 		{
 			name: "Should return wheel as group name",
-			id:   0,
+			id:   "0",
 			result: ExpectedResult{
 				name: "wheel",
 				err:  false,
@@ -116,7 +116,7 @@ func (s *UserTestSuite) TestGetGroupNameFromID() {
 		},
 		{
 			name: "Should return daemon as group name",
-			id:   1,
+			id:   "1",
 			result: ExpectedResult{
 				name: "daemon",
 				err:  false,
@@ -124,7 +124,7 @@ func (s *UserTestSuite) TestGetGroupNameFromID() {
 		},
 		{
 			name: "Should not return group name",
-			id:   1000,
+			id:   "1000",
 			result: ExpectedResult{
 				name: "",
 				err:  true,

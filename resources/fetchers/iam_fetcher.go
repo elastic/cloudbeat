@@ -71,3 +71,4 @@ func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    "",
 	}
 }
+func (r IAMResource) GetElasticCommonData() any { return nil }
