@@ -31,17 +31,10 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(EKSType, &EKSFactory{
-		extraElements: getEksExtraElements,
-	})
+	manager.Factories.ListFetcherFactory(EKSType, &EKSFactory{})
 }
 
 type EKSFactory struct {
-	extraElements func() (eksExtraElements, error)
-}
-
-type eksExtraElements struct {
-	eksProvider awslib.EksClusterDescriber
 }
 
 func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -53,30 +46,16 @@ func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 		return nil, err
 	}
 
-	elements, err := f.extraElements()
-	if err != nil {
-		return nil, err
-	}
-	return f.CreateFrom(log, cfg, elements, ch)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func getEksExtraElements() (eksExtraElements, error) {
-	awsConfigProvider := awslib.ConfigProvider{}
-	awsConfig, err := awsConfigProvider.GetConfig()
-	if err != nil {
-		return eksExtraElements{}, err
-	}
+func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	eksProvider := awslib.NewEksProvider(cfg.AwsConfig)
 
-	eks := awslib.NewEksProvider(awsConfig.Config)
-
-	return eksExtraElements{eksProvider: eks}, nil
-}
-
-func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, elements eksExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	fe := &EKSFetcher{
 		log:         log,
 		cfg:         cfg,
-		eksProvider: elements.eksProvider,
+		eksProvider: eksProvider,
 		resourceCh:  ch,
 	}
 

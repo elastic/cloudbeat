@@ -87,6 +87,9 @@ func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 
 	log.Info("Config initiated.")
 
+	if config.InputTypeEKS == config.InputTypeEKS {
+		//c.Streams[0].
+	}
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 	fetchersRegistry, err := initRegistry(log, c, resourceCh)
 	if err != nil {
