@@ -46,36 +46,40 @@ type registeredFetcher struct {
 }
 
 func NewFetcherRegistry(log *logp.Logger, cfg config.Config) FetchersRegistry {
-	if cfg.Type == config.InputTypeEKS {
-		supportedFetchers := map[string]bool{
-			fetching.KubeAPIType:    true,
-			fetching.FileSystemType: true,
-			fetching.ProcessType:    true,
-			fetching.ECRType:        true, // EKS fetchers
-			fetching.EKSType:        true, // EKS fetchers
-			fetching.ELBType:        true, // EKS fetchers
-			fetching.IAMType:        true, // EKS fetchers
-		}
-		log.Info("setting supported fetchers for EKS: %v", supportedFetchers)
-		return &fetchersRegistry{
-			log:               log,
-			reg:               make(map[string]registeredFetcher),
-			supportedFetchers: supportedFetchers,
-		}
+	reg := &fetchersRegistry{
+		log: log,
+		reg: make(map[string]registeredFetcher),
 	}
 
-	// Default - Vanilla supported kubernetes fetchers
-	supportedFetchers := map[string]bool{
+	// Configure Supported fetchers per framework
+	if cfg.Type == config.InputTypeEKS {
+		reg.enableEksFetchers(reg.log)
+	} else {
+		reg.enableVanillaFetchers(reg.log)
+	}
+	return reg
+}
+
+func (r *fetchersRegistry) enableEksFetchers(log *logp.Logger) {
+	r.supportedFetchers = map[string]bool{
+		fetching.KubeAPIType:    true,
+		fetching.FileSystemType: true,
+		fetching.ProcessType:    true,
+		fetching.ECRType:        true,
+		fetching.EKSType:        true,
+		fetching.ELBType:        true,
+		fetching.IAMType:        true,
+	}
+	log.Info("setting supported fetchers for EKS: %v", r.supportedFetchers)
+}
+
+func (r *fetchersRegistry) enableVanillaFetchers(log *logp.Logger) {
+	r.supportedFetchers = map[string]bool{
 		fetching.KubeAPIType:    true,
 		fetching.FileSystemType: true,
 		fetching.ProcessType:    true,
 	}
-	log.Info("setting supported fetchers for Vanilla kubernetes: %v", supportedFetchers)
-	return &fetchersRegistry{
-		log:               log,
-		reg:               make(map[string]registeredFetcher),
-		supportedFetchers: supportedFetchers,
-	}
+	log.Info("setting supported fetchers for Vanilla kubernetes: %v", r.supportedFetchers)
 }
 
 // RegisterFetchers registers entire list of parsed fetchers
