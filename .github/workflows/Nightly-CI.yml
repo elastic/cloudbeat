@@ -206,7 +206,7 @@ jobs:
 ##  Add cache purge on successful run https://github.com/elastic/security-team/issues/3936
   publish_results:
     name: Publish Results
-    needs: Functional_Tests
+    needs: Test_Matrix
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifacts
