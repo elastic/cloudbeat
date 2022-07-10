@@ -3,13 +3,13 @@ name: Nightly-CI
 on:
   # On demand execution of workflow will run all suites.
   workflow_dispatch:
-    # inputs:
-    #   test_targets:
-    #     required: true
-    #     description: 'Specify test markers to run'
-    #     default: >-
-    #       ["pre_merge", "file_system_rules"]
-#         ["pre_merge", "file_system_rules", "k8s_object_rules", "process_api_server_rules", "process_controller_manager_rules", "process_etcd_rules", "process_kubelet_rules", "process_scheduler_rules"]
+    inputs:
+      test_targets:
+        required: true
+        description: 'Specify test markers to run'
+        default: >-
+          ["pre_merge", "file_system_rules"]
+        # ["pre_merge", "file_system_rules", "k8s_object_rules", "process_api_server_rules", "process_controller_manager_rules", "process_etcd_rules", "process_kubelet_rules", "process_scheduler_rules"]
 
   push:
     branches:
@@ -48,6 +48,12 @@ jobs:
       env:
         TEST_TARGETS: >-
           ["pre_merge", "file_system_rules", "k8s_object_rules", "process_api_server_rules", "process_controller_manager_rules", "process_etcd_rules", "process_kubelet_rules", "process_scheduler_rules"]
+      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> GITHUB_ENV
+    - id: Push
+      if: github.event_name == 'push'
+      env:
+        TEST_TARGETS: >-
+          ["pre_merge", "file_system_rules"]
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> GITHUB_ENV
     - id: Dispatch
       if: github.event_name == 'workflow_dispatch'
