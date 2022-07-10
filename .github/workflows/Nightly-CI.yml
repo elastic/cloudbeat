@@ -5,6 +5,9 @@ on:
 
   schedule:
     - cron: '00 02 * * *'
+  push:
+    branches:
+    - "tests-ci-v2"
 
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
