@@ -1,7 +1,7 @@
 name: Cloudbeat-CI
 
 on:
-  worflow_dispatch:
+  workflow_dispatch:
 
   schedule:
     - cron: '00 02 * * *'
