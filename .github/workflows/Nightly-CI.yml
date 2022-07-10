@@ -25,6 +25,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CONTAINER_SUFFIX: ${{ github.run_id }
 
 jobs:
   Setup:
@@ -98,7 +99,7 @@ jobs:
           tags: cloudbeat:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/cloudbeat-${{ github.run_id }}.tar
+          outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Build pytest-docker
         uses: docker/build-push-action@v2
@@ -108,13 +109,13 @@ jobs:
           tags: cloudbeat-test:latest
           cache-from: type=local,mode=max,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/pytest-${{ github.run_id }}.tar
+          outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
       
       - name: Cache docker images
         uses: actions/cache@v2
         with:
           path: /tmp/*.tar
-          key: ${{ runner.os }}-buildx-${{ github.run_id }}
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
             ${{ runner.os }}-dockers-cache-
 
@@ -163,9 +164,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/*.tar
-          key: ${{ runner.os }}-buildx-${{ github.run_id }}
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ github.run_id }}
+            ${{ runner.os }}-dockers-cache-
 
       - name: Load images to kind
         run: |
@@ -190,7 +191,7 @@ jobs:
       - name: clear cache
         id: clear_cache
         if: success()
-        run: rm -rf /tmp/${{ github.run_id }}.tar
+        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}}.tar
 
       - name: Upload Test Results
         if: always()
