@@ -21,12 +21,12 @@
 package config
 
 import (
-	"time"
-
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"gopkg.in/yaml.v3"
+	"time"
 )
 
 const DefaultNamespace = "default"
@@ -38,16 +38,17 @@ const (
 )
 
 type Config struct {
+	Fetchers   []*config.C             `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
-	Fetchers   []*config.C             `config:"fetchers"`
 	Streams    []Stream                `config:"streams"`
-	Type       string                  `config:"type" yaml:"type" json:"type"`
+	Type       string                  `config:"type"`
 }
 
 type Stream struct {
-	DataYaml *DataYaml `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
+	AWSConfig aws.ConfigAWS `config:",inline"`
+	DataYaml  *DataYaml     `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
 }
 
 type DataYaml struct {
