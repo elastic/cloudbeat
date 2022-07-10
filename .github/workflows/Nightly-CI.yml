@@ -34,7 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-      matrix: ${{ steps.set-matrix2.outputs.matrix }}
     timeout-minutes: 15
     steps:
     - id: Nightly
