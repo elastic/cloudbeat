@@ -28,7 +28,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  CONTAINER_SUFFIX: ${{ github.run_id }
+  CONTAINER_SUFFIX: ${{ github.run_id }}
 
 jobs:
   Setup:
