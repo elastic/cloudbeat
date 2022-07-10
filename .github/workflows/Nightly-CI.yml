@@ -1,4 +1,4 @@
-name: Cloudbeat-CI
+name: Nightly-CI
 
 on:
   workflow_dispatch:
