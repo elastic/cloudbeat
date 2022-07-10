@@ -5,8 +5,7 @@ on:
     workflows: ["Cloudbeat-CI", "Nightly-CI"]
     types: 
       - completed
-
-jobs:    
+jobs:
   publish_results:
     name: Publish Results
     runs-on: ubuntu-latest
@@ -14,19 +13,12 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     permissions:
       checks: write
 
       # needed unless run with comment_mode: off
       pull-requests: write
 
-      # only needed for private repository
-      contents: read
-
-      # only needed for private repository
-      issues: read
-      
       # for aws cred access
       secrets: read
 
@@ -35,12 +27,12 @@ jobs:
     steps:
       - name: Download and Extract Artifacts
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p tests/allure/results
           mkdir -p artifacts && cd artifacts
 
-          artifacts_url=${{ github.event.workflow_run.artifacts_url }}
+          artifacts_url=${{ github.event.workflow_run.head_sha }}
 
           gh api "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
           do
@@ -49,14 +41,11 @@ jobs:
             unzip -d "../tests/allure/results" "$name.zip"
           done
 
-      # - name: Display structure of downloaded files
-      #   run: |
-      #     mkdir -p tests/allure/results
-      #     find artifacts/ -type f -print0 | xargs -0 mv -t tests/allure/results
-
       - name: Publish allure report
         if: always()
         uses: andrcuns/allure-publish-action@v1.0.1
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           storageType: s3
           resultsGlob: "tests/allure/results/*"
@@ -66,17 +55,21 @@ jobs:
           summaryTableType: markdown
           copyLatest: true
           bucket: csp-allure-reports
-          prefix: allure_reports/cloudbeat/${GITHUB_REF}
+          prefix: allure_reports/cloudbeat/${{ github.event.workflow_run.head_branch }}
           ignoreMissingResults: true
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        # if: steps.deploy_helm.outcome == 'failure'
-        if: failure()
-        with:
-          limit-access-to-actor: true
+#Todo comment allure results if pr gh ticket https://github.com/elastic/security-team/issues/3936
+      #   if: ${{ github.event.workflow_run.event == 'pull_request' }}
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   run: |
+      #     PR=$(gh api -X GET search/issues -f q='repo:elastic/cloudbeat is:open is:pr is:unmerged '${{ github.event.workflow_run.head_sha }}' | jq  '.items[] | .number')
+      #     gh pr comment $PR --body "Allure link: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/${{ github.event.workflow_run.head_branch }}/index.html"
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   if: failure()
+      #   with:
+      #     limit-access-to-actor: true
 
-  # comment_pr:
-  #   name: Comment Pr
-  #   runs-on: ubuntu-latest
-  #   steps: 
+

@@ -20,3 +20,7 @@ tests/allure/reports/*
 *-result.json
 *test.dummy
 /logs.ndjson
+
+# ci
+.secrets
+.env
