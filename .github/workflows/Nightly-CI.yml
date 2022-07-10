@@ -9,9 +9,9 @@ on:
         description: 'Specify test markers to run'
         default: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
 
-  push:
-    branches:
-    - "tests-ci-v2"
+  # push:
+  #   branches:
+  #   - "tests-ci-v2"
   schedule:
     # Nightly job. Running every day at 2 am
     - cron: '00 02 * * *'
