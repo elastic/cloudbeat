@@ -1,0 +1,79 @@
+name: Publish-test-results
+
+on:
+  workflow_run:
+    ["Cloudbeat-CI", "Nightly-CI"]
+jobs:    
+  publish_results:
+    name: Publish Results
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'skipped'
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      checks: write
+
+      # needed unless run with comment_mode: off
+      pull-requests: write
+
+      # only needed for private repository
+      contents: read
+
+      # only needed for private repository
+      issues: read
+      
+      # for aws cred access
+      secrets: read
+
+      # required by download step to access artifacts API
+      actions: read
+    steps:
+      - name: Download and Extract Artifacts
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          mkdir -p tests/allure/results
+          mkdir -p artifacts && cd artifacts
+
+          artifacts_url=${{ github.event.workflow_run.artifacts_url }}
+
+          gh api "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
+          do
+            IFS=$'\t' read name url <<< "$artifact"
+            gh api $url > "$name.zip"
+            unzip -d "../tests/allure/results" "$name.zip"
+          done
+
+      # - name: Display structure of downloaded files
+      #   run: |
+      #     mkdir -p tests/allure/results
+      #     find artifacts/ -type f -print0 | xargs -0 mv -t tests/allure/results
+
+      - name: Publish allure report
+        if: always()
+        uses: andrcuns/allure-publish-action@v1.0.1
+        with:
+          storageType: s3
+          resultsGlob: "tests/allure/results/*"
+          updatePr: actions
+          collapseSummary: false
+          summary: suites
+          summaryTableType: markdown
+          copyLatest: true
+          bucket: csp-allure-reports
+          prefix: allure_reports/cloudbeat/${GITHUB_REF}
+          ignoreMissingResults: true
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        # if: steps.deploy_helm.outcome == 'failure'
+        if: failure()
+        with:
+          limit-access-to-actor: true
+
+  # comment_pr:
+  #   name: Comment Pr
+  #   runs-on: ubuntu-latest
+  #   steps: 

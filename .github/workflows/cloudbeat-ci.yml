@@ -94,7 +94,7 @@ jobs:
     strategy:
       matrix:
         # test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
-        test-target: [pre_merge, file_system_rules]
+        test-target: [pre_merge]
       # fail-fast: false
     steps:
       - name: Check out the repo
@@ -155,39 +155,39 @@ jobs:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
 
-  publish_results:
-    name: Publish Results
-    needs: Integration_tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: artifacts
+  # publish_results:
+  #   name: Publish Results
+  #   needs: Integration_tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Download Artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         path: artifacts
 
-      - name: Display structure of downloaded files
-        run: |
-          mkdir -p tests/allure/results
-          find artifacts/ -type f -print0 | xargs -0 mv -t tests/allure/results
+  #     - name: Display structure of downloaded files
+  #       run: |
+  #         mkdir -p tests/allure/results
+  #         find artifacts/ -type f -print0 | xargs -0 mv -t tests/allure/results
 
-      - name: Publish allure report
-        if: always()
-        uses: andrcuns/allure-publish-action@v1.0.1
-        with:
-          storageType: s3
-          resultsGlob: "tests/allure/results/*"
-          updatePr: actions
-          collapseSummary: false
-          summary: suites
-          summaryTableType: markdown
-          copyLatest: true
-          bucket: csp-allure-reports
-          prefix: allure_reports/cloudbeat/${GITHUB_REF}
-          ignoreMissingResults: true
+  #     - name: Publish allure report
+  #       if: always()
+  #       uses: andrcuns/allure-publish-action@v1.0.1
+  #       with:
+  #         storageType: s3
+  #         resultsGlob: "tests/allure/results/*"
+  #         updatePr: actions
+  #         collapseSummary: false
+  #         summary: suites
+  #         summaryTableType: markdown
+  #         copyLatest: true
+  #         bucket: csp-allure-reports
+  #         prefix: allure_reports/cloudbeat/${GITHUB_REF}
+  #         ignoreMissingResults: true
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        # if: steps.deploy_helm.outcome == 'failure'
-        if: failure()
-        with:
-          limit-access-to-actor: true
+  #     - name: Setup tmate session
+  #       uses: mxschmitt/action-tmate@v3
+  #       # if: steps.deploy_helm.outcome == 'failure'
+  #       if: failure()
+  #       with:
+  #         limit-access-to-actor: true
