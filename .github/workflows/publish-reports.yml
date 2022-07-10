@@ -3,6 +3,8 @@ name: Publish-Test-Results
 on:
   workflow_run:
     workflows: ["Cloudbeat-CI", "Nightly-CI"]
+    types: 
+      - completed
 
 jobs:    
   publish_results:
