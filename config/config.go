@@ -21,29 +21,34 @@
 package config
 
 import (
-	"time"
-
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"gopkg.in/yaml.v3"
+	"time"
 )
 
 const DefaultNamespace = "default"
 
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
+const (
+	InputTypeEKS = "cloudbeat/eks"
+)
+
 type Config struct {
+	Fetchers   []*config.C             `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
-	Fetchers   []*config.C             `config:"fetchers"`
-
-	Streams []Stream `config:"streams"`
+	Streams    []Stream                `config:"streams"`
+	Type       string                  `config:"type"`
 }
 
 type Stream struct {
-	DataYaml *DataYaml `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
+	AWSConfig aws.ConfigAWS `config:",inline"`
+	DataYaml  *DataYaml     `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
 }
 
 type DataYaml struct {
@@ -93,16 +98,14 @@ func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
 	return nil
 }
 
-func (c *Config) DataYaml() (string, error) {
-	// TODO(yashtewari): Figure out the scenarios in which the integration sends
-	// multiple input streams. Since only one instance of our integration is allowed per
-	// agent policy, is it even possible that multiple input streams are received?
-	y, err := yaml.Marshal(c.Streams[0].DataYaml)
+// GetActivatedRules returns the activated rules from the config. The activated rules are in yaml format.
+func (c *Config) GetActivatedRules() (string, error) {
+	dataYaml, err := yaml.Marshal(c.Streams[0].DataYaml)
 	if err != nil {
 		return "", err
 	}
 
-	return string(y), nil
+	return string(dataYaml), nil
 }
 
 // Datastream function to generate the datastream value

@@ -1,9 +1,13 @@
+"""
+This module provides fixtures and configurations for
+product tests.
+"""
 from pathlib import Path
 import time
+import json
 import pytest
 from kubernetes.client import ApiException
 from kubernetes.utils import FailToCreateError
-import json
 from commonlib.io_utils import get_k8s_yaml_objects
 
 
@@ -12,10 +16,19 @@ KUBE_RULES_ENV_YML = "../../deploy/mock-pod.yml"
 POD_RESOURCE_TYPE = "Pod"
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='module', name='cloudbeat_start_stop')
 def data(k8s, api_client, cloudbeat_agent):
+    """
+    This fixture starts cloudbeat, in case cloudbeat exists
+    restart will be performed
+    @param k8s: Kubernetes wrapper object
+    @param api_client: Docker or FileSystem client
+    @param cloudbeat_agent: Cloudbeat configuration
+    @return:
+    """
     file_path = Path(__file__).parent / DEPLOY_YML
-    if k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace):
+    if k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
+                                   namespace=cloudbeat_agent.namespace):
         k8s.delete_from_yaml(get_k8s_yaml_objects(file_path=file_path))
     k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
     time.sleep(5)
@@ -23,30 +36,47 @@ def data(k8s, api_client, cloudbeat_agent):
     k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
     k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
 
-@pytest.fixture(scope='module')
-def config_node_pre_test(data):
-    k8s_client, api_client, cloudbeat_agent = data
+
+@pytest.fixture(scope='module', name='config_node_pre_test')
+def config_node_pre_test(cloudbeat_start_stop):
+    """
+    This fixture performs extra operations required in
+    file system rules tests.
+    Before test execution creates temporary files
+    After test execution delete files created in Before section
+    @param cloudbeat_start_stop: Cloudbeat fixture execution
+    @return: Kubernetes object, Api client, Cloudbeat configuration
+    """
+    k8s_client, api_client, cloudbeat_agent = cloudbeat_start_stop
 
     node = k8s_client.get_cluster_nodes()[0]
 
-    api_client.exec_command(container_name=node.metadata.name,
-                            command='touch',
-                            param_value='/var/lib/etcd/some_file.txt',
-                            resource='')
+    temp_file_list = [
+        '/var/lib/etcd/some_file.txt',
+        '/etc/kubernetes/pki/some_file.txt'
+    ]
+    # create temporary files:
+    for temp_file in temp_file_list:
+        api_client.exec_command(container_name=node.metadata.name,
+                                command='touch',
+                                param_value=temp_file,
+                                resource='')
 
-    api_client.exec_command(container_name=node.metadata.name,
-                            command='touch',
-                            param_value='/etc/kubernetes/pki/some_file.txt',
-                            resource='')
     yield k8s_client, api_client, cloudbeat_agent
+    # delete temporary files:
+    for temp_file in temp_file_list:
+        api_client.exec_command(container_name=node.metadata.name,
+                                command='unlink',
+                                param_value=temp_file,
+                                resource='')
 
 
-@pytest.fixture(scope='module')
-def clean_test_env(data):
+@pytest.fixture(scope='module', name='clean_test_env')
+def clean_test_env(cloudbeat_start_stop):
     """
     Sets up a testing env with needed kube resources
     """
-    k8s_client, api_client, cloudbeat_agent = data
+    k8s_client, api_client, cloudbeat_agent = cloudbeat_start_stop
 
     file_path = Path(__file__).parent / KUBE_RULES_ENV_YML
     k8s_resources = get_k8s_yaml_objects(file_path=file_path)
@@ -59,11 +89,13 @@ def clean_test_env(data):
             # try getting the resource before deleting it - will raise exception if not found
             k8s_client.get_resource(resource_type=resource_type, **relevant_metadata)
             k8s_client.delete_resources(resource_type=resource_type, **relevant_metadata)
-            k8s_client.wait_for_resource(resource_type=resource_type, status_list=["DELETED"], **relevant_metadata)
-        except ApiException as notFound:
-            print(f"no {relevant_metadata['name']} online - setting up a new one: {notFound}")
+            k8s_client.wait_for_resource(resource_type=resource_type,
+                                         status_list=["DELETED"],
+                                         **relevant_metadata)
+        except ApiException as not_found:
+            print(f"no {relevant_metadata['name']} online - setting up a new one: {not_found}")
             # create resource
-        
+
         k8s_client.create_from_dict(data=yml_resource, **relevant_metadata)
 
     yield k8s_client, api_client, cloudbeat_agent
@@ -71,12 +103,12 @@ def clean_test_env(data):
     k8s_client.delete_from_yaml(yaml_objects_list=k8s_resources)
 
 
-@pytest.fixture(scope='module')
-def test_env(data):
+@pytest.fixture(scope='module', name='test_env')
+def test_env(cloudbeat_start_stop):
     """
     Sets up a testing env with needed kube resources
     """
-    k8s, api_client, cloudbeat_agent = data
+    k8s, api_client, cloudbeat_agent = cloudbeat_start_stop
 
     file_path = Path(__file__).parent / KUBE_RULES_ENV_YML
     k8s_resources = get_k8s_yaml_objects(file_path=file_path)
@@ -89,7 +121,9 @@ def test_env(data):
     for yml_resource in k8s_resources:
         resource_type, metadata = yml_resource['kind'], yml_resource['metadata']
         relevant_metadata = {k: metadata[k] for k in ('name', 'namespace') if k in metadata}
-        k8s.wait_for_resource(resource_type=resource_type, status_list=["RUNNING", "ADDED"], **relevant_metadata)
+        k8s.wait_for_resource(resource_type=resource_type,
+                              status_list=["RUNNING", "ADDED"],
+                              **relevant_metadata)
 
     yield k8s, api_client, cloudbeat_agent
     # teardown

@@ -22,7 +22,7 @@ from product.tests.tests.file_system.file_system_test_cases import *
      *cis_1_1_7,
      *cis_1_1_8,
      *cis_1_1_11,
-     *cis_1_1_12,
+     # *cis_1_1_12, TODO: update environment to support user:group -> etcd:etcd
      *cis_1_1_13,
      *cis_1_1_14,
      *cis_1_1_15,
