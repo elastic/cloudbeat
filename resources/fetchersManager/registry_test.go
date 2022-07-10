@@ -19,14 +19,12 @@ package fetchersManager
 
 import (
 	"context"
-	"fmt"
 	"github.com/elastic/cloudbeat/config"
 	"testing"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"sync"
 )
@@ -82,14 +80,6 @@ func fetchValue(num int) fetching.Resource {
 	return NumberResource{num}
 }
 
-func registerNFetchers(t *testing.T, reg FetchersRegistry, n int, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) {
-	for i := 0; i < n; i++ {
-		key := fmt.Sprint(i)
-		err := reg.Register(key, newNumberFetcher(i, ch, wg))
-		assert.NoError(t, err)
-	}
-}
-
 type RegistryTestSuite struct {
 	suite.Suite
 
@@ -122,13 +112,10 @@ func (s *RegistryTestSuite) TestKeys() {
 		value int
 	}{
 		{
-			"some_fetcher", 2,
+			"process", 2,
 		},
 		{
-			"other_fetcher", 4,
-		},
-		{
-			"new_fetcher", 6,
+			"file-system", 4,
 		},
 	}
 
@@ -142,29 +129,22 @@ func (s *RegistryTestSuite) TestKeys() {
 
 	keys := s.registry.Keys()
 
-	s.Contains(keys, "some_fetcher")
-	s.Contains(keys, "other_fetcher")
-	s.Contains(keys, "new_fetcher")
+	s.Contains(keys, "process")
+	s.Contains(keys, "file-system")
 }
 
 func (s *RegistryTestSuite) TestRegisterDuplicateKey() {
 	f := newNumberFetcher(1, nil, s.wg)
-	err := s.registry.Register("some-key", f, nil)
+	err := s.registry.Register("process", f, nil)
 	s.NoError(err)
 
-	err = s.registry.Register("some-key", f, nil)
+	err = s.registry.Register("process", f, nil)
 	s.Error(err)
-}
-
-func (s *RegistryTestSuite) TestRegister10() {
-	count := 10
-	registerNFetchers(s.T(), s.registry, count, nil, s.wg)
-	s.Equal(count, len(s.registry.Keys()))
 }
 
 func (s *RegistryTestSuite) TestRunNotRegistered() {
 	f := newNumberFetcher(1, nil, s.wg)
-	err := s.registry.Register("some-key", f, nil)
+	err := s.registry.Register("process", f, nil)
 	s.NoError(err)
 
 	err = s.registry.Run(context.TODO(), "unknown", fetching.CycleMetadata{})
@@ -173,15 +153,11 @@ func (s *RegistryTestSuite) TestRunNotRegistered() {
 
 func (s *RegistryTestSuite) TestRunRegistered() {
 	f1 := newSyncNumberFetcher(1, s.resourceCh)
-	err := s.registry.Register("some-key-1", f1, nil)
+	err := s.registry.Register("process", f1, nil)
 	s.NoError(err)
 
 	f2 := newSyncNumberFetcher(2, s.resourceCh)
-	err = s.registry.Register("some-key-2", f2, nil)
-	s.NoError(err)
-
-	f3 := newSyncNumberFetcher(3, s.resourceCh)
-	err = s.registry.Register("some-key-3", f3, nil)
+	err = s.registry.Register("file-system", f2, nil)
 	s.NoError(err)
 
 	var tests = []struct {
@@ -189,13 +165,10 @@ func (s *RegistryTestSuite) TestRunRegistered() {
 		res NumberResource
 	}{
 		{
-			"some-key-1", NumberResource{1},
+			"process", NumberResource{1},
 		},
 		{
-			"some-key-2", NumberResource{2},
-		},
-		{
-			"some-key-3", NumberResource{3},
+			"file-system", NumberResource{2},
 		},
 	}
 
@@ -211,7 +184,7 @@ func (s *RegistryTestSuite) TestRunRegistered() {
 
 func (s *RegistryTestSuite) TestShouldRunNotRegistered() {
 	f := newNumberFetcher(1, nil, s.wg)
-	err := s.registry.Register("some-key", f, nil)
+	err := s.registry.Register("process", f, nil)
 	s.NoError(err)
 
 	res := s.registry.ShouldRun("unknown")
@@ -246,10 +219,10 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	for _, test := range tests {
 		s.registry = NewFetcherRegistry(s.log, config.DefaultConfig)
 		f := newNumberFetcher(1, nil, s.wg)
-		err := s.registry.Register("some-key", f, test.conditions...)
+		err := s.registry.Register("process", f, test.conditions...)
 		s.NoError(err)
 
-		should := s.registry.ShouldRun("some-key")
+		should := s.registry.ShouldRun("process")
 		s.Equal(test.expected, should)
 	}
 }

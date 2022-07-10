@@ -110,7 +110,7 @@ func TestDataTestSuite(t *testing.T) {
 func (s *DataTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.opts = goleak.IgnoreCurrent()
-	s.registry = NewFetcherRegistry(s.log, config.DefaultConfig) // todo: how do we load config from test?
+	s.registry = NewFetcherRegistry(s.log, config.DefaultConfig)
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
@@ -122,28 +122,32 @@ func (s *DataTestSuite) TearDownTest() {
 }
 
 func (s *DataTestSuite) TestDataRun() {
-	fetcherCount := 10
-	interval := 10 * time.Second
+	interval := 3 * time.Second
+	fetcherVal := 4
+	fetcherName := "process"
 
-	s.wg.Add(fetcherCount)
+	s.wg.Add(1)
+	f := newNumberFetcher(fetcherVal, s.resourceCh, s.wg)
+	err := s.registry.Register(fetcherName, f)
+	s.NoError(err)
 
-	registerNFetchers(s.T(), s.registry, fetcherCount, s.resourceCh, s.wg)
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = d.Run(s.ctx)
 	s.NoError(err)
 	defer d.Stop()
-	s.wg.Wait() // waiting for all fetchers to complete
 
+	s.wg.Wait()
 	results := testhelper.CollectResources(s.resourceCh)
-	s.Equal(fetcherCount, len(results))
+
+	s.Equal(1, len(results))
 }
 
 func (s *DataTestSuite) TestDataRunPanic() {
 	interval := 3 * time.Second
 	fetcherMessage := "fetcher got panic"
-	fetcherName := "panic_fetcher"
+	fetcherName := "process"
 
 	s.wg.Add(1)
 	f := newPanicFetcher(fetcherMessage, s.resourceCh, s.wg)
@@ -166,7 +170,7 @@ func (s *DataTestSuite) TestDataRunPanic() {
 func (s *DataTestSuite) TestDataFetchSinglePanic() {
 	interval := 3 * time.Second
 	fetcherMessage := "fetcher got panic"
-	fetcherName := "panic_fetcher"
+	fetcherName := "process"
 
 	f := newPanicFetcher(fetcherMessage, s.resourceCh, nil)
 	err := s.registry.Register(fetcherName, f)
@@ -182,7 +186,7 @@ func (s *DataTestSuite) TestDataFetchSinglePanic() {
 func (s *DataTestSuite) TestDataRunTimeout() {
 	fetcherDelay := 4 * time.Second
 	interval := 5 * time.Second
-	fetcherName := "delay_fetcher"
+	fetcherName := "process"
 
 	s.wg.Add(1)
 	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
@@ -205,7 +209,7 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 	fetcherDelay := 4 * time.Second
 	interval := 3 * time.Second
-	fetcherName := "timeout_fetcher"
+	fetcherName := "process"
 
 	s.wg.Add(1)
 	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
@@ -222,7 +226,7 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	fetcherVal := 4
 	interval := 5 * time.Second
-	fetcherName := "not_run_fetcher"
+	fetcherName := "process"
 	fetcherConditionName := "false_condition"
 
 	f := newNumberFetcher(fetcherVal, s.resourceCh, s.wg)
