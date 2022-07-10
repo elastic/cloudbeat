@@ -28,12 +28,17 @@ import (
 )
 
 type IAMRolePermissionGetter interface {
-	GetIAMRolePermissions(ctx context.Context, roleName string) ([]iam.GetRolePolicyResponse, error)
+	GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error)
 }
 
 type IAMProvider struct {
 	log    *logp.Logger
 	client *iam.Client
+}
+
+type RolePolicyInfo struct {
+	PolicyARN string
+	iam.GetRolePolicyResponse
 }
 
 func NewIAMProvider(log *logp.Logger, cfg aws.Config) *IAMProvider {
@@ -44,25 +49,31 @@ func NewIAMProvider(log *logp.Logger, cfg aws.Config) *IAMProvider {
 	}
 }
 
-func (p IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName string) ([]iam.GetRolePolicyResponse, error) {
-	results := make([]iam.GetRolePolicyResponse, 0)
+func (p IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error) {
+	results := make([]RolePolicyInfo, 0)
 	policiesIdentifiers, err := p.getAllRolePolicies(ctx, roleName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)
 	}
 
 	for _, policyId := range policiesIdentifiers {
+		policyArn := policyId.PolicyArn
 		input := &iam.GetRolePolicyInput{
 			PolicyName: policyId.PolicyName,
 			RoleName:   &roleName,
 		}
+
 		req := p.client.GetRolePolicyRequest(input)
 		policy, err := req.Send(ctx)
 		if err != nil {
 			p.log.Errorf("Failed to get policy %s: %v", *policyId.PolicyName, err)
 			continue
 		}
-		results = append(results, *policy)
+
+		results = append(results, RolePolicyInfo{
+			PolicyARN:             *policyArn,
+			GetRolePolicyResponse: *policy,
+		})
 	}
 
 	return results, nil

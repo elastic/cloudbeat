@@ -25,14 +25,17 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
 
-const ELBRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
+const (
+	elbRegexTemplate   = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
+	elbResourceType    = "load-balancer"
+	elbSubResourceType = "aws-elb"
+)
 
 type ELBFetcher struct {
 	log             *logp.Logger
@@ -104,11 +107,10 @@ func (r ELBResource) GetData() interface{} {
 }
 
 func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
-	uid, _ := uuid.NewV4()
 	return fetching.ResourceMetadata{
-		ID:      uid.String(),
-		Type:    ELBType,
-		SubType: ELBType,
-		Name:    "",
+		ID:      *r.LoadBalancerName,
+		Type:    elbResourceType,
+		SubType: elbSubResourceType,
+		Name:    *r.LoadBalancerName,
 	}
 }

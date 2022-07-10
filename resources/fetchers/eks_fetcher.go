@@ -27,6 +27,11 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
+const (
+	eksResourceType    = "container-management"
+	eksResourceSubType = "aws-eks"
+)
+
 type EKSFetcher struct {
 	log         *logp.Logger
 	cfg         EKSFetcherConfig
@@ -69,8 +74,8 @@ func (r EKSResource) GetData() interface{} {
 func (r EKSResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
 		ID:      *r.Cluster.Arn,
-		Type:    EKSType,
-		SubType: EKSType,
+		Type:    eksResourceType,
+		SubType: eksResourceSubType,
 		Name:    *r.Cluster.Name,
 	}
 }

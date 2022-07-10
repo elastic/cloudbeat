@@ -27,11 +27,11 @@ import (
 )
 
 const (
-	EKSType = "aws-eks"
+	eksType = "aws-eks"
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(EKSType, &EKSFactory{
+	manager.Factories.ListFetcherFactory(eksType, &EKSFactory{
 		extraElements: getEksExtraElements,
 	})
 }

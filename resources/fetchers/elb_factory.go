@@ -87,7 +87,7 @@ func getElbExtraElements() (elbExtraElements, error) {
 }
 
 func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, elements elbExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, elements.awsConfig.Config.Region)
+	loadBalancerRegex := fmt.Sprintf(elbRegexTemplate, elements.awsConfig.Config.Region)
 	kubeClient, err := elements.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)

@@ -28,13 +28,16 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
-const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
+const (
+	PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
+	PublicRepoRegex          = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
+	ecrResourceType          = "image-registry"
+	ecrResourceSubType       = "aws-ecr"
+)
 
 type ECRFetcher struct {
 	log           *logp.Logger
@@ -113,11 +116,10 @@ func (res ECRResource) GetData() interface{} {
 }
 
 func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
-	uid, _ := uuid.NewV4()
 	return fetching.ResourceMetadata{
-		ID:      uid.String(),
-		Type:    ECRType,
-		SubType: ECRType,
-		Name:    "AWS repositories",
+		ID:      *res.RepositoryArn,
+		Type:    ecrResourceType,
+		SubType: ecrResourceSubType,
+		Name:    *res.RepositoryName,
 	}
 }

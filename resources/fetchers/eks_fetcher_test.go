@@ -20,15 +20,19 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"testing"
-
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"testing"
+)
+
+var (
+	clusterARN  = "arn:aws:eks:us-west-2:012345678910:cluster/dev"
+	clusterName = "test-cluster"
 )
 
 type EksFetcherTestSuite struct {
@@ -64,7 +68,14 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 	}{
 		{
 			"cluster_name",
-			eks.DescribeClusterResponse{},
+			eks.DescribeClusterResponse{
+				DescribeClusterOutput: &eks.DescribeClusterOutput{
+					Cluster: &eks.Cluster{
+						Arn:  &clusterARN,
+						Name: &clusterName,
+					},
+				},
+			},
 		},
 	}
 
@@ -89,8 +100,11 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 
 		results := testhelper.CollectResources(s.resourceCh)
 		eksResource := results[0].Resource.(EKSResource)
+		metadata := eksResource.GetMetadata()
 
 		s.Equal(expectedResource, eksResource)
+		s.Equal(*expectedResource.Cluster.Name, metadata.Name)
+		s.Equal(*expectedResource.Cluster.Arn, metadata.ID)
 		s.Nil(err)
 
 	}

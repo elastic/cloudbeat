@@ -66,6 +66,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 	secondRepositoryName := "cloudbeat1"
 	publicRepoName := "build.security/citools"
 	privateRepoWithSlash := "build/cloudbeat"
+	repoArn := "arn:aws:ecr:us-west-2:012345678910:repository/ubuntu"
 
 	var tests = []struct {
 		identityAccount                 string
@@ -92,10 +93,12 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 				},
 			},
 			[]ecr.Repository{{
+				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &firstRepositoryName,
 				RepositoryUri:              nil,
 			}, {
+				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &secondRepositoryName,
 				RepositoryUri:              nil,
@@ -118,10 +121,12 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 				},
 			},
 			[]ecr.Repository{{
+				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &privateRepoWithSlash,
 				RepositoryUri:              nil,
 			}, {
+				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &secondRepositoryName,
 				RepositoryUri:              nil,
@@ -145,10 +150,12 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 				},
 			},
 			[]ecr.Repository{{
+				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &firstRepositoryName,
 				RepositoryUri:              nil,
 			}}, []ecr.Repository{{
+				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &publicRepoName,
 				RepositoryUri:              nil,
@@ -260,7 +267,11 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 
 		for i, name := range test.expectedRepositoriesNames {
 			ecrResource := results[i].Resource.(ECRResource)
+			metadata := ecrResource.GetMetadata()
+
 			s.Equal(name, *ecrResource.RepositoryName)
+			s.Equal(*ecrResource.RepositoryName, metadata.Name)
+			s.Equal(*ecrResource.RepositoryArn, metadata.ID)
 		}
 	}
 
