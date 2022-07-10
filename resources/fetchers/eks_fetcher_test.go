@@ -20,7 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"testing"
 
@@ -72,7 +72,7 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 	for _, test := range tests {
 		awsConfig := fetching.AwsBaseFetcherConfig{
 			BaseFetcherConfig: fetching.BaseFetcherConfig{},
-			AwsConfig:         aws.Config{},
+			AwsConfig:         aws.ConfigAWS{},
 		}
 
 		eksConfig := EKSFetcherConfig{
@@ -106,7 +106,7 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	clusterName := "my-cluster"
 	awsConfig := fetching.AwsBaseFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		AwsConfig:         aws.Config{},
+		AwsConfig:         aws.ConfigAWS{},
 	}
 	eksConfig := EKSFetcherConfig{
 		AwsBaseFetcherConfig: awsConfig,

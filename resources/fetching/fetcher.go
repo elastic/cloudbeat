@@ -19,7 +19,7 @@ package fetching
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/gofrs/uuid"
 
 	"github.com/elastic/elastic-agent-libs/config"
@@ -81,7 +81,7 @@ type BaseFetcherConfig struct {
 
 type AwsBaseFetcherConfig struct {
 	BaseFetcherConfig
-	AwsConfig aws.Config
+	AwsConfig aws.ConfigAWS
 }
 
 const KubeAPIType = "kube-api"

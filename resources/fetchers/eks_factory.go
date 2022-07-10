@@ -18,6 +18,8 @@
 package fetchers
 
 import (
+	"fmt"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -50,7 +52,11 @@ func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 }
 
 func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	eksProvider := awslib.NewEksProvider(cfg.AwsConfig)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+	}
+	eksProvider := awslib.NewEksProvider(awsConfig)
 
 	fe := &EKSFetcher{
 		log:         log,
