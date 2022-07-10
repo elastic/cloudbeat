@@ -169,8 +169,8 @@ func (s *DataTestSuite) TestDataFetchSinglePanic() {
 	fetcherName := "panic_fetcher"
 
 	f := newPanicFetcher(fetcherMessage, s.resourceCh, nil)
-	s.registry.Register(fetcherName, f)
-	//s.NoError(err) // todo: dp we want to return an error here
+	err := s.registry.Register(fetcherName, f)
+	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
@@ -186,8 +186,8 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 
 	s.wg.Add(1)
 	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
-	s.registry.Register(fetcherName, f)
-	//s.NoError(err)// todo: dp we want to return an error here
+	err := s.registry.Register(fetcherName, f)
+	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
@@ -209,8 +209,8 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 
 	s.wg.Add(1)
 	f := newDelayFetcher(fetcherDelay, s.resourceCh, s.wg)
-	s.registry.Register(fetcherName, f)
-	//s.NoError(err)// todo: dp we want to return an error here
+	err := s.registry.Register(fetcherName, f)
+	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
@@ -227,8 +227,8 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 
 	f := newNumberFetcher(fetcherVal, s.resourceCh, s.wg)
 	c := newBoolFetcherCondition(false, fetcherConditionName)
-	s.registry.Register(fetcherName, f, c)
-	//s.NoError(err) // todo: dp we want to return an error here
+	err := s.registry.Register(fetcherName, f, c)
+	s.NoError(err)
 
 	d, err := NewData(s.log, interval, timeout, s.registry)
 	s.NoError(err)
