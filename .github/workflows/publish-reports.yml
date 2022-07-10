@@ -2,7 +2,7 @@ name: Publish-test-results
 
 on:
   workflow_run:
-    ["Cloudbeat-CI", "Nightly-CI"]
+    workflows: ["Cloudbeat-CI", "Nightly-CI"]
 jobs:    
   publish_results:
     name: Publish Results
