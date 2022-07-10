@@ -50,7 +50,6 @@ jobs:
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> GITHUB_ENV
     - id: Push
       # if: github.event_name == 'push'
-      with:
       env:
         TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
       run: |
