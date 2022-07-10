@@ -121,3 +121,5 @@ func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    "AWS repositories",
 	}
 }
+
+func (res ECRResource) GetElasticCommonData() any { return nil }
