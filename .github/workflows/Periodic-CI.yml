@@ -1,17 +1,69 @@
-name: Cloudbeat-CI
+name: Periodic-CI
 
 on:
-  pull_request:
+  # On demand execution of workflow will run all suites.
+  workflow_dispatch:
+    inputs:
+      test-targets:
+        required: true
+        description: 'Specify test markers to run'
+        default: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
+
+  schedule:
+    # Nightly job. Running every day at 2 am
+    - cron: '00 02 * * 0-4'
+
+    # Weekly job running every saturday at 2 am
+    - cron: '00 02 * * 6'
+
+  push:
     branches:
-      - main
-      - '[0-9]+.[0-9]+'
-    types: [opened, synchronize, reopened]
+    - tests-ci-v2
+
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.2
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CONTAINER_SUFFIX: ${{ github.run_id }}
 
+permissions:
+  actions: read
+  checks: write
+  statuses: read
 jobs:
+  Setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    timeout-minutes: 15
+    steps:
+    - id: Nightly
+      if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * *'
+      env:
+        TEST_TARGETS: '"[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]"'
+      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+    - id: Weekly
+      if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 6'
+      env:
+        TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
+      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+    - id: Push
+      if: github.event_name == 'push'
+      env:
+        TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
+      run: |
+        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+    - id: Dispatch
+      if: github.event_name == 'workflow_dispatch'
+      env:
+        TEST_TARGETS: ${{ github.event.inputs.test-targets }}
+      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+    - id: set-matrix
+      run: |
+        echo "::set-output name=matrix::${{ env.TEST_MATRIX}}"
+
   Build:
     name: Build
     runs-on: ubuntu-latest
@@ -48,7 +100,7 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.workflow }}
           restore-keys: |
             ${{ runner.os }}-buildx-
-      
+
       - name: Build cloudbeat-docker
         uses: docker/build-push-action@v2
         with:
@@ -75,7 +127,7 @@ jobs:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
-            ${{ runner.os }}-dockers-cache-
+            ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Move cache
         run: |
@@ -83,15 +135,14 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   Test_Matrix:
-    name: ${{ matrix.test-target }}-tests
-    needs: Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    needs: ['Build', 'Setup']
     strategy:
-      matrix:
-        # test-targets chosen by stabillity and runtime.Only pre_merge will be set as mandatory
-        test-target: [pre_merge, file_system_rules]
       fail-fast: false
+      matrix:
+        test-target: ${{fromJson(needs.Setup.outputs.matrix)}}
+    name: ${{ matrix.test-target }}-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -113,7 +164,7 @@ jobs:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
-            ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
+            ${{ runner.os }}-dockers-cache-
 
       - name: Load images to kind
         run: |
@@ -136,13 +187,43 @@ jobs:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
 
+      - name: clear cache
+        id: clear_cache
+        if: success()
+        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}}.tar
+
+  publish_results:
+    name: Publish Results
+    needs: Test_Matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Extract Artifacts
+        run: |
+          mkdir -p tests/allure/results
+          find artifacts/ -type f -print0 | xargs -0 mv -t tests/allure/results
+
+      - name: Publish allure report
+        if: always()
+        uses: andrcuns/allure-publish-action@v1.0.1
+        with:
+          storageType: s3
+          resultsGlob: "tests/allure/results/*"
+          updatePr: actions
+          collapseSummary: false
+          summary: suites
+          summaryTableType: markdown
+          copyLatest: true
+          bucket: csp-allure-reports
+          prefix: allure_reports/cloudbeat/${{ github.ref_name }}
+          ignoreMissingResults: true
+
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: failure()
         with:
           limit-access-to-actor: true
-
-      - name: clear cache
-        id: clear_cache
-        if: success()
-        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}}.tar
