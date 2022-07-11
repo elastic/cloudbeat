@@ -17,8 +17,6 @@ jobs:
       checks: write
       # needed unless run with comment_mode: off
       pull-requests: write
-      # for aws cred access
-      secrets: read
       # required by download step to access artifacts API
       actions: read
     steps:
