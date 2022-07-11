@@ -39,10 +39,6 @@ func init() {
 type IAMFactory struct {
 }
 
-type IAMExtraElements struct {
-	iamProvider awslib.IAMRolePermissionGetter
-}
-
 func (f *IAMFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting IAMFactory.Create")
 
