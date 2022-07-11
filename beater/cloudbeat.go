@@ -22,12 +22,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/elastic/cloudbeat/launcher"
+	"github.com/elastic/cloudbeat/pipeline" //nolint: typecheck
+	"github.com/elastic/cloudbeat/resources/fetching"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/cloudbeat/launcher"
-	"github.com/elastic/cloudbeat/pipeline"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 	"github.com/elastic/cloudbeat/transformer"
 

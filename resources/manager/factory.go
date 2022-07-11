@@ -51,9 +51,6 @@ func (fa *factories) ListFetcherFactory(name string, f fetching.Factory) {
 }
 
 func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-
-	log.Infof("CreateFetcher in factory.go %s", commonconfig.DebugString(c, false))
-
 	factory, ok := fa.m[name]
 	if !ok {
 		return nil, errors.New("fetcher factory could not be found")
@@ -112,8 +109,6 @@ func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg config.Config, ch
 	arr := []*ParsedFetcher{}
 	for _, fcfg := range cfg.Fetchers {
 		addCredentialsToFetcherConfiguration(log, cfg, fcfg)
-		log.Infof("parseConfigFetchers in factory.go %s", commonconfig.DebugString(fcfg, false))
-
 		p, err := fa.parseConfigFetcher(log, fcfg, ch)
 		if err != nil {
 			return nil, err
