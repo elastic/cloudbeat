@@ -76,11 +76,12 @@ func (n *awsTestFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetc
 	return &awsTestFetcher{ch, cfg}, nil
 }
 
-func awsMockedFetcherConfig(awsConfig aws.ConfigAWS) *agentconfig.C {
+func awsMockedFetcherConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS) *agentconfig.C {
 	c := agentconfig.NewConfig()
 	conf := config.DefaultConfig
 	conf.Type = config.InputTypeEKS
-	c.Merge(awsConfig)
+	err := c.Merge(awsConfig)
+	s.Nil(err)
 
 	return c
 }
@@ -101,7 +102,7 @@ func (s *FactoriesTestSuite) TestCreateFetcherWithAwsCredentials() {
 
 	for _, test := range tests {
 		s.F.ListFetcherFactory(test.key, &awsTestFactory{})
-		c := awsMockedFetcherConfig(test.awsConfig)
+		c := awsMockedFetcherConfig(s, test.awsConfig)
 
 		f, err := s.F.CreateFetcher(s.log, test.key, c, s.resourceCh)
 		s.NoError(err)
