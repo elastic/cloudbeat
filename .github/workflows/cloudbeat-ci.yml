@@ -90,7 +90,7 @@ jobs:
     strategy:
       matrix:
         # test-target: [pre_merge, file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
-        test-target: [pre_merge]
+        test-target: [pre_merge, file_system_rules, k8s_object_rules]
       fail-fast: false
     steps:
       - name: Check out the repo
