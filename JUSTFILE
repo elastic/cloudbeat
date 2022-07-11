@@ -88,6 +88,8 @@ POD_STATUS_UNKNOWN := 'Unknown'
 POD_STATUS_PENDING := 'Pending'
 POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
+TESTS_TIMEOUT := '60m'
+
 
 patch-cb-yml-tests:
   kubectl kustomize deploy/k8s/kustomize/test > tests/deploy/cloudbeat-pytest.yml
@@ -98,8 +100,8 @@ build-pytest-docker:
 load-pytest-kind:
   kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
 
-deploy-tests-helm:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+deploy-tests-helm-ci target:
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-local-tests-helm target:
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
@@ -112,6 +114,16 @@ gen-report:
 
 run-tests:
   helm test {{TESTS_RELEASE}} --namespace kube-system
+
+run-tests-ci:
+  #!/usr/bin/env bash
+  helm test {{TESTS_RELEASE}} --namespace kube-system --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
+  result_code=${PIPESTATUS[0]}
+  SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
+  echo "summary<<EOF" >> "$GITHUB_ENV"
+  echo "$SUMMARY" >> "$GITHUB_ENV"
+  echo "EOF" >> "$GITHUB_ENV"
+  exit $result_code
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 

@@ -112,3 +112,4 @@ func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    "",
 	}
 }
+func (r ELBResource) GetElasticCommonData() any { return nil }

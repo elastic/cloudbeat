@@ -74,3 +74,5 @@ func (r EKSResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    *r.Cluster.Name,
 	}
 }
+
+func (r EKSResource) GetElasticCommonData() any { return nil }
