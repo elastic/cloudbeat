@@ -54,17 +54,16 @@ func (s *IamFactoryTestSuite) TestCreateFetcher() {
 		{
 			`
 name: aws-iam
+secret_access_key: secret
+session_token: session
+default_region: us1-east
 `,
 		},
 	}
 
 	for _, test := range tests {
 		iamProvider := &awslib.MockIAMRolePermissionGetter{}
-		factory := &IAMFactory{extraElements: func(log *logp.Logger) (IAMExtraElements, error) {
-			return IAMExtraElements{
-				iamProvider: iamProvider,
-			}, nil
-		}}
+		factory := &IAMFactory{}
 
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
@@ -76,5 +75,8 @@ name: aws-iam
 		iamFetcher, ok := fetcher.(*IAMFetcher)
 		s.True(ok)
 		s.Equal(iamProvider, iamFetcher.iamProvider)
+		s.Equal("key", iamFetcher.cfg.AwsConfig.AccessKeyID)
+		s.Equal("secret", iamFetcher.cfg.AwsConfig.SecretAccessKey)
+		s.Equal("session", iamFetcher.cfg.AwsConfig.SessionToken)
 	}
 }

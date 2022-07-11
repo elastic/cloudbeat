@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	commonconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -50,6 +51,9 @@ func (fa *factories) ListFetcherFactory(name string, f fetching.Factory) {
 }
 
 func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+
+	log.Infof("CreateFetcher in factory.go %s", commonconfig.DebugString(c, false))
+
 	factory, ok := fa.m[name]
 	if !ok {
 		return nil, errors.New("fetcher factory could not be found")
@@ -107,6 +111,9 @@ type ParsedFetcher struct {
 func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
 	arr := []*ParsedFetcher{}
 	for _, fcfg := range cfg.Fetchers {
+		addCredentialsToFetcherConfiguration(log, cfg, fcfg)
+		log.Infof("parseConfigFetchers in factory.go %s", commonconfig.DebugString(fcfg, false))
+
 		p, err := fa.parseConfigFetcher(log, fcfg, ch)
 		if err != nil {
 			return nil, err
@@ -131,4 +138,13 @@ func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, c
 	}
 
 	return &ParsedFetcher{gen.Name, f}, nil
+}
+
+func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg config.Config, fcfg *commonconfig.C) {
+	if cfg.Type == config.InputTypeEKS {
+		err := fcfg.Merge(cfg.Streams[0].AWSConfig)
+		if err != nil {
+			log.Errorf("Failed to merge aws configuration to fetcher configuration", err)
+		}
+	}
 }

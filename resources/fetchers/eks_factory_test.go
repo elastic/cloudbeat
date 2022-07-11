@@ -20,7 +20,6 @@ package fetchers
 import (
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
@@ -50,15 +49,16 @@ func (s *EksFactoryTestSuite) TestCreateFetcher() {
 		{
 			`
 name: aws-eks
+clusterName: my-cluster
+access_key_id: key
+secret_access_key: secret
+session_token: session
 `,
 		},
 	}
 
 	for _, test := range tests {
-		eksProvider := &awslib.MockedEksClusterDescriber{}
-		factory := &EKSFactory{extraElements: func() (eksExtraElements, error) {
-			return eksExtraElements{eksProvider: eksProvider}, nil
-		}}
+		factory := &EKSFactory{}
 
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
@@ -69,6 +69,8 @@ name: aws-eks
 
 		eksFetcher, ok := fetcher.(*EKSFetcher)
 		s.True(ok)
-		s.Equal(eksProvider, eksFetcher.eksProvider)
+		s.Equal("key", eksFetcher.cfg.AwsConfig.AccessKeyID)
+		s.Equal("secret", eksFetcher.cfg.AwsConfig.SecretAccessKey)
+		s.Equal("session", eksFetcher.cfg.AwsConfig.SessionToken)
 	}
 }

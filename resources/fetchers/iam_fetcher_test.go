@@ -69,8 +69,8 @@ func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 
 	for _, test := range tests {
 		eksConfig := IAMFetcherConfig{
-			BaseFetcherConfig: fetching.BaseFetcherConfig{},
-			RoleName:          test.role,
+			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
+			RoleName:             test.role,
 		}
 		iamProvider := &awslib.MockIAMRolePermissionGetter{}
 

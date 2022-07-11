@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"testing"
 
@@ -33,7 +34,6 @@ import (
 
 type EksFetcherTestSuite struct {
 	suite.Suite
-
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
@@ -69,9 +69,14 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 	}
 
 	for _, test := range tests {
-		eksConfig := EKSFetcherConfig{
+		awsConfig := fetching.AwsBaseFetcherConfig{
 			BaseFetcherConfig: fetching.BaseFetcherConfig{},
-			ClusterName:       test.clusterName,
+			AwsConfig:         aws.ConfigAWS{},
+		}
+
+		eksConfig := EKSFetcherConfig{
+			AwsBaseFetcherConfig: awsConfig,
+			ClusterName:          test.clusterName,
 		}
 		eksProvider := &awslib.MockedEksClusterDescriber{}
 		expectedResource := EKSResource{&test.clusterResponse}
@@ -98,9 +103,13 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 
 func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	clusterName := "my-cluster"
-	eksConfig := EKSFetcherConfig{
+	awsConfig := fetching.AwsBaseFetcherConfig{
 		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		ClusterName:       clusterName,
+		AwsConfig:         aws.ConfigAWS{},
+	}
+	eksConfig := EKSFetcherConfig{
+		AwsBaseFetcherConfig: awsConfig,
+		ClusterName:          clusterName,
 	}
 	eksProvider := &awslib.MockedEksClusterDescriber{}
 
@@ -116,7 +125,6 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	ctx := context.Background()
 	err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
-
 	s.Equal(0, len(results))
 	s.Equal(expectedErr, err)
 }
