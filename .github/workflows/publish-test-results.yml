@@ -60,12 +60,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR=$(gh api -X GET search/issues -f q='repo:elastic/cloudbeat is:open is:pr is:unmerged '${{ github.event.workflow_run.head_sha }}' | jq  '.items[] | .number')
+          PR=$(gh api -X GET search/issues -f q='repo:elastic/cloudbeat is:open is:pr is:unmerged '${{ github.event.workflow_run.head_sha }}' | jq  '.items[] | .number' )
           gh pr comment $PR --body "Allure link: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/${{ github.event.workflow_run.head_branch }}/index.html"
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: failure()
         with:
           limit-access-to-actor: true
-
-
