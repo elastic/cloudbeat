@@ -259,6 +259,7 @@ fetchers:
 
 		s.F.SetFetcherFactory(fetcher.Name, &numberFetcherFactory{})
 		parsedList, err := s.F.ParseConfigFetchers(s.log, c, s.resourceCh)
+		s.Equal(fetcher.Name, parsedList[0].name)
 		s.NoError(err)
 
 		err = reg.RegisterFetchers(parsedList)
