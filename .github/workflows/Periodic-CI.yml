@@ -16,10 +16,6 @@ on:
     # Weekly job running every saturday at 2 am
     - cron: '00 02 * * 6'
 
-  push:
-    branches:
-    - tests-ci-v2
-
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.2
@@ -195,6 +191,7 @@ jobs:
   publish_results:
     name: Publish Results
     needs: Test_Matrix
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifacts
