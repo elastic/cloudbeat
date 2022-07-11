@@ -82,14 +82,6 @@ default_region: us1-east
 		}
 		identityProvider := &awslib.MockedIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
-		awsConfig := awslib.Config{Config: aws.Config{
-			Region: test.region,
-		}}
-		awsconfigProvider := &awslib.MockConfigGetter{}
-		awsconfigProvider.EXPECT().GetConfig().Return(awsConfig)
-
-		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
-		ecrPublicProvider := &awslib.MockedEcrRepositoryDescriber{}
 
 		factory := &ECRFactory{
 			KubernetesProvider: mockedKubernetesClientGetter,
@@ -107,8 +99,6 @@ default_region: us1-east
 
 		ecrFetcher, ok := fetcher.(*ECRFetcher)
 		s.True(ok)
-		s.Equal(ecrProvider, ecrFetcher.PodDescribers[0].Provider)
-		s.Equal(ecrPublicProvider, ecrFetcher.PodDescribers[1].Provider)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
 		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].FilterRegex.String())
 		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].FilterRegex.String())
