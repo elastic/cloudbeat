@@ -116,6 +116,7 @@ run-tests:
   helm test {{TESTS_RELEASE}} --namespace kube-system
 
 run-tests-ci:
+  #!/usr/bin/env bash
   helm test {{TESTS_RELEASE}} --namespace kube-system --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
   result_code=${PIPESTATUS[0]}
   SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
