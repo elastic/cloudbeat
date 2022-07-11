@@ -174,7 +174,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.NoError(err)
 
-		reg := NewFetcherRegistry(s.log, config.DefaultConfig)
+		reg := NewFetcherRegistry(s.log)
 		err = reg.RegisterFetchers(parsedList)
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
@@ -247,7 +247,7 @@ fetchers:
 		c, err := config.New(cfg)
 		s.NoError(err)
 
-		reg := NewFetcherRegistry(s.log, c)
+		reg := NewFetcherRegistry(s.log)
 		var fetcher config.Fetcher
 		if len(c.Fetchers.Vanilla) > 0 {
 			err = c.Fetchers.Vanilla[0].Unpack(&fetcher)

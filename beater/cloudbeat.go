@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/elastic/cloudbeat/launcher"
-	"github.com/elastic/cloudbeat/pipeline"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/launcher"
+	"github.com/elastic/cloudbeat/pipeline"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/transformer"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -199,7 +199,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 }
 
 func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) (fetchersManager.FetchersRegistry, error) {
-	registry := fetchersManager.NewFetcherRegistry(log, cfg)
+	registry := fetchersManager.NewFetcherRegistry(log)
 
 	parsedList, err := fetchersManager.Factories.ParseConfigFetchers(log, cfg, ch)
 	if err != nil {

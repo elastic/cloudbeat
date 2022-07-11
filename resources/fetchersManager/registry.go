@@ -20,7 +20,6 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -44,7 +43,7 @@ type registeredFetcher struct {
 	c []fetching.Condition
 }
 
-func NewFetcherRegistry(log *logp.Logger, cfg config.Config) FetchersRegistry {
+func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
 	reg := &fetchersRegistry{
 		log: log,
 		reg: make(map[string]registeredFetcher),

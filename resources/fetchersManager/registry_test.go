@@ -19,7 +19,6 @@ package fetchersManager
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/config"
 	"testing"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -101,7 +100,7 @@ func TestRegistryTestSuite(t *testing.T) {
 }
 
 func (s *RegistryTestSuite) SetupTest() {
-	s.registry = NewFetcherRegistry(s.log, config.DefaultConfig)
+	s.registry = NewFetcherRegistry(s.log)
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
@@ -217,7 +216,7 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	}
 
 	for _, test := range tests {
-		s.registry = NewFetcherRegistry(s.log, config.DefaultConfig)
+		s.registry = NewFetcherRegistry(s.log)
 		f := newNumberFetcher(1, nil, s.wg)
 		err := s.registry.Register("process", f, test.conditions...)
 		s.NoError(err)
