@@ -50,8 +50,8 @@ type PodDescriber struct {
 }
 
 type ECRFetcherConfig struct {
-	fetching.BaseFetcherConfig
-	Kubeconfig string `config:"Kubeconfig"`
+	fetching.AwsBaseFetcherConfig `config:",inline"`
+	Kubeconfig                    string `config:"Kubeconfig"`
 }
 
 type EcrRepository ecr.Repository

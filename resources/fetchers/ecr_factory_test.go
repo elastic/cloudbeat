@@ -57,6 +57,10 @@ func (s *EcrFactoryTestSuite) TestCreateFetcher() {
 		{
 			`
 name: aws-ecr
+access_key_id: key
+secret_access_key: secret
+session_token: session
+default_region: us1-east
 `,
 			"us1-east",
 			"my-account",
@@ -88,14 +92,9 @@ name: aws-ecr
 		ecrPublicProvider := &awslib.MockedEcrRepositoryDescriber{}
 
 		factory := &ECRFactory{
-			extraElements: func() (ecrExtraElements, error) {
-				return ecrExtraElements{
-					awsConfig:               awsConfig,
-					kubernetesClientGetter:  mockedKubernetesClientGetter,
-					identityProviderGetter:  identityProvider,
-					ecrPrivateRepoDescriber: ecrProvider,
-					ecrPublicRepoDescriber:  ecrPublicProvider,
-				}, nil
+			KubernetesProvider: mockedKubernetesClientGetter,
+			IdentityProvider: func(cfg aws.Config) awslib.IdentityProviderGetter {
+				return identityProvider
 			},
 		}
 
