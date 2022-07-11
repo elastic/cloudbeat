@@ -121,9 +121,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/*.tar
-          key: ${{ runner.os }}-buildx-${{ env.CONTAINER_SUFFIX }}
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ github.sha }}
+            ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Load images to kind
         run: |

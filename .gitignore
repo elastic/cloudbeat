@@ -1,6 +1,5 @@
 *env.aws 
 data/*
-.vscode*
 tests/.idea
 /.idea
 /build
@@ -24,3 +23,8 @@ tests/allure/reports/*
 # ci
 .secrets
 .env
+.github/act/*
+
+# vscode
+.vscode*
+*.code-workspace

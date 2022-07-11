@@ -1,4 +1,4 @@
-name: Nightly-CI
+name: Periodic-CI
 
 on:
   # On demand execution of workflow will run all suites.
@@ -9,9 +9,6 @@ on:
         description: 'Specify test markers to run'
         default: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
 
-  # push:
-  #   branches:
-  #   - "tests-ci-v2"
   schedule:
     # Nightly job. Running every day at 2 am
     - cron: '00 02 * * *'
@@ -53,15 +50,11 @@ jobs:
     - id: Dispatch
       if: github.event_name == 'workflow_dispatch'
       env:
-        # TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
         TEST_TARGETS: ${{ github.event.inputs.test-targets }}
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
     - id: set-matrix
-      # env: 
-        # TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
       run: |
         echo "::set-output name=matrix::${{ env.TEST_MATRIX}}"
-      # run: echo "::set-output name=matrix::[\"pre_merge\", \"file_system_rules\"]"
 
   Build:
     name: Build
@@ -98,7 +91,6 @@ jobs:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.workflow }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ github.workflow }}
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
@@ -127,7 +119,7 @@ jobs:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
-            ${{ runner.os }}-dockers-cache-
+            ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Move cache
         run: |
