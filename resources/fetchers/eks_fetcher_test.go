@@ -34,7 +34,6 @@ import (
 
 type EksFetcherTestSuite struct {
 	suite.Suite
-
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
