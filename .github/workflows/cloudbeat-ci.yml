@@ -6,9 +6,6 @@ on:
       - main
       - '[0-9]+.[0-9]+'
     types: [opened, synchronize, reopened]
-  # push:
-  #   branches:
-  #     - "tests-ci-v2"
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.2
@@ -92,7 +89,8 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        test-target: [pre_merge, file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
+        # test-target: [pre_merge, file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
+        test-target: [pre_merge, file_system_rules, k8s_object_rules]
       fail-fast: false
     steps:
       - name: Check out the repo
@@ -130,12 +128,6 @@ jobs:
         id: run_tests 
         run: |
           just run-tests-ci
-          result_code=${PIPESTATUS[0]}
-          SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
-          echo "summary<<EOF" >> "$GITHUB_ENV"
-          echo "$SUMMARY" >> "$GITHUB_ENV"
-          echo "EOF" >> "$GITHUB_ENV"
-          exit $result_code
 
       - name: Upload Test Results
         if: always()

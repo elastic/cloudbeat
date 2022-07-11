@@ -88,6 +88,8 @@ POD_STATUS_UNKNOWN := 'Unknown'
 POD_STATUS_PENDING := 'Pending'
 POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
+TESTS_TIMEOUT := '60m'
+
 
 patch-cb-yml-tests:
   kubectl kustomize deploy/k8s/kustomize/test > tests/deploy/cloudbeat-pytest.yml
@@ -114,7 +116,15 @@ run-tests:
   helm test {{TESTS_RELEASE}} --namespace kube-system
 
 run-tests-ci:
-  helm test {{TESTS_RELEASE}} --namespace kube-system --kube-context kind-kind-mono --logs 2>&1 | tee test.log
+  #!/usr/bin/env sh
+
+  helm test {{TESTS_RELEASE}} --namespace kube-system --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
+  result_code=${PIPESTATUS[0]}
+  SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
+  echo "summary<<EOF" >> "$GITHUB_ENV"
+  echo "$SUMMARY" >> "$GITHUB_ENV"
+  echo "EOF" >> "$GITHUB_ENV"
+  exit $result_code
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 

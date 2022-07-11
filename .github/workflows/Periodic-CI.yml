@@ -185,12 +185,6 @@ jobs:
         id: run_tests 
         run: |
           just run-tests-ci
-          result_code=${PIPESTATUS[0]}
-          SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
-          echo "summary<<EOF" >> "$$GITHUB_ENV"
-          echo "$SUMMARY" >> "$$GITHUB_ENV"
-          echo "EOF" >> "$$GITHUB_ENV"
-          exit $result_code
 
       - name: Upload Test Results
         if: always()
