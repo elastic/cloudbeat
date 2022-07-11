@@ -24,6 +24,10 @@ env:
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CONTAINER_SUFFIX: ${{ github.run_id }}
 
+permissions:
+  actions: read
+  checks: write
+  statuses: read
 jobs:
   Setup:
     runs-on: ubuntu-latest
