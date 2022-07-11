@@ -35,9 +35,8 @@ type FetchersRegistry interface {
 }
 
 type fetchersRegistry struct {
-	log               *logp.Logger
-	reg               map[string]registeredFetcher
-	supportedFetchers map[string]bool
+	log *logp.Logger
+	reg map[string]registeredFetcher
 }
 
 type registeredFetcher struct {
@@ -50,36 +49,7 @@ func NewFetcherRegistry(log *logp.Logger, cfg config.Config) FetchersRegistry {
 		log: log,
 		reg: make(map[string]registeredFetcher),
 	}
-
-	// Configure Supported fetchers per framework
-	if cfg.Type == config.InputTypeEKS {
-		reg.enableEksFetchers(reg.log)
-	} else {
-		reg.enableVanillaFetchers(reg.log)
-	}
 	return reg
-}
-
-func (r *fetchersRegistry) enableEksFetchers(log *logp.Logger) {
-	r.supportedFetchers = map[string]bool{
-		fetching.KubeAPIType:    true,
-		fetching.FileSystemType: true,
-		fetching.ProcessType:    true,
-		fetching.ECRType:        true,
-		fetching.EKSType:        true,
-		fetching.ELBType:        true,
-		fetching.IAMType:        true,
-	}
-	log.Info("setting supported fetchers for EKS: %v", r.supportedFetchers)
-}
-
-func (r *fetchersRegistry) enableVanillaFetchers(log *logp.Logger) {
-	r.supportedFetchers = map[string]bool{
-		fetching.KubeAPIType:    true,
-		fetching.FileSystemType: true,
-		fetching.ProcessType:    true,
-	}
-	log.Info("setting supported fetchers for Vanilla kubernetes: %v", r.supportedFetchers)
 }
 
 // RegisterFetchers registers entire list of parsed fetchers
@@ -102,9 +72,6 @@ func (r *fetchersRegistry) RegisterFetchers(fetchers []*ParsedFetcher) error {
 // Register registers a Fetcher implementation.
 func (r *fetchersRegistry) Register(fetcherName string, f fetching.Fetcher, c ...fetching.Condition) error {
 	r.log.Infof("Registering new fetcher: %s", fetcherName)
-	if !r.supportedFetchers[fetcherName] {
-		return fmt.Errorf("fetcher %s is not supported in the selected framework", fetcherName)
-	}
 	if _, ok := r.reg[fetcherName]; ok {
 		return fmt.Errorf("fetcher %s is already registered", fetcherName)
 	}

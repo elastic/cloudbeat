@@ -169,7 +169,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		s.NoError(err, "Could not set name: %v", err)
 
 		conf := config.DefaultConfig
-		conf.Fetchers = append(conf.Fetchers, numCfg)
+		conf.Fetchers.Vanilla = append(conf.Fetchers.Vanilla, numCfg)
 
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.NoError(err)
@@ -202,7 +202,7 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 		err := numCfg.SetString("name", -1, test.key)
 		s.NoError(err, "Could not set name: %v", err)
 
-		conf.Fetchers = append(conf.Fetchers, numCfg)
+		conf.Fetchers.Vanilla = append(conf.Fetchers.Vanilla, numCfg)
 
 		_, err = s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.Error(err)
@@ -215,24 +215,28 @@ func (s *FactoriesTestSuite) TestRegisterFromFullConfig() {
 	}{
 		{
 			`
-  type: cloudbeat/vanilla
-  streams:
-    data_yaml:
+type: cloudbeat/vanilla
+streams:
+  - not_data_yaml:
       activated_rules:
         cis_k8s:
-  fetchers:
+          - a
+fetchers:
+  vanilla:
   - name: process
 `,
 		},
 		{
 			`
-  type: cloudbeat/eks
-  streams:
-    data_yaml:
+type: cloudbeat/eks
+streams:
+  - not_data_yaml:
       activated_rules:
         cis_k8s:
-  fetchers:
-  - name: file-system
+          - a
+fetchers:
+  eks:
+  - name: aws-eks
 `,
 		},
 	}
@@ -244,9 +248,14 @@ func (s *FactoriesTestSuite) TestRegisterFromFullConfig() {
 		s.NoError(err)
 
 		reg := NewFetcherRegistry(s.log, c)
-		fetcher := config.Fetcher{}
-		err = c.Fetchers[0].Unpack(&fetcher)
-		s.NoError(err)
+		var fetcher config.Fetcher
+		if len(c.Fetchers.Vanilla) > 0 {
+			err = c.Fetchers.Vanilla[0].Unpack(&fetcher)
+			s.NoError(err)
+		} else {
+			err = c.Fetchers.EKS[0].Unpack(&fetcher)
+			s.NoError(err)
+		}
 
 		s.F.SetFetcherFactory(fetcher.Name, &numberFetcherFactory{})
 		parsedList, err := s.F.ParseConfigFetchers(s.log, c, s.resourceCh)
@@ -254,42 +263,5 @@ func (s *FactoriesTestSuite) TestRegisterFromFullConfig() {
 
 		err = reg.RegisterFetchers(parsedList)
 		s.NoError(err)
-	}
-}
-
-func (s *FactoriesTestSuite) TestRegisterFullConfigUnsupportedFetchers() {
-	var tests = []struct {
-		config string
-	}{
-		{
-			`
-  type: cloudbeat/vanilla
-  streams:
-    data_yaml:
-      activated_rules:
-        cis_k8s:
-  fetchers:
-  - name: "aws-eks"
-`,
-		},
-	}
-
-	for _, test := range tests {
-		cfg, err := agentconfig.NewConfigFrom(test.config)
-		s.NoError(err)
-		c, err := config.New(cfg)
-		s.NoError(err)
-
-		reg := NewFetcherRegistry(s.log, c)
-		fetcher := config.Fetcher{}
-		err = c.Fetchers[0].Unpack(&fetcher)
-		s.NoError(err)
-
-		s.F.SetFetcherFactory(fetcher.Name, &numberFetcherFactory{})
-		parsedList, err := s.F.ParseConfigFetchers(s.log, c, s.resourceCh)
-		s.NoError(err)
-
-		err = reg.RegisterFetchers(parsedList)
-		s.Error(err)
 	}
 }

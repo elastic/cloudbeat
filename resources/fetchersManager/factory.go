@@ -83,7 +83,9 @@ type ParsedFetcher struct {
 
 func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
 	var arr []*ParsedFetcher
-	for _, fcfg := range cfg.Fetchers {
+
+	fetchers := loadFetchers(cfg)
+	for _, fcfg := range fetchers {
 		p, err := fa.parseConfigFetcher(log, fcfg, ch)
 		if err != nil {
 			return nil, err
@@ -93,6 +95,16 @@ func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg config.Config, ch
 	}
 
 	return arr, nil
+}
+
+func loadFetchers(cfg config.Config) []*agentconfig.C {
+	var fetchers []*agentconfig.C
+	if cfg.Type == config.InputTypeEKS {
+		fetchers = cfg.Fetchers.EKS
+	} else {
+		fetchers = cfg.Fetchers.Vanilla
+	}
+	return fetchers
 }
 
 func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, ch chan fetching.ResourceInfo) (*ParsedFetcher, error) {
