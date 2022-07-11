@@ -142,7 +142,7 @@ jobs:
         test-target: ${{fromJson(needs.Setup.outputs.matrix)}}
     name: ${{ matrix.test-target }}-tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 90
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2

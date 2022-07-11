@@ -86,11 +86,11 @@ jobs:
     name: ${{ matrix.test-target }}-tests
     needs: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       matrix:
-        # test-target: [pre_merge, file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
-        test-target: [pre_merge, file_system_rules, k8s_object_rules]
+        # test-targets chosen by stabillity and runtime.Only pre_merge will be set as mandatory
+        test-target: [pre_merge, file_system_rules]
       fail-fast: false
     steps:
       - name: Check out the repo
