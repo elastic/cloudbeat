@@ -55,7 +55,7 @@ jobs:
           prefix: allure_reports/cloudbeat/${{ github.event.workflow_run.head_branch }}
           ignoreMissingResults: true
 
-#Todo comment allure results if pr gh ticket https://github.com/elastic/security-team/issues/3936
+# Todo Workflow_run jobs only work from default branch.Verify post merge pr processing is functional & secure gh ticket https://github.com/elastic/security-team/issues/3936
       - name: Comment On PR
         if: ${{ github.event.workflow_run.event == 'pull_request' }}
         env:

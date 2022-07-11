@@ -11,7 +11,7 @@ on:
 
   schedule:
     # Nightly job. Running every day at 2 am
-    - cron: '00 02 * * *'
+    - cron: '00 02 * * 0-4'
 
     # Weekly job running every saturday at 2 am
     - cron: '00 02 * * 6'
