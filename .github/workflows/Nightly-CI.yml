@@ -96,9 +96,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.workflow }}-${{ github.run_id }}
+          key: ${{ runner.os }}-buildx-${{ github.workflow }}
           restore-keys: |
             ${{ runner.os }}-buildx-${{ github.workflow }}
+            ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
         uses: docker/build-push-action@v2

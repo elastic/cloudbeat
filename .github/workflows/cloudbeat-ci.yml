@@ -1,20 +1,18 @@
 name: Cloudbeat-CI
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
-  #     - '[0-9]+.[0-9]+'
-  #   types: [assigned, opened, synchronize, reopened]
-  push:
+  pull_request:
     branches:
-      - "tests-ci-v2"
+      - main
+      - '[0-9]+.[0-9]+'
+    types: [opened, synchronize, reopened]
+  # push:
+  #   branches:
+  #     - "tests-ci-v2"
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.2
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CONTAINER_SUFFIX: ${{ github.run_id }}
 
 jobs:
   Build:
@@ -50,9 +48,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}-${{ github.run_number }}
+          key: ${{ runner.os }}-buildx-${{ github.workflow }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ github.sha }}
+            ${{ runner.os }}-buildx-
       
       - name: Build cloudbeat-docker
         uses: docker/build-push-action@v2
@@ -62,7 +60,7 @@ jobs:
           tags: cloudbeat:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/cloudbeat-${{ github.sha }}-${{ github.run_number }}.tar
+          outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Build pytest-docker
         uses: docker/build-push-action@v2
@@ -72,13 +70,13 @@ jobs:
           tags: cloudbeat-test:latest
           cache-from: type=local,mode=max,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/pytest-${{ github.sha }}-${{ github.run_number }}.tar
+          outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
       
       - name: Cache docker images
         uses: actions/cache@v2
         with:
           path: /tmp/*.tar
-          key: ${{ runner.os }}-buildx-${{ github.sha }}-${{ github.run_number }}
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
             ${{ runner.os }}-dockers-cache-
 
@@ -87,15 +85,14 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-  Integration_tests:
-    name: Integration Tests
+  Test_Matrix:
+    name: ${{ matrix.test-target }}-tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       matrix:
-        # test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
-        test-target: [pre_merge]
-      # fail-fast: false
+        test-target: [pre_merge, file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
+      fail-fast: false
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -124,13 +121,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/*.tar
-          key: ${{ runner.os }}-buildx-${{ github.sha }}-${{ github.run_number }}
+          key: ${{ runner.os }}-buildx-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
             ${{ runner.os }}-buildx-${{ github.sha }}
 
       - name: Load images to kind
         run: |
-          kind load image-archive /tmp/cloudbeat-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.sha }}-${{ github.run_number }}.tar --name=kind-mono
+          kind load image-archive /tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono
 #          rm -rf /tmp/*.tar
       - name: Deploy tests Helm chart
         id: deploy_helm
