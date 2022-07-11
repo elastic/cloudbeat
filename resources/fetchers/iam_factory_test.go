@@ -20,7 +20,6 @@ package fetchers
 import (
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
@@ -54,6 +53,7 @@ func (s *IamFactoryTestSuite) TestCreateFetcher() {
 		{
 			`
 name: aws-iam
+access_key_id: key
 secret_access_key: secret
 session_token: session
 default_region: us1-east
@@ -62,7 +62,6 @@ default_region: us1-east
 	}
 
 	for _, test := range tests {
-		iamProvider := &awslib.MockIAMRolePermissionGetter{}
 		factory := &IAMFactory{}
 
 		cfg, err := config.NewConfigFrom(test.config)
@@ -74,7 +73,6 @@ default_region: us1-east
 
 		iamFetcher, ok := fetcher.(*IAMFetcher)
 		s.True(ok)
-		s.Equal(iamProvider, iamFetcher.iamProvider)
 		s.Equal("key", iamFetcher.cfg.AwsConfig.AccessKeyID)
 		s.Equal("secret", iamFetcher.cfg.AwsConfig.SecretAccessKey)
 		s.Equal("session", iamFetcher.cfg.AwsConfig.SessionToken)
