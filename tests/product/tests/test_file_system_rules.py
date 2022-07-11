@@ -3,41 +3,46 @@ Kubernetes CIS rules verification.
 This module verifies correctness of retrieved findings by manipulating audit and remediation actions
 """
 from datetime import datetime
-
 import pytest
-
 from commonlib.utils import get_evaluation
-from product.tests.tests.file_system.file_system_test_cases import *
+from commonlib.framework.reporting import skip_param_case, SkipReportData
+from .data.file_system import file_system_test_cases as fs_tc
 
 
 @pytest.mark.file_system_rules
 @pytest.mark.parametrize(
     ("rule_tag", "command", "param_value", "resource", "expected"),
-    [*cis_1_1_1,
-     *cis_1_1_2,
-     *cis_1_1_3,
-     *cis_1_1_4,
-     *cis_1_1_5,
-     *cis_1_1_6,
-     *cis_1_1_7,
-     *cis_1_1_8,
-     *cis_1_1_11,
-     # *cis_1_1_12, TODO: update environment to support user:group -> etcd:etcd
-     *cis_1_1_13,
-     *cis_1_1_14,
-     *cis_1_1_15,
-     *cis_1_1_16,
-     *cis_1_1_17,
-     *cis_1_1_18,
-     *cis_1_1_19,
-     *cis_1_1_20,
-     *cis_1_1_21,
-     *cis_4_1_1,
-     *cis_4_1_2,
-     *cis_4_1_5,
-     *cis_4_1_6,
-     *cis_4_1_9,
-     *cis_4_1_10
+    [*fs_tc.cis_1_1_1,
+     *fs_tc.cis_1_1_2,
+     *fs_tc.cis_1_1_3,
+     *fs_tc.cis_1_1_4,
+     *fs_tc.cis_1_1_5,
+     *fs_tc.cis_1_1_6,
+     *fs_tc.cis_1_1_7,
+     *fs_tc.cis_1_1_8,
+     *fs_tc.cis_1_1_11,
+     *[fs_tc.cis_1_1_12[0]],
+     *skip_param_case(skip_list=fs_tc.cis_1_1_12[1:],
+                      data_to_report=SkipReportData(
+                          url_title="security-team: #4311",
+                          url_link="https://github.com/elastic/security-team/issues/4311",
+                          skip_reason="known issue: broken file_system_rules tests"
+                      )),
+     *fs_tc.cis_1_1_13,
+     *fs_tc.cis_1_1_14,
+     *fs_tc.cis_1_1_15,
+     *fs_tc.cis_1_1_16,
+     *fs_tc.cis_1_1_17,
+     *fs_tc.cis_1_1_18,
+     *fs_tc.cis_1_1_19,
+     *fs_tc.cis_1_1_20,
+     *fs_tc.cis_1_1_21,
+     *fs_tc.cis_4_1_1,
+     *fs_tc.cis_4_1_2,
+     *fs_tc.cis_4_1_5,
+     *fs_tc.cis_4_1_6,
+     *fs_tc.cis_4_1_9,
+     *fs_tc.cis_4_1_10
      ],
 )
 def test_file_system_configuration(config_node_pre_test,
@@ -50,7 +55,8 @@ def test_file_system_configuration(config_node_pre_test,
     This data driven test verifies rules and findings return by cloudbeat agent.
     In order to add new cases @pytest.mark.parameterize section shall be updated.
     Setup and teardown actions are defined in data method.
-    This test creates cloudbeat agent instance, changes node resources (modes, users, groups) and verifies,
+    This test creates cloudbeat agent instance,
+    changes node resources (modes, users, groups) and verifies,
     that cloudbeat returns correct finding.
     @param rule_tag: Name of rule to be verified.
     @param command: Command to be executed, for example chmod / chown
@@ -62,7 +68,8 @@ def test_file_system_configuration(config_node_pre_test,
     k8s_client, api_client, cloudbeat_agent = config_node_pre_test
     # Currently, single node is used, in the future may be extended for all nodes.
     node = k8s_client.get_cluster_nodes()[0]
-    pods = k8s_client.get_agent_pod_instances(agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace)
+    pods = k8s_client.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
+                                              namespace=cloudbeat_agent.namespace)
 
     api_client.exec_command(container_name=node.metadata.name,
                             command=command,
@@ -82,5 +89,6 @@ def test_file_system_configuration(config_node_pre_test,
         resource_identifier=identifier
     )
 
-    assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found" 
-    assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected}, got: {evaluation}"
+    assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
+    assert evaluation == expected, f"Rule {rule_tag} verification failed," \
+                                   f"expected: {expected}, got: {evaluation}"
