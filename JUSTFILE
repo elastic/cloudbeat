@@ -173,8 +173,7 @@ run-test-target target:
   just build-load-run-tests &
 
 
-# run-test-targets +targets='file_system_rules k8s_object_rules process_api_server_rules process_controller_manager_rules process_etcd_rules process_kubelet_rules process_scheduler_rules':
-run-test-targets +targets='process_kubelet_rules':
+run-test-targets +targets='file_system_rules k8s_object_rules process_api_server_rules process_controller_manager_rules process_etcd_rules process_kubelet_rules process_scheduler_rules':
   #!/usr/bin/env sh
 
   echo 'Running tests: {{targets}}'

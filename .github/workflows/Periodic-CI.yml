@@ -131,8 +131,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # test-target: [file_system_rules, k8s_object_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules, process_scheduler_rules]
-        # test-target: [pre_merge, file_system_rules ]
         test-target: ${{fromJson(needs.Setup.outputs.matrix)}}
     name: ${{ matrix.test-target }}-tests
     runs-on: ubuntu-latest
@@ -190,11 +188,6 @@ jobs:
           echo "EOF" >> "$$GITHUB_ENV"
           exit $result_code
 
-      - name: clear cache
-        id: clear_cache
-        if: success()
-        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}}.tar
-
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v2
@@ -202,7 +195,11 @@ jobs:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
 
-##  Add cache purge on successful run https://github.com/elastic/security-team/issues/3936
+      - name: clear cache
+        id: clear_cache
+        if: success()
+        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}}.tar
+
   publish_results:
     name: Publish Results
     needs: Test_Matrix

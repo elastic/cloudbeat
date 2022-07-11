@@ -87,6 +87,7 @@ jobs:
 
   Test_Matrix:
     name: ${{ matrix.test-target }}-tests
+    needs: Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -108,15 +109,6 @@ jobs:
           config: deploy/k8s/kind/kind-config.yml
           cluster_name: kind-mono 
 
-      - name: Wait for build to succeed
-        uses: lewagon/wait-on-check-action@v1.0.0
-        with:
-          check-name: Build
-          ref: ${{ github.ref }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          allowed-conclusions: success
-          wait-interval: 10
-
       - name: Cache docker images
         uses: actions/cache@v2
         with:
@@ -128,7 +120,7 @@ jobs:
       - name: Load images to kind
         run: |
           kind load image-archive /tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono
-#          rm -rf /tmp/*.tar
+
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
@@ -152,39 +144,7 @@ jobs:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
 
-##  Add cache purge on successful run https://github.com/elastic/security-team/issues/3936
-  # publish_results:
-  #   name: Publish Results
-  #   needs: Integration_tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download Artifacts
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         path: artifacts
-
-  #     - name: Display structure of downloaded files
-  #       run: |
-  #         mkdir -p tests/allure/results
-  #         find artifacts/ -type f -print0 | xargs -0 mv -t tests/allure/results
-
-  #     - name: Publish allure report
-  #       if: always()
-  #       uses: andrcuns/allure-publish-action@v1.0.1
-  #       with:
-  #         storageType: s3
-  #         resultsGlob: "tests/allure/results/*"
-  #         updatePr: actions
-  #         collapseSummary: false
-  #         summary: suites
-  #         summaryTableType: markdown
-  #         copyLatest: true
-  #         bucket: csp-allure-reports
-  #         prefix: allure_reports/cloudbeat/${GITHUB_REF}
-  #         ignoreMissingResults: true
-
-  #     - name: Setup tmate session
-  #       uses: mxschmitt/action-tmate@v3
-  #       if: failure()
-  #       with:
-  #         limit-access-to-actor: true
+      - name: clear cache
+        id: clear_cache
+        if: success()
+        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}}.tar
