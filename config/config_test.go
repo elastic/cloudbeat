@@ -430,10 +430,9 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 
 func (s *ConfigTestSuite) TestActivatedRulesFrameWork() {
 	var tests = []struct {
-		config                    string
-		expectedActivatedRules    []string
-		expectedEksActivatedRules []string
-		expectedType              string
+		config                 string
+		expectedActivatedRules []string
+		expectedType           string
 	}{
 		{
 			`
@@ -446,7 +445,6 @@ streams:
           - b
 `,
 			[]string{"a", "b"},
-			nil,
 			"cloudbeat/vanilla",
 		},
 		{
@@ -459,7 +457,6 @@ streams:
           - a
           - b
 `,
-			nil,
 			[]string{"a", "b"},
 			"cloudbeat/eks",
 		},
@@ -473,7 +470,10 @@ streams:
 		s.NoError(err)
 
 		s.Equal(test.expectedType, c.Type)
-		s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
-		s.Equal(test.expectedEksActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisEKS)
+		if test.expectedType == "cloudbeat/eks" {
+			s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisEKS)
+		} else {
+			s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
+		}
 	}
 }
