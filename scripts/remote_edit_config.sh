@@ -6,16 +6,14 @@ SUFFIX="/install/cloudbeat-${CLOUDBEAT_VERSION}-SNAPSHOT-linux-${ARCH}/cloudbeat
 TMP_LOCAL="/tmp/cloudbeat.yml"
 
 PODS=$(kubectl -n kube-system get pod -l app=elastic-agent -o name)
-for P in $PODS
-do
-    POD=$(echo $P | cut -d '/' -f 2)
-    FOLDER=$(kubectl -n kube-system exec $POD -- ls $PREFIX)
-    FULL_PATH="${PREFIX}${FOLDER}${SUFFIX}"
-    kubectl -n kube-system cp "$POD":"$FULL_PATH" $TMP_LOCAL
-    vi $TMP_LOCAL
-    kubectl -n kube-system cp $TMP_LOCAL "$POD":"$FULL_PATH"
-    kubectl -n kube-system exec "$POD" -- chmod go-w "$FULL_PATH"
-    kubectl -n kube-system exec "$POD" -- chown root:root "$FULL_PATH"
-    rm $TMP_LOCAL
+for P in $PODS; do
+  POD=$(echo "$P" | cut -d '/' -f 2)
+  FOLDER=$(kubectl -n kube-system exec $POD -- ls $PREFIX)
+  FULL_PATH="${PREFIX}${FOLDER}${SUFFIX}"
+  kubectl -n kube-system cp "$POD":"$FULL_PATH" $TMP_LOCAL
+  vi $TMP_LOCAL
+  kubectl -n kube-system cp $TMP_LOCAL "$POD":"$FULL_PATH"
+  kubectl -n kube-system exec "$POD" -- chmod go-w "$FULL_PATH"
+  kubectl -n kube-system exec "$POD" -- chown root:root "$FULL_PATH"
+  rm $TMP_LOCAL
 done
-
