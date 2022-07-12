@@ -57,6 +57,10 @@ func (s *EcrFactoryTestSuite) TestCreateFetcher() {
 		{
 			`
 name: aws-ecr
+access_key_id: key
+secret_access_key: secret
+session_token: session
+default_region: us1-east
 `,
 			"us1-east",
 			"my-account",
@@ -78,24 +82,11 @@ name: aws-ecr
 		}
 		identityProvider := &awslib.MockedIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
-		awsConfig := awslib.Config{Config: aws.Config{
-			Region: test.region,
-		}}
-		awsconfigProvider := &awslib.MockConfigGetter{}
-		awsconfigProvider.EXPECT().GetConfig().Return(awsConfig)
-
-		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
-		ecrPublicProvider := &awslib.MockedEcrRepositoryDescriber{}
 
 		factory := &ECRFactory{
-			extraElements: func() (ecrExtraElements, error) {
-				return ecrExtraElements{
-					awsConfig:               awsConfig,
-					kubernetesClientGetter:  mockedKubernetesClientGetter,
-					identityProviderGetter:  identityProvider,
-					ecrPrivateRepoDescriber: ecrProvider,
-					ecrPublicRepoDescriber:  ecrPublicProvider,
-				}, nil
+			KubernetesProvider: mockedKubernetesClientGetter,
+			IdentityProvider: func(cfg aws.Config) awslib.IdentityProviderGetter {
+				return identityProvider
 			},
 		}
 
@@ -108,8 +99,6 @@ name: aws-ecr
 
 		ecrFetcher, ok := fetcher.(*ECRFetcher)
 		s.True(ok)
-		s.Equal(ecrProvider, ecrFetcher.PodDescribers[0].Provider)
-		s.Equal(ecrPublicProvider, ecrFetcher.PodDescribers[1].Provider)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
 		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].FilterRegex.String())
 		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].FilterRegex.String())

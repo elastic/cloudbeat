@@ -45,7 +45,7 @@ func (s *GlobMatcherTestSuite) TestGlobMatchingNonExistingPattern() {
 	filePath := filepath.Join(dir, fileName)
 	matchedFiles, err := Glob(filePath + "/***")
 
-	s.Nil(err)
+	s.NoError(err)
 	s.Nil(matchedFiles)
 }
 
@@ -58,7 +58,7 @@ func (s *GlobMatcherTestSuite) TestGlobMatchingPathDoesNotExist() {
 	filePath := filepath.Join(dir, fileName)
 	matchedFiles, err := Glob(filePath + "/abc")
 
-	s.Nil(err)
+	s.NoError(err)
 	s.Nil(matchedFiles)
 }
 
@@ -71,7 +71,7 @@ func (s *GlobMatcherTestSuite) TestGlobMatchingSingleFile() {
 	filePath := filepath.Join(dir, fileName)
 	matchedFiles, err := Glob(filePath)
 
-	s.Nil(err, "Glob could not fetch results")
+	s.NoError(err, "Glob could not fetch results")
 	s.Equal(1, len(matchedFiles))
 	s.Equal(matchedFiles[0], filePath)
 }
@@ -84,7 +84,7 @@ func (s *GlobMatcherTestSuite) TestGlobDirectoryOnly() {
 
 	matchedFiles, err := Glob(dir)
 
-	s.Nil(err, "Glob could not fetch results")
+	s.NoError(err, "Glob could not fetch results")
 	s.Equal(1, len(matchedFiles))
 	s.Equal(matchedFiles[0], dir)
 }
@@ -101,7 +101,7 @@ func (s *GlobMatcherTestSuite) TestGlobOuterDirectoryOnly() {
 
 	matchedFiles, err := Glob(outerDir + "/*")
 
-	s.Nil(err, "Glob could not fetch results")
+	s.NoError(err, "Glob could not fetch results")
 	s.Equal(2, len(matchedFiles))
 	s.Equal(matchedFiles[0], filepath.Join(outerDir, outerFiles[0]))
 	s.Equal(matchedFiles[1], innerDir)
@@ -123,7 +123,7 @@ func (s *GlobMatcherTestSuite) TestGlobDirectoryRecursively() {
 
 	matchedFiles, err := Glob(outerDir + "/**")
 
-	s.Nil(err, "Glob could not fetch results")
+	s.NoError(err, "Glob could not fetch results")
 	s.Equal(6, len(matchedFiles))
 
 	//When using glob matching recursively the first outer folder is being sent without a '/'
