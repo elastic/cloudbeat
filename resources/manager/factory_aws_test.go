@@ -124,20 +124,22 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 		key       string
 		awsConfig aws.ConfigAWS
 	}{
-		{"some_fetcher",
+		{
+			"some_fetcher",
 			aws.ConfigAWS{
 				AccessKeyID:     "key",
 				SecretAccessKey: "secret",
 				SessionToken:    "session",
 			},
 		},
-		//{"another_fetcher",
-		//	aws.ConfigAWS{
-		//		AccessKeyID:     "new_key",
-		//		SecretAccessKey: "new_secret",
-		//		SessionToken:    "new_session",
-		//	},
-		//},
+		{
+			"another_fetcher",
+			aws.ConfigAWS{
+				AccessKeyID:     "new_key",
+				SecretAccessKey: "new_secret",
+				SessionToken:    "new_session",
+			},
+		},
 	}
 
 	for _, test := range tests {

@@ -45,7 +45,7 @@ type ELBFetcher struct {
 
 type ELBFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
-	Kubeconfig                    string `config:"Kubeconfig"`
+	KubeConfig                    string `config:"Kubeconfig"`
 }
 
 type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription

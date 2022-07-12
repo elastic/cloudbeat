@@ -27,7 +27,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
-	commonconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -135,7 +134,7 @@ func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, c
 	return &ParsedFetcher{gen.Name, f}, nil
 }
 
-func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg config.Config, fcfg *commonconfig.C) {
+func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg config.Config, fcfg *agentconfig.C) {
 	if cfg.Type == config.InputTypeEKS {
 		err := fcfg.Merge(cfg.Streams[0].AWSConfig)
 		if err != nil {

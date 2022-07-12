@@ -61,7 +61,7 @@ func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan 
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsConfig.Region)
-	kubeClient, err := f.KubernetesProvider.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	kubeClient, err := f.KubernetesProvider.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)
 	}

@@ -20,13 +20,13 @@ package fetchers
 import (
 	"fmt"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"regexp"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/docker/distribution/context"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
-	providers "github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/config"
@@ -68,7 +68,7 @@ func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, ch chan 
 
 	ecrPrivateProvider := awslib.NewEcrProvider(awsConfig)
 	ecrPublicProvider := awslib.NewEcrPublicProvider()
-	kubeClient, err := f.KubernetesProvider.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	kubeClient, err := f.KubernetesProvider.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}

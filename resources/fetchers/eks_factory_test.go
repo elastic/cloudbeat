@@ -69,6 +69,7 @@ session_token: session
 
 		eksFetcher, ok := fetcher.(*EKSFetcher)
 		s.True(ok)
+		s.Equal("my-cluster", eksFetcher.cfg.ClusterName)
 		s.Equal("key", eksFetcher.cfg.AwsConfig.AccessKeyID)
 		s.Equal("secret", eksFetcher.cfg.AwsConfig.SecretAccessKey)
 		s.Equal("session", eksFetcher.cfg.AwsConfig.SessionToken)
