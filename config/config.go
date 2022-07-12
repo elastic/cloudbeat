@@ -34,7 +34,8 @@ const DefaultNamespace = "default"
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 const (
-	InputTypeEKS = "cloudbeat/eks"
+	InputTypeVanillaK8s = "cloudbeat/vanilla"
+	InputTypeEKS        = "cloudbeat/eks"
 )
 
 type Config struct {
