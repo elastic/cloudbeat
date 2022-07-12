@@ -36,6 +36,12 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     timeout-minutes: 15
     steps:
+    - id: Default
+      env:
+        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+      run: |
+        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+
     - id: Nightly
       if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 0-4'
       env:
@@ -61,15 +67,8 @@ jobs:
         TEST_TARGETS: ${{ github.event.inputs.test-targets }}
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
-    - id: Default
-      env:
-        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
-      run: |
-        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
-
     - id: set-matrix
       run: echo "::set-output name=matrix::${{ env.TEST_MATRIX}}"
-
 
   Build:
     name: Build
