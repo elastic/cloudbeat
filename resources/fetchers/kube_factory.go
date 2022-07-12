@@ -56,6 +56,6 @@ func (f *KubeFactory) CreateFrom(log *logp.Logger, cfg KubeApiFetcherConfig, ch 
 	}
 
 	log.Infof("Kube Fetcher created with the following config: Name: %s, Interval: %s, "+
-		"Kubeconfig: %s", cfg.Name, cfg.Interval, cfg.Kubeconfig)
+		"Kubeconfig: %s", cfg.Name, cfg.Interval, cfg.KubeConfig)
 	return fe, nil
 }

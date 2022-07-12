@@ -107,6 +107,7 @@ type ParsedFetcher struct {
 func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
 	arr := []*ParsedFetcher{}
 	for _, fcfg := range cfg.Fetchers {
+		addCredentialsToFetcherConfiguration(log, cfg, fcfg)
 		p, err := fa.parseConfigFetcher(log, fcfg, ch)
 		if err != nil {
 			return nil, err
@@ -131,4 +132,16 @@ func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, c
 	}
 
 	return &ParsedFetcher{gen.Name, f}, nil
+}
+
+// addCredentialsToFetcherConfiguration adds the relevant credentials to the `fcfg`- the fetcher config
+// This function takes the configuration file provided by the integration the `cfg` file
+// and depending on the input type, extract the relevant credentials and add them to the fetcher config
+func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg config.Config, fcfg *agentconfig.C) {
+	if cfg.Type == config.InputTypeEKS {
+		err := fcfg.Merge(cfg.Streams[0].AWSConfig)
+		if err != nil {
+			log.Errorf("Failed to merge aws configuration to fetcher configuration", err)
+		}
+	}
 }
