@@ -274,7 +274,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 	for _, tcase := range testcases {
 		s.Run(tcase.name, func() {
 			mocks := s.InitMocks()
-			sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
+			sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
 
 			go func(ic incomingConfigs) {
@@ -380,7 +380,7 @@ func (s *LauncherTestSuite) TestStarterValidator() {
 	for _, tcase := range testcases {
 		s.Run(tcase.name, func() {
 			mocks := s.InitMocks()
-			sut, err := New(mocks.ctx, s.log, mocks.reloader, mocks.validator, mocks.beat, beaterMockCreator, config.NewConfig())
+			sut, err := New(mocks.ctx, s.log, mocks.reloader, mocks.validator, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
 
 			mocks.reloader.ch = make(chan *agentconfig.C, len(tcase.configs))
@@ -406,7 +406,7 @@ func (s *LauncherTestSuite) TestStarterValidator() {
 
 func (s *LauncherTestSuite) TestStarterErrorBeater() {
 	mocks := s.InitMocks()
-	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterMockCreator, config.NewConfig())
+	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, errorBeaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
@@ -414,7 +414,7 @@ func (s *LauncherTestSuite) TestStarterErrorBeater() {
 
 func (s *LauncherTestSuite) TestStarterCancelBeater() {
 	mocks := s.InitMocks()
-	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, beaterMockCreator, config.NewConfig())
+	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -426,7 +426,7 @@ func (s *LauncherTestSuite) TestStarterCancelBeater() {
 
 func (s *LauncherTestSuite) TestStarterErrorBeaterCreation() {
 	mocks := s.InitMocks()
-	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, mocks.beat, errorBeaterCreator, config.NewConfig())
+	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, errorBeaterCreator, config.NewConfig())
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
