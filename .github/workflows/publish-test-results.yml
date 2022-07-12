@@ -28,7 +28,7 @@ jobs:
           mkdir -p tests/allure/results
           mkdir -p artifacts && cd artifacts
 
-          artifacts_url=${{ github.event.workflow_run.head_sha }}
+          artifacts_url=${{ github.event.workflow_run.artifacts_url }}
 
           gh api "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
           do
