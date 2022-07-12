@@ -18,6 +18,7 @@
 package fetchers
 
 import (
+	"context"
 	"fmt"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers"
@@ -67,10 +68,16 @@ func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan 
 	}
 
 	balancerDescriber := awslib.NewELBProvider(awsConfig)
+	identityClient := awslib.GetIdentityClient(awsConfig)
+	identity, err := identityClient.GetIdentity(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
+	}
 
 	return &ELBFetcher{
 		log:             log,
 		elbProvider:     balancerDescriber,
+		cloudIdentity:   identity,
 		cfg:             cfg,
 		kubeClient:      kubeClient,
 		lbRegexMatchers: []*regexp.Regexp{regexp.MustCompile(loadBalancerRegex)},

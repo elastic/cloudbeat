@@ -44,6 +44,7 @@ type ELBFetcher struct {
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
 	resourceCh      chan fetching.ResourceInfo
+	cloudIdentity   *awslib.Identity
 }
 
 type ELBFetcherConfig struct {
@@ -55,6 +56,7 @@ type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription
 
 type ELBResource struct {
 	LoadBalancersDescription
+	*awslib.Identity
 }
 
 func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -71,7 +73,7 @@ func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 
 	for _, loadBalancer := range result {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      ELBResource{LoadBalancersDescription(loadBalancer)},
+			Resource:      ELBResource{LoadBalancersDescription(loadBalancer), f.cloudIdentity},
 			CycleMetadata: cMetadata,
 		}
 	}
@@ -108,7 +110,7 @@ func (r ELBResource) GetData() interface{} {
 
 func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
-		ID:      *r.LoadBalancerName,
+		ID:      fmt.Sprintf("%s - %s", *r.Account, *r.LoadBalancerName),
 		Type:    elbResourceType,
 		SubType: elbSubResourceType,
 		Name:    *r.LoadBalancerName,
