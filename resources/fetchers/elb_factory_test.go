@@ -18,16 +18,14 @@
 package fetchers
 
 import (
+	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/stretchr/testify/mock"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources/providers"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
 )
 
 type ElbFactoryTestSuite struct {
@@ -56,6 +54,10 @@ func (s *ElbFactoryTestSuite) TestCreateFetcher() {
 		{
 			`
 name: aws-elb
+access_key_id: key
+secret_access_key: secret
+session_token: session
+default_region: us1-east
 `,
 			"us1-east",
 			"([\\w-]+)-\\d+\\.us1-east.elb.amazonaws.com",
@@ -68,21 +70,7 @@ name: aws-elb
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		awsConfig := awslib.Config{Config: aws.Config{
-			Region: test.region,
-		}}
-
-		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
-
-		factory := &ELBFactory{
-			extraElements: func() (elbExtraElements, error) {
-				return elbExtraElements{
-					balancerDescriber:      elbProvider,
-					awsConfig:              awsConfig,
-					kubernetesClientGetter: mockedKubernetesClientGetter,
-				}, nil
-			},
-		}
+		factory := &ELBFactory{mockedKubernetesClientGetter}
 
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
@@ -93,8 +81,10 @@ name: aws-elb
 
 		elbFetcher, ok := fetcher.(*ELBFetcher)
 		s.True(ok)
-		s.Equal(elbProvider, elbFetcher.elbProvider)
-		s.Equal(kubeclient, elbFetcher.kubeClient)
 		s.Equal(test.expectedRegex, elbFetcher.lbRegexMatchers[0].String())
+		s.Equal(kubeclient, elbFetcher.kubeClient)
+		s.Equal("key", elbFetcher.cfg.AwsConfig.AccessKeyID)
+		s.Equal("secret", elbFetcher.cfg.AwsConfig.SecretAccessKey)
+		s.Equal("session", elbFetcher.cfg.AwsConfig.SessionToken)
 	}
 }

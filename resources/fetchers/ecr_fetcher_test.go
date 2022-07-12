@@ -214,7 +214,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			},
 		}
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
-		s.Nil(err)
+		s.NoError(err)
 
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
@@ -256,7 +256,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(len(expectedRepositories), len(results))
-		s.Nil(err)
+		s.NoError(err)
 
 		for i, name := range test.expectedRepositoriesNames {
 			ecrResource := results[i].Resource.(ECRResource)
@@ -306,7 +306,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 			},
 		}
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
-		s.Nil(err)
+		s.NoError(err)
 
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)

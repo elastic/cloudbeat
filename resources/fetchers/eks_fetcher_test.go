@@ -33,7 +33,6 @@ import (
 
 type EksFetcherTestSuite struct {
 	suite.Suite
-
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
@@ -70,8 +69,8 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 
 	for _, test := range tests {
 		eksConfig := EKSFetcherConfig{
-			BaseFetcherConfig: fetching.BaseFetcherConfig{},
-			ClusterName:       test.clusterName,
+			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
+			ClusterName:          test.clusterName,
 		}
 		eksProvider := &awslib.MockedEksClusterDescriber{}
 		expectedResource := EKSResource{&test.clusterResponse}
@@ -91,7 +90,7 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 		eksResource := results[0].Resource.(EKSResource)
 
 		s.Equal(expectedResource, eksResource)
-		s.Nil(err)
+		s.NoError(err)
 
 	}
 }
@@ -99,8 +98,8 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	clusterName := "my-cluster"
 	eksConfig := EKSFetcherConfig{
-		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		ClusterName:       clusterName,
+		AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
+		ClusterName:          clusterName,
 	}
 	eksProvider := &awslib.MockedEksClusterDescriber{}
 
@@ -116,7 +115,6 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	ctx := context.Background()
 	err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
-
 	s.Equal(0, len(results))
 	s.Equal(expectedErr, err)
 }

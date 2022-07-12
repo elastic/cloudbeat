@@ -15,17 +15,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package manager
+package fetchersManager
 
 import (
 	"context"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"sync"
 )
@@ -134,7 +134,7 @@ func (s *RegistryTestSuite) TestKeys() {
 	for i, test := range tests {
 		f := newNumberFetcher(test.value, nil, s.wg)
 		err := s.registry.Register(test.key, f, nil)
-		s.Nil(err)
+		s.NoError(err)
 
 		s.Equal(i+1, len(s.registry.Keys()))
 	}
