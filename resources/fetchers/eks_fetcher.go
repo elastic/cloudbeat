@@ -35,8 +35,8 @@ type EKSFetcher struct {
 }
 
 type EKSFetcherConfig struct {
-	fetching.BaseFetcherConfig
-	ClusterName string `config:"clusterName"`
+	fetching.AwsBaseFetcherConfig `config:",inline"`
+	ClusterName                   string `config:"clusterName"`
 }
 
 type EKSResource struct {

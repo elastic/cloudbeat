@@ -132,7 +132,7 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(1, len(results))
-		s.Nil(err)
+		s.NoError(err)
 		s.Equal(test.value, results[0].GetData())
 	}
 }
@@ -154,11 +154,14 @@ func (s *FactoriesTestSuite) TestCreateFetcherCollision() {
 
 func (s *FactoriesTestSuite) TestRegisterFetchers() {
 	var tests = []struct {
-		key   string
-		value int
+		key             string
+		value           int
+		integrationType string
 	}{
-		{"process", 6},
-		{"file-system", 4},
+		{"new_fetcher", 6, ""},
+		{"new_fetcher", 6, "cloudbeat/vanilla"},
+		{"other_fetcher", 4, ""},
+		{"other_fetcher", 4, "cloudbeat/vanilla"},
 	}
 
 	for _, test := range tests {
@@ -169,6 +172,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		s.NoError(err, "Could not set name: %v", err)
 
 		conf := config.DefaultConfig
+		conf.Type = test.integrationType
 		conf.Fetchers.Vanilla = append(conf.Fetchers.Vanilla, numCfg)
 
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
