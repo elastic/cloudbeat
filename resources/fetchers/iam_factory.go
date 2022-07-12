@@ -18,6 +18,7 @@
 package fetchers
 
 import (
+	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"fmt"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -25,7 +26,6 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
 )
 
 const (
@@ -33,7 +33,7 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(IAMType, &IAMFactory{})
+	fetchersManager.Factories.RegisterFactory(IAMType, &IAMFactory{})
 }
 
 type IAMFactory struct {
