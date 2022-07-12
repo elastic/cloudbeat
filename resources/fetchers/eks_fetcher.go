@@ -40,8 +40,8 @@ type EKSFetcher struct {
 }
 
 type EKSFetcherConfig struct {
-	fetching.BaseFetcherConfig
-	ClusterName string `config:"clusterName"`
+	fetching.AwsBaseFetcherConfig `config:",inline"`
+	ClusterName                   string `config:"clusterName"`
 }
 
 type EKSResource struct {
@@ -79,3 +79,5 @@ func (r EKSResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    *r.Cluster.Name,
 	}
 }
+
+func (r EKSResource) GetElasticCommonData() any { return nil }

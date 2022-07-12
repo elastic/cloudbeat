@@ -20,12 +20,11 @@ package transformer
 import (
 	"context"
 	"encoding/json"
+	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"io/ioutil"
 	"os"
 	"testing"
-
-	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -43,16 +42,21 @@ const (
 	testIndex          = "test_index"
 )
 
-var fetcherResult = fetchers.FileSystemResource{
-	Name:    "scheduler.conf",
-	Mode:    "700",
-	Gid:     20,
-	Uid:     501,
-	Owner:   "root",
-	Group:   "root",
-	Path:    "/hostfs/etc/kubernetes/scheduler.conf",
-	Inode:   "8901",
-	SubType: "file",
+var fetcherResult = fetchers.FSResource{
+	EvalResource: fetchers.EvalFSResource{
+		Name:    "scheduler.conf",
+		Mode:    "700",
+		Gid:     "20",
+		Uid:     "501",
+		Owner:   "root",
+		Group:   "root",
+		Path:    "/hostfs/etc/kubernetes/scheduler.conf",
+		Inode:   "8901",
+		SubType: "file",
+	},
+	ElasticCommon: fetchers.FileCommonData{
+		Name: "scheduler.conf",
+	},
 }
 
 var (
@@ -129,6 +133,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(event.Timestamp, `event timestamp is missing`)
 				s.NotEmpty(event.Fields["result"], "event result is missing")
 				s.NotEmpty(event.Fields["rule"], "event rule is missing")
+				s.NotEmpty(event.Fields["file"], "elastic common data is missing")
 				s.NotEmpty(resource.Raw, "raw resource is missing")
 				s.NotEmpty(resource.SubType, "resource sub type is missing")
 				s.NotEmpty(resource.ID, "resource ID is missing")

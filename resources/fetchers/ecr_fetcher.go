@@ -53,8 +53,8 @@ type PodDescriber struct {
 }
 
 type ECRFetcherConfig struct {
-	fetching.BaseFetcherConfig
-	Kubeconfig string `config:"Kubeconfig"`
+	fetching.AwsBaseFetcherConfig `config:",inline"`
+	KubeConfig                    string `config:"Kubeconfig"`
 }
 
 type EcrRepository ecr.Repository
@@ -123,3 +123,5 @@ func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    *res.RepositoryName,
 	}
 }
+
+func (res ECRResource) GetElasticCommonData() any { return nil }

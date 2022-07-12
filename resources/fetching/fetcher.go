@@ -19,6 +19,7 @@ package fetching
 
 import (
 	"context"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/gofrs/uuid"
 
 	"github.com/elastic/elastic-agent-libs/config"
@@ -52,7 +53,8 @@ type CycleMetadata struct {
 
 type Resource interface {
 	GetMetadata() ResourceMetadata
-	GetData() interface{}
+	GetData() any
+	GetElasticCommonData() any
 }
 
 type ResourceFields struct {
@@ -61,11 +63,13 @@ type ResourceFields struct {
 }
 
 type ResourceMetadata struct {
-	ID      string `json:"id"`
-	Type    string `json:"type"`
-	SubType string `json:"sub_type"`
-	Name    string `json:"name"`
+	ID        string `json:"id"`
+	Type      string `json:"type"`
+	SubType   string `json:"sub_type"`
+	Name      string `json:"name"`
+	ECSFormat string `json:"ecsFormat"`
 }
+
 type Result struct {
 	Type string `json:"type"`
 	// Golang 1.18 will introduce generics which will be useful for typing the resource field
@@ -76,6 +80,11 @@ type ResourceMap map[string][]Resource
 
 type BaseFetcherConfig struct {
 	Name string `config:"name"`
+}
+
+type AwsBaseFetcherConfig struct {
+	BaseFetcherConfig `config:",inline"`
+	AwsConfig         aws.ConfigAWS `config:",inline"`
 }
 
 const KubeAPIType = "kube-api"

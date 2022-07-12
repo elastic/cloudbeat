@@ -18,6 +18,8 @@
 package fetchers
 
 import (
+	"fmt"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -31,17 +33,10 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(eksType, &EKSFactory{
-		extraElements: getEksExtraElements,
-	})
+	manager.Factories.ListFetcherFactory(eksType, &EKSFactory{})
 }
 
 type EKSFactory struct {
-	extraElements func() (eksExtraElements, error)
-}
-
-type eksExtraElements struct {
-	eksProvider awslib.EksClusterDescriber
 }
 
 func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -53,30 +48,20 @@ func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 		return nil, err
 	}
 
-	elements, err := f.extraElements()
-	if err != nil {
-		return nil, err
-	}
-	return f.CreateFrom(log, cfg, elements, ch)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func getEksExtraElements() (eksExtraElements, error) {
-	awsConfigProvider := awslib.ConfigProvider{}
-	awsConfig, err := awsConfigProvider.GetConfig()
+func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
-		return eksExtraElements{}, err
+		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
+	eksProvider := awslib.NewEksProvider(awsConfig)
 
-	eks := awslib.NewEksProvider(awsConfig.Config)
-
-	return eksExtraElements{eksProvider: eks}, nil
-}
-
-func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, elements eksExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	fe := &EKSFetcher{
 		log:         log,
 		cfg:         cfg,
-		eksProvider: elements.eksProvider,
+		eksProvider: eksProvider,
 		resourceCh:  ch,
 	}
 

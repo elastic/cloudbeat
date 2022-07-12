@@ -134,7 +134,7 @@ func (s *RegistryTestSuite) TestKeys() {
 	for i, test := range tests {
 		f := newNumberFetcher(test.value, nil, s.wg)
 		err := s.registry.Register(test.key, f, nil)
-		s.Nil(err)
+		s.NoError(err)
 
 		s.Equal(i+1, len(s.registry.Keys()))
 	}
@@ -264,4 +264,8 @@ func (res NumberResource) GetMetadata() fetching.ResourceMetadata {
 		SubType: "number",
 		Name:    "number",
 	}
+}
+
+func (res NumberResource) GetElasticCommonData() interface{} {
+	return nil
 }

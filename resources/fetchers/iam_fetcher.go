@@ -39,8 +39,8 @@ type IAMFetcher struct {
 }
 
 type IAMFetcherConfig struct {
-	fetching.BaseFetcherConfig
-	RoleName string `config:"roleName"`
+	fetching.AwsBaseFetcherConfig `config:",inline"`
+	RoleName                      string `config:"roleName"`
 }
 
 type IAMResource struct {
@@ -80,3 +80,4 @@ func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    *r.PolicyName,
 	}
 }
+func (r IAMResource) GetElasticCommonData() any { return nil }
