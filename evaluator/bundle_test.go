@@ -222,12 +222,31 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 			"valid config struct (EKS)", "/bundles/bundle.tar.gz", "200 OK", configWithEksType,
 		},
 		{
-			"valid config struct", "/bundles/bundle.tar.gz", "200 OK", config.Config{
+			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
+			config.Config{
+				Type: config.InputTypeVanillaK8s,
 				Streams: []config.Stream{
 					{
 						DataYaml: &config.DataYaml{
 							ActivatedRules: &config.Benchmarks{
 								CisK8s: []string{
+									"cis_1_1_1",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
+			config.Config{
+				Type: config.InputTypeEKS,
+				Streams: []config.Stream{
+					{
+						DataYaml: &config.DataYaml{
+							ActivatedRules: &config.Benchmarks{
+								CisEKS: []string{
 									"cis_1_1_1",
 								},
 							},
