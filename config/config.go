@@ -56,7 +56,8 @@ type DataYaml struct {
 }
 
 type Benchmarks struct {
-	CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
+	CisK8s []string `config:"cis_k8s,omitempty" yaml:"cis_k8s,omitempty" json:"cis_k8s,omitempty"`
+	CisEKS []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
 var DefaultConfig = Config{

@@ -48,12 +48,12 @@ func (s *ConfigTestSuite) SetupTest() {
 
 func (s *ConfigTestSuite) TestNew() {
 	var tests = []struct {
-		config                    string
-		expectedActivatedK8sRules []string
-		expectedType              string
-		expectedAccessKey         string
-		expectedSecret            string
-		expectedSessionToken      string
+		config                 string
+		expectedActivatedRules []string
+		expectedType           string
+		expectedAccessKey      string
+		expectedSecret         string
+		expectedSessionToken   string
 	}{
 		{
 			`
@@ -87,7 +87,7 @@ func (s *ConfigTestSuite) TestNew() {
 		s.NoError(err)
 
 		s.Equal(test.expectedType, c.Type)
-		s.Equal(test.expectedActivatedK8sRules, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+		s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
 		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
 		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
 		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
@@ -257,7 +257,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		err = c.Update(s.log, cfg)
 		s.NoError(err)
 
-		s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+		s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
 		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
 		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
 		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
@@ -358,7 +358,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 
 		s.Equal(test.expectedPeriod, c.Period)
 		s.Equal(test.expectedKubeConfig, c.KubeConfig)
-		s.Equal(test.expectedCISK8S, c.Streams[0].DataYaml.ActivatedRules.CISK8S)
+		s.Equal(test.expectedCISK8S, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
 		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
 		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
 		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
@@ -425,5 +425,55 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 		s.NoError(err)
 
 		s.Equal(test.expectedPeriod, c.Period)
+	}
+}
+
+func (s *ConfigTestSuite) TestActivatedRulesFrameWork() {
+	var tests = []struct {
+		config                 string
+		expectedActivatedRules []string
+		expectedType           string
+	}{
+		{
+			`
+type: cloudbeat/vanilla
+streams:
+  - data_yaml:
+      activated_rules:
+        cis_k8s:
+          - a
+          - b
+`,
+			[]string{"a", "b"},
+			"cloudbeat/vanilla",
+		},
+		{
+			`
+type: cloudbeat/eks
+streams:
+  - data_yaml:
+      activated_rules:
+        cis_eks:
+          - a
+          - b
+`,
+			[]string{"a", "b"},
+			"cloudbeat/eks",
+		},
+	}
+
+	for _, test := range tests {
+		cfg, err := config.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		c, err := New(cfg)
+		s.NoError(err)
+
+		s.Equal(test.expectedType, c.Type)
+		if test.expectedType == "cloudbeat/eks" {
+			s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisEKS)
+		} else {
+			s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
+		}
 	}
 }

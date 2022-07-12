@@ -134,7 +134,7 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 					{
 						DataYaml: &config.DataYaml{
 							ActivatedRules: &config.Benchmarks{
-								CISK8S: []string{
+								CisK8s: []string{
 									"invalid: - format -invalid",
 								},
 							},
@@ -208,7 +208,7 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 					{
 						DataYaml: &config.DataYaml{
 							ActivatedRules: &config.Benchmarks{
-								CISK8S: []string{
+								CisK8s: []string{
 									"invalid: - format -invalid",
 								},
 							},
