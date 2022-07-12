@@ -9,7 +9,6 @@ ARCH=$(uname -a | rev | cut -d " " -f 1 | rev) # This should return arm64 on m1 
 PREFIX="/usr/share/elastic-agent/data/"
 CLOUDBEAT_VERSION=$(grep defaultBeatVersion ../cmd/version.go | cut -d'=' -f2 | tr -d '" ')
 CLOUDBEAT_IMAGE="cloudbeat-${CLOUDBEAT_VERSION}-SNAPSHOT-linux-${ARCH}"
-SUFFIX="/install/${CLOUDBEAT_IMAGE}"
 DISTRIBUTION_LOCAL_FOLDER="../build/distributions"
 DOWNLOAD_PATH="/usr/share/elastic-agent/state/data/downloads/"
 
