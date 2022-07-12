@@ -88,8 +88,8 @@ func awsMockedFetcherConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS) *age
 
 func (s *FactoriesTestSuite) TestCreateFetcherWithAwsCredentials() {
 	var tests = []struct {
-		key       string
-		awsConfig aws.ConfigAWS
+		fetcherName string
+		awsConfig   aws.ConfigAWS
 	}{
 		{"some_fetcher",
 			aws.ConfigAWS{
@@ -101,10 +101,10 @@ func (s *FactoriesTestSuite) TestCreateFetcherWithAwsCredentials() {
 	}
 
 	for _, test := range tests {
-		s.F.RegisterFactory(test.key, &awsTestFactory{})
+		s.F.RegisterFactory(test.fetcherName, &awsTestFactory{})
 		c := awsMockedFetcherConfig(s, test.awsConfig)
 
-		f, err := s.F.CreateFetcher(s.log, test.key, c, s.resourceCh)
+		f, err := s.F.CreateFetcher(s.log, test.fetcherName, c, s.resourceCh)
 		s.NoError(err)
 		err = f.Fetch(context.TODO(), fetching.CycleMetadata{})
 		results := testhelper.CollectResources(s.resourceCh)
@@ -121,8 +121,8 @@ func (s *FactoriesTestSuite) TestCreateFetcherWithAwsCredentials() {
 
 func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 	var tests = []struct {
-		key       string
-		awsConfig aws.ConfigAWS
+		fetcherName string
+		awsConfig   aws.ConfigAWS
 	}{
 		{
 			"some_fetcher",
@@ -144,14 +144,18 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 
 	for _, test := range tests {
 		s.F = newFactories()
-		s.F.RegisterFactory(test.key, &awsTestFactory{})
+		s.F.RegisterFactory(test.fetcherName, &awsTestFactory{})
 		reg := NewFetcherRegistry(s.log)
-		conf := createEksAgentConfig(s, test.awsConfig, test.key)
-		err := s.F.RegisterFetchers(s.log, reg, conf, s.resourceCh)
+		conf := createEksAgentConfig(s, test.awsConfig, test.fetcherName)
+		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
+		s.Equal(test.fetcherName, parsedList[0].name)
+		s.NoError(err)
+
+		err = reg.RegisterFetchers(parsedList)
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
-		err = reg.Run(context.Background(), test.key, fetching.CycleMetadata{})
+		err = reg.Run(context.Background(), test.fetcherName, fetching.CycleMetadata{})
 		s.NoError(err)
 
 		results := testhelper.CollectResources(s.resourceCh)
@@ -168,7 +172,7 @@ func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetche
 	fetcherConfig := agentconfig.NewConfig()
 	err := fetcherConfig.SetString("name", -1, fetcherName)
 	s.NoError(err)
-	conf.Fetchers = append(conf.Fetchers, fetcherConfig)
+	conf.Fetchers.EKS = append(conf.Fetchers.EKS, fetcherConfig)
 	stream := config.Stream{
 		AWSConfig: awsConfig,
 		DataYaml:  nil,
