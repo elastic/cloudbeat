@@ -8,7 +8,7 @@ import pytest
 import time
 
 from commonlib.utils import get_evaluation
-from product.tests.tests.process.process_test_cases import *
+from product.tests.data.process.process_test_cases import *
 
 
 @pytest.mark.process_scheduler_rules
