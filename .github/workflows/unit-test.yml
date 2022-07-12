@@ -71,13 +71,15 @@ jobs:
           command: |
             kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/*.yml
             kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/kustomize/base/cloudbeat*.yml
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/eks/cloudbeat*.yml
 
   golangci:
     name: golangci-lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GO_VERSION }}
       - name: Check out the repo
         uses: actions/checkout@v3
         with:

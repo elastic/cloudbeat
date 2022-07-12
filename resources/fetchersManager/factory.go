@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package manager
+package fetchersManager
 
 import (
 	"context"
@@ -40,10 +40,10 @@ func newFactories() factories {
 	return factories{m: make(map[string]fetching.Factory)}
 }
 
-func (fa *factories) ListFetcherFactory(name string, f fetching.Factory) {
+func (fa *factories) RegisterFactory(name string, f fetching.Factory) {
 	_, ok := fa.m[name]
 	if ok {
-		panic(fmt.Errorf("fetcher factory with name %q listed more than once", name))
+		panic(fmt.Errorf("fetcher factory with name %q is already registered", name))
 	}
 
 	fa.m[name] = f
@@ -58,28 +58,6 @@ func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig
 	return factory.Create(log, c, ch)
 }
 
-func (fa *factories) RegisterFetchers(log *logp.Logger, registry FetchersRegistry, cfg config.Config, ch chan fetching.ResourceInfo) error {
-	parsedList, err := fa.parseConfigFetchers(log, cfg, ch)
-	if err != nil {
-		return err
-	}
-
-	for _, p := range parsedList {
-		c, err := fa.getConditions(log, p.name)
-		if err != nil {
-			log.Errorf("RegisterFetchers error in getConditions for factory %s skipping Register due to: %v", p.name, err)
-			continue
-		}
-
-		err = registry.Register(p.name, p.f, c...)
-		if err != nil {
-			log.Errorf("Could not read register fetcher: %v", err)
-		}
-	}
-
-	return nil
-}
-
 // TODO: Move conditions to factories and implement inside every factory
 func (fa *factories) getConditions(log *logp.Logger, name string) ([]fetching.Condition, error) {
 	c := make([]fetching.Condition, 0)
@@ -90,10 +68,9 @@ func (fa *factories) getConditions(log *logp.Logger, name string) ([]fetching.Co
 		if err != nil {
 			log.Errorf("getConditions error in GetKubernetesClient: %v", err)
 			return nil, err
-		} else {
-			leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
-			c = append(c, conditions.NewLeaseFetcherCondition(log, leaseProvider))
 		}
+		leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
+		c = append(c, conditions.NewLeaseFetcherCondition(log, leaseProvider))
 	}
 
 	return c, nil
@@ -104,9 +81,12 @@ type ParsedFetcher struct {
 	f    fetching.Fetcher
 }
 
-func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
-	arr := []*ParsedFetcher{}
-	for _, fcfg := range cfg.Fetchers {
+func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
+	var arr []*ParsedFetcher
+
+	fetchers := fa.loadFetchers(cfg)
+	for _, fcfg := range fetchers {
+		addCredentialsToFetcherConfiguration(log, cfg, fcfg)
 		p, err := fa.parseConfigFetcher(log, fcfg, ch)
 		if err != nil {
 			return nil, err
@@ -116,6 +96,16 @@ func (fa *factories) parseConfigFetchers(log *logp.Logger, cfg config.Config, ch
 	}
 
 	return arr, nil
+}
+
+func (fa *factories) loadFetchers(cfg config.Config) []*agentconfig.C {
+	var fetchers []*agentconfig.C
+	if cfg.Type == config.InputTypeEKS {
+		fetchers = cfg.Fetchers.EKS
+	} else {
+		fetchers = cfg.Fetchers.Vanilla
+	}
+	return fetchers
 }
 
 func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, ch chan fetching.ResourceInfo) (*ParsedFetcher, error) {
@@ -131,4 +121,16 @@ func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, c
 	}
 
 	return &ParsedFetcher{gen.Name, f}, nil
+}
+
+// addCredentialsToFetcherConfiguration adds the relevant credentials to the `fcfg`- the fetcher config
+// This function takes the configuration file provided by the integration the `cfg` file
+// and depending on the input type, extract the relevant credentials and add them to the fetcher config
+func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg config.Config, fcfg *agentconfig.C) {
+	if cfg.Type == config.InputTypeEKS {
+		err := fcfg.Merge(cfg.Streams[0].AWSConfig)
+		if err != nil {
+			log.Errorf("Failed to merge aws configuration to fetcher configuration", err)
+		}
+	}
 }

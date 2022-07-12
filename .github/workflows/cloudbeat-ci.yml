@@ -5,11 +5,11 @@ on:
     branches:
       - main
       - '[0-9]+.[0-9]+'
-    types: [assigned, opened, synchronize, reopened]
-
+    types: [opened, synchronize, reopened]
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.2
+  CONTAINER_SUFFIX: ${{ github.run_id }}
 
 jobs:
   Build:
@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-
+            
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -45,7 +45,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.event.pull_request.head.sha }}
+          key: ${{ runner.os }}-buildx-${{ github.workflow }}
           restore-keys: |
             ${{ runner.os }}-buildx-
       
@@ -57,7 +57,7 @@ jobs:
           tags: cloudbeat:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/cloudbeat-${{ github.event.pull_request.head.sha }}.tar
+          outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Build pytest-docker
         uses: docker/build-push-action@v2
@@ -67,13 +67,13 @@ jobs:
           tags: cloudbeat-test:latest
           cache-from: type=local,mode=max,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          outputs: type=docker,dest=/tmp/pytest-${{ github.event.pull_request.head.sha }}.tar
+          outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
       
-      - name: Cache dockers images
+      - name: Cache docker images
         uses: actions/cache@v2
         with:
           path: /tmp/*.tar
-          key: ${{ runner.os }}-dockers-cache-${{ github.event.pull_request.head.sha }}
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
             ${{ runner.os }}-dockers-cache-
 
@@ -82,10 +82,16 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-  Integration_tests:
-    name: Integration Tests
+  Test_Matrix:
+    name: ${{ matrix.test-target }}-tests
+    needs: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        # test-targets chosen by stabillity and runtime.Only pre_merge will be set as mandatory
+        test-target: [pre_merge, file_system_rules]
+      fail-fast: false
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -93,52 +99,50 @@ jobs:
       - uses: azure/setup-helm@v1
         id: install
 
+      - uses: extractions/setup-just@v1
+
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
         with:
           config: deploy/k8s/kind/kind-config.yml
           cluster_name: kind-mono 
 
-      - name: Wait for build to succeed
-        uses: lewagon/wait-on-check-action@v1.0.0
-        with:
-          check-name: Build
-          ref: ${{ github.event.pull_request.head.sha }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          allowed-conclusions: success
-          wait-interval: 10
-
-      - name: Cache dockers images
+      - name: Cache docker images
         uses: actions/cache@v2
         with:
           path: /tmp/*.tar
-          key: ${{ runner.os }}-dockers-cache-${{ github.event.pull_request.head.sha }}
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
           restore-keys: |
-            ${{ runner.os }}-dockers-cache-
+            ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Load images to kind
         run: |
-          kind load image-archive /tmp/cloudbeat-${{ github.event.pull_request.head.sha }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ github.event.pull_request.head.sha }}.tar --name=kind-mono
-          rm -rf /tmp/*.tar
+          kind load image-archive /tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono
 
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          helm upgrade --wait --install --values tests/deploy/values/ci.yml --namespace kube-system --kube-context kind-kind-mono cloudbeat-tests  tests/deploy/k8s-cloudbeat-tests/
+          just deploy-tests-helm-ci ${{ matrix.test-target }}
 
       - name: Run Tests
         id: run_tests 
         run: |
-          helm test cloudbeat-tests --namespace kube-system --kube-context kind-kind-mono --logs 2>&1 | tee test.log
-          result_code=${PIPESTATUS[0]}
-          SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
-          echo "summary<<EOF" >> "$GITHUB_ENV"
-          echo "$SUMMARY" >> "$GITHUB_ENV"
-          echo "EOF" >> "$GITHUB_ENV"
-          exit $result_code
+          just run-tests-ci
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: allure_results-${{ matrix.test-target}}
+          path: tests/allure/results/
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: steps.deploy_helm.outcome == 'failure'
+        if: failure()
         with:
           limit-access-to-actor: true
+
+      - name: clear cache
+        id: clear_cache
+        if: success()
+        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}}.tar

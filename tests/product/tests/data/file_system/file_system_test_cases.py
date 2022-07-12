@@ -1,3 +1,9 @@
+"""
+This module provides file system rule test cases.
+Cases are organized as rules.
+Each rule has one or more test cases.
+"""
+
 cis_1_1_1 = [
     ('CIS 1.1.1', 'chmod', '0700', '/etc/kubernetes/manifests/kube-apiserver.yaml', 'failed'),
     ('CIS 1.1.1', 'chmod', '0644', '/etc/kubernetes/manifests/kube-apiserver.yaml', 'passed')

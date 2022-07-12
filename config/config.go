@@ -21,12 +21,12 @@
 package config
 
 import (
-	"time"
-
 	"github.com/elastic/beats/v7/libbeat/processors"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"gopkg.in/yaml.v3"
+	"time"
 )
 
 const DefaultNamespace = "default"
@@ -34,20 +34,31 @@ const DefaultNamespace = "default"
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 const (
-	InputTypeEKS = "cloudbeat/eks"
+	InputTypeVanillaK8s = "cloudbeat/vanilla"
+	InputTypeEKS        = "cloudbeat/eks"
 )
 
+type Fetcher struct {
+	Name string `config:"name"` // Name of the fetcher
+}
+
+type Fetchers struct {
+	Vanilla []*config.C `config:"vanilla"` // Vanilla fetchers
+	EKS     []*config.C `config:"eks"`     // EKS fetchers
+}
+
 type Config struct {
+	Fetchers   Fetchers                `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
-	Fetchers   []*config.C             `config:"fetchers"`
 	Streams    []Stream                `config:"streams"`
-	Type       string                  `config:"type" yaml:"type" json:"type"`
+	Type       string                  `config:"type"`
 }
 
 type Stream struct {
-	DataYaml *DataYaml `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
+	AWSConfig aws.ConfigAWS `config:",inline"`
+	DataYaml  *DataYaml     `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
 }
 
 type DataYaml struct {
@@ -55,7 +66,8 @@ type DataYaml struct {
 }
 
 type Benchmarks struct {
-	CISK8S []string `config:"cis_k8s" yaml:"cis_k8s" json:"cis_k8s"`
+	CisK8s []string `config:"cis_k8s,omitempty" yaml:"cis_k8s,omitempty" json:"cis_k8s,omitempty"`
+	CisEKS []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
 var DefaultConfig = Config{

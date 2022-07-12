@@ -80,6 +80,8 @@ func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
 	}
 }
 
+func (r K8sResource) GetElasticCommonData() any { return nil }
+
 func getK8sObjectMeta(log *logp.Logger, k8sObj reflect.Value) metav1.ObjectMeta {
 	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)
 	if !ok {

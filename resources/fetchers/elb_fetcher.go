@@ -44,8 +44,8 @@ type ELBFetcher struct {
 }
 
 type ELBFetcherConfig struct {
-	fetching.BaseFetcherConfig
-	Kubeconfig string `config:"Kubeconfig"`
+	fetching.AwsBaseFetcherConfig `config:",inline"`
+	KubeConfig                    string `config:"Kubeconfig"`
 }
 
 type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription
@@ -112,3 +112,4 @@ func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
 		Name:    "",
 	}
 }
+func (r ELBResource) GetElasticCommonData() any { return nil }
