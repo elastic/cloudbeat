@@ -11,6 +11,7 @@ CLOUDBEAT_VERSION=$(grep defaultBeatVersion ../cmd/version.go | cut -d'=' -f2 | 
 CLOUDBEAT_IMAGE="cloudbeat-${CLOUDBEAT_VERSION}-SNAPSHOT-linux-${ARCH}"
 SUFFIX="/install/${CLOUDBEAT_IMAGE}"
 DISTRIBUTION_LOCAL_FOLDER="../build/distributions"
+DOWNLOAD_PATH="/usr/share/elastic-agent/state/data/downloads/"
 
 PODS=$(kubectl -n kube-system get pod -l app=elastic-agent -o name)
 for P in $PODS
@@ -21,10 +22,20 @@ do
     CLOUDBEAT_PID=$(kubectl -n kube-system exec "$POD" -- pidof cloudbeat)
     kubectl -n kube-system exec "$POD" -- kill -9 "${CLOUDBEAT_PID}"
     # Copy Cloudbeat from your local distribution folder to the agent
-    kubectl -n kube-system cp ${DISTRIBUTION_LOCAL_FOLDER}/"${CLOUDBEAT_IMAGE}".tar.gz "$POD":/usr/share/elastic-agent/state/data/downloads/"${CLOUDBEAT_IMAGE}".tar.gz
-    kubectl -n kube-system cp ${DISTRIBUTION_LOCAL_FOLDER}/"${CLOUDBEAT_IMAGE}".tar.gz.sha512 "$POD":/usr/share/elastic-agent/state/data/downloads/"${CLOUDBEAT_IMAGE}".tar.gz.sha512
+    kubectl -n kube-system cp ${DISTRIBUTION_LOCAL_FOLDER}/"${CLOUDBEAT_IMAGE}".tar.gz "$POD":"${DOWNLOAD_PATH}""${CLOUDBEAT_IMAGE}".tar.gz
+    kubectl -n kube-system cp ${DISTRIBUTION_LOCAL_FOLDER}/"${CLOUDBEAT_IMAGE}".tar.gz.sha512 "$POD":${DOWNLOAD_PATH}"${CLOUDBEAT_IMAGE}".tar.gz.sha512
+
     # Delete Cloudbeat artifacts
-    kubectl -n kube-system exec "$POD" -- rm -r "${PREFIX}${FOLDER}${SUFFIX}"
+    INSTALLATION_DIRECTORY=${PREFIX}${FOLDER}"/install"
+    kubectl -n kube-system exec "$POD" -- rm -r "${INSTALLATION_DIRECTORY}/${CLOUDBEAT_IMAGE}"
+    # Create new Cloudbeat artifcats
+    kubectl -n kube-system exec "$POD" -- tar xf "${DOWNLOAD_PATH}""${CLOUDBEAT_IMAGE}".tar.gz -C "${INSTALLATION_DIRECTORY}"
+    kubectl -n kube-system exec "$POD" -- chown -R elastic-agent:elastic-agent "${INSTALLATION_DIRECTORY}"
+    kubectl -n kube-system exec "$POD" -- chown -R root:root "${INSTALLATION_DIRECTORY}"/"${CLOUDBEAT_IMAGE}"/cloudbeat.yml
+    kubectl -n kube-system exec "$POD" -- chmod 0744 "${INSTALLATION_DIRECTORY}"/"${CLOUDBEAT_IMAGE}"/cloudbeat.yml
+#    chown -R root:root "${INSTALLATION_DIRECTORY}"/*/*.yml && \
+#    chmod 0644 "${INSTALLATION_DIRECTORY}"/*/*.yml && \
+#    "${INSTALLATION_DIRECTORY}"/"${CLOUDBEAT_IMAGE}"/cloudbeat -E setup.ilm.enabled=false -E setup.template.enabled=false -E management.enabled
 done
 
 # After the script finishes its work, you need to make Cloudbeat run again.
