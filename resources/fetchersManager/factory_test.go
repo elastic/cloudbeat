@@ -106,7 +106,7 @@ func (s *FactoriesTestSuite) TestListFetcher() {
 	}
 
 	for _, test := range tests {
-		s.F.SetFetcherFactory(test.key, &numberFetcherFactory{})
+		s.F.RegisterFactory(test.key, &numberFetcherFactory{})
 	}
 
 	s.Contains(s.F.m, "process")
@@ -123,7 +123,7 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 	}
 
 	for _, test := range tests {
-		s.F.SetFetcherFactory(test.key, &numberFetcherFactory{})
+		s.F.RegisterFactory(test.key, &numberFetcherFactory{})
 		c := numberConfig(test.value)
 
 		f, err := s.F.CreateFetcher(s.log, test.key, c, s.resourceCh)
@@ -147,7 +147,7 @@ func (s *FactoriesTestSuite) TestCreateFetcherCollision() {
 
 	s.Panics(func() {
 		for _, test := range tests {
-			s.F.SetFetcherFactory(test.key, &numberFetcherFactory{})
+			s.F.RegisterFactory(test.key, &numberFetcherFactory{})
 		}
 	})
 }
@@ -163,7 +163,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 
 	for _, test := range tests {
 		s.F = newFactories()
-		s.F.SetFetcherFactory(test.key, &numberFetcherFactory{})
+		s.F.RegisterFactory(test.key, &numberFetcherFactory{})
 		numCfg := numberConfig(test.value)
 		err := numCfg.SetString("name", -1, test.key)
 		s.NoError(err, "Could not set name: %v", err)
@@ -257,7 +257,7 @@ fetchers:
 			s.NoError(err)
 		}
 
-		s.F.SetFetcherFactory(fetcher.Name, &numberFetcherFactory{})
+		s.F.RegisterFactory(fetcher.Name, &numberFetcherFactory{})
 		parsedList, err := s.F.ParseConfigFetchers(s.log, c, s.resourceCh)
 		s.Equal(fetcher.Name, parsedList[0].name)
 		s.NoError(err)

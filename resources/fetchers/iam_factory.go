@@ -31,7 +31,7 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.SetFetcherFactory(IAMType, &IAMFactory{
+	fetchersManager.Factories.RegisterFactory(IAMType, &IAMFactory{
 		extraElements: getIamExtraElements,
 	})
 }

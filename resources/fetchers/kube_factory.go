@@ -32,7 +32,7 @@ type KubeFactory struct {
 type KubeClientProvider func(kubeconfig string, opt kubernetes.KubeClientOptions) (k8s.Interface, error)
 
 func init() {
-	fetchersManager.Factories.SetFetcherFactory(fetching.KubeAPIType, &KubeFactory{})
+	fetchersManager.Factories.RegisterFactory(fetching.KubeAPIType, &KubeFactory{})
 }
 
 func (f *KubeFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {

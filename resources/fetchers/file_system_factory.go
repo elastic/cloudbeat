@@ -30,7 +30,7 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.SetFetcherFactory(FileSystemType, &FileSystemFactory{})
+	fetchersManager.Factories.RegisterFactory(FileSystemType, &FileSystemFactory{})
 }
 
 type FileSystemFactory struct {

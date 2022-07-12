@@ -40,10 +40,10 @@ func newFactories() factories {
 	return factories{m: make(map[string]fetching.Factory)}
 }
 
-func (fa *factories) SetFetcherFactory(name string, f fetching.Factory) {
+func (fa *factories) RegisterFactory(name string, f fetching.Factory) {
 	_, ok := fa.m[name]
 	if ok {
-		panic(fmt.Errorf("fetcher factory with name %q listed more than once", name))
+		panic(fmt.Errorf("fetcher factory with name %q is already registered", name))
 	}
 
 	fa.m[name] = f

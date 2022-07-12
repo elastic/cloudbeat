@@ -31,7 +31,7 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.SetFetcherFactory(EKSType, &EKSFactory{
+	fetchersManager.Factories.RegisterFactory(EKSType, &EKSFactory{
 		extraElements: getEksExtraElements,
 	})
 }

@@ -36,7 +36,7 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.SetFetcherFactory(ECRType, &ECRFactory{extraElements: getEcrExtraElements})
+	fetchersManager.Factories.RegisterFactory(ECRType, &ECRFactory{extraElements: getEcrExtraElements})
 }
 
 type ECRFactory struct {

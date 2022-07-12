@@ -36,7 +36,7 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.SetFetcherFactory(ELBType,
+	fetchersManager.Factories.RegisterFactory(ELBType,
 		&ELBFactory{
 			extraElements: getElbExtraElements,
 		},

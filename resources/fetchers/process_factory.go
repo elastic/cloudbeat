@@ -34,7 +34,7 @@ type ProcessFactory struct {
 }
 
 func init() {
-	fetchersManager.Factories.SetFetcherFactory(ProcessType, &ProcessFactory{})
+	fetchersManager.Factories.RegisterFactory(ProcessType, &ProcessFactory{})
 }
 
 func (f *ProcessFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
