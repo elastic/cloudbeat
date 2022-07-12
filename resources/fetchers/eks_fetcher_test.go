@@ -90,7 +90,7 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 		eksResource := results[0].Resource.(EKSResource)
 
 		s.Equal(expectedResource, eksResource)
-		s.Nil(err)
+		s.NoError(err)
 
 	}
 }

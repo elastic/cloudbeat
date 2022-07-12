@@ -81,7 +81,7 @@ func awsMockedFetcherConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS) *age
 	conf := config.DefaultConfig
 	conf.Type = config.InputTypeEKS
 	err := c.Merge(awsConfig)
-	s.Nil(err)
+	s.NoError(err)
 
 	return c
 }
@@ -110,7 +110,7 @@ func (s *FactoriesTestSuite) TestCreateFetcherWithAwsCredentials() {
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(1, len(results))
-		s.Nil(err)
+		s.NoError(err)
 
 		result := results[0].GetData().(aws.ConfigAWS)
 		s.Equal(test.awsConfig.AccessKeyID, result.AccessKeyID)
@@ -167,7 +167,7 @@ func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetche
 	conf.Type = config.InputTypeEKS
 	fetcherConfig := agentconfig.NewConfig()
 	err := fetcherConfig.SetString("name", -1, fetcherName)
-	s.Nil(err)
+	s.NoError(err)
 	conf.Fetchers = append(conf.Fetchers, fetcherConfig)
 	stream := config.Stream{
 		AWSConfig: awsConfig,

@@ -93,6 +93,6 @@ func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 		iamResource := results[0].Resource.(IAMResource)
 
 		s.Equal(expectedResource, iamResource)
-		s.Nil(err)
+		s.NoError(err)
 	}
 }

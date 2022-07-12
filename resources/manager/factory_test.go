@@ -135,7 +135,7 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(1, len(results))
-		s.Nil(err)
+		s.NoError(err)
 		s.Equal(test.value, results[0].GetData())
 	}
 }
