@@ -157,11 +157,14 @@ func (s *FactoriesTestSuite) TestCreateFetcherCollision() {
 
 func (s *FactoriesTestSuite) TestRegisterFetchers() {
 	var tests = []struct {
-		key   string
-		value int
+		key             string
+		value           int
+		integrationType string
 	}{
-		{"new_fetcher", 6},
-		{"other_fetcher", 4},
+		{"new_fetcher", 6, ""},
+		{"new_fetcher", 6, "cloudbeat/vanilla"},
+		{"other_fetcher", 4, ""},
+		{"other_fetcher", 4, "cloudbeat/vanilla"},
 	}
 
 	for _, test := range tests {
@@ -175,6 +178,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 			return
 		}
 		conf := config.DefaultConfig
+		conf.Type = test.integrationType
 		conf.Fetchers = append(conf.Fetchers, numCfg)
 		err = s.F.RegisterFetchers(s.log, reg, conf, s.resourceCh)
 
