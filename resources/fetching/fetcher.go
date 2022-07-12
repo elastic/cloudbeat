@@ -19,6 +19,7 @@ package fetching
 
 import (
 	"context"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/gofrs/uuid"
 
 	"github.com/elastic/elastic-agent-libs/config"
@@ -79,6 +80,11 @@ type ResourceMap map[string][]Resource
 
 type BaseFetcherConfig struct {
 	Name string `config:"name"`
+}
+
+type AwsBaseFetcherConfig struct {
+	BaseFetcherConfig `config:",inline"`
+	AwsConfig         aws.ConfigAWS `config:",inline"`
 }
 
 const KubeAPIType = "kube-api"

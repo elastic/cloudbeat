@@ -209,7 +209,7 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 			err = kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 			results := testhelper.CollectResources(s.resourceCh)
 
-			s.Nil(err, "Fetcher was not able to fetch resources from kube api")
+			s.NoError(err, "Fetcher was not able to fetch resources from kube api")
 			require.ElementsMatch(s.T(), MapItems(tests[i]), Map(results))
 
 			s.T().Cleanup(clean(kubeFetcher))

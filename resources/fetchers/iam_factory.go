@@ -18,6 +18,8 @@
 package fetchers
 
 import (
+	"fmt"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -31,18 +33,10 @@ const (
 )
 
 func init() {
-
-	manager.Factories.ListFetcherFactory(IAMType, &IAMFactory{
-		extraElements: getIamExtraElements,
-	})
+	manager.Factories.ListFetcherFactory(IAMType, &IAMFactory{})
 }
 
 type IAMFactory struct {
-	extraElements func(*logp.Logger) (IAMExtraElements, error)
-}
-
-type IAMExtraElements struct {
-	iamProvider awslib.IAMRolePermissionGetter
 }
 
 func (f *IAMFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -53,32 +47,21 @@ func (f *IAMFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 	if err != nil {
 		return nil, err
 	}
-	elements, err := f.extraElements(log)
-	if err != nil {
-		return nil, err
-	}
 
-	return f.CreateFrom(log, cfg, elements, ch)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func getIamExtraElements(log *logp.Logger) (IAMExtraElements, error) {
-	awsConfigProvider := awslib.ConfigProvider{}
-	awsConfig, err := awsConfigProvider.GetConfig()
+func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
-		return IAMExtraElements{}, err
+		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
-	provider := awslib.NewIAMProvider(log, awsConfig.Config)
+	provider := awslib.NewIAMProvider(log, awsConfig)
 
-	return IAMExtraElements{
-		iamProvider: provider,
-	}, nil
-}
-
-func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, elements IAMExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	return &IAMFetcher{
 		log:         log,
 		cfg:         cfg,
-		iamProvider: elements.iamProvider,
+		iamProvider: provider,
 		resourceCh:  ch,
 	}, nil
 

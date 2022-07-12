@@ -19,12 +19,14 @@ package fetchers
 
 import (
 	"fmt"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"regexp"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/docker/distribution/context"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
-	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/config"
@@ -36,19 +38,15 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{extraElements: getEcrExtraElements})
+	manager.Factories.ListFetcherFactory(ECRType, &ECRFactory{
+		KubernetesProvider: providers.KubernetesProvider{},
+		IdentityProvider:   awslib.GetIdentityClient,
+	})
 }
 
 type ECRFactory struct {
-	extraElements func() (ecrExtraElements, error)
-}
-
-type ecrExtraElements struct {
-	awsConfig               awslib.Config
-	kubernetesClientGetter  providers.KubernetesClientGetter
-	identityProviderGetter  awslib.IdentityProviderGetter
-	ecrPrivateRepoDescriber awslib.EcrRepositoryDescriber
-	ecrPublicRepoDescriber  awslib.EcrRepositoryDescriber
+	KubernetesProvider providers.KubernetesClientGetter
+	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *ECRFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -59,56 +57,38 @@ func (f *ECRFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 	if err != nil {
 		return nil, err
 	}
-	elements, err := f.extraElements()
-	if err != nil {
-		return nil, err
-	}
-
-	return f.CreateFrom(log, cfg, elements, ch)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func getEcrExtraElements() (ecrExtraElements, error) {
-	awsConfigProvider := awslib.ConfigProvider{}
-	awsConfig, err := awsConfigProvider.GetConfig()
+func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
-		return ecrExtraElements{}, err
+		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
-	ecrPrivateProvider := awslib.NewEcrProvider(awsConfig.Config)
+
+	ecrPrivateProvider := awslib.NewEcrProvider(awsConfig)
 	ecrPublicProvider := awslib.NewEcrPublicProvider()
-	identityProvider := awslib.NewAWSIdentityProvider(awsConfig.Config)
-	kubeGetter := providers.KubernetesProvider{}
-
-	extraElements := ecrExtraElements{
-		awsConfig:               awsConfig,
-		kubernetesClientGetter:  kubeGetter,
-		identityProviderGetter:  identityProvider,
-		ecrPrivateRepoDescriber: ecrPrivateProvider,
-		ecrPublicRepoDescriber:  ecrPublicProvider,
-	}
-
-	return extraElements, nil
-}
-
-func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, elements ecrExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	ctx := context.Background()
-	identity, err := elements.identityProviderGetter.GetIdentity(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
-	}
-
-	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, elements.awsConfig.Config.Region)
-	kubeClient, err := elements.kubernetesClientGetter.GetClient(cfg.Kubeconfig, kubernetes.KubeClientOptions{})
+	kubeClient, err := f.KubernetesProvider.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}
 
+	ctx := context.Background()
+	identityProvider := f.IdentityProvider(awsConfig)
+	identity, err := identityProvider.GetIdentity(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
+	}
+
+	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, awsConfig.Region)
+
 	privateECRExecutor := PodDescriber{
 		FilterRegex: regexp.MustCompile(privateRepoRegex),
-		Provider:    elements.ecrPrivateRepoDescriber,
+		Provider:    ecrPrivateProvider,
 	}
 	publicECRExecutor := PodDescriber{
 		FilterRegex: regexp.MustCompile(PublicRepoRegex),
-		Provider:    elements.ecrPublicRepoDescriber,
+		Provider:    ecrPublicProvider,
 	}
 
 	fe := &ECRFetcher{
