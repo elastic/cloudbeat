@@ -110,7 +110,7 @@ func (r ELBResource) GetData() interface{} {
 
 func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
-		ID:      fmt.Sprintf("%s - %s", *r.Account, *r.LoadBalancerName),
+		ID:      fmt.Sprintf("%s-%s", *r.Account, *r.LoadBalancerName),
 		Type:    elbResourceType,
 		SubType: elbSubResourceType,
 		Name:    *r.LoadBalancerName,

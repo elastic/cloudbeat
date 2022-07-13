@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -38,11 +39,12 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(ELBType, &ELBFactory{providers.KubernetesProvider{}})
+	manager.Factories.ListFetcherFactory(ELBType, &ELBFactory{providers.KubernetesProvider{}, awslib.GetIdentityClient})
 }
 
 type ELBFactory struct {
 	KubernetesProvider providers.KubernetesClientGetter
+	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *ELBFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -68,8 +70,8 @@ func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan 
 	}
 
 	balancerDescriber := awslib.NewELBProvider(awsConfig)
-	identityClient := awslib.GetIdentityClient(awsConfig)
-	identity, err := identityClient.GetIdentity(context.Background())
+	identityProvider := f.IdentityProvider(awsConfig)
+	identity, err := identityProvider.GetIdentity(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}

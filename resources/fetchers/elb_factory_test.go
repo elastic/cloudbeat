@@ -18,7 +18,9 @@
 package fetchers
 
 import (
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"testing"
@@ -49,6 +51,7 @@ func (s *ElbFactoryTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		config        string
 		region        string
+		account       string
 		expectedRegex string
 	}{
 		{
@@ -60,6 +63,7 @@ session_token: session
 default_region: us1-east
 `,
 			"us1-east",
+			"my-account",
 			"([\\w-]+)-\\d+\\.us1-east.elb.amazonaws.com",
 		},
 	}
@@ -70,7 +74,14 @@ default_region: us1-east
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		factory := &ELBFactory{mockedKubernetesClientGetter}
+		identity := awslib.Identity{
+			Account: &test.account,
+		}
+		identityProvider := &awslib.MockedIdentityProviderGetter{}
+		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
+		factory := &ELBFactory{mockedKubernetesClientGetter, func(cfg aws.Config) awslib.IdentityProviderGetter {
+			return identityProvider
+		}}
 
 		cfg, err := config.NewConfigFrom(test.config)
 		s.NoError(err)
