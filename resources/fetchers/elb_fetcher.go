@@ -55,8 +55,8 @@ type ELBFetcherConfig struct {
 type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription
 
 type ELBResource struct {
-	LoadBalancersDescription
-	*awslib.Identity
+	lb       LoadBalancersDescription
+	identity *awslib.Identity
 }
 
 func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -105,15 +105,15 @@ func (f *ELBFetcher) Stop() {
 }
 
 func (r ELBResource) GetData() interface{} {
-	return r
+	return r.lb
 }
 
 func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
-		ID:      fmt.Sprintf("%s-%s", *r.Account, *r.LoadBalancerName),
+		ID:      fmt.Sprintf("%s-%s", *r.identity.Account, *r.lb.LoadBalancerName),
 		Type:    elbResourceType,
 		SubType: elbSubResourceType,
-		Name:    *r.LoadBalancerName,
+		Name:    *r.lb.LoadBalancerName,
 	}
 }
 func (r ELBResource) GetElasticCommonData() any { return nil }
