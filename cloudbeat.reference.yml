@@ -10,6 +10,7 @@
 cloudbeat:
   # Defines how often an event is sent to the output
   period: 4h
+  type: cloudbeat/vanilla # cloudbeat/eks in case of EKS configuration
   fetchers:
     # Vanilla K8s Fetchers configuration
     vanilla:
@@ -79,6 +80,10 @@ cloudbeat:
 # fields in the output document instead of being grouped under a fields
 # sub-dictionary. Default is false.
 #fields_under_root: false
+
+# Configure the precision of all timestamps in Cloudbeat.
+# Available options: millisecond, microsecond, nanosecond
+#timestamp.precision: millisecond
 
 # Internal queue configuration for buffering events to be published.
 #queue:
