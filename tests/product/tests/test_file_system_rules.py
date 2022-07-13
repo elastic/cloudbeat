@@ -36,7 +36,13 @@ from .data.file_system import file_system_test_cases as fs_tc
      *fs_tc.cis_1_1_18,
      *fs_tc.cis_1_1_19,
      *fs_tc.cis_1_1_20,
-     *fs_tc.cis_1_1_21,
+     *skip_param_case(skip_list=fs_tc.cis_1_1_12[0],
+                      data_to_report=SkipReportData(
+                          url_title="security-team: #4311",
+                          url_link="https://github.com/elastic/security-team/issues/4311",
+                          skip_reason="known issue: broken file_system_rules tests"
+                      )),
+     *fs_tc.cis_1_1_21[1:],
      *fs_tc.cis_4_1_1,
      *fs_tc.cis_4_1_2,
      *fs_tc.cis_4_1_5,
