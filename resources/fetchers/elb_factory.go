@@ -18,9 +18,9 @@
 package fetchers
 
 import (
+	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/resources/providers"
+	providers "github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 
@@ -37,11 +37,15 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(ELBType, &ELBFactory{providers.KubernetesProvider{}})
+	fetchersManager.Factories.RegisterFactory(ELBType, &ELBFactory{
+		KubernetesProvider: providers.KubernetesProvider{},
+		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+	})
 }
 
 type ELBFactory struct {
 	KubernetesProvider providers.KubernetesClientGetter
+	AwsConfigProvider  awslib.ConfigGetter
 }
 
 func (f *ELBFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -56,7 +60,8 @@ func (f *ELBFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 }
 
 func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
+	ctx := context.Background()
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}

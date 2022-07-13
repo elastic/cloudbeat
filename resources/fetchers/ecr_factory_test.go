@@ -18,11 +18,13 @@
 package fetchers
 
 import (
-	"testing"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
+	"context"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"testing"
+
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
@@ -77,6 +79,19 @@ default_region: us1-east
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
+		mockedConfigGetter := &awslib.MockConfigGetter{}
+		mockedConfigGetter.EXPECT().
+			InitializeAWSConfig(mock.Anything, mock.Anything).
+			Call.
+			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
+
+				return CreateSdkConfig(config, "us1-east")
+			},
+				func(ctx context.Context, config aws.ConfigAWS) error {
+					return nil
+				},
+			)
+
 		identity := awslib.Identity{
 			Account: &test.account,
 		}
@@ -85,7 +100,8 @@ default_region: us1-east
 
 		factory := &ECRFactory{
 			KubernetesProvider: mockedKubernetesClientGetter,
-			IdentityProvider: func(cfg aws.Config) awslib.IdentityProviderGetter {
+			AwsConfigProvider:  mockedConfigGetter,
+			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 				return identityProvider
 			},
 		}
@@ -103,4 +119,19 @@ default_region: us1-east
 		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].FilterRegex.String())
 		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].FilterRegex.String())
 	}
+}
+
+func CreateSdkConfig(config aws.ConfigAWS, region string) awssdk.Config {
+	awsConfig := awssdk.NewConfig()
+	awsCredentials := awssdk.Credentials{
+		AccessKeyID:     config.AccessKeyID,
+		SecretAccessKey: config.SecretAccessKey,
+		SessionToken:    config.SessionToken,
+	}
+
+	awsConfig.Credentials = awssdk.StaticCredentialsProvider{
+		Value: awsCredentials,
+	}
+	awsConfig.Region = region
+	return *awsConfig
 }

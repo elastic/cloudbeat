@@ -19,25 +19,25 @@ package awslib
 
 import (
 	"context"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/ec2metadata"
 )
 
-type ConfigGetter interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error)
+type Ec2MetadataProvider struct {
 }
 
-type ConfigProvider struct {
-	MetadataProvider MetadataGetter
+type Metadata = ec2metadata.EC2InstanceIdentityDocument
+
+type MetadataGetter interface {
+	GetMetadata(ctx context.Context, cfg aws.Config) (Metadata, error)
 }
 
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg)
-	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
+func (provider Ec2MetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (Metadata, error) {
+	svc := ec2metadata.New(cfg)
+	identityDocument, err := svc.GetInstanceIdentityDocument(ctx)
 	if err != nil {
-		return awssdk.Config{}, err
+		return ec2metadata.EC2InstanceIdentityDocument{}, err
 	}
-	awsConfig.Region = metadata.Region
 
-	return awsConfig, nil
+	return identityDocument, err
 }

@@ -18,8 +18,8 @@
 package fetchers
 
 import (
+	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -33,10 +33,13 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(EKSType, &EKSFactory{})
+	fetchersManager.Factories.RegisterFactory(EKSType, &EKSFactory{
+		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+	})
 }
 
 type EKSFactory struct {
+	AwsConfigProvider awslib.ConfigGetter
 }
 
 func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -52,7 +55,8 @@ func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 }
 
 func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
+	ctx := context.Background()
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
