@@ -22,13 +22,13 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: ES_HOST
-              value: "host.docker.internal:9200"
+              value: "https://elasticsearch:9200"
             - name: ES_USERNAME
               value: elastic
             - name: ES_PASSWORD
               value: changeme
             - name: KIBANA_HOST
-              value: "http://host.docker.internal:5601"
+              value: "https://kibana:5601"
             - name: ELASTIC_CLOUD_ID
               value: none
             - name: ELASTIC_CLOUD_AUTH
@@ -43,6 +43,8 @@ spec:
               value: cloudbeat-leader
                 # fieldRef:
                 #   fieldPath: metadata.name
+            - name: SSL_CERT_DIR
+              value: /etc/ssl/certs:/etc/ssl/elastic-package
           securityContext:
             runAsUser: 0
             # If using Red Hat OpenShift uncomment this:
@@ -84,6 +86,9 @@ spec:
             - name: etcsysmd
               mountPath: /hostfs/etc/systemd
               readOnly: true
+            - mountPath: /etc/ssl/elastic-package
+              name: elastic-package-ca
+              readOnly: true
       serviceAccountName: cloudbeat
       terminationGracePeriodSeconds: 30
       tolerations:
@@ -123,6 +128,10 @@ spec:
           configMap:
             defaultMode: 0640
             name: cloudbeat-daemonset-config
+        - name: elastic-package-ca
+          secret:
+            defaultMode: 420
+            secretName: elastic-package-certs
 ---
 apiVersion: v1
 kind: ConfigMap
