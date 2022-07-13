@@ -42,7 +42,7 @@ from .data.file_system import file_system_test_cases as fs_tc
                           url_link="https://github.com/elastic/security-team/issues/4311",
                           skip_reason="known issue: broken file_system_rules tests"
                       )),
-     *fs_tc.cis_1_1_21[1:],
+     *[fs_tc.cis_1_1_21[1:]],
      *fs_tc.cis_4_1_1,
      *fs_tc.cis_4_1_2,
      *fs_tc.cis_4_1_5,
