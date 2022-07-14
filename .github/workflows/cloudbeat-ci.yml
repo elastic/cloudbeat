@@ -145,4 +145,4 @@ jobs:
       - name: clear cache
         id: clear_cache
         if: success()
-        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}}.tar
+        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}.tar

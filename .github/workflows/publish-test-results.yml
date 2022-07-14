@@ -20,6 +20,7 @@ jobs:
       # required by download step to access artifacts API
       actions: read
     steps:
+
       - name: Download and Extract Artifacts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,6 +37,14 @@ jobs:
             unzip -d "../tests/allure/results" "$name.zip"
           done
 
+      - name: Get pr info
+        id: pr_info
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUM=$(gh api -X GET search/issues -f q='elastic/cloudbeat is:open is:pr is:unmerged ${{ github.event.workflow_run.head_sha }}' | jq  '.items[0].number' )
+          echo "PR_NUMBER=$PR_NUM" >> $GITHUB_ENV
+
       - name: Publish allure report
         if: always()
         uses: andrcuns/allure-publish-action@v1.0.1
@@ -50,7 +59,7 @@ jobs:
           summaryTableType: markdown
           copyLatest: true
           bucket: csp-allure-reports
-          prefix: allure_reports/cloudbeat/${{ github.event.workflow_run.head_branch }}
+          prefix: allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}
           ignoreMissingResults: true
 
 # Todo Workflow_run jobs only work from default branch.Verify post merge pr processing is functional & secure gh ticket https://github.com/elastic/security-team/issues/3936
@@ -60,8 +69,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR=$(gh api -X GET search/issues -f q='repo:elastic/cloudbeat is:open is:pr is:unmerged '${{ github.event.workflow_run.head_sha }}' | jq  '.items[] | .number' )
-          gh pr comment $PR --body "Allure link: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/${{ github.event.workflow_run.head_branch }}/index.html"
+          gh pr comment ${{ env.PR_NUMBER }} --body "Allure link: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/allure_reports/cloudbeat/prs/pr-${{ env.PR_NUMBER }}/index.html" --repo elastic/cloudbeat
+
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: failure()
