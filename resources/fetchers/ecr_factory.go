@@ -27,7 +27,6 @@ import (
 
 	"github.com/docker/distribution/context"
 	"github.com/elastic/cloudbeat/resources/fetching"
-
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/config"
