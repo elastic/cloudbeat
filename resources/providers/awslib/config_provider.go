@@ -33,6 +33,9 @@ type ConfigProvider struct {
 
 func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error) {
 	awsConfig, err := aws.InitializeAWSConfig(cfg)
+	if err != nil {
+		return awssdk.Config{}, err
+	}
 	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
 	if err != nil {
 		return awssdk.Config{}, err
