@@ -7,6 +7,7 @@ on:
       - completed
 jobs:
   publish_results:
+    timeout-minutes: 15
     name: Publish Results
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion != 'skipped'
@@ -70,7 +71,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr comment ${{ env.PR_NUMBER }} --body "Allure link: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/allure_reports/cloudbeat/prs/pr-${{ env.PR_NUMBER }}/index.html" --repo elastic/cloudbeat
-
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: failure()
