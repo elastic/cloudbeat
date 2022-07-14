@@ -1,0 +1,49 @@
+metadata:
+  id: 58b41542-b102-5c9a-81fb-89aa5bc0fcb8
+  name: Ensure that the --hostname-override argument is not set (Manual)
+  profile_applicability: |
+    * Level 1 - Worker Node
+  description: |
+    Do not override node hostnames.
+  rationale: >
+    Overriding hostnames could potentially break TLS setup between the kubelet
+    and the apiserver. 
+    Additionally, with overridden hostnames, it becomes increasingly difficult to
+    associate logs with a particular node and process them for security analytics. Hence, you
+    should setup your kubelet nodes with resolvable FQDNs and avoid overriding the
+    hostnames with IPs.
+  audit: |
+    Run the following command on each node:
+    ```
+    ps -ef | grep kubelet
+    ```
+    Verify that `--hostname-override` argument does not exist.
+    Note This setting is not configurable via the Kubelet config file.
+  remediation: |
+    Edit the kubelet service file `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf`
+    on each worker node and remove the `--hostname-override` argument from the
+    `KUBELET_SYSTEM_PODS_ARGS` variable.
+    Based on your system, restart the `kubelet` service. For example:
+    ```
+    systemctl daemon-reload
+    systemctl restart kubelet.service
+    ```
+  impact: |
+    Some cloud providers may require this flag to ensure that hostname matches
+    names issued by the cloud provider. 
+    In these environments, this recommendation should not apply.
+  default_value: |
+    By default, `--hostname-override argument` is not set.
+  references: |
+    1. [https://kubernetes.io/docs/admin/kubelet/](https://kubernetes.io/docs/admin/kubelet/)
+    2. [https://github.com/kubernetes/kubernetes/issues/22063](https://github.com/kubernetes/kubernetes/issues/22063)
+  section: Kubelet
+  version: "1.0"
+  tags:
+  - CIS
+  - Kubernetes
+  - CIS 4.2.8
+  - Kubelet
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.0

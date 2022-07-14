@@ -1,0 +1,42 @@
+metadata:
+  id: d8682dfd-f8ab-5f9f-b10f-6225b9b46560
+  name: Ensure that the admission control plugin AlwaysAdmit is not set (Automated)
+  profile_applicability: |
+    * Level 1 - Master Node
+  description: |
+    Do not allow all requests.
+  rationale: >
+    Setting admission control plugin `AlwaysAdmit` allows all requests and do
+    not filter any requests. The `AlwaysAdmit` admission controller was
+    deprecated in Kubernetes v1.13. Its behavior was equivalent to turning off
+    all admission controllers.
+  audit: |
+    Run the following command on the control plane node:
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+    Verify that if the `--enable-admission-plugins` argument is set, its value does not include
+    `AlwaysAdmit`.
+  remediation: |
+    Edit the API server pod specification file
+    `/etc/kubernetes/manifests/kube-apiserver.yaml`
+    on the control plane node and either remove the `--enable-admission-plugins`
+    parameter, or set it to a value that does not include `AlwaysAdmit`.
+  impact: >
+    Only requests explicitly allowed by the admissions control plugins would be
+    served.
+  default_value: |
+    `AlwaysAdmit` is not in the list of default admission plugins.
+  references: |
+    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+    2. [https://kubernetes.io/docs/admin/admission-controllers/#alwaysadmit](https://kubernetes.io/docs/admin/admission-controllers/#alwaysadmit)
+  section: API Server
+  version: "1.0"
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.2.11
+    - API Server
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.0

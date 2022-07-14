@@ -1,0 +1,48 @@
+metadata:
+  id: 5c060a65-bbc5-5af4-9a42-338717937ec4
+  name: Ensure that the --kubelet-client-certificate and
+    --kubelet-client-keyarguments are set as appropriate (Automated)
+  profile_applicability: |
+    * Level 1 - Master Node
+  description: |
+    Enable certificate based kubelet authentication.
+  rationale: >
+    The apiserver, by default, does not authenticate itself to the kubelet's
+    HTTPS endpoints. The requests from the apiserver are treated anonymously.
+    You should set up certificate- based kubelet authentication to ensure that
+    the apiserver authenticates itself to kubelets when submitting requests.
+  audit: |
+    Run the following command on the control plane node:
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+    Verify that the `--kubelet-client-certificate` and `--kubelet-client-key` arguments
+    exist and they are set as appropriate.
+  remediation: |
+    Follow the Kubernetes documentation and set up the TLS connection between
+    the
+    apiserver and kubelets. Then, edit API server pod specification file
+    `/etc/kubernetes/manifests/kube-apiserver.yaml` on the control plane node and set the
+    kubelet client certificate and key parameters as below.
+    ```
+    --kubelet-client-certificate=<path/to/client-certificate-file>
+    --kubelet-client-key=<path/to/client-key-file>
+    ```
+  impact: |
+    You require TLS to be configured on apiserver as well as kubelets.
+  default_value: |
+    By default, certificate-based kubelet authentication is not set.
+  references: |
+    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+    2. [https://kubernetes.io/docs/admin/kubelet-authentication-authorization/](https://kubernetes.io/docs/admin/kubelet-authentication-authorization/)
+    3. [https://kubernetes.io/docs/concepts/cluster-administration/master-node-communication/#apiserver---kubelet](https://kubernetes.io/docs/concepts/cluster-administration/master-node-communication/#apiserver---kubelet)
+  section: API Server
+  version: "1.0"
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.2.5
+    - API Server
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.0

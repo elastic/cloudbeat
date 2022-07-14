@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "The root schema",
+  "examples": [
+    {
+      "type": "process",
+      "command": "kube-apiserver --disable-admission-plugins=PodNodeSelector,NamespaceLifecycle"
+    },
+    {
+      "type": "file",
+      "mode": "0700",
+      "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+      "owner": "root",
+      "filename": "kube-apiserver.yaml",
+      "group": "root"
+    }
+  ],
+  "anyOf": [
+    {
+      "type": "object",
+      "examples": [
+        {
+          "type": "process",
+          "command": "kube-apiserver --disable-admission-plugins=PodNodeSelector,NamespaceLifecycle"
+        }
+      ],
+      "required": [
+        "type",
+        "command"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "process",
+          "title": "The type schema"
+        },
+        "command": {
+          "type": "string",
+          "title": "The command schema",
+          "examples": [
+            "kube-apiserver --disable-admission-plugins=PodNodeSelector,NamespaceLifecycle"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "title": "The second anyOf schema",
+      "examples": [
+        {
+          "type": "file",
+          "mode": "0700",
+          "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+          "owner": "root",
+          "name": "kube-apiserver.yaml",
+          "group": "root"
+        }
+      ],
+      "required": [
+        "type",
+        "mode",
+        "path",
+        "owner",
+        "name",
+        "group"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "file",
+          "title": "The type schema"
+        },
+        "mode": {
+          "type": "string",
+          "title": "The mode schema",
+          "examples": [
+            "0700"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "title": "The path schema",
+          "examples": [
+            "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "title": "The user schema",
+          "examples": [
+            "root"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "title": "The filename schema",
+          "examples": [
+            "kube-apiserver.yaml"
+          ]
+        },
+        "group": {
+          "type": "string",
+          "title": "The group owner schema",
+          "examples": [
+            "root"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+metadata:
+  id: 0cd77c44-7420-5cac-a366-821b44bf819e
+  name: Ensure that the admission control plugin NodeRestriction is set (Automated)
+  profile_applicability: |
+    * Level 1 - Master Node
+  description: |
+    Limit the `Node` and `Pod` objects that a kubelet could modify.
+  rationale: >
+    Using the `NodeRestriction` plug-in ensures that the kubelet is restricted
+    to the `Node` and Pod objects that it could modify as defined. Such kubelets
+    will only be allowed to modify their own `Node` API object, and only modify
+    `Pod` API objects that are bound to their node.
+  audit: |
+    Run the following command on the control plane node:
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+    Verify that the `--enable-admission-plugins` argument is set to a value that includes
+    `NodeRestriction`.
+  remediation: |
+    Follow the Kubernetes documentation and configure `NodeRestriction` plug-in
+    on
+    kubelets.
+    Then, edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` 
+    on the control plane node and set the `--enable-admission-plugins` parameter
+    to a value that includes `NodeRestriction`.
+    ```
+    --enable-admission-plugins=...,NodeRestriction,...
+    ```
+  impact: |
+    None
+  default_value: |
+    By default, `NodeRestriction` is not set.
+  references: |
+    1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)
+    2. [https://kubernetes.io/docs/admin/admission-controllers/#noderestriction](https://kubernetes.io/docs/admin/admission-controllers/#noderestriction)
+    3. [https://kubernetes.io/docs/admin/authorization/node/](https://kubernetes.io/docs/admin/authorization/node/)
+    4. [https://acotten.com/post/kube17-security](https://acotten.com/post/kube17-security)
+  section: API Server
+  version: "1.0"
+  tags:
+    - CIS
+    - Kubernetes
+    - CIS 1.2.16
+    - API Server
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.0

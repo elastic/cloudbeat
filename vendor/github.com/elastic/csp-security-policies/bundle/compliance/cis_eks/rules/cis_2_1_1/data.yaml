@@ -1,0 +1,81 @@
+metadata:
+  id: 433ae1b7-0411-54e2-8b06-f62be93b4089
+  name: Enable audit Logs (Manual)
+  profile_applicability: |
+    * Level 1
+  description: |
+    The audit logs are part of the EKS managed Kubernetes control plane logs
+    that are managed by Amazon EKS. 
+    Amazon EKS is integrated with AWS CloudTrail, a service that provides a
+    record of actions taken by a user, role, or an AWS service in Amazon EKS. CloudTrail
+    captures all API calls for Amazon EKS as events. The calls captured include calls from the
+    Amazon EKS console and code calls to the Amazon EKS API operations.
+  rationale: |
+    Exporting logs and metrics to a dedicated, persistent datastore such as
+    CloudTrail ensures
+    availability of audit data following a cluster security event, and provides a central location
+    for analysis of log and metric data collated from multiple sources.
+  audit: |
+    Perform the following to determine if CloudTrail is enabled for all regions:
+    **Via the Management Console**
+    1. Sign in to the AWS Management Console and open the EKS console at
+    https://console.aws.amazon.com/eks
+    2. Click on Cluster Name of the cluster you are auditing
+    3. Click Logging
+    You will see Control Plane Logging info
+    ```
+    API Server Enabled/Disabled
+    Audit Enabled/Disabled
+    Authenticator Enabled/Disabled
+    Controller Manager Enabled/Disabled 
+    Scheduler Enabled/Disabled
+    ```
+    4. Ensure all 5 choices are set to Enabled
+  remediation: |
+    Perform the following to determine if CloudTrail is enabled for all regions:
+    **Via The Management Console**
+    1. Sign in to the AWS Management Console and open the EKS console at
+    https://console.aws.amazon.com/eks
+    2. Click on Cluster Name of the cluster you are auditing
+    3. Click Logging
+    4. Select Manage Logging from the button on the right hand side
+    5. Toggle each selection to the Enabled position.
+    6. Click Save Changes
+
+    **Via CLI**
+    ```
+    aws --region "${REGION_CODE}" eks describe-cluster --name "${CLUSTER_NAME}" -
+    -query 'cluster.logging.clusterLogging[?enabled==true].types
+    ```
+  impact: >
+    Audit logs will be created on the master nodes, which will consume disk
+    space. 
+    Care should be taken to avoid generating too large volumes of log information as this could impact the
+    available of the cluster nodes. S3 lifecycle features can be used to manage the accumulation
+    and management of logs over time.
+    See the following AWS resource for more information on these features:
+    http://docs.aws.amazon.com/AmazonS3/latest/dev/object-lifecycle-mgmt.html
+  default_value: >
+    By default, cluster control plane logs aren't sent to CloudWatch Logs. ...
+    When you enable a log type, the logs are sent with a log verbosity level of 2 . 
+    To enable or disable control plane
+    logs with the console. Open the Amazon EKS console at
+    https://console.aws.amazon.com/eks/home#/clusters .
+    Amazon EKS Information in CloudTrail CloudTrail is enabled on your AWS account when
+    you create the account. When activity occurs in Amazon EKS, that activity is recorded in a
+    CloudTrail event along with other AWS service events in Event history.
+  references: |
+    1. https://kubernetes.io/docs/tasks/debug-application-cluster/audit/
+    2. https://aws.github.io/aws-eks-best-practices/detective/
+    3. https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+    4. https://docs.aws.amazon.com/eks/latest/userguide/logging-using-cloudtrail.html
+  section: Logging
+  version: "1.0"
+  tags:
+  - CIS
+  - EKS
+  - CIS 2.1.1
+  - Logging
+  benchmark:
+    name: CIS Amazon Elastic Kubernetes Service (EKS) Benchmark
+    version: v1.0.1
