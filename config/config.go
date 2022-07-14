@@ -38,8 +38,17 @@ const (
 	InputTypeEKS        = "cloudbeat/eks"
 )
 
+type Fetcher struct {
+	Name string `config:"name"` // Name of the fetcher
+}
+
+type Fetchers struct {
+	Vanilla []*config.C `config:"vanilla"` // Vanilla fetchers
+	EKS     []*config.C `config:"eks"`     // EKS fetchers
+}
+
 type Config struct {
-	Fetchers   []*config.C             `config:"fetchers"`
+	Fetchers   Fetchers                `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`

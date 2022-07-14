@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package manager
+package fetchersManager
 
 import (
 	"context"
@@ -25,11 +25,12 @@ import (
 )
 
 type FetchersRegistry interface {
-	Register(key string, f fetching.Fetcher, c ...fetching.Condition) error
+	Register(fetcherName string, f fetching.Fetcher, c ...fetching.Condition) error
 	Keys() []string
 	ShouldRun(key string) bool
 	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
 	Stop()
+	RegisterFetchers(fetchers []*ParsedFetcher) error
 }
 
 type fetchersRegistry struct {
@@ -43,20 +44,38 @@ type registeredFetcher struct {
 }
 
 func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
-	return &fetchersRegistry{
+	reg := &fetchersRegistry{
 		log: log,
 		reg: make(map[string]registeredFetcher),
 	}
+	return reg
+}
+
+// RegisterFetchers registers entire list of parsed fetchers
+func (r *fetchersRegistry) RegisterFetchers(fetchers []*ParsedFetcher) error {
+	for _, p := range fetchers {
+		c, err := Factories.getConditions(r.log, p.name)
+		if err != nil {
+			return fmt.Errorf("RegisterFetchers error in getConditions for factory %s skipping Register due to: %v", p.name, err)
+		}
+
+		err = r.Register(p.name, p.f, c...)
+		if err != nil {
+			return fmt.Errorf("RegisterFetchers error in Register for factory %s skipping Register due to: %v", p.name, err)
+		}
+	}
+
+	return nil
 }
 
 // Register registers a Fetcher implementation.
-func (r *fetchersRegistry) Register(key string, f fetching.Fetcher, c ...fetching.Condition) error {
-	r.log.Infof("Registering new fetcher: %s", key)
-	if _, ok := r.reg[key]; ok {
-		return fmt.Errorf("fetcher key collision: %q is already registered", key)
+func (r *fetchersRegistry) Register(fetcherName string, f fetching.Fetcher, c ...fetching.Condition) error {
+	r.log.Infof("Registering new fetcher: %s", fetcherName)
+	if _, ok := r.reg[fetcherName]; ok {
+		return fmt.Errorf("fetcher %s is already registered", fetcherName)
 	}
 
-	r.reg[key] = registeredFetcher{
+	r.reg[fetcherName] = registeredFetcher{
 		f: f,
 		c: c,
 	}
@@ -65,7 +84,7 @@ func (r *fetchersRegistry) Register(key string, f fetching.Fetcher, c ...fetchin
 }
 
 func (r *fetchersRegistry) Keys() []string {
-	keys := []string{}
+	var keys []string
 	for k := range r.reg {
 		keys = append(keys, k)
 	}

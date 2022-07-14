@@ -30,6 +30,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/manager"
 )
@@ -39,7 +40,7 @@ const (
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(ELBType, &ELBFactory{providers.KubernetesProvider{}, awslib.GetIdentityClient})
+	fetchersManager.Factories.RegisterFactory(ELBType, &ELBFactory{providers.KubernetesProvider{}, awslib.GetIdentityClient})
 }
 
 type ELBFactory struct {

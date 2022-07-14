@@ -7,6 +7,7 @@ on:
       - completed
 jobs:
   publish_results:
+    timeout-minutes: 15
     name: Publish Results
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion != 'skipped'
@@ -27,7 +28,7 @@ jobs:
           mkdir -p tests/allure/results
           mkdir -p artifacts && cd artifacts
 
-          artifacts_url=${{ github.event.workflow_run.head_sha }}
+          artifacts_url=${{ github.event.workflow_run.artifacts_url }}
 
           gh api "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
           do
@@ -60,12 +61,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR=$(gh api -X GET search/issues -f q='repo:elastic/cloudbeat is:open is:pr is:unmerged '${{ github.event.workflow_run.head_sha }}' | jq  '.items[] | .number')
+          PR=$(gh api -X GET search/issues -f q='repo:elastic/cloudbeat is:open is:pr is:unmerged ${{ github.event.workflow_run.head_sha }}' | jq  '.items[] | .number')
           gh pr comment $PR --body "Allure link: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/${{ github.event.workflow_run.head_branch }}/index.html"
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: failure()
         with:
           limit-access-to-actor: true
-
-
