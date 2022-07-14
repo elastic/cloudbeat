@@ -162,3 +162,4 @@ Command example:
 ```
 mockery --name=<interface_name> --with-expecter  --case underscore  --inpackage --recursive
 ```
+
