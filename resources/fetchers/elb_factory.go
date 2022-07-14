@@ -32,7 +32,6 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
 )
 
 const (
