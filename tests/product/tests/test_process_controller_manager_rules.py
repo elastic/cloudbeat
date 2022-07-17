@@ -4,11 +4,11 @@ This module verifies correctness of retrieved findings by manipulating audit and
 """
 from datetime import datetime
 
-import pytest
 import time
+import pytest
 
 from commonlib.utils import get_evaluation
-from product.tests.data.process.process_test_cases import *
+from product.tests.data.process.process_test_cases import controller_manager_rules
 
 
 @pytest.mark.process_controller_manager_rules
@@ -35,7 +35,7 @@ def test_process_controller_manager(config_node_pre_test,
     """
     k8s_client, api_client, cloudbeat_agent = config_node_pre_test
 
-    if not "edit_process_file" in dir(api_client):
+    if "edit_process_file" not in dir(api_client):
         pytest.skip("skipping process rules run in non-containerized api_client")
 
     # Currently, single node is used, in the future may be extended for all nodes.
@@ -43,8 +43,8 @@ def test_process_controller_manager(config_node_pre_test,
     pods = k8s_client.get_agent_pod_instances(agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace)
 
     api_client.edit_process_file(container_name=node.metadata.name,
-                        dictionary=dictionary,
-                        resource=resource)
+                                 dictionary=dictionary,
+                                 resource=resource)
 
     # Wait for process reboot
     # TODO: Implement a more optimal way of waiting
@@ -58,6 +58,6 @@ def test_process_controller_manager(config_node_pre_test,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
     )
-    
+
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
     assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected} actual: {evaluation}"
