@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/elastic/cloudbeat/resources/fetchers"
@@ -139,6 +140,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(resource.ID, "resource ID is missing")
 				s.NotEmpty(resource.Type, "resource  type is missing")
 				s.NotEmpty(event.Fields["type"], "resource type is missing") // for BC sake
+				s.Regexp(regexp.MustCompile("^Rule \".*\": (passed|failed)$"), event.Fields["message"], "event message is not correct")
 			}
 		})
 	}

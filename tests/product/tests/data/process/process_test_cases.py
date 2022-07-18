@@ -469,15 +469,15 @@ cis_1_2_7 = [(
         'passed'
     )]
 cis_1_2_8 = [(
-        'CIS 1.2.8',
-        {
-            "unset": [
-                "--authorization-mode"
-            ]
-        },
-        '/etc/kubernetes/manifests/kube-apiserver.yaml',
-        'failed'
-    ),
+    'CIS 1.2.8',
+    {
+        "unset": [
+            "--authorization-mode"
+        ]
+    },
+    '/etc/kubernetes/manifests/kube-apiserver.yaml',
+    'failed'
+),
     (
         'CIS 1.2.8',
         {
