@@ -64,7 +64,6 @@ jobs:
           prefix: allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}
           ignoreMissingResults: true
 
-# Todo Workflow_run jobs only work from default branch.Verify post merge pr processing is functional & secure gh ticket https://github.com/elastic/security-team/issues/3936
       - name: Output to Job Summary
         if: ${{ github.event.workflow_run.event == 'pull_request' }}
         env:
@@ -74,10 +73,13 @@ jobs:
           echo "### Run Summary :rocket:" >> $GITHUB_STEP_SUMMARY
           echo "Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html" >> $GITHUB_STEP_SUMMARY
 
-      - name: Comment On PR
+      - name: Comment test success result
+        uses: marocchino/sticky-pull-request-comment@v2
         if: ${{ github.event.workflow_run.event == 'pull_request' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          header: Test Results
+          recreate: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr comment ${{ env.PR_NUMBER }} --body "Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html" --repo elastic/cloudbeat
+          message: |
+            ## Cloudbeat CI :robot:
+            Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html
