@@ -28,7 +28,7 @@ type Ec2MetadataProvider struct {
 
 type Metadata = ec2metadata.EC2InstanceIdentityDocument
 
-type MetadataGetter interface {
+type MetadataProvider interface {
 	GetMetadata(ctx context.Context, cfg aws.Config) (Metadata, error)
 }
 

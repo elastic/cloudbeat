@@ -24,7 +24,7 @@ import (
 )
 
 type ConfigProvider struct {
-	MetadataProvider MetadataGetter
+	MetadataProvider MetadataProvider
 }
 
 func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error) {

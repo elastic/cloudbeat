@@ -69,7 +69,7 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 	}
 
 	for _, test := range tests {
-		metaDataGetter := &MockMetadataGetter{}
+		metaDataGetter := &MockMetadataProvider{}
 		metaDataGetter.EXPECT().
 			GetMetadata(mock.Anything, mock.Anything).
 			Return(ec2metadata.EC2InstanceIdentityDocument{
