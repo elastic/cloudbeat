@@ -19,6 +19,7 @@ package transformer
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -72,6 +73,7 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 				"cycle_id":            eventData.CycleId,
 				"result":              finding.Result,
 				"rule":                finding.Rule,
+				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
 			},
 		}
 
