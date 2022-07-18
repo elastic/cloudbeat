@@ -4,11 +4,11 @@ This module verifies correctness of retrieved findings by manipulating audit and
 """
 from datetime import datetime
 
-import pytest
 import time
+import pytest
 
 from commonlib.utils import get_evaluation
-from product.tests.data.process.process_test_cases import *
+from product.tests.data.process.process_test_cases import api_server_rules
 
 
 @pytest.mark.process_api_server_rules
@@ -35,7 +35,7 @@ def test_process_api_server(config_node_pre_test,
     """
     k8s_client, api_client, cloudbeat_agent = config_node_pre_test
 
-    if not "edit_process_file" in dir(api_client):
+    if "edit_process_file" not in dir(api_client):
         pytest.skip("skipping process rules run in non-containerized api_client")
 
     # Currently, single node is used, in the future may be extended for all nodes.
