@@ -21,13 +21,13 @@ import (
 	"context"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
@@ -74,7 +74,7 @@ default_region: us2-east
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		mockedConfigGetter := &awslib.MockConfigGetter{}
+		mockedConfigGetter := &config.MockAwsConfigProvider{}
 		mockedConfigGetter.EXPECT().
 			InitializeAWSConfig(mock.Anything, mock.Anything).
 			Call.
@@ -91,7 +91,7 @@ default_region: us2-east
 			AwsConfigProvider:  mockedConfigGetter,
 		}
 
-		cfg, err := config.NewConfigFrom(test.config)
+		cfg, err := agentconfig.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		fetcher, err := factory.Create(s.log, cfg, nil)
