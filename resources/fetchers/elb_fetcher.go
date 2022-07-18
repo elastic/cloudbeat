@@ -107,8 +107,8 @@ func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
 	uid, _ := uuid.NewV4()
 	return fetching.ResourceMetadata{
 		ID:      uid.String(),
-		Type:    ELBType,
-		SubType: ELBType,
+		Type:    fetching.ELBType,
+		SubType: fetching.ELBType,
 		Name:    "",
 	}
 }

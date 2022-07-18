@@ -34,12 +34,8 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-const (
-	ECRType = "aws-ecr"
-)
-
 func init() {
-	fetchersManager.Factories.RegisterFactory(ECRType, &ECRFactory{
+	fetchersManager.Factories.RegisterFactory(fetching.ECRType, &ECRFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
 		IdentityProvider:   awslib.GetIdentityClient,
 	})
