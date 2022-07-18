@@ -21,9 +21,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
@@ -39,10 +40,10 @@ func init() {
 }
 
 type EKSFactory struct {
-	AwsConfigProvider awslib.ConfigGetter
+	AwsConfigProvider config.AwsConfigProvider
 }
 
-func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *EKSFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting EKSFactory.Create")
 
 	cfg := EKSFetcherConfig{}

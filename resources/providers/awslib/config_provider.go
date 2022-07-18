@@ -23,10 +23,6 @@ import (
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 )
 
-type ConfigGetter interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error)
-}
-
 type ConfigProvider struct {
 	MetadataProvider MetadataGetter
 }

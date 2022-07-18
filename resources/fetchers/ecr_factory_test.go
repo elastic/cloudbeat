@@ -74,7 +74,6 @@ default_region: us1-east
 	}
 
 	for _, test := range tests {
-
 		kubeclient := k8sfake.NewSimpleClientset()
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
@@ -84,7 +83,6 @@ default_region: us1-east
 			InitializeAWSConfig(mock.Anything, mock.Anything).
 			Call.
 			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
-
 				return CreateSdkConfig(config, "us1-east")
 			},
 				func(ctx context.Context, config aws.ConfigAWS) error {
