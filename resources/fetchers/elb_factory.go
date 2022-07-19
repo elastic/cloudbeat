@@ -36,12 +36,8 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const (
-	ELBType = "aws-elb"
-)
-
 func init() {
-	fetchersManager.Factories.RegisterFactory(ELBType, &ELBFactory{
+	fetchersManager.Factories.RegisterFactory(fetching.ELBType, &ELBFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
     IdentityProvider:   awslib.GetIdentityClient,
 		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},

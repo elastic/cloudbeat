@@ -87,4 +87,8 @@ type AwsBaseFetcherConfig struct {
 	AwsConfig         aws.ConfigAWS `config:",inline"`
 }
 
-const KubeAPIType = "kube-api"
+const (
+	ECRType     = "aws-ecr"
+	KubeAPIType = "kube-api"
+	ELBType     = "aws-elb"
+)
