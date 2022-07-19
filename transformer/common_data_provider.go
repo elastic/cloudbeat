@@ -112,14 +112,21 @@ func (c CommonDataProvider) getNodeName() (string, error) {
 }
 
 func (cd CommonData) GetResourceId(metadata fetching.ResourceMetadata) string {
-	if metadata.Type == fetchers.ProcessResourceType || metadata.Type == fetchers.FSResourceType {
-		rid := cd.clusterId + cd.nodeId + metadata.ID
-		return uuid.NewV5(uuid_namespace, rid).String()
+	switch metadata.Type {
+	case fetchers.ProcessResourceType:
+		return cd.generateUUID(metadata)
+	case fetchers.FSResourceType:
+		return cd.generateUUID(metadata)
+	default:
+		return metadata.ID
 	}
-
-	return metadata.ID
 }
 
 func (cd CommonData) GetData() CommonData {
 	return cd
+}
+
+func (cd CommonData) generateUUID(metadata fetching.ResourceMetadata) string {
+	rid := cd.clusterId + cd.nodeId + metadata.ID
+	return uuid.NewV5(uuid_namespace, rid).String()
 }
