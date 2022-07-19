@@ -19,18 +19,18 @@ package fetchers
 
 import (
 	"fmt"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"regexp"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/docker/distribution/context"
-	"github.com/elastic/cloudbeat/resources/fetching"
 
+	"github.com/docker/distribution/context"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -42,15 +42,17 @@ func init() {
 	fetchersManager.Factories.RegisterFactory(ECRType, &ECRFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
 		IdentityProvider:   awslib.GetIdentityClient,
+		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }
 
 type ECRFactory struct {
 	KubernetesProvider providers.KubernetesClientGetter
 	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	AwsConfigProvider  config.AwsConfigProvider
 }
 
-func (f *ECRFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *ECRFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting ECRFactory.Create")
 
 	cfg := ECRFetcherConfig{}
@@ -62,7 +64,8 @@ func (f *ECRFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 }
 
 func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
+	ctx := context.Background()
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
@@ -74,7 +77,6 @@ func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}
 
-	ctx := context.Background()
 	identityProvider := f.IdentityProvider(awsConfig)
 	identity, err := identityProvider.GetIdentity(ctx)
 	if err != nil {

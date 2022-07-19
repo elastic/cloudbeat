@@ -18,9 +18,14 @@
 package fetchers
 
 import (
+	"context"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/stretchr/testify/mock"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
@@ -58,9 +63,22 @@ session_token: session
 	}
 
 	for _, test := range tests {
-		factory := &EKSFactory{}
 
-		cfg, err := config.NewConfigFrom(test.config)
+		mockedConfigGetter := &config.MockAwsConfigProvider{}
+		mockedConfigGetter.EXPECT().
+			InitializeAWSConfig(mock.Anything, mock.Anything).
+			Call.
+			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
+
+				return CreateSdkConfig(config, "us1-east")
+			},
+				func(ctx context.Context, config aws.ConfigAWS) error {
+					return nil
+				},
+			)
+		factory := &EKSFactory{mockedConfigGetter}
+
+		cfg, err := agentconfig.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		fetcher, err := factory.Create(s.log, cfg, nil)

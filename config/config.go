@@ -21,6 +21,8 @@
 package config
 
 import (
+	"context"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
@@ -125,4 +127,8 @@ func Datastream(namespace string, indexPrefix string) string {
 		namespace = DefaultNamespace
 	}
 	return indexPrefix + "-" + namespace
+}
+
+type AwsConfigProvider interface {
+	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error)
 }

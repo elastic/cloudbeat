@@ -18,11 +18,12 @@
 package fetchers
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
+	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -33,13 +34,14 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(IAMType, &IAMFactory{})
+	fetchersManager.Factories.RegisterFactory(IAMType, &IAMFactory{AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}}})
 }
 
 type IAMFactory struct {
+	AwsConfigProvider config.AwsConfigProvider
 }
 
-func (f *IAMFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting IAMFactory.Create")
 
 	cfg := IAMFetcherConfig{}
@@ -52,7 +54,8 @@ func (f *IAMFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 }
 
 func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
+	ctx := context.Background()
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
