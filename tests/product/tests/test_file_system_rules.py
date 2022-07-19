@@ -34,7 +34,7 @@ from .data.file_system import file_system_test_cases as fs_tc
      *fs_tc.cis_1_1_16,
      *fs_tc.cis_1_1_17,
      *fs_tc.cis_1_1_18,
-     *skip_param_case(skip_list=fs_tc.cis_1_1_19[0],
+     *skip_param_case(skip_list=fs_tc.cis_1_1_19[0:1],
                       data_to_report=SkipReportData(
                           url_title="security-team: #4311",
                           url_link="https://github.com/elastic/security-team/issues/4311",
