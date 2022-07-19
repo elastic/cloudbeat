@@ -65,9 +65,9 @@ type ResourceFields struct {
 type ResourceMetadata struct {
 	ID        string `json:"id"`
 	Type      string `json:"type"`
-	SubType   string `json:"sub_type"`
-	Name      string `json:"name"`
-	ECSFormat string `json:"ecsFormat"`
+	SubType   string `json:"sub_type,omitempty"`
+	Name      string `json:"name,omitempty"`
+	ECSFormat string `json:"ecsFormat,omitempty"`
 }
 
 type Result struct {
