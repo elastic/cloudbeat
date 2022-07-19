@@ -22,8 +22,7 @@ import (
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	providers "github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 
@@ -39,7 +38,7 @@ import (
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.ELBType, &ELBFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
-    IdentityProvider:   awslib.GetIdentityClient,
+		IdentityProvider:   awslib.GetIdentityClient,
 		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }

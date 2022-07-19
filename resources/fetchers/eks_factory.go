@@ -34,7 +34,7 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(EKSType, &EKSFactory{
+	fetchersManager.Factories.RegisterFactory(eksType, &EKSFactory{
 		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }

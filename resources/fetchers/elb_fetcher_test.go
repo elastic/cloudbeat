@@ -160,9 +160,9 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			elbResource := results[i].Resource.(ELBResource)
 			metadata := elbResource.GetMetadata()
 
-			s.Equal(expectedLbName, *elbResource.LoadBalancerName)
-			s.Equal(*elbResource.LoadBalancerName, metadata.Name)
-			s.Equal(fmt.Sprintf("%s-%s", testAccount, *elbResource.LoadBalancerName), metadata.ID)
+			s.Equal(expectedLbName, *elbResource.lb.LoadBalancerName)
+			s.Equal(*elbResource.lb.LoadBalancerName, metadata.Name)
+			s.Equal(fmt.Sprintf("%s-%s", testAccount, *elbResource.lb.LoadBalancerName), metadata.ID)
 		}
 	}
 }

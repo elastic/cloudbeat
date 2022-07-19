@@ -67,7 +67,7 @@ default_region: us2-east
 `,
 			"us2-east",
 			"my-account",
-			"([\\w-]+)-\\d+\\.us1-east.elb.amazonaws.com",
+			"([\\w-]+)-\\d+\\.us2-east.elb.amazonaws.com",
 		},
 	}
 
@@ -96,10 +96,10 @@ default_region: us2-east
 			)
 		factory := &ELBFactory{
 			KubernetesProvider: mockedKubernetesClientGetter,
-      IdentityProvider: func(cfg aws.Config) awslib.IdentityProviderGetter {
-			  return identityProvider
-		  },
-			AwsConfigProvider:  mockedConfigGetter,
+			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+				return identityProvider
+			},
+			AwsConfigProvider: mockedConfigGetter,
 		}
 
 		cfg, err := agentconfig.NewConfigFrom(test.config)
