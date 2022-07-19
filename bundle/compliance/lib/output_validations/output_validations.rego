@@ -20,6 +20,7 @@ validate_k8s_metadata(metadata) {
 	metadata.benchmark
 	metadata.benchmark.name
 	metadata.benchmark.version
+	metadata.benchmark.id
 } else = false {
 	true
 }
@@ -32,6 +33,7 @@ validate_eks_metadata(metadata) {
 	metadata.benchmark
 	metadata.benchmark.name
 	metadata.benchmark.version
+	metadata.benchmark.id
 	metadata.remediation
 } else = false {
 	true

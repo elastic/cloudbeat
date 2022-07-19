@@ -46,3 +46,4 @@ metadata:
   benchmark:
     name: CIS Amazon Elastic Kubernetes Service (EKS) Benchmark
     version: v1.0.1
+    id: cis_eks
