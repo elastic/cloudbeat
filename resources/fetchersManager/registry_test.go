@@ -257,13 +257,13 @@ func (res NumberResource) GetData() interface{} {
 	return res.Num
 }
 
-func (res NumberResource) GetMetadata() fetching.ResourceMetadata {
+func (res NumberResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      "",
 		Type:    "number",
 		SubType: "number",
 		Name:    "number",
-	}
+	}, nil
 }
 
 func (res NumberResource) GetElasticCommonData() interface{} {

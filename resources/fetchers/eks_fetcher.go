@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -28,8 +29,8 @@ import (
 )
 
 const (
-	eksResourceType    = "aws-container-management"
-	eksResourceSubType = "eks"
+	eksResourceType    = "caas"
+	eksResourceSubType = "aws-eks"
 )
 
 type EKSFetcher struct {
@@ -71,13 +72,17 @@ func (r EKSResource) GetData() interface{} {
 	return r
 }
 
-func (r EKSResource) GetMetadata() fetching.ResourceMetadata {
+func (r EKSResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	if r.Cluster.Arn == nil || r.Cluster.Name == nil {
+		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
+	}
+
 	return fetching.ResourceMetadata{
 		ID:      *r.Cluster.Arn,
-		Type:    eksResourceType,
-		SubType: eksResourceSubType,
+		Type:    fetching.CloudContainerMgmt,
+		SubType: fetching.EKSType,
 		Name:    *r.Cluster.Name,
-	}
+	}, nil
 }
 
 func (r EKSResource) GetElasticCommonData() any { return nil }

@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"regexp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -32,9 +33,7 @@ import (
 )
 
 const (
-	elbRegexTemplate   = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
-	elbResourceType    = "aws-load-balancer"
-	elbSubResourceType = "elb"
+	elbRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
 )
 
 type ELBFetcher struct {
@@ -108,13 +107,17 @@ func (r ELBResource) GetData() interface{} {
 	return r.lb
 }
 
-func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
+func (r ELBResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	if r.identity.Account == nil || r.lb.LoadBalancerName == nil {
+		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
+	}
+
 	return fetching.ResourceMetadata{
 		// A compromise because aws-sdk do not return an arn for an ELB
 		ID:      fmt.Sprintf("%s-%s", *r.identity.Account, *r.lb.LoadBalancerName),
-		Type:    elbResourceType,
-		SubType: elbSubResourceType,
+		Type:    fetching.CloudLoadBalancer,
+		SubType: fetching.ELBType,
 		Name:    *r.lb.LoadBalancerName,
-	}
+	}, nil
 }
 func (r ELBResource) GetElasticCommonData() any { return nil }

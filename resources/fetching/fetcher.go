@@ -52,7 +52,7 @@ type CycleMetadata struct {
 }
 
 type Resource interface {
-	GetMetadata() ResourceMetadata
+	GetMetadata() (ResourceMetadata, error)
 	GetData() any
 	GetElasticCommonData() any
 }
@@ -71,8 +71,8 @@ type ResourceMetadata struct {
 }
 
 type Result struct {
-	Type string `json:"type"`
-	// Golang 1.18 will introduce generics which will be useful for typing the resource field
+	Type     string      `json:"type"`
+	SubType  string      `json:"subType"`
 	Resource interface{} `json:"resource"`
 }
 
@@ -88,7 +88,15 @@ type AwsBaseFetcherConfig struct {
 }
 
 const (
-	ECRType     = "aws-ecr"
 	KubeAPIType = "kube-api"
-	ELBType     = "aws-elb"
+
+	ECRType        = "aws-ecr"
+	ELBType        = "aws-elb"
+	RolePolicyType = "aws-role-policy"
+	EKSType        = "aws-eks"
+
+	CloudIdentity          = "iam"
+	CloudContainerMgmt     = "caas" // containers as a service
+	CloudLoadBalancer      = "load-balancer"
+	CloudContainerRegistry = "container-registry"
 )

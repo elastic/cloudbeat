@@ -19,16 +19,12 @@ package fetchers
 
 import (
 	"context"
+	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-)
-
-const (
-	iamResourceType    = "aws-identity-access-management"
-	iamSubResourceType = "role-policy"
 )
 
 type IAMFetcher struct {
@@ -72,12 +68,16 @@ func (r IAMResource) GetData() interface{} {
 	return r
 }
 
-func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
+func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	if r.PolicyName == nil {
+		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
+	}
+
 	return fetching.ResourceMetadata{
 		ID:      r.PolicyARN,
-		Type:    iamResourceType,
-		SubType: iamSubResourceType,
+		Type:    fetching.CloudIdentity,
+		SubType: fetching.RolePolicyType,
 		Name:    *r.PolicyName,
-	}
+	}, nil
 }
 func (r IAMResource) GetElasticCommonData() any { return nil }

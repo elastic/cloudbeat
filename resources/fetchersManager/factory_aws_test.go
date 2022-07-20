@@ -52,8 +52,8 @@ type awsTestResource struct {
 	AwsConfig aws.ConfigAWS
 }
 
-func (a awsTestResource) GetMetadata() fetching.ResourceMetadata {
-	return fetching.ResourceMetadata{}
+func (a awsTestResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	return fetching.ResourceMetadata{}, nil
 }
 
 func (a awsTestResource) GetData() any {

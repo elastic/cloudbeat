@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"regexp"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -98,6 +99,7 @@ func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList
 	for _, pod := range podsList.Items {
 		for _, container := range pod.Spec.Containers {
 			image := container.Image
+
 			// Takes only aws images
 			regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
 			if regexMatcher != nil {
@@ -116,13 +118,17 @@ func (res ECRResource) GetData() interface{} {
 	return res
 }
 
-func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
+func (res ECRResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	if res.RepositoryArn == nil || res.RepositoryName == nil {
+		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
+	}
+
 	return fetching.ResourceMetadata{
 		ID:      *res.RepositoryArn,
-		Type:    ecrResourceType,
-		SubType: ecrResourceSubType,
+		Type:    fetching.CloudContainerRegistry,
+		SubType: fetching.ECRType,
 		Name:    *res.RepositoryName,
-	}
+	}, nil
 }
 
 func (res ECRResource) GetElasticCommonData() any { return nil }

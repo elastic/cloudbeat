@@ -183,14 +183,14 @@ func (r FSResource) GetElasticCommonData() any {
 	return r.ElasticCommon
 }
 
-func (r FSResource) GetMetadata() fetching.ResourceMetadata {
+func (r FSResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:        r.EvalResource.Path,
 		Type:      FSResourceType,
 		SubType:   r.EvalResource.SubType,
 		Name:      r.EvalResource.Path, // The Path from the container and not from the host
 		ECSFormat: FSResourceType,
-	}
+	}, nil
 }
 
 func getFSSubType(fileInfo os.FileInfo) string {

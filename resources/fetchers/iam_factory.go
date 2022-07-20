@@ -29,9 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const (
-	IAMType = "aws-iam"
-)
+const IAMType = "aws-iam"
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(IAMType, &IAMFactory{AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}}})
