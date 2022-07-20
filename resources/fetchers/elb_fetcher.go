@@ -33,8 +33,8 @@ import (
 
 const (
 	elbRegexTemplate   = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
-	elbResourceType    = "load-balancer"
-	elbSubResourceType = "aws-elb"
+	elbResourceType    = "aws-load-balancer"
+	elbSubResourceType = "elb"
 )
 
 type ELBFetcher struct {
@@ -110,6 +110,7 @@ func (r ELBResource) GetData() interface{} {
 
 func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
 	return fetching.ResourceMetadata{
+		// A compromise because aws-sdk do not return an arn for an ELB
 		ID:      fmt.Sprintf("%s-%s", *r.identity.Account, *r.lb.LoadBalancerName),
 		Type:    elbResourceType,
 		SubType: elbSubResourceType,

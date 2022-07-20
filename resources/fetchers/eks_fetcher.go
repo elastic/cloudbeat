@@ -28,8 +28,8 @@ import (
 )
 
 const (
-	eksResourceType    = "container-management"
-	eksResourceSubType = "aws-eks"
+	eksResourceType    = "aws-container-management"
+	eksResourceSubType = "eks"
 )
 
 type EKSFetcher struct {

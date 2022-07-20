@@ -27,8 +27,8 @@ import (
 )
 
 const (
-	iamResourceType    = "identity-access-management"
-	iamSubResourceType = "aws-role-policy"
+	iamResourceType    = "aws-identity-access-management"
+	iamSubResourceType = "role-policy"
 )
 
 type IAMFetcher struct {
