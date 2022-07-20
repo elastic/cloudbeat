@@ -79,6 +79,7 @@ jobs:
         with:
           header: Test Results
           recreate: true
+          number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Cloudbeat CI :robot:
