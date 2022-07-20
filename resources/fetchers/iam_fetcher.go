@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	iamResourceType    = "identity and Access Management"
+	iamResourceType    = "identity-access-management"
 	iamSubResourceType = "aws-role-policy"
 )
 
