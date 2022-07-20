@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"time"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/providers"
@@ -61,7 +62,9 @@ func (f *ELBFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 }
 
 func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
@@ -74,7 +77,7 @@ func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan 
 
 	balancerDescriber := awslib.NewELBProvider(awsConfig)
 	identityProvider := f.IdentityProvider(awsConfig)
-	identity, err := identityProvider.GetIdentity(context.Background())
+	identity, err := identityProvider.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}

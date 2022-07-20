@@ -113,9 +113,7 @@ func (c CommonDataProvider) getNodeName() (string, error) {
 
 func (cd CommonData) GetResourceId(metadata fetching.ResourceMetadata) string {
 	switch metadata.Type {
-	case fetchers.ProcessResourceType:
-		return cd.generateUUID(metadata)
-	case fetchers.FSResourceType:
+	case fetchers.ProcessResourceType, fetchers.FSResourceType:
 		return cd.generateUUID(metadata)
 	default:
 		return metadata.ID
