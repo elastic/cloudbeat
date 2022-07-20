@@ -117,8 +117,8 @@ func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
 	uid, _ := uuid.NewV4()
 	return fetching.ResourceMetadata{
 		ID:      uid.String(),
-		Type:    ECRType,
-		SubType: ECRType,
+		Type:    fetching.ECRType,
+		SubType: fetching.ECRType,
 		Name:    "AWS repositories",
 	}
 }

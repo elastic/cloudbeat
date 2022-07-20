@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -62,7 +61,7 @@ func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig
 func (fa *factories) getConditions(log *logp.Logger, name string) ([]fetching.Condition, error) {
 	c := make([]fetching.Condition, 0)
 	switch name {
-	case fetching.KubeAPIType:
+	case fetching.KubeAPIType, fetching.ECRType, fetching.ELBType:
 		// TODO: Use fetcher's kubeconfig configuration
 		client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
 		if err != nil {
