@@ -97,14 +97,15 @@ func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList
 			image := container.Image
 			// Takes only aws images
 			regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
-			{
-				if regexMatcher != nil {
-					repository := regexMatcher[1]
-					repositories = append(repositories, repository)
-				}
+			if regexMatcher != nil {
+				repository := regexMatcher[1]
+				repositories = append(repositories, repository)
 			}
 		}
 	}
+
+	f.log.Debugf("sending pods to ecrProviders: %v", repositories)
+
 	return describer.Provider.DescribeRepositories(ctx, repositories)
 }
 
@@ -116,8 +117,8 @@ func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
 	uid, _ := uuid.NewV4()
 	return fetching.ResourceMetadata{
 		ID:      uid.String(),
-		Type:    ECRType,
-		SubType: ECRType,
+		Type:    fetching.ECRType,
+		SubType: fetching.ECRType,
 		Name:    "AWS repositories",
 	}
 }

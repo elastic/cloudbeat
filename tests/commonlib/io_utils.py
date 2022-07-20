@@ -2,6 +2,7 @@
 This module provides input / output manipulations on streams / files
 """
 
+from datetime import datetime
 import os
 import io
 import json
@@ -9,6 +10,55 @@ import shutil
 from pathlib import Path
 import yaml
 from munch import Munch, munchify
+
+
+def get_events_from_index(elastic_client, index_name: str, rule_tag: str, time_after: datetime) -> list[Munch]:
+    """
+    This function returns events from the given index,
+    filtering for the given rule_tag, and after the given time.
+    @param elastic_client: Client to connect to Elasticsearch.
+    @param index_name: Index to get events from.
+    @param rule_tag: Rule tag to filter.
+    @param time_after: Filter events having timestamp > time_after
+    @return: List of Munch objects
+    """
+    query = {
+        "bool": {
+            "must": [
+                {
+                    "match": {
+                        "rule.tags": rule_tag
+                    }
+                }
+            ],
+            "filter": [
+                {
+                    "range": {
+                        "@timestamp": {
+                            "gte": time_after.strftime('%Y-%m-%dT%H:%M:%S.%f')
+                        }
+                    }
+                }
+            ]
+        }
+    }
+    sort = [{
+        "@timestamp": {
+            "order": "desc"
+        }
+    }]
+    result = elastic_client.get_index_data(
+        index_name=index_name,
+        query=query,
+        sort=sort,
+        size=1000,
+    )
+
+    events = []
+    for event in munchify(dict(result)).hits.hits:
+        events.append(event._source)
+
+    return events
 
 
 def get_logs_from_stream(stream: str) -> list[Munch]:
@@ -101,7 +151,7 @@ class FsClient:
         @return: None
         """
         if container_name == '':
-            raise Exception(f"Unknown container name is sent")
+            raise Exception("Unknown container name is sent")
 
         current_resource = Path(resource)
         if not current_resource.is_file():

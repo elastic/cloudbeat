@@ -4,7 +4,7 @@ This module verifies correctness of retrieved findings by manipulating audit and
 """
 from datetime import datetime
 import pytest
-from commonlib.utils import get_evaluation
+from commonlib.utils import get_ES_evaluation
 from commonlib.framework.reporting import skip_param_case, SkipReportData
 from .data.file_system import file_system_test_cases as fs_tc
 
@@ -51,7 +51,8 @@ from .data.file_system import file_system_test_cases as fs_tc
      *fs_tc.cis_4_1_10
      ],
 )
-def test_file_system_configuration(config_node_pre_test,
+def test_file_system_configuration(elastic_client,
+                                   config_node_pre_test,
                                    rule_tag,
                                    command,
                                    param_value,
@@ -74,9 +75,6 @@ def test_file_system_configuration(config_node_pre_test,
     k8s_client, api_client, cloudbeat_agent = config_node_pre_test
     # Currently, single node is used, in the future may be extended for all nodes.
     node = k8s_client.get_cluster_nodes()[0]
-    pods = k8s_client.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
-                                              namespace=cloudbeat_agent.namespace)
-
     api_client.exec_command(container_name=node.metadata.name,
                             command=command,
                             param_value=param_value,
@@ -85,14 +83,12 @@ def test_file_system_configuration(config_node_pre_test,
     def identifier(res):
         return res.name in resource
 
-    evaluation = get_evaluation(
-        k8s=k8s_client,
+    evaluation = get_ES_evaluation(
+        elastic_client=elastic_client,
         timeout=cloudbeat_agent.findings_timeout,
-        pod_name=pods[0].metadata.name,
-        namespace=cloudbeat_agent.namespace,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
-        resource_identifier=identifier
+        resource_identifier=identifier,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"

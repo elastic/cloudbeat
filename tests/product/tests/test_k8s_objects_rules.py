@@ -8,7 +8,7 @@ import pytest
 
 # from product.tests.data.k8s_object.k8s_object_rules import *
 from product.tests.data.k8s_object import k8s_object_rules as k8s_tc
-from commonlib.utils import get_evaluation, get_resource_identifier
+from commonlib.utils import get_ES_evaluation, get_resource_identifier
 from commonlib.framework.reporting import skip_param_case, SkipReportData
 
 
@@ -58,7 +58,7 @@ from commonlib.framework.reporting import skip_param_case, SkipReportData
         # *k8s_tc.cis_5_2_10.keys() - TODO: cases are not implemented
     ]
 )
-def test_kube_resource_patch(test_env, rule_tag, resource_type, resource_body, expected):
+def test_kube_resource_patch(elastic_client, test_env, rule_tag, resource_type, resource_body, expected):
     """
     Test kube resource
     @param test_env: pre step that set-ups a kube resources to test on
@@ -92,16 +92,10 @@ def test_kube_resource_patch(test_env, rule_tag, resource_type, resource_body, e
         raise ValueError(
             f'Could not patch resource type {resource_type}:'
             f' {relevant_metadata} with patch {resource_body}')
-
-    # check resource evaluation
-    pods = k8s_client.get_agent_pod_instances(agent_name=agent_config.name,
-                                              namespace=agent_config.namespace)
-
-    evaluation = get_evaluation(
-        k8s=k8s_client,
+    
+    evaluation = get_ES_evaluation(
+        elastic_client=elastic_client,
         timeout=agent_config.findings_timeout,
-        pod_name=pods[0].metadata.name,
-        namespace=agent_config.namespace,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
         resource_identifier=get_resource_identifier(resource_body),
