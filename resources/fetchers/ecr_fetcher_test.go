@@ -267,8 +267,8 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 
 		for i, name := range test.expectedRepositoriesNames {
 			ecrResource := results[i].Resource.(ECRResource)
-			metadata := ecrResource.GetMetadata()
-
+			metadata, err := ecrResource.GetMetadata()
+			s.NoError(err)
 			s.Equal(name, *ecrResource.RepositoryName)
 			s.Equal(*ecrResource.RepositoryName, metadata.Name)
 			s.Equal(*ecrResource.RepositoryArn, metadata.ID)

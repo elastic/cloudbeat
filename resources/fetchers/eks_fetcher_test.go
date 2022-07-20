@@ -96,11 +96,13 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 
 		ctx := context.Background()
 		err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		s.NoError(err)
 
 		results := testhelper.CollectResources(s.resourceCh)
 		eksResource := results[0].Resource.(EKSResource)
-		metadata := eksResource.GetMetadata()
+		metadata, err := eksResource.GetMetadata()
 
+		s.NoError(err)
 		s.Equal(expectedResource, eksResource)
 		s.Equal(*expectedResource.Cluster.Name, metadata.Name)
 		s.Equal(*expectedResource.Cluster.Arn, metadata.ID)

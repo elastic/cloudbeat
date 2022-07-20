@@ -29,12 +29,8 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const (
-	eksType = "aws-eks"
-)
-
 func init() {
-	fetchersManager.Factories.RegisterFactory(eksType, &EKSFactory{
+	fetchersManager.Factories.RegisterFactory(fetching.EKSType, &EKSFactory{
 		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }

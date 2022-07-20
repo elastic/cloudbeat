@@ -28,11 +28,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const (
-	eksResourceType    = "caas"
-	eksResourceSubType = "aws-eks"
-)
-
 type EKSFetcher struct {
 	log         *logp.Logger
 	cfg         EKSFetcherConfig
