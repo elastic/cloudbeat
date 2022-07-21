@@ -18,7 +18,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.3-0.20211202183452-c5a74bcca799 // indirect
 	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.7.1
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/tools v0.1.11
@@ -37,7 +37,7 @@ require (
 	github.com/elastic/elastic-agent-autodiscover v0.1.1
 	github.com/elastic/elastic-agent-libs v0.2.5
 	github.com/elastic/go-licenser v0.4.0
-	github.com/open-policy-agent/opa v0.42.0
+	github.com/open-policy-agent/opa v0.41.0
 	github.com/pkg/errors v0.9.1
 	go.elastic.co/go-licence-detector v0.5.0
 	go.uber.org/goleak v1.1.12
@@ -53,14 +53,14 @@ require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bytecodealliance/wasmtime-go v0.36.0 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
-	github.com/containerd/containerd v1.6.6 // indirect
+	github.com/containerd/containerd v1.6.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgraph-io/ristretto v0.1.0 // indirect
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220622083326-cab8871124af
-	github.com/elastic/csp-security-policies v1.0.7
+	github.com/elastic/csp-security-policies v1.0.5
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.6 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -134,8 +134,8 @@ require (
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/dgraph-io/badger/v3 v3.2103.2 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
-	github.com/docker/cli v20.10.17+incompatible // indirect
-	github.com/docker/docker v20.10.17+incompatible // indirect
+	github.com/docker/cli v20.10.11+incompatible // indirect
+	github.com/docker/docker v20.10.12+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.6.4 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
@@ -193,21 +193,21 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
-	github.com/prometheus/client_golang v1.12.2 // indirect
+	github.com/prometheus/client_golang v1.12.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.21.12 // indirect
-	github.com/spf13/cobra v1.5.0 // indirect
+	github.com/spf13/cobra v1.4.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.3.0 // indirect
 	github.com/ugorji/go/codec v1.1.8 // indirect
 	github.com/urso/sderr v0.0.0-20210525210834-52b04e8f5c71 // indirect
-	github.com/vektah/gqlparser/v2 v2.4.5 // indirect
+	github.com/vektah/gqlparser/v2 v2.4.4 // indirect
 	github.com/xdg/scram v1.0.3 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.elastic.co/apm v1.13.0 // indirect
@@ -222,7 +222,7 @@ require (
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/net v0.0.0-20220621193019-9d032be2e588 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
+	golang.org/x/sync v0.0.0-20220513210516-0976fa681c29 // indirect
 	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
@@ -232,7 +232,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirect; indirectresources/manager/data.go
 	howett.net/plist v1.0.0 // indirect
-	oras.land/oras-go v1.2.0 // indirect
+	oras.land/oras-go v1.1.1 // indirect
 )
 
 replace (
