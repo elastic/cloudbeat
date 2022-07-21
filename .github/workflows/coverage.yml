@@ -16,7 +16,7 @@ env:
 
 jobs:
   coverage:
-    name: Unit Tests
+    name: Coverage
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
