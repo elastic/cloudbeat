@@ -20,19 +20,21 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"regexp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
 
-const ELBRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
+const (
+	elbRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
+)
 
 type ELBFetcher struct {
 	log             *logp.Logger
@@ -41,6 +43,7 @@ type ELBFetcher struct {
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
 	resourceCh      chan fetching.ResourceInfo
+	cloudIdentity   *awslib.Identity
 }
 
 type ELBFetcherConfig struct {
@@ -51,7 +54,8 @@ type ELBFetcherConfig struct {
 type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription
 
 type ELBResource struct {
-	LoadBalancersDescription
+	lb       LoadBalancersDescription
+	identity *awslib.Identity
 }
 
 func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -68,7 +72,7 @@ func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 
 	for _, loadBalancer := range result {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      ELBResource{LoadBalancersDescription(loadBalancer)},
+			Resource:      ELBResource{LoadBalancersDescription(loadBalancer), f.cloudIdentity},
 			CycleMetadata: cMetadata,
 		}
 	}
@@ -100,16 +104,20 @@ func (f *ELBFetcher) Stop() {
 }
 
 func (r ELBResource) GetData() interface{} {
-	return r
+	return r.lb
 }
 
-func (r ELBResource) GetMetadata() fetching.ResourceMetadata {
-	uid, _ := uuid.NewV4()
-	return fetching.ResourceMetadata{
-		ID:      uid.String(),
-		Type:    fetching.ELBType,
-		SubType: fetching.ELBType,
-		Name:    "",
+func (r ELBResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	if r.identity.Account == nil || r.lb.LoadBalancerName == nil {
+		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
+
+	return fetching.ResourceMetadata{
+		// A compromise because aws-sdk do not return an arn for an ELB
+		ID:      fmt.Sprintf("%s-%s", *r.identity.Account, *r.lb.LoadBalancerName),
+		Type:    fetching.CloudLoadBalancer,
+		SubType: fetching.ELBType,
+		Name:    *r.lb.LoadBalancerName,
+	}, nil
 }
 func (r ELBResource) GetElasticCommonData() any { return nil }

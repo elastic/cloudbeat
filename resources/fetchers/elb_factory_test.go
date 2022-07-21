@@ -23,6 +23,7 @@ import (
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"testing"
@@ -53,6 +54,7 @@ func (s *ElbFactoryTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		config        string
 		region        string
+		account       string
 		expectedRegex string
 	}{
 		{
@@ -64,6 +66,7 @@ session_token: session
 default_region: us2-east
 `,
 			"us2-east",
+			"my-account",
 			"([\\w-]+)-\\d+\\.us2-east.elb.amazonaws.com",
 		},
 	}
@@ -74,12 +77,17 @@ default_region: us2-east
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
+		identity := awslib.Identity{
+			Account: &test.account,
+		}
+		identityProvider := &awslib.MockedIdentityProviderGetter{}
+		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
+
 		mockedConfigGetter := &config.MockAwsConfigProvider{}
 		mockedConfigGetter.EXPECT().
 			InitializeAWSConfig(mock.Anything, mock.Anything).
 			Call.
 			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
-
 				return CreateSdkConfig(config, "us2-east")
 			},
 				func(ctx context.Context, config aws.ConfigAWS) error {
@@ -88,7 +96,10 @@ default_region: us2-east
 			)
 		factory := &ELBFactory{
 			KubernetesProvider: mockedKubernetesClientGetter,
-			AwsConfigProvider:  mockedConfigGetter,
+			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+				return identityProvider
+			},
+			AwsConfigProvider: mockedConfigGetter,
 		}
 
 		cfg, err := agentconfig.NewConfigFrom(test.config)
