@@ -112,15 +112,19 @@ func (c CommonDataProvider) getNodeName() (string, error) {
 }
 
 func (cd CommonData) GetResourceId(metadata fetching.ResourceMetadata) string {
-	// kube-api resource id is the original k8s object metadata.uuid
-	if metadata.Type == fetchers.K8sObjType {
+	switch metadata.Type {
+	case fetchers.ProcessResourceType, fetchers.FSResourceType:
+		return cd.generateUUID(metadata)
+	default:
 		return metadata.ID
 	}
-
-	rid := cd.clusterId + cd.nodeId + metadata.ID
-	return uuid.NewV5(uuid_namespace, rid).String()
 }
 
 func (cd CommonData) GetData() CommonData {
 	return cd
+}
+
+func (cd CommonData) generateUUID(metadata fetching.ResourceMetadata) string {
+	rid := cd.clusterId + cd.nodeId + metadata.ID
+	return uuid.NewV5(uuid_namespace, rid).String()
 }

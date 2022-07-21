@@ -97,7 +97,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	s.Equal("root", evalResource.Owner)
 	s.Equal("root", evalResource.Group)
 
-	rMetadata := fsResource.GetMetadata()
+	rMetadata, err := fsResource.GetMetadata()
+	s.NoError(err)
 	s.NotNil(rMetadata.ID)
 	s.Equal(filePaths[0], rMetadata.Name)
 	s.Equal(FileSubType, rMetadata.SubType)
@@ -142,7 +143,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Equal("root", firstEvalResource.Owner)
 	s.Equal("root", firstEvalResource.Group)
 
-	rMetadata := firstFSResource.GetMetadata()
+	rMetadata, err := firstFSResource.GetMetadata()
+	s.NoError(err)
 	s.NotNil(rMetadata.ID)
 	s.Equal(paths[0], rMetadata.Name)
 	s.Equal(FileSubType, rMetadata.SubType)
@@ -155,7 +157,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Equal("etcd", secEvalResource.Owner)
 	s.Equal("etcd", secEvalResource.Group)
 
-	SecResMetadata := secFSResource.GetMetadata()
+	SecResMetadata, err := secFSResource.GetMetadata()
+	s.NoError(err)
 	s.NotNil(SecResMetadata.ID)
 	s.Equal(paths[1], SecResMetadata.Name)
 	s.Equal(FileSubType, SecResMetadata.SubType)
@@ -192,8 +195,9 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	fsResource := results[0].Resource
 	evalResource := fsResource.GetData().(EvalFSResource)
 	expectedResult := filepath.Base(dir)
-	rMetadata := fsResource.GetMetadata()
+	rMetadata, err := fsResource.GetMetadata()
 
+	s.NoError(err)
 	s.NotNil(rMetadata.ID)
 	s.NotNil(rMetadata.Name)
 	s.Equal(DirSubType, rMetadata.SubType)
@@ -243,7 +247,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	expectedResult := []string{"output.txt", filepath.Base(innerDir)}
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
-		rMetadata := fsResource.GetMetadata()
+		rMetadata, err := fsResource.GetMetadata()
+		s.NoError(err)
 		evalResource := fsResource.GetData().(EvalFSResource)
 
 		s.Contains(expectedResult, evalResource.Name)
@@ -299,9 +304,10 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	//All inner files should exist in the final result
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
-		rMetadata := fsResource.GetMetadata()
+		rMetadata, err := fsResource.GetMetadata()
 		evalResource := fsResource.GetData().(EvalFSResource)
 
+		s.NoError(err)
 		s.NotNil(rMetadata.SubType)
 		s.NotNil(rMetadata.Name)
 		s.NotNil(rMetadata.ID)

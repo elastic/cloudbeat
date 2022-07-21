@@ -20,7 +20,10 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	providers "github.com/elastic/cloudbeat/resources/providers"
+	"time"
+
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 
@@ -36,12 +39,14 @@ import (
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.ELBType, &ELBFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
+		IdentityProvider:   awslib.GetIdentityClient,
 		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }
 
 type ELBFactory struct {
 	KubernetesProvider providers.KubernetesClientGetter
+	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
 	AwsConfigProvider  config.AwsConfigProvider
 }
 
@@ -57,22 +62,30 @@ func (f *ELBFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 }
 
 func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
-	loadBalancerRegex := fmt.Sprintf(ELBRegexTemplate, awsConfig.Region)
+	loadBalancerRegex := fmt.Sprintf(elbRegexTemplate, awsConfig.Region)
 	kubeClient, err := f.KubernetesProvider.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)
 	}
 
 	balancerDescriber := awslib.NewELBProvider(awsConfig)
+	identityProvider := f.IdentityProvider(awsConfig)
+	identity, err := identityProvider.GetIdentity(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
+	}
 
 	return &ELBFetcher{
 		log:             log,
 		elbProvider:     balancerDescriber,
+		cloudIdentity:   identity,
 		cfg:             cfg,
 		kubeClient:      kubeClient,
 		lbRegexMatchers: []*regexp.Regexp{regexp.MustCompile(loadBalancerRegex)},

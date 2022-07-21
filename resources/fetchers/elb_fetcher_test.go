@@ -36,6 +36,12 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 )
 
+var (
+	testAccount = "test-account"
+	testID      = "test-id"
+	testARN     = "test-arn"
+)
+
 const (
 	elbRegex = "([\\w-]+)-\\d+\\.us-east-2.elb.amazonaws.com"
 )
@@ -126,6 +132,12 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
 
+		identity := awslib.Identity{
+			Account: &testAccount,
+			Arn:     &testARN,
+			UserId:  &testID,
+		}
+
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
 		elbFetcher := ELBFetcher{
@@ -135,6 +147,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
 			resourceCh:      s.resourceCh,
+			cloudIdentity:   &identity,
 		}
 
 		err = elbFetcher.Fetch(context.Background(), fetching.CycleMetadata{})
@@ -145,7 +158,12 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
 		for i, expectedLbName := range test.expectedlbNames {
 			elbResource := results[i].Resource.(ELBResource)
-			s.Equal(expectedLbName, *elbResource.LoadBalancerName)
+			metadata, err := elbResource.GetMetadata()
+
+			s.NoError(err)
+			s.Equal(expectedLbName, *elbResource.lb.LoadBalancerName)
+			s.Equal(*elbResource.lb.LoadBalancerName, metadata.Name)
+			s.Equal(fmt.Sprintf("%s-%s", testAccount, *elbResource.lb.LoadBalancerName), metadata.ID)
 		}
 	}
 }

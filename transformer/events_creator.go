@@ -52,7 +52,10 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 	}
 
 	events := make([]beat.Event, 0)
-	resMetadata := eventData.GetMetadata()
+	resMetadata, err := eventData.GetMetadata()
+	if err != nil {
+		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
+	}
 	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
 
 	timestamp := time.Now()
