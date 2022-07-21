@@ -36,8 +36,6 @@ import (
 const (
 	PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
 	PublicRepoRegex          = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
-	ecrResourceType          = "aws-image-registry"
-	ecrResourceSubType       = "ecr"
 )
 
 type ECRFetcher struct {

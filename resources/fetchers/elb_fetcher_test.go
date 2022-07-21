@@ -158,8 +158,9 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
 		for i, expectedLbName := range test.expectedlbNames {
 			elbResource := results[i].Resource.(ELBResource)
-			metadata := elbResource.GetMetadata()
+			metadata, err := elbResource.GetMetadata()
 
+			s.NoError(err)
 			s.Equal(expectedLbName, *elbResource.lb.LoadBalancerName)
 			s.Equal(*elbResource.lb.LoadBalancerName, metadata.Name)
 			s.Equal(fmt.Sprintf("%s-%s", testAccount, *elbResource.lb.LoadBalancerName), metadata.ID)
