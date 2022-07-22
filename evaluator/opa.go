@@ -85,8 +85,14 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 }
 
 func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceInfo) (EventData, error) {
+	resMetadata, err := resourceInfo.GetMetadata()
+	if err != nil {
+		return EventData{}, fmt.Errorf("failed to get resource metadata: %v", err)
+	}
+
 	fetcherResult := fetching.Result{
-		Type:     resourceInfo.GetMetadata().Type,
+		Type:     resMetadata.Type,
+		SubType:  resMetadata.SubType,
 		Resource: resourceInfo.GetData(),
 	}
 

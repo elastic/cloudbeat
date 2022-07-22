@@ -7,7 +7,7 @@ from datetime import datetime
 import time
 import pytest
 
-from commonlib.utils import get_evaluation
+from commonlib.utils import get_ES_evaluation
 from product.tests.data.process.process_test_cases import scheduler_rules
 
 
@@ -16,7 +16,8 @@ from product.tests.data.process.process_test_cases import scheduler_rules
     ("rule_tag", "dictionary", "resource", "expected"),
     scheduler_rules,
 )
-def test_process_scheduler(config_node_pre_test,
+def test_process_scheduler(elastic_client,
+                           config_node_pre_test,
                            rule_tag,
                            dictionary,
                            resource,
@@ -40,8 +41,6 @@ def test_process_scheduler(config_node_pre_test,
 
     # Currently, single node is used, in the future may be extended for all nodes.
     node = k8s_client.get_cluster_nodes()[0]
-    pods = k8s_client.get_agent_pod_instances(agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace)
-
     api_client.edit_process_file(container_name=node.metadata.name,
                                  dictionary=dictionary,
                                  resource=resource)
@@ -50,11 +49,9 @@ def test_process_scheduler(config_node_pre_test,
     # TODO: Implement a more optimal way of waiting
     time.sleep(60)
 
-    evaluation = get_evaluation(
-        k8s=k8s_client,
+    evaluation = get_ES_evaluation(
+        elastic_client=elastic_client,
         timeout=cloudbeat_agent.findings_timeout,
-        pod_name=pods[0].metadata.name,
-        namespace=cloudbeat_agent.namespace,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
     )

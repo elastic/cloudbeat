@@ -71,6 +71,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 	firstRepositoryName := "cloudbeat"
 	secondRepositoryName := "cloudbeat1"
 	privateRepoWithSlash := "build/cloudbeat"
+	repoArn := "arn:aws:ecr:us-west-2:012345678910:repository/ubuntu"
 	publicRepoName := "build.security/citools"
 
 	var tests = []struct {
@@ -99,10 +100,13 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					ExpectedImages: []string{"cloudbeat", "cloudbeat1"},
 					Repositories: []ecr.Repository{
 						{
+							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &firstRepositoryName,
 							RepositoryUri:              nil,
-						}, {
+						},
+						{
+							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &secondRepositoryName,
 							RepositoryUri:              nil,
@@ -130,10 +134,12 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					ExpectedImages: []string{"build/cloudbeat", "cloudbeat1"},
 					Repositories: []ecr.Repository{
 						{
+							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &privateRepoWithSlash,
 							RepositoryUri:              nil,
 						}, {
+							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &secondRepositoryName,
 							RepositoryUri:              nil,
@@ -160,6 +166,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					ExpectedImages: []string{"cloudbeat"},
 					Repositories: []ecr.Repository{
 						{
+							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &firstRepositoryName,
 							RepositoryUri:              nil,
@@ -171,6 +178,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					ExpectedImages: []string{"build.security/citools"},
 					Repositories: []ecr.Repository{
 						{
+							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &publicRepoName,
 							RepositoryUri:              nil,
@@ -323,7 +331,11 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 
 		for i, name := range test.expectedRepositoriesNames {
 			ecrResource := results[i].Resource.(ECRResource)
+			metadata, err := ecrResource.GetMetadata()
+			s.NoError(err)
 			s.Equal(name, *ecrResource.RepositoryName)
+			s.Equal(*ecrResource.RepositoryName, metadata.Name)
+			s.Equal(*ecrResource.RepositoryArn, metadata.ID)
 		}
 	}
 

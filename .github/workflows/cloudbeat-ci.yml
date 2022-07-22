@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-            
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -34,7 +34,7 @@ jobs:
           key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-${{ matrix.go-version }}-
-      
+
       - name: build cloudbeat
         run: make
 
@@ -48,7 +48,7 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.workflow }}
           restore-keys: |
             ${{ runner.os }}-buildx-
-      
+
       - name: Build cloudbeat-docker
         uses: docker/build-push-action@v2
         with:
@@ -68,7 +68,7 @@ jobs:
           cache-from: type=local,mode=max,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
-      
+
       - name: Cache docker images
         uses: actions/cache@v2
         with:
@@ -90,7 +90,7 @@ jobs:
     strategy:
       matrix:
         # test-targets chosen by stabillity and runtime.Only pre_merge will be set as mandatory
-        test-target: [pre_merge, file_system_rules, k8s_object_rules, process_etcd_rules, process_scheduler_rules  ]
+        test-target: [pre_merge, file_system_rules, k8s_object_rules, process_etcd_rules, process_scheduler_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules]
       fail-fast: false
     steps:
       - name: Check out the repo
@@ -105,7 +105,7 @@ jobs:
         uses: helm/kind-action@v1.2.0
         with:
           config: deploy/k8s/kind/kind-config.yml
-          cluster_name: kind-mono 
+          cluster_name: kind-mono
 
       - name: Cache docker images
         uses: actions/cache@v2
@@ -125,7 +125,7 @@ jobs:
           just deploy-tests-helm-ci ${{ matrix.test-target }}
 
       - name: Run Tests
-        id: run_tests 
+        id: run_tests
         run: |
           just run-tests-ci
 

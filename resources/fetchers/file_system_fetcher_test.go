@@ -62,8 +62,13 @@ func (s *FSFetcherTestSuite) TearDownTest() {
 func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	directoryName := "test-outer-dir"
 	files := []string{"file.txt"}
-	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, files)
-	defer os.RemoveAll(dir)
+	dir := createDirectoriesWithFiles(&s.Suite, "", directoryName, files)
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(dir)
 
 	filePaths := []string{filepath.Join(dir, files[0])}
 	cfg := FileFetcherConfig{
@@ -97,7 +102,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	s.Equal("root", evalResource.Owner)
 	s.Equal("root", evalResource.Group)
 
-	rMetadata := fsResource.GetMetadata()
+	rMetadata, err := fsResource.GetMetadata()
+	s.NoError(err)
 	s.NotNil(rMetadata.ID)
 	s.Equal(filePaths[0], rMetadata.Name)
 	s.Equal(FileSubType, rMetadata.SubType)
@@ -108,8 +114,13 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt", "output1.txt"}
-	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
-	defer os.RemoveAll(outerDir)
+	outerDir := createDirectoriesWithFiles(&s.Suite, "", outerDirectoryName, outerFiles)
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(outerDir)
 
 	paths := []string{filepath.Join(outerDir, outerFiles[0]), filepath.Join(outerDir, outerFiles[1])}
 	cfg := FileFetcherConfig{
@@ -142,7 +153,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Equal("root", firstEvalResource.Owner)
 	s.Equal("root", firstEvalResource.Group)
 
-	rMetadata := firstFSResource.GetMetadata()
+	rMetadata, err := firstFSResource.GetMetadata()
+	s.NoError(err)
 	s.NotNil(rMetadata.ID)
 	s.Equal(paths[0], rMetadata.Name)
 	s.Equal(FileSubType, rMetadata.SubType)
@@ -155,7 +167,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Equal("etcd", secEvalResource.Owner)
 	s.Equal("etcd", secEvalResource.Group)
 
-	SecResMetadata := secFSResource.GetMetadata()
+	SecResMetadata, err := secFSResource.GetMetadata()
+	s.NoError(err)
 	s.NotNil(SecResMetadata.ID)
 	s.Equal(paths[1], SecResMetadata.Name)
 	s.Equal(FileSubType, SecResMetadata.SubType)
@@ -165,8 +178,13 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	directoryName := "test-outer-dir"
 	files := []string{"file.txt"}
-	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, files)
-	defer os.RemoveAll(dir)
+	dir := createDirectoriesWithFiles(&s.Suite, "", directoryName, files)
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(dir)
 
 	filePaths := []string{filepath.Join(dir)}
 	cfg := FileFetcherConfig{
@@ -192,8 +210,9 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	fsResource := results[0].Resource
 	evalResource := fsResource.GetData().(EvalFSResource)
 	expectedResult := filepath.Base(dir)
-	rMetadata := fsResource.GetMetadata()
+	rMetadata, err := fsResource.GetMetadata()
 
+	s.NoError(err)
 	s.NotNil(rMetadata.ID)
 	s.NotNil(rMetadata.Name)
 	s.Equal(DirSubType, rMetadata.SubType)
@@ -209,12 +228,17 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt"}
-	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
-	defer os.RemoveAll(outerDir)
+	outerDir := createDirectoriesWithFiles(&s.Suite, "", outerDirectoryName, outerFiles)
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(outerDir)
 
 	innerDirectoryName := "test-inner-dir"
 	innerFiles := []string{"innerFolderFile.txt"}
-	innerDir := createDirectoriesWithFiles(s.Suite, outerDir, innerDirectoryName, innerFiles)
+	innerDir := createDirectoriesWithFiles(&s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	path := []string{outerDir + "/*"}
 	cfg := FileFetcherConfig{
@@ -243,7 +267,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	expectedResult := []string{"output.txt", filepath.Base(innerDir)}
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
-		rMetadata := fsResource.GetMetadata()
+		rMetadata, err := fsResource.GetMetadata()
+		s.NoError(err)
 		evalResource := fsResource.GetData().(EvalFSResource)
 
 		s.Contains(expectedResult, evalResource.Name)
@@ -261,16 +286,21 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt"}
-	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
-	defer os.RemoveAll(outerDir)
+	outerDir := createDirectoriesWithFiles(&s.Suite, "", outerDirectoryName, outerFiles)
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(outerDir)
 
 	innerDirectoryName := "test-inner-dir"
 	innerFiles := []string{"innerFolderFile.txt"}
-	innerDir := createDirectoriesWithFiles(s.Suite, outerDir, innerDirectoryName, innerFiles)
+	innerDir := createDirectoriesWithFiles(&s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	innerInnerDirectoryName := "test-inner-inner-dir"
 	innerInnerFiles := []string{"innerInnerFolderFile.txt"}
-	innerInnerDir := createDirectoriesWithFiles(s.Suite, innerDir, innerInnerDirectoryName, innerInnerFiles)
+	innerInnerDir := createDirectoriesWithFiles(&s.Suite, innerDir, innerInnerDirectoryName, innerInnerFiles)
 
 	path := []string{outerDir + "/**"}
 	cfg := FileFetcherConfig{
@@ -299,9 +329,10 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	//All inner files should exist in the final result
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
-		rMetadata := fsResource.GetMetadata()
+		rMetadata, err := fsResource.GetMetadata()
 		evalResource := fsResource.GetData().(EvalFSResource)
 
+		s.NoError(err)
 		s.NotNil(rMetadata.SubType)
 		s.NotNil(rMetadata.Name)
 		s.NotNil(rMetadata.ID)
@@ -318,8 +349,13 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 func (s *FSFetcherTestSuite) TestElasticCommonData() {
 	directoryName := "test-outer-dir"
 	files := []string{"file.txt"}
-	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, files)
-	defer os.RemoveAll(dir)
+	dir := createDirectoriesWithFiles(&s.Suite, "", directoryName, files)
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(dir)
 
 	filePaths := []string{filepath.Join(dir, files[0])}
 	cfg := FileFetcherConfig{
@@ -363,7 +399,7 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 }
 
 // This function creates a new directory with files inside and returns the path of the new directory
-func createDirectoriesWithFiles(s suite.Suite, dirPath string, dirName string, filesToWriteInDirectory []string) string {
+func createDirectoriesWithFiles(s *suite.Suite, dirPath string, dirName string, filesToWriteInDirectory []string) string {
 	dirPath, err := ioutil.TempDir(dirPath, dirName)
 	if err != nil {
 		s.FailNow(err.Error())

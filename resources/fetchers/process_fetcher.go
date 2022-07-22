@@ -268,14 +268,14 @@ func (res ProcResource) GetData() interface{} {
 	return res.EvalResource
 }
 
-func (res ProcResource) GetMetadata() fetching.ResourceMetadata {
+func (res ProcResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:        res.EvalResource.PID + res.EvalResource.Stat.StartTime,
 		Type:      ProcessResourceType,
 		SubType:   ProcessSubType,
 		Name:      res.EvalResource.Stat.Name,
 		ECSFormat: "process",
-	}
+	}, nil
 }
 
 func (res ProcResource) GetElasticCommonData() any {
