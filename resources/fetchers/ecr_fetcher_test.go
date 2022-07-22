@@ -222,6 +222,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					ExpectedImages: []string{"cloudbeat"},
 					Repositories: []ecr.Repository{
 						{
+							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &firstRepositoryName,
 							RepositoryUri:              nil,
@@ -231,6 +232,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					ExpectedImages: []string{"cloudbeat1"},
 					Repositories: []ecr.Repository{
 						{
+							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &secondRepositoryName,
 							RepositoryUri:              nil,
