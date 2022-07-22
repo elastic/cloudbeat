@@ -20,21 +20,25 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"regexp"
-
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	v1 "k8s.io/api/core/v1"
-
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
+	"regexp"
 )
 
-const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
-const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
+const (
+	PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.([-\\w]+)\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
+	PublicRepoRegex          = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
+	EcrRegionRegexGroup      = 1
+	PublicEcrImageRegexIndex = 1
+	EcrImageRegexGroup       = 2
+)
 
 type ECRFetcher struct {
 	log           *logp.Logger
@@ -42,11 +46,14 @@ type ECRFetcher struct {
 	kubeClient    k8s.Interface
 	PodDescribers []PodDescriber
 	resourceCh    chan fetching.ResourceInfo
+	awsConfig     aws.Config
 }
 
 type PodDescriber struct {
-	FilterRegex *regexp.Regexp
-	Provider    awslib.EcrRepositoryDescriber
+	FilterRegex     *regexp.Regexp
+	Provider        awslib.EcrRepositoryDescriber
+	ExtractRegion   func(describer PodDescriber, repo string) string
+	ImageRegexIndex int
 }
 
 type ECRFetcherConfig struct {
@@ -84,13 +91,26 @@ func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 			}
 		}
 	}
-
 	return nil
 }
 
 func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) ([]ecr.Repository, error) {
+	regionToReposMap := getAwsRepositories(podsList, describer)
+	f.log.Debugf("sending pods to ecrProviders: %v", regionToReposMap)
+	awsRepositories := make([]ecr.Repository, 0)
+	for region, repositories := range regionToReposMap {
+		// Add configuration
+		describedRepo, err := describer.Provider.DescribeRepositories(ctx, f.awsConfig, repositories, region)
+		if err != nil {
+			f.log.Errorf("could not retrieve pod's aws repositories for region %s: %w", region, err)
+		}
+		awsRepositories = append(awsRepositories, describedRepo.Repositories...)
+	}
+	return awsRepositories, nil
+}
 
-	repositories := make([]string, 0)
+func getAwsRepositories(podsList *v1.PodList, describer PodDescriber) map[string][]string {
+	reposByRegion := make(map[string][]string, 0)
 
 	for _, pod := range podsList.Items {
 		for _, container := range pod.Spec.Containers {
@@ -98,15 +118,28 @@ func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList
 			// Takes only aws images
 			regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
 			if regexMatcher != nil {
-				repository := regexMatcher[1]
-				repositories = append(repositories, repository)
+				repository := regexMatcher[describer.ImageRegexIndex]
+				region := describer.ExtractRegion(describer, image)
+				reposByRegion[region] = append(reposByRegion[region], repository)
 			}
 		}
 	}
+	return reposByRegion
+}
 
-	f.log.Debugf("sending pods to ecrProviders: %v", repositories)
+func ExtractRegionFromEcrImage(describer PodDescriber, image string) string {
+	regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
+	if regexMatcher != nil {
+		repository := regexMatcher[EcrRegionRegexGroup]
+		return repository
+	}
 
-	return describer.Provider.DescribeRepositories(ctx, repositories)
+	return ""
+}
+
+// ExtractRegionFromPublicEcrImage TODO Ofir - https://github.com/elastic/security-team/issues/4035
+func ExtractRegionFromPublicEcrImage(_ PodDescriber, _ string) string {
+	return ""
 }
 
 func (res ECRResource) GetData() interface{} {

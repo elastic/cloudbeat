@@ -68,7 +68,7 @@ default_region: us1-east
 			"us1-east",
 			"my-account",
 			[]string{
-				"^my-account\\.dkr\\.ecr\\.us1-east\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?",
+				"^my-account\\.dkr\\.ecr\\.([-\\w]+)\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?",
 				"public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?",
 			},
 		},
