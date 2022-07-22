@@ -26,7 +26,6 @@ import (
 )
 
 type ECRProvider struct {
-	client *ecr.Client
 }
 
 type ECRProviderResponse struct {

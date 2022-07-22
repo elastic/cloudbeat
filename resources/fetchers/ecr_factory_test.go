@@ -113,10 +113,15 @@ default_region: us1-east
 		s.NotNil(fetcher)
 
 		ecrFetcher, ok := fetcher.(*ECRFetcher)
+		expectedEcrImageRegexIndex := 2
+		expectedEcrPublicImageRegexIndex := 1
+
 		s.True(ok)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
 		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].FilterRegex.String())
+		s.Equal(expectedEcrImageRegexIndex, ecrFetcher.PodDescribers[0].ImageRegexIndex)
 		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].FilterRegex.String())
+		s.Equal(expectedEcrPublicImageRegexIndex, ecrFetcher.PodDescribers[1].ImageRegexIndex)
 	}
 }
 
