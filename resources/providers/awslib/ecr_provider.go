@@ -26,39 +26,50 @@ import (
 )
 
 type ECRProvider struct {
-	client *ecr.Client
+}
+
+type ECRProviderResponse struct {
+	Repositories    []ecr.Repository
+	PaginationToken string
 }
 
 type EcrRepositoryDescriber interface {
-	DescribeRepositories(ctx context.Context, repoNames []string) ([]ecr.Repository, error)
+	DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (ECRProviderResponse, error)
 }
 
-func NewEcrProvider(cfg aws.Config) *ECRProvider {
-	svc := ecr.New(cfg)
-	return &ECRProvider{
-		client: svc,
-	}
+func NewEcrProvider() *ECRProvider {
+	return &ECRProvider{}
 }
 
 // DescribeAllECRRepositories This method will return a maximum of 100 repository
 /// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-func (provider *ECRProvider) DescribeAllECRRepositories(ctx context.Context) ([]ecr.Repository, error) {
-	/// When repoNames is nil, it will describe all the existing repositories
-	return provider.DescribeRepositories(ctx, nil)
+func (provider *ECRProvider) DescribeAllECRRepositories(ctx context.Context, cfg aws.Config, region string) (ECRProviderResponse, error) {
+	/// When repoNames is nil, it will describe all the existing Repositories
+	return provider.DescribeRepositories(ctx, cfg, nil, region)
 }
 
 // DescribeRepositories This method will return a maximum of 100 repository
 /// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-/// When repoNames is nil, it will describe all the existing repositories
-func (provider *ECRProvider) DescribeRepositories(ctx context.Context, repoNames []string) ([]ecr.Repository, error) {
+/// When repoNames is nil, it will describe all the existing Repositories
+func (provider *ECRProvider) DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (ECRProviderResponse, error) {
+	if len(repoNames) == 0 {
+		return ECRProviderResponse{}, nil
+	}
+
+	cfg.Region = region
+	svc := ecr.New(cfg)
 	input := &ecr.DescribeRepositoriesInput{
 		RepositoryNames: repoNames,
 	}
-	req := provider.client.DescribeRepositoriesRequest(input)
+	req := svc.DescribeRepositoriesRequest(input)
+
 	response, err := req.Send(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch repository:%s from ecr, error - %w", repoNames, err)
+		return ECRProviderResponse{}, fmt.Errorf("failed to fetch repository:%s from ecr, error - %w", repoNames, err)
 	}
 
-	return response.Repositories, err
+	return ECRProviderResponse{
+		Repositories:    response.Repositories,
+		PaginationToken: *response.NextToken,
+	}, err
 }
