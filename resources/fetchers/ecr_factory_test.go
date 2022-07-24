@@ -68,7 +68,12 @@ default_region: us1-east
 			"us1-east",
 			"my-account",
 			[]string{
+
+				// this regex should identify images with an ecr regex template
+				// <account-id>.dkr.ecr.<region>.amazonaws.com/<repository-name>
 				"^my-account\\.dkr\\.ecr\\.([-\\w]+)\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?",
+				// this regex should identify images with a public ecr regex template
+				// public.ecr.aws/<aws-alias>/<repository>
 				"public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?",
 			},
 		},
