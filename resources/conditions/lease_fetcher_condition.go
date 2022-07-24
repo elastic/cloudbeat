@@ -23,7 +23,7 @@ import (
 )
 
 type LeaderLeaseProvider interface {
-	IsLeader() (bool, error)
+	IsLeader() bool
 }
 
 type LeaseFetcherCondition struct {
@@ -39,11 +39,7 @@ func NewLeaseFetcherCondition(log *logp.Logger, provider LeaderLeaseProvider) fe
 }
 
 func (c *LeaseFetcherCondition) Condition() bool {
-	l, err := c.provider.IsLeader()
-	if err != nil {
-		c.log.Errorf("Could not read leader value, using default value %v: %v", l, err)
-	}
-	return l
+	return c.provider.IsLeader()
 }
 
 func (c *LeaseFetcherCondition) Name() string {

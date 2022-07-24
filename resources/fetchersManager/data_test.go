@@ -20,6 +20,7 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"sync"
 	"testing"
@@ -109,7 +110,8 @@ func TestDataTestSuite(t *testing.T) {
 func (s *DataTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.opts = goleak.IgnoreCurrent()
-	s.registry = NewFetcherRegistry(s.log)
+
+	s.registry = NewFetcherRegistry(s.log, &leaderelection.MockElectionManager{})
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
