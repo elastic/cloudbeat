@@ -35,7 +35,11 @@ import (
 )
 
 const (
+	// PrivateRepoRegexTemplate should identify images with an ecr regex template
+	// <account-id>.dkr.ecr.<region>.amazonaws.com/<repository-name>
 	PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.([-\\w]+)\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
+	// PublicRepoRegex should identify images with a public ecr regex template
+	// public.ecr.aws/<aws-alias>/<repository>
 	PublicRepoRegex          = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
 	EcrRegionRegexGroup      = 1
 	PublicEcrImageRegexIndex = 1
@@ -105,8 +109,9 @@ func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList
 		describedRepo, err := describer.Provider.DescribeRepositories(ctx, f.awsConfig, repositories, region)
 		if err != nil {
 			f.log.Errorf("could not retrieve pod's aws repositories for region %s: %w", region, err)
+		} else {
+			awsRepositories = append(awsRepositories, describedRepo.Repositories...)
 		}
-		awsRepositories = append(awsRepositories, describedRepo.Repositories...)
 	}
 	return awsRepositories, nil
 }
@@ -140,7 +145,8 @@ func ExtractRegionFromEcrImage(describer PodDescriber, image string) string {
 	return ""
 }
 
-// ExtractRegionFromPublicEcrImage TODO Ofir - https://github.com/elastic/security-team/issues/4035
+// ExtractRegionFromPublicEcrImage - Currently the public ecr provider is not functional.
+// TODO - This method should be change as part of implementing the public ecr - https://github.com/elastic/security-team/issues/4035
 func ExtractRegionFromPublicEcrImage(_ PodDescriber, _ string) string {
 	return ""
 }
