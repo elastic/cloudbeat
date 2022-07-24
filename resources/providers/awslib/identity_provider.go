@@ -38,7 +38,7 @@ type IdentityProviderGetter interface {
 }
 
 func GetIdentityClient(cfg aws.Config) IdentityProviderGetter {
-	svc := sts.New(cfg)
+	svc := sts.NewFromConfig(cfg)
 
 	return &IdentityProvider{
 		client: svc,
@@ -48,8 +48,7 @@ func GetIdentityClient(cfg aws.Config) IdentityProviderGetter {
 // GetIdentity This method will return your identity (Arn, user-id...)
 func (provider *IdentityProvider) GetIdentity(ctx context.Context) (*Identity, error) {
 	input := &sts.GetCallerIdentityInput{}
-	request := provider.client.GetCallerIdentityRequest(input)
-	response, err := request.Send(ctx)
+	response, err := provider.client.GetCallerIdentity(ctx, input)
 	if err != nil {
 		return nil, err
 	}

@@ -29,7 +29,7 @@ import (
 
 type IAMFetcher struct {
 	log         *logp.Logger
-	iamProvider awslib.IAMRolePermissionGetter
+	iamProvider awslib.IamRolePermissionGetter
 	cfg         IAMFetcherConfig
 	resourceCh  chan fetching.ResourceInfo
 }

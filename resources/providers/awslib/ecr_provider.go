@@ -20,21 +20,23 @@ package awslib
 import (
 	"context"
 	"fmt"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
+	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 )
+
+type EcrRepositories []types.Repository
 
 type ECRProvider struct {
 	client *ecr.Client
 }
 
 type EcrRepositoryDescriber interface {
-	DescribeRepositories(ctx context.Context, repoNames []string) ([]ecr.Repository, error)
+	DescribeRepositories(ctx context.Context, repoNames []string) (EcrRepositories, error)
 }
 
 func NewEcrProvider(cfg aws.Config) *ECRProvider {
-	svc := ecr.New(cfg)
+	svc := ecr.NewFromConfig(cfg)
 	return &ECRProvider{
 		client: svc,
 	}
@@ -42,23 +44,27 @@ func NewEcrProvider(cfg aws.Config) *ECRProvider {
 
 // DescribeAllECRRepositories This method will return a maximum of 100 repository
 /// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-func (provider *ECRProvider) DescribeAllECRRepositories(ctx context.Context) ([]ecr.Repository, error) {
+func (provider *ECRProvider) DescribeAllECRRepositories(ctx context.Context) (EcrRepositories, error) {
 	/// When repoNames is nil, it will describe all the existing repositories
 	return provider.DescribeRepositories(ctx, nil)
 }
 
-// DescribeRepositories This method will return a maximum of 100 repository
-/// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-/// When repoNames is nil, it will describe all the existing repositories
-func (provider *ECRProvider) DescribeRepositories(ctx context.Context, repoNames []string) ([]ecr.Repository, error) {
+// DescribeRepositories returns a list of repositories that match the given names.
+/// When repoNames is empty, it will describe all the existing repositories
+func (provider *ECRProvider) DescribeRepositories(ctx context.Context, repoNames []string) (EcrRepositories, error) {
 	input := &ecr.DescribeRepositoriesInput{
 		RepositoryNames: repoNames,
 	}
-	req := provider.client.DescribeRepositoriesRequest(input)
-	response, err := req.Send(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch repository:%s from ecr, error - %w", repoNames, err)
+
+	var repos EcrRepositories
+	paginator := ecr.NewDescribeRepositoriesPaginator(provider.client, input)
+	for paginator.HasMorePages() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("error DescribeRepositories with Paginator: %w", err)
+		}
+		repos = append(repos, page.Repositories...)
 	}
 
-	return response.Repositories, err
+	return repos, nil
 }

@@ -20,7 +20,6 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -63,31 +62,27 @@ func (s *EksFetcherTestSuite) TearDownTest() {
 func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 	var tests = []struct {
 		clusterName     string
-		clusterResponse eks.DescribeClusterResponse
+		clusterResponse awslib.EksCluster
 	}{
 		{
 			"cluster_name",
-			eks.DescribeClusterResponse{
-				DescribeClusterOutput: &eks.DescribeClusterOutput{
-					Cluster: &eks.Cluster{
-						Arn:  &clusterARN,
-						Name: &clusterName,
-					},
-				},
+			awslib.EksCluster{
+				Arn:  &clusterARN,
+				Name: &clusterName,
 			},
 		},
 	}
 
 	for _, test := range tests {
-		eksConfig := EKSFetcherConfig{
+		eksConfig := EksFetcherConfig{
 			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
 			ClusterName:          test.clusterName,
 		}
-		eksProvider := &awslib.MockedEksClusterDescriber{}
-		expectedResource := EKSResource{&test.clusterResponse}
+		eksProvider := &awslib.MockEksClusterDescriber{}
+		expectedResource := EksResource{test.clusterResponse}
 
-		eksProvider.EXPECT().DescribeCluster(mock.Anything, test.clusterName).Return(&test.clusterResponse, nil)
-		eksFetcher := EKSFetcher{
+		eksProvider.EXPECT().DescribeCluster(mock.Anything, test.clusterName).Return(test.clusterResponse, nil)
+		eksFetcher := EksFetcher{
 			log:         s.log,
 			cfg:         eksConfig,
 			eksProvider: eksProvider,
@@ -99,28 +94,28 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 		s.NoError(err)
 
 		results := testhelper.CollectResources(s.resourceCh)
-		eksResource := results[0].Resource.(EKSResource)
+		eksResource := results[0].Resource.(EksResource)
 		metadata, err := eksResource.GetMetadata()
 
 		s.NoError(err)
 		s.Equal(expectedResource, eksResource)
-		s.Equal(*expectedResource.Cluster.Name, metadata.Name)
-		s.Equal(*expectedResource.Cluster.Arn, metadata.ID)
+		s.Equal(*expectedResource.Name, metadata.Name)
+		s.Equal(*expectedResource.Arn, metadata.ID)
 		s.NoError(err)
 	}
 }
 
 func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	clusterName := "my-cluster"
-	eksConfig := EKSFetcherConfig{
+	eksConfig := EksFetcherConfig{
 		AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
 		ClusterName:          clusterName,
 	}
-	eksProvider := &awslib.MockedEksClusterDescriber{}
+	eksProvider := &awslib.MockEksClusterDescriber{}
 
 	expectedErr := fmt.Errorf("my error")
-	eksProvider.EXPECT().DescribeCluster(mock.Anything, clusterName).Return(nil, expectedErr)
-	eksFetcher := EKSFetcher{
+	eksProvider.EXPECT().DescribeCluster(mock.Anything, clusterName).Return(awslib.EksCluster{}, expectedErr)
+	eksFetcher := EksFetcher{
 		log:         s.log,
 		cfg:         eksConfig,
 		eksProvider: eksProvider,
