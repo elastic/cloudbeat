@@ -100,8 +100,11 @@ func (m *Manager) getConfig(onNewLeaderCb func(ctx context.Context) error) le.Le
 			},
 			OnStoppedLeading: func() {
 				m.log.Infof("leader election lock LOST, id %v", id)
-				// re-running the leader election watch mechanism
-				m.Run(onNewLeaderCb)
+				// leaderelection.Run stops in case the lease was released, we re-run the manager
+				// to keep following leader status, even though, we lost the lease for some reason.
+				if err := m.Run(onNewLeaderCb); err != nil {
+					m.log.Errorf("failed to re-run the leader elector, Error: %v", err)
+				}
 			},
 			OnNewLeader: func(identity string) {
 				m.log.Infof("leader election lock has been acquired, id %v", identity)
