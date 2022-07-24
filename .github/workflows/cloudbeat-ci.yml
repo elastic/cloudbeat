@@ -140,12 +140,6 @@ jobs:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
-
       - name: clear cache
         id: clear_cache
         if: success()
