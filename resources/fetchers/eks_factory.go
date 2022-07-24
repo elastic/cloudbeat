@@ -42,7 +42,7 @@ type EKSFactory struct {
 func (f *EKSFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting EKSFactory.Create")
 
-	cfg := EKSFetcherConfig{}
+	cfg := EksFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (f *EKSFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EksFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
 	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
@@ -59,7 +59,7 @@ func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, ch chan 
 	}
 	eksProvider := awslib.NewEksProvider(awsConfig)
 
-	fe := &EKSFetcher{
+	fe := &EksFetcher{
 		log:         log,
 		cfg:         cfg,
 		eksProvider: eksProvider,

@@ -20,12 +20,12 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"regexp"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -77,7 +77,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
-		lbResponse          []elasticloadbalancing.LoadBalancerDescription
+		lbResponse          awslib.ElbLoadBalancerDescriptions
 		expectedlbNames     []string
 	}{
 		{
@@ -87,8 +87,8 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.us-east-2.elb.amazonaws.com",
 				},
 			},
-			[]elasticloadbalancing.LoadBalancerDescription{{
-				Instances:        []elasticloadbalancing.Instance{},
+			awslib.ElbLoadBalancerDescriptions{{
+				Instances:        []types.Instance{},
 				LoadBalancerName: &lbName,
 			}},
 			[]string{lbName},
@@ -100,7 +100,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.wrong-region.elb.amazonaws.com",
 				},
 			},
-			[]elasticloadbalancing.LoadBalancerDescription{},
+			awslib.ElbLoadBalancerDescriptions{},
 			[]string{},
 		},
 	}
@@ -129,7 +129,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
+		elbProvider := &awslib.MockElbLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
 
 		identity := awslib.Identity{
@@ -209,7 +209,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		elbProvider := &awslib.MockedELBLoadBalancerDescriber{}
+		elbProvider := &awslib.MockElbLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(nil, test.error)
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}

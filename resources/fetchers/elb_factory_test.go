@@ -80,7 +80,7 @@ default_region: us2-east
 		identity := awslib.Identity{
 			Account: &test.account,
 		}
-		identityProvider := &awslib.MockedIdentityProviderGetter{}
+		identityProvider := &awslib.MockIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
 
 		mockedConfigGetter := &config.MockAwsConfigProvider{}

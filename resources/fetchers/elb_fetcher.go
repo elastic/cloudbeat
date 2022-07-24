@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 	"github.com/pkg/errors"
 	"regexp"
 
@@ -28,8 +29,6 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
-
-	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 )
 
 const (
@@ -39,7 +38,7 @@ const (
 type ELBFetcher struct {
 	log             *logp.Logger
 	cfg             ELBFetcherConfig
-	elbProvider     awslib.ELBLoadBalancerDescriber
+	elbProvider     awslib.ElbLoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
 	resourceCh      chan fetching.ResourceInfo
@@ -51,7 +50,7 @@ type ELBFetcherConfig struct {
 	KubeConfig                    string `config:"Kubeconfig"`
 }
 
-type LoadBalancersDescription elasticloadbalancing.LoadBalancerDescription
+type LoadBalancersDescription types.LoadBalancerDescription
 
 type ELBResource struct {
 	lb       LoadBalancersDescription

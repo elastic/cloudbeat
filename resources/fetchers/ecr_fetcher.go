@@ -20,13 +20,13 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/pkg/errors"
 	"regexp"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	v1 "k8s.io/api/core/v1"
 
-	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -56,7 +56,7 @@ type ECRFetcherConfig struct {
 	KubeConfig                    string `config:"Kubeconfig"`
 }
 
-type EcrRepository ecr.Repository
+type EcrRepository types.Repository
 
 type ECRResource struct {
 	EcrRepository
@@ -90,7 +90,7 @@ func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 	return nil
 }
 
-func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) ([]ecr.Repository, error) {
+func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) (awslib.EcrRepositories, error) {
 
 	repositories := make([]string, 0)
 

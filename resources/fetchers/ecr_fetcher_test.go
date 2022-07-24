@@ -24,7 +24,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -73,8 +72,8 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		region                          string
 		namespace                       string
 		containers                      []v1.Container
-		expectedRepositories            []ecr.Repository
-		expectedPublicRepositories      []ecr.Repository
+		expectedRepositories            awslib.EcrRepositories
+		expectedPublicRepositories      awslib.EcrRepositories
 		expectedRepositoriesNames       []string
 		expectedPublicRepositoriesNames []string
 	}{
@@ -92,7 +91,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					Name:  "cloudbeat1",
 				},
 			},
-			[]ecr.Repository{{
+			awslib.EcrRepositories{{
 				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &firstRepositoryName,
@@ -103,7 +102,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 				RepositoryName:             &secondRepositoryName,
 				RepositoryUri:              nil,
 			}},
-			[]ecr.Repository{},
+			awslib.EcrRepositories{},
 			[]string{firstRepositoryName, secondRepositoryName},
 			[]string{},
 		}, {
@@ -120,7 +119,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					Name:  "cloudbeat1",
 				},
 			},
-			[]ecr.Repository{{
+			awslib.EcrRepositories{{
 				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &privateRepoWithSlash,
@@ -131,7 +130,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 				RepositoryName:             &secondRepositoryName,
 				RepositoryUri:              nil,
 			}},
-			[]ecr.Repository{},
+			awslib.EcrRepositories{},
 			[]string{privateRepoWithSlash, secondRepositoryName},
 			[]string{},
 		},
@@ -149,12 +148,12 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					Name:  "build.security/citools",
 				},
 			},
-			[]ecr.Repository{{
+			awslib.EcrRepositories{{
 				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &firstRepositoryName,
 				RepositoryUri:              nil,
-			}}, []ecr.Repository{{
+			}}, awslib.EcrRepositories{{
 				RepositoryArn:              &repoArn,
 				ImageScanningConfiguration: nil,
 				RepositoryName:             &publicRepoName,
@@ -177,8 +176,8 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					Name:  "cloudbeat1",
 				},
 			},
-			[]ecr.Repository{},
-			[]ecr.Repository{},
+			awslib.EcrRepositories{},
+			awslib.EcrRepositories{},
 			[]string{},
 			[]string{},
 		},
@@ -196,8 +195,8 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 					Name:  "cloudbeat1",
 				},
 			},
-			[]ecr.Repository{},
-			[]ecr.Repository{},
+			awslib.EcrRepositories{},
+			awslib.EcrRepositories{},
 			[]string{},
 			[]string{},
 		},
@@ -227,12 +226,12 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		// Needs to use the same services
-		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
+		ecrProvider := &awslib.MockEcrRepositoryDescriber{}
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.MatchedBy(func(repo []string) bool {
 			return s.Equal(test.expectedRepositoriesNames, repo)
 		})).Return(test.expectedRepositories, nil)
 
-		ecrPublicProvider := &awslib.MockedEcrRepositoryDescriber{}
+		ecrPublicProvider := &awslib.MockEcrRepositoryDescriber{}
 		ecrPublicProvider.EXPECT().DescribeRepositories(mock.Anything, mock.MatchedBy(func(repo []string) bool {
 			return s.Equal(test.expectedPublicRepositoriesNames, repo)
 		})).Return(test.expectedPublicRepositories, nil)
@@ -323,10 +322,10 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		// Needs to use the same services
-		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
+		ecrProvider := &awslib.MockEcrRepositoryDescriber{}
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything).Return(nil, test.error)
 
-		ecrPublicProvider := &awslib.MockedEcrRepositoryDescriber{}
+		ecrPublicProvider := &awslib.MockEcrRepositoryDescriber{}
 		ecrPublicProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything).Return(nil, test.error)
 
 		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount, test.region)

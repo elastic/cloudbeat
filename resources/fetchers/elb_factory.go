@@ -75,7 +75,7 @@ func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not initate Kubernetes: %w", err)
 	}
 
-	balancerDescriber := awslib.NewELBProvider(awsConfig)
+	balancerDescriber := awslib.NewElbProvider(awsConfig)
 	identityProvider := f.IdentityProvider(awsConfig)
 	identity, err := identityProvider.GetIdentity(ctx)
 	if err != nil {
