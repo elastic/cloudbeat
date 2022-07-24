@@ -96,3 +96,63 @@ def test_elastic_index_exists(elastic_client, match_type):
 
     assert len(result) > 0,\
         f"The findings of type {match_type} not found"
+
+@pytest.mark.pre_merge
+@pytest.mark.order(4)
+@pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
+def test_leader_election(elastic_client):
+    """
+    This test verifies that k8s_obj findings are being sent from only one agent
+    :param elastic_client: Elastic API client
+    :param match_type: Findings type for matching
+    :return:
+    """
+    # Get all k8s_obj resources
+    query = {
+        "bool": {
+            "filter": [
+                {
+                    "term": {
+                        "type": "k8s_object"
+                    }
+                },
+                {
+                    "range": {
+                        "@timestamp": {
+                            "gte": "now-30s"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+    sort = [{
+        "@timestamp": {
+            "order": "desc"
+        }
+    }]
+
+    time.sleep(CONFIG_TIMEOUT)
+    result = elastic_client.get_index_data(index_name=elastic_client.index,
+                                           query=query,
+                                           sort=sort)
+    for finding in result:
+        print(finding)
+
+    # while time.time() - start_time < CONFIG_TIMEOUT:
+    #     current_result = elastic_client.get_index_data(index_name=elastic_client.index,
+    #                                                    query=query,
+    #                                                    sort=sort)
+    #     if elastic_client.get_total_value(data=current_result) != 0:
+    #         allure.attach(json.dumps(elastic_client.get_doc_source(data=current_result),
+    #                                  indent=4,
+    #                                  sort_keys=True),
+    #                       match_type,
+    #                       attachment_type=allure.attachment_type.JSON)
+    #         result = current_result
+    #         break
+    #     time.sleep(1)
+
+
+ # Verify that all of them were sent by the same agent
+ # Verify that this specific agent is the leader
