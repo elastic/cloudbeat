@@ -285,10 +285,12 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        # This is done for leader election on local env
+        # GAP: https://github.com/elastic/cloudbeat/issues/162
         - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
+          value: cloudbeat-leader
+            # fieldRef:
+              #   fieldPath: metadata.name
         image: cloudbeat:latest
         imagePullPolicy: IfNotPresent
         name: cloudbeat
