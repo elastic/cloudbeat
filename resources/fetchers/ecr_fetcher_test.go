@@ -420,7 +420,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 
 		ctx := context.Background()
 		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		s.Nil(err)
+		s.NoError(err)
 		results := testhelper.CollectResources(s.resourceCh)
 		s.Equal(0, len(results))
 	}
