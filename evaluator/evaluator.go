@@ -19,6 +19,7 @@ package evaluator
 
 import (
 	"context"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
@@ -72,6 +73,7 @@ type Rule struct {
 }
 
 type Benchmark struct {
+	Id      string `json:"id"`
 	Name    string `json:"name"`
 	Version string `json:"version"`
 }
