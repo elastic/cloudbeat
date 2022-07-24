@@ -15,33 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package conditions
+// Config is put into a different package to prevent cyclic imports in case
+// it is needed in several locations
+
+package leaderelection
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"time"
 )
 
-type LeaderLeaseProvider interface {
-	IsLeader() bool
-}
+const (
+	// LeaseDuration is the duration that non-leader candidates will
+	// wait to force acquire leadership. This is measured against time of
+	// last observed ack.
+	//
+	LeaseDuration = 15 * time.Second
+	// RenewDeadline is the duration that the acting manager will retry
+	// refreshing leadership before giving up.
+	//
+	RenewDeadline = 10 * time.Second
 
-type LeaseFetcherCondition struct {
-	log      *logp.Logger
-	provider LeaderLeaseProvider
-}
+	// RetryPeriod is the duration the LeaderElector clients should wait
+	// between tries of actions.
+	//
+	RetryPeriod = 2 * time.Second
 
-func NewLeaseFetcherCondition(log *logp.Logger, provider LeaderLeaseProvider) fetching.Condition {
-	return &LeaseFetcherCondition{
-		log:      log,
-		provider: provider,
-	}
-}
+	PodNameEnvar = "POD_NAME"
 
-func (c *LeaseFetcherCondition) Condition() bool {
-	return c.provider.IsLeader()
-}
-
-func (c *LeaseFetcherCondition) Name() string {
-	return "leader_election_conditional_fetcher"
-}
+	LeaderLeaseName = "cloudbeat-cluster-leader"
+)
