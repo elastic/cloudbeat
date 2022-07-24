@@ -18,33 +18,28 @@
 package fetchers
 
 import (
+	"context"
+	"fmt"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
-)
-
-const (
-	EKSType = "aws-eks"
 )
 
 func init() {
-	manager.Factories.ListFetcherFactory(EKSType, &EKSFactory{
-		extraElements: getEksExtraElements,
+	fetchersManager.Factories.RegisterFactory(fetching.EKSType, &EKSFactory{
+		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }
 
 type EKSFactory struct {
-	extraElements func() (eksExtraElements, error)
+	AwsConfigProvider config.AwsConfigProvider
 }
 
-type eksExtraElements struct {
-	eksProvider awslib.EksClusterDescriber
-}
-
-func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *EKSFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting EKSFactory.Create")
 
 	cfg := EKSFetcherConfig{}
@@ -53,30 +48,21 @@ func (f *EKSFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 		return nil, err
 	}
 
-	elements, err := f.extraElements()
-	if err != nil {
-		return nil, err
-	}
-	return f.CreateFrom(log, cfg, elements, ch)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func getEksExtraElements() (eksExtraElements, error) {
-	awsConfigProvider := awslib.ConfigProvider{}
-	awsConfig, err := awsConfigProvider.GetConfig()
+func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	ctx := context.Background()
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
-		return eksExtraElements{}, err
+		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
+	eksProvider := awslib.NewEksProvider(awsConfig)
 
-	eks := awslib.NewEksProvider(awsConfig.Config)
-
-	return eksExtraElements{eksProvider: eks}, nil
-}
-
-func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, elements eksExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	fe := &EKSFetcher{
 		log:         log,
 		cfg:         cfg,
-		eksProvider: elements.eksProvider,
+		eksProvider: eksProvider,
 		resourceCh:  ch,
 	}
 

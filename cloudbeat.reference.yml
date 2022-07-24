@@ -10,35 +10,54 @@
 cloudbeat:
   # Defines how often an event is sent to the output
   period: 4h
+  type: cloudbeat/vanilla # cloudbeat/eks in case of EKS configuration
   fetchers:
-  - name: kube-api
-  - name: process
-    directory: "/hostfs"
-    processes:
-      etcd:
-      kube-apiserver:
-      kube-controller:
-      kube-scheduler:
-      kubelet:
-        config-file-arguments:
-        - config
-  - name: file-system
-    patterns: [
-      "/hostfs/etc/kubernetes/scheduler.conf",
-      "/hostfs/etc/kubernetes/controller-manager.conf",
-      "/hostfs/etc/kubernetes/admin.conf",
-      "/hostfs/etc/kubernetes/kubelet.conf",
-      "/hostfs/etc/kubernetes/manifests/etcd.yaml",
-      "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-      "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
-      "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
-      "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
-      "/hostfs/etc/kubernetes/pki/*.crt",
-      "/hostfs/etc/kubernetes/pki/*.key",
-      "/hostfs/var/lib/kubelet/config.yaml",
-      "/hostfs/var/lib/etcd",
-      "/hostfs/etc/kubernetes/pki"
-    ]
+    # Vanilla K8s Fetchers configuration
+    vanilla:
+      - name: kube-api
+      - name: process
+        directory: "/hostfs"
+        processes:
+          etcd:
+          kube-apiserver:
+          kube-controller:
+          kube-scheduler:
+          kubelet:
+            config-file-arguments:
+              - config
+      - name: file-system
+        patterns: [
+          "/hostfs/etc/kubernetes/scheduler.conf",
+          "/hostfs/etc/kubernetes/controller-manager.conf",
+          "/hostfs/etc/kubernetes/admin.conf",
+          "/hostfs/etc/kubernetes/kubelet.conf",
+          "/hostfs/etc/kubernetes/manifests/etcd.yaml",
+          "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+          "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
+          "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
+          "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
+          "/hostfs/etc/kubernetes/pki/*.crt",
+          "/hostfs/etc/kubernetes/pki/*.key",
+          "/hostfs/var/lib/kubelet/config.yaml",
+          "/hostfs/var/lib/etcd",
+          "/hostfs/etc/kubernetes/pki"
+        ]
+    # EKS Fetchers configuration
+    eks:
+      - name: kube-api
+      - name: process
+        directory: "/hostfs"
+        processes:
+          kubelet:
+            config-file-arguments:
+              - config
+      - name: aws-ecr
+      - name: aws-elb
+      - name: file-system
+        patterns: [
+          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
+          "/hostfs/var/lib/kubelet/kubeconfig",
+        ]
 # ================================== General ===================================
 
 # The name of the shipper that publishes the network data. It can be used to group
@@ -61,6 +80,10 @@ cloudbeat:
 # fields in the output document instead of being grouped under a fields
 # sub-dictionary. Default is false.
 #fields_under_root: false
+
+# Configure the precision of all timestamps in Cloudbeat.
+# Available options: millisecond, microsecond, nanosecond
+#timestamp.precision: millisecond
 
 # Internal queue configuration for buffering events to be published.
 #queue:

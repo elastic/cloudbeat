@@ -18,34 +18,28 @@
 package fetchers
 
 import (
+	"context"
+	"fmt"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/manager"
 )
 
-const (
-	IAMType = "aws-iam"
-)
+const IAMType = "aws-iam"
 
 func init() {
-
-	manager.Factories.ListFetcherFactory(IAMType, &IAMFactory{
-		extraElements: getIamExtraElements,
-	})
+	fetchersManager.Factories.RegisterFactory(IAMType, &IAMFactory{AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}}})
 }
 
 type IAMFactory struct {
-	extraElements func(*logp.Logger) (IAMExtraElements, error)
+	AwsConfigProvider config.AwsConfigProvider
 }
 
-type IAMExtraElements struct {
-	iamProvider awslib.IAMRolePermissionGetter
-}
-
-func (f *IAMFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting IAMFactory.Create")
 
 	cfg := IAMFetcherConfig{}
@@ -53,32 +47,22 @@ func (f *IAMFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 	if err != nil {
 		return nil, err
 	}
-	elements, err := f.extraElements(log)
-	if err != nil {
-		return nil, err
-	}
 
-	return f.CreateFrom(log, cfg, elements, ch)
+	return f.CreateFrom(log, cfg, ch)
 }
 
-func getIamExtraElements(log *logp.Logger) (IAMExtraElements, error) {
-	awsConfigProvider := awslib.ConfigProvider{}
-	awsConfig, err := awsConfigProvider.GetConfig()
+func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	ctx := context.Background()
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
-		return IAMExtraElements{}, err
+		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
-	provider := awslib.NewIAMProvider(log, awsConfig.Config)
+	provider := awslib.NewIAMProvider(log, awsConfig)
 
-	return IAMExtraElements{
-		iamProvider: provider,
-	}, nil
-}
-
-func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, elements IAMExtraElements, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	return &IAMFetcher{
 		log:         log,
 		cfg:         cfg,
-		iamProvider: elements.iamProvider,
+		iamProvider: provider,
 		resourceCh:  ch,
 	}, nil
 

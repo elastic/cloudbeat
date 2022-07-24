@@ -3,11 +3,11 @@
 
 # Infra & ops related
 /deploy/ @elastic/csp-ops 
-/.github/workflows  @elastic/csp-ops @elastic/csp-automation
+/.github/workflows  @elastic/csp-ops
 .ci/  @elastic/csp-ops
 /scripts/ @elastic/csp-ops
-Makefile  @elastic/csp-ops @elastic/csp-automation
-JUSTFILE  @elastic/csp-ops @elastic/csp-automation
+Makefile  @elastic/csp-ops
+JUSTFILE  @elastic/csp-ops 
 Jenkinsfile  @elastic/csp-ops
 
 # Beats related

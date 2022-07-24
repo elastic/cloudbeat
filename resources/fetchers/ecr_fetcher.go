@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"regexp"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -28,13 +29,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-const PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
-const PublicRepoRegex = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
+const (
+	PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.%s\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
+	PublicRepoRegex          = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
+)
 
 type ECRFetcher struct {
 	log           *logp.Logger
@@ -50,8 +52,8 @@ type PodDescriber struct {
 }
 
 type ECRFetcherConfig struct {
-	fetching.BaseFetcherConfig
-	Kubeconfig string `config:"Kubeconfig"`
+	fetching.AwsBaseFetcherConfig `config:",inline"`
+	KubeConfig                    string `config:"Kubeconfig"`
 }
 
 type EcrRepository ecr.Repository
@@ -95,16 +97,18 @@ func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList
 	for _, pod := range podsList.Items {
 		for _, container := range pod.Spec.Containers {
 			image := container.Image
+
 			// Takes only aws images
 			regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
-			{
-				if regexMatcher != nil {
-					repository := regexMatcher[1]
-					repositories = append(repositories, repository)
-				}
+			if regexMatcher != nil {
+				repository := regexMatcher[1]
+				repositories = append(repositories, repository)
 			}
 		}
 	}
+
+	f.log.Debugf("sending pods to ecrProviders: %v", repositories)
+
 	return describer.Provider.DescribeRepositories(ctx, repositories)
 }
 
@@ -112,14 +116,17 @@ func (res ECRResource) GetData() interface{} {
 	return res
 }
 
-func (res ECRResource) GetMetadata() fetching.ResourceMetadata {
-	uid, _ := uuid.NewV4()
-	return fetching.ResourceMetadata{
-		ID:      uid.String(),
-		Type:    ECRType,
-		SubType: ECRType,
-		Name:    "AWS repositories",
+func (res ECRResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	if res.RepositoryArn == nil || res.RepositoryName == nil {
+		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
+
+	return fetching.ResourceMetadata{
+		ID:      *res.RepositoryArn,
+		Type:    fetching.CloudContainerRegistry,
+		SubType: fetching.ECRType,
+		Name:    *res.RepositoryName,
+	}, nil
 }
 
 func (res ECRResource) GetElasticCommonData() any { return nil }

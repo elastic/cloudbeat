@@ -18,10 +18,14 @@
 package fetchers
 
 import (
+	"context"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/stretchr/testify/mock"
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
@@ -54,19 +58,30 @@ func (s *IamFactoryTestSuite) TestCreateFetcher() {
 		{
 			`
 name: aws-iam
+access_key_id: key
+secret_access_key: secret
+session_token: session
+default_region: us1-east
 `,
 		},
 	}
 
 	for _, test := range tests {
-		iamProvider := &awslib.MockIAMRolePermissionGetter{}
-		factory := &IAMFactory{extraElements: func(log *logp.Logger) (IAMExtraElements, error) {
-			return IAMExtraElements{
-				iamProvider: iamProvider,
-			}, nil
-		}}
+		mockedConfigGetter := &config.MockAwsConfigProvider{}
+		mockedConfigGetter.EXPECT().
+			InitializeAWSConfig(mock.Anything, mock.Anything).
+			Call.
+			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
 
-		cfg, err := config.NewConfigFrom(test.config)
+				return CreateSdkConfig(config, "us1-east")
+			},
+				func(ctx context.Context, config aws.ConfigAWS) error {
+					return nil
+				},
+			)
+		factory := &IAMFactory{mockedConfigGetter}
+
+		cfg, err := agentconfig.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		fetcher, err := factory.Create(s.log, cfg, nil)
@@ -75,6 +90,8 @@ name: aws-iam
 
 		iamFetcher, ok := fetcher.(*IAMFetcher)
 		s.True(ok)
-		s.Equal(iamProvider, iamFetcher.iamProvider)
+		s.Equal("key", iamFetcher.cfg.AwsConfig.AccessKeyID)
+		s.Equal("secret", iamFetcher.cfg.AwsConfig.SecretAccessKey)
+		s.Equal("session", iamFetcher.cfg.AwsConfig.SessionToken)
 	}
 }

@@ -18,12 +18,15 @@
 package fetchers
 
 import (
-	"testing"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
+	"context"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/config"
+	"testing"
+
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -57,6 +60,10 @@ func (s *EcrFactoryTestSuite) TestCreateFetcher() {
 		{
 			`
 name: aws-ecr
+access_key_id: key
+secret_access_key: secret
+session_token: session
+default_region: us1-east
 `,
 			"us1-east",
 			"my-account",
@@ -68,38 +75,37 @@ name: aws-ecr
 	}
 
 	for _, test := range tests {
-
 		kubeclient := k8sfake.NewSimpleClientset()
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
+
+		mockedConfigGetter := &config.MockAwsConfigProvider{}
+		mockedConfigGetter.EXPECT().
+			InitializeAWSConfig(mock.Anything, mock.Anything).
+			Call.
+			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
+				return CreateSdkConfig(config, "us1-east")
+			},
+				func(ctx context.Context, config aws.ConfigAWS) error {
+					return nil
+				},
+			)
 
 		identity := awslib.Identity{
 			Account: &test.account,
 		}
 		identityProvider := &awslib.MockedIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
-		awsConfig := awslib.Config{Config: aws.Config{
-			Region: test.region,
-		}}
-		awsconfigProvider := &awslib.MockConfigGetter{}
-		awsconfigProvider.EXPECT().GetConfig().Return(awsConfig)
-
-		ecrProvider := &awslib.MockedEcrRepositoryDescriber{}
-		ecrPublicProvider := &awslib.MockedEcrRepositoryDescriber{}
 
 		factory := &ECRFactory{
-			extraElements: func() (ecrExtraElements, error) {
-				return ecrExtraElements{
-					awsConfig:               awsConfig,
-					kubernetesClientGetter:  mockedKubernetesClientGetter,
-					identityProviderGetter:  identityProvider,
-					ecrPrivateRepoDescriber: ecrProvider,
-					ecrPublicRepoDescriber:  ecrPublicProvider,
-				}, nil
+			KubernetesProvider: mockedKubernetesClientGetter,
+			AwsConfigProvider:  mockedConfigGetter,
+			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+				return identityProvider
 			},
 		}
 
-		cfg, err := config.NewConfigFrom(test.config)
+		cfg, err := agentconfig.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		fetcher, err := factory.Create(s.log, cfg, nil)
@@ -108,10 +114,23 @@ name: aws-ecr
 
 		ecrFetcher, ok := fetcher.(*ECRFetcher)
 		s.True(ok)
-		s.Equal(ecrProvider, ecrFetcher.PodDescribers[0].Provider)
-		s.Equal(ecrPublicProvider, ecrFetcher.PodDescribers[1].Provider)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
 		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].FilterRegex.String())
 		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].FilterRegex.String())
 	}
+}
+
+func CreateSdkConfig(config aws.ConfigAWS, region string) awssdk.Config {
+	awsConfig := awssdk.NewConfig()
+	awsCredentials := awssdk.Credentials{
+		AccessKeyID:     config.AccessKeyID,
+		SecretAccessKey: config.SecretAccessKey,
+		SessionToken:    config.SessionToken,
+	}
+
+	awsConfig.Credentials = awssdk.StaticCredentialsProvider{
+		Value: awsCredentials,
+	}
+	awsConfig.Region = region
+	return *awsConfig
 }

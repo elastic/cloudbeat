@@ -19,12 +19,12 @@ package fetchers
 
 import (
 	"context"
+	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/gofrs/uuid"
 )
 
 type IAMFetcher struct {
@@ -35,40 +35,49 @@ type IAMFetcher struct {
 }
 
 type IAMFetcherConfig struct {
-	fetching.BaseFetcherConfig
-	RoleName string `config:"roleName"`
+	fetching.AwsBaseFetcherConfig `config:",inline"`
+	RoleName                      string `config:"roleName"`
 }
 
 type IAMResource struct {
-	Data interface{}
+	awslib.RolePolicyInfo
 }
 
 func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
 
-	result, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
-	f.resourceCh <- fetching.ResourceInfo{
-		Resource:      IAMResource{result},
-		CycleMetadata: cMetadata,
+	results, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
+	if err != nil {
+		return err
 	}
 
-	return err
+	for _, rolePermission := range results {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      IAMResource{rolePermission},
+			CycleMetadata: cMetadata,
+		}
+	}
+
+	return nil
 }
 
 func (f IAMFetcher) Stop() {
 }
 
 func (r IAMResource) GetData() interface{} {
-	return r.Data
+	return r
 }
 
-func (r IAMResource) GetMetadata() fetching.ResourceMetadata {
-	uid, _ := uuid.NewV4()
-	return fetching.ResourceMetadata{
-		ID:      uid.String(),
-		Type:    IAMType,
-		SubType: IAMType,
-		Name:    "",
+func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	if r.PolicyName == nil {
+		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
+
+	return fetching.ResourceMetadata{
+		ID:      r.PolicyARN,
+		Type:    fetching.CloudIdentity,
+		SubType: fetching.RolePolicyType,
+		Name:    *r.PolicyName,
+	}, nil
 }
 func (r IAMResource) GetElasticCommonData() any { return nil }

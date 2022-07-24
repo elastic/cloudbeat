@@ -58,13 +58,7 @@ type Validator interface {
 	Validate(*config.C) error
 }
 
-func New(ctx context.Context,
-	log *logp.Logger,
-	reloader Reloader,
-	validator Validator,
-	bt *beat.Beat,
-	creator beat.Creator,
-	cfg *config.C) (*launcher, error) {
+func New(ctx context.Context, log *logp.Logger, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
 	s := &launcher{
 		wg:        sync.WaitGroup{},
 		ctx:       ctx,

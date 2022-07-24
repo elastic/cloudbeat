@@ -16,10 +16,6 @@ on:
     # Weekly job running every saturday at 2 am
     - cron: '00 02 * * 6'
 
-  push:
-    branches:
-    - tests-ci-v2
-
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.2
@@ -27,6 +23,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CONTAINER_SUFFIX: ${{ github.run_id }}
+  TEST_TARGETS_DEFAULT: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
 
 permissions:
   actions: read
@@ -39,30 +36,39 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     timeout-minutes: 15
     steps:
-    - id: Nightly
-      if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * *'
+    - id: Default
       env:
-        TEST_TARGETS: '"[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]"'
+        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+      run: |
+        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+
+    - id: Nightly
+      if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 0-4'
+      env:
+        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+
     - id: Weekly
       if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 6'
       env:
-        TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
+        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+
     - id: Push
       if: github.event_name == 'push'
       env:
         TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
       run: |
         echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+
     - id: Dispatch
       if: github.event_name == 'workflow_dispatch'
       env:
         TEST_TARGETS: ${{ github.event.inputs.test-targets }}
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+
     - id: set-matrix
-      run: |
-        echo "::set-output name=matrix::${{ env.TEST_MATRIX}}"
+      run: echo "::set-output name=matrix::${{ env.TEST_MATRIX}}"
 
   Build:
     name: Build
@@ -86,7 +92,7 @@ jobs:
           key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-${{ matrix.go-version }}-
-      
+
       - name: build cloudbeat
         run: make
 
@@ -195,6 +201,7 @@ jobs:
   publish_results:
     name: Publish Results
     needs: Test_Matrix
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifacts

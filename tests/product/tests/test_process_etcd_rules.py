@@ -4,11 +4,11 @@ This module verifies correctness of retrieved findings by manipulating audit and
 """
 from datetime import datetime
 
-import pytest
 import time
+import pytest
 
-from commonlib.utils import get_evaluation
-from product.tests.tests.process.process_test_cases import *
+from commonlib.utils import get_ES_evaluation
+from product.tests.data.process.process_test_cases import etcd_rules
 
 
 @pytest.mark.process_etcd_rules
@@ -16,7 +16,8 @@ from product.tests.tests.process.process_test_cases import *
     ("rule_tag", "dictionary", "resource", "expected"),
     etcd_rules,
 )
-def test_process_etcd(config_node_pre_test,
+def test_process_etcd(elastic_client,
+                      config_node_pre_test,
                       rule_tag,
                       dictionary,
                       resource,
@@ -34,27 +35,23 @@ def test_process_etcd(config_node_pre_test,
     @return: None - Test Pass / Fail result is generated.
     """
     k8s_client, api_client, cloudbeat_agent = config_node_pre_test
-    
-    if not "edit_process_file" in dir(api_client):
+
+    if "edit_process_file" not in dir(api_client):
         pytest.skip("skipping process rules run in non-containerized api_client")
-    
+
     # Currently, single node is used, in the future may be extended for all nodes.
     node = k8s_client.get_cluster_nodes()[0]
-    pods = k8s_client.get_agent_pod_instances(agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace)
-
     api_client.edit_process_file(container_name=node.metadata.name,
-                        dictionary=dictionary,
-                        resource=resource)
-
+                                 dictionary=dictionary,
+                                 resource=resource)
+    
     # Wait for process reboot
     # TODO: Implement a more optimal way of waiting
     time.sleep(60)
 
-    evaluation = get_evaluation(
-        k8s=k8s_client,
+    evaluation = get_ES_evaluation(
+        elastic_client=elastic_client,
         timeout=cloudbeat_agent.findings_timeout,
-        pod_name=pods[0].metadata.name,
-        namespace=cloudbeat_agent.namespace,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
     )

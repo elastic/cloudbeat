@@ -19,6 +19,7 @@ package fetching
 
 import (
 	"context"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/gofrs/uuid"
 
 	"github.com/elastic/elastic-agent-libs/config"
@@ -51,7 +52,7 @@ type CycleMetadata struct {
 }
 
 type Resource interface {
-	GetMetadata() ResourceMetadata
+	GetMetadata() (ResourceMetadata, error)
 	GetData() any
 	GetElasticCommonData() any
 }
@@ -64,14 +65,14 @@ type ResourceFields struct {
 type ResourceMetadata struct {
 	ID        string `json:"id"`
 	Type      string `json:"type"`
-	SubType   string `json:"sub_type"`
-	Name      string `json:"name"`
-	ECSFormat string `json:"ecsFormat"`
+	SubType   string `json:"sub_type,omitempty"`
+	Name      string `json:"name,omitempty"`
+	ECSFormat string `json:"ecsFormat,omitempty"`
 }
 
 type Result struct {
-	Type string `json:"type"`
-	// Golang 1.18 will introduce generics which will be useful for typing the resource field
+	Type     string      `json:"type"`
+	SubType  string      `json:"subType"`
 	Resource interface{} `json:"resource"`
 }
 
@@ -81,4 +82,21 @@ type BaseFetcherConfig struct {
 	Name string `config:"name"`
 }
 
-const KubeAPIType = "kube-api"
+type AwsBaseFetcherConfig struct {
+	BaseFetcherConfig `config:",inline"`
+	AwsConfig         aws.ConfigAWS `config:",inline"`
+}
+
+const (
+	KubeAPIType = "kube-api"
+
+	ECRType        = "aws-ecr"
+	ELBType        = "aws-elb"
+	RolePolicyType = "aws-role-policy"
+	EKSType        = "aws-eks"
+
+	CloudIdentity          = "iam"
+	CloudContainerMgmt     = "caas" // containers as a service
+	CloudLoadBalancer      = "load-balancer"
+	CloudContainerRegistry = "container-registry"
+)

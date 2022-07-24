@@ -1,3 +1,7 @@
+"""
+This module provides definition for k8s object test cases
+"""
+
 from dataclasses import dataclass, astuple
 
 

@@ -37,8 +37,9 @@ type IdentityProviderGetter interface {
 	GetIdentity(ctx context.Context) (*Identity, error)
 }
 
-func NewAWSIdentityProvider(cfg aws.Config) *IdentityProvider {
+func GetIdentityClient(cfg aws.Config) IdentityProviderGetter {
 	svc := sts.New(cfg)
+
 	return &IdentityProvider{
 		client: svc,
 	}

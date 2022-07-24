@@ -59,25 +59,30 @@ func (s *IamFetcherTestSuite) TearDownTest() {
 func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 	var tests = []struct {
 		role        string
-		iamResponse []iam.GetRolePolicyResponse
+		iamResponse []awslib.RolePolicyInfo
 	}{
 		{
-			"some_role",
-			[]iam.GetRolePolicyResponse{},
+			role: "some_role",
+			iamResponse: []awslib.RolePolicyInfo{
+				{
+					PolicyARN:             "arn:aws:iam::123456789012:policy/TestPolicy",
+					GetRolePolicyResponse: iam.GetRolePolicyResponse{},
+				},
+			},
 		},
 	}
 
 	for _, test := range tests {
 		eksConfig := IAMFetcherConfig{
-			BaseFetcherConfig: fetching.BaseFetcherConfig{},
-			RoleName:          test.role,
+			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
+			RoleName:             test.role,
 		}
 		iamProvider := &awslib.MockIAMRolePermissionGetter{}
 
 		iamProvider.EXPECT().GetIAMRolePermissions(mock.Anything, test.role).
 			Return(test.iamResponse, nil)
 
-		expectedResource := IAMResource{test.iamResponse}
+		expectedResource := IAMResource{test.iamResponse[0]}
 
 		eksFetcher := IAMFetcher{
 			log:         s.log,
@@ -93,6 +98,6 @@ func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 		iamResource := results[0].Resource.(IAMResource)
 
 		s.Equal(expectedResource, iamResource)
-		s.Nil(err)
+		s.NoError(err)
 	}
 }
