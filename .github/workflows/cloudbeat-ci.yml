@@ -11,6 +11,10 @@ env:
   GO_VERSION: 1.18.2
   CONTAINER_SUFFIX: ${{ github.run_id }}
 
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   Build:
     name: Build
@@ -86,11 +90,11 @@ jobs:
     name: ${{ matrix.test-target }}-tests
     needs: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 55
     strategy:
       matrix:
         # test-targets chosen by stabillity and runtime.Only pre_merge will be set as mandatory
-        test-target: [pre_merge, file_system_rules, k8s_object_rules, process_etcd_rules, process_scheduler_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules]
+        test-target: [pre_merge, file_system_rules, k8s_object_rules, process_scheduler_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules]
       fail-fast: false
     steps:
       - name: Check out the repo
