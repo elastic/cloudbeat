@@ -42,8 +42,8 @@ func NewElbProvider(cfg aws.Config) *ElbProvider {
 	}
 }
 
-// DescribeLoadBalancer method will return up to 400 results
-// If we will ever want to increase this number, DescribeLoadBalancers support paginated requests
+// DescribeLoadBalancer returns LoadBalancerDescriptions which contain information about the load balancers.
+// When balancersNames is empty, it will describe all the existing load balancers
 func (provider ElbProvider) DescribeLoadBalancer(ctx context.Context, balancersNames []string) (ElbLoadBalancerDescriptions, error) {
 	input := &elb.DescribeLoadBalancersInput{
 		LoadBalancerNames: balancersNames,

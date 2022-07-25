@@ -43,14 +43,14 @@ func NewEcrProvider(cfg aws.Config) *ECRProvider {
 }
 
 // DescribeAllECRRepositories This method will return a maximum of 100 repository
-/// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
+// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
 func (provider *ECRProvider) DescribeAllECRRepositories(ctx context.Context) (EcrRepositories, error) {
-	/// When repoNames is nil, it will describe all the existing repositories
+	// When repoNames is nil, it will describe all the existing repositories
 	return provider.DescribeRepositories(ctx, nil)
 }
 
 // DescribeRepositories returns a list of repositories that match the given names.
-/// When repoNames is empty, it will describe all the existing repositories
+// When repoNames is empty, it will describe all the existing repositories
 func (provider *ECRProvider) DescribeRepositories(ctx context.Context, repoNames []string) (EcrRepositories, error) {
 	input := &ecr.DescribeRepositoriesInput{
 		RepositoryNames: repoNames,
