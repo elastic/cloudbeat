@@ -58,7 +58,7 @@ type ECRFetcher struct {
 type PodDescriber struct {
 	FilterRegex     *regexp.Regexp
 	Provider        awslib.EcrRepositoryDescriber
-	ExtractRegion   func(describer PodDescriber, repo string) string
+	ExtractRegion   func(describer PodDescriber, repo string) (string, error)
 	ImageRegexIndex int
 }
 
@@ -127,7 +127,11 @@ func getAwsRepositories(podsList *v1.PodList, describer PodDescriber) map[string
 			regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
 			if regexMatcher != nil {
 				repository := regexMatcher[describer.ImageRegexIndex]
-				region := describer.ExtractRegion(describer, image)
+				region, err := describer.ExtractRegion(describer, image)
+				if err != nil {
+					logp.Error(err)
+					continue
+				}
 				reposByRegion[region] = append(reposByRegion[region], repository)
 			}
 		}
@@ -135,20 +139,20 @@ func getAwsRepositories(podsList *v1.PodList, describer PodDescriber) map[string
 	return reposByRegion
 }
 
-func ExtractRegionFromEcrImage(describer PodDescriber, image string) string {
+func ExtractRegionFromEcrImage(describer PodDescriber, image string) (string, error) {
 	regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
 	if regexMatcher != nil {
 		repository := regexMatcher[EcrRegionRegexGroup]
-		return repository
+		return repository, nil
 	}
 
-	return ""
+	return "", fmt.Errorf("could not extract region, image does not match the aws ecr template")
 }
 
 // ExtractRegionFromPublicEcrImage - Currently the public ecr provider is not functional.
 // TODO - This method should be change as part of implementing the public ecr - https://github.com/elastic/security-team/issues/4035
-func ExtractRegionFromPublicEcrImage(_ PodDescriber, _ string) string {
-	return ""
+func ExtractRegionFromPublicEcrImage(_ PodDescriber, _ string) (string, error) {
+	return "", nil
 }
 
 func (res ECRResource) GetData() interface{} {
