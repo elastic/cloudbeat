@@ -3,7 +3,6 @@ module github.com/elastic/cloudbeat
 go 1.18
 
 require (
-
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
@@ -61,7 +60,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220622083326-cab8871124af
-	github.com/elastic/csp-security-policies v1.0.7
+	github.com/elastic/csp-security-policies v1.0.8-0.20220725171451-c367d45accb6
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.6 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
