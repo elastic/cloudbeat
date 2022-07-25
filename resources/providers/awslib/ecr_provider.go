@@ -28,36 +28,42 @@ import (
 type EcrRepository types.Repository
 type EcrRepositories []types.Repository
 
-type ECRProvider struct {
-	client *ecr.Client
+type EcrProvider struct {
+}
+
+type EcrProviderResponse struct {
+	Repositories    EcrRepositories
+	PaginationToken string
 }
 
 type EcrRepositoryDescriber interface {
-	DescribeRepositories(ctx context.Context, repoNames []string) (EcrRepositories, error)
+	DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error)
 }
 
-func NewEcrProvider(cfg aws.Config) *ECRProvider {
-	svc := ecr.NewFromConfig(cfg)
-	return &ECRProvider{
-		client: svc,
-	}
+func NewEcrProvider() *EcrProvider {
+	return &EcrProvider{}
 }
 
 // DescribeAllECRRepositories returns a list of all the existing repositories
-func (provider *ECRProvider) DescribeAllECRRepositories(ctx context.Context) (EcrRepositories, error) {
-	// When repoNames is nil, it will describe all the existing repositories
-	return provider.DescribeRepositories(ctx, nil)
+func (provider *EcrProvider) DescribeAllECRRepositories(ctx context.Context, cfg aws.Config, region string) (EcrRepositories, error) {
+	/// When repoNames is nil, it will describe all the existing Repositories
+	return provider.DescribeRepositories(ctx, cfg, nil, region)
 }
 
 // DescribeRepositories returns a list of repositories that match the given names.
 // When repoNames is empty, it will describe all the existing repositories
-func (provider *ECRProvider) DescribeRepositories(ctx context.Context, repoNames []string) (EcrRepositories, error) {
+func (provider *EcrProvider) DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error) {
+	if len(repoNames) == 0 {
+		return EcrRepositories{}, nil
+	}
+
+	cfg.Region = region
+	svc := ecr.NewFromConfig(cfg)
 	input := &ecr.DescribeRepositoriesInput{
 		RepositoryNames: repoNames,
 	}
-
 	var repos EcrRepositories
-	paginator := ecr.NewDescribeRepositoriesPaginator(provider.client, input)
+	paginator := ecr.NewDescribeRepositoriesPaginator(svc, input)
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(ctx)
 		if err != nil {
