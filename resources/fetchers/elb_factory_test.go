@@ -109,7 +109,7 @@ default_region: us2-east
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		elbFetcher, ok := fetcher.(*ELBFetcher)
+		elbFetcher, ok := fetcher.(*ElbFetcher)
 		s.True(ok)
 		s.Equal(test.expectedRegex, elbFetcher.lbRegexMatchers[0].String())
 		s.Equal(kubeclient, elbFetcher.kubeClient)

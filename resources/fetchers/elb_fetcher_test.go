@@ -140,9 +140,9 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
-		elbFetcher := ELBFetcher{
+		elbFetcher := ElbFetcher{
 			log:             s.log,
-			cfg:             ELBFetcherConfig{},
+			cfg:             ElbFetcherConfig{},
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
@@ -157,7 +157,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		s.NoError(err)
 
 		for i, expectedLbName := range test.expectedlbNames {
-			elbResource := results[i].Resource.(ELBResource)
+			elbResource := results[i].Resource.(ElbResource)
 			metadata, err := elbResource.GetMetadata()
 
 			s.NoError(err)
@@ -214,9 +214,9 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
-		elbFetcher := ELBFetcher{
+		elbFetcher := ElbFetcher{
 			log:             s.log,
-			cfg:             ELBFetcherConfig{},
+			cfg:             ElbFetcherConfig{},
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,

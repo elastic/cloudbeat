@@ -76,7 +76,7 @@ session_token: session
 					return nil
 				},
 			)
-		factory := &EKSFactory{mockedConfigGetter}
+		factory := &EksFactory{mockedConfigGetter}
 
 		cfg, err := agentconfig.NewConfigFrom(test.config)
 		s.NoError(err)

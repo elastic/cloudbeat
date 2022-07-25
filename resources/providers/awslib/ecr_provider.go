@@ -25,6 +25,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 )
 
+type EcrRepository types.Repository
 type EcrRepositories []types.Repository
 
 type ECRProvider struct {

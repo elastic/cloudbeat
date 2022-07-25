@@ -20,7 +20,6 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 	"github.com/pkg/errors"
 	"regexp"
 
@@ -35,9 +34,9 @@ const (
 	elbRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
 )
 
-type ELBFetcher struct {
+type ElbFetcher struct {
 	log             *logp.Logger
-	cfg             ELBFetcherConfig
+	cfg             ElbFetcherConfig
 	elbProvider     awslib.ElbLoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
@@ -45,20 +44,18 @@ type ELBFetcher struct {
 	cloudIdentity   *awslib.Identity
 }
 
-type ELBFetcherConfig struct {
+type ElbFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
 	KubeConfig                    string `config:"Kubeconfig"`
 }
 
-type LoadBalancersDescription types.LoadBalancerDescription
-
-type ELBResource struct {
-	lb       LoadBalancersDescription
+type ElbResource struct {
+	lb       awslib.ElbLoadBalancersDescription
 	identity *awslib.Identity
 }
 
-func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Debug("Starting ELBFetcher.Fetch")
+func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting ElbFetcher.Fetch")
 
 	balancers, err := f.GetLoadBalancers()
 	if err != nil {
@@ -71,14 +68,14 @@ func (f *ELBFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 
 	for _, loadBalancer := range result {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      ELBResource{LoadBalancersDescription(loadBalancer), f.cloudIdentity},
+			Resource:      ElbResource{awslib.ElbLoadBalancersDescription(loadBalancer), f.cloudIdentity},
 			CycleMetadata: cMetadata,
 		}
 	}
 	return nil
 }
 
-func (f *ELBFetcher) GetLoadBalancers() ([]string, error) {
+func (f *ElbFetcher) GetLoadBalancers() ([]string, error) {
 	ctx := context.Background()
 	services, err := f.kubeClient.CoreV1().Services("").List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -99,14 +96,14 @@ func (f *ELBFetcher) GetLoadBalancers() ([]string, error) {
 	return loadBalancers, nil
 }
 
-func (f *ELBFetcher) Stop() {
+func (f *ElbFetcher) Stop() {
 }
 
-func (r ELBResource) GetData() interface{} {
+func (r ElbResource) GetData() interface{} {
 	return r.lb
 }
 
-func (r ELBResource) GetMetadata() (fetching.ResourceMetadata, error) {
+func (r ElbResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if r.identity.Account == nil || r.lb.LoadBalancerName == nil {
 		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
@@ -119,4 +116,4 @@ func (r ELBResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Name:    *r.lb.LoadBalancerName,
 	}, nil
 }
-func (r ELBResource) GetElasticCommonData() any { return nil }
+func (r ElbResource) GetElasticCommonData() any { return nil }

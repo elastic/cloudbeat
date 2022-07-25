@@ -113,7 +113,7 @@ default_region: us1-east
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		ecrFetcher, ok := fetcher.(*ECRFetcher)
+		ecrFetcher, ok := fetcher.(*EcrFetcher)
 		s.True(ok)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
 		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].FilterRegex.String())

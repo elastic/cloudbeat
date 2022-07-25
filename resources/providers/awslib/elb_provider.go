@@ -26,6 +26,7 @@ import (
 )
 
 type ElbLoadBalancerDescriptions []types.LoadBalancerDescription
+type ElbLoadBalancersDescription types.LoadBalancerDescription
 
 type ElbLoadBalancerDescriber interface {
 	DescribeLoadBalancer(ctx context.Context, balancersNames []string) (ElbLoadBalancerDescriptions, error)

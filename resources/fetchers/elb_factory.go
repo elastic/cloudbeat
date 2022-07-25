@@ -53,7 +53,7 @@ type ELBFactory struct {
 func (f *ELBFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting ELBFactory.Create")
 
-	cfg := ELBFetcherConfig{}
+	cfg := ElbFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (f *ELBFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ElbFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -82,7 +82,7 @@ func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ELBFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
-	return &ELBFetcher{
+	return &ElbFetcher{
 		log:             log,
 		elbProvider:     balancerDescriber,
 		cloudIdentity:   identity,

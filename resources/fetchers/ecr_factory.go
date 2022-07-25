@@ -51,7 +51,7 @@ type ECRFactory struct {
 func (f *ECRFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting ECRFactory.Create")
 
-	cfg := ECRFetcherConfig{}
+	cfg := EcrFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (f *ECRFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
 	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
@@ -90,7 +90,7 @@ func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, ch chan 
 		Provider:    ecrPublicProvider,
 	}
 
-	fe := &ECRFetcher{
+	fe := &EcrFetcher{
 		log:        log,
 		cfg:        cfg,
 		kubeClient: kubeClient,

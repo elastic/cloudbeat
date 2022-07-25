@@ -249,9 +249,9 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		}
 
 		expectedRepositories := append(test.expectedRepositories, test.expectedPublicRepositories...)
-		ecrFetcher := ECRFetcher{
+		ecrFetcher := EcrFetcher{
 			log:           s.log,
-			cfg:           ECRFetcherConfig{},
+			cfg:           EcrFetcherConfig{},
 			kubeClient:    kubeclient,
 			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
 			resourceCh:    s.resourceCh,
@@ -265,7 +265,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		s.NoError(err)
 
 		for i, name := range test.expectedRepositoriesNames {
-			ecrResource := results[i].Resource.(ECRResource)
+			ecrResource := results[i].Resource.(EcrResource)
 			metadata, err := ecrResource.GetMetadata()
 			s.NoError(err)
 			s.Equal(name, *ecrResource.RepositoryName)
@@ -340,9 +340,9 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 			Provider:    ecrPublicProvider,
 		}
 
-		ecrFetcher := ECRFetcher{
+		ecrFetcher := EcrFetcher{
 			log:           s.log,
-			cfg:           ECRFetcherConfig{},
+			cfg:           EcrFetcherConfig{},
 			kubeClient:    kubeclient,
 			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
 			resourceCh:    s.resourceCh,

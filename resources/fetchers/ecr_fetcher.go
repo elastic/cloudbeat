@@ -20,7 +20,6 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/pkg/errors"
 	"regexp"
 
@@ -38,9 +37,9 @@ const (
 	PublicRepoRegex          = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
 )
 
-type ECRFetcher struct {
+type EcrFetcher struct {
 	log           *logp.Logger
-	cfg           ECRFetcherConfig
+	cfg           EcrFetcherConfig
 	kubeClient    k8s.Interface
 	PodDescribers []PodDescriber
 	resourceCh    chan fetching.ResourceInfo
@@ -51,22 +50,20 @@ type PodDescriber struct {
 	Provider    awslib.EcrRepositoryDescriber
 }
 
-type ECRFetcherConfig struct {
+type EcrFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
 	KubeConfig                    string `config:"Kubeconfig"`
 }
 
-type EcrRepository types.Repository
-
-type ECRResource struct {
-	EcrRepository
+type EcrResource struct {
+	awslib.EcrRepository
 }
 
-func (f *ECRFetcher) Stop() {
+func (f *EcrFetcher) Stop() {
 }
 
-func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Debug("Starting ECRFetcher.Fetch")
+func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting EcrFetcher.Fetch")
 
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -81,7 +78,7 @@ func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 		}
 		for _, repository := range ecrDescribedRepositories {
 			f.resourceCh <- fetching.ResourceInfo{
-				Resource:      ECRResource{EcrRepository(repository)},
+				Resource:      EcrResource{awslib.EcrRepository(repository)},
 				CycleMetadata: cMetadata,
 			}
 		}
@@ -90,7 +87,7 @@ func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 	return nil
 }
 
-func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) (awslib.EcrRepositories, error) {
+func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) (awslib.EcrRepositories, error) {
 
 	repositories := make([]string, 0)
 
@@ -112,11 +109,11 @@ func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList
 	return describer.Provider.DescribeRepositories(ctx, repositories)
 }
 
-func (res ECRResource) GetData() interface{} {
+func (res EcrResource) GetData() interface{} {
 	return res
 }
 
-func (res ECRResource) GetMetadata() (fetching.ResourceMetadata, error) {
+func (res EcrResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if res.RepositoryArn == nil || res.RepositoryName == nil {
 		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
@@ -129,4 +126,4 @@ func (res ECRResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res ECRResource) GetElasticCommonData() any { return nil }
+func (res EcrResource) GetElasticCommonData() any { return nil }
