@@ -4,17 +4,17 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("--event-qps=10")
-	test.assert_fail(finding) with input as rule_input_with_external("--event-qps=10", create_process_config(0))
-	test.assert_fail(finding) with input as rule_input_with_external("--event-qps=10", create_process_config(10))
+	test.assert_fail(finding) with input as rule_input("--event-qps 10")
+	test.assert_fail(finding) with input as rule_input_with_external("--event-qps 10", create_process_config(0))
+	test.assert_fail(finding) with input as rule_input_with_external("--event-qps 10", create_process_config(10))
 	test.assert_fail(finding) with input as rule_input_with_external("", create_process_config(10))
 	test.assert_fail(finding) with input as rule_input("")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("--event-qps=0")
-	test.assert_pass(finding) with input as rule_input_with_external("--event-qps=0", create_process_config(0))
-	test.assert_pass(finding) with input as rule_input_with_external("--event-qps=0", create_process_config(10))
+	test.assert_pass(finding) with input as rule_input("--event-qps 0")
+	test.assert_pass(finding) with input as rule_input_with_external("--event-qps 0", create_process_config(0))
+	test.assert_pass(finding) with input as rule_input_with_external("--event-qps 0", create_process_config(10))
 	test.assert_pass(finding) with input as rule_input_with_external("", create_process_config(0))
 }
 

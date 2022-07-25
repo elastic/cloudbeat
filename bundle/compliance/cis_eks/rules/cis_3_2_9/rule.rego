@@ -1,6 +1,6 @@
 package compliance.cis_eks.rules.cis_3_2_9
 
-import data.compliance.cis_k8s
+import data.compliance.cis_eks
 import data.compliance.lib.common
 import data.compliance.lib.data_adapter
 
@@ -9,7 +9,7 @@ import data.compliance.lib.data_adapter
 
 default rule_evaluation = false
 
-process_args := cis_k8s.data_adapter.process_args
+process_args := cis_eks.data_adapter.process_args
 
 rule_evaluation {
 	common.contains_key_with_value(process_args, "--event-qps", "0")
