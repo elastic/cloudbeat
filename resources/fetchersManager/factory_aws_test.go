@@ -21,7 +21,6 @@ import (
 	"context"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
@@ -146,7 +145,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 	for _, test := range tests {
 		s.F = newFactories()
 		s.F.RegisterFactory(test.fetcherName, &awsTestFactory{})
-		reg := NewFetcherRegistry(s.log, &leaderelection.MockElectionManager{})
+		reg := NewFetcherRegistry(s.log)
 		conf := createEksAgentConfig(s, test.awsConfig, test.fetcherName)
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.Equal(test.fetcherName, parsedList[0].name)

@@ -18,23 +18,21 @@
 package conditions
 
 import (
+	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type LeaderLeaseProvider interface {
-	IsLeader() bool
-}
-
 type LeaseFetcherCondition struct {
 	log      *logp.Logger
-	provider LeaderLeaseProvider
+	provider leaderelection.ElectionManager
 }
 
-func NewLeaseFetcherCondition(log *logp.Logger, provider LeaderLeaseProvider) fetching.Condition {
+func NewLeaseFetcherCondition(log *logp.Logger) fetching.Condition {
+	leaderManager := leaderelection.GetLeaderElectorManager()
 	return &LeaseFetcherCondition{
 		log:      log,
-		provider: provider,
+		provider: leaderManager,
 	}
 }
 

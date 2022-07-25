@@ -20,7 +20,6 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/stretchr/testify/assert"
 	"testing"
 
@@ -111,7 +110,7 @@ func TestRegistryTestSuite(t *testing.T) {
 }
 
 func (s *RegistryTestSuite) SetupTest() {
-	s.registry = NewFetcherRegistry(s.log, &leaderelection.MockElectionManager{})
+	s.registry = NewFetcherRegistry(s.log)
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
@@ -244,7 +243,7 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	}
 
 	for _, test := range tests {
-		s.registry = NewFetcherRegistry(s.log, &leaderelection.MockElectionManager{})
+		s.registry = NewFetcherRegistry(s.log)
 		f := newNumberFetcher(1, nil, s.wg)
 		err := s.registry.Register("some-key", f, test.conditions...)
 		s.NoError(err)

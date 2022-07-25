@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	le "k8s.io/client-go/tools/leaderelection"
@@ -34,17 +35,18 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
+	initOnce sync.Once
 	callOnce sync.Once
+	manager  *Manager
 )
 
-const ()
-
 type ElectionManager interface {
-	Run(onNewLeader func(ctx context.Context) error) error
 	IsLeader() bool
+	Run() error
 }
 
 type Manager struct {
@@ -52,8 +54,10 @@ type Manager struct {
 	ctx    context.Context
 	client k8s.Interface
 	leader *le.LeaderElector
+	block  chan bool
 }
 
+// NewLeaderElector acts as a singleton - return & run an instance of the Election manager
 func NewLeaderElector(ctx context.Context, log *logp.Logger, cfg config.Config) (ElectionManager, error) {
 	kubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
@@ -61,18 +65,34 @@ func NewLeaderElector(ctx context.Context, log *logp.Logger, cfg config.Config) 
 		return nil, err
 	}
 
-	return &Manager{
-		ctx:    ctx,
-		log:    log,
-		client: kubeClient,
-		leader: nil,
-	}, nil
+	initOnce.Do(func() {
+		manager = &Manager{
+			log:    log,
+			ctx:    ctx,
+			client: kubeClient,
+			leader: nil,
+			block:  make(chan bool),
+		}
+	})
+
+	return manager, nil
 }
 
-// Run runs leader election and calls onStarted when lease has been acquired
-func (m *Manager) Run(onNewLeader func(ctx context.Context) error) error {
+func GetLeaderElectorManager() ElectionManager {
+	return manager
+}
+
+func (m *Manager) IsLeader() bool {
+	return m.leader.IsLeader()
+}
+
+// Run leader election is blocking until a leader is being elected or timeout has reached.
+func (m *Manager) Run() error {
 	var err error
-	leaderElectionConf := m.getConfig(onNewLeader)
+	leaderElectionConf, err := m.buildConfig()
+	if err != nil {
+		return err
+	}
 
 	m.leader, err = le.NewLeaderElector(leaderElectionConf)
 	if err != nil {
@@ -80,20 +100,28 @@ func (m *Manager) Run(onNewLeader func(ctx context.Context) error) error {
 	}
 
 	go m.leader.Run(m.ctx)
-	m.log.Infof("started leader election", "for", leaderElectionConf.Lock.Describe(), "id", leaderElectionConf.Lock.Identity())
+	m.log.Infof("started leader election, description: %s, id: %s ", leaderElectionConf.Lock.Describe(), leaderElectionConf.Lock.Identity())
+
+	select {
+	case <-m.block:
+		m.log.Infof("new leader has been elected")
+	case <-time.After(FirstLeaderDeadline):
+		m.log.Warnf("timeout - no leader has been elected for %s seconds", FirstLeaderDeadline.String())
+	}
 
 	return nil
 }
 
-func (m *Manager) IsLeader() bool {
-	return m.leader.IsLeader()
-}
+func (m *Manager) buildConfig() (le.LeaderElectionConfig, error) {
+	podId, err := m.currentPodID()
+	if err != nil {
+		return le.LeaderElectionConfig{}, err
+	}
 
-func (m *Manager) getConfig(onNewLeaderCb func(ctx context.Context) error) le.LeaderElectionConfig {
-	id := fmt.Sprintf("%s_%s", LeaderLeaseName, currentPodID())
+	id := fmt.Sprintf("%s_%s", LeaderLeaseName, podId)
 	ns, err := kubernetes.InClusterNamespace()
 	if err != nil {
-		ns = "default"
+		return le.LeaderElectionConfig{}, err
 	}
 
 	lease := metav1.ObjectMeta{
@@ -115,40 +143,47 @@ func (m *Manager) getConfig(onNewLeaderCb func(ctx context.Context) error) le.Le
 		RetryPeriod:     RetryPeriod,
 		Callbacks: le.LeaderCallbacks{
 			OnStartedLeading: func(ctx context.Context) {
-				m.log.Infof("leader election lock GAINED, id %v", id)
-
+				m.log.Infof("leader election lock GAINED, id: %v", id)
 			},
 			OnStoppedLeading: func() {
-				m.log.Infof("leader election lock LOST, id %v", id)
+				m.log.Infof("leader election lock LOST, id: %v", id)
 				// leaderelection.Run stops in case the lease was released, we re-run the manager
-				// to keep following leader status, even though, we lost the lease for some reason.
-				if err := m.Run(onNewLeaderCb); err != nil {
-					m.log.Errorf("failed to re-run the leader elector, Error: %v", err)
-				}
+				// to keep following leader status, even though, pod has lost the lease.
+				go m.leader.Run(m.ctx)
+				m.log.Infof("re-running leader elector")
 			},
 			OnNewLeader: func(identity string) {
 				m.log.Infof("leader election lock has been acquired, id %v", identity)
 				callOnce.Do(func() {
-					if err := onNewLeaderCb(m.ctx); err != nil {
-						m.log.Error(err)
-					}
+					m.block <- false
 				})
 			},
 		},
+	}, nil
+}
+
+func (m *Manager) currentPodID() (string, error) {
+	pod, found := os.LookupEnv(PodNameEnvar)
+	if !found {
+		m.log.Warnf("Env var %s wasn't found", PodNameEnvar)
+		return m.generateUUID()
 	}
+
+	return m.lastPart(pod)
 }
 
-func currentPodID() string {
-	pod := os.Getenv(PodNameEnvar)
-
-	return lastPart(pod)
-}
-
-func lastPart(s string) string {
+func (m *Manager) lastPart(s string) (string, error) {
 	parts := strings.Split(s, "-")
 	if len(parts) == 0 {
-		return ""
+		m.log.Warnf("failed to find id for pod_name: %s", s)
+		return m.generateUUID()
 	}
 
-	return parts[len(parts)-1]
+	return parts[len(parts)-1], nil
+}
+
+func (m *Manager) generateUUID() (string, error) {
+	uuid, err := uuid.NewV4()
+	m.log.Warnf("Generating uuid as an identifier, UUID: ", uuid.String())
+	return uuid.String(), err
 }

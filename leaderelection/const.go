@@ -40,6 +40,9 @@ const (
 	//
 	RetryPeriod = 2 * time.Second
 
+	// FirstLeaderDeadline is the duration to wait for the leader to acquire the lease for the first time.
+	FirstLeaderDeadline = 5 * time.Second
+
 	PodNameEnvar = "POD_NAME"
 
 	LeaderLeaseName = "cloudbeat-cluster-leader"

@@ -20,7 +20,6 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -36,9 +35,8 @@ type FetchersRegistry interface {
 }
 
 type fetchersRegistry struct {
-	log    *logp.Logger
-	leader leaderelection.ElectionManager
-	reg    map[string]registeredFetcher
+	log *logp.Logger
+	reg map[string]registeredFetcher
 }
 
 type registeredFetcher struct {
@@ -46,11 +44,10 @@ type registeredFetcher struct {
 	c []fetching.Condition
 }
 
-func NewFetcherRegistry(log *logp.Logger, leader leaderelection.ElectionManager) FetchersRegistry {
+func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
 	reg := &fetchersRegistry{
-		log:    log,
-		leader: leader,
-		reg:    make(map[string]registeredFetcher),
+		log: log,
+		reg: make(map[string]registeredFetcher),
 	}
 	return reg
 }
@@ -134,7 +131,7 @@ func (r *fetchersRegistry) getConditions(name string) ([]fetching.Condition, err
 	switch name {
 	case fetching.KubeAPIType, fetching.ECRType, fetching.ELBType:
 		// TODO: Use fetcher's kubeconfig configuration
-		c = append(c, conditions.NewLeaseFetcherCondition(r.log, r.leader))
+		c = append(c, conditions.NewLeaseFetcherCondition(r.log))
 	}
 
 	return c, nil

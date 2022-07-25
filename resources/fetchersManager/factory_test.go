@@ -19,7 +19,6 @@ package fetchersManager
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"testing"
@@ -179,7 +178,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.NoError(err)
 
-		reg := NewFetcherRegistry(s.log, &leaderelection.MockElectionManager{})
+		reg := NewFetcherRegistry(s.log)
 		err = reg.RegisterFetchers(parsedList)
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
@@ -252,7 +251,7 @@ fetchers:
 		c, err := config.New(cfg)
 		s.NoError(err)
 
-		reg := NewFetcherRegistry(s.log, &leaderelection.MockElectionManager{})
+		reg := NewFetcherRegistry(s.log)
 		var fetcher config.Fetcher
 		if len(c.Fetchers.Vanilla) > 0 {
 			err = c.Fetchers.Vanilla[0].Unpack(&fetcher)
