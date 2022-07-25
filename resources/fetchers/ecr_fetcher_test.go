@@ -23,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"regexp"
+	"sort"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
@@ -185,7 +186,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 						}},
 				},
 			},
-			[]string{firstRepositoryName, publicRepoName},
+			[]string{publicRepoName, firstRepositoryName},
 		},
 		{
 			"123456789123",
@@ -330,6 +331,13 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 
 		s.Equal(len(test.expectedRepositoriesNames), len(results))
 		s.NoError(err)
+
+		// DO NOT REMOVE THIS METHOD
+		// The results provided by the channel can return the results in a different order
+		// This method order the results before asserting on them
+		sort.SliceStable(results, func(i, j int) bool {
+			return *results[i].Resource.(ECRResource).RepositoryName <= *results[j].Resource.(ECRResource).RepositoryName
+		})
 
 		for i, name := range test.expectedRepositoriesNames {
 			ecrResource := results[i].Resource.(ECRResource)
