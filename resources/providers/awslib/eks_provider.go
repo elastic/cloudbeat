@@ -20,16 +20,17 @@ package awslib
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/eks/types"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
-	"github.com/aws/aws-sdk-go-v2/service/eks/types"
 )
 
+type EksClusterOutput eks.DescribeClusterOutput
 type EksCluster types.Cluster
 
 type EksClusterDescriber interface {
-	DescribeCluster(ctx context.Context, clusterName string) (EksCluster, error)
+	DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error)
 }
 
 type EKSProvider struct {
@@ -43,15 +44,15 @@ func NewEksProvider(cfg aws.Config) *EKSProvider {
 	}
 }
 
-func (provider EKSProvider) DescribeCluster(ctx context.Context, clusterName string) (EksCluster, error) {
+func (provider EKSProvider) DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error) {
 	input := &eks.DescribeClusterInput{
 		Name: &clusterName,
 	}
 
 	response, err := provider.client.DescribeCluster(ctx, input)
 	if err != nil {
-		return EksCluster{}, fmt.Errorf("failed to describe cluster %s from eks, error - %w", clusterName, err)
+		return EksClusterOutput{}, fmt.Errorf("failed to describe cluster %s from eks, error - %w", clusterName, err)
 	}
 
-	return EksCluster(*response.Cluster), err
+	return EksClusterOutput(*response), err
 }

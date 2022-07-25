@@ -40,7 +40,7 @@ type EksFetcherConfig struct {
 }
 
 type EksResource struct {
-	awslib.EksCluster
+	awslib.EksClusterOutput
 }
 
 func (f EksFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -67,15 +67,15 @@ func (r EksResource) GetData() interface{} {
 }
 
 func (r EksResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	if r.Arn == nil || r.Name == nil {
+	if r.Cluster.Arn == nil || r.Cluster.Name == nil {
 		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
 
 	return fetching.ResourceMetadata{
-		ID:      *r.Arn,
+		ID:      *r.Cluster.Arn,
 		Type:    fetching.CloudContainerMgmt,
 		SubType: fetching.EKSType,
-		Name:    *r.Name,
+		Name:    *r.Cluster.Name,
 	}, nil
 }
 

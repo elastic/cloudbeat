@@ -39,14 +39,14 @@ func (_m *MockEksClusterDescriber) EXPECT() *MockEksClusterDescriber_Expecter {
 }
 
 // DescribeCluster provides a mock function with given fields: ctx, clusterName
-func (_m *MockEksClusterDescriber) DescribeCluster(ctx context.Context, clusterName string) (EksCluster, error) {
+func (_m *MockEksClusterDescriber) DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error) {
 	ret := _m.Called(ctx, clusterName)
 
-	var r0 EksCluster
-	if rf, ok := ret.Get(0).(func(context.Context, string) EksCluster); ok {
+	var r0 EksClusterOutput
+	if rf, ok := ret.Get(0).(func(context.Context, string) EksClusterOutput); ok {
 		r0 = rf(ctx, clusterName)
 	} else {
-		r0 = ret.Get(0).(EksCluster)
+		r0 = ret.Get(0).(EksClusterOutput)
 	}
 
 	var r1 error
@@ -78,7 +78,7 @@ func (_c *MockEksClusterDescriber_DescribeCluster_Call) Run(run func(ctx context
 	return _c
 }
 
-func (_c *MockEksClusterDescriber_DescribeCluster_Call) Return(_a0 EksCluster, _a1 error) *MockEksClusterDescriber_DescribeCluster_Call {
+func (_c *MockEksClusterDescriber_DescribeCluster_Call) Return(_a0 EksClusterOutput, _a1 error) *MockEksClusterDescriber_DescribeCluster_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }

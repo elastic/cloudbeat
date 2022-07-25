@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/eks/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -62,13 +63,15 @@ func (s *EksFetcherTestSuite) TearDownTest() {
 func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 	var tests = []struct {
 		clusterName     string
-		clusterResponse awslib.EksCluster
+		clusterResponse awslib.EksClusterOutput
 	}{
 		{
 			"cluster_name",
-			awslib.EksCluster{
-				Arn:  &clusterARN,
-				Name: &clusterName,
+			awslib.EksClusterOutput{
+				Cluster: &types.Cluster{
+					Arn:  &clusterARN,
+					Name: &clusterName,
+				},
 			},
 		},
 	}
@@ -99,8 +102,8 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 
 		s.NoError(err)
 		s.Equal(expectedResource, eksResource)
-		s.Equal(*expectedResource.Name, metadata.Name)
-		s.Equal(*expectedResource.Arn, metadata.ID)
+		s.Equal(*expectedResource.Cluster.Name, metadata.Name)
+		s.Equal(*expectedResource.Cluster.Arn, metadata.ID)
 		s.NoError(err)
 	}
 }
@@ -114,7 +117,7 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	eksProvider := &awslib.MockEksClusterDescriber{}
 
 	expectedErr := fmt.Errorf("my error")
-	eksProvider.EXPECT().DescribeCluster(mock.Anything, clusterName).Return(awslib.EksCluster{}, expectedErr)
+	eksProvider.EXPECT().DescribeCluster(mock.Anything, clusterName).Return(awslib.EksClusterOutput{}, expectedErr)
 	eksFetcher := EksFetcher{
 		log:         s.log,
 		cfg:         eksConfig,
