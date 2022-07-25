@@ -107,11 +107,11 @@ cis_1_1_18 = [
 
 cis_1_1_19 = [
     ('CIS 1.1.19', 'chown', 'root:daemon', '/etc/kubernetes/pki/', 'failed'),
+    ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki/', 'passed'),
+    ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki/some_file.txt', 'passed'),
     ('CIS 1.1.19', 'chown', 'daemon:root', '/etc/kubernetes/pki/', 'failed'),
     ('CIS 1.1.19', 'chown', 'daemon:daemon', '/etc/kubernetes/pki/', 'failed'),
     ('CIS 1.1.19', 'chown', 'root:daemon', '/etc/kubernetes/pki/some_file.txt', 'failed'),
-    ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki/', 'passed'),
-    ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki/some_file.txt', 'passed'),
 
 ]
 
