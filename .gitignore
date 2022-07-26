@@ -34,3 +34,4 @@ tests/allure/reports/*
 # vscode
 .vscode*
 *.code-workspace
+/evaluator/tmpBundles/bundle.tar.gz
