@@ -19,6 +19,7 @@ package awslib
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 )
 
@@ -34,16 +35,20 @@ func NewEcrPublicProvider() *ECRPublicProvider {
 // DescribeAllECRRepositories This method will return a maximum of 100 repository
 /// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
 
-func (provider *ECRPublicProvider) DescribeAllECRRepositories(ctx context.Context) ([]ecr.Repository, error) {
-	/// When repoNames is nil, it will describe all the existing repositories
+func (provider *ECRPublicProvider) DescribeAllECRRepositories(_ context.Context, _ aws.Config, _ string) (ECRProviderResponse, error) {
+	/// When repoNames is nil, it will describe all the existing Repositories
 	var emptyArray = make([]ecr.Repository, 0)
-	return emptyArray, nil
+	return ECRProviderResponse{
+		Repositories: emptyArray,
+	}, nil
 }
 
 // DescribeRepositories This method will return a maximum of 100 repository
 /// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-/// When repoNames is nil, it will describe all the existing repositories
-func (provider *ECRPublicProvider) DescribeRepositories(ctx context.Context, repoNames []string) ([]ecr.Repository, error) {
+/// When repoNames is nil, it will describe all the existing Repositories
+func (provider *ECRPublicProvider) DescribeRepositories(_ context.Context, _ aws.Config, _ []string, _ string) (ECRProviderResponse, error) {
 	var emptyArray = make([]ecr.Repository, 0)
-	return emptyArray, nil
+	return ECRProviderResponse{
+		Repositories: emptyArray,
+	}, nil
 }
