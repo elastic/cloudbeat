@@ -8,7 +8,7 @@ on:
     types: [opened, synchronize, reopened]
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
-  GO_VERSION: 1.18.2
+  GO_VERSION: 1.18.4
   CONTAINER_SUFFIX: ${{ github.run_id }}
 
 concurrency:
