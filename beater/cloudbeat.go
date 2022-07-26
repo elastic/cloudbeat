@@ -96,7 +96,7 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 		return nil, err
 	}
 
-	fetchersRegistry, err := initRegistry(log, c, resourceCh, le)
+	fetchersRegistry, err := initRegistry(log, c, resourceCh)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -157,7 +157,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 
 	if err := bt.data.Run(bt.ctx); err != nil {
-		return nil
+		return err
 	}
 
 	procs, err := bt.configureProcessors(bt.config.Processors)
@@ -211,7 +211,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo, le leaderelection.ElectionManager) (fetchersManager.FetchersRegistry, error) {
+func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) (fetchersManager.FetchersRegistry, error) {
 	registry := fetchersManager.NewFetcherRegistry(log)
 
 	parsedList, err := fetchersManager.Factories.ParseConfigFetchers(log, cfg, ch)

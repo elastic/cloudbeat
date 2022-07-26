@@ -109,7 +109,6 @@ func TestDataTestSuite(t *testing.T) {
 func (s *DataTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.opts = goleak.IgnoreCurrent()
-
 	s.registry = NewFetcherRegistry(s.log)
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
