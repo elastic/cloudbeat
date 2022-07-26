@@ -26,7 +26,6 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -39,19 +38,19 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 )
 
-type ECRFetcherTestSuite struct {
+type EcrFetcherTestSuite struct {
 	suite.Suite
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
 type describeRepoMockParameters struct {
-	EcrRepositories      []ecr.Repository
+	EcrRepositories      awslib.EcrRepositories
 	ExpectedRepositories []string
 }
 
-func TestECRFetcherTestSuite(t *testing.T) {
-	s := new(ECRFetcherTestSuite)
+func TestEcrFetcherTestSuite(t *testing.T) {
+	s := new(EcrFetcherTestSuite)
 	s.log = logp.NewLogger("cloudbeat_ecr_fetcher_test_suite")
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -60,15 +59,15 @@ func TestECRFetcherTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *ECRFetcherTestSuite) SetupTest() {
+func (s *EcrFetcherTestSuite) SetupTest() {
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
-func (s *ECRFetcherTestSuite) TearDownTest() {
+func (s *EcrFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *ECRFetcherTestSuite) TestCreateFetcher() {
+func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 	firstRepositoryName := "cloudbeat"
 	secondRepositoryName := "cloudbeat1"
 	privateRepoWithSlash := "build/cloudbeat"
@@ -99,7 +98,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			map[string]describeRepoMockParameters{
 				"us-east-2": {
 					ExpectedRepositories: []string{"cloudbeat", "cloudbeat1"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: awslib.EcrRepositories{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -133,7 +132,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			map[string]describeRepoMockParameters{
 				"us-east-2": {
 					ExpectedRepositories: []string{"build/cloudbeat", "cloudbeat1"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: awslib.EcrRepositories{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -165,7 +164,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			map[string]describeRepoMockParameters{
 				"us-east-2": {
 					ExpectedRepositories: []string{"cloudbeat"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: awslib.EcrRepositories{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -177,7 +176,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			map[string]describeRepoMockParameters{
 				"": {
 					ExpectedRepositories: []string{"build.security/citools"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: awslib.EcrRepositories{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -221,7 +220,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			map[string]describeRepoMockParameters{
 				"us-east-2": {
 					ExpectedRepositories: []string{"cloudbeat"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: awslib.EcrRepositories{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -231,7 +230,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 				},
 				"us-east-1": {
 					ExpectedRepositories: []string{"cloudbeat1"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: awslib.EcrRepositories{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -272,14 +271,12 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		// Init private repositories provider
 
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Call.
-			Return(func(ctx context.Context, cfg aws.Config, repoNames []string, region string) awslib.ECRProviderResponse {
+			Return(func(ctx context.Context, cfg aws.Config, repoNames []string, region string) awslib.EcrRepositories {
 				response, ok := test.privateRepositoriesResponseByRegion[region]
 				s.True(ok)
 				s.Equal(response.ExpectedRepositories, repoNames)
 
-				return awslib.ECRProviderResponse{
-					Repositories: response.EcrRepositories,
-				}
+				return response.EcrRepositories
 			},
 				func(ctx context.Context, cfg aws.Config, repoNames []string, region string) error {
 					return nil
@@ -288,14 +285,12 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		// Init public repositories provider
 		ecrPublicProvider := &awslib.MockEcrRepositoryDescriber{}
 		ecrPublicProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Call.
-			Return(func(ctx context.Context, cfg aws.Config, repoNames []string, region string) awslib.ECRProviderResponse {
+			Return(func(ctx context.Context, cfg aws.Config, repoNames []string, region string) awslib.EcrRepositories {
 				response, ok := test.publicRepositoriesResponseByRegion[region]
 				s.True(ok)
 				s.Equal(response.ExpectedRepositories, repoNames)
 
-				return awslib.ECRProviderResponse{
-					Repositories: response.EcrRepositories,
-				}
+				return response.EcrRepositories
 			},
 				func(ctx context.Context, cfg aws.Config, repoNames []string, region string) error {
 					return nil
@@ -317,9 +312,9 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 			ImageRegexIndex: PublicEcrImageRegexIndex,
 		}
 
-		ecrFetcher := ECRFetcher{
+		ecrFetcher := EcrFetcher{
 			log:           s.log,
-			cfg:           ECRFetcherConfig{},
+			cfg:           EcrFetcherConfig{},
 			kubeClient:    kubeclient,
 			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
 			resourceCh:    s.resourceCh,
@@ -336,11 +331,11 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 		// The results provided by the channel can return the results in a different order
 		// This method order the results before asserting on them
 		sort.SliceStable(results, func(i, j int) bool {
-			return *results[i].Resource.(ECRResource).RepositoryName <= *results[j].Resource.(ECRResource).RepositoryName
+			return *results[i].Resource.(EcrResource).RepositoryName <= *results[j].Resource.(EcrResource).RepositoryName
 		})
 
 		for i, name := range test.expectedRepositoriesNames {
-			ecrResource := results[i].Resource.(ECRResource)
+			ecrResource := results[i].Resource.(EcrResource)
 			metadata, err := ecrResource.GetMetadata()
 			s.NoError(err)
 			s.Equal(name, *ecrResource.RepositoryName)
@@ -351,7 +346,7 @@ func (s *ECRFetcherTestSuite) TestCreateFetcher() {
 
 }
 
-func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
+func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 	var tests = []struct {
 		identityAccount string
 		region          string
@@ -397,10 +392,10 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		ecrProvider := &awslib.MockEcrRepositoryDescriber{}
-		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(awslib.ECRProviderResponse{}, test.error)
+		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(awslib.EcrRepositories{}, test.error)
 
 		ecrPublicProvider := &awslib.MockEcrRepositoryDescriber{}
-		ecrPublicProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(awslib.ECRProviderResponse{}, test.error)
+		ecrPublicProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(awslib.EcrRepositories{}, test.error)
 
 		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount)
 
@@ -418,9 +413,9 @@ func (s *ECRFetcherTestSuite) TestCreateFetcherErrorCases() {
 			ImageRegexIndex: PublicEcrImageRegexIndex,
 		}
 
-		ecrFetcher := ECRFetcher{
+		ecrFetcher := EcrFetcher{
 			log:           s.log,
-			cfg:           ECRFetcherConfig{},
+			cfg:           EcrFetcherConfig{},
 			kubeClient:    kubeclient,
 			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
 			resourceCh:    s.resourceCh,

@@ -20,24 +20,25 @@ package awslib
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/aws/ec2metadata"
+	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 )
+
+type Ec2Metadata = ec2imds.InstanceIdentityDocument
 
 type Ec2MetadataProvider struct {
 }
 
-type Metadata = ec2metadata.EC2InstanceIdentityDocument
-
 type MetadataProvider interface {
-	GetMetadata(ctx context.Context, cfg aws.Config) (Metadata, error)
+	GetMetadata(ctx context.Context, cfg aws.Config) (Ec2Metadata, error)
 }
 
-func (provider Ec2MetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (Metadata, error) {
-	svc := ec2metadata.New(cfg)
-	identityDocument, err := svc.GetInstanceIdentityDocument(ctx)
+func (provider Ec2MetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (Ec2Metadata, error) {
+	svc := ec2imds.NewFromConfig(cfg)
+	input := &ec2imds.GetInstanceIdentityDocumentInput{}
+	identityDocument, err := svc.GetInstanceIdentityDocument(ctx, input)
 	if err != nil {
-		return ec2metadata.EC2InstanceIdentityDocument{}, err
+		return ec2imds.GetInstanceIdentityDocumentOutput{}.InstanceIdentityDocument, err
 	}
 
-	return identityDocument, err
+	return identityDocument.InstanceIdentityDocument, err
 }

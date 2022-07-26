@@ -20,35 +20,29 @@ package awslib
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ecr"
 )
 
 // TODO Ofir - https://github.com/elastic/security-team/issues/4035
 
-type ECRPublicProvider struct {
+type EcrPublicProvider struct {
 }
 
-func NewEcrPublicProvider() *ECRPublicProvider {
-	return &ECRPublicProvider{}
+func NewEcrPublicProvider() *EcrPublicProvider {
+	return &EcrPublicProvider{}
 }
 
-// DescribeAllECRRepositories This method will return a maximum of 100 repository
-/// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-
-func (provider *ECRPublicProvider) DescribeAllECRRepositories(_ context.Context, _ aws.Config, _ string) (ECRProviderResponse, error) {
-	/// When repoNames is nil, it will describe all the existing Repositories
-	var emptyArray = make([]ecr.Repository, 0)
-	return ECRProviderResponse{
-		Repositories: emptyArray,
-	}, nil
+// DescribeAllEcrRepositories This method will return a maximum of 100 repository
+// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
+func (provider *EcrPublicProvider) DescribeAllEcrRepositories(_ context.Context) (EcrRepositories, error) {
+	// When repoNames is nil, it will describe all the existing repositories
+	var emptyArray = make(EcrRepositories, 0)
+	return emptyArray, nil
 }
 
 // DescribeRepositories This method will return a maximum of 100 repository
-/// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-/// When repoNames is nil, it will describe all the existing Repositories
-func (provider *ECRPublicProvider) DescribeRepositories(_ context.Context, _ aws.Config, _ []string, _ string) (ECRProviderResponse, error) {
-	var emptyArray = make([]ecr.Repository, 0)
-	return ECRProviderResponse{
-		Repositories: emptyArray,
-	}, nil
+// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
+// When repoNames is nil, it will describe all the existing repositories
+func (provider *EcrPublicProvider) DescribeRepositories(_ context.Context, _ aws.Config, _ []string, _ string) (EcrRepositories, error) {
+	var emptyArray = make(EcrRepositories, 0)
+	return emptyArray, nil
 }

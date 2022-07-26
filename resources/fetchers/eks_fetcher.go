@@ -24,28 +24,27 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type EKSFetcher struct {
+type EksFetcher struct {
 	log         *logp.Logger
-	cfg         EKSFetcherConfig
+	cfg         EksFetcherConfig
 	eksProvider awslib.EksClusterDescriber
 	resourceCh  chan fetching.ResourceInfo
 }
 
-type EKSFetcherConfig struct {
+type EksFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
 	ClusterName                   string `config:"clusterName"`
 }
 
-type EKSResource struct {
-	*eks.DescribeClusterResponse
+type EksResource struct {
+	awslib.EksClusterOutput
 }
 
-func (f EKSFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Debug("Starting EKSFetcher.Fetch")
+func (f EksFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting EksFetcher.Fetch")
 
 	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)
 	if err != nil {
@@ -53,21 +52,21 @@ func (f EKSFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 	}
 
 	f.resourceCh <- fetching.ResourceInfo{
-		Resource:      EKSResource{result},
+		Resource:      EksResource{result},
 		CycleMetadata: cMetadata,
 	}
 
 	return nil
 }
 
-func (f EKSFetcher) Stop() {
+func (f EksFetcher) Stop() {
 }
 
-func (r EKSResource) GetData() interface{} {
+func (r EksResource) GetData() interface{} {
 	return r
 }
 
-func (r EKSResource) GetMetadata() (fetching.ResourceMetadata, error) {
+func (r EksResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if r.Cluster.Arn == nil || r.Cluster.Name == nil {
 		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
@@ -75,9 +74,9 @@ func (r EKSResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      *r.Cluster.Arn,
 		Type:    fetching.CloudContainerMgmt,
-		SubType: fetching.EKSType,
+		SubType: fetching.EksType,
 		Name:    *r.Cluster.Name,
 	}, nil
 }
 
-func (r EKSResource) GetElasticCommonData() any { return nil }
+func (r EksResource) GetElasticCommonData() any { return nil }

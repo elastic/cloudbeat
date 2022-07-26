@@ -20,56 +20,52 @@ package awslib
 import (
 	"context"
 	"fmt"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
+	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 )
 
-type ECRProvider struct {
-}
+type EcrRepository types.Repository
+type EcrRepositories []types.Repository
 
-type ECRProviderResponse struct {
-	Repositories    []ecr.Repository
-	PaginationToken string
+type EcrProvider struct {
 }
 
 type EcrRepositoryDescriber interface {
-	DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (ECRProviderResponse, error)
+	DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error)
 }
 
-func NewEcrProvider() *ECRProvider {
-	return &ECRProvider{}
+func NewEcrProvider() *EcrProvider {
+	return &EcrProvider{}
 }
 
-// DescribeAllECRRepositories This method will return a maximum of 100 repository
-/// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-func (provider *ECRProvider) DescribeAllECRRepositories(ctx context.Context, cfg aws.Config, region string) (ECRProviderResponse, error) {
+// DescribeAllEcrRepositories returns a list of all the existing repositories
+func (provider *EcrProvider) DescribeAllEcrRepositories(ctx context.Context, cfg aws.Config, region string) (EcrRepositories, error) {
 	/// When repoNames is nil, it will describe all the existing Repositories
 	return provider.DescribeRepositories(ctx, cfg, nil, region)
 }
 
-// DescribeRepositories This method will return a maximum of 100 repository
-/// If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-/// When repoNames is nil, it will describe all the existing Repositories
-func (provider *ECRProvider) DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (ECRProviderResponse, error) {
+// DescribeRepositories returns a list of repositories that match the given names.
+// When repoNames is empty, it will describe all the existing repositories
+func (provider *EcrProvider) DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error) {
 	if len(repoNames) == 0 {
-		return ECRProviderResponse{}, nil
+		return EcrRepositories{}, nil
 	}
 
 	cfg.Region = region
-	svc := ecr.New(cfg)
+	svc := ecr.NewFromConfig(cfg)
 	input := &ecr.DescribeRepositoriesInput{
 		RepositoryNames: repoNames,
 	}
-	req := svc.DescribeRepositoriesRequest(input)
-
-	response, err := req.Send(ctx)
-	if err != nil {
-		return ECRProviderResponse{}, fmt.Errorf("failed to fetch repository:%s from ecr, error - %w", repoNames, err)
+	var repos EcrRepositories
+	paginator := ecr.NewDescribeRepositoriesPaginator(svc, input)
+	for paginator.HasMorePages() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("error DescribeRepositories with Paginator: %w", err)
+		}
+		repos = append(repos, page.Repositories...)
 	}
 
-	return ECRProviderResponse{
-		Repositories:    response.Repositories,
-		PaginationToken: *response.NextToken,
-	}, err
+	return repos, nil
 }

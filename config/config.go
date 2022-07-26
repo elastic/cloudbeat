@@ -37,7 +37,7 @@ const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 const (
 	InputTypeVanillaK8s = "cloudbeat/vanilla"
-	InputTypeEKS        = "cloudbeat/eks"
+	InputTypeEks        = "cloudbeat/eks"
 )
 
 type Fetcher struct {
@@ -46,7 +46,7 @@ type Fetcher struct {
 
 type Fetchers struct {
 	Vanilla []*config.C `config:"vanilla"` // Vanilla fetchers
-	EKS     []*config.C `config:"eks"`     // EKS fetchers
+	Eks     []*config.C `config:"eks"`     // EKS fetchers
 }
 
 type Config struct {
@@ -69,7 +69,7 @@ type DataYaml struct {
 
 type Benchmarks struct {
 	CisK8s []string `config:"cis_k8s,omitempty" yaml:"cis_k8s,omitempty" json:"cis_k8s,omitempty"`
-	CisEKS []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
+	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
 var DefaultConfig = Config{

@@ -148,12 +148,12 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 		{
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
 			config.Config{
-				Type: config.InputTypeEKS,
+				Type: config.InputTypeEks,
 				Streams: []config.Stream{
 					{
 						DataYaml: &config.DataYaml{
 							ActivatedRules: &config.Benchmarks{
-								CisEKS: []string{
+								CisEks: []string{
 									"cis_1_1_1",
 								},
 							},
@@ -197,7 +197,7 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 	configWithVanillaType, err := config.New(validStreamsVanilla)
 	s.NoError(err)
 
-	validStreamsEKS := agentconfig.MustNewConfigFrom(`
+	validStreamsEks := agentconfig.MustNewConfigFrom(`
     type: cloudbeat/eks
     streams:
       - data_yaml:
@@ -206,7 +206,7 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
               - a
               - b
 `)
-	configWithEksType, err := config.New(validStreamsEKS)
+	configWithEksType, err := config.New(validStreamsEks)
 	s.NoError(err)
 
 	var tests = []struct {
@@ -241,12 +241,12 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 		{
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
 			config.Config{
-				Type: config.InputTypeEKS,
+				Type: config.InputTypeEks,
 				Streams: []config.Stream{
 					{
 						DataYaml: &config.DataYaml{
 							ActivatedRules: &config.Benchmarks{
-								CisEKS: []string{
+								CisEks: []string{
 									"cis_1_1_1",
 								},
 							},
