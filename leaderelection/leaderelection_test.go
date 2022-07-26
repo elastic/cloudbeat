@@ -1,0 +1,96 @@
+package leaderelection
+
+import (
+	"context"
+	"fmt"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/hashicorp/go-uuid"
+	"github.com/stretchr/testify/suite"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
+	le "k8s.io/client-go/tools/leaderelection"
+	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
+	"os"
+	"strings"
+	"testing"
+)
+
+type LeaderElectionTestSuite struct {
+	suite.Suite
+	log                  *logp.Logger
+	mockK8sLeaderElector *MockK8SLeaderElectionService
+}
+
+func TestLeaderElectionTestSuite(t *testing.T) {
+	s := new(LeaderElectionTestSuite)
+	s.log = logp.NewLogger("cloudbeat_leader_election_test_suite")
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
+}
+
+func (s *LeaderElectionTestSuite) SetupTest() {
+	s.mockK8sLeaderElector = &MockK8SLeaderElectionService{}
+}
+
+func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
+	const podId = "my_cloudbeat"
+
+	tests := []struct {
+		name           string
+		want           le.LeaderElectionConfig
+		shouldSetEnvar bool
+		wantErr        bool
+	}{
+		{
+			name: "Leader election config created as expected",
+			want: le.LeaderElectionConfig{
+				Lock: &rl.LeaseLock{
+					LockConfig: rl.ResourceLockConfig{
+						Identity:      fmt.Sprintf("%s_%s", LeaderLeaseName, podId),
+						EventRecorder: nil,
+					},
+				},
+			},
+			shouldSetEnvar: true,
+			wantErr:        false,
+		},
+		{
+			name:           "No POD_NAME env var was set using uuid as an identifier",
+			want:           le.LeaderElectionConfig{},
+			shouldSetEnvar: false,
+			wantErr:        false,
+		},
+	}
+
+	for _, tt := range tests {
+		if tt.shouldSetEnvar {
+			os.Setenv(PodNameEnvar, podId)
+		}
+
+		got, err := buildConfig(context.TODO(), s.log, k8sfake.NewSimpleClientset(), make(chan bool))
+		if (err != nil) != tt.wantErr {
+			s.FailNow("unexpected error: %v", err)
+		}
+
+		if !tt.shouldSetEnvar {
+			// verify that the lock identity has been constructed with uuid
+			err := parseUUID(got)
+			s.NoError(err)
+		} else {
+			s.Equal(got.Lock.Identity(), tt.want.Lock.Identity(), "buildConfig() got = %v, want %v", got, tt.want)
+		}
+
+		os.Unsetenv(PodNameEnvar)
+	}
+}
+
+func parseUUID(cfg le.LeaderElectionConfig) error {
+	id := cfg.Lock.Identity()
+	parts := strings.Split(id, "_")
+	uuidAsString := parts[len(parts)-1]
+	_, err := uuid.ParseUUID(uuidAsString)
+
+	return err
+}

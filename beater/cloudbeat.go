@@ -156,7 +156,9 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		return err
 	}
 
-	bt.data.Run(bt.ctx)
+	if err := bt.data.Run(bt.ctx); err != nil {
+		return nil
+	}
 
 	procs, err := bt.configureProcessors(bt.config.Processors)
 	if err != nil {
