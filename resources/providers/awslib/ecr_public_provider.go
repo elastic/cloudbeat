@@ -19,21 +19,21 @@ package awslib
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
 // TODO Ofir - https://github.com/elastic/security-team/issues/4035
 
-type ECRPublicProvider struct {
+type EcrPublicProvider struct {
 }
 
-func NewEcrPublicProvider() *ECRPublicProvider {
-	return &ECRPublicProvider{}
+func NewEcrPublicProvider() *EcrPublicProvider {
+	return &EcrPublicProvider{}
 }
 
 // DescribeAllEcrRepositories This method will return a maximum of 100 repository
 // If we will ever wish to change it, DescribeRepositories returns results in paginated manner
-
-func (provider *ECRPublicProvider) DescribeAllEcrRepositories(_ context.Context) (EcrRepositories, error) {
+func (provider *EcrPublicProvider) DescribeAllEcrRepositories(_ context.Context) (EcrRepositories, error) {
 	// When repoNames is nil, it will describe all the existing repositories
 	var emptyArray = make(EcrRepositories, 0)
 	return emptyArray, nil
@@ -42,7 +42,7 @@ func (provider *ECRPublicProvider) DescribeAllEcrRepositories(_ context.Context)
 // DescribeRepositories This method will return a maximum of 100 repository
 // If we will ever wish to change it, DescribeRepositories returns results in paginated manner
 // When repoNames is nil, it will describe all the existing repositories
-func (provider *ECRPublicProvider) DescribeRepositories(_ context.Context, _ []string) (EcrRepositories, error) {
+func (provider *EcrPublicProvider) DescribeRepositories(_ context.Context, _ aws.Config, _ []string, _ string) (EcrRepositories, error) {
 	var emptyArray = make(EcrRepositories, 0)
 	return emptyArray, nil
 }

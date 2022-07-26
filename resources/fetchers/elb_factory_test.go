@@ -94,7 +94,7 @@ default_region: us2-east
 					return nil
 				},
 			)
-		factory := &ELBFactory{
+		factory := &ElbFactory{
 			KubernetesProvider: mockedKubernetesClientGetter,
 			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 				return identityProvider

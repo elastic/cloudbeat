@@ -90,10 +90,10 @@ type AwsBaseFetcherConfig struct {
 const (
 	KubeAPIType = "kube-api"
 
-	ECRType        = "aws-ecr"
-	ELBType        = "aws-elb"
+	EcrType        = "aws-ecr"
+	ElbType        = "aws-elb"
 	RolePolicyType = "aws-role-policy"
-	EKSType        = "aws-eks"
+	EksType        = "aws-eks"
 
 	CloudIdentity          = "iam"
 	CloudContainerMgmt     = "caas" // containers as a service

@@ -109,10 +109,10 @@ func (r ElbResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}
 
 	return fetching.ResourceMetadata{
-		// A compromise because aws-sdk do not return an arn for an ELB
+		// A compromise because aws-sdk do not return an arn for an Elb
 		ID:      fmt.Sprintf("%s-%s", *r.identity.Account, *r.lb.LoadBalancerName),
 		Type:    fetching.CloudLoadBalancer,
-		SubType: fetching.ELBType,
+		SubType: fetching.ElbType,
 		Name:    *r.lb.LoadBalancerName,
 	}, nil
 }

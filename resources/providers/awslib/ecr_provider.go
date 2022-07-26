@@ -31,11 +31,6 @@ type EcrRepositories []types.Repository
 type EcrProvider struct {
 }
 
-type EcrProviderResponse struct {
-	Repositories    EcrRepositories
-	PaginationToken string
-}
-
 type EcrRepositoryDescriber interface {
 	DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error)
 }
@@ -44,8 +39,8 @@ func NewEcrProvider() *EcrProvider {
 	return &EcrProvider{}
 }
 
-// DescribeAllECRRepositories returns a list of all the existing repositories
-func (provider *EcrProvider) DescribeAllECRRepositories(ctx context.Context, cfg aws.Config, region string) (EcrRepositories, error) {
+// DescribeAllEcrRepositories returns a list of all the existing repositories
+func (provider *EcrProvider) DescribeAllEcrRepositories(ctx context.Context, cfg aws.Config, region string) (EcrRepositories, error) {
 	/// When repoNames is nil, it will describe all the existing Repositories
 	return provider.DescribeRepositories(ctx, cfg, nil, region)
 }

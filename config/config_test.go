@@ -474,6 +474,6 @@ streams:
 
 		s.Equal(test.expectedType, c.Type)
 		s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
-		s.Equal(test.expectedEksActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisEKS)
+		s.Equal(test.expectedEksActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisEks)
 	}
 }

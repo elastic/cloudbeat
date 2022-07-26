@@ -31,18 +31,18 @@ type EksClusterDescriber interface {
 	DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error)
 }
 
-type EKSProvider struct {
+type EksProvider struct {
 	client *eks.Client
 }
 
-func NewEksProvider(cfg aws.Config) *EKSProvider {
+func NewEksProvider(cfg aws.Config) *EksProvider {
 	svc := eks.NewFromConfig(cfg)
-	return &EKSProvider{
+	return &EksProvider{
 		client: svc,
 	}
 }
 
-func (provider EKSProvider) DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error) {
+func (provider EksProvider) DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error) {
 	input := &eks.DescribeClusterInput{
 		Name: &clusterName,
 	}

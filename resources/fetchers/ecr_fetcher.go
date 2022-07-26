@@ -27,7 +27,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -101,14 +100,14 @@ func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) (awslib.EcrRepositories, error) {
 	regionToReposMap := getAwsRepositories(podsList, describer)
 	f.log.Debugf("sending pods to ecrProviders: %v", regionToReposMap)
-	awsRepositories := make([]ecr.Repository, 0)
+	awsRepositories := make(awslib.EcrRepositories, 0)
 	for region, repositories := range regionToReposMap {
 		// Add configuration
 		describedRepo, err := describer.Provider.DescribeRepositories(ctx, f.awsConfig, repositories, region)
 		if err != nil {
 			f.log.Errorf("could not retrieve pod's aws repositories for region %s: %w", region, err)
 		} else {
-			awsRepositories = append(awsRepositories, describedRepo.Repositories...)
+			awsRepositories = append(awsRepositories, describedRepo...)
 		}
 	}
 	return awsRepositories, nil
@@ -165,7 +164,7 @@ func (res EcrResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      *res.RepositoryArn,
 		Type:    fetching.CloudContainerRegistry,
-		SubType: fetching.ECRType,
+		SubType: fetching.EcrType,
 		Name:    *res.RepositoryName,
 	}, nil
 }

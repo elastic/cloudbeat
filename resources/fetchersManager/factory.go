@@ -61,7 +61,7 @@ func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig
 func (fa *factories) getConditions(log *logp.Logger, name string) ([]fetching.Condition, error) {
 	c := make([]fetching.Condition, 0)
 	switch name {
-	case fetching.KubeAPIType, fetching.ECRType, fetching.ELBType:
+	case fetching.KubeAPIType, fetching.EcrType, fetching.ElbType:
 		// TODO: Use fetcher's kubeconfig configuration
 		client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
 		if err != nil {
@@ -99,8 +99,8 @@ func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg config.Config, ch
 
 func (fa *factories) loadFetchers(cfg config.Config) []*agentconfig.C {
 	var fetchers []*agentconfig.C
-	if cfg.Type == config.InputTypeEKS {
-		fetchers = cfg.Fetchers.EKS
+	if cfg.Type == config.InputTypeEks {
+		fetchers = cfg.Fetchers.Eks
 	} else {
 		fetchers = cfg.Fetchers.Vanilla
 	}
@@ -126,7 +126,7 @@ func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, c
 // This function takes the configuration file provided by the integration the `cfg` file
 // and depending on the input type, extract the relevant credentials and add them to the fetcher config
 func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg config.Config, fcfg *agentconfig.C) {
-	if cfg.Type == config.InputTypeEKS {
+	if cfg.Type == config.InputTypeEks {
 		err := fcfg.Merge(cfg.Streams[0].AWSConfig)
 		if err != nil {
 			log.Errorf("Failed to merge aws configuration to fetcher configuration", err)

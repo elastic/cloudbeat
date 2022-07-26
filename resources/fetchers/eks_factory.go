@@ -30,7 +30,7 @@ import (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.EKSType, &EksFactory{
+	fetchersManager.Factories.RegisterFactory(fetching.EksType, &EksFactory{
 		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }

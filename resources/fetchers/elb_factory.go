@@ -37,21 +37,21 @@ import (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.ELBType, &ELBFactory{
+	fetchersManager.Factories.RegisterFactory(fetching.ElbType, &ElbFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
 		IdentityProvider:   awslib.GetIdentityClient,
 		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }
 
-type ELBFactory struct {
+type ElbFactory struct {
 	KubernetesProvider providers.KubernetesClientGetter
 	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
 	AwsConfigProvider  config.AwsConfigProvider
 }
 
-func (f *ELBFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	log.Debug("Starting ELBFactory.Create")
+func (f *ElbFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting ElbFactory.Create")
 
 	cfg := ElbFetcherConfig{}
 	err := c.Unpack(&cfg)
@@ -61,7 +61,7 @@ func (f *ELBFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *ELBFactory) CreateFrom(log *logp.Logger, cfg ElbFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *ElbFactory) CreateFrom(log *logp.Logger, cfg ElbFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

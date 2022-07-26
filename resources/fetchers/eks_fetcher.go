@@ -74,7 +74,7 @@ func (r EksResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      *r.Cluster.Arn,
 		Type:    fetching.CloudContainerMgmt,
-		SubType: fetching.EKSType,
+		SubType: fetching.EksType,
 		Name:    *r.Cluster.Name,
 	}, nil
 }

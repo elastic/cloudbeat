@@ -257,7 +257,7 @@ fetchers:
 			err = c.Fetchers.Vanilla[0].Unpack(&fetcher)
 			s.NoError(err)
 		} else {
-			err = c.Fetchers.EKS[0].Unpack(&fetcher)
+			err = c.Fetchers.Eks[0].Unpack(&fetcher)
 			s.NoError(err)
 		}
 

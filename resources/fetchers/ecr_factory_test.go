@@ -103,7 +103,7 @@ default_region: us1-east
 		identityProvider := &awslib.MockIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
 
-		factory := &ECRFactory{
+		factory := &EcrFactory{
 			KubernetesProvider: mockedKubernetesClientGetter,
 			AwsConfigProvider:  mockedConfigGetter,
 			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
