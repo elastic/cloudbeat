@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
@@ -68,7 +69,12 @@ default_region: us1-east
 			"us1-east",
 			"my-account",
 			[]string{
-				"^my-account\\.dkr\\.ecr\\.us1-east\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?",
+
+				// this regex should identify images with an ecr regex template
+				// <account-id>.dkr.ecr.<region>.amazonaws.com/<repository-name>
+				"^my-account\\.dkr\\.ecr\\.([-\\w]+)\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?",
+				// this regex should identify images with a public ecr regex template
+				// public.ecr.aws/<aws-alias>/<repository>
 				"public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?",
 			},
 		},
@@ -94,10 +100,10 @@ default_region: us1-east
 		identity := awslib.Identity{
 			Account: &test.account,
 		}
-		identityProvider := &awslib.MockedIdentityProviderGetter{}
+		identityProvider := &awslib.MockIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
 
-		factory := &ECRFactory{
+		factory := &EcrFactory{
 			KubernetesProvider: mockedKubernetesClientGetter,
 			AwsConfigProvider:  mockedConfigGetter,
 			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
@@ -112,11 +118,16 @@ default_region: us1-east
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		ecrFetcher, ok := fetcher.(*ECRFetcher)
+		ecrFetcher, ok := fetcher.(*EcrFetcher)
+		expectedEcrImageRegexIndex := 2
+		expectedEcrPublicImageRegexIndex := 1
+
 		s.True(ok)
 		s.Equal(kubeclient, ecrFetcher.kubeClient)
 		s.Equal(test.expectedRegex[0], ecrFetcher.PodDescribers[0].FilterRegex.String())
+		s.Equal(expectedEcrImageRegexIndex, ecrFetcher.PodDescribers[0].ImageRegexIndex)
 		s.Equal(test.expectedRegex[1], ecrFetcher.PodDescribers[1].FilterRegex.String())
+		s.Equal(expectedEcrPublicImageRegexIndex, ecrFetcher.PodDescribers[1].ImageRegexIndex)
 	}
 }
 
@@ -128,7 +139,7 @@ func CreateSdkConfig(config aws.ConfigAWS, region string) awssdk.Config {
 		SessionToken:    config.SessionToken,
 	}
 
-	awsConfig.Credentials = awssdk.StaticCredentialsProvider{
+	awsConfig.Credentials = credentials.StaticCredentialsProvider{
 		Value: awsCredentials,
 	}
 	awsConfig.Region = region

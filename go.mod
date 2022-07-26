@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
-	github.com/aws/aws-sdk-go-v2 v0.24.0
+	github.com/aws/aws-sdk-go-v2 v1.16.7
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
@@ -32,10 +32,17 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go-v2/credentials v1.12.7
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.7
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.17.8
+	github.com/aws/aws-sdk-go-v2/service/eks v1.21.4
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.14.8
+	github.com/aws/aws-sdk-go-v2/service/iam v1.18.4
+	github.com/aws/aws-sdk-go-v2/service/sts v1.16.8
 	github.com/djherbis/times v1.5.0
 	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
-	github.com/elastic/elastic-agent-autodiscover v0.1.1
-	github.com/elastic/elastic-agent-libs v0.2.5
+	github.com/elastic/elastic-agent-autodiscover v0.2.1
+	github.com/elastic/elastic-agent-libs v0.2.9
 	github.com/elastic/go-licenser v0.4.0
 	github.com/open-policy-agent/opa v0.42.0
 	github.com/pkg/errors v0.9.1
@@ -45,7 +52,20 @@ require (
 	k8s.io/api v0.24.2
 )
 
-require github.com/dschmidt/go-layerfs v0.1.0 // indirect
+require (
+	github.com/aws/aws-sdk-go-v2/config v1.15.12 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.14 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.8 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.14 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.36.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.18.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.11.10 // indirect
+	github.com/aws/smithy-go v1.12.0 // indirect
+	github.com/dschmidt/go-layerfs v0.1.0 // indirect
+	github.com/elastic/elastic-agent-shipper-client v0.2.0 // indirect
+	github.com/pierrec/lz4/v4 v4.1.15 // indirect
+)
 
 require (
 	code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f // indirect
@@ -59,8 +79,8 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220622083326-cab8871124af
-	github.com/elastic/csp-security-policies v1.0.7
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220722154342-f5ff0a9495c2
+	github.com/elastic/csp-security-policies v1.0.8-0.20220725171451-c367d45accb6
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.6 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -145,12 +165,12 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/elastic/elastic-agent-client/v7 v7.0.0-20220607160924-1a71765a8bbe // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.4.1 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.4.3 // indirect
 	github.com/elastic/go-concert v0.2.0 // indirect
 	github.com/elastic/go-lumber v0.1.0 // indirect
 	github.com/elastic/go-seccomp-bpf v1.2.0 // indirect
 	github.com/elastic/go-structform v0.0.9 // indirect
-	github.com/elastic/go-sysinfo v1.8.0 // indirect
+	github.com/elastic/go-sysinfo v1.8.1 // indirect
 	github.com/elastic/go-ucfg v0.8.6
 	github.com/elastic/go-windows v1.0.1 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
@@ -223,7 +243,7 @@ require (
 	golang.org/x/net v0.0.0-20220621193019-9d032be2e588 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
-	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c // indirect
+	golang.org/x/sys v0.0.0-20220702020025-31831981b65f // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	google.golang.org/genproto v0.0.0-20220622131801-db39fadba55f // indirect
@@ -239,7 +259,6 @@ replace (
 	github.com/Microsoft/go-winio => github.com/bi-zone/go-winio v0.4.15
 	github.com/Shopify/sarama => github.com/elastic/sarama v1.19.1-0.20210823122811-11c3ef800752
 	github.com/apoydence/eachers => github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 //indirect, see https://github.com/elastic/beats/pull/29780 for details.
-	github.com/cucumber/godog => github.com/cucumber/godog v0.8.1
 	github.com/dop251/goja => github.com/andrewkroh/goja v0.0.0-20190128172624-dd2ac4456e20
 	github.com/dop251/goja_nodejs => github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6
 	github.com/fsnotify/fsnotify => github.com/adriansr/fsnotify v1.4.8-0.20211018144411-a81f2b630e7c
