@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
@@ -99,10 +100,10 @@ default_region: us1-east
 		identity := awslib.Identity{
 			Account: &test.account,
 		}
-		identityProvider := &awslib.MockedIdentityProviderGetter{}
+		identityProvider := &awslib.MockIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
 
-		factory := &ECRFactory{
+		factory := &EcrFactory{
 			KubernetesProvider: mockedKubernetesClientGetter,
 			AwsConfigProvider:  mockedConfigGetter,
 			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
@@ -117,7 +118,7 @@ default_region: us1-east
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		ecrFetcher, ok := fetcher.(*ECRFetcher)
+		ecrFetcher, ok := fetcher.(*EcrFetcher)
 		expectedEcrImageRegexIndex := 2
 		expectedEcrPublicImageRegexIndex := 1
 
@@ -138,7 +139,7 @@ func CreateSdkConfig(config aws.ConfigAWS, region string) awssdk.Config {
 		SessionToken:    config.SessionToken,
 	}
 
-	awsConfig.Credentials = awssdk.StaticCredentialsProvider{
+	awsConfig.Credentials = credentials.StaticCredentialsProvider{
 		Value: awsCredentials,
 	}
 	awsConfig.Region = region

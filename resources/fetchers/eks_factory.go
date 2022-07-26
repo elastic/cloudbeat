@@ -30,19 +30,19 @@ import (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.EKSType, &EKSFactory{
+	fetchersManager.Factories.RegisterFactory(fetching.EksType, &EksFactory{
 		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }
 
-type EKSFactory struct {
+type EksFactory struct {
 	AwsConfigProvider config.AwsConfigProvider
 }
 
-func (f *EKSFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	log.Debug("Starting EKSFactory.Create")
+func (f *EksFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting EksFactory.Create")
 
-	cfg := EKSFetcherConfig{}
+	cfg := EksFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (f *EKSFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *EksFactory) CreateFrom(log *logp.Logger, cfg EksFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
 	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
@@ -59,7 +59,7 @@ func (f *EKSFactory) CreateFrom(log *logp.Logger, cfg EKSFetcherConfig, ch chan 
 	}
 	eksProvider := awslib.NewEksProvider(awsConfig)
 
-	fe := &EKSFetcher{
+	fe := &EksFetcher{
 		log:         log,
 		cfg:         cfg,
 		eksProvider: eksProvider,

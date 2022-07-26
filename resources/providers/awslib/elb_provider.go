@@ -21,36 +21,44 @@ import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
+	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
+	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 )
 
-type ELBLoadBalancerDescriber interface {
-	DescribeLoadBalancer(ctx context.Context, balancersNames []string) ([]elasticloadbalancing.LoadBalancerDescription, error)
+type ElbLoadBalancerDescriptions []types.LoadBalancerDescription
+type ElbLoadBalancersDescription types.LoadBalancerDescription
+
+type ElbLoadBalancerDescriber interface {
+	DescribeLoadBalancer(ctx context.Context, balancersNames []string) (ElbLoadBalancerDescriptions, error)
 }
 
-type ELBProvider struct {
-	client *elasticloadbalancing.Client
+type ElbProvider struct {
+	client *elb.Client
 }
 
-func NewELBProvider(cfg aws.Config) *ELBProvider {
-	svc := elasticloadbalancing.New(cfg)
-	return &ELBProvider{
+func NewElbProvider(cfg aws.Config) *ElbProvider {
+	svc := elb.NewFromConfig(cfg)
+	return &ElbProvider{
 		client: svc,
 	}
 }
 
-// DescribeLoadBalancer method will return up to 400 results
-// If we will ever want to increase this number, DescribeLoadBalancers support paginated requests
-func (provider ELBProvider) DescribeLoadBalancer(ctx context.Context, balancersNames []string) ([]elasticloadbalancing.LoadBalancerDescription, error) {
-	input := &elasticloadbalancing.DescribeLoadBalancersInput{
+// DescribeLoadBalancer returns LoadBalancerDescriptions which contain information about the load balancers.
+// When balancersNames is empty, it will describe all the existing load balancers
+func (provider ElbProvider) DescribeLoadBalancer(ctx context.Context, balancersNames []string) (ElbLoadBalancerDescriptions, error) {
+	input := &elb.DescribeLoadBalancersInput{
 		LoadBalancerNames: balancersNames,
 	}
 
-	req := provider.client.DescribeLoadBalancersRequest(input)
-	response, err := req.Send(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to describe load balancers %s from elb, error - %w", balancersNames, err)
+	var loadBalancerDescriptions ElbLoadBalancerDescriptions
+	paginator := elb.NewDescribeLoadBalancersPaginator(provider.client, input)
+	for paginator.HasMorePages() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("error DescribeRepositories with Paginator: %w", err)
+		}
+		loadBalancerDescriptions = append(loadBalancerDescriptions, page.LoadBalancerDescriptions...)
 	}
 
-	return response.LoadBalancerDescriptions, err
+	return loadBalancerDescriptions, nil
 }

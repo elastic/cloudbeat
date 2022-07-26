@@ -129,7 +129,7 @@ func (r *fetchersRegistry) Stop() {
 func (r *fetchersRegistry) getConditions(name string) ([]fetching.Condition, error) {
 	c := make([]fetching.Condition, 0)
 	switch name {
-	case fetching.KubeAPIType, fetching.ECRType, fetching.ELBType:
+	case fetching.KubeAPIType, fetching.EcrType, fetching.ElbType:
 		// TODO: Use fetcher's kubeconfig configuration
 		c = append(c, conditions.NewLeaseFetcherCondition(r.log))
 	}

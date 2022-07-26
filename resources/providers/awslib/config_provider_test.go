@@ -19,7 +19,6 @@ package awslib
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws/ec2metadata"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"testing"
 
@@ -72,7 +71,7 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 		metaDataGetter := &MockMetadataProvider{}
 		metaDataGetter.EXPECT().
 			GetMetadata(mock.Anything, mock.Anything).
-			Return(ec2metadata.EC2InstanceIdentityDocument{
+			Return(Ec2Metadata{
 				Region: test.region,
 			}, nil)
 

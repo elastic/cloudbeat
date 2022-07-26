@@ -76,7 +76,7 @@ session_token: session
 					return nil
 				},
 			)
-		factory := &EKSFactory{mockedConfigGetter}
+		factory := &EksFactory{mockedConfigGetter}
 
 		cfg, err := agentconfig.NewConfigFrom(test.config)
 		s.NoError(err)
@@ -85,7 +85,7 @@ session_token: session
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		eksFetcher, ok := fetcher.(*EKSFetcher)
+		eksFetcher, ok := fetcher.(*EksFetcher)
 		s.True(ok)
 		s.Equal("my-cluster", eksFetcher.cfg.ClusterName)
 		s.Equal("key", eksFetcher.cfg.AwsConfig.AccessKeyID)
