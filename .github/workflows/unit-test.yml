@@ -12,7 +12,7 @@ on:
 
 env:
   K8S_MANIFEST_DIR: deploy
-  GO_VERSION: 1.18.2
+  GO_VERSION: 1.18.4
 
 jobs:
   unit_tests:
@@ -59,7 +59,7 @@ jobs:
         if: env.GIT_DIFF
         uses: stefanprodan/kube-tools@v1
         with:
-          kubectl: 1.18.2
+          kubectl: 1.18.4
           kubeval: v0.16.1
           command: |
             kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/*.yml
