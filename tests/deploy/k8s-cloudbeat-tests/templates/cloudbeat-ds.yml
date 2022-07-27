@@ -234,7 +234,7 @@ data:
     #logging.selectors: ["publisher"]
 
     # Send all logging output to stderr. The default is false.
-    logging.to_stderr: true
+    #logging.to_stderr: false
 ---
 apiVersion: v1
 kind: ServiceAccount

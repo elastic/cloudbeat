@@ -72,14 +72,12 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 	secondRepositoryName := "cloudbeat1"
 	privateRepoWithSlash := "build/cloudbeat"
 	repoArn := "arn:aws:ecr:us-west-2:012345678910:repository/ubuntu"
-	publicRepoName := "build.security/citools"
 
 	var tests = []struct {
 		identityAccount                     string
 		namespace                           string
 		containers                          []v1.Container
 		privateRepositoriesResponseByRegion map[string]describeRepoMockParameters
-		publicRepositoriesResponseByRegion  map[string]describeRepoMockParameters
 		expectedRepositoriesNames           []string
 	}{
 		{
@@ -113,7 +111,6 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 						}},
 				},
 			},
-			map[string]describeRepoMockParameters{},
 			[]string{firstRepositoryName, secondRepositoryName},
 		},
 		{
@@ -145,47 +142,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 							RepositoryUri:              nil,
 						}},
 				},
-			}, map[string]describeRepoMockParameters{},
+			},
 			[]string{privateRepoWithSlash, secondRepositoryName},
-		},
-		{
-			"123456789123",
-			"my-namespace",
-			[]v1.Container{
-				{
-					Image: "123456789123.dkr.ecr.us-east-2.amazonaws.com/cloudbeat:latest",
-					Name:  "cloudbeat",
-				},
-				{
-					Image: "public.ecr.aws/a7d1s9l0/build.security/citools",
-					Name:  "build.security/citools",
-				},
-			},
-			map[string]describeRepoMockParameters{
-				"us-east-2": {
-					ExpectedRepositories: []string{"cloudbeat"},
-					EcrRepositories: awslib.EcrRepositories{
-						{
-							RepositoryArn:              &repoArn,
-							ImageScanningConfiguration: nil,
-							RepositoryName:             &firstRepositoryName,
-							RepositoryUri:              nil,
-						}},
-				},
-			},
-			map[string]describeRepoMockParameters{
-				"": {
-					ExpectedRepositories: []string{"build.security/citools"},
-					EcrRepositories: awslib.EcrRepositories{
-						{
-							RepositoryArn:              &repoArn,
-							ImageScanningConfiguration: nil,
-							RepositoryName:             &publicRepoName,
-							RepositoryUri:              nil,
-						}},
-				},
-			},
-			[]string{publicRepoName, firstRepositoryName},
 		},
 		{
 			"123456789123",
@@ -200,7 +158,6 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 					Name:  "cloudbeat1",
 				},
 			},
-			map[string]describeRepoMockParameters{},
 			map[string]describeRepoMockParameters{},
 			[]string{},
 		},
@@ -239,7 +196,6 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 						}},
 				},
 			},
-			map[string]describeRepoMockParameters{},
 			[]string{firstRepositoryName, secondRepositoryName},
 		},
 	}
@@ -282,42 +238,19 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 					return nil
 				})
 
-		// Init public repositories provider
-		ecrPublicProvider := &awslib.MockEcrRepositoryDescriber{}
-		ecrPublicProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Call.
-			Return(func(ctx context.Context, cfg aws.Config, repoNames []string, region string) awslib.EcrRepositories {
-				response, ok := test.publicRepositoriesResponseByRegion[region]
-				s.True(ok)
-				s.Equal(response.ExpectedRepositories, repoNames)
-
-				return response.EcrRepositories
-			},
-				func(ctx context.Context, cfg aws.Config, repoNames []string, region string) error {
-					return nil
-				})
-
 		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount)
 
 		privateEcrExecutor := PodDescriber{
-			FilterRegex:     regexp.MustCompile(privateRepoRegex),
-			Provider:        ecrProvider,
-			ExtractRegion:   ExtractRegionFromEcrImage,
-			ImageRegexIndex: EcrImageRegexGroup,
-		}
-
-		publicEcrExecutor := PodDescriber{
-			FilterRegex:     regexp.MustCompile(PublicRepoRegex),
-			Provider:        ecrPublicProvider,
-			ExtractRegion:   ExtractRegionFromPublicEcrImage,
-			ImageRegexIndex: PublicEcrImageRegexIndex,
+			FilterRegex: regexp.MustCompile(privateRepoRegex),
+			Provider:    ecrProvider,
 		}
 
 		ecrFetcher := EcrFetcher{
-			log:           s.log,
-			cfg:           EcrFetcherConfig{},
-			kubeClient:    kubeclient,
-			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
-			resourceCh:    s.resourceCh,
+			log:          s.log,
+			cfg:          EcrFetcherConfig{},
+			kubeClient:   kubeclient,
+			PodDescriber: privateEcrExecutor,
+			resourceCh:   s.resourceCh,
 		}
 
 		ctx := context.Background()
@@ -394,31 +327,18 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 		ecrProvider := &awslib.MockEcrRepositoryDescriber{}
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(awslib.EcrRepositories{}, test.error)
 
-		ecrPublicProvider := &awslib.MockEcrRepositoryDescriber{}
-		ecrPublicProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(awslib.EcrRepositories{}, test.error)
-
 		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount)
 
 		privateEcrExecutor := PodDescriber{
-			FilterRegex:     regexp.MustCompile(privateRepoRegex),
-			Provider:        ecrProvider,
-			ExtractRegion:   ExtractRegionFromEcrImage,
-			ImageRegexIndex: EcrImageRegexGroup,
+			FilterRegex: regexp.MustCompile(privateRepoRegex),
+			Provider:    ecrProvider,
 		}
-
-		publicEcrExecutor := PodDescriber{
-			FilterRegex:     regexp.MustCompile(PublicRepoRegex),
-			Provider:        ecrPublicProvider,
-			ExtractRegion:   ExtractRegionFromPublicEcrImage,
-			ImageRegexIndex: PublicEcrImageRegexIndex,
-		}
-
 		ecrFetcher := EcrFetcher{
-			log:           s.log,
-			cfg:           EcrFetcherConfig{},
-			kubeClient:    kubeclient,
-			PodDescribers: []PodDescriber{privateEcrExecutor, publicEcrExecutor},
-			resourceCh:    s.resourceCh,
+			log:          s.log,
+			cfg:          EcrFetcherConfig{},
+			kubeClient:   kubeclient,
+			PodDescriber: privateEcrExecutor,
+			resourceCh:   s.resourceCh,
 		}
 
 		ctx := context.Background()
