@@ -33,8 +33,7 @@ import (
 
 type LeaderElectionTestSuite struct {
 	suite.Suite
-	log                  *logp.Logger
-	mockK8sLeaderElector *MockK8SLeaderElectionService
+	log *logp.Logger
 }
 
 func TestLeaderElectionTestSuite(t *testing.T) {
@@ -45,10 +44,6 @@ func TestLeaderElectionTestSuite(t *testing.T) {
 	}
 
 	suite.Run(t, s)
-}
-
-func (s *LeaderElectionTestSuite) SetupTest() {
-	s.mockK8sLeaderElector = &MockK8SLeaderElectionService{}
 }
 
 func (s *LeaderElectionTestSuite) TestManager_buildConfig() {

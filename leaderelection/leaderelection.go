@@ -46,13 +46,12 @@ var (
 
 type ElectionManager interface {
 	IsLeader() bool
-	Run() error
+	Run(ctx context.Context) error
 }
 
 type Manager struct {
 	log    *logp.Logger
-	ctx    context.Context
-	leader K8SLeaderElectionService
+	leader *le.LeaderElector
 	block  chan bool
 }
 
@@ -66,15 +65,14 @@ func NewLeaderElector(ctx context.Context, log *logp.Logger, cfg config.Config) 
 
 	initOnce.Do(func() {
 		var leConfig le.LeaderElectionConfig
-		var leader K8SLeaderElectionService
+		var leader *le.LeaderElector
 
 		block := make(chan bool)
 		leConfig, err = buildConfig(ctx, log, kubeClient, block)
-		leader, err = NewK8sLeaderElector(leConfig)
+		leader, err = le.NewLeaderElector(leConfig)
 
 		manager = &Manager{
 			log:    log,
-			ctx:    ctx,
 			leader: leader,
 			block:  block,
 		}
@@ -92,8 +90,8 @@ func (m *Manager) IsLeader() bool {
 }
 
 // Run leader election is blocking until a leader is being elected or timeout has reached.
-func (m *Manager) Run() error {
-	go m.leader.Run(m.ctx)
+func (m *Manager) Run(ctx context.Context) error {
+	go m.leader.Run(ctx)
 	m.log.Infof("started leader election")
 
 	select {
