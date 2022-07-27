@@ -37,28 +37,22 @@ const (
 	// PrivateRepoRegexTemplate should identify images with an ecr regex template
 	// <account-id>.dkr.ecr.<region>.amazonaws.com/<repository-name>
 	PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.([-\\w]+)\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
-	// PublicRepoRegex should identify images with a public ecr regex template
-	// public.ecr.aws/<aws-alias>/<repository>
-	PublicRepoRegex          = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
 	EcrRegionRegexGroup      = 1
-	PublicEcrImageRegexIndex = 1
 	EcrImageRegexGroup       = 2
 )
 
 type EcrFetcher struct {
-	log           *logp.Logger
-	cfg           EcrFetcherConfig
-	kubeClient    k8s.Interface
-	PodDescribers []PodDescriber
-	resourceCh    chan fetching.ResourceInfo
-	awsConfig     aws.Config
+	log          *logp.Logger
+	cfg          EcrFetcherConfig
+	kubeClient   k8s.Interface
+	PodDescriber PodDescriber
+	resourceCh   chan fetching.ResourceInfo
+	awsConfig    aws.Config
 }
 
 type PodDescriber struct {
-	FilterRegex     *regexp.Regexp
-	Provider        awslib.EcrRepositoryDescriber
-	ExtractRegion   func(describer PodDescriber, repo string) (string, error)
-	ImageRegexIndex int
+	FilterRegex *regexp.Regexp
+	Provider    awslib.EcrRepositoryDescriber
 }
 
 type EcrFetcherConfig struct {
@@ -82,16 +76,14 @@ func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 		return err
 	}
 
-	for _, podDescriber := range f.PodDescribers {
-		ecrDescribedRepositories, err := f.describePodImagesRepositories(ctx, podsList, podDescriber)
-		if err != nil {
-			return fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
-		}
-		for _, repository := range ecrDescribedRepositories {
-			f.resourceCh <- fetching.ResourceInfo{
-				Resource:      EcrResource{awslib.EcrRepository(repository)},
-				CycleMetadata: cMetadata,
-			}
+	ecrDescribedRepositories, err := f.describePodImagesRepositories(ctx, podsList, f.PodDescriber)
+	if err != nil {
+		return fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
+	}
+	for _, repository := range ecrDescribedRepositories {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      EcrResource{awslib.EcrRepository(repository)},
+			CycleMetadata: cMetadata,
 		}
 	}
 	return nil
@@ -123,33 +115,13 @@ func getAwsRepositories(podsList *v1.PodList, describer PodDescriber) map[string
 			// Takes only aws images
 			regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
 			if regexMatcher != nil {
-				repository := regexMatcher[describer.ImageRegexIndex]
-				region, err := describer.ExtractRegion(describer, image)
-				if err != nil {
-					logp.Error(err)
-					continue
-				}
+				repository := regexMatcher[EcrImageRegexGroup]
+				region := regexMatcher[EcrRegionRegexGroup]
 				reposByRegion[region] = append(reposByRegion[region], repository)
 			}
 		}
 	}
 	return reposByRegion
-}
-
-func ExtractRegionFromEcrImage(describer PodDescriber, image string) (string, error) {
-	regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
-	if regexMatcher != nil {
-		repository := regexMatcher[EcrRegionRegexGroup]
-		return repository, nil
-	}
-
-	return "", fmt.Errorf("could not extract region, image does not match the aws ecr template")
-}
-
-// ExtractRegionFromPublicEcrImage - Currently the public ecr provider is not functional.
-// TODO - This method should be change as part of implementing the public ecr - https://github.com/elastic/security-team/issues/4035
-func ExtractRegionFromPublicEcrImage(_ PodDescriber, _ string) (string, error) {
-	return "", nil
 }
 
 func (res EcrResource) GetData() interface{} {

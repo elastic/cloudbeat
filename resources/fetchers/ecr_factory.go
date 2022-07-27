@@ -66,8 +66,6 @@ func (f *EcrFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan 
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	ecrPrivateProvider := awslib.NewEcrProvider()
-	ecrPublicProvider := awslib.NewEcrPublicProvider()
 	kubeClient, err := f.KubernetesProvider.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
@@ -79,31 +77,21 @@ func (f *EcrFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
 	}
 
+	ecrPrivateProvider := awslib.NewEcrProvider()
 	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account)
 
-	privateEcrExecutor := PodDescriber{
-		FilterRegex:     regexp.MustCompile(privateRepoRegex),
-		Provider:        ecrPrivateProvider,
-		ExtractRegion:   ExtractRegionFromEcrImage,
-		ImageRegexIndex: EcrImageRegexGroup,
-	}
-	publicEcrExecutor := PodDescriber{
-		FilterRegex:     regexp.MustCompile(PublicRepoRegex),
-		Provider:        ecrPublicProvider,
-		ExtractRegion:   ExtractRegionFromPublicEcrImage,
-		ImageRegexIndex: PublicEcrImageRegexIndex,
+	ecrPodDescriber := PodDescriber{
+		FilterRegex: regexp.MustCompile(privateRepoRegex),
+		Provider:    ecrPrivateProvider,
 	}
 
 	fe := &EcrFetcher{
-		log:        log,
-		cfg:        cfg,
-		kubeClient: kubeClient,
-		PodDescribers: []PodDescriber{
-			privateEcrExecutor,
-			publicEcrExecutor,
-		},
-		resourceCh: ch,
-		awsConfig:  awsConfig,
+		log:          log,
+		cfg:          cfg,
+		kubeClient:   kubeClient,
+		PodDescriber: ecrPodDescriber,
+		resourceCh:   ch,
+		awsConfig:    awsConfig,
 	}
 	return fe, nil
 }

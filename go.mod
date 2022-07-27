@@ -35,6 +35,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.7
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.7
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.17.8
+	github.com/aws/aws-sdk-go-v2/service/ecrpublic v1.13.8
 	github.com/aws/aws-sdk-go-v2/service/eks v1.21.4
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.14.8
 	github.com/aws/aws-sdk-go-v2/service/iam v1.18.4
