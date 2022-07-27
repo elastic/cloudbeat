@@ -38,4 +38,4 @@ Please follow the following checklist in the beginning of your work, please comm
 **Before closing this ticket**
 - [ ] Commit the [technical index](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/Technical_Index.mdx) PR
 - [ ] Reference to tech-debts that shall be solved as we move forward
-- [ ] Run the [ECS mapping generator](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/tools/ecs/README.mdx) in case of an ECS schema updates
+- [ ] Run the [ECS mapping generator](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/tools/ecs/README.mdx) in case of an ECS schema updates and commit the auto-generated mappings to the integration repo
