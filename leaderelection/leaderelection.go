@@ -35,7 +35,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"time"
 )
 
 var (
@@ -91,13 +90,16 @@ func (m *Manager) IsLeader() bool {
 
 // Run leader election is blocking until a leader is being elected or timeout has reached.
 func (m *Manager) Run(ctx context.Context) error {
+	timeoutCtx, cancel := context.WithTimeout(ctx, FirstLeaderDeadline)
+	defer cancel()
+
 	go m.leader.Run(ctx)
 	m.log.Infof("started leader election")
 
 	select {
 	case <-m.block:
 		m.log.Infof("new leader has been elected")
-	case <-time.After(FirstLeaderDeadline):
+	case <-timeoutCtx.Done():
 		m.log.Warnf("timeout - no leader has been elected for %s", FirstLeaderDeadline.String())
 	}
 
