@@ -141,10 +141,6 @@ func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface, bl
 			},
 			OnStoppedLeading: func() {
 				log.Infof("leader election lock LOST, id: %v", id)
-				// leaderelection.Run stops in case it has stopped holding the leader lease, we re-run the manager
-				// to keep following leader status.
-				go manager.leader.Run(ctx)
-				log.Infof("re-running leader elector")
 			},
 			OnNewLeader: func(identity string) {
 				log.Infof("leader election lock has been acquired, id: %v", identity)
