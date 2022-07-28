@@ -44,7 +44,7 @@ def test_process_etcd(elastic_client,
     api_client.edit_process_file(container_name=node.metadata.name,
                                  dictionary=dictionary,
                                  resource=resource)
-    
+
     # Wait for process reboot
     # TODO: Implement a more optimal way of waiting
     time.sleep(60)
