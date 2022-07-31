@@ -16,7 +16,7 @@ spec:
         - "3600"
       securityContext:
         privileged: false
-        allowPrivilegeEscalation: false
+        allowPrivilegeEscalation: true
         capabilities:
           add: [ "NET_ADMIN", "SYS_TIME" ]
 ---
