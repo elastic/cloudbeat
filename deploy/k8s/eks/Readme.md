@@ -6,7 +6,7 @@
 ## Installation
 
 ### Prerequisites
-Follow guidelines below if not yet installed.
+Follow guidelines below if not yet installed.See [references](#useful-references) section below for links to installation.
 
 1. **AWS CLI**
 
@@ -19,17 +19,15 @@ Follow guidelines below if not yet installed.
    You will also need [AWS IAM Authenticator for Kubernetes](https://github.com/kubernetes-sigs/aws-iam-authenticator) command (either `aws-iam-authenticator` or `aws eks get-token` (available in version 1.16.156 or greater of AWS CLI) in your `PATH`.
 
 2. **Kubectl**
-
     Once you have created a cluster, you will find that cluster credentials were added in `~/.kube/config`. If you have `kubectl` v1.10.x as well as `aws-iam-authenticator` commands in your PATH, you should be
     able to use `kubectl`. You will need to make sure to use the same AWS API credentials for this also. Check [EKS docs][ekskubectl] for instructions. If you installed `eksctl` via Homebrew, you should have all of these dependencies installed already.
-
     [ekskubectl]: https://docs.aws.amazon.com/eks/latest/userguide/configure-kubectl.html
 
 ---
 
 ## Usage
 
-### Create a cluster:
+### Create a cluster
 
 1. Add unique cluster name to conf file `deploy/k8s/eks/simple-cluster.yml`
 
@@ -48,19 +46,21 @@ Follow guidelines below if not yet installed.
     eksctl create cluster --config-file deploy/k8s/eks/simple-cluster.yml
     ```
     Creation should take around 20 minutes for a simple config.
-    eksctl will create your cluster and automatically add the context to your `~/.kubeconfig`
+    eksctl will create your cluster and automatically add the context to your `~/.kube/config`
     The you can proceed with as usual with your tool of choice (kubectl/k9s/lens)
 
 ### Delete a cluster
 
-1. Run the delewte command0:
+1. Run the delete command below:
    ```
    eksctl delete cluster --region=eu-west-1 --name=<your_cluster_name> --wait
    ```
 
 
-### Useful references
+## Useful references
 
-- [Config file examples](https://github.com/weaveworks/eksctl/tree/main/examples)  for different deployment scenerions
+- [ekcstl config file examples](https://github.com/weaveworks/eksctl/tree/main/examples)  for different deployment scenerios
 
-- [eksctl docs](https://eksctl.io/introduction/)
+- [eksctl-docs](https://eksctl.io/introduction/)
+- [Aws cli installation](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html)
+- [kubectl installation](https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/)
