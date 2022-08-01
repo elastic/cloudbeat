@@ -56,7 +56,8 @@ type Manager struct {
 
 // NewLeaderElector acts as a singleton
 func NewLeaderElector(ctx context.Context, log *logp.Logger, cfg config.Config) (ElectionManager, error) {
-	// reset sync every new beater
+	// the launcher is creating a new beater instance every new configuration.
+	// therefore, we must reset callOnce every new beater to stale the fetching cycle until we have the leader information.
 	*callOnce = sync.Once{}
 	kubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
