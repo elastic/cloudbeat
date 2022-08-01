@@ -18,32 +18,26 @@
 package conditions
 
 import (
+	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type LeaderLeaseProvider interface {
-	IsLeader() (bool, error)
-}
-
 type LeaseFetcherCondition struct {
 	log      *logp.Logger
-	provider LeaderLeaseProvider
+	provider leaderelection.ElectionManager
 }
 
-func NewLeaseFetcherCondition(log *logp.Logger, provider LeaderLeaseProvider) fetching.Condition {
+func NewLeaseFetcherCondition(log *logp.Logger) fetching.Condition {
+	leaderManager := leaderelection.GetLeaderElectorManager()
 	return &LeaseFetcherCondition{
 		log:      log,
-		provider: provider,
+		provider: leaderManager,
 	}
 }
 
 func (c *LeaseFetcherCondition) Condition() bool {
-	l, err := c.provider.IsLeader()
-	if err != nil {
-		c.log.Errorf("Could not read leader value, using default value %v: %v", l, err)
-	}
-	return l
+	return c.provider.IsLeader()
 }
 
 func (c *LeaseFetcherCondition) Name() string {
