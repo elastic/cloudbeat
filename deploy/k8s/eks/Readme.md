@@ -6,7 +6,8 @@
 ## Installation
 
 ### Prerequisites
-Follow guidelines below if not yet installed.See [references](#useful-references) section below for links to installation.
+**Follow guidelines below if aws cli or kubectl are not yet installed on your local machine**.
+See [references](#useful-references) section below for links to installation docs.
 
 1. **AWS CLI**
 
@@ -65,7 +66,6 @@ Follow guidelines below if not yet installed.See [references](#useful-references
 ## Useful references
 
 - [ekcstl config file examples](https://github.com/weaveworks/eksctl/tree/main/examples)  for different deployment scenerios
-
 - [eksctl-docs](https://eksctl.io/introduction/)
 - [Aws cli installation](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html)
 - [kubectl installation](https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/)
