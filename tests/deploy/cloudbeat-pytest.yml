@@ -6,17 +6,6 @@ metadata:
   name: cloudbeat
   namespace: kube-system
 ---
-# GAP: https://github.com/elastic/cloudbeat/issues/162
-apiVersion: coordination.k8s.io/v1
-kind: Lease
-metadata:
-  name: elastic-agent-cluster-leader
-  namespace: kube-system
-spec:
-  holderIdentity: cloudbeat-leader
-  leaseDurationSeconds: 15
-  renewTime: "1992-04-26T00:00:00.000000Z"
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -296,12 +285,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
-        # This is done for leader election on local env
-        # GAP: https://github.com/elastic/cloudbeat/issues/162
         - name: POD_NAME
-          value: cloudbeat-leader
-            # fieldRef:
-              #   fieldPath: metadata.name
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         image: cloudbeat:latest
         imagePullPolicy: IfNotPresent
         name: cloudbeat

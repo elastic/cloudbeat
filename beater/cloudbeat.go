@@ -20,6 +20,7 @@ package beater
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/leaderelection"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
@@ -55,6 +56,7 @@ type cloudbeat struct {
 	transformer transformer.Transformer
 	log         *logp.Logger
 	resourceCh  chan fetching.ResourceInfo
+	leader      leaderelection.ElectionManager
 }
 
 func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
@@ -87,6 +89,13 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log.Info("Config initiated.")
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
+
+	le, err := leaderelection.NewLeaderElector(ctx, log, c)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+
 	fetchersRegistry, err := initRegistry(log, c, resourceCh)
 	if err != nil {
 		cancel()
@@ -135,6 +144,7 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 		transformer: t,
 		log:         log,
 		resourceCh:  resourceCh,
+		leader:      le,
 	}
 	return bt, nil
 }
@@ -142,6 +152,9 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 // Run starts cloudbeat.
 func (bt *cloudbeat) Run(b *beat.Beat) error {
 	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it.")
+	if err := bt.leader.Run(bt.ctx); err != nil {
+		return err
+	}
 
 	if err := bt.data.Run(bt.ctx); err != nil {
 		return err
