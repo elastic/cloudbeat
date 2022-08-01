@@ -33,8 +33,9 @@ Please follow the following checklist in the beginning of your work, please comm
    - [ ] Include assumptions being taken
    - [ ] Provide backward/forward compatibility when changing data model schemas and key constants
    - [ ] Mention relevant individuals with a reason (getting feedback, fyi etc)
-- [ ] Submit a PR for our [technical index](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/Technical_Index.md) that includes breaking changes/ new features
+- [ ] Submit a PR for our [technical index](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/Technical_Index.mdx) that includes breaking changes/ new features
 
 **Before closing this ticket**
-- [ ] Commit the [technical index](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/Technical_Index.md) PR
+- [ ] Commit the [technical index](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/Technical_Index.mdx) PR
 - [ ] Reference to tech-debts that shall be solved as we move forward
+- [ ] Run the [ECS mapping generator](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/tools/ecs/README.mdx) in case of an ECS schema updates and commit the auto-generated mappings to the integration repo
