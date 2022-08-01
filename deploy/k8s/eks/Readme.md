@@ -8,7 +8,7 @@
 ### Prerequisites
 Follow guidelines below if not yet installed.
 
-1. AWS CLI
+1. **AWS CLI**
 
    You will need to have AWS CLI credentials configured. You can use [`~/.aws/credentials` file][awsconfig]
    or [environment variables][awsenv]. For more information read [AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html).
@@ -18,7 +18,7 @@ Follow guidelines below if not yet installed.
 
    You will also need [AWS IAM Authenticator for Kubernetes](https://github.com/kubernetes-sigs/aws-iam-authenticator) command (either `aws-iam-authenticator` or `aws eks get-token` (available in version 1.16.156 or greater of AWS CLI) in your `PATH`.
 
-2.  Kubectl
+2. **Kubectl**
 
     Once you have created a cluster, you will find that cluster credentials were added in `~/.kube/config`. If you have `kubectl` v1.10.x as well as `aws-iam-authenticator` commands in your PATH, you should be
     able to use `kubectl`. You will need to make sure to use the same AWS API credentials for this also. Check [EKS docs][ekskubectl] for instructions. If you installed `eksctl` via Homebrew, you should have all of these dependencies installed already.
@@ -31,7 +31,7 @@ Follow guidelines below if not yet installed.
 
 ### Create a cluster:
 
-1. Add unique cluster to conf file `deploy/k8s/eks/simple-cluster.yml`
+1. Add unique cluster name to conf file `deploy/k8s/eks/simple-cluster.yml`
 
    ```yml
    ---
@@ -51,13 +51,15 @@ Follow guidelines below if not yet installed.
     eksctl will create your cluster and automatically add the context to your `~/.kubeconfig`
     The you can proceed with as usual with your tool of choice (kubectl/k9s/lens)
 
-3. Delete cluster:
+### Delete a cluster
+
+1. Run the delewte command0:
    ```
    eksctl delete cluster --region=eu-west-1 --name=<your_cluster_name> --wait
    ```
 
 
-## useful reference
+### Useful reference
 
 - [Config file examples](https://github.com/weaveworks/eksctl/tree/main/examples)  for different deployment scenerions
 
