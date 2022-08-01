@@ -23,6 +23,11 @@ Follow guidelines below if not yet installed.See [references](#useful-references
     able to use `kubectl`. You will need to make sure to use the same AWS API credentials for this also. Check [EKS docs][ekskubectl] for instructions. If you installed `eksctl` via Homebrew, you should have all of these dependencies installed already.
     [ekskubectl]: https://docs.aws.amazon.com/eks/latest/userguide/configure-kubectl.html
 
+### Install eksctl via brew
+   ```bash
+   brew tap weaveworks/tap
+   brew install weaveworks/tap/eksctl
+   ```
 ---
 
 ## Usage
