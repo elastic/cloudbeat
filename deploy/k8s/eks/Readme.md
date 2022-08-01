@@ -59,7 +59,7 @@ Follow guidelines below if not yet installed.
    ```
 
 
-### Useful reference
+### Useful references
 
 - [Config file examples](https://github.com/weaveworks/eksctl/tree/main/examples)  for different deployment scenerions
 
