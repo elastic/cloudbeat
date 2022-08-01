@@ -38,8 +38,8 @@ import (
 )
 
 var (
-	initOnce sync.Once
-	callOnce sync.Once
+	initOnce = &sync.Once{}
+	callOnce = &sync.Once{}
 	manager  *Manager
 )
 
@@ -56,6 +56,8 @@ type Manager struct {
 
 // NewLeaderElector acts as a singleton
 func NewLeaderElector(ctx context.Context, log *logp.Logger, cfg config.Config) (ElectionManager, error) {
+	// reset sync every new beater
+	*callOnce = sync.Once{}
 	kubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		log.Errorf("NewLeaderElector error in GetClient: %v", err)
@@ -67,7 +69,7 @@ func NewLeaderElector(ctx context.Context, log *logp.Logger, cfg config.Config) 
 		var leader *le.LeaderElector
 
 		block := make(chan bool)
-		leConfig, err = buildConfig(ctx, log, kubeClient, block)
+		leConfig, err = buildConfig(ctx, log, kubeClient, block, callOnce)
 		leader, err = le.NewLeaderElector(leConfig)
 
 		manager = &Manager{
@@ -106,7 +108,7 @@ func (m *Manager) Run(ctx context.Context) error {
 	return nil
 }
 
-func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface, block chan bool) (le.LeaderElectionConfig, error) {
+func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface, block chan bool, callOnce *sync.Once) (le.LeaderElectionConfig, error) {
 	podId, err := currentPodID(log)
 	if err != nil {
 		return le.LeaderElectionConfig{}, err
@@ -123,6 +125,7 @@ func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface, bl
 		Namespace: ns,
 	}
 
+	retryOnce := &sync.Once{}
 	return le.LeaderElectionConfig{
 		Lock: &rl.LeaseLock{
 			LeaseMeta: lease,
@@ -140,12 +143,23 @@ func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface, bl
 				log.Infof("leader election lock GAINED, id: %v", id)
 			},
 			OnStoppedLeading: func() {
-				log.Infof("leader election lock LOST, id: %v", id)
+				// leaderelection.Run stops in case it has stopped holding the leader lease, we re-run the manager
+				// to keep following leader status.
+				retryOnce.Do(func() {
+					log.Infof("leader election lock LOST, id: %v", id)
+					go manager.leader.Run(ctx)
+					log.Infof("re-running leader elector")
+				})
 			},
 			OnNewLeader: func(identity string) {
-				log.Infof("leader election lock has been acquired, id: %v", identity)
+				if identity == id {
+					log.Infof("leader election lock has been acquired by this pod, id: %v", identity)
+				} else {
+					log.Infof("leader election lock has been acquired by another pod, id: %v", identity)
+				}
+				// called every new beater
 				callOnce.Do(func() {
-					defer close(block)
+					retryOnce = new(sync.Once)
 					block <- false
 				})
 			},
