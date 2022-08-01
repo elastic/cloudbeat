@@ -18,13 +18,10 @@
 package fetchersManager
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -33,6 +30,11 @@ var Factories = newFactories()
 
 type factories struct {
 	m map[string]fetching.Factory
+}
+
+type ParsedFetcher struct {
+	name string
+	f    fetching.Fetcher
 }
 
 func newFactories() factories {
@@ -55,29 +57,6 @@ func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig
 	}
 
 	return factory.Create(log, c, ch)
-}
-
-// TODO: Move conditions to factories and implement inside every factory
-func (fa *factories) getConditions(log *logp.Logger, name string) ([]fetching.Condition, error) {
-	c := make([]fetching.Condition, 0)
-	switch name {
-	case fetching.KubeAPIType, fetching.EcrType, fetching.ElbType:
-		// TODO: Use fetcher's kubeconfig configuration
-		client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
-		if err != nil {
-			log.Errorf("getConditions error in GetKubernetesClient: %v", err)
-			return nil, err
-		}
-		leaseProvider := conditions.NewLeaderLeaseProvider(context.Background(), client)
-		c = append(c, conditions.NewLeaseFetcherCondition(log, leaseProvider))
-	}
-
-	return c, nil
-}
-
-type ParsedFetcher struct {
-	name string
-	f    fetching.Fetcher
 }
 
 func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
