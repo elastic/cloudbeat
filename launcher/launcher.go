@@ -132,6 +132,11 @@ func (l *launcher) runBeater() error {
 	l.wg.Add(1)
 	go func(beater beat.Beater) {
 		l.log.Info("Launcher is running the new created Beater")
+		defer func() {
+			if r := recover(); r != nil {
+				l.beaterErr <- fmt.Errorf("beater panic recovered: %s", r)
+			}
+		}()
 		defer l.wg.Done()
 		l.beaterErr <- beater.Run(l.beat)
 		l.log.Info("Beater run has finished")
