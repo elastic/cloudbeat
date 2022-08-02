@@ -82,6 +82,19 @@ func (m *errorBeaterMock) Run(b *beat.Beat) error {
 func (m *errorBeaterMock) Stop() {
 }
 
+type panicBeaterMock struct{}
+
+func panicBeaterMockCreator(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+	return &panicBeaterMock{}, nil
+}
+
+func (m *panicBeaterMock) Run(b *beat.Beat) error {
+	panic("panicBeaterMock panics")
+}
+
+func (m *panicBeaterMock) Stop() {
+}
+
 type reloaderMock struct {
 	ch chan *agentconfig.C
 }
@@ -410,6 +423,15 @@ func (s *LauncherTestSuite) TestStarterErrorBeater() {
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
+}
+
+func (s *LauncherTestSuite) TestLauncherPanicBeater() {
+	mocks := s.InitMocks()
+	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, panicBeaterMockCreator, config.NewConfig())
+	s.NoError(err)
+	err = sut.run()
+	s.Error(err)
+	s.ErrorContains(err, "panicBeaterMock panics")
 }
 
 func (s *LauncherTestSuite) TestStarterCancelBeater() {
