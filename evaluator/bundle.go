@@ -38,17 +38,17 @@ func StartServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
 	log := logp.NewLogger("cloudbeat_bundle_server")
 
 	bundle := loadBundle(cfg, log)
-
-	// if no config is provided, all rules will be activated
-	if len(cfg.Streams) > 0 {
-		activatedRules, err := cfg.GetActivatedRules()
-		if err != nil {
-			return nil, fmt.Errorf("could not marshal to YAML: %w", err)
-		}
-
-		// activated rules are in YAML format
-		bundle.With("data.yaml", activatedRules)
-	}
+	//
+	//// if no config is provided, all rules will be activated
+	//if len(cfg.Streams) > 0 {
+	//	activatedRules, err := cfg.GetActivatedRules()
+	//	if err != nil {
+	//		return nil, fmt.Errorf("could not marshal to YAML: %w", err)
+	//	}
+	//
+	//	// activated rules are in YAML format
+	//	bundle.With("data.yaml", activatedRules)
+	//}
 
 	h := csppolicies.NewServer()
 	if err := csppolicies.HostBundle("bundle.tar.gz", bundle, ctx); err != nil {

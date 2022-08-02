@@ -22,12 +22,12 @@ package config
 
 import (
 	"context"
+	"fmt"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"gopkg.in/yaml.v3"
 	"time"
 )
 
@@ -59,11 +59,11 @@ type Config struct {
 }
 
 type Stream struct {
-	AWSConfig aws.ConfigAWS `config:",inline"`
-	DataYaml  *DataYaml     `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
+	AWSConfig  aws.ConfigAWS  `config:",inline"`
+	RuntimeCfg *RuntimeConfig `config:"data_yaml"`
 }
 
-type DataYaml struct {
+type RuntimeConfig struct {
 	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
 }
 
@@ -111,14 +111,14 @@ func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
 	return nil
 }
 
-// GetActivatedRules returns the activated rules from the config. The activated rules are in yaml format.
-func (c *Config) GetActivatedRules() (string, error) {
-	dataYaml, err := yaml.Marshal(c.Streams[0].DataYaml)
-	if err != nil {
-		return "", err
+// GetActivatedRules returns the activated rules from the config. The activated rules are in a json format.
+func (c *Config) GetActivatedRules() (*Benchmarks, error) {
+	cfgStream := c.Streams
+	if len(cfgStream) == 0 || cfgStream[0].RuntimeCfg == nil {
+		return nil, fmt.Errorf("could not find runtime cfg")
 	}
 
-	return string(dataYaml), nil
+	return cfgStream[0].RuntimeCfg.ActivatedRules, nil
 }
 
 // Datastream function to generate the datastream value

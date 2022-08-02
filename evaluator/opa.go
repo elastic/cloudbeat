@@ -35,9 +35,15 @@ import (
 )
 
 type OpaEvaluator struct {
-	log          *logp.Logger
-	opa          *sdk.OPA
-	bundleServer *http.Server
+	log            *logp.Logger
+	opa            *sdk.OPA
+	bundleServer   *http.Server
+	activatedRules *config.Benchmarks
+}
+
+type OpaInput struct {
+	fetching.Result
+	*config.Benchmarks
 }
 
 var opaConfig = `{
@@ -77,10 +83,16 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 		return nil, fmt.Errorf("fail to init opa: %s", err.Error())
 	}
 
+	rules, err := cfg.GetActivatedRules()
+	if err != nil {
+		log.Warnf("failed to get activated rules: %v", err)
+	}
+
 	return &OpaEvaluator{
-		log:          log,
-		opa:          opa,
-		bundleServer: server,
+		log:            log,
+		opa:            opa,
+		bundleServer:   server,
+		activatedRules: rules,
 	}, nil
 }
 
@@ -96,7 +108,11 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 		Resource: resourceInfo.GetData(),
 	}
 
-	result, err := o.decision(ctx, fetcherResult)
+	result, err := o.decision(ctx, OpaInput{
+		Result:     fetcherResult,
+		Benchmarks: o.activatedRules,
+	})
+
 	if err != nil {
 		return EventData{}, fmt.Errorf("error running the policy: %v", err)
 	}
@@ -119,7 +135,7 @@ func (o *OpaEvaluator) Stop(ctx context.Context) {
 	}
 }
 
-func (o *OpaEvaluator) decision(ctx context.Context, input interface{}) (interface{}, error) {
+func (o *OpaEvaluator) decision(ctx context.Context, input OpaInput) (interface{}, error) {
 	// get the named policy decision for the specified input
 	result, err := o.opa.Decision(ctx, sdk.DecisionOptions{
 		Path:  "main",
