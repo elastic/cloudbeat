@@ -533,6 +533,8 @@ github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220722154342-f5ff0a9495c2 h1:617KC/Pe8JVhdDKM8S8GLeTPHQF/l85J0Ue64xE3H0g=
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220722154342-f5ff0a9495c2/go.mod h1:w9b9yyXtqmZIYrMzDxPmPlRvAco6pVLmHvqEr3PuoO8=
+github.com/elastic/csp-security-policies v1.0.8-0.20220725171451-c367d45accb6 h1:cyasZM3duKb9Ti2md+IbcvSAUAe9X6fcd5JeBvsLanQ=
+github.com/elastic/csp-security-policies v1.0.8-0.20220725171451-c367d45accb6/go.mod h1:iiMuf3IRjGmWD+a88MGen0qeYgReNd2EUqDDb+LZJGc=
 github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4 h1:uYT+Krd8dsvnhnLK9pe/JHZkYtXEGPfbV4Wt1JPPol0=
 github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4/go.mod h1:UcNuf4pX/qDVNQr0zybm1NL2YoWik+jKBaINZqQCA40=
 github.com/elastic/elastic-agent-autodiscover v0.2.1 h1:Nbeayh3vq2FNm6xaFo34mhUdOu0EVlpj53CqCsbU0E4=
@@ -1483,8 +1485,6 @@ github.com/urfave/cli v0.0.0-20171014202726-7bc6a0acffa5/go.mod h1:70zkFmudgCuE/
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/urfave/cli v1.22.2/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
-github.com/uri-weisman/csp-security-policies v0.0.18-go-lib.0.20220801134428-747e21fc1617 h1:V61+s7RB9/m+yBgVjQmZERY/MAXfL9sq9b9PXrZ2oEU=
-github.com/uri-weisman/csp-security-policies v0.0.18-go-lib.0.20220801134428-747e21fc1617/go.mod h1:iiMuf3IRjGmWD+a88MGen0qeYgReNd2EUqDDb+LZJGc=
 github.com/urso/diag v0.0.0-20200210123136-21b3cc8eb797 h1:OHNw/6pXODJAB32NujjdQO/KIYQ3KAbHQfCzH81XdCs=
 github.com/urso/diag v0.0.0-20200210123136-21b3cc8eb797/go.mod h1:pNWFTeQ+V1OYT/TzWpnWb6eQBdoXpdx+H+lrH97/Oyo=
 github.com/urso/sderr v0.0.0-20210525210834-52b04e8f5c71 h1:CehQeKbysHV8J2V7AD0w8NL2x1h04kmmo/Ft5su4lU0=
