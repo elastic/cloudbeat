@@ -6,23 +6,22 @@
 ## Installation
 
 ### Prerequisites
-**Follow guidelines below if aws cli or kubectl are not yet installed on your local machine**.
+**Follow steps 1 & 2 only if aws cli or kubectl are not yet installed on your local machine**.
 See [references](#useful-references) section below for links to installation docs.
 
 1. **AWS CLI**
+   1.1 Follow this doc to install [aws-cli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-   You will need to have AWS CLI credentials configured. You can use [`~/.aws/credentials` file][awsconfig]
+   1.2 You will need to have AWS CLI credentials configured. You can use [`~/.aws/credentials` file][awsconfig]
    or [environment variables][awsenv]. For more information read [AWS documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html).
 
    [awsenv]: https://docs.aws.amazon.com/cli/latest/userguide/cli-environment.html
    [awsconfig]: https://docs.aws.amazon.com/cli/latest/userguide/cli-config-files.html
 
-   You will also need [AWS IAM Authenticator for Kubernetes](https://github.com/kubernetes-sigs/aws-iam-authenticator) command (either `aws-iam-authenticator` or `aws eks get-token` (available in version 1.16.156 or greater of AWS CLI) in your `PATH`.
-
 2. **Kubectl**
-    Once you have created a cluster, you will find that cluster credentials were added in `~/.kube/config`. If you have `kubectl` v1.10.x as well as `aws-iam-authenticator` commands in your PATH, you should be
-    able to use `kubectl`. You will need to make sure to use the same AWS API credentials for this also. Check [EKS docs][ekskubectl] for instructions. If you installed `eksctl` via Homebrew, you should have all of these dependencies installed already.
-    [ekskubectl]: https://docs.aws.amazon.com/eks/latest/userguide/configure-kubectl.html
+   ```bash
+   brew install kubectl
+   ```
 
 ### Install eksctl via brew
    ```bash

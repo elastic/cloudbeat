@@ -8,6 +8,7 @@ metadata:
   region: eu-west-1
 
 vpc:
+# Don't change vpc settings
   id: 	"vpc-6cb55a15"  # (optional, must match VPC ID used for each subnet below)
   subnets:
     # must provide 'private' and/or 'public' subnets by availibility zone as shown
