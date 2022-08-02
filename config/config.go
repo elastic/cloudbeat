@@ -111,7 +111,7 @@ func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
 	return nil
 }
 
-// GetActivatedRules returns the activated rules from the config. The activated rules are in a json format.
+// GetActivatedRules returns the activated rules from the config.
 func (c *Config) GetActivatedRules() (*Benchmarks, error) {
 	cfgStream := c.Streams
 	if len(cfgStream) == 0 || cfgStream[0].RuntimeCfg == nil {
