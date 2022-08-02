@@ -43,7 +43,7 @@ type OpaEvaluator struct {
 
 type OpaInput struct {
 	fetching.Result
-	*config.Benchmarks
+	ActivatedRules *config.Benchmarks `json:"activated_rules,omitempty"`
 }
 
 var opaConfig = `{
@@ -109,8 +109,8 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 	}
 
 	result, err := o.decision(ctx, OpaInput{
-		Result:     fetcherResult,
-		Benchmarks: o.activatedRules,
+		Result:         fetcherResult,
+		ActivatedRules: o.activatedRules,
 	})
 
 	if err != nil {

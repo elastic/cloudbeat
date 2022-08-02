@@ -115,7 +115,7 @@ func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
 func (c *Config) GetActivatedRules() (*Benchmarks, error) {
 	cfgStream := c.Streams
 	if len(cfgStream) == 0 || cfgStream[0].RuntimeCfg == nil {
-		return nil, fmt.Errorf("could not find runtime cfg")
+		return &Benchmarks{}, fmt.Errorf("could not find runtime cfg")
 	}
 
 	return cfgStream[0].RuntimeCfg.ActivatedRules, nil
