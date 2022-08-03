@@ -40,9 +40,9 @@ interface BenchmarkSchema {
     rules: RuleSchema[];
 }
 
-interface ExcelDataObject {
+interface SpreadsheetTab {
     name: string;
-    data: unknown[];
+    data: string[][];
 }
 
 interface RuleSchema {

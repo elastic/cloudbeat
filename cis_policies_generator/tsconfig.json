@@ -5,22 +5,15 @@
     "outDir": "bin",
     "rootDir": "src",
     "strict": true,
-    "noImplicitAny": false,
-    "strictNullChecks": true,
-    "checkJs": true,
-    "allowJs": true,
+    "noImplicitAny": true,
     "moduleResolution": "node",
-    "types": [
-      "node"
-    ],
     "lib": [
       "es6",
-      "es2019"
+      "es2021"
     ],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "allowUnreachableCode": true,
   },
   "include": [
     "src/**/*.ts",

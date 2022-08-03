@@ -5,18 +5,18 @@ import xlsx from 'node-xlsx';
 import path from 'path';
 import YAML from 'yaml';
 
-const {v5: uuidv5} = require('uuid');
+const {v5: uuid} = require('uuid');
 
 const output_folder: string = config.get("output_folder");
 const benchmarks_folder: string = config.get("benchmarks_folder");
 
 function generateOutputFolder(): void {
     console.log("Creating output folder:", output_folder);
-    fs.rmSync(output_folder, {recursive: true});
+    if (fs.existsSync(output_folder)) fs.rmSync(output_folder, {recursive: true});
     fs.mkdirSync(output_folder);
 }
 
-function parseReferences(references): string[] {
+function parseReferences(references: string): string[] {
     if (!references) {
         return [];
     }
@@ -26,7 +26,7 @@ function parseReferences(references): string[] {
 
 // Generate a mapping between section # and its title.
 // For example: { 'section #': '1', title: 'Control Plane Components' }
-function parseAllSections(data): SectionMetadata[] {
+function parseAllSections(data: BenchmarksData[]): SectionMetadata[] {
     return data.filter((el) => (el["section #"] && el["title"] && !el["recommendation #"]))
         .map(i => _.pick(i, ["section #", "title"]));
 }
@@ -45,7 +45,7 @@ function identifySection(rule_section: string, sections: SectionMetadata[]): str
 // Adds newline character after code-blocks that are at the end of a property
 function fixCodeBlocks(val: string): string {
     if (val.endsWith("```")) {
-        return val.concat("\r\n");
+        return val.concat("\n");
     }
     return val;
 }
@@ -63,11 +63,12 @@ function normalizeResults(data: BenchmarksData[], benchmark_metadata: BenchmarkM
             console.log("Parsing:", benchmark_metadata.name, rule_name);
             const refs = parseReferences(it["references"])
             return {
-                "id": uuidv5(`${benchmark_metadata.name} ${rule_name}`, config.get("uuid_seed")),
+                "id": uuid(`${benchmark_metadata.name} ${rule_name}`, config.get("uuid_seed")),
                 "name": rule_name,
                 "rule_number": it["recommendation #"],
                 "profile_applicability": `* ${profile_applicability}`,
                 "description": it["description"],
+                // @ts-ignore
                 "rationale": fixCodeBlocks(it["rational statement"] || it["rationale statement"] || ""),
                 "audit": fixCodeBlocks(it["audit procedure"] || ""),
                 "remediation": fixCodeBlocks(it["remediation procedure"] || ""),
@@ -81,7 +82,7 @@ function normalizeResults(data: BenchmarksData[], benchmark_metadata: BenchmarkM
     );
 }
 
-function parseSpreadsheet(tab, benchmark_metadata: BenchmarkMetadata): RuleSchema[] {
+function parseSpreadsheet(tab: SpreadsheetTab, benchmark_metadata: BenchmarkMetadata): RuleSchema[] {
     const profile_applicability = tab.name;
     const results: BenchmarksData[] = [];
     const keys = tab.data[0].map(el => el.toLowerCase()); // Different benchmarks have different casing in the columns titles
@@ -91,9 +92,11 @@ function parseSpreadsheet(tab, benchmark_metadata: BenchmarkMetadata): RuleSchem
         // `values` is an array that holds the cell values
         // The following line will push into results an object that is look something like:
         // {key1: value1, key2: value2, key3: value3, ...}
-        results.push(Object.assign.apply({}, keys.map((v, i) => ({
+        const benchmark_data = keys.map((v: string, i: number) => ({
             [v]: values[i]?.replace(/\r\n/g, "\n")
-        }))));
+        }));
+        // @ts-ignore
+        results.push(Object.assign.apply({}, benchmark_data));
     }
 
     return normalizeResults(results, benchmark_metadata, profile_applicability);
@@ -103,11 +106,11 @@ function parseBenchmark(file: string, benchmark_metadata: BenchmarkMetadata): Ru
     const excel = xlsx.parse(file, {raw: false, type: 'file', cellText: true});
     // Assumption, we treat only tabs that start with the word "Level" (as in the string "Level 1 - Master Node")
     return excel.filter(tab => Boolean(tab.name.indexOf("Level") == 0))
-        .map(tab => parseSpreadsheet(tab, benchmark_metadata))
+        .map(tab => parseSpreadsheet(tab as SpreadsheetTab, benchmark_metadata))
         .flat();
 }
 
-function parseBenchmarks(folder): BenchmarkSchema[] {
+function parseBenchmarks(folder: string): BenchmarkSchema[] {
     const files = fs.readdirSync(folder);
     return files.map(file => {
         const file_path = folder + "/" + file;

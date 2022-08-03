@@ -7,6 +7,3 @@ output
 # TS output dir
 bin/
 out/
-
-# TS --incremental file
-tsconfig.tsbuildinfo
