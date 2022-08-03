@@ -23,12 +23,14 @@ package config
 import (
 	"context"
 	"fmt"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"time"
+
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"time"
+
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
 
 const DefaultNamespace = "default"

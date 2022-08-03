@@ -41,7 +41,7 @@ func (v *validator) Validate(cfg *agentconfig.C) error {
 	}
 
 	if c.Streams[0].RuntimeCfg == nil {
-		return fmt.Errorf("data_yaml not present in reconfiguration %v", cfg.FlattenedKeys())
+		return fmt.Errorf("RuntimeCfg is not present in reconfiguration %v", cfg.FlattenedKeys())
 	}
 
 	return nil
