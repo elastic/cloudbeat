@@ -39,8 +39,13 @@ func TestGlobMatcherTestSuite(t *testing.T) {
 func (s *GlobMatcherTestSuite) TestGlobMatchingNonExistingPattern() {
 	directoryName := "test-outer-dir"
 	fileName := "file.txt"
-	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, []string{fileName})
-	defer os.RemoveAll(dir)
+	dir := createDirectoriesWithFiles(&s.Suite, "", directoryName, []string{fileName})
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(dir)
 
 	filePath := filepath.Join(dir, fileName)
 	matchedFiles, err := Glob(filePath + "/***")
@@ -52,8 +57,13 @@ func (s *GlobMatcherTestSuite) TestGlobMatchingNonExistingPattern() {
 func (s *GlobMatcherTestSuite) TestGlobMatchingPathDoesNotExist() {
 	directoryName := "test-outer-dir"
 	fileName := "file.txt"
-	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, []string{fileName})
-	defer os.RemoveAll(dir)
+	dir := createDirectoriesWithFiles(&s.Suite, "", directoryName, []string{fileName})
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(dir)
 
 	filePath := filepath.Join(dir, fileName)
 	matchedFiles, err := Glob(filePath + "/abc")
@@ -65,8 +75,13 @@ func (s *GlobMatcherTestSuite) TestGlobMatchingPathDoesNotExist() {
 func (s *GlobMatcherTestSuite) TestGlobMatchingSingleFile() {
 	directoryName := "test-outer-dir"
 	fileName := "file.txt"
-	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, []string{fileName})
-	defer os.RemoveAll(dir)
+	dir := createDirectoriesWithFiles(&s.Suite, "", directoryName, []string{fileName})
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(dir)
 
 	filePath := filepath.Join(dir, fileName)
 	matchedFiles, err := Glob(filePath)
@@ -79,8 +94,13 @@ func (s *GlobMatcherTestSuite) TestGlobMatchingSingleFile() {
 func (s *GlobMatcherTestSuite) TestGlobDirectoryOnly() {
 	directoryName := "test-outer-dir"
 	fileName := "file.txt"
-	dir := createDirectoriesWithFiles(s.Suite, "", directoryName, []string{fileName})
-	defer os.RemoveAll(dir)
+	dir := createDirectoriesWithFiles(&s.Suite, "", directoryName, []string{fileName})
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(dir)
 
 	matchedFiles, err := Glob(dir)
 
@@ -92,12 +112,17 @@ func (s *GlobMatcherTestSuite) TestGlobDirectoryOnly() {
 func (s *GlobMatcherTestSuite) TestGlobOuterDirectoryOnly() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt"}
-	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
-	defer os.RemoveAll(outerDir)
+	outerDir := createDirectoriesWithFiles(&s.Suite, "", outerDirectoryName, outerFiles)
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(outerDir)
 
 	innerDirectoryName := "test-inner-dir"
 	innerFiles := []string{"innerFolderFile.txt"}
-	innerDir := createDirectoriesWithFiles(s.Suite, outerDir, innerDirectoryName, innerFiles)
+	innerDir := createDirectoriesWithFiles(&s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	matchedFiles, err := Glob(outerDir + "/*")
 
@@ -110,16 +135,21 @@ func (s *GlobMatcherTestSuite) TestGlobOuterDirectoryOnly() {
 func (s *GlobMatcherTestSuite) TestGlobDirectoryRecursively() {
 	outerDirectoryName := "test-outer-dir"
 	outerFiles := []string{"output.txt"}
-	outerDir := createDirectoriesWithFiles(s.Suite, "", outerDirectoryName, outerFiles)
-	defer os.RemoveAll(outerDir)
+	outerDir := createDirectoriesWithFiles(&s.Suite, "", outerDirectoryName, outerFiles)
+	defer func(path string) {
+		err := os.RemoveAll(path)
+		if err != nil {
+			s.Fail(err.Error())
+		}
+	}(outerDir)
 
 	innerDirectoryName := "test-inner-dir"
 	innerFiles := []string{"innerFolderFile.txt"}
-	innerDir := createDirectoriesWithFiles(s.Suite, outerDir, innerDirectoryName, innerFiles)
+	innerDir := createDirectoriesWithFiles(&s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	innerInnerDirectoryName := "test-inner-inner-dir"
 	innerInnerFiles := []string{"innerInnerFolderFile.txt"}
-	innerInnerDir := createDirectoriesWithFiles(s.Suite, innerDir, innerInnerDirectoryName, innerInnerFiles)
+	innerInnerDir := createDirectoriesWithFiles(&s.Suite, innerDir, innerInnerDirectoryName, innerInnerFiles)
 
 	matchedFiles, err := Glob(outerDir + "/**")
 

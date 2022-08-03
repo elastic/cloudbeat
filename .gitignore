@@ -13,18 +13,25 @@ cloudbeat-test
 *local.yaml
 *local.yml
 fields.yml
-tests/allure/results/*
-tests/allure/results/test.dummy
-tests/allure/reports/*
+
 *-result.json
 *test.dummy
 /logs.ndjson
+
+# Go
+vendor/*
 
 # ci
 .secrets
 .env
 .github/act/*
 
+# tests:
+test-logs*
+tests/allure/results/*
+tests/allure/reports/*
+
 # vscode
 .vscode*
 *.code-workspace
+/evaluator/tmpBundles/bundle.tar.gz

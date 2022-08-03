@@ -19,10 +19,10 @@ package fetchers
 
 import (
 	"context"
+	iam "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -59,11 +59,16 @@ func (s *IamFetcherTestSuite) TearDownTest() {
 func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 	var tests = []struct {
 		role        string
-		iamResponse []iam.GetRolePolicyResponse
+		iamResponse []awslib.RolePolicyInfo
 	}{
 		{
-			"some_role",
-			[]iam.GetRolePolicyResponse{},
+			role: "some_role",
+			iamResponse: []awslib.RolePolicyInfo{
+				{
+					PolicyARN:           "arn:aws:iam::123456789012:policy/TestPolicy",
+					GetRolePolicyOutput: iam.GetRolePolicyOutput{},
+				},
+			},
 		},
 	}
 
@@ -72,12 +77,12 @@ func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
 			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
 			RoleName:             test.role,
 		}
-		iamProvider := &awslib.MockIAMRolePermissionGetter{}
+		iamProvider := &awslib.MockIamRolePermissionGetter{}
 
 		iamProvider.EXPECT().GetIAMRolePermissions(mock.Anything, test.role).
 			Return(test.iamResponse, nil)
 
-		expectedResource := IAMResource{test.iamResponse}
+		expectedResource := IAMResource{test.iamResponse[0]}
 
 		eksFetcher := IAMFetcher{
 			log:         s.log,

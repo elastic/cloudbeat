@@ -468,27 +468,16 @@ cis_1_2_7 = [(
         '/etc/kubernetes/manifests/kube-apiserver.yaml',
         'passed'
     )]
-
 cis_1_2_8 = [(
     'CIS 1.2.8',
     {
-        "set": {
-            "--authorization-mode": "RBAC"
-        }
+        "unset": [
+            "--authorization-mode"
+        ]
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'failed'
 ),
-    (
-        'CIS 1.2.8',
-        {
-            "unset": [
-                "--authorization-mode"
-            ]
-        },
-        '/etc/kubernetes/manifests/kube-apiserver.yaml',
-        'failed'
-    ),
     (
         'CIS 1.2.8',
         {

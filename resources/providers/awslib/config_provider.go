@@ -18,23 +18,25 @@
 package awslib
 
 import (
-	"github.com/aws/aws-sdk-go-v2/aws/external"
+	"context"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 )
 
-type ConfigGetter interface {
-	GetConfig() Config
-}
-
 type ConfigProvider struct {
+	MetadataProvider MetadataProvider
 }
 
-func (p ConfigProvider) GetConfig() (Config, error) {
-	cfg, err := external.LoadDefaultAWSConfig()
+func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error) {
+	awsConfig, err := aws.InitializeAWSConfig(cfg)
 	if err != nil {
-		return Config{}, err
+		return awssdk.Config{}, err
 	}
+	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
+	if err != nil {
+		return awssdk.Config{}, err
+	}
+	awsConfig.Region = metadata.Region
 
-	return Config{
-		Config: cfg,
-	}, nil
+	return awsConfig, nil
 }

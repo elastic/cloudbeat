@@ -66,7 +66,7 @@ func (r K8sResource) GetData() interface{} {
 	return r.Data
 }
 
-func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
+func (r K8sResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	k8sObj := reflect.Indirect(reflect.ValueOf(r.Data))
 	k8sObjMeta := getK8sObjectMeta(r.log, k8sObj)
 	resourceID := k8sObjMeta.UID
@@ -77,7 +77,7 @@ func (r K8sResource) GetMetadata() fetching.ResourceMetadata {
 		Type:    K8sObjType,
 		SubType: getK8sSubType(r.log, k8sObj),
 		Name:    resourceName,
-	}
+	}, nil
 }
 
 func (r K8sResource) GetElasticCommonData() any { return nil }
@@ -121,6 +121,8 @@ func nullifyManagedFields(resource interface{}) {
 	case *kubernetes.ServiceAccount:
 		val.ManagedFields = nil
 	case *kubernetes.NetworkPolicy:
+		val.ManagedFields = nil
+	case *kubernetes.Node:
 		val.ManagedFields = nil
 	}
 }

@@ -21,6 +21,8 @@
 package config
 
 import (
+	"context"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
@@ -35,7 +37,7 @@ const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 const (
 	InputTypeVanillaK8s = "cloudbeat/vanilla"
-	InputTypeEKS        = "cloudbeat/eks"
+	InputTypeEks        = "cloudbeat/eks"
 )
 
 type Fetcher struct {
@@ -44,7 +46,7 @@ type Fetcher struct {
 
 type Fetchers struct {
 	Vanilla []*config.C `config:"vanilla"` // Vanilla fetchers
-	EKS     []*config.C `config:"eks"`     // EKS fetchers
+	Eks     []*config.C `config:"eks"`     // EKS fetchers
 }
 
 type Config struct {
@@ -67,7 +69,7 @@ type DataYaml struct {
 
 type Benchmarks struct {
 	CisK8s []string `config:"cis_k8s,omitempty" yaml:"cis_k8s,omitempty" json:"cis_k8s,omitempty"`
-	CisEKS []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
+	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
 var DefaultConfig = Config{
@@ -125,4 +127,8 @@ func Datastream(namespace string, indexPrefix string) string {
 		namespace = DefaultNamespace
 	}
 	return indexPrefix + "-" + namespace
+}
+
+type AwsConfigProvider interface {
+	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error)
 }

@@ -18,12 +18,17 @@
 package fetchers
 
 import (
+	"context"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
@@ -49,6 +54,7 @@ func (s *ElbFactoryTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		config        string
 		region        string
+		account       string
 		expectedRegex string
 	}{
 		{
@@ -57,10 +63,11 @@ name: aws-elb
 access_key_id: key
 secret_access_key: secret
 session_token: session
-default_region: us1-east
+default_region: us2-east
 `,
-			"us1-east",
-			"([\\w-]+)-\\d+\\.us1-east.elb.amazonaws.com",
+			"us2-east",
+			"my-account",
+			"([\\w-]+)-\\d+\\.us2-east.elb.amazonaws.com",
 		},
 	}
 
@@ -70,16 +77,39 @@ default_region: us1-east
 		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		factory := &ELBFactory{mockedKubernetesClientGetter}
+		identity := awslib.Identity{
+			Account: &test.account,
+		}
+		identityProvider := &awslib.MockIdentityProviderGetter{}
+		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
 
-		cfg, err := config.NewConfigFrom(test.config)
+		mockedConfigGetter := &config.MockAwsConfigProvider{}
+		mockedConfigGetter.EXPECT().
+			InitializeAWSConfig(mock.Anything, mock.Anything).
+			Call.
+			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
+				return CreateSdkConfig(config, "us2-east")
+			},
+				func(ctx context.Context, config aws.ConfigAWS) error {
+					return nil
+				},
+			)
+		factory := &ElbFactory{
+			KubernetesProvider: mockedKubernetesClientGetter,
+			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+				return identityProvider
+			},
+			AwsConfigProvider: mockedConfigGetter,
+		}
+
+		cfg, err := agentconfig.NewConfigFrom(test.config)
 		s.NoError(err)
 
 		fetcher, err := factory.Create(s.log, cfg, nil)
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		elbFetcher, ok := fetcher.(*ELBFetcher)
+		elbFetcher, ok := fetcher.(*ElbFetcher)
 		s.True(ok)
 		s.Equal(test.expectedRegex, elbFetcher.lbRegexMatchers[0].String())
 		s.Equal(kubeclient, elbFetcher.kubeClient)

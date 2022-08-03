@@ -20,6 +20,7 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -54,7 +55,7 @@ func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
 // RegisterFetchers registers entire list of parsed fetchers
 func (r *fetchersRegistry) RegisterFetchers(fetchers []*ParsedFetcher) error {
 	for _, p := range fetchers {
-		c, err := Factories.getConditions(r.log, p.name)
+		c, err := r.getConditions(p.name)
 		if err != nil {
 			return fmt.Errorf("RegisterFetchers error in getConditions for factory %s skipping Register due to: %v", p.name, err)
 		}
@@ -122,4 +123,16 @@ func (r *fetchersRegistry) Stop() {
 		rfetcher.f.Stop()
 		r.log.Infof("Fetcher for key %q stopped", key)
 	}
+}
+
+// TODO: Move conditions to factories and implement inside every factory
+func (r *fetchersRegistry) getConditions(name string) ([]fetching.Condition, error) {
+	c := make([]fetching.Condition, 0)
+	switch name {
+	case fetching.KubeAPIType, fetching.EcrType, fetching.ElbType:
+		// TODO: Use fetcher's kubeconfig configuration
+		c = append(c, conditions.NewLeaseFetcherCondition(r.log))
+	}
+
+	return c, nil
 }

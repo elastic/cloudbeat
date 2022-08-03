@@ -19,41 +19,39 @@ package fetchers
 
 import (
 	"fmt"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"regexp"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/docker/distribution/context"
-	"github.com/elastic/cloudbeat/resources/fetching"
 
+	"github.com/docker/distribution/context"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/config"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-const (
-	ECRType = "aws-ecr"
-)
-
 func init() {
-	fetchersManager.Factories.RegisterFactory(ECRType, &ECRFactory{
+	fetchersManager.Factories.RegisterFactory(fetching.EcrType, &EcrFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
 		IdentityProvider:   awslib.GetIdentityClient,
+		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }
 
-type ECRFactory struct {
+type EcrFactory struct {
 	KubernetesProvider providers.KubernetesClientGetter
 	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	AwsConfigProvider  config.AwsConfigProvider
 }
 
-func (f *ECRFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	log.Debug("Starting ECRFactory.Create")
+func (f *EcrFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting EcrFactory.Create")
 
-	cfg := ECRFetcherConfig{}
+	cfg := EcrFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
@@ -61,46 +59,39 @@ func (f *ECRFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.Reso
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
+func (f *EcrFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	ctx := context.Background()
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	ecrPrivateProvider := awslib.NewEcrProvider(awsConfig)
-	ecrPublicProvider := awslib.NewEcrPublicProvider()
 	kubeClient, err := f.KubernetesProvider.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}
 
-	ctx := context.Background()
 	identityProvider := f.IdentityProvider(awsConfig)
 	identity, err := identityProvider.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
 	}
 
-	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account, awsConfig.Region)
+	ecrPrivateProvider := awslib.NewEcrProvider()
+	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account)
 
-	privateECRExecutor := PodDescriber{
+	ecrPodDescriber := PodDescriber{
 		FilterRegex: regexp.MustCompile(privateRepoRegex),
 		Provider:    ecrPrivateProvider,
 	}
-	publicECRExecutor := PodDescriber{
-		FilterRegex: regexp.MustCompile(PublicRepoRegex),
-		Provider:    ecrPublicProvider,
-	}
 
-	fe := &ECRFetcher{
-		log:        log,
-		cfg:        cfg,
-		kubeClient: kubeClient,
-		PodDescribers: []PodDescriber{
-			privateECRExecutor,
-			publicECRExecutor,
-		},
-		resourceCh: ch,
+	fe := &EcrFetcher{
+		log:          log,
+		cfg:          cfg,
+		kubeClient:   kubeClient,
+		PodDescriber: ecrPodDescriber,
+		resourceCh:   ch,
+		awsConfig:    awsConfig,
 	}
 	return fe, nil
 }

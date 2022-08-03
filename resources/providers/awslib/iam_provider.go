@@ -20,6 +20,7 @@ package awslib
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -27,53 +28,62 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type IAMRolePermissionGetter interface {
-	GetIAMRolePermissions(ctx context.Context, roleName string) ([]iam.GetRolePolicyResponse, error)
+type IamRolePermissionGetter interface {
+	GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error)
 }
 
-type IAMProvider struct {
+type IamProvider struct {
 	log    *logp.Logger
 	client *iam.Client
 }
 
-func NewIAMProvider(log *logp.Logger, cfg aws.Config) *IAMProvider {
-	svc := iam.New(cfg)
-	return &IAMProvider{
+type RolePolicyInfo struct {
+	PolicyARN string
+	iam.GetRolePolicyOutput
+}
+
+func NewIAMProvider(log *logp.Logger, cfg aws.Config) *IamProvider {
+	svc := iam.NewFromConfig(cfg)
+	return &IamProvider{
 		log:    log,
 		client: svc,
 	}
 }
 
-func (p IAMProvider) GetIAMRolePermissions(ctx context.Context, roleName string) ([]iam.GetRolePolicyResponse, error) {
-	results := make([]iam.GetRolePolicyResponse, 0)
+func (p IamProvider) GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error) {
+	results := make([]RolePolicyInfo, 0)
 	policiesIdentifiers, err := p.getAllRolePolicies(ctx, roleName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)
 	}
 
 	for _, policyId := range policiesIdentifiers {
+		policyArn := policyId.PolicyArn
 		input := &iam.GetRolePolicyInput{
 			PolicyName: policyId.PolicyName,
 			RoleName:   &roleName,
 		}
-		req := p.client.GetRolePolicyRequest(input)
-		policy, err := req.Send(ctx)
+
+		policy, err := p.client.GetRolePolicy(ctx, input)
 		if err != nil {
 			p.log.Errorf("Failed to get policy %s: %v", *policyId.PolicyName, err)
 			continue
 		}
-		results = append(results, *policy)
+
+		results = append(results, RolePolicyInfo{
+			PolicyARN:           *policyArn,
+			GetRolePolicyOutput: *policy,
+		})
 	}
 
 	return results, nil
 }
 
-func (p IAMProvider) getAllRolePolicies(ctx context.Context, roleName string) ([]iam.AttachedPolicy, error) {
+func (p IamProvider) getAllRolePolicies(ctx context.Context, roleName string) ([]types.AttachedPolicy, error) {
 	input := &iam.ListAttachedRolePoliciesInput{
 		RoleName: &roleName,
 	}
-	req := p.client.ListAttachedRolePoliciesRequest(input)
-	allPolicies, err := req.Send(ctx)
+	allPolicies, err := p.client.ListAttachedRolePolicies(ctx, input)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list role %s policies - %w", roleName, err)
 	}
