@@ -29,4 +29,3 @@ class DockerWrapper:
             raise ValueError(f'Failed to execute command: {command_f, output}')
 
         return output.decode().strip()
-

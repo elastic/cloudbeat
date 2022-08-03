@@ -81,7 +81,7 @@ func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
 			os.Setenv(PodNameEnvar, podId)
 		}
 
-		got, err := buildConfig(context.TODO(), s.log, k8sfake.NewSimpleClientset(), make(chan bool))
+		got, err := buildConfig(context.TODO(), s.log, k8sfake.NewSimpleClientset(), make(chan bool), nil)
 		if (err != nil) != tt.wantErr {
 			s.FailNow("unexpected error: %v", err)
 		}
