@@ -1,0 +1,33 @@
+{
+  "name": "cis_policies_generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "set TS_NODE_FILES=true & node -r ts-node/register/transpile-only src/index.ts",
+    "nodemon": "nodemon --watch src/**/*.ts --watch src/**/*.js --exec node -r ts-node/register/transpile-only src/index.ts",
+    "eslint": "eslint src/**/*.{js,ts,tsx}"
+  },
+  "keywords": [],
+  "author": "Amit Kanfer",
+  "license": "",
+  "devDependencies": {
+    "@types/bluebird": "^3.5.36",
+    "@types/config": "^0.0.41",
+    "@types/node-xlsx": "^0.15.3",
+    "@types/underscore": "^1.11.4",
+    "@typescript-eslint/eslint-plugin": "^4.29.0",
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "axios-retry": "^3.3.0",
+    "bluebird": "^3.7.2",
+    "config": "^3.3.7",
+    "json-to-pretty-yaml": "^1.2.2",
+    "node-xlsx": "^0.21.0",
+    "underscore": "^1.13.4",
+    "uuid": "^8.3.2",
+    "yaml": "^2.1.1"
+  }
+}
