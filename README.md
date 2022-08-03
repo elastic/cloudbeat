@@ -52,29 +52,19 @@
 
 ## Local Evaluation
 
-Add the following configuration files into the root folder
-
-##### `data.yaml`
-
-should contain the list of rules you want to evaluate (also supports json)
-
-```yaml
-activated_rules:
-  cis_k8s:
-    - cis_1_1_1
-    - cis_1_1_2
-  cis_eks:
-    - cis_3_1_1
-    - cis_3_1_2
-```
-
 ##### `input.json`
 
-should contain an beat/agent output, e.g. filesystem data
+should contain a beat/agent output and the `activated_rules` (not mandatory - without specifying rules all rules will apply), e.g. filesystem data
 
 ```json
 {
   "type": "file",
+  "activated_rules": {
+    "cis_k8s": [
+      "cis_1_1_1"
+    ]
+  },
+  "sub_type": "file",
   "resource": {
     "mode": "0700",
     "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
@@ -104,89 +94,39 @@ opa eval data.main.findings --format pretty -i input.json -b ./bundle > output.j
 
 ````json
 {
-  "findings": [
-    {
-      "result": {
-        "evaluation": "failed",
-        "expected": {
-          "filemode": "0644"
-        },
-        "evidence": {
-          "filemode": "0700"
-        }
-      },
-      "rule": {
-        "id": "59b5a77b-b090-5630-9a33-73eb805b2d52",
-        "name": "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Automated)",
-        "profile_applicability": "* Level 1 - Master Node\n",
-        "description": "Ensure that the API server pod specification file has permissions of `644` or more restrictive.\n",
-        "rationale": "The API server pod specification file controls various parameters that set the behavior of the API server. You should restrict its file permissions to maintain the integrity of the file. The file should be writable by only the administrators on the system.\n",
-        "audit": "Run the below command (based on the file location on your system) on the\nmaster node.\nFor example,\n```\nstat -c %a /etc/kubernetes/manifests/kube-apiserver.yaml\n```\nVerify that the permissions are `644` or more restrictive.\n",
-        "remediation": "Run the below command (based on the file location on your system) on the\nmaster node.\nFor example,\n```\nchmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml\n```\n",
-        "impact": "None\n",
-        "default_value": "By default, the `kube-apiserver.yaml` file has permissions of `640`.\n",
-        "references": "1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)\n",
-        "section": "Master Node Configuration Files",
-        "version": 1,
-        "tags": [
-          "CIS",
-          "Kubernetes",
-          "CIS 1.1.1",
-          "Master Node Configuration Files"
-        ],
-        "benchmark": {
-          "name": "CIS Kubernetes V1.20",
-          "version": "v1.0.0"
-        }
-      }
+  "result": {
+    "evaluation": "failed",
+    "evidence": {
+      "filemode": "0700"
     },
-    {
-      "result": {
-        "evaluation": "passed",
-        "expected": {
-          "group": "root",
-          "owner": "root"
-        },
-        "evidence": {
-          "group": "root",
-          "owner": "root"
-        }
-      },
-      "rule": {
-        "id": "9f318d4d-2451-574a-99dc-838ed213f09b",
-        "name": "Ensure that the API server pod specification file ownership is set toroot:root (Automated)",
-        "profile_applicability": "* Level 1 - Master Node\n",
-        "description": "Ensure that the API server pod specification file ownership is set to `root:root`.\n",
-        "rationale": "The API server pod specification file controls various parameters that set the behavior of the API server. You should set its file ownership to maintain the integrity of the file. The file should be owned by `root:root`.\n",
-        "audit": "Run the below command (based on the file location on your system) on the\nmaster node.\nFor example,\n```\nstat -c %U:%G /etc/kubernetes/manifests/kube-apiserver.yaml\n```\nVerify that the ownership is set to `root:root`.\n",
-        "remediation": "Run the below command (based on the file location on your system) on the\nmaster node.\nFor example,\n```\nchown root:root /etc/kubernetes/manifests/kube-apiserver.yaml\n```\n",
-        "impact": "None\n",
-        "default_value": "By default, the `kube-apiserver.yaml` file ownership is set to `root:root`.\n",
-        "references": "1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)\n",
-        "section": "Master Node Configuration Files",
-        "version": 1,
-        "tags": [
-          "CIS",
-          "Kubernetes",
-          "CIS 1.1.2",
-          "Master Node Configuration Files"
-        ],
-        "benchmark": {
-          "name": "CIS Kubernetes V1.20",
-          "version": "v1.0.0"
-        }
-      }
+    "expected": {
+      "filemode": "644"
     }
-  ],
-  "resource": {
-    "name": "kube-apiserver.yaml",
-    "group": "root",
-    "mode": "0700",
-    "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-    "type": "file",
-    "owner": "root",
-    "uid": 501,
-    "gid": 20
+  },
+  "rule": {
+    "audit": "Run the below command (based on the file location on your system) on the\ncontrol plane node.\nFor example,\n```\nstat -c %a /etc/kubernetes/manifests/kube-apiserver.yaml\n```\nVerify that the permissions are `644` or more restrictive.\n",
+    "benchmark": {
+      "id": "cis_k8s",
+      "name": "CIS Kubernetes V1.23",
+      "version": "v1.0.0"
+    },
+    "default_value": "By default, the `kube-apiserver.yaml` file has permissions of `640`.\n",
+    "description": "Ensure that the API server pod specification file has permissions of `644` or more restrictive.\n",
+    "id": "6664c1b8-05f2-5872-a516-4b2c3c36d2d7",
+    "impact": "None\n",
+    "name": "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Automated)",
+    "profile_applicability": "* Level 1 - Master Node\n",
+    "rationale": "The API server pod specification file controls various parameters that set the behavior of the API server. You should restrict its file permissions to maintain the integrity of the file. The file should be writable by only the administrators on the system.\n",
+    "references": "1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)\n",
+    "remediation": "Run the below command (based on the file location on your system) on the\ncontrol plane node.\nFor example,\n```\nchmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml\n```\n",
+    "section": "Control Plane Node Configuration Files",
+    "tags": [
+      "CIS",
+      "Kubernetes",
+      "CIS 1.1.1",
+      "Control Plane Node Configuration Files"
+    ],
+    "version": "1.0"
   }
 }
 ````
@@ -244,6 +184,7 @@ curl --location --request POST 'http://localhost:8181/v1/data/main' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "input": {
+        "type": "file",
         "resource": {
             "type": "file",
             "mode": "0700",

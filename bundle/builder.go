@@ -3,12 +3,10 @@ package bundle
 import (
 	"bytes"
 	"context"
-	"io/fs"
-	"testing/fstest"
-
 	layerfs "github.com/dschmidt/go-layerfs"
 	opaBundle "github.com/open-policy-agent/opa/bundle"
 	opaCompile "github.com/open-policy-agent/opa/compile"
+	"io/fs"
 )
 
 type Bundle struct {
@@ -59,14 +57,4 @@ func CISKubernetesBundle() Bundle {
 
 func CISEksBundle() Bundle {
 	return Bundle{fs: layerfs.New(CommonEmbed, EKSRulesEmbed)}
-}
-
-func (b *Bundle) With(path string, content string) Bundle {
-	tmpFS := fstest.MapFS{
-		path: {
-			Data: []byte(content),
-		},
-	}
-	b.fs = layerfs.New(tmpFS, b.fs)
-	return *b
 }

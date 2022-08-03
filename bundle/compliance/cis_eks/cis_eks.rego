@@ -11,9 +11,9 @@ benchmark_metadata := {
 
 findings[finding] {
 	# if activated rules were configured for this benchmark run only them
-	data.activated_rules.cis_eks
+	input.activated_rules.cis_eks
 
-	rule_id := data.activated_rules.cis_eks[_]
+	rule_id := input.activated_rules.cis_eks[_]
 	finding = {
 		"result": rules[rule_id].finding,
 		"rule": rules[rule_id].metadata,
@@ -22,7 +22,7 @@ findings[finding] {
 
 findings[finding] {
 	# no activated rules were configured for this benchmark, run all rules
-	not data.activated_rules.cis_eks
+	not input.activated_rules.cis_eks
 
 	finding = {
 		"result": rules[rule_id].finding,
