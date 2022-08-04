@@ -11,4 +11,5 @@ var EKSRulesEmbed embed.FS
 //go:embed compliance/main.rego
 //go:embed compliance/lib
 //go:embed compliance/kubernetes_common
+//go:embed compliance/policy
 var CommonEmbed embed.FS

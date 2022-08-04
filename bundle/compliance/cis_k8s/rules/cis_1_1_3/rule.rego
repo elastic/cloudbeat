@@ -1,18 +1,8 @@
 package compliance.cis_k8s.rules.cis_1_1_3
 
-import data.compliance.lib.common
-import data.compliance.lib.data_adapter
+import data.compliance.policy.file.ensure_permissions as audit
 
-# Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive (Automated)
 finding = result {
-	data_adapter.filename == "kube-controller-manager.yaml"
-	filemode := data_adapter.filemode
-	rule_evaluation := common.file_permission_match(filemode, 6, 4, 4)
-
-	# set result
-	result := {
-		"evaluation": common.calculate_result(rule_evaluation),
-		"expected": {"filemode": "644"},
-		"evidence": {"filemode": filemode},
-	}
+	audit.filename_filter("kube-controller-manager.yaml")
+	result := audit.finding(6, 4, 4)
 }
