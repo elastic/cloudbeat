@@ -45,6 +45,10 @@ interface SpreadsheetTab {
     data: string[][];
 }
 
+interface HttpCache {
+    [key: string]: number
+}
+
 interface RuleSchema {
     audit: string;
     rule_number: string;

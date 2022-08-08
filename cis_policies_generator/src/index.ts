@@ -4,6 +4,7 @@ import config from 'config';
 import xlsx from 'node-xlsx';
 import path from 'path';
 import YAML from 'yaml';
+import {FixBrokenReferences} from "./fixBrokenReferences";
 
 const {v5: uuid} = require('uuid');
 
@@ -146,13 +147,14 @@ function generateOutputFiles(benchmarks: BenchmarkSchema[]): void {
     fs.writeFileSync(output_folder + "/" + config.get("output_filename"), YAML.stringify(result));
 }
 
-function main(): void {
+
+async function main(): Promise<void> {
     // Make sure output folder exists an is empty
     generateOutputFolder();
-
     const parsed_benchmarks = parseBenchmarks(benchmarks_folder)
+    await FixBrokenReferences(parsed_benchmarks)
     generateOutputFiles(parsed_benchmarks);
     console.log("Done!");
 }
 
-main()
+main().then(r => r)
