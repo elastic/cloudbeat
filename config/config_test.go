@@ -58,7 +58,7 @@ func (s *ConfigTestSuite) TestNew() {
 			`
    type : cloudbeat/cis_k8s
    streams:
-    - data_yaml:
+    - runtime_cfg:
         activated_rules:
           cis_k8s:
             - a
@@ -93,7 +93,7 @@ func (s *ConfigTestSuite) TestNew() {
 	}
 }
 
-func (s *ConfigTestSuite) TestDataYamlExists() {
+func (s *ConfigTestSuite) TestRuntimeCfgExists() {
 	var tests = []struct {
 		config   string
 		expected bool
@@ -101,7 +101,7 @@ func (s *ConfigTestSuite) TestDataYamlExists() {
 		{
 			`
   streams:
-    - data_yaml:
+    - runtime_cfg:
         activated_rules:
           cis_k8s:
             - a
@@ -115,7 +115,7 @@ func (s *ConfigTestSuite) TestDataYamlExists() {
 		{
 			`
   streams:
-    - not_data_yaml:
+    - not_runtime_cfg:
         something: true
 `,
 			false,
@@ -136,7 +136,7 @@ func (s *ConfigTestSuite) TestDataYamlExists() {
 func (s *ConfigTestSuite) TestConfigUpdate() {
 	configYml := `
     streams:
-      - data_yaml:
+      - runtime_cfg:
           activated_rules:
             cis_k8s:
               - a
@@ -158,7 +158,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		{
 			`
           streams:
-            - data_yaml:
+            - runtime_cfg:
                 activated_rules:
                   cis_k8s:
                     - a	
@@ -177,7 +177,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		{
 			`
           streams:
-            - data_yaml:
+            - runtime_cfg:
                 activated_rules:
                   cis_k8s:
                     - b	
@@ -197,7 +197,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		{
 			`
           streams:
-            - data_yaml:
+            - runtime_cfg:
                 activated_rules:
                   cis_k8s: []
               access_key_id: 
@@ -215,7 +215,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		{
 			`
           streams:
-            - data_yaml:
+            - runtime_cfg:
                 activated_rules:
                   cis_k8s:
                     - x	
@@ -224,7 +224,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
               access_key_id: first_stream_key
               secret_access_key: first_stream_secret
               session_token: first_stream_session  
-            - data_yaml:
+            - runtime_cfg:
                 activated_rules:
                   cis_k8s:
                     - f	
@@ -271,7 +271,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
     period: 10s
     kube_config: some_path
     streams:
-      - data_yaml:
+      - runtime_cfg:
           activated_rules:
             cis_k8s:
               - a
@@ -295,7 +295,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 		{
 			update: `
            streams:
-             - data_yaml:
+             - runtime_cfg:
                  activated_rules:
                    cis_k8s:
                      - a
@@ -325,7 +325,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 			update: `
            kube_config: some_other_path
            streams:
-             - data_yaml:
+             - runtime_cfg:
                  activated_rules:
                    cis_k8s:
                      - a
@@ -364,7 +364,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 	}
 }
 
-func (s *ConfigTestSuite) TestConfigDataYaml() {
+func (s *ConfigTestSuite) TestRuntimeConfig() {
 	var tests = []struct {
 		config   string
 		expected []string
@@ -372,7 +372,7 @@ func (s *ConfigTestSuite) TestConfigDataYaml() {
 		{
 			`
   streams:
-    - data_yaml:
+    - runtime_cfg:
         activated_rules:
           cis_k8s:
             - a
@@ -429,7 +429,7 @@ func (s *ConfigTestSuite) TestActivatedRulesFrameWork() {
 			`
 type: cloudbeat/cis_k8s
 streams:
-  - data_yaml:
+  - runtime_cfg:
       activated_rules:
         cis_k8s:
           - a
@@ -443,7 +443,7 @@ streams:
 			`
 type: cloudbeat/cis_eks
 streams:
-  - data_yaml:
+  - runtime_cfg:
       activated_rules:
         cis_eks:
           - a
