@@ -56,7 +56,7 @@ func (s *ConfigTestSuite) TestNew() {
 	}{
 		{
 			`
-   type : cloudbeat/vanilla
+   type : cloudbeat/cis_k8s
    streams:
     - data_yaml:
         activated_rules:
@@ -71,7 +71,7 @@ func (s *ConfigTestSuite) TestNew() {
       session_token: session
 `,
 			[]string{"a", "b", "c", "d", "e"},
-			"cloudbeat/vanilla",
+			"cloudbeat/cis_k8s",
 			"key",
 			"secret",
 			"session",
@@ -427,7 +427,7 @@ func (s *ConfigTestSuite) TestActivatedRulesFrameWork() {
 	}{
 		{
 			`
-type: cloudbeat/vanilla
+type: cloudbeat/cis_k8s
 streams:
   - data_yaml:
       activated_rules:
@@ -437,11 +437,11 @@ streams:
 `,
 			[]string{"a", "b"},
 			nil,
-			"cloudbeat/vanilla",
+			"cloudbeat/cis_k8s",
 		},
 		{
 			`
-type: cloudbeat/eks
+type: cloudbeat/cis_eks
 streams:
   - data_yaml:
       activated_rules:
@@ -451,7 +451,7 @@ streams:
 `,
 			nil,
 			[]string{"a", "b"},
-			"cloudbeat/eks",
+			"cloudbeat/cis_eks",
 		},
 	}
 

@@ -159,9 +159,9 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		integrationType string
 	}{
 		{"new_fetcher", 6, ""},
-		{"new_fetcher", 6, "cloudbeat/vanilla"},
+		{"new_fetcher", 6, "cloudbeat/cis_k8s"},
 		{"other_fetcher", 4, ""},
-		{"other_fetcher", 4, "cloudbeat/vanilla"},
+		{"other_fetcher", 4, "cloudbeat/cis_k8s"},
 	}
 
 	for _, test := range tests {
@@ -219,7 +219,7 @@ func (s *FactoriesTestSuite) TestRegisterFromFullConfig() {
 	}{
 		{
 			`
-type: cloudbeat/vanilla
+type: cloudbeat/cis_k8s
 streams:
   - not_data_yaml:
       activated_rules:
@@ -232,7 +232,7 @@ fetchers:
 		},
 		{
 			`
-type: cloudbeat/eks
+type: cloudbeat/cis_eks
 streams:
   - not_data_yaml:
       activated_rules:
