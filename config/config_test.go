@@ -18,7 +18,6 @@
 package config
 
 import (
-	"strings"
 	"testing"
 	"time"
 
@@ -87,7 +86,7 @@ func (s *ConfigTestSuite) TestNew() {
 		s.NoError(err)
 
 		s.Equal(test.expectedType, c.Type)
-		s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
+		s.Equal(test.expectedActivatedRules, c.Streams[0].RuntimeCfg.ActivatedRules.CisK8s)
 		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
 		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
 		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
@@ -130,7 +129,7 @@ func (s *ConfigTestSuite) TestDataYamlExists() {
 		c, err := New(cfg)
 		s.NoError(err)
 
-		s.Equal(test.expected, c.Streams[0].DataYaml != nil)
+		s.Equal(test.expected, c.Streams[0].RuntimeCfg != nil)
 	}
 }
 
@@ -257,7 +256,7 @@ func (s *ConfigTestSuite) TestConfigUpdate() {
 		err = c.Update(s.log, cfg)
 		s.NoError(err)
 
-		s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
+		s.Equal(test.expectedActivatedRules, c.Streams[0].RuntimeCfg.ActivatedRules.CisK8s)
 		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
 		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
 		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
@@ -358,7 +357,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 
 		s.Equal(test.expectedPeriod, c.Period)
 		s.Equal(test.expectedKubeConfig, c.KubeConfig)
-		s.Equal(test.expectedCISK8S, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
+		s.Equal(test.expectedCISK8S, c.Streams[0].RuntimeCfg.ActivatedRules.CisK8s)
 		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
 		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
 		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
@@ -368,7 +367,7 @@ func (s *ConfigTestSuite) TestConfigUpdateIsolated() {
 func (s *ConfigTestSuite) TestConfigDataYaml() {
 	var tests = []struct {
 		config   string
-		expected string
+		expected []string
 	}{
 		{
 			`
@@ -380,16 +379,7 @@ func (s *ConfigTestSuite) TestConfigDataYaml() {
             - b
             - c
             - d
-`,
-			`
-activated_rules:
-    cis_k8s:
-        - a
-        - b
-        - c
-        - d
-`,
-		},
+`, []string{"a", "b", "c", "d"}},
 	}
 
 	for _, test := range tests {
@@ -402,7 +392,7 @@ activated_rules:
 		dy, err := c.GetActivatedRules()
 		s.NoError(err)
 
-		s.Equal(strings.TrimSpace(test.expected), strings.TrimSpace(dy))
+		s.Equal(test.expected, dy.CisK8s)
 	}
 }
 
@@ -473,7 +463,7 @@ streams:
 		s.NoError(err)
 
 		s.Equal(test.expectedType, c.Type)
-		s.Equal(test.expectedActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisK8s)
-		s.Equal(test.expectedEksActivatedRules, c.Streams[0].DataYaml.ActivatedRules.CisEks)
+		s.Equal(test.expectedActivatedRules, c.Streams[0].RuntimeCfg.ActivatedRules.CisK8s)
+		s.Equal(test.expectedEksActivatedRules, c.Streams[0].RuntimeCfg.ActivatedRules.CisEks)
 	}
 }
