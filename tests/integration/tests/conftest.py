@@ -43,32 +43,12 @@ def fixture_data(start_stop_cloudbeat, k8s, cloudbeat_agent):
     @param start_stop_cloudbeat: fixture to start and stop agent / cloudbeat
     @param k8s: Kubernetes wrapper object
     @param cloudbeat_agent: config object
-    @return: pods, nodes, leader_node in cluster
+    @return: pods, nodes in cluster
     """
     # pylint: disable=W0612,W0613
     pods = k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
                                        namespace=cloudbeat_agent.namespace)
     nodes = k8s.get_cluster_nodes()
-    leader_node = get_cluster_leader(k8s, cloudbeat_agent, pods)
 
-    return pods, nodes, leader_node
+    return pods, nodes
 
-
-def get_cluster_leader(k8s, cloudbeat_agent, pods):
-    lease_name = "cloudbeat-cluster-leader"
-
-    k8s.wait_for_resource(resource_type='Lease',
-                          name=lease_name,
-                          status_list=['ADDED', 'MODIFIED'],
-                          namespace=cloudbeat_agent.namespace)
-
-    lease_info = k8s.get_resource(resource_type="Lease", name=lease_name, namespace=cloudbeat_agent.namespace)
-    lease_holder_identity = lease_info.spec.holder_identity
-    holder_id = lease_holder_identity.split("_")[-1]
-
-    leader_node = ""
-    for pod in pods:
-        if holder_id in pod.metadata.name:
-            leader_node = pod.spec.node_name
-
-    return leader_node

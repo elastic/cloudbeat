@@ -9,6 +9,7 @@ class ElasticWrapper:
     """
     Wrapper that uses elasticsearch official package
     """
+
     def __init__(self, elastic_params):
         self.index = elastic_params.cis_index
         self.es_client = Elasticsearch(hosts=elastic_params.url,
@@ -39,8 +40,8 @@ class ElasticWrapper:
         @param data: Data dictionary from elasticsearch
         @return: Total Value integer
         """
-        ret_value = data.get('hits', {})\
-            .get('total', {})\
+        ret_value = data.get('hits', {}) \
+            .get('total', {}) \
             .get('value', 0)
         return ret_value
 
@@ -64,3 +65,37 @@ class ElasticWrapper:
         """
         ret_value = data['hits']['hits']
         return ret_value
+
+    @staticmethod
+    def build_es_query(match_type: str) -> (dict, list):
+        """
+        This method builds a ES query based on the provided param
+        @param match_type: resource type to be matched against
+        @return: ES query and sorting order
+        """
+        query = {
+            "bool": {
+                "filter": [
+                    {
+                        "term": {
+                            "type": match_type
+                        }
+                    },
+                    {
+                        "range": {
+                            "@timestamp": {
+                                "gte": "now-30s"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        sort = [{
+            "@timestamp": {
+                "order": "desc"
+            }
+        }]
+
+        return query, sort

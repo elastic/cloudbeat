@@ -22,7 +22,7 @@ def test_cloudbeat_pod_exist(fixture_data):
     :param fixture_data: (Pods list, Nodes list)
     :return:
     """
-    pods, nodes, leader_node = fixture_data
+    pods, nodes = fixture_data
     pods_count = len(pods)
     nodes_count = len(nodes)
     assert pods_count == nodes_count, \
@@ -55,7 +55,7 @@ def test_elastic_index_exists(elastic_client, match_type):
     :param match_type: Findings type for matching
     :return:
     """
-    query, sort = build_es_query(match_type)
+    query, sort = elastic_client.build_es_query(match_type=match_type)
     start_time = time.time()
     result = {}
     while time.time() - start_time < CONFIG_TIMEOUT:
@@ -79,17 +79,21 @@ def test_elastic_index_exists(elastic_client, match_type):
 @pytest.mark.pre_merge
 @pytest.mark.order(4)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
-def test_leader_election(fixture_data, elastic_client):
+def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
     """
-    This test verifies that findings of all types are sending to elasticsearch
+    This test verifies that k8s related findings are sent by a single agent
+    :param fixture_data: (Pods list, Nodes list)
     :param elastic_client: Elastic API client
+    :param cloudbeat_agent: Cloudbeat configuration
+    :param k8s: Kubernetes client object
     :return:
     """
 
-    query, sort = build_es_query("k8s_object")
-    pods, nodes, leader_node = fixture_data
+    query, sort = elastic_client.build_es_query(match_type="k8s_object")
+    pods, nodes = fixture_data
+    leader_node = k8s.get_cluster_leader(namespace=cloudbeat_agent.namespace, pods=pods)
     assert leader_node != "", \
-        f"The Leader node could not be found"
+        "The Leader node could not be found"
 
     time.sleep(CONFIG_TIMEOUT)  # Wait for all pods to send resources to ES
 
@@ -100,33 +104,5 @@ def test_leader_election(fixture_data, elastic_client):
     # checking that k8s_objects are being sent only by the leader node.
     for resource in result['hits']['hits']:
         assert leader_node == resource['_source']['agent']['name'], \
-            f"Multiple agents send k8s_objects"
+            f"Multiple agents send k8s_objects, leader: {leader_node}, resource: {resource['_source']}"
 
-
-def build_es_query(match_type):
-    query = {
-        "bool": {
-            "filter": [
-                {
-                    "term": {
-                        "type": match_type
-                    }
-                },
-                {
-                    "range": {
-                        "@timestamp": {
-                            "gte": "now-30s"
-                        }
-                    }
-                }
-            ]
-        }
-    }
-
-    sort = [{
-        "@timestamp": {
-            "order": "desc"
-        }
-    }]
-
-    return query, sort
