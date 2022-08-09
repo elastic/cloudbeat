@@ -122,5 +122,7 @@ func nullifyManagedFields(resource interface{}) {
 		val.ManagedFields = nil
 	case *kubernetes.NetworkPolicy:
 		val.ManagedFields = nil
+	case *kubernetes.Node:
+		val.ManagedFields = nil
 	}
 }

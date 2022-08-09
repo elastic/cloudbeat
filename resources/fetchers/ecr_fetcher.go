@@ -27,7 +27,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,46 +37,38 @@ const (
 	// PrivateRepoRegexTemplate should identify images with an ecr regex template
 	// <account-id>.dkr.ecr.<region>.amazonaws.com/<repository-name>
 	PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.([-\\w]+)\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
-	// PublicRepoRegex should identify images with a public ecr regex template
-	// public.ecr.aws/<aws-alias>/<repository>
-	PublicRepoRegex          = "public\\.ecr\\.aws\\/\\w+\\/([-\\w\\.\\/]+)\\:?"
 	EcrRegionRegexGroup      = 1
-	PublicEcrImageRegexIndex = 1
 	EcrImageRegexGroup       = 2
 )
 
-type ECRFetcher struct {
-	log           *logp.Logger
-	cfg           ECRFetcherConfig
-	kubeClient    k8s.Interface
-	PodDescribers []PodDescriber
-	resourceCh    chan fetching.ResourceInfo
-	awsConfig     aws.Config
+type EcrFetcher struct {
+	log          *logp.Logger
+	cfg          EcrFetcherConfig
+	kubeClient   k8s.Interface
+	PodDescriber PodDescriber
+	resourceCh   chan fetching.ResourceInfo
+	awsConfig    aws.Config
 }
 
 type PodDescriber struct {
-	FilterRegex     *regexp.Regexp
-	Provider        awslib.EcrRepositoryDescriber
-	ExtractRegion   func(describer PodDescriber, repo string) (string, error)
-	ImageRegexIndex int
+	FilterRegex *regexp.Regexp
+	Provider    awslib.EcrRepositoryDescriber
 }
 
-type ECRFetcherConfig struct {
+type EcrFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
 	KubeConfig                    string `config:"Kubeconfig"`
 }
 
-type EcrRepository ecr.Repository
-
-type ECRResource struct {
-	EcrRepository
+type EcrResource struct {
+	awslib.EcrRepository
 }
 
-func (f *ECRFetcher) Stop() {
+func (f *EcrFetcher) Stop() {
 }
 
-func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Debug("Starting ECRFetcher.Fetch")
+func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting EcrFetcher.Fetch")
 
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -85,32 +76,30 @@ func (f *ECRFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 		return err
 	}
 
-	for _, podDescriber := range f.PodDescribers {
-		ecrDescribedRepositories, err := f.describePodImagesRepositories(ctx, podsList, podDescriber)
-		if err != nil {
-			return fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
-		}
-		for _, repository := range ecrDescribedRepositories {
-			f.resourceCh <- fetching.ResourceInfo{
-				Resource:      ECRResource{EcrRepository(repository)},
-				CycleMetadata: cMetadata,
-			}
+	ecrDescribedRepositories, err := f.describePodImagesRepositories(ctx, podsList, f.PodDescriber)
+	if err != nil {
+		return fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
+	}
+	for _, repository := range ecrDescribedRepositories {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      EcrResource{awslib.EcrRepository(repository)},
+			CycleMetadata: cMetadata,
 		}
 	}
 	return nil
 }
 
-func (f *ECRFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) ([]ecr.Repository, error) {
+func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) (awslib.EcrRepositories, error) {
 	regionToReposMap := getAwsRepositories(podsList, describer)
 	f.log.Debugf("sending pods to ecrProviders: %v", regionToReposMap)
-	awsRepositories := make([]ecr.Repository, 0)
+	awsRepositories := make(awslib.EcrRepositories, 0)
 	for region, repositories := range regionToReposMap {
 		// Add configuration
 		describedRepo, err := describer.Provider.DescribeRepositories(ctx, f.awsConfig, repositories, region)
 		if err != nil {
 			f.log.Errorf("could not retrieve pod's aws repositories for region %s: %w", region, err)
 		} else {
-			awsRepositories = append(awsRepositories, describedRepo.Repositories...)
+			awsRepositories = append(awsRepositories, describedRepo...)
 		}
 	}
 	return awsRepositories, nil
@@ -126,12 +115,8 @@ func getAwsRepositories(podsList *v1.PodList, describer PodDescriber) map[string
 			// Takes only aws images
 			regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
 			if regexMatcher != nil {
-				repository := regexMatcher[describer.ImageRegexIndex]
-				region, err := describer.ExtractRegion(describer, image)
-				if err != nil {
-					logp.Error(err)
-					continue
-				}
+				repository := regexMatcher[EcrImageRegexGroup]
+				region := regexMatcher[EcrRegionRegexGroup]
 				reposByRegion[region] = append(reposByRegion[region], repository)
 			}
 		}
@@ -139,27 +124,11 @@ func getAwsRepositories(podsList *v1.PodList, describer PodDescriber) map[string
 	return reposByRegion
 }
 
-func ExtractRegionFromEcrImage(describer PodDescriber, image string) (string, error) {
-	regexMatcher := describer.FilterRegex.FindStringSubmatch(image)
-	if regexMatcher != nil {
-		repository := regexMatcher[EcrRegionRegexGroup]
-		return repository, nil
-	}
-
-	return "", fmt.Errorf("could not extract region, image does not match the aws ecr template")
-}
-
-// ExtractRegionFromPublicEcrImage - Currently the public ecr provider is not functional.
-// TODO - This method should be change as part of implementing the public ecr - https://github.com/elastic/security-team/issues/4035
-func ExtractRegionFromPublicEcrImage(_ PodDescriber, _ string) (string, error) {
-	return "", nil
-}
-
-func (res ECRResource) GetData() interface{} {
+func (res EcrResource) GetData() interface{} {
 	return res
 }
 
-func (res ECRResource) GetMetadata() (fetching.ResourceMetadata, error) {
+func (res EcrResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if res.RepositoryArn == nil || res.RepositoryName == nil {
 		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
@@ -167,9 +136,9 @@ func (res ECRResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      *res.RepositoryArn,
 		Type:    fetching.CloudContainerRegistry,
-		SubType: fetching.ECRType,
+		SubType: fetching.EcrType,
 		Name:    *res.RepositoryName,
 	}, nil
 }
 
-func (res ECRResource) GetElasticCommonData() any { return nil }
+func (res EcrResource) GetElasticCommonData() any { return nil }

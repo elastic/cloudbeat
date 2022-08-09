@@ -35,23 +35,23 @@ import (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.ECRType, &ECRFactory{
+	fetchersManager.Factories.RegisterFactory(fetching.EcrType, &EcrFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
 		IdentityProvider:   awslib.GetIdentityClient,
 		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }
 
-type ECRFactory struct {
+type EcrFactory struct {
 	KubernetesProvider providers.KubernetesClientGetter
 	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
 	AwsConfigProvider  config.AwsConfigProvider
 }
 
-func (f *ECRFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	log.Debug("Starting ECRFactory.Create")
+func (f *EcrFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting EcrFactory.Create")
 
-	cfg := ECRFetcherConfig{}
+	cfg := EcrFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
@@ -59,15 +59,13 @@ func (f *ECRFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *EcrFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
 	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	ecrPrivateProvider := awslib.NewEcrProvider()
-	ecrPublicProvider := awslib.NewEcrPublicProvider()
 	kubeClient, err := f.KubernetesProvider.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
@@ -79,31 +77,21 @@ func (f *ECRFactory) CreateFrom(log *logp.Logger, cfg ECRFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
 	}
 
+	ecrPrivateProvider := awslib.NewEcrProvider()
 	privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, *identity.Account)
 
-	privateECRExecutor := PodDescriber{
-		FilterRegex:     regexp.MustCompile(privateRepoRegex),
-		Provider:        ecrPrivateProvider,
-		ExtractRegion:   ExtractRegionFromEcrImage,
-		ImageRegexIndex: EcrImageRegexGroup,
-	}
-	publicECRExecutor := PodDescriber{
-		FilterRegex:     regexp.MustCompile(PublicRepoRegex),
-		Provider:        ecrPublicProvider,
-		ExtractRegion:   ExtractRegionFromPublicEcrImage,
-		ImageRegexIndex: PublicEcrImageRegexIndex,
+	ecrPodDescriber := PodDescriber{
+		FilterRegex: regexp.MustCompile(privateRepoRegex),
+		Provider:    ecrPrivateProvider,
 	}
 
-	fe := &ECRFetcher{
-		log:        log,
-		cfg:        cfg,
-		kubeClient: kubeClient,
-		PodDescribers: []PodDescriber{
-			privateECRExecutor,
-			publicECRExecutor,
-		},
-		resourceCh: ch,
-		awsConfig:  awsConfig,
+	fe := &EcrFetcher{
+		log:          log,
+		cfg:          cfg,
+		kubeClient:   kubeClient,
+		PodDescriber: ecrPodDescriber,
+		resourceCh:   ch,
+		awsConfig:    awsConfig,
 	}
 	return fe, nil
 }

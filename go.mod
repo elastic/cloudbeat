@@ -6,8 +6,8 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
-	github.com/aws/aws-sdk-go-v2 v0.24.0
-	github.com/dlclark/regexp2 v1.4.0 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.16.7
+	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible
@@ -21,7 +21,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
-	golang.org/x/tools v0.1.11
+	golang.org/x/tools v0.1.12
 	gopkg.in/jcmturner/aescts.v1 v1.0.1 // indirect
 	gopkg.in/jcmturner/dnsutils.v1 v1.0.1 // indirect
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
@@ -32,11 +32,19 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go-v2/credentials v1.12.7
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.7
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.17.8
+	github.com/aws/aws-sdk-go-v2/service/ecrpublic v1.13.8
+	github.com/aws/aws-sdk-go-v2/service/eks v1.21.4
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.14.8
+	github.com/aws/aws-sdk-go-v2/service/iam v1.18.4
+	github.com/aws/aws-sdk-go-v2/service/sts v1.16.8
 	github.com/djherbis/times v1.5.0
 	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
-	github.com/elastic/elastic-agent-autodiscover v0.1.1
-	github.com/elastic/elastic-agent-libs v0.2.5
-	github.com/elastic/go-licenser v0.4.0
+	github.com/elastic/elastic-agent-autodiscover v0.2.1
+	github.com/elastic/elastic-agent-libs v0.2.10
+	github.com/elastic/go-licenser v0.4.1
 	github.com/open-policy-agent/opa v0.42.0
 	github.com/pkg/errors v0.9.1
 	go.elastic.co/go-licence-detector v0.5.0
@@ -45,7 +53,20 @@ require (
 	k8s.io/api v0.24.2
 )
 
-require github.com/dschmidt/go-layerfs v0.1.0 // indirect
+require (
+	github.com/aws/aws-sdk-go-v2/config v1.15.12 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.14 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.8 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.14 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.36.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.18.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.11.10 // indirect
+	github.com/aws/smithy-go v1.12.0 // indirect
+	github.com/dschmidt/go-layerfs v0.1.0 // indirect
+	github.com/elastic/elastic-agent-shipper-client v0.2.0 // indirect
+	github.com/pierrec/lz4/v4 v4.1.15 // indirect
+)
 
 require (
 	code.cloudfoundry.org/gofileutils v0.0.0-20170111115228-4d0c80011a0f // indirect
@@ -59,8 +80,8 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220622083326-cab8871124af
-	github.com/elastic/csp-security-policies v1.0.8-0.20220725171451-c367d45accb6
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220726163833-e8a0da132f1f
+	github.com/elastic/csp-security-policies v1.0.8
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.6 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -74,7 +95,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
-	github.com/hashicorp/go-uuid v1.0.2 // indirect
+	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -106,7 +127,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.7.0 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	gopkg.in/yaml.v3 v3.0.1
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/klog/v2 v2.60.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20220328201542-3ee0da9b0b42 // indirect
 	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9 // indirect
@@ -140,17 +161,17 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/dop251/goja v0.0.0-20220516123900-4418d4575a41 // indirect
-	github.com/dop251/goja_nodejs v0.0.0-20211022123610-8dd9abb0616d // indirect
+	github.com/dop251/goja v0.0.0-20220801092856-7adb49968576 // indirect
+	github.com/dop251/goja_nodejs v0.0.0-20220712185256-8cad205bf387 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/elastic/elastic-agent-client/v7 v7.0.0-20220607160924-1a71765a8bbe // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.4.1 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.4.4 // indirect
 	github.com/elastic/go-concert v0.2.0 // indirect
 	github.com/elastic/go-lumber v0.1.0 // indirect
 	github.com/elastic/go-seccomp-bpf v1.2.0 // indirect
 	github.com/elastic/go-structform v0.0.9 // indirect
-	github.com/elastic/go-sysinfo v1.8.0 // indirect
+	github.com/elastic/go-sysinfo v1.8.1 // indirect
 	github.com/elastic/go-ucfg v0.8.6
 	github.com/elastic/go-windows v1.0.1 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
@@ -196,7 +217,7 @@ require (
 	github.com/prometheus/client_golang v1.12.2 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
-	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.21.12 // indirect
@@ -218,17 +239,17 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
-	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
+	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/net v0.0.0-20220621193019-9d032be2e588 // indirect
+	golang.org/x/net v0.0.0-20220802222814-0bcc04d9c69b // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
-	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c // indirect
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
+	golang.org/x/sys v0.0.0-20220731174439-a90be440212d // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
-	google.golang.org/genproto v0.0.0-20220622131801-db39fadba55f // indirect
-	google.golang.org/grpc v1.47.0 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/genproto v0.0.0-20220802133213-ce4fa296bf78 // indirect
+	google.golang.org/grpc v1.48.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/jcmturner/gokrb5.v7 v7.5.0 // indirect; indirectresources/manager/data.go
 	howett.net/plist v1.0.0 // indirect
@@ -239,7 +260,6 @@ replace (
 	github.com/Microsoft/go-winio => github.com/bi-zone/go-winio v0.4.15
 	github.com/Shopify/sarama => github.com/elastic/sarama v1.19.1-0.20210823122811-11c3ef800752
 	github.com/apoydence/eachers => github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 //indirect, see https://github.com/elastic/beats/pull/29780 for details.
-	github.com/cucumber/godog => github.com/cucumber/godog v0.8.1
 	github.com/dop251/goja => github.com/andrewkroh/goja v0.0.0-20190128172624-dd2ac4456e20
 	github.com/dop251/goja_nodejs => github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6
 	github.com/fsnotify/fsnotify => github.com/adriansr/fsnotify v1.4.8-0.20211018144411-a81f2b630e7c

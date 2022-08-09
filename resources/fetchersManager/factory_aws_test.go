@@ -79,7 +79,7 @@ func (n *awsTestFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetc
 func awsMockedFetcherConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS) *agentconfig.C {
 	c := agentconfig.NewConfig()
 	conf := config.DefaultConfig
-	conf.Type = config.InputTypeEKS
+	conf.Type = config.InputTypeEks
 	err := c.Merge(awsConfig)
 	s.NoError(err)
 
@@ -168,14 +168,14 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 
 func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetcherName string) config.Config {
 	conf := config.DefaultConfig
-	conf.Type = config.InputTypeEKS
+	conf.Type = config.InputTypeEks
 	fetcherConfig := agentconfig.NewConfig()
 	err := fetcherConfig.SetString("name", -1, fetcherName)
 	s.NoError(err)
-	conf.Fetchers.EKS = append(conf.Fetchers.EKS, fetcherConfig)
+	conf.Fetchers.Eks = append(conf.Fetchers.Eks, fetcherConfig)
 	stream := config.Stream{
-		AWSConfig: awsConfig,
-		DataYaml:  nil,
+		AWSConfig:  awsConfig,
+		RuntimeCfg: nil,
 	}
 	conf.Streams = append(conf.Streams, stream)
 	return conf

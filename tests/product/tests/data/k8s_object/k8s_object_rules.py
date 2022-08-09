@@ -94,7 +94,7 @@ cis_5_1_5_pod_serviceAccount = KubeTestCase(
     resource_type='Pod',
     resource_body={
         'metadata': {'name': TEST_POD_NAME, 'namespace': KUBE_SYSTEM_NAMESPACE},
-        'spec': {'serviceAccount': DEFAULT, 'namespace': DEFAULT},
+        'spec': {'serviceAccount': DEFAULT},
     },
     expected=RULE_FAIL_STATUS,
 )
@@ -104,7 +104,7 @@ cis_5_1_5_pod_serviceAccountName = KubeTestCase(
     resource_type='Pod',
     resource_body={
         'metadata': {'name': TEST_POD_NAME, 'namespace': KUBE_SYSTEM_NAMESPACE},
-        'spec': {'serviceAccountName': DEFAULT, 'namespace': DEFAULT},
+        'spec': {'serviceAccountName': DEFAULT},
     },
     expected=RULE_FAIL_STATUS,
 )
@@ -122,9 +122,6 @@ cis_5_1_5_service_account = KubeTestCase(
 cis_5_1_5 = {
     "5.1.5 ServiceAccount.Name == default and automountServiceAccountToken == true":
         cis_5_1_5_service_account,
-}
-
-cis_5_1_5_skip = {
     '5.1.5 Pod.serviceAccount == default': cis_5_1_5_pod_serviceAccount,
     '5.1.5 Pod.serviceAccountName == default': cis_5_1_5_pod_serviceAccountName,
 }
@@ -179,7 +176,7 @@ cis_5_1_6 = {
 
 # CIS 5.2.2
 cis_5_2_2_pod_fail = KubeTestCase(
-    rule_tag='CIS 5.2.3',
+    rule_tag='CIS 5.2.2',
     resource_type='Pod',
     resource_body={
         'metadata': {'name': TEST_POD_NAME, 'namespace': KUBE_SYSTEM_NAMESPACE},
@@ -196,7 +193,7 @@ cis_5_2_2_pod_fail = KubeTestCase(
 )
 
 cis_5_2_2_pod_pass = KubeTestCase(
-    rule_tag='CIS 5.2.3',
+    rule_tag='CIS 5.2.2',
     resource_type='Pod',
     resource_body={
         'metadata': {'name': TEST_POD_NAME, 'namespace': KUBE_SYSTEM_NAMESPACE},
@@ -239,9 +236,7 @@ cis_5_2_3_pod_pass = KubeTestCase(
 )
 
 cis_5_2_3 = {
-    '5.2.3 Pod.spec.hostPID == true': cis_5_2_3_pod_fail
-}
-cis_5_2_3_skip = {
+    '5.2.3 Pod.spec.hostPID == true': cis_5_2_3_pod_fail,
     '5.2.3 Pod.spec.hostPID == false': cis_5_2_3_pod_pass,
 }
 
@@ -267,10 +262,7 @@ cis_5_2_4_pod_pass = KubeTestCase(
 )
 
 cis_5_2_4 = {
-    '5.2.4 Pod.spec.hostIPC == true': cis_5_2_4_pod_fail
-}
-
-cis_5_2_4_skip = {
+    '5.2.4 Pod.spec.hostIPC == true': cis_5_2_4_pod_fail,
     '5.2.4 Pod.spec.hostIPC == false': cis_5_2_4_pod_pass
 }
 
@@ -296,12 +288,8 @@ cis_5_2_5_pod_pass = KubeTestCase(
 )
 
 cis_5_2_5 = {
-    '5.2.5 Pod.spec.hostNetwork == true': cis_5_2_5_pod_fail
-
-}
-
-cis_5_2_5_skip = {
-    '5.2.5 Pod.spec.hostNetwork == false': cis_5_2_5_pod_pass
+    '5.2.5 Pod.spec.hostNetwork == true': cis_5_2_5_pod_fail,
+    '5.2.5 Pod.spec.hostNetwork == false': cis_5_2_5_pod_pass,
 }
 
 # CIS 5.2.6

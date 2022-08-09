@@ -10,7 +10,7 @@ env:
   AWS_ECR_KEY: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
   AWS_ECR_SECRET: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
   AWS_ECR_REGION: ${{ secrets.AWS_ECR_REGION_DEVELOP }}
-  GO_VERSION: 1.18.2
+  GO_VERSION: 1.18.4
 
 jobs:
   publish_image_cloudbeat:

@@ -22,13 +22,15 @@ package config
 
 import (
 	"context"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"fmt"
+	"time"
+
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"gopkg.in/yaml.v3"
-	"time"
+
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
 
 const DefaultNamespace = "default"
@@ -37,7 +39,7 @@ const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 const (
 	InputTypeVanillaK8s = "cloudbeat/vanilla"
-	InputTypeEKS        = "cloudbeat/eks"
+	InputTypeEks        = "cloudbeat/eks"
 )
 
 type Fetcher struct {
@@ -46,7 +48,7 @@ type Fetcher struct {
 
 type Fetchers struct {
 	Vanilla []*config.C `config:"vanilla"` // Vanilla fetchers
-	EKS     []*config.C `config:"eks"`     // EKS fetchers
+	Eks     []*config.C `config:"eks"`     // EKS fetchers
 }
 
 type Config struct {
@@ -59,17 +61,17 @@ type Config struct {
 }
 
 type Stream struct {
-	AWSConfig aws.ConfigAWS `config:",inline"`
-	DataYaml  *DataYaml     `config:"data_yaml" yaml:"data_yaml" json:"data_yaml"`
+	AWSConfig  aws.ConfigAWS  `config:",inline"`
+	RuntimeCfg *RuntimeConfig `config:"data_yaml"`
 }
 
-type DataYaml struct {
+type RuntimeConfig struct {
 	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
 }
 
 type Benchmarks struct {
 	CisK8s []string `config:"cis_k8s,omitempty" yaml:"cis_k8s,omitempty" json:"cis_k8s,omitempty"`
-	CisEKS []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
+	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
 var DefaultConfig = Config{
@@ -111,14 +113,14 @@ func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
 	return nil
 }
 
-// GetActivatedRules returns the activated rules from the config. The activated rules are in yaml format.
-func (c *Config) GetActivatedRules() (string, error) {
-	dataYaml, err := yaml.Marshal(c.Streams[0].DataYaml)
-	if err != nil {
-		return "", err
+// GetActivatedRules returns the activated rules from the config.
+func (c *Config) GetActivatedRules() (*Benchmarks, error) {
+	cfgStream := c.Streams
+	if len(cfgStream) == 0 || cfgStream[0].RuntimeCfg == nil {
+		return nil, fmt.Errorf("could not find runtime cfg")
 	}
 
-	return string(dataYaml), nil
+	return cfgStream[0].RuntimeCfg.ActivatedRules, nil
 }
 
 // Datastream function to generate the datastream value

@@ -80,7 +80,7 @@ default_region: us2-east
 		identity := awslib.Identity{
 			Account: &test.account,
 		}
-		identityProvider := &awslib.MockedIdentityProviderGetter{}
+		identityProvider := &awslib.MockIdentityProviderGetter{}
 		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
 
 		mockedConfigGetter := &config.MockAwsConfigProvider{}
@@ -94,7 +94,7 @@ default_region: us2-east
 					return nil
 				},
 			)
-		factory := &ELBFactory{
+		factory := &ElbFactory{
 			KubernetesProvider: mockedKubernetesClientGetter,
 			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 				return identityProvider
@@ -109,7 +109,7 @@ default_region: us2-east
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		elbFetcher, ok := fetcher.(*ELBFetcher)
+		elbFetcher, ok := fetcher.(*ElbFetcher)
 		s.True(ok)
 		s.Equal(test.expectedRegex, elbFetcher.lbRegexMatchers[0].String())
 		s.Equal(kubeclient, elbFetcher.kubeClient)

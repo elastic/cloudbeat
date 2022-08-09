@@ -18,31 +18,32 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package beater
+package leaderelection
 
 import (
-	"fmt"
-
-	"github.com/elastic/cloudbeat/config"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"time"
 )
 
-type validator struct {
-}
+const (
+	// LeaseDuration is the duration that non-leader candidates will
+	// wait to force acquire leadership. This is measured against time of
+	// last observed ack.
+	//
+	LeaseDuration = 15 * time.Second
+	// RenewDeadline is the duration that the acting manager will retry
+	// refreshing leadership before giving up.
+	//
+	RenewDeadline = 10 * time.Second
 
-func (v *validator) Validate(cfg *agentconfig.C) error {
-	c, err := config.New(cfg)
-	if err != nil {
-		return fmt.Errorf("Could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
-	}
+	// RetryPeriod is the duration the LeaderElector clients should wait
+	// between tries of actions.
+	//
+	RetryPeriod = 2 * time.Second
 
-	if len(c.Streams) == 0 {
-		return fmt.Errorf("No streams received in reconfiguration %v", cfg.FlattenedKeys())
-	}
+	// FirstLeaderDeadline is the duration to wait for the leader to acquire the lease for the first time.
+	FirstLeaderDeadline = 5 * time.Second
 
-	if c.Streams[0].RuntimeCfg == nil {
-		return fmt.Errorf("RuntimeCfg is not present in reconfiguration %v", cfg.FlattenedKeys())
-	}
+	PodNameEnvar = "POD_NAME"
 
-	return nil
-}
+	LeaderLeaseName = "cloudbeat-cluster-leader"
+)

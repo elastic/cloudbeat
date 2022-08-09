@@ -48,7 +48,7 @@ def test_process_controller_manager(elastic_client,
     # Wait for process reboot
     # TODO: Implement a more optimal way of waiting
     time.sleep(60)
-    
+
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.findings_timeout,

@@ -46,12 +46,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            # This is done for leader election on local env
-            # GAP: https://github.com/elastic/cloudbeat/issues/162
             - name: POD_NAME
-              value: cloudbeat-leader
-                # fieldRef:
-                #   fieldPath: metadata.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           securityContext:
             runAsUser: 0
             # If using Red Hat OpenShift uncomment this:
@@ -238,7 +236,7 @@ data:
     #logging.selectors: ["publisher"]
 
     # Send all logging output to stderr. The default is false.
-    logging.to_stderr: true
+    #logging.to_stderr: false
 
 ---
 apiVersion: v1

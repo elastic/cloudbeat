@@ -76,7 +76,7 @@ func (s *BundleTestSuite) TestCreateServer() {
 	}
 }
 
-func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
+func (s *BundleTestSuite) TestCreateServerWithRuntimeConfig() {
 	invalidStreams := agentconfig.MustNewConfigFrom(`
     not_streams:
       - not_data_yaml:
@@ -92,11 +92,11 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 	configNoStreams, err := config.New(invalidStreams)
 	s.NoError(err)
 
-	invalidDataYaml := agentconfig.MustNewConfigFrom(`
+	invalidRuntimeConfig := agentconfig.MustNewConfigFrom(`
     streams:
       - data_yaml
 `)
-	configNoDataYaml, err := config.New(invalidDataYaml)
+	configNoRuntimeConfig, err := config.New(invalidRuntimeConfig)
 	s.Error(err)
 
 	validStreams := agentconfig.MustNewConfigFrom(`
@@ -110,7 +110,7 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
               - d
               - e
 `)
-	configWithDataYaml, err := config.New(validStreams)
+	configWithRuntimeConfig, err := config.New(validStreams)
 	s.NoError(err)
 
 	var tests = []struct {
@@ -120,13 +120,13 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 		cfg                config.Config
 	}{
 		{
-			"config missing data yaml", "/bundles/bundle.tar.gz", "200 OK", configNoDataYaml,
+			"config missing data yaml", "/bundles/bundle.tar.gz", "200 OK", configNoRuntimeConfig,
 		},
 		{
 			"config missing streams", "/bundles/bundle.tar.gz", "200 OK", configNoStreams,
 		},
 		{
-			"valid config from string", "/bundles/bundle.tar.gz", "200 OK", configWithDataYaml,
+			"valid config from string", "/bundles/bundle.tar.gz", "200 OK", configWithRuntimeConfig,
 		},
 		{
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
@@ -134,7 +134,7 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 				Type: config.InputTypeVanillaK8s,
 				Streams: []config.Stream{
 					{
-						DataYaml: &config.DataYaml{
+						RuntimeCfg: &config.RuntimeConfig{
 							ActivatedRules: &config.Benchmarks{
 								CisK8s: []string{
 									"cis_1_1_1",
@@ -148,12 +148,12 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 		{
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
 			config.Config{
-				Type: config.InputTypeEKS,
+				Type: config.InputTypeEks,
 				Streams: []config.Stream{
 					{
-						DataYaml: &config.DataYaml{
+						RuntimeCfg: &config.RuntimeConfig{
 							ActivatedRules: &config.Benchmarks{
-								CisEKS: []string{
+								CisEks: []string{
 									"cis_1_1_1",
 								},
 							},
@@ -183,7 +183,7 @@ func (s *BundleTestSuite) TestCreateServerWithDataYaml() {
 	}
 }
 
-// TestCreateServerWithDataYaml tests the creation of a server with a valid config
+// TestCreateServerWithRuntimeConfig tests the creation of a server with a valid config
 func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 	validStreamsVanilla := agentconfig.MustNewConfigFrom(`
     type: cloudbeat/vanilla
@@ -197,7 +197,7 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 	configWithVanillaType, err := config.New(validStreamsVanilla)
 	s.NoError(err)
 
-	validStreamsEKS := agentconfig.MustNewConfigFrom(`
+	validStreamsEks := agentconfig.MustNewConfigFrom(`
     type: cloudbeat/eks
     streams:
       - data_yaml:
@@ -206,7 +206,7 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
               - a
               - b
 `)
-	configWithEksType, err := config.New(validStreamsEKS)
+	configWithEksType, err := config.New(validStreamsEks)
 	s.NoError(err)
 
 	var tests = []struct {
@@ -227,7 +227,7 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 				Type: config.InputTypeVanillaK8s,
 				Streams: []config.Stream{
 					{
-						DataYaml: &config.DataYaml{
+						RuntimeCfg: &config.RuntimeConfig{
 							ActivatedRules: &config.Benchmarks{
 								CisK8s: []string{
 									"cis_1_1_1",
@@ -241,12 +241,12 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 		{
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
 			config.Config{
-				Type: config.InputTypeEKS,
+				Type: config.InputTypeEks,
 				Streams: []config.Stream{
 					{
-						DataYaml: &config.DataYaml{
+						RuntimeCfg: &config.RuntimeConfig{
 							ActivatedRules: &config.Benchmarks{
-								CisEKS: []string{
+								CisEks: []string{
 									"cis_1_1_1",
 								},
 							},
