@@ -11,14 +11,3 @@ components:
 
 patchesStrategicMerge:
   - configmap_patch.yml
-
-configMapGenerator:
-- name: aws-creds
-  options:
-    disableNameSuffixHash: true
-    labels:
-      k8s-app: cloudbeat
-  namespace: kube-system
-  behavior: create
-  envs:
-    - env.aws

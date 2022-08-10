@@ -132,6 +132,7 @@ metadata:
 data:
   cloudbeat.yml: |-
     cloudbeat:
+      type: cloudbeat/vanilla
       # Defines how often an event is sent to the output
       period: 30s
       fetchers:
