@@ -55,6 +55,7 @@ metadata:
   references: |
     1. https://kubernetes.io/docs/admin/kubelet/
   section: Kubelet
+  version: "1.0"
   tags:
     - CIS
     - EKS

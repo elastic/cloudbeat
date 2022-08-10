@@ -97,6 +97,7 @@ metadata:
     2. https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/apis/kubeletconfig/v1beta1/types.go
     3. https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
   section: Kubelet
+  version: "1.0"
   tags:
     - CIS
     - EKS

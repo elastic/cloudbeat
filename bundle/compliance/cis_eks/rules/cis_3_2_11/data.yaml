@@ -92,6 +92,7 @@ metadata:
     1. https://github.com/kubernetes/kubernetes/pull/45059
     2. https://kubernetes.io/docs/admin/kubelet-tls-bootstrapping/#kubelet-configuration
   section: Kubelet
+  version: "1.0"
   tags:
     - CIS
     - EKS

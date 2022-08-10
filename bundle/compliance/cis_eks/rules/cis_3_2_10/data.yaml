@@ -60,6 +60,7 @@ metadata:
     4. https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/
     5. https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
   section: Kubelet
+  version: "1.0"
   tags:
     - CIS
     - EKS

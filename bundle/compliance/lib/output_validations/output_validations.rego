@@ -3,7 +3,7 @@ package compliance.lib.output_validations
 import data.compliance
 import future.keywords.every
 
-validate_k8s_metadata(metadata) {
+validate_common_kuberentes_provider_metadata(metadata) {
 	metadata.id
 	metadata.name
 	metadata.profile_applicability
@@ -21,20 +21,16 @@ validate_k8s_metadata(metadata) {
 	metadata.benchmark.name
 	metadata.benchmark.version
 	metadata.benchmark.id
+}
+
+validate_k8s_metadata(metadata) {
+	validate_common_kuberentes_provider_metadata(metadata)
 } else = false {
 	true
 }
 
 validate_eks_metadata(metadata) {
-	metadata.name
-	metadata.description
-	metadata.impact
-	metadata.tags
-	metadata.benchmark
-	metadata.benchmark.name
-	metadata.benchmark.version
-	metadata.benchmark.id
-	metadata.remediation
+	validate_common_kuberentes_provider_metadata(metadata)
 } else = false {
 	true
 }
