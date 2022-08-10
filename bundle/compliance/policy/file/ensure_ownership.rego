@@ -12,8 +12,8 @@ finding(owner_user, owner_group) = result {
 	# set result
 	result := lib_common.generate_result(
 		lib_common.calculate_result(rule_evaluation),
-		{"owner": owner_user, "group": owner_group},
 		{"owner": user, "group": group},
+		{"owner": owner_user, "group": owner_group},
 	)
 }
 

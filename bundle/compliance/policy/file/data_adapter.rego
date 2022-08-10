@@ -1,7 +1,5 @@
 package compliance.policy.file.data_adapter
 
-import future.keywords.in
-
 is_filesystem {
 	input.type == "file"
 }

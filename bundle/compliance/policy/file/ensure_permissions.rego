@@ -11,8 +11,8 @@ finding(user, group, other) := result {
 	# set result
 	result := lib_common.generate_result(
 		lib_common.calculate_result(rule_evaluation),
-		{"filemode": ((user * 100) + (group * 10)) + other},
 		{"filemode": mode},
+		{"filemode": ((user * 100) + (group * 10)) + other},
 	)
 }
 
