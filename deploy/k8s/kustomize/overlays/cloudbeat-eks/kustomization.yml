@@ -7,7 +7,6 @@ resources:
 
 components:
   - ../../components/cb_leader_lease
-  - ../../components/cb_configmap
 
 patchesStrategicMerge:
-  - configmap_patch.yml
+- daemonset.yml

@@ -8,11 +8,8 @@ metadata:
 data:
   cloudbeat.yml: |-
     cloudbeat:
+      type: ${CLOUDBEAT_TYPE}
       # Defines how often an event is sent to the output
-      type: cloudbeat/eks
-      streams:
-      - access_key_id: ${AWS_ACCESS_KEY_ID}
-        secret_access_key: <AWS_SECRET_ACCESS_KEY>
       period: 30s
       fetchers:
         # Vanilla K8s Fetchers configuration
@@ -47,6 +44,9 @@ data:
           ]
         # EKS Fetchers configuration
         eks:
+        - streams:
+          - access_key_id: ${AWS_ACCESS_KEY_ID}
+            secret_access_key: ${AWS_SECRET_ACCESS_KEY}
         - name: kube-api
         - name: process
           directory: "/hostfs"
@@ -61,6 +61,7 @@ data:
             "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
             "/hostfs/var/lib/kubelet/kubeconfig",
           ]
+
     # =================================== Kibana ===================================
     setup.kibana:
 
