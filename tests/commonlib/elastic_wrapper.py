@@ -67,19 +67,17 @@ class ElasticWrapper:
         return ret_value
 
     @staticmethod
-    def build_es_query(match_type: str) -> (dict, list):
+    def build_es_query(term: dict) -> (dict, list):
         """
         This method builds a ES query based on the provided param
-        @param match_type: resource type to be matched against
+        @param term: search term to be matched against
         @return: ES query and sorting order
         """
         query = {
             "bool": {
                 "filter": [
                     {
-                        "term": {
-                            "type": match_type
-                        }
+                        "term": term
                     },
                     {
                         "range": {

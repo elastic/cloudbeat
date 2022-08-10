@@ -8,6 +8,8 @@ import time
 import json
 import pytest
 import allure
+from commonlib.utils import wait_for_cycle_completion
+
 
 testdata = ['file', 'process', 'k8s_object']
 CONFIG_TIMEOUT = 30
@@ -55,7 +57,7 @@ def test_elastic_index_exists(elastic_client, match_type):
     :param match_type: Findings type for matching
     :return:
     """
-    query, sort = elastic_client.build_es_query(match_type=match_type)
+    query, sort = elastic_client.build_es_query(term={"type": match_type})
     start_time = time.time()
     result = {}
     while time.time() - start_time < CONFIG_TIMEOUT:
@@ -89,13 +91,16 @@ def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
     :return:
     """
 
-    query, sort = elastic_client.build_es_query(match_type="k8s_object")
+    query, sort = elastic_client.build_es_query(term={"type": "k8s_object"})
     pods, nodes = fixture_data
     leader_node = k8s.get_cluster_leader(namespace=cloudbeat_agent.namespace, pods=pods)
     assert leader_node != "", \
         "The Leader node could not be found"
 
-    time.sleep(CONFIG_TIMEOUT)  # Wait for all pods to send resources to ES
+    # Wait for all agents to send resources to ES
+    res = wait_for_cycle_completion(elastic_client=elastic_client, nodes=nodes)
+    assert res, \
+        f"Not all nodes have completed a cycle within the configured threshold"
 
     result = elastic_client.get_index_data(index_name=elastic_client.index,
                                            query=query,
