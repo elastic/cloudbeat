@@ -11,9 +11,9 @@ spec:
   template:
     spec:
       containers:
-      - name: cloudbeat
-        image: cloudbeat:latest
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: CLOUDBEAT_TYPE
-          value: cloudbeat/eks
+        - name: cloudbeat
+          image: cloudbeat:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CLOUDBEAT_TYPE
+              value: cloudbeat/eks

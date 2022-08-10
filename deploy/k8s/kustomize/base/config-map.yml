@@ -14,53 +14,53 @@ data:
       fetchers:
         # Vanilla K8s Fetchers configuration
         vanilla:
-        - name: kube-api
-        - name: process
-          directory: "/hostfs"
-          processes:
-            etcd:
-            kube-apiserver:
-            kube-controller:
-            kube-scheduler:
-            kubelet:
-              config-file-arguments:
-              - config
-        - name: file-system
-          patterns: [
-            "/hostfs/etc/kubernetes/scheduler.conf",
-            "/hostfs/etc/kubernetes/controller-manager.conf",
-            "/hostfs/etc/kubernetes/admin.conf",
-            "/hostfs/etc/kubernetes/kubelet.conf",
-            "/hostfs/etc/kubernetes/manifests/etcd.yaml",
-            "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-            "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
-            "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
-            "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
-            "/hostfs/etc/kubernetes/pki/*.crt",
-            "/hostfs/etc/kubernetes/pki/*.key",
-            "/hostfs/var/lib/kubelet/config.yaml",
-            "/hostfs/var/lib/etcd",
-            "/hostfs/etc/kubernetes/pki"
-          ]
+          - name: kube-api
+          - name: process
+            directory: "/hostfs"
+            processes:
+              etcd:
+              kube-apiserver:
+              kube-controller:
+              kube-scheduler:
+              kubelet:
+                config-file-arguments:
+                  - config
+          - name: file-system
+            patterns: [
+              "/hostfs/etc/kubernetes/scheduler.conf",
+              "/hostfs/etc/kubernetes/controller-manager.conf",
+              "/hostfs/etc/kubernetes/admin.conf",
+              "/hostfs/etc/kubernetes/kubelet.conf",
+              "/hostfs/etc/kubernetes/manifests/etcd.yaml",
+              "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+              "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
+              "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
+              "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
+              "/hostfs/etc/kubernetes/pki/*.crt",
+              "/hostfs/etc/kubernetes/pki/*.key",
+              "/hostfs/var/lib/kubelet/config.yaml",
+              "/hostfs/var/lib/etcd",
+              "/hostfs/etc/kubernetes/pki"
+            ]
         # EKS Fetchers configuration
         eks:
-        - streams:
-          - access_key_id: ${AWS_ACCESS_KEY_ID}
-            secret_access_key: ${AWS_SECRET_ACCESS_KEY}
-        - name: kube-api
-        - name: process
-          directory: "/hostfs"
-          processes:
-            kubelet:
-              config-file-arguments:
-              - config
-        - name: aws-ecr
-        - name: aws-elb
-        - name: file-system
-          patterns: [
-            "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
-            "/hostfs/var/lib/kubelet/kubeconfig",
-          ]
+          - streams:
+              - access_key_id: ${AWS_ACCESS_KEY_ID}
+                secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+          - name: kube-api
+          - name: process
+            directory: "/hostfs"
+            processes:
+              kubelet:
+                config-file-arguments:
+                  - config
+          - name: aws-ecr
+          - name: aws-elb
+          - name: file-system
+            patterns: [
+              "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
+              "/hostfs/var/lib/kubelet/kubeconfig",
+            ]
 
     # =================================== Kibana ===================================
     setup.kibana:
@@ -98,10 +98,10 @@ data:
 
     # ================================= Processors =================================
     processors:
-    - add_host_metadata: ~
-    - add_cloud_metadata: ~
-    - add_docker_metadata: ~
-    - add_cluster_id: ~
+      - add_host_metadata: ~
+      - add_cloud_metadata: ~
+      - add_docker_metadata: ~
+      - add_cluster_id: ~
 
     # Sets log level. The default log level is info.
     # Available log levels are: error, warning, info, debug

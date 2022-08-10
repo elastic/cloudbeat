@@ -134,9 +134,9 @@ data:
     cloudbeat:
       # Defines how often an event is sent to the output
       type: cloudbeat/eks
-      streams: 
-      - access_key_id: <your-aws-access-key>
-        secret_access_key: <your-aws-secret-key> 
+      streams:
+        - access_key_id: <your-aws-access-key>
+          secret_access_key: <your-aws-secret-key>
       period: 30s
       fetchers:
         # Vanilla K8s Fetchers configuration
@@ -254,7 +254,7 @@ metadata:
   labels:
     k8s-app: cloudbeat
 rules:
-  - apiGroups: [""]
+  - apiGroups: [ "" ]
     resources:
       - nodes
       - namespaces
@@ -263,26 +263,26 @@ rules:
       - services
       - configmaps
       - serviceaccounts
-    verbs: ["get", "list", "watch"]
+    verbs: [ "get", "list", "watch" ]
   # Enable this rule only if planing to use Kubernetes keystore
   #- apiGroups: [""]
   #  resources:
   #  - secrets
   #  verbs: ["get"]
-  - apiGroups: ["extensions"]
+  - apiGroups: [ "extensions" ]
     resources:
       - replicasets
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["apps"]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "apps" ]
     resources:
       - statefulsets
       - deployments
       - replicasets
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["batch"]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "batch" ]
     resources:
       - jobs
-    verbs: ["get", "list", "watch"]
+    verbs: [ "get", "list", "watch" ]
   - apiGroups:
       - ""
     resources:
@@ -293,23 +293,23 @@ rules:
       - "/metrics"
     verbs:
       - get
-  - apiGroups: ["rbac.authorization.k8s.io"]
+  - apiGroups: [ "rbac.authorization.k8s.io" ]
     resources:
       - clusterrolebindings
       - clusterroles
       - rolebindings
       - roles
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["networking.k8s.io"]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "networking.k8s.io" ]
     resources:
       - ingressclasses
       - ingresses
       - networkpolicies
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["policy"]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "policy" ]
     resources:
       - podsecuritypolicies
-    verbs: ["get", "list", "watch"]
+    verbs: [ "get", "list", "watch" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -324,7 +324,7 @@ rules:
       - coordination.k8s.io
     resources:
       - leases
-    verbs: ["get", "create", "update"]
+    verbs: [ "get", "create", "update" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -334,12 +334,12 @@ metadata:
   labels:
     k8s-app: cloudbeat
 rules:
-  - apiGroups: [""]
+  - apiGroups: [ "" ]
     resources:
       - configmaps
     resourceNames:
       - kubeadm-config
-    verbs: ["get"]
+    verbs: [ "get" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

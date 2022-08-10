@@ -9,4 +9,4 @@ components:
   - ../../components/cb_leader_lease
 
 patchesStrategicMerge:
-- daemonset.yml
+  - daemonset.yml
