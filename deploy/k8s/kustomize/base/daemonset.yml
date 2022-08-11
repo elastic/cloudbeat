@@ -21,18 +21,6 @@ spec:
           image: cloudbeat:latest
           imagePullPolicy: IfNotPresent
           env:
-            - name: AWS_ACCESS_KEY
-              valueFrom:
-                configMapKeyRef:
-                  name: aws-creds
-                  key: aws.key
-                  optional: true
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                configMapKeyRef:
-                  name: aws-creds
-                  key: aws.secret
-                  optional: true
             - name: ES_HOST
               value: "host.docker.internal:9200"
             - name: CLOUDBEAT_TYPE
