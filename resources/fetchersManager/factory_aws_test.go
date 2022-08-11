@@ -174,8 +174,8 @@ func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetche
 	s.NoError(err)
 	conf.Fetchers.Eks = append(conf.Fetchers.Eks, fetcherConfig)
 	stream := config.Stream{
-		AWSConfig: awsConfig,
-		DataYaml:  nil,
+		AWSConfig:  awsConfig,
+		RuntimeCfg: nil,
 	}
 	conf.Streams = append(conf.Streams, stream)
 	return conf

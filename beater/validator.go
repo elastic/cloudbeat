@@ -40,8 +40,8 @@ func (v *validator) Validate(cfg *agentconfig.C) error {
 		return fmt.Errorf("No streams received in reconfiguration %v", cfg.FlattenedKeys())
 	}
 
-	if c.Streams[0].DataYaml == nil {
-		return fmt.Errorf("data_yaml not present in reconfiguration %v", cfg.FlattenedKeys())
+	if c.Streams[0].RuntimeCfg == nil {
+		return fmt.Errorf("RuntimeCfg is not present in reconfiguration %v", cfg.FlattenedKeys())
 	}
 
 	return nil
