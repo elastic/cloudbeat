@@ -14,7 +14,7 @@ setup-env: install-kind create-kind-cluster
 
 build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
-build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat-debug
+build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat
 
 load-cloudbeat-image:
   kind load docker-image cloudbeat:latest --name kind-mono
@@ -24,19 +24,13 @@ build-cloudbeat:
   GOOS=linux go build -v && docker build -t cloudbeat .
 
 deploy-cloudbeat:
-  kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system & kubectl apply -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
+  kubectl delete -k overlays/cloudbeat-vanilla -n kube-system & kubectl apply -k overlays/cloudbeat-vanilla -n kube-system
 
 build-cloudbeat-debug:
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
-deploy-cloudbeat-debug:
-   kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system
-
 delete-cloudbeat:
-  kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
-
-delete-cloudbeat-debug:
-  kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system
+  kubectl delete -k overlays/cloudbeat-vanilla -n kube-system
 
 #General
 
