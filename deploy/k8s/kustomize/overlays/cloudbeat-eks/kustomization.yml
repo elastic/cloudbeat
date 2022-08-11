@@ -5,8 +5,5 @@ kind: Kustomization
 resources:
   - ../../base
 
-components:
-  - ../../components/cb_leader_lease
-
 patchesStrategicMerge:
   - daemonset.yml
