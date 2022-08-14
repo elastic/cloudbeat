@@ -33,7 +33,7 @@ pipeline {
     booleanParam(name: 'test_ci', defaultValue: false, description: 'Enable test')
     booleanParam(name: 'release_ci', defaultValue: true, description: 'Enable build the release packages')
     booleanParam(name: 'its_ci', defaultValue: true, description: 'Enable async ITs')
-    choice(name: 'build_type', choices: ['snapshot', 'staging'], description: 'Choose Snapshot or Staging Build type(Default: Snapshot)')
+    choice(name: 'build_type', choices: ['both', 'snapshot', 'staging'], description: 'Choose Snapshot or Staging Build type(Default: Both)')
     string(name: 'DIAGNOSTIC_INTERVAL', defaultValue: "0", description: 'Elasticsearch detailed logging every X seconds')
     string(name: 'ES_LOG_LEVEL', defaultValue: "error", description: 'Elasticsearch error level')
   }
@@ -169,7 +169,7 @@ pipeline {
                 withGithubNotify(context: 'Package') {
                   deleteDir()
                   unstash 'source'
-                  
+
                   dir("${BASE_DIR}"){
                     withMageEnv(){
                       sh(label: 'Build packages', script: './.ci/scripts/package.sh')
@@ -185,7 +185,7 @@ pipeline {
               steps {
                 // Login to Docker Registery
                 dockerLogin(secret: env.DOCKER_SECRET, registry: env.DOCKER_REGISTRY)
-                
+
                 // Upload files to the default location
                 googleStorageUpload(bucket: "${BUCKET_URI}",
                   credentialsId: "${JOB_GCS_CREDENTIALS}",
@@ -193,7 +193,7 @@ pipeline {
                   pattern: "${BASE_DIR}/build/distributions/**/*",
                   sharedPublicly: true,
                   showInline: true)
-                  
+
                   // Call rm-docker command
                   dir("${BASE_DIR}"){
                   sh(label: 'Release-manager-docker', script: './.ci/scripts/rm-docker.sh')

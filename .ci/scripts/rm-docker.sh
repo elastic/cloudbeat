@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 IMAGE="docker.elastic.co/infra/release-manager:latest"
 # Allow other users write access to create checksum files
-chmod -R 777 build/distributions 
+chmod -R 777 build/distributions
 
 # The "branch" here selects which "$BRANCH.gradle" file of release manager is used
 VERSION=$(make get-version)
@@ -17,17 +17,25 @@ fi
 
 
 # Generate checksum files and upload to GCS
-docker run --rm \
-  --name release-manager \
-  -e VAULT_ADDR \
-  -e VAULT_ROLE_ID \
-  -e VAULT_SECRET_ID \
-  --mount type=bind,readonly=false,src="$PWD",target=/artifacts \
-  "$IMAGE" \
-    cli collect \
-      --project cloudbeat \
-      --branch "$BRANCH" \
-      --commit `git rev-parse HEAD` \
-      --workflow "$WORKFLOW" \
-      --version "$VERSION" \
-      --artifact-set main
+function rm-docker () {
+  docker run --rm \
+    --name release-manager \
+    -e VAULT_ADDR \
+    -e VAULT_ROLE_ID \
+    -e VAULT_SECRET_ID \
+    --mount type=bind,readonly=false,src="$PWD",target=/artifacts \
+    "$IMAGE" \
+      cli collect \
+        --project cloudbeat \
+        --branch "$BRANCH" \
+        --commit `git rev-parse HEAD` \
+        --workflow "$WORKFLOW" \
+        --version "$VERSION" \
+        --artifact-set main
+}
+
+if [ $WORKFLOW != 'both'] ; then
+    rm-docker()
+else
+  export WORKFLOW='snapshot'; rm-docker()
+  export WORKFLOW='staging'; rm-docker()
