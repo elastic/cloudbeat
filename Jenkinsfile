@@ -165,36 +165,38 @@ pipeline {
           }
           stages {
             stage('Package') {
-              stages {
-                stage('Package-snapshot') {
-                  environment {
-                    WORKFLOW = "snapshot"
-                  }
-                  steps {
-                    withGithubNotify(context: 'Package') {
-                      deleteDir()
-                      unstash 'source'
+              parallel {
+                stages {
+                  stage('Package-snapshot') {
+                    environment {
+                      WORKFLOW = "snapshot"
+                    }
+                    steps {
+                      withGithubNotify(context: 'Package') {
+                        deleteDir()
+                        unstash 'source'
 
-                      dir("${BASE_DIR}"){
-                        withMageEnv(){
-                          sh(label: 'Build packages', script: './.ci/scripts/package.sh')
+                        dir("${BASE_DIR}"){
+                          withMageEnv(){
+                            sh(label: 'Build packages', script: './.ci/scripts/package.sh')
+                          }
                         }
                       }
                     }
                   }
-                }
-                stage('Package-staging') {
-                  environment {
-                    WORKFLOW = "staging"
-                  }
-                  steps {
-                    withGithubNotify(context: 'Package') {
-                      deleteDir()
-                      unstash 'source'
+                  stage('Package-staging') {
+                    environment {
+                      WORKFLOW = "staging"
+                    }
+                    steps {
+                      withGithubNotify(context: 'Package') {
+                        deleteDir()
+                        unstash 'source'
 
-                      dir("${BASE_DIR}"){
-                        withMageEnv(){
-                          sh(label: 'Build packages', script: './.ci/scripts/package.sh')
+                        dir("${BASE_DIR}"){
+                          withMageEnv(){
+                            sh(label: 'Build packages', script: './.ci/scripts/package.sh')
+                          }
                         }
                       }
                     }
