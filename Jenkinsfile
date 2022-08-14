@@ -166,7 +166,7 @@ pipeline {
           stages {
             stage('Package') {
               parallel {
-                stages {
+                // stages {
                   stage('Package-snapshot') {
                     environment {
                       WORKFLOW = "snapshot"
@@ -201,7 +201,7 @@ pipeline {
                       }
                     }
                   }
-                }
+                // }
               }
             }
             stage('Publish') {
