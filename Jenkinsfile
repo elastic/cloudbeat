@@ -144,7 +144,7 @@ pipeline {
         /**
         Packages Artifacts & Publishes release
         */
-        stage('Package&Publish-SNAPSHOT') {
+        stage('Package&Publish-Snapshot') {
           agent { label 'linux && immutable && debian-11' }
           options { skipDefaultCheckout() }
           environment {
@@ -166,7 +166,7 @@ pipeline {
             }
           }
           stages {
-            stage('Package') {
+            stage('Package-Snapshot') {
               steps {
                 withGithubNotify(context: 'Package') {
                   deleteDir()
@@ -180,7 +180,7 @@ pipeline {
                 }
               }
             }
-            stage('Publish') {
+            stage('Publish-Snapshot') {
               environment {
                 BUCKET_URI = """${isPR() ? "gs://${JOB_GCS_BUCKET}/cloudbeat/pull-requests/pr-${env.CHANGE_ID}" : "gs://${JOB_GCS_BUCKET}/cloudbeat/snapshots"}"""
               }
@@ -203,8 +203,8 @@ pipeline {
               }
             }
           } // Package&Publish stages
-        } // Package&Publish-SNAPSHOT
-        stage('Package&Publish-STAGING') {
+        } // Package&Publish-Snapshot
+        stage('Package&Publish-Staging') {
           agent { label 'linux && immutable && debian-11' }
           options { skipDefaultCheckout() }
           environment {
@@ -226,7 +226,7 @@ pipeline {
             }
           }
           stages {
-            stage('Package') {
+            stage('Package-Staging') {
               steps {
                 withGithubNotify(context: 'Package') {
                   deleteDir()
@@ -240,7 +240,7 @@ pipeline {
                 }
               }
             }
-            stage('Publish') {
+            stage('Publish-Staging') {
               environment {
                 BUCKET_URI = """${isPR() ? "gs://${JOB_GCS_BUCKET}/cloudbeat/pull-requests/pr-${env.CHANGE_ID}" : "gs://${JOB_GCS_BUCKET}/cloudbeat/snapshots"}"""
               }
@@ -263,7 +263,7 @@ pipeline {
               }
             }
           } // Package&Publish stages
-        } // Package&Publish-STAGING
+        } // Package&Publish-Staging
       } // build&test stages
     } // build&test
   } // stages
