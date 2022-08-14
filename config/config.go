@@ -38,8 +38,8 @@ const DefaultNamespace = "default"
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
 const (
-	InputTypeVanillaK8s = "cloudbeat/vanilla"
-	InputTypeEks        = "cloudbeat/eks"
+	InputTypeVanillaK8s = "cloudbeat/cis_k8s"
+	InputTypeEks        = "cloudbeat/cis_eks"
 )
 
 type Fetcher struct {
@@ -62,7 +62,7 @@ type Config struct {
 
 type Stream struct {
 	AWSConfig  aws.ConfigAWS  `config:",inline"`
-	RuntimeCfg *RuntimeConfig `config:"data_yaml"`
+	RuntimeCfg *RuntimeConfig `config:"runtime_cfg"`
 }
 
 type RuntimeConfig struct {
