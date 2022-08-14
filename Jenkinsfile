@@ -144,17 +144,19 @@ pipeline {
         /**
         Packages Artifacts & Publishes release
         */
-        stage('Package&Publish') {
+        stage('Package&Publish-SNAPSHOT') {
           agent { label 'linux && immutable && debian-11' }
           options { skipDefaultCheckout() }
           environment {
             PATH = "${env.PATH}:${env.WORKSPACE}/bin"
             HOME = "${env.WORKSPACE}"
+            WORKFLOW = "snapshot"
           }
           when {
             beforeAgent true
             allOf {
               expression { return params.release_ci }
+              expression { params.build_type != 'staging' }
               anyOf {
                 branch 'main'
                 branch pattern: '\\d+\\.\\d+', comparator: 'REGEXP'
@@ -165,43 +167,17 @@ pipeline {
           }
           stages {
             stage('Package') {
-              parallel {
-                // stages {
-                  stage('Package-snapshot') {
-                    environment {
-                      WORKFLOW = "snapshot"
-                    }
-                    steps {
-                      withGithubNotify(context: 'Package') {
-                        deleteDir()
-                        unstash 'source'
+              steps {
+                withGithubNotify(context: 'Package') {
+                  deleteDir()
+                  unstash 'source'
 
-                        dir("${BASE_DIR}"){
-                          withMageEnv(){
-                            sh(label: 'Build packages', script: './.ci/scripts/package.sh')
-                          }
-                        }
-                      }
+                  dir("${BASE_DIR}"){
+                    withMageEnv(){
+                      sh(label: 'Build packages', script: './.ci/scripts/package.sh')
                     }
                   }
-                  stage('Package-staging') {
-                    environment {
-                      WORKFLOW = "staging"
-                    }
-                    steps {
-                      withGithubNotify(context: 'Package') {
-                        deleteDir()
-                        unstash 'source'
-
-                        dir("${BASE_DIR}"){
-                          withMageEnv(){
-                            sh(label: 'Build packages', script: './.ci/scripts/package.sh')
-                          }
-                        }
-                      }
-                    }
-                  }
-                // }
+                }
               }
             }
             stage('Publish') {
@@ -227,7 +203,67 @@ pipeline {
               }
             }
           } // Package&Publish stages
-        } // Package&Publish
+        } // Package&Publish-SNAPSHOT
+        stage('Package&Publish-STAGING') {
+          agent { label 'linux && immutable && debian-11' }
+          options { skipDefaultCheckout() }
+          environment {
+            PATH = "${env.PATH}:${env.WORKSPACE}/bin"
+            HOME = "${env.WORKSPACE}"
+            WORKFLOW = "staging"
+          }
+          when {
+            beforeAgent true
+            allOf {
+              expression { return params.release_ci }
+              expression { params.build_type != 'snapshot' }
+              anyOf {
+                branch 'main'
+                branch pattern: '\\d+\\.\\d+', comparator: 'REGEXP'
+                tag pattern: 'v\\d+\\.\\d+\\.\\d+.*', comparator: 'REGEXP'
+                expression { return params.Run_As_Main_Branch }
+              }
+            }
+          }
+          stages {
+            stage('Package') {
+              steps {
+                withGithubNotify(context: 'Package') {
+                  deleteDir()
+                  unstash 'source'
+
+                  dir("${BASE_DIR}"){
+                    withMageEnv(){
+                      sh(label: 'Build packages', script: './.ci/scripts/package.sh')
+                    }
+                  }
+                }
+              }
+            }
+            stage('Publish') {
+              environment {
+                BUCKET_URI = """${isPR() ? "gs://${JOB_GCS_BUCKET}/cloudbeat/pull-requests/pr-${env.CHANGE_ID}" : "gs://${JOB_GCS_BUCKET}/cloudbeat/snapshots"}"""
+              }
+              steps {
+                // Login to Docker Registery
+                dockerLogin(secret: env.DOCKER_SECRET, registry: env.DOCKER_REGISTRY)
+
+                // Upload files to the default location
+                googleStorageUpload(bucket: "${BUCKET_URI}",
+                  credentialsId: "${JOB_GCS_CREDENTIALS}",
+                  pathPrefix: "${BASE_DIR}/build/distributions/",
+                  pattern: "${BASE_DIR}/build/distributions/**/*",
+                  sharedPublicly: true,
+                  showInline: true)
+
+                  // Call rm-docker command
+                  dir("${BASE_DIR}"){
+                  sh(label: 'Release-manager-docker', script: './.ci/scripts/rm-docker.sh')
+                  }
+              }
+            }
+          } // Package&Publish stages
+        } // Package&Publish-STAGING
       } // build&test stages
     } // build&test
   } // stages
