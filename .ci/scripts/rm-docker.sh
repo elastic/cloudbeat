@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 IMAGE="docker.elastic.co/infra/release-manager:latest"
 # Allow other users write access to create checksum files
 chmod -R 777 build/distributions
@@ -17,7 +17,7 @@ fi
 
 
 # Generate checksum files and upload to GCS
-function rm-docker () {
+function rm_docker_func () {
   docker run --rm \
     --name release-manager \
     -e VAULT_ADDR \
@@ -34,8 +34,11 @@ function rm-docker () {
         --artifact-set main
 }
 
-if [ $WORKFLOW != 'both'] ; then
-    rm-docker()
+if [ "$WORKFLOW" != "both" ] ; then
+    echo $WORKFLOW
+    rm_docker_func
 else
-  export WORKFLOW='snapshot'; rm-docker()
-  export WORKFLOW='staging'; rm-docker()
+    echo $WORKFLOW
+    export WORKFLOW='snapshot' ; rm_docker_func
+    export WORKFLOW='staging'  ;  rm_docker_func
+fi
