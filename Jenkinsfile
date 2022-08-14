@@ -14,7 +14,7 @@ pipeline {
     ES_LOG_LEVEL = "${params.ES_LOG_LEVEL}"
     DOCKER_SECRET = 'secret/apm-team/ci/docker-registry/prod'
     DOCKER_REGISTRY = 'docker.elastic.co'
-    WORKFLOW = "${params.build_type}"
+    // WORKFLOW = "${params.build_type}"
   }
   options {
     timeout(time: 2, unit: 'HOURS')
@@ -33,7 +33,7 @@ pipeline {
     booleanParam(name: 'test_ci', defaultValue: false, description: 'Enable test')
     booleanParam(name: 'release_ci', defaultValue: true, description: 'Enable build the release packages')
     booleanParam(name: 'its_ci', defaultValue: true, description: 'Enable async ITs')
-    choice(name: 'build_type', choices: ['both', 'snapshot', 'staging'], description: 'Choose Snapshot or Staging Build type(Default: Both)')
+    // choice(name: 'build_type', choices: ['both', 'snapshot', 'staging'], description: 'Choose Snapshot or Staging Build type(Default: Both)')
     string(name: 'DIAGNOSTIC_INTERVAL', defaultValue: "0", description: 'Elasticsearch detailed logging every X seconds')
     string(name: 'ES_LOG_LEVEL', defaultValue: "error", description: 'Elasticsearch error level')
   }
@@ -165,14 +165,38 @@ pipeline {
           }
           stages {
             stage('Package') {
-              steps {
-                withGithubNotify(context: 'Package') {
-                  deleteDir()
-                  unstash 'source'
+              stages {
+                stage('Package-snapshot') {
+                  environment {
+                    WORKFLOW = "snapshot"
+                  }
+                  steps {
+                    withGithubNotify(context: 'Package') {
+                      deleteDir()
+                      unstash 'source'
 
-                  dir("${BASE_DIR}"){
-                    withMageEnv(){
-                      sh(label: 'Build packages', script: './.ci/scripts/package.sh')
+                      dir("${BASE_DIR}"){
+                        withMageEnv(){
+                          sh(label: 'Build packages', script: './.ci/scripts/package.sh')
+                        }
+                      }
+                    }
+                  }
+                }
+                stage('Package-staging') {
+                  environment {
+                    WORKFLOW = "staging"
+                  }
+                  steps {
+                    withGithubNotify(context: 'Package') {
+                      deleteDir()
+                      unstash 'source'
+
+                      dir("${BASE_DIR}"){
+                        withMageEnv(){
+                          sh(label: 'Build packages', script: './.ci/scripts/package.sh')
+                        }
+                      }
                     }
                   }
                 }
