@@ -61,6 +61,7 @@ type cloudbeat struct {
 
 func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("starter")
+	log := logp.NewLogger("starter1")
 	ctx := context.Background()
 	reloader := launcher.NewListener(ctx, log)
 	validator := &validator{}
