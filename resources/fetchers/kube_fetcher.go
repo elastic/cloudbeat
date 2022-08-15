@@ -78,8 +78,6 @@ var (
 		// 	allNamespaces,
 		// },
 	}
-
-	watcherlock sync.Once
 )
 
 type requiredResource struct {
@@ -94,6 +92,7 @@ type KubeFetcher struct {
 
 	watchers       []kubernetes.Watcher
 	clientProvider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)
+	watcherLock    *sync.Once
 }
 
 type KubeApiFetcherConfig struct {
@@ -155,12 +154,12 @@ func (f *KubeFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadat
 	f.log.Debug("Starting KubeFetcher.Fetch")
 
 	var err error
-	watcherlock.Do(func() {
+	f.watcherLock.Do(func() {
 		err = f.initWatchers()
 	})
 	if err != nil {
-		// Reset watcherlock if the watchers could not be initiated.
-		watcherlock = sync.Once{}
+		// Reset watcherLock if the watchers could not be initiated.
+		f.watcherLock = &sync.Once{}
 		return fmt.Errorf("could not initate Kubernetes watchers: %w", err)
 	}
 
