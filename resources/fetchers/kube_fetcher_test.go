@@ -33,7 +33,6 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"reflect"
-	"sync"
 	"testing"
 )
 
@@ -72,7 +71,6 @@ func MockProvider(client *k8sfake.Clientset) KubeClientProvider {
 func clean(fetcher fetching.Fetcher) func() {
 	return func() {
 		fetcher.Stop()
-		watcherlock = sync.Once{}
 	}
 }
 
