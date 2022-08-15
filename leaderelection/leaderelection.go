@@ -45,13 +45,12 @@ var (
 
 type ElectionManager interface {
 	IsLeader() bool
-	Run(ctx context.Context) error
+	Run(ctx context.Context)
 }
 
 type Manager struct {
 	log    *logp.Logger
 	leader *le.LeaderElector
-	block  chan bool
 }
 
 // NewLeaderElector acts as a singleton
@@ -69,14 +68,12 @@ func NewLeaderElector(ctx context.Context, log *logp.Logger, cfg config.Config) 
 		var leConfig le.LeaderElectionConfig
 		var leader *le.LeaderElector
 
-		block := make(chan bool)
-		leConfig, err = buildConfig(ctx, log, kubeClient, block, callOnce)
+		leConfig, err = buildConfig(ctx, log, kubeClient)
 		leader, err = le.NewLeaderElector(leConfig)
 
 		manager = &Manager{
 			log:    log,
 			leader: leader,
-			block:  block,
 		}
 	})
 
@@ -91,25 +88,19 @@ func (m *Manager) IsLeader() bool {
 	return m.leader.IsLeader()
 }
 
-// Run leader election is blocking until a leader is being elected or timeout has reached.
-func (m *Manager) Run(ctx context.Context) error {
+// Run leader election is blocking until a FirstLeaderDeadline timeout has reached.
+func (m *Manager) Run(ctx context.Context) {
 	timeoutCtx, cancel := context.WithTimeout(ctx, FirstLeaderDeadline)
 	defer cancel()
 
 	go m.leader.Run(ctx)
 	m.log.Infof("started leader election")
 
-	select {
-	case <-m.block:
-		m.log.Infof("new leader has been elected")
-	case <-timeoutCtx.Done():
-		m.log.Warnf("timeout - no leader has been elected for %s", FirstLeaderDeadline.String())
-	}
-
-	return nil
+	<-timeoutCtx.Done()
+	m.log.Infof("stop waiting after %s for a leader to be elected", FirstLeaderDeadline)
 }
 
-func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface, block chan bool, callOnce *sync.Once) (le.LeaderElectionConfig, error) {
+func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface) (le.LeaderElectionConfig, error) {
 	podId, err := currentPodID(log)
 	if err != nil {
 		return le.LeaderElectionConfig{}, err
@@ -158,11 +149,6 @@ func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface, bl
 				} else {
 					log.Infof("leader election lock has been acquired by another pod, id: %v", identity)
 				}
-				// called every new beater
-				callOnce.Do(func() {
-					retryOnce = new(sync.Once)
-					block <- false
-				})
 			},
 		},
 	}, nil
