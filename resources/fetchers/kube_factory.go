@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
+	"sync"
 )
 
 type KubeFactory struct {
@@ -51,6 +52,7 @@ func (f *KubeFactory) CreateFrom(log *logp.Logger, cfg KubeApiFetcherConfig, ch 
 		log:            log,
 		cfg:            cfg,
 		clientProvider: provider,
+		watcherLock:    &sync.Once{},
 		watchers:       make([]kubernetes.Watcher, 0),
 		resourceCh:     ch,
 	}
