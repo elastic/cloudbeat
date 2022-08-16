@@ -1,7 +1,7 @@
 # Variables
 
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
-kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
+kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yml
