@@ -5,8 +5,6 @@ from typing import Union
 
 from commonlib.io_utils import get_logs_from_stream, get_events_from_index
 
-CONFIG_TIMEOUT = 30
-
 
 def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
                       resource_identifier=lambda r: True) -> Union[str, None]:
@@ -130,10 +128,11 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
     active_agents = 0
     num_cycles = 0
 
-    while num_cycles < required_cycles:
+    while num_cycles < required_cycles and not is_timeout(start_time, 30):
         for node in nodes:
+            start_time_per_agent = time.time()
             query, sort = elastic_client.build_es_query(term={"agent.name": node.metadata.name})
-            while time.time() - start_time < CONFIG_TIMEOUT:
+            while not is_timeout(start_time_per_agent, 10):
                 # keep query ES until the cycle_id has changed
                 result = elastic_client.get_index_data(index_name=elastic_client.index,
                                                        query=query,
@@ -152,3 +151,7 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
             num_cycles += 1
 
     return active_agents == (len(nodes) * required_cycles)
+
+
+def is_timeout(start_time: time, timeout: int) -> bool:
+    time.time() - start_time > timeout
