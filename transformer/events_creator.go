@@ -28,12 +28,30 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
+	"github.com/gofrs/uuid"
+)
+
+const (
+	ecsCategoryConfiguration = "configuration"
+	ecsKindState             = "state"
+	ecsOutcomeSuccess        = "success"
+	ecsTypeInfo              = "info"
 )
 
 type Transformer struct {
 	log           *logp.Logger
 	eventMetadata mapstr.M
 	commonData    CommonDataInterface
+}
+
+type ECSEvent struct {
+	Category []string  `json:"category"`
+	Created  time.Time `json:"created"`
+	ID       string    `json:"id"`
+	Kind     string    `json:"kind"`
+	Sequence int64     `json:"sequence"`
+	Outcome  string    `json:"outcome"`
+	Type     []string  `json:"type"`
 }
 
 func NewTransformer(log *logp.Logger, cd CommonDataInterface, index string) Transformer {
@@ -58,7 +76,7 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 	}
 	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
 
-	timestamp := time.Now()
+	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
 		Raw:              eventData.RuleResult.Resource,
@@ -70,6 +88,7 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 			Timestamp: timestamp,
 			Fields: mapstr.M{
 				resMetadata.ECSFormat: eventData.GetElasticCommonData(),
+				"event":               buildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt),
 				"resource":            resource,
 				"resource_id":         resMetadata.ID,   // Deprecated - kept for BC
 				"type":                resMetadata.Type, // Deprecated - kept for BC
@@ -84,4 +103,17 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 	}
 
 	return events, nil
+}
+
+func buildECSEvent(seq int64, created time.Time) ECSEvent {
+	id, _ := uuid.NewV4() // zero value in case of an error is uuid.Nil
+	return ECSEvent{
+		Category: []string{ecsCategoryConfiguration},
+		Created:  created,
+		ID:       id.String(),
+		Kind:     ecsKindState,
+		Sequence: seq,
+		Outcome:  ecsOutcomeSuccess,
+		Type:     []string{ecsTypeInfo},
+	}
 }

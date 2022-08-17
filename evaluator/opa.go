@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -34,6 +35,8 @@ import (
 	"github.com/open-policy-agent/opa/sdk"
 	"github.com/sirupsen/logrus"
 )
+
+var now = func() time.Time { return time.Now().UTC() }
 
 type OpaEvaluator struct {
 	log            *logp.Logger
@@ -115,7 +118,6 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 		Result:         fetcherResult,
 		ActivatedRules: o.activatedRules,
 	})
-
 	if err != nil {
 		return EventData{}, fmt.Errorf("error running the policy: %v", err)
 	}
@@ -159,6 +161,7 @@ func (o *OpaEvaluator) decode(result interface{}) (RuleResult, error) {
 	}
 
 	err = decoder.Decode(result)
+	opaResult.Metadata.CreatedAt = now()
 	return opaResult, err
 }
 
