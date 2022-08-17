@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 IMAGE="docker.elastic.co/infra/release-manager:latest"
 # Allow other users write access to create checksum files
-chmod -R 777 build/distributions 
+chmod -R 777 build/distributions
 
 # The "branch" here selects which "$BRANCH.gradle" file of release manager is used
 VERSION=$(make get-version)
