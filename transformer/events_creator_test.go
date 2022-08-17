@@ -30,7 +30,6 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -73,8 +72,7 @@ var (
 type EventsCreatorTestSuite struct {
 	suite.Suite
 
-	log     *logp.Logger
-	cycleId uuid.UUID
+	log *logp.Logger
 }
 
 func TestSuite(t *testing.T) {
@@ -104,7 +102,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				RuleResult: opaResults,
 				ResourceInfo: fetching.ResourceInfo{
 					Resource:      fetcherResult,
-					CycleMetadata: fetching.CycleMetadata{CycleId: s.cycleId},
+					CycleMetadata: fetching.CycleMetadata{},
 				},
 			},
 		},
@@ -118,7 +116,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				},
 				ResourceInfo: fetching.ResourceInfo{
 					Resource:      fetcherResult,
-					CycleMetadata: fetching.CycleMetadata{CycleId: s.cycleId},
+					CycleMetadata: fetching.CycleMetadata{},
 				},
 			},
 		},
@@ -131,7 +129,6 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 
 			for _, event := range generatedEvents {
 				resource := event.Fields["resource"].(fetching.ResourceFields)
-				s.Equal(s.cycleId, event.Fields["cycle_id"], "event cycle_id is not correct")
 				s.NotEmpty(event.Timestamp, `event timestamp is missing`)
 				s.NotEmpty(event.Fields["result"], "event result is missing")
 				s.NotEmpty(event.Fields["rule"], "event rule is missing")

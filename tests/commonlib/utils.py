@@ -123,8 +123,8 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
     """
     required_cycles = 2
     start_time = time.time()
-    prev_cycle_id = ""
-    curr_cycle_id = ""
+    prev_sequence = ""
+    curr_sequence = ""
     active_agents = 0
     num_cycles = 0
 
@@ -133,21 +133,21 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
             start_time_per_agent = time.time()
             query, sort = elastic_client.build_es_query(term={"agent.name": node.metadata.name})
             while not is_timeout(start_time_per_agent, 10):
-                # keep query ES until the cycle_id has changed
+                # keep query ES until the sequence has changed
                 result = elastic_client.get_index_data(index_name=elastic_client.index,
                                                        query=query,
                                                        sort=sort)
                 doc_src = elastic_client.get_doc_source(data=result)
-                curr_cycle_id = doc_src['cycle_id']
+                curr_sequence = doc_src['event']['sequence']
 
-                if elastic_client.get_total_value(data=result) != 0 and curr_cycle_id != prev_cycle_id:
+                if elastic_client.get_total_value(data=result) != 0 and curr_sequence != prev_sequence:
                     # New cycle findings for this node
                     active_agents += 1
                     break
                 time.sleep(1)
 
-        if prev_cycle_id != curr_cycle_id:
-            prev_cycle_id = curr_cycle_id
+        if prev_sequence != curr_sequence:
+            prev_sequence = curr_sequence
             num_cycles += 1
 
     return active_agents == (len(nodes) * required_cycles)
