@@ -10,7 +10,7 @@
 cloudbeat:
   # Defines how often an event is sent to the output
   period: 4h
-  type: cloudbeat/vanilla # cloudbeat/eks in case of EKS configuration
+  type: cloudbeat/cis_k8s # cloudbeat/cis_eks in case of EKS configuration
   fetchers:
     # Vanilla K8s Fetchers configuration
     vanilla:
@@ -686,9 +686,6 @@ output.elasticsearch:
 
     # Strategy for fetching the topics metadata from the broker. Default is false.
     #full: false
-
-  # The number of concurrent load-balanced Kafka output workers.
-  #worker: 1
 
   # The number of times to retry publishing an event after a publishing failure.
   # After the specified number of retries, events are typically dropped.
