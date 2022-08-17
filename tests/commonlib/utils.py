@@ -154,4 +154,4 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
 
 
 def is_timeout(start_time: time, timeout: int) -> bool:
-    time.time() - start_time > timeout
+    return time.time() - start_time > timeout
