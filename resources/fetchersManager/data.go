@@ -85,7 +85,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 	start := time.Now()
 
 	cycleId, _ := uuid.NewV4()
-	cycleMetadata := fetching.CycleMetadata{CycleId: cycleId, Sequence: time.Now().Unix()}
+	cycleMetadata := fetching.CycleMetadata{Sequence: time.Now().Unix()}
 	d.log.Infof("Cycle %s has started", cycleId.String())
 
 	for _, key := range d.fetchers.Keys() {

@@ -76,7 +76,6 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 				"resource":            resource,
 				"resource_id":         resMetadata.ID,   // Deprecated - kept for BC
 				"type":                resMetadata.Type, // Deprecated - kept for BC
-				"cycle_id":            eventData.CycleId,
 				"result":              finding.Result,
 				"rule":                finding.Rule,
 				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
