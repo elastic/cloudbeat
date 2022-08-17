@@ -1,6 +1,13 @@
 interface BenchmarkMetadata {
     name: string;
     version: string;
+    filename: string;
+}
+
+interface BenchmarkInfo {
+    name: string;
+    version: string;
+    id: string;
 }
 
 interface CisEksBenchmarkSchema {
@@ -35,7 +42,6 @@ interface SectionMetadata {
 }
 
 interface BenchmarkSchema {
-    filename: string;
     metadata: BenchmarkMetadata;
     rules: RuleSchema[];
 }
@@ -49,10 +55,14 @@ interface HttpCache {
     [key: string]: number
 }
 
+interface MetadataFile {
+    metadata: RuleSchema
+}
+
 interface RuleSchema {
     audit: string;
-    rule_number: string;
-    benchmark: BenchmarkMetadata;
+    rule_number?: string;
+    benchmark: BenchmarkInfo;
     default_value?: string;
     description: string;
     id: string;
@@ -61,9 +71,27 @@ interface RuleSchema {
     profile_applicability: string;
     rationale: string;
     references: string[];
-    // rego_rule_id: string;
     remediation: string;
     section: string;
-    // tags: string[];
-    // version: string;
+    tags: string[];
+    version: string;
+}
+
+interface CspRuleTemplate {
+    attributes: CspRuleTemplateAttr;
+    id: string;
+    type: string;
+    migrationVersion: object;
+    coreMigrationVersion: string;
+}
+
+interface CspRuleTemplateAttr {
+    enabled: boolean;
+    muted: boolean;
+    metadata: RuleSchema;
+}
+
+interface BenchmarkAttributes {
+    id: string,
+    tag: string
 }
