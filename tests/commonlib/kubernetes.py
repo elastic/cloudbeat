@@ -14,6 +14,10 @@ from commonlib.io_utils import get_k8s_yaml_objects
 
 RESOURCE_POD = 'Pod'
 RESOURCE_SERVICE_ACCOUNT = 'ServiceAccount'
+<<<<<<< HEAD
+=======
+LEASE_NAME = "cloudbeat-cluster-leader"
+>>>>>>> 036581d (Add integration test for leader election (#324))
 
 class KubernetesHelper:
 
@@ -309,3 +313,21 @@ class KubernetesHelper:
                 return True
 
         return False
+
+    def get_cluster_leader(self, namespace: str, pods: list) -> str:
+        """
+        retrieve the node name of the leading cloudbeat
+        @param namespace: namespace
+        @param pods: a list of the cluster pods
+        @return: Leader's node name
+        """
+
+        lease_info = self.get_resource(resource_type="Lease", name=LEASE_NAME, namespace=namespace)
+        lease_holder_identity = lease_info.spec.holder_identity
+        holder_id = lease_holder_identity.split("_")[-1]
+
+        for pod in pods:
+            if holder_id in pod.metadata.name:
+                return pod.spec.node_name
+
+        return ""

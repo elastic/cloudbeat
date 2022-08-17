@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 from commonlib.io_utils import get_k8s_yaml_objects
 
-
 DEPLOY_YML = "../../deploy/cloudbeat-pytest.yml"
 
 
@@ -50,4 +49,6 @@ def fixture_data(start_stop_cloudbeat, k8s, cloudbeat_agent):
     pods = k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
                                        namespace=cloudbeat_agent.namespace)
     nodes = k8s.get_cluster_nodes()
+
     return pods, nodes
+
