@@ -12,6 +12,12 @@ spec:
     spec:
       containers:
         - name: cloudbeat
+#          Please replace this image with your own cloudbeat public ecr image
+          image: public.ecr.aws/z7e1r9l0/cloudbeat:latest
           env:
             - name: CLOUDBEAT_TYPE
               value: cloudbeat/eks
+            - name: AWS_ACCESS_KEY_ID
+              value: YOUR_ACCESS_KEY
+            - name: AWS_SECRET_ACCESS_KEY
+              value: YOUR_AWS_SECRET_KEY
