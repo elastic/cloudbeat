@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -33,6 +34,8 @@ import (
 	"github.com/open-policy-agent/opa/sdk"
 	"github.com/sirupsen/logrus"
 )
+
+var now = func() time.Time { return time.Now().UTC() }
 
 type OpaEvaluator struct {
 	log            *logp.Logger
@@ -156,6 +159,7 @@ func (o *OpaEvaluator) decode(result interface{}) (RuleResult, error) {
 	}
 
 	err = decoder.Decode(result)
+	opaResult.Metadata.CreatedAt = now()
 	return opaResult, err
 }
 

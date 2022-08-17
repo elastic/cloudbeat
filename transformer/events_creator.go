@@ -25,9 +25,11 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
 	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/resources/ecs"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
+	"github.com/gofrs/uuid"
 )
 
 type Transformer struct {
@@ -58,7 +60,7 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 	}
 	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
 
-	timestamp := time.Now()
+	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
 		Raw:              eventData.RuleResult.Resource,
@@ -70,6 +72,7 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 			Timestamp: timestamp,
 			Fields: mapstr.M{
 				resMetadata.ECSFormat: eventData.GetElasticCommonData(),
+				"event":               buildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt),
 				"resource":            resource,
 				"resource_id":         resMetadata.ID,   // Deprecated - kept for BC
 				"type":                resMetadata.Type, // Deprecated - kept for BC
@@ -84,4 +87,17 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 	}
 
 	return events, nil
+}
+
+func buildECSEvent(seq int64, created time.Time) ecs.Event {
+	id, _ := uuid.NewV4() // zero value in case of an error is uuid.Nil
+	return ecs.Event{
+		Category: []string{ecs.CategoryConfiguration},
+		Created:  created,
+		ID:       id.String(),
+		Kind:     ecs.KindState,
+		Sequence: seq,
+		Outcome:  ecs.OutcomeSuccess,
+		Type:     []string{ecs.TypeInfo},
+	}
 }

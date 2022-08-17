@@ -20,9 +20,10 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"sync"
 	"time"
+
+	"github.com/gofrs/uuid"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -84,7 +85,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 	start := time.Now()
 
 	cycleId, _ := uuid.NewV4()
-	cycleMetadata := fetching.CycleMetadata{CycleId: cycleId}
+	cycleMetadata := fetching.CycleMetadata{CycleId: cycleId, Sequence: time.Now().Unix()}
 	d.log.Infof("Cycle %s has started", cycleId.String())
 
 	for _, key := range d.fetchers.Keys() {
