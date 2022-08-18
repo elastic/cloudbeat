@@ -18,6 +18,12 @@ spec:
             - name: CLOUDBEAT_TYPE
               value: cloudbeat/eks
             - name: AWS_ACCESS_KEY_ID
-              value: YOUR_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_ACCESS_KEY_ID
+                  name: aws-creds-secret
             - name: AWS_SECRET_ACCESS_KEY
-              value: YOUR_AWS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_SECRET_ACCESS_KEY
+                  name: aws-creds-secret
