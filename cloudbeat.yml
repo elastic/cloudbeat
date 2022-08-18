@@ -13,7 +13,7 @@
 cloudbeat:
   # Defines how often an event is sent to the output
   period: 4h
-  type: cloudbeat/vanilla # cloudbeat/eks in case of EKS configuration
+  type: cloudbeat/cis_k8s # cloudbeat/cis_eks in case of EKS configuration
   fetchers:
     # Vanilla K8s Fetchers configuration
     vanilla:
