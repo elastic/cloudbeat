@@ -8,9 +8,9 @@ from pathlib import Path
 from kubernetes import client, config, utils
 from kubernetes.client import ApiException
 from kubernetes.watch import watch
+from kubernetes.stream import stream
 
 from commonlib.io_utils import get_k8s_yaml_objects
-
 
 RESOURCE_POD = 'Pod'
 RESOURCE_SERVICE_ACCOUNT = 'ServiceAccount'
@@ -223,7 +223,8 @@ class KubernetesHelper:
             patched_body = self.patch_resource_body(yml_resource, patch_body)
             created_resource = self.create_from_dict(patched_body, **relevant_metadata)
 
-            done = self.wait_for_resource(resource_type=resource_type, status_list=["RUNNING", "ADDED"], **relevant_metadata)
+            done = self.wait_for_resource(resource_type=resource_type, status_list=["RUNNING", "ADDED"],
+                                          **relevant_metadata)
             if done:
                 patched_resource = created_resource
 
@@ -304,12 +305,50 @@ class KubernetesHelper:
                               timeout_seconds=timeout,
                               **kwargs):
             if name in event["object"].metadata.name and event["type"] in status_list:
-                if (resource_type == RESOURCE_POD) and ('ADDED' in status_list) and (event['object'].status.phase == 'Pending'):
+                if (resource_type == RESOURCE_POD) and ('ADDED' in status_list) and (
+                        event['object'].status.phase == 'Pending'):
                     continue
                 w.stop()
                 return True
 
         return False
+
+    def pod_exec_command(self, pod_name: str, namespace: str, command: list):
+
+        resp = stream(self.core_v1_client.connect_get_namespaced_pod_exec,
+                      name=pod_name, namespace=namespace, command=command,
+                      stderr=True, stdin=True,
+                      stdout=True, tty=False,
+                      _preload_content=False,
+                      _request_timeout=30)
+        return resp
+
+    def pod_exec(self, name, namespace, command):
+        # exec_command = ["/bin/sh", "-c", "/usr/share/elastic-agent/elastic-agent status --output json"]
+        exec_command = ["/usr/share/elastic-agent/elastic-agent", "status", "--output", "json"]
+
+        resp = stream(self.core_v1_client.connect_get_namespaced_pod_exec,
+                      name,
+                      namespace,
+                      command=exec_command,
+                      stderr=True, stdin=False,
+                      stdout=True, tty=False,
+                      _preload_content=False)
+        text_list = []
+        while resp.is_open():
+            resp.update(timeout=1)
+            if resp.peek_stdout():
+
+                text_list.append(resp.read_stdout())
+                print(f"STDOUT: \n{resp.read_stdout()}")
+            if resp.peek_stderr():
+                print(f"STDERR: \n{resp.read_stderr()}")
+
+        resp.close()
+        import json
+        dict_result = json.loads(text_list[0])
+        if resp.returncode != 0:
+            raise Exception("Response failure")
 
     def get_cluster_leader(self, namespace: str, pods: list) -> str:
         """

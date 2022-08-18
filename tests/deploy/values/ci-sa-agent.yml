@@ -1,0 +1,9 @@
+cloudbeat:
+  deploy: false
+
+standaloneAgent:
+  deploy: true
+
+testData:
+  marker: ci_agent
+  agentName: elastic-agent

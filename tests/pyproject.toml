@@ -28,12 +28,14 @@ addopts = "-p no:warnings -s -v --alluredir=tests/allure/results --clean-allured
 markers = [
     # tests used in cloudbeat CI
     "pre_merge",
+    "ci_agent",
     # test target markers
     "file_system_rules",
     "k8s_object_rules",
     "process_api_server_rules",
     "process_controller_manager_rules",
     "process_etcd_rules",
-    "process_kubelet_rules",
-    "process_scheduler_rules"
+    "process_api_server_rules",
+    "process_scheduler_rules",
+    "eks_file_system_rules"
 ]

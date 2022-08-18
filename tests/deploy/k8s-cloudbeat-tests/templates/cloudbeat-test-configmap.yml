@@ -6,8 +6,9 @@ metadata:
     {{- include "k8s-cloudbeat-tests.labels" . | indent 4 }}
 data:
   KUBERNETES_IN_CLUSTER: "true"
-  ES_USER: "elastic"
+  ES_USER: "kibana_system"
   ES_PASSWORD: "changeme"
   ES_HOST: "elasticsearch-master.kube-system"
   USE_DOCKER: "false"
   TEST_MARKER: {{ .Values.testData.marker }}
+  AGENT_NAME: {{ .Values.testData.agentName }}

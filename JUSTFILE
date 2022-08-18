@@ -21,7 +21,7 @@ load-cloudbeat-image:
 
 build-cloudbeat:
   GOOS=linux go mod vendor
-  GOOS=linux go build -v && docker build -t cloudbeat .
+  GOOS=linux go build -v && docker buildx build --platform=linux/amd64 -t cloudbeat .
 
 deploy-cloudbeat:
   kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system & kubectl apply -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
