@@ -40,6 +40,9 @@ delete-cloudbeat:
 create-eks-deployment-file:
     kustomize build {{kustomizeEksOverlay}} --output deploy/eks/cloudbeat-ds.yaml
 
+deploy-eks-cloudbeat:
+  kubectl delete -k {{kustomizeEksOverlay}} -n kube-system & kubectl apply -k {{kustomizeEksOverlay}} -n kube-system
+
 #General
 
 logs-cloudbeat:
