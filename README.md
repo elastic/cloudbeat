@@ -112,7 +112,12 @@ Create an agent policy and install the CSP integration. Now, when adding a new a
 ### Update settings
 Update cloudbeat settings on a runnign elastic-agent can be done by running the [script](/scripts/remote_edit_config.sh).
 The script still requires a second step of trigerring the agent to re-run cloudbeat.
-This can be done on Fleet UI by renaming the integration or even changing the agent log level.
+This can be done on Fleet UI by changing the agent log level.
+Another option is through CLI on the agent by running 
+```
+kill -9 `pidof cloudbeat`
+```
+
 
 
 ## Code guidelines
