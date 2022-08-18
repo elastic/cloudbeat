@@ -186,7 +186,7 @@ func (s *BundleTestSuite) TestCreateServerWithRuntimeConfig() {
 // TestCreateServerWithRuntimeConfig tests the creation of a server with a valid config
 func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 	validStreamsVanilla := agentconfig.MustNewConfigFrom(`
-    type: cloudbeat/vanilla
+    type: cloudbeat/cis_k8s
     streams:
       - data_yaml:
           activated_rules:
@@ -198,7 +198,7 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 	s.NoError(err)
 
 	validStreamsEks := agentconfig.MustNewConfigFrom(`
-    type: cloudbeat/eks
+    type: cloudbeat/cis_eks
     streams:
       - data_yaml:
           activated_rules:

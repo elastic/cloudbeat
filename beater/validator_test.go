@@ -47,7 +47,7 @@ func TestValidatorTestSuite(t *testing.T) {
 func (s *ValidatorTestSuite) TestConfig() {
 	configNoStreams := config.MustNewConfigFrom(`
 not_streams:
-  - data_yaml:
+  - runtime_cfg:
       activated_rules:
         cis_k8s:
           - a
@@ -57,9 +57,9 @@ not_streams:
           - e
 `)
 
-	configNoDataYaml := config.MustNewConfigFrom(`
+	configNoRuntimeCfg := config.MustNewConfigFrom(`
 streams:
-  - not_data_yaml:
+  - not_runtime_cfg:
       activated_rules:
         cis_k8s:
           - a
@@ -68,9 +68,9 @@ streams:
           - d
           - e
 `)
-	configWithDataYaml := config.MustNewConfigFrom(`
+	configWithRuntimeCfg := config.MustNewConfigFrom(`
 streams:
-  - data_yaml:
+  - runtime_cfg:
       activated_rules:
         cis_k8s:
           - a
@@ -89,13 +89,13 @@ streams:
 			config.NewConfig(),
 		}, {
 			true,
-			configNoDataYaml,
+			configNoRuntimeCfg,
 		}, {
 			true,
 			configNoStreams,
 		}, {
 			false,
-			configWithDataYaml,
+			configWithRuntimeCfg,
 		},
 	}
 
