@@ -39,9 +39,14 @@ Export AWS creds as env vars, kustomize will use these to populate your cloudbea
 $ export AWS_ACCESS_KEY="<YOUR_AWS_KEY>" AWS_SECRET_ACCESS_KEY="<YOUR_AWS_SECRET>"
 ```
 
-Deploy cloudbeat:
+Set your default cluster an EKS cluster Deploy cloudbeat
 ```zsh
-deploy-eks-cloudbeat
+ kubectl config use-context your-eks-cluster
+```
+
+Deploy cloudbeat on your EKS cluster
+```zsh
+just deploy-eks-cloudbeat
 ````
 ### Advanced
 
