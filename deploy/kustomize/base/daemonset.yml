@@ -21,20 +21,10 @@ spec:
           image: cloudbeat:latest
           imagePullPolicy: IfNotPresent
           env:
-            - name: AWS_ACCESS_KEY
-              valueFrom:
-                configMapKeyRef:
-                  name: aws-creds
-                  key: aws.key
-                  optional: true
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                configMapKeyRef:
-                  name: aws-creds
-                  key: aws.secret
-                  optional: true 
             - name: ES_HOST
               value: "host.docker.internal:9200"
+            - name: CLOUDBEAT_TYPE
+              value: cloudbeat/vanilla
             - name: ES_USERNAME
               value: elastic
             - name: ES_PASSWORD
@@ -53,8 +43,8 @@ spec:
             # GAP: https://github.com/elastic/cloudbeat/issues/162
             - name: POD_NAME
               value: cloudbeat-leader
-                # fieldRef:
-                #   fieldPath: metadata.name
+              # fieldRef:
+              #   fieldPath: metadata.name
           securityContext:
             runAsUser: 0
             # If using Red Hat OpenShift uncomment this:
@@ -66,10 +56,10 @@ spec:
               cpu: 100m
               memory: 100Mi
           volumeMounts:
-            # - name: config
-            #   mountPath: /cloudbeat.yml
-            #   readOnly: true
-            #   subPath: cloudbeat.yml
+            - name: config
+              mountPath: /cloudbeat.yml
+              readOnly: true
+              subPath: cloudbeat.yml
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
@@ -104,10 +94,6 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
-        # - name: config
-        #   configMap:
-        #     defaultMode: 0640
-        #     name: cloudbeat-daemonset-config
         - name: proc
           hostPath:
             path: /proc
@@ -135,3 +121,7 @@ spec:
         - name: etcsysmd
           hostPath:
             path: /etc/systemd
+        - name: config
+          configMap:
+            defaultMode: 0640
+            name: cloudbeat-daemonset-config

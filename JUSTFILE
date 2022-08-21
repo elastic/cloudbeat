@@ -1,6 +1,7 @@
-# Refactor via kustomize https://kustomize.io/
+# Variables
 
-image_tag := `git branch --show-current`
+kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
+kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yml
@@ -12,9 +13,12 @@ setup-env: install-kind create-kind-cluster
 
 # Vanilla
 
+create-vanilla-deployment-file:
+   kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
+
 build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
-build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat-debug
+build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat
 
 load-cloudbeat-image:
   kind load docker-image cloudbeat:latest --name kind-mono
@@ -24,19 +28,20 @@ build-cloudbeat:
   GOOS=linux go build -v && docker build -t cloudbeat .
 
 deploy-cloudbeat:
-  kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system & kubectl apply -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
+  kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
 
 build-cloudbeat-debug:
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
-deploy-cloudbeat-debug:
-   kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system & kubectl apply -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system
-
 delete-cloudbeat:
-  kubectl delete -f deploy/k8s/kustomize/base/cloudbeat-ds.yml -n kube-system
+  kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system
 
-delete-cloudbeat-debug:
-  kubectl delete -f deploy/k8s/cloudbeat-ds-debug.yml -n kube-system
+# EKS
+create-eks-deployment-file:
+    kustomize build {{kustomizeEksOverlay}} --output deploy/eks/cloudbeat-ds.yaml
+
+deploy-eks-cloudbeat:
+  kubectl delete -k {{kustomizeEksOverlay}} -n kube-system & kubectl apply -k {{kustomizeEksOverlay}} -n kube-system
 
 #General
 

@@ -1,0 +1,16 @@
+# $COMMUNITY/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  - ../../base
+
+secretGenerator:
+  - name: aws-creds-secret
+    env: aws.creds
+
+patchesStrategicMerge:
+  - daemonset.yml

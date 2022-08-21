@@ -26,14 +26,46 @@ just setup-env
 
 ## Running Cloudbeat
 
+### Kubernetes Vanilla
 Build & deploy cloudbeat:
 
 ```zsh
 just build-deploy-cloudbeat
 ```
 
+### Amazon Elastic Kubernetes Service (EKS)
+Export AWS creds as env vars, kustomize will use these to populate your cloudbeat deployment.
+```zsh
+$ export AWS_ACCESS_KEY="<YOUR_AWS_KEY>" AWS_SECRET_ACCESS_KEY="<YOUR_AWS_SECRET>"
+```
+
+Set your default cluster to your EKS cluster 
+```zsh
+ kubectl config use-context your-eks-cluster
+```
+
+Deploy cloudbeat on your EKS cluster
+```zsh
+just deploy-eks-cloudbeat
+````
+### Advanced
+
+If you need to change the default values in the configuration(ES_HOST, ES_PORT, ES_USERNAME, ES_PASSWORD), you can
+also create the deployment file yourself.
+
+Vanilla
+```zsh
+just create-vanilla-deployment-file
+```
+
+EKS
+```zsh
+just create-eks-deployment-file
+```
+
 To validate check the logs:
 
+### See logs
 ```zsh
 just logs-cloudbeat
 ```
