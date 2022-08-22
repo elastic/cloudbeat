@@ -16,7 +16,11 @@ RESOURCE_POD = 'Pod'
 RESOURCE_SERVICE_ACCOUNT = 'ServiceAccount'
 LEASE_NAME = "cloudbeat-cluster-leader"
 
+
 class KubernetesHelper:
+    """
+    This class is Kubernetes wrapper
+    """
 
     def __init__(self, is_in_cluster_config: bool = False):
         if is_in_cluster_config:
@@ -314,16 +318,6 @@ class KubernetesHelper:
                 return True
 
         return False
-
-    def pod_exec_command(self, pod_name: str, namespace: str, command: list):
-
-        resp = stream(self.core_v1_client.connect_get_namespaced_pod_exec,
-                      name=pod_name, namespace=namespace, command=command,
-                      stderr=True, stdin=True,
-                      stdout=True, tty=False,
-                      _preload_content=False,
-                      _request_timeout=30)
-        return resp
 
     def pod_exec(self, name: str, namespace: str, command: list) -> str:
         """
