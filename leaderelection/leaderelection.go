@@ -35,11 +35,11 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
 	initOnce = &sync.Once{}
-	callOnce = &sync.Once{}
 	manager  *Manager
 )
 
@@ -55,9 +55,6 @@ type Manager struct {
 
 // NewLeaderElector acts as a singleton
 func NewLeaderElector(ctx context.Context, log *logp.Logger, cfg config.Config) (ElectionManager, error) {
-	// the launcher is creating a new beater instance every new configuration.
-	// therefore, we must reset callOnce every new beater to stall the fetching cycle until we have the leader information.
-	*callOnce = sync.Once{}
 	kubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		log.Errorf("NewLeaderElector error in GetClient: %v", err)
@@ -90,13 +87,10 @@ func (m *Manager) IsLeader() bool {
 
 // Run leader election is blocking until a FirstLeaderDeadline timeout has reached.
 func (m *Manager) Run(ctx context.Context) {
-	timeoutCtx, cancel := context.WithTimeout(ctx, FirstLeaderDeadline)
-	defer cancel()
-
 	go m.leader.Run(ctx)
 	m.log.Infof("started leader election")
 
-	<-timeoutCtx.Done()
+	<-time.After(FirstLeaderDeadline)
 	m.log.Infof("stop waiting after %s for a leader to be elected", FirstLeaderDeadline)
 }
 
