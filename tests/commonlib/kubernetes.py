@@ -229,7 +229,8 @@ class KubernetesHelper:
             patched_body = self.patch_resource_body(yml_resource, patch_body)
             created_resource = self.create_from_dict(patched_body, **relevant_metadata)
 
-            done = self.wait_for_resource(resource_type=resource_type, status_list=["RUNNING", "ADDED"],
+            done = self.wait_for_resource(resource_type=resource_type,
+                                          status_list=["RUNNING", "ADDED"],
                                           **relevant_metadata)
             if done:
                 patched_resource = created_resource
