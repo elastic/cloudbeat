@@ -102,7 +102,7 @@ standaloneAgent:
   deploy: false
 
 elasticsearch:
-  imageTag: "8.5.0-SNAPSHOT"
+  imageTag: "8.4.0-SNAPSHOT"
 
   protocol: http
 
@@ -151,7 +151,7 @@ elasticsearch:
 
 
 kibana:
-  imageTag: "8.5.0-SNAPSHOT"
+  imageTag: "8.4.0-SNAPSHOT"
 
   resources:
     requests:

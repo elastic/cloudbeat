@@ -88,6 +88,9 @@ load-pytest-kind:
 deploy-tests-helm-ci target:
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
+deploy-tests-helm-ci-agent target:
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+
 deploy-local-tests-helm target:
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 

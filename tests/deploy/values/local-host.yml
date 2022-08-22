@@ -7,3 +7,6 @@ standaloneAgent:
 testData:
   marker: pre_merge
   agentName: cloudbeat
+
+elasticsearch:
+  imageTag: "8.5.0-SNAPSHOT"

@@ -2,8 +2,11 @@ cloudbeat:
   deploy: false
 
 standaloneAgent:
-  deploy: true
+  deploy: false
 
 testData:
-  marker: ci_agent
+  marker: post_merge_agent
   agentName: elastic-agent
+
+elasticsearch:
+  imageTag: "8.5.0-SNAPSHOT"

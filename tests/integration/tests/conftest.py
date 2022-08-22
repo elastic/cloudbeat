@@ -6,6 +6,7 @@ import pytest
 from commonlib.io_utils import get_k8s_yaml_objects
 
 DEPLOY_YML = "../../deploy/cloudbeat-pytest.yml"
+DEPLOY_YML_AGENT = "../../deploy/sa-agent-pytest.yml"
 
 
 @pytest.fixture(scope='module', name='start_stop_cloudbeat')
@@ -18,7 +19,14 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     @param cloudbeat_agent: Cloudbeat configuration
     @return: Kubernetes object, Api client, Cloudbeat config
     """
-    file_path = Path(__file__).parent / DEPLOY_YML
+
+    if cloudbeat_agent.name == 'cloudbeat':
+        file_path = Path(__file__).parent / DEPLOY_YML
+    elif cloudbeat_agent.name == 'elastic-agent':
+        file_path = Path(__file__).parent / DEPLOY_YML_AGENT
+    else:
+        raise Exception(f"configuration {cloudbeat_agent.name} is unknown")
+
     if k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
                                    namespace=cloudbeat_agent.namespace):
         k8s.delete_from_yaml(get_k8s_yaml_objects(file_path=file_path))

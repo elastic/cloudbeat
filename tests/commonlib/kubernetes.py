@@ -164,6 +164,8 @@ class KubernetesHelper:
         """
         result_list = []
         for yaml_object in yaml_objects_list:
+            if yaml_object is None:
+                continue
             metadata = yaml_object['metadata']
             relevant_metadata = {k: metadata[k] for k in ('name', 'namespace') if k in metadata}
             try:
