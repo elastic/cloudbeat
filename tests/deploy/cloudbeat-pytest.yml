@@ -272,7 +272,7 @@ spec:
         - name: ES_HOST
           value: elasticsearch-master.kube-system:9200
         - name: ES_USERNAME
-          value: elastic
+          value: kibana_system
         - name: ES_PASSWORD
           value: changeme
         - name: KIBANA_HOST

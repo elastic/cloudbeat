@@ -240,3 +240,19 @@ class FsClient:
         # Write the newly built config
         with current_resource.open(mode="w") as f:
             yaml.dump(r_file, f)
+
+    @staticmethod
+    def get_bit_status_from_json(response: str, bit_name: str) -> str:
+        """
+        This function parses status response json retrieved as json and
+        returns information from Application.Message field.
+        @param response: Elastic-agent status string (param --output json)
+        @param bit_name: The name of bit the status should be retrieved
+        @return: status message string
+        """
+        response = json.loads(response)
+        bits_list = response['Applications']
+        for bit in bits_list:
+            if bit['Name'] == bit_name:
+                return bit['Message']
+        return ''

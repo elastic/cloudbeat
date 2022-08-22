@@ -14,8 +14,8 @@ data:
         hosts:
           - >-
             elasticsearch-master.kube-system:9200
-        username: 'elastic'
-        password: 'IhHO1XBJ4XgN1VCo'
+        username: 'kibana_system'
+        password: 'changeme'
     inputs:
       - id: logfile-system-cd257808-f786-4559-ad2b-5cc4598bbb04
         revision: 1
@@ -490,7 +490,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
-          image: docker.elastic.co/beats/elastic-agent:8.5.0-SNAPSHOT
+          image: docker.elastic.co/beats/elastic-agent:8.4.0-SNAPSHOT
           args: [
             "-c", "/etc/agent.yml",
             "-e",

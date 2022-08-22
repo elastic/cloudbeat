@@ -323,32 +323,34 @@ class KubernetesHelper:
                       _request_timeout=30)
         return resp
 
-    def pod_exec(self, name, namespace, command):
-        # exec_command = ["/bin/sh", "-c", "/usr/share/elastic-agent/elastic-agent status --output json"]
-        exec_command = ["/usr/share/elastic-agent/elastic-agent", "status", "--output", "json"]
+    def pod_exec(self, name: str, namespace: str, command: list) -> str:
+        """
+        This function connects to pod and executes command
+        @param name: Pod name
+        @param namespace: Pod namespace
+        @param command: Command to be executed
+        @return: Executed command response
+        """
 
         resp = stream(self.core_v1_client.connect_get_namespaced_pod_exec,
                       name,
                       namespace,
-                      command=exec_command,
+                      command=command,
                       stderr=True, stdin=False,
                       stdout=True, tty=False,
                       _preload_content=False)
-        text_list = []
+        response = ''
         while resp.is_open():
             resp.update(timeout=1)
             if resp.peek_stdout():
-
-                text_list.append(resp.read_stdout())
-                print(f"STDOUT: \n{resp.read_stdout()}")
+                response = resp.read_stdout()
             if resp.peek_stderr():
-                print(f"STDERR: \n{resp.read_stderr()}")
+                response = resp.read_stderr()
 
         resp.close()
-        import json
-        dict_result = json.loads(text_list[0])
         if resp.returncode != 0:
             raise Exception("Response failure")
+        return response
 
     def get_cluster_leader(self, namespace: str, pods: list) -> str:
         """

@@ -1,0 +1,212 @@
+{
+    "@timestamp": "2022-08-18T17:42:26.617Z",
+    "agent": {
+        "ephemeral_id": "63460ab2-2caa-4827-8ed1-c9e42eac1784",
+        "id": "f98c145e-9dfa-447e-86cb-0449d04c1206",
+        "name": "kind-mono-control-plane",
+        "type": "cloudbeat",
+        "version": "8.4.0"
+    },
+    "cluster_id": "3d81f72f-a281-4aaa-ae02-010d3e8c756f",
+    "cycle_id": "9f03b19f-e2bc-4c1d-8546-80456cad0b5f",
+    "ecs": {
+        "version": "8.0.0"
+    },
+    "elastic_agent": {
+        "id": "f98c145e-9dfa-447e-86cb-0449d04c1206",
+        "snapshot": true,
+        "version": "8.4.0"
+    },
+    "host": {
+        "architecture": "aarch64",
+        "containerized": false,
+        "hostname": "kind-mono-control-plane",
+        "ip": [
+            "10.244.0.1",
+            "10.244.0.1",
+            "10.244.0.1",
+            "10.244.0.1",
+            "172.19.0.2",
+            "fc00:f853:ccd:e793::2",
+            "fe80::42:acff:fe13:2"
+        ],
+        "mac": [
+            "02:42:ac:13:00:02",
+            "1e:93:5d:c6:8e:07",
+            "86:3b:5b:e7:4a:5e",
+            "a2:00:92:38:c6:8d",
+            "ba:a7:dd:c9:35:55"
+        ],
+        "name": "kind-mono-control-plane",
+        "os": {
+            "codename": "focal",
+            "family": "debian",
+            "kernel": "5.10.104-linuxkit",
+            "name": "Ubuntu",
+            "platform": "ubuntu",
+            "type": "linux",
+            "version": "20.04.4 LTS (Focal Fossa)"
+        }
+    },
+    "message": "Rule \"Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)\": failed",
+    "process": {
+        "args": [
+            "/usr/bin/kubelet",
+            "--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf",
+            "--kubeconfig=/etc/kubernetes/kubelet.conf",
+            "--config=/var/lib/kubelet/config.yaml",
+            "--container-runtime=remote",
+            "--container-runtime-endpoint=unix:///run/containerd/containerd.sock",
+            "--fail-swap-on=false",
+            "--node-ip=172.19.0.2",
+            "--node-labels=",
+            "--pod-infra-container-image=k8s.gcr.io/pause:3.4.1",
+            "--provider-id=kind://docker/kind-mono/kind-mono-control-plane",
+            "--fail-swap-on=false",
+            "--cgroup-root=/kubelet"
+        ],
+        "args_count": 13,
+        "command_line": "/usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --config=/var/lib/kubelet/config.yaml --container-runtime=remote --container-runtime-endpoint=unix:///run/containerd/containerd.sock --fail-swap-on=false --node-ip=172.19.0.2 --node-labels= --pod-infra-container-image=k8s.gcr.io/pause:3.4.1 --provider-id=kind://docker/kind-mono/kind-mono-control-plane --fail-swap-on=false --cgroup-root=/kubelet",
+        "name": "kubelet",
+        "parent": {
+            "pid": 1,
+            "start": "0001-01-01T00:00:00Z"
+        },
+        "pgid": 644,
+        "pid": 644,
+        "start": "2022-08-18T11:30:00.438885759Z",
+        "title": "kubelet",
+        "uptime": 22346
+    },
+    "resource": {
+        "ecsFormat": "process",
+        "id": "d3506665-d472-5395-8c7f-31c7c688ada4",
+        "name": "kubelet",
+        "raw": {
+            "command": "/usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --config=/var/lib/kubelet/config.yaml --container-runtime=remote --container-runtime-endpoint=unix:///run/containerd/containerd.sock --fail-swap-on=false --node-ip=172.19.0.2 --node-labels= --pod-infra-container-image=k8s.gcr.io/pause:3.4.1 --provider-id=kind://docker/kind-mono/kind-mono-control-plane --fail-swap-on=false --cgroup-root=/kubelet",
+            "external_data": {
+                "config": {
+                    "apiVersion": "kubelet.config.k8s.io/v1beta1",
+                    "authentication": {
+                        "anonymous": {
+                            "enabled": false
+                        },
+                        "webhook": {
+                            "cacheTTL": "0s",
+                            "enabled": true
+                        },
+                        "x509": {
+                            "clientCAFile": "/etc/kubernetes/pki/ca.crt"
+                        }
+                    },
+                    "authorization": {
+                        "mode": "Webhook",
+                        "webhook": {
+                            "cacheAuthorizedTTL": "0s",
+                            "cacheUnauthorizedTTL": "0s"
+                        }
+                    },
+                    "cgroupDriver": "cgroupfs",
+                    "clusterDNS": [
+                        "10.96.0.10"
+                    ],
+                    "clusterDomain": "cluster.local",
+                    "cpuManagerReconcilePeriod": "0s",
+                    "evictionHard": {
+                        "imagefs.available": "0%",
+                        "nodefs.available": "0%",
+                        "nodefs.inodesFree": "0%"
+                    },
+                    "evictionPressureTransitionPeriod": "0s",
+                    "fileCheckFrequency": "0s",
+                    "healthzBindAddress": "127.0.0.1",
+                    "healthzPort": 10248,
+                    "httpCheckFrequency": "0s",
+                    "imageGCHighThresholdPercent": 100,
+                    "imageMinimumGCAge": "0s",
+                    "kind": "KubeletConfiguration",
+                    "logging": {},
+                    "nodeStatusReportFrequency": "0s",
+                    "nodeStatusUpdateFrequency": "0s",
+                    "rotateCertificates": true,
+                    "runtimeRequestTimeout": "0s",
+                    "shutdownGracePeriod": "0s",
+                    "shutdownGracePeriodCriticalPods": "0s",
+                    "staticPodPath": "/etc/kubernetes/manifests",
+                    "streamingConnectionIdleTimeout": "0s",
+                    "syncFrequency": "0s",
+                    "volumeStatsAggPeriod": "0s"
+                }
+            },
+            "pid": "644",
+            "stat": {
+                "EffectiveGID": "",
+                "EffectiveUID": "",
+                "Group": "644",
+                "Name": "kubelet",
+                "Nice": "0",
+                "Parent": "1",
+                "RealGID": "",
+                "RealUID": "",
+                "ResidentSize": "88560000",
+                "SavedGID": "",
+                "SavedUID": "",
+                "StartTime": "37577189",
+                "State": "S",
+                "SystemTime": "50273",
+                "Threads": "17",
+                "TotalSize": "1997836000",
+                "UserTime": "41964"
+            }
+        },
+        "sub_type": "process",
+        "type": "process"
+    },
+    "resource_id": "d3506665-d472-5395-8c7f-31c7c688ada4",
+    "result": {
+        "evaluation": "failed",
+        "evidence": {
+            "process_args": {
+                "--/usr/bin/kubelet": "",
+                "--bootstrap-kubeconfig": "/etc/kubernetes/bootstrap-kubelet.conf",
+                "--cgroup-root": "/kubelet",
+                "--config": "/var/lib/kubelet/config.yaml",
+                "--container-runtime": "remote",
+                "--container-runtime-endpoint": "unix:///run/containerd/containerd.sock",
+                "--fail-swap-on": "false",
+                "--kubeconfig": "/etc/kubernetes/kubelet.conf",
+                "--node-ip": "172.19.0.2",
+                "--node-labels": "",
+                "--pod-infra-container-image": "k8s.gcr.io/pause:3.4.1",
+                "--provider-id": "kind://docker/kind-mono/kind-mono-control-plane"
+            }
+        },
+        "expected": null
+    },
+    "rule": {
+        "audit": "Run the following command on each node:\n```\nps -ef | grep kubelet\n```\nVerify that the `--tls-cert-file` and `--tls-private-key-file` arguments exist and they are set as\nappropriate.\nIf these arguments are not present, check that there is a Kubelet config specified by `--config`\nand that it contains appropriate settings for tlsCertFile and tlsPrivateKeyFile.\n",
+        "benchmark": {
+            "id": "cis_k8s",
+            "name": "CIS Kubernetes V1.23",
+            "version": "v1.0.0"
+        },
+        "default_value": "",
+        "description": "Setup TLS connection on the Kubelets.\n",
+        "id": "dc91f4c4-4f0e-59ba-a0e1-96e996736787,",
+        "impact": "",
+        "name": "Ensure that the --tls-cert-file and --tls-private-key-file arguments are set as appropriate (Manual)",
+        "profile_applicability": "* Level 1 - Worker Node\n",
+        "rationale": "The connections from the apiserver to the kubelet are used for fetching logs for pods,\nattaching (through kubectl) to running pods, and using the kubelet\u2019s port-forwarding\nfunctionality. These connections terminate at the kubelet\u2019s HTTPS endpoint. By default, the\napiserver does not verify the kubelet\u2019s serving certificate, which makes the connection\nsubject to man-in-the-middle attacks, and unsafe to run over untrusted and/or public\nnetworks.\n",
+        "references": "",
+        "remediation": "If using a Kubelet config file, edit the file to set tlsCertFile to the location of the certificate\nfile to use to identify this Kubelet, and tlsPrivateKeyFile to the location of the\ncorresponding private key file.\nIf using command line arguments, edit the kubelet service file\n`/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` on each worker node and set\nthe below parameters in KUBELET_CERTIFICATE_ARGS variable.\n--tls-cert-file=<path/to/tls-certificate-file> --tls-private-key-file=<path/to/tls-key-file>\nBased on your system, restart the kubelet service. For example:\n```\nsystemctl daemon-reload\nsystemctl restart kubelet.service\n```\n",
+        "section": "Kubelet",
+        "tags": [
+            "CIS",
+            "Kubernetes",
+            "CIS 4.2.10",
+            "Kubelet"
+        ],
+        "version": "1.0"
+    },
+    "type": "process"
+}

@@ -8,6 +8,7 @@ import time
 import json
 import pytest
 import allure
+from commonlib.io_utils import FsClient
 
 testdata = ['file', 'process', 'k8s_object']
 CONFIG_TIMEOUT = 30
@@ -96,3 +97,31 @@ def test_elastic_index_exists(elastic_client, match_type):
 
     assert len(result) > 0,\
         f"The findings of type {match_type} not found"
+
+
+@pytest.mark.ci_agent
+@pytest.mark.order(4)
+@pytest.mark.dependency(depends=["test_agent_pods_running"])
+def test_cloudbeat_status(k8s, cloudbeat_agent):
+    """
+    This test connects to all elastic agents, executes command to
+    retrieve beats status, verifies that cloud beat status in state "Running"
+    @param k8s: Kubernetes wrapper client
+    @param cloudbeat_agent: Cloudbeat configuration
+    @return: Pass / Fail
+    """
+
+    pods = k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
+                                       namespace=cloudbeat_agent.namespace)
+    results = []
+    exec_command = ["/usr/share/elastic-agent/elastic-agent", "status", "--output", "json"]
+    for pod in pods:
+        response = k8s.pod_exec(name=pod.metadata.name,
+                                namespace=cloudbeat_agent.namespace,
+                                command=exec_command)
+        status = FsClient.get_bit_status_from_json(response=response,
+                                                   bit_name='cloudbeat')
+        if status != 'Running':
+            results.append(f"Pod: {pod.metadata.name} status: {status}")
+
+    assert len(results) == 0, '\n'.join(results)

@@ -1,0 +1,124 @@
+{
+    "@timestamp": "2022-08-18T17:42:26.613Z",
+    "agent": {
+        "ephemeral_id": "63460ab2-2caa-4827-8ed1-c9e42eac1784",
+        "id": "f98c145e-9dfa-447e-86cb-0449d04c1206",
+        "name": "kind-mono-control-plane",
+        "type": "cloudbeat",
+        "version": "8.4.0"
+    },
+    "cluster_id": "3d81f72f-a281-4aaa-ae02-010d3e8c756f",
+    "cycle_id": "9f03b19f-e2bc-4c1d-8546-80456cad0b5f",
+    "ecs": {
+        "version": "8.0.0"
+    },
+    "elastic_agent": {
+        "id": "f98c145e-9dfa-447e-86cb-0449d04c1206",
+        "snapshot": true,
+        "version": "8.4.0"
+    },
+    "file": {
+        "accessed": "2022-08-18T08:56:32.941838008Z",
+        "ctime": "2022-08-18T08:56:33.741838008Z",
+        "directory": "/hostfs/etc/kubernetes",
+        "gid": "0",
+        "group": "root",
+        "inode": "4857882",
+        "mode": "755",
+        "mtime": "2022-08-18T08:56:33.741838008Z",
+        "name": "pki",
+        "owner": "root",
+        "path": "/hostfs/etc/kubernetes/pki",
+        "size": 4096,
+        "type": "directory",
+        "uid": "0"
+    },
+    "host": {
+        "architecture": "aarch64",
+        "containerized": false,
+        "hostname": "kind-mono-control-plane",
+        "ip": [
+            "10.244.0.1",
+            "10.244.0.1",
+            "10.244.0.1",
+            "10.244.0.1",
+            "172.19.0.2",
+            "fc00:f853:ccd:e793::2",
+            "fe80::42:acff:fe13:2"
+        ],
+        "mac": [
+            "02:42:ac:13:00:02",
+            "1e:93:5d:c6:8e:07",
+            "86:3b:5b:e7:4a:5e",
+            "a2:00:92:38:c6:8d",
+            "ba:a7:dd:c9:35:55"
+        ],
+        "name": "kind-mono-control-plane",
+        "os": {
+            "codename": "focal",
+            "family": "debian",
+            "kernel": "5.10.104-linuxkit",
+            "name": "Ubuntu",
+            "platform": "ubuntu",
+            "type": "linux",
+            "version": "20.04.4 LTS (Focal Fossa)"
+        }
+    },
+    "message": "Rule \"Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Automated)\": passed",
+    "resource": {
+        "ecsFormat": "file",
+        "id": "26ab0903-b916-59ae-81c0-2faf79c7ad89",
+        "name": "/hostfs/etc/kubernetes/pki",
+        "raw": {
+            "gid": "0",
+            "group": "root",
+            "inode": "4857882",
+            "mode": "755",
+            "name": "pki",
+            "owner": "root",
+            "path": "/hostfs/etc/kubernetes/pki",
+            "sub_type": "directory",
+            "uid": "0"
+        },
+        "sub_type": "directory",
+        "type": "file"
+    },
+    "resource_id": "26ab0903-b916-59ae-81c0-2faf79c7ad89",
+    "result": {
+        "evaluation": "passed",
+        "evidence": {
+            "group": "root",
+            "owner": "root"
+        },
+        "expected": {
+            "group": "root",
+            "owner": "root"
+        }
+    },
+    "rule": {
+        "audit": "Run the below command (based on the file location on your system) on the\ncontrol plane node.\nFor example,\n```\nls -laR /etc/kubernetes/pki/\n```\nVerify that the ownership of all files and directories in this hierarchy is set to `root:root`.\n",
+        "benchmark": {
+            "id": "cis_k8s",
+            "name": "CIS Kubernetes V1.23",
+            "version": "v1.0.0"
+        },
+        "default_value": "By default, the `/etc/kubernetes/pki/` directory and all of the files and directories contained within it, are set to be owned by the root user.\n",
+        "description": "Ensure that the Kubernetes PKI directory and file ownership is set to `root:root`.\n",
+        "id": "780ac02f-e0f5-537c-98ba-354ae5873a81",
+        "impact": "None\n",
+        "name": "Ensure that the Kubernetes PKI directory and file ownership is set to root:root (Automated)",
+        "profile_applicability": "* Level 1 - Master Node\n",
+        "rationale": "Kubernetes makes use of a number of certificates as part of its operation. You should set the ownership of the directory containing the PKI information and all files in that directory to maintain their integrity. The directory and files should be owned by root:root.\n",
+        "references": "1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)\n",
+        "remediation": "Run the below command (based on the file location on your system) on the\ncontrol plane node.\nFor example,\n```\nchown -R root:root /etc/kubernetes/pki/\n```\n",
+        "section": "Control Plane Node Configuration Files",
+        "tags": [
+            "CIS",
+            "Kubernetes",
+            "CIS 1.1.19",
+            "Control Plane Node Configuration Files"
+        ],
+        "version": "1.0"
+    },
+    "type": "file"
+}
