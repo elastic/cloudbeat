@@ -40,3 +40,5 @@ containers = c {
 	container_types := {"containers", "initContainers"}
 	c := pod.spec[container_types[t]]
 }
+
+status = input.resource.status
