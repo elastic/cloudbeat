@@ -57,11 +57,9 @@ cis_1_1_11 = [
 
 cis_1_1_12 = [
     ('CIS 1.1.12', 'chown', 'root:root', '/var/lib/etcd', 'failed'),
-    ('CIS 1.1.12', 'chown', 'etcd:root', '/var/lib/etcd/', 'failed'),
+    ('CIS 1.1.12', 'chown', 'etcd:root', '/var/lib/etcd', 'failed'),
     ('CIS 1.1.12', 'chown', 'root:etcd', '/var/lib/etcd', 'failed'),
-    ('CIS 1.1.12', 'chown', 'root:etcd', '/var/lib/etcd/some_file.txt', 'failed'),
     ('CIS 1.1.12', 'chown', 'etcd:etcd', '/var/lib/etcd', 'passed'),
-    ('CIS 1.1.12', 'chown', 'etcd:etcd', '/var/lib/etcd/some_file.txt', 'passed'),
 ]
 
 cis_1_1_13 = [
