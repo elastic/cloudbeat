@@ -11,6 +11,7 @@ data:
       # Defines how often an event is sent to the output
       period: 30s
       fetchers:
+<<<<<<< HEAD:deploy/k8s/kustomize/overlays/cloudbeat-eks/configmap_patch.yml
       - name: kube-api
       - name: process
         directory: "/hostfs"
@@ -27,6 +28,53 @@ data:
           "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
           "/hostfs/var/lib/kubelet/kubeconfig",
         ]
+=======
+        # Vanilla K8s Fetchers configuration
+        vanilla:
+          - name: kube-api
+          - name: process
+            directory: "/hostfs"
+            processes:
+              etcd:
+              kube-apiserver:
+              kube-controller:
+              kube-scheduler:
+              kubelet:
+                config-file-arguments:
+                  - config
+          - name: file-system
+            patterns: [
+              "/hostfs/etc/kubernetes/scheduler.conf",
+              "/hostfs/etc/kubernetes/controller-manager.conf",
+              "/hostfs/etc/kubernetes/admin.conf",
+              "/hostfs/etc/kubernetes/kubelet.conf",
+              "/hostfs/etc/kubernetes/manifests/etcd.yaml",
+              "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+              "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
+              "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
+              "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
+              "/hostfs/etc/kubernetes/pki/*",
+              "/hostfs/var/lib/kubelet/config.yaml",
+              "/hostfs/var/lib/etcd",
+              "/hostfs/etc/kubernetes/pki"
+            ]
+        # EKS Fetchers configuration
+        eks:
+          - name: kube-api
+          - name: process
+            directory: "/hostfs"
+            processes:
+              kubelet:
+                config-file-arguments:
+                  - config
+          - name: aws-ecr
+          - name: aws-elb
+          - name: file-system
+            patterns: [
+              "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
+              "/hostfs/var/lib/kubelet/kubeconfig",
+            ]
+>>>>>>> 4bed346 (Fix flaky file_system_rules tests with better resource-matching. (#329)):deploy/kustomize/base/config-map.yml
 
     # =================================== Kibana ===================================
     setup.kibana:

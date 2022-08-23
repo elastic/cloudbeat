@@ -50,7 +50,13 @@ cis_1_1_8 = [
 
 cis_1_1_11 = [
     ('CIS 1.1.11', 'chmod', '0710', '/var/lib/etcd', 'failed'),
+<<<<<<< HEAD
     ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd', 'passed'),
+=======
+    # ('CIS 1.1.11', 'chmod', '0710', '/var/lib/etcd/some_file.txt', 'failed'),
+    ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd', 'passed'),
+    # ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd/some_file.txt', 'passed'),
+>>>>>>> 4bed346 (Fix flaky file_system_rules tests with better resource-matching. (#329))
 ]
 
 cis_1_1_12 = [
@@ -104,11 +110,11 @@ cis_1_1_18 = [
 ]
 
 cis_1_1_19 = [
-    ('CIS 1.1.19', 'chown', 'root:daemon', '/etc/kubernetes/pki/', 'failed'),
-    ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki/', 'passed'),
+    ('CIS 1.1.19', 'chown', 'root:daemon', '/etc/kubernetes/pki', 'failed'),
+    ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki', 'passed'),
     ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki/some_file.txt', 'passed'),
-    ('CIS 1.1.19', 'chown', 'daemon:root', '/etc/kubernetes/pki/', 'failed'),
-    ('CIS 1.1.19', 'chown', 'daemon:daemon', '/etc/kubernetes/pki/', 'failed'),
+    ('CIS 1.1.19', 'chown', 'daemon:root', '/etc/kubernetes/pki', 'failed'),
+    ('CIS 1.1.19', 'chown', 'daemon:daemon', '/etc/kubernetes/pki', 'failed'),
     ('CIS 1.1.19', 'chown', 'root:daemon', '/etc/kubernetes/pki/some_file.txt', 'failed'),
 
 ]
