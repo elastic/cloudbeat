@@ -50,9 +50,13 @@ cis_1_1_8 = [
 
 cis_1_1_11 = [
     ('CIS 1.1.11', 'chmod', '0710', '/var/lib/etcd', 'failed'),
+<<<<<<< HEAD
     ('CIS 1.1.11', 'chmod', '0710', '/var/lib/etcd/some_file.txt', 'failed'),
     ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd', 'passed'),
     ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd/some_file.txt', 'passed'),
+=======
+    ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd', 'passed'),
+>>>>>>> e420a60 (Fix broken file_system_rules tests. (#320))
 ]
 
 cis_1_1_12 = [
