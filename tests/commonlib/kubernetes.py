@@ -312,8 +312,9 @@ class KubernetesHelper:
                               timeout_seconds=timeout,
                               **kwargs):
             if name in event["object"].metadata.name and event["type"] in status_list:
-                if (resource_type == RESOURCE_POD) and ('ADDED' in status_list) and (
-                        event['object'].status.phase == 'Pending'):
+                if (resource_type == RESOURCE_POD) and\
+                        ('ADDED' in status_list) and\
+                        (event['object'].status.phase == 'Pending'):
                     continue
                 w.stop()
                 return True
@@ -333,8 +334,10 @@ class KubernetesHelper:
                       name,
                       namespace,
                       command=command,
-                      stderr=True, stdin=False,
-                      stdout=True, tty=False,
+                      stderr=True,
+                      stdin=False,
+                      stdout=True,
+                      tty=False,
                       _preload_content=False)
         response = ''
         while resp.is_open():
