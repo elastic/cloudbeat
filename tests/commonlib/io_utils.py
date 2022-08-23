@@ -2,14 +2,16 @@
 This module provides input / output manipulations on streams / files
 """
 
-from datetime import datetime
-import os
 import io
 import json
+import os
 import shutil
-from pathlib import Path
+import subprocess
 import yaml
+
+from datetime import datetime
 from munch import Munch, munchify
+from pathlib import Path
 
 
 def get_events_from_index(elastic_client, index_name: str, rule_tag: str, time_after: datetime) -> list[Munch]:
@@ -129,17 +131,62 @@ class FsClient:
         if command == 'chmod':
             os.chmod(path=resource, mode=int(param_value, base=8))
         elif command == 'chown':
-            uid_gid = param_value.split(':')
-            if len(uid_gid) != 2:
-                raise Exception(
-                    "User and group parameter shall be separated by ':' ")
-            shutil.chown(path=resource, user=uid_gid[0], group=uid_gid[1])
+            try:
+                uid, gid = param_value.split(':')
+            except ValueError as exc:
+                raise Exception("User and group parameter shall be separated by ':' ") from exc
+
+            FsClient.add_users_to_node([uid, gid], in_place=True)
+            shutil.chown(path=resource, user=uid, group=gid)
         elif command == 'unlink':
             if not Path(param_value).is_dir():
                 Path(param_value).unlink()
         else:
             raise Exception(
                 f"Command '{command}' still not implemented in test framework")
+    
+    @staticmethod
+    def add_users_to_node(users: list, in_place: bool):
+        """
+        This function creates the given users along with groups with the
+        same name, on the local container as well the host node.
+        @param users: List of users to create.
+        @param in_place: Whether host node configuration files should be modified in-place or overwritten.
+        @return: None
+        """
+        if in_place:
+            host_users_file = Path('/hostfs/etc/passwd')
+            host_groups_file = Path('/hostfs/etc/group')
+
+            temp_etc = Path('/tmp/etc')
+            temp_etc.mkdir(parents=True, exist_ok=True)
+
+            temp_users_file = temp_etc / 'passwd'
+            temp_groups_file = temp_etc / 'group'
+
+            shutil.copyfile(host_users_file, temp_users_file)
+            shutil.copyfile(host_groups_file, temp_groups_file)
+
+            for user in users:
+                # These commands fail silently for users/groups that exist.
+                subprocess.run(['groupadd', user, '-P', '/tmp'], capture_output=True)
+                subprocess.run(['useradd', user, '-g', user, '-P', '/tmp'], capture_output=True)
+                subprocess.run(['useradd', user], capture_output=True) # For container to get around chmod check.
+
+            FsClient.in_place_copy(temp_users_file, host_users_file)
+            FsClient.in_place_copy(temp_groups_file, host_groups_file)
+
+        else:
+            # TODO(yashtewari): Implement this section which simulates a "normal" user flow
+            # where useradd command overwrites passwd and group files,
+            # as part of tests for: https://github.com/elastic/cloudbeat/issues/235
+            pass
+
+    @staticmethod
+    def in_place_copy(source, destination):
+        with open(source, 'r') as sf, open(destination, 'w') as df:
+            for line in sf:
+                df.write(line)
 
     @staticmethod
     def edit_process_file(container_name: str, dictionary, resource: str):

@@ -50,9 +50,7 @@ cis_1_1_8 = [
 
 cis_1_1_11 = [
     ('CIS 1.1.11', 'chmod', '0710', '/var/lib/etcd', 'failed'),
-    ('CIS 1.1.11', 'chmod', '0710', '/var/lib/etcd/some_file.txt', 'failed'),
     ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd', 'passed'),
-    ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd/some_file.txt', 'passed'),
 ]
 
 cis_1_1_12 = [
@@ -106,11 +104,11 @@ cis_1_1_18 = [
 ]
 
 cis_1_1_19 = [
-    ('CIS 1.1.19', 'chown', 'root:daemon', '/etc/kubernetes/pki/', 'failed'),
-    ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki/', 'passed'),
+    ('CIS 1.1.19', 'chown', 'root:daemon', '/etc/kubernetes/pki', 'failed'),
+    ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki', 'passed'),
     ('CIS 1.1.19', 'chown', 'root:root', '/etc/kubernetes/pki/some_file.txt', 'passed'),
-    ('CIS 1.1.19', 'chown', 'daemon:root', '/etc/kubernetes/pki/', 'failed'),
-    ('CIS 1.1.19', 'chown', 'daemon:daemon', '/etc/kubernetes/pki/', 'failed'),
+    ('CIS 1.1.19', 'chown', 'daemon:root', '/etc/kubernetes/pki', 'failed'),
+    ('CIS 1.1.19', 'chown', 'daemon:daemon', '/etc/kubernetes/pki', 'failed'),
     ('CIS 1.1.19', 'chown', 'root:daemon', '/etc/kubernetes/pki/some_file.txt', 'failed'),
 
 ]
