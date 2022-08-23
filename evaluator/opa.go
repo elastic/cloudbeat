@@ -58,7 +58,7 @@ var opaConfig = `{
 		}
 	},
 	"decision_logs": {
-		"console": true
+		"console": false
 	}
 }`
 
