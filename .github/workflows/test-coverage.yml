@@ -18,13 +18,9 @@ jobs:
           chmod +x opa
           ./opa -h
 
-      - name: OPA Bundle
-        run: |
-          build -b ./bundle -e ./bundle/compliance
-
       - name: OPA test coverage
         run: |
-          coverage=$( ./opa test -b ./bundle -c | jq '.coverage' )
+          coverage=$( ./opa test ./bundle -c | jq '.coverage' )
           echo "COVERAGE=$coverage" >> "$GITHUB_ENV"
 
       - name: Create Coverage Badge
