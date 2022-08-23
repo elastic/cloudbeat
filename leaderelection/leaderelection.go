@@ -90,7 +90,7 @@ func (m *Manager) Run(ctx context.Context) {
 	go m.leader.Run(ctx)
 	m.log.Infof("started leader election")
 
-	<-time.After(FirstLeaderDeadline)
+	time.Sleep(FirstLeaderDeadline)
 	m.log.Infof("stop waiting after %s for a leader to be elected", FirstLeaderDeadline)
 }
 
@@ -111,7 +111,6 @@ func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface) (l
 		Namespace: ns,
 	}
 
-	retryOnce := &sync.Once{}
 	return le.LeaderElectionConfig{
 		Lock: &rl.LeaseLock{
 			LeaseMeta: lease,
@@ -131,11 +130,9 @@ func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface) (l
 			OnStoppedLeading: func() {
 				// leaderelection.Run stops in case it has stopped holding the leader lease, we re-run the manager
 				// to keep following leader status.
-				retryOnce.Do(func() {
-					log.Infof("leader election lock LOST, id: %v", id)
-					go manager.leader.Run(ctx)
-					log.Infof("re-running leader elector")
-				})
+				log.Infof("leader election lock LOST, id: %v", id)
+				go manager.leader.Run(ctx)
+				log.Infof("re-running leader elector")
 			},
 			OnNewLeader: func(identity string) {
 				if identity == id {
