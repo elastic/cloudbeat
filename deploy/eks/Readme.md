@@ -34,7 +34,7 @@ See [references](#useful-references) section below for links to installation doc
 
 ### Create a cluster
 
-1. Add unique cluster name to conf file `deploy/k8s/eks/simple-cluster.yml`
+1. Add unique cluster name to conf file `deploy/eks/simple-cluster.yml`
 
    ```yml
    ---
@@ -48,7 +48,7 @@ See [references](#useful-references) section below for links to installation doc
 
 2. Run The following command to deploy cluster:
     ```bash
-    eksctl create cluster --config-file deploy/k8s/eks/simple-cluster.yml
+    eksctl create cluster --config-file deploy/eks/simple-cluster.yml
     ```
     Creation should take around 20 minutes for a simple config.
     eksctl will create your cluster and automatically add the context to your `~/.kube/config`

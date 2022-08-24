@@ -20,8 +20,9 @@ package beater
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/leaderelection"
 	"time"
+
+	"github.com/elastic/cloudbeat/leaderelection"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
@@ -86,7 +87,7 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	log.Info("Config initiated.")
+	log.Info("Config initiated with cycle period of ", c.Period)
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 

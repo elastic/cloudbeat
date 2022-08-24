@@ -35,3 +35,5 @@ tests/allure/reports/*
 .vscode*
 *.code-workspace
 /evaluator/tmpBundles/bundle.tar.gz
+/deploy/eks/cloudbeat-ds.yaml
+/deploy/k8s/cloudbeat-ds.yaml
