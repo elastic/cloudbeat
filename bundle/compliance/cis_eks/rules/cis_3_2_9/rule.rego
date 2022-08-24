@@ -1,35 +1,17 @@
 package compliance.cis_eks.rules.cis_3_2_9
 
-import data.compliance.cis_eks
-import data.compliance.lib.common
-import data.compliance.lib.data_adapter
+import data.compliance.policy.process.ensure_arguments_and_config as audit
 
 # Ensure that the --event-qps argument is set to 0 or a level which
 # ensures appropriate event capture 
-
 default rule_evaluation = false
 
-process_args := cis_eks.data_adapter.process_args
-
 rule_evaluation {
-	common.contains_key_with_value(process_args, "--event-qps", "0")
+	audit.process_contains_key_with_value("--event-qps", "0")
 }
 
 rule_evaluation {
-	not common.contains_key(process_args, "--event-qps")
-	data_adapter.process_config.config.eventRecordQPS == 0
+	audit.not_process_key_comparison("--event-qps", ["eventRecordQPS"], 0)
 }
 
-finding = result {
-	# filter
-	data_adapter.is_kubelet
-
-	# set result
-	result := {
-		"evaluation": common.calculate_result(rule_evaluation),
-		"evidence": {
-			"process_args": process_args,
-			"process_config": data_adapter.process_config,
-		},
-	}
-}
+finding = audit.finding(rule_evaluation)

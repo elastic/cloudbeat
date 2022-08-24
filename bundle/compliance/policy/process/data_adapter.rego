@@ -55,12 +55,4 @@ is_kubelet {
 	process_name == "kubelet"
 }
 
-# TODO: Audits should be able to handle different processes
-# process_args = result {
-# 	result = data_adapter.process_args(" ")
-# }
-
-# process_args = data_adapter.process_args("=")
-
-# TODO: Code something more complex this works only for k8s
-process_args = {flag: value | [flag, value] = parse_argument(process_args_list[_], "=")}
+process_args(seperator) = {flag: value | [flag, value] = parse_argument(process_args_list[_], seperator)}
