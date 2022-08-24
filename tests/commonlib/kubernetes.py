@@ -8,15 +8,19 @@ from pathlib import Path
 from kubernetes import client, config, utils
 from kubernetes.client import ApiException
 from kubernetes.watch import watch
+from kubernetes.stream import stream
 
 from commonlib.io_utils import get_k8s_yaml_objects
-
 
 RESOURCE_POD = 'Pod'
 RESOURCE_SERVICE_ACCOUNT = 'ServiceAccount'
 LEASE_NAME = "cloudbeat-cluster-leader"
 
+
 class KubernetesHelper:
+    """
+    This class is Kubernetes wrapper
+    """
 
     def __init__(self, is_in_cluster_config: bool = False):
         if is_in_cluster_config:
@@ -164,6 +168,8 @@ class KubernetesHelper:
         """
         result_list = []
         for yaml_object in yaml_objects_list:
+            if yaml_object is None:
+                continue
             metadata = yaml_object['metadata']
             relevant_metadata = {k: metadata[k] for k in ('name', 'namespace') if k in metadata}
             try:
@@ -223,7 +229,9 @@ class KubernetesHelper:
             patched_body = self.patch_resource_body(yml_resource, patch_body)
             created_resource = self.create_from_dict(patched_body, **relevant_metadata)
 
-            done = self.wait_for_resource(resource_type=resource_type, status_list=["RUNNING", "ADDED"], **relevant_metadata)
+            done = self.wait_for_resource(resource_type=resource_type,
+                                          status_list=["RUNNING", "ADDED"],
+                                          **relevant_metadata)
             if done:
                 patched_resource = created_resource
 
@@ -304,12 +312,45 @@ class KubernetesHelper:
                               timeout_seconds=timeout,
                               **kwargs):
             if name in event["object"].metadata.name and event["type"] in status_list:
-                if (resource_type == RESOURCE_POD) and ('ADDED' in status_list) and (event['object'].status.phase == 'Pending'):
+                if (resource_type == RESOURCE_POD) and\
+                        ('ADDED' in status_list) and\
+                        (event['object'].status.phase == 'Pending'):
                     continue
                 w.stop()
                 return True
 
         return False
+
+    def pod_exec(self, name: str, namespace: str, command: list) -> str:
+        """
+        This function connects to pod and executes command
+        @param name: Pod name
+        @param namespace: Pod namespace
+        @param command: Command to be executed
+        @return: Executed command response
+        """
+
+        resp = stream(self.core_v1_client.connect_get_namespaced_pod_exec,
+                      name,
+                      namespace,
+                      command=command,
+                      stderr=True,
+                      stdin=False,
+                      stdout=True,
+                      tty=False,
+                      _preload_content=False)
+        response = ''
+        while resp.is_open():
+            resp.update(timeout=1)
+            if resp.peek_stdout():
+                response = resp.read_stdout()
+            if resp.peek_stderr():
+                response = resp.read_stderr()
+
+        resp.close()
+        if resp.returncode != 0:
+            raise Exception("Response failure")
+        return response
 
     def get_cluster_leader(self, namespace: str, pods: list) -> str:
         """

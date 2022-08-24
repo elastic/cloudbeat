@@ -5,5 +5,5 @@ standaloneAgent:
   deploy: false
 
 testData:
-  marker: pre_merge
-  agentName: cloudbeat
+  marker: post_merge_agent
+  agentName: elastic-agent
