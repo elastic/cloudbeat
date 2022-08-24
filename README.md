@@ -154,6 +154,17 @@ kill -9 `pidof cloudbeat`
 
 ## Code guidelines
 
+### Pre-commit hooks
+
+see [pre-commit](https://pre-commit.com/) package
+
+- Install the package `brew install pre-commit`
+- Then run `pre-commit install`
+- Finally `pre-commit run --all-files --verbose`
+
+### Editorconfig
+
+see [editorconfig](https://editorconfig.org/#pre-installed) package
 ### Testing
 
 Cloudbeat has a various sets of tests. This guide should help to understand how the different test suites work, how they are used and how new tests are added.
