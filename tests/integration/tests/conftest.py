@@ -4,6 +4,7 @@ Integration tests setup configurations and fixtures
 from pathlib import Path
 import pytest
 from commonlib.io_utils import get_k8s_yaml_objects
+from commonlib.kubernetes import ApiException
 
 DEPLOY_YML = "../../deploy/cloudbeat-pytest.yml"
 DEPLOY_YML_AGENT = "../../deploy/sa-agent-pytest.yml"
@@ -54,7 +55,10 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     ]
     # Delete lease resources
     for resource in lease_resources:
-        k8s.delete_resources(resource_type='Lease', **resource)
+        try:
+            k8s.delete_resources(resource_type='Lease', **resource)
+        except ApiException:
+            continue
 
 
 @pytest.fixture(name='fixture_data')

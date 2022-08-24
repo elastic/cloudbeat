@@ -7,6 +7,3 @@ standaloneAgent:
 testData:
   marker: post_merge_agent
   agentName: elastic-agent
-
-elasticsearch:
-  imageTag: "8.5.0-SNAPSHOT"
