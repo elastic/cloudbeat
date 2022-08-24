@@ -9,7 +9,7 @@ from munch import Munch
 
 # --- Cloudbeat agent environment definition ----------------
 agent = Munch()
-agent.name = os.getenv('AGENT_NAME', 'cloudbeat')
+agent.name = os.getenv('AGENT_NAME', 'elastic-agent')
 agent.namespace = os.getenv('AGENT_NAMESPACE', 'kube-system')
 agent.findings_timeout = 30
 
