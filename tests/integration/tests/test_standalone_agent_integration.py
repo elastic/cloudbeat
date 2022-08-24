@@ -8,17 +8,16 @@ import time
 import json
 import pytest
 import allure
-from commonlib.utils import wait_for_cycle_completion
-
+from commonlib.io_utils import FsClient
 
 testdata = ['file', 'process', 'k8s_object']
-CONFIG_TIMEOUT = 30
+CONFIG_TIMEOUT = 60
 
 
-@pytest.mark.pre_merge
+@pytest.mark.post_merge_agent
 @pytest.mark.order(1)
 @pytest.mark.dependency()
-def test_cloudbeat_pod_exist(fixture_data):
+def test_agent_pod_exist(fixture_data):
     """
     This test verifies that pods count is equal to nodes count
     :param fixture_data: (Pods list, Nodes list)
@@ -27,28 +26,28 @@ def test_cloudbeat_pod_exist(fixture_data):
     pods, nodes = fixture_data
     pods_count = len(pods)
     nodes_count = len(nodes)
-    assert pods_count == nodes_count, \
+    assert pods_count == nodes_count,\
         f"Pods count is {pods_count}, and nodes count is {nodes_count}"
 
 
-@pytest.mark.pre_merge
+@pytest.mark.post_merge_agent
 @pytest.mark.order(2)
-@pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
-def test_cloudbeat_pods_running(fixture_data):
+@pytest.mark.dependency(depends=["test_agent_pod_exist"])
+def test_agent_pods_running(fixture_data):
     """
     This test verifies that all pods are in status "Running"
-    :param fixture_data: (Pods list, Nodes list)
+    :param fixture_sa_data: (Pods list, Nodes list)
     :return:
     """
     # Verify that at least 1 pod is running the cluster
-    assert len(fixture_data[0]) > 0, "There are no cloudbeat pod instances running in the cluster"
+    assert len(fixture_data[0]) > 0, "There are no elastic-agent pod instances running in the cluster"
     # Verify that each pod is in running state
     assert all(pod.status.phase == "Running" for pod in fixture_data[0]), "Not all pods are running"
 
 
-@pytest.mark.pre_merge
+@pytest.mark.post_merge_agent
 @pytest.mark.order(3)
-@pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
+@pytest.mark.dependency(depends=["test_agent_pod_exist"])
 @pytest.mark.parametrize("match_type", testdata)
 def test_elastic_index_exists(elastic_client, match_type):
     """
@@ -74,38 +73,33 @@ def test_elastic_index_exists(elastic_client, match_type):
             break
         time.sleep(1)
 
-    assert len(result) > 0, \
+    assert len(result) > 0,\
         f"The findings of type {match_type} not found"
 
 
-@pytest.mark.pre_merge
+@pytest.mark.post_merge_agent
 @pytest.mark.order(4)
-@pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
-def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
+@pytest.mark.dependency(depends=["test_agent_pods_running"])
+def test_cloudbeat_status(k8s, cloudbeat_agent):
     """
-    This test verifies that k8s related findings are sent by a single agent
-    :param fixture_data: (Pods list, Nodes list)
-    :param elastic_client: Elastic API client
-    :param cloudbeat_agent: Cloudbeat configuration
-    :param k8s: Kubernetes client object
-    :return:
+    This test connects to all elastic agents, executes command to
+    retrieve beats status, verifies that cloud beat status in state "Running"
+    @param k8s: Kubernetes wrapper client
+    @param cloudbeat_agent: Cloudbeat configuration
+    @return: Pass / Fail
     """
 
-    query, sort = elastic_client.build_es_query(term={"type": "k8s_object"})
-    pods, nodes = fixture_data
-    leader_node = k8s.get_cluster_leader(namespace=cloudbeat_agent.namespace, pods=pods)
-    assert leader_node != "", \
-        "The Leader node could not be found"
+    pods = k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
+                                       namespace=cloudbeat_agent.namespace)
+    results = []
+    exec_command = ["/usr/share/elastic-agent/elastic-agent", "status", "--output", "json"]
+    for pod in pods:
+        response = k8s.pod_exec(name=pod.metadata.name,
+                                namespace=cloudbeat_agent.namespace,
+                                command=exec_command)
+        status = FsClient.get_beat_status_from_json(response=response,
+                                                    beat_name='cloudbeat')
+        if status != 'Running':
+            results.append(f"Pod: {pod.metadata.name} status: {status}")
 
-    # Wait for all agents to send resources to ES
-    res = wait_for_cycle_completion(elastic_client=elastic_client, nodes=nodes)
-    assert res, 'Not all nodes have completed a cycle within the configured threshold'
-
-    result = elastic_client.get_index_data(index_name=elastic_client.index,
-                                           query=query,
-                                           size=1000,
-                                           sort=sort)
-    # checking that k8s_objects are being sent only by the leader node.
-    for resource in result['hits']['hits']:
-        assert leader_node == resource['_source']['agent']['name'], \
-            f"Multiple agents send k8s_objects, leader: {leader_node}, resource: {resource['_source']}"
+    assert len(results) == 0, '\n'.join(results)

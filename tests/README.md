@@ -65,9 +65,10 @@ just load-cloudbeat-image
 
 3. Install elasticsearch and start cloudbeat
 ```shell
-just deploy-tests-helm
+just deploy-tests-helm-ci pre_merge
 ```
-This command will install elasticsearch 7.17.7 one node instance in kubernetes cluster and also will start cloudbeat
+This command will install elasticsearch 8.5.0 one node instance in kubernetes cluster and prepare configuration
+for executing **pre_merge** marker tests.
 
 
 ## Developing Tests
@@ -164,6 +165,13 @@ docker images
 ```
 The cloudbeat-tests:latest image shall appear in docker images list.
 
+### Uploading Image
+
+For loading test's docker image to kind cluster execute
+```shell
+just load-pytest-kind
+```
+
 ## Tests Execution
 
 Tests execution depends on the developers needs and currently this framework supports the following modes:
@@ -207,11 +215,11 @@ just load-tests-image-kind
 ```
 2. If **SUT** is not deployed initiate:
 ```shell
-just deploy-tests-helm
+just deploy-tests-helm-ci pre_merge
 ```
 3. Execute tests
 ```shell
-helm test cloudbeat-test
+just run-tests
 ```
 4. Investigate reports
 ```shell
