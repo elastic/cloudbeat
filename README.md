@@ -23,7 +23,7 @@
 ```zsh
 just setup-env
 ```
-TEST
+
 ## Running Cloudbeat
 
 ### Kubernetes Vanilla
