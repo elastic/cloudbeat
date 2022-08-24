@@ -54,6 +54,5 @@ repos:
         name: mage config
         entry: bash -c 'mage config'
         language: system
-## insert cloudbeat.ymls regex
         files: (^_meta\/.*|^cloudbeat.*yml)$
         pass_filenames: false
