@@ -110,3 +110,48 @@ def get_resource_identifier(body):
             return dict_contains(body, dict(resource))
 
     return resource_identifier
+
+
+def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
+    """
+    Wait for all agents to finish sending findings to ES.
+    Done by waiting for all agents to send at least a single finding in the second cycle,
+    by that we verify that the first cycle is completed.
+    @param elastic_client: ES client
+    @param nodes: nodes list
+    @return: true if all agents finished sending findings in the configured timeout
+    """
+    required_cycles = 2
+    start_time = time.time()
+    prev_cycle_id = ""
+    curr_cycle_id = ""
+    active_agents = 0
+    num_cycles = 0
+
+    while num_cycles < required_cycles and not is_timeout(start_time, 30):
+        for node in nodes:
+            start_time_per_agent = time.time()
+            query, sort = elastic_client.build_es_query(term={"agent.name": node.metadata.name})
+            while not is_timeout(start_time_per_agent, 10):
+                # keep query ES until the cycle_id has changed
+                result = elastic_client.get_index_data(index_name=elastic_client.index,
+                                                       query=query,
+                                                       sort=sort)
+                doc_src = elastic_client.get_doc_source(data=result)
+                curr_cycle_id = doc_src['cycle_id']
+
+                if elastic_client.get_total_value(data=result) != 0 and curr_cycle_id != prev_cycle_id:
+                    # New cycle findings for this node
+                    active_agents += 1
+                    break
+                time.sleep(1)
+
+        if prev_cycle_id != curr_cycle_id:
+            prev_cycle_id = curr_cycle_id
+            num_cycles += 1
+
+    return active_agents == (len(nodes) * required_cycles)
+
+
+def is_timeout(start_time: time, timeout: int) -> bool:
+    return time.time() - start_time > timeout

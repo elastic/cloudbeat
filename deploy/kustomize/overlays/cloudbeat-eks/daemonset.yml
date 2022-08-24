@@ -1,0 +1,29 @@
+# Deploy a cloudbeat instance per node for cis policy
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cloudbeat
+  namespace: kube-system
+  labels:
+    k8s-app: cloudbeat
+spec:
+  template:
+    spec:
+      containers:
+        - name: cloudbeat
+#          Please replace this image with your own cloudbeat public ecr image
+          image: public.ecr.aws/z7e1r9l0/cloudbeat:latest
+          env:
+            - name: CLOUDBEAT_TYPE
+              value: cloudbeat/eks
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_ACCESS_KEY_ID
+                  name: aws-creds-secret
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_SECRET_ACCESS_KEY
+                  name: aws-creds-secret
