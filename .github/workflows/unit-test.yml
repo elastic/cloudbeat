@@ -62,9 +62,7 @@ jobs:
           kubectl: 1.18.4
           kubeval: v0.16.1
           command: |
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/**/*.yml --ignore-missing-schemas
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/eks/*.yml --ignore-missing-schemas
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/kustomize/base/*.yml --ignore-missing-schemas
+            kubeval --strict --directories ${{ env.K8S_MANIFEST_DIR }} --ignore-missing-schemas --ignored-filename-patterns kustomization
 
   golangci:
     name: golangci-lint
