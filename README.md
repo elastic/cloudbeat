@@ -1,4 +1,4 @@
-# Cloudbeat 
+# Cloudbeat
 [![Coverage Status](https://coveralls.io/repos/github/elastic/cloudbeat/badge.svg?branch=main)](https://coveralls.io/github/elastic/cloudbeat?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 [![Build Status](https://internal-ci.elastic.co/buildStatus/icon?job=cloudbeat%2Fcloudbeat-mbp%2Fmain)](https://internal-ci.elastic.co/job/cloudbeat/job/cloudbeat-mbp/job/main/)
@@ -23,7 +23,7 @@
 ```zsh
 just setup-env
 ```
-
+TEST
 ## Running Cloudbeat
 
 ### Kubernetes Vanilla
@@ -39,7 +39,7 @@ Export AWS creds as env vars, kustomize will use these to populate your cloudbea
 $ export AWS_ACCESS_KEY="<YOUR_AWS_KEY>" AWS_SECRET_ACCESS_KEY="<YOUR_AWS_SECRET>"
 ```
 
-Set your default cluster to your EKS cluster 
+Set your default cluster to your EKS cluster
 ```zsh
  kubectl config use-context your-eks-cluster
 ```
@@ -145,7 +145,7 @@ Create an agent policy and install the CSP integration. Now, when adding a new a
 Update cloudbeat settings on a runnign elastic-agent can be done by running the [script](/scripts/remote_edit_config.sh).
 The script still requires a second step of trigerring the agent to re-run cloudbeat.
 This can be done on Fleet UI by changing the agent log level.
-Another option is through CLI on the agent by running 
+Another option is through CLI on the agent by running
 ```
 kill -9 `pidof cloudbeat`
 ```
