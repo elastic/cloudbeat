@@ -11,7 +11,7 @@ import allure
 from commonlib.io_utils import FsClient
 
 testdata = ['file', 'process', 'k8s_object']
-CONFIG_TIMEOUT = 30
+CONFIG_TIMEOUT = 60
 
 
 @pytest.mark.post_merge_agent
