@@ -79,6 +79,8 @@ POD_STATUS_PENDING := 'Pending'
 POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
+VERSION := '$(make -s get-version)-SNAPSHOT'
+NAMESPACE := 'kube-system'
 
 
 patch-cb-yml-tests:
@@ -91,23 +93,31 @@ load-pytest-kind:
   kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
 
 deploy-tests-helm-ci target:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+
+deploy-tests-helm-ci-agent target:
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-local-tests-helm target:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --namespace kube-system {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+
+purge-pvc:
+  kubectl delete -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}} & kubectl apply -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}}
 
 purge-tests:
-	helm del {{TESTS_RELEASE}} -n kube-system
+	helm del {{TESTS_RELEASE}} -n {{NAMESPACE}}
+
+purge-tests-full: purge-tests purge-pvc
 
 gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
 run-tests:
-  helm test {{TESTS_RELEASE}} --namespace kube-system
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}}
 
 run-tests-ci:
   #!/usr/bin/env bash
-  helm test {{TESTS_RELEASE}} --namespace kube-system --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
   result_code=${PIPESTATUS[0]}
   SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
   echo "summary<<EOF" >> "$GITHUB_ENV"

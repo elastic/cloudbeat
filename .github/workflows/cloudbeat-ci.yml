@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - main
+      - '[0-9]+.[0-9]+'
 env:
   K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.4
