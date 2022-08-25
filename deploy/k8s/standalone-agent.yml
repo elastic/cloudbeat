@@ -683,4 +683,4 @@ metadata:
   namespace: kube-system
   labels:
     k8s-app: elastic-agent
----
+
