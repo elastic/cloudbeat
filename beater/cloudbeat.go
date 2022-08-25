@@ -91,7 +91,11 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
-	le := leaderelection.NewLeaderElector(log, c)
+	le, err := leaderelection.NewLeaderElector(log, c)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
 
 	fetchersRegistry, err := initRegistry(log, c, resourceCh, le)
 	if err != nil {
@@ -149,7 +153,9 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 // Run starts cloudbeat.
 func (bt *cloudbeat) Run(b *beat.Beat) error {
 	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it.")
-	bt.leader.Run(bt.ctx)
+	if err := bt.leader.Run(bt.ctx); err != nil {
+		return err
+	}
 
 	if err := bt.data.Run(bt.ctx); err != nil {
 		return err

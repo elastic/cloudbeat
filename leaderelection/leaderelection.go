@@ -29,6 +29,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8s "k8s.io/client-go/kubernetes"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 	"os"
@@ -48,19 +49,25 @@ type Manager struct {
 	leader     *le.LeaderElector
 	wg         *sync.WaitGroup
 	cancelFunc context.CancelFunc
-	cfg        config.Config
+	kubeClient k8s.Interface
 }
 
-func NewLeaderElector(log *logp.Logger, cfg config.Config) ElectionManager {
+func NewLeaderElector(log *logp.Logger, cfg config.Config) (ElectionManager, error) {
+	kubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
+	if err != nil {
+		log.Errorf("NewLeaderElector error in GetClient: %v", err)
+		return nil, err
+	}
+
 	wg := &sync.WaitGroup{}
 
 	return &Manager{
 		log:        log,
-		cfg:        cfg,
+		kubeClient: kubeClient,
 		leader:     nil,
 		cancelFunc: nil,
 		wg:         wg,
-	}
+	}, nil
 }
 
 func (m *Manager) IsLeader() bool {
@@ -103,12 +110,6 @@ func (m *Manager) Stop() {
 }
 
 func (m *Manager) buildConfig(ctx context.Context) (le.LeaderElectionConfig, error) {
-	kubeClient, err := providers.KubernetesProvider{}.GetClient(m.cfg.KubeConfig, kubernetes.KubeClientOptions{})
-	if err != nil {
-		m.log.Errorf("NewLeaderElector error in GetClient: %v", err)
-		return le.LeaderElectionConfig{}, err
-	}
-
 	podId, err := m.currentPodID()
 	if err != nil {
 		return le.LeaderElectionConfig{}, err
@@ -128,7 +129,7 @@ func (m *Manager) buildConfig(ctx context.Context) (le.LeaderElectionConfig, err
 	return le.LeaderElectionConfig{
 		Lock: &rl.LeaseLock{
 			LeaseMeta: lease,
-			Client:    kubeClient.CoordinationV1(),
+			Client:    m.kubeClient.CoordinationV1(),
 			LockConfig: rl.ResourceLockConfig{
 				Identity: id,
 			},

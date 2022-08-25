@@ -23,7 +23,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/hashicorp/go-uuid"
 	"github.com/stretchr/testify/suite"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
+	k8sFake "k8s.io/client-go/kubernetes/fake"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 	"os"
@@ -81,7 +81,15 @@ func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
 			os.Setenv(PodNameEnvar, podId)
 		}
 
-		got, err := buildConfig(context.TODO(), s.log, k8sfake.NewSimpleClientset())
+		manager := &Manager{
+			log:        s.log,
+			leader:     nil,
+			wg:         nil,
+			cancelFunc: nil,
+			kubeClient: k8sFake.NewSimpleClientset(),
+		}
+
+		got, err := manager.buildConfig(context.TODO())
 		if (err != nil) != tt.wantErr {
 			s.FailNow("unexpected error: %v", err)
 		}
