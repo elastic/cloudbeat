@@ -179,7 +179,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		s.NoError(err)
 
 		reg := NewFetcherRegistry(s.log)
-		err = reg.RegisterFetchers(parsedList)
+		err = reg.RegisterFetchers(parsedList, nil)
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
@@ -266,7 +266,7 @@ fetchers:
 		s.Equal(fetcher.Name, parsedList[0].name)
 		s.NoError(err)
 
-		err = reg.RegisterFetchers(parsedList)
+		err = reg.RegisterFetchers(parsedList, nil)
 		s.NoError(err)
 	}
 }

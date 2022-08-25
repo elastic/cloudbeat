@@ -28,11 +28,10 @@ type LeaseFetcherCondition struct {
 	provider leaderelection.ElectionManager
 }
 
-func NewLeaseFetcherCondition(log *logp.Logger) fetching.Condition {
-	leaderManager := leaderelection.GetLeaderElectorManager()
+func NewLeaseFetcherCondition(log *logp.Logger, le leaderelection.ElectionManager) fetching.Condition {
 	return &LeaseFetcherCondition{
 		log:      log,
-		provider: leaderManager,
+		provider: le,
 	}
 }
 

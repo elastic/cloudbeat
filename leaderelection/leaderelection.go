@@ -29,7 +29,6 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8s "k8s.io/client-go/kubernetes"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 	"os"
@@ -38,47 +37,31 @@ import (
 	"time"
 )
 
-var (
-	initOnce = &sync.Once{}
-	manager  *Manager
-)
-
 type ElectionManager interface {
 	IsLeader() bool
-	Run(ctx context.Context)
+	Run(ctx context.Context) error
+	Stop()
 }
 
 type Manager struct {
-	log    *logp.Logger
-	leader *le.LeaderElector
+	log        *logp.Logger
+	leader     *le.LeaderElector
+	wg         *sync.WaitGroup
+	cancelFunc context.CancelFunc
+	cfg        config.Config
 }
 
 // NewLeaderElector acts as a singleton
-func NewLeaderElector(ctx context.Context, log *logp.Logger, cfg config.Config) (ElectionManager, error) {
-	kubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
-	if err != nil {
-		log.Errorf("NewLeaderElector error in GetClient: %v", err)
-		return nil, err
+func NewLeaderElector(log *logp.Logger, cfg config.Config) ElectionManager {
+	wg := &sync.WaitGroup{}
+
+	return &Manager{
+		log:        log,
+		cfg:        cfg,
+		leader:     nil,
+		cancelFunc: nil,
+		wg:         wg,
 	}
-
-	initOnce.Do(func() {
-		var leConfig le.LeaderElectionConfig
-		var leader *le.LeaderElector
-
-		leConfig, err = buildConfig(ctx, log, kubeClient)
-		leader, err = le.NewLeaderElector(leConfig)
-
-		manager = &Manager{
-			log:    log,
-			leader: leader,
-		}
-	})
-
-	return manager, err
-}
-
-func GetLeaderElectorManager() ElectionManager {
-	return manager
 }
 
 func (m *Manager) IsLeader() bool {
@@ -86,16 +69,48 @@ func (m *Manager) IsLeader() bool {
 }
 
 // Run leader election is blocking until a FirstLeaderDeadline timeout has reached.
-func (m *Manager) Run(ctx context.Context) {
-	go m.leader.Run(ctx)
+func (m *Manager) Run(ctx context.Context) error {
+	newCtx, cancel := context.WithCancel(ctx)
+	m.cancelFunc = cancel
+
+	leConfig, err := m.buildConfig(newCtx)
+	if err != nil {
+		m.log.Errorf("Fail building leader election config: %v", err)
+		return err
+	}
+
+	m.leader, err = le.NewLeaderElector(leConfig)
+	if err != nil {
+		m.log.Errorf("Fail to create a new leader elector: %v", err)
+		return err
+	}
+
+	go m.leader.Run(newCtx)
+	m.wg.Add(1)
 	m.log.Infof("started leader election")
 
 	time.Sleep(FirstLeaderDeadline)
 	m.log.Infof("stop waiting after %s for a leader to be elected", FirstLeaderDeadline)
+
+	return nil
 }
 
-func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface) (le.LeaderElectionConfig, error) {
-	podId, err := currentPodID(log)
+func (m *Manager) Stop() {
+	if m.cancelFunc != nil {
+		m.log.Info("Stopping leader election manager")
+		m.cancelFunc()
+		m.wg.Wait()
+	}
+}
+
+func (m *Manager) buildConfig(ctx context.Context) (le.LeaderElectionConfig, error) {
+	kubeClient, err := providers.KubernetesProvider{}.GetClient(m.cfg.KubeConfig, kubernetes.KubeClientOptions{})
+	if err != nil {
+		m.log.Errorf("NewLeaderElector error in GetClient: %v", err)
+		return le.LeaderElectionConfig{}, err
+	}
+
+	podId, err := m.currentPodID()
 	if err != nil {
 		return le.LeaderElectionConfig{}, err
 	}
@@ -114,7 +129,7 @@ func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface) (l
 	return le.LeaderElectionConfig{
 		Lock: &rl.LeaseLock{
 			LeaseMeta: lease,
-			Client:    client.CoordinationV1(),
+			Client:    kubeClient.CoordinationV1(),
 			LockConfig: rl.ResourceLockConfig{
 				Identity: id,
 			},
@@ -125,48 +140,57 @@ func buildConfig(ctx context.Context, log *logp.Logger, client k8s.Interface) (l
 		RetryPeriod:     RetryPeriod,
 		Callbacks: le.LeaderCallbacks{
 			OnStartedLeading: func(ctx context.Context) {
-				log.Infof("leader election lock GAINED, id: %v", id)
+				m.log.Infof("leader election lock GAINED, id: %v", id)
 			},
 			OnStoppedLeading: func() {
 				// leaderelection.Run stops in case it has stopped holding the leader lease, we re-run the manager
-				// to keep following leader status.
-				log.Infof("leader election lock LOST, id: %v", id)
-				go manager.leader.Run(ctx)
-				log.Infof("re-running leader elector")
+				// to keep following leader status if the context is not cancelled.
+				m.log.Infof("leader election lock LOST, id: %v", id)
+				defer m.wg.Done()
+
+				select {
+				case <-ctx.Done():
+					m.log.Info("Context is cancelled - should not re-run leader election")
+					return
+				default:
+					go m.leader.Run(ctx)
+					m.wg.Add(1)
+					m.log.Infof("re-running leader elector")
+				}
 			},
 			OnNewLeader: func(identity string) {
 				if identity == id {
-					log.Infof("leader election lock has been acquired by this pod, id: %v", identity)
+					m.log.Infof("leader election lock has been acquired by this pod, id: %v", identity)
 				} else {
-					log.Infof("leader election lock has been acquired by another pod, id: %v", identity)
+					m.log.Infof("leader election lock has been acquired by another pod, id: %v", identity)
 				}
 			},
 		},
 	}, nil
 }
 
-func currentPodID(log *logp.Logger) (string, error) {
+func (m *Manager) currentPodID() (string, error) {
 	pod, found := os.LookupEnv(PodNameEnvar)
 	if !found {
-		log.Warnf("Env var %s wasn't found", PodNameEnvar)
-		return generateUUID(log)
+		m.log.Warnf("Env var %s wasn't found", PodNameEnvar)
+		return m.generateUUID()
 	}
 
-	return lastPart(log, pod)
+	return m.lastPart(pod)
 }
 
-func lastPart(log *logp.Logger, s string) (string, error) {
+func (m *Manager) lastPart(s string) (string, error) {
 	parts := strings.Split(s, "-")
 	if len(parts) == 0 {
-		log.Warnf("failed to find id for pod_name: %s", s)
-		return generateUUID(log)
+		m.log.Warnf("failed to find id for pod_name: %s", s)
+		return m.generateUUID()
 	}
 
 	return parts[len(parts)-1], nil
 }
 
-func generateUUID(log *logp.Logger) (string, error) {
+func (m *Manager) generateUUID() (string, error) {
 	uuid, err := uuid.NewV4()
-	log.Warnf("Generating uuid as an identifier, UUID: ", uuid.String())
+	m.log.Warnf("Generating uuid as an identifier, UUID: ", uuid.String())
 	return uuid.String(), err
 }
