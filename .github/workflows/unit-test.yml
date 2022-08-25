@@ -62,8 +62,7 @@ jobs:
           kubectl: 1.18.4
           kubeval: v0.16.1
           command: |
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/*.yml
-            kubeval --strict ${{ env.K8S_MANIFEST_DIR }}/k8s/kustomize/base/cloudbeat*.yml
+            kubeval --strict -d ${{ env.K8S_MANIFEST_DIR }} --ignore-missing-schemas --ignored-filename-patterns kustomization,kind --skip-kinds ClusterConfig
 
   golangci:
     name: golangci-lint
