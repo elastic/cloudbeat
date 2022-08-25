@@ -50,9 +50,7 @@ cis_1_1_8 = [
 
 cis_1_1_11 = [
     ('CIS 1.1.11', 'chmod', '0710', '/var/lib/etcd', 'failed'),
-    ('CIS 1.1.11', 'chmod', '0710', '/var/lib/etcd/some_file.txt', 'failed'),
     ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd', 'passed'),
-    ('CIS 1.1.11', 'chmod', '0600', '/var/lib/etcd/some_file.txt', 'passed'),
 ]
 
 cis_1_1_12 = [
