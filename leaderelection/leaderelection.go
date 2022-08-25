@@ -51,7 +51,6 @@ type Manager struct {
 	cfg        config.Config
 }
 
-// NewLeaderElector acts as a singleton
 func NewLeaderElector(log *logp.Logger, cfg config.Config) ElectionManager {
 	wg := &sync.WaitGroup{}
 
