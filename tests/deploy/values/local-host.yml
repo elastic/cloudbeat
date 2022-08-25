@@ -1,5 +1,9 @@
 cloudbeat:
   deploy: false
 
+standaloneAgent:
+  deploy: false
+
 testData:
   marker: pre_merge
+  agentName: cloudbeat

@@ -1,0 +1,49 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pvc-deleter-role
+rules:
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get", "list", "delete", "deletecollection"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pvc-deleter-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pvc-deleter-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: pvc-deleter-role
+subjects:
+- kind: ServiceAccount
+  name: pvc-deleter-sa
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pvc-deleter-job
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: post-delete-job
+        image: "bitnami/kubectl"
+        command: ["kubectl"]
+        args:
+        - "delete"
+        - "pvc"
+        - "--all"
+      serviceAccountName: pvc-deleter-sa
+      securityContext:
+        runAsUser: 0
