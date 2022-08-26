@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -75,9 +76,11 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 
 	// create an instance of the OPA object
 	opaLogger := newEvaluatorLogger()
+	opaDecisionLogger := newDecisionLogger()
 	opa, err := sdk.New(ctx, sdk.Options{
-		Config: bytes.NewReader(config),
-		Logger: opaLogger,
+		Config:        bytes.NewReader(config),
+		Logger:        opaLogger,
+		ConsoleLogger: opaDecisionLogger,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("fail to init opa: %s", err.Error())
@@ -159,8 +162,9 @@ func (o *OpaEvaluator) decode(result interface{}) (RuleResult, error) {
 	return opaResult, err
 }
 
-func newEvaluatorLogger() logging.Logger {
+func newOpaLogger(name string) logging.Logger {
 	opaLogger := logging.New()
+	opaLogger.SetOutput(os.Stdout)
 	opaLogger.SetFormatter(&logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
 			logrus.FieldKeyTime:  "@timestamp",
@@ -170,7 +174,17 @@ func newEvaluatorLogger() logging.Logger {
 		},
 	})
 	return opaLogger.WithFields(map[string]interface{}{
-		"log.logger":   "opa",
+		"log.logger":   name,
 		"service.name": "cloudbeat",
 	})
+}
+
+func newEvaluatorLogger() logging.Logger {
+	return newOpaLogger("opa_logger")
+}
+
+func newDecisionLogger() logging.Logger {
+	logger := newOpaLogger("opa_decision_logger")
+	logger.SetLevel(logging.Debug)
+	return logger
 }
