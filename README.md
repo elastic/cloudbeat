@@ -32,8 +32,6 @@ Build & deploy cloudbeat:
 just build-deploy-cloudbeat
 ```
 
-<<<<<<< HEAD
-=======
 ### Amazon Elastic Kubernetes Service (EKS)
 Export AWS creds as env vars, kustomize will use these to populate your cloudbeat deployment.
 ```zsh
@@ -64,7 +62,6 @@ EKS
 just create-eks-deployment-file
 ```
 
->>>>>>> fe39754 (Main-reports (#355))
 To validate check the logs:
 
 ```zsh
