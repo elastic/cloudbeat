@@ -26,6 +26,9 @@ spec:
       - name: etc-kubernetes
         mountPath: /etc/kubernetes/
         readOnly: false
+      - name: etc-full
+        mountPath: /hostfs/etc
+        readOnly: false
       - name: var-lib-etcd
         mountPath: /var/lib/etcd
         readOnly: false
@@ -44,6 +47,9 @@ spec:
     - name: etc-kubernetes
       hostPath:
         path: /etc/kubernetes/
+    - name: etc-full
+      hostPath:
+        path: /etc/
     - name: var-lib-etcd
       hostPath:
         path: /var/lib/etcd
