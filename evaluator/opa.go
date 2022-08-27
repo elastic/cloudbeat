@@ -59,7 +59,7 @@ var opaConfig = `{
 		}
 	},
 	"decision_logs": {
-		"console": true
+		"console": %t
 	}
 }`
 
@@ -72,7 +72,7 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	// provide the OPA configuration which specifies
 	// fetching policy bundles from the mock bundleServer
 	// and logging decisions locally to the console
-	config := []byte(fmt.Sprintf(opaConfig, ServerAddress))
+	config := []byte(fmt.Sprintf(opaConfig, ServerAddress, cfg.Evaluator.DecisionLogs))
 
 	// create an instance of the OPA object
 	opaLogger := newEvaluatorLogger()
