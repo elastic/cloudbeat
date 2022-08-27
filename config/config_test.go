@@ -165,6 +165,31 @@ func (s *ConfigTestSuite) TestRuntimeConfig() {
 	}
 }
 
+func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
+	var tests = []struct {
+		config   string
+		expected EvaluatorConfig
+	}{
+		{`
+evaluator:
+  decision_logs: true
+`,
+			EvaluatorConfig{
+				DecisionLogs: true,
+			}},
+	}
+
+	for _, test := range tests {
+		cfg, err := config.NewConfigFrom(test.config)
+		s.NoError(err)
+
+		c, err := New(cfg)
+		s.NoError(err)
+
+		s.Equal(test.expected, c.Evaluator)
+	}
+}
+
 func (s *ConfigTestSuite) TestConfigPeriod() {
 	var tests = []struct {
 		config         string
