@@ -1,4 +1,4 @@
-# Cloudbeat 
+# Cloudbeat
 [![Coverage Status](https://coveralls.io/repos/github/elastic/cloudbeat/badge.svg?branch=main)](https://coveralls.io/github/elastic/cloudbeat?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 [![Build Status](https://internal-ci.elastic.co/buildStatus/icon?job=cloudbeat%2Fcloudbeat-mbp%2Fmain)](https://internal-ci.elastic.co/job/cloudbeat/job/cloudbeat-mbp/job/main/)
@@ -30,6 +30,36 @@ Build & deploy cloudbeat:
 
 ```zsh
 just build-deploy-cloudbeat
+```
+
+### Amazon Elastic Kubernetes Service (EKS)
+Export AWS creds as env vars, kustomize will use these to populate your cloudbeat deployment.
+```zsh
+$ export AWS_ACCESS_KEY="<YOUR_AWS_KEY>" AWS_SECRET_ACCESS_KEY="<YOUR_AWS_SECRET>"
+```
+
+Set your default cluster to your EKS cluster
+```zsh
+ kubectl config use-context your-eks-cluster
+```
+
+Deploy cloudbeat on your EKS cluster
+```zsh
+just deploy-eks-cloudbeat
+````
+### Advanced
+
+If you need to change the default values in the configuration(ES_HOST, ES_PORT, ES_USERNAME, ES_PASSWORD), you can
+also create the deployment file yourself.
+
+Vanilla
+```zsh
+just create-vanilla-deployment-file
+```
+
+EKS
+```zsh
+just create-eks-deployment-file
 ```
 
 To validate check the logs:
@@ -112,11 +142,31 @@ Create an agent policy and install the CSP integration. Now, when adding a new a
 ### Update settings
 Update cloudbeat settings on a runnign elastic-agent can be done by running the [script](/scripts/remote_edit_config.sh).
 The script still requires a second step of trigerring the agent to re-run cloudbeat.
+<<<<<<< HEAD
 This can be done on Fleet UI by renaming the integration or even changing the agent log level.
+=======
+This can be done on Fleet UI by changing the agent log level.
+Another option is through CLI on the agent by running
+```
+kill -9 `pidof cloudbeat`
+```
+
+>>>>>>> fe39754 (Main-reports (#355))
 
 
 ## Code guidelines
 
+### Pre-commit hooks
+
+see [pre-commit](https://pre-commit.com/) package
+
+- Install the package `brew install pre-commit`
+- Then run `pre-commit install`
+- Finally `pre-commit run --all-files --verbose`
+
+### Editorconfig
+
+see [editorconfig](https://editorconfig.org/#pre-installed) package
 ### Testing
 
 Cloudbeat has a various sets of tests. This guide should help to understand how the different test suites work, how they are used and how new tests are added.
