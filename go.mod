@@ -259,7 +259,7 @@ replace (
 	github.com/apoydence/eachers => github.com/poy/eachers v0.0.0-20181020210610-23942921fe77 //indirect, see https://github.com/elastic/beats/pull/29780 for details.
 	github.com/dop251/goja => github.com/andrewkroh/goja v0.0.0-20190128172624-dd2ac4456e20
 	github.com/dop251/goja_nodejs => github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6
-	//github.com/elastic/beats/v7 => github.com/fearful-symmetry/beats/v7 v1.2.2-0.20220825171527-b0d25807e2ab+incompatible
+	//github.com/elastic/beats/v7 => github.com/fearful-symmetry/beats/v7 v1.2.2-0.20220825171527-b0d25807e2ab
 	github.com/elastic/beats/v7 => github.com/eyalkraft/beats/v7 v7.0.0-testv2 // forked from ^
 	github.com/fsnotify/fsnotify => github.com/adriansr/fsnotify v1.4.8-0.20211018144411-a81f2b630e7c
 	github.com/golang/glog => github.com/elastic/glog v1.0.1-0.20210831205241-7d8b5c89dfc4
