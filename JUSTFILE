@@ -4,7 +4,9 @@ kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 
 create-kind-cluster:
-  kind create cluster --config deploy/k8s/kind/kind-config.yml
+  kind create cluster --config deploy/k8s/kind/kind-config.yml --wait 30s
+  ID=$( docker ps --filter name=kind-mono-control-plane --format "{{{{.ID}}" ) && \
+  docker network connect elastic-package-stack_default $ID
 
 install-kind:
   brew install kind
@@ -28,7 +30,9 @@ build-cloudbeat:
   GOOS=linux go build -v && docker build -t cloudbeat .
 
 deploy-cloudbeat:
+  cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
+  rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
 build-cloudbeat-debug:
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
@@ -55,7 +59,7 @@ build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v
 
 elastic-stack-up:
-  elastic-package stack up --version=8.1.0-SNAPSHOT
+  elastic-package stack up -vd
 
 elastic-stack-down:
   elastic-package stack down
