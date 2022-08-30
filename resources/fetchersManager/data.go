@@ -20,7 +20,6 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"sync"
 	"time"
 
@@ -83,15 +82,14 @@ func (d *Data) fetchIteration(ctx context.Context) {
 	d.wg = &sync.WaitGroup{}
 	start := time.Now()
 
-	cycleId, _ := uuid.NewV4()
-	cycleMetadata := fetching.CycleMetadata{CycleId: cycleId}
-	d.log.Infof("Cycle %s has started", cycleId.String())
+	seq := time.Now().Unix()
+	d.log.Infof("Cycle %d has started", seq)
 
 	for _, key := range d.fetchers.Keys() {
 		d.wg.Add(1)
 		go func(k string) {
 			defer d.wg.Done()
-			err := d.fetchSingle(ctx, k, cycleMetadata)
+			err := d.fetchSingle(ctx, k, fetching.CycleMetadata{Sequence: time.Now().Unix()})
 			if err != nil {
 				d.log.Errorf("Error running fetcher for key %s: %v", k, err)
 			}
@@ -100,7 +98,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 
 	d.wg.Wait()
 	d.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
-	d.log.Infof("Cycle %s resource fetching has ended", cycleId.String())
+	d.log.Infof("Cycle %d resource fetching has ended", seq)
 }
 
 func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching.CycleMetadata) error {

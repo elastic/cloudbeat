@@ -19,6 +19,7 @@ package evaluator
 
 import (
 	"context"
+	"time"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
@@ -29,7 +30,8 @@ type Evaluator interface {
 }
 
 type Metadata struct {
-	Version string `json:"opa_version"`
+	Version   string    `json:"opa_version"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type RuleResult struct {
