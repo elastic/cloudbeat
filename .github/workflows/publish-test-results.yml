@@ -78,7 +78,6 @@ jobs:
         if: ${{ github.event.workflow_run.event == 'pull_request' }}
         with:
           header: Test Results
-          recreate: false
           number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
