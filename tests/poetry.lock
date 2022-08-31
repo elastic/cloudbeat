@@ -1,19 +1,19 @@
 [[package]]
 name = "allure-pytest"
-version = "2.10.0"
+version = "2.9.45"
 description = "Allure pytest integration"
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-allure-python-commons = "2.10.0"
+allure-python-commons = "2.9.45"
 pytest = ">=4.5.0"
 six = ">=1.9.0"
 
 [[package]]
 name = "allure-python-commons"
-version = "2.10.0"
+version = "2.9.45"
 description = "Common module for integrate allure with python-based frameworks"
 category = "main"
 optional = false
@@ -26,23 +26,20 @@ six = ">=1.9.0"
 
 [[package]]
 name = "astroid"
-version = "2.12.5"
+version = "2.11.6"
 description = "An abstract syntax tree for Python with inference support."
 category = "main"
 optional = false
-python-versions = ">=3.7.2"
+python-versions = ">=3.6.2"
 
 [package.dependencies]
 lazy-object-proxy = ">=1.4.0"
 typing-extensions = {version = ">=3.10", markers = "python_version < \"3.10\""}
-wrapt = [
-    {version = ">=1.11,<2", markers = "python_version < \"3.11\""},
-    {version = ">=1.14,<2", markers = "python_version >= \"3.11\""},
-]
+wrapt = ">=1.11,<2"
 
 [[package]]
 name = "atomicwrites"
-version = "1.4.1"
+version = "1.4.0"
 description = "Atomic file writes."
 category = "main"
 optional = false
@@ -50,17 +47,17 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "attrs"
-version = "22.1.0"
+version = "21.4.0"
 description = "Classes Without Boilerplate"
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [package.extras]
-dev = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "mypy (>=0.900,!=0.940)", "pytest-mypy-plugins", "zope.interface", "furo", "sphinx", "sphinx-notfound-page", "pre-commit", "cloudpickle"]
+dev = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "zope.interface", "furo", "sphinx", "sphinx-notfound-page", "pre-commit", "cloudpickle"]
 docs = ["furo", "sphinx", "zope.interface", "sphinx-notfound-page"]
-tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "mypy (>=0.900,!=0.940)", "pytest-mypy-plugins", "zope.interface", "cloudpickle"]
-tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "mypy (>=0.900,!=0.940)", "pytest-mypy-plugins", "cloudpickle"]
+tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "zope.interface", "cloudpickle"]
+tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six", "mypy", "pytest-mypy-plugins", "cloudpickle"]
 
 [[package]]
 name = "cachetools"
@@ -80,18 +77,18 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "charset-normalizer"
-version = "2.1.1"
+version = "2.0.12"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 category = "main"
 optional = false
-python-versions = ">=3.6.0"
+python-versions = ">=3.5.0"
 
 [package.extras]
 unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "colorama"
-version = "0.4.5"
+version = "0.4.4"
 description = "Cross-platform colored terminal text."
 category = "main"
 optional = false
@@ -128,7 +125,7 @@ ssh = ["paramiko (>=2.4.3)"]
 
 [[package]]
 name = "elastic-transport"
-version = "8.4.0"
+version = "8.1.2"
 description = "Transport classes and utilities shared among Python Elastic client libraries"
 category = "main"
 optional = false
@@ -143,7 +140,7 @@ develop = ["pytest", "pytest-cov", "pytest-mock", "pytest-asyncio", "pytest-http
 
 [[package]]
 name = "elasticsearch"
-version = "8.4.0"
+version = "8.2.3"
 description = "Python client for Elasticsearch"
 category = "main"
 optional = false
@@ -169,7 +166,7 @@ testing = ["pre-commit"]
 
 [[package]]
 name = "google-auth"
-version = "2.11.0"
+version = "2.8.0"
 description = "Google Authentication Library"
 category = "main"
 optional = false
@@ -347,15 +344,15 @@ pyasn1 = ">=0.4.6,<0.5.0"
 
 [[package]]
 name = "pylint"
-version = "2.15.0"
+version = "2.14.2"
 description = "python code static checker"
 category = "main"
 optional = false
 python-versions = ">=3.7.2"
 
 [package.dependencies]
-astroid = ">=2.12.4,<=2.14.0-dev0"
-colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
+astroid = ">=2.11.6,<=2.12.0-dev0"
+colorama = {version = "*", markers = "sys_platform == \"win32\""}
 dill = ">=0.2"
 isort = ">=4.2.5,<6"
 mccabe = ">=0.6,<0.8"
@@ -484,7 +481,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "requests"
-version = "2.28.1"
+version = "2.28.0"
 description = "Python HTTP for Humans."
 category = "main"
 optional = false
@@ -492,13 +489,13 @@ python-versions = ">=3.7, <4"
 
 [package.dependencies]
 certifi = ">=2017.4.17"
-charset-normalizer = ">=2,<3"
+charset-normalizer = ">=2.0.0,<2.1.0"
 idna = ">=2.5,<4"
 urllib3 = ">=1.21.1,<1.27"
 
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
-use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
+use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
 
 [[package]]
 name = "requests-oauthlib"
@@ -517,7 +514,7 @@ rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 
 [[package]]
 name = "rsa"
-version = "4.9"
+version = "4.8"
 description = "Pure-Python RSA implementation"
 category = "main"
 optional = false
@@ -544,7 +541,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "tomlkit"
-version = "0.11.4"
+version = "0.11.0"
 description = "Style preserving TOML library"
 category = "main"
 optional = false
@@ -552,7 +549,7 @@ python-versions = ">=3.6,<4.0"
 
 [[package]]
 name = "typing-extensions"
-version = "4.3.0"
+version = "4.2.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
@@ -560,29 +557,29 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "urllib3"
-version = "1.26.12"
+version = "1.26.9"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
 [package.extras]
 brotli = ["brotlicffi (>=0.8.0)", "brotli (>=1.0.9)", "brotlipy (>=0.6.0)"]
-secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "urllib3-secure-extra", "ipaddress"]
+secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "ipaddress"]
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "websocket-client"
-version = "1.4.0"
+version = "1.3.2"
 description = "WebSocket client for Python with low level API options"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 
 [package.extras]
+docs = ["Sphinx (>=3.4)", "sphinx-rtd-theme (>=0.5)"]
+optional = ["python-socks", "wsaccel"]
 test = ["websockets"]
-optional = ["wsaccel", "python-socks"]
-docs = ["sphinx-rtd-theme (>=0.5)", "Sphinx (>=3.4)"]
 
 [[package]]
 name = "wrapt"
@@ -598,18 +595,39 @@ python-versions = "^3.9"
 content-hash = "2fcb1ce2daaa62d7cb979038fcf544019c3b020f07b9b3c9cdbb153fb16600a2"
 
 [metadata.files]
-allure-pytest = []
-allure-python-commons = []
+allure-pytest = [
+    {file = "allure-pytest-2.9.45.tar.gz", hash = "sha256:20620fde08a597578b157a60ff38bdcc300e312d12eaa38cf28e4a62e22bdaa3"},
+    {file = "allure_pytest-2.9.45-py3-none-any.whl", hash = "sha256:9b0325e06f8f79cf03289d4f4d741e57607d0fa12d9c094e243cbb042283f083"},
+]
+allure-python-commons = [
+    {file = "allure-python-commons-2.9.45.tar.gz", hash = "sha256:c238d28aeac35e8c7c517d8a2327e25ae5bbf2c30b5e2313d20ef11d75f5549d"},
+    {file = "allure_python_commons-2.9.45-py3-none-any.whl", hash = "sha256:3572f0526db3946fb14470c58b0b41d343483aad91d37d414e4641815e13691a"},
+]
 astroid = []
-atomicwrites = []
-attrs = []
+atomicwrites = [
+    {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},
+    {file = "atomicwrites-1.4.0.tar.gz", hash = "sha256:ae70396ad1a434f9c7046fd2dd196fc04b12f9e91ffb859164193be8b6168a7a"},
+]
+attrs = [
+    {file = "attrs-21.4.0-py2.py3-none-any.whl", hash = "sha256:2d27e3784d7a565d36ab851fe94887c5eccd6a463168875832a1be79c82828b4"},
+    {file = "attrs-21.4.0.tar.gz", hash = "sha256:626ba8234211db98e869df76230a137c4c40a12d72445c45d5f5b716f076e2fd"},
+]
 cachetools = []
 certifi = []
-charset-normalizer = []
-colorama = []
+charset-normalizer = [
+    {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
+    {file = "charset_normalizer-2.0.12-py3-none-any.whl", hash = "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"},
+]
+colorama = [
+    {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
+    {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
+]
 dill = []
 docker = []
-elastic-transport = []
+elastic-transport = [
+    {file = "elastic-transport-8.1.2.tar.gz", hash = "sha256:869f7d668fb7738776639053fc87499caacbd1bdc7819f0de8025ac0e6cb29ce"},
+    {file = "elastic_transport-8.1.2-py3-none-any.whl", hash = "sha256:10914d0c5c268d9dcfee02cfbef861382d098309ba4eedab820062841bd214b3"},
+]
 elasticsearch = []
 execnet = [
     {file = "execnet-1.9.0-py2.py3-none-any.whl", hash = "sha256:a295f7cc774947aac58dde7fdc85f4aa00c42adf5d8f5468fc630c1acf30a142"},
@@ -746,7 +764,10 @@ requests-oauthlib = [
     {file = "requests-oauthlib-1.3.1.tar.gz", hash = "sha256:75beac4a47881eeb94d5ea5d6ad31ef88856affe2332b9aafb52c6452ccf0d7a"},
     {file = "requests_oauthlib-1.3.1-py2.py3-none-any.whl", hash = "sha256:2577c501a2fb8d05a304c09d090d6e47c306fef15809d102b327cf8364bddab5"},
 ]
-rsa = []
+rsa = [
+    {file = "rsa-4.8-py3-none-any.whl", hash = "sha256:95c5d300c4e879ee69708c428ba566c59478fd653cc3a22243eeb8ed846950bb"},
+    {file = "rsa-4.8.tar.gz", hash = "sha256:5c6bd9dc7a543b7fe4304a631f8a8a3b674e2bbfc49c2ae96200cdbe55df6b17"},
+]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
@@ -757,6 +778,12 @@ tomli = [
 ]
 tomlkit = []
 typing-extensions = []
-urllib3 = []
-websocket-client = []
+urllib3 = [
+    {file = "urllib3-1.26.9-py2.py3-none-any.whl", hash = "sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14"},
+    {file = "urllib3-1.26.9.tar.gz", hash = "sha256:aabaf16477806a5e1dd19aa41f8c2b7950dd3c746362d7e3223dbe6de6ac448e"},
+]
+websocket-client = [
+    {file = "websocket-client-1.3.2.tar.gz", hash = "sha256:50b21db0058f7a953d67cc0445be4b948d7fc196ecbeb8083d68d94628e4abf6"},
+    {file = "websocket_client-1.3.2-py3-none-any.whl", hash = "sha256:722b171be00f2b90e1d4fb2f2b53146a536ca38db1da8ff49c972a4e1365d0ef"},
+]
 wrapt = []
