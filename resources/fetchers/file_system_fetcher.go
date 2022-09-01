@@ -20,16 +20,18 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/djherbis/times"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/user"
-	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/djherbis/times"
+	"github.com/elastic/beats/v7/libbeat/ecs"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/user"
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -75,7 +77,7 @@ type FileCommonData struct {
 
 type FSResource struct {
 	EvalResource  EvalFSResource
-	ElasticCommon FileCommonData
+	ElasticCommon ecs.File
 }
 
 // FileSystemFetcher implement the Fetcher interface
@@ -118,7 +120,6 @@ func (f *FileSystemFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleM
 }
 
 func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FSResource, error) {
-
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return FSResource{}, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
@@ -129,7 +130,6 @@ func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FSResource, er
 }
 
 func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FSResource, error) {
-
 	if info == nil {
 		return FSResource{}, nil
 	}
@@ -200,8 +200,8 @@ func getFSSubType(fileInfo os.FileInfo) string {
 	return FileSubType
 }
 
-func enrichFileCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) FileCommonData {
-	cd := FileCommonData{}
+func enrichFileCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) ecs.File {
+	cd := ecs.File{}
 	if err := enrichFromFileResource(&cd, data); err != nil {
 		logp.Error(fmt.Errorf("failed to decode data, Error: %v", err))
 	}
@@ -218,7 +218,7 @@ func enrichFileCommonData(stat *syscall.Stat_t, data EvalFSResource, path string
 	return cd
 }
 
-func enrichFileTimes(cd *FileCommonData, filepath string) error {
+func enrichFileTimes(cd *ecs.File, filepath string) error {
 	t, err := times.Stat(filepath)
 	if err != nil {
 		return fmt.Errorf("failed to get file time data, error - %+v", err)
@@ -234,6 +234,6 @@ func enrichFileTimes(cd *FileCommonData, filepath string) error {
 	return nil
 }
 
-func enrichFromFileResource(cd *FileCommonData, data EvalFSResource) error {
+func enrichFromFileResource(cd *ecs.File, data EvalFSResource) error {
 	return mapstructure.Decode(data, cd)
 }

@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -99,7 +100,7 @@ type ProcCommonData struct {
 
 type ProcResource struct {
 	EvalResource  EvalProcResource
-	ElasticCommon ProcCommonData
+	ElasticCommon ecs.Process
 }
 
 type ProcessesFetcher struct {
@@ -163,8 +164,8 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 	return ProcResource{EvalResource: evalRes, ElasticCommon: ProcCd}, nil
 }
 
-func (f *ProcessesFetcher) enrichProcCommonData(stat proc.ProcStat, cmd string, pid string) ProcCommonData {
-	procCd := &ProcCommonData{}
+func (f *ProcessesFetcher) enrichProcCommonData(stat proc.ProcStat, cmd string, pid string) ecs.Process {
+	procCd := &ecs.Process{}
 	processID, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
 		f.log.Errorf("Couldn't parse PID, pid: %s", pid)
@@ -198,7 +199,7 @@ func (f *ProcessesFetcher) enrichProcCommonData(stat proc.ProcStat, cmd string, 
 	procCd.Name = stat.Name
 	procCd.Title = stat.Name
 	procCd.PGID = pgid
-	procCd.Parent = &ProcCommonData{PID: ppid}
+	procCd.Parent = &ecs.Process{PID: ppid}
 	procCd.Start = uptimeDate.Add(ticksToDuration(startTime))
 	procCd.Uptime = int64(time.Since(procCd.Start).Seconds())
 

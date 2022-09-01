@@ -58,16 +58,16 @@ type Resource interface {
 }
 
 type ResourceFields struct {
-	ResourceMetadata
-	Raw interface{} `json:"raw"`
+	ResourceMetadata `ecs:",inline"`
+	Raw              interface{} `json:"raw" ecs:"raw"`
 }
 
 type ResourceMetadata struct {
-	ID        string `json:"id"`
-	Type      string `json:"type"`
-	SubType   string `json:"sub_type,omitempty"`
-	Name      string `json:"name,omitempty"`
-	ECSFormat string `json:"ecsFormat,omitempty"`
+	ID        string `json:"id" ecs:"id"`
+	Type      string `json:"type" ecs:"type"`
+	SubType   string `json:"sub_type,omitempty" ecs:"sub_type"`
+	Name      string `json:"name,omitempty" ecs:"name"`
+	ECSFormat string `json:"ecsFormat,omitempty" ecs:"ecsFormat"`
 }
 
 type Result struct {

@@ -52,30 +52,30 @@ type EventData struct {
 }
 
 type Result struct {
-	Evaluation string      `json:"evaluation"`
-	Expected   interface{} `json:"expected"`
-	Evidence   interface{} `json:"evidence"`
+	Evaluation string      `json:"evaluation" ecs:"evaluation"`
+	Expected   interface{} `json:"expected" ecs:"expected"`
+	Evidence   interface{} `json:"evidence" ecs:"evidence"`
 }
 
 type Rule struct {
-	Id                    string    `json:"id"`
-	Name                  string    `json:"name"`
-	Profile_Applicability string    `json:"profile_applicability"`
-	Description           string    `json:"description"`
-	Rationale             string    `json:"rationale"`
-	Audit                 string    `json:"audit"`
-	Remediation           string    `json:"remediation"`
-	Impact                string    `json:"impact"`
-	Default_Value         string    `json:"default_value"`
-	References            string    `json:"references"`
-	Section               string    `json:"section"`
-	Version               string    `json:"version"`
-	Tags                  []string  `json:"tags"`
-	Benchmark             Benchmark `json:"benchmark"`
+	Id                    string     `json:"id" ecs:"id"`
+	Name                  string     `json:"name" ecs:"name"`
+	Profile_Applicability string     `json:"profile_applicability" ecs:"profile_applicability"`
+	Description           string     `json:"description" ecs:"description"`
+	Rationale             string     `json:"rationale" ecs:"rationale"`
+	Audit                 string     `json:"audit" ecs:"audit"`
+	Remediation           string     `json:"remediation" ecs:"remediation"`
+	Impact                string     `json:"impact" ecs:"impact"`
+	Default_Value         string     `json:"default_value" ecs:"default_value"`
+	References            string     `json:"references" ecs:"references"`
+	Section               string     `json:"section" ecs:"section"`
+	Version               string     `json:"version" ecs:"version"`
+	Tags                  []string   `json:"tags" ecs:"tags"`
+	Benchmark             *Benchmark `json:"benchmark" ecs:"benchmark"`
 }
 
 type Benchmark struct {
-	Id      string `json:"id"`
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Id      string `json:"id" ecs:"id"`
+	Name    string `json:"name" ecs:"name"`
+	Version string `json:"version" ecs:"vesion"`
 }

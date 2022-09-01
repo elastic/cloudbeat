@@ -25,6 +25,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -55,7 +56,7 @@ var fetcherResult = fetchers.FSResource{
 		Inode:   "8901",
 		SubType: "file",
 	},
-	ElasticCommon: fetchers.FileCommonData{
+	ElasticCommon: ecs.File{
 		Name: "scheduler.conf",
 	},
 }

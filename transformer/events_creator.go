@@ -24,6 +24,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
+	"github.com/elastic/beats/v7/libbeat/ecs"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -37,6 +38,11 @@ const (
 	ecsOutcomeSuccess        = "success"
 	ecsTypeInfo              = "info"
 )
+
+var generateUUID = func() string {
+	id, _ := uuid.NewV4() // zero value in case of an error is uuid.Nil
+	return id.String()
+}
 
 type Transformer struct {
 	log           *logp.Logger
@@ -83,19 +89,35 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 	}
 
 	for _, finding := range eventData.Findings {
+		c := eventData.GetElasticCommonData()
+		proc := ecs.Process{}
+		file := ecs.File{}
+		switch t := c.(type) {
+		case ecs.Process:
+			proc = t
+		case ecs.File:
+			file = t
+		}
+
+		fields := Fields{
+			Process:    proc,
+			File:       file,
+			Event:      buildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt),
+			Resource:   resource,
+			ResourceID: resMetadata.ID,
+			Type:       resMetadata.Type,
+			Result:     finding.Result,
+			Rule:       finding.Rule,
+			Message:    fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
+		}
+		mFields := mapstr.M{}
+		if err := fields.MarshalMapStr(mFields); err != nil {
+			continue
+		}
 		event := beat.Event{
 			Meta:      t.eventMetadata,
 			Timestamp: timestamp,
-			Fields: mapstr.M{
-				resMetadata.ECSFormat: eventData.GetElasticCommonData(),
-				"event":               buildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt),
-				"resource":            resource,
-				"resource_id":         resMetadata.ID,   // Deprecated - kept for BC
-				"type":                resMetadata.Type, // Deprecated - kept for BC
-				"result":              finding.Result,
-				"rule":                finding.Rule,
-				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
-			},
+			Fields:    mFields,
 		}
 
 		events = append(events, event)
@@ -104,12 +126,12 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 	return events, nil
 }
 
-func buildECSEvent(seq int64, created time.Time) ECSEvent {
-	id, _ := uuid.NewV4() // zero value in case of an error is uuid.Nil
-	return ECSEvent{
+func buildECSEvent(seq int64, created time.Time) ecs.Event {
+	id := generateUUID()
+	return ecs.Event{
 		Category: []string{ecsCategoryConfiguration},
 		Created:  created,
-		ID:       id.String(),
+		ID:       id,
 		Kind:     ecsKindState,
 		Sequence: seq,
 		Outcome:  ecsOutcomeSuccess,
