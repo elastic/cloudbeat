@@ -1,0 +1,58 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-merge-conflict
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: (^cloudbeat.*yml)$
+      - id: end-of-file-fixer
+        exclude: (^cloudbeat.*yml)$
+      - id: check-yaml
+        exclude: (^cloudbeat.*yml)$
+      - id: check-json
+      - id: name-tests-test
+
+  ## Security
+      - id: detect-private-key
+      - id: detect-aws-credentials
+
+  ## Golang hooks
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: master
+    hooks:
+      - id: go-fmt
+      - id: golangci-lint
+
+  ## Python
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v1.6.0
+    hooks:
+      - id: autopep8
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+
+  - repo: https://github.com/pycqa/pylint
+    rev: pylint-2.6.0
+    hooks:
+      - id: pylint
+        args: [
+            "-rn", # Only display messages
+            "-sn", # Don't display the score
+            "--rcfile=tests/pylintrc", # Link to your config file
+          ]
+
+  - repo: local
+    hooks:
+      - id: mage-config
+        name: mage config
+        entry: bash -c 'mage config'
+        language: system
+        files: (^_meta\/.*|^cloudbeat.*yml)$
+        pass_filenames: false
