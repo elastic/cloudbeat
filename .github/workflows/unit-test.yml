@@ -71,6 +71,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
       - name: Fetch Go version from .go-version
         run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
       - uses: actions/setup-go@v3
