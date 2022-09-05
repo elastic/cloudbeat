@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	le "k8s.io/client-go/tools/leaderelection"
@@ -106,7 +107,10 @@ func (m *Manager) Stop() {
 		m.log.Info("Stopping leader election manager")
 		m.cancelFunc()
 		m.wg.Wait()
+		return
 	}
+
+	m.log.Warnf("cancelFunc is not set")
 }
 
 func (m *Manager) buildConfig(ctx context.Context) (le.LeaderElectionConfig, error) {
@@ -118,7 +122,7 @@ func (m *Manager) buildConfig(ctx context.Context) (le.LeaderElectionConfig, err
 	id := fmt.Sprintf("%s_%s", LeaderLeaseName, podId)
 	ns, err := kubernetes.InClusterNamespace()
 	if err != nil {
-		ns = "default"
+		ns = v1.NamespaceDefault
 	}
 
 	lease := metav1.ObjectMeta{
@@ -191,6 +195,6 @@ func (m *Manager) lastPart(s string) (string, error) {
 
 func (m *Manager) generateUUID() (string, error) {
 	uuid, err := uuid.NewV4()
-	m.log.Warnf("Generating uuid as an identifier, UUID: ", uuid.String())
+	m.log.Warnf("Generating uuid as an identifier, UUID: %s", uuid.String())
 	return uuid.String(), err
 }

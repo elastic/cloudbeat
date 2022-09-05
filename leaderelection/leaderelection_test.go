@@ -23,27 +23,117 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/hashicorp/go-uuid"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/goleak"
+	v1 "k8s.io/api/coordination/v1"
+	core "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sFake "k8s.io/client-go/kubernetes/fake"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 	"os"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 )
 
 type LeaderElectionTestSuite struct {
 	suite.Suite
-	log *logp.Logger
+	log        *logp.Logger
+	wg         *sync.WaitGroup
+	manager    *Manager
+	opts       goleak.Option
+	kubeClient *k8sFake.Clientset
 }
 
 func TestLeaderElectionTestSuite(t *testing.T) {
 	s := new(LeaderElectionTestSuite)
-	s.log = logp.NewLogger("cloudbeat_leader_election_test_suite")
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
 	}
 
 	suite.Run(t, s)
+}
+
+func (s *LeaderElectionTestSuite) SetupTest() {
+	s.wg = &sync.WaitGroup{}
+	s.log = logp.NewLogger("cloudbeat_leader_election_test_suite")
+	s.opts = goleak.IgnoreCurrent()
+	s.kubeClient = k8sFake.NewSimpleClientset()
+	s.manager = &Manager{
+		log:        s.log,
+		leader:     nil,
+		wg:         s.wg,
+		cancelFunc: nil,
+		kubeClient: s.kubeClient,
+	}
+}
+
+func (s *LeaderElectionTestSuite) TearDownTest() {
+	// Stop is blocking until all go routines are finished,
+	// we verify there is no running leader-election managers after calling stop.
+	s.manager.Stop()
+
+	// Verify no goroutines are leaking. Safest to keep this on top of the function.
+	goleak.VerifyNone(s.T(), s.opts)
+}
+
+func (s *LeaderElectionTestSuite) TestManager_RunWaitForLeader() {
+	sTime := time.Now()
+	s.manager.Run(context.Background())
+	elapsed := time.Since(sTime)
+
+	s.GreaterOrEqual(elapsed, FirstLeaderDeadline, "run did not wait a sufficient time to acquire the lease")
+	s.Equal(true, s.manager.IsLeader())
+}
+
+// Verify that when a pre-configured lease exists, eventually, the leader-manager will try to gain control if the
+// lease is not being renewed.
+func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
+	podId := "this_pod"
+	os.Setenv(PodNameEnvar, podId)
+
+	holderIdentity := LeaderLeaseName + "_another_pod"
+	lease := generateLease(&holderIdentity)
+	s.manager.kubeClient = k8sFake.NewSimpleClientset(lease)
+	s.manager.Run(context.Background())
+
+	lease, err := s.manager.kubeClient.CoordinationV1().Leases(core.NamespaceDefault).Get(
+		context.Background(),
+		LeaderLeaseName,
+		metav1.GetOptions{},
+	)
+
+	if err != nil {
+		s.Fail("failed to fetch the leader lease info")
+	}
+
+	s.Contains(*lease.Spec.HolderIdentity, podId)
+}
+
+// Verify that after the lease is lost we re-run the leader-election manager.
+// After waiting for a FirstLeaderDeadline seconds we should be holding the lease again as it has not been renewed.
+func (s *LeaderElectionTestSuite) TestManager_ReRun() {
+	podId := "this_pod"
+	os.Setenv(PodNameEnvar, podId)
+
+	s.manager.kubeClient = k8sFake.NewSimpleClientset()
+	s.manager.Run(context.Background())
+
+	holderIdentity := LeaderLeaseName + "_another_pod"
+	lease := generateLease(&holderIdentity)
+	_, err := s.manager.kubeClient.CoordinationV1().Leases(core.NamespaceDefault).Update(
+		context.Background(),
+		lease,
+		metav1.UpdateOptions{},
+	)
+
+	if err != nil {
+		s.Fail("failed to update the leader lease")
+	}
+
+	time.Sleep(FirstLeaderDeadline)
+	s.Equal(true, s.manager.IsLeader())
 }
 
 func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
@@ -81,15 +171,7 @@ func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
 			os.Setenv(PodNameEnvar, podId)
 		}
 
-		manager := &Manager{
-			log:        s.log,
-			leader:     nil,
-			wg:         nil,
-			cancelFunc: nil,
-			kubeClient: k8sFake.NewSimpleClientset(),
-		}
-
-		got, err := manager.buildConfig(context.TODO())
+		got, err := s.manager.buildConfig(context.TODO())
 		if (err != nil) != tt.wantErr {
 			s.FailNow("unexpected error: %v", err)
 		}
@@ -113,4 +195,16 @@ func parseUUID(cfg le.LeaderElectionConfig) error {
 	_, err := uuid.ParseUUID(uuidAsString)
 
 	return err
+}
+
+func generateLease(holderIdentity *string) *v1.Lease {
+	return &v1.Lease{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      LeaderLeaseName,
+			Namespace: core.NamespaceDefault,
+		},
+		Spec: v1.LeaseSpec{
+			HolderIdentity: holderIdentity,
+		},
+	}
 }
