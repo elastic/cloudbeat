@@ -80,9 +80,10 @@ func (s *LeaderElectionTestSuite) TearDownTest() {
 
 func (s *LeaderElectionTestSuite) TestManager_RunWaitForLeader() {
 	sTime := time.Now()
-	s.manager.Run(context.Background())
+	err := s.manager.Run(context.Background())
 	elapsed := time.Since(sTime)
 
+	s.NoError(err)
 	s.GreaterOrEqual(elapsed, FirstLeaderDeadline, "run did not wait a sufficient time to acquire the lease")
 	s.Equal(true, s.manager.IsLeader())
 }
@@ -96,16 +97,17 @@ func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 	holderIdentity := LeaderLeaseName + "_another_pod"
 	lease := generateLease(&holderIdentity)
 	s.manager.kubeClient = k8sFake.NewSimpleClientset(lease)
-	s.manager.Run(context.Background())
+	err := s.manager.Run(context.Background())
+	s.NoError(err)
 
-	lease, err := s.manager.kubeClient.CoordinationV1().Leases(core.NamespaceDefault).Get(
+	updatedLease, err := s.manager.kubeClient.CoordinationV1().Leases(core.NamespaceDefault).Get(
 		context.Background(),
 		LeaderLeaseName,
 		metav1.GetOptions{},
 	)
 
 	s.NoError(err)
-	s.Contains(*lease.Spec.HolderIdentity, podId)
+	s.Contains(*updatedLease.Spec.HolderIdentity, podId)
 }
 
 // Verify that after the lease is lost we re-run the leader-election manager.
@@ -115,11 +117,12 @@ func (s *LeaderElectionTestSuite) TestManager_ReRun() {
 	os.Setenv(PodNameEnvar, podId)
 
 	s.manager.kubeClient = k8sFake.NewSimpleClientset()
-	s.manager.Run(context.Background())
+	err := s.manager.Run(context.Background())
+	s.NoError(err)
 
 	holderIdentity := LeaderLeaseName + "_another_pod"
 	lease := generateLease(&holderIdentity)
-	_, err := s.manager.kubeClient.CoordinationV1().Leases(core.NamespaceDefault).Update(
+	_, err = s.manager.kubeClient.CoordinationV1().Leases(core.NamespaceDefault).Update(
 		context.Background(),
 		lease,
 		metav1.UpdateOptions{},
