@@ -43,7 +43,7 @@ CLOUDBEAT_VERSION=$(shell grep defaultBeatVersion cmd/version.go | cut -d'=' -f2
 hermit:
 	curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
 
-.PHONY: active-hermit
+.PHONY: activate-hermit
 active-hermit:
 	. ./bin/activate-hermit
 
