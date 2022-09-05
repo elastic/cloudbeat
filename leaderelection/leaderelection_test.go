@@ -104,10 +104,7 @@ func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 		metav1.GetOptions{},
 	)
 
-	if err != nil {
-		s.Fail("failed to fetch the leader lease info")
-	}
-
+	s.NoError(err)
 	s.Contains(*lease.Spec.HolderIdentity, podId)
 }
 
@@ -128,11 +125,8 @@ func (s *LeaderElectionTestSuite) TestManager_ReRun() {
 		metav1.UpdateOptions{},
 	)
 
-	if err != nil {
-		s.Fail("failed to update the leader lease")
-	}
-
 	time.Sleep(FirstLeaderDeadline)
+	s.NoError(err)
 	s.Equal(true, s.manager.IsLeader())
 }
 
