@@ -1,6 +1,18 @@
 # $COMMUNITY/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: kube-system
 
 resources:
   - ../../base
+
+patches:
+  - path: ./patches/patch-add-ssl-certs.yaml
+    target:
+      kind: DaemonSet
+
+secretGenerator:
+  - behavior: create
+    name: elastic-package-certs
+    files:
+      - ./ca-cert.pem
