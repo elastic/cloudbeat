@@ -1,5 +1,4 @@
 # Deploy a cloudbeat instance per node for cis policy
----
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

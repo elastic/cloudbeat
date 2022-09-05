@@ -4,6 +4,9 @@ metadata:
   name: cloudbeat
   namespace: kube-system
 spec:
+  selector:
+    matchLabels:
+      k8s-app: cloudbeat
   template:
     spec:
       containers:
