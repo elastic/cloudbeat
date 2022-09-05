@@ -84,3 +84,11 @@ jobs:
         with:
           version: latest
           args: --timeout=10m --whole-files
+          
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v2
