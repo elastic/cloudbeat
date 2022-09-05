@@ -28,7 +28,6 @@ import (
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
@@ -57,6 +56,7 @@ type Config struct {
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
 	Streams    []Stream                `config:"streams"`
+	Evaluator  EvaluatorConfig         `config:"evaluator"`
 	Type       string                  `config:"type"`
 }
 
@@ -67,6 +67,10 @@ type Stream struct {
 
 type RuntimeConfig struct {
 	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
+}
+
+type EvaluatorConfig struct {
+	DecisionLogs bool `config:"decision_logs"`
 }
 
 type Benchmarks struct {
@@ -86,31 +90,6 @@ func New(cfg *config.C) (Config, error) {
 	}
 
 	return c, nil
-}
-
-// Update replaces values of those keys in the current config which are
-// present in the incoming config.
-//
-// NOTE(yashtewari): This will be removed with the planned update to restart the
-// beat with the new config.
-func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
-	log.Infof("Updating config with the following keys: %v", cfg.FlattenedKeys())
-
-	if err := cfg.Unpack(&c); err != nil {
-		return err
-	}
-
-	// Check if the incoming config has streams.
-	if cfg.HasField("streams") {
-		uc, err := New(cfg)
-		if err != nil {
-			return err
-		}
-
-		c.Streams = uc.Streams
-	}
-
-	return nil
 }
 
 // GetActivatedRules returns the activated rules from the config.
