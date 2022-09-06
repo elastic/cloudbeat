@@ -151,7 +151,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 		s.Equal(test.fetcherName, parsedList[0].name)
 		s.NoError(err)
 
-		err = reg.RegisterFetchers(parsedList)
+		err = reg.RegisterFetchers(parsedList, nil)
 		s.NoError(err)
 		s.Equal(1, len(reg.Keys()))
 
