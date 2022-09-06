@@ -99,8 +99,7 @@ def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
 
     # Wait for all agents to send resources to ES
     res = wait_for_cycle_completion(elastic_client=elastic_client, nodes=nodes)
-    assert res, \
-        f"Not all nodes have completed a cycle within the configured threshold"
+    assert res, 'Not all nodes have completed a cycle within the configured threshold'
 
     result = elastic_client.get_index_data(index_name=elastic_client.index,
                                            query=query,
@@ -110,4 +109,3 @@ def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
     for resource in result['hits']['hits']:
         assert leader_node == resource['_source']['agent']['name'], \
             f"Multiple agents send k8s_objects, leader: {leader_node}, resource: {resource['_source']}"
-

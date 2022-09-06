@@ -17,7 +17,6 @@ on:
     - cron: '00 02 * * 6'
 
 env:
-  K8S_MANIFEST_DIR: deploy/k8s/kustomize/base
   GO_VERSION: 1.18.4
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

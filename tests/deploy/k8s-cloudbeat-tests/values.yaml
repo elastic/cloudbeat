@@ -13,6 +13,7 @@ image:
 
 testData:
   marker: rules
+  agentName: cloudbeat
 
 imagePullSecrets: []
 nameOverride: ""
@@ -46,7 +47,7 @@ securityContext:
 
 service:
   type: ClusterIP
-  port: 80
+  #port: 80
 
 ingress:
   enabled: false
@@ -97,7 +98,22 @@ job:
 cloudbeat:
   deploy: false
 
+standaloneAgent:
+  deploy: false
+
 elasticsearch:
+  imageTag: "8.5.0-SNAPSHOT"
+
+  protocol: http
+
+  xpackSecurity:
+    enabled: false
+
+  secret:
+    enabled: true
+    user: "kibana_system"
+    password: "changeme" # generated randomly if not defined
+
   # replicas/masters
   replicas: 1
   minimumMasterNodes: 1
@@ -123,12 +139,21 @@ elasticsearch:
     storageClassName: "standard"
     resources:
       requests:
-        storage: 100M
+        storage: 500M
 
   # Storage settings
-  persistence:
-    enabled: false
+#  persistence:
+#    enabled: false
 
   #disable ES tests
   tests:
     enabled: false
+
+
+kibana:
+  imageTag: "8.4.0-SNAPSHOT"
+
+  resources:
+    requests:
+      cpu: "1000m"
+      memory: "1Gi"

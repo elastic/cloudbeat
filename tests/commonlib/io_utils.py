@@ -287,3 +287,19 @@ class FsClient:
         # Write the newly built config
         with current_resource.open(mode="w") as f:
             yaml.dump(r_file, f)
+
+    @staticmethod
+    def get_beat_status_from_json(response: str, beat_name: str) -> str:
+        """
+        This function parses status response json retrieved as json and
+        returns information from Application.Message field.
+        @param response: Elastic-agent status string (param --output json)
+        @param beat_name: The name of beat the status should be retrieved
+        @return: status message string
+        """
+        response = json.loads(response)
+        beat_list = response['Applications']
+        for beat in beat_list:
+            if beat['Name'] == beat_name:
+                return beat['Message']
+        return ''

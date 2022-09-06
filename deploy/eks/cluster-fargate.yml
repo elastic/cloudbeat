@@ -1,5 +1,4 @@
 # An example of ClusterConfig with a normal nodegroup and a Fargate profile.
----
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 

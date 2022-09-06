@@ -12,7 +12,7 @@ kubernetes = "^23.3.0"
 elasticsearch = "^8.1.0"
 allure-pytest = "^2.9.45"
 pytest-xdist = "^2.5.0"
-docker = "^5.0.3"
+docker = "^6.0.0"
 pytest-order = "^1.0.1"
 pytest-dependency = "^0.5.1"
 pylint = "^2.14.2"
@@ -28,12 +28,15 @@ addopts = "-p no:warnings -s -v --alluredir=tests/allure/results --clean-allured
 markers = [
     # tests used in cloudbeat CI
     "pre_merge",
+    "post_merge_agent",
     # test target markers
     "file_system_rules",
     "k8s_object_rules",
     "process_api_server_rules",
     "process_controller_manager_rules",
     "process_etcd_rules",
+    "process_api_server_rules",
+    "process_scheduler_rules",
     "process_kubelet_rules",
-    "process_scheduler_rules"
+    "eks_file_system_rules"
 ]
