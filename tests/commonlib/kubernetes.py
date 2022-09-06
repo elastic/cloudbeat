@@ -19,6 +19,7 @@ RESOURCE_SERVICE_ACCOUNT = 'ServiceAccount'
 LEASE_NAME = "cloudbeat-cluster-leader"
 >>>>>>> 036581d (Add integration test for leader election (#324))
 
+
 class KubernetesHelper:
 
     def __init__(self, is_in_cluster_config: bool = False):
@@ -196,15 +197,15 @@ class KubernetesHelper:
 
         patch_body = kwargs.pop('body')
 
-        pod = self.get_resource(resource_type, **kwargs)
+        self.get_resource(resource_type, **kwargs)
         self.delete_resources(resource_type=resource_type, **kwargs)
         deleted = self.wait_for_resource(resource_type=resource_type, status_list=['DELETED'], **kwargs)
 
         if not deleted:
-            raise ValueError(f'could not delete Pod: {kwargs}')
+            raise ValueError(f'could not delete {resource_type}: {kwargs}')
 
         return self.create_patched_resource(resource_type, patch_body)
-    
+
     def create_patched_resource(self, patch_resource_type, patch_body):
         """
         """
@@ -229,17 +230,17 @@ class KubernetesHelper:
             done = self.wait_for_resource(resource_type=resource_type, status_list=["RUNNING", "ADDED"], **relevant_metadata)
             if done:
                 patched_resource = created_resource
-            
+
             break
-        
+
         return patched_resource
-    
-    def patch_resource_body(self, body: Union[list,dict], patch: Union[list,dict]) -> Union[list,dict]:
+
+    def patch_resource_body(self, body: Union[list, dict], patch: Union[list, dict]) -> Union[list, dict]:
         """
         """
         if type(body) != type(patch):
             raise ValueError(f'Cannot compare {type(body)}: {body} with {type(patch)}: {patch}')
-        
+
         if isinstance(body, dict):
             for key, val in patch.items():
                 if key not in body:
@@ -249,23 +250,23 @@ class KubernetesHelper:
                         body[key] = self.patch_resource_body(body[key], val)
                     else:
                         body[key] = val
-        
+
         elif isinstance(body, list):
-            for i, val in enumerate(body):
-                if i >= len(patch):
+            for i, val in enumerate(patch):
+                if i >= len(body):
                     break
 
                 if isinstance(val, list) or isinstance(val, dict):
                     body[i] = self.patch_resource_body(body[i], val)
                 else:
                     body[i] = val
-            
+
             if len(patch) > len(body):
                 body += val[len(patch):]
-                
+
         else:
             raise ValueError(f'Invalid body {body} of type {type(body)}')
-        
+
         return body
 
     def list_resources(self, resource_type: str, **kwargs):
