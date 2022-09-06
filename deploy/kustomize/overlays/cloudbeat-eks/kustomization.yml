@@ -14,3 +14,4 @@ secretGenerator:
 
 patchesStrategicMerge:
   - daemonset.yml
+  - config-map.yml

@@ -35,12 +35,8 @@ func (v *validator) Validate(cfg *agentconfig.C) error {
 	if err != nil {
 		return fmt.Errorf("Could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
 	}
-
-	if len(c.Streams) == 0 {
-		return fmt.Errorf("No streams received in reconfiguration %v", cfg.FlattenedKeys())
-	}
-
-	if c.Streams[0].RuntimeCfg == nil {
+	
+	if c.RuntimeCfg == nil {
 		return fmt.Errorf("RuntimeCfg is not present in reconfiguration %v", cfg.FlattenedKeys())
 	}
 
