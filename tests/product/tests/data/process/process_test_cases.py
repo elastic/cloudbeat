@@ -1301,51 +1301,59 @@ etcd_rules = [
 
 api_server_rules = [
     *cis_1_2_2,
-    *skip_param_case(skip_list=[*cis_1_2_3,
-                                *cis_1_2_4,
-                                *cis_1_2_5
-                                ],
-                     data_to_report=SkipReportData(
-                         skip_reason="This case fails and breaks cluster")
-                     ),
+    *cis_1_2_3,
+    *cis_1_2_4,
+    *cis_1_2_5,
+    # *skip_param_case(skip_list=[*cis_1_2_3,
+    #                             *cis_1_2_4,
+    #                             *cis_1_2_5
+    #                             ],
+    #                  data_to_report=SkipReportData(
+    #                      skip_reason="This case fails and breaks cluster"
+    #                  )),
     *cis_1_2_6,
     *cis_1_2_7,
     *cis_1_2_8,
-    *skip_param_case(skip_list=[*cis_1_2_9,
-                                *cis_1_2_10
-                                ],
-                     data_to_report=SkipReportData(
-                         skip_reason="This case fails and breaks cluster")
-                     ),
+    *cis_1_2_9,
+    *cis_1_2_10,
+    # *skip_param_case(skip_list=[*cis_1_2_9,
+    #                             *cis_1_2_10
+    #                             ],
+    #                  data_to_report=SkipReportData(
+    #                      skip_reason="This case fails and breaks cluster"
+    #                  )),
     *cis_1_2_11,
     *cis_1_2_12,
     *cis_1_2_13,
     *cis_1_2_14,
     *cis_1_2_15,
     *cis_1_2_16,
-    *skip_param_case(skip_list=[*cis_1_2_17],
-                     data_to_report=SkipReportData(
-                         skip_reason="This case fails and breaks cluster")
-                     ),
+    *cis_1_2_17,
+    # *skip_param_case(skip_list=[*cis_1_2_17],
+    #                  data_to_report=SkipReportData(
+    #                      skip_reason="This case fails and breaks cluster"
+    #                  )),
     *cis_1_2_18,
     *cis_1_2_19,
     *cis_1_2_20,
     *cis_1_2_21,
     *cis_1_2_22,
-    *skip_param_case(skip_list=[*cis_1_2_23],
-                     data_to_report=SkipReportData(
-                         skip_reason="This case fails and breaks cluster")
-                     ),
+    *cis_1_2_23,
+    # *skip_param_case(skip_list=[*cis_1_2_23],
+    #                  data_to_report=SkipReportData(
+    #                      skip_reason="This case fails and breaks cluster"
+    #                  )),
     *cis_1_2_24,
     *cis_1_2_25,
     *cis_1_2_26,
     *cis_1_2_27,
     *cis_1_2_28,
     *cis_1_2_29,
-    *skip_param_case(skip_list=[*cis_1_2_32],
-                     data_to_report=SkipReportData(
-                         skip_reason="This case fails and breaks cluster")
-                     )
+    *cis_1_2_32,
+    # *skip_param_case(skip_list=[*cis_1_2_32],
+    #                  data_to_report=SkipReportData(
+    #                      skip_reason="This case fails and breaks cluster"
+    #                  ))
 ]
 
 controller_manager_rules = [
