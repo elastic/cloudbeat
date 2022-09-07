@@ -170,8 +170,9 @@ func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
 		expected EvaluatorConfig
 	}{
 		{`
-evaluator:
-  decision_logs: true
+  streams:
+    - evaluator:
+       decision_logs: true
 `,
 			EvaluatorConfig{
 				DecisionLogs: true,
