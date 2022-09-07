@@ -31,13 +31,9 @@ type validator struct {
 }
 
 func (v *validator) Validate(cfg *agentconfig.C) error {
-	c, err := config.New(cfg)
+	_, err := config.New(cfg)
 	if err != nil {
-		return fmt.Errorf("Could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
-	}
-	
-	if c.RuntimeCfg == nil {
-		return fmt.Errorf("RuntimeCfg is not present in reconfiguration %v", cfg.FlattenedKeys())
+		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
 	}
 
 	return nil

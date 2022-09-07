@@ -47,12 +47,13 @@ func TestBundleTestSuite(t *testing.T) {
 }
 
 func (s *BundleTestSuite) TestCreateServer() {
-	_, err := StartServer(context.Background(), config.Config{
+	config := config.Config{
 		Stream: config.Stream{
 			Period: 4 * time.Hour,
 		},
 		Type: config.InputTypeVanillaK8s,
-	})
+	}
+	_, err := StartServer(context.Background(), config)
 	s.NoError(err)
 
 	var tests = []struct {

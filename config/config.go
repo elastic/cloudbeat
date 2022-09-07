@@ -90,6 +90,7 @@ func New(cfg *config.C) (Config, error) {
 	if err := cfg.Unpack(&c); err != nil {
 		return Config{}, err
 	}
+
 	if c.Streams == nil || len(c.Streams) == 0 {
 		return Config{}, fmt.Errorf("could not find streams config")
 	}
