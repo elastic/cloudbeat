@@ -23,12 +23,13 @@ package config
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/libbeat/processors"
 	"time"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
+
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
 
 const DefaultNamespace = "default"
@@ -55,6 +56,7 @@ type Stream struct {
 	Fetchers   []*config.C             `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
+	Evaluator  EvaluatorConfig         `config:"evaluator"`
 	Processors processors.PluginConfig `config:"processors"`
 }
 
@@ -65,6 +67,10 @@ type Config struct {
 
 type RuntimeConfig struct {
 	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
+}
+
+type EvaluatorConfig struct {
+	DecisionLogs bool `config:"decision_logs"`
 }
 
 type Benchmarks struct {

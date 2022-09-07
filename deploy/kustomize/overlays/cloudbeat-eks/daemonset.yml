@@ -1,5 +1,4 @@
 # Deploy a cloudbeat instance per node for cis policy
----
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -8,6 +7,9 @@ metadata:
   labels:
     k8s-app: cloudbeat
 spec:
+  selector:
+      matchLabels:
+        k8s-app: cloudbeat
   template:
     spec:
       containers:

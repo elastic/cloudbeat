@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cloudbeat
+  namespace: kube-system
+  labels:
+    k8s-app: cloudbeat
+spec:
+  template:
+    spec:
+      containers:
+        - name: cloudbeat
+          env:
+          - name: ES_HOST
+            value: "https://elasticsearch:9200"
+          - name: KIBANA_HOST
+            value: "https://kibana:5601"
+          - name: SSL_CERT_DIR
+            value: /etc/ssl/elastic-package
+          volumeMounts:
+          - mountPath: /etc/ssl/elastic-package
+            name: elastic-package-ca
+            readOnly: true
+      volumes:
+        - name: elastic-package-ca
+          secret:
+            defaultMode: 420
+            secretName: elastic-package-certs
