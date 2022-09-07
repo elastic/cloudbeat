@@ -17,7 +17,6 @@ on:
     - cron: '00 02 * * 6'
 
 env:
-  GO_VERSION: 1.18.4
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,7 +75,10 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
-            
+
+      - name: Fetch Go version from .go-version
+        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
@@ -125,7 +127,7 @@ jobs:
           cache-from: type=local,mode=max,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
-      
+
       - name: Cache docker images
         uses: actions/cache@v2
         with:
@@ -154,14 +156,14 @@ jobs:
 
       - uses: azure/setup-helm@v1
         id: install
-      
+
       - uses: extractions/setup-just@v1
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
         with:
           config: deploy/k8s/kind/kind-config.yml
-          cluster_name: kind-mono 
+          cluster_name: kind-mono
 
       - name: Cache docker images
         uses: actions/cache@v2
@@ -181,7 +183,7 @@ jobs:
           just deploy-tests-helm-ci ${{ matrix.test-target }}
 
       - name: Run Tests
-        id: run_tests 
+        id: run_tests
         run: |
           just run-tests-ci
 
