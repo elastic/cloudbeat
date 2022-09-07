@@ -8,12 +8,11 @@
 # https://www.elastic.co/guide/en/beats/cloudbeat/index.html
 
 cloudbeat:
-  # Defines how often an event is sent to the output
-  period: 4h
   type: cloudbeat/cis_k8s # cloudbeat/cis_eks in case of EKS configuration
-  fetchers:
-    # Vanilla K8s Fetchers configuration
-    vanilla:
+  streams:
+    # Defines how often an event is sent to the output
+    period: 4h
+    fetchers:
       - name: kube-api
       - name: process
         directory: "/hostfs"
@@ -41,24 +40,24 @@ cloudbeat:
           "/hostfs/var/lib/etcd",
           "/hostfs/etc/kubernetes/pki"
         ]
-    # EKS Fetchers configuration
-    eks:
-      - name: kube-api
-      - name: process
-        directory: "/hostfs"
-        processes:
-          kubelet:
-            config-file-arguments:
-              - config
-      - name: aws-ecr
-      - name: aws-elb
-      - name: file-system
-        patterns: [
-          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
-          "/hostfs/var/lib/kubelet/kubeconfig",
-        ]
-  evaluator:
-    decision_logs: false
+
+#    # EKS Fetchers configuration
+#      - name: kube-api
+#      - name: process
+#        directory: "/hostfs"
+#        processes:
+#          kubelet:
+#            config-file-arguments:
+#              - config
+#      - name: aws-ecr
+#      - name: aws-elb
+#      - name: file-system
+#        patterns: [
+#          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
+#          "/hostfs/var/lib/kubelet/kubeconfig",
+#        ]
+    evaluator:
+      decision_logs: false
 # ================================== General ===================================
 
 # The name of the shipper that publishes the network data. It can be used to group
@@ -1017,7 +1016,7 @@ output.elasticsearch:
 
   # Permissions to use for file creation. The default is 0600.
   #permissions: 0600
-  
+
   # Configure automatic file rotation on every startup. The default is true.
   #rotate_on_startup: true
 
