@@ -8,7 +8,6 @@ on:
     types: [assigned, opened, synchronize, reopened]
 
 env:
-  GO_VERSION: 1.18.4
   DEV: true
   SNAPSHOT: true
   PLATFORMS: linux/amd64
@@ -26,6 +25,9 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+
+      - name: Fetch Go version from .go-version
+        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v2
