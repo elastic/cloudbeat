@@ -29,11 +29,11 @@ const (
 	// wait to force acquire leadership. This is measured against time of
 	// last observed ack.
 	//
-	LeaseDuration = 15 * time.Second
+	LeaseDuration = 5 * time.Second
 	// RenewDeadline is the duration that the acting manager will retry
 	// refreshing leadership before giving up.
 	//
-	RenewDeadline = 10 * time.Second
+	RenewDeadline = 3 * time.Second
 
 	// RetryPeriod is the duration the LeaderElector clients should wait
 	// between tries of actions.
@@ -41,7 +41,10 @@ const (
 	RetryPeriod = 2 * time.Second
 
 	// FirstLeaderDeadline is the duration to wait for the leader to acquire the lease for the first time.
-	FirstLeaderDeadline = 5 * time.Second
+	// Known issue: the lease is not released when we delete an agent deployment,
+	// it's causing the new agents to think that the old agent still hold the lease,
+	// therefore, we wait for at least a LeaseDuration + few seconds.
+	FirstLeaderDeadline = LeaseDuration + 5*time.Second
 
 	PodNameEnvar = "POD_NAME"
 
