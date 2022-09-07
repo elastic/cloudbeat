@@ -10,7 +10,6 @@ env:
   AWS_ECR_KEY: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
   AWS_ECR_SECRET: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
   AWS_ECR_REGION: ${{ secrets.AWS_ECR_REGION_DEVELOP }}
-  GO_VERSION: 1.18.4
 
 jobs:
   publish_image_cloudbeat:
@@ -27,6 +26,9 @@ jobs:
           registry: ${{ env.CLOUDBEAT_REGISTRY }}
           username: ${{ secrets.AWS_ECR_KEY_DEVELOP }}
           password: ${{ secrets.AWS_ECR_SECRET_DEVELOP }}
+
+      - name: Fetch Go version from .go-version
+        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v2
