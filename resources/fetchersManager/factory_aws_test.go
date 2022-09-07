@@ -167,16 +167,17 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 }
 
 func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetcherName string) config.Config {
-	conf := config.DefaultConfig
+	conf := config.Config{}
 	conf.Type = config.InputTypeEks
 	fetcherConfig := agentconfig.NewConfig()
 	err := fetcherConfig.SetString("name", -1, fetcherName)
 	s.NoError(err)
-	conf.Fetchers.Eks = append(conf.Fetchers.Eks, fetcherConfig)
-	stream := config.Stream{
+
+	conf.Stream = config.Stream{
 		AWSConfig:  awsConfig,
 		RuntimeCfg: nil,
+		Fetchers:   []*agentconfig.C{fetcherConfig},
 	}
-	conf.Streams = append(conf.Streams, stream)
+
 	return conf
 }

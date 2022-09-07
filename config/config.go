@@ -72,17 +72,18 @@ type Benchmarks struct {
 	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
+var DefaultConfig = AgentInput{
+	Streams: []Stream{{
+		Period: 4 * time.Hour,
+	}},
+}
+
 func New(cfg *config.C) (Config, error) {
-	c := AgentInput{
-		Streams: []Stream{{
-			Period: 4 * time.Hour,
-		}},
-	}
+	c := DefaultConfig
 
 	if err := cfg.Unpack(&c); err != nil {
 		return Config{}, err
 	}
-
 	if c.Streams == nil || len(c.Streams) == 0 {
 		return Config{}, fmt.Errorf("could not find streams config")
 	}

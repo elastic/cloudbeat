@@ -171,9 +171,9 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		err := numCfg.SetString("name", -1, test.key)
 		s.NoError(err, "Could not set name: %v", err)
 
-		conf := config.DefaultConfig
+		conf := config.Config{}
 		conf.Type = test.integrationType
-		conf.Fetchers.Vanilla = append(conf.Fetchers.Vanilla, numCfg)
+		conf.Stream.Fetchers = []*agentconfig.C{numCfg}
 
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.NoError(err)
@@ -201,12 +201,12 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 	}
 
 	for _, test := range tests {
-		conf := config.DefaultConfig
+		conf := config.Config{}
 		numCfg := numberConfig(test.value)
 		err := numCfg.SetString("name", -1, test.key)
 		s.NoError(err, "Could not set name: %v", err)
 
-		conf.Fetchers.Vanilla = append(conf.Fetchers.Vanilla, numCfg)
+		conf.Stream.Fetchers = []*agentconfig.C{numCfg}
 
 		_, err = s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.Error(err)
@@ -225,9 +225,8 @@ streams:
       activated_rules:
         cis_k8s:
           - a
-fetchers:
-  vanilla:
-  - name: process
+    fetchers:
+     - name: process
 `,
 		},
 		{
@@ -238,9 +237,8 @@ streams:
       activated_rules:
         cis_k8s:
           - a
-fetchers:
-  eks:
-  - name: aws-eks
+    fetchers:
+     - name: aws-eks
 `,
 		},
 	}
@@ -253,13 +251,8 @@ fetchers:
 
 		reg := NewFetcherRegistry(s.log)
 		var fetcher config.Fetcher
-		if len(c.Fetchers.Vanilla) > 0 {
-			err = c.Fetchers.Vanilla[0].Unpack(&fetcher)
-			s.NoError(err)
-		} else {
-			err = c.Fetchers.Eks[0].Unpack(&fetcher)
-			s.NoError(err)
-		}
+		err = c.Fetchers[0].Unpack(&fetcher)
+		s.NoError(err)
 
 		s.F.RegisterFactory(fetcher.Name, &numberFetcherFactory{})
 		parsedList, err := s.F.ParseConfigFetchers(s.log, c, s.resourceCh)
