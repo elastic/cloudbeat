@@ -31,6 +31,10 @@ type validator struct {
 }
 
 func (v *validator) Validate(cfg *agentconfig.C) error {
+	if !cfg.HasField("streams") {
+		return fmt.Errorf("no streams in config")
+	}
+
 	_, err := config.New(cfg)
 	if err != nil {
 		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)

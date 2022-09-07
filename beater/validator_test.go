@@ -57,17 +57,6 @@ not_streams:
           - e
 `)
 
-	configNoRuntimeCfg := config.MustNewConfigFrom(`
-streams:
-  - not_runtime_cfg:
-      activated_rules:
-        cis_k8s:
-          - a
-          - b
-          - c
-          - d
-          - e
-`)
 	configWithRuntimeCfg := config.MustNewConfigFrom(`
 streams:
   - runtime_cfg:
@@ -87,9 +76,6 @@ streams:
 		{
 			true,
 			config.NewConfig(),
-		}, {
-			true,
-			configNoRuntimeCfg,
 		}, {
 			true,
 			configNoStreams,
