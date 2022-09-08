@@ -2,6 +2,7 @@
 
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
+cspPoliciesPkg := "github.com/elastic/csp-security-policies@latest"
 
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yml --wait 30s
@@ -25,7 +26,12 @@ build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-
 load-cloudbeat-image:
   kind load docker-image cloudbeat:latest --name kind-mono
 
+build-opa-bundle:
+  CSP_POLICIES_PKG_DIR=$( go list -mod=mod -m -json {{cspPoliciesPkg}} | jq -r '.Dir' ) && \
+  opa build -b ${CSP_POLICIES_PKG_DIR}/bundle -e ${CSP_POLICIES_PKG_DIR}/bundle/compliance
+
 build-cloudbeat:
+  just build-opa-bundle
   GOOS=linux go mod vendor
   GOOS=linux go build -v && docker build -t cloudbeat .
 
@@ -157,7 +163,7 @@ collect-logs target:
 
   mkdir -p {{TEST_LOGS_DIRECTORY}}
   echo '' > $LOG_FILE
-  
+
   STATUS={{POD_STATUS_UNKNOWN}}
   while [ $STATUS = {{POD_STATUS_UNKNOWN}} ] || [ $STATUS = {{POD_STATUS_PENDING}} ] || [ $STATUS = {{POD_STATUS_RUNNING}} ]; do
     sleep 5
