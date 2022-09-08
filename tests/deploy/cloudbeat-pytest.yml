@@ -144,10 +144,8 @@ data:
     cloudbeat:
       type: cloudbeat/cis_k8s
       streams:
-        - access_key_id: ${AWS_ACCESS_KEY_ID:no_access_key_was_set}
-          secret_access_key: ${AWS_SECRET_ACCESS_KEY:no_secret_was_set}
           # Defines how often an event is sent to the output
-          period: 30s
+        - period: 5s
           fetchers:
             - name: kube-api
             - name: process
@@ -192,7 +190,7 @@ data:
           #          "/hostfs/var/lib/kubelet/kubeconfig",
           #        ]
           evaluator:
-            decision_logs: false
+            decision_logs: true
 
     # =================================== Kibana ===================================
     setup.kibana:

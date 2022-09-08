@@ -91,11 +91,10 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	}
 
 	var rules *config.Benchmarks
-	if cfg.RuntimeCfg == nil {
-		log.Info("no runtime config supplied")
-		rules = nil
-	} else {
+	if cfg.RuntimeCfg != nil {
 		rules = cfg.RuntimeCfg.ActivatedRules
+	} else {
+		log.Warn("no runtime config supplied")
 	}
 
 	return &OpaEvaluator{
