@@ -1,10 +1,9 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: "[BUG]"
-labels: ["bug", "csp: last mile"]
+about: Report a bug to help us improve
+title: 
+labels: ["bug", "Team: Cloud Security Posture"]
 assignees: ''
-
 ---
 
 **Describe the bug**
@@ -22,14 +21,19 @@ Steps to reproduce the behavior:
 **Expected behavior**
 
 
+<!-- Optinal: Please uncomment if relevant
 **Screenshots**
+-->
 
-
+<!-- Optinal: Please uncomment if relevant
 **Desktop (please complete the following information):**
  - OS: 
  - Browser: 
  - Kibana Version: 
  - Endpoint Version:
  - Other Version: 
+ -->
 
+ <!-- Optinal: Please uncomment if relevant
 **Additional context**
+-->
