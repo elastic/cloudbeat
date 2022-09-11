@@ -12,7 +12,6 @@ on:
 
 env:
   K8S_MANIFEST_DIR: deploy
-  GO_VERSION: 1.18.4
 
 jobs:
   unit_tests:
@@ -22,6 +21,9 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+
+      - name: Fetch Go version from .go-version
+        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -69,6 +71,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Fetch Go version from .go-version
+        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
