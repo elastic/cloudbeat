@@ -69,6 +69,10 @@ streams:
           - e
 `)
 
+	configWithEmptyStreams := config.MustNewConfigFrom(`
+streams:
+`)
+
 	testcases := []struct {
 		err bool
 		cfg *config.C
@@ -82,6 +86,9 @@ streams:
 		}, {
 			false,
 			configWithRuntimeCfg,
+		}, {
+			false,
+			configWithEmptyStreams,
 		},
 	}
 

@@ -167,8 +167,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 }
 
 func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetcherName string) config.Config {
-	conf := config.Config{}
-	conf.Type = config.InputTypeEks
+	conf := config.Config{Type: config.InputTypeEks}
 	fetcherConfig := agentconfig.NewConfig()
 	err := fetcherConfig.SetString("name", -1, fetcherName)
 	s.NoError(err)

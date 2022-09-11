@@ -7,4 +7,3 @@ resources:
   - role-binding.yml
   - role.yml
   - service-account.yml
-  - config-map.yml

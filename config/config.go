@@ -78,7 +78,7 @@ type Benchmarks struct {
 }
 
 var DefaultConfig = AgentInput{
-	Type: InputTypeEks,
+	Type: InputTypeVanillaK8s,
 	Streams: []Stream{{
 		Period: 4 * time.Hour,
 	}},

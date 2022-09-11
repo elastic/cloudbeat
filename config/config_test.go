@@ -48,11 +48,12 @@ func (s *ConfigTestSuite) SetupTest() {
 func (s *ConfigTestSuite) TestNew() {
 	var tests = []struct {
 		config                 string
-		expectedActivatedRules []string
+		expectedActivatedRules *Benchmarks
 		expectedType           string
 		expectedAccessKey      string
 		expectedSecret         string
 		expectedSessionToken   string
+		expectedFetchers       int
 	}{
 		{
 			`
@@ -66,15 +67,47 @@ func (s *ConfigTestSuite) TestNew() {
             - c
             - d
             - e
+      fetchers:
+        - name: a
+          directory: b
+        - name: b
+          directory: b
+`,
+			&Benchmarks{CisK8s: []string{"a", "b", "c", "d", "e"}},
+			"cloudbeat/cis_k8s",
+			"",
+			"",
+			"",
+			2,
+		}, {
+			`
+   type : cloudbeat/cis_eks
+   streams:
+    - runtime_cfg:
+        activated_rules:
+          cis_eks:
+            - a
+            - b
+            - c
+            - d
+            - e
       access_key_id: key
       secret_access_key: secret
       session_token: session
+      fetchers:
+        - name: a
+          directory: b
+        - name: b
+          directory: b
+        - name: c
+          directory: c
 `,
-			[]string{"a", "b", "c", "d", "e"},
-			"cloudbeat/cis_k8s",
+			&Benchmarks{CisEks: []string{"a", "b", "c", "d", "e"}},
+			"cloudbeat/cis_eks",
 			"key",
 			"secret",
 			"session",
+			3,
 		},
 	}
 
@@ -86,10 +119,11 @@ func (s *ConfigTestSuite) TestNew() {
 		s.NoError(err)
 
 		s.Equal(test.expectedType, c.Type)
-		s.Equal(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules.CisK8s)
+		s.EqualValues(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules)
 		s.Equal(test.expectedAccessKey, c.AWSConfig.AccessKeyID)
 		s.Equal(test.expectedSecret, c.AWSConfig.SecretAccessKey)
 		s.Equal(test.expectedSessionToken, c.AWSConfig.SessionToken)
+		s.Equal(test.expectedFetchers, len(c.Fetchers))
 	}
 }
 
