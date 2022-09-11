@@ -34,6 +34,24 @@ CLOUDBEAT_VERSION=$(shell grep defaultBeatVersion cmd/version.go | cut -d'=' -f2
 -include config.mk
 
 ##############################################################################
+# Getting Started.
+##############################################################################
+
+## hermit
+
+.PHONY: hermit
+hermit:
+	curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
+
+.PHONY: activate-hermit
+active-hermit:
+	. ./bin/activate-hermit
+
+.PHONY: deactivate-hermit
+deactivate-hermit:
+	. ./bin/activate-hermit
+
+##############################################################################
 # Rules for building and unit-testing cloudbeat.
 ##############################################################################
 
@@ -93,7 +111,7 @@ go-generate:
 
 notice: NOTICE.txt
 NOTICE.txt: $(PYTHON) go.mod utils/go.mod
-	@$(PYTHON) scripts/make/generate_notice.py . 
+	@$(PYTHON) scripts/make/generate_notice.py .
 
 .PHONY: add-headers
 add-headers: $(GOLICENSER)
