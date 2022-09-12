@@ -30,15 +30,6 @@ contains_key_with_value(object, key, value) {
 	true
 }
 
-# checks if argument contains value (argument format is csv)
-arg_values_contains(arguments, key, value) {
-	argument := arguments[key]
-	values := split(argument, ",")
-	value == values[_]
-} else = false {
-	true
-}
-
 # checks if a value is greater or equals to a minimum value
 greater_or_equal(value, minimum) {
 	to_number(value) >= minimum

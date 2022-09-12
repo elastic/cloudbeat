@@ -1,4 +1,4 @@
-package compliance.lib.data_adapter
+package compliance.policy.process.data_adapter
 
 import data.kubernetes_common.test_data
 

@@ -2,7 +2,6 @@ package compliance.policy.process.ensure_arguments_lte
 
 import data.benchmark_data_adapter
 import data.compliance.lib.common as lib_common
-import data.compliance.policy.process.common as process_common
 import data.compliance.policy.process.data_adapter
 
 process_args := data_adapter.process_args(benchmark_data_adapter.process_args_seperator)
@@ -19,7 +18,7 @@ finding(entity, value) = result {
 
 rule_evaluation(entity, value) = false {
 	e := process_args[entity]
-	process_common.duration_lte(e, value)
+	lib_common.duration_lte(e, value)
 } else = true {
 	true
 }
