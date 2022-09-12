@@ -57,6 +57,17 @@ not_streams:
           - e
 `)
 
+	configNoRuntimeCfg := config.MustNewConfigFrom(`
+streams:
+  - not_runtime_cfg:
+      activated_rules:
+        cis_k8s:
+          - a
+          - b
+          - c
+          - d
+          - e
+`)
 	configWithRuntimeCfg := config.MustNewConfigFrom(`
 streams:
   - runtime_cfg:
@@ -69,10 +80,6 @@ streams:
           - e
 `)
 
-	configWithEmptyStreams := config.MustNewConfigFrom(`
-streams:
-`)
-
 	testcases := []struct {
 		err bool
 		cfg *config.C
@@ -82,13 +89,13 @@ streams:
 			config.NewConfig(),
 		}, {
 			true,
+			configNoRuntimeCfg,
+		}, {
+			true,
 			configNoStreams,
 		}, {
 			false,
 			configWithRuntimeCfg,
-		}, {
-			false,
-			configWithEmptyStreams,
 		},
 	}
 
