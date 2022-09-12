@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
@@ -46,17 +47,15 @@ func (s *ConfigTestSuite) SetupTest() {
 }
 
 func (s *ConfigTestSuite) TestNew() {
-	var tests = []struct {
+	tests := []struct {
 		config                 string
 		expectedActivatedRules []string
 		expectedType           string
-		expectedAccessKey      string
-		expectedSecret         string
-		expectedSessionToken   string
+		expectedAWSConfig      aws.ConfigAWS
 	}{
 		{
 			`
-   type : cloudbeat/cis_k8s
+   type : cloudbeat/cis_eks
    streams:
     - runtime_cfg:
         activated_rules:
@@ -69,12 +68,20 @@ func (s *ConfigTestSuite) TestNew() {
       access_key_id: key
       secret_access_key: secret
       session_token: session
+      shared_credential_file: shared_credential_file
+      credential_profile_name: credential_profile_name
+      role_arn: role_arn
 `,
 			[]string{"a", "b", "c", "d", "e"},
-			"cloudbeat/cis_k8s",
-			"key",
-			"secret",
-			"session",
+			"cloudbeat/cis_eks",
+			aws.ConfigAWS{
+				AccessKeyID:          "key",
+				SecretAccessKey:      "secret",
+				SessionToken:         "session",
+				SharedCredentialFile: "shared_credential_file",
+				ProfileName:          "credential_profile_name",
+				RoleArn:              "role_arn",
+			},
 		},
 	}
 
@@ -87,14 +94,12 @@ func (s *ConfigTestSuite) TestNew() {
 
 		s.Equal(test.expectedType, c.Type)
 		s.Equal(test.expectedActivatedRules, c.Streams[0].RuntimeCfg.ActivatedRules.CisK8s)
-		s.Equal(test.expectedAccessKey, c.Streams[0].AWSConfig.AccessKeyID)
-		s.Equal(test.expectedSecret, c.Streams[0].AWSConfig.SecretAccessKey)
-		s.Equal(test.expectedSessionToken, c.Streams[0].AWSConfig.SessionToken)
+		s.Equal(test.expectedAWSConfig, c.Streams[0].AWSConfig)
 	}
 }
 
 func (s *ConfigTestSuite) TestRuntimeCfgExists() {
-	var tests = []struct {
+	tests := []struct {
 		config   string
 		expected bool
 	}{
@@ -134,7 +139,7 @@ func (s *ConfigTestSuite) TestRuntimeCfgExists() {
 }
 
 func (s *ConfigTestSuite) TestRuntimeConfig() {
-	var tests = []struct {
+	tests := []struct {
 		config   string
 		expected []string
 	}{
@@ -148,7 +153,8 @@ func (s *ConfigTestSuite) TestRuntimeConfig() {
             - b
             - c
             - d
-`, []string{"a", "b", "c", "d"}},
+`, []string{"a", "b", "c", "d"},
+		},
 	}
 
 	for _, test := range tests {
@@ -166,17 +172,19 @@ func (s *ConfigTestSuite) TestRuntimeConfig() {
 }
 
 func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
-	var tests = []struct {
+	tests := []struct {
 		config   string
 		expected EvaluatorConfig
 	}{
-		{`
+		{
+			`
 evaluator:
   decision_logs: true
 `,
 			EvaluatorConfig{
 				DecisionLogs: true,
-			}},
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -191,7 +199,7 @@ evaluator:
 }
 
 func (s *ConfigTestSuite) TestConfigPeriod() {
-	var tests = []struct {
+	tests := []struct {
 		config         string
 		expectedPeriod time.Duration
 	}{
@@ -213,7 +221,7 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 }
 
 func (s *ConfigTestSuite) TestActivatedRulesFrameWork() {
-	var tests = []struct {
+	tests := []struct {
 		config                    string
 		expectedActivatedRules    []string
 		expectedEksActivatedRules []string
