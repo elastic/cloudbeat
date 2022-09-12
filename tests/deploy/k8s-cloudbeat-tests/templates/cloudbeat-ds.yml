@@ -183,7 +183,7 @@ data:
           #          "/hostfs/var/lib/kubelet/kubeconfig",
           #        ]
           evaluator:
-            decision_logs: false
+            decision_logs: true
 
     # =================================== Kibana ===================================
     setup.kibana:
