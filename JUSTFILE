@@ -6,8 +6,6 @@ cspPoliciesPkg := "github.com/elastic/csp-security-policies@latest"
 
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yml --wait 30s
-  ID=$( docker ps --filter name=kind-mono-control-plane --format "{{{{.ID}}" ) && \
-  docker network connect elastic-package-stack_default $ID
 
 install-kind:
   brew install kind
@@ -69,6 +67,10 @@ elastic-stack-up:
 
 elastic-stack-down:
   elastic-package stack down
+
+elastic-stack-connect-kind:
+  ID=$( docker ps --filter name=kind-mono-control-plane --format "{{{{.ID}}" ) && \
+  docker network connect elastic-package-stack_default $ID
 
 ssh-cloudbeat:
     CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \

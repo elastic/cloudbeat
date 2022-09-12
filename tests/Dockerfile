@@ -6,7 +6,7 @@ RUN pip install poetry
 
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry export --without-hashes -f requirements.txt > requirements.txt
+RUN poetry export --without-hashes -f requirements.txt --output requirements.txt
 
 
 FROM python:3.9-slim
