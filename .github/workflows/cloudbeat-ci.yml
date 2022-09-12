@@ -47,6 +47,9 @@ jobs:
       - name: build cloudbeat
         run: make
 
+      - name: build opa bundle
+        run: make BuildOpaBundle
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 

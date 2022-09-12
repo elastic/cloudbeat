@@ -22,6 +22,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -333,4 +334,21 @@ func Config() { mg.Deps(cloudbeat.Update.Config) }
 func PythonEnv() error {
 	_, err := mage.PythonVirtualenv(true)
 	return err
+}
+
+func BuildOpaBundle() error {
+	pkgName := "github.com/elastic/csp-security-policies@latest"
+	cspPoliciesPkgInfo, err := sh.Output("go", "list", "-mod=mod", "-m", "-json", pkgName)
+	if err != nil {
+		return err
+	}
+
+	buffer := []byte(cspPoliciesPkgInfo)
+	var output map[string]interface{}
+	if err = json.Unmarshal(buffer, &output); err != nil {
+		return err
+	}
+
+	dir := output["Dir"].(string)
+	return sh.Run("opa", "build", "-b", dir+"/bundle", "-e", dir+"/bundle/compliance")
 }
