@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
@@ -46,13 +47,11 @@ func (s *ConfigTestSuite) SetupTest() {
 }
 
 func (s *ConfigTestSuite) TestNew() {
-	var tests = []struct {
+	tests := []struct {
 		config                 string
 		expectedActivatedRules *Benchmarks
 		expectedType           string
-		expectedAccessKey      string
-		expectedSecret         string
-		expectedSessionToken   string
+		expectedAWSConfig      aws.ConfigAWS
 		expectedFetchers       int
 	}{
 		{
@@ -75,9 +74,7 @@ func (s *ConfigTestSuite) TestNew() {
 `,
 			&Benchmarks{CisK8s: []string{"a", "b", "c", "d", "e"}},
 			"cloudbeat/cis_k8s",
-			"",
-			"",
-			"",
+			aws.ConfigAWS{},
 			2,
 		}, {
 			`
@@ -94,6 +91,9 @@ func (s *ConfigTestSuite) TestNew() {
       access_key_id: key
       secret_access_key: secret
       session_token: session
+      shared_credential_file: shared_credential_file
+      credential_profile_name: credential_profile_name
+      role_arn: role_arn
       fetchers:
         - name: a
           directory: b
@@ -104,9 +104,14 @@ func (s *ConfigTestSuite) TestNew() {
 `,
 			&Benchmarks{CisEks: []string{"a", "b", "c", "d", "e"}},
 			"cloudbeat/cis_eks",
-			"key",
-			"secret",
-			"session",
+			aws.ConfigAWS{
+				AccessKeyID:          "key",
+				SecretAccessKey:      "secret",
+				SessionToken:         "session",
+				SharedCredentialFile: "shared_credential_file",
+				ProfileName:          "credential_profile_name",
+				RoleArn:              "role_arn",
+			},
 			3,
 		},
 	}
@@ -120,15 +125,13 @@ func (s *ConfigTestSuite) TestNew() {
 
 		s.Equal(test.expectedType, c.Type)
 		s.EqualValues(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules)
-		s.Equal(test.expectedAccessKey, c.AWSConfig.AccessKeyID)
-		s.Equal(test.expectedSecret, c.AWSConfig.SecretAccessKey)
-		s.Equal(test.expectedSessionToken, c.AWSConfig.SessionToken)
+		s.Equal(test.expectedAWSConfig, c.AWSConfig)
 		s.Equal(test.expectedFetchers, len(c.Fetchers))
 	}
 }
 
 func (s *ConfigTestSuite) TestRuntimeCfgExists() {
-	var tests = []struct {
+	tests := []struct {
 		config   string
 		expected bool
 	}{
@@ -168,7 +171,7 @@ func (s *ConfigTestSuite) TestRuntimeCfgExists() {
 }
 
 func (s *ConfigTestSuite) TestRuntimeConfig() {
-	var tests = []struct {
+	tests := []struct {
 		config   string
 		expected []string
 	}{
@@ -182,7 +185,8 @@ func (s *ConfigTestSuite) TestRuntimeConfig() {
             - b
             - c
             - d
-`, []string{"a", "b", "c", "d"}},
+`, []string{"a", "b", "c", "d"},
+		},
 	}
 
 	for _, test := range tests {
@@ -199,7 +203,7 @@ func (s *ConfigTestSuite) TestRuntimeConfig() {
 }
 
 func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
-	var tests = []struct {
+	tests := []struct {
 		config   string
 		expected EvaluatorConfig
 	}{
@@ -210,7 +214,8 @@ func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
 `,
 			EvaluatorConfig{
 				DecisionLogs: true,
-			}},
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -225,7 +230,7 @@ func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
 }
 
 func (s *ConfigTestSuite) TestConfigPeriod() {
-	var tests = []struct {
+	tests := []struct {
 		config         string
 		expectedPeriod time.Duration
 	}{
@@ -259,7 +264,7 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 }
 
 func (s *ConfigTestSuite) TestActivatedRulesFrameWork() {
-	var tests = []struct {
+	tests := []struct {
 		config                    string
 		expectedActivatedRules    []string
 		expectedEksActivatedRules []string
