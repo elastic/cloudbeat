@@ -34,6 +34,11 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v1
+        with:
+          version: 0.42
+
       - name: cache go dependencies
         uses: actions/cache@v2
         with:
