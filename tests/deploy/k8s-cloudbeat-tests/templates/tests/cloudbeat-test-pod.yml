@@ -16,7 +16,7 @@ spec:
     - /bin/sh
     - -c
     - |
-      pytest -rA --disable-warnings -m ${TEST_MARKER} --alluredir=/usr/src/app/tests/report
+      pytest -rA --disable-warnings -m ${TEST_MARKER} ${RANGE_FLAG} ${TEST_RANGE} --alluredir=/usr/src/app/tests/report
     envFrom:
       - configMapRef:
           name: {{ .Values.serviceAccount.name }}-configmap
