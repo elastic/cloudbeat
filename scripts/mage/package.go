@@ -21,13 +21,25 @@ import (
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
 )
 
+const opaBundle = "bundle.tar.gz"
+
 // CustomizePackaging modifies the device in the configuration files based on
 // the target OS.
 func CustomizePackaging() {
+	bundleDir := devtools.PackageFile{
+		Mode:   0o644,
+		Source: opaBundle,
+		//Target: "/bundles/",
+		Config: true,
+	}
+
 	for _, args := range devtools.Packages {
 		if len(args.Types) == 0 {
 			continue
 		}
+
+		args.Spec.Files["/bundles/bundle.tar.gz"] = bundleDir
+
 		// Remove files unused by cloudbeat.
 		for filename, filespec := range args.Spec.Files {
 			switch filespec.Source {

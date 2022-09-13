@@ -2,7 +2,7 @@
 
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
-cspPoliciesPkg := "github.com/elastic/csp-security-policies@latest"
+cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yml --wait 30s
