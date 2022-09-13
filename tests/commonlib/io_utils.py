@@ -120,6 +120,11 @@ class FsClient:
             open(param_value, "a+").close()
             return
 
+        if command == 'cat':
+            with open(resource, 'w') as f:
+                f.write(param_value)
+            return
+
         if container_name == '':
             raise Exception("Unknown container name is sent")
 
