@@ -49,15 +49,11 @@ func (l *logger) WithFields(m map[string]interface{}) logging.Logger {
 }
 
 func (l *logger) GetLevel() logging.Level {
-	if res, ok := zapToOpaLevelsMap[l.lvl.Level()]; ok {
-		return res
-	}
-
-	return logging.Level(4)
+	return toOpaLevel(l.lvl.Level())
 }
 
 func (l *logger) SetLevel(level logging.Level) {
-	l.lvl.SetLevel(parseLevel(level))
+	l.lvl.SetLevel(toZapLevel(level))
 }
 
 func mapToArray(m map[string]interface{}) []interface{} {
@@ -82,10 +78,18 @@ func newLogger() logging.Logger {
 	}
 }
 
-func parseLevel(level logging.Level) zapcore.Level {
-	if res, ok := opaToZapLevelsMap[level]; ok {
+func toZapLevel(l logging.Level) zapcore.Level {
+	if res, ok := opaToZapLevelsMap[l]; ok {
 		return res
 	}
 
 	return zap.FatalLevel
+}
+
+func toOpaLevel(l zapcore.Level) logging.Level {
+	if res, ok := zapToOpaLevelsMap[l]; ok {
+		return res
+	}
+
+	return logging.Level(4)
 }
