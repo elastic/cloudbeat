@@ -16,3 +16,14 @@ secretGenerator:
     name: elastic-package-certs
     files:
       - ./ca-cert.pem
+
+configMapGenerator:
+  - name: cloudbeat-daemonset-config
+    behavior: create
+    files:
+      - cloudbeat.yml
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    k8s-app: cloudbeat

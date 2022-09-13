@@ -75,23 +75,26 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	// provide the OPA configuration which specifies
 	// fetching policy bundles from the mock bundleServer
 	// and logging decisions locally to the console
-	config := []byte(fmt.Sprintf(opaConfig, ServerAddress, cfg.Evaluator.DecisionLogs))
+	opaCfg := []byte(fmt.Sprintf(opaConfig, ServerAddress, cfg.Evaluator.DecisionLogs))
 
 	// create an instance of the OPA object
 	opaLogger := newEvaluatorLogger()
 	opaDecisionLogger := newDecisionLogger()
 	opa, err := sdk.New(ctx, sdk.Options{
-		Config:        bytes.NewReader(config),
+		Config:        bytes.NewReader(opaCfg),
 		Logger:        opaLogger,
 		ConsoleLogger: opaDecisionLogger,
 	})
+
 	if err != nil {
 		return nil, fmt.Errorf("fail to init opa: %s", err.Error())
 	}
 
-	rules, err := cfg.GetActivatedRules()
-	if err != nil {
-		log.Warnf("failed to get activated rules: %v", err)
+	var rules *config.Benchmarks
+	if cfg.RuntimeCfg != nil {
+		rules = cfg.RuntimeCfg.ActivatedRules
+	} else {
+		log.Warn("no runtime config supplied")
 	}
 
 	return &OpaEvaluator{
@@ -118,6 +121,7 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 		Result:         fetcherResult,
 		ActivatedRules: o.activatedRules,
 	})
+
 	if err != nil {
 		return EventData{}, fmt.Errorf("error running the policy: %v", err)
 	}
