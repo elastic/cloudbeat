@@ -535,6 +535,8 @@ github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220726163833-e8a0da132f1f h1:38wPs
 github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220726163833-e8a0da132f1f/go.mod h1:TbnF0mFQuaoeDCZyiCzCd/xLmTtY+NpgRCDv3rouHJM=
 github.com/elastic/csp-security-policies v1.0.8 h1:Wy13f5kFlwoJLMhnhS8O5gmP3EnGEsPxPlDDz1Eo/Z4=
 github.com/elastic/csp-security-policies v1.0.8/go.mod h1:iiMuf3IRjGmWD+a88MGen0qeYgReNd2EUqDDb+LZJGc=
+github.com/elastic/csp-security-policies v1.1.0 h1:iDY//oNQjiZHTfYBey/69RgqckrP8x57R5jhAuj4xWk=
+github.com/elastic/csp-security-policies v1.1.0/go.mod h1:iiMuf3IRjGmWD+a88MGen0qeYgReNd2EUqDDb+LZJGc=
 github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4 h1:uYT+Krd8dsvnhnLK9pe/JHZkYtXEGPfbV4Wt1JPPol0=
 github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4/go.mod h1:UcNuf4pX/qDVNQr0zybm1NL2YoWik+jKBaINZqQCA40=
 github.com/elastic/elastic-agent-autodiscover v0.2.1 h1:Nbeayh3vq2FNm6xaFo34mhUdOu0EVlpj53CqCsbU0E4=
