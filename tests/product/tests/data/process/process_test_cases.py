@@ -416,16 +416,16 @@ cis_1_2_3 = [(
 )]
 
 cis_1_2_5 = [(
-    'CIS 1.2.5',
-    {
-        "set": {
-            "--kubelet-client-certificate": "/etc/kubernetes/pki/apiserver-kubelet-client.crt ",
-            "--kubelet-client-key": "/etc/kubernetes/pki/apiserver-kubelet-client.key"
-        }
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'passed'
-)]
+        'CIS 1.2.5',
+        {
+            "set": {
+                "--kubelet-client-certificate": "/etc/kubernetes/pki/apiserver-kubelet-client.crt",
+                "--kubelet-client-key": "/etc/kubernetes/pki/apiserver-kubelet-client.key"
+            }
+        },
+        '/etc/kubernetes/manifests/kube-apiserver.yaml',
+        'passed'
+    )]
 
 cis_1_2_6 = [(
     'CIS 1.2.6',
@@ -535,12 +535,13 @@ cis_1_2_10 = [(
         'CIS 1.2.10',
         {
             "set": {
-                "--enable-admission-plugins": "EventRateLimit"
+                "--enable-admission-plugins": "EventRateLimit",
+                "--admission-control-config-file": "/etc/kubernetes/pki/admission_config.yaml",
             }
         },
         '/etc/kubernetes/manifests/kube-apiserver.yaml',
-        'passed'
-)]
+        'passed',
+    )]
 
 cis_1_2_11 = [(
     'CIS 1.2.11',
@@ -595,15 +596,25 @@ cis_1_2_12 = [(
 )]
 
 cis_1_2_13 = [(
-    'CIS 1.2.13',
-    {
-        "set": {
-            "--enable-admission-plugins": "AlwaysDeny"
-        }
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
-),
+        'CIS 1.2.13',
+        {
+            "unset": [
+                "--enable-admission-plugins"
+            ]
+        },
+        '/etc/kubernetes/manifests/kube-apiserver.yaml',
+        'failed'
+    ),
+    (
+        'CIS 1.2.13',
+        {
+            "set": {
+                "--enable-admission-plugins": "AlwaysPullImages"
+            }
+        },
+        '/etc/kubernetes/manifests/kube-apiserver.yaml',
+        'failed'
+    ),
     (
         'CIS 1.2.13',
         {
@@ -697,16 +708,6 @@ cis_1_2_17 = [(
     },
     '/etc/kubernetes/manifests/kube-apiserver.yaml',
     'passed'
-),
-    (
-        'CIS 1.2.17',
-        {
-            "set": {
-                "--secure-port": "260492"
-            }
-        },
-        '/etc/kubernetes/manifests/kube-apiserver.yaml',
-        'failed'
 ),
     (
         'CIS 1.2.17',
@@ -855,16 +856,6 @@ cis_1_2_22 = [(
 )]
 
 cis_1_2_23 = [(
-    'CIS 1.2.23',
-    {
-        "set": {
-            "--request-timeout": "-1s"
-        }
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
-),
-    (
         'CIS 1.2.23',
         {
             "set": {
@@ -974,15 +965,15 @@ cis_1_2_29 = [(
 )]
 
 cis_1_2_32 = [(
-    'CIS 1_2_32',
-    {
-        "set": {
-            "--tls-cipher-suites": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_DUMMY"
-        }
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
-),
+        'CIS 1_2_32',
+        {
+            "set": {
+                "--tls-cipher-suites": "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA"
+            }
+        },
+        '/etc/kubernetes/manifests/kube-apiserver.yaml',
+        'failed'
+    ),
     (
         'CIS 1_2_32',
         {
@@ -998,12 +989,23 @@ cis_1_2_32 = [(
         {
             "set": {
                 "--tls-cipher-suites":
-                    "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+                    "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
             }
         },
         '/etc/kubernetes/manifests/kube-apiserver.yaml',
         'passed'
-)]
+    ),
+    (
+        'CIS 1_2_32',
+        {
+            "set": {
+                "--tls-cipher-suites":
+                    "TLS_ECDHE_RSA_WITH_RC4_128_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+            }
+        },
+        '/etc/kubernetes/manifests/kube-apiserver.yaml',
+        'failed'
+    )]
 
 cis_4_2_1 = [(
     'CIS 4.2.1',
@@ -1301,27 +1303,19 @@ etcd_rules = [
 
 api_server_rules = [
     *cis_1_2_2,
-    *cis_1_2_3,
+    *skip_param_case(skip_list=[*cis_1_2_3],
+                     data_to_report=SkipReportData(
+                        url_title="security-team: #4975",
+                        url_link="https://github.com/elastic/security-team/issues/4975",
+                        skip_reason="Known issue: rule not implemented"
+                    )),
     *cis_1_2_4,
     *cis_1_2_5,
-    # *skip_param_case(skip_list=[*cis_1_2_3,
-    #                             *cis_1_2_4,
-    #                             *cis_1_2_5
-    #                             ],
-    #                  data_to_report=SkipReportData(
-    #                      skip_reason="This case fails and breaks cluster"
-    #                  )),
     *cis_1_2_6,
     *cis_1_2_7,
     *cis_1_2_8,
     *cis_1_2_9,
     *cis_1_2_10,
-    # *skip_param_case(skip_list=[*cis_1_2_9,
-    #                             *cis_1_2_10
-    #                             ],
-    #                  data_to_report=SkipReportData(
-    #                      skip_reason="This case fails and breaks cluster"
-    #                  )),
     *cis_1_2_11,
     *cis_1_2_12,
     *cis_1_2_13,
@@ -1329,27 +1323,18 @@ api_server_rules = [
     *cis_1_2_15,
     *cis_1_2_16,
     *cis_1_2_17,
-    # *skip_param_case(skip_list=[*cis_1_2_17],
-    #                  data_to_report=SkipReportData(
-    #                      skip_reason="This case fails and breaks cluster"
-    #                  )),
     *cis_1_2_18,
     *cis_1_2_19,
     *cis_1_2_20,
     *cis_1_2_21,
     *cis_1_2_22,
     *cis_1_2_23,
-    # *skip_param_case(skip_list=[*cis_1_2_23],
-    #                  data_to_report=SkipReportData(
-    #                      skip_reason="This case fails and breaks cluster"
-    #                  )),
     *cis_1_2_24,
     *cis_1_2_25,
     *cis_1_2_26,
     *cis_1_2_27,
     *cis_1_2_28,
     *cis_1_2_29,
-    *cis_1_2_32,
     # *skip_param_case(skip_list=[*cis_1_2_32],
     #                  data_to_report=SkipReportData(
     #                      skip_reason="This case fails and breaks cluster"

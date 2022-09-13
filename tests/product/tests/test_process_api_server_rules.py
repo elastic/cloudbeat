@@ -3,6 +3,7 @@ Kubernetes CIS rules verification.
 This module verifies correctness of retrieved findings by manipulating audit and remediation actions
 """
 from datetime import datetime
+from http import client
 
 import time
 import pytest
@@ -38,6 +39,7 @@ def test_process_api_server(elastic_client,
 
     # Currently, single node is used, in the future may be extended for all nodes.
     node = k8s_client.get_cluster_nodes()[0]
+
     api_client.edit_process_file(container_name=node.metadata.name,
                                  dictionary=dictionary,
                                  resource=resource)
@@ -61,6 +63,9 @@ def test_process_api_server(elastic_client,
     assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected} actual: {evaluation}"
 
 
+params = ("rule_tag", "dictionary", "resource", "expected")
 register_params(test_process_api_server, Parameters(
-    ("rule_tag", "dictionary", "resource", "expected"),
+    params,
     api_server_rules))
+    # Set default for testcase_params if it's not provided.
+    # [(*case, None) if len(case) == len(params)-1 else case for case in api_server_rules]))

@@ -57,6 +57,25 @@ def config_node_pre_test(cloudbeat_start_stop):
         '/var/lib/etcd/some_file.txt',
         '/etc/kubernetes/pki/some_file.txt'
     ]
+
+    config_files = {
+        '/etc/kubernetes/pki/admission_config.yaml': '''apiVersion: apiserver.config.k8s.io/v1
+kind: AdmissionConfiguration
+plugins:
+  - name: EventRateLimit
+    path: /etc/kubernetes/pki/event_config.yaml''',
+        '/etc/kubernetes/pki/event_config.yaml': '''apiVersion: eventratelimit.admission.k8s.io/v1alpha1
+kind: Configuration
+limits:
+  - type: Namespace
+    qps: 50
+    burst: 100
+    cacheSize: 2000
+  - type: User
+    qps: 10
+    burst: 50'''
+    }
+
     # create temporary files:
     for node in nodes: 
         if node.metadata.name != cloudbeat_agent.node_name:
@@ -66,6 +85,13 @@ def config_node_pre_test(cloudbeat_start_stop):
                                 command='touch',
                                 param_value=temp_file,
                                 resource='')
+
+    # create config files:
+    for config_file, contents in config_files.items():
+        api_client.exec_command(container_name=node.metadata.name,
+                                command='cat',
+                                param_value=contents,
+                                resource=config_file)
 
     yield k8s_client, api_client, cloudbeat_agent
     # delete temporary files:
