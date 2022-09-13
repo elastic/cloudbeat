@@ -31,17 +31,17 @@ type validator struct {
 }
 
 func (v *validator) Validate(cfg *agentconfig.C) error {
+	if !cfg.HasField("streams") {
+		return fmt.Errorf("no streams in config")
+	}
+
 	c, err := config.New(cfg)
 	if err != nil {
-		return fmt.Errorf("Could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
+		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
 	}
 
-	if len(c.Streams) == 0 {
-		return fmt.Errorf("No streams received in reconfiguration %v", cfg.FlattenedKeys())
-	}
-
-	if c.Streams[0].RuntimeCfg == nil {
-		return fmt.Errorf("RuntimeCfg is not present in reconfiguration %v", cfg.FlattenedKeys())
+	if c.RuntimeCfg == nil {
+		return fmt.Errorf("runtime configuration didn't exist in new configuration")
 	}
 
 	return nil
