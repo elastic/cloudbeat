@@ -240,6 +240,8 @@ class FsClient:
         with current_resource.open(mode="w") as f:
             yaml.dump(r_file, f)
 
+        print(f'FINAL PROCESS FILE {current_resource}: ', r_file)
+
     @staticmethod
     def edit_config_file(container_name: str, dictionary, resource: str):
         """
