@@ -14,3 +14,12 @@ secretGenerator:
 
 patchesStrategicMerge:
   - daemonset.yml
+
+configMapGenerator:
+  - name: cloudbeat-daemonset-config
+    behavior: create
+    files:
+      - cloudbeat.yml
+
+
+
