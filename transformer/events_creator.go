@@ -90,8 +90,6 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 				resMetadata.ECSFormat: eventData.GetElasticCommonData(),
 				"event":               buildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt),
 				"resource":            resource,
-				"resource_id":         resMetadata.ID,   // Deprecated - kept for BC
-				"type":                resMetadata.Type, // Deprecated - kept for BC
 				"result":              finding.Result,
 				"rule":                finding.Rule,
 				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
