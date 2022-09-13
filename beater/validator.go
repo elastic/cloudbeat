@@ -22,7 +22,6 @@ package beater
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/elastic/cloudbeat/config"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
@@ -32,24 +31,18 @@ type validator struct {
 }
 
 func (v *validator) Validate(cfg *agentconfig.C) error {
-	cfgKeys := cfg.FlattenedKeys()
-	if !isKeyInConfig("streams.0.runtime_cfg", cfgKeys) {
-		return fmt.Errorf("RuntimeCfg is not present in agent configuration %v", cfgKeys)
+	if !cfg.HasField("streams") {
+		return fmt.Errorf("no streams in config")
 	}
 
-	_, err := config.New(cfg)
+	c, err := config.New(cfg)
 	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfgKeys, err)
+		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
+	}
+
+	if c.RuntimeCfg == nil {
+		return fmt.Errorf("runtime configuration didn't exist in new configuration")
 	}
 
 	return nil
-}
-
-func isKeyInConfig(value string, list []string) bool {
-	for _, k := range list {
-		if strings.HasPrefix(k, value) {
-			return true
-		}
-	}
-	return false
 }

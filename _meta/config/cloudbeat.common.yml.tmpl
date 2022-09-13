@@ -33,20 +33,20 @@ cloudbeat:
           "/hostfs/etc/kubernetes/pki"
         ]
 
-    #    # EKS Fetchers configuration
-    #      - name: kube-api
-    #      - name: process
-    #        directory: "/hostfs"
-    #        processes:
-    #          kubelet:
-    #            config-file-arguments:
-    #              - config
-    #      - name: aws-ecr
-    #      - name: aws-elb
-    #      - name: file-system
-    #        patterns: [
-    #          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
-    #          "/hostfs/var/lib/kubelet/kubeconfig",
-    #        ]
+#    # EKS Fetchers configuration
+#      - name: kube-api
+#      - name: process
+#        directory: "/hostfs"
+#        processes:
+#          kubelet:
+#            config-file-arguments:
+#              - config
+#      - name: aws-ecr
+#      - name: aws-elb
+#      - name: file-system
+#        patterns: [
+#          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
+#          "/hostfs/var/lib/kubelet/kubeconfig",
+#        ]
     evaluator:
       decision_logs: false
