@@ -23,7 +23,7 @@ spec:
             - name: ES_HOST
               value: "host.docker.internal:9200"
             - name: CLOUDBEAT_TYPE
-              value: cloudbeat/vanilla
+              value: cloudbeat/cis_k8s
             - name: ES_USERNAME
               value: elastic
             - name: ES_PASSWORD
@@ -38,12 +38,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            # This is done for leader election on local env
-            # GAP: https://github.com/elastic/cloudbeat/issues/162
             - name: POD_NAME
-              value: cloudbeat-leader
-              # fieldRef:
-              #   fieldPath: metadata.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           securityContext:
             runAsUser: 0
             # If using Red Hat OpenShift uncomment this:

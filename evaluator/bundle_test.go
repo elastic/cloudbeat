@@ -47,7 +47,13 @@ func TestBundleTestSuite(t *testing.T) {
 }
 
 func (s *BundleTestSuite) TestCreateServer() {
-	_, err := StartServer(context.Background(), config.DefaultConfig)
+	config := config.Config{
+		Stream: config.Stream{
+			Period: 4 * time.Hour,
+		},
+		Type: config.InputTypeVanillaK8s,
+	}
+	_, err := StartServer(context.Background(), config)
 	s.NoError(err)
 
 	var tests = []struct {
@@ -132,13 +138,11 @@ func (s *BundleTestSuite) TestCreateServerWithRuntimeConfig() {
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
 			config.Config{
 				Type: config.InputTypeVanillaK8s,
-				Streams: []config.Stream{
-					{
-						RuntimeCfg: &config.RuntimeConfig{
-							ActivatedRules: &config.Benchmarks{
-								CisK8s: []string{
-									"cis_1_1_1",
-								},
+				Stream: config.Stream{
+					RuntimeCfg: &config.RuntimeConfig{
+						ActivatedRules: &config.Benchmarks{
+							CisK8s: []string{
+								"cis_1_1_1",
 							},
 						},
 					},
@@ -149,13 +153,11 @@ func (s *BundleTestSuite) TestCreateServerWithRuntimeConfig() {
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
 			config.Config{
 				Type: config.InputTypeEks,
-				Streams: []config.Stream{
-					{
-						RuntimeCfg: &config.RuntimeConfig{
-							ActivatedRules: &config.Benchmarks{
-								CisEks: []string{
-									"cis_1_1_1",
-								},
+				Stream: config.Stream{
+					RuntimeCfg: &config.RuntimeConfig{
+						ActivatedRules: &config.Benchmarks{
+							CisEks: []string{
+								"cis_1_1_1",
 							},
 						},
 					},
@@ -225,13 +227,12 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
 			config.Config{
 				Type: config.InputTypeVanillaK8s,
-				Streams: []config.Stream{
-					{
-						RuntimeCfg: &config.RuntimeConfig{
-							ActivatedRules: &config.Benchmarks{
-								CisK8s: []string{
-									"cis_1_1_1",
-								},
+				Stream: config.Stream{
+
+					RuntimeCfg: &config.RuntimeConfig{
+						ActivatedRules: &config.Benchmarks{
+							CisK8s: []string{
+								"cis_1_1_1",
 							},
 						},
 					},
@@ -242,13 +243,11 @@ func (s *BundleTestSuite) TestCreateServerWithFetchersConfig() {
 			"valid config struct", "/bundles/bundle.tar.gz", "200 OK",
 			config.Config{
 				Type: config.InputTypeEks,
-				Streams: []config.Stream{
-					{
-						RuntimeCfg: &config.RuntimeConfig{
-							ActivatedRules: &config.Benchmarks{
-								CisEks: []string{
-									"cis_1_1_1",
-								},
+				Stream: config.Stream{
+					RuntimeCfg: &config.RuntimeConfig{
+						ActivatedRules: &config.Benchmarks{
+							CisEks: []string{
+								"cis_1_1_1",
 							},
 						},
 					},

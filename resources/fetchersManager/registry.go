@@ -20,6 +20,7 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -31,7 +32,7 @@ type FetchersRegistry interface {
 	ShouldRun(key string) bool
 	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
 	Stop()
-	RegisterFetchers(fetchers []*ParsedFetcher) error
+	RegisterFetchers(fetchers []*ParsedFetcher, le leaderelection.ElectionManager) error
 }
 
 type fetchersRegistry struct {
@@ -53,9 +54,9 @@ func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
 }
 
 // RegisterFetchers registers entire list of parsed fetchers
-func (r *fetchersRegistry) RegisterFetchers(fetchers []*ParsedFetcher) error {
+func (r *fetchersRegistry) RegisterFetchers(fetchers []*ParsedFetcher, le leaderelection.ElectionManager) error {
 	for _, p := range fetchers {
-		c, err := r.getConditions(p.name)
+		c, err := r.getConditions(p.name, le)
 		if err != nil {
 			return fmt.Errorf("RegisterFetchers error in getConditions for factory %s skipping Register due to: %v", p.name, err)
 		}
@@ -126,12 +127,12 @@ func (r *fetchersRegistry) Stop() {
 }
 
 // TODO: Move conditions to factories and implement inside every factory
-func (r *fetchersRegistry) getConditions(name string) ([]fetching.Condition, error) {
+func (r *fetchersRegistry) getConditions(name string, le leaderelection.ElectionManager) ([]fetching.Condition, error) {
 	c := make([]fetching.Condition, 0)
 	switch name {
 	case fetching.KubeAPIType, fetching.EcrType, fetching.ElbType:
 		// TODO: Use fetcher's kubeconfig configuration
-		c = append(c, conditions.NewLeaseFetcherCondition(r.log))
+		c = append(c, conditions.NewLeaseFetcherCondition(r.log, le))
 	}
 
 	return c, nil

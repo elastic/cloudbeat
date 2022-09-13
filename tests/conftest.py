@@ -54,3 +54,11 @@ def api_client():
     else:
         client = FsClient
     return client
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        '--range',
+        default=['..'],
+        help='range to run tests on',
+    )

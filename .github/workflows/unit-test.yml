@@ -12,7 +12,6 @@ on:
 
 env:
   K8S_MANIFEST_DIR: deploy
-  GO_VERSION: 1.18.4
 
 jobs:
   unit_tests:
@@ -22,6 +21,9 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
+
+      - name: Fetch Go version from .go-version
+        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -62,13 +64,17 @@ jobs:
           kubectl: 1.18.4
           kubeval: v0.16.1
           command: |
-            kubeval --strict -d ${{ env.K8S_MANIFEST_DIR }} --ignore-missing-schemas --ignored-filename-patterns kustomization,kind --skip-kinds ClusterConfig
+            kubeval --strict -d ${{ env.K8S_MANIFEST_DIR }} --ignore-missing-schemas --ignored-filename-patterns kustomization,kind,patch,cloudbeat --skip-kinds ClusterConfig
 
   golangci:
     name: golangci-lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Fetch Go version from .go-version
+        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -84,3 +90,11 @@ jobs:
         with:
           version: latest
           args: --timeout=10m --whole-files
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v2

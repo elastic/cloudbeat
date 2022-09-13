@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -31,6 +32,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/sdk"
 )
+
+var now = func() time.Time { return time.Now().UTC() }
 
 type OpaEvaluator struct {
 	log            *logp.Logger
@@ -69,22 +72,25 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	// provide the OPA configuration which specifies
 	// fetching policy bundles from the mock bundleServer
 	// and logging decisions locally to the console
-	config := []byte(fmt.Sprintf(opaConfig, ServerAddress, cfg.Evaluator.DecisionLogs))
+	opaCfg := []byte(fmt.Sprintf(opaConfig, ServerAddress, cfg.Evaluator.DecisionLogs))
 
 	// create an instance of the OPA object
 	opaLogger := newLogger()
 	opa, err := sdk.New(ctx, sdk.Options{
-		Config:        bytes.NewReader(config),
+		Config:        bytes.NewReader(opaCfg),
 		Logger:        opaLogger,
 		ConsoleLogger: opaLogger,
 	})
+
 	if err != nil {
 		return nil, fmt.Errorf("fail to init opa: %s", err.Error())
 	}
 
-	rules, err := cfg.GetActivatedRules()
-	if err != nil {
-		log.Warnf("failed to get activated rules: %v", err)
+	var rules *config.Benchmarks
+	if cfg.RuntimeCfg != nil {
+		rules = cfg.RuntimeCfg.ActivatedRules
+	} else {
+		log.Warn("no runtime config supplied")
 	}
 
 	return &OpaEvaluator{
@@ -155,5 +161,6 @@ func (o *OpaEvaluator) decode(result interface{}) (RuleResult, error) {
 	}
 
 	err = decoder.Decode(result)
+	opaResult.Metadata.CreatedAt = now()
 	return opaResult, err
 }
