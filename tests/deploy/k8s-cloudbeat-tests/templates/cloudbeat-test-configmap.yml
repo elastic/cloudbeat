@@ -12,3 +12,4 @@ data:
   USE_DOCKER: "false"
   TEST_MARKER: {{ .Values.testData.marker }}
   AGENT_NAME: {{ .Values.testData.agentName }}
+  CLUSTER_TYPE: {{ .Values.testData.clusterType }}

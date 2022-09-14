@@ -5,7 +5,6 @@ This module verifies correctness of retrieved findings by manipulating audit and
 from datetime import datetime
 import pytest
 from commonlib.utils import get_ES_evaluation
-from commonlib.framework.reporting import skip_param_case, SkipReportData
 from .data.file_system import file_system_test_cases as fs_tc
 
 
@@ -86,7 +85,6 @@ def test_file_system_configuration(elastic_client,
                 return False
 
         return False
-
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,

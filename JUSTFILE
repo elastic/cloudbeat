@@ -87,6 +87,7 @@ TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
 VERSION := '$(make -s get-version)-SNAPSHOT'
 NAMESPACE := 'kube-system'
+ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
 
 patch-cb-yml-tests:
@@ -98,6 +99,9 @@ build-pytest-docker:
 load-pytest-kind:
   kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
 
+load-pytest-eks:
+  docker tag {{TESTS_RELEASE}}:latest {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest; docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
+
 deploy-tests-helm-ci target:
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
@@ -105,7 +109,7 @@ deploy-tests-helm-ci-agent target:
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-local-tests-helm target:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 purge-pvc:
   kubectl delete -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}} & kubectl apply -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}}
@@ -159,7 +163,7 @@ collect-logs target:
 
   mkdir -p {{TEST_LOGS_DIRECTORY}}
   echo '' > $LOG_FILE
-  
+
   STATUS={{POD_STATUS_UNKNOWN}}
   while [ $STATUS = {{POD_STATUS_UNKNOWN}} ] || [ $STATUS = {{POD_STATUS_PENDING}} ] || [ $STATUS = {{POD_STATUS_RUNNING}} ]; do
     sleep 5
@@ -197,4 +201,3 @@ run-test-targets +targets='file_system_rules k8s_object_rules process_api_server
     just run-test-target $TARGET
     just collect-logs $TARGET
   done
-

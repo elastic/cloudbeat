@@ -22,13 +22,15 @@ def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
 
     while time.time() - start_time < timeout:
         try:
-            events = get_events_from_index(elastic_client, elastic_client.index, rule_tag, latest_timestamp)
+            events = get_events_from_index(
+                elastic_client, elastic_client.index, rule_tag, latest_timestamp)
         except Exception as e:
             print(e)
             continue
 
         for event in events:
-            findings_timestamp = datetime.datetime.strptime(getattr(event, '@timestamp'), '%Y-%m-%dT%H:%M:%S.%fZ')
+            findings_timestamp = datetime.datetime.strptime(
+                getattr(event, '@timestamp'), '%Y-%m-%dT%H:%M:%S.%fZ')
             if findings_timestamp > latest_timestamp:
                 latest_timestamp = findings_timestamp
 
@@ -61,13 +63,15 @@ def get_logs_evaluation(k8s, timeout, pod_name, namespace, rule_tag, exec_timest
     start_time = time.time()
     while time.time() - start_time < timeout:
         try:
-            logs = get_logs_from_stream(k8s.get_pod_logs(pod_name=pod_name, namespace=namespace, since_seconds=2))
+            logs = get_logs_from_stream(k8s.get_pod_logs(
+                pod_name=pod_name, namespace=namespace, since_seconds=2))
         except Exception as e:
             print(e)
             continue
 
         for log in logs:
-            findings_timestamp = datetime.datetime.strptime(log.time, '%Y-%m-%dT%H:%M:%Sz')
+            findings_timestamp = datetime.datetime.strptime(
+                log.time, '%Y-%m-%dT%H:%M:%Sz')
             if (findings_timestamp - exec_timestamp).total_seconds() < 0:
                 continue
 
@@ -131,13 +135,16 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
     while num_cycles < required_cycles and not is_timeout(start_time, 30):
         for node in nodes:
             start_time_per_agent = time.time()
-            query, sort = elastic_client.build_es_query(term={"agent.name": node.metadata.name})
+            query, sort = elastic_client.build_es_query(
+                term={"agent.name": node.metadata.name})
             while not is_timeout(start_time_per_agent, 10):
                 # keep query ES until the sequence has changed
                 result = elastic_client.get_index_data(index_name=elastic_client.index,
                                                        query=query,
                                                        sort=sort)
                 doc_src = elastic_client.get_doc_source(data=result)
+                if len(doc_src) == 0:
+                    continue
                 curr_sequence = doc_src['event']['sequence']
 
                 if elastic_client.get_total_value(data=result) != 0 and curr_sequence != prev_sequence:

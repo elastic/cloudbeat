@@ -29,8 +29,8 @@ from commonlib.framework.reporting import skip_param_case, SkipReportData
                          data_to_report=SkipReportData(
                              url_title="security-team: #4540",
                              url_link="https://github.com/elastic/security-team/issues/4540",
-                             skip_reason="Known issue: incorrect implementation"
-                         ))
+                             skip_reason="Known issue: incorrect implementation")
+                         )
     ],
     ids=[
         *k8s_tc.cis_5_1_3.keys(),

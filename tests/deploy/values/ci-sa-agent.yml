@@ -7,3 +7,4 @@ standaloneAgent:
 testData:
   marker: post_merge_agent
   agentName: elastic-agent
+  clusterType: vanilla
