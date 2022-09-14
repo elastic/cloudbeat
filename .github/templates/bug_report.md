@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Report a bug to help us improve
-title: 
+title:
 labels: ["bug", "Team: Cloud Security Posture"]
 assignees: ''
 ---
@@ -15,25 +15,25 @@ Environment state and/or platform specific configurations.
 **To Reproduce**
 Write the exact actions one should perform in order to reproduce the bug.
 Steps to reproduce the behavior:
-1. 
+1.
 
 
 **Expected behavior**
 
 
-<!-- Optinal: Please uncomment if relevant
+<!-- Optional: Please uncomment if relevant
 **Screenshots**
 -->
 
-<!-- Optinal: Please uncomment if relevant
+<!-- Optional: Please uncomment if relevant
 **Desktop (please complete the following information):**
- - OS: 
- - Browser: 
- - Kibana Version: 
+ - OS:
+ - Browser:
+ - Kibana Version:
  - Endpoint Version:
- - Other Version: 
+ - Other Version:
  -->
 
- <!-- Optinal: Please uncomment if relevant
+ <!-- Optional: Please uncomment if relevant
 **Additional context**
 -->
