@@ -21,7 +21,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
@@ -29,7 +31,6 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/logging"
 	"github.com/open-policy-agent/opa/sdk"
 	"github.com/sirupsen/logrus"
@@ -51,7 +52,7 @@ type OpaInput struct {
 var opaConfig = `{
 	"bundles": {
 		"CSP": {
-			"resource": "file:///bundles/bundle.tar.gz"
+			"resource": "file://%s"
 		}
 	},
 	"decision_logs": {
@@ -63,7 +64,13 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 
 	// provide the OPA configuration which specifies
 	// fetching policy bundle and logging decisions locally to the console
-	opaCfg := []byte(fmt.Sprintf(opaConfig, cfg.Evaluator.DecisionLogs))
+	path, err := filepath.Abs("bundle.tar.gz")
+	log.Infof("OPA bundle path: %s", path)
+
+	if err != nil {
+		return nil, err
+	}
+	opaCfg := []byte(fmt.Sprintf(opaConfig, path, cfg.Evaluator.DecisionLogs))
 
 	// create an instance of the OPA object
 	opaLogger := newEvaluatorLogger()

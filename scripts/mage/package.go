@@ -29,8 +29,6 @@ func CustomizePackaging() {
 	bundleDir := devtools.PackageFile{
 		Mode:   0o644,
 		Source: opaBundle,
-		//Target: "/bundles/",
-		Config: true,
 	}
 
 	for _, args := range devtools.Packages {
@@ -38,7 +36,8 @@ func CustomizePackaging() {
 			continue
 		}
 
-		args.Spec.Files["/bundles/bundle.tar.gz"] = bundleDir
+		// Add csp-policies bundle archive to package
+		args.Spec.Files[opaBundle] = bundleDir
 
 		// Remove files unused by cloudbeat.
 		for filename, filespec := range args.Spec.Files {

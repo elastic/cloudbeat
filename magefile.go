@@ -124,8 +124,8 @@ func Package() {
 	start := time.Now()
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
+	BuildOpaBundle()
 	devtools.UseElasticBeatXPackPackaging()
-	mg.Deps(BuildOpaBundle)
 	cloudbeat.CustomizePackaging()
 
 	if packageTypes := os.Getenv("TYPES"); packageTypes != "" {
@@ -344,11 +344,12 @@ func BuildOpaBundle() error {
 		return err
 	}
 
-	var outputAsJson map[string]string
-	if err = json.Unmarshal([]byte(cspPoliciesPkgInfo), &outputAsJson); err != nil {
+	buffer := []byte(cspPoliciesPkgInfo)
+	var output map[string]interface{}
+	if err = json.Unmarshal(buffer, &output); err != nil {
 		return err
 	}
 
-	pkgDir := outputAsJson["Dir"]
-	return sh.Run("opa", "build", "-b", pkgDir+"/bundle", "-e", pkgDir+"/bundle/compliance")
+	dir := output["Dir"].(string)
+	return sh.Run("opa", "build", "-b", dir+"/bundle", "-e", dir+"/bundle/compliance")
 }

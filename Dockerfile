@@ -7,7 +7,7 @@ RUN set -x && \
 
 COPY ./cloudbeat /cloudbeat
 COPY ./cloudbeat.yml /cloudbeat.yml
-COPY ./bundle.tar.gz /bundles/bundle.tar.gz
+COPY ./bundle.tar.gz /bundle.tar.gz
 
 ENTRYPOINT ["/cloudbeat"]
 CMD ["-e", "-d", "'*'"]
