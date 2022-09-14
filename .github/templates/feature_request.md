@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for this project
 title:
-labels: "Team: Cloud Security Posture"
+labels: "Team:Cloud Security Posture"
 assignees: ''
 ---
 

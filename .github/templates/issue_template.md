@@ -2,7 +2,7 @@
 name: Cloudbeat Task
 about: Create an issue for the Cloudbeat team
 title:
-labels: "Team: Cloud Security Posture"
+labels: "Team:Cloud Security Posture"
 assignees: ''
 ---
 
