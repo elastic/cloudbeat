@@ -29,13 +29,13 @@ jobs:
       - name: Fetch Go version from .go-version
         run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
 
-#      - name: Fetch OPA version
-#        run: go list -m -f {{.Version}} github.com/open-policy-agent/opa >> $OPA_VERSION
+      - name: Fetch OPA version
+        run: go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//' >> $OPA_VERSION
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v1
         with:
-          version: 0.42
+          version: ${{ OPA_VERSION }}
 
       - name: Set up Go
         uses: actions/setup-go@v2

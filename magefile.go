@@ -22,7 +22,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -339,17 +338,10 @@ func PythonEnv() error {
 
 func BuildOpaBundle() error {
 	pkgName := "github.com/elastic/csp-security-policies"
-	cspPoliciesPkgInfo, err := sh.Output("go", "list", "-mod=mod", "-m", "-json", pkgName)
+	cspPoliciesPkgDir, err := sh.Output("go", "list", "-m", "-f", "{{.Dir}}", pkgName)
 	if err != nil {
 		return err
 	}
 
-	buffer := []byte(cspPoliciesPkgInfo)
-	var output map[string]interface{}
-	if err = json.Unmarshal(buffer, &output); err != nil {
-		return err
-	}
-
-	dir := output["Dir"].(string)
-	return sh.Run("opa", "build", "-b", dir+"/bundle", "-e", dir+"/bundle/compliance")
+	return sh.Run("opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
 }
