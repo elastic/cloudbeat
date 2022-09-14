@@ -73,10 +73,6 @@ clean: $(MAGE)
 PackageAgent: $(MAGE)
 	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
 
-.PHONY: BuildOpaBundle
-BuildOpaBundle:
-	$(MAGE) $@
-
 ##############################################################################
 # Checks/tests.
 ##############################################################################

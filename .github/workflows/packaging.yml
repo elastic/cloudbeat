@@ -41,6 +41,9 @@ jobs:
           go run bootstrap.go
           mage -version
 
+      - name: make vendored copy of dependencies
+        run: GOOS=linux go mod vendor
+
       - name: Packaging
         run: |
           mage -v package

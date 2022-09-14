@@ -61,11 +61,10 @@ var opaConfig = `{
 }`
 
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (Evaluator, error) {
-
 	// provide the OPA configuration which specifies
 	// fetching policy bundle and logging decisions locally to the console
 	path, err := filepath.Abs("bundle.tar.gz")
-	log.Infof("OPA bundle path: %s", path)
+	log.Debugf("OPA bundle path: %s", path)
 
 	if err != nil {
 		return nil, err
