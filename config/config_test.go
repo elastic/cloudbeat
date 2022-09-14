@@ -49,17 +49,40 @@ func (s *ConfigTestSuite) SetupTest() {
 func (s *ConfigTestSuite) TestNew() {
 	tests := []struct {
 		config                 string
-		expectedActivatedRules []string
+		expectedActivatedRules *Benchmarks
 		expectedType           string
 		expectedAWSConfig      aws.ConfigAWS
+		expectedFetchers       int
 	}{
 		{
+			`
+   type : cloudbeat/cis_k8s
+   streams:
+    - runtime_cfg:
+        activated_rules:
+          cis_k8s:
+            - a
+            - b
+            - c
+            - d
+            - e
+      fetchers:
+        - name: a
+          directory: b
+        - name: b
+          directory: b
+`,
+			&Benchmarks{CisK8s: []string{"a", "b", "c", "d", "e"}},
+			"cloudbeat/cis_k8s",
+			aws.ConfigAWS{},
+			2,
+		}, {
 			`
    type : cloudbeat/cis_eks
    streams:
     - runtime_cfg:
         activated_rules:
-          cis_k8s:
+          cis_eks:
             - a
             - b
             - c
@@ -71,8 +94,15 @@ func (s *ConfigTestSuite) TestNew() {
       shared_credential_file: shared_credential_file
       credential_profile_name: credential_profile_name
       role_arn: role_arn
+      fetchers:
+        - name: a
+          directory: b
+        - name: b
+          directory: b
+        - name: c
+          directory: c
 `,
-			[]string{"a", "b", "c", "d", "e"},
+			&Benchmarks{CisEks: []string{"a", "b", "c", "d", "e"}},
 			"cloudbeat/cis_eks",
 			aws.ConfigAWS{
 				AccessKeyID:          "key",
@@ -82,6 +112,7 @@ func (s *ConfigTestSuite) TestNew() {
 				ProfileName:          "credential_profile_name",
 				RoleArn:              "role_arn",
 			},
+			3,
 		},
 	}
 
@@ -93,8 +124,9 @@ func (s *ConfigTestSuite) TestNew() {
 		s.NoError(err)
 
 		s.Equal(test.expectedType, c.Type)
-		s.Equal(test.expectedActivatedRules, c.Streams[0].RuntimeCfg.ActivatedRules.CisK8s)
-		s.Equal(test.expectedAWSConfig, c.Streams[0].AWSConfig)
+		s.EqualValues(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules)
+		s.Equal(test.expectedAWSConfig, c.AWSConfig)
+		s.Equal(test.expectedFetchers, len(c.Fetchers))
 	}
 }
 
@@ -134,7 +166,7 @@ func (s *ConfigTestSuite) TestRuntimeCfgExists() {
 		c, err := New(cfg)
 		s.NoError(err)
 
-		s.Equal(test.expected, c.Streams[0].RuntimeCfg != nil)
+		s.Equal(test.expected, c.RuntimeCfg != nil)
 	}
 }
 
@@ -164,10 +196,9 @@ func (s *ConfigTestSuite) TestRuntimeConfig() {
 		c, err := New(cfg)
 		s.NoError(err)
 
-		dy, err := c.GetActivatedRules()
-		s.NoError(err)
+		rules := c.RuntimeCfg.ActivatedRules
 
-		s.Equal(test.expected, dy.CisK8s)
+		s.Equal(test.expected, rules.CisK8s)
 	}
 }
 
@@ -176,10 +207,10 @@ func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
 		config   string
 		expected EvaluatorConfig
 	}{
-		{
-			`
-evaluator:
-  decision_logs: true
+		{`
+  streams:
+    - evaluator:
+       decision_logs: true
 `,
 			EvaluatorConfig{
 				DecisionLogs: true,
@@ -204,9 +235,21 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 		expectedPeriod time.Duration
 	}{
 		{"", 4 * time.Hour},
-		{"period: 50s", 50 * time.Second},
-		{"period: 5m", 5 * time.Minute},
-		{"period: 2h", 2 * time.Hour},
+		{
+			`
+   streams:
+    - period: 50s
+`, 50 * time.Second},
+		{
+			`
+   streams:
+    - period: 5m
+`, 5 * time.Minute},
+		{
+			`
+   streams:
+    - period: 2h
+`, 2 * time.Hour},
 	}
 
 	for _, test := range tests {
@@ -265,7 +308,7 @@ streams:
 		s.NoError(err)
 
 		s.Equal(test.expectedType, c.Type)
-		s.Equal(test.expectedActivatedRules, c.Streams[0].RuntimeCfg.ActivatedRules.CisK8s)
-		s.Equal(test.expectedEksActivatedRules, c.Streams[0].RuntimeCfg.ActivatedRules.CisEks)
+		s.Equal(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules.CisK8s)
+		s.Equal(test.expectedEksActivatedRules, c.RuntimeCfg.ActivatedRules.CisEks)
 	}
 }

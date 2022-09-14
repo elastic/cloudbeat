@@ -9,13 +9,10 @@ import pytest
 
 from commonlib.utils import get_ES_evaluation
 from product.tests.data.process.process_test_cases import etcd_rules
+from product.tests.parameters import register_params, Parameters
 
 
 @pytest.mark.process_etcd_rules
-@pytest.mark.parametrize(
-    ("rule_tag", "dictionary", "resource", "expected"),
-    etcd_rules,
-)
 def test_process_etcd(elastic_client,
                       config_node_pre_test,
                       rule_tag,
@@ -58,3 +55,8 @@ def test_process_etcd(elastic_client,
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
     assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected} actual: {evaluation}"
+
+
+register_params(test_process_etcd, Parameters(
+    ("rule_tag", "dictionary", "resource", "expected"),
+    etcd_rules))

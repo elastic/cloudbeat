@@ -23,7 +23,7 @@ spec:
             - name: ES_HOST
               value: "host.docker.internal:9200"
             - name: CLOUDBEAT_TYPE
-              value: cloudbeat/vanilla
+              value: cloudbeat/cis_k8s
             - name: ES_USERNAME
               value: elastic
             - name: ES_PASSWORD
