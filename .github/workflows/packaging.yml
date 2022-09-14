@@ -41,8 +41,15 @@ jobs:
           go run bootstrap.go
           mage -version
 
-      - name: make vendored copy of dependencies
-        run: GOOS=linux go mod vendor
+      - name: cache go dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: Packaging
         run: |
