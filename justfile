@@ -104,12 +104,16 @@ load-pytest-eks:
 
 deploy-tests-helm-ci target:
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+deploy-tests-helm-ci target range='':
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
-deploy-tests-helm-ci-agent target:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+deploy-tests-helm-ci-agent target range='':
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-local-tests-helm target:
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+deploy-local-tests-helm target range='':
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 purge-pvc:
   kubectl delete -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}} & kubectl apply -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}}
@@ -140,8 +144,8 @@ build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 delete-local-helm-cluster:
   kind delete cluster --name kind-mono
 
-cleanup-create-local-helm-cluster target: delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
-  just deploy-local-tests-helm {{target}}
+cleanup-create-local-helm-cluster target range='..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
+  just deploy-local-tests-helm {{target}} {{range}}
 
 # TODO(DaveSys911): Move scripts out of JUSTFILE: https://github.com/elastic/security-team/issues/4291
 test-pod-status:
@@ -184,20 +188,21 @@ collect-logs target:
   rm $LOG_FILE_TMP
   echo 'Done collecting logs for target {{target}}.'
 
-run-test-target target:
+run-test-target target range='..':
   echo 'Cleaning up cluster for running test target: {{target}}'
-  just cleanup-create-local-helm-cluster {{target}}
+  just cleanup-create-local-helm-cluster {{target}} {{range}}
 
   echo 'Running test target: {{target}}'
   just build-load-run-tests &
 
 
-run-test-targets +targets='file_system_rules k8s_object_rules process_api_server_rules process_controller_manager_rules process_etcd_rules process_kubelet_rules process_scheduler_rules':
+run-test-targets range='..' +targets='file_system_rules k8s_object_rules process_api_server_rules process_controller_manager_rules process_etcd_rules process_kubelet_rules process_scheduler_rules':
   #!/usr/bin/env sh
 
   echo 'Running tests: {{targets}}'
 
   for TARGET in {{targets}}; do
-    just run-test-target $TARGET
+    just run-test-target $TARGET {{range}}
     just collect-logs $TARGET
   done
+

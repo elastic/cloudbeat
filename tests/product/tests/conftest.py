@@ -10,6 +10,8 @@ from kubernetes.client import ApiException
 from kubernetes.utils import FailToCreateError
 from commonlib.io_utils import get_k8s_yaml_objects
 
+from product.tests.parameters import TEST_PARAMETERS
+
 
 DEPLOY_YML = "../../deploy/cloudbeat-pytest.yml"
 KUBE_RULES_ENV_YML = "../../deploy/mock-pod.yml"
@@ -128,3 +130,33 @@ def test_env(cloudbeat_start_stop):
     yield k8s, api_client, cloudbeat_agent
     # teardown
     k8s.delete_from_yaml(yaml_objects_list=k8s_resources)  # stop agent
+
+
+def pytest_generate_tests(metafunc):
+    # Only parametrize tests which are required for this run.
+    if metafunc.definition.get_closest_marker(metafunc.config.getoption('markexpr', default=None)) is None:
+        return
+
+    params = TEST_PARAMETERS.get(metafunc.function)
+    if params is None:
+        raise ValueError(f'Params for function {metafunc.function} are not registered.')
+
+    test_range = metafunc.config.getoption('range')
+    test_range_start, test_range_end = test_range.split('..')
+
+    if test_range_end != '' and int(test_range_end) < len(params.argvalues):
+        params.argvalues = params.argvalues[:int(test_range_end)]
+
+        if params.ids is not None:
+            params.ids = params.ids[:int(test_range_end)]
+
+    if test_range_start != '':
+        if int(test_range_start) >= len(params.argvalues):
+            raise ValueError(f'Invalid range for test function {metafunc.function}')
+
+        params.argvalues = params.argvalues[int(test_range_start):]
+
+        if params.ids is not None:
+            params.ids = params.ids[int(test_range_start):]
+
+    metafunc.parametrize(params.argnames, params.argvalues, ids=params.ids)

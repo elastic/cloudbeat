@@ -5,39 +5,12 @@ This module verifies correctness of retrieved findings by manipulating audit and
 from datetime import datetime
 import pytest
 from commonlib.utils import get_ES_evaluation
-from .data.file_system import file_system_test_cases as fs_tc
+
+from product.tests.data.file_system import file_system_test_cases as fs_tc
+from product.tests.parameters import register_params, Parameters
 
 
 @pytest.mark.file_system_rules
-@pytest.mark.parametrize(
-    ("rule_tag", "command", "param_value", "resource", "expected"),
-    [*fs_tc.cis_1_1_1,
-     *fs_tc.cis_1_1_2,
-     *fs_tc.cis_1_1_3,
-     *fs_tc.cis_1_1_4,
-     *fs_tc.cis_1_1_5,
-     *fs_tc.cis_1_1_6,
-     *fs_tc.cis_1_1_7,
-     *fs_tc.cis_1_1_8,
-     *fs_tc.cis_1_1_11,
-     *fs_tc.cis_1_1_12,
-     *fs_tc.cis_1_1_13,
-     *fs_tc.cis_1_1_14,
-     *fs_tc.cis_1_1_15,
-     *fs_tc.cis_1_1_16,
-     *fs_tc.cis_1_1_17,
-     *fs_tc.cis_1_1_18,
-     *fs_tc.cis_1_1_19,
-     *fs_tc.cis_1_1_20,
-     *fs_tc.cis_1_1_21,
-     *fs_tc.cis_4_1_1,
-     *fs_tc.cis_4_1_2,
-     *fs_tc.cis_4_1_5,
-     *fs_tc.cis_4_1_6,
-     *fs_tc.cis_4_1_9,
-     *fs_tc.cis_4_1_10
-     ],
-)
 def test_file_system_configuration(elastic_client,
                                    config_node_pre_test,
                                    rule_tag,
@@ -86,6 +59,7 @@ def test_file_system_configuration(elastic_client,
 
         return False
 
+
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.findings_timeout,
@@ -97,3 +71,34 @@ def test_file_system_configuration(elastic_client,
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
     assert evaluation == expected, f"Rule {rule_tag} verification failed," \
                                    f"expected: {expected}, got: {evaluation}"
+
+
+register_params(test_file_system_configuration, Parameters(
+    ("rule_tag", "command", "param_value", "resource", "expected"),
+    [*fs_tc.cis_1_1_1,
+     *fs_tc.cis_1_1_2,
+     *fs_tc.cis_1_1_3,
+     *fs_tc.cis_1_1_4,
+     *fs_tc.cis_1_1_5,
+     *fs_tc.cis_1_1_6,
+     *fs_tc.cis_1_1_7,
+     *fs_tc.cis_1_1_8,
+     *fs_tc.cis_1_1_11,
+     *fs_tc.cis_1_1_12,
+     *fs_tc.cis_1_1_13,
+     *fs_tc.cis_1_1_14,
+     *fs_tc.cis_1_1_15,
+     *fs_tc.cis_1_1_16,
+     *fs_tc.cis_1_1_17,
+     *fs_tc.cis_1_1_18,
+     *fs_tc.cis_1_1_19,
+     *fs_tc.cis_1_1_20,
+     *fs_tc.cis_1_1_21,
+     *fs_tc.cis_4_1_1,
+     *fs_tc.cis_4_1_2,
+     *fs_tc.cis_4_1_5,
+     *fs_tc.cis_4_1_6,
+     *fs_tc.cis_4_1_9,
+     *fs_tc.cis_4_1_10
+     ],
+))
