@@ -102,16 +102,12 @@ load-pytest-kind:
 load-pytest-eks:
   docker tag {{TESTS_RELEASE}}:latest {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest; docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
-deploy-tests-helm-ci target:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 deploy-tests-helm-ci target range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-tests-helm-ci-agent target range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
-deploy-local-tests-helm target:
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 deploy-local-tests-helm target range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
