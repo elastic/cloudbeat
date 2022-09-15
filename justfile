@@ -1,3 +1,6 @@
+default:
+  @just --list
+
 # Variables
 
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
@@ -136,7 +139,7 @@ build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 delete-local-helm-cluster:
   kind delete cluster --name kind-mono
 
-cleanup-create-local-helm-cluster target range='..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
+cleanup-create-local-helm-cluster target range='0..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
   just deploy-local-tests-helm {{target}} {{range}}
 
 # TODO(DaveSys911): Move scripts out of JUSTFILE: https://github.com/elastic/security-team/issues/4291
@@ -180,7 +183,7 @@ collect-logs target:
   rm $LOG_FILE_TMP
   echo 'Done collecting logs for target {{target}}.'
 
-run-test-target target range='..':
+run-test-target target range='0..':
   echo 'Cleaning up cluster for running test target: {{target}}'
   just cleanup-create-local-helm-cluster {{target}} {{range}}
 
@@ -188,7 +191,7 @@ run-test-target target range='..':
   just build-load-run-tests &
 
 
-run-test-targets range='..' +targets='file_system_rules k8s_object_rules process_api_server_rules process_controller_manager_rules process_etcd_rules process_kubelet_rules process_scheduler_rules':
+run-test-targets range='0..' +targets='file_system_rules k8s_object_rules process_api_server_rules process_controller_manager_rules process_etcd_rules process_kubelet_rules process_scheduler_rules':
   #!/usr/bin/env sh
 
   echo 'Running tests: {{targets}}'
