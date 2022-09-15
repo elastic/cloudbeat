@@ -27,6 +27,8 @@ def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
             print(e)
             continue
 
+        print('MATCHING EVENTS:', len(events))
+
         for event in events:
             findings_timestamp = datetime.datetime.strptime(getattr(event, '@timestamp'), '%Y-%m-%dT%H:%M:%S.%fZ')
             if findings_timestamp > latest_timestamp:
@@ -39,6 +41,7 @@ def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
                 continue
 
             if resource_identifier(resource):
+                print('FINDING MATCH:', event)
                 return evaluation
 
     return None
