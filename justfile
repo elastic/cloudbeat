@@ -201,4 +201,3 @@ run-test-targets range='..' +targets='file_system_rules k8s_object_rules process
     just run-test-target $TARGET {{range}}
     just collect-logs $TARGET
   done
-
