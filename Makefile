@@ -1,7 +1,16 @@
-
 ##############################################################################
 # Variables used for various build targets.
 ##############################################################################
+
+BUILD_ID=$(shell curl -X GET "https://artifacts-api.elastic.co/v1/versions/${CLOUDBEAT_VERSION}-SNAPSHOT" | jq -r '.version.builds[0].build_id')
+IMAGE_TAG?=${BUILD_ID}-SNAPSHOT
+export DOCKER_BUILDKIT=1
+
+# Tag custom images with the username and current timestamp.
+# The timestamp must be included to force images to be pulled.
+USER_NAME?=${USER}
+CUSTOM_IMAGE_TAG?=${IMAGE_TAG}-${USER_NAME}-$(shell date +%s)
+CI_ELASTIC_AGENT_DOCKER_IMAGE?=704479110758.dkr.ecr.eu-west-1.amazonaws.com/elastic-agent
 
 # Ensure the Go version in .go_version is installed and used.
 GOROOT?=$(shell ./scripts/make/run_with_go_ver go env GOROOT)
@@ -77,6 +86,19 @@ clean: $(MAGE)
 PackageAgent: $(MAGE)
 	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
 
+# elastic_agent_docker_image builds the Cloud Elastic Agent image
+# with the local APM Server binary injected. The image will be based
+# off the stack version defined in ${REPO_ROOT}/docker-compose.yml,
+# unless overridden.
+.PHONY: build_elastic_agent_docker_image
+elastic_agent_docker_image: build_elastic_agent_docker_image
+	docker push "${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CUSTOM_IMAGE_TAG}"
+
+build_elastic_agent_docker_image:
+	@env BASE_IMAGE=docker.elastic.co/beats/elastic-agent:${IMAGE_TAG} GOARCH=amd64 GOOS=linux  \
+		bash dev-tools/packaging/docker/elastic-agent/build.sh \
+		     -t ${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CUSTOM_IMAGE_TAG}
+
 ##############################################################################
 # Checks/tests.
 ##############################################################################
@@ -126,7 +148,7 @@ endif
 ## get-version : Get cloudbeat version
 .PHONY: get-version
 get-version:
-	@echo $(CLOUDBEAT_VERSION)
+	echo $(CLOUDBEAT_VERSION)
 
 ##############################################################################
 # Documentation.
