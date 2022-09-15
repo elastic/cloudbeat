@@ -35,7 +35,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v1
         with:
-          version: ${{ OPA_VERSION }}
+          version: $OPA_VERSION
 
       - name: Set up Go
         uses: actions/setup-go@v2

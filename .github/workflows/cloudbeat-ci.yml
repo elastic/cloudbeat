@@ -40,7 +40,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v1
         with:
-          version: ${{ OPA_VERSION }}
+          version: $OPA_VERSION
 
       - name: cache go dependencies
         uses: actions/cache@v2
