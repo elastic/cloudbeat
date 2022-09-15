@@ -127,6 +127,7 @@ func Package() {
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
 	devtools.UseElasticBeatXPackPackaging()
+	BuildOpaBundle()
 	cloudbeat.CustomizePackaging()
 
 	if packageTypes := os.Getenv("TYPES"); packageTypes != "" {
