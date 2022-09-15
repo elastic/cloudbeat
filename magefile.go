@@ -49,6 +49,8 @@ import (
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
 
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
+	// A required dependency for building cloudbeat
+	_ "github.com/elastic/csp-security-policies"
 )
 
 const (
