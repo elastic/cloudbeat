@@ -81,6 +81,7 @@ func Check() error {
 
 // Build builds the Beat binary.
 func Build() error {
+	mg.Deps(BuildOpaBundle)
 	return devtools.Build(devtools.DefaultBuildArgs())
 }
 
@@ -125,7 +126,6 @@ func Package() {
 	start := time.Now()
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
-	BuildOpaBundle()
 	devtools.UseElasticBeatXPackPackaging()
 	cloudbeat.CustomizePackaging()
 
@@ -340,7 +340,7 @@ func PythonEnv() error {
 
 func BuildOpaBundle() error {
 	pkgName := "github.com/elastic/csp-security-policies"
-	cspPoliciesPkgDir, err := sh.Output("go", "list", "-m", "-f", "{{.Dir}}", pkgName)
+	cspPoliciesPkgDir, err := sh.Output("go", "list", "-mod=mod", "-m", "-f", "{{.Dir}}", pkgName)
 	if err != nil {
 		return err
 	}

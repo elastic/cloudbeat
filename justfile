@@ -25,8 +25,7 @@ load-cloudbeat-image:
   kind load docker-image cloudbeat:latest --name kind-mono
 
 build-opa-bundle:
-  CSP_POLICIES_PKG_DIR=$( go list -m -f {{{{.Dir}} {{cspPoliciesPkg}} ) && \
-  opa build -b ${CSP_POLICIES_PKG_DIR}/bundle -e ${CSP_POLICIES_PKG_DIR}/bundle/compliance
+  mage BuildOpaBundle
 
 build-cloudbeat:
   just build-opa-bundle
