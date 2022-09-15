@@ -137,7 +137,7 @@ jobs:
 
   Test_Matrix:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
-    needs: Build
+    needs: [pytest-build, cloudbeat-build]
     runs-on: ubuntu-latest
     timeout-minutes: 55
     strategy:
