@@ -1367,14 +1367,14 @@ kubelet_rules = [
                                 *cis_4_2_2,
                                 *cis_4_2_3,
                                 *cis_4_2_4,
+                                *cis_4_2_5,
+                                *cis_4_2_6,
                                 *cis_4_2_7,
                                 *cis_4_2_9,
                                 ],
                      data_to_report=SkipReportData(
                          skip_reason="Dangling tests"
                      )),
-    *cis_4_2_5,
-    *cis_4_2_6,
     # *cis_4_2_8, # TODO setting is not configurable via the Kubelet config file.
     *cis_4_2_10,
     *cis_4_2_11,
