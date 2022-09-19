@@ -65,6 +65,7 @@ pipeline {
     stage('Intake') {
       options { skipDefaultCheckout() }
       environment {
+        hermitEnvVars = sh(returnStdout: true, script: './bin/hermit env --raw').trim()
         PATH = "${env.PATH}:${env.WORKSPACE}/bin"
         HOME = "${env.WORKSPACE}"
       }
@@ -80,8 +81,10 @@ pipeline {
           deleteDir()
           unstash 'source'
           dir("${BASE_DIR}"){
-            withGoEnv(){
-              sh(label: 'Run intake', script: './.ci/scripts/intake.sh')
+            withEnv(hermitEnvVars.split('\n').toList()) {
+              withGoEnv(){
+                sh(label: 'Run intake', script: './.ci/scripts/intake.sh')
+              }
             }
           }
         }

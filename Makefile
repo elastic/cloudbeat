@@ -47,6 +47,10 @@ hermit:
 active-hermit:
 	. ./bin/activate-hermit
 
+.PHONY: activate-hermit
+active-hermit:
+	. ./bin/activate-hermit
+
 .PHONY: deactivate-hermit
 deactivate-hermit:
 	. ./bin/activate-hermit
