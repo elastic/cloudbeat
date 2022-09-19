@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - main
+      - 'depedency-review-fix'
 
 env:
   K8S_MANIFEST_DIR: deploy
