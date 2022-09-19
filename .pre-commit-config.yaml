@@ -15,7 +15,6 @@ repos:
         exclude: (^cloudbeat.*yml)$
         args: [--allow-multiple-documents]
       - id: check-json
-      - id: name-tests-test
 
   ## Security
       - id: detect-private-key
