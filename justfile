@@ -2,6 +2,7 @@
 
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
+cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 
 create-kind-cluster:
   kind create cluster --config deploy/k8s/kind/kind-config.yml --wait 30s
@@ -23,7 +24,11 @@ build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-
 load-cloudbeat-image:
   kind load docker-image cloudbeat:latest --name kind-mono
 
+build-opa-bundle:
+  mage BuildOpaBundle
+
 build-cloudbeat:
+  just build-opa-bundle
   GOOS=linux go mod vendor
   GOOS=linux go build -v && docker build -t cloudbeat .
 
