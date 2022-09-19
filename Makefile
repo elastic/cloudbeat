@@ -59,7 +59,7 @@ deactivate-hermit:
 
 .PHONY: cloudbeat
 cloudbeat:
-	@$(GO) build -o $@
+	@$(MAGE) build
 
 .PHONY: test
 test:
