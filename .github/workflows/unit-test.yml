@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - main
-      - 'depedency-review-fix'
 
 env:
   K8S_MANIFEST_DIR: deploy
@@ -94,7 +93,7 @@ jobs:
 
   dependency-review:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
