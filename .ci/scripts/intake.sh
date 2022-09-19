@@ -10,6 +10,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-make activate-hermit
+make hermit-env
 
 make check-full

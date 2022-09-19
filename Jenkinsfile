@@ -65,7 +65,7 @@ pipeline {
     stage('Intake') {
       options { skipDefaultCheckout() }
       environment {
-        hermitEnvVars = sh(returnStdout: true, script: './bin/hermit env --raw').trim()
+        hermitEnvVars = sh(returnStdout: true, script: 'make hermit-env').trim()
         PATH = "${env.PATH}:${env.WORKSPACE}/bin"
         HOME = "${env.WORKSPACE}"
       }
