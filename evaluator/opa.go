@@ -21,23 +21,26 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/http"
+	"github.com/mitchellh/mapstructure"
+	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/logging"
 	"github.com/open-policy-agent/opa/sdk"
 	"github.com/sirupsen/logrus"
 )
 
+var now = func() time.Time { return time.Now().UTC() }
+
 type OpaEvaluator struct {
 	log            *logp.Logger
 	opa            *sdk.OPA
-	bundleServer   *http.Server
 	activatedRules *config.Benchmarks
 }
 
@@ -47,51 +50,50 @@ type OpaInput struct {
 }
 
 var opaConfig = `{
-	"services": {
-		"CSP": {
-			"url": %q
-		}
-	},
 	"bundles": {
 		"CSP": {
-			"resource": "/bundles/bundle.tar.gz"
+			"resource": "file://%s"
 		}
 	},
 	"decision_logs": {
-		"console": true
+		"console": %t
 	}
 }`
 
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (Evaluator, error) {
-	server, err := StartServer(ctx, cfg)
+	// provide the OPA configuration which specifies
+	// fetching policy bundle and logging decisions locally to the console
+	path, err := filepath.Abs("bundle.tar.gz")
+	log.Debugf("OPA bundle path: %s", path)
+
 	if err != nil {
 		return nil, err
 	}
-
-	// provide the OPA configuration which specifies
-	// fetching policy bundles from the mock bundleServer
-	// and logging decisions locally to the console
-	config := []byte(fmt.Sprintf(opaConfig, ServerAddress))
+	opaCfg := []byte(fmt.Sprintf(opaConfig, path, cfg.Evaluator.DecisionLogs))
 
 	// create an instance of the OPA object
 	opaLogger := newEvaluatorLogger()
+	opaDecisionLogger := newDecisionLogger()
 	opa, err := sdk.New(ctx, sdk.Options{
-		Config: bytes.NewReader(config),
-		Logger: opaLogger,
+		Config:        bytes.NewReader(opaCfg),
+		Logger:        opaLogger,
+		ConsoleLogger: opaDecisionLogger,
 	})
+
 	if err != nil {
 		return nil, fmt.Errorf("fail to init opa: %s", err.Error())
 	}
 
-	rules, err := cfg.GetActivatedRules()
-	if err != nil {
-		log.Warnf("failed to get activated rules: %v", err)
+	var rules *config.Benchmarks
+	if cfg.RuntimeCfg != nil {
+		rules = cfg.RuntimeCfg.ActivatedRules
+	} else {
+		log.Warn("no runtime config supplied")
 	}
 
 	return &OpaEvaluator{
 		log:            log,
 		opa:            opa,
-		bundleServer:   server,
 		activatedRules: rules,
 	}, nil
 }
@@ -129,10 +131,6 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 
 func (o *OpaEvaluator) Stop(ctx context.Context) {
 	o.opa.Stop(ctx)
-	err := o.bundleServer.Shutdown(ctx)
-	if err != nil {
-		o.log.Errorf("Could not stop OPA evaluator: %v", err)
-	}
 }
 
 func (o *OpaEvaluator) decision(ctx context.Context, input OpaInput) (interface{}, error) {
@@ -156,11 +154,13 @@ func (o *OpaEvaluator) decode(result interface{}) (RuleResult, error) {
 	}
 
 	err = decoder.Decode(result)
+	opaResult.Metadata.CreatedAt = now()
 	return opaResult, err
 }
 
-func newEvaluatorLogger() logging.Logger {
+func newOpaLogger(name string) logging.Logger {
 	opaLogger := logging.New()
+	opaLogger.SetOutput(os.Stdout)
 	opaLogger.SetFormatter(&logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
 			logrus.FieldKeyTime:  "@timestamp",
@@ -170,7 +170,17 @@ func newEvaluatorLogger() logging.Logger {
 		},
 	})
 	return opaLogger.WithFields(map[string]interface{}{
-		"log.logger":   "opa",
+		"log.logger":   name,
 		"service.name": "cloudbeat",
 	})
+}
+
+func newEvaluatorLogger() logging.Logger {
+	return newOpaLogger("opa_logger")
+}
+
+func newDecisionLogger() logging.Logger {
+	logger := newOpaLogger("opa_decision_logger")
+	logger.SetLevel(logging.Debug)
+	return logger
 }

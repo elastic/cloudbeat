@@ -22,13 +22,11 @@ package config
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
@@ -46,27 +44,32 @@ type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
 }
 
-type Fetchers struct {
-	Vanilla []*config.C `config:"vanilla"` // Vanilla fetchers
-	Eks     []*config.C `config:"eks"`     // EKS fetchers
-}
-
-type Config struct {
-	Fetchers   Fetchers                `config:"fetchers"`
-	KubeConfig string                  `config:"kube_config"`
-	Period     time.Duration           `config:"period"`
-	Processors processors.PluginConfig `config:"processors"`
-	Streams    []Stream                `config:"streams"`
-	Type       string                  `config:"type"`
+type AgentInput struct {
+	Streams []Stream `config:"streams"`
+	Type    string   `config:"type"`
 }
 
 type Stream struct {
-	AWSConfig  aws.ConfigAWS  `config:",inline"`
-	RuntimeCfg *RuntimeConfig `config:"runtime_cfg"`
+	AWSConfig  aws.ConfigAWS           `config:",inline"`
+	RuntimeCfg *RuntimeConfig          `config:"runtime_cfg"`
+	Fetchers   []*config.C             `config:"fetchers"`
+	KubeConfig string                  `config:"kube_config"`
+	Period     time.Duration           `config:"period"`
+	Evaluator  EvaluatorConfig         `config:"evaluator"`
+	Processors processors.PluginConfig `config:"processors"`
+}
+
+type Config struct {
+	Stream
+	Type string `config:"type"`
 }
 
 type RuntimeConfig struct {
 	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
+}
+
+type EvaluatorConfig struct {
+	DecisionLogs bool `config:"decision_logs"`
 }
 
 type Benchmarks struct {
@@ -74,53 +77,24 @@ type Benchmarks struct {
 	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
-var DefaultConfig = Config{
-	Period: 4 * time.Hour,
+var DefaultConfig = AgentInput{
+	Type: InputTypeVanillaK8s,
+	Streams: []Stream{{
+		Period: 4 * time.Hour,
+	}},
 }
 
 func New(cfg *config.C) (Config, error) {
 	c := DefaultConfig
 
 	if err := cfg.Unpack(&c); err != nil {
-		return c, err
+		return Config{}, err
 	}
 
-	return c, nil
-}
-
-// Update replaces values of those keys in the current config which are
-// present in the incoming config.
-//
-// NOTE(yashtewari): This will be removed with the planned update to restart the
-// beat with the new config.
-func (c *Config) Update(log *logp.Logger, cfg *config.C) error {
-	log.Infof("Updating config with the following keys: %v", cfg.FlattenedKeys())
-
-	if err := cfg.Unpack(&c); err != nil {
-		return err
-	}
-
-	// Check if the incoming config has streams.
-	if cfg.HasField("streams") {
-		uc, err := New(cfg)
-		if err != nil {
-			return err
-		}
-
-		c.Streams = uc.Streams
-	}
-
-	return nil
-}
-
-// GetActivatedRules returns the activated rules from the config.
-func (c *Config) GetActivatedRules() (*Benchmarks, error) {
-	cfgStream := c.Streams
-	if len(cfgStream) == 0 || cfgStream[0].RuntimeCfg == nil {
-		return nil, fmt.Errorf("could not find runtime cfg")
-	}
-
-	return cfgStream[0].RuntimeCfg.ActivatedRules, nil
+	return Config{
+		Stream: c.Streams[0],
+		Type:   c.Type,
+	}, nil
 }
 
 // Datastream function to generate the datastream value

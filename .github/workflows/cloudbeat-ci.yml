@@ -11,7 +11,6 @@ on:
       - main
       - '[0-9]+.[0-9]+'
 env:
-  GO_VERSION: 1.18.4
   CONTAINER_SUFFIX: ${{ github.run_id }}
 
 concurrency:
@@ -27,10 +26,21 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
+      - name: Fetch Go version from .go-version
+        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO_VERSION }}
+
+      - name: Fetch OPA version
+        run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v1
+        with:
+          version: ${{ env.OPA_VERSION }}
 
       - name: cache go dependencies
         uses: actions/cache@v2
@@ -44,6 +54,12 @@ jobs:
 
       - name: build cloudbeat
         run: make
+
+      - name: build opa bundle
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: BuildOpaBundle
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -90,14 +106,92 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   Test_Matrix:
-    name: ${{ matrix.test-target }}-tests
+    name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
     needs: Build
     runs-on: ubuntu-latest
     timeout-minutes: 55
     strategy:
       matrix:
-        # test-targets chosen by stabillity and runtime.Only pre_merge will be set as mandatory
-        test-target: [pre_merge, file_system_rules, k8s_object_rules, process_scheduler_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules]
+        include:
+          - test-target: pre_merge
+          - test-target: file_system_rules
+            range: '0..15'
+          - test-target: file_system_rules
+            range: '15..30'
+          - test-target: file_system_rules
+            range: '30..45'
+          - test-target: file_system_rules
+            range: '45..60'
+          - test-target: file_system_rules
+            range: '60..'
+          - test-target: k8s_object_rules
+            range: '0..6'
+          - test-target: k8s_object_rules
+            range: '6..12'
+          - test-target: k8s_object_rules
+            range: '12..18'
+          - test-target: k8s_object_rules
+            range: '18..'
+          - test-target: process_scheduler_rules
+            range: '0..3'
+          - test-target: process_scheduler_rules
+            range: '3..'
+          - test-target: process_api_server_rules
+            range: '0..5'
+          - test-target: process_api_server_rules
+            range: '5..10'
+          - test-target: process_api_server_rules
+            range: '10..15'
+          - test-target: process_api_server_rules
+            range: '15..20'
+          - test-target: process_api_server_rules
+            range: '20..24'
+          - test-target: process_api_server_rules
+            range: '24..28'
+          - test-target: process_api_server_rules
+            range: '28..32'
+          - test-target: process_api_server_rules
+            range: '32..36'
+          - test-target: process_api_server_rules
+            range: '36..40'
+          - test-target: process_api_server_rules
+            range: '40..44'
+          - test-target: process_api_server_rules
+            range: '44..48'
+          - test-target: process_api_server_rules
+            range: '48..52'
+          - test-target: process_api_server_rules
+            range: '52..56'
+          - test-target: process_api_server_rules
+            range: '56..'
+          - test-target: process_controller_manager_rules
+            range: '0..4'
+          - test-target: process_controller_manager_rules
+            range: '4..8'
+          - test-target: process_controller_manager_rules
+            range: '8..12'
+          - test-target: process_controller_manager_rules
+            range: '12..'
+          - test-target: process_etcd_rules
+            range: '0..4'
+          - test-target: process_etcd_rules
+            range: '4..8'
+          - test-target: process_etcd_rules
+            range: '8..12'
+          - test-target: process_etcd_rules
+            range: '12..'
+          - test-target: process_kubelet_rules
+            range: '0..4'
+          - test-target: process_kubelet_rules
+            range: '4..8'
+          - test-target: process_kubelet_rules
+            range: '8..12'
+          - test-target: process_kubelet_rules
+            range: '12..16'
+          - test-target: process_kubelet_rules
+            range: '16..20'
+          - test-target: process_kubelet_rules
+            range: '20..'
       fail-fast: false
     steps:
       - name: Check out the repo
@@ -107,6 +201,8 @@ jobs:
         id: install
 
       - uses: extractions/setup-just@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
@@ -129,7 +225,7 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm-ci ${{ matrix.test-target }}
+          just deploy-tests-helm-ci ${{ matrix.test-target }} ${{ matrix.range }}
 
       - name: Run Tests
         id: run_tests

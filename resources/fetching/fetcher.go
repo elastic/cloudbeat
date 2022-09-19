@@ -19,8 +19,8 @@ package fetching
 
 import (
 	"context"
+
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/gofrs/uuid"
 
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -48,7 +48,7 @@ type ResourceInfo struct {
 }
 
 type CycleMetadata struct {
-	CycleId uuid.UUID
+	Sequence int64
 }
 
 type Resource interface {

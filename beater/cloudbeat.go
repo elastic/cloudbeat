@@ -91,13 +91,13 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
-	le, err := leaderelection.NewLeaderElector(ctx, log, c)
+	le, err := leaderelection.NewLeaderElector(log, c)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	fetchersRegistry, err := initRegistry(log, c, resourceCh)
+	fetchersRegistry, err := initRegistry(log, c, resourceCh, le)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -212,7 +212,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) (fetchersManager.FetchersRegistry, error) {
+func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo, le leaderelection.ElectionManager) (fetchersManager.FetchersRegistry, error) {
 	registry := fetchersManager.NewFetcherRegistry(log)
 
 	parsedList, err := fetchersManager.Factories.ParseConfigFetchers(log, cfg, ch)
@@ -220,7 +220,7 @@ func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.Resource
 		return nil, err
 	}
 
-	if err := registry.RegisterFetchers(parsedList); err != nil {
+	if err := registry.RegisterFetchers(parsedList, le); err != nil {
 		return nil, err
 	}
 
@@ -232,6 +232,7 @@ func (bt *cloudbeat) Stop() {
 	bt.cancel()
 	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
+	bt.leader.Stop()
 	close(bt.resourceCh)
 
 	bt.client.Close()
