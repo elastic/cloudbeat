@@ -201,6 +201,8 @@ jobs:
         id: install
 
       - uses: extractions/setup-just@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
