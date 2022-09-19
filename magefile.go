@@ -123,11 +123,11 @@ func GoTestUnit(ctx context.Context) error {
 // Use PLATFORMS to control the target platforms.
 // Use VERSION_QUALIFIER to control the version qualifier.
 func Package() {
+
 	start := time.Now()
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
 	devtools.UseElasticBeatXPackPackaging()
-	BuildOpaBundle()
 	cloudbeat.CustomizePackaging()
 
 	if packageTypes := os.Getenv("TYPES"); packageTypes != "" {
@@ -209,7 +209,7 @@ func CheckLicenseHeaders() error {
 }
 
 func Update() {
-	mg.Deps(cloudbeat.Update.All)
+	mg.Deps(cloudbeat.Update.All, BuildOpaBundle)
 	mg.Deps(AddLicenseHeaders)
 }
 
