@@ -1,3 +1,4 @@
+# pylint: skip-file
 import datetime
 import time
 
@@ -129,7 +130,7 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
     start_time = time.time()
     prev_sequence = ""
     curr_sequence = ""
-    active_agents = 0
+    agents_cycles_count = 0
     num_cycles = 0
 
     while num_cycles < required_cycles and not is_timeout(start_time, 30):
@@ -149,7 +150,7 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
 
                 if elastic_client.get_total_value(data=result) != 0 and curr_sequence != prev_sequence:
                     # New cycle findings for this node
-                    active_agents += 1
+                    agents_cycles_count += 1
                     break
                 time.sleep(1)
 
@@ -157,7 +158,7 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
             prev_sequence = curr_sequence
             num_cycles += 1
 
-    return active_agents == (len(nodes) * required_cycles)
+    return agents_cycles_count >= (len(nodes) * required_cycles)
 
 
 def is_timeout(start_time: time, timeout: int) -> bool:

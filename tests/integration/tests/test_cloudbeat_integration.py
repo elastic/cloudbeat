@@ -4,6 +4,7 @@ The test executed on pre-merge events as required test.
 The following flow is tested:
 Cloudbeat -> ElasticSearch
 """
+# pylint: disable=E0401, E1101
 import time
 import json
 import pytest
@@ -12,7 +13,7 @@ from commonlib.utils import wait_for_cycle_completion
 
 
 testdata = ['file', 'process', 'k8s_object']
-CONFIG_TIMEOUT = 30
+CONFIG_TIMEOUT = 45
 
 
 @pytest.mark.pre_merge
