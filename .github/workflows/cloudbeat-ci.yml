@@ -29,18 +29,18 @@ jobs:
       - name: Fetch Go version from .go-version
         run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v29.0.4
-        with:
-          files: |
-            **/*.go
-            *.go
-            Dockerfile*
-          files_ignore: |
-            magefile.go
-            utils/*.go
-            scripts/mage/*.go
+      # - name: Get changed files
+      #   id: changed-files
+      #   uses: tj-actions/changed-files@v29.0.4
+      #   with:
+      #     files: |
+      #       **/*.go
+      #       *.go
+      #       Dockerfile*
+      #     files_ignore: |
+      #       magefile.go
+      #       utils/*.go
+      #       scripts/mage/*.go
 
       - name: Set up Go
         uses: actions/setup-go@v2
@@ -103,10 +103,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dockers-cache-
 
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      # - name: Move cache
+      #   run: |
+      #     rm -rf /tmp/.buildx-cache
+      #     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   pytest-build:
     name: Build pytest docker
@@ -152,10 +152,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-dockers-cache-
 
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      # - name: Move cache
+      #   run: |
+      #     rm -rf /tmp/.buildx-cache
+      #     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   Test_Matrix:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
