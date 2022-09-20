@@ -3,8 +3,6 @@
 This file is generated! See _meta/fields.yml and scripts/generate_fields_docs.py
 ////
 
-:edit_url:
-
 [[exported-fields]]
 = Exported fields
 
@@ -15685,5 +15683,3 @@ example: albert
 type: text
 
 --
-
-:edit_url!:
