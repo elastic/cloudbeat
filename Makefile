@@ -48,7 +48,7 @@ hermit-env:
 	./bin/hermit env --raw
 
 .PHONY: activate-hermit
-active-hermit:
+active-hermit: hermit
 	. ./bin/activate-hermit
 
 .PHONY: deactivate-hermit
