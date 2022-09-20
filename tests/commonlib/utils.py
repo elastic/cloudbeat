@@ -27,7 +27,7 @@ def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
             print(e)
             continue
 
-        print('MATCHING EVENTS:', len(events))
+        # print('MATCHING EVENTS:', len(events))
 
         for event in events:
             findings_timestamp = datetime.datetime.strptime(getattr(event, '@timestamp'), '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -38,10 +38,11 @@ def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
                 resource = event.resource.raw
                 evaluation = event.result.evaluation
             except AttributeError:
+                print('COULDNT FIND VALUE IN', event)
                 continue
 
+            # print('EVENT', event)
             if resource_identifier(resource):
-                print('FINDING MATCH:', event)
                 return evaluation
 
     return None
@@ -158,3 +159,30 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
 
 def is_timeout(start_time: time, timeout: int) -> bool:
     return time.time() - start_time > timeout
+
+
+def command_contains_arguments(command, arguments_dict):
+    args = command.split()[1:]
+    args_dict = {}
+    for arg in args:
+        try:
+            key, val = arg.split('=', 1)
+        except ValueError:
+            print('PROBLEM ARG', arg)
+        args_dict[key] = val
+
+    set_dict = arguments_dict.get('set', {})
+    unset_list = arguments_dict.get('unset', [])
+
+    print('PROCESS IDENTIFIER', args_dict, set_dict, unset_list)
+
+    for key, val in set_dict.items():
+        argval = args_dict.get(key)
+        if val != argval:
+            return False
+
+    for key in unset_list:
+        if key in args_dict:
+            return False
+
+    return True

@@ -9,6 +9,8 @@ from commonlib.utils import get_ES_evaluation
 from product.tests.data.file_system import file_system_test_cases as fs_tc
 from product.tests.parameters import register_params, Parameters
 
+import os
+
 
 @pytest.mark.file_system_rules
 def test_file_system_configuration(elastic_client,
@@ -40,7 +42,11 @@ def test_file_system_configuration(elastic_client,
                             param_value=param_value,
                             resource=resource)
 
+    st = os.stat(resource)
+    print('ACTUAL PERMISSIONS', resource, oct(st.st_mode), st.st_uid, st.st_gid)
+
     def identifier(eval_resource):
+        print('FILE IDENTIFIER GOT RESOURCE', eval_resource, 'COMMAND', command, 'PARAM VALUE', param_value)
         if not eval_resource.path.endswith(resource):
             return False
 
