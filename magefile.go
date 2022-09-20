@@ -346,5 +346,5 @@ func BuildOpaBundle() error {
 		return err
 	}
 
-	return sh.Run("opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
+	return sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
 }
