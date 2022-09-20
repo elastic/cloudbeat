@@ -215,7 +215,7 @@ func (f *ProcessesFetcher) getProcessConfigurationFile(processConfig ProcessInpu
 		regex := fmt.Sprintf(CMDArgumentMatcher, argument)
 		matcher := regexp.MustCompile(regex)
 		if !matcher.MatchString(cmd) {
-			f.log.Infof("Couldn't find a configuration file associated with flag %s for process %s from cmd", argument, processName, cmd)
+			f.log.Infof("Couldn't find a configuration file associated with flag %s for process %s from cmd %s", argument, processName, cmd)
 			continue
 		}
 

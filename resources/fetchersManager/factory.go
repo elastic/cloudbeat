@@ -20,6 +20,7 @@ package fetchersManager
 import (
 	"errors"
 	"fmt"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
@@ -97,7 +98,7 @@ func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg config.Config, f
 	if cfg.Type == config.InputTypeEks {
 		err := fcfg.Merge(cfg.AWSConfig)
 		if err != nil {
-			log.Errorf("Failed to merge aws configuration to fetcher configuration", err)
+			log.Errorf("Failed to merge aws configuration to fetcher configuration: %v", err)
 		}
 	}
 }
