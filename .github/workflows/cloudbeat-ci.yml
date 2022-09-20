@@ -211,6 +211,13 @@ jobs:
         run: |
           just deploy-tests-helm-ci ${{ matrix.test-target }} ${{ matrix.range }}
 
+# Todo remove when ready to merge
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: always()
+        with:
+          limit-access-to-actor: true
+
       - name: Run Tests
         id: run_tests
         run: |
