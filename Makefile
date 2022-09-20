@@ -62,7 +62,7 @@ deactivate-hermit:
 .DEFAULT_GOAL := cloudbeat
 
 .PHONY: cloudbeat
-cloudbeat:
+cloudbeat: @$(MAGE)
 	@$(MAGE) build
 
 .PHONY: test
