@@ -1,0 +1,16 @@
+# https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
+run:
+  timeout: 10m
+
+linters-settings:
+  govet:
+    settings:
+      printf:
+        funcs:
+          - Infof
+          - Debugf
+          - Warnf
+          - Errorf
+          - Fatalf
+          - Panicf
+          - DPanicf
