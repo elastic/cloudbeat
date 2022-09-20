@@ -21,19 +21,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"net/http"
-	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
-
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/open-policy-agent/opa/logging"
 	"github.com/open-policy-agent/opa/sdk"
 )
 
