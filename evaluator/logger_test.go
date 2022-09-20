@@ -57,6 +57,7 @@ func (s *LoggerTestSuite) TestLogFormat() {
 
 func (s *LoggerTestSuite) TestLogFields() {
 	logger := newLogger()
+	logger.SetLevel(logging.Debug)
 	logger = logger.WithFields(map[string]interface{}{
 		"key": "val",
 	})
@@ -86,6 +87,7 @@ func (s *LoggerTestSuite) TestLoggerGetLevel() {
 
 func (s *LoggerTestSuite) TestLoggerSetLevel() {
 	logger := newLogger()
+	logger.SetLevel(logging.Debug)
 	logger.Debug("debug")
 	logs := logp.ObserverLogs().TakeAll()
 	if s.Len(logs, 1) {
