@@ -10,4 +10,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
+make activate-hermit
+
 make check-full

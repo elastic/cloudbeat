@@ -43,8 +43,12 @@ CLOUDBEAT_VERSION=$(shell grep defaultBeatVersion cmd/version.go | cut -d'=' -f2
 hermit:
 	curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
 
+.PHONY: hermit-env
+hermit-env:
+	./bin/hermit env --raw
+
 .PHONY: activate-hermit
-active-hermit:
+active-hermit: hermit
 	. ./bin/activate-hermit
 
 .PHONY: deactivate-hermit
@@ -58,8 +62,8 @@ deactivate-hermit:
 .DEFAULT_GOAL := cloudbeat
 
 .PHONY: cloudbeat
-cloudbeat:
-	@$(GO) build -o $@
+cloudbeat: $(MAGE)
+	@$(MAGE) build
 
 .PHONY: test
 test:

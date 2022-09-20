@@ -80,9 +80,9 @@ pipeline {
           deleteDir()
           unstash 'source'
           dir("${BASE_DIR}"){
-            withGoEnv(){
-              sh(label: 'Run intake', script: './.ci/scripts/intake.sh')
-            }
+              withGoEnv(){
+                sh(label: 'Run intake', script: './.ci/scripts/intake.sh')
+              }
           }
         }
       // }
