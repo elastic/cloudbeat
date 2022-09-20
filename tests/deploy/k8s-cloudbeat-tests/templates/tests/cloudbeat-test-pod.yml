@@ -11,7 +11,7 @@ spec:
   containers:
   - name: {{ .Values.image.name }}
     image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-    imagePullPolicy: Always
+    imagePullPolicy: IfNotPresent
     command:
     - /bin/sh
     - -c
