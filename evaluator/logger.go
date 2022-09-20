@@ -57,7 +57,7 @@ func (l *logger) SetLevel(level logging.Level) {
 }
 
 func mapToArray(m map[string]interface{}) []interface{} {
-	ret := []interface{}{}
+	var ret []interface{}
 	for k, v := range m {
 		ret = append(ret, k, v)
 	}
@@ -83,7 +83,7 @@ func toZapLevel(l logging.Level) zapcore.Level {
 		return res
 	}
 
-	return zap.FatalLevel
+	return zap.DebugLevel
 }
 
 func toOpaLevel(l zapcore.Level) logging.Level {
@@ -91,5 +91,5 @@ func toOpaLevel(l zapcore.Level) logging.Level {
 		return res
 	}
 
-	return logging.Level(4)
+	return logging.Debug
 }
