@@ -6,6 +6,8 @@ set -euox pipefail
 export PLATFORMS="linux/amd64,linux/arm64"
 export TYPES="tar.gz"
 
+make activate-hermit
+
 if [ $WORKFLOW = "staging" ] ; then
     make release-manager-release
 else
