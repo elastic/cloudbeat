@@ -238,6 +238,13 @@ jobs:
         with:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
+      
+      # Todo remove when ready to merge
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: always()
+        with:
+          limit-access-to-actor: true
 
       - name: clear cache
         id: clear_cache
