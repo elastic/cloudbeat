@@ -1,10 +1,9 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: "[BUG]"
-labels: ["bug", "csp: last mile"]
+about: Report a bug to help us improve
+title:
+labels: ["bug", "Team:Cloud Security Posture"]
 assignees: ''
-
 ---
 
 **Describe the bug**
@@ -16,20 +15,25 @@ Environment state and/or platform specific configurations.
 **To Reproduce**
 Write the exact actions one should perform in order to reproduce the bug.
 Steps to reproduce the behavior:
-1. 
+1.
 
 
 **Expected behavior**
 
 
+<!-- Optional: Please uncomment if relevant
 **Screenshots**
+-->
 
-
+<!-- Optional: Please uncomment if relevant
 **Desktop (please complete the following information):**
- - OS: 
- - Browser: 
- - Kibana Version: 
+ - OS:
+ - Browser:
+ - Kibana Version:
  - Endpoint Version:
- - Other Version: 
+ - Other Version:
+ -->
 
+ <!-- Optional: Please uncomment if relevant
 **Additional context**
+-->

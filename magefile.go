@@ -49,6 +49,8 @@ import (
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
 
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
+	// A required dependency for building cloudbeat
+	_ "github.com/elastic/csp-security-policies/bundle"
 )
 
 const (
@@ -79,6 +81,7 @@ func Check() error {
 
 // Build builds the Beat binary.
 func Build() error {
+	mg.Deps(BuildOpaBundle)
 	return devtools.Build(devtools.DefaultBuildArgs())
 }
 
@@ -120,6 +123,7 @@ func GoTestUnit(ctx context.Context) error {
 // Use PLATFORMS to control the target platforms.
 // Use VERSION_QUALIFIER to control the version qualifier.
 func Package() {
+
 	start := time.Now()
 	defer func() { fmt.Println("package ran for", time.Since(start)) }()
 
@@ -205,7 +209,7 @@ func CheckLicenseHeaders() error {
 }
 
 func Update() {
-	mg.Deps(cloudbeat.Update.All)
+	mg.Deps(cloudbeat.Update.All, BuildOpaBundle)
 	mg.Deps(AddLicenseHeaders)
 }
 
@@ -333,4 +337,14 @@ func Config() { mg.Deps(cloudbeat.Update.Config) }
 func PythonEnv() error {
 	_, err := mage.PythonVirtualenv(true)
 	return err
+}
+
+func BuildOpaBundle() error {
+	pkgName := "github.com/elastic/csp-security-policies"
+	cspPoliciesPkgDir, err := sh.Output("go", "list", "-mod=mod", "-m", "-f", "{{.Dir}}", pkgName)
+	if err != nil {
+		return err
+	}
+
+	return sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
 }

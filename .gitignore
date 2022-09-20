@@ -1,4 +1,4 @@
-*env.aws 
+*env.aws
 data/*
 tests/.idea
 /.idea
@@ -34,6 +34,6 @@ tests/allure/reports/*
 # vscode
 .vscode*
 *.code-workspace
-/evaluator/tmpBundles/bundle.tar.gz
+bundle.tar.gz
 /deploy/eks/cloudbeat-ds.yaml
 /deploy/k8s/cloudbeat-ds.yaml
