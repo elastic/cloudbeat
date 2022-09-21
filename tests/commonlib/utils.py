@@ -21,6 +21,8 @@ def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
     latest_timestamp = exec_timestamp
 
     while time.time() - start_time < timeout:
+        time.sleep(1)
+
         try:
             events = get_events_from_index(elastic_client, elastic_client.index, rule_tag, latest_timestamp)
         except Exception as e:

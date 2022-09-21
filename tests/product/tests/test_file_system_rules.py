@@ -43,10 +43,10 @@ def test_file_system_configuration(elastic_client,
                             resource=resource)
 
     st = os.stat(resource)
-    print('ACTUAL PERMISSIONS', resource, oct(st.st_mode), st.st_uid, st.st_gid)
+    print(datetime.now(), 'ACTUAL PERMISSIONS', resource, oct(st.st_mode), st.st_uid, st.st_gid)
 
     def identifier(eval_resource):
-        print('FILE IDENTIFIER GOT RESOURCE', eval_resource, 'COMMAND', command, 'PARAM VALUE', param_value)
+        # print('FILE IDENTIFIER GOT RESOURCE', eval_resource, 'COMMAND', command, 'PARAM VALUE', param_value)
         if not eval_resource.path.endswith(resource):
             return False
 
