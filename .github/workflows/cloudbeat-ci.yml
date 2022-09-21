@@ -244,8 +244,8 @@ jobs:
 
       - name: Load images to kind
         run: |
-          chmod +x ./.ci/kind-images.sh
-          ./.ci/kind-images.sh
+          chmod +x ./.ci//scripts/kind-images.sh
+          ./.ci/scripts/kind-images.sh
         shell: bash
 
       - name: Deploy tests Helm chart
