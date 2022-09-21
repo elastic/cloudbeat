@@ -105,7 +105,9 @@ jobs:
 
       - name: Move cache
         run: |
+          chmod +x ./.ci/scripts/gh-cache.sh
           ./.ci/scripts/gh-cache.sh
+        shell: bash
 
   Test_Matrix:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
@@ -241,7 +243,10 @@ jobs:
             ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Load images to kind
-        run: ./.ci/kind-images.sh
+        run: |
+          chmod +x ./.ci/kind-images.sh
+          ./.ci/kind-images.sh
+        shell: bash
 
       - name: Deploy tests Helm chart
         id: deploy_helm
