@@ -28,11 +28,8 @@ pipeline {
   }
   parameters {
     booleanParam(name: 'Run_As_Main_Branch', defaultValue: false, description: 'Allow to run any steps on a PR, some steps normally only run on main branch.')
-    booleanParam(name: 'linux_ci', defaultValue: true, description: 'Enable Linux build')
     booleanParam(name: 'intake_ci', defaultValue: true, description: 'Enable test')
-    booleanParam(name: 'test_ci', defaultValue: false, description: 'Enable test')
     booleanParam(name: 'release_ci', defaultValue: true, description: 'Enable build the release packages')
-    booleanParam(name: 'its_ci', defaultValue: true, description: 'Enable async ITs')
     choice(name: 'build_type', choices: ['both', 'snapshot', 'staging'], description: 'Choose Snapshot or Staging Build type(Default: Both)')
     string(name: 'DIAGNOSTIC_INTERVAL', defaultValue: "0", description: 'Elasticsearch detailed logging every X seconds')
     string(name: 'ES_LOG_LEVEL', defaultValue: "error", description: 'Elasticsearch error level')
