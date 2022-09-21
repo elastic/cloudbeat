@@ -32,6 +32,15 @@ def get_events_from_index(elastic_client, index_name: str, rule_tag: str, time_a
                         "rule.tags": rule_tag
                     }
                 }
+            ],
+            "filter": [
+                {
+                    "range": {
+                        "@timestamp": {
+                            "gte": time_after.strftime('%Y-%m-%dT%H:%M:%S.%f')
+                        }
+                    }
+                }
             ]
         }
     }
