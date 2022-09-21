@@ -142,24 +142,6 @@ update-beats-docs: $(PYTHON)
 	@$(PYTHON) script/copy-docs.py
 
 ##############################################################################
-# Beats synchronisation.
-##############################################################################
-
-BEATS_VERSION?=main
-BEATS_MODULE:=$(shell $(GO) list -m -f {{.Path}} all | grep github.com/elastic/beats)
-
-.PHONY: update-beats
-update-beats: update-beats-module update
-	@echo --- Use this commit message: Update to elastic/beats@$(shell $(GO) list -m -f {{.Version}} $(BEATS_MODULE) | cut -d- -f3)
-
-.PHONY: update-beats-module
-update-beats-module:
-	$(GO) get -d -u $(BEATS_MODULE)@$(BEATS_VERSION) && $(GO) mod tidy
-	cp -f $$($(GO) list -m -f {{.Dir}} $(BEATS_MODULE))/.go-version .go-version
-	find . -maxdepth 2 -name Dockerfile -exec sed -i'.bck' -E -e "s#(FROM golang):[0-9]+\.[0-9]+\.[0-9]+#\1:$$(cat .go-version)#g" {} \;
-	sed -i'.bck' -E -e "s#(:go-version): [0-9]+\.[0-9]+\.[0-9]+#\1: $$(cat .go-version)#g" docs/version.asciidoc
-
-##############################################################################
 # Linting, style-checking, license header checks, etc.
 ##############################################################################
 
