@@ -1,0 +1,27 @@
+# $COMMUNITY/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kube-system
+
+resources:
+  - manifests.yaml 
+
+patches:
+  - path: ./patches/patchs.yaml
+    target:
+      kind: DaemonSet
+
+secretGenerator:
+  - behavior: create
+    name: elastic-package-certs
+    files:
+      - ./ca-cert.pem
+  - behavior: create
+    name: fleet
+    envs:
+      - .fleet-token.env
+
+images:
+  - name: docker.elastic.co/beats/elastic-agent:8.5.0-SNAPSHOT
+    newName: elastic-agent
+    newTag: 8.5.0-SNAPSHOT
