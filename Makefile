@@ -210,7 +210,7 @@ $(GOIMPORTS): go.mod
 $(STATICCHECK): utils/go.mod
 	$(GO) build -o $@ -modfile=$< honnef.co/go/utils/cmd/staticcheck
 
-$(GOLICENSER): utils/go.mod
+$(GOLICENSER): go.mod
 	$(GO) build -o $@ -modfile=$< github.com/elastic/go-licenser
 
 $(REVIEWDOG): utils/go.mod
