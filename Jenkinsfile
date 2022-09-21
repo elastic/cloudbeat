@@ -87,60 +87,9 @@ pipeline {
         }
       // }
     }
-    stage('Build and Test'){
+    stage('Package'){
       failFast false
       parallel {
-        /**
-        Build on a linux environment.
-        */
-        stage('linux build') {
-          options { skipDefaultCheckout() }
-          when {
-            beforeAgent true
-            allOf {
-              expression { return params.linux_ci }
-            }
-          }
-          steps {
-            deleteDir()
-            unstash 'source'
-            dir(BASE_DIR){
-              withMageEnv(){
-                retry(2) { // Retry in case there are any errors to avoid temporary glitches
-                  sleep randomNumber(min: 5, max: 10)
-                  sh(label: 'Linux build', script: './.ci/scripts/build.sh')
-                }
-              }
-            }
-          }
-        }
-        /**
-          Run unit tests and report junit results.
-        */
-        stage('Unit Test') {
-          agent { label 'linux && immutable && debian-11' }
-          options { skipDefaultCheckout() }
-          environment {
-            PATH = "${env.PATH}:${env.WORKSPACE}/bin"
-            HOME = "${env.WORKSPACE}"
-            TEST_COVERAGE = "true"
-          }
-          when {
-            beforeAgent true
-            allOf {
-              expression { return params.test_ci }
-            }
-          }
-          steps {
-              deleteDir()
-              unstash 'source'
-              dir("${BASE_DIR}"){
-                withMageEnv(){
-                  sh(label: 'Run Unit tests', script: './.ci/scripts/unit-test.sh')
-                }
-              }
-          }
-        }
         /**
         Packages Artifacts & Publishes release
         */
