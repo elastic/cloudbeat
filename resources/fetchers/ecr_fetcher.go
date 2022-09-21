@@ -20,8 +20,9 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"regexp"
+
+	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	v1 "k8s.io/api/core/v1"
@@ -72,7 +73,7 @@ func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
 	if err != nil {
-		logp.Error(fmt.Errorf("failed to get pods  - %w", err))
+		f.log.Errorf("failed to get pods - %v", err)
 		return err
 	}
 
@@ -97,7 +98,7 @@ func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList
 		// Add configuration
 		describedRepo, err := describer.Provider.DescribeRepositories(ctx, f.awsConfig, repositories, region)
 		if err != nil {
-			f.log.Errorf("could not retrieve pod's aws repositories for region %s: %w", region, err)
+			f.log.Errorf("could not retrieve pod's aws repositories for region %s: %v", region, err)
 		} else {
 			awsRepositories = append(awsRepositories, describedRepo...)
 		}
