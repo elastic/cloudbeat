@@ -245,7 +245,7 @@ jobs:
       - name: Load images to kind
         run: |
           chmod +x ./.ci//scripts/kind-images.sh
-          ./.ci/scripts/kind-images.sh
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }}
         shell: bash
 
       - name: Deploy tests Helm chart
