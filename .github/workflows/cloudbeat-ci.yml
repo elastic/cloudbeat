@@ -52,8 +52,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
-      - name: Build cloudbeat
-        run: mage build
+      - name: build cloudbeat binary
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: build
 
       - name: build opa bundle
         uses: magefile/mage-action@v2
