@@ -59,7 +59,7 @@ def test_elastic_index_exists(elastic_client, match_type):
     :return:
     """
     query, sort = elastic_client.build_es_query(
-        term={"resource.ResourceMetadata.type": match_type})
+        term={"resource.type": match_type})
     start_time = time.time()
     result = {}
     while time.time() - start_time < CONFIG_TIMEOUT:
