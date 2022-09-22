@@ -55,7 +55,8 @@ class ElasticWrapper:
         """
         try:
             ret_value = data['hits']['hits'][index]['_source']
-        except IndexError:
+        except IndexError as ex:
+            print(ex)
             return {}
         return ret_value
 
