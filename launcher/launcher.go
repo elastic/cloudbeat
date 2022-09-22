@@ -104,13 +104,13 @@ func (l *launcher) run() error {
 	l.log.Info("Beater launcher is running")
 	err := l.runBeater()
 	if err != nil {
-		l.log.Errorf("Could not run Beater: %w", err)
+		l.log.Errorf("Could not run Beater: %v", err)
 		return err
 	}
 
 	err = l.waitForUpdates()
 	if err != nil {
-		l.log.Errorf("Beater launcher is stopping: %w", err)
+		l.log.Errorf("Beater launcher is stopping: %v", err)
 	} else {
 		l.log.Info("Beater launcher was shutted down gracefully")
 	}
@@ -126,7 +126,7 @@ func (l *launcher) runBeater() error {
 	l.log.Info("Launcher is creating a new Beater")
 	beater, err := l.creator(l.beat, l.latest)
 	if err != nil {
-		return fmt.Errorf("Could not create beater: %w", err)
+		return fmt.Errorf("could not create beater: %w", err)
 	}
 
 	l.wg.Add(1)
@@ -164,7 +164,7 @@ func (l *launcher) waitForUpdates() error {
 
 		case err := <-l.beaterErr:
 			if err != nil {
-				return fmt.Errorf("Beater returned an error:  %w", err)
+				return fmt.Errorf("beater returned an error:  %w", err)
 			}
 
 		case update, ok := <-l.reloader.Channel():
@@ -223,7 +223,7 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 			if l.validator != nil {
 				err := l.validator.Validate(update)
 				if err != nil {
-					l.log.Errorf("Config update validation failed: %w", err)
+					l.log.Errorf("Config update validation failed: %v", err)
 					continue
 				}
 			}

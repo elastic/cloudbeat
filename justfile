@@ -90,7 +90,7 @@ POD_STATUS_PENDING := 'Pending'
 POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
-VERSION := '$(make -s get-version)-SNAPSHOT'
+ES_IMAGE_VERSION := '8.4.2'
 NAMESPACE := 'kube-system'
 ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
@@ -110,13 +110,13 @@ load-pytest-eks:
   docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
 deploy-tests-helm-ci target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ES_IMAGE_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-tests-helm-ci-agent target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ES_IMAGE_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-local-tests-helm target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ES_IMAGE_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 purge-pvc:
   kubectl delete -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}} & kubectl apply -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}}
