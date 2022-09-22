@@ -5,5 +5,5 @@ import data.compliance.policy.file.ensure_permissions as audit
 finding = result {
 	audit.path_filter("/etc/kubernetes/pki")
 	audit.filename_suffix_filter(".crt")
-	result := audit.finding(6, 4, 4)
+	result := audit.finding(audit.file_permission_match(6, 4, 4))
 }

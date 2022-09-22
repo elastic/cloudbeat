@@ -4,5 +4,5 @@ import data.compliance.policy.file.ensure_permissions as audit
 
 finding = result {
 	audit.filename_filter("admin.conf")
-	result := audit.finding(6, 0, 0)
+	result := audit.finding(audit.file_permission_match(6, 0, 0))
 }

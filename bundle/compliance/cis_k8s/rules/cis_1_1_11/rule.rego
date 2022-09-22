@@ -4,5 +4,5 @@ import data.compliance.policy.file.ensure_permissions as audit
 
 finding = result {
 	audit.path_filter("/var/lib/etcd/")
-	result := audit.finding(7, 0, 0)
+	result := audit.finding(audit.file_permission_match(7, 0, 0))
 }

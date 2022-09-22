@@ -34,6 +34,15 @@ test_file_ownership_match_user_gid_mismatch {
 	assert.is_false(file_ownership_match(user, group, requierd_user, requierd_group))
 }
 
+test_file_permission_match_exact {
+	users := [0, 1, 2, 3, 4, 5, 6, 7]
+	groups := [0, 1, 2, 3, 4, 5, 6, 7]
+	others := [0, 1, 2, 3, 4, 5, 6, 7]
+
+	results := {file_permission_match_exact(sprintf("%d%d%d", filemode), filemode[0], filemode[1], filemode[2]) | filemode := [users[u], groups[g], others[o]]}
+	assert.all_true(results)
+}
+
 test_file_permission_match {
 	users := [0, 1, 2, 3, 4, 5, 6, 7]
 	groups := [0, 1, 2, 3, 4, 5, 6, 7]

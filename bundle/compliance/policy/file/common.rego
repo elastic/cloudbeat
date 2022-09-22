@@ -18,6 +18,15 @@ file_permission_match(filemode, user, group, other) {
 	true
 }
 
+file_permission_match_exact(filemode, user, group, other) {
+	permissions = parse_permission(filemode)
+
+	# filemode format {user}{group}{other} e.g. 644
+	check_permissions_exact(permissions, [user, group, other])
+} else = false {
+	true
+}
+
 # in some os filemodes starts with 0 to indicate that the value is Octal (base 8)
 # remove prefix if needed, and return a list of file premission [user, group, other]
 parse_permission(filemode) = permissions {
@@ -33,6 +42,12 @@ parse_permission(filemode) = permissions {
 
 check_permissions(permissions, max_permissions) {
 	assert.all_true([r | r = bits.and(permissions[p], bits.negate(max_permissions[p])) == 0])
+} else = false {
+	true
+}
+
+check_permissions_exact(permissions, target_permissions) {
+	assert.all_true([r | r = permissions[p] == target_permissions[p]])
 } else = false {
 	true
 }
