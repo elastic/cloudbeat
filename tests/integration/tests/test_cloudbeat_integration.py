@@ -4,7 +4,6 @@ The test executed on pre-merge events as required test.
 The following flow is tested:
 Cloudbeat -> ElasticSearch
 """
-# pylint: disable=E0401, E1101
 import time
 import json
 import pytest
