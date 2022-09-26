@@ -115,15 +115,35 @@ jobs:
         include:
           - test-target: pre_merge
           - test-target: file_system_rules
-            range: '0..15'
+            range: '0..5'
           - test-target: file_system_rules
-            range: '15..30'
+            range: '5..10'
           - test-target: file_system_rules
-            range: '30..45'
+            range: '10..15'
           - test-target: file_system_rules
-            range: '45..60'
+            range: '15..20'
           - test-target: file_system_rules
-            range: '60..'
+            range: '20..25'
+          - test-target: file_system_rules
+            range: '25..30'
+          - test-target: file_system_rules
+            range: '30..35'
+          - test-target: file_system_rules
+            range: '35..40'
+          - test-target: file_system_rules
+            range: '40..45'
+          - test-target: file_system_rules
+            range: '45..50'
+          - test-target: file_system_rules
+            range: '50..55'
+          - test-target: file_system_rules
+            range: '55..60'
+          - test-target: file_system_rules
+            range: '60..65'
+          - test-target: file_system_rules
+            range: '65..70'
+          - test-target: file_system_rules
+            range: '70..'
           - test-target: k8s_object_rules
             range: '0..6'
           - test-target: k8s_object_rules
