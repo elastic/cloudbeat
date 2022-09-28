@@ -49,6 +49,7 @@ def test_process_kubelet(elastic_client,
     def identifier(eval_resource):
         # Needs to be done because EKS findings are showing up in vanilla K8S tests,
         # leading to unexpected findings structure.
+        # See: https://github.com/elastic/security-team/issues/5107
         if 'external_data' not in eval_resource.keys():
             return False
 
