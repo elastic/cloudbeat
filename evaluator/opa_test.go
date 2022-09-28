@@ -18,11 +18,30 @@
 package evaluator
 
 import (
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zaptest/observer"
 )
+
+type DummyResource struct {
+}
+
+func (d *DummyResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	return fetching.ResourceMetadata{}, nil
+}
+func (d *DummyResource) GetData() any {
+	return d
+}
+func (d *DummyResource) GetElasticCommonData() any {
+	return d
+}
 
 func TestOpaEvaluator_decode(t *testing.T) {
 	type args struct {
@@ -67,4 +86,54 @@ func TestOpaEvaluator_decode(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestOpaEvaluatorWithDecisionLogs(t *testing.T) {
+	ctx := context.Background()
+	err := logp.DevelopmentSetup(logp.ToObserverOutput())
+	assert.NoError(t, err)
+
+	log := logp.NewLogger("opa_evaluator_test")
+
+	tests := []struct {
+		enabled  bool
+		evals    int
+		expected int
+	}{
+		{true, 1, 1},
+		{true, 3, 3},
+		{false, 1, 0},
+		{false, 3, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("TestEvaluationsDecisionLogs %+v", tt), func(t *testing.T) {
+			cfg := config.Config{
+				Stream: config.Stream{
+					Evaluator: config.EvaluatorConfig{
+						DecisionLogs: tt.enabled,
+					},
+				},
+			}
+
+			e, err := NewOpaEvaluator(ctx, log, cfg)
+			assert.NoError(t, err)
+
+			for i := 0; i < tt.evals; i++ {
+				_, err = e.Eval(ctx, fetching.ResourceInfo{
+					Resource:      &DummyResource{},
+					CycleMetadata: fetching.CycleMetadata{},
+				})
+				assert.NoError(t, err)
+			}
+
+			logs := findDecisionLogs()
+			logp.ObserverLogs().TakeAll()
+			assert.Len(t, logs, tt.expected)
+		})
+	}
+}
+
+func findDecisionLogs() []observer.LoggedEntry {
+	return logp.ObserverLogs().FilterMessage("Decision Log").TakeAll()
 }

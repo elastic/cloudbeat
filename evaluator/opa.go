@@ -29,6 +29,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/open-policy-agent/opa/logging"
 	"github.com/open-policy-agent/opa/sdk"
 )
 
@@ -52,7 +53,7 @@ var opaConfig = `{
 		}
 	},
 	"decision_logs": {
-		"console": %t
+		"console": true
 	}
 }`
 
@@ -65,14 +66,21 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	if err != nil {
 		return nil, err
 	}
-	opaCfg := []byte(fmt.Sprintf(opaConfig, path, cfg.Evaluator.DecisionLogs))
+	opaCfg := []byte(fmt.Sprintf(opaConfig, path))
+
+	var decisonLogger logging.Logger
+	if cfg.Evaluator.DecisionLogs {
+		decisonLogger = newLogger()
+	} else {
+		decisonLogger = logging.NewNoOpLogger()
+	}
+	stdLogger := newLogger()
 
 	// create an instance of the OPA object
-	opaLogger := newLogger()
 	opa, err := sdk.New(ctx, sdk.Options{
 		Config:        bytes.NewReader(opaCfg),
-		Logger:        opaLogger,
-		ConsoleLogger: opaLogger,
+		Logger:        stdLogger,
+		ConsoleLogger: decisonLogger,
 	})
 
 	if err != nil {
