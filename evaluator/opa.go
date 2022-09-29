@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
+	dlogger "github.com/elastic/cloudbeat/evaluator/debug_logger"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -57,10 +58,10 @@ var opaConfig = `{
 
 var logPlugin = `
 	"decision_logs": {
-		"plugin": "debug_decision_logs"
+		"plugin": "%s"
 	},
 	"plugins": {
-		"debug_decision_logs": {}
+		"%s": {}
 	}`
 
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (Evaluator, error) {
@@ -74,20 +75,20 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	}
 	plugin := ""
 	if cfg.Evaluator.DecisionLogs {
-		plugin = logPlugin
+		plugin = fmt.Sprintf(logPlugin, dlogger.PluginName, dlogger.PluginName)
 	}
-	opaCfg := []byte(fmt.Sprintf(opaConfig, path, plugin))
+	opaCfg := fmt.Sprintf(opaConfig, path, plugin)
 
 	decisonLogger := newLogger()
 	stdLogger := newLogger()
 
 	// create an instance of the OPA object
 	opa, err := sdk.New(ctx, sdk.Options{
-		Config:        bytes.NewReader(opaCfg),
+		Config:        bytes.NewReader([]byte(opaCfg)),
 		Logger:        stdLogger,
 		ConsoleLogger: decisonLogger,
 		Plugins: map[string]plugins.Factory{
-			"debug_decision_logs": &DebugLoggerFactory{},
+			dlogger.PluginName: &dlogger.Factory{},
 		},
 	})
 

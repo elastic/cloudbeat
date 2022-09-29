@@ -1,23 +1,23 @@
-package evaluator
+package dlogger
 
 import (
 	"github.com/open-policy-agent/opa/plugins"
 	"github.com/open-policy-agent/opa/util"
 )
 
-type DebugLoggerFactory struct{}
+type Factory struct{}
 
-func (DebugLoggerFactory) New(m *plugins.Manager, config interface{}) plugins.Plugin {
+func (Factory) New(m *plugins.Manager, config interface{}) plugins.Plugin {
 
 	m.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 
-	return &DebugLogger{
+	return &Plugin{
 		manager: m,
 		config:  config.(Config),
 	}
 }
 
-func (DebugLoggerFactory) Validate(_ *plugins.Manager, config []byte) (interface{}, error) {
+func (Factory) Validate(_ *plugins.Manager, config []byte) (interface{}, error) {
 	parsedConfig := Config{}
 	return parsedConfig, util.Unmarshal(config, &parsedConfig)
 }

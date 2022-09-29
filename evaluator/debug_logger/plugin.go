@@ -1,4 +1,4 @@
-package evaluator
+package dlogger
 
 import (
 	"context"
@@ -15,22 +15,22 @@ const PluginName = "debug_decision_logs"
 type Config struct {
 }
 
-type DebugLogger struct {
+type Plugin struct {
 	manager *plugins.Manager
 	mtx     sync.Mutex
 	config  Config
 }
 
-func (p *DebugLogger) Start(ctx context.Context) error {
+func (p *Plugin) Start(ctx context.Context) error {
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
 	return nil
 }
 
-func (p *DebugLogger) Stop(ctx context.Context) {
+func (p *Plugin) Stop(ctx context.Context) {
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 }
 
-func (p *DebugLogger) Reconfigure(ctx context.Context, config interface{}) {
+func (p *Plugin) Reconfigure(ctx context.Context, config interface{}) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	p.config = config.(Config)
@@ -38,7 +38,7 @@ func (p *DebugLogger) Reconfigure(ctx context.Context, config interface{}) {
 
 // Log is called by the decision logger when a record (event) should be emitted. The logs.EventV1 fields
 // map 1:1 to those described in https://www.openpolicyagent.org/docs/latest/management-decision-logs
-func (p *DebugLogger) Log(ctx context.Context, event logs.EventV1) error {
+func (p *Plugin) Log(ctx context.Context, event logs.EventV1) error {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
