@@ -7,7 +7,7 @@ from datetime import datetime
 import time
 import pytest
 
-from commonlib.utils import get_ES_evaluation
+from commonlib.utils import get_ES_evaluation, config_contains_arguments
 from product.tests.data.process.process_test_cases import kubelet_rules
 from product.tests.parameters import register_params, Parameters
 
@@ -46,11 +46,21 @@ def test_process_kubelet(elastic_client,
     # TODO: Implement a more optimal way of waiting
     time.sleep(60)
 
+    def identifier(eval_resource):
+        # Needs to be done because EKS findings are showing up in vanilla K8S tests,
+        # leading to unexpected findings structure.
+        # See: https://github.com/elastic/security-team/issues/5107
+        if 'external_data' not in eval_resource.keys():
+            return False
+
+        return config_contains_arguments(eval_resource.external_data.config, dictionary)
+
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
+        resource_identifier=identifier,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
