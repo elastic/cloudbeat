@@ -29,7 +29,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/open-policy-agent/opa/logging"
+	"github.com/open-policy-agent/opa/plugins"
 	"github.com/open-policy-agent/opa/sdk"
 )
 
@@ -52,10 +52,16 @@ var opaConfig = `{
 			"resource": "file://%s"
 		}
 	},
-	"decision_logs": {
-		"console": true
-	}
+%s
 }`
+
+var logPlugin = `
+	"decision_logs": {
+		"plugin": "debug_decision_logs"
+	},
+	"plugins": {
+		"debug_decision_logs": {}
+	}`
 
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (Evaluator, error) {
 	// provide the OPA configuration which specifies
@@ -66,14 +72,13 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	if err != nil {
 		return nil, err
 	}
-	opaCfg := []byte(fmt.Sprintf(opaConfig, path))
-
-	var decisonLogger logging.Logger
+	plugin := ""
 	if cfg.Evaluator.DecisionLogs {
-		decisonLogger = newLogger()
-	} else {
-		decisonLogger = logging.NewNoOpLogger()
+		plugin = logPlugin
 	}
+	opaCfg := []byte(fmt.Sprintf(opaConfig, path, plugin))
+
+	decisonLogger := newLogger()
 	stdLogger := newLogger()
 
 	// create an instance of the OPA object
@@ -81,6 +86,9 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 		Config:        bytes.NewReader(opaCfg),
 		Logger:        stdLogger,
 		ConsoleLogger: decisonLogger,
+		Plugins: map[string]plugins.Factory{
+			"debug_decision_logs": &DebugLoggerFactory{},
+		},
 	})
 
 	if err != nil {

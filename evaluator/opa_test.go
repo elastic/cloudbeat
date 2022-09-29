@@ -130,6 +130,9 @@ func TestOpaEvaluatorWithDecisionLogs(t *testing.T) {
 			logs := findDecisionLogs()
 			logp.ObserverLogs().TakeAll()
 			assert.Len(t, logs, tt.expected)
+			if tt.expected > 0 {
+				assert.Contains(t, logs[0].ContextMap(), "decision_id")
+			}
 		})
 	}
 }
