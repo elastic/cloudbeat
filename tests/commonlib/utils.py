@@ -36,6 +36,7 @@ def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
                 resource = event.resource.raw
                 evaluation = event.result.evaluation
             except AttributeError:
+                print('Warning: got finding with missing fields:', event)
                 continue
 
             if resource_identifier(resource):
@@ -155,3 +156,49 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
 
 def is_timeout(start_time: time, timeout: int) -> bool:
     return time.time() - start_time > timeout
+
+
+def command_contains_arguments(command, arguments_dict):
+    args = command.split()[1:]
+    args_dict = {}
+    for arg in args:
+        key, val = arg.split('=', 1)
+        args_dict[key] = val
+
+    set_dict = arguments_dict.get('set', {})
+    unset_list = arguments_dict.get('unset', [])
+
+    for key, val in set_dict.items():
+        argval = args_dict.get(key)
+        if val != argval:
+            return False
+
+    for key in unset_list:
+        if key in args_dict:
+            return False
+
+    return True
+
+
+def config_contains_arguments(config, arguments_dict):
+    set_dict = arguments_dict.get('set', {})
+    unset_list = arguments_dict.get('unset', [])
+
+    if not dict_contains(set_dict, config):
+        return False
+
+    for arg in unset_list:
+        current = config
+        arg_set = True
+
+        for arg_part in arg.split('.'):
+            if (not isinstance(current, dict)) or (arg_part not in current):
+                arg_set = False
+                break
+
+            current = current[arg_part]
+
+        if arg_set:
+            return False
+
+    return True
