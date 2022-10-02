@@ -95,7 +95,7 @@ def go_license_detector(notice_out, deps_out, modules):
         notice_template_file.close()
 
         args = [
-            "go", "run", "-modfile=utils/go.mod", "go.elastic.co/go-licence-detector",
+            "go", "run", "-modfile=go.mod", "go.elastic.co/go-licence-detector",
             "-includeIndirect",
             "-overrides", overrides_file.name,
             "-rules", beats_rules_path,
