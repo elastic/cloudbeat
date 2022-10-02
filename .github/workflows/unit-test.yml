@@ -40,6 +40,11 @@ jobs:
         with:
           args: checkLicenseHeaders
 
+      - name: Mage build bundle before unit tests
+        uses: magefile/mage-action@v1.6.0
+        with:
+          args: buildOpaBundle
+
       - name: Unit-Test Cloudbeat
         run: |
           GOOS=linux go test ./...
