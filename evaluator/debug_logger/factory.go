@@ -18,23 +18,26 @@
 package dlogger
 
 import (
+	"sync"
+
 	"github.com/open-policy-agent/opa/plugins"
 	"github.com/open-policy-agent/opa/util"
 )
 
 type Factory struct{}
 
-func (Factory) New(m *plugins.Manager, config interface{}) plugins.Plugin {
+func (Factory) New(m *plugins.Manager, conf interface{}) plugins.Plugin {
 
 	m.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 
-	return &Plugin{
+	return &plugin{
 		manager: m,
-		config:  config.(Config),
+		mtx:     sync.Mutex{},
+		config:  conf.(config),
 	}
 }
 
-func (Factory) Validate(_ *plugins.Manager, config []byte) (interface{}, error) {
-	parsedConfig := Config{}
-	return parsedConfig, util.Unmarshal(config, &parsedConfig)
+func (Factory) Validate(_ *plugins.Manager, conf []byte) (interface{}, error) {
+	parsedConfig := config{}
+	return parsedConfig, util.Unmarshal(conf, &parsedConfig)
 }

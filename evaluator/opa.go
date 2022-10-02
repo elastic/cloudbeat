@@ -131,7 +131,6 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 		return EventData{}, fmt.Errorf("error running the policy: %v", err)
 	}
 
-	o.log.Debugf("Eval decision for input: %v -- %v", fetcherResult, result)
 	ruleResults, err := o.decode(result)
 	if err != nil {
 		return EventData{}, fmt.Errorf("error decoding findings: %v", err)

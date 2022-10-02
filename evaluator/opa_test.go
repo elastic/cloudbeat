@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 )
 
@@ -132,6 +133,7 @@ func TestOpaEvaluatorWithDecisionLogs(t *testing.T) {
 			assert.Len(t, logs, tt.expected)
 			if tt.expected > 0 {
 				assert.Contains(t, logs[0].ContextMap(), "decision_id")
+				assert.Equal(t, logs[0].Level, zapcore.DebugLevel)
 			}
 		})
 	}
