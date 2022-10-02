@@ -18,8 +18,7 @@ import tempfile
 DEFAULT_BUILD_TAGS = "darwin,linux,windows"
 
 # Get the beats repo root directory, making sure it's downloaded first.
-subprocess.run(
-    ["go", "mod", "download", "github.com/elastic/beats/..."], check=True)
+subprocess.run(["go", "mod", "download", "github.com/elastic/beats/..."], check=True)
 BEATS_DIR = subprocess.check_output(
     ["go", "list", "-m", "-f", "{{.Dir}}", "github.com/elastic/beats/..."]).decode("utf-8").strip()
 
@@ -52,8 +51,7 @@ def read_go_deps(main_packages, build_tags):
     go_list_args = ["go", "list", "-deps", "-json"]
     if build_tags:
         go_list_args.extend(["-tags", build_tags])
-    output = subprocess.check_output(
-        go_list_args + main_packages).decode("utf-8")
+    output = subprocess.check_output(go_list_args + main_packages).decode("utf-8")
     modules = {}
     decoder = json.JSONDecoder()
     while True:
@@ -73,14 +71,10 @@ def read_go_deps(main_packages, build_tags):
 def go_license_detector(notice_out, deps_out, modules):
     modules_json = "\n".join(map(json.dumps, modules))
 
-    beats_deps_template_path = os.path.join(
-        BEATS_DIR, "dev-tools", "notice", "dependencies.csv.tmpl")
-    beats_notice_template_path = os.path.join(
-        BEATS_DIR, "dev-tools", "notice", "NOTICE.txt.tmpl")
-    beats_overrides_path = os.path.join(
-        BEATS_DIR, "dev-tools", "notice", "overrides.json")
-    beats_rules_path = os.path.join(
-        BEATS_DIR, "dev-tools", "notice", "rules.json")
+    beats_deps_template_path = os.path.join(BEATS_DIR, "dev-tools", "notice", "dependencies.csv.tmpl")
+    beats_notice_template_path = os.path.join(BEATS_DIR, "dev-tools", "notice", "NOTICE.txt.tmpl")
+    beats_overrides_path = os.path.join(BEATS_DIR, "dev-tools", "notice", "overrides.json")
+    beats_rules_path = os.path.join(BEATS_DIR, "dev-tools", "notice", "rules.json")
 
     beats_notice_template = open(beats_notice_template_path).read()
     beats_overrides = open(beats_overrides_path).read()
@@ -96,14 +90,12 @@ def go_license_detector(notice_out, deps_out, modules):
         overrides_file.close()
 
         # Replace "Elastic Beats" with "Elastic Cloudbeat" in the NOTICE.txt template.
-        notice_template_file = open(
-            os.path.join(tmpdir, "NOTICE.txt.tmpl"), "w")
-        notice_template_file.write(beats_notice_template.replace(
-            "Elastic Beats", "Elastic Cloudbeat"))
+        notice_template_file = open(os.path.join(tmpdir, "NOTICE.txt.tmpl"), "w")
+        notice_template_file.write(beats_notice_template.replace("Elastic Beats", "Elastic Cloudbeat"))
         notice_template_file.close()
 
         args = [
-            "go", "run", "-modfile=go.mod", "go.elastic.co/go-licence-detector",
+            "go", "run", "-modfile=utils/go.mod", "go.elastic.co/go-licence-detector",
             "-includeIndirect",
             "-overrides", overrides_file.name,
             "-rules", beats_rules_path,
@@ -139,8 +131,7 @@ def write_csv_file(csv_filename, modules):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Generate the NOTICE file from package dependencies")
+    parser = argparse.ArgumentParser(description="Generate the NOTICE file from package dependencies")
     parser.add_argument("main_package", nargs="*", default=["."],
                         help="List of main Go packages for which dependencies should be processed")
     parser.add_argument("--csv", dest="csvfile",
