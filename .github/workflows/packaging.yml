@@ -13,7 +13,6 @@ env:
   PLATFORMS: linux/amd64
   GOPATH: /home/runner/go
 
-
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
