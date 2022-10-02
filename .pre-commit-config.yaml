@@ -27,12 +27,6 @@ repos:
       - id: go-fmt
       - id: golangci-lint
 
-  ## Python
-  - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v1.6.0
-    hooks:
-      - id: autopep8
-
   - repo: https://github.com/PyCQA/flake8
     rev: 4.0.1
     hooks:
