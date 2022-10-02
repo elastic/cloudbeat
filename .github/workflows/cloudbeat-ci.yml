@@ -52,8 +52,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
-      - name: build cloudbeat
-        run: make
+      - name: build cloudbeat binary
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: build
 
       - name: build opa bundle
         uses: magefile/mage-action@v2
@@ -102,8 +105,9 @@ jobs:
 
       - name: Move cache
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          chmod +x ./.ci/scripts/gh-cache.sh
+          ./.ci/scripts/gh-cache.sh
+        shell: bash
 
   Test_Matrix:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
@@ -240,7 +244,9 @@ jobs:
 
       - name: Load images to kind
         run: |
-          kind load image-archive /tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono
+          chmod +x ./.ci//scripts/kind-images.sh
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }}
+        shell: bash
 
       - name: Deploy tests Helm chart
         id: deploy_helm

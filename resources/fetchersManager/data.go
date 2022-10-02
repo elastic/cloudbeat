@@ -89,7 +89,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 		d.wg.Add(1)
 		go func(k string) {
 			defer d.wg.Done()
-			err := d.fetchSingle(ctx, k, fetching.CycleMetadata{Sequence: time.Now().Unix()})
+			err := d.fetchSingle(ctx, k, fetching.CycleMetadata{Sequence: seq})
 			if err != nil {
 				d.log.Errorf("Error running fetcher for key %s: %v", k, err)
 			}
