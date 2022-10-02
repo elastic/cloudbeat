@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - '[0-9]+.[0-9]+'
-    types: [assigned, opened, synchronize, reopened]
+    types: [opened, synchronize, reopened]
 
 env:
   DEV: true
