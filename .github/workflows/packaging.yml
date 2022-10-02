@@ -13,6 +13,10 @@ env:
   PLATFORMS: linux/amd64
   GOPATH: /home/runner/go
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   packag_beat:
     name: Package Cloudbeat
