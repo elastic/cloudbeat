@@ -32,7 +32,7 @@ def test_cloudbeat_pod_exist(fixture_data):
 
 
 @pytest.mark.pre_merge
-@pytest.mark.order(2)
+@pytest.mark.order(3)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
 def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
     """
@@ -51,7 +51,7 @@ def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
 
 
 @pytest.mark.pre_merge
-@pytest.mark.order(3)
+@pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
 @pytest.mark.parametrize("match_type", testdata)
 def test_elastic_index_exists(elastic_client, match_type):
