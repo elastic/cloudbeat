@@ -116,6 +116,7 @@ jobs:
     timeout-minutes: 999
     strategy:
       matrix:
+<<<<<<< HEAD
         include:
           - test-target: pre_merge
           - test-target: file_system_rules
@@ -216,6 +217,10 @@ jobs:
             range: '16..20'
           - test-target: process_kubelet_rules
             range: '20..'
+=======
+        test-target: [process_controller_manager_rules]
+        range: ['0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..', '0..']
+>>>>>>> 92eb0bc0 (Tmate debugging)
       fail-fast: false
     steps:
       - name: Check out the repo
@@ -264,6 +269,13 @@ jobs:
         with:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
+
+      # Todo remove when ready to merge
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: success() == false
+        with:
+          limit-access-to-actor: true  
 
       - name: clear cache
         id: clear_cache
