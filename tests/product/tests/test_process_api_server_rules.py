@@ -7,7 +7,7 @@ from datetime import datetime
 import time
 import pytest
 
-from commonlib.utils import get_ES_evaluation
+from commonlib.utils import get_ES_evaluation, command_contains_arguments
 from product.tests.data.process.process_test_cases import api_server_rules
 from product.tests.parameters import register_params, Parameters
 
@@ -46,11 +46,15 @@ def test_process_api_server(elastic_client,
     # TODO: Implement a more optimal way of waiting
     time.sleep(60)
 
+    def identifier(eval_resource):
+        return command_contains_arguments(eval_resource.command, dictionary)
+
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
+        resource_identifier=identifier,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"

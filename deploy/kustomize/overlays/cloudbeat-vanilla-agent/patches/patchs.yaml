@@ -1,0 +1,17 @@
+- op: add
+  path: /spec/template/spec/containers/0/env/-
+  value:
+    name: SSL_CERT_DIR
+    value: /etc/ssl/elastic-package
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: elastic-package-certs
+    secret:
+      defaultMode: 420
+      secretName: elastic-package-certs
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: elastic-package-certs
+    mountPath: /etc/ssl/elastic-package

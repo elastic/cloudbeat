@@ -11,7 +11,7 @@ from munch import Munch
 agent = Munch()
 agent.name = os.getenv('AGENT_NAME', 'elastic-agent')
 agent.namespace = os.getenv('AGENT_NAMESPACE', 'kube-system')
-agent.findings_timeout = 30
+agent.findings_timeout = 500
 
 # --- Kubernetes environment definition --------------------
 kubernetes = Munch()

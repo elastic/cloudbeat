@@ -28,11 +28,8 @@ pipeline {
   }
   parameters {
     booleanParam(name: 'Run_As_Main_Branch', defaultValue: false, description: 'Allow to run any steps on a PR, some steps normally only run on main branch.')
-    booleanParam(name: 'linux_ci', defaultValue: true, description: 'Enable Linux build')
     booleanParam(name: 'intake_ci', defaultValue: true, description: 'Enable test')
-    booleanParam(name: 'test_ci', defaultValue: false, description: 'Enable test')
     booleanParam(name: 'release_ci', defaultValue: true, description: 'Enable build the release packages')
-    booleanParam(name: 'its_ci', defaultValue: true, description: 'Enable async ITs')
     choice(name: 'build_type', choices: ['both', 'snapshot', 'staging'], description: 'Choose Snapshot or Staging Build type(Default: Both)')
     string(name: 'DIAGNOSTIC_INTERVAL', defaultValue: "0", description: 'Elasticsearch detailed logging every X seconds')
     string(name: 'ES_LOG_LEVEL', defaultValue: "error", description: 'Elasticsearch error level')
@@ -87,60 +84,9 @@ pipeline {
         }
       // }
     }
-    stage('Build and Test'){
+    stage('Package'){
       failFast false
       parallel {
-        /**
-        Build on a linux environment.
-        */
-        stage('linux build') {
-          options { skipDefaultCheckout() }
-          when {
-            beforeAgent true
-            allOf {
-              expression { return params.linux_ci }
-            }
-          }
-          steps {
-            deleteDir()
-            unstash 'source'
-            dir(BASE_DIR){
-              withMageEnv(){
-                retry(2) { // Retry in case there are any errors to avoid temporary glitches
-                  sleep randomNumber(min: 5, max: 10)
-                  sh(label: 'Linux build', script: './.ci/scripts/build.sh')
-                }
-              }
-            }
-          }
-        }
-        /**
-          Run unit tests and report junit results.
-        */
-        stage('Unit Test') {
-          agent { label 'linux && immutable && debian-11' }
-          options { skipDefaultCheckout() }
-          environment {
-            PATH = "${env.PATH}:${env.WORKSPACE}/bin"
-            HOME = "${env.WORKSPACE}"
-            TEST_COVERAGE = "true"
-          }
-          when {
-            beforeAgent true
-            allOf {
-              expression { return params.test_ci }
-            }
-          }
-          steps {
-              deleteDir()
-              unstash 'source'
-              dir("${BASE_DIR}"){
-                withMageEnv(){
-                  sh(label: 'Run Unit tests', script: './.ci/scripts/unit-test.sh')
-                }
-              }
-          }
-        }
         /**
         Packages Artifacts & Publishes release
         */
