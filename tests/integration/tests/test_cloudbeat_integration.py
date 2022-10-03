@@ -34,16 +34,20 @@ def test_cloudbeat_pod_exist(fixture_data):
 @pytest.mark.pre_merge
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
-def test_cloudbeat_pods_running(fixture_data):
+def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
     """
     This test verifies that all pods are in status "Running"
-    :param fixture_data: (Pods list, Nodes list)
+    :param k8s: Kubernetes client
+    :param cloudbeat_agent: cloudbeat config
     :return:
     """
+    pods = k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
+                                       namespace=cloudbeat_agent.namespace)
     # Verify that at least 1 pod is running the cluster
-    assert len(fixture_data[0]) > 0, "There are no cloudbeat pod instances running in the cluster"
+    assert len(pods) > 0, "There are no cloudbeat pod instances running in the cluster"
     # Verify that each pod is in running state
-    assert all(pod.status.phase == "Running" for pod in fixture_data[0]), "Not all pods are running"
+    for pod in pods:
+        assert pod.status.phase == "Running", f"The pod '{pod.metadata.name}' status is: '{pod.status.phase}'"
 
 
 @pytest.mark.pre_merge
