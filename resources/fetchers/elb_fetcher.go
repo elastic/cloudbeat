@@ -20,8 +20,9 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"regexp"
+
+	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -47,11 +48,13 @@ type ElbFetcher struct {
 type ElbFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
 	KubeConfig                    string `config:"Kubeconfig"`
+	ClusterName                   string `config:"clusterName"`
 }
 
 type ElbResource struct {
 	lb       awslib.ElbLoadBalancersDescription
 	identity *awslib.Identity
+	cluster  string
 }
 
 func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -68,7 +71,7 @@ func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 
 	for _, loadBalancer := range result {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      ElbResource{awslib.ElbLoadBalancersDescription(loadBalancer), f.cloudIdentity},
+			Resource:      ElbResource{awslib.ElbLoadBalancersDescription(loadBalancer), f.cloudIdentity, f.cfg.ClusterName},
 			CycleMetadata: cMetadata,
 		}
 	}
@@ -108,9 +111,14 @@ func (r ElbResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
 
+	// A compromise because aws-sdk do not return an arn for an Elb
+	id := fmt.Sprintf("%s-%s", *r.identity.Account, *r.lb.LoadBalancerName)
+	if r.cluster != "" {
+		id = fmt.Sprintf("%s-%s-%s", *r.identity.Account, r.cluster, *r.lb.LoadBalancerName)
+	}
+
 	return fetching.ResourceMetadata{
-		// A compromise because aws-sdk do not return an arn for an Elb
-		ID:      fmt.Sprintf("%s-%s", *r.identity.Account, *r.lb.LoadBalancerName),
+		ID:      id,
 		Type:    fetching.CloudLoadBalancer,
 		SubType: fetching.ElbType,
 		Name:    *r.lb.LoadBalancerName,

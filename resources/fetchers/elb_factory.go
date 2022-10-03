@@ -20,12 +20,12 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"regexp"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
