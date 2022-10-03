@@ -137,7 +137,6 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(resource.SubType, "resource sub type is missing")
 				s.NotEmpty(resource.ID, "resource ID is missing")
 				s.NotEmpty(resource.Type, "resource  type is missing")
-				s.NotEmpty(event.Fields["type"], "resource type is missing") // for BC sake
 				s.NotEmpty(event.Fields["event"], "resource event is missing")
 				s.Regexp(regexp.MustCompile("^Rule \".*\": (passed|failed)$"), event.Fields["message"], "event message is not correct")
 			}
