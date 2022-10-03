@@ -50,6 +50,7 @@ def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
         assert pod.status.phase == "Running", f"The pod '{pod.metadata.name}' status is: '{pod.status.phase}'"
 
 
+
 @pytest.mark.pre_merge
 @pytest.mark.order(3)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
@@ -61,7 +62,8 @@ def test_elastic_index_exists(elastic_client, match_type):
     :param match_type: Findings type for matching
     :return:
     """
-    query, sort = elastic_client.build_es_query(term={"type": match_type})
+    query, sort = elastic_client.build_es_query(
+        term={"resource.type": match_type})
     start_time = time.time()
     result = {}
     while time.time() - start_time < CONFIG_TIMEOUT:
@@ -97,7 +99,8 @@ def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
 
     query, sort = elastic_client.build_es_query(term={"type": "k8s_object"})
     pods, nodes = fixture_data
-    leader_node = k8s.get_cluster_leader(namespace=cloudbeat_agent.namespace, pods=pods)
+    leader_node = k8s.get_cluster_leader(
+        namespace=cloudbeat_agent.namespace, pods=pods)
     assert leader_node != "", \
         "The Leader node could not be found"
 
