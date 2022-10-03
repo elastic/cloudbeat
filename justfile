@@ -106,7 +106,7 @@ load-pytest-kind: build-pytest-docker
   kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
 
 deploy-tests-helm-ci target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/ --debug
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-tests-helm-ci-agent target range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
@@ -126,11 +126,11 @@ gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
 run-tests:
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --debug --logs
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --logs
 
 run-tests-ci:
   #!/usr/bin/env bash
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --debug --logs 2>&1 | tee test.log
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
   result_code=${PIPESTATUS[0]}
   SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
   echo "summary<<EOF" >> "$GITHUB_ENV"
