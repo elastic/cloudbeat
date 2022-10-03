@@ -18,6 +18,10 @@
 package transformer
 
 import (
+	"context"
+	"os"
+	"testing"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -28,15 +32,9 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sFake "k8s.io/client-go/kubernetes/fake"
-
-	"context"
-	"os"
-	"testing"
 )
 
-var (
-	bgCtx = context.Background()
-)
+var bgCtx = context.Background()
 
 func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 	cdProvider := CommonDataProvider{
@@ -110,7 +108,8 @@ func TestCommonData_GetResourceId(t *testing.T) {
 				},
 			},
 			want: "uuid-test",
-		}, {
+		},
+		{
 			name: "Get FS resource id",
 			commonData: CDFields{
 				clusterId: "cluster-test",
@@ -125,6 +124,20 @@ func TestCommonData_GetResourceId(t *testing.T) {
 				},
 			},
 			want: uuid.NewV5(uuid_namespace, "cluster-test"+"nodeid-test"+"1234").String(),
+		},
+		{
+			name: "Get AWS resource id",
+			commonData: CDFields{
+				clusterId: "cluster-test",
+			},
+			args: args{
+				metadata: fetching.ResourceMetadata{
+					ID:   "1234",
+					Type: "load-balancer",
+					Name: "aws-loadbalancer",
+				},
+			},
+			want: uuid.NewV5(uuid_namespace, "cluster-test"+"1234").String(),
 		},
 	}
 	for _, tt := range tests {
@@ -143,7 +156,7 @@ func TestCommonData_GetResourceId(t *testing.T) {
 func adjustK8sCluster(t *testing.T, cdProvider *CommonDataProvider) {
 	// libbeat DiscoverKubernetesNode performs a fallback to environment variable NODE_NAME
 	os.Setenv("NODE_NAME", "testing_node")
-	//Need to add services
+	// Need to add services
 	namespace := &v1.Namespace{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Namespace",
