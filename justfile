@@ -128,7 +128,7 @@ run-tests:
 
 run-tests-ci:
   #!/usr/bin/env bash
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs --debug 2>&1 | tee test.log
   result_code=${PIPESTATUS[0]}
   SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
   echo "summary<<EOF" >> "$GITHUB_ENV"
