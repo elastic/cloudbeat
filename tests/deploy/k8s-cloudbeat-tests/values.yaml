@@ -156,11 +156,7 @@ kibana:
   resources:
     requests:
       cpu: "1000m"
-<<<<<<< HEAD
-      memory: "1Gi"
-=======
       memory: "1Gi"
 
   labels:
     catf: related
->>>>>>> 2e7cca0 (Optimize test stack resources & cloudbeat cycle duration (#449))
