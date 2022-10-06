@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script uses the kubectl commands in order to ssh into the cluster defined in the host current-context
+# The script lets you to remotely edit the cloudbeat.yml file that configures cloudbeat process
+
 source ./scripts/common.sh
 
 TMP_LOCAL="/tmp/cloudbeat.yml"

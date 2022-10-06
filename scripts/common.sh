@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# The function remotely searches for a file with a given pattern on a given folder
+# $1 is the pod on which it should run
+# $2 is the folder on which it should search
+# $3 is a regex pattern of the file which you want to find
+# The function returns the file name
 find_in_folder() {
   POD=$1
   FOLDER=$2
@@ -19,6 +24,11 @@ find_in_folder() {
   echo "${RES}"
 }
 
+# The function remotely searches for a file with a given pattern on cloudbeat installation folder
+# /usr/share/elastic-agent/data/elastic-agent-*/install/cloudbeat-*/
+# $1 is the pod on which it should run
+# $2 is a regex pattern of the file which you want to find
+# The function returns the file full path
 find_in_cloudbeat_folder() {
   POD=$1
 
