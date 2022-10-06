@@ -131,7 +131,7 @@ elasticsearch:
       memory: "512M"
     limits:
       cpu: "1000m"
-      memory: "512M"
+      memory: "2048M"
 
   # Request smaller persistent volumes.
   volumeClaimTemplate:
@@ -157,3 +157,6 @@ kibana:
     requests:
       cpu: "1000m"
       memory: "1Gi"
+
+  labels:
+    catf: related
