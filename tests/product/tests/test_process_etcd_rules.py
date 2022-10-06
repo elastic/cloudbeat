@@ -7,7 +7,7 @@ from datetime import datetime
 import time
 import pytest
 
-from commonlib.utils import get_ES_evaluation, command_contains_arguments
+from commonlib.utils import get_ES_evaluation, command_contains_arguments, get_logs_evaluation
 from product.tests.data.process.process_test_cases import etcd_rules
 from product.tests.parameters import register_params, Parameters
 
@@ -38,6 +38,8 @@ def test_process_etcd(elastic_client,
 
     # Currently, single node is used, in the future may be extended for all nodes.
     node = k8s_client.get_cluster_nodes()[0]
+    pods = k8s_client.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
+                                            namespace=cloudbeat_agent.namespace)
     api_client.edit_process_file(container_name=node.metadata.name,
                                  dictionary=dictionary,
                                  resource=resource)
@@ -49,9 +51,19 @@ def test_process_etcd(elastic_client,
     def identifier(eval_resource):
         return command_contains_arguments(eval_resource.command, dictionary)
 
-    evaluation = get_ES_evaluation(
-        elastic_client=elastic_client,
+    # evaluation = get_ES_evaluation(
+    #     elastic_client=elastic_client,
+    #     timeout=cloudbeat_agent.findings_timeout,
+    #     rule_tag=rule_tag,
+    #     exec_timestamp=datetime.utcnow(),
+    #     resource_identifier=identifier,
+    # )
+
+    evaluation = get_logs_evaluation(
+        k8s=k8s_client,
         timeout=cloudbeat_agent.findings_timeout,
+        pod_name=pods[0].metadata.name,
+        namespace=cloudbeat_agent.namespace,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
         resource_identifier=identifier,

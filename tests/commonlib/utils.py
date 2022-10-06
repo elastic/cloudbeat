@@ -68,7 +68,7 @@ def get_logs_evaluation(k8s, timeout, pod_name, namespace, rule_tag, exec_timest
             continue
 
         for log in logs:
-            findings_timestamp = datetime.datetime.strptime(log.time, '%Y-%m-%dT%H:%M:%Sz')
+            findings_timestamp = datetime.datetime.strptime(log['@timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ')
             if (findings_timestamp - exec_timestamp).total_seconds() < 0:
                 continue
 

@@ -10,7 +10,7 @@ import pytest
 from product.tests.data.k8s_object import k8s_object_rules as k8s_tc
 from product.tests.parameters import register_params, Parameters
 
-from commonlib.utils import get_ES_evaluation
+from commonlib.utils import get_ES_evaluation, get_logs_evaluation
 from commonlib.framework.reporting import skip_param_case, SkipReportData
 
 
@@ -25,6 +25,9 @@ def test_kube_resource_patch(elastic_client, test_env, rule_tag, resource_type, 
     @param expected: "failed" or "passed"
     """
     k8s_client, _, agent_config = test_env
+
+    pods = k8s_client.get_agent_pod_instances(agent_name=agent_config.name,
+                                            namespace=agent_config.namespace)
 
     # make sure resource exists
     metadata = resource_body['metadata']
@@ -61,9 +64,19 @@ def test_kube_resource_patch(elastic_client, test_env, rule_tag, resource_type, 
         except AttributeError:
             return False
 
-    evaluation = get_ES_evaluation(
-        elastic_client=elastic_client,
+    # evaluation = get_ES_evaluation(
+    #     elastic_client=elastic_client,
+    #     timeout=agent_config.findings_timeout,
+    #     rule_tag=rule_tag,
+    #     exec_timestamp=datetime.utcnow(),
+    #     resource_identifier=match_resource,
+    # )
+
+    evaluation = get_logs_evaluation(
+        k8s=k8s_client,
         timeout=agent_config.findings_timeout,
+        pod_name=pods[0].metadata.name,
+        namespace=agent_config.namespace,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
         resource_identifier=match_resource,
