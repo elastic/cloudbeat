@@ -30,28 +30,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Fetch Go version from .go-version
-        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
-
-      - name: Fetch OPA version
-        run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v1
-        with:
-          version: ${{ env.OPA_VERSION }}
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Install Mage
-        run: |
-          git clone https://github.com/magefile/mage
-          cd mage
-          go run bootstrap.go
-          mage -version
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: cache go dependencies
         uses: actions/cache@v2
