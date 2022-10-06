@@ -113,7 +113,7 @@ jobs:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
     needs: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 55
     strategy:
       matrix:
         include:
