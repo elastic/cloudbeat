@@ -17,7 +17,7 @@ setup-env: install-kind create-kind-cluster
 create-vanilla-deployment-file:
    kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
-build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image
+build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
 build-load-both: build-deploy-cloudbeat load-pytest-kind
 
