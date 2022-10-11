@@ -145,7 +145,7 @@ data:
       type: cloudbeat/cis_k8s
       streams:
           # Defines how often an event is sent to the output
-        - period: 5s
+        - period: 30s
           fetchers:
             - name: kube-api
             - name: process
@@ -296,6 +296,9 @@ spec:
           requests:
             cpu: 100m
             memory: 100Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
         securityContext:
           runAsUser: 0
         volumeMounts:

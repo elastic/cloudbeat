@@ -19,6 +19,8 @@ create-vanilla-deployment-file:
 
 build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
+build-load-both: build-deploy-cloudbeat load-pytest-kind
+
 build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat
 
 load-cloudbeat-image:
@@ -90,7 +92,7 @@ POD_STATUS_PENDING := 'Pending'
 POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
-ES_IMAGE_VERSION := '8.4.2'
+ELK_STACK_VERSION := '8.4.2'
 NAMESPACE := 'kube-system'
 ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
@@ -101,7 +103,7 @@ patch-cb-yml-tests:
 build-pytest-docker:
   cd tests; docker build -t {{TESTS_RELEASE}} .
 
-load-pytest-kind:
+load-pytest-kind: build-pytest-docker
   kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
 
 load-pytest-eks:
@@ -110,13 +112,13 @@ load-pytest-eks:
   docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
 deploy-tests-helm-ci target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ES_IMAGE_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-tests-helm-ci-agent target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ES_IMAGE_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 deploy-local-tests-helm target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ES_IMAGE_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 purge-pvc:
   kubectl delete -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}} & kubectl apply -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}}
@@ -130,11 +132,11 @@ gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
 run-tests:
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}}
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --logs
 
 run-tests-ci:
   #!/usr/bin/env bash
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs --debug 2>&1 | tee test.log
   result_code=${PIPESTATUS[0]}
   SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
   echo "summary<<EOF" >> "$GITHUB_ENV"

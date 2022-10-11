@@ -40,9 +40,11 @@ def test_agent_pods_running(fixture_data):
     :return:
     """
     # Verify that at least 1 pod is running the cluster
-    assert len(fixture_data[0]) > 0, "There are no elastic-agent pod instances running in the cluster"
+    assert len(
+        fixture_data[0]) > 0, "There are no elastic-agent pod instances running in the cluster"
     # Verify that each pod is in running state
-    assert all(pod.status.phase == "Running" for pod in fixture_data[0]), "Not all pods are running"
+    assert all(pod.status.phase ==
+               "Running" for pod in fixture_data[0]), "Not all pods are running"
 
 
 @pytest.mark.post_merge_agent
@@ -56,7 +58,8 @@ def test_elastic_index_exists(elastic_client, match_type):
     :param match_type: Findings type for matching
     :return:
     """
-    query, sort = elastic_client.build_es_query(term={"type": match_type})
+    query, sort = elastic_client.build_es_query(
+        term={"resource.type": match_type})
     start_time = time.time()
     result = {}
     while time.time() - start_time < CONFIG_TIMEOUT:
@@ -92,7 +95,8 @@ def test_cloudbeat_status(k8s, cloudbeat_agent):
     pods = k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
                                        namespace=cloudbeat_agent.namespace)
     results = []
-    exec_command = ["/usr/share/elastic-agent/elastic-agent", "status", "--output", "json"]
+    exec_command = ["/usr/share/elastic-agent/elastic-agent",
+                    "status", "--output", "json"]
     for pod in pods:
         response = k8s.pod_exec(name=pod.metadata.name,
                                 namespace=cloudbeat_agent.namespace,
