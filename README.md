@@ -18,7 +18,7 @@
 1. [Just command runner](https://github.com/casey/just)
 2. Elasticsearch with the default username & password (`elastic` & `changeme`) running on the default port (`http://localhost:9200`)
 3. Kibana with running on the default port (`http://localhost:5601`)
-4. Install and configureElastic-Package (`https://github.com/elastic/elastic-package`)
+4. Install and configure [Elastic-Package](https://github.com/elastic/elastic-package)
 5. Set up the local env:
 
 ```zsh
