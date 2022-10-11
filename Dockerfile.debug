@@ -1,11 +1,17 @@
 FROM golang
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
-RUN apt-get update
-RUN apt-get install -y ca-certificates
+RUN set -x && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+      ca-certificates curl iputils-ping jq && \
+      apt-get clean
+
 EXPOSE 40000
 EXPOSE 8080
+
 COPY ./cloudbeat /cloudbeat
 COPY ./cloudbeat.yml /cloudbeat.yml
 COPY ./bundle.tar.gz /bundle.tar.gz
+
 ENTRYPOINT ["/go/bin/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--wd=/", "exec", "/cloudbeat"]
 CMD ["--", "-e", "-d", "'*'"]

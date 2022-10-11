@@ -40,6 +40,8 @@ deploy-cloudbeat:
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
 build-cloudbeat-debug:
+  just build-opa-bundle
+  GOOS=linux go mod vendor
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 delete-cloudbeat:
