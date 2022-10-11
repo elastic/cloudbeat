@@ -94,6 +94,7 @@ TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
 ELK_STACK_VERSION := '8.4.2'
 NAMESPACE := 'kube-system'
+ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
 
 patch-cb-yml-tests:
@@ -104,6 +105,11 @@ build-pytest-docker:
 
 load-pytest-kind: build-pytest-docker
   kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
+
+load-pytest-eks:
+  aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/z7e1r9l0
+  docker tag {{TESTS_RELEASE}}:latest {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
+  docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
 deploy-tests-helm-ci target range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
