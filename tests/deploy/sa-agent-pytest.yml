@@ -225,6 +225,7 @@ data:
             name: Findings
             processors:
               - add_cluster_id: null
+              - add_environment_metadata: null
             runtime_cfg:
               activated_rules:
                 cis_k8s:
