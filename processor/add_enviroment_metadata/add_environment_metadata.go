@@ -57,15 +57,15 @@ func New(cfg *agentconfig.C) (processors.Processor, error) {
 		return nil, err
 	}
 
+	logger := logp.NewLogger(processorName)
 	clusterIdentifier, err := metadata.GetKubernetesClusterIdentifier(cfg, client)
-	if err != nil {
-		// Maybe no need to return here
-		// What will happen in EKS??
-		return nil, err
+	if err == nil {
+		logger.Errorf("fail to resolve the name of the cluster, error %v", err)
 	}
+
 	p := &addEnvironmentMetadata{
 		ClusterName: clusterIdentifier.Name,
-		logger:      logp.NewLogger(processorName),
+		logger:      logger,
 		config:      config,
 	}
 
