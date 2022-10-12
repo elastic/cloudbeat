@@ -62,6 +62,7 @@ processors:
   - add_cloud_metadata: ~
   - add_docker_metadata: ~
   - add_cluster_id: ~
+  - add_environment_metadata: ~
 
 # Sets log level. The default log level is info.
 # Available log levels are: error, warning, info, debug
