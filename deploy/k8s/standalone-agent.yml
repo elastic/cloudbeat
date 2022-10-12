@@ -422,6 +422,7 @@ data:
               type: logs
             processors:
               - add_cluster_id: null
+              - add_environment_metadata: null
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -683,4 +684,3 @@ metadata:
   namespace: kube-system
   labels:
     k8s-app: elastic-agent
-
