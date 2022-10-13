@@ -7,7 +7,7 @@ import data.compliance.policy.kube_api.data_adapter
 default rule_evaluation = true
 
 rule_evaluation = false {
-	container := data_adapter.containers[_]
+	container := data_adapter.containers.app_containers[_]
 	capabilities := object.get(container.securityContext, "capabilities", [])
 	not assert.array_is_empty(capabilities)
 }
@@ -19,6 +19,6 @@ finding := result {
 	# set result
 	result := lib_common.generate_result_without_expected(
 		lib_common.calculate_result(rule_evaluation),
-		{"containers": {json.filter(c, ["name", "securityContext/capabilities"]) | c := data_adapter.containers[_]}},
+		{"containers": {json.filter(c, ["name", "securityContext"]) | c := data_adapter.containers.app_containers[_]}},
 	)
 }

@@ -11,13 +11,16 @@ finding(entity) = result {
 		lib_common.calculate_result(rule_evaluation(entity)),
 		{
 			"uid": data_adapter.pod.metadata.uid,
-			"containers": {json.filter(c, ["name", concat("", ["securityContext/", entity])]) | c := data_adapter.containers[_]},
+			"containers": {json.filter(c, ["name", concat("", ["securityContext"])]) | c := data_adapter.containers.app_containers[_]},
+			"initContainers": {json.filter(c, ["name", concat("", ["securityContext"])]) | c := data_adapter.containers.init_containers[_]},
+			"ephemeralContainers": {json.filter(c, ["name", concat("", ["securityContext"])]) | c := data_adapter.containers.init_containers[_]},
 		},
 	)
 }
 
 rule_evaluation(entity) = false {
-	container := data_adapter.containers[_]
+	some container_type # "containers", "init_containers", "ephemeral_containers"
+	container := data_adapter.containers[container_type][_]
 	lib_common.contains_key_with_value(container.securityContext, entity, true)
 } else = true {
 	true
