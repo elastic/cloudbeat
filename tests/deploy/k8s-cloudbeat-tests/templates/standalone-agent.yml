@@ -313,8 +313,7 @@ data:
                 cis_eks: []
             name: Findings
             processors:
-              - add_cluster_id: null
-              - add_environment_metadata: null
+              - add_orchestrator_metadata: null
         meta:
           package:
             name: cloud_security_posture
