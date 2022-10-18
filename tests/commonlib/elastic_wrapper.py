@@ -53,7 +53,11 @@ class ElasticWrapper:
         @param index: Document index in result dictionary
         @return: Source dictionary
         """
-        ret_value = data['hits']['hits'][index]['_source']
+        try:
+            ret_value = data['hits']['hits'][index]['_source']
+        except IndexError as ex:
+            print(ex)
+            return {}
         return ret_value
 
     @staticmethod

@@ -1,5 +1,5 @@
 # Cloudbeat Automated Tests Framework (C-ATF)
-> 
+>
 
 This project provides an ability to develop component and integration tests for Cloudbeat.
 
@@ -42,7 +42,7 @@ Helm is a package manager for Kubernetes.
 ```shell
 brew install allure
 ```
-After install allure commandline you will be able to display raw test results in pretty html format. 
+After install allure commandline you will be able to display raw test results in pretty html format.
 
 ## System Under Test (SUT) Setup
 
@@ -86,7 +86,7 @@ Install [poetry](https://python-poetry.org/docs/#installation) python package ma
 ```shell
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
 ```
-**Note**: Installing poetry process will also initiate python installation if not installed yet. 
+**Note**: Installing poetry process will also initiate python installation if not installed yet.
 
 ### Setting up Dev
 
@@ -152,7 +152,7 @@ The project main folders are:
 
 Test framework output is a docker image that encapsulates python framework and tests.
 In order to build tests docker image ensure that docker desktop application is running.
- 
+
 ```shell
 cd tests
 docker build -t cloudbeat-tests .
@@ -176,7 +176,7 @@ just load-pytest-kind
 
 Tests execution depends on the developers needs and currently this framework supports the following modes:
 1. Dev Mode - Writing test and executing tests on dev machine
-2. Integration Mode (Production) - Writing tests on dev machine, building test's docker image, and executing tests in kubernetes cluster. 
+2. Integration Mode (Production) - Writing tests on dev machine, building test's docker image, and executing tests in kubernetes cluster.
 
 ### Dev Mode
 
@@ -197,7 +197,7 @@ kubectl port-forward svc/elasticsearch-master -n kube-system 9200
 ```
 For kibana:
 ```shell
-kubectl port-forward svc/kibana-kibana -n kube-system 5601
+kubectl port-forward svc/cloudbeat-test-kibana -n kube-system 5601
 ```
 IDE: Execute tests by IDE runner (assume run/debug setup done before) -> click on play/debug button
 Terminal: Ensure that virtualenv is activated and then execute

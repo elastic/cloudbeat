@@ -131,7 +131,7 @@ elasticsearch:
       memory: "512M"
     limits:
       cpu: "1000m"
-      memory: "512M"
+      memory: "2048M"
 
   # Request smaller persistent volumes.
   volumeClaimTemplate:
@@ -149,11 +149,23 @@ elasticsearch:
   tests:
     enabled: false
 
+  labels:
+    catf: related
+
 
 kibana:
-  imageTag: "8.4.0-SNAPSHOT"
+  imageTag: "8.5.0-SNAPSHOT"
+
+  replicas: 1
+  minimumMasterNodes: 1
 
   resources:
     requests:
+      cpu: "100m"
+      memory: "512M"
+    limits:
       cpu: "1000m"
       memory: "1Gi"
+
+  labels:
+    catf: related

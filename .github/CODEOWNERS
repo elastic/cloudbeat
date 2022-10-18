@@ -2,12 +2,12 @@
 * @elastic/cloudbeat
 
 # Infra & ops related
-/deploy/ @elastic/csp-ops 
+/deploy/ @elastic/csp-ops
 /.github/workflows  @elastic/csp-ops
 .ci/  @elastic/csp-ops
 /scripts/ @elastic/csp-ops
 Makefile  @elastic/csp-ops
-JUSTFILE  @elastic/csp-ops 
+justfile  @elastic/csp-ops
 Jenkinsfile  @elastic/csp-ops
 
 # Beats related

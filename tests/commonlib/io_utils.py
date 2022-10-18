@@ -144,7 +144,7 @@ class FsClient:
         else:
             raise Exception(
                 f"Command '{command}' still not implemented in test framework")
-    
+
     @staticmethod
     def add_users_to_node(users: list, in_place: bool):
         """
@@ -171,7 +171,7 @@ class FsClient:
                 # These commands fail silently for users/groups that exist.
                 subprocess.run(['groupadd', user, '-P', '/tmp'], capture_output=True)
                 subprocess.run(['useradd', user, '-g', user, '-P', '/tmp'], capture_output=True)
-                subprocess.run(['useradd', user], capture_output=True) # For container to get around chmod check.
+                subprocess.run(['useradd', user], capture_output=True)  # For container to get around chmod check.
 
             FsClient.in_place_copy(temp_users_file, host_users_file)
             FsClient.in_place_copy(temp_groups_file, host_groups_file)
