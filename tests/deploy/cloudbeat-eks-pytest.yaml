@@ -39,7 +39,6 @@ rules:
   - get
   - create
   - update
-  - list
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -56,6 +55,8 @@ rules:
   - events
   - pods
   - services
+  - configmaps
+  - serviceaccounts
   verbs:
   - get
   - list
@@ -96,6 +97,35 @@ rules:
   - /metrics
   verbs:
   - get
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  - rolebindings
+  - roles
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  - ingresses
+  - networkpolicies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - policy
+  resources:
+  - podsecuritypolicies
+  verbs:
+  - get
+  - list
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -140,58 +170,31 @@ subjects:
 ---
 apiVersion: v1
 data:
-  cloudbeat.yml: |-
+  cloudbeat.yml: |
     cloudbeat:
-      type: cloudbeat/cis_k8s
+      type: cloudbeat/cis_eks
       streams:
+        - access_key_id: ${AWS_ACCESS_KEY_ID:no_access_key_was_set}
+          secret_access_key: ${AWS_SECRET_ACCESS_KEY:no_secret_was_set}
           # Defines how often an event is sent to the output
-        - period: 30s
+          period: 5s
           fetchers:
             - name: kube-api
             - name: process
               directory: "/hostfs"
               processes:
-                etcd:
-                kube-apiserver:
-                kube-controller:
-                kube-scheduler:
                 kubelet:
                   config-file-arguments:
                     - config
+            - name: aws-ecr
+            - name: aws-elb
             - name: file-system
               patterns: [
-                "/hostfs/etc/kubernetes/scheduler.conf",
-                "/hostfs/etc/kubernetes/controller-manager.conf",
-                "/hostfs/etc/kubernetes/admin.conf",
-                "/hostfs/etc/kubernetes/kubelet.conf",
-                "/hostfs/etc/kubernetes/manifests/etcd.yaml",
-                "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-                "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
-                "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
-                "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
-                "/hostfs/etc/kubernetes/pki/*",
-                "/hostfs/var/lib/kubelet/config.yaml",
-                "/hostfs/var/lib/etcd",
-                "/hostfs/etc/kubernetes/pki"
+                "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
+                "/hostfs/var/lib/kubelet/kubeconfig",
               ]
-      #    # EKS Fetchers configuration
-      #      - name: kube-api
-      #      - name: process
-      #        directory: "/hostfs"
-      #        processes:
-      #          kubelet:
-      #            config-file-arguments:
-      #              - config
-      #      - name: aws-ecr
-      #      - name: aws-elb
-      #      - name: file-system
-      #        patterns: [
-      #          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
-      #          "/hostfs/var/lib/kubelet/kubeconfig",
-      #        ]
           evaluator:
-            decision_logs: true
-
+            decision_logs: false
     # =================================== Kibana ===================================
     setup.kibana:
 
@@ -269,6 +272,18 @@ spec:
     spec:
       containers:
       - env:
+        - name: CLOUDBEAT_TYPE
+          value: cloudbeat/eks
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              key: AWS_ACCESS_KEY_ID
+              name: aws-creds-secret
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              key: AWS_SECRET_ACCESS_KEY
+              name: aws-creds-secret
         - name: ES_HOST
           value: elasticsearch-master.kube-system:9200
         - name: ES_USERNAME
@@ -289,16 +304,13 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        image: cloudbeat:latest
+        image: public.ecr.aws/z7e1r9l0/cloudbeat:latest
         imagePullPolicy: IfNotPresent
         name: cloudbeat
         resources:
           requests:
             cpu: 100m
             memory: 100Mi
-          limits:
-            cpu: 1000m
-            memory: 1Gi
         securityContext:
           runAsUser: 0
         volumeMounts:

@@ -45,6 +45,8 @@ deploy-cloudbeat:
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
 build-cloudbeat-debug:
+  just build-opa-bundle
+  GOOS=linux go mod vendor
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 delete-cloudbeat:
@@ -99,6 +101,7 @@ TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
 ELK_STACK_VERSION := '8.4.2'
 NAMESPACE := 'kube-system'
+ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
 
 patch-cb-yml-tests:
@@ -109,6 +112,11 @@ build-pytest-docker:
 
 load-pytest-kind: build-pytest-docker
   kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
+
+load-pytest-eks:
+  aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/z7e1r9l0
+  docker tag {{TESTS_RELEASE}}:latest {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
+  docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
 deploy-tests-helm-ci target range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
@@ -135,7 +143,7 @@ run-tests:
 
 run-tests-ci:
   #!/usr/bin/env bash
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs --debug 2>&1 | tee test.log
   result_code=${PIPESTATUS[0]}
   SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
   echo "summary<<EOF" >> "$GITHUB_ENV"
