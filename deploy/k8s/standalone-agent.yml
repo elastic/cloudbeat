@@ -421,8 +421,7 @@ data:
               dataset: cloud_security_posture.findings
               type: logs
             processors:
-              - add_cluster_id: null
-              - add_environment_metadata: null
+              - add_orchestrator_metadata: null
 ---
 apiVersion: apps/v1
 kind: DaemonSet
