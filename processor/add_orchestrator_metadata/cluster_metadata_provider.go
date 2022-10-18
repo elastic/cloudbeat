@@ -15,10 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package add_cluster_id
+package add_orchestrator_metadata
 
 import (
 	"context"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes/metadata"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -26,23 +29,35 @@ import (
 )
 
 type ClusterHelper interface {
-	ClusterId() string
+	GetClusterMetadata() ClusterMetadata
 }
 
-type clusterHelper struct {
-	clusterId string
+type ClusterMetadataProvider struct {
+	clusterId   string
+	clusterName string
+	logger      *logp.Logger
 }
 
-func newClusterHelper(client k8s.Interface) (ClusterHelper, error) {
+type ClusterMetadata struct {
+	clusterId   string
+	clusterName string
+}
+
+func newClusterMetadataProvider(client k8s.Interface, cfg *agentconfig.C, logger *logp.Logger) (ClusterHelper, error) {
 	clusterId, err := getClusterIdFromClient(client)
 	if err != nil {
 		return nil, err
 	}
-	return &clusterHelper{clusterId: clusterId}, nil
+
+	clusterIdentifier, err := metadata.GetKubernetesClusterIdentifier(cfg, client)
+	if err != nil {
+		logger.Errorf("fail to resolve the name of the cluster, error %v", err)
+	}
+	return &ClusterMetadataProvider{clusterId: clusterId, clusterName: clusterIdentifier.Name, logger: logger}, nil
 }
 
-func (c *clusterHelper) ClusterId() string {
-	return c.clusterId
+func (c *ClusterMetadataProvider) GetClusterMetadata() ClusterMetadata {
+	return ClusterMetadata{clusterName: c.clusterName, clusterId: c.clusterId}
 }
 
 func getClusterIdFromClient(client k8s.Interface) (string, error) {

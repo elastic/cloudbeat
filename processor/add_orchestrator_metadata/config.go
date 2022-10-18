@@ -15,11 +15,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package add_enviroment_metadata
+package add_orchestrator_metadata
 
-type Config struct {
+// configuration for Add orchestrator metadata .
+type config struct {
 }
 
-func defaultConfig() Config {
-	return Config{}
+func defaultConfig() config {
+	return config{}
+}
+
+func (c *config) Validate() error {
+	return nil
 }

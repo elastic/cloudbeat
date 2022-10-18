@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package add_cluster_id
+package add_orchestrator_metadata
 
 import (
 	"fmt"

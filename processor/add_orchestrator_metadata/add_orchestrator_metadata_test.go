@@ -15,10 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package add_enviroment_metadata
+package add_orchestrator_metadata
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -27,14 +26,15 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type AddEnvironmentMetadataTestSuite struct {
+type AddMetadataTestSuite struct {
 	suite.Suite
+
 	log *logp.Logger
 }
 
-func TestAddEnvironmentMetadataTestSuite(t *testing.T) {
-	s := new(AddEnvironmentMetadataTestSuite)
-	s.log = logp.NewLogger(fmt.Sprintf("cloudbeat_%s_test_suite", processorName))
+func TestAddOrchestratorMetadataTestSuite(t *testing.T) {
+	s := new(AddMetadataTestSuite)
+	s.log = logp.NewLogger("cloudbeat_add_cluster_id_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -43,21 +43,27 @@ func TestAddEnvironmentMetadataTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *AddEnvironmentMetadataTestSuite) TestAddEnvironmentMetadataProcessor() {
+func (s *AddMetadataTestSuite) TestAddOrchestratorMetadataRun() {
 	var tests = []struct {
 		clusterName string
+		clusterId   string
 	}{
 		{
 			"some-cluster-name",
+			"some-cluster-id",
 		},
 		{
 			"some-cluster-name-2",
+			"some-cluster-id-2",
 		},
 	}
-
 	for _, t := range tests {
-		processor := &addEnvironmentMetadata{
-			ClusterName: t.clusterName,
+		mock := &clusterHelperMock{
+			id:          t.clusterId,
+			clusterName: t.clusterName,
+		}
+		processor := &Processor{
+			helper: mock,
 		}
 
 		e := beat.Event{
@@ -70,21 +76,56 @@ func (s *AddEnvironmentMetadataTestSuite) TestAddEnvironmentMetadataProcessor() 
 		res, err := event.GetValue("orchestrator.cluster.name")
 		s.NoError(err)
 		s.Equal(t.clusterName, res)
+
+		res, err = event.GetValue("cluster_id")
+		s.NoError(err)
+		s.Equal(t.clusterId, res)
 	}
 }
 
-func (s *AddEnvironmentMetadataTestSuite) TestAddEnvironmentMetadataProcessorNoClusterName() {
-	processor := &addEnvironmentMetadata{}
-
-	e := beat.Event{
-		Fields: make(mapstr.M),
+func (s *AddMetadataTestSuite) TestAddOrchestratorMetadataRunWhenNoClusterName() {
+	var tests = []struct {
+		clusterName string
+		clusterId   string
+	}{
+		{
+			"",
+			"some-cluster-id",
+		},
 	}
+	for _, t := range tests {
+		mock := &clusterHelperMock{
+			id:          t.clusterId,
+			clusterName: t.clusterName,
+		}
+		processor := &Processor{
+			helper: mock,
+		}
 
-	event, err := processor.Run(&e)
-	s.NoError(err)
+		e := beat.Event{
+			Fields: make(mapstr.M),
+		}
 
-	res, err := event.GetValue("orchestrator.cluster.name")
-	s.Error(err)
-	s.ErrorContains(err, "key not found")
-	s.Empty(res)
+		event, err := processor.Run(&e)
+		s.NoError(err)
+
+		res, err := event.GetValue("orchestrator.cluster.name")
+		s.Error(err)
+		s.ErrorContains(err, "key not found")
+		s.Empty(res)
+
+		res, err = event.GetValue("cluster_id")
+		s.NoError(err)
+		s.Equal(t.clusterId, res)
+
+	}
+}
+
+type clusterHelperMock struct {
+	id          string
+	clusterName string
+}
+
+func (m *clusterHelperMock) GetClusterMetadata() ClusterMetadata {
+	return ClusterMetadata{clusterName: m.clusterName, clusterId: m.id}
 }
