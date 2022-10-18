@@ -29,23 +29,28 @@ import (
 )
 
 const (
-	processorName  = "add_orchestrator_metadata"
-	clusterNameKey = "orchestrator.cluster.name"
-	ClusterIdKey   = "cluster_id"
+	oldProcessorName = "add_cluster_id"
+	processorName    = "add_orchestrator_metadata"
+	clusterNameKey   = "orchestrator.cluster.name"
+	ClusterIdKey     = "cluster_id"
 )
 
 func init() {
+	// This is for backward compatibility - it needs to be removed once we are 9.0 and above
+	processors.RegisterPlugin(oldProcessorName, New)
+	jsprocessor.RegisterPlugin("AddClusterID", New)
+
 	processors.RegisterPlugin(processorName, New)
 	jsprocessor.RegisterPlugin("AddOrchestratorMetadata", New)
 }
 
-type Processor struct {
+type processor struct {
 	config config
 	helper ClusterHelper
 	logger *logp.Logger
 }
 
-// New constructs a new orchestrator metadata Processor.
+// New constructs a new orchestrator metadata processor.
 func New(cfg *agentconfig.C) (processors.Processor, error) {
 	config := defaultConfig()
 	if err := cfg.Unpack(&config); err != nil {
@@ -63,7 +68,7 @@ func New(cfg *agentconfig.C) (processors.Processor, error) {
 	if err != nil {
 		return nil, err
 	}
-	p := &Processor{
+	p := &processor{
 		config,
 		clusterMetadataProvider,
 		logger,
@@ -73,7 +78,7 @@ func New(cfg *agentconfig.C) (processors.Processor, error) {
 }
 
 // Run enriches the given event with an ID
-func (p *Processor) Run(event *beat.Event) (*beat.Event, error) {
+func (p *processor) Run(event *beat.Event) (*beat.Event, error) {
 	clusterMetaData := p.helper.GetClusterMetadata()
 
 	if _, err := event.PutValue(ClusterIdKey, clusterMetaData.clusterId); err != nil {
@@ -91,6 +96,6 @@ func (p *Processor) Run(event *beat.Event) (*beat.Event, error) {
 	return event, nil
 }
 
-func (p *Processor) String() string {
+func (p *processor) String() string {
 	return fmt.Sprintf("%v=", processorName)
 }

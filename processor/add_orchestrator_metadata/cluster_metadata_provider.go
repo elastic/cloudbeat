@@ -33,9 +33,8 @@ type ClusterHelper interface {
 }
 
 type ClusterMetadataProvider struct {
-	clusterId   string
-	clusterName string
-	logger      *logp.Logger
+	metadata ClusterMetadata
+	logger   *logp.Logger
 }
 
 type ClusterMetadata struct {
@@ -53,11 +52,11 @@ func newClusterMetadataProvider(client k8s.Interface, cfg *agentconfig.C, logger
 	if err != nil {
 		logger.Errorf("fail to resolve the name of the cluster, error %v", err)
 	}
-	return &ClusterMetadataProvider{clusterId: clusterId, clusterName: clusterIdentifier.Name, logger: logger}, nil
+	return &ClusterMetadataProvider{metadata: ClusterMetadata{clusterId: clusterId, clusterName: clusterIdentifier.Name}, logger: logger}, nil
 }
 
 func (c *ClusterMetadataProvider) GetClusterMetadata() ClusterMetadata {
-	return ClusterMetadata{clusterName: c.clusterName, clusterId: c.clusterId}
+	return ClusterMetadata{clusterName: c.metadata.clusterName, clusterId: c.metadata.clusterId}
 }
 
 func getClusterIdFromClient(client k8s.Interface) (string, error) {

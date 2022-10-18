@@ -34,7 +34,7 @@ type AddMetadataTestSuite struct {
 
 func TestAddOrchestratorMetadataTestSuite(t *testing.T) {
 	s := new(AddMetadataTestSuite)
-	s.log = logp.NewLogger("cloudbeat_add_cluster_id_test_suite")
+	s.log = logp.NewLogger("cloudbeat_add_orchestrator_metadata_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -62,7 +62,7 @@ func (s *AddMetadataTestSuite) TestAddOrchestratorMetadataRun() {
 			id:          t.clusterId,
 			clusterName: t.clusterName,
 		}
-		processor := &Processor{
+		processor := &processor{
 			helper: mock,
 		}
 
@@ -98,7 +98,7 @@ func (s *AddMetadataTestSuite) TestAddOrchestratorMetadataRunWhenNoClusterName()
 			id:          t.clusterId,
 			clusterName: t.clusterName,
 		}
-		processor := &Processor{
+		processor := &processor{
 			helper: mock,
 		}
 
