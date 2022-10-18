@@ -10,7 +10,7 @@ create-kind-cluster:
 install-kind:
   brew install kind
 
-setup-env: install-kind create-kind-cluster
+setup-env: install-kind create-kind-cluster elastic-stack-connect-kind
 
 # Vanilla
 
