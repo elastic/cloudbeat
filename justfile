@@ -23,16 +23,21 @@ build-load-both: build-deploy-cloudbeat load-pytest-kind
 
 build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat
 
+build-replace-cloudbeat: build-binary
+  ./scripts/remote_replace_cloudbeat.sh
+
 load-cloudbeat-image:
   kind load docker-image cloudbeat:latest --name kind-mono
 
 build-opa-bundle:
   mage BuildOpaBundle
 
-build-cloudbeat:
-  just build-opa-bundle
+build-binary:
   GOOS=linux go mod vendor
-  GOOS=linux go build -v && docker build -t cloudbeat .
+  GOOS=linux go build -v
+
+build-cloudbeat: build-opa-bundle build-binary
+  docker build -t cloudbeat .
 
 deploy-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
