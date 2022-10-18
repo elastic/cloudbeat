@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# The function remotely searches for a file with a given pattern on a given folder
+# Based on the kubeconfig on the running host,
+# the function remotely searches for a file with a given pattern on a given folder
 # $1 is the pod on which it should run
 # $2 is the folder on which it should search
 # $3 is a regex pattern of the file which you want to find
@@ -24,7 +25,8 @@ find_in_folder() {
   echo "${RES}"
 }
 
-# The function remotely searches for a file with a given pattern on cloudbeat installation folder
+# Based on the kubeconfig on the running host,
+# the function remotely searches for a file with a given pattern on cloudbeat installation folder
 # /usr/share/elastic-agent/data/elastic-agent-*/install/cloudbeat-*/
 # $1 is the pod on which it should run
 # $2 is a regex pattern of the file which you want to find
