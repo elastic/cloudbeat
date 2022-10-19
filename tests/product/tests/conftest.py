@@ -59,15 +59,19 @@ def config_node_pre_test(cloudbeat_start_stop):
     ]
     # create temporary files:
     for node in nodes: 
+        if node.metadata.name != cloudbeat_agent.node_name:
+            continue
         for temp_file in temp_file_list:
             api_client.exec_command(container_name=node.metadata.name,
-                                    command='touch',
-                                    param_value=temp_file,
-                                    resource='')
+                                command='touch',
+                                param_value=temp_file,
+                                resource='')
 
     yield k8s_client, api_client, cloudbeat_agent
     # delete temporary files:
     for node in nodes: 
+        if node.metadata.name != cloudbeat_agent.node_name:
+            continue
         for temp_file in temp_file_list:
             api_client.exec_command(container_name=node.metadata.name,
                                     command='unlink',
