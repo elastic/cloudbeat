@@ -421,7 +421,7 @@ data:
               dataset: cloud_security_posture.findings
               type: logs
             processors:
-              - add_orchestrator_metadata: null
+              - add_cluster_id: null
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -683,3 +683,4 @@ metadata:
   namespace: kube-system
   labels:
     k8s-app: elastic-agent
+

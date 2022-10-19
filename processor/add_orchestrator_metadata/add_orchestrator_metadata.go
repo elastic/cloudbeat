@@ -29,19 +29,14 @@ import (
 )
 
 const (
-	oldProcessorName = "add_cluster_id"
-	processorName    = "add_orchestrator_metadata"
-	clusterNameKey   = "orchestrator.cluster.name"
-	ClusterIdKey     = "cluster_id"
+	processorName  = "add_cluster_id"
+	clusterNameKey = "orchestrator.cluster.name"
+	ClusterIdKey   = "cluster_id"
 )
 
 func init() {
-	// This is for backward compatibility - it needs to be removed once we are 9.0 and above
-	processors.RegisterPlugin(oldProcessorName, New)
-	jsprocessor.RegisterPlugin("AddClusterID", New)
-
 	processors.RegisterPlugin(processorName, New)
-	jsprocessor.RegisterPlugin("AddOrchestratorMetadata", New)
+	jsprocessor.RegisterPlugin("AddEnvironmentMetadata", New)
 }
 
 type processor struct {
