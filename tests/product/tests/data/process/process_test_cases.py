@@ -1335,6 +1335,7 @@ api_server_rules = [
     *cis_1_2_27,
     *cis_1_2_28,
     *cis_1_2_29,
+    *cis_1_2_32,
     # *skip_param_case(skip_list=[*cis_1_2_32],
     #                  data_to_report=SkipReportData(
     #                      skip_reason="This case fails and breaks cluster"
