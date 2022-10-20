@@ -32,10 +32,10 @@ notice_overrides = [
 
 # Additional third-party, non-source code dependencies, to add to the CSV output.
 additional_third_party_deps = [{
-    "name":      "Red Hat Universal Base Image minimal",
-    "version":   "8",
-    "url":       "https://catalog.redhat.com/software/containers/ubi8/ubi-minimal/5c359a62bed8bd75a2c3fba8",
-    "license":   "Custom;https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf",
+    "name": "Red Hat Universal Base Image minimal",
+    "version": "8",
+    "url": "https://catalog.redhat.com/software/containers/ubi8/ubi-minimal/5c359a62bed8bd75a2c3fba8",
+    "license": "Custom;https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf",
     "sourceURL": "https://oss-dependencies.elastic.co/red-hat-universal-base-image-minimal/8/ubi-minimal-8-source.tar.gz",
 }]
 
@@ -95,7 +95,7 @@ def go_license_detector(notice_out, deps_out, modules):
         notice_template_file.close()
 
         args = [
-            "go", "run", "-modfile=utils/go.mod", "go.elastic.co/go-licence-detector",
+            "go", "run", "-modfile=go.mod", "go.elastic.co/go-licence-detector",
             "-includeIndirect",
             "-overrides", overrides_file.name,
             "-rules", beats_rules_path,

@@ -1,3 +1,4 @@
+# pylint: skip-file
 import datetime
 import time
 
@@ -22,13 +23,17 @@ def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
 
     while time.time() - start_time < timeout:
         try:
-            events = get_events_from_index(elastic_client, elastic_client.index, rule_tag, latest_timestamp)
+            events = get_events_from_index(elastic_client,
+                                           elastic_client.index,
+                                           rule_tag,
+                                           latest_timestamp)
         except Exception as e:
             print(e)
             continue
 
         for event in events:
-            findings_timestamp = datetime.datetime.strptime(getattr(event, '@timestamp'), '%Y-%m-%dT%H:%M:%S.%fZ')
+            findings_timestamp = datetime.datetime.strptime(getattr(event, '@timestamp'),
+                                                            '%Y-%m-%dT%H:%M:%S.%fZ')
             if findings_timestamp > latest_timestamp:
                 latest_timestamp = findings_timestamp
 
@@ -62,13 +67,16 @@ def get_logs_evaluation(k8s, timeout, pod_name, namespace, rule_tag, exec_timest
     start_time = time.time()
     while time.time() - start_time < timeout:
         try:
-            logs = get_logs_from_stream(k8s.get_pod_logs(pod_name=pod_name, namespace=namespace, since_seconds=2))
+            logs = get_logs_from_stream(k8s.get_pod_logs(pod_name=pod_name,
+                                                         namespace=namespace,
+                                                         since_seconds=2))
         except Exception as e:
             print(e)
             continue
 
         for log in logs:
-            findings_timestamp = datetime.datetime.strptime(log.time, '%Y-%m-%dT%H:%M:%Sz')
+            findings_timestamp = datetime.datetime.strptime(log.time,
+                                                            '%Y-%m-%dT%H:%M:%Sz')
             if (findings_timestamp - exec_timestamp).total_seconds() < 0:
                 continue
 
@@ -126,7 +134,7 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
     start_time = time.time()
     prev_sequence = ""
     curr_sequence = ""
-    active_agents = 0
+    agents_cycles_count = 0
     num_cycles = 0
 
     while num_cycles < required_cycles and not is_timeout(start_time, 30):
@@ -139,11 +147,13 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
                                                        query=query,
                                                        sort=sort)
                 doc_src = elastic_client.get_doc_source(data=result)
+                if len(doc_src) == 0:
+                    continue
                 curr_sequence = doc_src['event']['sequence']
 
                 if elastic_client.get_total_value(data=result) != 0 and curr_sequence != prev_sequence:
                     # New cycle findings for this node
-                    active_agents += 1
+                    agents_cycles_count += 1
                     break
                 time.sleep(1)
 
@@ -151,7 +161,7 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
             prev_sequence = curr_sequence
             num_cycles += 1
 
-    return active_agents == (len(nodes) * required_cycles)
+    return agents_cycles_count >= (len(nodes) * required_cycles)
 
 
 def is_timeout(start_time: time, timeout: int) -> bool:

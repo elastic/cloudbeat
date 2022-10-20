@@ -12,7 +12,7 @@ from commonlib.utils import wait_for_cycle_completion
 
 
 testdata = ['file', 'process', 'k8s_object']
-CONFIG_TIMEOUT = 30
+CONFIG_TIMEOUT = 45
 
 
 @pytest.mark.pre_merge
@@ -32,22 +32,27 @@ def test_cloudbeat_pod_exist(fixture_data):
 
 
 @pytest.mark.pre_merge
-@pytest.mark.order(2)
+@pytest.mark.order(3)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
-def test_cloudbeat_pods_running(fixture_data):
+def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
     """
     This test verifies that all pods are in status "Running"
-    :param fixture_data: (Pods list, Nodes list)
+    :param k8s: Kubernetes client
+    :param cloudbeat_agent: cloudbeat config
     :return:
     """
+    pods = k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
+                                       namespace=cloudbeat_agent.namespace)
     # Verify that at least 1 pod is running the cluster
-    assert len(fixture_data[0]) > 0, "There are no cloudbeat pod instances running in the cluster"
+    assert len(pods) > 0, "There are no cloudbeat pod instances running in the cluster"
     # Verify that each pod is in running state
-    assert all(pod.status.phase == "Running" for pod in fixture_data[0]), "Not all pods are running"
+    for pod in pods:
+        assert pod.status.phase == "Running", f"The pod '{pod.metadata.name}' status is: '{pod.status.phase}'"
+
 
 
 @pytest.mark.pre_merge
-@pytest.mark.order(3)
+@pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
 @pytest.mark.parametrize("match_type", testdata)
 def test_elastic_index_exists(elastic_client, match_type):
@@ -57,7 +62,8 @@ def test_elastic_index_exists(elastic_client, match_type):
     :param match_type: Findings type for matching
     :return:
     """
-    query, sort = elastic_client.build_es_query(term={"type": match_type})
+    query, sort = elastic_client.build_es_query(
+        term={"resource.type": match_type})
     start_time = time.time()
     result = {}
     while time.time() - start_time < CONFIG_TIMEOUT:
@@ -93,7 +99,8 @@ def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
 
     query, sort = elastic_client.build_es_query(term={"type": "k8s_object"})
     pods, nodes = fixture_data
-    leader_node = k8s.get_cluster_leader(namespace=cloudbeat_agent.namespace, pods=pods)
+    leader_node = k8s.get_cluster_leader(
+        namespace=cloudbeat_agent.namespace, pods=pods)
     assert leader_node != "", \
         "The Leader node could not be found"
 

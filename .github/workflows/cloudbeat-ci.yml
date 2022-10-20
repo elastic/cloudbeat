@@ -14,7 +14,7 @@ env:
   CONTAINER_SUFFIX: ${{ github.run_id }}
 
 concurrency:
-  group: ${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
@@ -26,21 +26,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Fetch Go version from .go-version
-        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Fetch OPA version
-        run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v1
-        with:
-          version: ${{ env.OPA_VERSION }}
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: cache go dependencies
         uses: actions/cache@v2
@@ -52,8 +39,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
-      - name: build cloudbeat
-        run: make
+      - name: build cloudbeat binary
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: build
 
       - name: build opa bundle
         uses: magefile/mage-action@v2
@@ -102,8 +92,9 @@ jobs:
 
       - name: Move cache
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          chmod +x ./.ci/scripts/gh-cache.sh
+          ./.ci/scripts/gh-cache.sh
+        shell: bash
 
   Test_Matrix:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
@@ -240,7 +231,9 @@ jobs:
 
       - name: Load images to kind
         run: |
-          kind load image-archive /tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono & kind load image-archive /tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar --name=kind-mono
+          chmod +x ./.ci//scripts/kind-images.sh
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }}
+        shell: bash
 
       - name: Deploy tests Helm chart
         id: deploy_helm

@@ -5,15 +5,18 @@ metadata:
   name: cloudbeat
   namespace: kube-system
   labels:
+    catf: related
     k8s-app: cloudbeat
 spec:
   selector:
     matchLabels:
       k8s-app: cloudbeat
+      catf: related
   template:
     metadata:
       labels:
         k8s-app: cloudbeat
+        catf: related
     spec:
       serviceAccountName: cloudbeat
       terminationGracePeriodSeconds: 30
