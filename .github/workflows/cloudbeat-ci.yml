@@ -218,8 +218,8 @@ jobs:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
         with:
-          config: deploy/k8s/kind/kind-config.yml
-          cluster_name: kind-mono
+          config: deploy/k8s/kind/kind-multi.yml
+          cluster_name: kind-multi
 
       - name: Cache docker images
         uses: actions/cache@v2
@@ -232,7 +232,7 @@ jobs:
       - name: Load images to kind
         run: |
           chmod +x ./.ci//scripts/kind-images.sh
-          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }}
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
         shell: bash
 
       - name: Deploy tests Helm chart
@@ -243,7 +243,7 @@ jobs:
       - name: Run Tests
         id: run_tests
         run: |
-          just run-tests-ci
+          just run-tests-ci kind-multi
 
       - name: Upload Test Results
         if: always()
