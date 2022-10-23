@@ -36,7 +36,7 @@ const (
 
 func init() {
 	processors.RegisterPlugin(processorName, New)
-	jsprocessor.RegisterPlugin("AddEnvironmentMetadata", New)
+	jsprocessor.RegisterPlugin("AddClusterID", New)
 }
 
 type processor struct {
