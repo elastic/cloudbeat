@@ -15,16 +15,33 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package add_orchestrator_metadata
+package add_cluster_id
 
-// configuration for Add orchestrator metadata .
-type config struct {
+import (
+	"fmt"
+)
+
+type (
+	errConfigUnpack struct{ cause error }
+	errComputeID    struct{ cause error }
+)
+
+func makeErrConfigUnpack(cause error) errConfigUnpack {
+	return errConfigUnpack{cause}
+}
+func (e errConfigUnpack) Error() string {
+	return fmt.Sprintf("failed to unpack %v processor configuration: %v", processorName, e.cause)
+}
+func (e errConfigUnpack) Unwrap() error {
+	return e.cause
 }
 
-func defaultConfig() config {
-	return config{}
+func makeErrComputeID(cause error) errComputeID {
+	return errComputeID{cause}
 }
-
-func (c *config) Validate() error {
-	return nil
+func (e errComputeID) Error() string {
+	return fmt.Sprintf("failed to compute ID: %v", e.cause)
+}
+func (e errComputeID) Unwrap() error {
+	return e.cause
 }

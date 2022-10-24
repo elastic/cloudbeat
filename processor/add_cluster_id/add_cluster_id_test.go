@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package add_orchestrator_metadata
+package add_cluster_id
 
 import (
 	"testing"
@@ -26,14 +26,14 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type AddMetadataTestSuite struct {
+type AddClusterIdTestSuite struct {
 	suite.Suite
 
 	log *logp.Logger
 }
 
-func TestAddOrchestratorMetadataTestSuite(t *testing.T) {
-	s := new(AddMetadataTestSuite)
+func TestAddClusterIdTestSuite(t *testing.T) {
+	s := new(AddClusterIdTestSuite)
 	s.log = logp.NewLogger("cloudbeat_add_orchestrator_metadata_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
@@ -43,7 +43,7 @@ func TestAddOrchestratorMetadataTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *AddMetadataTestSuite) TestAddOrchestratorMetadataRun() {
+func (s *AddClusterIdTestSuite) TestAddClusterIdRun() {
 	var tests = []struct {
 		clusterName string
 		clusterId   string
@@ -83,7 +83,7 @@ func (s *AddMetadataTestSuite) TestAddOrchestratorMetadataRun() {
 	}
 }
 
-func (s *AddMetadataTestSuite) TestAddOrchestratorMetadataRunWhenNoClusterName() {
+func (s *AddClusterIdTestSuite) TestAddClusterIdRunWhenNoClusterName() {
 	var tests = []struct {
 		clusterName string
 		clusterId   string

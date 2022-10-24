@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package add_orchestrator_metadata
+package add_cluster_id
 
 import (
 	"fmt"
@@ -45,7 +45,8 @@ type processor struct {
 	logger *logp.Logger
 }
 
-// New constructs a new orchestrator metadata processor.
+// New constructs a new Add ID processor.
+// This processor adds the cluster id along with some other orchestrator metadata fields.
 func New(cfg *agentconfig.C) (processors.Processor, error) {
 	config := defaultConfig()
 	if err := cfg.Unpack(&config); err != nil {
@@ -72,7 +73,7 @@ func New(cfg *agentconfig.C) (processors.Processor, error) {
 	return p, nil
 }
 
-// Run enriches the given event with an ID
+// Run enriches the given event with an ID and the cluster.name
 func (p *processor) Run(event *beat.Event) (*beat.Event, error) {
 	clusterMetaData := p.helper.GetClusterMetadata()
 
