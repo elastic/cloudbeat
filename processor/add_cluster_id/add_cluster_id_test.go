@@ -34,7 +34,7 @@ type AddClusterIdTestSuite struct {
 
 func TestAddClusterIdTestSuite(t *testing.T) {
 	s := new(AddClusterIdTestSuite)
-	s.log = logp.NewLogger("cloudbeat_add_orchestrator_metadata_test_suite")
+	s.log = logp.NewLogger("cloudbeat_add_cluster_id_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
