@@ -4,13 +4,13 @@ kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 
-create-kind-cluster:
-  kind create cluster --config deploy/k8s/kind/kind-config.yml --wait 30s
+create-kind-cluster kind='kind-multi':
+  kind create cluster --config deploy/k8s/kind/{{kind}}.yml --wait 30s
 
 install-kind:
   brew install kind
 
-setup-env: install-kind create-kind-cluster
+setup-env: install-kind create-kind-cluster elastic-stack-connect-kind
 
 # Vanilla
 
@@ -23,16 +23,21 @@ build-load-both: build-deploy-cloudbeat load-pytest-kind
 
 build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat
 
-load-cloudbeat-image:
-  kind load docker-image cloudbeat:latest --name kind-mono
+build-replace-cloudbeat: build-binary
+  ./scripts/remote_replace_cloudbeat.sh
+
+load-cloudbeat-image kind='kind-multi':
+  kind load docker-image cloudbeat:latest --name {{kind}}
 
 build-opa-bundle:
   mage BuildOpaBundle
 
-build-cloudbeat:
-  just build-opa-bundle
+build-binary:
   GOOS=linux go mod vendor
-  GOOS=linux go build -v && docker build -t cloudbeat .
+  GOOS=linux go build -v
+
+build-cloudbeat: build-opa-bundle build-binary
+  docker build -t cloudbeat .
 
 deploy-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
@@ -71,8 +76,8 @@ elastic-stack-up:
 elastic-stack-down:
   elastic-package stack down
 
-elastic-stack-connect-kind:
-  ID=$( docker ps --filter name=kind-mono-control-plane --format "{{{{.ID}}" ) && \
+elastic-stack-connect-kind kind='kind-multi':
+  ID=$( docker ps --filter name={{kind}}-control-plane --format "{{{{.ID}}" ) && \
   docker network connect elastic-package-stack_default $ID
 
 ssh-cloudbeat:
@@ -105,8 +110,8 @@ patch-cb-yml-tests:
 build-pytest-docker:
   cd tests; docker build -t {{TESTS_RELEASE}} .
 
-load-pytest-kind: build-pytest-docker
-  kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
+load-pytest-kind kind='kind-multi': build-pytest-docker
+  kind load docker-image {{TESTS_RELEASE}}:latest --name {{kind}}
 
 load-pytest-eks:
   aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/z7e1r9l0
@@ -136,9 +141,9 @@ gen-report:
 run-tests:
   helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --logs
 
-run-tests-ci:
+run-tests-ci kind='kind-multi':
   #!/usr/bin/env bash
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs --debug 2>&1 | tee test.log
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-{{kind}} --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
   result_code=${PIPESTATUS[0]}
   SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
   echo "summary<<EOF" >> "$GITHUB_ENV"
@@ -148,8 +153,8 @@ run-tests-ci:
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 
-delete-local-helm-cluster:
-  kind delete cluster --name kind-mono
+delete-local-helm-cluster kind='kind-multi':
+  kind delete cluster --name {{kind}}
 
 cleanup-create-local-helm-cluster target range='..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
   just deploy-local-tests-helm {{target}} {{range}}
