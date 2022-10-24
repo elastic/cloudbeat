@@ -77,8 +77,12 @@ elastic-stack-down:
   elastic-package stack down
 
 elastic-stack-connect-kind kind='kind-multi':
-  ID=$( docker ps --filter name={{kind}}-control-plane --format "{{{{.ID}}" ) && \
-  docker network connect elastic-package-stack_default $ID
+  #!/usr/bin/env sh
+
+  containers=$(docker ps | grep {{kind}} | awk '{ print $1 }')
+  for container in $containers; do
+    docker network connect elastic-package-stack_default $container
+  done
 
 ssh-cloudbeat:
     CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
