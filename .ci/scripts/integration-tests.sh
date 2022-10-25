@@ -18,7 +18,7 @@ get_logs () {
 }
 
 main () {
-  just run-tests &
+  just run-tests "$1" &
   PID=$!
   while true; do
     get_logs
@@ -36,4 +36,4 @@ main () {
   exit $CODE
 }
 
-main
+main "$1"
