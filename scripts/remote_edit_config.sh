@@ -1,46 +1,16 @@
 #!/bin/bash
-# set -x
-find_in_folder() {
-  POD=$1
-  FOLDER=$2
-  PATTERN=$3
-  RES=$(kubectl -n kube-system exec $POD -- ls -1 $FOLDER)
-  if [ -z "$RES" ]
-  then
-    return
-  fi
 
-  RES=$(echo "$RES" | grep $PATTERN)
-  if [ -z "$RES" ]
-  then
-    return
-  fi
+# This script uses the kubectl commands in order to ssh into the cluster defined in the host current-context
+# The script lets you to remotely edit the cloudbeat.yml file that configures cloudbeat process
 
-  echo "${RES}"
-}
-
-find_config_file() {
-  POD=$1
-  PREFIX="/usr/share/elastic-agent/data"
-  PATH_PARTS=("elastic-agent-" "install" "cloudbeat-" "cloudbeat.yml")
-  for NEXT in ${PATH_PARTS[@]}; do
-    FOUND=$(find_in_folder $POD $PREFIX $NEXT)
-    if [ -z "$FOUND" ]
-    then
-      return
-    fi
-    PREFIX="${PREFIX}/${FOUND}"
-  done
-
-  echo $PREFIX
-}
+source ./scripts/common.sh
 
 TMP_LOCAL="/tmp/cloudbeat.yml"
 
 PODS=$(kubectl -n kube-system get pod -l app=elastic-agent -o name)
 for P in $PODS; do
   POD=$(echo "$P" | cut -d '/' -f 2)
-  CONFIG_FILEPATH="$(find_config_file $POD)"
+  CONFIG_FILEPATH="$(find_cloudbeat_config $POD)"
   if [ -z "$CONFIG_FILEPATH" ]
   then
     echo "could not find remote config file"

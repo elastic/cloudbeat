@@ -4,13 +4,13 @@ kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 
-create-kind-cluster:
-  kind create cluster --config deploy/k8s/kind/kind-config.yml --wait 30s
+create-kind-cluster kind='kind-multi':
+  kind create cluster --config deploy/k8s/kind/{{kind}}.yml --wait 30s
 
 install-kind:
   brew install kind
 
-setup-env: install-kind create-kind-cluster
+setup-env: install-kind create-kind-cluster elastic-stack-connect-kind
 
 # Vanilla
 
@@ -23,16 +23,21 @@ build-load-both: build-deploy-cloudbeat load-pytest-kind
 
 build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat
 
-load-cloudbeat-image:
-  kind load docker-image cloudbeat:latest --name kind-mono
+build-replace-cloudbeat: build-binary
+  ./scripts/remote_replace_cloudbeat.sh
+
+load-cloudbeat-image kind='kind-multi':
+  kind load docker-image cloudbeat:latest --name {{kind}}
 
 build-opa-bundle:
   mage BuildOpaBundle
 
-build-cloudbeat:
-  just build-opa-bundle
+build-binary:
   GOOS=linux go mod vendor
-  GOOS=linux go build -v && docker build -t cloudbeat .
+  GOOS=linux go build -v
+
+build-cloudbeat: build-opa-bundle build-binary
+  docker build -t cloudbeat .
 
 deploy-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
@@ -40,6 +45,8 @@ deploy-cloudbeat:
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
 build-cloudbeat-debug:
+  just build-opa-bundle
+  GOOS=linux go mod vendor
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 delete-cloudbeat:
@@ -69,8 +76,8 @@ elastic-stack-up:
 elastic-stack-down:
   elastic-package stack down
 
-elastic-stack-connect-kind:
-  ID=$( docker ps --filter name=kind-mono-control-plane --format "{{{{.ID}}" ) && \
+elastic-stack-connect-kind kind='kind-multi':
+  ID=$( docker ps --filter name={{kind}}-control-plane --format "{{{{.ID}}" ) && \
   docker network connect elastic-package-stack_default $ID
 
 ssh-cloudbeat:
@@ -94,6 +101,7 @@ TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
 ELK_STACK_VERSION := '8.4.2'
 NAMESPACE := 'kube-system'
+ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
 patch-cb-yml-tests:
   kubectl kustomize deploy/k8s/kustomize/test > tests/deploy/cloudbeat-pytest.yml
@@ -101,8 +109,13 @@ patch-cb-yml-tests:
 build-pytest-docker:
   cd tests; docker build -t {{TESTS_RELEASE}} .
 
-load-pytest-kind: build-pytest-docker
-  kind load docker-image {{TESTS_RELEASE}}:latest --name kind-mono
+load-pytest-kind kind='kind-multi': build-pytest-docker
+  kind load docker-image {{TESTS_RELEASE}}:latest --name {{kind}}
+
+load-pytest-eks:
+  aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/z7e1r9l0
+  docker tag {{TESTS_RELEASE}}:latest {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
+  docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
 deploy-tests-helm values_file target range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
@@ -114,12 +127,12 @@ gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
 run-tests:
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-mono --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-kind-multi --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 
-delete-local-helm-cluster:
-  kind delete cluster --name kind-mono
+delete-local-helm-cluster kind='kind-multi':
+  kind delete cluster --name {{kind}}
 
 cleanup-create-local-helm-cluster target range='..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
   just deploy-tests-helm tests/deploy/values/local-host.yml {{target}} {{range}}

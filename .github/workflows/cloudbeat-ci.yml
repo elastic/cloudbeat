@@ -26,21 +26,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Fetch Go version from .go-version
-        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Fetch OPA version
-        run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v1
-        with:
-          version: ${{ env.OPA_VERSION }}
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: cache go dependencies
         uses: actions/cache@v2
@@ -231,8 +218,8 @@ jobs:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
         with:
-          config: deploy/k8s/kind/kind-config.yml
-          cluster_name: kind-mono
+          config: deploy/k8s/kind/kind-multi.yml
+          cluster_name: kind-multi
 
       - name: Cache docker images
         uses: actions/cache@v2
@@ -245,7 +232,7 @@ jobs:
       - name: Load images to kind
         run: |
           chmod +x ./.ci//scripts/kind-images.sh
-          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }}
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
         shell: bash
 
       - name: Deploy tests Helm chart
@@ -257,7 +244,7 @@ jobs:
         id: run_tests
         run: |
           ./.ci/scripts/integration-tests.sh
-
+          
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v2

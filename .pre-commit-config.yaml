@@ -14,8 +14,8 @@ repos:
       - id: check-yaml
         args: [--allow-multiple-documents]
         exclude: (^cloudbeat.*yml)$
+        args: [--allow-multiple-documents]
       - id: check-json
-      - id: name-tests-test
 
   ## Security
       - id: detect-private-key
@@ -33,6 +33,9 @@ repos:
     rev: 4.0.1
     hooks:
       - id: flake8
+        name: flake8 ./tests/
+        files: ^tests/
+        args: [--config, tests/setup.cfg]
 
   - repo: https://github.com/pycqa/pylint
     rev: pylint-2.6.0

@@ -12,7 +12,7 @@ from commonlib.utils import wait_for_cycle_completion
 
 
 testdata = ['file', 'process', 'k8s_object']
-CONFIG_TIMEOUT = 30
+CONFIG_TIMEOUT = 45
 
 
 @pytest.mark.pre_merge

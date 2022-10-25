@@ -19,3 +19,4 @@ data:
   TEST_RANGE: ""
   {{- end }}
   AGENT_NAME: {{ .Values.testData.agentName }}
+  CLUSTER_TYPE: {{ .Values.testData.clusterType }}
