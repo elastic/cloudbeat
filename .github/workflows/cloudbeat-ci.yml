@@ -208,18 +208,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - uses: azure/setup-helm@v1
-        id: install
-
-      - uses: extractions/setup-just@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Create k8s Kind Cluster
-      #   uses: helm/kind-action@v1.2.0
-      #   with:
-      #     config: deploy/k8s/kind/kind-multi.yml
-      #     cluster_name: kind-multi
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Create k8s Kind Cluster
         run: |
