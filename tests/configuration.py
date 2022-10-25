@@ -19,6 +19,16 @@ kubernetes = Munch()
 kubernetes.is_in_cluster_config = bool(strtobool(os.getenv('KUBERNETES_IN_CLUSTER',
                                                            'False')))
 
+# --- AWS EKS ---------------------------------------------
+eks = Munch()
+eks.current_config = os.getenv('EKS_CONFIG', 'test-eks-config-1')
+eks.config_1 = os.getenv('EKS_CONFIG_1', 'test-eks-config-1')
+eks.config_1_node_1 = os.getenv('EKS_CONFIG_1_NODE_1', 'ip-192-168-57-173.eu-west-2.compute.internal')
+eks.config_1_node_2 = os.getenv('EKS_CONFIG_1_NODE_2', 'ip-192-168-83-229.eu-west-2.compute.internal')
+eks.config_2 = os.getenv('EKS_CONFIG_2', 'test-eks-config-2')
+eks.config_2_node_1 = os.getenv('EKS_CONFIG_2_NODE_1', 'ip-192-168-14-74.eu-west-2.compute.internal')
+eks.config_2_node_2 = os.getenv('EKS_CONFIG_2_NODE_2', 'ip-192-168-89-216.eu-west-2.compute.internal')
+
 # --- Elasticsearch environment definition --------------------------------
 elasticsearch = Munch()
 elasticsearch.hosts = os.getenv('ES_HOST', "localhost")

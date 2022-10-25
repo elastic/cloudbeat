@@ -305,7 +305,6 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         image: public.ecr.aws/z7e1r9l0/cloudbeat:latest
-        imagePullPolicy: IfNotPresent
         name: cloudbeat
         resources:
           requests:
