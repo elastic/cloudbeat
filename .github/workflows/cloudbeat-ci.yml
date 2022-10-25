@@ -251,12 +251,12 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm-ci ${{ matrix.test-target }} ${{ matrix.range }}
+          just deploy-tests-helm tests/deploy/values/ci.yml ${{ matrix.test-target }} ${{ matrix.range }}
 
       - name: Run Tests
         id: run_tests
         run: |
-          just run-tests-ci
+          ./.ci/scripts/integration-tests.sh
 
       - name: Upload Test Results
         if: always()

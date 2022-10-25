@@ -12,6 +12,7 @@ repos:
       - id: end-of-file-fixer
         exclude: (^cloudbeat.*yml)$
       - id: check-yaml
+        args: [--allow-multiple-documents]
         exclude: (^cloudbeat.*yml)$
       - id: check-json
       - id: name-tests-test
