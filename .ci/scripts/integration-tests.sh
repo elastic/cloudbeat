@@ -31,7 +31,7 @@ main () {
     sleep 10
   done
   echo "Tests Finished"
-  cat test.log
+  cat test-logs/*.log | sed -n '/summary/,/===/p'
   kubectl delete po test-pod-v1 -n kube-system
   exit $CODE
 }
