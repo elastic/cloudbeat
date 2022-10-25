@@ -27,7 +27,7 @@ vendor/*
 .github/act/*
 
 # tests:
-test-logs*
+test-logs/*
 tests/allure/results/*
 tests/allure/reports/*
 
