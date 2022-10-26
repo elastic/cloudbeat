@@ -22,16 +22,17 @@
 5. Set up the local env:
 
 - Install & activate hermit
-```zsh
-curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
-```
-```
-. ./bin/activate-hermit
-```
-- Setup env recipe
-```zsh
-just setup-env
-```
+    ```zsh
+    curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
+    ```
+    ```zsh
+    . ./bin/activate-hermit
+    ```
+- Run setup env recipe
+
+  ```zsh
+  just setup-env
+  ```
 
 ## Running Cloudbeat
 Load the elastic stack environment variables.
