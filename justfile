@@ -17,7 +17,7 @@ setup-env: install-kind create-kind-cluster elastic-stack-connect-kind
 create-vanilla-deployment-file:
    kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
-build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
+build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image
 
 build-load-both: build-deploy-cloudbeat load-pytest-kind
 
@@ -103,7 +103,6 @@ ELK_STACK_VERSION := '8.4.2'
 NAMESPACE := 'kube-system'
 ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
-
 patch-cb-yml-tests:
   kubectl kustomize deploy/k8s/kustomize/test > tests/deploy/cloudbeat-pytest.yml
 
@@ -118,38 +117,17 @@ load-pytest-eks:
   docker tag {{TESTS_RELEASE}}:latest {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
   docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
-deploy-tests-helm-ci target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
-
-deploy-tests-helm-ci-agent target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/ci-sa-agent.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
-
-deploy-local-tests-helm target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values tests/deploy/values/local-host.yml --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} -n {{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
-
-purge-pvc:
-  kubectl delete -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}} & kubectl apply -f tests/deploy/pvc-deleter.yaml -n {{NAMESPACE}}
+deploy-tests-helm values_file target range='':
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 purge-tests:
-	helm del {{TESTS_RELEASE}} -n {{NAMESPACE}}
-
-purge-tests-full: purge-tests purge-pvc
+	helm del {{TESTS_RELEASE}} -n {{NAMESPACE}} & kubectl delete pvc --all
 
 gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
-run-tests:
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --logs
-
-run-tests-ci kind='kind-multi':
-  #!/usr/bin/env bash
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-{{kind}} --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee test.log
-  result_code=${PIPESTATUS[0]}
-  SUMMARY=$(cat test.log | sed -n '/summary/,/===/p')
-  echo "summary<<EOF" >> "$GITHUB_ENV"
-  echo "$SUMMARY" >> "$GITHUB_ENV"
-  echo "EOF" >> "$GITHUB_ENV"
-  exit $result_code
+run-tests target='default' kind='kind-multi':
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-{{kind}} --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee {{TEST_LOGS_DIRECTORY}}/{{target}}-$(date +"%d-%m-%y-%H-%M-%S").log
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 
@@ -157,7 +135,7 @@ delete-local-helm-cluster kind='kind-multi':
   kind delete cluster --name {{kind}}
 
 cleanup-create-local-helm-cluster target range='..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
-  just deploy-local-tests-helm {{target}} {{range}}
+  just deploy-tests-helm tests/deploy/values/local-host.yml {{target}} {{range}}
 
 # TODO(DaveSys911): Move scripts out of JUSTFILE: https://github.com/elastic/security-team/issues/4291
 test-pod-status:
