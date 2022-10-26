@@ -25,6 +25,10 @@
     ```zsh
     curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
     ```
+
+> **Note**
+> This will download and install hermit into ~/bin. You should add this to your $PATH if it isn't already. Also consider to review documentation for automatic shell & IDE integration for your setup of choice.
+
     ```zsh
     . ./bin/activate-hermit
     ```
@@ -33,6 +37,7 @@
   ```zsh
   just setup-env
   ```
+
 
 ## Running Cloudbeat
 Load the elastic stack environment variables.

@@ -7,10 +7,7 @@ cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 create-kind-cluster kind='kind-multi':
   kind create cluster --config deploy/k8s/kind/{{kind}}.yml --wait 30s
 
-install-kind:
-  brew install kind
-
-setup-env: install-kind create-kind-cluster elastic-stack-connect-kind
+setup-env: create-kind-cluster elastic-stack-connect-kind
 
 # Vanilla
 
