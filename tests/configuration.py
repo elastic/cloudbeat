@@ -14,6 +14,8 @@ agent.namespace = os.getenv('AGENT_NAMESPACE', 'kube-system')
 agent.findings_timeout = 500
 agent.cluster_type = os.getenv('CLUSTER_TYPE', 'eks')  # options: vanilla / eks
 
+agent.node_name = os.getenv('NODE_NAME') # this is the node name where the test pod is running
+
 # --- Kubernetes environment definition --------------------
 kubernetes = Munch()
 kubernetes.is_in_cluster_config = bool(strtobool(os.getenv('KUBERNETES_IN_CLUSTER',

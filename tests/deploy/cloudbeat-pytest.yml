@@ -255,16 +255,19 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:
+    catf: related
     k8s-app: cloudbeat
   name: cloudbeat
   namespace: kube-system
 spec:
   selector:
     matchLabels:
+      catf: related
       k8s-app: cloudbeat
   template:
     metadata:
       labels:
+        catf: related
         k8s-app: cloudbeat
     spec:
       containers:
@@ -339,6 +342,8 @@ spec:
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
       volumes:
       - hostPath:
           path: /proc

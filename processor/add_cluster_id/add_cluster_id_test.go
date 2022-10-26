@@ -43,38 +43,89 @@ func TestAddClusterIdTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *AddClusterIdTestSuite) TestClusterIdProcessor() {
-	tests := []string{
-		"abc",
-		"some-cluster-id",
+func (s *AddClusterIdTestSuite) TestAddClusterIdRun() {
+	var tests = []struct {
+		clusterName string
+		clusterId   string
+	}{
+		{
+			"some-cluster-name",
+			"some-cluster-id",
+		},
+		{
+			"some-cluster-name-2",
+			"some-cluster-id-2",
+		},
 	}
-
 	for _, t := range tests {
 		mock := &clusterHelperMock{
-			id: t,
+			id:          t.clusterId,
+			clusterName: t.clusterName,
 		}
-
-		processor := &addClusterID{
+		processor := &processor{
 			helper: mock,
-			config: defaultConfig(),
 		}
 
 		e := beat.Event{
 			Fields: make(mapstr.M),
 		}
+
 		event, err := processor.Run(&e)
 		s.NoError(err)
 
-		res, err := event.GetValue("cluster_id")
+		res, err := event.GetValue("orchestrator.cluster.name")
 		s.NoError(err)
-		s.Equal(t, res)
+		s.Equal(t.clusterName, res)
+
+		res, err = event.GetValue("cluster_id")
+		s.NoError(err)
+		s.Equal(t.clusterId, res)
+	}
+}
+
+func (s *AddClusterIdTestSuite) TestAddClusterIdRunWhenNoClusterName() {
+	var tests = []struct {
+		clusterName string
+		clusterId   string
+	}{
+		{
+			"",
+			"some-cluster-id",
+		},
+	}
+	for _, t := range tests {
+		mock := &clusterHelperMock{
+			id:          t.clusterId,
+			clusterName: t.clusterName,
+		}
+		processor := &processor{
+			helper: mock,
+		}
+
+		e := beat.Event{
+			Fields: make(mapstr.M),
+		}
+
+		event, err := processor.Run(&e)
+		s.NoError(err)
+
+		res, err := event.GetValue("orchestrator.cluster.name")
+		s.Error(err)
+		s.ErrorContains(err, "key not found")
+		s.Empty(res)
+
+		res, err = event.GetValue("cluster_id")
+		s.NoError(err)
+		s.Equal(t.clusterId, res)
+
 	}
 }
 
 type clusterHelperMock struct {
-	id string
+	id          string
+	clusterName string
 }
 
-func (m *clusterHelperMock) ClusterId() string {
-	return m.id
+func (m *clusterHelperMock) GetClusterMetadata() ClusterMetadata {
+	return ClusterMetadata{clusterName: m.clusterName, clusterId: m.id}
 }
