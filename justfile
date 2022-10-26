@@ -133,7 +133,7 @@ delete-local-helm-cluster kind='kind-multi':
 cleanup-create-local-helm-cluster target range='..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
   just deploy-tests-helm tests/deploy/values/local-host.yml {{target}} {{range}}
 
-# TODO(DaveSys911): Move scripts out of JUSTFILE: https://github.com/elastic/security-team/issues/4291
+
 test-pod-status:
   #!/usr/bin/env sh
 
