@@ -21,24 +21,23 @@
 4. Install and configure [Elastic-Package](https://github.com/elastic/elastic-package)
 5. Set up the local env:
 
-- Install & activate hermit
-    ```zsh
-    curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
-    ```
-
-> **Note**
-> This will download and install hermit into ~/bin. You should add this to your $PATH if it isn't already. Also consider to review documentation for automatic shell & IDE integration for your setup of choice.
-
-    ```zsh
-    . ./bin/activate-hermit
-    ```
-- Run setup env recipe
-
+- Install & activate hermit<br />
+  ```zsh
+  curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
+  ```
+	```zsh
+  . ./bin/activate-hermit
+  ```
+- Run setup env recipe<br />
   ```zsh
   just setup-env
   ```
+<br />
 
+>**Note**
+>This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already. Also consider to review documentation for automatic shell & IDE integration for your setup of choice.
 
+<br />
 ## Running Cloudbeat
 Load the elastic stack environment variables.
 ```zsh
