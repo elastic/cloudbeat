@@ -39,5 +39,6 @@ markers = [
     "process_scheduler_rules",
     "process_kubelet_rules",
     "eks_file_system_rules",
-    "eks_process_rules"
+    "eks_process_rules",
+    "eks_k8s_objects_rules"
 ]

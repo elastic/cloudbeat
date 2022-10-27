@@ -11,11 +11,11 @@ from product.tests.parameters import register_params, Parameters
 
 
 @pytest.mark.eks_process_rules
-def test_eks_file_system_configuration(elastic_client,
-                                       cloudbeat_agent,
-                                       rule_tag,
-                                       node_hostname,
-                                       expected):
+def test_eks_process_rules(elastic_client,
+                           cloudbeat_agent,
+                           rule_tag,
+                           node_hostname,
+                           expected):
     """
     This data driven test verifies rules and findings return by cloudbeat agent.
     In order to add new cases @pytest.mark.parameterize section shall be updated.
@@ -46,7 +46,7 @@ def test_eks_file_system_configuration(elastic_client,
                                    f"expected: {expected}, got: {evaluation}"
 
 
-register_params(test_eks_file_system_configuration, Parameters(
+register_params(test_eks_process_rules, Parameters(
     ("rule_tag", "node_hostname", "expected"),
     [
         *eks_proc_tc.cis_eks_kubelet_cases.values()
