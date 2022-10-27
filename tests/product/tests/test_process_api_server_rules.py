@@ -49,6 +49,7 @@ def test_process_api_server(elastic_client,
     time.sleep(60)
 
     def identifier(eval_resource):
+        print('IN RESOURCE IDENTIFIER')
         return command_contains_arguments(eval_resource.command, dictionary)
 
     evaluation = get_ES_evaluation(

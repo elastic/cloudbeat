@@ -6,26 +6,6 @@ Rule test case is defined as tuple of data
 from commonlib.framework.reporting import skip_param_case, SkipReportData
 
 cis_1_2_4 = [(
-    'CIS 1.2.4',
-    {
-        "set": {
-            "--kubelet-https": "false",
-        },
-    },
-    '/etc/kubernetes/manifests/kube-apiserver.yaml',
-    'failed'
-),
-    (
-        'CIS 1.2.4',
-        {
-            "set": {
-                "--kubelet-https": "true",
-            },
-        },
-        '/etc/kubernetes/manifests/kube-apiserver.yaml',
-        'passed'
-),
-    (
         'CIS 1.2.4',
         {
             "unset": [
@@ -965,17 +945,17 @@ cis_1_2_29 = [(
 )]
 
 cis_1_2_32 = [(
-        'CIS 1_2_32',
+        'CIS 1.2.32',
         {
             "set": {
-                "--tls-cipher-suites": "TLS_ECDHE_ECDSA_WITH_RC4_128_SHA"
+                "--tls-cipher-suites": "TLS_ECDHE_RSA_WITH_RC4_128_SHA"
             }
         },
         '/etc/kubernetes/manifests/kube-apiserver.yaml',
         'failed'
     ),
     (
-        'CIS 1_2_32',
+        'CIS 1.2.32',
         {
             "set": {
                 "--tls-cipher-suites": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"
@@ -983,9 +963,9 @@ cis_1_2_32 = [(
         },
         '/etc/kubernetes/manifests/kube-apiserver.yaml',
         'passed'
-),
+    ),
     (
-        'CIS 1_2_32',
+        'CIS 1.2.32',
         {
             "set": {
                 "--tls-cipher-suites":
@@ -996,7 +976,7 @@ cis_1_2_32 = [(
         'passed'
     ),
     (
-        'CIS 1_2_32',
+        'CIS 1.2.32',
         {
             "set": {
                 "--tls-cipher-suites":

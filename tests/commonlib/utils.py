@@ -178,8 +178,12 @@ def command_contains_arguments(command, arguments_dict):
     set_dict = arguments_dict.get('set', {})
     unset_list = arguments_dict.get('unset', [])
 
+    print('SET DICT', set_dict)
+    print('UNSET LIST', unset_list)
+
     for key, val in set_dict.items():
         argval = args_dict.get(key)
+        print('COMPARING', key, 'VALUES', val, '--', argval)
         if val != argval:
             return False
 
