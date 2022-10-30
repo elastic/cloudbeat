@@ -37,7 +37,7 @@
 >**Note**
 >This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already. Also consider to review documentation for automatic shell & IDE integration for your setup of choice.
 
-<br />
+
 ## Running Cloudbeat
 Load the elastic stack environment variables.
 ```zsh
