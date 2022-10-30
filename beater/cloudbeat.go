@@ -181,7 +181,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	eventsCh := pipeline.Step(bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event
-	var ticker = time.NewTicker(flushInterval)
+	ticker := time.NewTicker(flushInterval)
 	for {
 		select {
 		case <-bt.ctx.Done():

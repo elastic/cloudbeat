@@ -174,7 +174,8 @@ func (l *launcher) waitForUpdates() error {
 
 			go func() {
 				if err := l.configUpdate(update); err != nil {
-					l.log.Errorf("Failed to update Beater config: %v", err)
+					l.beaterErr <- fmt.Errorf("failed to update Beater config: %w", err)
+					return
 				}
 			}()
 		}
