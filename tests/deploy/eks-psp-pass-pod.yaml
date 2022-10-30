@@ -12,8 +12,8 @@ spec:
   automountServiceAccountToken: false
   containers:
     - name: busybox
-      image: busybox
-      imagePullPolicy: IfNotPresent
+      image: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/test-eks-scan-true:latest
+      imagePullPolicy: Always
       command:
         - sleep
         - "3600"
