@@ -56,51 +56,48 @@ func (s *ConfigTestSuite) TestNew() {
 	}{
 		{
 			`
-   type : cloudbeat/cis_k8s
-   streams:
-    - runtime_cfg:
-        activated_rules:
-          cis_k8s:
-            - a
-            - b
-            - c
-            - d
-            - e
-      fetchers:
-        - name: a
-          directory: b
-        - name: b
-          directory: b
+runtime_cfg:
+  activated_rules:
+    cis_k8s:
+      - a
+      - b
+      - c
+      - d
+      - e
+fetchers:
+  - name: a
+    directory: b
+  - name: b
+    directory: b
 `,
 			&Benchmarks{CisK8s: []string{"a", "b", "c", "d", "e"}},
 			"cloudbeat/cis_k8s",
 			aws.ConfigAWS{},
 			2,
-		}, {
+		},
+		{
 			`
-   type : cloudbeat/cis_eks
-   streams:
-    - runtime_cfg:
-        activated_rules:
-          cis_eks:
-            - a
-            - b
-            - c
-            - d
-            - e
-      access_key_id: key
-      secret_access_key: secret
-      session_token: session
-      shared_credential_file: shared_credential_file
-      credential_profile_name: credential_profile_name
-      role_arn: role_arn
-      fetchers:
-        - name: a
-          directory: b
-        - name: b
-          directory: b
-        - name: c
-          directory: c
+runtime_cfg:
+  activated_rules:
+    cis_eks:
+      - a
+      - b
+      - c
+      - d
+      - e
+access_key_id: key
+secret_access_key: secret
+session_token: session
+shared_credential_file: shared_credential_file
+credential_profile_name: credential_profile_name
+role_arn: role_arn
+fetchers:
+  - name: a
+    directory: b
+  - name: b
+    directory: b
+  - name: c
+    directory: c
 `,
 			&Benchmarks{CisEks: []string{"a", "b", "c", "d", "e"}},
 			"cloudbeat/cis_eks",
@@ -137,23 +134,21 @@ func (s *ConfigTestSuite) TestRuntimeCfgExists() {
 	}{
 		{
 			`
-  streams:
-    - runtime_cfg:
-        activated_rules:
-          cis_k8s:
-            - a
-            - b
-            - c
-            - d
-            - e
+runtime_cfg:
+  activated_rules:
+    cis_k8s:
+      - a
+      - b
+      - c
+      - d
+      - e
 `,
 			true,
 		},
 		{
 			`
-  streams:
-    - not_runtime_cfg:
-        something: true
+not_runtime_cfg:
+  something: true
 `,
 			false,
 		},
@@ -177,14 +172,13 @@ func (s *ConfigTestSuite) TestRuntimeConfig() {
 	}{
 		{
 			`
-  streams:
-    - runtime_cfg:
-        activated_rules:
-          cis_k8s:
-            - a
-            - b
-            - c
-            - d
+runtime_cfg:
+  activated_rules:
+    cis_k8s:
+      - a
+      - b
+      - c
+      - d
 `, []string{"a", "b", "c", "d"},
 		},
 	}
@@ -207,10 +201,10 @@ func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
 		config   string
 		expected EvaluatorConfig
 	}{
-		{`
-  streams:
-    - evaluator:
-       decision_logs: true
+		{
+			`
+evaluator:
+  decision_logs: true
 `,
 			EvaluatorConfig{
 				DecisionLogs: true,
@@ -237,19 +231,19 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 		{"", 4 * time.Hour},
 		{
 			`
-   streams:
-    - period: 50s
-`, 50 * time.Second},
+    period: 50s
+`, 50 * time.Second,
+		},
 		{
 			`
-   streams:
-    - period: 5m
-`, 5 * time.Minute},
+    period: 5m
+`, 5 * time.Minute,
+		},
 		{
 			`
-   streams:
-    - period: 2h
-`, 2 * time.Hour},
+    period: 2h
+`, 2 * time.Hour,
+		},
 	}
 
 	for _, test := range tests {
@@ -272,13 +266,11 @@ func (s *ConfigTestSuite) TestActivatedRulesFrameWork() {
 	}{
 		{
 			`
-type: cloudbeat/cis_k8s
-streams:
-  - runtime_cfg:
-      activated_rules:
-        cis_k8s:
-          - a
-          - b
+runtime_cfg:
+  activated_rules:
+    cis_k8s:
+      - a
+      - b
 `,
 			[]string{"a", "b"},
 			nil,
@@ -286,13 +278,11 @@ streams:
 		},
 		{
 			`
-type: cloudbeat/cis_eks
-streams:
-  - runtime_cfg:
-      activated_rules:
-        cis_eks:
-          - a
-          - b
+runtime_cfg:
+  activated_rules:
+    cis_eks:
+      - a
+      - b
 `,
 			nil,
 			[]string{"a", "b"},
