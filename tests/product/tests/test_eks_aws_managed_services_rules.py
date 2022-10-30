@@ -51,7 +51,7 @@ register_params(test_eks_aws_service_rules, Parameters(
     ("rule_tag", "case_identifier", "expected"),
     [
         *ms_tc.cis_eks_aws_cases.values()
-     ],
+    ],
     ids=[
         *ms_tc.cis_eks_aws_cases.keys()
     ]

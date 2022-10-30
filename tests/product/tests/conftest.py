@@ -58,7 +58,7 @@ def config_node_pre_test(cloudbeat_start_stop):
         '/etc/kubernetes/pki/some_file.txt'
     ]
     # create temporary files:
-    for node in nodes: 
+    for node in nodes:
         if node.metadata.name != cloudbeat_agent.node_name:
             continue
         for temp_file in temp_file_list:
@@ -69,7 +69,7 @@ def config_node_pre_test(cloudbeat_start_stop):
 
     yield k8s_client, api_client, cloudbeat_agent
     # delete temporary files:
-    for node in nodes: 
+    for node in nodes:
         if node.metadata.name != cloudbeat_agent.node_name:
             continue
         for temp_file in temp_file_list:

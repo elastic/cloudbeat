@@ -6,6 +6,7 @@ Each rule has one or more test cases.
 
 from ..eks_test_case import EksAwsServiceCase
 from configuration import eks
+from commonlib.framework.reporting import skip_param_case, SkipReportData
 
 config_1_node_1 = eks.config_1_node_1
 RULE_FAIL_STATUS = 'failed'
@@ -68,16 +69,27 @@ cis_eks_5_4_5_config_1 = {
     '5.4.5 ELB - TCP traffic no encryption evaluation failed': cis_eks_5_4_5_fail
 }
 
-
 cis_eks_all = {
     'test-eks-config-1': {
         **cis_eks_5_1_1,
         # **cis_eks_5_4_3_config_1,
         **cis_eks_5_4_5_config_1,
-        # **cis_eks_2_1_1_config_1 Findings are not revealed TODO: open bug
+        **dict(zip(cis_eks_2_1_1_config_1.keys(),
+                   skip_param_case(skip_list=[*cis_eks_2_1_1_config_1.values()],
+                                   data_to_report=SkipReportData(
+                                       skip_reason='This rule is implemented partially',
+                                       url_title='security-team: #3929',
+                                       url_link='https://github.com/elastic/security-team/issues/3929'
+                                   ))))
     },
     'test-eks-config-2': {
-        # **cis_eks_2_1_1_config_2
+        **dict(zip(cis_eks_2_1_1_config_2.keys(),
+                   skip_param_case(skip_list=[*cis_eks_2_1_1_config_2.values()],
+                                   data_to_report=SkipReportData(
+                                       skip_reason='This rule is implemented partially',
+                                       url_title='security-team: #3929',
+                                       url_link='https://github.com/elastic/security-team/issues/3929'
+                                   ))))
     }
 }
 
