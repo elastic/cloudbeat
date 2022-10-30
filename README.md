@@ -21,18 +21,18 @@
 4. Install and configure [Elastic-Package](https://github.com/elastic/elastic-package)
 5. Set up the local env:
 
-- Install & activate hermit<br />
+- Install & activate hermit
   ```zsh
   curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
   ```
 	```zsh
   . ./bin/activate-hermit
   ```
-- Run setup env recipe<br />
+- Run setup env recipe
   ```zsh
   just setup-env
   ```
-<br />
+
 
 >**Note**
 >This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already. Also consider to review documentation for automatic shell & IDE integration for your setup of choice.
