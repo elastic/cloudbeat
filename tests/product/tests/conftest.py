@@ -140,8 +140,8 @@ def test_env(cloudbeat_start_stop):
 
 def pytest_generate_tests(metafunc):
     # Only parametrize tests which are required for this run.
-    # if metafunc.definition.get_closest_marker(metafunc.config.getoption('markexpr', default=None)) is None:
-    #     return
+    if metafunc.definition.get_closest_marker(metafunc.config.getoption('markexpr', default=None)) is None:
+        return
 
     params = TEST_PARAMETERS.get(metafunc.function)
     if params is None:
