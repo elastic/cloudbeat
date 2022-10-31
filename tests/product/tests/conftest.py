@@ -28,15 +28,15 @@ def data(k8s, api_client, cloudbeat_agent):
     @param cloudbeat_agent: Cloudbeat configuration
     @return:
     """
-    # file_path = Path(__file__).parent / DEPLOY_YML
-    # if k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
-    #                                namespace=cloudbeat_agent.namespace):
-    #     k8s.delete_from_yaml(get_k8s_yaml_objects(file_path=file_path))
-    # k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
-    # time.sleep(5)
+    file_path = Path(__file__).parent / DEPLOY_YML
+    if k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
+                                   namespace=cloudbeat_agent.namespace):
+        k8s.delete_from_yaml(get_k8s_yaml_objects(file_path=file_path))
+    k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
+    time.sleep(5)
     yield k8s, api_client, cloudbeat_agent
-    # k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
-    # k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
+    k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
+    k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
 
 
 @pytest.fixture(scope='module', name='config_node_pre_test')
@@ -121,21 +121,21 @@ def test_env(cloudbeat_start_stop):
     file_path = Path(__file__).parent / KUBE_RULES_ENV_YML
     k8s_resources = get_k8s_yaml_objects(file_path=file_path)
 
-    # try:
-    #     k8s.create_from_yaml(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
-    # except FailToCreateError as conflict:
-    #     print([json.loads(c.body)['message'] for c in conflict.api_exceptions])
-    #
-    # for yml_resource in k8s_resources:
-    #     resource_type, metadata = yml_resource['kind'], yml_resource['metadata']
-    #     relevant_metadata = {k: metadata[k] for k in ('name', 'namespace') if k in metadata}
-    #     k8s.wait_for_resource(resource_type=resource_type,
-    #                           status_list=["RUNNING", "ADDED"],
-    #                           **relevant_metadata)
+    try:
+        k8s.create_from_yaml(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
+    except FailToCreateError as conflict:
+        print([json.loads(c.body)['message'] for c in conflict.api_exceptions])
+
+    for yml_resource in k8s_resources:
+        resource_type, metadata = yml_resource['kind'], yml_resource['metadata']
+        relevant_metadata = {k: metadata[k] for k in ('name', 'namespace') if k in metadata}
+        k8s.wait_for_resource(resource_type=resource_type,
+                              status_list=["RUNNING", "ADDED"],
+                              **relevant_metadata)
 
     yield k8s, api_client, cloudbeat_agent
     # teardown
-    # k8s.delete_from_yaml(yaml_objects_list=k8s_resources)  # stop agent
+    k8s.delete_from_yaml(yaml_objects_list=k8s_resources)  # stop agent
 
 
 def pytest_generate_tests(metafunc):
