@@ -7,10 +7,9 @@ Each rule has one or more test cases.
 from ..eks_test_case import EksAwsServiceCase
 from configuration import eks
 from commonlib.framework.reporting import skip_param_case, SkipReportData
+from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 
 config_1_node_1 = eks.config_1_node_1
-RULE_FAIL_STATUS = 'failed'
-RULE_PASS_STATUS = 'passed'
 
 cis_eks_2_1_1_fail = EksAwsServiceCase(
     rule_tag='CIS 2.1.1',

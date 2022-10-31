@@ -5,12 +5,11 @@ Each rule has one or more test cases.
 """
 
 from ..eks_test_case import EksTestCase
+from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 from configuration import eks
 
 config_1_node_1 = eks.config_1_node_1
 config_1_node_2 = eks.config_1_node_2
-RULE_FAIL_STATUS = 'failed'
-RULE_PASS_STATUS = 'passed'
 
 cis_eks_3_1_1_pass = EksTestCase(
     rule_tag='CIS 3.1.1',

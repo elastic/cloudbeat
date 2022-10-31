@@ -5,10 +5,9 @@ Each rule has one or more test cases.
 """
 
 from ..eks_test_case import EksKubeObjectCase
+from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 from configuration import eks
 
-RULE_FAIL_STATUS = 'failed'
-RULE_PASS_STATUS = 'passed'
 
 cis_eks_4_2_1_pass = EksKubeObjectCase(
     rule_tag='CIS 4.2.1',

@@ -112,7 +112,7 @@ class ElasticWrapper:
                     {
                         "range": {
                             "@timestamp": {
-                                "gte": "now-5h"  # TODO: replace by 30s
+                                "gte": "now-30m"
                             }
                         }
                     }
