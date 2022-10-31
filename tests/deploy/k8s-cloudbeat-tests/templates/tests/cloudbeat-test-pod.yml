@@ -20,6 +20,11 @@ spec:
     envFrom:
       - configMapRef:
           name: {{ .Values.serviceAccount.name }}-configmap
+    env:
+      - name: NODE_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName
     volumeMounts:
       - name: cloudbeat-test-pv-storage
         mountPath: /usr/src/app/tests/report
@@ -40,6 +45,14 @@ spec:
         readOnly: false
 
   restartPolicy: Never
+  nodeName: kind-multi-control-plane
+  tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/control-plane
+    operator: "Exists"
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
+    operator: "Exists"
   volumes:
     - name: cloudbeat-test-pv-storage
       hostPath:

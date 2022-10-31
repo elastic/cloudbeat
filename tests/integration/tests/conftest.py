@@ -2,6 +2,7 @@
 Integration tests setup configurations and fixtures
 """
 from pathlib import Path
+import time
 import pytest
 from commonlib.io_utils import get_k8s_yaml_objects
 from commonlib.kubernetes import ApiException
@@ -43,6 +44,11 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
                           name=cloudbeat_agent.name,
                           status_list=['ADDED', 'MODIFIED'],
                           namespace=cloudbeat_agent.namespace)
+    # adding sleep here to workaround a flakiness of the test
+    # some of them are runinng in multi cluster environment
+    # the k8s.wait_for_resoruce waits for only the first pod it founds
+    # see more details https://github.com/elastic/cloudbeat/pull/422
+    time.sleep(10)
     yield k8s, api_client, cloudbeat_agent
     k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
     k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent

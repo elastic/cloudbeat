@@ -74,6 +74,17 @@ func errorBeaterCreator(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	return nil, errors.New("beater creation error")
 }
 
+func errorReloadBeaterCreator() func(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+	shouldReturnError := false
+	return func(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+		if shouldReturnError {
+			return errorBeaterCreator(b, cfg)
+		}
+		shouldReturnError = true
+		return beaterMockCreator(b, cfg)
+	}
+}
+
 func (m *errorBeaterMock) Run(b *beat.Beat) error {
 	time.Sleep(10 * time.Millisecond)
 	return errors.New("some error")
@@ -291,18 +302,20 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			s.NoError(err)
 
 			go func(ic incomingConfigs) {
-				defer close(mocks.reloader.ch)
-
 				for _, c := range ic {
 					time.Sleep(c.after)
 					mocks.reloader.ch <- c.config
 				}
-
-				time.Sleep(100 * time.Millisecond)
 			}(tcase.configs)
 
+			go func() {
+				time.Sleep(100 * time.Millisecond)
+				mocks.cancel()
+				close(mocks.reloader.ch)
+			}()
+
 			err = sut.run()
-			s.Error(err)
+			s.NoError(err)
 			beater, ok := sut.beater.(*beaterMock)
 			s.True(ok)
 			s.Equal(tcase.expected, beater.cfg)
@@ -310,6 +323,30 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			sut.wg.Wait()
 		})
 	}
+}
+
+func (s *LauncherTestSuite) TestErrorWaitForUpdates() {
+	configErr := config.MustNewConfigFrom(mapstr.M{
+		"error": "true",
+	})
+
+	mocks := s.InitMocks()
+	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, errorReloadBeaterCreator(), config.NewConfig())
+	s.NoError(err)
+
+	go func() {
+		time.Sleep(40 * time.Millisecond)
+		mocks.reloader.ch <- configErr
+	}()
+
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		mocks.cancel()
+		close(mocks.reloader.ch)
+	}()
+
+	err = sut.run()
+	s.Error(err)
 }
 
 func (s *LauncherTestSuite) TestStarterValidator() {

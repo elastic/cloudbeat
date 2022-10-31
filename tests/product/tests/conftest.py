@@ -51,26 +51,32 @@ def config_node_pre_test(cloudbeat_start_stop):
     """
     k8s_client, api_client, cloudbeat_agent = cloudbeat_start_stop
 
-    node = k8s_client.get_cluster_nodes()[0]
+    nodes = k8s_client.get_cluster_nodes()
 
     temp_file_list = [
         '/var/lib/etcd/some_file.txt',
         '/etc/kubernetes/pki/some_file.txt'
     ]
     # create temporary files:
-    for temp_file in temp_file_list:
-        api_client.exec_command(container_name=node.metadata.name,
+    for node in nodes: 
+        if node.metadata.name != cloudbeat_agent.node_name:
+            continue
+        for temp_file in temp_file_list:
+            api_client.exec_command(container_name=node.metadata.name,
                                 command='touch',
                                 param_value=temp_file,
                                 resource='')
 
     yield k8s_client, api_client, cloudbeat_agent
     # delete temporary files:
-    for temp_file in temp_file_list:
-        api_client.exec_command(container_name=node.metadata.name,
-                                command='unlink',
-                                param_value=temp_file,
-                                resource='')
+    for node in nodes: 
+        if node.metadata.name != cloudbeat_agent.node_name:
+            continue
+        for temp_file in temp_file_list:
+            api_client.exec_command(container_name=node.metadata.name,
+                                    command='unlink',
+                                    param_value=temp_file,
+                                    resource='')
 
 
 @pytest.fixture(scope='module', name='clean_test_env')
