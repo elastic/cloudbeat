@@ -49,13 +49,25 @@ jobs:
         run: |
           GOOS=linux go test -coverprofile=covprofile ./...
 
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-file
+          path: covprofile
+
   coverage:
     name: Coverage report
+    needs: unit_tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Install goveralls
         run: go install github.com/mattn/goveralls@latest
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-file
 
       - name: Send coverage
         env:
