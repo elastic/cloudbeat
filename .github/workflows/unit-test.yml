@@ -61,6 +61,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
       - name: Install goveralls
         run: go install github.com/mattn/goveralls@latest
 
