@@ -18,7 +18,7 @@ spec:
       containers:
         - name: cloudbeat
           image: cloudbeat:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: ES_HOST
               value: "host.docker.internal:9200"

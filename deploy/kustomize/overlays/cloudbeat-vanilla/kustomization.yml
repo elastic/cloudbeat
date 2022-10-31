@@ -6,6 +6,11 @@ namespace: kube-system
 resources:
   - ../../base
 
+images:
+  - name: cloudbeat:latest
+    newName: localhost:5001/cloudbeat
+    newTag: latest
+
 patches:
   - path: ./patches/patch-add-ssl-certs.yaml
     target:

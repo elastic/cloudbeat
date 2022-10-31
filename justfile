@@ -5,7 +5,7 @@ kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 
 create-kind-cluster kind='kind-multi':
-  kind create cluster --config deploy/k8s/kind/{{kind}}.yml --wait 30s
+  ./scripts/create_local_cluster.sh {{kind}}
 
 setup-env: create-kind-cluster elastic-stack-connect-kind
 
@@ -24,7 +24,9 @@ build-replace-cloudbeat: build-binary
   ./scripts/remote_replace_cloudbeat.sh
 
 load-cloudbeat-image kind='kind-multi':
-  kind load docker-image cloudbeat:latest --name {{kind}}
+  # kind load docker-image cloudbeat:latest --name {{kind}} # 2 nodes, 1m 24s
+  docker tag cloudbeat:latest localhost:5001/cloudbeat:latest  
+  docker push localhost:5001/cloudbeat:latest  # 14s, first time, time not including the pull from nodes, docker cache on push and on pull, pull from node 32 s, first time
 
 build-opa-bundle:
   mage BuildOpaBundle
@@ -106,7 +108,9 @@ build-pytest-docker:
   cd tests; docker build -t {{TESTS_RELEASE}} .
 
 load-pytest-kind kind='kind-multi': build-pytest-docker
-  kind load docker-image {{TESTS_RELEASE}}:latest --name {{kind}}
+  # kind load docker-image {{TESTS_RELEASE}}:latest --name {{kind}}
+  docker tag {{TESTS_RELEASE}}:latest localhost:5001/{{TESTS_RELEASE}}:latest
+  docker push  localhost:5001/{{TESTS_RELEASE}}:latest
 
 load-pytest-eks:
   aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/z7e1r9l0

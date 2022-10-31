@@ -13,3 +13,7 @@ nodes:
   extraMounts:
   - hostPath: ./tests/allure/results
     containerPath: /tmp/data
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5001"]
+    endpoint = ["http://kind-registry:5000"]

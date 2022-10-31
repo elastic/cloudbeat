@@ -23,5 +23,5 @@ secretGenerator:
 
 images:
   - name: docker.elastic.co/beats/elastic-agent:8.5.0-SNAPSHOT
-    newName: elastic-agent
-    newTag: 8.5.0-SNAPSHOT
+    newName: localhost:5001/elastic-agent
+    newTag: 8.6.0-SNAPSHOT
