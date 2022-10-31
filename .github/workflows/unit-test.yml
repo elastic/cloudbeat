@@ -61,6 +61,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
