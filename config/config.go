@@ -77,6 +77,10 @@ var DefaultConfig = Stream{
 }
 
 func New(cfg *config.C) (Config, error) {
+	// work with v1 cloudbeat.yml in dev mod
+	if cfg.HasField("streams") {
+		return newStandaloneConfig(cfg)
+	}
 	c := DefaultConfig
 	if err := cfg.Unpack(&c); err != nil {
 		return Config{}, err
@@ -97,6 +101,22 @@ func Datastream(namespace string, indexPrefix string) string {
 		namespace = DefaultNamespace
 	}
 	return indexPrefix + "-" + namespace
+}
+
+// stanalone config is used for development flows
+// see an example deploy/kustomize/overlays/cloudbeat-vanilla/cloudbeat.yml
+func newStandaloneConfig(cfg *config.C) (Config, error) {
+	c := struct {
+		Period  time.Duration
+		Streams []Stream
+	}{4 * time.Hour, []Stream{}}
+	if err := cfg.Unpack(&c); err != nil {
+		return Config{}, err
+	}
+	return Config{
+		Type:   InputTypeVanillaK8s,
+		Stream: c.Streams[0],
+	}, nil
 }
 
 type AwsConfigProvider interface {
