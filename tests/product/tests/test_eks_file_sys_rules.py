@@ -27,31 +27,6 @@ def test_eks_file_system_configuration(elastic_client,
     @return: None - Test Pass / Fail result is generated.
     """
 
-    # must_list = [
-    #     {
-    #       "match": {
-    #         "host.name": node_hostname
-    #       }
-    #     },
-    #     {
-    #       "match": {
-    #         "rule.tags": rule_tag
-    #       }
-    #     }
-    #   ]
-    # query, sort = elastic_client.build_es_must_match_query(must_query_list=must_list)
-    #
-    # current_result = elastic_client.get_index_data(index_name=elastic_client.index,
-    #                                                query=query,
-    #                                                sort=sort,
-    #                                                size=10)
-    # doc_source = elastic_client.get_doc_source(data=current_result)
-    # assert current_result is not None, f"No evaluation for rule {rule_tag} could be found"
-    # # assert len(current_result) == 1, f"Results count is {len(current_result)} instead of 1"
-    # evaluation = doc_source['result']['evaluation']
-    # assert evaluation == expected, f"Rule {rule_tag} verification failed,"\
-    #                                f"expected: {expected}, got: {evaluation}"
-
     def identifier(eval_resource):
         try:
             return eval_resource.host.name == node_hostname
