@@ -47,7 +47,20 @@ jobs:
 
       - name: Unit-Test Cloudbeat
         run: |
-          GOOS=linux go test ./...
+          GOOS=linux go test -coverprofile=covprofile ./...
+
+  coverage:
+    name: Coverage report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Install goveralls
+        run: go install github.com/mattn/goveralls@latest
+
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -coverprofile=covprofile -service=github
 
   manifest_tests:
     name: Manifest Tests
