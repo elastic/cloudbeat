@@ -7,10 +7,7 @@ cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 create-kind-cluster kind='kind-multi':
   kind create cluster --config deploy/k8s/kind/{{kind}}.yml --wait 30s
 
-install-kind:
-  brew install kind
-
-setup-env: install-kind create-kind-cluster elastic-stack-connect-kind
+setup-env: create-kind-cluster elastic-stack-connect-kind
 
 # Vanilla
 
@@ -136,7 +133,7 @@ delete-local-helm-cluster kind='kind-multi':
 cleanup-create-local-helm-cluster target range='..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
   just deploy-tests-helm tests/deploy/values/local-host.yml {{target}} {{range}}
 
-# TODO(DaveSys911): Move scripts out of JUSTFILE: https://github.com/elastic/security-team/issues/4291
+
 test-pod-status:
   #!/usr/bin/env sh
 
