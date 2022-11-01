@@ -43,8 +43,8 @@ def test_agent_pods_running(fixture_data):
     assert len(
         fixture_data[0]) > 0, "There are no elastic-agent pod instances running in the cluster"
     # Verify that each pod is in running state
-    assert all(pod.status.phase ==
-               "Running" for pod in fixture_data[0]), "Not all pods are running"
+    assert all((pod.status.phase == "Running" for pod in fixture_data[0]),
+               "Not all pods are running")
 
 
 @pytest.mark.post_merge_agent

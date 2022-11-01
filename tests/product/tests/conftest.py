@@ -82,9 +82,9 @@ limits:
             continue
         for temp_file in temp_file_list:
             api_client.exec_command(container_name=node.metadata.name,
-                                command='touch',
-                                param_value=temp_file,
-                                resource='')
+                                    command='touch',
+                                    param_value=temp_file,
+                                    resource='')
 
     # create config files:
     for config_file, contents in config_files.items():
