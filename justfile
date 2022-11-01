@@ -90,7 +90,7 @@ POD_STATUS_PENDING := 'Pending'
 POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
-VERSION := '$(make -s get-version)-SNAPSHOT'
+VERSION := '8.5.0-SNAPSHOT'
 NAMESPACE := 'kube-system'
 
 
