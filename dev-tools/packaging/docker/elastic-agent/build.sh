@@ -6,7 +6,8 @@
 
 set -eu
 
-REPO_ROOT=$(cd $(dirname $(realpath "$0"))/../../../.. && pwd)
+# REPO_ROOT=$(cd $(dirname $(realpath "$0"))/../../../.. && pwd)
+ REPO_ROOT=$(realpath "$(dirname "$(realpath dev-tools/packaging/docker/elastic-agent/build.sh)")"/../../../..)
 
 DEFAULT_IMAGE_TAG=$(curl -X GET https://snapshots.elastic.co/latest/master.json | jq -r '.build_id')-SNAPSHOT
 BASE_IMAGE="${BASE_IMAGE:-docker.elastic.co/beats/elastic-agent:$DEFAULT_IMAGE_TAG}"
@@ -18,7 +19,6 @@ docker pull $BASE_IMAGE
 STACK_VERSION=$(docker inspect -f '{{index .Config.Labels "org.label-schema.version"}}' $BASE_IMAGE)
 VCS_REF=$(docker inspect -f '{{index .Config.Labels "org.label-schema.vcs-ref"}}' $BASE_IMAGE)
 
-# make -C $REPO_ROOT build/apm-server-linux-$GOARCH
 GOOS=linux GOARCH=amd64 mage -d $REPO_ROOT build
 
 docker build \
@@ -27,4 +27,5 @@ docker build \
 	--build-arg STACK_VERSION=$STACK_VERSION \
 	--build-arg VCS_REF_SHORT=${VCS_REF:0:6} \
 	--platform linux/$GOARCH \
+  --output type=tar,dest=/tmp/elastic-agent-$CONTAINER_SUFFIX.tar \
 	$* $REPO_ROOT

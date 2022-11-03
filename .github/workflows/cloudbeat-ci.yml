@@ -72,6 +72,10 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new
           outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
+      - name: Build elastic-agent Docker
+        run: |
+          make build_elastic_agent_docker_image
+
       - name: Cache docker images
         uses: actions/cache@v2
         with:
@@ -142,7 +146,13 @@ jobs:
     timeout-minutes: 55
     strategy:
       matrix:
+        values_files: [tests/deploy/values/ci.yml]
+        exclude:
+          - test-target: post_merge_agent
+            values_files: [tests/deploy/values/ci.yml]
         include:
+          - test-target: post_merge_agent
+            values_files: [tests/deploy/values/ci-sa-agent.yml]
           - test-target: pre_merge
           - test-target: file_system_rules
             range: '0..5'
@@ -270,7 +280,7 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm tests/deploy/values/ci.yml ${{ matrix.test-target }} ${{ matrix.range }}
+          just deploy-tests-helm ${{ matrix.values_file }} ${{ matrix.test-target }} ${{ matrix.range }}
 
       - name: Run Tests
         id: run_tests
