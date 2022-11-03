@@ -147,9 +147,6 @@ jobs:
     strategy:
       matrix:
         values_files: [tests/deploy/values/ci.yml]
-        exclude:
-          - test-target: post_merge_agent
-            values_files: [tests/deploy/values/ci.yml]
         include:
           - test-target: post_merge_agent
             values_files: [tests/deploy/values/ci-sa-agent.yml]
@@ -252,6 +249,9 @@ jobs:
             range: '16..20'
           - test-target: process_kubelet_rules
             range: '20..'
+        exclude:
+          - test-target: post_merge_agent
+            values_files: [tests/deploy/values/ci.yml]
       fail-fast: false
     steps:
       - name: Check out the repo
