@@ -104,17 +104,12 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - uses: azure/setup-helm@v1
-        id: install
-
-      - uses: extractions/setup-just@v1
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.2.0
-        with:
-          config: deploy/k8s/kind/kind-config.yml
-          cluster_name: kind-mono
-
+        run: |
+          just create-kind-cluster
       - name: Cache docker images
         uses: actions/cache@v2
         with:
