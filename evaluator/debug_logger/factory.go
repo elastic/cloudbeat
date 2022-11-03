@@ -27,7 +27,6 @@ import (
 type Factory struct{}
 
 func (Factory) New(m *plugins.Manager, conf interface{}) plugins.Plugin {
-
 	m.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 
 	return &plugin{
