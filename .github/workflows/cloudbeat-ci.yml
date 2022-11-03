@@ -146,6 +146,7 @@ jobs:
     timeout-minutes: 55
     strategy:
       matrix:
+        test-target: [post_merge_agent]
         values_files: [tests/deploy/values/ci.yml]
         include:
           - test-target: post_merge_agent
