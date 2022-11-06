@@ -156,9 +156,8 @@ jobs:
     timeout-minutes: 55
     strategy:
       matrix:
-        test-target: [post_merge_agent]
-        values_files: [tests/deploy/values/ci.yml]
         include:
+          - values_files: tests/deploy/values/ci.yml
           - test-target: post_merge_agent
             values_files: [tests/deploy/values/ci-sa-agent.yml]
           - test-target: pre_merge
@@ -260,9 +259,6 @@ jobs:
             range: '16..20'
           - test-target: process_kubelet_rules
             range: '20..'
-        exclude:
-          - test-target: post_merge_agent
-            values_files: [tests/deploy/values/ci.yml]
       fail-fast: false
     steps:
       - name: Check out the repo
