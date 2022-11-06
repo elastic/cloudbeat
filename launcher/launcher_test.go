@@ -319,7 +319,6 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			beater, ok := sut.beater.(*beaterMock)
 			s.True(ok)
 			s.Equal(tcase.expected, beater.cfg)
-			sut.wg.Wait()
 		})
 	}
 }

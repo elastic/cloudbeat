@@ -104,24 +104,24 @@ func (l *launcher) Run(b *beat.Beat) error {
 }
 
 func (l *launcher) run() error {
-	l.log.Info("Beater launcher is running")
+	l.log.Info("Launcher is running")
 	err := l.runBeater()
 	if err != nil {
-		l.log.Errorf("Could not run Beater: %v", err)
+		l.log.Errorf("Launcher could not run Beater: %v", err)
 		return err
 	}
 
 	err = l.waitForUpdates()
 	if err != nil {
-		l.log.Errorf("Beater launcher has stopped: %v", err)
+		l.log.Errorf("Launcher has stopped: %v", err)
 	} else {
-		l.log.Info("Beater launcher was shutted down gracefully")
+		l.log.Info("Launcher was shutted down gracefully")
 	}
 	return err
 }
 
 func (l *launcher) Stop() {
-	l.log.Info("Beater launcher is about to shut down gracefully")
+	l.log.Info("Launcher is about to shut down gracefully")
 	l.cancel()
 }
 
