@@ -154,7 +154,6 @@ jobs:
     needs: [Build]
     runs-on: ubuntu-latest
     timeout-minutes: 55
-    env:
     strategy:
       matrix:
         include:
