@@ -15,20 +15,35 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cmd
+package version
 
 import (
-	"github.com/elastic/beats/v7/libbeat/cmd"
-	"github.com/elastic/cloudbeat/beater"
-	"github.com/elastic/cloudbeat/version"
-
-	"github.com/elastic/beats/v7/libbeat/cmd/instance"
-
-	_ "github.com/elastic/beats/v7/x-pack/libbeat/include"
+	"runtime/debug"
 )
 
-// Name of this beat
-var Name = "cloudbeat"
+var (
+	policyVersion string
+)
 
-// RootCmd to handle beats cli
-var RootCmd = cmd.GenRootCmdWithSettings(beater.New, instance.Settings{Name: Name, Version: version.CloudbeatSemanticVersion()})
+func init() {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, dep := range info.Deps {
+			if dep.Path == "github.com/elastic/csp-security-policies" {
+				policyVersion = dep.Version
+				break
+			}
+		}
+	}
+}
+
+// PolicySemanticVersion returns the current cloudbeat version.
+func PolicySemanticVersion() string {
+	return policyVersion
+}
+
+// PolicyVersion returns cloudbeat version info used for the build.
+func PolicyVersion() Version {
+	return Version{
+		SemanticVersion: PolicySemanticVersion(),
+	}
+}

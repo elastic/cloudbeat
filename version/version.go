@@ -15,7 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cmd
+package version
 
 // name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
 const defaultBeatVersion = "8.6.0"
+
+// Version represents version information for a package
+type Version struct {
+	SemanticVersion string `json:"semantic_version,omitempty"`
+	CommitHash      string `json:"commit_sha,omitempty"`
+	CommitTime      string `json:"commit_time,omitempty"` // time.Time is not nullable
+}

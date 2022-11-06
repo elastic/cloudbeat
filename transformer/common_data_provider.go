@@ -19,16 +19,14 @@ package transformer
 
 import (
 	"context"
-
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
-
-	"github.com/gofrs/uuid"
-
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/gofrs/uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -36,7 +34,7 @@ const (
 	namespace = "kube-system"
 )
 
-var uuid_namespace uuid.UUID = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
+var uuidNamespace = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
 
 func NewCommonDataProvider(log *logp.Logger, cfg config.Config) (CommonDataProvider, error) {
 	KubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
@@ -52,6 +50,7 @@ func NewCommonDataProvider(log *logp.Logger, cfg config.Config) (CommonDataProvi
 	}, nil
 }
 
+// FetchCommonData fetches cluster and node id
 // Note: As of today Kubernetes is the only environment supported by CommonDataProvider
 func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInterface, error) {
 	cm := CommonData{}
@@ -61,12 +60,20 @@ func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInte
 		return CommonData{}, err
 	}
 	cm.clusterId = ClusterId
+
 	NodeId, err := c.getNodeId(ctx)
 	if err != nil {
 		c.log.Errorf("fetchCommonData error in getNodeId: %v", err)
 		return CommonData{}, err
 	}
 	cm.nodeId = NodeId
+
+	versionInfo, err := c.FetchVersionInfo()
+	if err != nil {
+		c.log.Errorf("fetchCommonData error in FetchServerVersion: %v", err)
+		return CommonData{}, err
+	}
+	cm.versionInfo = versionInfo
 	return cm, nil
 }
 
@@ -111,12 +118,35 @@ func (c CommonDataProvider) getNodeName() (string, error) {
 	return nName, nil
 }
 
+// FetchServerVersion returns the version of the Kubernetes server
+func (c CommonDataProvider) FetchServerVersion() (version.Version, error) {
+	serverVersion, err := c.kubeClient.Discovery().ServerVersion()
+	if err != nil {
+		return version.Version{}, err
+	}
+	return version.Version{
+		SemanticVersion: serverVersion.Major + "." + serverVersion.Minor,
+	}, nil
+}
+
+func (c CommonDataProvider) FetchVersionInfo() (fetching.VersionInfo, error) {
+	serverVersion, err := c.FetchServerVersion()
+	if err != nil {
+		return fetching.VersionInfo{}, err
+	}
+	return fetching.VersionInfo{
+		Cloudbeat:  version.CloudbeatVersion(),
+		Policy:     version.PolicyVersion(),
+		Kubernetes: serverVersion,
+	}, nil
+}
+
 func (cd CommonData) GetResourceId(metadata fetching.ResourceMetadata) string {
 	switch metadata.Type {
 	case fetchers.ProcessResourceType, fetchers.FSResourceType:
-		return uuid.NewV5(uuid_namespace, cd.clusterId+cd.nodeId+metadata.ID).String()
+		return uuid.NewV5(uuidNamespace, cd.clusterId+cd.nodeId+metadata.ID).String()
 	case fetching.CloudContainerMgmt, fetching.CloudIdentity, fetching.CloudLoadBalancer, fetching.CloudContainerRegistry:
-		return uuid.NewV5(uuid_namespace, cd.clusterId+metadata.ID).String()
+		return uuid.NewV5(uuidNamespace, cd.clusterId+metadata.ID).String()
 	default:
 		return metadata.ID
 	}
@@ -124,4 +154,8 @@ func (cd CommonData) GetResourceId(metadata fetching.ResourceMetadata) string {
 
 func (cd CommonData) GetData() CommonData {
 	return cd
+}
+
+func (cd CommonData) GetVersionInfo() fetching.VersionInfo {
+	return cd.versionInfo
 }
