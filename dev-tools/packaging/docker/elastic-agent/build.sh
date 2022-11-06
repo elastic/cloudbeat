@@ -19,13 +19,13 @@ docker pull $BASE_IMAGE
 STACK_VERSION=$(docker inspect -f '{{index .Config.Labels "org.label-schema.version"}}' $BASE_IMAGE)
 VCS_REF=$(docker inspect -f '{{index .Config.Labels "org.label-schema.vcs-ref"}}' $BASE_IMAGE)
 
-GOOS=linux GOARCH=amd64 mage -d $REPO_ROOT build
+GOOS=linux GOARCH=$GOARCH mage -d "$REPO_ROOT" build
 
-docker build \
+docker buildx build \
 	-f $REPO_ROOT/dev-tools/packaging/docker/elastic-agent/Dockerfile \
 	--build-arg ELASTIC_AGENT_IMAGE=$BASE_IMAGE \
 	--build-arg STACK_VERSION=$STACK_VERSION \
 	--build-arg VCS_REF_SHORT=${VCS_REF:0:6} \
 	--platform linux/$GOARCH \
-  --output type=tar,dest=/tmp/elastic-agent-$CONTAINER_SUFFIX.tar \
+  --output type=docker,dest=/tmp/elastic-agent-$CONTAINER_SUFFIX.tar \
 	$* $REPO_ROOT

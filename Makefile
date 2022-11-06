@@ -9,7 +9,7 @@ export DOCKER_BUILDKIT=1
 # Tag custom images with the username and current timestamp.
 # The timestamp must be included to force images to be pulled.
 USER_NAME?=${USER}
-CUSTOM_IMAGE_TAG?=${IMAGE_TAG}-${USER_NAME}-$(shell date +%s)
+CI_ELASTIC_AGENT_DOCKER_TAG?=${CLOUDBEAT_VERSION}-SNAPSHOT
 CI_ELASTIC_AGENT_DOCKER_IMAGE?=704479110758.dkr.ecr.eu-west-1.amazonaws.com/elastic-agent
 
 # Ensure the Go version in .go_version is installed and used.
@@ -92,12 +92,12 @@ PackageAgent: $(MAGE)
 # unless overridden.
 .PHONY: build_elastic_agent_docker_image
 elastic_agent_docker_image: build_elastic_agent_docker_image
-	docker push "${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CUSTOM_IMAGE_TAG}"
+	docker push "${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CI_ELASTIC_AGENT_DOCKER_TAG}"
 
 build_elastic_agent_docker_image:
 	@env BASE_IMAGE=docker.elastic.co/beats/elastic-agent:${IMAGE_TAG} GOARCH=amd64 GOOS=linux  \
 		bash dev-tools/packaging/docker/elastic-agent/build.sh \
-		     -t ${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CUSTOM_IMAGE_TAG}
+		     -t ${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CI_ELASTIC_AGENT_DOCKER_TAG}
 
 ##############################################################################
 # Checks/tests.
