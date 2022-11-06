@@ -150,17 +150,19 @@ jobs:
   #       shell: bash
 
   Test_Matrix:
-    name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
+    name: ${{ matrix.test-target }}-${{ matrix.range }}
     needs: [Build]
     runs-on: ubuntu-latest
     timeout-minutes: 55
+    env:
     strategy:
       matrix:
         include:
-          - values_files: tests/deploy/values/ci.yml
           - test-target: post_merge_agent
-            values_files: [tests/deploy/values/ci-sa-agent.yml]
+            range: ''
+            values_files: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
+            range: ''
           - test-target: file_system_rules
             range: '0..5'
           - test-target: file_system_rules
@@ -287,7 +289,7 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm ${{ matrix.values_file }} ${{ matrix.test-target }} ${{ matrix.range }}
+          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.range }} ${{ matrix.values_file }}
 
       - name: Run Tests
         id: run_tests
