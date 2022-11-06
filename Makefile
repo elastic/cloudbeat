@@ -2,13 +2,12 @@
 # Variables used for various build targets.
 ##############################################################################
 
-BUILD_ID=$(shell curl -X GET "https://artifacts-api.elastic.co/v1/versions/${CLOUDBEAT_VERSION}-SNAPSHOT" | jq -r '.version.builds[0].build_id')
-IMAGE_TAG?=${BUILD_ID}-SNAPSHOT
-export DOCKER_BUILDKIT=1
+# BUILD_ID=$(shell curl -X GET "https://artifacts-api.elastic.co/v1/versions/${CLOUDBEAT_VERSION}-SNAPSHOT" | jq -r '.version.builds[0].build_id')
+# IMAGE_TAG?=${CLOUDBEAT_VERSION}-SNAPSHOT
+# export DOCKER_BUILDKIT=1
 
 # Tag custom images with the username and current timestamp.
 # The timestamp must be included to force images to be pulled.
-USER_NAME?=${USER}
 CI_ELASTIC_AGENT_DOCKER_TAG?=${CLOUDBEAT_VERSION}-SNAPSHOT
 CI_ELASTIC_AGENT_DOCKER_IMAGE?=704479110758.dkr.ecr.eu-west-1.amazonaws.com/elastic-agent
 
@@ -95,7 +94,7 @@ elastic_agent_docker_image: build_elastic_agent_docker_image
 	docker push "${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CI_ELASTIC_AGENT_DOCKER_TAG}"
 
 build_elastic_agent_docker_image:
-	@env BASE_IMAGE=docker.elastic.co/beats/elastic-agent:${IMAGE_TAG} GOARCH=amd64 GOOS=linux  \
+	@env BASE_IMAGE=docker.elastic.co/beats/elastic-agent:${CI_ELASTIC_AGENT_DOCKER_TAG} GOARCH=amd64 GOOS=linux  \
 		bash dev-tools/packaging/docker/elastic-agent/build.sh \
 		     -t ${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CI_ELASTIC_AGENT_DOCKER_TAG}
 
@@ -148,7 +147,7 @@ endif
 ## get-version : Get cloudbeat version
 .PHONY: get-version
 get-version:
-	echo $(CLOUDBEAT_VERSION)
+	@echo $(CLOUDBEAT_VERSION)
 
 ##############################################################################
 # Documentation.
