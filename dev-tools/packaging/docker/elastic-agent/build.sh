@@ -20,8 +20,6 @@ docker pull $BASE_IMAGE
 STACK_VERSION=$(docker inspect -f '{{index .Config.Labels "org.label-schema.version"}}' $BASE_IMAGE)
 VCS_REF=$(docker inspect -f '{{index .Config.Labels "org.label-schema.vcs-ref"}}' $BASE_IMAGE)
 
-# GOOS=linux GOARCH=$GOARCH mage -d "$REPO_ROOT" build
-
 docker buildx build \
 	-f $REPO_ROOT/dev-tools/packaging/docker/elastic-agent/Dockerfile \
 	--build-arg ELASTIC_AGENT_IMAGE=$BASE_IMAGE \

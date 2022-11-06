@@ -1,13 +1,6 @@
 ##############################################################################
 # Variables used for various build targets.
 ##############################################################################
-
-# BUILD_ID=$(shell curl -X GET "https://artifacts-api.elastic.co/v1/versions/${CLOUDBEAT_VERSION}-SNAPSHOT" | jq -r '.version.builds[0].build_id')
-# IMAGE_TAG?=${CLOUDBEAT_VERSION}-SNAPSHOT
-# export DOCKER_BUILDKIT=1
-
-# Tag custom images with the username and current timestamp.
-# The timestamp must be included to force images to be pulled.
 CI_ELASTIC_AGENT_DOCKER_TAG?=${CLOUDBEAT_VERSION}-SNAPSHOT
 CI_ELASTIC_AGENT_DOCKER_IMAGE?=704479110758.dkr.ecr.eu-west-1.amazonaws.com/elastic-agent
 
