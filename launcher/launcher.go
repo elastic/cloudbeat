@@ -39,6 +39,8 @@ const (
 
 type launcher struct {
 	wg        sync.WaitGroup
+	cfgmtx    sync.Mutex
+	runmtx    sync.Mutex
 	beater    beat.Beater
 	beaterErr chan error
 	reloader  Reloader
@@ -63,6 +65,8 @@ func New(ctx context.Context, log *logp.Logger, reloader Reloader, validator Val
 	cctx, cancel := context.WithCancel(ctx)
 	s := &launcher{
 		wg:        sync.WaitGroup{},
+		cfgmtx:    sync.Mutex{},
+		runmtx:    sync.Mutex{},
 		ctx:       cctx,
 		cancel:    cancel,
 		log:       log,
@@ -126,6 +130,9 @@ func (l *launcher) Stop() {
 }
 
 func (l *launcher) runBeater() error {
+	l.runmtx.Lock()
+	defer l.runmtx.Unlock()
+
 	l.log.Info("Launcher is creating a new Beater")
 	beater, err := l.creator(l.beat, l.latest)
 	if err != nil {
@@ -189,6 +196,9 @@ func (l *launcher) waitForUpdates() error {
 // configUpdate applies incoming reconfiguration from the Fleet server to the beater config,
 // and recreate the beater with the new values.
 func (l *launcher) configUpdate(update *config.C) error {
+	l.cfgmtx.Lock()
+	defer l.cfgmtx.Unlock()
+
 	l.log.Infof("Got config update from fleet with %d keys", len(update.FlattenedKeys()))
 
 	err := l.mergeConfig(update)
