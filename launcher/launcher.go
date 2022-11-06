@@ -44,6 +44,7 @@ type launcher struct {
 	reloader  Reloader
 	log       *logp.Logger
 	ctx       context.Context
+	cancel    context.CancelFunc
 	latest    *config.C
 	beat      *beat.Beat
 	creator   beat.Creator
@@ -59,9 +60,11 @@ type Validator interface {
 }
 
 func New(ctx context.Context, log *logp.Logger, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
+	cctx, cancel := context.WithCancel(ctx)
 	s := &launcher{
 		wg:        sync.WaitGroup{},
-		ctx:       ctx,
+		ctx:       cctx,
+		cancel:    cancel,
 		log:       log,
 		reloader:  reloader,
 		validator: validator,
@@ -110,7 +113,7 @@ func (l *launcher) run() error {
 
 	err = l.waitForUpdates()
 	if err != nil {
-		l.log.Errorf("Beater launcher is stopping: %v", err)
+		l.log.Errorf("Beater launcher has stopped: %v", err)
 	} else {
 		l.log.Info("Beater launcher was shutted down gracefully")
 	}
@@ -119,7 +122,7 @@ func (l *launcher) run() error {
 
 func (l *launcher) Stop() {
 	l.log.Info("Beater launcher is about to shut down gracefully")
-	l.stopBeater()
+	l.cancel()
 }
 
 func (l *launcher) runBeater() error {
@@ -153,6 +156,7 @@ func (l *launcher) stopBeater() {
 
 	// By waiting to the wait group, it make sure that the old beater has really stopped
 	l.wg.Wait()
+	l.log.Info("Launcher shutted the Beater down gracefully")
 }
 
 func (l *launcher) waitForUpdates() error {

@@ -61,7 +61,7 @@ type cloudbeat struct {
 }
 
 func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
-	log := logp.NewLogger("starter")
+	log := logp.NewLogger("launcher")
 	ctx := context.Background()
 	reloader := launcher.NewListener(ctx, log)
 	validator := &validator{}
@@ -75,8 +75,12 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	return s, nil
 }
 
+func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+	return newCloudbeat(b, cfg)
+}
+
 // NewCloudbeat creates an instance of cloudbeat.
-func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	log := logp.NewLogger("cloudbeat")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -229,13 +233,15 @@ func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.Resource
 
 // Stop stops cloudbeat.
 func (bt *cloudbeat) Stop() {
-	bt.cancel()
 	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
 	bt.leader.Stop()
 	close(bt.resourceCh)
+	if err := bt.client.Close(); err != nil {
+		bt.log.Fatal("Cannot close client", err)
+	}
 
-	bt.client.Close()
+	bt.cancel()
 }
 
 // configureProcessors configure processors to be used by the beat
