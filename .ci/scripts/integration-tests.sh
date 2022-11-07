@@ -4,7 +4,7 @@
 
 non_blocking_wait() {
     PID=$1
-    if [[ ! $(lsof -p "$PID") ]]; then
+    if [ ! -d "/proc/$PID" ]; then
         wait "$PID"
         CODE=$?
     else
