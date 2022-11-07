@@ -113,6 +113,10 @@ func (m *reloaderMock) Channel() <-chan *config.C {
 	return m.ch
 }
 
+func (m *reloaderMock) Stop() {
+	close(m.ch)
+}
+
 type validatorMock struct {
 	expected *config.C
 }
@@ -134,8 +138,6 @@ type LauncherTestSuite struct {
 }
 
 type launcherMocks struct {
-	ctx       context.Context
-	cancel    context.CancelFunc
 	reloader  *reloaderMock
 	beat      *beat.Beat
 	validator Validator
@@ -143,10 +145,10 @@ type launcherMocks struct {
 
 func TestLauncherTestSuite(t *testing.T) {
 	s := new(LauncherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_launcher_test_suite")
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
 	}
+	s.log = logp.NewLogger("cloudbeat_launcher_test_suite")
 
 	s.opts = goleak.IgnoreCurrent()
 	suite.Run(t, s)
@@ -154,7 +156,6 @@ func TestLauncherTestSuite(t *testing.T) {
 
 func (s *LauncherTestSuite) InitMocks() *launcherMocks {
 	mocks := launcherMocks{}
-	mocks.ctx, mocks.cancel = context.WithCancel(context.Background())
 	mocks.reloader = &reloaderMock{
 		ch: make(chan *config.C),
 	}
@@ -292,12 +293,22 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			},
 			expected4,
 		},
+		{
+			"multiple updates no delay A B A C",
+			incomingConfigs{
+				{0, configA},
+				{0, configB},
+				{0, configA},
+				{0, configC},
+			},
+			expected1,
+		},
 	}
 
 	for _, tcase := range testcases {
 		s.Run(tcase.name, func() {
 			mocks := s.InitMocks()
-			sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+			sut, err := New(s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
 
 			go func(ic incomingConfigs) {
@@ -305,14 +316,10 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 					time.Sleep(c.after)
 					mocks.reloader.ch <- c.config
 				}
-			}(tcase.configs)
 
-			go func() {
 				time.Sleep(100 * time.Millisecond)
-				mocks.cancel()
-				close(mocks.reloader.ch)
 				sut.Stop()
-			}()
+			}(tcase.configs)
 
 			err = sut.run()
 			s.NoError(err)
@@ -329,7 +336,7 @@ func (s *LauncherTestSuite) TestErrorWaitForUpdates() {
 	})
 
 	mocks := s.InitMocks()
-	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, errorReloadBeaterCreator(), config.NewConfig())
+	sut, err := New(s.log, mocks.reloader, nil, errorReloadBeaterCreator(), config.NewConfig())
 	s.NoError(err)
 
 	go func() {
@@ -339,8 +346,6 @@ func (s *LauncherTestSuite) TestErrorWaitForUpdates() {
 
 	go func() {
 		time.Sleep(100 * time.Millisecond)
-		mocks.cancel()
-		close(mocks.reloader.ch)
 	}()
 
 	err = sut.run()
@@ -428,13 +433,11 @@ func (s *LauncherTestSuite) TestLauncherValidator() {
 	for _, tcase := range testcases {
 		s.Run(tcase.name, func() {
 			mocks := s.InitMocks()
-			sut, err := New(mocks.ctx, s.log, mocks.reloader, mocks.validator, beaterMockCreator, config.NewConfig())
+			sut, err := New(s.log, mocks.reloader, mocks.validator, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
 
 			mocks.reloader.ch = make(chan *config.C, len(tcase.configs))
 			go func(ic incomingConfigs) {
-				defer close(mocks.reloader.ch)
-
 				for _, c := range ic {
 					time.Sleep(c.after)
 					mocks.reloader.ch <- c.config
@@ -452,17 +455,19 @@ func (s *LauncherTestSuite) TestLauncherValidator() {
 	}
 }
 
+// TestLauncherErrorBeater should not call sut.Stop as the launcher should stop without callling it
 func (s *LauncherTestSuite) TestLauncherErrorBeater() {
 	mocks := s.InitMocks()
-	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, errorBeaterMockCreator, config.NewConfig())
+	sut, err := New(s.log, mocks.reloader, nil, errorBeaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
 }
 
+// TestLauncherPanicBeater should not call sut.Stop as the launcher should stop without callling it
 func (s *LauncherTestSuite) TestLauncherPanicBeater() {
 	mocks := s.InitMocks()
-	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, panicBeaterMockCreator, config.NewConfig())
+	sut, err := New(s.log, mocks.reloader, nil, panicBeaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
@@ -471,7 +476,7 @@ func (s *LauncherTestSuite) TestLauncherPanicBeater() {
 
 func (s *LauncherTestSuite) TestLauncherStop() {
 	mocks := s.InitMocks()
-	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+	sut, err := New(s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -481,21 +486,10 @@ func (s *LauncherTestSuite) TestLauncherStop() {
 	s.NoError(err)
 }
 
-func (s *LauncherTestSuite) TestLauncherCancelBeater() {
-	mocks := s.InitMocks()
-	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
-	s.NoError(err)
-	go func() {
-		time.Sleep(100 * time.Millisecond)
-		mocks.cancel()
-	}()
-	err = sut.run()
-	s.NoError(err)
-}
-
+// TestLauncherErrorBeaterCreation should not call sut.Stop as the launcher should stop without callling it
 func (s *LauncherTestSuite) TestLauncherErrorBeaterCreation() {
 	mocks := s.InitMocks()
-	sut, err := New(mocks.ctx, s.log, mocks.reloader, nil, errorBeaterCreator, config.NewConfig())
+	sut, err := New(s.log, mocks.reloader, nil, errorBeaterCreator, config.NewConfig())
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)

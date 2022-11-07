@@ -66,7 +66,7 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	reloader := launcher.NewListener(ctx, log)
 	validator := &validator{}
 
-	s, err := launcher.New(ctx, log, reloader, validator, NewCloudbeat, cfg)
+	s, err := launcher.New(log, reloader, validator, NewCloudbeat, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -75,11 +75,11 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	return s, nil
 }
 
+// NewCloudbeat creates an instance of cloudbeat.
 func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	return newCloudbeat(b, cfg)
 }
 
-// NewCloudbeat creates an instance of cloudbeat.
 func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	log := logp.NewLogger("cloudbeat")
 

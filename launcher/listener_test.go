@@ -62,6 +62,10 @@ func (s *ListenerTestSuite) TearDownTest() {
 	goleak.VerifyNone(s.T(), s.opts)
 }
 
+var conf = config.MustNewConfigFrom(map[string]string{
+	"test": "test",
+})
+
 func (s *ListenerTestSuite) TestEmptyReload() {
 	go func() {
 		err := s.sut.Reload([]*reload.ConfigWithMeta{})
@@ -78,10 +82,6 @@ func (s *ListenerTestSuite) TestEmptyReload() {
 
 func (s *ListenerTestSuite) TestCancelBeforeReload() {
 	meta := mapstr.NewPointer(mapstr.M{})
-	conf, err := config.NewConfigFrom(map[string]string{
-		"test": "test",
-	})
-	s.NoError(err)
 
 	s.cancel()
 	go func() {
@@ -97,10 +97,6 @@ func (s *ListenerTestSuite) TestCancelBeforeReload() {
 
 func (s *ListenerTestSuite) TestCancelAfterReload() {
 	meta := mapstr.NewPointer(mapstr.M{})
-	conf, err := config.NewConfigFrom(map[string]string{
-		"test": "test",
-	})
-	s.NoError(err)
 
 	go func() {
 		err := s.sut.Reload([]*reload.ConfigWithMeta{
@@ -116,10 +112,6 @@ func (s *ListenerTestSuite) TestCancelAfterReload() {
 
 func (s *ListenerTestSuite) TestSingleReload() {
 	meta := mapstr.NewPointer(mapstr.M{})
-	conf, err := config.NewConfigFrom(map[string]string{
-		"test": "test",
-	})
-	s.NoError(err)
 
 	values := []*reload.ConfigWithMeta{
 		{

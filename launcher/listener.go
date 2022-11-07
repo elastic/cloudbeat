@@ -29,9 +29,10 @@ import (
 )
 
 type Listener struct {
-	ctx context.Context
-	log *logp.Logger
-	ch  chan *config.C
+	ctx    context.Context
+	cancel context.CancelFunc
+	log    *logp.Logger
+	ch     chan *config.C
 }
 
 func (l *Listener) Reload(configs []*reload.ConfigWithMeta) error {
@@ -57,11 +58,18 @@ func (l *Listener) Channel() <-chan *config.C {
 	return l.ch
 }
 
+func (l *Listener) Stop() {
+	l.cancel()
+	close(l.ch)
+}
+
 func NewListener(ctx context.Context, log *logp.Logger) *Listener {
 	ch := make(chan *config.C)
+	cctx, cancel := context.WithCancel(ctx)
 	return &Listener{
-		ctx: ctx,
-		log: log,
-		ch:  ch,
+		ctx:    cctx,
+		cancel: cancel,
+		log:    log,
+		ch:     ch,
 	}
 }
