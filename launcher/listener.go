@@ -63,11 +63,11 @@ func (l *Listener) Stop() {
 	close(l.ch)
 }
 
-func NewListener(ctx context.Context, log *logp.Logger) *Listener {
+func NewListener(log *logp.Logger) *Listener {
 	ch := make(chan *config.C)
-	cctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(context.Background())
 	return &Listener{
-		ctx:    cctx,
+		ctx:    ctx,
 		cancel: cancel,
 		log:    log,
 		ch:     ch,
