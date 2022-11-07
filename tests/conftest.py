@@ -17,7 +17,9 @@ def k8s():
     When code executed as container (pod / job) in K8s cluster in cluster configuration is used.
     @return: Kubernetes Helper instance.
     """
-    return KubernetesHelper(is_in_cluster_config=configuration.kubernetes.is_in_cluster_config)
+    return KubernetesHelper(
+        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -66,10 +68,13 @@ def api_client():
 
 
 def pytest_addoption(parser):
+    """
+    Add custom options to the pytest commandline utility.
+    """
     parser.addoption(
-        '--range',
-        default='..',
-        help='range to run tests on',
+        "--range",
+        default="..",
+        help="range to run tests on",
     )
 
 

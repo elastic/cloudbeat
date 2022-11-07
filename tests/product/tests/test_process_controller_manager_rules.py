@@ -13,12 +13,14 @@ from product.tests.parameters import register_params, Parameters
 
 
 @pytest.mark.process_controller_manager_rules
-def test_process_controller_manager(elastic_client,
-                                    config_node_pre_test,
-                                    rule_tag,
-                                    dictionary,
-                                    resource,
-                                    expected):
+def test_process_controller_manager(
+    elastic_client,
+    config_node_pre_test,
+    rule_tag,
+    dictionary,
+    resource,
+    expected,
+):
     """
     This data driven test verifies rules and findings return by cloudbeat agent.
     In order to add new cases @pytest.mark.parameterize section shall be updated.
@@ -31,6 +33,8 @@ def test_process_controller_manager(elastic_client,
     @param expected: Result to be found in finding evaluation field.
     @return: None - Test Pass / Fail result is generated.
     """
+    # pylint: disable=duplicate-code
+
     k8s_client, api_client, cloudbeat_agent = config_node_pre_test
 
     if "edit_process_file" not in dir(api_client):
@@ -38,9 +42,9 @@ def test_process_controller_manager(elastic_client,
 
     # Currently, single node is used, in the future may be extended for all nodes.
     node = k8s_client.get_cluster_nodes()[0]
-    api_client.edit_process_file(container_name=node.metadata.name,
-                                 dictionary=dictionary,
-                                 resource=resource)
+    api_client.edit_process_file(
+        container_name=node.metadata.name, dictionary=dictionary, resource=resource
+    )
 
     # Wait for process reboot
     # TODO: Implement a more optimal way of waiting
@@ -59,9 +63,14 @@ def test_process_controller_manager(elastic_client,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
-    assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected} actual: {evaluation}"
+    assert (
+        evaluation == expected
+    ), f"Rule {rule_tag} verification failed, expected: {expected} actual: {evaluation}"
 
 
-register_params(test_process_controller_manager, Parameters(
-    ("rule_tag", "dictionary", "resource", "expected"),
-    controller_manager_rules))
+register_params(
+    test_process_controller_manager,
+    Parameters(
+        ("rule_tag", "dictionary", "resource", "expected"), controller_manager_rules
+    ),
+)

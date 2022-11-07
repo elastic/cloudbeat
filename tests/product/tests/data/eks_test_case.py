@@ -10,6 +10,7 @@ class EksTestCase:
     """
     Represents EKS nodes test case
     """
+
     rule_tag: str
     node_hostname: str
     expected: str
@@ -26,6 +27,7 @@ class EksKubeObjectCase:
     """
     Represents Kube Object test case
     """
+
     rule_tag: str
     test_resource_id: str
     expected: str
@@ -42,6 +44,7 @@ class EksAwsServiceCase:
     """
     Represents EKS AWS service test case
     """
+
     rule_tag: str
     case_identifier: str
     expected: str

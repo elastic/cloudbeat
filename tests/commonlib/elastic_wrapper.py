@@ -12,13 +12,17 @@ class ElasticWrapper:
 
     def __init__(self, elastic_params):
         self.index = elastic_params.cis_index
-        self.es_client = Elasticsearch(hosts=elastic_params.url,
-                                       basic_auth=elastic_params.basic_auth)
+        self.es_client = Elasticsearch(
+            hosts=elastic_params.url, basic_auth=elastic_params.basic_auth
+        )
 
-    def get_index_data(self, index_name: str,
-                       query: dict,
-                       sort: list,
-                       size: int = 1) -> dict:
+    def get_index_data(
+        self,
+        index_name: str,
+        query: dict,
+        sort: list,
+        size: int = 1,
+    ) -> dict:
         """
         This method retrieves data from specified index
         @param index_name: Name of index the data should be received from
@@ -27,10 +31,12 @@ class ElasticWrapper:
         @param sort: Sorting order
         @return: Result dictionary
         """
-        result = self.es_client.search(index=index_name,
-                                       query=query,
-                                       size=size,
-                                       sort=sort)
+        result = self.es_client.search(
+            index=index_name,
+            query=query,
+            size=size,
+            sort=sort,
+        )
         return result
 
     @staticmethod
@@ -40,9 +46,7 @@ class ElasticWrapper:
         @param data: Data dictionary from elasticsearch
         @return: Total Value integer
         """
-        ret_value = data.get('hits', {}) \
-            .get('total', {}) \
-            .get('value', 0)
+        ret_value = data.get("hits", {}).get("total", {}).get("value", 0)
         return ret_value
 
     @staticmethod
@@ -54,7 +58,7 @@ class ElasticWrapper:
         @return: Source dictionary
         """
         try:
-            ret_value = data['hits']['hits'][index]['_source']
+            ret_value = data["hits"]["hits"][index]["_source"]
         except IndexError as ex:
             print(ex)
             return {}
@@ -67,7 +71,7 @@ class ElasticWrapper:
         @param data: Data dictionary
         @return: Hits dictionary
         """
-        ret_value = data['hits']['hits']
+        ret_value = data["hits"]["hits"]
         return ret_value
 
     @staticmethod
@@ -80,50 +84,30 @@ class ElasticWrapper:
         query = {
             "bool": {
                 "filter": [
-                    {
-                        "term": term
-                    },
-                    {
-                        "range": {
-                            "@timestamp": {
-                                "gte": "now-30s"
-                            }
-                        }
-                    }
+                    {"term": term},
+                    {"range": {"@timestamp": {"gte": "now-30s"}}},
                 ]
             }
         }
 
-        sort = [{
-            "@timestamp": {
-                "order": "desc"
-            }
-        }]
+        sort = [{"@timestamp": {"order": "desc"}}]
 
         return query, sort
 
     @staticmethod
     def build_es_must_match_query(must_query_list: list[dict]):
-
+        """
+        This method builds an ES 'must' query with the given query list.
+        @param must_query_list: list of queries
+        @return: ES query and sorting order
+        """
         query = {
             "bool": {
                 "must": must_query_list,
-                "filter": [
-                    {
-                        "range": {
-                            "@timestamp": {
-                                "gte": "now-30m"
-                            }
-                        }
-                    }
-                ]
+                "filter": [{"range": {"@timestamp": {"gte": "now-30m"}}}],
             }
         }
 
-        sort = [{
-            "@timestamp": {
-                "order": "desc"
-            }
-        }]
+        sort = [{"@timestamp": {"order": "desc"}}]
 
         return query, sort

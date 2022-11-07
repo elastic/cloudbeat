@@ -2,19 +2,26 @@
 This module provides input / output manipulations on streams / files
 """
 
+
 import io
 import json
 import os
 import shutil
 import subprocess
-import yaml
 
 from datetime import datetime
-from munch import Munch, munchify
 from pathlib import Path
 
+import yaml
+from munch import Munch, munchify
 
-def get_events_from_index(elastic_client, index_name: str, rule_tag: str, time_after: datetime) -> list[Munch]:
+
+def get_events_from_index(
+    elastic_client,
+    index_name: str,
+    rule_tag: str,
+    time_after: datetime,
+) -> list[Munch]:
     """
     This function returns events from the given index,
     filtering for the given rule_tag, and after the given time.
@@ -26,29 +33,19 @@ def get_events_from_index(elastic_client, index_name: str, rule_tag: str, time_a
     """
     query = {
         "bool": {
-            "must": [
-                {
-                    "match": {
-                        "rule.tags": rule_tag
-                    }
-                }
-            ],
+            "must": [{"match": {"rule.tags": rule_tag}}],
             "filter": [
                 {
                     "range": {
                         "@timestamp": {
-                            "gte": time_after.strftime('%Y-%m-%dT%H:%M:%S.%f')
+                            "gte": time_after.strftime("%Y-%m-%dT%H:%M:%S.%f")
                         }
                     }
                 }
-            ]
+            ],
         }
     }
-    sort = [{
-        "@timestamp": {
-            "order": "desc"
-        }
-    }]
+    sort = [{"@timestamp": {"order": "desc"}}]
     result = elastic_client.get_index_data(
         index_name=index_name,
         query=query,
@@ -77,14 +74,14 @@ def get_logs_from_stream(stream: str) -> list[Munch]:
                 result.append(munchify(json.loads(log)))
             except json.decoder.JSONDecodeError:
                 result.append(munchify(json.loads(log.replace("'", '"'))))
-            except Exception as ex:
-                print(ex)
+            except AttributeError as exc:
+                print(exc)
                 continue
 
     return result
 
 
-def get_k8s_yaml_objects(file_path: Path) -> list[str: dict]:
+def get_k8s_yaml_objects(file_path: Path) -> list[str:dict]:
     """
     This function loads yaml file, and returns the following list:
     [ {<k8s_kind> : {<k8s_metadata}}]
@@ -92,9 +89,9 @@ def get_k8s_yaml_objects(file_path: Path) -> list[str: dict]:
     :return: [ {<k8s_kind> : {<k8s_metadata}}]
     """
     if not file_path:
-        raise Exception(f'{file_path} is required')
-    with file_path.open() as yaml_file:
-        return [resource for resource in yaml.safe_load_all(yaml_file)]
+        raise Exception(f"{file_path} is required")
+    with file_path.open(encoding="utf-8") as yaml_file:
+        return list(yaml.safe_load_all(yaml_file))
 
 
 class FsClient:
@@ -104,7 +101,12 @@ class FsClient:
     """
 
     @staticmethod
-    def exec_command(container_name: str, command: str, param_value: str, resource: str):
+    def exec_command(
+        container_name: str,
+        command: str,
+        param_value: str,
+        resource: str,
+    ):
         """
         This function executes os command
         @param container_name: Container node
@@ -114,41 +116,44 @@ class FsClient:
         @return: None
         """
 
-        if command == 'touch':
+        if command == "touch":
             if os.path.exists(param_value):
                 return
-            open(param_value, "a+").close()
+            with open(param_value, "a+", encoding="utf-8"):
+                pass
             return
 
-        if command == 'cat':
-            with open(resource, 'w') as f:
-                f.write(param_value)
+        if command == "cat":
+            with open(resource, "w", encoding="utf-8") as file:
+                file.write(param_value)
             return
 
-        if container_name == '':
+        if container_name == "":
             raise Exception("Unknown container name is sent")
 
         current_resource = Path(resource)
         if not (current_resource.is_file() or current_resource.is_dir()):
-            raise Exception(
-                f"File {resource} does not exist or mount missing.")
+            raise Exception(f"File {resource} does not exist or mount missing.")
 
-        if command == 'chmod':
+        if command == "chmod":
             os.chmod(path=resource, mode=int(param_value, base=8))
-        elif command == 'chown':
+        elif command == "chown":
             try:
-                uid, gid = param_value.split(':')
+                uid, gid = param_value.split(":")
             except ValueError as exc:
-                raise Exception("User and group parameter shall be separated by ':' ") from exc
+                raise Exception(
+                    "User and group parameter shall be separated by ':' "
+                ) from exc
 
             FsClient.add_users_to_node([uid, gid], in_place=True)
             shutil.chown(path=resource, user=uid, group=gid)
-        elif command == 'unlink':
+        elif command == "unlink":
             if not Path(param_value).is_dir():
                 Path(param_value).unlink()
         else:
             raise Exception(
-                f"Command '{command}' still not implemented in test framework")
+                f"Command '{command}' still not implemented in test framework"
+            )
 
     @staticmethod
     def add_users_to_node(users: list, in_place: bool):
@@ -160,23 +165,33 @@ class FsClient:
         @return: None
         """
         if in_place:
-            host_users_file = Path('/hostfs/etc/passwd')
-            host_groups_file = Path('/hostfs/etc/group')
+            host_users_file = Path("/hostfs/etc/passwd")
+            host_groups_file = Path("/hostfs/etc/group")
 
-            temp_etc = Path('/tmp/etc')
+            temp_etc = Path("/tmp/etc")
             temp_etc.mkdir(parents=True, exist_ok=True)
 
-            temp_users_file = temp_etc / 'passwd'
-            temp_groups_file = temp_etc / 'group'
+            temp_users_file = temp_etc / "passwd"
+            temp_groups_file = temp_etc / "group"
 
             shutil.copyfile(host_users_file, temp_users_file)
             shutil.copyfile(host_groups_file, temp_groups_file)
 
             for user in users:
                 # These commands fail silently for users/groups that exist.
-                subprocess.run(['groupadd', user, '-P', '/tmp'], capture_output=True)
-                subprocess.run(['useradd', user, '-g', user, '-P', '/tmp'], capture_output=True)
-                subprocess.run(['useradd', user], capture_output=True)  # For container to get around chmod check.
+                subprocess.run(
+                    ["groupadd", user, "-P", "/tmp"], capture_output=True, check=False
+                )
+                subprocess.run(
+                    ["useradd", user, "-g", user, "-P", "/tmp"],
+                    capture_output=True,
+                    check=False,
+                )
+                subprocess.run(
+                    ["useradd", user],
+                    capture_output=True,
+                    check=False,
+                )  # For container to get around chmod check.
 
             FsClient.in_place_copy(temp_users_file, host_users_file)
             FsClient.in_place_copy(temp_groups_file, host_groups_file)
@@ -189,9 +204,14 @@ class FsClient:
 
     @staticmethod
     def in_place_copy(source, destination):
-        with open(source, 'r') as sf, open(destination, 'w') as df:
-            for line in sf:
-                df.write(line)
+        """
+        Copy the contents of source into destination without overwriting the destination file.
+        """
+        with open(source, "r", encoding="utf-8") as sfile, open(
+            destination, "w", encoding="utf-8"
+        ) as dfile:
+            for line in sfile:
+                dfile.write(line)
 
     @staticmethod
     def edit_process_file(container_name: str, dictionary, resource: str):
@@ -202,17 +222,16 @@ class FsClient:
         @param resource: File / Resource path
         @return: None
         """
-        if container_name == '':
+        if container_name == "":
             raise Exception("Unknown container name is sent")
 
         current_resource = Path(resource)
         if not current_resource.is_file():
-            raise Exception(
-                f"File {resource} does not exist or mount missing.")
+            raise Exception(f"File {resource} does not exist or mount missing.")
 
         # Open and load the YAML into variable
-        with current_resource.open() as f:
-            r_file = yaml.safe_load(f)
+        with current_resource.open(encoding="utf-8") as file:
+            r_file = yaml.safe_load(file)
 
         # Get process configuration arguments
         command = r_file["spec"]["containers"][0]["command"]
@@ -222,16 +241,22 @@ class FsClient:
         unset_list = dictionary.get("unset", [])
 
         # Cycle across set items from the dictionary
-        for skey, s_value in set_dict.items():
+        for s_key, s_value in set_dict.items():
             # Find if set key exists already in the configuration arguments
-            if any(skey == x.split("=")[0] for x in command):
+            if any(s_key == x.split("=")[0] for x in command):
                 # Replace the value of the key with the new value from the set items
-                command = list(map(lambda x: x.replace(
-                    x, skey + "=" + s_value) if skey == x.split("=")[0] else x, command))
+                command = list(
+                    map(
+                        lambda x, s_key, s_value: x.replace(x, s_key + "=" + s_value)
+                        if s_key == x.split("=")[0]
+                        else x,
+                        command,
+                    )
+                )
             else:
                 # In case of non-existing key in the configuration arguments,
                 # append the key/value from set items
-                command.append(skey + "=" + s_value)
+                command.append(s_key + "=" + s_value)
 
         # Cycle across unset items from the dictionary
         for us_key in unset_list:
@@ -242,8 +267,8 @@ class FsClient:
         r_file["spec"]["containers"][0]["command"] = command
 
         # Write the newly built configuration arguments
-        with current_resource.open(mode="w") as f:
-            yaml.dump(r_file, f)
+        with current_resource.open(mode="w", encoding="utf-8") as file:
+            yaml.dump(r_file, file)
 
     @staticmethod
     def edit_config_file(container_name: str, dictionary, resource: str):
@@ -254,17 +279,16 @@ class FsClient:
         @param resource: Config path
         @return: None
         """
-        if container_name == '':
+        if container_name == "":
             raise Exception("Unknown container name is sent")
 
         current_resource = Path(resource)
         if not current_resource.is_file():
-            raise Exception(
-                f"File {resource} does not exist or mount missing.")
+            raise Exception(f"File {resource} does not exist or mount missing.")
 
         # Open and load the YAML into variable
-        with current_resource.open() as f:
-            r_file = yaml.safe_load(f)
+        with current_resource.open(encoding="utf-8") as file:
+            r_file = yaml.safe_load(file)
 
         # Collect set/unset keys and values from the dictionary
         set_dict = dictionary.get("set", {})
@@ -276,22 +300,22 @@ class FsClient:
         # Cycle across unset items from the dictionary
         for us_key in unset_list:
             # Parsed dot separated key values
-            keys = us_key.split('.')
+            keys = us_key.split(".")
             key_to_del = keys.pop()
-            p = r_file
+            r_dict = r_file
 
             # Advance inside the dictionary for nested keys
             for key in keys:
-                p = p.get(key, None)
-                if p is None:
+                r_dict = r_dict.get(key, None)
+                if r_dict is None:
                     # Non-existing nested key
                     break
             # Remove nested keys when all path exists
-            if p:
-                del p[key_to_del]
+            if r_dict:
+                del r_dict[key_to_del]
         # Write the newly built config
-        with current_resource.open(mode="w") as f:
-            yaml.dump(r_file, f)
+        with current_resource.open(mode="w", encoding="utf-8") as file:
+            yaml.dump(r_file, file)
 
     @staticmethod
     def get_beat_status_from_json(response: str, beat_name: str) -> str:
@@ -303,8 +327,8 @@ class FsClient:
         @return: status message string
         """
         response = json.loads(response)
-        beat_list = response['Applications']
+        beat_list = response["Applications"]
         for beat in beat_list:
-            if beat['Name'] == beat_name:
-                return beat['Message']
-        return ''
+            if beat["Name"] == beat_name:
+                return beat["Message"]
+        return ""
