@@ -73,7 +73,7 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
 	}
 	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
-
+	clusterName := t.commonData.GetClusterName()
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
@@ -85,12 +85,13 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 			Meta:      mapstr.M{libevents.FieldMetaIndex: t.index},
 			Timestamp: timestamp,
 			Fields: mapstr.M{
-				resMetadata.ECSFormat: eventData.GetElasticCommonData(),
-				"event":               buildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt),
-				"resource":            resource,
-				"result":              finding.Result,
-				"rule":                finding.Rule,
-				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
+				resMetadata.ECSFormat:       eventData.GetElasticCommonData(),
+				"event":                     buildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt),
+				"resource":                  resource,
+				"result":                    finding.Result,
+				"rule":                      finding.Rule,
+				"message":                   fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
+				"orchestrator.cluster.name": clusterName,
 			},
 		}
 

@@ -19,6 +19,7 @@ package transformer
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchers"
@@ -45,14 +46,23 @@ func NewCommonDataProvider(log *logp.Logger, cfg config.Config) (CommonDataProvi
 		return CommonDataProvider{}, err
 	}
 
+	clusterNameProvider := providers.ClusterNameProvider{
+		KubernetesClusterNameProvider: providers.KubernetesClusterNameProvider{},
+		EKSMetadataProvider:           awslib.Ec2MetadataProvider{},
+		EKSClusterNameProvider:        awslib.EKSClusterNameProvider{},
+		KubeClient:                    KubeClient,
+		AwsConfigProvider:             awslib.ConfigProvider{},
+	}
+
 	return CommonDataProvider{
-		log:        log,
-		kubeClient: KubeClient,
-		cfg:        cfg,
+		log:                 log,
+		kubeClient:          KubeClient,
+		cfg:                 cfg,
+		clusterNameProvider: clusterNameProvider,
 	}, nil
 }
 
-// Note: As of today Kubernetes is the only environment supported by CommonDataProvider
+// FetchCommonData Note: As of today Kubernetes is the only environment supported by CommonDataProvider
 func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInterface, error) {
 	cm := CommonData{}
 	ClusterId, err := c.getClusterId(ctx)
@@ -67,6 +77,13 @@ func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInte
 		return CommonData{}, err
 	}
 	cm.nodeId = NodeId
+
+	clusterName, err := c.clusterNameProvider.GetClusterName(ctx, c.cfg)
+	if err != nil {
+		c.log.Errorf("Could not fetch cluster name", err)
+	}
+	cm.clusterName = clusterName
+
 	return cm, nil
 }
 
@@ -120,6 +137,10 @@ func (cd CommonData) GetResourceId(metadata fetching.ResourceMetadata) string {
 	default:
 		return metadata.ID
 	}
+}
+
+func (cd CommonData) GetClusterName() string {
+	return cd.clusterName
 }
 
 func (cd CommonData) GetData() CommonData {

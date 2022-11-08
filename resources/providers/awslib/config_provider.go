@@ -27,6 +27,10 @@ type ConfigProvider struct {
 	MetadataProvider MetadataProvider
 }
 
+type ConfigProviderAPI interface {
+	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error)
+}
+
 func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error) {
 	awsConfig, err := aws.InitializeAWSConfig(cfg)
 	if err != nil {
