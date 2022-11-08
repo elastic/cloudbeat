@@ -116,6 +116,41 @@ class KubernetesHelper:
                 pods.append(pod)
         return pods
 
+    def get_pod_image_version(self, pod_name: str, namespace: str) -> dict:
+        """
+        This function retrieves image version for specified pod
+        @param pod_name: Pod instance name
+        @param namespace: Namespace location
+        @return:
+        """
+
+        result_dict = {}
+        try:
+            current_pod_list = self.core_v1_client.list_namespaced_pod(namespace=namespace)
+            for pod in current_pod_list.items:
+                if pod_name in pod.metadata.name:
+                    result_dict[pod.metadata.name] = pod.spec.containers[0].image
+            return result_dict
+        except ValueError:
+            print("Warning: Cannot retrieve pod image version")
+        finally:
+            return result_dict
+
+    def get_nodes_versions(self) -> dict:
+        """
+        This function retrieves cluster nod versions
+        @return:
+        """
+        nodes_data = {}
+        try:
+            nodes = self.get_cluster_nodes()
+            for node in nodes:
+                nodes_data[node.metadata.name] = node.status.node_info.kubelet_version
+        except ValueError:
+            print('Warning: Cannot retrieve nodes data')
+        finally:
+            return nodes_data
+
     def get_service_accounts(self, namespace: str):
         service_accounts = self.core_v1_client.list_namespaced_service_account(namespace=namespace)
         return service_accounts
