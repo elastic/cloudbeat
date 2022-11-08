@@ -21,18 +21,15 @@
 package launcher
 
 import (
-	"context"
-
 	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Listener struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-	log    *logp.Logger
-	ch     chan *config.C
+	log  *logp.Logger
+	done chan struct{}
+	ch   chan *config.C
 }
 
 func (l *Listener) Reload(configs []*reload.ConfigWithMeta) error {
@@ -47,7 +44,7 @@ func (l *Listener) Reload(configs []*reload.ConfigWithMeta) error {
 	data := configs[len(configs)-1].Config
 
 	select {
-	case <-l.ctx.Done():
+	case <-l.done:
 	case l.ch <- data:
 	}
 
@@ -60,17 +57,14 @@ func (l *Listener) Channel() <-chan *config.C {
 
 func (l *Listener) Stop() {
 	l.log.Info("Listener is about to stop")
-	l.cancel()
+	close(l.done)
 	close(l.ch)
 }
 
 func NewListener(log *logp.Logger) *Listener {
-	ch := make(chan *config.C)
-	ctx, cancel := context.WithCancel(context.Background())
 	return &Listener{
-		ctx:    ctx,
-		cancel: cancel,
-		log:    log,
-		ch:     ch,
+		log:  log,
+		done: make(chan struct{}),
+		ch:   make(chan *config.C),
 	}
 }
