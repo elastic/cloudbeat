@@ -358,10 +358,6 @@ func (s *LauncherTestSuite) TestErrorWaitForUpdates() {
 		mocks.reloader.ch <- configErr
 	}()
 
-	go func() {
-		time.Sleep(100 * time.Millisecond)
-	}()
-
 	err = sut.run()
 	s.Error(err)
 }
