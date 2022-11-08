@@ -38,6 +38,8 @@ const (
 
 type launcher struct {
 	wg        sync.WaitGroup
+	stpmtx    sync.Mutex
+	stopped   bool
 	cfgmtx    sync.Mutex
 	runmtx    sync.Mutex
 	beater    beat.Beater
@@ -65,6 +67,8 @@ func New(log *logp.Logger, reloader Reloader, validator Validator, creator beat.
 	ctx, cancel := context.WithCancel(context.Background())
 	s := &launcher{
 		wg:        sync.WaitGroup{},
+		stpmtx:    sync.Mutex{},
+		stopped:   false,
 		cfgmtx:    sync.Mutex{},
 		runmtx:    sync.Mutex{},
 		ctx:       ctx,
@@ -126,23 +130,38 @@ func (l *launcher) run() error {
 }
 
 func (l *launcher) Stop() {
+	l.stpmtx.Lock()
+	defer l.stpmtx.Unlock()
+	if l.stopped {
+		return
+	}
+
 	l.log.Info("Launcher is about to shut down gracefully")
 
 	// Stop listening for updates
 	l.reloader.Stop()
 
-	// Stop the beater without interrupting to an update
+	// Make sure not to interrupt to an update
 	l.cfgmtx.Lock()
+	defer l.cfgmtx.Unlock()
+
 	l.runmtx.Lock()
+	defer l.runmtx.Unlock()
+
+	// Stop the beater
 	l.stopBeater()
 
-	// Trigger the launcher loop in waitForFinish to stop
+	// Trigger waitForFinish to stop
 	l.cancel()
+	l.stopped = true
 }
 
 func (l *launcher) runBeater() error {
 	l.runmtx.Lock()
 	defer l.runmtx.Unlock()
+	if l.stopped {
+		return nil
+	}
 
 	l.log.Info("Launcher is creating a new Beater")
 	beater, err := l.creator(l.beat, l.latest)
@@ -201,23 +220,25 @@ func (l *launcher) waitForUpdates() {
 	for {
 		update, ok := <-l.reloader.Channel()
 		if !ok {
-			l.log.Info("Reloader channel closed")
+			l.log.Info("Launcher has stopped waiting for updates")
 			return
 		}
 
-		l.cfgmtx.Lock()
-		go func() {
-			defer l.cfgmtx.Unlock()
-			if err := l.configUpdate(update); err != nil {
-				l.beaterErr <- fmt.Errorf("failed to update Beater config: %w", err)
-			}
-		}()
+		if err := l.configUpdate(update); err != nil {
+			l.beaterErr <- fmt.Errorf("failed to update Beater config: %w", err)
+		}
 	}
 }
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the beater config,
 // and recreate the beater with the new values.
 func (l *launcher) configUpdate(update *config.C) error {
+	l.cfgmtx.Lock()
+	defer l.cfgmtx.Unlock()
+	if l.stopped {
+		return nil
+	}
+
 	l.log.Infof("Got config update from fleet with %d keys", len(update.FlattenedKeys()))
 
 	err := l.mergeConfig(update)

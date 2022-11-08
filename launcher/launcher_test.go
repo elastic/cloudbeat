@@ -241,16 +241,19 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 
 	testcases := []struct {
 		name     string
+		delay    time.Duration
 		configs  incomingConfigs
 		expected *config.C
 	}{
 		{
 			"no updates",
+			100 * time.Millisecond,
 			incomingConfigs{},
 			config.NewConfig(),
 		},
 		{
 			"single update",
+			100 * time.Millisecond,
 			incomingConfigs{
 				{40 * time.Millisecond, configC},
 			},
@@ -258,6 +261,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 		},
 		{
 			"multiple updates A B A C",
+			100 * time.Millisecond,
 			incomingConfigs{
 				{1 * time.Millisecond, configA},
 				{1 * time.Millisecond, configB},
@@ -268,6 +272,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 		},
 		{
 			"multiple updates A B A",
+			100 * time.Millisecond,
 			incomingConfigs{
 				{1 * time.Millisecond, configA},
 				{40 * time.Millisecond, configB},
@@ -277,6 +282,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 		},
 		{
 			"multiple updates A C B",
+			100 * time.Millisecond,
 			incomingConfigs{
 				{1 * time.Millisecond, configA},
 				{1 * time.Millisecond, configC},
@@ -286,6 +292,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 		},
 		{
 			"multiple updates C C A",
+			100 * time.Millisecond,
 			incomingConfigs{
 				{1 * time.Millisecond, configC},
 				{1 * time.Millisecond, configC},
@@ -295,6 +302,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 		},
 		{
 			"multiple updates no delay A B A C",
+			100 * time.Millisecond,
 			incomingConfigs{
 				{0, configA},
 				{0, configB},
@@ -302,6 +310,14 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 				{0, configC},
 			},
 			expected1,
+		},
+		{
+			"single update immediate stop",
+			0,
+			incomingConfigs{
+				{0, configA},
+			},
+			configA,
 		},
 	}
 
@@ -317,7 +333,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 					mocks.reloader.ch <- c.config
 				}
 
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(tcase.delay)
 				sut.Stop()
 			}(tcase.configs)
 
@@ -480,6 +496,20 @@ func (s *LauncherTestSuite) TestLauncherStop() {
 	s.NoError(err)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
+		sut.Stop()
+	}()
+	err = sut.run()
+	s.NoError(err)
+}
+
+// TestLauncherStopTwice is not a rational use case but we do want to be protected in case the agent calls the stop more than once
+func (s *LauncherTestSuite) TestLauncherStopTwice() {
+	mocks := s.InitMocks()
+	sut, err := New(s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+	s.NoError(err)
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		sut.Stop()
 		sut.Stop()
 	}()
 	err = sut.run()

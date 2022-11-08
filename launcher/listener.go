@@ -40,7 +40,7 @@ func (l *Listener) Reload(configs []*reload.ConfigWithMeta) error {
 		return nil
 	}
 
-	l.log.Infof("Received %v new configs for reload.", len(configs))
+	l.log.Infof("Listener received %v new configs for reload.", len(configs))
 
 	// TODO(yashtewari): Based on limitations elsewhere, such as the CSP integration,
 	// don't think we should receive more than one Config here. Need to confirm and handle.
@@ -59,6 +59,7 @@ func (l *Listener) Channel() <-chan *config.C {
 }
 
 func (l *Listener) Stop() {
+	l.log.Info("Listener is about to stop")
 	l.cancel()
 	close(l.ch)
 }
