@@ -15,15 +15,28 @@
 
 
 ## Prerequisites
-1. [Just command runner](https://github.com/casey/just)
+1. [Hermit by Cashapp](https://cashapp.github.io/hermit/usage/get-started/)
 2. Elasticsearch with the default username & password (`elastic` & `changeme`) running on the default port (`http://localhost:9200`)
 3. Kibana with running on the default port (`http://localhost:5601`)
 4. Install and configure [Elastic-Package](https://github.com/elastic/elastic-package)
 5. Set up the local env:
 
-```zsh
-just setup-env
-```
+- Install & activate hermit
+  ```zsh
+  curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
+  ```
+	```zsh
+  . ./bin/activate-hermit
+  ```
+- Run setup env recipe
+  ```zsh
+  just setup-env
+  ```
+
+
+>**Note**
+>This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already. Also consider to review documentation for automatic shell & IDE integration for your setup of choice.
+
 
 ## Running Cloudbeat
 Load the elastic stack environment variables.
