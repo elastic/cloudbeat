@@ -78,7 +78,7 @@ def pytest_sessionfinish(session, exitstatus):
 
     report_dir = session.config.option.allure_report_dir
     cloudbeat = configuration.agent
-    kube_client = KubernetesHelper()
+    kube_client = KubernetesHelper(is_in_cluster_config=configuration.kubernetes.is_in_cluster_config)
     app_list = [cloudbeat.name, 'kibana', 'elasticsearch']
     apps_dict = {}
     for app in app_list:
