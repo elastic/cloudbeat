@@ -8,6 +8,7 @@ from commonlib.utils import get_ES_evaluation
 
 from product.tests.data.k8s_object import eks_k8s_object_test_cases as eks_k8s_object_tc
 from product.tests.parameters import register_params, Parameters
+from commonlib.framework.reporting import skip_param_case, SkipReportData
 
 
 @pytest.mark.eks_k8s_objects_rules
@@ -57,7 +58,12 @@ register_params(test_eks_kube_objects, Parameters(
         *eks_k8s_object_tc.cis_eks_4_2_5.values(),
         *eks_k8s_object_tc.cis_eks_4_2_6.values(),
         *eks_k8s_object_tc.cis_eks_4_2_7.values(),
-        # *eks_k8s_object_tc.cis_eks_4_2_8.values(), # TODO to check if finding retrieved on real env
+        *skip_param_case(skip_list=[*eks_k8s_object_tc.cis_eks_4_2_8.values()],
+                         data_to_report=SkipReportData(
+                             url_title="cloudbeat: #500",
+                             url_link="https://github.com/elastic/cloudbeat/issues/500",
+                             skip_reason="Retest after testing configuration will be fixed."
+                         )),
         *eks_k8s_object_tc.cis_eks_4_2_9.values()
      ],
     ids=[
@@ -68,7 +74,7 @@ register_params(test_eks_kube_objects, Parameters(
         *eks_k8s_object_tc.cis_eks_4_2_5.keys(),
         *eks_k8s_object_tc.cis_eks_4_2_6.keys(),
         *eks_k8s_object_tc.cis_eks_4_2_7.keys(),
-        # *eks_k8s_object_tc.cis_eks_4_2_8.keys(),
+        *eks_k8s_object_tc.cis_eks_4_2_8.keys(),
         *eks_k8s_object_tc.cis_eks_4_2_9.keys()
     ]
 ))

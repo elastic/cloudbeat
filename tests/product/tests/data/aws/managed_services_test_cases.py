@@ -71,7 +71,13 @@ cis_eks_5_4_5_config_1 = {
 cis_eks_all = {
     'test-eks-config-1': {
         **cis_eks_5_1_1,
-        # **cis_eks_5_4_3_config_1,
+        **dict(zip(cis_eks_5_4_3_config_1.keys(),
+                   skip_param_case(skip_list=[*cis_eks_5_4_3_config_1.values()],
+                                   data_to_report=SkipReportData(
+                                       skip_reason="Retest after testing configuration will be fixed.",
+                                       url_title='cloudbeat: #500',
+                                       url_link='https://github.com/elastic/cloudbeat/issues/500'
+                                   )))),
         **cis_eks_5_4_5_config_1,
         **dict(zip(cis_eks_2_1_1_config_1.keys(),
                    skip_param_case(skip_list=[*cis_eks_2_1_1_config_1.values()],

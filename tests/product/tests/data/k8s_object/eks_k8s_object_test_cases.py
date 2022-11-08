@@ -128,22 +128,22 @@ cis_eks_4_2_7 = {
     '4.2.7 PSP spec.securityContext.capabilities.add==["NET_RAW"] eval failed': cis_eks_4_2_7_fail
 }
 
-# cis_eks_4_2_8_pass = EksKubeObjectCase(
-#     rule_tag='CIS 4.2.8',
-#     test_resource_id='eks-psp-pass',
-#     expected=RULE_PASS_STATUS
-# )
-#
-# cis_eks_4_2_8_fail = EksKubeObjectCase(
-#     rule_tag='CIS 4.2.8',
-#     test_resource_id='eks-psp-failures',
-#     expected=RULE_FAIL_STATUS
-# )
-#
-# cis_eks_4_2_8 = {
-#     '4.2.8 PSP spec.securityContext.capabilities default == not presented eval passed': cis_eks_4_2_8_pass,
-#     '4.2.8 PSP spec.securityContext.capabilities.add==["NET_ADMIN", "SYS_TIME"] eval failed': cis_eks_4_2_8_fail
-# }
+cis_eks_4_2_8_pass = EksKubeObjectCase(
+    rule_tag='CIS 4.2.8',
+    test_resource_id='eks-psp-pass',
+    expected=RULE_PASS_STATUS
+)
+
+cis_eks_4_2_8_fail = EksKubeObjectCase(
+    rule_tag='CIS 4.2.8',
+    test_resource_id='eks-psp-failures',
+    expected=RULE_FAIL_STATUS
+)
+
+cis_eks_4_2_8 = {
+    '4.2.8 PSP spec.securityContext.capabilities default == not presented eval passed': cis_eks_4_2_8_pass,
+    '4.2.8 PSP spec.securityContext.capabilities.add==["NET_ADMIN", "SYS_TIME"] eval failed': cis_eks_4_2_8_fail
+}
 
 cis_eks_4_2_9_pass = EksKubeObjectCase(
     rule_tag='CIS 4.2.9',
