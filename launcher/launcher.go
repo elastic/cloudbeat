@@ -38,7 +38,6 @@ const (
 type launcher struct {
 	done      chan struct{}  // Channel used to initiate shutdown.
 	wg        sync.WaitGroup // WaitGroup used to wait for active beaters
-	stpmtx    sync.Mutex
 	stopped   bool
 	cfgmtx    sync.Mutex
 	runmtx    sync.Mutex
@@ -65,7 +64,6 @@ func New(log *logp.Logger, reloader Reloader, validator Validator, creator beat.
 	s := &launcher{
 		done:      make(chan struct{}),
 		wg:        sync.WaitGroup{},
-		stpmtx:    sync.Mutex{},
 		stopped:   false,
 		cfgmtx:    sync.Mutex{},
 		runmtx:    sync.Mutex{},
@@ -126,12 +124,6 @@ func (l *launcher) run() error {
 }
 
 func (l *launcher) Stop() {
-	l.stpmtx.Lock()
-	defer l.stpmtx.Unlock()
-	if l.stopped {
-		return
-	}
-
 	l.log.Info("Launcher is about to shut down gracefully")
 
 	// Make sure not to interrupt to an update

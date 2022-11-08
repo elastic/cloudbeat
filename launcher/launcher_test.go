@@ -500,20 +500,6 @@ func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 	s.NoError(err)
 }
 
-// TestLauncherStopTwice is not a rational use case but we do want to be protected in case the agent calls the stop more than once
-func (s *LauncherTestSuite) TestLauncherStopTwice() {
-	mocks := s.InitMocks()
-	sut, err := New(s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
-	s.NoError(err)
-	go func() {
-		time.Sleep(100 * time.Millisecond)
-		sut.Stop()
-		sut.Stop()
-	}()
-	err = sut.run()
-	s.NoError(err)
-}
-
 // TestLauncherErrorBeaterCreation should not call sut.Stop as the launcher should stop without callling it
 func (s *LauncherTestSuite) TestLauncherErrorBeaterCreation() {
 	mocks := s.InitMocks()
