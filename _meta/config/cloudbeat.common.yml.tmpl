@@ -1,8 +1,10 @@
 {{$SELF_MANAGED_TYPE := "cloudbeat/cis_k8s" -}}
 {{$EKS_TYPE := "cloudbeat/cis_eks" -}}
-
-{{/* TODO: consider changing this to an argument */ -}}
+{{/* Setting default type to self managed k8s */ -}}
 {{$type := $SELF_MANAGED_TYPE -}}
+{{if index . "type" -}}
+{{$type = .type -}}
+{{end -}}
 cloudbeat:
   type: {{$type}}
   streams:
