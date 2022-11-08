@@ -96,7 +96,7 @@ POD_STATUS_PENDING := 'Pending'
 POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
-ELK_STACK_VERSION := env_var('$ELK_VERSION')
+ELK_STACK_VERSION := env_var('ELK_VERSION')
 NAMESPACE := 'kube-system'
 ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
