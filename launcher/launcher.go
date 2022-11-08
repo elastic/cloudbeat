@@ -21,7 +21,6 @@
 package launcher
 
 import (
-	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -37,7 +36,8 @@ const (
 )
 
 type launcher struct {
-	wg        sync.WaitGroup
+	done      chan struct{}  // Channel used to initiate shutdown.
+	wg        sync.WaitGroup // WaitGroup used to wait for active beaters
 	stpmtx    sync.Mutex
 	stopped   bool
 	cfgmtx    sync.Mutex
@@ -46,8 +46,6 @@ type launcher struct {
 	beaterErr chan error
 	reloader  Reloader
 	log       *logp.Logger
-	ctx       context.Context
-	cancel    context.CancelFunc
 	latest    *config.C
 	beat      *beat.Beat
 	creator   beat.Creator
@@ -64,15 +62,13 @@ type Validator interface {
 }
 
 func New(log *logp.Logger, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
-	ctx, cancel := context.WithCancel(context.Background())
 	s := &launcher{
+		done:      make(chan struct{}),
 		wg:        sync.WaitGroup{},
 		stpmtx:    sync.Mutex{},
 		stopped:   false,
 		cfgmtx:    sync.Mutex{},
 		runmtx:    sync.Mutex{},
-		ctx:       ctx,
-		cancel:    cancel,
 		log:       log,
 		reloader:  reloader,
 		validator: validator,
@@ -152,7 +148,7 @@ func (l *launcher) Stop() {
 	l.stopBeater()
 
 	// Trigger waitForFinish to stop
-	l.cancel()
+	close(l.done)
 	l.stopped = true
 }
 
@@ -204,7 +200,7 @@ func (l *launcher) stopBeater() {
 func (l *launcher) waitForFinish() error {
 	for {
 		select {
-		case <-l.ctx.Done():
+		case <-l.done:
 			return nil
 
 		case err := <-l.beaterErr:
@@ -264,7 +260,7 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 
 	for {
 		select {
-		case <-l.ctx.Done():
+		case <-l.done:
 			return nil, fmt.Errorf("cancelled via context")
 
 		case <-timer:
