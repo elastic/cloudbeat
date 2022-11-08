@@ -138,15 +138,15 @@ func (l *launcher) Stop() {
 
 	l.log.Info("Launcher is about to shut down gracefully")
 
-	// Stop listening for updates
-	l.reloader.Stop()
-
 	// Make sure not to interrupt to an update
 	l.cfgmtx.Lock()
 	defer l.cfgmtx.Unlock()
 
 	l.runmtx.Lock()
 	defer l.runmtx.Unlock()
+
+	// Stop listening for updates
+	l.reloader.Stop()
 
 	// Stop the beater
 	l.stopBeater()

@@ -313,11 +313,17 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 		},
 		{
 			"single update immediate stop",
-			0,
+			1,
 			incomingConfigs{
 				{0, configA},
 			},
 			configA,
+		},
+		{
+			"no updates immediate stop",
+			0,
+			incomingConfigs{},
+			config.NewConfig(),
 		},
 	}
 
