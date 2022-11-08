@@ -8,9 +8,3 @@ testData:
   marker: post_merge_agent
   agentName: elastic-agent
   clusterType: vanilla
-
-elasticsearch:
-  imageTag: "8.6.0-SNAPSHOT"
-
-kibana:
-  imageTag: "8.6.0-SNAPSHOT"

@@ -1,5 +1,5 @@
 # Variables
-
+CLOUDBEAT_VERSION := ''
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
@@ -88,6 +88,7 @@ expose-ports:
 #### TESTS ####
 
 TEST_POD := 'test-pod-v1'
+
 TESTS_RELEASE := 'cloudbeat-test'
 TEST_LOGS_DIRECTORY := 'test-logs'
 POD_STATUS_UNKNOWN := 'Unknown'
@@ -95,7 +96,7 @@ POD_STATUS_PENDING := 'Pending'
 POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
-ELK_STACK_VERSION := '8.4.2'
+ELK_STACK_VERSION := env_var('$ELK_VERSION')
 NAMESPACE := 'kube-system'
 ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
@@ -114,7 +115,7 @@ load-pytest-eks:
   docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
 deploy-tests-helm target range='' values_file='tests/deploy/values/ci.yml':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker={{target}} --set testData.range={{range}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} kibana.imageTag={{ELK_STACK_VERSION}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
 
 purge-tests:
 	helm del {{TESTS_RELEASE}} -n {{NAMESPACE}} & kubectl delete pvc --all -n {{NAMESPACE}}
