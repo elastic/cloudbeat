@@ -312,14 +312,6 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			expected1,
 		},
 		{
-			"single update immediate stop",
-			1,
-			incomingConfigs{
-				{0, configA},
-			},
-			configA,
-		},
-		{
 			"no updates immediate stop",
 			0,
 			incomingConfigs{},
@@ -496,12 +488,12 @@ func (s *LauncherTestSuite) TestLauncherPanicBeater() {
 	s.ErrorContains(err, "panicBeaterMock panics")
 }
 
-func (s *LauncherTestSuite) TestLauncherStop() {
+func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 	mocks := s.InitMocks()
 	sut, err := New(s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	go func() {
-		time.Sleep(100 * time.Millisecond)
+		mocks.reloader.ch <- config.NewConfig()
 		sut.Stop()
 	}()
 	err = sut.run()
