@@ -21,7 +21,6 @@
 package launcher
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -40,27 +39,24 @@ import (
 )
 
 type beaterMock struct {
-	cfg    *config.C
-	ctx    context.Context
-	cancel context.CancelFunc
+	cfg  *config.C
+	done chan struct{}
 }
 
 func beaterMockCreator(b *beat.Beat, cfg *config.C) (beat.Beater, error) {
-	ctx, cancel := context.WithCancel(context.Background())
 	return &beaterMock{
-		cfg:    cfg,
-		ctx:    ctx,
-		cancel: cancel,
+		cfg:  cfg,
+		done: make(chan struct{}),
 	}, nil
 }
 
 func (m *beaterMock) Run(b *beat.Beat) error {
-	<-m.ctx.Done()
+	<-m.done
 	return nil
 }
 
 func (m *beaterMock) Stop() {
-	m.cancel()
+	close(m.done)
 }
 
 type errorBeaterMock struct{}
@@ -90,6 +86,7 @@ func (m *errorBeaterMock) Run(b *beat.Beat) error {
 }
 
 func (m *errorBeaterMock) Stop() {
+	panic("Error beater should not be stopped")
 }
 
 type panicBeaterMock struct{}
