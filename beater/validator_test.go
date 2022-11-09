@@ -45,39 +45,15 @@ func TestValidatorTestSuite(t *testing.T) {
 }
 
 func (s *ValidatorTestSuite) TestConfig() {
-	configNoStreams := config.MustNewConfigFrom(`
-not_streams:
-  - runtime_cfg:
-      activated_rules:
-        cis_k8s:
-          - a
-          - b
-          - c
-          - d
-          - e
-`)
-
-	configNoRuntimeCfg := config.MustNewConfigFrom(`
-streams:
-  - not_runtime_cfg:
-      activated_rules:
-        cis_k8s:
-          - a
-          - b
-          - c
-          - d
-          - e
-`)
 	configWithRuntimeCfg := config.MustNewConfigFrom(`
-streams:
-  - runtime_cfg:
-      activated_rules:
-        cis_k8s:
-          - a
-          - b
-          - c
-          - d
-          - e
+runtime_cfg:
+  activated_rules:
+    cis_k8s:
+      - a
+      - b
+      - c
+      - d
+      - e
 `)
 
 	testcases := []struct {
@@ -87,13 +63,8 @@ streams:
 		{
 			true,
 			config.NewConfig(),
-		}, {
-			true,
-			configNoRuntimeCfg,
-		}, {
-			true,
-			configNoStreams,
-		}, {
+		},
+		{
 			false,
 			configWithRuntimeCfg,
 		},

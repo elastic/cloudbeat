@@ -15,29 +15,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Config is put into a different package to prevent cyclic imports in case
-// it is needed in several locations
-
-package beater
+package dlogger
 
 import (
-	"fmt"
+	"sync"
 
-	"github.com/elastic/cloudbeat/config"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/open-policy-agent/opa/plugins"
+	"github.com/open-policy-agent/opa/util"
 )
 
-type validator struct{}
+type Factory struct{}
 
-func (v *validator) Validate(cfg *agentconfig.C) error {
-	c, err := config.New(cfg)
-	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
+func (Factory) New(m *plugins.Manager, conf interface{}) plugins.Plugin {
+	m.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
+
+	return &plugin{
+		manager: m,
+		mtx:     sync.Mutex{},
+		config:  conf.(config),
 	}
+}
 
-	if c.RuntimeCfg == nil {
-		return fmt.Errorf("runtime configuration didn't exist in new configuration")
-	}
-
-	return nil
+func (Factory) Validate(_ *plugins.Manager, conf []byte) (interface{}, error) {
+	parsedConfig := config{}
+	return parsedConfig, util.Unmarshal(conf, &parsedConfig)
 }

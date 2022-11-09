@@ -15,29 +15,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Config is put into a different package to prevent cyclic imports in case
-// it is needed in several locations
-
-package beater
+package dlogger
 
 import (
-	"fmt"
+	"testing"
 
-	"github.com/elastic/cloudbeat/config"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/open-policy-agent/opa/plugins"
+	"github.com/open-policy-agent/opa/storage/inmem"
+	"github.com/stretchr/testify/assert"
 )
 
-type validator struct{}
+func TestFactoryNew(t *testing.T) {
+	f := Factory{}
+	manager, err := plugins.New([]byte{}, "test", inmem.New())
+	assert.NoError(t, err)
 
-func (v *validator) Validate(cfg *agentconfig.C) error {
-	c, err := config.New(cfg)
-	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
-	}
+	p := f.New(manager, config{})
+	assert.NotNil(t, p)
+}
 
-	if c.RuntimeCfg == nil {
-		return fmt.Errorf("runtime configuration didn't exist in new configuration")
-	}
+func TestFactoryValidate(t *testing.T) {
+	f := Factory{}
+	manager, err := plugins.New([]byte{}, "test", inmem.New())
+	assert.NoError(t, err)
 
-	return nil
+	cfg, err := f.Validate(manager, []byte{})
+	assert.NoError(t, err)
+	assert.IsType(t, config{}, cfg)
 }

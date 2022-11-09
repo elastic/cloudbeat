@@ -25,10 +25,12 @@ import (
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
+	dlogger "github.com/elastic/cloudbeat/evaluator/debug_logger"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/open-policy-agent/opa/plugins"
 	"github.com/open-policy-agent/opa/sdk"
 )
 
@@ -51,10 +53,16 @@ var opaConfig = `{
 			"resource": "file://%s"
 		}
 	},
-	"decision_logs": {
-		"console": %t
-	}
+%s
 }`
+
+var logPlugin = `
+	"decision_logs": {
+		"plugin": "%s"
+	},
+	"plugins": {
+		"%s": {}
+	}`
 
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (Evaluator, error) {
 	// provide the OPA configuration which specifies
@@ -65,14 +73,23 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	if err != nil {
 		return nil, err
 	}
-	opaCfg := []byte(fmt.Sprintf(opaConfig, path, cfg.Evaluator.DecisionLogs))
+	plugin := ""
+	if cfg.Evaluator.DecisionLogs {
+		plugin = fmt.Sprintf(logPlugin, dlogger.PluginName, dlogger.PluginName)
+	}
+	opaCfg := fmt.Sprintf(opaConfig, path, plugin)
+
+	decisonLogger := newLogger()
+	stdLogger := newLogger()
 
 	// create an instance of the OPA object
-	opaLogger := newLogger()
 	opa, err := sdk.New(ctx, sdk.Options{
-		Config:        bytes.NewReader(opaCfg),
-		Logger:        opaLogger,
-		ConsoleLogger: opaLogger,
+		Config:        bytes.NewReader([]byte(opaCfg)),
+		Logger:        stdLogger,
+		ConsoleLogger: decisonLogger,
+		Plugins: map[string]plugins.Factory{
+			dlogger.PluginName: &dlogger.Factory{},
+		},
 	})
 
 	if err != nil {
@@ -114,7 +131,6 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 		return EventData{}, fmt.Errorf("error running the policy: %v", err)
 	}
 
-	o.log.Debugf("Eval decision for input: %v -- %v", fetcherResult, result)
 	ruleResults, err := o.decode(result)
 	if err != nil {
 		return EventData{}, fmt.Errorf("error decoding findings: %v", err)
