@@ -1,7 +1,8 @@
-
 ##############################################################################
 # Variables used for various build targets.
 ##############################################################################
+CI_ELASTIC_AGENT_DOCKER_TAG?=${CLOUDBEAT_VERSION}-SNAPSHOT
+CI_ELASTIC_AGENT_DOCKER_IMAGE?=704479110758.dkr.ecr.eu-west-1.amazonaws.com/elastic-agent
 
 # Ensure the Go version in .go_version is installed and used.
 GOROOT?=$(shell ./scripts/make/run_with_go_ver go env GOROOT)
@@ -76,6 +77,19 @@ clean: $(MAGE)
 .PHONY: PackageAgent
 PackageAgent: $(MAGE)
 	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
+
+# elastic_agent_docker_image builds the Cloud Elastic Agent image
+# with the local APM Server binary injected. The image will be based
+# off the stack version defined in ${REPO_ROOT}/docker-compose.yml,
+# unless overridden.
+.PHONY: build_elastic_agent_docker_image
+elastic_agent_docker_image: build_elastic_agent_docker_image
+	docker push "${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CI_ELASTIC_AGENT_DOCKER_TAG}"
+
+build_elastic_agent_docker_image:
+	@env BASE_IMAGE=docker.elastic.co/beats/elastic-agent:${CI_ELASTIC_AGENT_DOCKER_TAG} GOARCH=amd64 GOOS=linux  \
+		bash dev-tools/packaging/docker/elastic-agent/build.sh \
+		     -t ${CI_ELASTIC_AGENT_DOCKER_IMAGE}:${CI_ELASTIC_AGENT_DOCKER_TAG}
 
 ##############################################################################
 # Checks/tests.
