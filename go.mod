@@ -32,6 +32,7 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go-v2/config v1.15.12
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.7
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.7
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.23.18
@@ -56,7 +57,6 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go-v2/config v1.15.12 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.25 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.19 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.14 // indirect
