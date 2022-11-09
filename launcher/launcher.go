@@ -130,7 +130,7 @@ func (l *launcher) runLoop() error {
 			l.stopBeater()
 		}
 
-		// If it's a config update let's merge the new config and continue with the loop
+		// If it's a config update let's merge the new config and continue with the next iteration
 		if cfg != nil {
 			err = l.configUpdate(cfg)
 			if err != nil {

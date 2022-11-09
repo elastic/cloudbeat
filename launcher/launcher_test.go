@@ -341,6 +341,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 	}
 }
 
+// TestErrorWaitForUpdates should not call sut.Stop as the launcher should stop without callling it
 func (s *LauncherTestSuite) TestErrorWaitForUpdates() {
 	configErr := config.MustNewConfigFrom(mapstr.M{
 		"error": "true",
@@ -491,6 +492,22 @@ func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 	}()
 	err = sut.run()
 	s.NoError(err)
+}
+
+func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
+	mocks := s.InitMocks()
+	sut, err := New(s.log, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+	s.NoError(err)
+	go func() {
+		mocks.reloader.ch <- config.NewConfig()
+		sut.Stop()
+	}()
+	err = sut.run()
+	s.NoError(err)
+
+	s.Panics(func() {
+		sut.Stop()
+	})
 }
 
 // TestLauncherErrorBeaterCreation should not call sut.Stop as the launcher should stop without callling it
