@@ -177,7 +177,7 @@ data:
         - access_key_id: ${AWS_ACCESS_KEY_ID:no_access_key_was_set}
           secret_access_key: ${AWS_SECRET_ACCESS_KEY:no_secret_was_set}
           # Defines how often an event is sent to the output
-          period: 5s
+          period: 30s
           fetchers:
             - name: kube-api
             - name: process
@@ -305,7 +305,6 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         image: public.ecr.aws/z7e1r9l0/cloudbeat:latest
-        imagePullPolicy: IfNotPresent
         name: cloudbeat
         resources:
           requests:

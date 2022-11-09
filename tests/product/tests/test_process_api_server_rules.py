@@ -46,7 +46,8 @@ def test_process_api_server(elastic_client,
     # TODO: Implement a more optimal way of waiting
     time.sleep(60)
 
-    def identifier(eval_resource):
+    def identifier(ident_resource):
+        eval_resource = ident_resource.resource.raw
         return command_contains_arguments(eval_resource.command, dictionary)
 
     evaluation = get_ES_evaluation(

@@ -40,7 +40,8 @@ def test_file_system_configuration(elastic_client,
                             param_value=param_value,
                             resource=resource)
 
-    def identifier(eval_resource):
+    def identifier(ident_resource):
+        eval_resource = ident_resource.resource.raw
         if not eval_resource.path.endswith(resource):
             return False
 
@@ -58,7 +59,6 @@ def test_file_system_configuration(elastic_client,
                 return False
 
         return False
-
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
