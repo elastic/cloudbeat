@@ -36,11 +36,21 @@ import (
 
 var bgCtx = context.Background()
 
+type clusterNameProviderMock struct {
+	clusterName string
+}
+
+func (c clusterNameProviderMock) GetClusterName(_ context.Context, _ config.Config) (string, error) {
+	return c.clusterName, nil
+}
+
 func TestCommonDataProvider_FetchCommonData(t *testing.T) {
+	clusterName := "my-cluster"
 	cdProvider := CommonDataProvider{
-		log:        logp.NewLogger("cloudbeat_common_data_provider_test"),
-		kubeClient: k8sFake.NewSimpleClientset(),
-		cfg:        config.Config{},
+		log:                 logp.NewLogger("cloudbeat_common_data_provider_test"),
+		kubeClient:          k8sFake.NewSimpleClientset(),
+		cfg:                 config.Config{},
+		clusterNameProvider: clusterNameProviderMock{clusterName},
 	}
 
 	type args struct {
@@ -75,6 +85,7 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 
 			assert.Equal(t, tt.want.clusterId, got.GetData().clusterId, "commonData clusterId is not correct")
 			assert.Equal(t, tt.want.nodeId, got.GetData().nodeId, "commonData nodeId is not correct")
+			assert.Equal(t, clusterName, got.GetData().clusterName, "commonData nodeId is not correct")
 		})
 	}
 }
