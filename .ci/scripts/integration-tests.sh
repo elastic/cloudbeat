@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euxo pipefail
 
 
 non_blocking_wait() {
@@ -17,8 +16,13 @@ get_logs () {
   kubectl logs --selector="catf=related" --all-containers=true --prefix -n kube-system --timestamps=true --since 10s
 }
 
+run_tests () {
+  set -euxo pipefail
+  just run-tests "$1"
+}
+
 main () {
-  just run-tests "$1" &
+  just run_tests "$1" &
   PID=$!
   while true; do
     get_logs
