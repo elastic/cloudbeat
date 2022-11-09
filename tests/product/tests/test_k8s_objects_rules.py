@@ -55,8 +55,9 @@ def test_kube_resource_patch(elastic_client, test_env, rule_tag, resource_type, 
             f'Could not patch resource type {resource_type}:'
             f' {relevant_metadata} with patch {resource_body}')
 
-    def match_resource(eval_resource):
+    def match_resource(ident_resource):
         try:
+            eval_resource = ident_resource.resource.raw
             return eval_resource.metadata.labels.test_resource_id == test_resource_id
         except AttributeError:
             return False
