@@ -41,5 +41,7 @@ for P in $(get_agents); do
     cp_to_pod $POD $LOCAL_DIR/bundle.tar.gz $BUNDLE_DIR/bundle.tar.gz
   fi
   echo "Copied all the assets, restarting the agent $POD"
-  exec_pod $POD "elastic-agent restart"
+  PID=$(exec_pod $POD "pidof cloudbeat")
+  exec_pod $POD "kill -9 $PID"
+  # exec_pod $POD "elastic-agent restart" 
 done
