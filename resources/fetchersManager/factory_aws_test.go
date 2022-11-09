@@ -19,6 +19,7 @@ package fetchersManager
 
 import (
 	"context"
+
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -78,8 +79,6 @@ func (n *awsTestFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetc
 
 func awsMockedFetcherConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS) *agentconfig.C {
 	c := agentconfig.NewConfig()
-	conf := config.DefaultConfig
-	conf.Type = config.InputTypeEks
 	err := c.Merge(awsConfig)
 	s.NoError(err)
 
@@ -87,11 +86,12 @@ func awsMockedFetcherConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS) *age
 }
 
 func (s *FactoriesTestSuite) TestCreateFetcherWithAwsCredentials() {
-	var tests = []struct {
+	tests := []struct {
 		fetcherName string
 		awsConfig   aws.ConfigAWS
 	}{
-		{"some_fetcher",
+		{
+			"some_fetcher",
 			aws.ConfigAWS{
 				AccessKeyID:     "key",
 				SecretAccessKey: "secret",
@@ -120,7 +120,7 @@ func (s *FactoriesTestSuite) TestCreateFetcherWithAwsCredentials() {
 }
 
 func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
-	var tests = []struct {
+	tests := []struct {
 		fetcherName string
 		awsConfig   aws.ConfigAWS
 	}{
