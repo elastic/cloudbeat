@@ -77,11 +77,10 @@ def get_fixtures():
     return cloudbeat_agent, k8s
 
 
-def pytest_sessionfinish(session, exitstatus):
+def pytest_sessionfinish(session):
     """
     Called after whole test run finished, right before returning the exit status to the system.
     @param session: The pytest session object.
-    @param exitstatus: (Union[int, ExitCode]) – The status which pytest will return to the system
     @return:
     """
 
