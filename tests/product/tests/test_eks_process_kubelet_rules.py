@@ -6,16 +6,16 @@ from datetime import datetime, timedelta
 import pytest
 from commonlib.utils import get_ES_evaluation
 
-from product.tests.data.file_system import eks_file_system_test_cases as eks_fs_tc
+from product.tests.data.process import eks_process_test_cases as eks_proc_tc
 from product.tests.parameters import register_params, Parameters
 
 
-@pytest.mark.eks_file_system_rules
-def test_eks_file_system_configuration(elastic_client,
-                                       cloudbeat_agent,
-                                       rule_tag,
-                                       node_hostname,
-                                       expected):
+@pytest.mark.eks_process_rules
+def test_eks_process_rules(elastic_client,
+                           cloudbeat_agent,
+                           rule_tag,
+                           node_hostname,
+                           expected):
     """
     This data driven test verifies rules and findings return by cloudbeat agent.
     In order to add new cases @pytest.mark.parameterize section shall be updated.
@@ -37,7 +37,7 @@ def test_eks_file_system_configuration(elastic_client,
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.findings_timeout,
         rule_tag=rule_tag,
-        exec_timestamp=datetime.utcnow() - timedelta(hours=1),
+        exec_timestamp=datetime.utcnow() - timedelta(hours=4),
         resource_identifier=identifier,
     )
 
@@ -46,18 +46,12 @@ def test_eks_file_system_configuration(elastic_client,
                                    f"expected: {expected}, got: {evaluation}"
 
 
-register_params(test_eks_file_system_configuration, Parameters(
+register_params(test_eks_process_rules, Parameters(
     ("rule_tag", "node_hostname", "expected"),
     [
-        *eks_fs_tc.cis_eks_3_1_1.values(),
-        *eks_fs_tc.cis_eks_3_1_2.values(),
-        *eks_fs_tc.cis_eks_3_1_3.values(),
-        *eks_fs_tc.cis_eks_3_1_4.values()
-     ],
+        *eks_proc_tc.cis_eks_kubelet_cases.values()
+    ],
     ids=[
-        *eks_fs_tc.cis_eks_3_1_1.keys(),
-        *eks_fs_tc.cis_eks_3_1_2.keys(),
-        *eks_fs_tc.cis_eks_3_1_3.keys(),
-        *eks_fs_tc.cis_eks_3_1_4.keys()
+        *eks_proc_tc.cis_eks_kubelet_cases.keys()
     ]
 ))
