@@ -101,3 +101,29 @@ class ElasticWrapper:
         }]
 
         return query, sort
+
+    @staticmethod
+    def build_es_must_match_query(must_query_list: list[dict]):
+
+        query = {
+            "bool": {
+                "must": must_query_list,
+                "filter": [
+                    {
+                        "range": {
+                            "@timestamp": {
+                                "gte": "now-30m"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        sort = [{
+            "@timestamp": {
+                "order": "desc"
+            }
+        }]
+
+        return query, sort

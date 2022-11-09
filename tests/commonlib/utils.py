@@ -38,13 +38,12 @@ def get_ES_evaluation(elastic_client, timeout, rule_tag, exec_timestamp,
                 latest_timestamp = findings_timestamp
 
             try:
-                resource = event.resource.raw
                 evaluation = event.result.evaluation
             except AttributeError:
                 print('Warning: got finding with missing fields:', event)
                 continue
 
-            if resource_identifier(resource):
+            if resource_identifier(event):
                 return evaluation
 
     return None
