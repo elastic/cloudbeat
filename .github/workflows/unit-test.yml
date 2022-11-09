@@ -47,7 +47,7 @@ jobs:
 
       - name: Unit-Test Cloudbeat
         run: |
-          GOOS=linux go test -coverprofile=covprofile ./...
+          GOOS=linux go test -coverpkg=./... -coverprofile=covprofile ./...
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v3
