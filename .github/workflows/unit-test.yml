@@ -36,9 +36,49 @@ jobs:
       - name: Mage checkLicenseHeaders
         run: mage checkLicenseHeaders
 
+      - name: Mage build bundle before unit tests
+        uses: magefile/mage-action@v1.6.0
+        with:
+          args: buildOpaBundle
+
+      - name: Copy bundle to requried dirs
+        run: |
+          cp bundle.tar.gz evaluator/
+
       - name: Unit-Test Cloudbeat
         run: |
-          GOOS=linux go test ./...
+          GOOS=linux go test -coverpkg=./... -coverprofile=covprofile ./...
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-file
+          path: covprofile
+
+  coverage:
+    name: Coverage report
+    needs: unit_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Install goveralls
+        run: go install github.com/mattn/goveralls@latest
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-file
+
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -coverprofile=covprofile -service=github
 
   manifest_tests:
     name: Manifest Tests

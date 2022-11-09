@@ -83,7 +83,7 @@ func mapToArray(m map[string]interface{}) []interface{} {
 }
 
 func newLogger() logging.Logger {
-	lvl := zap.NewAtomicLevelAt(zapcore.InfoLevel)
+	lvl := zap.NewAtomicLevelAt(zapcore.DebugLevel)
 	log := logp.NewLogger("opa").WithOptions(
 		zap.IncreaseLevel(lvl),
 		zap.AddCallerSkip(1),
