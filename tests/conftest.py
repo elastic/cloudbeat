@@ -30,6 +30,15 @@ def cloudbeat_agent():
 
 
 @pytest.fixture(scope="session", autouse=True)
+def eks_cluster():
+    """
+    This function (fixture) retrieves eks_cluster configuration, defined in configuration.py file.
+    @return: EKS config
+    """
+    return configuration.eks
+
+
+@pytest.fixture(scope="session", autouse=True)
 def elastic_client():
     """
     This function (fixture) instantiate ElasticWrapper.
@@ -59,7 +68,7 @@ def api_client():
 def pytest_addoption(parser):
     parser.addoption(
         '--range',
-        default=['..'],
+        default='..',
         help='range to run tests on',
     )
 
