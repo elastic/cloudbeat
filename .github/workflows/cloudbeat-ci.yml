@@ -72,6 +72,10 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new
           outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
+      - name: Build elastic-agent
+        run: |
+          make build_elastic_agent_docker_image
+
       - name: Build pytest-docker
         uses: docker/build-push-action@v2
         with:
@@ -87,24 +91,25 @@ jobs:
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
-          restore-keys: |
-            ${{ runner.os }}-dockers-cache-
 
       - name: Move cache
         run: |
-          chmod +x ./.ci/scripts/gh-cache.sh
           ./.ci/scripts/gh-cache.sh
         shell: bash
 
   Test_Matrix:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
-    needs: Build
+    needs: [Build]
     runs-on: ubuntu-latest
     timeout-minutes: 55
     strategy:
       matrix:
         include:
+          - test-target: post_merge_agent
+            range: ''
+            values_files: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
+            range: ''
           - test-target: file_system_rules
             range: '0..5'
           - test-target: file_system_rules
@@ -220,8 +225,6 @@ jobs:
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
-          restore-keys: |
-            ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Load images to kind
         run: |
@@ -231,7 +234,7 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm tests/deploy/values/ci.yml ${{ matrix.test-target }} ${{ matrix.range }}
+          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.range }} ${{ matrix.values_file }}
 
       - name: Run Tests
         id: run_tests
@@ -247,5 +250,5 @@ jobs:
 
       - name: clear cache
         id: clear_cache
-        if: success()
-        run: rm -rf /tmp/${{ env.CONTAINER_SUFFIX }}.tar
+        if: always()
+        run: rm -rf /tmp/*-${{ env.CONTAINER_SUFFIX }}.tar
