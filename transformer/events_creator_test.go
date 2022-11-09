@@ -20,7 +20,7 @@ package transformer
 import (
 	"context"
 	"encoding/json"
-	"io"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"testing"
@@ -151,7 +151,7 @@ func parseJsonfile(filename string, data interface{}) error {
 	}
 	defer fetcherDataFile.Close()
 
-	byteValue, err := io.ReadAll(fetcherDataFile)
+	byteValue, err := ioutil.ReadAll(fetcherDataFile)
 	if err != nil {
 		return err
 	}
