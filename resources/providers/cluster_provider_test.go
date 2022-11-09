@@ -112,3 +112,15 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		s.Equal(test.expectedClusterName, clusterName)
 	}
 }
+
+func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
+	clusterProvider := ClusterNameProvider{}
+	ctx := context.Background()
+	cfg := config.Config{
+		Type: "invalid-type",
+		Stream: config.Stream{
+			AWSConfig: aws.ConfigAWS{},
+		},
+	}
+	s.Panics(func() { clusterProvider.GetClusterName(ctx, cfg) })
+}
