@@ -29,10 +29,10 @@ type ClusterNameProvider interface {
 func (provider EKSClusterNameProvider) GetClusterName(ctx context.Context, cfg aws.Config, instanceId string) (string, error) {
 	// With EKS, there is no data source that can guarantee to return the cluster name.
 	// Therefore, we need to try multiple ways to find the cluster name.
-	// First, try to find the cluster name from the instance tags.
+	// First, try to extract the cluster name from the instance tags.
 	// This is the most reliable way to find the cluster name.
-	// However, this method will work only on new EKS clusters
-	// Therefor,if the tag was not found we will try to extract the cluster name from the autoscaling group.
+	// However, this method will work only on new EKS clusters.
+	// Therefore, if the tag was not found we will try to extract the cluster name from the autoscaling group.
 	clusterName, err := provider.getClusterNameFromInstanceTags(ctx, cfg, instanceId)
 	if err != nil {
 		return "", fmt.Errorf("failed to get cluster name from the instance tags: %v", err)
