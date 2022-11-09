@@ -22,7 +22,7 @@ run_tests () {
 }
 
 main () {
-  just run_tests "$1" &
+  run_tests "$1" &
   PID=$!
   while true; do
     get_logs
