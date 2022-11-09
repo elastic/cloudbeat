@@ -531,8 +531,6 @@ github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 h1:YEetp8
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220726163833-e8a0da132f1f h1:38wPsXXWiK2HH9lI0swZ+H0MZhEbzrpkwVJCxLhU59c=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20220726163833-e8a0da132f1f/go.mod h1:TbnF0mFQuaoeDCZyiCzCd/xLmTtY+NpgRCDv3rouHJM=
 github.com/elastic/csp-security-policies v1.2.2 h1:lWoYY9KaxMuupVNtGd63y9EvUYYKg6ab2wmdIBV6q+s=
 github.com/elastic/csp-security-policies v1.2.2/go.mod h1:3fA3X9OiyP7IRNyacOGnWqt1eHSMVZRx7p3bmZm98oE=
 github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4 h1:uYT+Krd8dsvnhnLK9pe/JHZkYtXEGPfbV4Wt1JPPol0=
@@ -1548,9 +1546,8 @@ github.com/yvasiyarov/newrelic_platform_go v0.0.0-20140908184405-b21fdbd4370f h1
 github.com/yvasiyarov/newrelic_platform_go v0.0.0-20140908184405-b21fdbd4370f/go.mod h1:GlGEuHIJweS1mbCqG+7vt2nvWLzLLnRHbXz5JKd/Qbg=
 github.com/ziutek/mymysql v1.5.4/go.mod h1:LMSpPZ6DbqWFxNCHW77HeMg9I646SAhApZ/wKdgO/C0=
 go.elastic.co/apm v1.10.0/go.mod h1:qoOSi09pnzJDh5fKnfY7bPmQgl8yl2tULdOu03xhui0=
+go.elastic.co/apm v1.13.0 h1:SUCDscFfpshuxoxuoSh+r+2E3v1uvd5HrlRK5ZHpyvs=
 go.elastic.co/apm v1.13.0/go.mod h1:dylGv2HKR0tiCV+wliJz1KHtDyuD8SPe69oV7VyK6WY=
-go.elastic.co/apm v1.15.0 h1:uPk2g/whK7c7XiZyz/YCUnAUBNPiyNeE3ARX3G6Gx7Q=
-go.elastic.co/apm v1.15.0/go.mod h1:dylGv2HKR0tiCV+wliJz1KHtDyuD8SPe69oV7VyK6WY=
 go.elastic.co/apm/module/apmelasticsearch v1.10.0/go.mod h1:lwoaGDfZzfb9e6TXd3h8/KNmLAONOas7o5NLVNmv8Xk=
 go.elastic.co/apm/module/apmelasticsearch/v2 v2.0.0 h1:5UaI4agfuGoGRhpFVb6s63Hj/9xtqYxF7kd6T77tNAw=
 go.elastic.co/apm/module/apmelasticsearch/v2 v2.0.0/go.mod h1:GmYz+KDp2LDAa2nd/qJ+OkrjWVEoCRIPAWarbUvyt6Y=

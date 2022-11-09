@@ -165,7 +165,7 @@ require (
 	github.com/dop251/goja_nodejs v0.0.0-20220712185256-8cad205bf387 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
-	github.com/elastic/elastic-agent-client/v7 v7.0.0-20220804181728-b0328d2fe484 // indirect
+	github.com/elastic/elastic-agent-client/v7 v7.0.0-20220804181728-b0328d2fe484
 	github.com/elastic/elastic-agent-system-metrics v0.4.4 // indirect
 	github.com/elastic/go-concert v0.2.0 // indirect
 	github.com/elastic/go-lumber v0.1.0 // indirect
