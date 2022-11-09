@@ -80,7 +80,7 @@ func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInte
 
 	clusterName, err := c.clusterNameProvider.GetClusterName(ctx, c.cfg)
 	if err != nil {
-		c.log.Errorf("Could not fetch cluster name", err)
+		c.log.Errorf("could not fetch cluster name", err)
 	}
 	cm.clusterName = clusterName
 

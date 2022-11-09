@@ -16,6 +16,9 @@ type KubernetesClusterNameProvider struct {
 
 func (provider KubernetesClusterNameProvider) GetClusterName(cfg config.Config, client k8s.Interface) (string, error) {
 	agentConfig, err := agentcfg.NewConfigFrom(cfg)
+	if err != nil {
+		return "", fmt.Errorf("failed to create agent config: %v", err)
+	}
 	clusterIdentifier, err := metadata.GetKubernetesClusterIdentifier(agentConfig, client)
 	if err != nil {
 		return "", fmt.Errorf("fail to resolve the name of the cluster, error %v", err)
