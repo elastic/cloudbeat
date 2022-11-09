@@ -15,7 +15,7 @@ type EKSClusterNameProvider struct {
 
 const (
 	asgPattern     = "^kubernetes.io/cluster/(.*)$"
-	ClusterNameTag = "eks:cluster-name"
+	clusterNameTag = "eks:cluster-name"
 )
 
 var (
@@ -29,14 +29,13 @@ type ClusterNameProvider interface {
 func (provider EKSClusterNameProvider) GetClusterName(ctx context.Context, cfg aws.Config, instanceId string) (string, error) {
 	// With EKS, there is no data source that can guarantee to return the cluster name.
 	// Therefore, we need to try multiple ways to find the cluster name.
-	// First, try to find the cluster name from the instance tag
-	// This is the most reliable way to find the cluster name
+	// First, try to find the cluster name from the instance tags.
+	// This is the most reliable way to find the cluster name.
 	// However, this method will work only on new EKS clusters
-	// In that case, we will try to find the cluster name from the autoscaling group
-	svc1 := ec2.NewFromConfig(cfg)
-	clusterName, err := provider.getClusterNameFromInstanceTag(ctx, svc1, instanceId)
+	// Therefor,if the tag was not found we will try to extract the cluster name from the autoscaling group.
+	clusterName, err := provider.getClusterNameFromInstanceTags(ctx, cfg, instanceId)
 	if err != nil {
-		return "", fmt.Errorf("failed to get cluster name from the instance tag: %v", err)
+		return "", fmt.Errorf("failed to get cluster name from the instance tags: %v", err)
 	}
 	if clusterName != "" {
 		return clusterName, nil
@@ -49,25 +48,24 @@ func (provider EKSClusterNameProvider) GetClusterName(ctx context.Context, cfg a
 	return clusterName, nil
 }
 
-func (provider EKSClusterNameProvider) getClusterNameFromInstanceTag(ctx context.Context, svc *ec2.Client, instanceId string) (string, error) {
+func (provider EKSClusterNameProvider) getClusterNameFromInstanceTags(ctx context.Context, cfg aws.Config, instanceId string) (string, error) {
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []string{instanceId},
 	}
+	svc := ec2.NewFromConfig(cfg)
 
 	for {
 		r, err := svc.DescribeInstances(ctx, input)
 		if err != nil {
-			klog.Errorf("failed to describe cluster: %v", err)
-			return "", err
+			return "", fmt.Errorf("failed to describe instance required for cluster name detection: %v", err)
 		}
 
-		// ClusterName will be found in the autoscaling group tag with "owned" value.
-		// Find the autoscaling group that has this instance, then get the cluster name from the tag of that group
+		// Look for the cluster name tag in the instance tags
 		for _, reservation := range r.Reservations {
 			for _, instance := range reservation.Instances {
 				if *instance.InstanceId == instanceId {
 					for _, tag := range instance.Tags {
-						if *tag.Key == ClusterNameTag {
+						if *tag.Key == clusterNameTag {
 							return *tag.Value, nil
 						}
 					}
@@ -84,7 +82,6 @@ func (provider EKSClusterNameProvider) getClusterNameFromInstanceTag(ctx context
 }
 
 func (provider EKSClusterNameProvider) getClusterNameFromAutoscalingGroup(ctx context.Context, cfg aws.Config, instanceId string) (string, error) {
-	klog.Infof("attempting to find cluster name from autoscaling group")
 	svc := autoscaling.NewFromConfig(cfg)
 	input := &autoscaling.DescribeAutoScalingGroupsInput{}
 
@@ -101,11 +98,10 @@ func (provider EKSClusterNameProvider) getClusterNameFromAutoscalingGroup(ctx co
 			for _, instance := range autoscalingGroup.Instances {
 				if *instance.InstanceId == instanceId {
 					for _, tag := range autoscalingGroup.Tags {
-						tagB := []byte(*tag.Key)
-						if *tag.Value == "owned" && asgCompiledRegex.Match(tagB) {
-							groups := asgCompiledRegex.FindSubmatch(tagB)
-							clusterName := string(groups[1][:])
-							klog.Infof("found cluster name from autoscaling group: '%v'", clusterName)
+						stringifyTag := *tag.Key
+						if *tag.Value == "owned" && asgCompiledRegex.MatchString(stringifyTag) {
+							groups := asgCompiledRegex.FindStringSubmatch(stringifyTag)
+							clusterName := groups[1][:]
 							return clusterName, nil
 						}
 					}
