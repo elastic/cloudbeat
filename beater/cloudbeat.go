@@ -70,7 +70,7 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 		return nil, err
 	}
 
-	reload.Register.MustRegisterList("inputs", reloader)
+	reload.RegisterV2.MustRegisterInput(reloader)
 	return s, nil
 }
 
