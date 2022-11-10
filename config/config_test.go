@@ -196,33 +196,6 @@ runtime_cfg:
 	}
 }
 
-func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
-	tests := []struct {
-		config   string
-		expected EvaluatorConfig
-	}{
-		{
-			`
-evaluator:
-  decision_logs: true
-`,
-			EvaluatorConfig{
-				DecisionLogs: true,
-			},
-		},
-	}
-
-	for _, test := range tests {
-		cfg, err := config.NewConfigFrom(test.config)
-		s.NoError(err)
-
-		c, err := New(cfg)
-		s.NoError(err)
-
-		s.Equal(test.expected, c.Evaluator)
-	}
-}
-
 func (s *ConfigTestSuite) TestConfigPeriod() {
 	tests := []struct {
 		config         string
