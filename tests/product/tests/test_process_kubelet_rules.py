@@ -46,8 +46,9 @@ def test_process_kubelet(elastic_client,
     # TODO: Implement a more optimal way of waiting
     time.sleep(60)
 
-    def identifier(eval_resource):
+    def identifier(ident_resource):
         try:
+            eval_resource = ident_resource.resource.raw
             kubelet_config = eval_resource.external_data.config
         except AttributeError:
             return False

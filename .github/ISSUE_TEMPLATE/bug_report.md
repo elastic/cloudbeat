@@ -7,10 +7,10 @@ assignees: ''
 ---
 
 **Describe the bug**
-Write a detailed description of the observer behavior using the actions you performed.
+Write a detailed description of the observed behavior using the actions you performed.
 
 **Preconditions**
-Environment state and/or platform specific configurations.
+Environment state and/or platform-specific configurations.
 
 **To Reproduce**
 Write the exact actions one should perform in order to reproduce the bug.
@@ -19,8 +19,6 @@ Steps to reproduce the behavior:
 
 
 **Expected behavior**
-
-
 <!-- Optional: Please uncomment if relevant
 **Screenshots**
 -->

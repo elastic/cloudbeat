@@ -66,7 +66,29 @@ func (s *LoggerTestSuite) TestLogFields() {
 	logs := logp.ObserverLogs().TakeAll()
 	if s.Len(logs, 1) {
 		s.assertLog(logs[0], zap.DebugLevel, "debug")
+		s.Len(logs[0].Context, 1)
 		s.Equal("val", logs[0].ContextMap()["key"])
+	}
+}
+
+func (s *LoggerTestSuite) TestLogMultipleFields() {
+	logger := newLogger()
+	logger.SetLevel(logging.Debug)
+	logger = logger.WithFields(map[string]interface{}{
+		"key1": "val1",
+	})
+
+	logger = logger.WithFields(map[string]interface{}{
+		"key2": "val2",
+	})
+
+	logger.Debug("debug")
+	logs := logp.ObserverLogs().TakeAll()
+	if s.Len(logs, 1) {
+		s.assertLog(logs[0], zap.DebugLevel, "debug")
+		s.Len(logs[0].Context, 2)
+		s.Equal("val1", logs[0].ContextMap()["key1"])
+		s.Equal("val2", logs[0].ContextMap()["key2"])
 	}
 }
 
