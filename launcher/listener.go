@@ -21,17 +21,15 @@
 package launcher
 
 import (
-	"context"
-
 	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Listener struct {
-	ctx context.Context
-	log *logp.Logger
-	ch  chan *config.C
+	log  *logp.Logger
+	done chan struct{}
+	ch   chan *config.C
 }
 
 func (l *Listener) Reload(configs []*reload.ConfigWithMeta) error {
@@ -39,14 +37,14 @@ func (l *Listener) Reload(configs []*reload.ConfigWithMeta) error {
 		return nil
 	}
 
-	l.log.Infof("Received %v new configs for reload.", len(configs))
+	l.log.Infof("Listener received %v new configs for reload.", len(configs))
 
 	// TODO(yashtewari): Based on limitations elsewhere, such as the CSP integration,
 	// don't think we should receive more than one Config here. Need to confirm and handle.
 	data := configs[len(configs)-1].Config
 
 	select {
-	case <-l.ctx.Done():
+	case <-l.done:
 	case l.ch <- data:
 	}
 
@@ -57,11 +55,16 @@ func (l *Listener) Channel() <-chan *config.C {
 	return l.ch
 }
 
-func NewListener(ctx context.Context, log *logp.Logger) *Listener {
-	ch := make(chan *config.C)
+func (l *Listener) Stop() {
+	l.log.Info("Listener is about to stop")
+	close(l.done)
+	close(l.ch)
+}
+
+func NewListener(log *logp.Logger) *Listener {
 	return &Listener{
-		ctx: ctx,
-		log: log,
-		ch:  ch,
+		log:  log,
+		done: make(chan struct{}),
+		ch:   make(chan *config.C),
 	}
 }
