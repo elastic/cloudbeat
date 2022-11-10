@@ -179,7 +179,7 @@ In order to control the policy type you can pass the following environment varia
 POLICY_TYPE=cloudbeat/cis_eks mage config
 ```
 
-The default `POLICY_TYPE` is set to `cloudbeat/cis_k8s` on `_meta/config/cloudbeat.common.yml.tmpl`
+The default `POLICY_TYPE` is set to `cloudbeat/cis_k8s` on [`_meta/config/cloudbeat.common.yml.tmpl`](_meta/config/cloudbeat.common.yml.tmpl)
 
 ## Code guidelines
 
