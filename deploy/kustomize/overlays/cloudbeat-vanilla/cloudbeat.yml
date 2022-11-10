@@ -31,8 +31,6 @@ cloudbeat:
             "/hostfs/var/lib/etcd",
             "/hostfs/etc/kubernetes/pki"
           ]
-      evaluator:
-        decision_logs: false
 # =================================== Kibana ===================================
 setup.kibana:
 

@@ -57,8 +57,6 @@ cloudbeat:
 #          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
 #          "/hostfs/var/lib/kubelet/kubeconfig",
 #        ]
-    evaluator:
-      decision_logs: false
 
 # ================================== General ===================================
 
