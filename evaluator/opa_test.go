@@ -97,27 +97,16 @@ func TestOpaEvaluatorWithDecisionLogs(t *testing.T) {
 	log := logp.NewLogger("opa_evaluator_test")
 
 	tests := []struct {
-		enabled  bool
 		evals    int
 		expected int
 	}{
-		{true, 1, 1},
-		{true, 3, 3},
-		{false, 1, 0},
-		{false, 3, 0},
+		{1, 1},
+		{3, 3},
 	}
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("TestEvaluationsDecisionLogs %+v", tt), func(t *testing.T) {
-			cfg := config.Config{
-				Stream: config.Stream{
-					Evaluator: config.EvaluatorConfig{
-						DecisionLogs: tt.enabled,
-					},
-				},
-			}
-
-			e, err := NewOpaEvaluator(ctx, log, cfg)
+			e, err := NewOpaEvaluator(ctx, log, config.Config{})
 			assert.NoError(t, err)
 
 			for i := 0; i < tt.evals; i++ {
