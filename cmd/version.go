@@ -15,11 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package version
+package cmd
 
-// Version represents version information for a package
-type Version struct {
-	Version    string `json:"version,omitempty"`     // Version is the semantic version of the package
-	CommitHash string `json:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
-	CommitTime string `json:"commit_time,omitempty"` // CommitTime is the git commit time of the package
+// name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
+const defaultBeatVersion = "8.6.0"
+
+// GetBeatVersion returns the version of the beat
+func GetBeatVersion() string {
+	return defaultBeatVersion
 }
