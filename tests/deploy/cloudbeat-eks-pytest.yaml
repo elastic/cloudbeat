@@ -223,8 +223,6 @@ data:
                 - cis_5_1_1
                 - cis_5_4_3
                 - cis_5_4_5
-          evaluator:
-            decision_logs: false
     # =================================== Kibana ===================================
     setup.kibana:
 
