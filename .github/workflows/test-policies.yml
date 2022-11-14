@@ -13,27 +13,27 @@ jobs:
         uses: actions/checkout@v2
 
       - name: OPA format
-        uses: docker://openpolicyagent/opa
+        uses: docker://openpolicyagent/opa:0.45.0
         with:
           args: "fmt ./bundle --fail=true --diff"
 
       - name: OPA format list failed files
-        uses: docker://openpolicyagent/opa
+        uses: docker://openpolicyagent/opa:0.45.0
         if: always()
         with:
           args: "fmt ./bundle --list"
 
       - name: OPA build
-        uses: docker://openpolicyagent/opa
+        uses: docker://openpolicyagent/opa:0.45.0
         with:
           args: "build -b ./bundle -e ./bundle/compliance"
 
       - name: OPA test
-        uses: docker://openpolicyagent/opa
+        uses: docker://openpolicyagent/opa:0.45.0
         with:
           args: "test -b ./bundle -v"
 
       - name: OPA check -strict
-        uses: docker://openpolicyagent/opa
+        uses: docker://openpolicyagent/opa:0.45.0
         with:
           args: "check --strict --bundle ./bundle"
