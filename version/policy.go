@@ -44,6 +44,6 @@ func PolicySemanticVersion() string {
 // PolicyVersion returns cloudbeat version info used for the build.
 func PolicyVersion() Version {
 	return Version{
-		SemanticVersion: PolicySemanticVersion(),
+		Version: PolicySemanticVersion(),
 	}
 }

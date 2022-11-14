@@ -125,17 +125,17 @@ func (c CommonDataProvider) FetchServerVersion() (version.Version, error) {
 		return version.Version{}, err
 	}
 	return version.Version{
-		SemanticVersion: serverVersion.Major + "." + serverVersion.Minor,
+		Version: serverVersion.Major + "." + serverVersion.Minor,
 	}, nil
 }
 
-func (c CommonDataProvider) FetchVersionInfo() (fetching.VersionInfo, error) {
+func (c CommonDataProvider) FetchVersionInfo() (fetching.CloudbeatVersionInfo, error) {
 	serverVersion, err := c.FetchServerVersion()
 	if err != nil {
-		return fetching.VersionInfo{}, err
+		return fetching.CloudbeatVersionInfo{}, err
 	}
-	return fetching.VersionInfo{
-		Cloudbeat:  version.CloudbeatVersion(),
+	return fetching.CloudbeatVersionInfo{
+		Version:    version.CloudbeatVersion(), // cloudbeat version info
 		Policy:     version.PolicyVersion(),
 		Kubernetes: serverVersion,
 	}, nil
@@ -156,6 +156,6 @@ func (cd CommonData) GetData() CommonData {
 	return cd
 }
 
-func (cd CommonData) GetVersionInfo() fetching.VersionInfo {
+func (cd CommonData) GetVersionInfo() fetching.CloudbeatVersionInfo {
 	return cd.versionInfo
 }

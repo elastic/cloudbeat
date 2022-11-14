@@ -38,11 +38,11 @@ type CommonDataProvider struct {
 type CommonData struct {
 	clusterId   string
 	nodeId      string
-	versionInfo fetching.VersionInfo
+	versionInfo fetching.CloudbeatVersionInfo
 }
 
 type CommonDataInterface interface {
 	GetData() CommonData
 	GetResourceId(fetching.ResourceMetadata) string
-	GetVersionInfo() fetching.VersionInfo
+	GetVersionInfo() fetching.CloudbeatVersionInfo
 }

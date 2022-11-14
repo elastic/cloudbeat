@@ -22,7 +22,7 @@ const defaultBeatVersion = "8.6.0"
 
 // Version represents version information for a package
 type Version struct {
-	SemanticVersion string `json:"semantic_version,omitempty"`
-	CommitHash      string `json:"commit_sha,omitempty"`
-	CommitTime      string `json:"commit_time,omitempty"` // time.Time is not nullable
+	Version    string `json:"version,omitempty"`     // Version is the semantic version of the package
+	CommitHash string `json:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
+	CommitTime string `json:"commit_time,omitempty"` // CommitTime is the git commit time of the package
 }

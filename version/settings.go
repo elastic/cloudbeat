@@ -58,8 +58,8 @@ func CloudbeatSemanticVersion() string {
 // CloudbeatVersion returns cloudbeat version info used for the build.
 func CloudbeatVersion() Version {
 	return Version{
-		SemanticVersion: CloudbeatSemanticVersion(),
-		CommitHash:      CloudbeatCommitHash(),
-		CommitTime:      CloudbeatCommitTime(),
+		Version:    CloudbeatSemanticVersion(),
+		CommitHash: CloudbeatCommitHash(),
+		CommitTime: CloudbeatCommitTime(),
 	}
 }

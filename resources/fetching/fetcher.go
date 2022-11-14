@@ -63,18 +63,17 @@ type ResourceFields struct {
 }
 
 type ResourceMetadata struct {
-	ID          string      `json:"id"`
-	Type        string      `json:"type"`
-	SubType     string      `json:"sub_type,omitempty"`
-	Name        string      `json:"name,omitempty"`
-	ECSFormat   string      `json:"ecsFormat,omitempty"`
-	VersionInfo VersionInfo `json:"version,omitempty"`
+	ID        string `json:"id"`
+	Type      string `json:"type"`
+	SubType   string `json:"sub_type,omitempty"`
+	Name      string `json:"name,omitempty"`
+	ECSFormat string `json:"ecsFormat,omitempty"`
 }
 
-type VersionInfo struct {
-	Cloudbeat  version.Version `json:"cloudbeat,omitempty"`
-	Policy     version.Version `json:"policy,omitempty"`
-	Kubernetes version.Version `json:"kubernetes,omitempty"`
+type CloudbeatVersionInfo struct {
+	version.Version
+	Policy     version.Version `json:"policy,omitempty"`     // Policy version info for the rules policy
+	Kubernetes version.Version `json:"kubernetes,omitempty"` // Kubernetes version info for the rules policy
 }
 
 type Result struct {
