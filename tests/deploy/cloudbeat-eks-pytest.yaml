@@ -177,7 +177,7 @@ data:
         - access_key_id: ${AWS_ACCESS_KEY_ID:no_access_key_was_set}
           secret_access_key: ${AWS_SECRET_ACCESS_KEY:no_secret_was_set}
           # Defines how often an event is sent to the output
-          period: 5s
+          period: 30s
           fetchers:
             - name: kube-api
             - name: process
@@ -193,8 +193,36 @@ data:
                 "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
                 "/hostfs/var/lib/kubelet/kubeconfig",
               ]
-          evaluator:
-            decision_logs: false
+          runtime_cfg:
+            activated_rules:
+              cis_eks:
+                - cis_3_1_1
+                - cis_3_1_2
+                - cis_3_1_3
+                - cis_3_1_4
+                - cis_3_2_1
+                - cis_3_2_2
+                - cis_3_2_3
+                - cis_3_2_4
+                - cis_3_2_5
+                - cis_3_2_6
+                - cis_3_2_7
+                - cis_3_2_8
+                - cis_3_2_9
+                - cis_3_2_10
+                - cis_3_2_11
+                - cis_4_2_1
+                - cis_4_2_2
+                - cis_4_2_3
+                - cis_4_2_4
+                - cis_4_2_5
+                - cis_4_2_6
+                - cis_4_2_7
+                - cis_4_2_8
+                - cis_4_2_9
+                - cis_5_1_1
+                - cis_5_4_3
+                - cis_5_4_5
     # =================================== Kibana ===================================
     setup.kibana:
 
@@ -305,7 +333,6 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         image: public.ecr.aws/z7e1r9l0/cloudbeat:latest
-        imagePullPolicy: IfNotPresent
         name: cloudbeat
         resources:
           requests:

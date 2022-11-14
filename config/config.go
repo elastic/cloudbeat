@@ -44,18 +44,12 @@ type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
 }
 
-type AgentInput struct {
-	Streams []Stream `config:"streams"`
-	Type    string   `config:"type"`
-}
-
 type Stream struct {
 	AWSConfig  aws.ConfigAWS           `config:",inline"`
 	RuntimeCfg *RuntimeConfig          `config:"runtime_cfg"`
 	Fetchers   []*config.C             `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
-	Evaluator  EvaluatorConfig         `config:"evaluator"`
 	Processors processors.PluginConfig `config:"processors"`
 }
 
@@ -68,32 +62,31 @@ type RuntimeConfig struct {
 	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
 }
 
-type EvaluatorConfig struct {
-	DecisionLogs bool `config:"decision_logs"`
-}
-
 type Benchmarks struct {
 	CisK8s []string `config:"cis_k8s,omitempty" yaml:"cis_k8s,omitempty" json:"cis_k8s,omitempty"`
 	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
-var DefaultConfig = AgentInput{
-	Type: InputTypeVanillaK8s,
-	Streams: []Stream{{
-		Period: 4 * time.Hour,
-	}},
+var DefaultConfig = Stream{
+	Period: 4 * time.Hour,
 }
 
 func New(cfg *config.C) (Config, error) {
+	// work with v1 cloudbeat.yml in dev mod
+	if cfg.HasField("streams") {
+		return newStandaloneConfig(cfg)
+	}
 	c := DefaultConfig
-
 	if err := cfg.Unpack(&c); err != nil {
 		return Config{}, err
 	}
-
+	inputType := InputTypeVanillaK8s
+	if c.RuntimeCfg != nil && c.RuntimeCfg.ActivatedRules != nil && len(c.RuntimeCfg.ActivatedRules.CisEks) > 0 {
+		inputType = InputTypeEks
+	}
 	return Config{
-		Stream: c.Streams[0],
-		Type:   c.Type,
+		Stream: c,
+		Type:   inputType,
 	}, nil
 }
 
@@ -103,6 +96,22 @@ func Datastream(namespace string, indexPrefix string) string {
 		namespace = DefaultNamespace
 	}
 	return indexPrefix + "-" + namespace
+}
+
+// stanalone config is used for development flows
+// see an example deploy/kustomize/overlays/cloudbeat-vanilla/cloudbeat.yml
+func newStandaloneConfig(cfg *config.C) (Config, error) {
+	c := struct {
+		Period  time.Duration
+		Streams []Stream
+	}{4 * time.Hour, []Stream{}}
+	if err := cfg.Unpack(&c); err != nil {
+		return Config{}, err
+	}
+	return Config{
+		Type:   InputTypeVanillaK8s,
+		Stream: c.Streams[0],
+	}, nil
 }
 
 type AwsConfigProvider interface {

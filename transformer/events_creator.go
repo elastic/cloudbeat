@@ -39,9 +39,9 @@ const (
 )
 
 type Transformer struct {
-	log           *logp.Logger
-	eventMetadata mapstr.M
-	commonData    CommonDataInterface
+	log        *logp.Logger
+	index      string
+	commonData CommonDataInterface
 }
 
 type ECSEvent struct {
@@ -55,12 +55,10 @@ type ECSEvent struct {
 }
 
 func NewTransformer(log *logp.Logger, cd CommonDataInterface, index string) Transformer {
-	eventMetadata := mapstr.M{libevents.FieldMetaIndex: index}
-
 	return Transformer{
-		log:           log,
-		eventMetadata: eventMetadata,
-		commonData:    cd,
+		log:        log,
+		index:      index,
+		commonData: cd,
 	}
 }
 
@@ -83,7 +81,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 
 	for _, finding := range eventData.Findings {
 		event := beat.Event{
-			Meta:      t.eventMetadata,
+			Meta:      mapstr.M{libevents.FieldMetaIndex: t.index},
 			Timestamp: timestamp,
 			Fields: mapstr.M{
 				resMetadata.ECSFormat: eventData.GetElasticCommonData(),

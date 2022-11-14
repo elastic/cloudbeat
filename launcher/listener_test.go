@@ -21,9 +21,8 @@
 package launcher
 
 import (
-	"context"
+	"sync"
 	"testing"
-	"time"
 
 	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/elastic-agent-libs/config"
@@ -36,11 +35,8 @@ import (
 type ListenerTestSuite struct {
 	suite.Suite
 
-	log    *logp.Logger
-	ctx    context.Context
-	cancel context.CancelFunc
-	sut    *Listener
-	opts   goleak.Option
+	log  *logp.Logger
+	opts goleak.Option
 }
 
 func TestListenerTestSuite(t *testing.T) {
@@ -49,11 +45,11 @@ func TestListenerTestSuite(t *testing.T) {
 }
 
 func (s *ListenerTestSuite) SetupTest() {
+	if err := logp.TestingSetup(); err != nil {
+		s.Error(err)
+	}
 	s.log = logp.NewLogger("cloudbeat_listener_test_suite")
-	s.ctx, s.cancel = context.WithCancel(context.Background())
 	s.opts = goleak.IgnoreCurrent()
-
-	s.sut = NewListener(s.ctx, s.log)
 }
 
 func (s *ListenerTestSuite) TearDownTest() {
@@ -62,78 +58,134 @@ func (s *ListenerTestSuite) TearDownTest() {
 	goleak.VerifyNone(s.T(), s.opts)
 }
 
-func (s *ListenerTestSuite) TestEmptyReload() {
-	go func() {
-		err := s.sut.Reload([]*reload.ConfigWithMeta{})
-		s.NoError(err)
-	}()
-	var re *config.C
-	select {
-	case <-time.After(time.Second):
-	case re = <-s.sut.Channel():
+var conf = config.MustNewConfigFrom(map[string]string{
+	"foo": "bar",
+})
+
+func (s *ListenerTestSuite) TestReloadAndStop() {
+	type configUpdate []*reload.ConfigWithMeta
+	type incomingConfigs struct {
+		values []configUpdate
+		name   string
 	}
 
-	s.Nil(re)
-}
-
-func (s *ListenerTestSuite) TestCancelBeforeReload() {
 	meta := mapstr.NewPointer(mapstr.M{})
-	conf, err := config.NewConfigFrom(map[string]string{
-		"test": "test",
-	})
-	s.NoError(err)
 
-	s.cancel()
-	go func() {
-		err := s.sut.Reload([]*reload.ConfigWithMeta{
-			{
-				Config: conf,
-				Meta:   &meta,
-			},
-		})
-		s.NoError(err)
-	}()
-}
-
-func (s *ListenerTestSuite) TestCancelAfterReload() {
-	meta := mapstr.NewPointer(mapstr.M{})
-	conf, err := config.NewConfigFrom(map[string]string{
-		"test": "test",
-	})
-	s.NoError(err)
-
-	go func() {
-		err := s.sut.Reload([]*reload.ConfigWithMeta{
-			{
-				Config: conf,
-				Meta:   &meta,
-			},
-		})
-		s.NoError(err)
-	}()
-	s.cancel()
-}
-
-func (s *ListenerTestSuite) TestSingleReload() {
-	meta := mapstr.NewPointer(mapstr.M{})
-	conf, err := config.NewConfigFrom(map[string]string{
-		"test": "test",
-	})
-	s.NoError(err)
-
-	values := []*reload.ConfigWithMeta{
+	tests := []incomingConfigs{
 		{
-			Config: conf,
-			Meta:   &meta,
+			name:   "no configs",
+			values: []configUpdate{},
+		},
+		{
+			name: "single empty config",
+			values: []configUpdate{
+				{},
+			},
+		},
+		{
+			name: "multiuple empty configs",
+			values: []configUpdate{
+				{},
+				{},
+			},
+		},
+		{
+			name: "single config",
+			values: []configUpdate{
+				{
+					{
+						Config: conf,
+						Meta:   &meta,
+					},
+				},
+			},
+		},
+		{
+			name: "single config with length",
+			values: []configUpdate{
+				{
+					{},
+					{},
+					{
+						Config: conf,
+						Meta:   &meta,
+					},
+				},
+			},
+		},
+		{
+			name: "same config 3 times",
+			values: []configUpdate{
+				{
+					{
+						Config: conf,
+						Meta:   &meta,
+					},
+				},
+				{
+					{
+						Config: conf,
+						Meta:   &meta,
+					},
+				},
+				{
+					{
+						Config: conf,
+						Meta:   &meta,
+					},
+				},
+			},
+		},
+		{
+			name: "mixed updates",
+			values: []configUpdate{
+				{
+					{
+						Config: conf,
+						Meta:   &meta,
+					},
+				},
+				{},
+				{
+					{
+						Config: conf,
+						Meta:   &meta,
+					},
+				},
+				{},
+				{
+					{
+						Config: conf,
+						Meta:   &meta,
+					},
+				},
+			},
 		},
 	}
-	go func() {
-		err := s.sut.Reload(values)
-		s.NoError(err)
-	}()
 
-	re := <-s.sut.Channel()
-	test, err := re.String("test", -1)
-	s.NoError(err)
-	s.Equal("test", test)
+	for _, tcase := range tests {
+		s.Run(tcase.name, func() {
+			sut := NewListener(s.log)
+			wg := sync.WaitGroup{}
+
+			for _, val := range tcase.values {
+				wg.Add(1)
+				go func(listener *Listener, update configUpdate) {
+					err := listener.Reload(update)
+					s.NoError(err)
+					wg.Done()
+				}(sut, val)
+
+				if len(val) > 0 {
+					re := <-sut.Channel()
+					test, err := re.String("foo", -1)
+					s.NoError(err)
+					s.Equal("bar", test)
+				}
+			}
+
+			sut.Stop()
+			wg.Wait()
+		})
+	}
 }

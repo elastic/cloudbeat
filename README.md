@@ -15,15 +15,28 @@
 
 
 ## Prerequisites
-1. [Just command runner](https://github.com/casey/just)
+1. [Hermit by Cashapp](https://cashapp.github.io/hermit/usage/get-started/)
 2. Elasticsearch with the default username & password (`elastic` & `changeme`) running on the default port (`http://localhost:9200`)
 3. Kibana with running on the default port (`http://localhost:5601`)
 4. Install and configure [Elastic-Package](https://github.com/elastic/elastic-package) (you may need to [authenticate](https://docker-auth.elastic.co/github_auth))
 5. Set up the local env:
 
-```zsh
-just setup-env
-```
+- Install & activate hermit
+  ```zsh
+  curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
+  ```
+	```zsh
+  . ./bin/activate-hermit
+  ```
+- Run setup env recipe
+  ```zsh
+  just setup-env
+  ```
+
+
+>**Note**
+>This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already. Also consider to review documentation for automatic shell & IDE integration for your setup of choice.
+
 
 ## Running Cloudbeat
 Load the elastic stack environment variables.
@@ -145,7 +158,7 @@ Cloudbeat is only supported on managed elastic-agents. It means, that in order t
 Create an agent policy and install the CSP integration. Now, when adding a new agent, you will get the K8s deployment instructions of elastic-agent.
 
 ### Update settings
-Update cloudbeat settings on a runnign elastic-agent can be done by running the [script](/scripts/remote_edit_config.sh).
+Update cloudbeat settings on a running elastic-agent can be done by running the [script](/scripts/remote_edit_config.sh).
 The script still requires a second step of trigerring the agent to re-run cloudbeat.
 This can be done on Fleet UI by changing the agent log level.
 Another option is through CLI on the agent by running
@@ -153,7 +166,18 @@ Another option is through CLI on the agent by running
 kill -9 `pidof cloudbeat`
 ```
 
+### Local configuration changes
+To update your local configuration of cloudbeat and control it, use 
+```sh
+mage config
+```
 
+In order to control the policy type you can pass the following environment variable
+```sh
+POLICY_TYPE=cloudbeat/cis_eks mage config
+```
+
+The default `POLICY_TYPE` is set to `cloudbeat/cis_k8s` on [`_meta/config/cloudbeat.common.yml.tmpl`](_meta/config/cloudbeat.common.yml.tmpl)
 
 ## Code guidelines
 

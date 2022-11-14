@@ -19,9 +19,10 @@ package fetchersManager
 
 import (
 	"context"
+	"testing"
+
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"testing"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -98,7 +99,7 @@ func (s *FactoriesTestSuite) TearDownTest() {
 }
 
 func (s *FactoriesTestSuite) TestListFetcher() {
-	var tests = []struct {
+	tests := []struct {
 		key string
 	}{
 		{"process"},
@@ -114,7 +115,7 @@ func (s *FactoriesTestSuite) TestListFetcher() {
 }
 
 func (s *FactoriesTestSuite) TestCreateFetcher() {
-	var tests = []struct {
+	tests := []struct {
 		key   string
 		value int
 	}{
@@ -138,7 +139,7 @@ func (s *FactoriesTestSuite) TestCreateFetcher() {
 }
 
 func (s *FactoriesTestSuite) TestCreateFetcherCollision() {
-	var tests = []struct {
+	tests := []struct {
 		key string
 	}{
 		{"process"},
@@ -153,7 +154,7 @@ func (s *FactoriesTestSuite) TestCreateFetcherCollision() {
 }
 
 func (s *FactoriesTestSuite) TestRegisterFetchers() {
-	var tests = []struct {
+	tests := []struct {
 		key             string
 		value           int
 		integrationType string
@@ -192,7 +193,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 }
 
 func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
-	var tests = []struct {
+	tests := []struct {
 		key   string
 		value int
 	}{
@@ -213,31 +214,27 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 }
 
 func (s *FactoriesTestSuite) TestRegisterFromFullConfig() {
-	var tests = []struct {
+	tests := []struct {
 		config string
 	}{
 		{
 			`
-type: cloudbeat/cis_k8s
-streams:
-  - not_data_yaml:
-      activated_rules:
-        cis_k8s:
-          - a
-    fetchers:
-     - name: process
+not_data_yaml:
+  activated_rules:
+    cis_k8s:
+      - a
+fetchers:
+  - name: process
 `,
 		},
 		{
 			`
-type: cloudbeat/cis_eks
-streams:
-  - not_data_yaml:
-      activated_rules:
-        cis_k8s:
-          - a
-    fetchers:
-     - name: aws-eks
+not_data_yaml:
+  activated_rules:
+    cis_k8s:
+      - a
+fetchers:
+  - name: aws-eks
 `,
 		},
 	}
