@@ -26,3 +26,9 @@ type Version struct {
 	CommitHash string `json:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
 	CommitTime string `json:"commit_time,omitempty"` // CommitTime is the git commit time of the package
 }
+
+type CloudbeatVersionInfo struct {
+	Version
+	Policy     Version `json:"policy,omitempty"`     // Policy version info for the rules policy
+	Kubernetes Version `json:"kubernetes,omitempty"` // Kubernetes version info for the rules policy
+}

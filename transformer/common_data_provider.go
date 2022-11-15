@@ -70,8 +70,7 @@ func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInte
 
 	versionInfo, err := c.FetchVersionInfo()
 	if err != nil {
-		c.log.Errorf("fetchCommonData error in FetchServerVersion: %v", err)
-		return CommonData{}, err
+		c.log.Errorf("fetchCommonData error in FetchKubernetesVersion: %v", err)
 	}
 	cm.versionInfo = versionInfo
 	return cm, nil
@@ -118,8 +117,8 @@ func (c CommonDataProvider) getNodeName() (string, error) {
 	return nName, nil
 }
 
-// FetchServerVersion returns the version of the Kubernetes server
-func (c CommonDataProvider) FetchServerVersion() (version.Version, error) {
+// FetchKubernetesVersion returns the version of the Kubernetes server
+func (c CommonDataProvider) FetchKubernetesVersion() (version.Version, error) {
 	serverVersion, err := c.kubeClient.Discovery().ServerVersion()
 	if err != nil {
 		return version.Version{}, err
@@ -129,12 +128,15 @@ func (c CommonDataProvider) FetchServerVersion() (version.Version, error) {
 	}, nil
 }
 
-func (c CommonDataProvider) FetchVersionInfo() (fetching.CloudbeatVersionInfo, error) {
-	serverVersion, err := c.FetchServerVersion()
+func (c CommonDataProvider) FetchVersionInfo() (version.CloudbeatVersionInfo, error) {
+	serverVersion, err := c.FetchKubernetesVersion()
 	if err != nil {
-		return fetching.CloudbeatVersionInfo{}, err
+		return version.CloudbeatVersionInfo{
+			Version: version.CloudbeatVersion(), // cloudbeat version info
+			Policy:  version.PolicyVersion(),
+		}, err
 	}
-	return fetching.CloudbeatVersionInfo{
+	return version.CloudbeatVersionInfo{
 		Version:    version.CloudbeatVersion(), // cloudbeat version info
 		Policy:     version.PolicyVersion(),
 		Kubernetes: serverVersion,
@@ -156,6 +158,6 @@ func (cd CommonData) GetData() CommonData {
 	return cd
 }
 
-func (cd CommonData) GetVersionInfo() fetching.CloudbeatVersionInfo {
+func (cd CommonData) GetVersionInfo() version.CloudbeatVersionInfo {
 	return cd.versionInfo
 }

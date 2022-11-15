@@ -20,6 +20,7 @@ package transformer
 import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"k8s.io/client-go/kubernetes"
 )
@@ -38,11 +39,11 @@ type CommonDataProvider struct {
 type CommonData struct {
 	clusterId   string
 	nodeId      string
-	versionInfo fetching.CloudbeatVersionInfo
+	versionInfo version.CloudbeatVersionInfo
 }
 
 type CommonDataInterface interface {
 	GetData() CommonData
 	GetResourceId(fetching.ResourceMetadata) string
-	GetVersionInfo() fetching.CloudbeatVersionInfo
+	GetVersionInfo() version.CloudbeatVersionInfo
 }

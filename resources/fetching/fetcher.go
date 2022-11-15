@@ -20,8 +20,6 @@ package fetching
 import (
 	"context"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/version"
-
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -68,12 +66,6 @@ type ResourceMetadata struct {
 	SubType   string `json:"sub_type,omitempty"`
 	Name      string `json:"name,omitempty"`
 	ECSFormat string `json:"ecsFormat,omitempty"`
-}
-
-type CloudbeatVersionInfo struct {
-	version.Version
-	Policy     version.Version `json:"policy,omitempty"`     // Policy version info for the rules policy
-	Kubernetes version.Version `json:"kubernetes,omitempty"` // Kubernetes version info for the rules policy
 }
 
 type Result struct {
