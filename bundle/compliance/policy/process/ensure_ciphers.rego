@@ -4,7 +4,7 @@ import data.benchmark_data_adapter
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.process.data_adapter
 
-process_args := data_adapter.process_args(benchmark_data_adapter.process_args_seperator)
+process_args := benchmark_data_adapter.process_args
 
 is_process_args_includes_non_supported_cipher(supported_ciphers) {
 	ciphers := split(process_args["--tls-cipher-suites"], ",")

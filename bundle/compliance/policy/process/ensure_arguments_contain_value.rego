@@ -6,7 +6,7 @@ import data.compliance.lib.common as lib_common
 import data.compliance.policy.process.common as process_common
 import data.compliance.policy.process.data_adapter
 
-process_args := data_adapter.process_args(benchmark_data_adapter.process_args_seperator)
+process_args := benchmark_data_adapter.process_args
 
 finding(rule_evaluation) = result {
 	data_adapter.is_kube_apiserver
