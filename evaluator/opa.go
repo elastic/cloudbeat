@@ -21,8 +21,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
@@ -69,16 +67,10 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	// provide the OPA configuration which specifies
 	// fetching policy bundle and logging decisions locally to the console
 
-	ex, err := os.Executable()
-	if err != nil {
-		return nil, err
-	}
-
-	path := filepath.Join(filepath.Dir(ex), ("bundle.tar.gz"))
-	log.Infof("OPA bundle path: %s", path)
+	log.Infof("OPA bundle path: %s", cfg.BundlePath)
 
 	plugin := fmt.Sprintf(logPlugin, dlogger.PluginName, dlogger.PluginName)
-	opaCfg := fmt.Sprintf(opaConfig, path, plugin)
+	opaCfg := fmt.Sprintf(opaConfig, cfg.BundlePath, plugin)
 
 	decisonLogger := newLogger()
 	stdLogger := newLogger()

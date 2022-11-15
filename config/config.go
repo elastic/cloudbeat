@@ -22,6 +22,8 @@ package config
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
@@ -51,6 +53,7 @@ type Stream struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
+	BundlePath string                  `config:"bundle_path"`
 }
 
 type Config struct {
@@ -67,16 +70,16 @@ type Benchmarks struct {
 	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
-var DefaultConfig = Stream{
-	Period: 4 * time.Hour,
-}
-
 func New(cfg *config.C) (Config, error) {
 	// work with v1 cloudbeat.yml in dev mod
 	if cfg.HasField("streams") {
 		return newStandaloneConfig(cfg)
 	}
-	c := DefaultConfig
+	c, err := defaultConfig()
+	if err != nil {
+		return Config{}, err
+	}
+
 	if err := cfg.Unpack(&c); err != nil {
 		return Config{}, err
 	}
@@ -88,6 +91,20 @@ func New(cfg *config.C) (Config, error) {
 		Stream: c,
 		Type:   inputType,
 	}, nil
+}
+
+func defaultConfig() (Stream, error) {
+	ret := Stream{
+		Period: 4 * time.Hour,
+	}
+
+	ex, err := os.Executable()
+	if err != nil {
+		return Stream{}, err
+	}
+	ret.BundlePath = filepath.Join(filepath.Dir(ex), ("bundle.tar.gz"))
+
+	return ret, nil
 }
 
 // Datastream function to generate the datastream value
