@@ -50,7 +50,7 @@ func NewCommonDataProvider(log *logp.Logger, cfg config.Config) (CommonDataProvi
 	}, nil
 }
 
-// FetchCommonData fetches cluster and node id
+// FetchCommonData fetches cluster and node id and version info
 // Note: As of today Kubernetes is the only environment supported by CommonDataProvider
 func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInterface, error) {
 	cm := CommonData{}
