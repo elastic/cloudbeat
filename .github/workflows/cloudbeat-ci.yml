@@ -193,7 +193,13 @@ jobs:
           - test-target: process_etcd_rules
             range: '4..8'
           - test-target: process_etcd_rules
-            range: '8..12'
+            range: '8..9'
+          - test-target: process_etcd_rules
+            range: '9..10'
+          - test-target: process_etcd_rules
+            range: '10..11'
+          - test-target: process_etcd_rules
+            range: '11..12'
           - test-target: process_etcd_rules
             range: '12..'
           - test-target: process_kubelet_rules
