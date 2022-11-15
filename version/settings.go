@@ -18,7 +18,6 @@
 package version
 
 import (
-	"github.com/elastic/cloudbeat/cmd"
 	"runtime/debug"
 	"time"
 )
@@ -53,7 +52,7 @@ func CloudbeatCommitTime() string {
 
 // CloudbeatSemanticVersion returns the current cloudbeat version.
 func CloudbeatSemanticVersion() string {
-	return cmd.GetBeatVersion()
+	return defaultBeatVersion
 }
 
 // CloudbeatVersion returns cloudbeat version info used for the build.

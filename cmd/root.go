@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/elastic/cloudbeat/version"
 
 	"github.com/elastic/cloudbeat/beater"
 	"github.com/elastic/elastic-agent-client/v7/pkg/client"
@@ -36,7 +37,7 @@ import (
 var Name = "cloudbeat"
 
 // RootCmd to handle beats cli
-var RootCmd = cmd.GenRootCmdWithSettings(beater.New, instance.Settings{Name: Name, Version: GetBeatVersion()})
+var RootCmd = cmd.GenRootCmdWithSettings(beater.New, instance.Settings{Name: Name, Version: version.CloudbeatSemanticVersion()})
 
 func cloudbeatCfg(rawIn *proto.UnitExpectedConfig, agentInfo *client.AgentInfo) ([]*reload.ConfigWithMeta, error) {
 	modules, err := management.CreateInputsFromStreams(rawIn, "logs", agentInfo)
