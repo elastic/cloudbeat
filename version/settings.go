@@ -40,13 +40,13 @@ func init() {
 	}
 }
 
-// CloudbeatCommitHash returns the hash of the git commit used for the build.
-func CloudbeatCommitHash() string {
+// cloudbeatCommitHash returns the hash of the git commit used for the build.
+func cloudbeatCommitHash() string {
 	return vcsRevision
 }
 
-// CloudbeatCommitTime returns the timestamp of the commit used for the build.
-func CloudbeatCommitTime() string {
+// cloudbeatCommitTime returns the timestamp of the commit used for the build.
+func cloudbeatCommitTime() string {
 	return vcsTime.String()
 }
 
@@ -59,7 +59,7 @@ func CloudbeatSemanticVersion() string {
 func CloudbeatVersion() Version {
 	return Version{
 		Version:    CloudbeatSemanticVersion(),
-		CommitHash: CloudbeatCommitHash(),
-		CommitTime: CloudbeatCommitTime(),
+		CommitHash: cloudbeatCommitHash(),
+		CommitTime: cloudbeatCommitTime(),
 	}
 }
