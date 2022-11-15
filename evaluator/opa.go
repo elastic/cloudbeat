@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -67,12 +68,14 @@ var logPlugin = `
 func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (Evaluator, error) {
 	// provide the OPA configuration which specifies
 	// fetching policy bundle and logging decisions locally to the console
-	path, err := filepath.Abs("bundle.tar.gz")
-	log.Debugf("OPA bundle path: %s", path)
 
+	ex, err := os.Executable()
 	if err != nil {
 		return nil, err
 	}
+
+	path := filepath.Join(filepath.Dir(ex), ("bundle.tar.gz"))
+	log.Infof("OPA bundle path: %s", path)
 
 	plugin := fmt.Sprintf(logPlugin, dlogger.PluginName, dlogger.PluginName)
 	opaCfg := fmt.Sprintf(opaConfig, path, plugin)
@@ -101,6 +104,7 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 		log.Warn("no runtime config supplied")
 	}
 
+	log.Info("Successfully initiated OPA")
 	return &OpaEvaluator{
 		log:            log,
 		opa:            opa,
