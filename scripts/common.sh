@@ -37,3 +37,27 @@ get_agent_sha() {
 _kubectl_node_info() {
  kubectl get node -o go-template="{{(index .items 0 ).status.nodeInfo.$1}}" 
 }
+
+copy_to_agents() {
+  for P in $(get_agents); do
+    POD=$(echo $P | cut -d '/' -f 2)
+    SHA=$(get_agent_sha $POD)
+    echo "Found sha=$SHA in pod=$POD"
+
+    DEST=/usr/share/elastic-agent/data/elastic-agent-$SHA/components
+
+    for FILE in "$@"
+    do
+      cp_to_pod $POD $FILE $DEST
+    done
+
+    echo "Copied all the assets to $POD"
+  done
+}
+
+restart_agents() {
+  echo "Agent restart is not supported yet"
+  # for P in $(get_agents); do
+    # exec_pod $POD "elastic-agent restart" # https://github.com/elastic/cloudbeat/pull/458#issuecomment-1308837098
+  # done
+}
