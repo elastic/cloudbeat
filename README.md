@@ -18,7 +18,7 @@
 1. [Hermit by Cashapp](https://cashapp.github.io/hermit/usage/get-started/)
 2. Elasticsearch with the default username & password (`elastic` & `changeme`) running on the default port (`http://localhost:9200`)
 3. Kibana with running on the default port (`http://localhost:5601`)
-4. Install and configure [Elastic-Package](https://github.com/elastic/elastic-package)
+4. Install and configure [Elastic-Package](https://github.com/elastic/elastic-package) (you may need to [authenticate](https://docker-auth.elastic.co/github_auth))
 5. Set up the local env:
 
 - Install & activate hermit
@@ -117,8 +117,6 @@ just logs-cloudbeat
 
 Use your favorite IDE to connect to the debugger on `localhost:40000` (for example [Goland](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html#step-3-create-the-remote-run-debug-configuration-on-the-client-computer))
 
-Note: Check the jusfile for all available commands for build or deploy `$ just --summary`
-</br>
 
 ### Skaffold Workflows
 [Skaffold](https://skaffold.dev/) is a CLI tool that enables continuous development for K8s applications. Skaffold will initiate a file-system watcher and will continuously deploy cloudbeat to a local or remote K8s cluster. The skaffold workflows are defined in the [skaffold.yml](skaffold.yml) file.

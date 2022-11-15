@@ -120,18 +120,14 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
+
+	commonDataProvider, err := transformer.NewCommonDataProvider(log, c)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	cdp, err := transformer.NewCommonDataProvider(log, c)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-
-	commonData, err := cdp.FetchCommonData(ctx)
+	commonData, err := commonDataProvider.FetchCommonData(ctx)
 	if err != nil {
 		cancel()
 		return nil, err

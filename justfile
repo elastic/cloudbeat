@@ -41,8 +41,7 @@ deploy-cloudbeat:
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
-build-cloudbeat-debug:
-  just build-opa-bundle
+build-cloudbeat-debug: build-opa-bundle
   GOOS=linux go mod vendor
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
@@ -59,10 +58,8 @@ deploy-eks-cloudbeat:
 #General
 
 logs-cloudbeat:
-  kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system
-
-logs-cloudbeat-file:
-  kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system > cloudbeat-logs.ndjson
+    CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
+    kubectl logs -f "${CLOUDBEAT_POD}" -n kube-system
 
 build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v
@@ -77,11 +74,11 @@ elastic-stack-connect-kind kind='kind-multi':
   ./.ci/scripts/connect_kind.sh {{kind}}
 
 ssh-cloudbeat:
-    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
+    CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
     kubectl exec --stdin --tty "${CLOUDBEAT_POD}" -n kube-system -- /bin/bash
 
 expose-ports:
-    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
+    CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
     kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
 
 
