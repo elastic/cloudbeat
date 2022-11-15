@@ -129,16 +129,18 @@ func (c CommonDataProvider) FetchKubernetesVersion() (version.Version, error) {
 }
 
 func (c CommonDataProvider) FetchVersionInfo() (version.CloudbeatVersionInfo, error) {
+	cloudbeatVersion := version.CloudbeatVersion()
+	policyVersion := version.PolicyVersion()
 	serverVersion, err := c.FetchKubernetesVersion()
 	if err != nil {
 		return version.CloudbeatVersionInfo{
-			Version: version.CloudbeatVersion(), // cloudbeat version info
-			Policy:  version.PolicyVersion(),
+			Version: cloudbeatVersion,
+			Policy:  policyVersion,
 		}, err
 	}
 	return version.CloudbeatVersionInfo{
-		Version:    version.CloudbeatVersion(), // cloudbeat version info
-		Policy:     version.PolicyVersion(),
+		Version:    cloudbeatVersion,
+		Policy:     policyVersion,
 		Kubernetes: serverVersion,
 	}, nil
 }
