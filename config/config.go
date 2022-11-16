@@ -98,11 +98,12 @@ func defaultConfig() (Stream, error) {
 		Period: 4 * time.Hour,
 	}
 
+	// The bundle resides on the same location as the executable
 	ex, err := os.Executable()
 	if err != nil {
 		return Stream{}, err
 	}
-	ret.BundlePath = filepath.Join(filepath.Dir(ex), ("bundle.tar.gz"))
+	ret.BundlePath = filepath.Join(filepath.Dir(ex), "bundle.tar.gz")
 
 	return ret, nil
 }

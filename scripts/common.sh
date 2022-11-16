@@ -38,17 +38,18 @@ _kubectl_node_info() {
  kubectl get node -o go-template="{{(index .items 0 ).status.nodeInfo.$1}}" 
 }
 
+# Iterates over the agents, and copies a list of files into each one of them to the `components` folder
 copy_to_agents() {
   for P in $(get_agents); do
     POD=$(echo $P | cut -d '/' -f 2)
-    SHA=$(get_agent_sha $POD)
+    SHA=$(get_agent_sha "$POD")
     echo "Found sha=$SHA in pod=$POD"
 
     DEST=/usr/share/elastic-agent/data/elastic-agent-$SHA/components
 
     for FILE in "$@"
     do
-      cp_to_pod $POD $FILE $DEST
+      cp_to_pod "$POD" "$FILE" "$DEST"
     done
 
     echo "Copied all the assets to $POD"
