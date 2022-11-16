@@ -146,7 +146,9 @@ func (s *OpaTestSuite) getTestConfig() config.Config {
 	path, err := filepath.Abs("bundle.tar.gz")
 	s.NoError(err)
 	return config.Config{
-		BundlePath: path,
+		Stream: config.Stream{
+			BundlePath: path,
+		},
 	}
 }
 
