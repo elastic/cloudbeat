@@ -239,7 +239,7 @@ jobs:
       - name: Run Tests
         id: run_tests
         run: |
-          ./.ci/scripts/integration-tests.sh ${{ matrix.test-target }}
+          just run-tests ${{ matrix.test-target }}
 
       - name: Upload Test Results
         if: always()
