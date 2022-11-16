@@ -10,6 +10,28 @@ pre-commit install # install the pre commits hooks
 pre-commit run --all-files --verbose # run it!
 ```
 
+### Update settings
+Update cloudbeat settings on a running elastic-agent can be done by running the [script](/scripts/remote_edit_config.sh).
+The script still requires a second step of trigerring the agent to re-run cloudbeat.
+This can be done on Fleet UI by changing the agent log level.
+Another option is through CLI on the agent by running
+```
+kill -9 `pidof cloudbeat`
+```
+
+### Local configuration changes
+To update your local configuration of cloudbeat and control it, use
+```sh
+mage config
+```
+
+In order to control the policy type you can pass the following environment variable
+```sh
+POLICY_TYPE=cloudbeat/cis_eks mage config
+```
+
+The default `POLICY_TYPE` is set to `cloudbeat/cis_k8s` on [`_meta/config/cloudbeat.common.yml.tmpl`](_meta/config/cloudbeat.common.yml.tmpl)
+
 ### Testing
 
 Cloudbeat has a various sets of tests. This guide should help to understand how the different test suites work, how they are used and how new tests are added.
