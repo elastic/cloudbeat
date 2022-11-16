@@ -9,35 +9,20 @@ This project provides an ability to develop component and integration tests for 
 This guide provides installations for macOS users via [Homebrew](https://brew.sh/).
 For other platforms, please go forward through instructions provided in links and select relevant installation:
 
-1. Install [Python 3](https://www.python.org/downloads/)
-
-
-2. Install [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
-
-
-3. Install [JUST](https://github.com/casey/just) command runner
-
-```shell
-brew install just
+1. Initialize `hermit`
+```
+source bin/activate-hermit
 ```
 
-After installing just you will be able to execute commands defined in **JUSTFILE** located in the project root folder.
-
-4. Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start)
-
-```shell
-brew install kind
+2. Setup linters
 ```
-After installing kind you will be able to create and run local Kubernetes clusters using Docker container.
-
-5. Install [Helm](https://helm.sh/docs/intro/install/)
-
+just linter-setup
 ```
-brew install helm
-```
-Helm is a package manager for Kubernetes.
 
-6. Install [Allure](https://docs.qameta.io/allure/#_installing_a_commandline) commandline tool
+3. Install [Docker Desktop](https://docs.docker.com/desktop/mac/install/)
+
+
+4. Install [Allure](https://docs.qameta.io/allure/#_installing_a_commandline) commandline tool
 
 ```shell
 brew install allure
