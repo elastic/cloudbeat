@@ -30,7 +30,7 @@ Run `export FLEET_ENROLLMENT_TOKEN=$TOKEN`
 
 #### Step 3 - Take care of SSL
 The SSL certificate was created by `elastic-package` and stored in `ELASTIC_PACKAGE_CA_CERT`.
-Run 
+Run
 ```bash
 eval "$(elastic-package stack shellinit)"
 cp $ELASTIC_PACKAGE_CA_CERT deploy/kustomize/overlays/cloudbeat-vanilla-agent
@@ -47,8 +47,8 @@ Go to `app/fleet/agents` and check that the new agent (`kind-mono-control-plane`
 
 **From cloudbeat repo**
 
-To use custom binray of cloudbeat you need
-1. Build binray + checksum
+To use custom binary of cloudbeat you need
+1. Build binary + checksum
 2. Copy the files to agent pod
 3. Restart the cloudbeat process in the pod
 

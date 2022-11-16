@@ -123,7 +123,7 @@ func TestCommonData_GetResourceId(t *testing.T) {
 					Name:    "/etc/passwd",
 				},
 			},
-			want: uuid.NewV5(uuid_namespace, "cluster-test"+"nodeid-test"+"1234").String(),
+			want: uuid.NewV5(uuidNamespace, "cluster-test"+"nodeid-test"+"1234").String(),
 		},
 		{
 			name: "Get AWS resource id",
@@ -137,7 +137,7 @@ func TestCommonData_GetResourceId(t *testing.T) {
 					Name: "aws-loadbalancer",
 				},
 			},
-			want: uuid.NewV5(uuid_namespace, "cluster-test"+"1234").String(),
+			want: uuid.NewV5(uuidNamespace, "cluster-test"+"1234").String(),
 		},
 	}
 	for _, tt := range tests {
