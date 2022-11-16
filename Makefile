@@ -28,7 +28,7 @@ PYTHON_ENV?=.
 PYTHON_BIN:=$(PYTHON_ENV)/build/ve/$(shell $(GO) env GOOS)/bin
 PYTHON=$(PYTHON_BIN)/python
 
-CLOUDBEAT_VERSION=$(shell grep defaultBeatVersion cmd/version.go | cut -d'=' -f2 | tr -d '" ')
+CLOUDBEAT_VERSION=$(shell grep defaultBeatVersion version/version.go | cut -d'=' -f2 | tr -d '" ')
 
 # Create a local config.mk file to override configuration,
 # e.g. for setting "GOLINT_UPSTREAM".
