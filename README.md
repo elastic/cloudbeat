@@ -1,50 +1,50 @@
 # Cloudbeat
 [![Coverage Status](https://coveralls.io/repos/github/elastic/cloudbeat/badge.svg?branch=main)](https://coveralls.io/github/elastic/cloudbeat?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
-[![Build Status](https://internal-ci.elastic.co/buildStatus/icon?job=cloudbeat%2Fcloudbeat-mbp%2Fmain)](https://internal-ci.elastic.co/job/cloudbeat/job/cloudbeat-mbp/job/main/)
 
 ### Cloudbeat evaluates cloud assets for security compliance and ships findings to Elasticsearch
 
 ## Table of contents
 - [Prerequisites](#prerequisites)
-- [Running Cloudbeat](#running-cloudbeat)
-  - [Clean up](#clean-up)
-  - [Remote Debugging](#remote-debugging)
-  - [Skaffold Workflows](#skaffold-workflows)
+- [Deploying Cloudbeat as a process](#deploying-cloudbeat)
+  - [Unmanaged Kubernetes](#clean-up)
+  - [EKS](#remote-debugging)
+- [Deploying Cloudbeat with Elastic-Agent](#skaffold-workflows)
+  - [Unmanaged Kubernetes](#clean-up)
+  - [EKS](#remote-debugging)
 - [Code guidelines](#code-guidelines)
 
 
 ## Prerequisites
-1. [Hermit by Cashapp](https://cashapp.github.io/hermit/usage/get-started/)
-2. Elasticsearch with the default username & password (`elastic` & `changeme`) running on the default port (`http://localhost:9200`)
-3. Kibana with running on the default port (`http://localhost:5601`)
-4. Install and configure [Elastic-Package](https://github.com/elastic/elastic-package) (you may need to [authenticate](https://docker-auth.elastic.co/github_auth))
-5. Set up the local env:
+[Hermit](https://cashapp.github.io/hermit/usage/get-started/)
 
 - Install & activate hermit
   ```zsh
   curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
-  ```
-	```zsh
   . ./bin/activate-hermit
   ```
-- Run setup env recipe
+- _optional:_ Create local kind cluster
   ```zsh
-  just setup-env
+  just create-kind-cluster
+  just elastic-stack-connect-kind # connect it to local elastic stack
+  ```
+
+>**Note**
+This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already.
+
+- Elastic stack running locally, preferably using [Elastic-Package](https://github.com/elastic/elastic-package) (you may need to [authenticate](https://docker-auth.elastic.co/github_auth))
+
+  For example, spinning up 8.5.0 stack locally:
+
+  ```zsh
+  eval "$(elastic-package stack shellinit)" # load stack environment variables using
+  elastic-package stack up --version 8.5.0 -v -d
   ```
 
 
->**Note**
->This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already. Also consider to review documentation for automatic shell & IDE integration for your setup of choice.
-
-
-## Running Cloudbeat
-Load the elastic stack environment variables.
-```zsh
-eval "$(elastic-package stack shellinit)"
-```
-
-### Kubernetes Vanilla
+# Deploying Cloudbeat
+## Running Cloudbeat as a process
+### Unmanaged Kubernetes (Vanilla)
 Build & deploy cloudbeat:
 
 ```zsh
@@ -54,21 +54,23 @@ just build-deploy-cloudbeat
 ### Amazon Elastic Kubernetes Service (EKS)
 Export AWS creds as env vars, kustomize will use these to populate your cloudbeat deployment.
 ```zsh
-$ export AWS_ACCESS_KEY="<YOUR_AWS_KEY>" AWS_SECRET_ACCESS_KEY="<YOUR_AWS_SECRET>"
+export AWS_ACCESS_KEY="<YOUR_AWS_KEY>"
+export AWS_SECRET_ACCESS_KEY="<YOUR_AWS_SECRET>"
 ```
 
 Set your default cluster to your EKS cluster
 ```zsh
- kubectl config use-context your-eks-cluster
+kubectl config use-context {your-eks-cluster}
 ```
 
 Deploy cloudbeat on your EKS cluster
 ```zsh
 just deploy-eks-cloudbeat
 ````
+
 ### Advanced
 
-If you need to change the default values in the configuration(ES_HOST, ES_PORT, ES_USERNAME, ES_PASSWORD), you can
+If you need to change the default values in the configuration(`ES_HOST`, `ES_PORT`, `ES_USERNAME`, `ES_PASSWORD`), you can
 also create the deployment file yourself.
 
 Vanilla
@@ -82,8 +84,6 @@ just create-eks-deployment-file
 ```
 
 To validate check the logs:
-
-### See logs
 ```zsh
 just logs-cloudbeat
 ```
@@ -96,6 +96,7 @@ To stop this example and clean up the pod, run:
 ```zsh
 just delete-cloudbeat
 ```
+
 ### Remote Debugging
 
 Build & Deploy remote debug docker:
@@ -111,10 +112,7 @@ just expose-ports
 
 The app will wait for the debugger to connect before starting
 
-```zsh
-just logs-cloudbeat
-```
-
+>**Note**
 Use your favorite IDE to connect to the debugger on `localhost:40000` (for example [Goland](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html#step-3-create-the-remote-run-debug-configuration-on-the-client-computer))
 
 
@@ -167,7 +165,7 @@ kill -9 `pidof cloudbeat`
 ```
 
 ### Local configuration changes
-To update your local configuration of cloudbeat and control it, use 
+To update your local configuration of cloudbeat and control it, use
 ```sh
 mage config
 ```
@@ -179,61 +177,4 @@ POLICY_TYPE=cloudbeat/cis_eks mage config
 
 The default `POLICY_TYPE` is set to `cloudbeat/cis_k8s` on [`_meta/config/cloudbeat.common.yml.tmpl`](_meta/config/cloudbeat.common.yml.tmpl)
 
-## Code guidelines
 
-### Pre-commit hooks
-
-see [pre-commit](https://pre-commit.com/) package
-
-- Install the package `brew install pre-commit`
-- Then run `pre-commit install`
-- Finally `pre-commit run --all-files --verbose`
-
-### Editorconfig
-
-see [editorconfig](https://editorconfig.org/#pre-installed) package
-### Testing
-
-Cloudbeat has a various sets of tests. This guide should help to understand how the different test suites work, how they are used and how new tests are added.
-
-In general there are two major test suites:
-
-- Unit tests written in Go
-- Integration tests written in Python
-
-The tests written in Go use the Go Testing package. The tests written in Python depend on pytest and require a compiled and executable binary from the Go code. The python test run a beat with a specific config and params and either check if the output is as expected or if the correct things show up in the logs.
-
-Integration tests in Beats are tests which require an external system like Elasticsearch to test if the integration with this service works as expected. Beats provides in its testsuite docker containers and docker-compose files to start these environments but a developer can run the required services also locally.
-
-#### Mocking
-
-Cloudbeat uses [`mockery`](https://github.com/vektra/mockery) as its mocking test framework.
-`Mockery` provides an easy way to generate mocks for golang interfaces.
-
-Some tests use the new [expecter]((https://github.com/vektra/mockery#expecter-interfaces)) interface the library provides.
-For example, given an interface such as
-
-```go
-type Requester interface {
-	Get(path string) (string, error)
-}
-```
-You can use the type-safe expecter interface as such:
-```go
-requesterMock := Requester{}
-requesterMock.EXPECT().Get("some path").Return("result", nil)
-requesterMock.EXPECT().
-	Get(mock.Anything).
-	Run(func(path string) { fmt.Println(path, "was called") }).
-	// Can still use return functions by getting the embedded mock.Call
-	Call.Return(func(path string) string { return "result for " + path }, nil)
-```
-
-Notes
-- Place the test in the same package as the code it meant to test.
-- File name should be aligned with the convention `original_file_mock`. For example: ecr_provider -> ecr_provider_mock.
-
-Command example:
-```
-mockery --name=<interface_name> --with-expecter  --case underscore  --inpackage --recursive
-```
