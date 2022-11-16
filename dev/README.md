@@ -55,3 +55,40 @@ Command example:
 ```
 mockery --name=<interface_name> --with-expecter  --case underscore  --inpackage --recursive
 ```
+
+### Skaffold Workflows
+[Skaffold](https://skaffold.dev/) is a CLI tool that enables continuous development for K8s applications. Skaffold will initiate a file-system watcher and will continuously deploy cloudbeat to a local or remote K8s cluster. The skaffold workflows are defined in the [skaffold.yml](skaffold.yml) file.
+[Kustomize](https://kustomize.io/) is used to overlay different config options. (current are cloudbeat vanilla & EKS)
+
+#### Cloudbeat Vanilla:
+Skaffold will initiate a watcher to build and re-deploy Cloudbeat every time a go file is saved and output logs to stdout
+```zsh
+skaffold dev
+```
+
+#### Cloudbeat EKS:
+Export AWS creds as env vars, Skaffold & kustomize will use these to populate your k8s deployment.
+```zsh
+$ export AWS_ACCESS_KEY="<YOUR_AWS_KEY>" AWS_SECRET_ACCESS_KEY="<YOUR_AWS_SECRET>"
+```
+A [skaffold profile](https://skaffold.dev/docs/environment/profiles/) is configured for EKS, it can be activated via the following options
+
+Specify the profile name using the `-p` flag
+```zsh
+skaffold -p eks dev
+```
+
+export the activation var prior to skaffold invocation, then proceed as usual.
+```zsh
+export SKF_MODE="CB_EKS"
+skaffold dev
+```
+
+#### Additional commands:
+
+Skaffold supports one-off commands (no continuous watcher) if you wish to build or deploy just once.
+```zsh
+skaffold build
+skaffold deploy
+```
+Full CLI reference can be found [here](https://skaffold.dev/docs/references/cli/)

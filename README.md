@@ -2,42 +2,41 @@
 [![Coverage Status](https://coveralls.io/repos/github/elastic/cloudbeat/badge.svg?branch=main)](https://coveralls.io/github/elastic/cloudbeat?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 
-### Cloudbeat evaluates cloud assets for security compliance and ships findings to Elasticsearch
+Cloudbeat evaluates cloud assets for security compliance and ships findings to Elasticsearch
 
-## Table of contents
+### Table of contents
 - [Prerequisites](#prerequisites)
 - [Deploying Cloudbeat as a process](#deploying-cloudbeat)
   - [Unmanaged Kubernetes](#clean-up)
   - [EKS](#remote-debugging)
-- [Deploying Cloudbeat with Elastic-Agent](#skaffold-workflows)
-  - [Unmanaged Kubernetes](#clean-up)
-  - [EKS](#remote-debugging)
-- [Code guidelines](#code-guidelines)
+- [Deploying Cloudbeat with Elastic-Agent](#running-cloudbeat-with-elastic-agent)
 
 
-## Prerequisites
+# Prerequisites
 [Hermit](https://cashapp.github.io/hermit/usage/get-started/)
 
 - Install & activate hermit
+
   ```zsh
   curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
   . ./bin/activate-hermit
   ```
+
+  >  **Note**
+  This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already.
+
 - _optional:_ Create local kind cluster
   ```zsh
   just create-kind-cluster
   just elastic-stack-connect-kind # connect it to local elastic stack
   ```
 
->**Note**
-This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already.
-
 - Elastic stack running locally, preferably using [Elastic-Package](https://github.com/elastic/elastic-package) (you may need to [authenticate](https://docker-auth.elastic.co/github_auth))
 
   For example, spinning up 8.5.0 stack locally:
 
   ```zsh
-  eval "$(elastic-package stack shellinit)" # load stack environment variables using
+  eval "$(elastic-package stack shellinit)" # load stack environment variables
   elastic-package stack up --version 8.5.0 -v -d
   ```
 
@@ -53,12 +52,14 @@ just build-deploy-cloudbeat
 
 ### Amazon Elastic Kubernetes Service (EKS)
 Export AWS creds as env vars, kustomize will use these to populate your cloudbeat deployment.
+
 ```zsh
 export AWS_ACCESS_KEY="<YOUR_AWS_KEY>"
 export AWS_SECRET_ACCESS_KEY="<YOUR_AWS_SECRET>"
 ```
 
 Set your default cluster to your EKS cluster
+
 ```zsh
 kubectl config use-context {your-eks-cluster}
 ```
@@ -116,42 +117,7 @@ The app will wait for the debugger to connect before starting
 Use your favorite IDE to connect to the debugger on `localhost:40000` (for example [Goland](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html#step-3-create-the-remote-run-debug-configuration-on-the-client-computer))
 
 
-### Skaffold Workflows
-[Skaffold](https://skaffold.dev/) is a CLI tool that enables continuous development for K8s applications. Skaffold will initiate a file-system watcher and will continuously deploy cloudbeat to a local or remote K8s cluster. The skaffold workflows are defined in the [skaffold.yml](skaffold.yml) file.
-[Kustomize](https://kustomize.io/) is used to overlay different config options. (current are cloudbeat vanilla & EKS)
-
-#### Cloudbeat Vanilla:
-Skaffold will initiate a watcher to build and re-deploy Cloudbeat every time a go file is saved and output logs to stdout
-```zsh
-skaffold dev
-```
-
-#### Cloudbeat EKS:
-Export AWS creds as env vars, Skaffold & kustomize will use these to populate your k8s deployment.
-```zsh
-$ export AWS_ACCESS_KEY="<YOUR_AWS_KEY>" AWS_SECRET_ACCESS_KEY="<YOUR_AWS_SECRET>"
-```
-A [skaffold profile](https://skaffold.dev/docs/environment/profiles/) is configured for EKS, it can be activated via the following options
-
-Specify the profile name using the `-p` flag
-```zsh
-skaffold -p eks dev
-```
-
-export the activation var prior to skaffold invocation, then proceed as usual.
-```zsh
-export SKF_MODE="CB_EKS"
-skaffold dev
-```
-#### Additional commands:
-
-Skaffold supports one-off commands (no continuous watcher) if you wish to build or deploy just once.
-```zsh
-skaffold build
-skaffold deploy
-```
-Full CLI reference can be found [here](https://skaffold.dev/docs/references/cli/)
-## Running Agent & Cloudbeat
+## Running Cloudbeat with Elastic Agent
 Cloudbeat is only supported on managed elastic-agents. It means, that in order to run the setup, you will be required to have a Kibana running.
 Create an agent policy and install the CSP integration. Now, when adding a new agent, you will get the K8s deployment instructions of elastic-agent.
 
