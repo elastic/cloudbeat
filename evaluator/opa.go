@@ -73,10 +73,8 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (
 	if err != nil {
 		return nil, err
 	}
-	plugin := ""
-	if cfg.Evaluator.DecisionLogs {
-		plugin = fmt.Sprintf(logPlugin, dlogger.PluginName, dlogger.PluginName)
-	}
+
+	plugin := fmt.Sprintf(logPlugin, dlogger.PluginName, dlogger.PluginName)
 	opaCfg := fmt.Sprintf(opaConfig, path, plugin)
 
 	decisonLogger := newLogger()

@@ -15,9 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package include
+package version
 
-import (
-	_ "github.com/elastic/cloudbeat/resources/fetchers"
-	_ "github.com/elastic/csp-security-policies/bundle"
-)
+// name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
+const defaultBeatVersion = "8.7.0"
+
+// Version represents version information for a package
+type Version struct {
+	Version    string `json:"version,omitempty"`     // Version is the semantic version of the package
+	CommitHash string `json:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
+	CommitTime string `json:"commit_time,omitempty"` // CommitTime is the git commit time of the package
+}
+
+type CloudbeatVersionInfo struct {
+	Version
+	Policy     Version `json:"policy,omitempty"`     // Policy version info for the rules policy
+	Kubernetes Version `json:"kubernetes,omitempty"` // Kubernetes version info for the rules policy
+}

@@ -18,16 +18,42 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/elastic/cloudbeat/version"
+
 	"github.com/elastic/cloudbeat/beater"
+	"github.com/elastic/elastic-agent-client/v7/pkg/client"
+	"github.com/elastic/elastic-agent-client/v7/pkg/proto"
 
 	cmd "github.com/elastic/beats/v7/libbeat/cmd"
 	"github.com/elastic/beats/v7/libbeat/cmd/instance"
+	"github.com/elastic/beats/v7/libbeat/common/reload"
 
 	_ "github.com/elastic/beats/v7/x-pack/libbeat/include"
+	"github.com/elastic/beats/v7/x-pack/libbeat/management"
 )
 
 // Name of this beat
 var Name = "cloudbeat"
 
 // RootCmd to handle beats cli
-var RootCmd = cmd.GenRootCmdWithSettings(beater.New, instance.Settings{Name: Name, Version: defaultBeatVersion})
+var RootCmd = cmd.GenRootCmdWithSettings(beater.New, instance.Settings{Name: Name, Version: version.CloudbeatSemanticVersion()})
+
+func cloudbeatCfg(rawIn *proto.UnitExpectedConfig, agentInfo *client.AgentInfo) ([]*reload.ConfigWithMeta, error) {
+	modules, err := management.CreateInputsFromStreams(rawIn, "logs", agentInfo)
+	if err != nil {
+		return nil, fmt.Errorf("error creating input list from raw expected config: %w", err)
+	}
+
+	// format for the reloadable list needed bythe cm.Reload() method
+	configList, err := management.CreateReloadConfigFromInputs(modules)
+	if err != nil {
+		return nil, fmt.Errorf("error creating reloader config: %w", err)
+	}
+
+	return configList, nil
+}
+
+func init() {
+	management.ConfigTransform.SetTransform(cloudbeatCfg)
+}

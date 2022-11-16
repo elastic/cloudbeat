@@ -19,9 +19,7 @@ package fetching
 
 import (
 	"context"
-
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )

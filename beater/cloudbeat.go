@@ -61,22 +61,25 @@ type cloudbeat struct {
 }
 
 func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
-	log := logp.NewLogger("starter")
-	ctx := context.Background()
-	reloader := launcher.NewListener(ctx, log)
+	log := logp.NewLogger("launcher")
+	reloader := launcher.NewListener(log)
 	validator := &validator{}
 
-	s, err := launcher.New(ctx, log, reloader, validator, NewCloudbeat, cfg)
+	s, err := launcher.New(log, reloader, validator, NewCloudbeat, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	reload.Register.MustRegisterList("inputs", reloader)
+	reload.RegisterV2.MustRegisterInput(reloader)
 	return s, nil
 }
 
 // NewCloudbeat creates an instance of cloudbeat.
-func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+	return newCloudbeat(b, cfg)
+}
+
+func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	log := logp.NewLogger("cloudbeat")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -117,18 +120,14 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
+
+	commonDataProvider, err := transformer.NewCommonDataProvider(log, c)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	cdp, err := transformer.NewCommonDataProvider(log, c)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-
-	commonData, err := cdp.FetchCommonData(ctx)
+	commonData, err := commonDataProvider.FetchCommonData(ctx)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -229,13 +228,15 @@ func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.Resource
 
 // Stop stops cloudbeat.
 func (bt *cloudbeat) Stop() {
-	bt.cancel()
 	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
 	bt.leader.Stop()
 	close(bt.resourceCh)
+	if err := bt.client.Close(); err != nil {
+		bt.log.Fatal("Cannot close client", err)
+	}
 
-	bt.client.Close()
+	bt.cancel()
 }
 
 // configureProcessors configure processors to be used by the beat
