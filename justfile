@@ -121,7 +121,7 @@ gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
 run-tests target='default' kind='kind-multi':
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-{{kind}} --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee {{TEST_LOGS_DIRECTORY}}/{{target}}-$(date +"%d-%m-%y-%H-%M-%S").log
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-{{kind}} --timeout {{TESTS_TIMEOUT}} --logs
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 
