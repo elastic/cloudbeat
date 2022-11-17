@@ -98,14 +98,22 @@ func defaultConfig() (Stream, error) {
 		Period: 4 * time.Hour,
 	}
 
-	// The bundle resides on the same location as the executable
-	ex, err := os.Executable()
+	bundle, err := getBundlePath()
 	if err != nil {
 		return Stream{}, err
 	}
-	ret.BundlePath = filepath.Join(filepath.Dir(ex), "bundle.tar.gz")
 
+	ret.BundlePath = bundle
 	return ret, nil
+}
+
+func getBundlePath() (string, error) {
+	// The bundle resides on the same location as the executable
+	ex, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(filepath.Dir(ex), "bundle.tar.gz"), nil
 }
 
 // Datastream function to generate the datastream value
@@ -119,6 +127,11 @@ func Datastream(namespace string, indexPrefix string) string {
 // stanalone config is used for development flows
 // see an example deploy/kustomize/overlays/cloudbeat-vanilla/cloudbeat.yml
 func newStandaloneConfig(cfg *config.C) (Config, error) {
+	bundle, err := getBundlePath()
+	if err != nil {
+		return Config{}, err
+	}
+
 	c := struct {
 		Period  time.Duration
 		Streams []Stream
@@ -126,6 +139,8 @@ func newStandaloneConfig(cfg *config.C) (Config, error) {
 	if err := cfg.Unpack(&c); err != nil {
 		return Config{}, err
 	}
+
+	c.Streams[0].BundlePath = bundle
 	return Config{
 		Type:   InputTypeVanillaK8s,
 		Stream: c.Streams[0],
