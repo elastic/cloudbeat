@@ -23,30 +23,27 @@ ___
 
 
 ## Prerequisites
-We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to keep all our tooling in check. You can install it with the following command:
-```zsh
-curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
-. ./bin/activate-hermit
-```
+1. We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to keep all our tooling in check. Install it with the following command:
+    ```zsh
+    curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
+    . ./bin/activate-hermit
+    ```
 
->  **Note**
-This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already.
+    >  **Note**
+    This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already.
 
+2. Elastic stack running locally, preferably using [Elastic-Package](https://github.com/elastic/elastic-package) (you may need to [authenticate](https://docker-auth.elastic.co/github_auth))
+   For example, spinning up 8.5.0 stack locally:
+
+    ```zsh
+    eval "$(elastic-package stack shellinit)" # load stack environment variables
+    elastic-package stack up --version 8.5.0 -v -d
+    ```
 - _optional:_ Create local kind cluster to test against
   ```zsh
   just create-kind-cluster
   just elastic-stack-connect-kind # connect it to local elastic stack
   ```
-
-- Elastic stack running locally, preferably using [Elastic-Package](https://github.com/elastic/elastic-package) (you may need to [authenticate](https://docker-auth.elastic.co/github_auth))
-
-  For example, spinning up 8.5.0 stack locally:
-
-  ```zsh
-  eval "$(elastic-package stack shellinit)" # load stack environment variables
-  elastic-package stack up --version 8.5.0 -v -d
-  ```
-
 
 # Deploying Cloudbeat
 ## Running Cloudbeat as a process
