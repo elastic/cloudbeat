@@ -235,6 +235,95 @@ Current usage of test project is in the following ci flows:
   - deploy tests helm chart
   - execute product and integration cloudbeat tests
 
+## EKS Functional Tests
+
+The verification results are based on pre-defined configuration of EKS clusters.
+In order to be able to cover all test cases need to execute eks related tests on the following clusters
+- test-eks-config-1
+- test-eks-config-2
+
+Environment variable EKS_CONFIG is used by framework to identify which test cases to execute.
+
+### Tests Execution
+
+EKS test markers are defined in pyproject.toml
+- eks_file_system_rules
+- eks_process_rules
+- eks_k8s_objects_rules
+- eks_aws_service_rules
+
+Tests execution may be done by selecting appropriate marker.
+
+### Expected Findings
+
+Tables below describe expected findings to be verified in the test cases.
+
+#### File Tests
+|  Rule  | Conf-1-Node-1 | Conf-1-Node-2 | Conf-2-Node-1 | Conf-2-Node-2 |
+|:------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| 3.1.1  |    Passed     |    Failed     |       -       |       -       |
+| 3.1.2  |    Failed     |    Failed     |       -       |       -       |
+| 3.1.3  |    Passed     |    Failed     |       -       |       -       |
+| 3.1.4  |    Failed     |    Failed     |       -       |       -       |
+
+#### Process Tests
+|  Rule  | Conf-1-Node-1 | Conf-1-Node-2 | Conf-2-Node-1 | Conf-2-Node-2 |
+|:------:|:-------------:|:-------------:|:-------------:|:-------------:|
+| 3.2.1  |    Passed     |    Failed     |       -       |       -       |
+| 3.2.2  |    Passed     |    Failed     |       -       |       -       |
+| 3.2.3  |    Passed     |    Failed     |       -       |       -       |
+| 3.2.4  |    Failed     |    Failed     |    Passed     |    Failed     |
+| 3.2.5  |    Failed     |    Failed     |    Passed     |    Failed     |
+| 3.2.6  |    Failed     |    Passed     |       -       |       -       |
+| 3.2.7  |    Failed     |    Failed     |    Passed     |    Passed     |
+| 3.2.8  |    Passed     |    Failed     |       -       |       -       |
+| 3.2.9  |    Passed     |    Passed     |       -       |    Failed     |
+| 3.2.10 |    Failed     |    Passed     |       -       |       -       |
+| 3.2.11 |    Failed     |    Passed     |       -       |       -       |
+
+#### Kubernetes Objects Tests
+
+Kubernetes objects findings are not dependent on cluster configuration and may be executed in any EKS cluster.
+Before tests execution ensure that the following pods are running:
+- test-eks-good-pod
+- test-eks-bad-pod
+
+Pods definition location:
+- [test-eks-good-pod](./deploy/eks-psp-pass-pod.yaml)
+- [test-eks-bad-pod](./deploy/eks-psp-failures-pod.yaml)
+
+Pods are identified by label `testResourceId`.
+
+| Rule  | id=eks-psp-pass | id=eks-psp-failures |
+|:-----:|:---------------:|:-------------------:|
+| 4.2.1 |     Passed      |       Failed        |
+| 4.2.2 |     Passed      |       Failed        |
+| 4.2.3 |     Passed      |       Failed        |
+| 4.2.4 |     Passed      |       Failed        |
+| 4.2.5 |     Passed      |       Failed        |
+| 4.2.6 |     Passed      |       Failed        |
+| 4.2.7 |     Passed      |       Failed        |
+| 4.2.8 |     Passed      |       Failed        |
+| 4.2.9 |     Passed      |       Failed        |
+
+#### AWS Managed Services Tests
+
+| Rule  | Config-1 | Config-2 |
+|:-----:|:--------:|:--------:|
+| 2.1.1 |  Failed  |  Passed  |
+
+| Rule  | id=test-eks-scan-true | id=test-eks-scan-false |
+|:-----:|:---------------------:|:----------------------:|
+| 5.1.1 |        Passed         |         Failed         |
+
+| Rule  | Conf-1-Node-1 | Conf-1-Node-2 | Conf-2-Node-1 | Conf-2-Node-2 |
+|:-----:|:-------------:|:-------------:|:-------------:|:-------------:|
+| 5.4.3 |    Failed     |       -       |       -       |       -       |
+
+| Rule  | id=a628adbaa057d44c5b7aa777a9e36462 |
+|:-----:|:-----------------------------------:|
+| 5.4.5 |               Failed                |
+
 ## Licensing
 
 Will be defined later.
