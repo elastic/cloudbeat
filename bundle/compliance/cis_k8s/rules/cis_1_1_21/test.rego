@@ -4,15 +4,15 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("/etc/kubernetes/pki/client.key", "0700")
+	test.assert_fail(finding) with input as rule_input("/etc/kubernetes/pki/client.key", "700")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("/etc/kubernetes/pki/client.key", "0600")
+	test.assert_pass(finding) with input as rule_input("/etc/kubernetes/pki/client.key", "600")
 }
 
 test_not_evaluated {
-	not finding with input as rule_input("/etc/kubernetes/pki/client.crt", "0600")
+	not finding with input as rule_input("/etc/kubernetes/pki/client.crt", "600")
 }
 
 rule_input(filename, filemode) = filesystem_input {

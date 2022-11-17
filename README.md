@@ -60,13 +60,11 @@ should contain a beat/agent output and the `activated_rules` (not mandatory - wi
 {
   "type": "file",
   "activated_rules": {
-    "cis_k8s": [
-      "cis_1_1_1"
-    ]
+    "cis_k8s": ["cis_1_1_1"]
   },
   "sub_type": "file",
   "resource": {
-    "mode": "0700",
+    "mode": "700",
     "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
     "owner": "etc",
     "group": "root",
@@ -97,7 +95,7 @@ opa eval data.main.findings --format pretty -i input.json -b ./bundle > output.j
   "result": {
     "evaluation": "failed",
     "evidence": {
-      "filemode": "0700"
+      "filemode": "700"
     },
     "expected": {
       "filemode": "644"
@@ -187,7 +185,7 @@ curl --location --request POST 'http://localhost:8181/v1/data/main' \
         "type": "file",
         "resource": {
             "type": "file",
-            "mode": "0700",
+            "mode": "700",
             "path": "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
             "uid": "etc",
             "name": "kube-apiserver.yaml",

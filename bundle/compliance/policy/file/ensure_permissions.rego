@@ -9,7 +9,7 @@ finding(rule_evaluation) := result {
 	result := lib_common.generate_result(
 		lib_common.calculate_result(rule_evaluation.evaluation),
 		{"filemode": rule_evaluation.mode},
-		{"filemode": ((rule_evaluation.user * 100) + (rule_evaluation.group * 10)) + rule_evaluation.other},
+		{"filemode": sprintf("%d%d%d", [rule_evaluation.user, rule_evaluation.group, rule_evaluation.other])},
 	)
 }
 

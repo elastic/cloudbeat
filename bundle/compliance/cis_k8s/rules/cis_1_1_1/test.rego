@@ -4,15 +4,15 @@ import data.kubernetes_common.test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input("kube-apiserver.yaml", "0700")
+	test.assert_fail(finding) with input as rule_input("kube-apiserver.yaml", "700")
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input("kube-apiserver.yaml", "0644")
+	test.assert_pass(finding) with input as rule_input("kube-apiserver.yaml", "644")
 }
 
 test_not_evaluated {
-	not finding with input as rule_input("file.txt", "0644")
+	not finding with input as rule_input("file.txt", "644")
 }
 
 rule_input(filename, filemode) = filesystem_input {

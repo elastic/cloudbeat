@@ -22,32 +22,19 @@ file_permission_match_exact(filemode, user, group, other) {
 	permissions = parse_permission(filemode)
 
 	# filemode format {user}{group}{other} e.g. 644
-	check_permissions_exact(permissions, [user, group, other])
+	permissions == [user, group, other]
 } else = false {
 	true
 }
 
-# in some os filemodes starts with 0 to indicate that the value is Octal (base 8)
-# remove prefix if needed, and return a list of file premission [user, group, other]
+# return a list of file premission [user, group, other]
 parse_permission(filemode) = permissions {
-	# if prefix exist we should start the substring from 1, else 0
-	start = count(filemode) - 3
-
-	# remove prefix (if needed) and split
-	str_permissions = split(substring(filemode, start, 3), "")
-
 	# cast to numbers
-	permissions := [to_number(p) | p = str_permissions[_]]
+	permissions := [to_number(p) | p = split(filemode, "")[_]]
 }
 
 check_permissions(permissions, max_permissions) {
 	assert.all_true([r | r = bits.and(permissions[p], bits.negate(max_permissions[p])) == 0])
-} else = false {
-	true
-}
-
-check_permissions_exact(permissions, target_permissions) {
-	assert.all_true([r | r = permissions[p] == target_permissions[p]])
 } else = false {
 	true
 }

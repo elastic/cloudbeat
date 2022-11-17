@@ -18,6 +18,6 @@ test_not_evaluated {
 }
 
 rule_input(filename, user, group) = filesystem_input {
-	filemode := "0644"
+	filemode := "644"
 	filesystem_input = test_data.filesystem_input(filename, filemode, user, group)
 }
