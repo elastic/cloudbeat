@@ -1,9 +1,19 @@
-# Cloudbeat
+
 [![Coverage Status](https://coveralls.io/repos/github/elastic/cloudbeat/badge.svg?branch=main)](https://coveralls.io/github/elastic/cloudbeat?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 
-Cloudbeat evaluates cloud assets for security compliance and ships findings to Elasticsearch
+# Cloudbeat
+Cloudbeat analyzes cloud assets for security compliance and sends findings to Elasticsearch as part of the [Cloud Security Posture](https://www.elastic.co/blog/secure-your-cloud-with-elastic-security) plugin in Kibana.
 
+
+## Getting Started
+To get started with Cloud Security Posture on your cluster, see our [documentation](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#kspm-setup-unmanaged).
+- [Setup KSPM for Amazon EKS clusters](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#kspm-setup-unmanaged)
+
+- [Setup KSPM for unmanaged Kubernetes clusters](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#kspm-setup-eks-start)
+___
+
+## Cloudbeat Development
 ### Table of contents
 - [Prerequisites](#prerequisites)
 - [Deploying Cloudbeat as a process](#deploying-cloudbeat)
@@ -12,7 +22,7 @@ Cloudbeat evaluates cloud assets for security compliance and ships findings to E
 - [Deploying Cloudbeat with Elastic-Agent](#running-cloudbeat-with-elastic-agent)
 
 
-# Prerequisites
+## Prerequisites
 We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to keep all our tooling in check. You can install it with the following command:
 ```zsh
 curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
@@ -118,4 +128,4 @@ Use your favorite IDE to connect to the debugger on `localhost:40000` (for examp
 Cloudbeat is only supported on managed Elastic-Agents. It means, that in order to run the setup, you will be required to have a Kibana running.
 Create an agent policy and install the CSP integration. Now, when adding a new agent, you will get the K8s deployment instructions of elastic-agent.
 
->**Note** Are you a developer/contribute or just looking for more deployment types? check out our [dev docs](dev/README.md)
+>**Note** Are you a developer/contributor or just looking for more deployment types? check out our [dev docs](dev/README.md)
