@@ -85,6 +85,7 @@ func New(cfg *config.C) (*Config, error) {
 func defaultConfig() (*Config, error) {
 	ret := &Config{
 		Period: 4 * time.Hour,
+		Type:   InputTypeVanillaK8s,
 	}
 
 	bundle, err := getBundlePath()
