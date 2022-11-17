@@ -23,6 +23,9 @@ build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-
 build-replace-cloudbeat: build-binary
   ./scripts/remote_replace_cloudbeat.sh
 
+build-replace-bundle: build-opa-bundle
+  ./scripts/remote_replace_bundle.sh
+
 load-cloudbeat-image kind='kind-multi':
   kind load docker-image cloudbeat:latest --name {{kind}}
 

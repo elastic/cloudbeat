@@ -22,6 +22,8 @@ package config
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
@@ -51,6 +53,7 @@ type Stream struct {
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
+	BundlePath string                  `config:"bundle_path"`
 }
 
 type Config struct {
@@ -67,16 +70,16 @@ type Benchmarks struct {
 	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
-var DefaultConfig = Stream{
-	Period: 4 * time.Hour,
-}
-
 func New(cfg *config.C) (Config, error) {
 	// work with v1 cloudbeat.yml in dev mod
 	if cfg.HasField("streams") {
 		return newStandaloneConfig(cfg)
 	}
-	c := DefaultConfig
+	c, err := defaultConfig()
+	if err != nil {
+		return Config{}, err
+	}
+
 	if err := cfg.Unpack(&c); err != nil {
 		return Config{}, err
 	}
@@ -90,6 +93,29 @@ func New(cfg *config.C) (Config, error) {
 	}, nil
 }
 
+func defaultConfig() (Stream, error) {
+	ret := Stream{
+		Period: 4 * time.Hour,
+	}
+
+	bundle, err := getBundlePath()
+	if err != nil {
+		return Stream{}, err
+	}
+
+	ret.BundlePath = bundle
+	return ret, nil
+}
+
+func getBundlePath() (string, error) {
+	// The bundle resides on the same location as the executable
+	ex, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(filepath.Dir(ex), "bundle.tar.gz"), nil
+}
+
 // Datastream function to generate the datastream value
 func Datastream(namespace string, indexPrefix string) string {
 	if namespace == "" {
@@ -101,6 +127,11 @@ func Datastream(namespace string, indexPrefix string) string {
 // stanalone config is used for development flows
 // see an example deploy/kustomize/overlays/cloudbeat-vanilla/cloudbeat.yml
 func newStandaloneConfig(cfg *config.C) (Config, error) {
+	bundle, err := getBundlePath()
+	if err != nil {
+		return Config{}, err
+	}
+
 	c := struct {
 		Period  time.Duration
 		Streams []Stream
@@ -108,6 +139,8 @@ func newStandaloneConfig(cfg *config.C) (Config, error) {
 	if err := cfg.Unpack(&c); err != nil {
 		return Config{}, err
 	}
+
+	c.Streams[0].BundlePath = bundle
 	return Config{
 		Type:   InputTypeVanillaK8s,
 		Stream: c.Streams[0],
