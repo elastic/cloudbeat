@@ -62,7 +62,7 @@ func NewTransformer(log *logp.Logger, cd CommonDataInterface, index string) Tran
 	}
 }
 
-func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.EventData) ([]beat.Event, error) {
+func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.EventData) ([]beat.Event, error) {
 	if len(eventData.Findings) == 0 {
 		return nil, nil
 	}
@@ -73,7 +73,6 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
 	}
 	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
-
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
@@ -91,6 +90,7 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 				"result":              finding.Result,
 				"rule":                finding.Rule,
 				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
+				"cloudbeat":           t.commonData.GetVersionInfo(),
 			},
 		}
 

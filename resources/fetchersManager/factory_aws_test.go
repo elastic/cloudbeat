@@ -19,6 +19,8 @@ package fetchersManager
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -78,8 +80,6 @@ func (n *awsTestFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetc
 
 func awsMockedFetcherConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS) *agentconfig.C {
 	c := agentconfig.NewConfig()
-	conf := config.DefaultConfig
-	conf.Type = config.InputTypeEks
 	err := c.Merge(awsConfig)
 	s.NoError(err)
 
@@ -87,11 +87,12 @@ func awsMockedFetcherConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS) *age
 }
 
 func (s *FactoriesTestSuite) TestCreateFetcherWithAwsCredentials() {
-	var tests = []struct {
+	tests := []struct {
 		fetcherName string
 		awsConfig   aws.ConfigAWS
 	}{
-		{"some_fetcher",
+		{
+			"some_fetcher",
 			aws.ConfigAWS{
 				AccessKeyID:     "key",
 				SecretAccessKey: "secret",
@@ -120,7 +121,7 @@ func (s *FactoriesTestSuite) TestCreateFetcherWithAwsCredentials() {
 }
 
 func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
-	var tests = []struct {
+	tests := []struct {
 		fetcherName string
 		awsConfig   aws.ConfigAWS
 	}{
@@ -166,16 +167,12 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 	}
 }
 
-func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetcherName string) config.Config {
-	conf := config.Config{Type: config.InputTypeEks}
-	fetcherConfig := agentconfig.NewConfig()
-	err := fetcherConfig.SetString("name", -1, fetcherName)
-	s.NoError(err)
-
-	conf.Stream = config.Stream{
+func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetcherName string) *config.Config {
+	conf := &config.Config{
+		Type:       config.InputTypeEks,
 		AWSConfig:  awsConfig,
 		RuntimeCfg: nil,
-		Fetchers:   []*agentconfig.C{fetcherConfig},
+		Fetchers:   []*agentconfig.C{agentconfig.MustNewConfigFrom(fmt.Sprint("name: ", fetcherName))},
 	}
 
 	return conf

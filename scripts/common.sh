@@ -1,57 +1,64 @@
 #!/bin/bash
 
-# Based on the kubeconfig on the running host,
-# the function remotely searches for a file with a given pattern on a given folder
-# $1 is the pod on which it should run
-# $2 is the folder on which it should search
-# $3 is a regex pattern of the file which you want to find
-# The function returns the file name
-find_in_folder() {
-  POD=$1
-  FOLDER=$2
-  PATTERN=$3
-  RES=$(kubectl -n kube-system exec $POD -- ls -1 $FOLDER)
-  if [ -z "$RES" ]
-  then
-    return
-  fi
-
-  RES=$(echo "$RES" | grep $PATTERN)
-  if [ -z "$RES" ]
-  then
-    return
-  fi
-
-  echo "${RES}"
+exec_pod() {
+  pod=$1
+  cmd=$2
+  kubectl -n kube-system exec $pod -- $cmd
 }
 
-# Based on the kubeconfig on the running host,
-# the function remotely searches for a file with a given pattern on cloudbeat installation folder
-# /usr/share/elastic-agent/data/elastic-agent-*/install/cloudbeat-*/
-# $1 is the pod on which it should run
-# $2 is a regex pattern of the file which you want to find
-# The function returns the file full path
-find_in_cloudbeat_folder() {
-  POD=$1
+cp_to_pod() {
+  pod=$1
+  source=$2
+  dest=$3
+  kubectl cp $2 kube-system/$1:$dest
+}
 
-  PREFIX="/usr/share/elastic-agent/data"
-  PATH_PARTS=("elastic-agent-" "install" "cloudbeat-" "$2")
-  for NEXT in ${PATH_PARTS[@]}; do
-    FOUND=$(find_in_folder $POD $PREFIX $NEXT)
-    if [ -z "$FOUND" ]
-    then
-      return
-    fi
-    PREFIX="${PREFIX}/${FOUND}"
+get_agents() {
+  kubectl -n kube-system get pod -l app=elastic-agent -o name
+}
+
+find_target_os() {
+  _kubectl_node_info operatingSystem
+}
+
+find_target_arch() {
+  _kubectl_node_info architecture
+}
+
+is_eks() {
+  _kubectl_node_info kubeletVersion | grep "eks"
+}
+
+get_agent_sha() {
+  out=$(exec_pod $1 "elastic-agent version --yaml --binary-only")
+  echo $out | cut -d ":" -f4 | awk '{$1=$1};1'|  awk '{ print substr($0, 0, 6) }'
+}
+
+_kubectl_node_info() {
+ kubectl get node -o go-template="{{(index .items 0 ).status.nodeInfo.$1}}" 
+}
+
+# Iterates over the agents, and copies a list of files into each one of them to the `components` folder
+copy_to_agents() {
+  for P in $(get_agents); do
+    POD=$(echo $P | cut -d '/' -f 2)
+    SHA=$(get_agent_sha "$POD")
+    echo "Found sha=$SHA in pod=$POD"
+
+    DEST=/usr/share/elastic-agent/data/elastic-agent-$SHA/components
+
+    for FILE in "$@"
+    do
+      cp_to_pod "$POD" "$FILE" "$DEST"
+    done
+
+    echo "Copied all the assets to $POD"
   done
-
-  echo $PREFIX
 }
 
-find_cloudbeat_config() {
-  find_in_cloudbeat_folder $1 "cloudbeat.yml"
-}
-
-find_cloudbeat_binary() {
-  find_in_cloudbeat_folder $1 "cloudbeat$"
+restart_agents() {
+  echo "Agent restart is not supported yet"
+  # for P in $(get_agents); do
+    # exec_pod $POD "elastic-agent restart" # https://github.com/elastic/cloudbeat/pull/458#issuecomment-1308837098
+  # done
 }

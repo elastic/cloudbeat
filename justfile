@@ -1,5 +1,5 @@
 # Variables
-
+CLOUDBEAT_VERSION := ''
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
@@ -14,7 +14,7 @@ setup-env: create-kind-cluster elastic-stack-connect-kind
 create-vanilla-deployment-file:
    kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
-build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image
+build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
 build-load-both: build-deploy-cloudbeat load-pytest-kind
 
@@ -22,6 +22,9 @@ build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-
 
 build-replace-cloudbeat: build-binary
   ./scripts/remote_replace_cloudbeat.sh
+
+build-replace-bundle: build-opa-bundle
+  ./scripts/remote_replace_bundle.sh
 
 load-cloudbeat-image kind='kind-multi':
   kind load docker-image cloudbeat:latest --name {{kind}}
@@ -41,8 +44,7 @@ deploy-cloudbeat:
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
-build-cloudbeat-debug:
-  just build-opa-bundle
+build-cloudbeat-debug: build-opa-bundle
   GOOS=linux go mod vendor
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
@@ -59,10 +61,8 @@ deploy-eks-cloudbeat:
 #General
 
 logs-cloudbeat:
-  kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system
-
-logs-cloudbeat-file:
-  kubectl logs -f --selector="k8s-app=cloudbeat" -n kube-system > cloudbeat-logs.ndjson
+    CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
+    kubectl logs -f "${CLOUDBEAT_POD}" -n kube-system
 
 build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v
@@ -77,17 +77,18 @@ elastic-stack-connect-kind kind='kind-multi':
   ./.ci/scripts/connect_kind.sh {{kind}}
 
 ssh-cloudbeat:
-    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
+    CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
     kubectl exec --stdin --tty "${CLOUDBEAT_POD}" -n kube-system -- /bin/bash
 
 expose-ports:
-    CLOUDBEAT_POD=$( kubectl get pods --no-headers -o custom-columns=":metadata.name" -n kube-system | grep "cloudbeat" ) && \
+    CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
     kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
 
 
 #### TESTS ####
 
 TEST_POD := 'test-pod-v1'
+
 TESTS_RELEASE := 'cloudbeat-test'
 TEST_LOGS_DIRECTORY := 'test-logs'
 POD_STATUS_UNKNOWN := 'Unknown'
@@ -95,7 +96,7 @@ POD_STATUS_PENDING := 'Pending'
 POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
-ELK_STACK_VERSION := '8.4.2'
+ELK_STACK_VERSION := env_var('ELK_VERSION')
 NAMESPACE := 'kube-system'
 ECR_CLOUDBEAT_TEST := 'public.ecr.aws/z7e1r9l0/'
 
@@ -113,8 +114,8 @@ load-pytest-eks:
   docker tag {{TESTS_RELEASE}}:latest {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
   docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
-deploy-tests-helm values_file target range='':
-  helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}}  tests/deploy/k8s-cloudbeat-tests/
+deploy-tests-helm target range='' values_file='tests/deploy/values/ci.yml':
+  helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}} tests/deploy/k8s-cloudbeat-tests/
 
 purge-tests:
 	helm del {{TESTS_RELEASE}} -n {{NAMESPACE}} & kubectl delete pvc --all -n {{NAMESPACE}}
@@ -123,7 +124,7 @@ gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
 run-tests target='default' kind='kind-multi':
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-{{kind}} --timeout {{TESTS_TIMEOUT}} --logs 2>&1 | tee {{TEST_LOGS_DIRECTORY}}/{{target}}-$(date +"%d-%m-%y-%H-%M-%S").log
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-{{kind}} --timeout {{TESTS_TIMEOUT}} --logs
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 

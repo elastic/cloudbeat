@@ -27,14 +27,9 @@ import (
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 )
 
-type validator struct {
-}
+type validator struct{}
 
 func (v *validator) Validate(cfg *agentconfig.C) error {
-	if !cfg.HasField("streams") {
-		return fmt.Errorf("no streams in config")
-	}
-
 	c, err := config.New(cfg)
 	if err != nil {
 		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)

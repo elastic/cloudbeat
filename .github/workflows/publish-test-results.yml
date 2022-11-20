@@ -36,7 +36,7 @@ jobs:
           do
             IFS=$'\t' read name url <<< "$artifact"
             gh api $url > "$name.zip"
-            unzip -o "$name.zip" -d "../tests/allure/results" 
+            unzip -o "$name.zip" -d "../tests/allure/results"
           done
 
       - name: Get pr info

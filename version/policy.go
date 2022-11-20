@@ -15,7 +15,35 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cmd
+package version
 
-// name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
-const defaultBeatVersion = "8.6.0"
+import (
+	"runtime/debug"
+)
+
+var (
+	policyVersion string
+)
+
+func init() {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, dep := range info.Deps {
+			if dep.Path == "github.com/elastic/csp-security-policies" {
+				policyVersion = dep.Version
+				break
+			}
+		}
+	}
+}
+
+// PolicySemanticVersion returns the current cloudbeat version.
+func PolicySemanticVersion() string {
+	return policyVersion
+}
+
+// PolicyVersion returns cloudbeat version info used for the build.
+func PolicyVersion() Version {
+	return Version{
+		Version: PolicySemanticVersion(),
+	}
+}

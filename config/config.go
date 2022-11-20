@@ -22,6 +22,8 @@ package config
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
@@ -44,32 +46,19 @@ type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
 }
 
-type AgentInput struct {
-	Streams []Stream `config:"streams"`
-	Type    string   `config:"type"`
-}
-
-type Stream struct {
+type Config struct {
+	Type       string                  `config:"type"`
 	AWSConfig  aws.ConfigAWS           `config:",inline"`
 	RuntimeCfg *RuntimeConfig          `config:"runtime_cfg"`
 	Fetchers   []*config.C             `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
-	Evaluator  EvaluatorConfig         `config:"evaluator"`
 	Processors processors.PluginConfig `config:"processors"`
-}
-
-type Config struct {
-	Stream
-	Type string `config:"type"`
+	BundlePath string                  `config:"bundle_path"`
 }
 
 type RuntimeConfig struct {
 	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
-}
-
-type EvaluatorConfig struct {
-	DecisionLogs bool `config:"decision_logs"`
 }
 
 type Benchmarks struct {
@@ -77,24 +66,44 @@ type Benchmarks struct {
 	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
-var DefaultConfig = AgentInput{
-	Type: InputTypeVanillaK8s,
-	Streams: []Stream{{
-		Period: 4 * time.Hour,
-	}},
-}
-
-func New(cfg *config.C) (Config, error) {
-	c := DefaultConfig
-
-	if err := cfg.Unpack(&c); err != nil {
-		return Config{}, err
+func New(cfg *config.C) (*Config, error) {
+	c, err := defaultConfig()
+	if err != nil {
+		return nil, err
 	}
 
-	return Config{
-		Stream: c.Streams[0],
-		Type:   c.Type,
-	}, nil
+	if err := cfg.Unpack(&c); err != nil {
+		return nil, err
+	}
+
+	if c.RuntimeCfg != nil && c.RuntimeCfg.ActivatedRules != nil && len(c.RuntimeCfg.ActivatedRules.CisEks) > 0 {
+		c.Type = InputTypeEks
+	}
+	return c, nil
+}
+
+func defaultConfig() (*Config, error) {
+	ret := &Config{
+		Period: 4 * time.Hour,
+		Type:   InputTypeVanillaK8s,
+	}
+
+	bundle, err := getBundlePath()
+	if err != nil {
+		return nil, err
+	}
+
+	ret.BundlePath = bundle
+	return ret, nil
+}
+
+func getBundlePath() (string, error) {
+	// The bundle resides on the same location as the executable
+	ex, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(filepath.Dir(ex), "bundle.tar.gz"), nil
 }
 
 // Datastream function to generate the datastream value

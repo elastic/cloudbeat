@@ -20,6 +20,7 @@ package transformer
 import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"k8s.io/client-go/kubernetes"
 )
@@ -32,15 +33,17 @@ type ResourceTypeMetadata struct {
 type CommonDataProvider struct {
 	log        *logp.Logger
 	kubeClient kubernetes.Interface
-	cfg        config.Config
+	cfg        *config.Config
 }
 
 type CommonData struct {
-	clusterId string
-	nodeId    string
+	clusterId   string
+	nodeId      string
+	versionInfo version.CloudbeatVersionInfo
 }
 
 type CommonDataInterface interface {
 	GetData() CommonData
 	GetResourceId(fetching.ResourceMetadata) string
+	GetVersionInfo() version.CloudbeatVersionInfo
 }

@@ -85,9 +85,6 @@ spec:
               readOnly: true
       serviceAccountName: cloudbeat
       terminationGracePeriodSeconds: 30
-      tolerations:
-        - key: node-role.kubernetes.io/master
-          effect: NoSchedule
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
