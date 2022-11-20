@@ -14,7 +14,7 @@ setup-env: create-kind-cluster elastic-stack-connect-kind
 create-vanilla-deployment-file:
    kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
-build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image
+build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
 
 build-load-both: build-deploy-cloudbeat load-pytest-kind
 

@@ -23,6 +23,11 @@ package leaderelection
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
@@ -33,10 +38,6 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
-	"os"
-	"strings"
-	"sync"
-	"time"
 )
 
 type ElectionManager interface {
@@ -53,7 +54,7 @@ type Manager struct {
 	kubeClient k8s.Interface
 }
 
-func NewLeaderElector(log *logp.Logger, cfg config.Config) (ElectionManager, error) {
+func NewLeaderElector(log *logp.Logger, cfg *config.Config) (ElectionManager, error) {
 	kubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		log.Errorf("NewLeaderElector error in GetClient: %v", err)

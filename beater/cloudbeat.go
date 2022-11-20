@@ -50,7 +50,7 @@ const (
 type cloudbeat struct {
 	ctx         context.Context
 	cancel      context.CancelFunc
-	config      config.Config
+	config      *config.Config
 	client      beat.Client
 	data        *fetchersManager.Data
 	evaluator   evaluator.Evaluator
@@ -211,7 +211,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo, le leaderelection.ElectionManager) (fetchersManager.FetchersRegistry, error) {
+func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le leaderelection.ElectionManager) (fetchersManager.FetchersRegistry, error) {
 	registry := fetchersManager.NewFetcherRegistry(log)
 
 	parsedList, err := fetchersManager.Factories.ParseConfigFetchers(log, cfg, ch)

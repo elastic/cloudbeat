@@ -63,7 +63,7 @@ var logPlugin = `
 		"%s": {}
 	}`
 
-func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg config.Config) (Evaluator, error) {
+func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg *config.Config) (Evaluator, error) {
 	// provide the OPA configuration which specifies
 	// fetching policy bundle and logging decisions locally to the console
 

@@ -33,7 +33,7 @@ type ResourceTypeMetadata struct {
 type CommonDataProvider struct {
 	log        *logp.Logger
 	kubeClient kubernetes.Interface
-	cfg        config.Config
+	cfg        *config.Config
 }
 
 type CommonData struct {

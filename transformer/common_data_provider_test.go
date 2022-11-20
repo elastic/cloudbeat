@@ -40,7 +40,7 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 	cdProvider := CommonDataProvider{
 		log:        logp.NewLogger("cloudbeat_common_data_provider_test"),
 		kubeClient: k8sFake.NewSimpleClientset(),
-		cfg:        config.Config{},
+		cfg:        &config.Config{},
 	}
 
 	type args struct {

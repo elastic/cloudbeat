@@ -142,13 +142,11 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 	}
 }
 
-func (s *OpaTestSuite) getTestConfig() config.Config {
+func (s *OpaTestSuite) getTestConfig() *config.Config {
 	path, err := filepath.Abs("bundle.tar.gz")
 	s.NoError(err)
-	return config.Config{
-		Stream: config.Stream{
-			BundlePath: path,
-		},
+	return &config.Config{
+		BundlePath: path,
 	}
 }
 

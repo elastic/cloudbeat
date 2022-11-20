@@ -172,8 +172,8 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		err := numCfg.SetString("name", -1, test.key)
 		s.NoError(err, "Could not set name: %v", err)
 
-		conf := config.Config{Type: test.integrationType}
-		conf.Stream.Fetchers = []*agentconfig.C{numCfg}
+		conf := &config.Config{Type: test.integrationType}
+		conf.Fetchers = []*agentconfig.C{numCfg}
 
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.NoError(err)
@@ -201,12 +201,12 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 	}
 
 	for _, test := range tests {
-		conf := config.Config{}
+		conf := &config.Config{}
 		numCfg := numberConfig(test.value)
 		err := numCfg.SetString("name", -1, test.key)
 		s.NoError(err, "Could not set name: %v", err)
 
-		conf.Stream.Fetchers = []*agentconfig.C{numCfg}
+		conf.Fetchers = []*agentconfig.C{numCfg}
 
 		_, err = s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.Error(err)
