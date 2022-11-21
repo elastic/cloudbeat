@@ -41,13 +41,13 @@ jobs:
         with:
           args: buildOpaBundle
 
-      - name: Copy bundle to requried dirs
+      - name: Copy bundle to required dirs
         run: |
           cp bundle.tar.gz evaluator/
 
       - name: Unit-Test Cloudbeat
         run: |
-          GOOS=linux go test -v -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
+          GOOS=linux go test -v -coverpkg=./... -coverprofile=cover.out.tmp ./...
           cat cover.out.tmp | grep -v "_mock.go" > cover.out # remove mock files from coverage report
 
       - name: Upload coverage artifact
