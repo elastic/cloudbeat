@@ -110,8 +110,10 @@ jobs:
             values_file: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
             range: ''
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '0..5'
+            values_file: tests/deploy/values/ci.yml
       fail-fast: false
     steps:
       - name: Check out the repo
@@ -138,7 +140,7 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm target=${{ matrix.test-target }} range=${{ matrix.range }} ${{ matrix.values_file }}
+          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 
       - name: Run Tests
         id: run_tests
