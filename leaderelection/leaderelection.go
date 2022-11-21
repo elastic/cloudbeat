@@ -47,36 +47,40 @@ type ElectionManager interface {
 }
 
 type Manager struct {
-	log        *logp.Logger
-	leader     *le.LeaderElector
-	wg         *sync.WaitGroup
-	cancelFunc context.CancelFunc
-	kubeClient k8s.Interface
+	log          *logp.Logger
+	leader       *le.LeaderElector
+	wg           *sync.WaitGroup
+	cancelFunc   context.CancelFunc
+	kubeClient   k8s.Interface
+	k8sAvailable bool
 }
 
 func NewLeaderElector(log *logp.Logger, cfg *config.Config) ElectionManager {
+	k8sAvailable := true
 	kubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
+		k8sAvailable = false
 		log.Errorf("NewLeaderElector error in GetClient: %v", err)
 	}
 	wg := &sync.WaitGroup{}
 
 	return &Manager{
-		log:        log,
-		kubeClient: kubeClient,
-		leader:     nil,
-		cancelFunc: nil,
-		wg:         wg,
+		log:          log,
+		leader:       nil,
+		wg:           wg,
+		cancelFunc:   nil,
+		kubeClient:   kubeClient,
+		k8sAvailable: k8sAvailable,
 	}
 }
 
 func (m *Manager) IsLeader() bool {
-	return m.leader.IsLeader()
+	return m.k8sAvailable && m.leader.IsLeader()
 }
 
 // Run leader election is blocking until a FirstLeaderDeadline timeout has reached.
 func (m *Manager) Run(ctx context.Context) error {
-	if m.kubeClient == nil {
+	if !m.k8sAvailable {
 		m.log.Warnf("K8s is unavailable")
 		return nil
 	}
