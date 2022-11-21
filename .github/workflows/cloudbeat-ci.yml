@@ -108,12 +108,12 @@ jobs:
           - test-target: post_merge_agent
             range: ''
             values_file: tests/deploy/values/ci-sa-agent.yml
-          - test-target: pre_merge
-            range: ''
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '0..5'
-            values_file: tests/deploy/values/ci.yml
+#           - test-target: pre_merge
+#             range: ''
+#             values_file: tests/deploy/values/ci.yml
+#           - test-target: file_system_rules
+#             range: '0..5'
+#             values_file: tests/deploy/values/ci.yml
       fail-fast: false
     steps:
       - name: Check out the repo
@@ -147,6 +147,12 @@ jobs:
         run: |
           just run-tests ${{ matrix.test-target }}
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
+          
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v2
