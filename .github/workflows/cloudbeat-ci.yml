@@ -107,7 +107,7 @@ jobs:
         include:
           - test-target: post_merge_agent
             range: ''
-            values_files: tests/deploy/values/ci-sa-agent.yml
+            values_file: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
             range: ''
           - test-target: file_system_rules
