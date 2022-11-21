@@ -47,13 +47,14 @@ jobs:
 
       - name: Unit-Test Cloudbeat
         run: |
-          GOOS=linux go test -v -coverpkg=./... -coverprofile=covprofile ./...
+          GOOS=linux go test -v -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
+          cat cover.out.tmp | grep -v "_mock.go" > cover.out # remove mock files from coverage report
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v3
         with:
           name: coverage-file
-          path: covprofile
+          path: cover.out
 
   coverage:
     name: Coverage report
@@ -78,7 +79,7 @@ jobs:
       - name: Send coverage
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goveralls -coverprofile=covprofile -service=github
+        run: goveralls -coverprofile=cover.out -service=github
 
   manifest_tests:
     name: Manifest Tests
