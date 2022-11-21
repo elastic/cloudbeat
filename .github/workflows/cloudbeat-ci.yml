@@ -106,10 +106,10 @@ jobs:
       matrix:
         include:
           - test-target: post_merge_agent
-            range: ''
+            range: '..'
             values_file: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
-            range: ''
+            range: '..'
           - test-target: file_system_rules
             range: '0..5'
       fail-fast: false
@@ -138,7 +138,7 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
+          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.range }} ${{ matrix.values_file }}
 
       - name: Run Tests
         id: run_tests
