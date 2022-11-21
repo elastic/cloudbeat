@@ -138,7 +138,7 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.range }} ${{ matrix.values_file }}
+          just deploy-tests-helm ${{ matrix.values_file }} ${{ matrix.test-target }} ${{ matrix.range }}
 
       - name: Run Tests
         id: run_tests
