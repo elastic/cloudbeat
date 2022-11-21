@@ -94,11 +94,7 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
-	le, err := leaderelection.NewLeaderElector(log, c)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
+	le := leaderelection.NewLeaderElector(log, c)
 
 	fetchersRegistry, err := initRegistry(log, c, resourceCh, le)
 	if err != nil {
@@ -121,7 +117,7 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
-	commonDataProvider, err := transformer.NewCommonDataProvider(log, c)
+	commonDataProvider := transformer.NewCommonDataProvider(log, c)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -152,6 +148,7 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 // Run starts cloudbeat.
 func (bt *cloudbeat) Run(b *beat.Beat) error {
 	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it.")
+
 	if err := bt.leader.Run(bt.ctx); err != nil {
 		return err
 	}

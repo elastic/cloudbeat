@@ -19,7 +19,9 @@ package providers
 
 import (
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"gotest.tools/gotestsum/log"
 	k8s "k8s.io/client-go/kubernetes"
+	"os"
 )
 
 type KubernetesClientGetter interface {
@@ -31,5 +33,15 @@ type KubernetesProvider struct {
 
 func (provider KubernetesProvider) GetClient(kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
 	client, err := kubernetes.GetKubernetesClient(kubeConfig, options)
+	if err != nil {
+		if kubernetes.IsInCluster(kubeConfig) {
+			log.Debugf("Could not create kubernetes client using in_cluster config: %+v", err)
+		} else if kubeConfig == "" {
+			log.Debugf("Could not create kubernetes client using config: %v: %+v", os.Getenv("KUBECONFIG"), err)
+		} else {
+			log.Debugf("Could not create kubernetes client using config: %v: %+v", kubeConfig, err)
+		}
+	}
+
 	return client, err
 }

@@ -37,24 +37,37 @@ const (
 
 var uuidNamespace = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
 
-func NewCommonDataProvider(log *logp.Logger, cfg *config.Config) (CommonDataProvider, error) {
+func NewCommonDataProvider(log *logp.Logger, cfg *config.Config) CommonDataProvider {
+	k8sAvailable := true
 	KubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
+		k8sAvailable = false
 		log.Errorf("NewCommonDataProvider error in GetClient: %v", err)
-		return CommonDataProvider{}, err
 	}
 
 	return CommonDataProvider{
-		log:        log,
-		kubeClient: KubeClient,
-		cfg:        cfg,
-	}, nil
+		log:          log,
+		kubeClient:   KubeClient,
+		cfg:          cfg,
+		k8sAvailable: k8sAvailable,
+	}
 }
 
 // FetchCommonData fetches cluster and node id and version info
 // Note: As of today Kubernetes is the only environment supported by CommonDataProvider
 func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInterface, error) {
 	cm := CommonData{}
+	versionInfo, err := c.FetchVersionInfo()
+	if err != nil {
+		c.log.Errorf("fetchCommonData error in FetchKubernetesVersion: %v", err)
+	}
+	cm.versionInfo = versionInfo
+
+	if c.kubeClient == nil {
+		c.log.Warn("k8s is unavailable")
+		return cm, nil
+	}
+
 	ClusterId, err := c.getClusterId(ctx)
 	if err != nil {
 		c.log.Errorf("fetchCommonData error in getClusterId: %v", err)
@@ -69,11 +82,6 @@ func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInte
 	}
 	cm.nodeId = NodeId
 
-	versionInfo, err := c.FetchVersionInfo()
-	if err != nil {
-		c.log.Errorf("fetchCommonData error in FetchKubernetesVersion: %v", err)
-	}
-	cm.versionInfo = versionInfo
 	return cm, nil
 }
 
@@ -132,18 +140,20 @@ func (c CommonDataProvider) FetchKubernetesVersion() (version.Version, error) {
 func (c CommonDataProvider) FetchVersionInfo() (version.CloudbeatVersionInfo, error) {
 	cloudbeatVersion := version.CloudbeatVersion()
 	policyVersion := version.PolicyVersion()
-	serverVersion, err := c.FetchKubernetesVersion()
-	if err != nil {
+	if !c.k8sAvailable {
+		c.log.Warn("K8s is unavailable")
 		return version.CloudbeatVersionInfo{
 			Version: cloudbeatVersion,
 			Policy:  policyVersion,
-		}, err
+		}, nil
 	}
+
+	serverVersion, err := c.FetchKubernetesVersion()
 	return version.CloudbeatVersionInfo{
 		Version:    cloudbeatVersion,
 		Policy:     policyVersion,
 		Kubernetes: serverVersion,
-	}, nil
+	}, err
 }
 
 func (cd CommonData) GetResourceId(metadata fetching.ResourceMetadata) string {
