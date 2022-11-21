@@ -23,6 +23,7 @@ brew install just
 
 After installing just you will be able to execute commands defined in **JUSTFILE** located in the project root folder.
 
+
 4. Install [kind](https://kind.sigs.k8s.io/docs/user/quick-start)
 
 ```shell
