@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/beats/v7/libbeat/management"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/go-ucfg"
@@ -44,7 +45,8 @@ type launcher struct {
 	latest    *config.C
 	beat      *beat.Beat
 	creator   beat.Creator
-	validator Validator
+	// A Validator for finding the first valid configuration event from the Fleet server.
+	initialValidator Validator
 }
 
 type Reloader interface {
@@ -56,15 +58,15 @@ type Validator interface {
 	Validate(*config.C) error
 }
 
-func New(log *logp.Logger, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
+func New(log *logp.Logger, reloader Reloader, initvalidator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
 	s := &launcher{
-		beaterErr: make(chan error, 1),
-		wg:        sync.WaitGroup{},
-		log:       log,
-		reloader:  reloader,
-		validator: validator,
-		creator:   creator,
-		latest:    cfg,
+		beaterErr:        make(chan error, 1),
+		wg:               sync.WaitGroup{},
+		log:              log,
+		reloader:         reloader,
+		initialValidator: initvalidator,
+		creator:          creator,
+		latest:           cfg,
 	}
 
 	return s, nil
@@ -101,8 +103,12 @@ func (l *launcher) run() error {
 	err := l.runLoop()
 	if err != nil {
 		l.log.Errorf("Launcher has stopped: %v", err)
+
+		if l.beat != nil && l.beat.Manager.Enabled() {
+			l.beat.Manager.UpdateStatus(management.Degraded, err.Error())
+		}
 	} else {
-		l.log.Info("Launcher was shutted down gracefully")
+		l.log.Info("Launcher shut down gracefully")
 	}
 
 	l.reloader.Stop()
@@ -235,10 +241,10 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 				return nil, fmt.Errorf("reconfiguration channel is closed")
 			}
 
-			if l.validator != nil {
-				err := l.validator.Validate(update)
+			if l.initialValidator != nil {
+				err := l.initialValidator.Validate(update)
 				if err != nil {
-					l.log.Errorf("Config update validation failed: %v", err)
+					l.log.Errorf("This configuration is not valid to start up the beat: %v", err)
 					continue
 				}
 			}

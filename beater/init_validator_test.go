@@ -29,13 +29,13 @@ type ValidatorTestSuite struct {
 	suite.Suite
 
 	log *logp.Logger
-	sut *validator
+	sut *initialValidator
 }
 
 func TestValidatorTestSuite(t *testing.T) {
 	s := new(ValidatorTestSuite)
 	s.log = logp.NewLogger("cloudbeat_validator_test_suite")
-	s.sut = &validator{}
+	s.sut = &initialValidator{}
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -45,7 +45,7 @@ func TestValidatorTestSuite(t *testing.T) {
 }
 
 func (s *ValidatorTestSuite) TestConfig() {
-	configWithRuntimeCfg := config.MustNewConfigFrom(`
+	configWithRuntimeConfig := config.MustNewConfigFrom(`
 runtime_cfg:
   activated_rules:
     cis_k8s:
@@ -66,7 +66,7 @@ runtime_cfg:
 		},
 		{
 			false,
-			configWithRuntimeCfg,
+			configWithRuntimeConfig,
 		},
 	}
 

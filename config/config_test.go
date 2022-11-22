@@ -25,6 +25,8 @@ import (
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -49,11 +51,12 @@ func (s *ConfigTestSuite) SetupTest() {
 
 func (s *ConfigTestSuite) TestNew() {
 	tests := []struct {
-		config                 string
-		expectedActivatedRules *Benchmarks
-		expectedType           string
-		expectedAWSConfig      aws.ConfigAWS
-		expectedFetchers       int
+		config                     string
+		expectedActivatedRules     *Benchmarks
+		expectedType               string
+		expectedAWSConfig          aws.ConfigAWS
+		expectedFetchers           int
+		expectedCompatibleVersions *CompatibleVersions
 	}{
 		{
 			`
@@ -70,11 +73,14 @@ fetchers:
     directory: b
   - name: b
     directory: b
+compatible_versions:
+  cloudbeat: some_range
 `,
 			&Benchmarks{CisK8s: []string{"a", "b", "c", "d", "e"}},
 			"cloudbeat/cis_k8s",
 			aws.ConfigAWS{},
 			2,
+			&CompatibleVersions{Cloudbeat: awssdk.String("some_range")},
 		},
 		{
 			`
@@ -111,6 +117,7 @@ fetchers:
 				RoleArn:              "role_arn",
 			},
 			3,
+			nil,
 		},
 	}
 
@@ -123,14 +130,15 @@ fetchers:
 			s.NoError(err)
 
 			s.Equal(test.expectedType, c.Type)
-			s.EqualValues(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules)
+			s.EqualValues(test.expectedActivatedRules, c.RuntimeConfig.ActivatedRules)
 			s.Equal(test.expectedAWSConfig, c.AWSConfig)
 			s.Equal(test.expectedFetchers, len(c.Fetchers))
+			s.Equal(test.expectedCompatibleVersions, c.CompatibleVersions)
 		})
 	}
 }
 
-func (s *ConfigTestSuite) TestRuntimeCfgExists() {
+func (s *ConfigTestSuite) TestRuntimeConfigExists() {
 	tests := []struct {
 		config   string
 		expected bool
@@ -165,7 +173,7 @@ not_runtime_cfg:
 			c, err := New(cfg)
 			s.NoError(err)
 
-			s.Equal(test.expected, c.RuntimeCfg != nil)
+			s.Equal(test.expected, c.RuntimeConfig != nil)
 		})
 	}
 }
@@ -196,7 +204,7 @@ runtime_cfg:
 			c, err := New(cfg)
 			s.NoError(err)
 
-			rules := c.RuntimeCfg.ActivatedRules
+			rules := c.RuntimeConfig.ActivatedRules
 
 			s.Equal(test.expected, rules.CisK8s)
 		})
@@ -281,8 +289,142 @@ runtime_cfg:
 			s.NoError(err)
 
 			s.Equal(test.expectedType, c.Type)
-			s.Equal(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules.CisK8s)
-			s.Equal(test.expectedEksActivatedRules, c.RuntimeCfg.ActivatedRules.CisEks)
+			s.Equal(test.expectedActivatedRules, c.RuntimeConfig.ActivatedRules.CisK8s)
+			s.Equal(test.expectedEksActivatedRules, c.RuntimeConfig.ActivatedRules.CisEks)
+		})
+	}
+}
+
+func (s *ConfigTestSuite) TestConfigValidatefVersionCompatibility() {
+	tests := []struct {
+		config  string
+		version string
+		valid   bool
+	}{
+		{
+			`
+compatible_versions:
+  cloudbeat: ">= 8.4.0 <= 8.5.0"
+`,
+			"8.4.0",
+			true,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: "8.5.0"
+`,
+			"v8.5.0-SNAPSHOT",
+			true,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: ">= v8.5.0 <= v8.7.0"
+`,
+			"8.3.0",
+			false,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: ">= 8.5.0 <= 8.7.0"
+`,
+			"8.3.0-SNAPSHOT",
+			false,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: ">= 8.5.0 <= 8.7.0"
+`,
+			"8.6.0-SNAPSHOT",
+			true,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: ">= 8.5.0 <= 8.7.0"
+`,
+			"v8.8.0",
+			false,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: ">= v8.5.0 <= v8.7.0"
+`,
+			"v8.5.0",
+			true,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: ">= v8.5.0 < v8.7.0"
+`,
+			"8.7.0",
+			false,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: ">= 8.5.0"
+`,
+			"v8.3.0-SNAPSHOT",
+			false,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: ">= v8.5.0"
+`,
+			"v8.8.0-SNAPSHOT",
+			true,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: "< 8.7.0"
+`,
+			"8.3.0",
+			true,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: "<= 8.7.0"
+`,
+			"v8.7.0-SNAPSHOT",
+			true,
+		},
+		{
+			`
+compatible_versions:
+  cloudbeat: "< v8.7.0"
+`,
+			"8.3.0",
+			true,
+		},
+	}
+
+	versionfuncer := func(s string) func() string {
+		return func() string {
+			return s
+		}
+	}
+
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			cfg, err := config.NewConfigFrom(test.config)
+			s.NoError(err)
+
+			c, err := New(cfg)
+			s.NoError(err)
+
+			valid, err := c.validateVersionCompatibility(versionfuncer(test.version))
+			s.NoError(err)
+
+			s.Equal(test.valid, valid)
 		})
 	}
 }

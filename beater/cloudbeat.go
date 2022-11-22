@@ -35,6 +35,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/common/reload"
+	"github.com/elastic/beats/v7/libbeat/management"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -63,7 +64,7 @@ type cloudbeat struct {
 func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("launcher")
 	reloader := launcher.NewListener(log)
-	validator := &validator{}
+	validator := &initialValidator{}
 
 	s, err := launcher.New(log, reloader, validator, NewCloudbeat, cfg)
 	if err != nil {
@@ -79,7 +80,7 @@ func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	return newCloudbeat(b, cfg)
 }
 
-func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
+func newCloudbeat(b *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	log := logp.NewLogger("cloudbeat")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -87,7 +88,14 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	c, err := config.New(cfg)
 	if err != nil {
 		cancel()
-		return nil, fmt.Errorf("error reading config file: %w", err)
+		return nil, fmt.Errorf("error parsing config file: %w", err)
+	}
+
+	if err := c.PostParseValidate(); err != nil {
+		// Report validation issues and keep going.
+		msg := fmt.Sprintf("could not validate parsed configuration: %v", err)
+		log.Error(msg)
+		b.Manager.UpdateStatus(management.Degraded, msg)
 	}
 
 	log.Info("Config initiated with cycle period of ", c.Period)

@@ -27,16 +27,16 @@ import (
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 )
 
-type validator struct{}
+type initialValidator struct{}
 
-func (v *validator) Validate(cfg *agentconfig.C) error {
+func (v *initialValidator) Validate(cfg *agentconfig.C) error {
 	c, err := config.New(cfg)
 	if err != nil {
 		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
 	}
 
-	if c.RuntimeCfg == nil {
-		return fmt.Errorf("runtime configuration didn't exist in new configuration")
+	if c.RuntimeConfig == nil {
+		return fmt.Errorf("the runtime configuration does not exist in reconfiguration event")
 	}
 
 	return nil
