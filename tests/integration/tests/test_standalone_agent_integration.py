@@ -104,7 +104,7 @@ def test_cloudbeat_status(k8s, cloudbeat_agent):
         print(response)
         status = FsClient.get_beat_status_from_json(response=response,
                                                     beat_name='cloudbeat')
-        if 'Healthy' in status:
+        if 'Healthy' not in status:
             results.append(f"Pod: {pod.metadata.name} status: {status}")
 
     assert len(results) == 0, '\n'.join(results)
