@@ -242,6 +242,7 @@ Current usage of test project is in the following ci flows:
 
 The verification results are based on pre-defined configuration of EKS clusters.
 In order to be able to cover all test cases need to execute eks related tests on the following clusters
+
 - test-eks-config-1
 - test-eks-config-2
 
@@ -250,6 +251,7 @@ Environment variable EKS_CONFIG is used by framework to identify which test case
 ### Tests Execution
 
 EKS test markers are defined in pyproject.toml
+
 - eks_file_system_rules
 - eks_process_rules
 - eks_k8s_objects_rules
@@ -262,6 +264,7 @@ Tests execution may be done by selecting appropriate marker.
 Tables below describe expected findings to be verified in the test cases.
 
 #### File Tests
+
 |  Rule  | Conf-1-Node-1 | Conf-1-Node-2 | Conf-2-Node-1 | Conf-2-Node-2 |
 |:------:|:-------------:|:-------------:|:-------------:|:-------------:|
 | 3.1.1  |    Passed     |    Failed     |       -       |       -       |
@@ -270,6 +273,7 @@ Tables below describe expected findings to be verified in the test cases.
 | 3.1.4  |    Failed     |    Failed     |       -       |       -       |
 
 #### Process Tests
+
 |  Rule  | Conf-1-Node-1 | Conf-1-Node-2 | Conf-2-Node-1 | Conf-2-Node-2 |
 |:------:|:-------------:|:-------------:|:-------------:|:-------------:|
 | 3.2.1  |    Passed     |    Failed     |       -       |       -       |
@@ -288,12 +292,14 @@ Tables below describe expected findings to be verified in the test cases.
 
 Kubernetes objects findings are not dependent on cluster configuration and may be executed in any EKS cluster.
 Before tests execution ensure that the following pods are running:
+
 - test-eks-good-pod
 - test-eks-bad-pod
 
 Pods definition location:
-- [test-eks-good-pod](./deploy/eks-psp-pass-pod.yaml)
-- [test-eks-bad-pod](./deploy/eks-psp-failures-pod.yaml)
+
+- [test-eks-good-pod](deploy/eks-psp-pass-pod.yaml)
+- [test-eks-bad-pod](deploy/eks-psp-failures-pod.yaml)
 
 Pods are identified by label `testResourceId`.
 
