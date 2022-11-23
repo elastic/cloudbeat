@@ -61,11 +61,12 @@ func (s *LeaderElectionTestSuite) SetupTest() {
 	s.opts = goleak.IgnoreCurrent()
 	s.kubeClient = k8sFake.NewSimpleClientset()
 	s.manager = &Manager{
-		log:        s.log,
-		leader:     nil,
-		wg:         s.wg,
-		cancelFunc: nil,
-		kubeClient: s.kubeClient,
+		log:          s.log,
+		leader:       nil,
+		wg:           s.wg,
+		cancelFunc:   nil,
+		kubeClient:   s.kubeClient,
+		k8sAvailable: true,
 	}
 }
 
