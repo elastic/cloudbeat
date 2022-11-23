@@ -60,7 +60,7 @@ func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig
 	return factory.Create(log, c, ch)
 }
 
-func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
+func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
 	var arr []*ParsedFetcher
 
 	for _, fcfg := range cfg.Fetchers {
@@ -94,7 +94,7 @@ func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, c
 // addCredentialsToFetcherConfiguration adds the relevant credentials to the `fcfg`- the fetcher config
 // This function takes the configuration file provided by the integration the `cfg` file
 // and depending on the input type, extract the relevant credentials and add them to the fetcher config
-func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg config.Config, fcfg *agentconfig.C) {
+func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg *config.Config, fcfg *agentconfig.C) {
 	if cfg.Type == config.InputTypeEks {
 		err := fcfg.Merge(cfg.AWSConfig)
 		if err != nil {
