@@ -220,8 +220,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
-		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
+		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		ecrProvider := &awslib.MockEcrRepositoryDescriber{}
 		// Init private repositories provider
@@ -321,8 +321,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
-		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
+		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		ecrProvider := &awslib.MockEcrRepositoryDescriber{}
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(awslib.EcrRepositories{}, test.error)
