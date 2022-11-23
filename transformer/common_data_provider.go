@@ -39,7 +39,7 @@ var uuidNamespace = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c
 
 func NewCommonDataProvider(log *logp.Logger, cfg *config.Config) CommonDataProvider {
 	k8sAvailable := true
-	KubeClient, err := providers.KubernetesProvider{}.GetClient(cfg.KubeConfig, kubernetes.KubeClientOptions{})
+	KubeClient, err := providers.KubernetesProvider{}.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		k8sAvailable = false
 		log.Errorf("NewCommonDataProvider error in GetClient: %v", err)

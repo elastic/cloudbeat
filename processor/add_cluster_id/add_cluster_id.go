@@ -59,8 +59,9 @@ func New(cfg *agentconfig.C) (processors.Processor, error) {
 		return nil, makeErrConfigUnpack(err)
 	}
 
-	client, err := providers.KubernetesProvider{}.GetClient("", kubernetes.KubeClientOptions{})
+	client, err := providers.KubernetesProvider{}.GetClient(logger, "", kubernetes.KubeClientOptions{})
 	if err != nil {
+		logger.Warn("k8s is unavailable")
 		isK8sAvailable = false
 	} else {
 		clusterMetadataProvider, err = newClusterMetadataProvider(client, cfg, logger)
