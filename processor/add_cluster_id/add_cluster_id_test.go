@@ -63,7 +63,8 @@ func (s *AddClusterIdTestSuite) TestAddClusterIdRun() {
 			clusterName: t.clusterName,
 		}
 		processor := &processor{
-			helper: mock,
+			helper:       mock,
+			k8sAvailable: true,
 		}
 
 		e := beat.Event{
@@ -99,7 +100,8 @@ func (s *AddClusterIdTestSuite) TestAddClusterIdRunWhenNoClusterName() {
 			clusterName: t.clusterName,
 		}
 		processor := &processor{
-			helper: mock,
+			helper:       mock,
+			k8sAvailable: true,
 		}
 
 		e := beat.Event{
