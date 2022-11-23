@@ -118,11 +118,6 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
 	commonDataProvider := transformer.NewCommonDataProvider(log, c)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-
 	commonData, err := commonDataProvider.FetchCommonData(ctx)
 	if err != nil {
 		cancel()
