@@ -213,7 +213,7 @@ allure serve ./reports
 2. If test suite is not deployed initiate:
 
     ```shell
-    just deploy-tests-helm-ci pre_merge
+    just deploy-tests-helm pre_merge
     ```
 3. Execute tests
 
