@@ -117,7 +117,6 @@ bench:
 
 #update: go-generate add-headers build-package notice $(MAGE)
 update: go-generate add-headers $(MAGE)
-	@$(MAGE) update
 	@go mod download all # make sure go.sum is complete
 
 config:
