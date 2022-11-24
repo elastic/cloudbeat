@@ -17,7 +17,7 @@ our [documentation](https://www.elastic.co/guide/en/security/master/get-started-
 
 ___
 
-## Cloudbeat Development
+## Development
 
 ### Table of contents
 
@@ -57,7 +57,7 @@ ___
   just elastic-stack-connect-kind # connect it to local elastic stack
   ```
 
-# Deploying Cloudbeat
+## Deployment
 
 ## Running Cloudbeat as a process
 
