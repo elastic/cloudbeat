@@ -57,13 +57,11 @@ func NewCommonDataProvider(log *logp.Logger, cfg *config.Config) CommonDataProvi
 // Note: As of today Kubernetes is the only environment supported by CommonDataProvider
 func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInterface, error) {
 	cm := CommonData{}
+	cm.versionInfo.Version = version.CloudbeatVersion()
+	cm.versionInfo.Policy = version.PolicyVersion()
 
 	if !c.k8sAvailable {
 		c.log.Warn("k8s is unavailable")
-
-		cm.versionInfo.Version = version.CloudbeatVersion()
-		cm.versionInfo.Policy = version.PolicyVersion()
-
 		return cm, nil
 	}
 

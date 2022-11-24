@@ -37,20 +37,15 @@ import (
 var bgCtx = context.Background()
 
 func TestCommonDataProvider_FetchCommonData(t *testing.T) {
-	cdProvider := CommonDataProvider{
-		log:        logp.NewLogger("cloudbeat_common_data_provider_test"),
-		kubeClient: k8sFake.NewSimpleClientset(),
-		cfg:        &config.Config{},
-	}
-
 	type args struct {
 		ctx context.Context
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    CommonData
-		wantErr bool
+		name           string
+		args           args
+		want           CommonData
+		wantErr        bool
+		isK8sAvailable bool
 	}{
 		{
 			name: "test common data",
@@ -61,12 +56,26 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 				clusterId: "testing_namespace_uid",
 				nodeId:    "testing_node_uid",
 			},
-			wantErr: false,
+			isK8sAvailable: true,
+			wantErr:        false,
+		},
+		{
+			name: "test common data without k8s",
+			args: args{
+				ctx: bgCtx,
+			},
+			want: CommonData{
+				clusterId: "",
+				nodeId:    "",
+			},
+			isK8sAvailable: false,
+			wantErr:        false,
 		},
 	}
-	adjustK8sCluster(t, &cdProvider)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cdProvider := createCommonDataProvider(tt.isK8sAvailable)
+			adjustK8sCluster(t, &cdProvider)
 			got, err := cdProvider.FetchCommonData(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FetchCommonData() error = %v, wantErr %v", err, tt.wantErr)
@@ -75,6 +84,7 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 
 			assert.Equal(t, tt.want.clusterId, got.GetData().clusterId, "commonData clusterId is not correct")
 			assert.Equal(t, tt.want.nodeId, got.GetData().nodeId, "commonData nodeId is not correct")
+			assert.NotEmpty(t, got.GetData().versionInfo.Version, "Beat's version is empty")
 		})
 	}
 }
@@ -184,4 +194,13 @@ func adjustK8sCluster(t *testing.T, cdProvider *CommonDataProvider) {
 
 	_, err = cdProvider.kubeClient.CoreV1().Nodes().Create(ctx, node, metav1.CreateOptions{})
 	assert.NoError(t, err)
+}
+
+func createCommonDataProvider(isK8sAvailable bool) CommonDataProvider {
+	return CommonDataProvider{
+		log:          logp.NewLogger("cloudbeat_common_data_provider_test"),
+		kubeClient:   k8sFake.NewSimpleClientset(),
+		cfg:          &config.Config{},
+		k8sAvailable: isK8sAvailable,
+	}
 }
