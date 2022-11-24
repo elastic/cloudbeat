@@ -267,3 +267,5 @@ replace (
 	github.com/golang/glog => github.com/elastic/glog v1.0.1-0.20210831205241-7d8b5c89dfc4
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20211202005954-d412fca7f83a
 )
+
+exclude github.com/elastic/elastic-agent v0.0.0-20220831162706-5f1e54f40d3e
