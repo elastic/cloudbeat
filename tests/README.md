@@ -39,7 +39,7 @@ Before performing steps below verify that **just** tool is installed and your ro
 3. Install elasticsearch and start cloudbeat
 
     ```shell
-    just deploy-tests-helm-ci pre_merge
+    just deploy-tests-helm pre_merge values_file='tests/deploy/values/ci.yml' range=''
     ```
 
 This command will install elasticsearch one node instance in kubernetes cluster and prepare configuration
@@ -213,7 +213,7 @@ allure serve ./reports
 2. If test suite is not deployed initiate:
 
     ```shell
-    just deploy-tests-helm-ci pre_merge
+    just deploy-tests-helm pre_merge
     ```
 3. Execute tests
 
