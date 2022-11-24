@@ -19,6 +19,7 @@ package fetchersManager
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
@@ -166,16 +167,12 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 	}
 }
 
-func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetcherName string) config.Config {
-	conf := config.Config{Type: config.InputTypeEks}
-	fetcherConfig := agentconfig.NewConfig()
-	err := fetcherConfig.SetString("name", -1, fetcherName)
-	s.NoError(err)
-
-	conf.Stream = config.Stream{
+func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetcherName string) *config.Config {
+	conf := &config.Config{
+		Type:       config.InputTypeEks,
 		AWSConfig:  awsConfig,
 		RuntimeCfg: nil,
-		Fetchers:   []*agentconfig.C{fetcherConfig},
+		Fetchers:   []*agentconfig.C{agentconfig.MustNewConfigFrom(fmt.Sprint("name: ", fetcherName))},
 	}
 
 	return conf

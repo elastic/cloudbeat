@@ -20,13 +20,14 @@ package evaluator
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 )
@@ -44,7 +45,24 @@ func (d *DummyResource) GetElasticCommonData() any {
 	return d
 }
 
-func TestOpaEvaluator_decode(t *testing.T) {
+type OpaTestSuite struct {
+	suite.Suite
+	log *logp.Logger
+}
+
+func TestOpaTestSuite(t *testing.T) {
+	s := new(OpaTestSuite)
+	s.log = logp.NewLogger("opa_evaluator_test")
+
+	suite.Run(t, s)
+}
+
+func (s *OpaTestSuite) SetupSuite() {
+	err := logp.TestingSetup(logp.ToObserverOutput())
+	s.NoError(err)
+}
+
+func (s *OpaTestSuite) TestOpaEvaluator_decode() {
 	type args struct {
 		result interface{}
 		now    func() time.Time
@@ -73,29 +91,24 @@ func TestOpaEvaluator_decode(t *testing.T) {
 	n := now
 	for _, tt := range tests {
 		now = n
-		t.Run(tt.name, func(t *testing.T) {
+		s.Run(tt.name, func() {
 			o := &OpaEvaluator{}
 			if tt.args.now != nil {
 				now = tt.args.now
 			}
 			got, err := o.decode(tt.args.result)
 			if tt.wantErr {
-				assert.Error(t, err, "expected to have an error")
+				s.Error(err, "expected to have an error")
 				return
 			}
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			s.NoError(err)
+			s.Equal(tt.want, got)
 		})
 	}
 }
 
-func TestOpaEvaluatorWithDecisionLogs(t *testing.T) {
+func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 	ctx := context.Background()
-	err := logp.DevelopmentSetup(logp.ToObserverOutput())
-	assert.NoError(t, err)
-
-	log := logp.NewLogger("opa_evaluator_test")
-
 	tests := []struct {
 		evals    int
 		expected int
@@ -105,26 +118,35 @@ func TestOpaEvaluatorWithDecisionLogs(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(fmt.Sprintf("TestEvaluationsDecisionLogs %+v", tt), func(t *testing.T) {
-			e, err := NewOpaEvaluator(ctx, log, config.Config{})
-			assert.NoError(t, err)
+		s.Run(fmt.Sprintf("TestEvaluationsDecisionLogs %+v", tt), func() {
+			cfg := s.getTestConfig()
+			e, err := NewOpaEvaluator(ctx, s.log, cfg)
+			s.NoError(err)
 
 			for i := 0; i < tt.evals; i++ {
 				_, err = e.Eval(ctx, fetching.ResourceInfo{
 					Resource:      &DummyResource{},
 					CycleMetadata: fetching.CycleMetadata{},
 				})
-				assert.NoError(t, err)
+				s.NoError(err)
 			}
 
 			logs := findDecisionLogs()
 			logp.ObserverLogs().TakeAll()
-			assert.Len(t, logs, tt.expected)
+			s.Len(logs, tt.expected)
 			if tt.expected > 0 {
-				assert.Contains(t, logs[0].ContextMap(), "decision_id")
-				assert.Equal(t, logs[0].Level, zapcore.DebugLevel)
+				s.Contains(logs[0].ContextMap(), "decision_id")
+				s.Equal(logs[0].Level, zapcore.DebugLevel)
 			}
 		})
+	}
+}
+
+func (s *OpaTestSuite) getTestConfig() *config.Config {
+	path, err := filepath.Abs("bundle.tar.gz")
+	s.NoError(err)
+	return &config.Config{
+		BundlePath: path,
 	}
 }
 

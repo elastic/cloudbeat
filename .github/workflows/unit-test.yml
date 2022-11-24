@@ -21,7 +21,7 @@ concurrency:
 jobs:
   unit_tests:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 15
     steps:
       - name: Check out the repo
@@ -41,24 +41,25 @@ jobs:
         with:
           args: buildOpaBundle
 
-      - name: Copy bundle to requried dirs
+      - name: Copy bundle to required dirs
         run: |
           cp bundle.tar.gz evaluator/
 
       - name: Unit-Test Cloudbeat
         run: |
-          GOOS=linux go test -coverpkg=./... -coverprofile=covprofile ./...
+          GOOS=linux go test -v -coverpkg=./... -coverprofile=cover.out.tmp ./...
+          cat cover.out.tmp | grep -v "_mock.go" > cover.out # remove mock files from coverage report
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v3
         with:
           name: coverage-file
-          path: covprofile
+          path: cover.out
 
   coverage:
     name: Coverage report
     needs: unit_tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 10
     steps:
       - name: Check out the repo
@@ -78,11 +79,11 @@ jobs:
       - name: Send coverage
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goveralls -coverprofile=covprofile -service=github
+        run: goveralls -coverprofile=cover.out -service=github
 
   manifest_tests:
     name: Manifest Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 15
     steps:
       - name: Check out the repo
@@ -104,7 +105,7 @@ jobs:
 
   golangci:
     name: golangci-lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 15
     steps:
       - name: Check out the repo
@@ -128,7 +129,7 @@ jobs:
           args: --timeout=10m --whole-files
 
   dependency-review:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout Repository

@@ -22,6 +22,8 @@ package config
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
@@ -44,18 +46,15 @@ type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
 }
 
-type Stream struct {
+type Config struct {
+	Type       string                  `config:"type"`
 	AWSConfig  aws.ConfigAWS           `config:",inline"`
 	RuntimeCfg *RuntimeConfig          `config:"runtime_cfg"`
 	Fetchers   []*config.C             `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
-}
-
-type Config struct {
-	Stream
-	Type string `config:"type"`
+	BundlePath string                  `config:"bundle_path"`
 }
 
 type RuntimeConfig struct {
@@ -67,27 +66,44 @@ type Benchmarks struct {
 	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
 }
 
-var DefaultConfig = Stream{
-	Period: 4 * time.Hour,
+func New(cfg *config.C) (*Config, error) {
+	c, err := defaultConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cfg.Unpack(&c); err != nil {
+		return nil, err
+	}
+
+	if c.RuntimeCfg != nil && c.RuntimeCfg.ActivatedRules != nil && len(c.RuntimeCfg.ActivatedRules.CisEks) > 0 {
+		c.Type = InputTypeEks
+	}
+	return c, nil
 }
 
-func New(cfg *config.C) (Config, error) {
-	// work with v1 cloudbeat.yml in dev mod
-	if cfg.HasField("streams") {
-		return newStandaloneConfig(cfg)
+func defaultConfig() (*Config, error) {
+	ret := &Config{
+		Period: 4 * time.Hour,
+		Type:   InputTypeVanillaK8s,
 	}
-	c := DefaultConfig
-	if err := cfg.Unpack(&c); err != nil {
-		return Config{}, err
+
+	bundle, err := getBundlePath()
+	if err != nil {
+		return nil, err
 	}
-	inputType := InputTypeVanillaK8s
-	if c.RuntimeCfg != nil && c.RuntimeCfg.ActivatedRules != nil && len(c.RuntimeCfg.ActivatedRules.CisEks) > 0 {
-		inputType = InputTypeEks
+
+	ret.BundlePath = bundle
+	return ret, nil
+}
+
+func getBundlePath() (string, error) {
+	// The bundle resides on the same location as the executable
+	ex, err := os.Executable()
+	if err != nil {
+		return "", err
 	}
-	return Config{
-		Stream: c,
-		Type:   inputType,
-	}, nil
+	return filepath.Join(filepath.Dir(ex), "bundle.tar.gz"), nil
 }
 
 // Datastream function to generate the datastream value
@@ -96,22 +112,6 @@ func Datastream(namespace string, indexPrefix string) string {
 		namespace = DefaultNamespace
 	}
 	return indexPrefix + "-" + namespace
-}
-
-// stanalone config is used for development flows
-// see an example deploy/kustomize/overlays/cloudbeat-vanilla/cloudbeat.yml
-func newStandaloneConfig(cfg *config.C) (Config, error) {
-	c := struct {
-		Period  time.Duration
-		Streams []Stream
-	}{4 * time.Hour, []Stream{}}
-	if err := cfg.Unpack(&c); err != nil {
-		return Config{}, err
-	}
-	return Config{
-		Type:   InputTypeVanillaK8s,
-		Stream: c.Streams[0],
-	}, nil
 }
 
 type AwsConfigProvider interface {
