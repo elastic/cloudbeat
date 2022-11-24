@@ -23,7 +23,8 @@ ___
 
 
 ## Prerequisites
-1. We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to keep all our tooling in check. Install it with the following command:
+1. We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to keep all our tooling in check. See our [README](bin/README.hermit.md) for more details.
+   Install it with the following command:
     ```zsh
     curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
     . ./bin/activate-hermit
@@ -47,7 +48,7 @@ ___
 
 # Deploying Cloudbeat
 ## Running Cloudbeat as a process
-### Unmanaged Kubernetes (Vanilla)
+### Self-Managed Kubernetes
 Build and deploying cloudbeat into your local kind cluster:
 
 ```zsh
@@ -78,7 +79,7 @@ just deploy-eks-cloudbeat
 If you need to change the default values in the configuration(`ES_HOST`, `ES_PORT`, `ES_USERNAME`, `ES_PASSWORD`), you can
 also create the deployment file yourself.
 
-Vanilla
+Self-Managed Kubernetes
 ```zsh
 just create-vanilla-deployment-file
 ```
