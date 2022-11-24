@@ -21,7 +21,7 @@ concurrency:
 jobs:
   unit_tests:
     name: Unit Tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Check out the repo
@@ -59,7 +59,7 @@ jobs:
   coverage:
     name: Coverage report
     needs: unit_tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Check out the repo
@@ -83,7 +83,7 @@ jobs:
 
   manifest_tests:
     name: Manifest Tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Check out the repo
@@ -105,7 +105,7 @@ jobs:
 
   golangci:
     name: golangci-lint
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Check out the repo
@@ -129,7 +129,7 @@ jobs:
           args: --timeout=10m --whole-files
 
   dependency-review:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout Repository
