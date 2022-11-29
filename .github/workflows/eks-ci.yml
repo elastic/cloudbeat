@@ -6,7 +6,7 @@ on:
     inputs:
       test-targets:
         required: true
-        description: 'Specify test markers to run'
+        description: "Specify test markers to run"
         default: '[\"pre_merge\"]'
 
 env:
@@ -16,7 +16,7 @@ env:
   KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
   CONTAINER_SUFFIX: ${{ github.run_id }}
   TEST_TARGETS_DEFAULT: '[\"pre_merge\"]'
-  
+
 permissions:
   actions: read
   checks: write
@@ -28,10 +28,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-target: ${{fromJson(needs.Setup.outputs.matrix)}}
-        range: ''
-        values_file: tests/deploy/values/ci-eks.yml
-        k8s_context: 'test-eks-config-1'
+        include:
+          test-target: ${{fromJson(needs.Setup.outputs.matrix)}}
+          range: ""
+          values_file: tests/deploy/values/ci-eks.yml
+          k8s_context: "test-eks-config-1"
     name: ${{ matrix.test-target }}-tests
     timeout-minutes: 20
     steps:
@@ -41,20 +42,20 @@ jobs:
       # Setup all required tools
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
-      
+
       - name: Get kubeconfig and select context
         if: success()
         run: |
           echo "$KUBE_CONFIG_DATA" | base64 -d > /tmp/config
           export KUBECONFIG=/tmp/config
           kubectl config use-context ${{ matrix.k8s_context }}
-      
+
       - name: Deploy tests Helm chart
         id: deploy_helm
         if: success()
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
-      
+
       - name: Execute tests
         id: run_tests
         if: success()
