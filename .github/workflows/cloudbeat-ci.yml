@@ -105,109 +105,159 @@ jobs:
     strategy:
       matrix:
         include:
-          - test-target: post_merge_agent
+          - test-target: pre_merge_agent
             range: ''
-            values_files: tests/deploy/values/ci-sa-agent.yml
+            values_file: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
             range: ''
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '0..5'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '5..10'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '10..15'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '15..20'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '20..25'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '25..30'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '30..35'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '35..40'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '40..45'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '45..50'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '50..55'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '55..60'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '60..65'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '65..70'
+            values_file: tests/deploy/values/ci.yml
           - test-target: file_system_rules
             range: '70..'
+            values_file: tests/deploy/values/ci.yml
           - test-target: k8s_object_rules
             range: '0..6'
+            values_file: tests/deploy/values/ci.yml
           - test-target: k8s_object_rules
             range: '6..12'
+            values_file: tests/deploy/values/ci.yml
           - test-target: k8s_object_rules
             range: '12..18'
+            values_file: tests/deploy/values/ci.yml
           - test-target: k8s_object_rules
             range: '18..'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_scheduler_rules
             range: '0..3'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_scheduler_rules
             range: '3..'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '0..5'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '5..10'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '10..15'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '15..20'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '20..24'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '24..28'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '28..32'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '32..36'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '36..40'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '40..44'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '44..48'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '48..52'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '52..56'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_api_server_rules
             range: '56..'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_controller_manager_rules
             range: '0..4'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_controller_manager_rules
             range: '4..8'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_controller_manager_rules
             range: '8..12'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_controller_manager_rules
             range: '12..'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_etcd_rules
             range: '0..4'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_etcd_rules
             range: '4..8'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_etcd_rules
             range: '8..12'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_etcd_rules
             range: '12..'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_kubelet_rules
             range: '0..4'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_kubelet_rules
             range: '4..8'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_kubelet_rules
             range: '8..12'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_kubelet_rules
             range: '12..16'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_kubelet_rules
             range: '16..20'
+            values_file: tests/deploy/values/ci.yml
           - test-target: process_kubelet_rules
             range: '20..'
+            values_file: tests/deploy/values/ci.yml
       fail-fast: false
     steps:
       - name: Check out the repo
@@ -234,7 +284,7 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.range }} ${{ matrix.values_file }}
+          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 
       - name: Run Tests
         id: run_tests

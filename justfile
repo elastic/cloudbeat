@@ -114,7 +114,7 @@ load-pytest-eks:
   docker tag {{TESTS_RELEASE}}:latest {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
   docker push {{ECR_CLOUDBEAT_TEST}}{{TESTS_RELEASE}}:latest
 
-deploy-tests-helm target range='' values_file='tests/deploy/values/ci.yml':
+deploy-tests-helm target values_file='tests/deploy/values/ci.yml' range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}} tests/deploy/k8s-cloudbeat-tests/
 
 purge-tests:
@@ -132,7 +132,7 @@ delete-local-helm-cluster kind='kind-multi':
   kind delete cluster --name {{kind}}
 
 cleanup-create-local-helm-cluster target range='..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
-  just deploy-tests-helm tests/deploy/values/local-host.yml {{target}} {{range}}
+  just deploy-tests-helm {{target}} tests/deploy/values/local-host.yml {{range}}
 
 
 test-pod-status:
