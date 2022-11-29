@@ -38,3 +38,9 @@ bundle.tar.gz
 /deploy/eks/cloudbeat-ds.yaml
 /deploy/k8s/cloudbeat-ds.yaml
 /deploy/kustomize/overlays/cloudbeat-vanilla-agent/ca-cert.pem
+
+# terraform
+deploy/cloud/.terraform
+deploy/cloud/.terraform.lock.hcl
+deploy/cloud/terraform.tfstate
+deploy/cloud/terraform.tfstate.backup
