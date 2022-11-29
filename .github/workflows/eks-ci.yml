@@ -1,0 +1,88 @@
+name: EKS-CI
+
+on:
+  # On demand execution of workflow will run all suites.
+  workflow_dispatch:
+    inputs:
+      test-targets:
+        required: true
+        description: 'Specify test markers to run'
+        default: '[\"pre_merge\"]'
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+  CONTAINER_SUFFIX: ${{ github.run_id }}
+  TEST_TARGETS_DEFAULT: '[\"pre_merge\"]'
+  
+permissions:
+  actions: read
+  checks: write
+  statuses: read
+
+jobs:
+  Test_Matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        test-target: ${{fromJson(needs.Setup.outputs.matrix)}}
+        range: ''
+        values_file: tests/deploy/values/ci-eks.yml
+        k8s_context: 'test-eks-config-1'
+    name: ${{ matrix.test-target }}-tests
+    timeout-minutes: 20
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      # Setup all required tools
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+      
+      - name: Get kubeconfig and select context
+        if: success()
+        run: |
+          echo "$KUBE_CONFIG_DATA" | base64 -d > /tmp/config
+          export KUBECONFIG=/tmp/config
+          kubectl config use-context ${{ matrix.k8s_context }}
+      
+      - name: Deploy tests Helm chart
+        id: deploy_helm
+        if: success()
+        run: |
+          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
+      
+      - name: Execute tests
+        id: run_tests
+        if: success()
+        run: |
+          just run-tests
+
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   if: failure()
+      #   with:
+      #     limit-access-to-actor: true
+
+      - name: Copy test results
+        id: copy_results
+        if: success()
+        run: |
+          NODE=$(kubectl get po test-pod-v1 -n kube-system -o jsonpath='{.spec.nodeName}')
+          RESULTS_POD=$(kubectl get po -n kube-system -l k8s-app=eks-results --field-selector spec.nodeName=$NODE -o jsonpath='{.items[*].metadata.name}')
+          kubectl cp $(RESULTS_POD):/reports tests/allure/results/ -n kube-system
+
+      # - name: Upload Test Results
+      #   if: always()
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: allure_results-${{ matrix.test-target}}
+      #     path: tests/allure/results/
+
+      # - name: Purge tests environment
+      #   id: purge_helm
+      #   run: |
+      #     just purge-tests

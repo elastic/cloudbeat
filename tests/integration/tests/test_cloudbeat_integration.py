@@ -50,7 +50,6 @@ def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
         assert pod.status.phase == "Running", f"The pod '{pod.metadata.name}' status is: '{pod.status.phase}'"
 
 
-
 @pytest.mark.pre_merge
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
