@@ -7,26 +7,26 @@ metadata:
     k8s-app: elastic-agent
 data:
   agent.yml: |-
-    id: 29806d90-221a-11ed-8edf-ad46543286fa
+    id: 018a9260-6a50-11ed-8f5e-0d25f77fe149
     outputs:
       default:
         type: elasticsearch
         hosts:
           - >-
             elasticsearch-master.kube-system:9200
-        username: 'kibana_system'
-        password: 'changeme'
+        username: '${ES_USERNAME}'
+        password: '${ES_PASSWORD}'
     inputs:
-      - id: logfile-system-543f80aa-253c-4589-8bf3-3b0608c1d14b
+      - id: logfile-system-c0895400-34c2-473f-a802-566f866f9186
         revision: 1
-        name: system-1
+        name: system-2
         type: logfile
         data_stream:
           namespace: default
         use_output: default
-        package_policy_id: 543f80aa-253c-4589-8bf3-3b0608c1d14b
+        package_policy_id: c0895400-34c2-473f-a802-566f866f9186
         streams:
-          - id: logfile-system.auth-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: logfile-system.auth-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: logs
               dataset: system.auth
@@ -40,10 +40,10 @@ data:
               pattern: ^\s
               match: after
             tags:
-              - hashicorp-vault-log
+              - system-auth
             processors:
               - add_locale: null
-          - id: logfile-system.syslog-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: logfile-system.syslog-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: logs
               dataset: system.syslog
@@ -61,31 +61,31 @@ data:
         meta:
           package:
             name: system
-            version: 1.19.1
-      - id: winlog-system-543f80aa-253c-4589-8bf3-3b0608c1d14b
+            version: 1.20.4
+      - id: winlog-system-c0895400-34c2-473f-a802-566f866f9186
         revision: 1
-        name: system-1
+        name: system-2
         type: winlog
         data_stream:
           namespace: default
         use_output: default
-        package_policy_id: 543f80aa-253c-4589-8bf3-3b0608c1d14b
+        package_policy_id: c0895400-34c2-473f-a802-566f866f9186
         streams:
-          - id: winlog-system.application-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: winlog-system.application-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: logs
               dataset: system.application
             name: Application
             condition: '${host.platform} == ''windows'''
             ignore_older: 72h
-          - id: winlog-system.security-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: winlog-system.security-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: logs
               dataset: system.security
             name: Security
             condition: '${host.platform} == ''windows'''
             ignore_older: 72h
-          - id: winlog-system.system-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: winlog-system.system-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: logs
               dataset: system.system
@@ -95,17 +95,17 @@ data:
         meta:
           package:
             name: system
-            version: 1.19.1
-      - id: system/metrics-system-543f80aa-253c-4589-8bf3-3b0608c1d14b
+            version: 1.20.4
+      - id: system/metrics-system-c0895400-34c2-473f-a802-566f866f9186
         revision: 1
-        name: system-1
+        name: system-2
         type: system/metrics
         data_stream:
           namespace: default
         use_output: default
-        package_policy_id: 543f80aa-253c-4589-8bf3-3b0608c1d14b
+        package_policy_id: c0895400-34c2-473f-a802-566f866f9186
         streams:
-          - id: system/metrics-system.cpu-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: system/metrics-system.cpu-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.cpu
@@ -115,7 +115,7 @@ data:
               - percentages
               - normalized_percentages
             period: 10s
-          - id: system/metrics-system.diskio-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: system/metrics-system.diskio-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.diskio
@@ -124,7 +124,7 @@ data:
             diskio.include_devices: null
             period: 10s
           - id: >-
-              system/metrics-system.filesystem-543f80aa-253c-4589-8bf3-3b0608c1d14b
+              system/metrics-system.filesystem-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.filesystem
@@ -134,7 +134,7 @@ data:
             processors:
               - drop_event.when.regexp:
                   system.filesystem.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
-          - id: system/metrics-system.fsstat-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: system/metrics-system.fsstat-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.fsstat
@@ -144,7 +144,7 @@ data:
             processors:
               - drop_event.when.regexp:
                   system.fsstat.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
-          - id: system/metrics-system.load-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: system/metrics-system.load-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.load
@@ -152,14 +152,14 @@ data:
               - load
             condition: '${host.platform} != ''windows'''
             period: 10s
-          - id: system/metrics-system.memory-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: system/metrics-system.memory-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.memory
             metricsets:
               - memory
             period: 10s
-          - id: system/metrics-system.network-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: system/metrics-system.network-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.network
@@ -167,7 +167,7 @@ data:
               - network
             period: 10s
             network.interfaces: null
-          - id: system/metrics-system.process-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: system/metrics-system.process-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.process
@@ -182,7 +182,7 @@ data:
             processes:
               - .*
           - id: >-
-              system/metrics-system.process.summary-543f80aa-253c-4589-8bf3-3b0608c1d14b
+              system/metrics-system.process.summary-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.process.summary
@@ -190,14 +190,14 @@ data:
               - process_summary
             period: 10s
           - id: >-
-              system/metrics-system.socket_summary-543f80aa-253c-4589-8bf3-3b0608c1d14b
+              system/metrics-system.socket_summary-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.socket_summary
             metricsets:
               - socket_summary
             period: 10s
-          - id: system/metrics-system.uptime-543f80aa-253c-4589-8bf3-3b0608c1d14b
+          - id: system/metrics-system.uptime-c0895400-34c2-473f-a802-566f866f9186
             data_stream:
               type: metrics
               dataset: system.uptime
@@ -207,124 +207,152 @@ data:
         meta:
           package:
             name: system
-            version: 1.19.1
-      - id: 3f8cbb75-38e5-465e-a4aa-ee577d67eccd
-        revision: 2
-        name: sa-agent
+            version: 1.20.4
+      - id: 147702c3-409a-4a63-81a3-5d9ab84c620c
+        revision: 1
+        name: cloud_security_posture-2
         type: cloudbeat/cis_k8s
         data_stream:
           namespace: default
         use_output: default
-        package_policy_id: 3f8cbb75-38e5-465e-a4aa-ee577d67eccd
+        package_policy_id: 147702c3-409a-4a63-81a3-5d9ab84c620c
         streams:
           - id: >-
-              cloudbeat/cis_k8s-cloud_security_posture.findings-3f8cbb75-38e5-465e-a4aa-ee577d67eccd
+              cloudbeat/cis_k8s-cloud_security_posture.findings-147702c3-409a-4a63-81a3-5d9ab84c620c
             data_stream:
               type: logs
               dataset: cloud_security_posture.findings
             name: Findings
+            fetchers:
+              - name: kube-api
+              - name: process
+                directory: /hostfs
+                processes:
+                  etcd: null
+                  kube-apiserver: null
+                  kube-controller: null
+                  kube-scheduler: null
+                  kubelet:
+                    config-file-arguments:
+                      - config
+              - name: file-system
+                patterns:
+                  - /hostfs/etc/kubernetes/scheduler.conf
+                  - /hostfs/etc/kubernetes/controller-manager.conf
+                  - /hostfs/etc/kubernetes/admin.conf
+                  - /hostfs/etc/kubernetes/kubelet.conf
+                  - /hostfs/etc/kubernetes/manifests/etcd.yaml
+                  - /hostfs/etc/kubernetes/manifests/kube-apiserver.yaml
+                  - >-
+                    /hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml
+                  - /hostfs/etc/kubernetes/manifests/kube-scheduler.yaml
+                  - /hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+                  - /hostfs/etc/kubernetes/pki/*
+                  - /hostfs/var/lib/kubelet/config.yaml
+                  - /hostfs/var/lib/etcd
+                  - /hostfs/etc/kubernetes/pki
             processors:
               - add_cluster_id: null
             runtime_cfg:
               activated_rules:
                 cis_k8s:
-                  - cis_1_2_18
-                  - cis_1_2_20
-                  - cis_1_2_19
-                  - cis_1_2_16
-                  - cis_1_2_32
-                  - cis_1_1_15
-                  - cis_4_2_6
-                  - cis_4_1_10
-                  - cis_1_1_12
-                  - cis_1_1_3
-                  - cis_5_2_8
-                  - cis_5_2_5
-                  - cis_1_2_15
-                  - cis_1_2_29
-                  - cis_1_1_14
-                  - cis_5_1_5
-                  - cis_4_2_2
-                  - cis_1_1_2
-                  - cis_1_2_24
-                  - cis_4_1_5
-                  - cis_1_1_11
-                  - cis_1_2_14
-                  - cis_5_2_4
-                  - cis_1_1_20
-                  - cis_2_3
-                  - cis_4_2_12
-                  - cis_1_2_25
-                  - cis_1_4_2
-                  - cis_4_2_4
-                  - cis_1_2_27
-                  - cis_1_1_18
-                  - cis_4_2_8
-                  - cis_2_6
-                  - cis_1_2_5
-                  - cis_1_1_21
-                  - cis_1_4_1
-                  - cis_4_1_9
                   - cis_1_1_1
-                  - cis_1_1_5
-                  - cis_2_1
-                  - cis_1_2_2
-                  - cis_1_1_16
-                  - cis_5_1_6
-                  - cis_2_4
-                  - cis_4_1_6
-                  - cis_5_2_9
-                  - cis_1_1_17
-                  - cis_1_1_19
-                  - cis_1_2_7
-                  - cis_1_1_6
-                  - cis_1_3_5
-                  - cis_4_1_2
-                  - cis_5_2_3
-                  - cis_1_2_21
-                  - cis_1_2_4
-                  - cis_5_1_3
-                  - cis_4_2_9
-                  - cis_4_1_1
-                  - cis_1_2_12
-                  - cis_1_2_6
-                  - cis_1_2_13
-                  - cis_1_2_26
-                  - cis_4_2_1
-                  - cis_4_2_3
-                  - cis_2_2
-                  - cis_1_3_6
-                  - cis_2_5
-                  - cis_5_2_7
-                  - cis_5_2_6
-                  - cis_1_2_23
-                  - cis_1_1_8
-                  - cis_5_2_2
-                  - cis_5_2_10
-                  - cis_1_2_10
-                  - cis_1_2_8
-                  - cis_1_2_11
-                  - cis_4_2_11
-                  - cis_4_2_5
-                  - cis_4_2_10
-                  - cis_4_2_7
-                  - cis_1_2_17
-                  - cis_1_3_4
-                  - cis_1_2_28
-                  - cis_1_2_22
-                  - cis_1_2_9
-                  - cis_1_3_2
-                  - cis_1_3_7
-                  - cis_1_3_3
+                  - cis_1_1_2
+                  - cis_1_1_3
                   - cis_1_1_4
+                  - cis_1_1_5
+                  - cis_1_1_6
                   - cis_1_1_7
-                  - cis_4_2_13
+                  - cis_1_1_8
+                  - cis_1_1_11
+                  - cis_1_1_12
                   - cis_1_1_13
+                  - cis_1_1_14
+                  - cis_1_1_15
+                  - cis_1_1_16
+                  - cis_1_1_17
+                  - cis_1_1_18
+                  - cis_1_1_19
+                  - cis_1_1_20
+                  - cis_1_1_21
+                  - cis_1_2_2
+                  - cis_1_2_4
+                  - cis_1_2_5
+                  - cis_1_2_6
+                  - cis_1_2_7
+                  - cis_1_2_8
+                  - cis_1_2_9
+                  - cis_1_2_10
+                  - cis_1_2_11
+                  - cis_1_2_12
+                  - cis_1_2_13
+                  - cis_1_2_14
+                  - cis_1_2_15
+                  - cis_1_2_16
+                  - cis_1_2_17
+                  - cis_1_2_18
+                  - cis_1_2_19
+                  - cis_1_2_20
+                  - cis_1_2_21
+                  - cis_1_2_22
+                  - cis_1_2_23
+                  - cis_1_2_24
+                  - cis_1_2_25
+                  - cis_1_2_26
+                  - cis_1_2_27
+                  - cis_1_2_28
+                  - cis_1_2_29
+                  - cis_1_2_32
+                  - cis_1_3_2
+                  - cis_1_3_3
+                  - cis_1_3_4
+                  - cis_1_3_5
+                  - cis_1_3_6
+                  - cis_1_3_7
+                  - cis_1_4_1
+                  - cis_1_4_2
+                  - cis_2_1
+                  - cis_2_2
+                  - cis_2_3
+                  - cis_2_4
+                  - cis_2_5
+                  - cis_2_6
+                  - cis_4_1_1
+                  - cis_4_1_2
+                  - cis_4_1_5
+                  - cis_4_1_6
+                  - cis_4_1_9
+                  - cis_4_1_10
+                  - cis_4_2_1
+                  - cis_4_2_2
+                  - cis_4_2_3
+                  - cis_4_2_4
+                  - cis_4_2_5
+                  - cis_4_2_6
+                  - cis_4_2_7
+                  - cis_4_2_8
+                  - cis_4_2_9
+                  - cis_4_2_10
+                  - cis_4_2_11
+                  - cis_4_2_12
+                  - cis_4_2_13
+                  - cis_5_1_3
+                  - cis_5_1_5
+                  - cis_5_1_6
+                  - cis_5_2_2
+                  - cis_5_2_3
+                  - cis_5_2_4
+                  - cis_5_2_5
+                  - cis_5_2_6
+                  - cis_5_2_7
+                  - cis_5_2_8
+                  - cis_5_2_9
+                  - cis_5_2_10
         meta:
           package:
             name: cloud_security_posture
-            version: 0.0.27
-    revision: 3
+            version: 1.0.7
+    revision: 2
     agent:
       download:
         source_uri: 'https://artifacts.elastic.co/downloads/'
@@ -409,7 +437,7 @@ data:
         _elastic_agent_checks:
           cluster:
             - monitor
-        543f80aa-253c-4589-8bf3-3b0608c1d14b:
+        c0895400-34c2-473f-a802-566f866f9186:
           indices:
             - names:
                 - logs-system.auth-default
@@ -459,14 +487,14 @@ data:
             - names:
                 - metrics-system.uptime-default
               privileges: *ref_0
-        3f8cbb75-38e5-465e-a4aa-ee577d67eccd:
+        147702c3-409a-4a63-81a3-5d9ab84c620c:
           indices:
             - names:
                 - logs-cloud_security_posture.findings-default
               privileges: *ref_0
 
 ---
-# For more information refer to https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
+# For more information refer https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -483,9 +511,11 @@ spec:
       labels:
         app: elastic-agent
     spec:
-      # Tolerations are needed to run Elastic Agent on Kubernetes master nodes.
-      # Agents running on master nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
+      # Tolerations are needed to run Elastic Agent on Kubernetes control-plane nodes.
+      # Agents running on control-plane nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
       tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          effect: NoSchedule
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
       serviceAccountName: elastic-agent
@@ -493,11 +523,10 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
-          image: 704479110758.dkr.ecr.eu-west-1.amazonaws.com/elastic-agent:8.6.0-SNAPSHOT
+          image: docker.elastic.co/beats/elastic-agent:8.6.0-SNAPSHOT
           args: [
             "-c", "/etc/agent.yml",
             "-e",
-            "-d", "'*'",
           ]
           env:
             # The basic authentication username used to connect to Elasticsearch
@@ -519,10 +548,10 @@ spec:
             runAsUser: 0
           resources:
             limits:
-              memory: 500Mi
+              memory: 700Mi
             requests:
               cpu: 100m
-              memory: 200Mi
+              memory: 400Mi
           volumeMounts:
             - name: datastreams
               mountPath: /etc/agent.yml
@@ -530,12 +559,6 @@ spec:
               subPath: agent.yml
             - name: proc
               mountPath: /hostfs/proc
-              readOnly: true
-            - name: etc-kubernetes
-              mountPath: /hostfs/etc/kubernetes
-              readOnly: true
-            - name: var-lib
-              mountPath: /hostfs/var/lib
               readOnly: true
             - name: cgroup
               mountPath: /hostfs/sys/fs/cgroup
@@ -546,14 +569,11 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
-            - name: passwd
-              mountPath: /hostfs/etc/passwd
+            - name: etc-full
+              mountPath: /hostfs/etc
               readOnly: true
-            - name: group
-              mountPath: /hostfs/etc/group
-              readOnly: true
-            - name: etcsysmd
-              mountPath: /hostfs/etc/systemd
+            - name: var-lib
+              mountPath: /hostfs/var/lib
               readOnly: true
       volumes:
         - name: datastreams
@@ -563,22 +583,6 @@ spec:
         - name: proc
           hostPath:
             path: /proc
-        # Needed for cloudbeat
-        - name: etc-kubernetes
-          hostPath:
-            path: /etc/kubernetes
-        # Needed for cloudbeat
-        - name: var-lib
-          hostPath:
-            path: /var/lib
-        # Needed for cloudbeat
-        - name: passwd
-          hostPath:
-            path: /etc/passwd
-        # Needed for cloudbeat
-        - name: group
-          hostPath:
-            path: /etc/group
         - name: cgroup
           hostPath:
             path: /sys/fs/cgroup
@@ -588,10 +592,15 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        # Needed for cloudbeat
-        - name: etcsysmd
+        # The following volumes are needed for Cloud Security Posture integration (cloudbeat)
+        # If you are not using this integration, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: etc-full
           hostPath:
-            path: /etc/systemd
+            path: /etc
+        - name: var-lib
+          hostPath:
+            path: /var/lib
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -694,7 +703,7 @@ rules:
       - rolebindings
       - roles
     verbs: ["get", "list", "watch"]
-    # Needed for cloudbeat
+  # Needed for cloudbeat
   - apiGroups: ["policy"]
     resources:
       - podsecuritypolicies
