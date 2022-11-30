@@ -19,7 +19,6 @@ package add_cluster_id
 
 import (
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -41,40 +40,34 @@ func init() {
 }
 
 type processor struct {
-	config       config
-	helper       ClusterHelper
-	logger       *logp.Logger
-	k8sAvailable bool
+	config config
+	helper ClusterHelper
+	logger *logp.Logger
 }
 
 // New constructs a new Add ID processor.
 // This processor adds the cluster id along with some other orchestrator metadata fields.
 func New(cfg *agentconfig.C) (processors.Processor, error) {
-	var clusterMetadataProvider ClusterHelper
-	isK8sAvailable := true
-	logger := logp.NewLogger(processorName)
-
 	config := defaultConfig()
 	if err := cfg.Unpack(&config); err != nil {
 		return nil, makeErrConfigUnpack(err)
 	}
 
-	client, err := providers.KubernetesProvider{}.GetClient(logger, "", kubernetes.KubeClientOptions{})
+	client, err := kubernetes.GetKubernetesClient("", kubernetes.KubeClientOptions{})
 	if err != nil {
-		logger.Warn("k8s is unavailable")
-		isK8sAvailable = false
-	} else {
-		clusterMetadataProvider, err = newClusterMetadataProvider(client, cfg, logger)
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 
+	logger := logp.NewLogger(processorName)
+	clusterMetadataProvider, err := newClusterMetadataProvider(client, cfg, logger)
+
+	if err != nil {
+		return nil, err
+	}
 	p := &processor{
 		config,
 		clusterMetadataProvider,
 		logger,
-		isK8sAvailable,
 	}
 
 	return p, nil
@@ -82,10 +75,6 @@ func New(cfg *agentconfig.C) (processors.Processor, error) {
 
 // Run enriches the given event with an ID and the cluster.name
 func (p *processor) Run(event *beat.Event) (*beat.Event, error) {
-	if !p.k8sAvailable {
-		return event, nil
-	}
-
 	clusterMetaData := p.helper.GetClusterMetadata()
 
 	if _, err := event.PutValue(ClusterIdKey, clusterMetaData.clusterId); err != nil {

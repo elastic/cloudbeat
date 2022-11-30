@@ -20,6 +20,7 @@ package beater
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/dataprovider"
 	"time"
 
 	"github.com/elastic/cloudbeat/leaderelection"
@@ -117,7 +118,7 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
-	commonDataProvider := transformer.NewCommonDataProvider(log, c)
+	commonDataProvider := dataprovider.NewCommonDataProvider(log, c)
 	commonData, err := commonDataProvider.FetchCommonData(ctx)
 	if err != nil {
 		cancel()
