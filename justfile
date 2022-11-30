@@ -32,11 +32,13 @@ load-cloudbeat-image kind='kind-multi':
 build-opa-bundle:
   mage BuildOpaBundle
 
-build-binary:
+vendor-dependencies:
   GOOS=linux go mod vendor
+
+build-binary:
   GOOS=linux go build -v
 
-build-cloudbeat: build-opa-bundle build-binary
+build-cloudbeat: vendor-dependencies build-opa-bundle build-binary
   docker build -t cloudbeat .
 
 deploy-cloudbeat:
@@ -44,8 +46,7 @@ deploy-cloudbeat:
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
-build-cloudbeat-debug: build-opa-bundle
-  GOOS=linux go mod vendor
+build-cloudbeat-debug: vendor-dependencies build-opa-bundle
   GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 delete-cloudbeat:
