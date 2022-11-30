@@ -303,8 +303,8 @@ class FsClient:
         @return: status message string
         """
         response = json.loads(response)
-        beat_list = response['Applications']
+        beat_list = response['components']
         for beat in beat_list:
-            if beat['Name'] == beat_name:
-                return beat['Message']
+            if beat_name in beat['name']:
+                return beat['message']
         return ''
