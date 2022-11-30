@@ -32,6 +32,4 @@ func (d DummyManager) Run(ctx context.Context) error {
 	return nil
 }
 
-func (d DummyManager) Stop() {
-	return
-}
+func (d DummyManager) Stop() {}
