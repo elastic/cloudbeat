@@ -52,7 +52,7 @@ jobs:
           args: BuildOpaBundle
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Cache Build dependencies
         uses: actions/cache@v3
@@ -63,7 +63,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: false
@@ -77,7 +77,7 @@ jobs:
           make build_elastic_agent_docker_image
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: ./tests/.
           push: false
