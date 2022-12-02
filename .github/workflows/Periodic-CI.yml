@@ -201,7 +201,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
