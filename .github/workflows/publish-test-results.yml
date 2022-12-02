@@ -49,16 +49,14 @@ jobs:
 
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@v1.0.1
+        uses: andrcuns/allure-publish-action@v1
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           storageType: s3
           resultsGlob: "tests/allure/results/*"
-          updatePr: actions
-          collapseSummary: false
-          summary: suites
-          summaryTableType: markdown
+          updatePr: comment
+          summary: total
           copyLatest: true
           bucket: csp-allure-reports
           prefix: allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}
@@ -71,9 +69,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "### Run Summary :rocket:" >> $GITHUB_STEP_SUMMARY
-          echo "Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html" >> $GITHUB_STEP_SUMMARY
-          jq '.[0].data' tests/allure/results/history/history-trend.json -c
-          OUTPUT=$(jq '.[0].data' tests/allure/results/history/history-trend.json -c | npx tablemark-cli -)
+          echo "[Report](http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html)" >> $GITHUB_STEP_SUMMARY
+          jq '.[0].data' tests/allure/results/allure-report/history/history-trend.json -c
+          OUTPUT=$(jq '.[0].data' tests/allure/results/allure-report/history/history-trend.json -c | npx tablemark-cli -)
           OUTPUT="${OUTPUT//'Failed'/'\![](https://placehold.co/7x7/fc593e/fc593e.png) Failed'}"
           OUTPUT="${OUTPUT//'Broken'/'\![](https://placehold.co/7x7/ffd050/ffd050.png) Broken'}" 
           OUTPUT="${OUTPUT//'Skipped'/'\![](https://placehold.co/7x7/aaaaaa/aaaaaa.png) Skipped'}" 
