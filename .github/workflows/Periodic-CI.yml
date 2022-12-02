@@ -66,7 +66,7 @@ jobs:
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
     - id: set-matrix
-      run: echo "::set-output name=matrix::${{ env.TEST_MATRIX}}"
+      run: echo "{matrix}={${{ env.TEST_MATRIX}}}" >> $GITHUB_OUTPUT
 
   Build:
     name: Build
