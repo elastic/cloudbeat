@@ -946,10 +946,8 @@ cis_4_2_13 = [
 etcd_rules = [
     *cis_2_1,
     *cis_2_2,
-    *cis_2_3,
-    *cis_2_4,
     *skip_param_case(
-        skip_list=[*cis_2_5],
+        skip_list=[*cis_2_3, *cis_2_4, *cis_2_5],
         data_to_report=SkipReportData(
             url_title="cloudbeat: #512",
             url_link="https://github.com/elastic/cloudbeat/issues/512",
