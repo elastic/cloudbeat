@@ -26,12 +26,12 @@ import (
 )
 
 type KubernetesClusterNameProviderApi interface {
-	GetClusterName(cfg config.Config, client k8s.Interface) (string, error)
+	GetClusterName(cfg *config.Config, client k8s.Interface) (string, error)
 }
 type KubernetesClusterNameProvider struct {
 }
 
-func (provider KubernetesClusterNameProvider) GetClusterName(cfg config.Config, client k8s.Interface) (string, error) {
+func (provider KubernetesClusterNameProvider) GetClusterName(cfg *config.Config, client k8s.Interface) (string, error) {
 	agentConfig, err := agentcfg.NewConfigFrom(cfg)
 	if err != nil {
 		return "", fmt.Errorf("failed to create agent config: %v", err)
