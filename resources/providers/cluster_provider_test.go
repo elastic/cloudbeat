@@ -118,5 +118,5 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 			AWSConfig: aws.ConfigAWS{},
 		},
 	}
-	s.Panics(func() { clusterProvider.GetClusterName(ctx, cfg) })
+	s.Panics(func() { _, _ = clusterProvider.GetClusterName(ctx, cfg) })
 }
