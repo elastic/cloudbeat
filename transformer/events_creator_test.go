@@ -23,7 +23,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/version"
 	"github.com/stretchr/testify/mock"
-	"io/ioutil"
+	"io"
 	"os"
 	"regexp"
 	"testing"
