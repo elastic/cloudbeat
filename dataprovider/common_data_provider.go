@@ -78,5 +78,5 @@ func (cd CommonData) GetVersionInfo() version.CloudbeatVersionInfo {
 }
 
 func (cd CommonData) GetClusterName() string {
-	return cd.clusterId
+	return cd.clusterName
 }
