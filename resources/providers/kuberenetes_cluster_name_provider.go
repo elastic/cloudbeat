@@ -38,7 +38,7 @@ func (provider KubernetesClusterNameProvider) GetClusterName(cfg *config.Config,
 	}
 	clusterIdentifier, err := metadata.GetKubernetesClusterIdentifier(agentConfig, client)
 	if err != nil {
-		return "", fmt.Errorf("fail to resolve the name of the cluster, error %v", err)
+		return "", fmt.Errorf("fail to resolve the name of the cluster: %v", err)
 	}
 
 	return clusterIdentifier.Name, nil
