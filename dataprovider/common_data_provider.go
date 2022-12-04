@@ -48,9 +48,11 @@ func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInte
 	cm.versionInfo.Policy = version.PolicyVersion()
 
 	k8sCommonData := c.k8sDataProvider.CollectK8sData(ctx)
-	cm.versionInfo.Kubernetes = k8sCommonData.serverVersion
-	cm.clusterId = k8sCommonData.clusterId
-	cm.nodeId = k8sCommonData.nodeId
+	if k8sCommonData != nil {
+		cm.versionInfo.Kubernetes = k8sCommonData.serverVersion
+		cm.clusterId = k8sCommonData.clusterId
+		cm.nodeId = k8sCommonData.nodeId
+	}
 
 	return cm, nil
 }

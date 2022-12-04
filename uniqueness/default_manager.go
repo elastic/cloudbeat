@@ -19,9 +19,14 @@ package uniqueness
 
 import "context"
 
-// A dummy leader-election manager to implement the UniquenessManager interface.
-// Use to keep the leaderelection code clean and without a non k8s logic.
+type Manager interface {
+	IsLeader() bool
+	Run(ctx context.Context) error
+	Stop()
+}
 
+// DefaultUniqueManager A dummy leader-election manager to implement the UniquenessManager interface.
+// Use to keep the leaderelection code clean and without a non k8s logic.
 type DefaultUniqueManager struct{}
 
 func (d *DefaultUniqueManager) IsLeader() bool {

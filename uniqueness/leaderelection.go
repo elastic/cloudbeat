@@ -40,12 +40,6 @@ import (
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 )
 
-type Manager interface {
-	IsLeader() bool
-	Run(ctx context.Context) error
-	Stop()
-}
-
 type LeaderelectionManager struct {
 	log        *logp.Logger
 	leader     *le.LeaderElector
