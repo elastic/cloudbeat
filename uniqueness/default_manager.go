@@ -15,13 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package transformer
+package uniqueness
 
-import (
-	"github.com/elastic/cloudbeat/resources/fetching"
-)
+import "context"
 
-type ResourceTypeMetadata struct {
-	fetching.CycleMetadata
-	Type string
+type Manager interface {
+	IsLeader() bool
+	Run(ctx context.Context) error
+	Stop()
 }
+
+// DefaultUniqueManager A dummy leader-election manager to implement the UniquenessManager interface.
+// Use to keep the leaderelection code clean and without a non k8s logic.
+type DefaultUniqueManager struct{}
+
+func (d *DefaultUniqueManager) IsLeader() bool {
+	return true
+}
+
+func (d *DefaultUniqueManager) Run(_ context.Context) error {
+	return nil
+}
+
+func (d *DefaultUniqueManager) Stop() {}

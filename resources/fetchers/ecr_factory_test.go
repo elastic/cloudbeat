@@ -78,8 +78,8 @@ default_region: us1-east
 
 	for _, test := range tests {
 		kubeclient := k8sfake.NewSimpleClientset()
-		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
-		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
+		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		mockedConfigGetter := &config.MockAwsConfigProvider{}
 		mockedConfigGetter.EXPECT().
