@@ -20,9 +20,9 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -32,7 +32,7 @@ type FetchersRegistry interface {
 	ShouldRun(key string) bool
 	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
 	Stop()
-	RegisterFetchers(fetchers []*ParsedFetcher, le leaderelection.ElectionManager) error
+	RegisterFetchers(fetchers []*ParsedFetcher, le uniqueness.Manager) error
 }
 
 type fetchersRegistry struct {
@@ -54,7 +54,7 @@ func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
 }
 
 // RegisterFetchers registers entire list of parsed fetchers
-func (r *fetchersRegistry) RegisterFetchers(fetchers []*ParsedFetcher, le leaderelection.ElectionManager) error {
+func (r *fetchersRegistry) RegisterFetchers(fetchers []*ParsedFetcher, le uniqueness.Manager) error {
 	for _, p := range fetchers {
 		c, err := r.getConditions(p.name, le)
 		if err != nil {
@@ -127,7 +127,7 @@ func (r *fetchersRegistry) Stop() {
 }
 
 // TODO: Move conditions to factories and implement inside every factory
-func (r *fetchersRegistry) getConditions(name string, le leaderelection.ElectionManager) ([]fetching.Condition, error) {
+func (r *fetchersRegistry) getConditions(name string, le uniqueness.Manager) ([]fetching.Condition, error) {
 	c := make([]fetching.Condition, 0)
 	switch name {
 	case fetching.KubeAPIType, fetching.EcrType, fetching.ElbType:

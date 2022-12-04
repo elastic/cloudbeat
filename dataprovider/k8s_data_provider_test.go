@@ -41,11 +41,11 @@ func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 	tests := []struct {
 		collector k8sDataCollector
 		name      string
-		want      CommonK8sData
+		want      *CommonK8sData
 	}{
 		{
 			name: "test k8s common data",
-			want: CommonK8sData{
+			want: &CommonK8sData{
 				clusterId: "testing_namespace_uid",
 				nodeId:    "testing_node_uid",
 				serverVersion: version.Version{
@@ -60,11 +60,7 @@ func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 		},
 		{
 			name: "test k8s common data with no k8s connection",
-			want: CommonK8sData{
-				clusterId:     "",
-				nodeId:        "",
-				serverVersion: version.Version{},
-			},
+			want: nil,
 			collector: k8sDataCollector{
 				kubeClient: nil,
 				log:        logger,

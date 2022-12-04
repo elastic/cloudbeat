@@ -35,7 +35,7 @@ type k8sDataCollector struct {
 }
 
 type k8sDataProvider interface {
-	CollectK8sData(ctx context.Context) CommonK8sData
+	CollectK8sData(ctx context.Context) *CommonK8sData
 }
 
 func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) k8sDataProvider {
@@ -51,13 +51,13 @@ func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) k8sDataProvider {
 	}
 }
 
-func (k k8sDataCollector) CollectK8sData(ctx context.Context) CommonK8sData {
+func (k k8sDataCollector) CollectK8sData(ctx context.Context) *CommonK8sData {
 	if k.kubeClient == nil {
 		k.log.Warn("k8s in unavailable")
-		return CommonK8sData{}
+		return nil
 	}
 
-	return CommonK8sData{
+	return &CommonK8sData{
 		clusterId:     k.getClusterId(ctx),
 		nodeId:        k.getNodeId(ctx),
 		serverVersion: k.fetchKubernetesVersion(),

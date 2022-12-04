@@ -18,7 +18,7 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package leaderelection
+package uniqueness
 
 import (
 	"context"
@@ -40,13 +40,13 @@ import (
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 )
 
-type ElectionManager interface {
+type Manager interface {
 	IsLeader() bool
 	Run(ctx context.Context) error
 	Stop()
 }
 
-type Manager struct {
+type LeaderelectionManager struct {
 	log        *logp.Logger
 	leader     *le.LeaderElector
 	wg         *sync.WaitGroup
@@ -54,15 +54,15 @@ type Manager struct {
 	kubeClient k8s.Interface
 }
 
-func NewLeaderElector(log *logp.Logger, cfg *config.Config) ElectionManager {
-	kubeClient, err := providers.KubernetesProvider{}.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
+func NewLeaderElector(log *logp.Logger, cfg *config.Config, k8sProvider providers.KubernetesClientGetter) Manager {
+	kubeClient, err := k8sProvider.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		log.Errorf("NewLeaderElector error in GetClient: %v", err)
-		return &DummyManager{}
+		return &DefaultUniqueManager{}
 	}
 
 	wg := &sync.WaitGroup{}
-	return &Manager{
+	return &LeaderelectionManager{
 		log:        log,
 		leader:     nil,
 		wg:         wg,
@@ -71,12 +71,12 @@ func NewLeaderElector(log *logp.Logger, cfg *config.Config) ElectionManager {
 	}
 }
 
-func (m *Manager) IsLeader() bool {
+func (m *LeaderelectionManager) IsLeader() bool {
 	return m.leader.IsLeader()
 }
 
 // Run leader election is blocking until a FirstLeaderDeadline timeout has reached.
-func (m *Manager) Run(ctx context.Context) error {
+func (m *LeaderelectionManager) Run(ctx context.Context) error {
 	newCtx, cancel := context.WithCancel(ctx)
 	m.cancelFunc = cancel
 
@@ -102,7 +102,7 @@ func (m *Manager) Run(ctx context.Context) error {
 	return nil
 }
 
-func (m *Manager) Stop() {
+func (m *LeaderelectionManager) Stop() {
 	if m.cancelFunc != nil {
 		m.log.Info("Stopping leader election manager")
 		m.cancelFunc()
@@ -113,7 +113,7 @@ func (m *Manager) Stop() {
 	m.log.Warnf("cancelFunc is not set")
 }
 
-func (m *Manager) buildConfig(ctx context.Context) (le.LeaderElectionConfig, error) {
+func (m *LeaderelectionManager) buildConfig(ctx context.Context) (le.LeaderElectionConfig, error) {
 	podId, err := m.currentPodID()
 	if err != nil {
 		return le.LeaderElectionConfig{}, err
@@ -173,7 +173,7 @@ func (m *Manager) buildConfig(ctx context.Context) (le.LeaderElectionConfig, err
 	}, nil
 }
 
-func (m *Manager) currentPodID() (string, error) {
+func (m *LeaderelectionManager) currentPodID() (string, error) {
 	pod, found := os.LookupEnv(PodNameEnvar)
 	if !found {
 		m.log.Warnf("Env var %s wasn't found", PodNameEnvar)
@@ -183,7 +183,7 @@ func (m *Manager) currentPodID() (string, error) {
 	return m.lastPart(pod)
 }
 
-func (m *Manager) lastPart(s string) (string, error) {
+func (m *LeaderelectionManager) lastPart(s string) (string, error) {
 	parts := strings.Split(s, "-")
 	if len(parts) == 0 {
 		m.log.Warnf("failed to find id for pod_name: %s", s)
@@ -193,7 +193,7 @@ func (m *Manager) lastPart(s string) (string, error) {
 	return parts[len(parts)-1], nil
 }
 
-func (m *Manager) generateUUID() (string, error) {
+func (m *LeaderelectionManager) generateUUID() (string, error) {
 	uuid, err := uuid.NewV4()
 	m.log.Warnf("Generating uuid as an identifier, UUID: %s", uuid.String())
 	return uuid.String(), err

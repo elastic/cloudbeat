@@ -15,21 +15,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package leaderelection
+package uniqueness
 
 import "context"
 
-// A dummy leader-election manager to implement the ElectionManager interface.
+// A dummy leader-election manager to implement the UniquenessManager interface.
 // Use to keep the leaderelection code clean and without a non k8s logic.
 
-type DummyManager struct{}
+type DefaultUniqueManager struct{}
 
-func (d DummyManager) IsLeader() bool {
-	return false
+func (d *DefaultUniqueManager) IsLeader() bool {
+	return true
 }
 
-func (d DummyManager) Run(ctx context.Context) error {
+func (d *DefaultUniqueManager) Run(_ context.Context) error {
 	return nil
 }
 
-func (d DummyManager) Stop() {}
+func (d *DefaultUniqueManager) Stop() {}

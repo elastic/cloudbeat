@@ -83,7 +83,7 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			k8sDataProviderMock := &mockK8sDataProvider{}
-			k8sDataProviderMock.EXPECT().CollectK8sData(mock.Anything).Return(tt.k8sCommonData)
+			k8sDataProviderMock.EXPECT().CollectK8sData(mock.Anything).Return(&tt.k8sCommonData)
 			cdProvider := createCommonDataProvider(k8sDataProviderMock)
 
 			got, err := cdProvider.FetchCommonData(tt.args.ctx)
