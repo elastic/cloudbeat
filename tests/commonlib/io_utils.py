@@ -120,6 +120,11 @@ class FsClient:
             open(param_value, "a+").close()
             return
 
+        if command == 'cat':
+            with open(resource, 'w') as f:
+                f.write(param_value)
+            return
+
         if container_name == '':
             raise Exception("Unknown container name is sent")
 
@@ -298,8 +303,8 @@ class FsClient:
         @return: status message string
         """
         response = json.loads(response)
-        beat_list = response['Applications']
+        beat_list = response['components']
         for beat in beat_list:
-            if beat['Name'] == beat_name:
-                return beat['Message']
+            if beat_name in beat['name']:
+                return beat['message']
         return ''

@@ -91,6 +91,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 				"result":              finding.Result,
 				"rule":                finding.Rule,
 				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
+				"cloudbeat":           t.commonData.GetVersionInfo(),
 			},
 		}
 		if clusterName != "" {

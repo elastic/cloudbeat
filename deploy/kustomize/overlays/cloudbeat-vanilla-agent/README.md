@@ -1,7 +1,7 @@
-# Kustomize Vanilla Agent
+# Kustomize Self-Managed Kubernetes Agent
 
 This manifests are used to deploy the agent on local kind cluster with dev image of the agent.
-So that later we can inject into that agent a custom binray of cloudbeat and run E2E flow.
+So that later we can inject into that agent a custom binary of cloudbeat and run E2E flow.
 
 ## How to use it
 
@@ -24,13 +24,13 @@ just elastic-stack-connect-kind
 kind load docker-image elastic-agent:8.5.0-SNAPSHOT --name kind-mono
 ```
 
-#### Step 2 - Get the entrollment token
-To find the envorllment token, `app/fleet/enrollment-tokens` copy the token of the `Elastic-Agent (elastic-package)`
+#### Step 2 - Get the enrollment token
+To find the enrollment token, `app/fleet/enrollment-tokens` copy the token of the `Elastic-Agent (elastic-package)`
 Run `export FLEET_ENROLLMENT_TOKEN=$TOKEN`
 
 #### Step 3 - Take care of SSL
 The SSL certificate was created by `elastic-package` and stored in `ELASTIC_PACKAGE_CA_CERT`.
-Run 
+Run
 ```bash
 eval "$(elastic-package stack shellinit)"
 cp $ELASTIC_PACKAGE_CA_CERT deploy/kustomize/overlays/cloudbeat-vanilla-agent
@@ -47,8 +47,8 @@ Go to `app/fleet/agents` and check that the new agent (`kind-mono-control-plane`
 
 **From cloudbeat repo**
 
-To use custom binray of cloudbeat you need
-1. Build binray + checksum
+To use custom binary of cloudbeat you need
+1. Build binary + checksum
 2. Copy the files to agent pod
 3. Restart the cloudbeat process in the pod
 

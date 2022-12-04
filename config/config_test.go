@@ -18,6 +18,7 @@
 package config
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -113,17 +114,19 @@ fetchers:
 		},
 	}
 
-	for _, test := range tests {
-		cfg, err := config.NewConfigFrom(test.config)
-		s.NoError(err)
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			cfg, err := config.NewConfigFrom(test.config)
+			s.NoError(err)
 
-		c, err := New(cfg)
-		s.NoError(err)
+			c, err := New(cfg)
+			s.NoError(err)
 
-		s.Equal(test.expectedType, c.Type)
-		s.EqualValues(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules)
-		s.Equal(test.expectedAWSConfig, c.AWSConfig)
-		s.Equal(test.expectedFetchers, len(c.Fetchers))
+			s.Equal(test.expectedType, c.Type)
+			s.EqualValues(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules)
+			s.Equal(test.expectedAWSConfig, c.AWSConfig)
+			s.Equal(test.expectedFetchers, len(c.Fetchers))
+		})
 	}
 }
 
@@ -154,14 +157,16 @@ not_runtime_cfg:
 		},
 	}
 
-	for _, test := range tests {
-		cfg, err := config.NewConfigFrom(test.config)
-		s.NoError(err)
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			cfg, err := config.NewConfigFrom(test.config)
+			s.NoError(err)
 
-		c, err := New(cfg)
-		s.NoError(err)
+			c, err := New(cfg)
+			s.NoError(err)
 
-		s.Equal(test.expected, c.RuntimeCfg != nil)
+			s.Equal(test.expected, c.RuntimeCfg != nil)
+		})
 	}
 }
 
@@ -183,43 +188,18 @@ runtime_cfg:
 		},
 	}
 
-	for _, test := range tests {
-		cfg, err := config.NewConfigFrom(test.config)
-		s.NoError(err)
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			cfg, err := config.NewConfigFrom(test.config)
+			s.NoError(err)
 
-		c, err := New(cfg)
-		s.NoError(err)
+			c, err := New(cfg)
+			s.NoError(err)
 
-		rules := c.RuntimeCfg.ActivatedRules
+			rules := c.RuntimeCfg.ActivatedRules
 
-		s.Equal(test.expected, rules.CisK8s)
-	}
-}
-
-func (s *ConfigTestSuite) TestRuntimeEvaluatorConfig() {
-	tests := []struct {
-		config   string
-		expected EvaluatorConfig
-	}{
-		{
-			`
-evaluator:
-  decision_logs: true
-`,
-			EvaluatorConfig{
-				DecisionLogs: true,
-			},
-		},
-	}
-
-	for _, test := range tests {
-		cfg, err := config.NewConfigFrom(test.config)
-		s.NoError(err)
-
-		c, err := New(cfg)
-		s.NoError(err)
-
-		s.Equal(test.expected, c.Evaluator)
+			s.Equal(test.expected, rules.CisK8s)
+		})
 	}
 }
 
@@ -246,14 +226,16 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 		},
 	}
 
-	for _, test := range tests {
-		cfg, err := config.NewConfigFrom(test.config)
-		s.NoError(err)
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			cfg, err := config.NewConfigFrom(test.config)
+			s.NoError(err)
 
-		c, err := New(cfg)
-		s.NoError(err)
+			c, err := New(cfg)
+			s.NoError(err)
 
-		s.Equal(test.expectedPeriod, c.Period)
+			s.Equal(test.expectedPeriod, c.Period)
+		})
 	}
 }
 
@@ -290,15 +272,17 @@ runtime_cfg:
 		},
 	}
 
-	for _, test := range tests {
-		cfg, err := config.NewConfigFrom(test.config)
-		s.NoError(err)
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			cfg, err := config.NewConfigFrom(test.config)
+			s.NoError(err)
 
-		c, err := New(cfg)
-		s.NoError(err)
+			c, err := New(cfg)
+			s.NoError(err)
 
-		s.Equal(test.expectedType, c.Type)
-		s.Equal(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules.CisK8s)
-		s.Equal(test.expectedEksActivatedRules, c.RuntimeCfg.ActivatedRules.CisEks)
+			s.Equal(test.expectedType, c.Type)
+			s.Equal(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules.CisK8s)
+			s.Equal(test.expectedEksActivatedRules, c.RuntimeCfg.ActivatedRules.CisEks)
+		})
 	}
 }

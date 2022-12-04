@@ -29,7 +29,7 @@ permissions:
   statuses: read
 jobs:
   Setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     timeout-minutes: 15
@@ -70,19 +70,16 @@ jobs:
 
   Build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 15
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
-
-      - name: Fetch Go version from .go-version
-        run: echo "GO_VERSION=$(cat .go-version)" >> $GITHUB_ENV
+        uses: actions/checkout@v3
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version-file: .go-version
 
       - name: Fetch OPA version
         run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
@@ -162,7 +159,7 @@ jobs:
       matrix:
         test-target: ${{fromJson(needs.Setup.outputs.matrix)}}
     name: ${{ matrix.test-target }}-tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     timeout-minutes: 90
     steps:
       - name: Check out the repo
@@ -218,7 +215,7 @@ jobs:
     name: Publish Results
     needs: Test_Matrix
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v3

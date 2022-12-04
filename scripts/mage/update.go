@@ -38,7 +38,10 @@ func (Update) All() {
 
 // Config generates both the short and reference configs.
 func (Update) Config() error {
-	return devtools.Config(devtools.ShortConfigType|devtools.ReferenceConfigType, XPackConfigFileParams(), ".")
+	cfgArgs := XPackConfigFileParams()
+	policyType := devtools.EnvOr("POLICY_TYPE", "")
+	cfgArgs.ExtraVars["type"] = policyType
+	return devtools.Config(devtools.ShortConfigType|devtools.ReferenceConfigType, cfgArgs, ".")
 }
 
 // Fields generates a fields.yml for the Beat.

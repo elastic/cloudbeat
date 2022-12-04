@@ -26,7 +26,7 @@ import (
 )
 
 type ClusterNameProviderAPI interface {
-	GetClusterName(ctx context.Context, cfg config.Config) (string, error)
+	GetClusterName(ctx context.Context, cfg *config.Config) (string, error)
 }
 
 type ClusterNameProvider struct {
@@ -37,7 +37,7 @@ type ClusterNameProvider struct {
 	AwsConfigProvider             awslib.ConfigProviderAPI
 }
 
-func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg config.Config) (string, error) {
+func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg *config.Config) (string, error) {
 	switch cfg.Type {
 	case config.InputTypeVanillaK8s:
 		return provider.KubernetesClusterNameProvider.GetClusterName(cfg, provider.KubeClient)

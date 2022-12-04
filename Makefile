@@ -1,7 +1,7 @@
 ##############################################################################
 # Variables used for various build targets.
 ##############################################################################
-CI_ELASTIC_AGENT_DOCKER_TAG?=${CLOUDBEAT_VERSION}-SNAPSHOT
+CI_ELASTIC_AGENT_DOCKER_TAG?=8.6.0-SNAPSHOT
 CI_ELASTIC_AGENT_DOCKER_IMAGE?=704479110758.dkr.ecr.eu-west-1.amazonaws.com/elastic-agent
 
 # Ensure the Go version in .go_version is installed and used.
@@ -28,7 +28,7 @@ PYTHON_ENV?=.
 PYTHON_BIN:=$(PYTHON_ENV)/build/ve/$(shell $(GO) env GOOS)/bin
 PYTHON=$(PYTHON_BIN)/python
 
-CLOUDBEAT_VERSION=$(shell grep defaultBeatVersion cmd/version.go | cut -d'=' -f2 | tr -d '" ')
+CLOUDBEAT_VERSION=$(shell grep defaultBeatVersion version/version.go | cut -d'=' -f2 | tr -d '" ')
 
 # Create a local config.mk file to override configuration,
 # e.g. for setting "GOLINT_UPSTREAM".
@@ -117,7 +117,6 @@ bench:
 
 #update: go-generate add-headers build-package notice $(MAGE)
 update: go-generate add-headers $(MAGE)
-	@$(MAGE) update
 	@go mod download all # make sure go.sum is complete
 
 config:
