@@ -15,8 +15,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package processor
+package add_cluster_id
 
 import (
-	_ "github.com/elastic/cloudbeat/processor/add_cluster_id" // Add cloudbeat add_cluster_id processor
+	"context"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	k8s "k8s.io/client-go/kubernetes"
 )
+
+type ClusterHelper interface {
+	ClusterId() string
+}
+
+type clusterHelper struct {
+	clusterId string
+}
+
+func newClusterHelper(client k8s.Interface) (ClusterHelper, error) {
+	clusterId, err := getClusterIdFromClient(client)
+	if err != nil {
+		return nil, err
+	}
+	return &clusterHelper{clusterId: clusterId}, nil
+}
+
+func (c *clusterHelper) ClusterId() string {
+	return c.clusterId
+}
+
+func getClusterIdFromClient(client k8s.Interface) (string, error) {
+	n, err := client.CoreV1().Namespaces().Get(context.Background(), "kube-system", metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	return string(n.ObjectMeta.UID), nil
+}

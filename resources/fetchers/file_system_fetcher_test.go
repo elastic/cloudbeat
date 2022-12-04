@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -399,13 +400,13 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 
 // This function creates a new directory with files inside and returns the path of the new directory
 func createDirectoriesWithFiles(s *suite.Suite, dirPath string, dirName string, filesToWriteInDirectory []string) string {
-	dirPath, err := os.MkdirTemp(dirPath, dirName)
+	dirPath, err := ioutil.TempDir(dirPath, dirName)
 	if err != nil {
 		s.FailNow(err.Error())
 	}
 	for _, fileName := range filesToWriteInDirectory {
 		file := filepath.Join(dirPath, fileName)
-		s.Nil(os.WriteFile(file, []byte("test txt\n"), 0600), "Could not able to write a new file")
+		s.Nil(ioutil.WriteFile(file, []byte("test txt\n"), 0600), "Could not able to write a new file")
 	}
 	return dirPath
 }
