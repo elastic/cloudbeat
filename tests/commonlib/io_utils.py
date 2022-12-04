@@ -38,12 +38,12 @@ def get_events_from_index(
                 {
                     "range": {
                         "@timestamp": {
-                            "gte": time_after.strftime("%Y-%m-%dT%H:%M:%S.%f")
-                        }
-                    }
-                }
+                            "gte": time_after.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+                        },
+                    },
+                },
             ],
-        }
+        },
     }
     sort = [{"@timestamp": {"order": "desc"}}]
     result = elastic_client.get_index_data(
@@ -142,7 +142,7 @@ class FsClient:
                 uid, gid = param_value.split(":")
             except ValueError as exc:
                 raise Exception(
-                    "User and group parameter shall be separated by ':' "
+                    "User and group parameter shall be separated by ':' ",
                 ) from exc
 
             FsClient.add_users_to_node([uid, gid], in_place=True)
@@ -152,7 +152,7 @@ class FsClient:
                 Path(param_value).unlink()
         else:
             raise Exception(
-                f"Command '{command}' still not implemented in test framework"
+                f"Command '{command}' still not implemented in test framework",
             )
 
     @staticmethod
@@ -180,7 +180,9 @@ class FsClient:
             for user in users:
                 # These commands fail silently for users/groups that exist.
                 subprocess.run(
-                    ["groupadd", user, "-P", "/tmp"], capture_output=True, check=False
+                    ["groupadd", user, "-P", "/tmp"],
+                    capture_output=True,
+                    check=False,
                 )
                 subprocess.run(
                     ["useradd", user, "-g", user, "-P", "/tmp"],
@@ -208,7 +210,9 @@ class FsClient:
         Copy the contents of source into destination without overwriting the destination file.
         """
         with open(source, "r", encoding="utf-8") as sfile, open(
-            destination, "w", encoding="utf-8"
+            destination,
+            "w",
+            encoding="utf-8",
         ) as dfile:
             for line in sfile:
                 dfile.write(line)
@@ -251,7 +255,7 @@ class FsClient:
                         if s_key == x.split("=")[0]
                         else x,
                         command,
-                    )
+                    ),
                 )
             else:
                 # In case of non-existing key in the configuration arguments,

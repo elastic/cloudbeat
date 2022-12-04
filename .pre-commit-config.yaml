@@ -1,24 +1,25 @@
 repos:
+  ## General
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
       - id: check-merge-conflict
-
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
-    hooks:
       - id: trailing-whitespace
-        exclude: (^cloudbeat.*yml)$
       - id: end-of-file-fixer
-        exclude: (^cloudbeat.*yml)$
+      - id: check-added-large-files
       - id: check-yaml
         args: [--allow-multiple-documents]
-        exclude: (^cloudbeat.*yml)$
+        exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*|dev-tools/packaging/packages.yml)$
       - id: check-json
 
-  ## Security
+      ## Security
       - id: detect-private-key
       - id: detect-aws-credentials
+
+  - repo: https://github.com/asottile/add-trailing-comma
+    rev: v2.3.0
+    hooks:
+      - id: add-trailing-comma
 
   ## Golang hooks
   - repo: https://github.com/dnephin/pre-commit-golang
@@ -36,20 +37,19 @@ repos:
         files: ^tests/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v2.15.6
+    rev: v2.15.7
     hooks:
       - id: pylint
         args: [
-            "-rn", # Only display messages
-            "-sn", # Don't display the score
-            "--rcfile=tests/pylintrc", # Link to your config file
-          ]
+          "-rn", # Only display messages
+          "--rcfile=tests/pylintrc", # Link to your config file
+        ]
 
   - repo: https://github.com/psf/black
     rev: 22.10.0
     hooks:
       - id: black
-        args: ["tests"]
+        args: [tests]
 
   - repo: local
     hooks:

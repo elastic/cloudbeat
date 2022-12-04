@@ -9,11 +9,15 @@ from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 
 cis_eks_4_2_1_pass = EksKubeObjectCase(
-    rule_tag="CIS 4.2.1", test_resource_id="eks-psp-pass", expected=RULE_PASS_STATUS
+    rule_tag="CIS 4.2.1",
+    test_resource_id="eks-psp-pass",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_4_2_1_fail = EksKubeObjectCase(
-    rule_tag="CIS 4.2.1", test_resource_id="eks-psp-failures", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 4.2.1",
+    test_resource_id="eks-psp-failures",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_4_2_1 = {
@@ -22,11 +26,15 @@ cis_eks_4_2_1 = {
 }
 
 cis_eks_4_2_2_pass = EksKubeObjectCase(
-    rule_tag="CIS 4.2.2", test_resource_id="eks-psp-pass", expected=RULE_PASS_STATUS
+    rule_tag="CIS 4.2.2",
+    test_resource_id="eks-psp-pass",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_4_2_2_fail = EksKubeObjectCase(
-    rule_tag="CIS 4.2.2", test_resource_id="eks-psp-failures", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 4.2.2",
+    test_resource_id="eks-psp-failures",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_4_2_2 = {
@@ -35,11 +43,15 @@ cis_eks_4_2_2 = {
 }
 
 cis_eks_4_2_3_pass = EksKubeObjectCase(
-    rule_tag="CIS 4.2.3", test_resource_id="eks-psp-pass", expected=RULE_PASS_STATUS
+    rule_tag="CIS 4.2.3",
+    test_resource_id="eks-psp-pass",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_4_2_3_fail = EksKubeObjectCase(
-    rule_tag="CIS 4.2.3", test_resource_id="eks-psp-failures", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 4.2.3",
+    test_resource_id="eks-psp-failures",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_4_2_3 = {
@@ -48,11 +60,15 @@ cis_eks_4_2_3 = {
 }
 
 cis_eks_4_2_4_pass = EksKubeObjectCase(
-    rule_tag="CIS 4.2.4", test_resource_id="eks-psp-pass", expected=RULE_PASS_STATUS
+    rule_tag="CIS 4.2.4",
+    test_resource_id="eks-psp-pass",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_4_2_4_fail = EksKubeObjectCase(
-    rule_tag="CIS 4.2.4", test_resource_id="eks-psp-failures", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 4.2.4",
+    test_resource_id="eks-psp-failures",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_4_2_4 = {
@@ -61,11 +77,15 @@ cis_eks_4_2_4 = {
 }
 
 cis_eks_4_2_5_pass = EksKubeObjectCase(
-    rule_tag="CIS 4.2.5", test_resource_id="eks-psp-pass", expected=RULE_PASS_STATUS
+    rule_tag="CIS 4.2.5",
+    test_resource_id="eks-psp-pass",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_4_2_5_fail = EksKubeObjectCase(
-    rule_tag="CIS 4.2.5", test_resource_id="eks-psp-failures", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 4.2.5",
+    test_resource_id="eks-psp-failures",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_4_2_5 = {
@@ -74,11 +94,15 @@ cis_eks_4_2_5 = {
 }
 
 cis_eks_4_2_6_pass = EksKubeObjectCase(
-    rule_tag="CIS 4.2.6", test_resource_id="eks-psp-pass", expected=RULE_PASS_STATUS
+    rule_tag="CIS 4.2.6",
+    test_resource_id="eks-psp-pass",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_4_2_6_fail = EksKubeObjectCase(
-    rule_tag="CIS 4.2.6", test_resource_id="eks-psp-failures", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 4.2.6",
+    test_resource_id="eks-psp-failures",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_4_2_6 = {
@@ -87,11 +111,15 @@ cis_eks_4_2_6 = {
 }
 
 cis_eks_4_2_7_pass = EksKubeObjectCase(
-    rule_tag="CIS 4.2.7", test_resource_id="eks-psp-pass", expected=RULE_PASS_STATUS
+    rule_tag="CIS 4.2.7",
+    test_resource_id="eks-psp-pass",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_4_2_7_fail = EksKubeObjectCase(
-    rule_tag="CIS 4.2.7", test_resource_id="eks-psp-failures", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 4.2.7",
+    test_resource_id="eks-psp-failures",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_4_2_7 = {
@@ -100,11 +128,15 @@ cis_eks_4_2_7 = {
 }
 
 cis_eks_4_2_8_pass = EksKubeObjectCase(
-    rule_tag="CIS 4.2.8", test_resource_id="eks-psp-pass", expected=RULE_PASS_STATUS
+    rule_tag="CIS 4.2.8",
+    test_resource_id="eks-psp-pass",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_4_2_8_fail = EksKubeObjectCase(
-    rule_tag="CIS 4.2.8", test_resource_id="eks-psp-failures", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 4.2.8",
+    test_resource_id="eks-psp-failures",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_4_2_8 = {
@@ -113,11 +145,15 @@ cis_eks_4_2_8 = {
 }
 
 cis_eks_4_2_9_pass = EksKubeObjectCase(
-    rule_tag="CIS 4.2.9", test_resource_id="eks-psp-pass", expected=RULE_PASS_STATUS
+    rule_tag="CIS 4.2.9",
+    test_resource_id="eks-psp-pass",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_4_2_9_fail = EksKubeObjectCase(
-    rule_tag="CIS 4.2.9", test_resource_id="eks-psp-failures", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 4.2.9",
+    test_resource_id="eks-psp-failures",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_4_2_9 = {

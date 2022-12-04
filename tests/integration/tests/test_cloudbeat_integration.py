@@ -43,7 +43,8 @@ def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
     :return:
     """
     pods = k8s.get_agent_pod_instances(
-        agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace
+        agent_name=cloudbeat_agent.name,
+        namespace=cloudbeat_agent.namespace,
     )
     # Verify that at least 1 pod is running the cluster
     assert len(pods) > 0, "There are no cloudbeat pod instances running in the cluster"
@@ -93,7 +94,10 @@ def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
     assert res, "Not all nodes have completed a cycle within the configured threshold"
 
     result = elastic_client.get_index_data(
-        index_name=elastic_client.index, query=query, size=1000, sort=sort
+        index_name=elastic_client.index,
+        query=query,
+        size=1000,
+        sort=sort,
     )
     # checking that k8s_objects are being sent only by the leader node.
     for resource in result["hits"]["hits"]:

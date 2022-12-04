@@ -18,7 +18,7 @@ def k8s():
     @return: Kubernetes Helper instance.
     """
     return KubernetesHelper(
-        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config
+        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
     )
 
 
@@ -79,6 +79,10 @@ def pytest_addoption(parser):
 
 
 def get_fixtures():
+    """
+    This function returns all fixtures in the current file.
+    @return: List of fixtures.
+    """
     return cloudbeat_agent, k8s
 
 
@@ -91,16 +95,29 @@ def pytest_sessionfinish(session):
 
     report_dir = session.config.option.allure_report_dir
     cloudbeat = configuration.agent
-    kube_client = KubernetesHelper(is_in_cluster_config=configuration.kubernetes.is_in_cluster_config)
-    app_list = [cloudbeat.name, 'kibana', 'elasticsearch']
+    kube_client = KubernetesHelper(
+        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
+    )
+    app_list = [cloudbeat.name, "kibana", "elasticsearch"]
     apps_dict = {}
     for app in app_list:
-        apps_dict.update(kube_client.get_pod_image_version(pod_name=app, namespace=cloudbeat.namespace))
+        apps_dict.update(
+            kube_client.get_pod_image_version(
+                pod_name=app,
+                namespace=cloudbeat.namespace,
+            ),
+        )
     kubernetes_data = kube_client.get_nodes_versions()
     report_data = {**apps_dict, **kubernetes_data}
     try:
         if report_dir:
-            with open('{}/{}'.format(report_dir, 'environment.properties'), 'w') as allure_env:
-                allure_env.writelines([f"{key}:{value}\n" for key, value in report_data.items()])
+            with open(
+                f"{report_dir}/{'environment.properties'}",
+                "w",
+                encoding="utf8",
+            ) as allure_env:
+                allure_env.writelines(
+                    [f"{key}:{value}\n" for key, value in report_data.items()],
+                )
     except ValueError:
         print("Warning fail to create allure environment report")

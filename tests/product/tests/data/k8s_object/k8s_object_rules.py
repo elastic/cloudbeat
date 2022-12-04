@@ -43,7 +43,7 @@ cis_5_1_3_role_pass = KubeTestCase(
                 "apiGroups": [""],
                 "resources": ["pods"],
                 "verbs": ["get", "watch", "list"],
-            }
+            },
         ],
     },
     expected=RULE_PASS_STATUS,
@@ -75,7 +75,7 @@ cis_5_1_3_cluster_role_pass = KubeTestCase(
                 "apiGroups": [""],
                 "resources": ["pods"],
                 "verbs": ["get", "watch", "list"],
-            }
+            },
         ],
     },
     expected=RULE_PASS_STATUS,
@@ -187,8 +187,8 @@ cis_5_2_2_pod_fail = KubeTestCase(
         "metadata": {"name": TEST_POD_NAME, "namespace": KUBE_SYSTEM_NAMESPACE},
         "spec": {
             "containers": [
-                {"name": TEST_CONTAINER_NAME, "securityContext": {"privileged": True}}
-            ]
+                {"name": TEST_CONTAINER_NAME, "securityContext": {"privileged": True}},
+            ],
         },
     },
     expected=RULE_FAIL_STATUS,
@@ -201,8 +201,8 @@ cis_5_2_2_pod_pass = KubeTestCase(
         "metadata": {"name": TEST_POD_NAME, "namespace": KUBE_SYSTEM_NAMESPACE},
         "spec": {
             "containers": [
-                {"name": TEST_CONTAINER_NAME, "securityContext": {"privileged": False}}
-            ]
+                {"name": TEST_CONTAINER_NAME, "securityContext": {"privileged": False}},
+            ],
         },
     },
     expected=RULE_PASS_STATUS,
@@ -302,8 +302,8 @@ cis_5_2_6_pod_fail = KubeTestCase(
                 {
                     "name": TEST_CONTAINER_NAME,
                     "securityContext": {"allowPrivilegeEscalation": True},
-                }
-            ]
+                },
+            ],
         },
     },
     expected=RULE_FAIL_STATUS,
@@ -319,8 +319,8 @@ cis_5_2_6_pod_pass = KubeTestCase(
                 {
                     "name": TEST_CONTAINER_NAME,
                     "securityContext": {"allowPrivilegeEscalation": False},
-                }
-            ]
+                },
+            ],
         },
     },
     expected=RULE_PASS_STATUS,
@@ -338,7 +338,7 @@ cis_5_2_7_pod_fail = KubeTestCase(
     resource_body={
         "metadata": {"name": TEST_POD_NAME, "namespace": KUBE_SYSTEM_NAMESPACE},
         "spec": {
-            "runAsUser": {"rule": "MustRunAs", "ranges": [{"min": 0, "max": 65535}]}
+            "runAsUser": {"rule": "MustRunAs", "ranges": [{"min": 0, "max": 65535}]},
         },
     },
     expected=RULE_FAIL_STATUS,
@@ -350,7 +350,7 @@ cis_5_2_7_pod_pass = KubeTestCase(
     resource_body={
         "metadata": {"name": TEST_POD_NAME, "namespace": KUBE_SYSTEM_NAMESPACE},
         "spec": {
-            "runAsUser": {"rule": "MustRunAs", "ranges": [{"min": 1, "max": 65535}]}
+            "runAsUser": {"rule": "MustRunAs", "ranges": [{"min": 1, "max": 65535}]},
         },
     },
     expected=RULE_PASS_STATUS,
@@ -363,8 +363,8 @@ cis_5_2_7_pod_container_fail = KubeTestCase(
         "metadata": {"name": TEST_POD_NAME, "namespace": KUBE_SYSTEM_NAMESPACE},
         "spec": {
             "containers": [
-                {"name": TEST_CONTAINER_NAME, "securityContext": {"runAsUser": 0}}
-            ]
+                {"name": TEST_CONTAINER_NAME, "securityContext": {"runAsUser": 0}},
+            ],
         },
     },
     expected=RULE_FAIL_STATUS,
@@ -384,8 +384,8 @@ cis_5_2_8_pod_container_fail = KubeTestCase(
         "metadata": {"name": TEST_POD_NAME, "namespace": KUBE_SYSTEM_NAMESPACE},
         "spec": {
             "containers": [
-                {"name": TEST_CONTAINER_NAME, "securityContext": {"runAsUser": 0}}
-            ]
+                {"name": TEST_CONTAINER_NAME, "securityContext": {"runAsUser": 0}},
+            ],
         },
     },
     expected=RULE_FAIL_STATUS,

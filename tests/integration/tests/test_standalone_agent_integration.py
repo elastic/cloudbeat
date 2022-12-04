@@ -82,7 +82,8 @@ def test_cloudbeat_status(k8s, cloudbeat_agent):
     """
 
     pods = k8s.get_agent_pod_instances(
-        agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace
+        agent_name=cloudbeat_agent.name,
+        namespace=cloudbeat_agent.namespace,
     )
     results = []
     exec_command = [
@@ -98,7 +99,8 @@ def test_cloudbeat_status(k8s, cloudbeat_agent):
             command=exec_command,
         )
         status = FsClient.get_beat_status_from_json(
-            response=response, beat_name="cloudbeat"
+            response=response,
+            beat_name="cloudbeat",
         )
         if status != "Running":
             results.append(f"Pod: {pod.metadata.name} status: {status}")

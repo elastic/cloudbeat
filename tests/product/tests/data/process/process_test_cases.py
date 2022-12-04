@@ -11,7 +11,7 @@ cis_1_2_4 = [
         {"unset": ["--kubelet-https"]},
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_2_1 = [
@@ -21,11 +21,11 @@ cis_2_1 = [
             "set": {
                 "--cert-file": "/etc/kubernetes/pki/etcd/server.crt",
                 "--key-file": "/etc/kubernetes/pki/etcd/server.key",
-            }
+            },
         },
         "/etc/kubernetes/manifests/etcd.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_2_2 = [
@@ -77,11 +77,11 @@ cis_2_4 = [
             "set": {
                 "--peer-cert-file": "/etc/kubernetes/pki/etcd/peer.crt",
                 "--peer-key-file": "/etc/kubernetes/pki/etcd/peer.key",
-            }
+            },
         },
         "/etc/kubernetes/manifests/etcd.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_2_5 = [
@@ -216,7 +216,7 @@ cis_1_3_4 = [
         {"unset": ["--use-service-account-credentials"]},
         "/etc/kubernetes/manifests/kube-controller-manager.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_1_3_5 = [
@@ -225,7 +225,7 @@ cis_1_3_5 = [
         {"unset": ["--root-ca-file"]},
         "/etc/kubernetes/manifests/kube-controller-manager.yaml",
         "failed",
-    )
+    ),
 ]
 
 cis_1_3_6 = [
@@ -276,7 +276,7 @@ cis_1_2_2 = [
         {"unset": ["--token-auth-file"]},
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_1_2_3 = [
@@ -285,7 +285,7 @@ cis_1_2_3 = [
         {"unset": ["--DenyServiceExternalIPs"]},
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_1_2_5 = [
@@ -295,11 +295,11 @@ cis_1_2_5 = [
             "set": {
                 "--kubelet-client-certificate": "/etc/kubernetes/pki/apiserver-kubelet-client.crt",
                 "--kubelet-client-key": "/etc/kubernetes/pki/apiserver-kubelet-client.key",
-            }
+            },
         },
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_1_2_6 = [
@@ -308,7 +308,7 @@ cis_1_2_6 = [
         {"unset": ["--kubelet-certificate-authority"]},
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "failed",
-    )
+    ),
 ]
 
 cis_1_2_7 = [
@@ -381,7 +381,7 @@ cis_1_2_10 = [
             "set": {
                 "--enable-admission-plugins": "EventRateLimit",
                 "--admission-control-config-file": "/etc/kubernetes/pki/admission_config.yaml",
-            }
+            },
         },
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
@@ -538,7 +538,7 @@ cis_1_2_19 = [
         {"unset": ["--audit-log-path"]},
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "failed",
-    )
+    ),
 ]
 
 cis_1_2_20 = [
@@ -652,7 +652,7 @@ cis_1_2_25 = [
         {"set": {"--service-account-key-file": "/etc/kubernetes/pki/sa.pub"}},
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_1_2_26 = [
@@ -662,11 +662,11 @@ cis_1_2_26 = [
             "set": {
                 "--etcd-certfile": "/etc/kubernetes/pki/apiserver-etcd-client.crt",
                 "--etcd-keyfile": "/etc/kubernetes/pki/apiserver-etcd-client.key",
-            }
+            },
         },
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_1_2_27 = [
@@ -676,11 +676,11 @@ cis_1_2_27 = [
             "set": {
                 "--tls-cert-file": "/etc/kubernetes/pki/apiserver.crt",
                 "--tls-private-key-file": "/etc/kubernetes/pki/apiserver.key",
-            }
+            },
         },
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_1_2_28 = [
@@ -689,7 +689,7 @@ cis_1_2_28 = [
         {"set": {"--client-ca-file": "/etc/kubernetes/pki/ca.crt"}},
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_1_2_29 = [
@@ -698,7 +698,7 @@ cis_1_2_29 = [
         {"set": {"--etcd-cafile": "/etc/kubernetes/pki/etcd/ca.crt"}},
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_1_2_32 = [
@@ -712,8 +712,8 @@ cis_1_2_32 = [
         "CIS 1.2.32",
         {
             "set": {
-                "--tls-cipher-suites": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
-            }
+                "--tls-cipher-suites": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+            },
         },
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "passed",
@@ -722,8 +722,8 @@ cis_1_2_32 = [
         "CIS 1.2.32",
         {
             "set": {
-                "--tls-cipher-suites": "TLS_ECDHE_RSA_WITH_RC4_128_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
-            }
+                "--tls-cipher-suites": "TLS_ECDHE_RSA_WITH_RC4_128_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+            },
         },
         "/etc/kubernetes/manifests/kube-apiserver.yaml",
         "failed",
@@ -768,7 +768,7 @@ cis_4_2_3 = [
         {"unset": ["authentication.x509.clientCAFile"]},
         "/var/lib/kubelet/config.yaml",
         "failed",
-    )
+    ),
 ]
 
 cis_4_2_4 = [
@@ -852,7 +852,7 @@ cis_4_2_10 = [
         {"set": {"tlsCertFile": "", "tlsPrivateKeyFile": ""}},
         "/var/lib/kubelet/config.yaml",
         "passed",
-    )
+    ),
 ]
 
 cis_4_2_11 = [
@@ -891,7 +891,7 @@ cis_4_2_12 = [
             "set": {
                 "serverTLSBootstrap": False,
                 "featureGates": {"RotateKubeletServerCertificate": True},
-            }
+            },
         },
         "/var/lib/kubelet/config.yaml",
         "passed",
@@ -902,7 +902,7 @@ cis_4_2_12 = [
             "set": {
                 "serverTLSBootstrap": True,
                 "featureGates": {"RotateKubeletServerCertificate": False},
-            }
+            },
         },
         "/var/lib/kubelet/config.yaml",
         "passed",
@@ -935,8 +935,8 @@ cis_4_2_13 = [
                     "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
                     "TLS_RSA_WITH_AES_256_GCM_SHA384",
                     "TLS_RSA_WITH_AES_128_GCM_SHA256",
-                ]
-            }
+                ],
+            },
         },
         "/var/lib/kubelet/config.yaml",
         "passed",
@@ -948,12 +948,14 @@ etcd_rules = [
     *cis_2_2,
     *cis_2_3,
     *cis_2_4,
-    *skip_param_case(skip_list=[*cis_2_5],
-                     data_to_report=SkipReportData(
-                         url_title="cloudbeat: #512",
-                         url_link="https://github.com/elastic/cloudbeat/issues/512",
-                         skip_reason="flaky test",
-                     )),
+    *skip_param_case(
+        skip_list=[*cis_2_5],
+        data_to_report=SkipReportData(
+            url_title="cloudbeat: #512",
+            url_link="https://github.com/elastic/cloudbeat/issues/512",
+            skip_reason="flaky test",
+        ),
+    ),
     *cis_2_6,
 ]
 

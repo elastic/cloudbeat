@@ -167,7 +167,7 @@ kill -9 `pidof cloudbeat`
 ```
 
 ### Local configuration changes
-To update your local configuration of cloudbeat and control it, use 
+To update your local configuration of cloudbeat and control it, use
 ```sh
 mage config
 ```

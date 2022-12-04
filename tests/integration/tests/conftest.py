@@ -32,11 +32,12 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
         )
     except KeyError:
         raise Exception(
-            f"configuration {cloudbeat_agent.name}_{cloudbeat_agent.cluster_type} is unknown"
+            f"configuration {cloudbeat_agent.name}_{cloudbeat_agent.cluster_type} is unknown",
         ) from KeyError
 
     if k8s.get_agent_pod_instances(
-        agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace
+        agent_name=cloudbeat_agent.name,
+        namespace=cloudbeat_agent.namespace,
     ):
         k8s.delete_from_yaml(get_k8s_yaml_objects(file_path=file_path))
         k8s.wait_for_resource(
@@ -87,7 +88,8 @@ def fixture_data(start_stop_cloudbeat, k8s, cloudbeat_agent):
     """
     # pylint: disable=W0612,W0613
     pods = k8s.get_agent_pod_instances(
-        agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace
+        agent_name=cloudbeat_agent.name,
+        namespace=cloudbeat_agent.namespace,
     )
     nodes = k8s.get_cluster_nodes()
 
@@ -104,7 +106,8 @@ def fixture_sa_data(k8s, cloudbeat_agent):
     """
     # pylint: disable=W0612,W0613
     pods = k8s.get_agent_pod_instances(
-        agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace
+        agent_name=cloudbeat_agent.name,
+        namespace=cloudbeat_agent.namespace,
     )
     nodes = k8s.get_cluster_nodes()
     return pods, nodes

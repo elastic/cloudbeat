@@ -14,11 +14,15 @@ config_2_node_1 = eks.config_2_node_1
 config_2_node_2 = eks.config_2_node_2
 
 cis_eks_3_2_1_pass = EksTestCase(
-    rule_tag="CIS 3.2.1", node_hostname=config_1_node_1, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.1",
+    node_hostname=config_1_node_1,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_1_fail = EksTestCase(
-    rule_tag="CIS 3.2.1", node_hostname=config_1_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.1",
+    node_hostname=config_1_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_1_config_1 = {
@@ -27,11 +31,15 @@ cis_eks_3_2_1_config_1 = {
 }
 
 cis_eks_3_2_2_pass = EksTestCase(
-    rule_tag="CIS 3.2.2", node_hostname=config_1_node_1, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.2",
+    node_hostname=config_1_node_1,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_2_fail = EksTestCase(
-    rule_tag="CIS 3.2.2", node_hostname=config_1_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.2",
+    node_hostname=config_1_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_2_config_1 = {
@@ -40,11 +48,15 @@ cis_eks_3_2_2_config_1 = {
 }
 
 cis_eks_3_2_3_pass = EksTestCase(
-    rule_tag="CIS 3.2.3", node_hostname=config_1_node_1, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.3",
+    node_hostname=config_1_node_1,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_3_fail = EksTestCase(
-    rule_tag="CIS 3.2.3", node_hostname=config_1_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.3",
+    node_hostname=config_1_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_3_config_1 = {
@@ -53,19 +65,27 @@ cis_eks_3_2_3_config_1 = {
 }
 
 cis_eks_3_2_4_fail_1 = EksTestCase(
-    rule_tag="CIS 3.2.4", node_hostname=config_1_node_1, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.4",
+    node_hostname=config_1_node_1,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_4_fail_2 = EksTestCase(
-    rule_tag="CIS 3.2.4", node_hostname=config_1_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.4",
+    node_hostname=config_1_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_4_pass_1 = EksTestCase(
-    rule_tag="CIS 3.2.4", node_hostname=config_2_node_1, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.4",
+    node_hostname=config_2_node_1,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_4_pass_2 = EksTestCase(
-    rule_tag="CIS 3.2.4", node_hostname=config_2_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.4",
+    node_hostname=config_2_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_4_config_1 = {
@@ -79,19 +99,27 @@ cis_eks_3_2_4_config_2 = {
 }
 
 cis_eks_3_2_5_fail_1 = EksTestCase(
-    rule_tag="CIS 3.2.5", node_hostname=config_1_node_1, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.5",
+    node_hostname=config_1_node_1,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_5_fail_2 = EksTestCase(
-    rule_tag="CIS 3.2.5", node_hostname=config_1_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.5",
+    node_hostname=config_1_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_5_pass = EksTestCase(
-    rule_tag="CIS 3.2.5", node_hostname=config_2_node_1, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.5",
+    node_hostname=config_2_node_1,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_5_fail_3 = EksTestCase(
-    rule_tag="CIS 3.2.5", node_hostname=config_2_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.5",
+    node_hostname=config_2_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_5_config_1 = {
@@ -105,11 +133,15 @@ cis_eks_3_2_5_config_2 = {
 }
 
 cis_eks_3_2_6_fail = EksTestCase(
-    rule_tag="CIS 3.2.6", node_hostname=config_1_node_1, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.6",
+    node_hostname=config_1_node_1,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_6_pass = EksTestCase(
-    rule_tag="CIS 3.2.6", node_hostname=config_1_node_2, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.6",
+    node_hostname=config_1_node_2,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_6_config_1 = {
@@ -118,11 +150,15 @@ cis_eks_3_2_6_config_1 = {
 }
 
 cis_eks_3_2_7_fail_1 = EksTestCase(
-    rule_tag="CIS 3.2.7", node_hostname=config_1_node_1, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.7",
+    node_hostname=config_1_node_1,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_7_fail_2 = EksTestCase(
-    rule_tag="CIS 3.2.7", node_hostname=config_1_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.7",
+    node_hostname=config_1_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_7_config_1 = {
@@ -131,11 +167,15 @@ cis_eks_3_2_7_config_1 = {
 }
 
 cis_eks_3_2_7_pass_1 = EksTestCase(
-    rule_tag="CIS 3.2.7", node_hostname=config_2_node_1, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.7",
+    node_hostname=config_2_node_1,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_7_pass_2 = EksTestCase(
-    rule_tag="CIS 3.2.7", node_hostname=config_2_node_2, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.7",
+    node_hostname=config_2_node_2,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_7_config_2 = {
@@ -144,11 +184,15 @@ cis_eks_3_2_7_config_2 = {
 }
 
 cis_eks_3_2_8_pass = EksTestCase(
-    rule_tag="CIS 3.2.8", node_hostname=config_1_node_1, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.8",
+    node_hostname=config_1_node_1,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_8_fail = EksTestCase(
-    rule_tag="CIS 3.2.8", node_hostname=config_1_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.8",
+    node_hostname=config_1_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_8_config_1 = {
@@ -157,15 +201,21 @@ cis_eks_3_2_8_config_1 = {
 }
 
 cis_eks_3_2_9_pass_1 = EksTestCase(
-    rule_tag="CIS 3.2.9", node_hostname=config_1_node_1, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.9",
+    node_hostname=config_1_node_1,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_9_pass_2 = EksTestCase(
-    rule_tag="CIS 3.2.9", node_hostname=config_1_node_2, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.9",
+    node_hostname=config_1_node_2,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_9_fail = EksTestCase(
-    rule_tag="CIS 3.2.9", node_hostname=config_2_node_2, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.9",
+    node_hostname=config_2_node_2,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_9_config_1 = {
@@ -174,15 +224,19 @@ cis_eks_3_2_9_config_1 = {
 }
 
 cis_eks_3_2_9_config_2 = {
-    "3.2.9 Kubelet config eventRecordQPS==5, --event-qps==0 eval failed": cis_eks_3_2_9_fail
+    "3.2.9 Kubelet config eventRecordQPS==5, --event-qps==0 eval failed": cis_eks_3_2_9_fail,
 }
 
 cis_eks_3_2_10_fail = EksTestCase(
-    rule_tag="CIS 3.2.10", node_hostname=config_1_node_1, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.10",
+    node_hostname=config_1_node_1,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_10_pass = EksTestCase(
-    rule_tag="CIS 3.2.10", node_hostname=config_1_node_2, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.10",
+    node_hostname=config_1_node_2,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_10_config_1 = {
@@ -191,11 +245,15 @@ cis_eks_3_2_10_config_1 = {
 }
 
 cis_eks_3_2_11_fail = EksTestCase(
-    rule_tag="CIS 3.2.11", node_hostname=config_1_node_1, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 3.2.11",
+    node_hostname=config_1_node_1,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_3_2_11_pass = EksTestCase(
-    rule_tag="CIS 3.2.11", node_hostname=config_1_node_2, expected=RULE_PASS_STATUS
+    rule_tag="CIS 3.2.11",
+    node_hostname=config_1_node_2,
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_3_2_11_config_1 = {

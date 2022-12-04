@@ -20,6 +20,7 @@ concurrency:
 jobs:
   Lint:
     name: Lint
+    description: for more information see .pre-commit-config.yaml
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

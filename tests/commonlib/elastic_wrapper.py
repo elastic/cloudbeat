@@ -13,7 +13,8 @@ class ElasticWrapper:
     def __init__(self, elastic_params):
         self.index = elastic_params.cis_index
         self.es_client = Elasticsearch(
-            hosts=elastic_params.url, basic_auth=elastic_params.basic_auth
+            hosts=elastic_params.url,
+            basic_auth=elastic_params.basic_auth,
         )
 
     def get_index_data(
@@ -86,8 +87,8 @@ class ElasticWrapper:
                 "filter": [
                     {"term": term},
                     {"range": {"@timestamp": {"gte": "now-30s"}}},
-                ]
-            }
+                ],
+            },
         }
 
         sort = [{"@timestamp": {"order": "desc"}}]
@@ -105,7 +106,7 @@ class ElasticWrapper:
             "bool": {
                 "must": must_query_list,
                 "filter": [{"range": {"@timestamp": {"gte": "now-30m"}}}],
-            }
+            },
         }
 
         sort = [{"@timestamp": {"order": "desc"}}]

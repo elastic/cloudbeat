@@ -43,7 +43,9 @@ def test_process_etcd(
     # Currently, single node is used, in the future may be extended for all nodes.
     node = k8s_client.get_cluster_nodes()[0]
     api_client.edit_process_file(
-        container_name=node.metadata.name, dictionary=dictionary, resource=resource
+        container_name=node.metadata.name,
+        dictionary=dictionary,
+        resource=resource,
     )
 
     # Wait for process reboot

@@ -12,19 +12,23 @@ from ..constants import RULE_FAIL_STATUS, RULE_PASS_STATUS
 config_1_node_1 = eks.config_1_node_1
 
 cis_eks_2_1_1_fail = EksAwsServiceCase(
-    rule_tag="CIS 2.1.1", case_identifier="test-eks-config-1", expected=RULE_FAIL_STATUS
+    rule_tag="CIS 2.1.1",
+    case_identifier="test-eks-config-1",
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_2_1_1_pass = EksAwsServiceCase(
-    rule_tag="CIS 2.1.1", case_identifier="test-eks-config-2", expected=RULE_PASS_STATUS
+    rule_tag="CIS 2.1.1",
+    case_identifier="test-eks-config-2",
+    expected=RULE_PASS_STATUS,
 )
 
 cis_eks_2_1_1_config_1 = {
-    "2.1.1 EKS Cluster loggers enabled==false evaluation failed": cis_eks_2_1_1_fail
+    "2.1.1 EKS Cluster loggers enabled==false evaluation failed": cis_eks_2_1_1_fail,
 }
 
 cis_eks_2_1_1_config_2 = {
-    "2.1.1 EKS Cluster loggers all enabled==true evaluation passed": cis_eks_2_1_1_pass
+    "2.1.1 EKS Cluster loggers all enabled==true evaluation passed": cis_eks_2_1_1_pass,
 }
 
 cis_eks_5_1_1_pass = EksAwsServiceCase(
@@ -45,11 +49,13 @@ cis_eks_5_1_1 = {
 }
 
 cis_eks_5_4_3_fail = EksAwsServiceCase(
-    rule_tag="CIS 5.4.3", case_identifier=config_1_node_1, expected=RULE_FAIL_STATUS
+    rule_tag="CIS 5.4.3",
+    case_identifier=config_1_node_1,
+    expected=RULE_FAIL_STATUS,
 )
 
 cis_eks_5_4_3_config_1 = {
-    "5.4.3 Network configuration public==true evaluation failed": cis_eks_5_4_3_fail
+    "5.4.3 Network configuration public==true evaluation failed": cis_eks_5_4_3_fail,
 }
 
 cis_eks_5_4_5_fail = EksAwsServiceCase(
@@ -59,7 +65,7 @@ cis_eks_5_4_5_fail = EksAwsServiceCase(
 )
 
 cis_eks_5_4_5_config_1 = {
-    "5.4.5 ELB - TCP traffic no encryption evaluation failed": cis_eks_5_4_5_fail
+    "5.4.5 ELB - TCP traffic no encryption evaluation failed": cis_eks_5_4_5_fail,
 }
 
 cis_eks_all = {
@@ -76,7 +82,7 @@ cis_eks_all = {
                         url_link="https://github.com/elastic/cloudbeat/issues/500",
                     ),
                 ),
-            )
+            ),
         ),
         **cis_eks_5_4_5_config_1,
         **dict(
@@ -90,7 +96,7 @@ cis_eks_all = {
                         url_link="https://github.com/elastic/security-team/issues/3929",
                     ),
                 ),
-            )
+            ),
         ),
     },
     "test-eks-config-2": {
@@ -105,8 +111,8 @@ cis_eks_all = {
                         url_link="https://github.com/elastic/security-team/issues/3929",
                     ),
                 ),
-            )
-        )
+            ),
+        ),
     },
 }
 

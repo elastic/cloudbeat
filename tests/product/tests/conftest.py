@@ -30,7 +30,8 @@ def data(k8s, api_client, cloudbeat_agent):
     """
     file_path = Path(__file__).parent / DEPLOY_YML
     if k8s.get_agent_pod_instances(
-        agent_name=cloudbeat_agent.name, namespace=cloudbeat_agent.namespace
+        agent_name=cloudbeat_agent.name,
+        namespace=cloudbeat_agent.namespace,
     ):
         k8s.delete_from_yaml(get_k8s_yaml_objects(file_path=file_path))
     k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
@@ -142,7 +143,7 @@ def clean_test_env(cloudbeat_start_stop):
             )
         except ApiException as not_found:
             print(
-                f"no {relevant_metadata['name']} online - setting up a new one: {not_found}"
+                f"no {relevant_metadata['name']} online - setting up a new one: {not_found}",
             )
             # create resource
 
@@ -192,7 +193,7 @@ def pytest_generate_tests(metafunc):
     """
     if (
         metafunc.definition.get_closest_marker(
-            metafunc.config.getoption("markexpr", default=None)
+            metafunc.config.getoption("markexpr", default=None),
         )
         is None
     ):

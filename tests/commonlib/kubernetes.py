@@ -129,15 +129,17 @@ class KubernetesHelper:
 
         result_dict = {}
         try:
-            current_pod_list = self.core_v1_client.list_namespaced_pod(namespace=namespace)
+            current_pod_list = self.core_v1_client.list_namespaced_pod(
+                namespace=namespace,
+            )
             for pod in current_pod_list.items:
                 if pod_name in pod.metadata.name:
                     result_dict[pod.metadata.name] = pod.spec.containers[0].image
             return result_dict
         except ValueError:
             print("Warning: Cannot retrieve pod image version")
-        finally:
-            return result_dict
+
+        return result_dict
 
     def get_nodes_versions(self) -> dict:
         """
@@ -150,16 +152,16 @@ class KubernetesHelper:
             for node in nodes:
                 nodes_data[node.metadata.name] = node.status.node_info.kubelet_version
         except ValueError:
-            print('Warning: Cannot retrieve nodes data')
-        finally:
-            return nodes_data
+            print("Warning: Cannot retrieve nodes data")
+
+        return nodes_data
 
     def get_service_accounts(self, namespace: str):
         """
         This function retrieves all ServiceAccount instances in the given namespace.
         """
         service_accounts = self.core_v1_client.list_namespaced_service_account(
-            namespace=namespace
+            namespace=namespace,
         )
         return service_accounts
 
@@ -208,7 +210,10 @@ class KubernetesHelper:
         Create the K8S resources described in the given dict.
         """
         return utils.create_from_dict(
-            k8s_client=self.api_client, data=data, namespace=namespace, verbose=verbose
+            k8s_client=self.api_client,
+            data=data,
+            namespace=namespace,
+            verbose=verbose,
         )
 
     def delete_from_yaml(self, yaml_objects_list: list):
@@ -234,7 +239,7 @@ class KubernetesHelper:
                 result_list.append(
                     self.delete_resources(
                         resource_type=yaml_object["kind"], **relevant_metadata
-                    )
+                    ),
                 )
             except ApiException as not_found:
                 print(f"{relevant_metadata['name']} not found {not_found.status}")
@@ -324,7 +329,7 @@ class KubernetesHelper:
         """
         if not isinstance(body, type(patch)):
             raise ValueError(
-                f"Cannot compare {type(body)}: {body} with {type(patch)}: {patch}"
+                f"Cannot compare {type(body)}: {body} with {type(patch)}: {patch}",
             )
 
         if isinstance(body, dict):
@@ -460,7 +465,9 @@ class KubernetesHelper:
         """
 
         lease_info = self.get_resource(
-            resource_type="Lease", name=LEASE_NAME, namespace=namespace
+            resource_type="Lease",
+            name=LEASE_NAME,
+            namespace=namespace,
         )
         lease_holder_identity = lease_info.spec.holder_identity
         holder_id = lease_holder_identity.split("_")[-1]

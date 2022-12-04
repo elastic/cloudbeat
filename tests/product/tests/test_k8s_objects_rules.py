@@ -66,7 +66,7 @@ def test_kube_resource_patch(
     if resource is None:
         raise ValueError(
             f"Could not patch resource type {resource_type}:"
-            f" {relevant_metadata} with patch {resource_body}"
+            f" {relevant_metadata} with patch {resource_body}",
         )
 
     def match_resource(ident_resource):

@@ -41,7 +41,8 @@ def get_ES_evaluation(
 
         for event in events:
             findings_timestamp = datetime.datetime.strptime(
-                getattr(event, "@timestamp"), "%Y-%m-%dT%H:%M:%S.%fZ"
+                getattr(event, "@timestamp"),
+                "%Y-%m-%dT%H:%M:%S.%fZ",
             )
             if findings_timestamp > latest_timestamp:
                 latest_timestamp = findings_timestamp
@@ -87,7 +88,7 @@ def get_logs_evaluation(
                     pod_name=pod_name,
                     namespace=namespace,
                     since_seconds=2,
-                )
+                ),
             )
         except Exception as e:
             print(e)
@@ -95,7 +96,8 @@ def get_logs_evaluation(
 
         for log in logs:
             findings_timestamp = datetime.datetime.strptime(
-                log.time, "%Y-%m-%dT%H:%M:%Sz"
+                log.time,
+                "%Y-%m-%dT%H:%M:%Sz",
             )
             if (findings_timestamp - exec_timestamp).total_seconds() < 0:
                 continue
@@ -161,12 +163,14 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
         for node in nodes:
             start_time_per_agent = time.time()
             query, sort = elastic_client.build_es_query(
-                term={"agent.name": node.metadata.name}
+                term={"agent.name": node.metadata.name},
             )
             while not is_timeout(start_time_per_agent, 10):
                 # keep query ES until the sequence has changed
                 result = elastic_client.get_index_data(
-                    index_name=elastic_client.index, query=query, sort=sort
+                    index_name=elastic_client.index,
+                    query=query,
+                    sort=sort,
                 )
                 doc_src = elastic_client.get_doc_source(data=result)
                 if len(doc_src) == 0:
@@ -245,7 +249,9 @@ def get_findings(elastic_client, config_timeout, match_type):
     result = {}
     while time.time() - start_time < config_timeout:
         current_result = elastic_client.get_index_data(
-            index_name=elastic_client.index, query=query, sort=sort
+            index_name=elastic_client.index,
+            query=query,
+            sort=sort,
         )
         if elastic_client.get_total_value(data=current_result) != 0:
             allure.attach(
