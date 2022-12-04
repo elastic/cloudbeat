@@ -27,9 +27,7 @@ def test_cloudbeat_pod_exist(fixture_data):
     pods, nodes = fixture_data
     pods_count = len(pods)
     nodes_count = len(nodes)
-    assert (
-        pods_count == nodes_count
-    ), f"Pods count is {pods_count}, and nodes count is {nodes_count}"
+    assert pods_count == nodes_count, f"Pods count is {pods_count}, and nodes count is {nodes_count}"
 
 
 @pytest.mark.pre_merge
@@ -50,9 +48,7 @@ def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
     assert len(pods) > 0, "There are no cloudbeat pod instances running in the cluster"
     # Verify that each pod is in running state
     for pod in pods:
-        assert (
-            pod.status.phase == "Running"
-        ), f"The pod '{pod.metadata.name}' status is: '{pod.status.phase}'"
+        assert pod.status.phase == "Running", f"The pod '{pod.metadata.name}' status is: '{pod.status.phase}'"
 
 
 @pytest.mark.pre_merge

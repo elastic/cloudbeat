@@ -127,15 +127,11 @@ def clean_test_env(cloudbeat_start_stop):
     for yml_resource in k8s_resources:
         # check if we already have one - delete if so
         resource_type, metadata = yml_resource["kind"], yml_resource["metadata"]
-        relevant_metadata = {
-            k: metadata[k] for k in ("name", "namespace") if k in metadata
-        }
+        relevant_metadata = {k: metadata[k] for k in ("name", "namespace") if k in metadata}
         try:
             # try getting the resource before deleting it - will raise exception if not found
             k8s_client.get_resource(resource_type=resource_type, **relevant_metadata)
-            k8s_client.delete_resources(
-                resource_type=resource_type, **relevant_metadata
-            )
+            k8s_client.delete_resources(resource_type=resource_type, **relevant_metadata)
             k8s_client.wait_for_resource(
                 resource_type=resource_type,
                 status_list=["DELETED"],
@@ -171,9 +167,7 @@ def test_env(cloudbeat_start_stop):
 
     for yml_resource in k8s_resources:
         resource_type, metadata = yml_resource["kind"], yml_resource["metadata"]
-        relevant_metadata = {
-            k: metadata[k] for k in ("name", "namespace") if k in metadata
-        }
+        relevant_metadata = {k: metadata[k] for k in ("name", "namespace") if k in metadata}
         k8s.wait_for_resource(
             resource_type=resource_type,
             status_list=["RUNNING", "ADDED"],

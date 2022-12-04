@@ -65,9 +65,7 @@ def test_process_api_server(
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
-    assert (
-        evaluation == expected
-    ), f"Rule {rule_tag} verification failed, expected: {expected} actual: {evaluation}"
+    assert evaluation == expected, f"Rule {rule_tag} verification failed, expected: {expected} actual: {evaluation}"
 
 
 register_params(

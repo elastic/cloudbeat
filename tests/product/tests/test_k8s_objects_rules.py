@@ -39,9 +39,7 @@ def test_kube_resource_patch(
     metadata = resource_body["metadata"]
     relevant_metadata = {k: metadata[k] for k in ("name", "namespace") if k in metadata}
     try:
-        resource = k8s_client.get_resource(
-            resource_type=resource_type, **relevant_metadata
-        )
+        resource = k8s_client.get_resource(resource_type=resource_type, **relevant_metadata)
     except TypeError as type_error:
         print(type_error)
         resource = k8s_client.get_resource(
@@ -65,8 +63,7 @@ def test_kube_resource_patch(
     )
     if resource is None:
         raise ValueError(
-            f"Could not patch resource type {resource_type}:"
-            f" {relevant_metadata} with patch {resource_body}",
+            f"Could not patch resource type {resource_type}:" f" {relevant_metadata} with patch {resource_body}",
         )
 
     def match_resource(ident_resource):
@@ -85,10 +82,7 @@ def test_kube_resource_patch(
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
-    assert evaluation == expected, (
-        f"Rule {rule_tag} verification failed, "
-        f"expected: {expected} actual: {evaluation}"
-    )
+    assert evaluation == expected, f"Rule {rule_tag} verification failed, " f"expected: {expected} actual: {evaluation}"
 
 
 register_params(

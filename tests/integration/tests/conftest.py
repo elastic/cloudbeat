@@ -26,10 +26,7 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     """
 
     try:
-        file_path = (
-            Path(__file__).parent
-            / DEPLOY_YML_DICT[f"{cloudbeat_agent.name}_{cloudbeat_agent.cluster_type}"]
-        )
+        file_path = Path(__file__).parent / DEPLOY_YML_DICT[f"{cloudbeat_agent.name}_{cloudbeat_agent.cluster_type}"]
     except KeyError:
         raise Exception(
             f"configuration {cloudbeat_agent.name}_{cloudbeat_agent.cluster_type} is unknown",

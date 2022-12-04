@@ -49,7 +49,11 @@ repos:
     rev: 22.10.0
     hooks:
       - id: black
-        args: [tests]
+        args: [
+          --line-length=120,
+          --check,
+          --diff,
+        ]
 
   - repo: local
     hooks:

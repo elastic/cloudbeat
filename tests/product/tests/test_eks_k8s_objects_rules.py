@@ -48,10 +48,7 @@ def test_eks_kube_objects(
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
-    assert evaluation == expected, (
-        f"Rule {rule_tag} verification failed,"
-        f"expected: {expected}, got: {evaluation}"
-    )
+    assert evaluation == expected, f"Rule {rule_tag} verification failed," f"expected: {expected}, got: {evaluation}"
 
 
 register_params(

@@ -112,10 +112,7 @@ class KubernetesHelper:
             return pods
         current_pod_list = self.core_v1_client.list_namespaced_pod(namespace=namespace)
         for pod in current_pod_list.items:
-            if (
-                pod.metadata.name.startswith(agent_name)
-                and "test" not in pod.metadata.name
-            ):
+            if pod.metadata.name.startswith(agent_name) and "test" not in pod.metadata.name:
                 pods.append(pod)
         return pods
 
@@ -229,17 +226,11 @@ class KubernetesHelper:
             if yaml_object is None:
                 continue
             metadata = yaml_object["metadata"]
-            relevant_metadata = {
-                k: metadata[k] for k in ("name", "namespace") if k in metadata
-            }
+            relevant_metadata = {k: metadata[k] for k in ("name", "namespace") if k in metadata}
             try:
-                self.get_resource(
-                    resource_type=yaml_object["kind"], **relevant_metadata
-                )
+                self.get_resource(resource_type=yaml_object["kind"], **relevant_metadata)
                 result_list.append(
-                    self.delete_resources(
-                        resource_type=yaml_object["kind"], **relevant_metadata
-                    ),
+                    self.delete_resources(resource_type=yaml_object["kind"], **relevant_metadata),
                 )
             except ApiException as not_found:
                 print(f"{relevant_metadata['name']} not found {not_found.status}")
@@ -286,22 +277,15 @@ class KubernetesHelper:
         k8s_resources = get_k8s_yaml_objects(file_path=file_path)
 
         patch_metadata = patch_body["metadata"]
-        patch_relevant_metadata = {
-            k: patch_metadata[k] for k in ("name", "namespace") if k in patch_metadata
-        }
+        patch_relevant_metadata = {k: patch_metadata[k] for k in ("name", "namespace") if k in patch_metadata}
 
         patched_resource = None
 
         for yml_resource in k8s_resources:
             resource_type, metadata = yml_resource["kind"], yml_resource["metadata"]
-            relevant_metadata = {
-                k: metadata[k] for k in ("name", "namespace") if k in metadata
-            }
+            relevant_metadata = {k: metadata[k] for k in ("name", "namespace") if k in metadata}
 
-            if (
-                resource_type != patch_resource_type
-                or relevant_metadata != patch_relevant_metadata
-            ):
+            if resource_type != patch_resource_type or relevant_metadata != patch_relevant_metadata:
                 continue
 
             patched_body = self.patch_resource_body(yml_resource, patch_body)
@@ -400,17 +384,11 @@ class KubernetesHelper:
         """
         # When pods are being created, MODIFIED events are also of interest to check if
         # they successfully transition from ContainerCreating to Running state.
-        if (
-            (resource_type == RESOURCE_POD)
-            and ("ADDED" in status_list)
-            and ("MODIFIED" not in status_list)
-        ):
+        if (resource_type == RESOURCE_POD) and ("ADDED" in status_list) and ("MODIFIED" not in status_list):
             status_list.append("MODIFIED")
 
         kube_watch = watch.Watch()
-        for event in kube_watch.stream(
-            func=self.dispatch_list[resource_type], timeout_seconds=timeout, **kwargs
-        ):
+        for event in kube_watch.stream(func=self.dispatch_list[resource_type], timeout_seconds=timeout, **kwargs):
             if name in event["object"].metadata.name and event["type"] in status_list:
                 if (
                     (resource_type == RESOURCE_POD)

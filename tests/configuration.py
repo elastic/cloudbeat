@@ -52,9 +52,7 @@ elasticsearch.password = os.getenv("ES_PASSWORD", "changeme")
 elasticsearch.basic_auth = (elasticsearch.user, elasticsearch.password)
 elasticsearch.port = os.getenv("ES_PORT", "9200")
 elasticsearch.protocol = os.getenv("ES_PROTOCOL", "http")
-elasticsearch.url = (
-    f"{elasticsearch.protocol}://{elasticsearch.hosts}:{elasticsearch.port}"
-)
+elasticsearch.url = f"{elasticsearch.protocol}://{elasticsearch.hosts}:{elasticsearch.port}"
 elasticsearch.cis_index = os.getenv("CIS_INDEX", "*cloud_security_posture.findings*")
 
 # --- Docker environment definition

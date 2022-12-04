@@ -177,10 +177,7 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
                     continue
                 curr_sequence = doc_src["event"]["sequence"]
 
-                if (
-                    elastic_client.get_total_value(data=result) != 0
-                    and curr_sequence != prev_sequence
-                ):
+                if elastic_client.get_total_value(data=result) != 0 and curr_sequence != prev_sequence:
                     # New cycle findings for this node
                     agents_cycles_count += 1
                     break
