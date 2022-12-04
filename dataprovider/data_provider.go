@@ -15,13 +15,35 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package transformer
+package dataprovider
 
 import (
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/version"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type ResourceTypeMetadata struct {
-	fetching.CycleMetadata
-	Type string
+type CommonDataProvider struct {
+	log             *logp.Logger
+	cfg             *config.Config
+	k8sDataProvider k8sDataProvider
+}
+
+type CommonData struct {
+	clusterId   string
+	nodeId      string
+	versionInfo version.CloudbeatVersionInfo
+}
+
+type CommonK8sData struct {
+	clusterId     string
+	nodeId        string
+	serverVersion version.Version
+}
+
+type CommonDataInterface interface {
+	GetData() CommonData
+	GetResourceId(fetching.ResourceMetadata) string
+	GetVersionInfo() version.CloudbeatVersionInfo
 }
