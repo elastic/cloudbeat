@@ -13,7 +13,7 @@ testdata = ["file", "process", "k8s_object"]
 CONFIG_TIMEOUT = 60
 
 
-@pytest.mark.post_merge_agent
+@pytest.mark.pre_merge_agent
 @pytest.mark.order(1)
 @pytest.mark.dependency()
 def test_agent_pod_exist(fixture_data):
@@ -30,7 +30,7 @@ def test_agent_pod_exist(fixture_data):
     assert pods_count == nodes_count, f"Pods count is {pods_count}, and nodes count is {nodes_count}"
 
 
-@pytest.mark.post_merge_agent
+@pytest.mark.pre_merge_agent
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_agent_pod_exist"])
 def test_agent_pods_running(fixture_data):
@@ -48,7 +48,7 @@ def test_agent_pods_running(fixture_data):
     )
 
 
-@pytest.mark.post_merge_agent
+@pytest.mark.pre_merge_agent
 @pytest.mark.order(3)
 @pytest.mark.dependency(depends=["test_agent_pod_exist"])
 @pytest.mark.parametrize("match_type", testdata)
@@ -64,7 +64,7 @@ def test_elastic_index_exists(elastic_client, match_type):
     assert len(result) > 0, f"The findings of type {match_type} not found"
 
 
-@pytest.mark.post_merge_agent
+@pytest.mark.pre_merge_agent
 @pytest.mark.order(4)
 @pytest.mark.dependency(depends=["test_agent_pods_running"])
 @pytest.mark.skip(reason="Broken")
@@ -98,7 +98,7 @@ def test_cloudbeat_status(k8s, cloudbeat_agent):
             response=response,
             beat_name="cloudbeat",
         )
-        if status != "Running":
+        if not status.startswith("Healthy"):
             results.append(f"Pod: {pod.metadata.name} status: {status}")
 
     assert len(results) == 0, "\n".join(results)
