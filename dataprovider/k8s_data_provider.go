@@ -41,7 +41,7 @@ type k8sDataProvider interface {
 func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) k8sDataProvider {
 	kubeClient, err := providers.KubernetesProvider{}.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
-		log.Errorf("NewK8sDataProvider error in GetClient: %v", err)
+		log.Warnf("Could not create Kubernetes client to provide common data: %v", err)
 	}
 
 	return k8sDataCollector{
@@ -53,7 +53,7 @@ func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) k8sDataProvider {
 
 func (k k8sDataCollector) CollectK8sData(ctx context.Context) CommonK8sData {
 	if k.kubeClient == nil {
-		k.log.Warn("k8s in unavailable")
+		k.log.Debug("Could not collect Kubernetes common data as the client was not provided")
 		return CommonK8sData{}
 	}
 
