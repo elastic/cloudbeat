@@ -15,35 +15,45 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package iam
 
 import (
 	"context"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type ConfigProvider struct {
-	MetadataProvider MetadataProvider
-}
-type ConfigProviderAPI interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error)
+type AccessManagement interface {
+	GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error)
+	GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, error)
 }
 
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg)
-	if err != nil {
-		return awssdk.Config{}, err
-	}
+type Provider struct {
+	log    *logp.Logger
+	client *iam.Client
+}
 
-	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
-	if err != nil {
-		log.Errorf("MetadataProvider.GetMetadata Error: %v, setting AWSConfig region to default - %s", err, DefaultRegion)
-		awsConfig.Region = DefaultRegion
-		return awsConfig, nil
-	}
+type RolePolicyInfo struct {
+	PolicyARN string
+	iam.GetRolePolicyOutput
+}
 
-	awsConfig.Region = metadata.Region
-	return awsConfig, nil
+type PasswordPolicy struct {
+	ReusePreventionCount int
+	RequireLowercase     bool
+	RequireUppercase     bool
+	RequireNumbers       bool
+	RequireSymbols       bool
+	MaxAgeDays           int
+	MinimumLength        int
+}
+
+func NewIAMProvider(log *logp.Logger, cfg aws.Config) *Provider {
+	svc := iam.NewFromConfig(cfg)
+	return &Provider{
+		log:    log,
+		client: svc,
+	}
 }

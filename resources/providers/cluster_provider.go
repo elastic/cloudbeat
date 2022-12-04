@@ -22,11 +22,12 @@ import (
 	"fmt"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
 )
 
 type ClusterNameProviderAPI interface {
-	GetClusterName(ctx context.Context, cfg *config.Config) (string, error)
+	GetClusterName(ctx context.Context, cfg *config.Config, log *logp.Logger) (string, error)
 }
 
 type ClusterNameProvider struct {
@@ -37,12 +38,12 @@ type ClusterNameProvider struct {
 	AwsConfigProvider             awslib.ConfigProviderAPI
 }
 
-func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg *config.Config) (string, error) {
+func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg *config.Config, log *logp.Logger) (string, error) {
 	switch cfg.Type {
 	case config.InputTypeVanillaK8s:
 		return provider.KubernetesClusterNameProvider.GetClusterName(cfg, provider.KubeClient)
 	case config.InputTypeEks:
-		awsConfig, err := provider.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AWSConfig)
+		awsConfig, err := provider.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AWSConfig, log)
 		if err != nil {
 			return "", fmt.Errorf("failed to initialize aws configuration for identifying the cluster name: %v", err)
 		}

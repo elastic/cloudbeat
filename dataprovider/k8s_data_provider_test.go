@@ -40,7 +40,7 @@ type clusterNameProviderMock struct {
 	clusterName string
 }
 
-func (c clusterNameProviderMock) GetClusterName(_ context.Context, _ *config.Config) (string, error) {
+func (c clusterNameProviderMock) GetClusterName(ctx context.Context, cfg *config.Config, log *logp.Logger) (string, error) {
 	if c.clusterName == "error" {
 		return "", os.ErrNotExist
 	}
