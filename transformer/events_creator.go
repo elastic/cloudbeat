@@ -74,6 +74,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
 	}
 	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
+	clusterName := t.commonData.GetClusterName()
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
@@ -93,6 +94,13 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
 				"cloudbeat":           t.commonData.GetVersionInfo(),
 			},
+		}
+
+		if clusterName != "" {
+			_, err := event.Fields.Put("orchestrator.cluster.name", clusterName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to add cluster name to object: %v", err)
+			}
 		}
 
 		events = append(events, event)

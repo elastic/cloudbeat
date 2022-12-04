@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.16.7
+	github.com/aws/aws-sdk-go-v2 v1.17.1
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
@@ -34,6 +34,8 @@ require (
 require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.7
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.7
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.23.18
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.66.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.17.8
 	github.com/aws/aws-sdk-go-v2/service/ecrpublic v1.13.8
 	github.com/aws/aws-sdk-go-v2/service/eks v1.21.4
@@ -55,14 +57,13 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.15.12 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.14 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.8 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.25 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.19 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.14 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.36.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.18.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.19 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.10 // indirect
-	github.com/aws/smithy-go v1.12.0 // indirect
+	github.com/aws/smithy-go v1.13.4 // indirect
 	github.com/dschmidt/go-layerfs v0.1.0 // indirect
 	github.com/elastic/elastic-agent-shipper-client v0.4.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
@@ -129,7 +130,7 @@ require (
 	golang.org/x/term v0.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/klog/v2 v2.60.1 // indirect
+	k8s.io/klog/v2 v2.60.1
 	k8s.io/kube-openapi v0.0.0-20220328201542-3ee0da9b0b42 // indirect
 	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9 // indirect
 	sigs.k8s.io/json v0.0.0-20211208200746-9f7c6b3444d2 // indirect

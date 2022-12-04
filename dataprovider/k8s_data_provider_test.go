@@ -36,8 +36,17 @@ var (
 	cfg    = &config.Config{}
 )
 
-func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
+type clusterNameProviderMock struct {
+	clusterName string
+}
 
+func (c clusterNameProviderMock) GetClusterName(_ context.Context, _ *config.Config) (string, error) {
+	return c.clusterName, nil
+}
+
+func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
+	clusterName := "name"
+	clusterNameProvider := clusterNameProviderMock{clusterName}
 	tests := []struct {
 		collector k8sDataCollector
 		name      string
@@ -51,20 +60,23 @@ func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 				serverVersion: version.Version{
 					Version: ".",
 				},
+				clusterName: clusterName,
 			},
 			collector: k8sDataCollector{
-				kubeClient: k8sFake.NewSimpleClientset(),
-				log:        logger,
-				cfg:        cfg,
+				kubeClient:          k8sFake.NewSimpleClientset(),
+				log:                 logger,
+				cfg:                 cfg,
+				clusterNameProvider: clusterNameProvider,
 			},
 		},
 		{
 			name: "test k8s common data with no k8s connection",
 			want: nil,
 			collector: k8sDataCollector{
-				kubeClient: nil,
-				log:        logger,
-				cfg:        cfg,
+				kubeClient:          nil,
+				log:                 logger,
+				cfg:                 cfg,
+				clusterNameProvider: clusterNameProvider,
 			},
 		},
 	}

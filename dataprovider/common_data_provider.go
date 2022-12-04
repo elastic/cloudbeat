@@ -52,6 +52,7 @@ func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInte
 		cm.versionInfo.Kubernetes = k8sCommonData.serverVersion
 		cm.clusterId = k8sCommonData.clusterId
 		cm.nodeId = k8sCommonData.nodeId
+		cm.clusterName = k8sCommonData.clusterName
 	}
 
 	return cm, nil
@@ -74,4 +75,8 @@ func (cd CommonData) GetData() CommonData {
 
 func (cd CommonData) GetVersionInfo() version.CloudbeatVersionInfo {
 	return cd.versionInfo
+}
+
+func (cd CommonData) GetClusterName() string {
+	return cd.clusterId
 }

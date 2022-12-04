@@ -125,15 +125,19 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
+			clusterName := "test_cluster_name"
 			s.dataProviderMock.EXPECT().GetResourceId(mock.Anything).Return("test_resource_id")
 			s.dataProviderMock.EXPECT().GetVersionInfo().Return(version.CloudbeatVersionInfo{
 				Version: version.Version{Version: "test_version"},
 			})
-			
+			s.dataProviderMock.EXPECT().GetClusterName().Return(clusterName)
+
 			transformer := NewTransformer(s.log, &s.dataProviderMock, testIndex)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
+				eventClusterName, _ := event.GetValue("orchestrator.cluster.name")
+				s.Equal(clusterName, eventClusterName)
 				resource := event.Fields["resource"].(fetching.ResourceFields)
 				s.NotEmpty(event.Timestamp, `event timestamp is missing`)
 				s.NotEmpty(event.Fields["result"], "event result is missing")
@@ -146,6 +150,51 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(event.Fields["event"], "resource event is missing")
 				s.NotEmpty(event.Fields["cloudbeat"], "cloudbeat's version info is missing")
 				s.Regexp(regexp.MustCompile("^Rule \".*\": (passed|failed)$"), event.Fields["message"], "event message is not correct")
+			}
+		})
+	}
+}
+func (s *EventsCreatorTestSuite) TestTransformer_EmptyClusterName() {
+	tests := []testAttr{
+		{
+			name: "All events propagated as expected",
+			input: evaluator.EventData{
+				RuleResult: opaResults,
+				ResourceInfo: fetching.ResourceInfo{
+					Resource:      fetcherResult,
+					CycleMetadata: fetching.CycleMetadata{},
+				},
+			},
+		},
+		{
+			name: "Events should not be created due zero findings",
+			input: evaluator.EventData{
+				RuleResult: evaluator.RuleResult{
+					Findings: []evaluator.Finding{},
+					Metadata: evaluator.Metadata{},
+					Resource: nil,
+				},
+				ResourceInfo: fetching.ResourceInfo{
+					Resource:      fetcherResult,
+					CycleMetadata: fetching.CycleMetadata{},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			s.dataProviderMock.EXPECT().GetResourceId(mock.Anything).Return("test_resource_id")
+			s.dataProviderMock.EXPECT().GetVersionInfo().Return(version.CloudbeatVersionInfo{
+				Version: version.Version{Version: "test_version"},
+			})
+			s.dataProviderMock.EXPECT().GetClusterName().Return("")
+
+			transformer := NewTransformer(s.log, &s.dataProviderMock, testIndex)
+			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
+
+			for _, event := range generatedEvents {
+				s.False(event.Fields.HasKey("orchestrator.cluster.name"))
 			}
 		})
 	}
