@@ -166,20 +166,6 @@ func (s *EventsCreatorTestSuite) TestTransformer_EmptyClusterName() {
 				},
 			},
 		},
-		{
-			name: "Events should not be created due zero findings",
-			input: evaluator.EventData{
-				RuleResult: evaluator.RuleResult{
-					Findings: []evaluator.Finding{},
-					Metadata: evaluator.Metadata{},
-					Resource: nil,
-				},
-				ResourceInfo: fetching.ResourceInfo{
-					Resource:      fetcherResult,
-					CycleMetadata: fetching.CycleMetadata{},
-				},
-			},
-		},
 	}
 
 	for _, tt := range tests {

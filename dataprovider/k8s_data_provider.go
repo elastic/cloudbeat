@@ -89,7 +89,7 @@ func (k k8sDataCollector) getClusterId(ctx context.Context) string {
 func (k k8sDataCollector) getClusterName(ctx context.Context) string {
 	clusterName, err := k.clusterNameProvider.GetClusterName(ctx, k.cfg)
 	if err != nil {
-		k.log.Errorf("getClusterId error in Namespaces get: %v", err)
+		k.log.Errorf("cloud not identify the cluster name: %v", err)
 		return ""
 	}
 	return clusterName

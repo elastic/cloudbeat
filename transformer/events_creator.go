@@ -102,13 +102,6 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 			}
 		}
 
-		if clusterName != "" {
-			_, err := event.Fields.Put("orchestrator.cluster.name", clusterName)
-			if err != nil {
-				return nil, fmt.Errorf("failed to add cluster name to object: %v", err)
-			}
-		}
-
 		events = append(events, event)
 	}
 

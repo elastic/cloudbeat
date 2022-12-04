@@ -31,8 +31,10 @@ type EKSClusterNameProvider struct {
 }
 
 const (
-	asgPattern     = "^kubernetes.io/cluster/(.*)$"
-	clusterNameTag = "eks:cluster-name"
+	asgPattern                               = "^kubernetes.io/cluster/(.*)$"
+	clusterNameTag                           = "eks:cluster-name"
+	numberOfAutoScalingGroups                = 100
+	numberOfIterationsInEachAutoScalingGroup = 100
 )
 
 var (
@@ -111,8 +113,15 @@ func (provider EKSClusterNameProvider) getClusterNameFromAutoscalingGroup(ctx co
 
 		// ClusterName will be found in the autoscaling group tag with "owned" value.
 		// Find the autoscaling group that has this instance, then get the cluster name from the tag of that group
-		for _, autoscalingGroup := range r.AutoScalingGroups {
-			for _, instance := range autoscalingGroup.Instances {
+		// We wish to limit the search and preform a best effort search, therefore we will limit the number of iterations
+		for scalingGroupNumber, autoscalingGroup := range r.AutoScalingGroups {
+			if scalingGroupNumber > numberOfAutoScalingGroups {
+				break
+			}
+			for numberOfInstance, instance := range autoscalingGroup.Instances {
+				if numberOfInstance > numberOfIterationsInEachAutoScalingGroup {
+					break
+				}
 				if *instance.InstanceId == instanceId {
 					for _, tag := range autoscalingGroup.Tags {
 						stringifyTag := *tag.Key
