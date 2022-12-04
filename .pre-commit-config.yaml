@@ -14,7 +14,6 @@ repos:
 
       ## Security
       - id: detect-private-key
-      - id: detect-aws-credentials
 
   - repo: https://github.com/asottile/add-trailing-comma
     rev: v2.3.0
