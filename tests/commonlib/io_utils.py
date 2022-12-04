@@ -238,7 +238,7 @@ class FsClient:
             r_file = yaml.safe_load(file)
 
         # Get process configuration arguments
-        command = r_file["spec"]["containers"][0]["command"]
+        arguments = r_file["spec"]["containers"][0]["command"]
 
         # Collect set/unset keys and values from the dictionary
         set_dict = dictionary.get("set", {})
@@ -247,28 +247,21 @@ class FsClient:
         # Cycle across set items from the dictionary
         for s_key, s_value in set_dict.items():
             # Find if set key exists already in the configuration arguments
-            if any(s_key == x.split("=")[0] for x in command):
+            if any(s_key == x.split("=")[0] for x in arguments):
                 # Replace the value of the key with the new value from the set items
-                command = list(
-                    map(
-                        lambda x, s_key, s_value: x.replace(x, s_key + "=" + s_value)
-                        if s_key == x.split("=")[0]
-                        else x,
-                        command,
-                    ),
-                )
+                arguments = [f"{s_key}={s_value}" if arg.split("=")[0] == s_key else arg for arg in arguments]
             else:
                 # In case of non-existing key in the configuration arguments,
                 # append the key/value from set items
-                command.append(s_key + "=" + s_value)
+                arguments.append(f"{s_key}={s_value}")
 
         # Cycle across unset items from the dictionary
         for us_key in unset_list:
             # Filter out the unset keys from the configuration arguments
-            command = [x for x in command if us_key != x.split("=")[0]]
+            arguments = [x for x in arguments if us_key != x.split("=")[0]]
 
         # Override the configuration arguments with the newly built configuration arguments
-        r_file["spec"]["containers"][0]["command"] = command
+        r_file["spec"]["containers"][0]["command"] = arguments
 
         # Write the newly built configuration arguments
         with current_resource.open(mode="w", encoding="utf-8") as file:
