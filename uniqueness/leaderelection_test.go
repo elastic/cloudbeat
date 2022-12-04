@@ -15,13 +15,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package leaderelection
+package uniqueness
 
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/hashicorp/go-uuid"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 	v1 "k8s.io/api/coordination/v1"
@@ -31,6 +34,7 @@ import (
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
 	"os"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -41,7 +45,7 @@ type LeaderElectionTestSuite struct {
 	suite.Suite
 	log        *logp.Logger
 	wg         *sync.WaitGroup
-	manager    *Manager
+	manager    *LeaderelectionManager
 	opts       goleak.Option
 	kubeClient *k8sFake.Clientset
 }
@@ -60,7 +64,7 @@ func (s *LeaderElectionTestSuite) SetupTest() {
 	s.log = logp.NewLogger("cloudbeat_leader_election_test_suite")
 	s.opts = goleak.IgnoreCurrent()
 	s.kubeClient = k8sFake.NewSimpleClientset()
-	s.manager = &Manager{
+	s.manager = &LeaderelectionManager{
 		log:        s.log,
 		leader:     nil,
 		wg:         s.wg,
@@ -76,6 +80,45 @@ func (s *LeaderElectionTestSuite) TearDownTest() {
 
 	// Verify no goroutines are leaking. Safest to keep this on top of the function.
 	goleak.VerifyNone(s.T(), s.opts)
+}
+
+func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
+	mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+	mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(s.kubeClient, nil)
+
+	type args struct {
+		log         *logp.Logger
+		cfg         *config.Config
+		k8sProvider providers.KubernetesClientGetter
+	}
+	tests := []struct {
+		name string
+		args args
+		want Manager
+	}{
+		{
+			name: "Should receive the leader election manager",
+			args: args{
+				log:         s.log,
+				cfg:         &config.Config{},
+				k8sProvider: mockedKubernetesClientGetter,
+			},
+			want: &LeaderelectionManager{},
+		},
+		{
+			name: "k8s client couldn't established - should receive the default unique manager",
+			args: args{
+				log:         s.log,
+				cfg:         &config.Config{},
+				k8sProvider: providers.KubernetesProvider{},
+			},
+			want: &DefaultUniqueManager{},
+		},
+	}
+	for _, tt := range tests {
+		got := NewLeaderElector(tt.args.log, tt.args.cfg, tt.args.k8sProvider)
+		s.Truef(reflect.TypeOf(got) == reflect.TypeOf(tt.want), "NewLeaderElector() = %v, want %v", got, tt.want)
+	}
 }
 
 func (s *LeaderElectionTestSuite) TestManager_RunWaitForLeader() {
