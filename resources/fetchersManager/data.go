@@ -34,8 +34,9 @@ type Data struct {
 	timeout  time.Duration
 	interval time.Duration
 	fetchers FetchersRegistry
-	wg       sync.WaitGroup
-	stop     chan struct{}
+	// Wait for completion of fetcher's fetchSingle
+	wg   sync.WaitGroup
+	stop chan struct{}
 }
 
 // NewData returns a new Data instance.
