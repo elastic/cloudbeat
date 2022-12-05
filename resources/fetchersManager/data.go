@@ -34,8 +34,9 @@ type Data struct {
 	timeout  time.Duration
 	interval time.Duration
 	fetchers FetchersRegistry
-	wg       *sync.WaitGroup
-	stop     chan struct{}
+	// Wait for completion of fetcher's fetchSingle
+	wg   sync.WaitGroup
+	stop chan struct{}
 }
 
 // NewData returns a new Data instance.
@@ -47,6 +48,7 @@ func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fe
 		timeout:  timeout,
 		interval: interval,
 		fetchers: fetchers,
+		wg:       sync.WaitGroup{},
 		stop:     make(chan struct{}),
 	}, nil
 }
@@ -79,7 +81,6 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 func (d *Data) fetchIteration(ctx context.Context) {
 	d.log.Infof("Manager triggered fetching for %d fetchers", len(d.fetchers.Keys()))
 
-	d.wg = &sync.WaitGroup{}
 	start := time.Now()
 
 	seq := time.Now().Unix()
