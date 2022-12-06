@@ -290,7 +290,7 @@ jobs:
         id: run_tests
         run: |
           just run-tests ${{ matrix.test-target }}
-          
+
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v2
