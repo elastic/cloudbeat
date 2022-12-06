@@ -45,7 +45,6 @@ spec:
         readOnly: false
 
   restartPolicy: Never
-  # nodeName: kind-multi-control-plane
   tolerations:
   - effect: NoSchedule
     key: node-role.kubernetes.io/control-plane

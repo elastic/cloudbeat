@@ -101,7 +101,6 @@ def test_cloudbeat_status(k8s, cloudbeat_agent):
         response = k8s.pod_exec(name=pod.metadata.name,
                                 namespace=cloudbeat_agent.namespace,
                                 command=exec_command)
-        print(response)
         status = FsClient.get_beat_status_from_json(response=response,
                                                     beat_name='cloudbeat')
         if 'Healthy' not in status:

@@ -50,24 +50,24 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     # see more details https://github.com/elastic/cloudbeat/pull/422
     time.sleep(10)
     yield k8s, api_client, cloudbeat_agent
-#     k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
-#     k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
+    k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
+    k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
 
-#     lease_resources = [{
-#         'name': 'cloudbeat-cluster-leader',
-#         'namespace': cloudbeat_agent.namespace
-#     },
-#         {
-#             'name': 'elastic-agent-cluster-leader',
-#             'namespace': cloudbeat_agent.namespace
-#     }
-#     ]
-#     # Delete lease resources
-#     for resource in lease_resources:
-#         try:
-#             k8s.delete_resources(resource_type='Lease', **resource)
-#         except ApiException:
-#             continue
+    lease_resources = [{
+        'name': 'cloudbeat-cluster-leader',
+        'namespace': cloudbeat_agent.namespace
+    },
+        {
+            'name': 'elastic-agent-cluster-leader',
+            'namespace': cloudbeat_agent.namespace
+    }
+    ]
+    # Delete lease resources
+    for resource in lease_resources:
+        try:
+            k8s.delete_resources(resource_type='Lease', **resource)
+        except ApiException:
+            continue
 
 
 @pytest.fixture(name='fixture_data')
