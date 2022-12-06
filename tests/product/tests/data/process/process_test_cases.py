@@ -972,15 +972,15 @@ api_server_rules = [
     *cis_1_2_6,
     *cis_1_2_7,
     *cis_1_2_8,
-    *cis_1_2_9[:1],
     *skip_param_case(
-        skip_list=[*cis_1_2_9[1:], *cis_1_2_10],
+        skip_list=[*cis_1_2_9],
         data_to_report=SkipReportData(
             url_title="security-team: #5128",
             url_link="https://github.com/elastic/security-team/issues/5128",
             skip_reason="Known issue: connection errors",
         ),
     ),
+    *cis_1_2_10,
     *cis_1_2_11,
     *cis_1_2_12,
     *cis_1_2_13,
