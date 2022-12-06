@@ -13,9 +13,11 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
   CONTAINER_SUFFIX: ${{ github.run_id }}
   TEST_TARGETS_DEFAULT: '[\"pre_merge\"]'
+  AWS_REGION: eu-west-2
+  REPORTS_DIR: tests/allure/results/
+  KUBE_NAMESPACE: kube-system
 
 permissions:
   actions: read
@@ -23,18 +25,41 @@ permissions:
   statuses: read
 
 jobs:
+  Setup:
+    runs-on: ubuntu-20.04
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    timeout-minutes: 15
+    steps:
+    - id: Default
+      env:
+        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+      run: |
+        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+
+    - id: Dispatch
+      if: github.event_name == 'workflow_dispatch'
+      env:
+        TEST_TARGETS: ${{ github.event.inputs.test-targets }}
+      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+
+    - id: set-matrix
+      run: echo "::set-output name=matrix::${{ env.TEST_MATRIX}}"
+
   Test_Matrix:
-    runs-on: ubuntu-latest
+    needs: ['Setup']
     strategy:
       fail-fast: false
       matrix:
+        # test-target: ${{fromJson(needs.Setup.outputs.matrix)}}
         include:
-          test-target: pre_merge
-          range: ''
-          values_file: tests/deploy/values/ci-eks.yml
-          k8s_context: "test-eks-config-1"
+          - test-target: pre_merge
+            range: ''
+            values_file: tests/deploy/values/ci-eks.yml
+            k8s_context: "test-eks-config-1"        
     name: ${{ matrix.test-target }}-tests
-    timeout-minutes: 20
+    runs-on: ubuntu-20.04
+    timeout-minutes: 90
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -46,9 +71,10 @@ jobs:
       - name: Get kubeconfig and select context
         if: success()
         run: |
-          echo "$KUBE_CONFIG_DATA" | base64 -d > /tmp/config
-          export KUBECONFIG=/tmp/config
+          aws eks update-kubeconfig --name ${{ matrix.k8s_context }} --region ${{ env.AWS_REGION }} --alias ${{ matrix.k8s_context }}
+          echo "KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)" >> $GITHUB_ENV
           kubectl config use-context ${{ matrix.k8s_context }}
+          kubectl config set-context --current --namespace=${{ env.KUBE_NAMESPACE }}
 
       - name: Deploy tests Helm chart
         id: deploy_helm
@@ -60,7 +86,7 @@ jobs:
         id: run_tests
         if: success()
         run: |
-          just run-tests
+          just run-tests ${{ matrix.test-target }} ${{ matrix.k8s_context }}
 
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v3
@@ -70,20 +96,22 @@ jobs:
 
       - name: Copy test results
         id: copy_results
-        if: success()
+        if: always()
         run: |
-          NODE=$(kubectl get po test-pod-v1 -n kube-system -o jsonpath='{.spec.nodeName}')
-          RESULTS_POD=$(kubectl get po -n kube-system -l k8s-app=eks-results --field-selector spec.nodeName=$NODE -o jsonpath='{.items[*].metadata.name}')
-          kubectl cp $(RESULTS_POD):/reports tests/allure/results/ -n kube-system
+          NODE=$(kubectl get po test-pod-v1 -o jsonpath='{.spec.nodeName}')
+          RESULTS_POD=$(kubectl get po -l k8s-app=eks-results --field-selector spec.nodeName=$NODE -o jsonpath='{.items[*].metadata.name}')
+          kubectl cp $RESULTS_POD:/reports ${{ env.REPORTS_DIR }}
+          kubectl exec $RESULTS_POD -- sh -c 'rm -rf /reports/*'
 
-      # - name: Upload Test Results
-      #   if: always()
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: allure_results-${{ matrix.test-target}}
-      #     path: tests/allure/results/
+      - name: Upload Test Results
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: allure_results-${{ matrix.test-target}}
+          path: ${{ env.REPORTS_DIR }}
 
-      # - name: Purge tests environment
-      #   id: purge_helm
-      #   run: |
-      #     just purge-tests
+      - name: Purge tests environment
+        id: purge_helm
+        if: always()
+        run: |
+          just purge-tests
