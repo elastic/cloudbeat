@@ -20,10 +20,11 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -246,4 +247,21 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	}
 
 	s.Empty(results)
+}
+
+func (s *DataTestSuite) TestDataStop() {
+	fetcherVal := 4
+	interval := 5 * time.Second
+	fetcherName := "not_run_fetcher"
+	fetcherConditionName := "false_condition"
+
+	f := newNumberFetcher(fetcherVal, s.resourceCh, s.wg)
+	c := newBoolFetcherCondition(false, fetcherConditionName)
+	err := s.registry.Register(fetcherName, f, c)
+	s.NoError(err)
+
+	d, err := NewData(s.log, interval, timeout, s.registry)
+	s.NoError(err)
+
+	d.Stop()
 }
