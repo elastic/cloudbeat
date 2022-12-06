@@ -333,13 +333,6 @@ cis_4_1_6 = [
     ("CIS 4.1.6", "chown", "root:root", "/etc/kubernetes/kubelet.conf", "passed"),
 ]
 
-cis_4_1_6 = [
-    ("CIS 4.1.6", "chown", "root:daemon", "/etc/kubernetes/kubelet.conf", "failed"),
-    ("CIS 4.1.6", "chown", "daemon:root", "/etc/kubernetes/kubelet.conf", "failed"),
-    ("CIS 4.1.6", "chown", "daemon:daemon", "/etc/kubernetes/kubelet.conf", "failed"),
-    ("CIS 4.1.6", "chown", "root:root", "/etc/kubernetes/kubelet.conf", "passed"),
-]
-
 cis_4_1_9 = [
     ("CIS 4.1.9", "chmod", "0700", "/var/lib/kubelet/config.yaml", "failed"),
     ("CIS 4.1.9", "chmod", "0644", "/var/lib/kubelet/config.yaml", "passed"),
