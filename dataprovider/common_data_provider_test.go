@@ -15,11 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package transformer
+package dataprovider
 
 import (
 	"context"
-	"os"
+	"github.com/elastic/cloudbeat/version"
+	"github.com/stretchr/testify/mock"
 	"testing"
 
 	"github.com/elastic/cloudbeat/config"
@@ -28,45 +29,63 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
-
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sFake "k8s.io/client-go/kubernetes/fake"
 )
 
 var bgCtx = context.Background()
 
 func TestCommonDataProvider_FetchCommonData(t *testing.T) {
-	cdProvider := CommonDataProvider{
-		log:        logp.NewLogger("cloudbeat_common_data_provider_test"),
-		kubeClient: k8sFake.NewSimpleClientset(),
-		cfg:        &config.Config{},
-	}
-
 	type args struct {
 		ctx context.Context
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    CommonData
-		wantErr bool
+		name          string
+		args          args
+		want          CommonK8sData
+		wantErr       bool
+		k8sCommonData CommonK8sData
 	}{
 		{
 			name: "test common data",
 			args: args{
 				ctx: bgCtx,
 			},
-			want: CommonData{
+			want: CommonK8sData{
 				clusterId: "testing_namespace_uid",
 				nodeId:    "testing_node_uid",
+				serverVersion: version.Version{
+					Version: "testing_version",
+				},
+			},
+			k8sCommonData: CommonK8sData{
+				clusterId: "testing_namespace_uid",
+				nodeId:    "testing_node_uid",
+				serverVersion: version.Version{
+					Version: "testing_version",
+				},
 			},
 			wantErr: false,
 		},
+		{
+			name: "test common data without k8s",
+			args: args{
+				ctx: bgCtx,
+			},
+			want: CommonK8sData{
+				clusterId:     "",
+				nodeId:        "",
+				serverVersion: version.Version{},
+			},
+			k8sCommonData: CommonK8sData{},
+			wantErr:       false,
+		},
 	}
-	adjustK8sCluster(t, &cdProvider)
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			k8sDataProviderMock := &mockK8sDataProvider{}
+			k8sDataProviderMock.EXPECT().CollectK8sData(mock.Anything).Return(&tt.k8sCommonData)
+			cdProvider := createCommonDataProvider(k8sDataProviderMock)
+
 			got, err := cdProvider.FetchCommonData(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FetchCommonData() error = %v, wantErr %v", err, tt.wantErr)
@@ -75,6 +94,8 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 
 			assert.Equal(t, tt.want.clusterId, got.GetData().clusterId, "commonData clusterId is not correct")
 			assert.Equal(t, tt.want.nodeId, got.GetData().nodeId, "commonData nodeId is not correct")
+			assert.Equal(t, tt.want.serverVersion.Version, got.GetData().versionInfo.Kubernetes.Version, "k8s server version is empty")
+			assert.NotEmpty(t, got.GetData().versionInfo.Version, "Beat's version is empty")
 		})
 	}
 }
@@ -153,35 +174,10 @@ func TestCommonData_GetResourceId(t *testing.T) {
 	}
 }
 
-func adjustK8sCluster(t *testing.T, cdProvider *CommonDataProvider) {
-	// libbeat DiscoverKubernetesNode performs a fallback to environment variable NODE_NAME
-	os.Setenv("NODE_NAME", "testing_node")
-	// Need to add services
-	namespace := &v1.Namespace{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Namespace",
-			APIVersion: "apps/v1beta1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "kube-system",
-			UID:  "testing_namespace_uid",
-		},
+func createCommonDataProvider(mock *mockK8sDataProvider) CommonDataProvider {
+	return CommonDataProvider{
+		log:             logp.NewLogger("cloudbeat_common_data_provider_test"),
+		cfg:             &config.Config{},
+		k8sDataProvider: mock,
 	}
-
-	node := &v1.Node{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Node",
-			APIVersion: "apps/v1beta1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "testing_node",
-			UID:  "testing_node_uid",
-		},
-	}
-
-	_, err := cdProvider.kubeClient.CoreV1().Namespaces().Create(ctx, namespace, metav1.CreateOptions{})
-	assert.NoError(t, err)
-
-	_, err = cdProvider.kubeClient.CoreV1().Nodes().Create(ctx, node, metav1.CreateOptions{})
-	assert.NoError(t, err)
 }
