@@ -18,17 +18,17 @@
 package conditions
 
 import (
-	"github.com/elastic/cloudbeat/leaderelection"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type LeaseFetcherCondition struct {
 	log      *logp.Logger
-	provider leaderelection.ElectionManager
+	provider uniqueness.Manager
 }
 
-func NewLeaseFetcherCondition(log *logp.Logger, le leaderelection.ElectionManager) fetching.Condition {
+func NewLeaseFetcherCondition(log *logp.Logger, le uniqueness.Manager) fetching.Condition {
 	return &LeaseFetcherCondition{
 		log:      log,
 		provider: le,

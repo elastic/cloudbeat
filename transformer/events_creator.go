@@ -24,6 +24,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
+	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -41,7 +42,7 @@ const (
 type Transformer struct {
 	log        *logp.Logger
 	index      string
-	commonData CommonDataInterface
+	commonData dataprovider.CommonDataInterface
 }
 
 type ECSEvent struct {
@@ -54,7 +55,7 @@ type ECSEvent struct {
 	Type     []string  `json:"type"`
 }
 
-func NewTransformer(log *logp.Logger, cd CommonDataInterface, index string) Transformer {
+func NewTransformer(log *logp.Logger, cd dataprovider.CommonDataInterface, index string) Transformer {
 	return Transformer{
 		log:        log,
 		index:      index,

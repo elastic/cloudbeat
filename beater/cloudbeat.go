@@ -20,11 +20,11 @@ package beater
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"time"
 
-	"github.com/elastic/cloudbeat/leaderelection"
-
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/launcher"
 	"github.com/elastic/cloudbeat/pipeline"
@@ -32,6 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/transformer"
+	"github.com/elastic/cloudbeat/uniqueness"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/common/reload"
@@ -57,7 +58,7 @@ type cloudbeat struct {
 	transformer transformer.Transformer
 	log         *logp.Logger
 	resourceCh  chan fetching.ResourceInfo
-	leader      leaderelection.ElectionManager
+	leader      uniqueness.Manager
 }
 
 func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
@@ -94,11 +95,7 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
-	le, err := leaderelection.NewLeaderElector(log, c)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
+	le := uniqueness.NewLeaderElector(log, c, &providers.KubernetesProvider{})
 
 	fetchersRegistry, err := initRegistry(log, c, resourceCh, le)
 	if err != nil {
@@ -121,12 +118,7 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
-	commonDataProvider, err := transformer.NewCommonDataProvider(log, c)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-
+	commonDataProvider := dataprovider.NewCommonDataProvider(log, c)
 	commonData, err := commonDataProvider.FetchCommonData(ctx)
 	if err != nil {
 		cancel()
@@ -152,6 +144,7 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 // Run starts cloudbeat.
 func (bt *cloudbeat) Run(b *beat.Beat) error {
 	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it.")
+
 	if err := bt.leader.Run(bt.ctx); err != nil {
 		return err
 	}
@@ -211,7 +204,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le leaderelection.ElectionManager) (fetchersManager.FetchersRegistry, error) {
+func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (fetchersManager.FetchersRegistry, error) {
 	registry := fetchersManager.NewFetcherRegistry(log)
 
 	parsedList, err := fetchersManager.Factories.ParseConfigFetchers(log, cfg, ch)

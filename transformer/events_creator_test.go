@@ -20,6 +20,9 @@ package transformer
 import (
 	"context"
 	"encoding/json"
+	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/version"
+	"github.com/stretchr/testify/mock"
 	"io"
 	"os"
 	"regexp"
@@ -63,16 +66,12 @@ var fetcherResult = fetchers.FSResource{
 var (
 	opaResults evaluator.RuleResult
 	ctx        = context.Background()
-	cd         = CommonData{
-		clusterId: "test-cluster-id",
-		nodeId:    "test-node-id",
-	}
 )
 
 type EventsCreatorTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
+	log              *logp.Logger
+	dataProviderMock dataprovider.MockCommonDataInterface
 }
 
 func TestSuite(t *testing.T) {
@@ -92,6 +91,8 @@ func (s *EventsCreatorTestSuite) SetupSuite() {
 		s.log.Errorf("Could not parse JSON file: %v", err)
 		return
 	}
+
+	s.dataProviderMock = dataprovider.MockCommonDataInterface{}
 }
 
 func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
@@ -124,7 +125,12 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
-			transformer := NewTransformer(s.log, cd, testIndex)
+			s.dataProviderMock.EXPECT().GetResourceId(mock.Anything).Return("test_resource_id")
+			s.dataProviderMock.EXPECT().GetVersionInfo().Return(version.CloudbeatVersionInfo{
+				Version: version.Version{Version: "test_version"},
+			})
+			
+			transformer := NewTransformer(s.log, &s.dataProviderMock, testIndex)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
@@ -138,6 +144,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(resource.ID, "resource ID is missing")
 				s.NotEmpty(resource.Type, "resource  type is missing")
 				s.NotEmpty(event.Fields["event"], "resource event is missing")
+				s.NotEmpty(event.Fields["cloudbeat"], "cloudbeat's version info is missing")
 				s.Regexp(regexp.MustCompile("^Rule \".*\": (passed|failed)$"), event.Fields["message"], "event message is not correct")
 			}
 		})
