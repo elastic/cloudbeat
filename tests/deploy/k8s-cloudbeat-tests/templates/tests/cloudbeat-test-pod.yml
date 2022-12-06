@@ -45,7 +45,9 @@ spec:
         readOnly: false
 
   restartPolicy: Never
+  {{ if eq .Values.testData.clusterType "vanilla" }}
   nodeName: kind-multi-control-plane
+  {{ end }}
   tolerations:
   - effect: NoSchedule
     key: node-role.kubernetes.io/control-plane
