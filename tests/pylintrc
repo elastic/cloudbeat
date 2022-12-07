@@ -164,6 +164,7 @@ disable=raw-checker-failed,
         too-many-branches,
         too-many-arguments,
         too-many-locals,
+        W1514 # we use default encoding from the env var
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
