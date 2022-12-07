@@ -18,6 +18,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  Lint:
+    # for more information see .pre-commit-config.yaml
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Python lints
+        run: |
+          git ls-files -- '*.py' | xargs pre-commit run --file
+        shell: bash
+
+      - name: Go lints
+        run: |
+          git ls-files -- '*.go' | xargs pre-commit run --file
+        shell: bash
+
   Build:
     name: Build
     runs-on: ubuntu-20.04
@@ -235,10 +257,7 @@ jobs:
             range: '4..8'
             values_file: tests/deploy/values/ci.yml
           - test-target: process_etcd_rules
-            range: '8..12'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_etcd_rules
-            range: '12..'
+            range: '8..'
             values_file: tests/deploy/values/ci.yml
           - test-target: process_kubelet_rules
             range: '0..4'

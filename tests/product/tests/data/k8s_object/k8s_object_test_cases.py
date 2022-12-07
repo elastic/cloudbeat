@@ -10,6 +10,7 @@ class KubeTestCase:
     """
     Represent a test case for Kube API resources
     """
+
     rule_tag: str
     resource_type: str
     resource_body: dict

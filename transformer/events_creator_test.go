@@ -129,7 +129,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			s.dataProviderMock.EXPECT().GetVersionInfo().Return(version.CloudbeatVersionInfo{
 				Version: version.Version{Version: "test_version"},
 			})
-			
+
 			transformer := NewTransformer(s.log, &s.dataProviderMock, testIndex)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 

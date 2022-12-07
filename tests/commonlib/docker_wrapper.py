@@ -6,6 +6,9 @@ import docker
 
 
 class DockerWrapper:
+    """
+    Exposes functions to interact with Docker.
+    """
 
     def __init__(self, config=None):
         if config.base_url != "":
@@ -13,7 +16,13 @@ class DockerWrapper:
         else:
             self.client = docker.from_env()
 
-    def exec_command(self, container_name: str, command: str, param_value: str, resource: str):
+    def exec_command(
+        self,
+        container_name: str,
+        command: str,
+        param_value: str,
+        resource: str,
+    ):
         """
         This function retrieves container by name / id and executes (docker exec) command to container
         @param container_name: Container id or name
@@ -26,6 +35,6 @@ class DockerWrapper:
         command_f = f"{command} {param_value} {resource}"
         exit_code, output = container.exec_run(cmd=command_f)
         if exit_code > 0:
-            raise ValueError(f'Failed to execute command: {command_f, output}')
+            raise ValueError(f"Failed to execute command: {command_f, output}")
 
         return output.decode().strip()

@@ -20,6 +20,3 @@ configMapGenerator:
     behavior: create
     files:
       - cloudbeat.yml
-
-
-

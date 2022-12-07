@@ -11,11 +11,13 @@ from product.tests.parameters import register_params, Parameters
 
 
 @pytest.mark.eks_file_system_rules
-def test_eks_file_system_configuration(elastic_client,
-                                       cloudbeat_agent,
-                                       rule_tag,
-                                       node_hostname,
-                                       expected):
+def test_eks_file_system_configuration(
+    elastic_client,
+    cloudbeat_agent,
+    rule_tag,
+    node_hostname,
+    expected,
+):
     """
     This data driven test verifies rules and findings return by cloudbeat agent.
     In order to add new cases @pytest.mark.parameterize section shall be updated.
@@ -26,6 +28,7 @@ def test_eks_file_system_configuration(elastic_client,
     @param expected: Result to be found in finding evaluation field.
     @return: None - Test Pass / Fail result is generated.
     """
+    # pylint: disable=duplicate-code
 
     def identifier(eval_resource):
         try:
@@ -42,22 +45,24 @@ def test_eks_file_system_configuration(elastic_client,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
-    assert evaluation == expected, f"Rule {rule_tag} verification failed," \
-                                   f"expected: {expected}, got: {evaluation}"
+    assert evaluation == expected, f"Rule {rule_tag} verification failed," f"expected: {expected}, got: {evaluation}"
 
 
-register_params(test_eks_file_system_configuration, Parameters(
-    ("rule_tag", "node_hostname", "expected"),
-    [
-        *eks_fs_tc.cis_eks_3_1_1.values(),
-        *eks_fs_tc.cis_eks_3_1_2.values(),
-        *eks_fs_tc.cis_eks_3_1_3.values(),
-        *eks_fs_tc.cis_eks_3_1_4.values()
-     ],
-    ids=[
-        *eks_fs_tc.cis_eks_3_1_1.keys(),
-        *eks_fs_tc.cis_eks_3_1_2.keys(),
-        *eks_fs_tc.cis_eks_3_1_3.keys(),
-        *eks_fs_tc.cis_eks_3_1_4.keys()
-    ]
-))
+register_params(
+    test_eks_file_system_configuration,
+    Parameters(
+        ("rule_tag", "node_hostname", "expected"),
+        [
+            *eks_fs_tc.cis_eks_3_1_1.values(),
+            *eks_fs_tc.cis_eks_3_1_2.values(),
+            *eks_fs_tc.cis_eks_3_1_3.values(),
+            *eks_fs_tc.cis_eks_3_1_4.values(),
+        ],
+        ids=[
+            *eks_fs_tc.cis_eks_3_1_1.keys(),
+            *eks_fs_tc.cis_eks_3_1_2.keys(),
+            *eks_fs_tc.cis_eks_3_1_3.keys(),
+            *eks_fs_tc.cis_eks_3_1_4.keys(),
+        ],
+    ),
+)
