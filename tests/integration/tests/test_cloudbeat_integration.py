@@ -4,14 +4,12 @@ The test executed on pre-merge events as required test.
 The following flow is tested:
 Cloudbeat -> ElasticSearch
 """
-import time
-import json
 import pytest
-import allure
-from commonlib.utils import wait_for_cycle_completion
+
+from commonlib.utils import wait_for_cycle_completion, get_findings
 
 
-testdata = ['file', 'process', 'k8s_object']
+testdata = ["file", "process", "k8s_object"]
 CONFIG_TIMEOUT = 45
 
 
@@ -24,11 +22,12 @@ def test_cloudbeat_pod_exist(fixture_data):
     :param fixture_data: (Pods list, Nodes list)
     :return:
     """
+    # pylint: disable=duplicate-code
+
     pods, nodes = fixture_data
     pods_count = len(pods)
     nodes_count = len(nodes)
-    assert pods_count == nodes_count, \
-        f"Pods count is {pods_count}, and nodes count is {nodes_count}"
+    assert pods_count == nodes_count, f"Pods count is {pods_count}, and nodes count is {nodes_count}"
 
 
 @pytest.mark.pre_merge
@@ -41,14 +40,15 @@ def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
     :param cloudbeat_agent: cloudbeat config
     :return:
     """
-    pods = k8s.get_agent_pod_instances(agent_name=cloudbeat_agent.name,
-                                       namespace=cloudbeat_agent.namespace)
+    pods = k8s.get_agent_pod_instances(
+        agent_name=cloudbeat_agent.name,
+        namespace=cloudbeat_agent.namespace,
+    )
     # Verify that at least 1 pod is running the cluster
     assert len(pods) > 0, "There are no cloudbeat pod instances running in the cluster"
     # Verify that each pod is in running state
     for pod in pods:
         assert pod.status.phase == "Running", f"The pod '{pod.metadata.name}' status is: '{pod.status.phase}'"
-
 
 
 @pytest.mark.pre_merge
@@ -62,26 +62,9 @@ def test_elastic_index_exists(elastic_client, match_type):
     :param match_type: Findings type for matching
     :return:
     """
-    query, sort = elastic_client.build_es_query(
-        term={"resource.type": match_type})
-    start_time = time.time()
-    result = {}
-    while time.time() - start_time < CONFIG_TIMEOUT:
-        current_result = elastic_client.get_index_data(index_name=elastic_client.index,
-                                                       query=query,
-                                                       sort=sort)
-        if elastic_client.get_total_value(data=current_result) != 0:
-            allure.attach(json.dumps(elastic_client.get_doc_source(data=current_result),
-                                     indent=4,
-                                     sort_keys=True),
-                          match_type,
-                          attachment_type=allure.attachment_type.JSON)
-            result = current_result
-            break
-        time.sleep(1)
+    result = get_findings(elastic_client, CONFIG_TIMEOUT, match_type)
 
-    assert len(result) > 0, \
-        f"The findings of type {match_type} not found"
+    assert len(result) > 0, f"The findings of type {match_type} not found"
 
 
 @pytest.mark.pre_merge
@@ -99,20 +82,21 @@ def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
 
     query, sort = elastic_client.build_es_query(term={"type": "k8s_object"})
     pods, nodes = fixture_data
-    leader_node = k8s.get_cluster_leader(
-        namespace=cloudbeat_agent.namespace, pods=pods)
-    assert leader_node != "", \
-        "The Leader node could not be found"
+    leader_node = k8s.get_cluster_leader(namespace=cloudbeat_agent.namespace, pods=pods)
+    assert leader_node != "", "The Leader node could not be found"
 
     # Wait for all agents to send resources to ES
     res = wait_for_cycle_completion(elastic_client=elastic_client, nodes=nodes)
-    assert res, 'Not all nodes have completed a cycle within the configured threshold'
+    assert res, "Not all nodes have completed a cycle within the configured threshold"
 
-    result = elastic_client.get_index_data(index_name=elastic_client.index,
-                                           query=query,
-                                           size=1000,
-                                           sort=sort)
+    result = elastic_client.get_index_data(
+        index_name=elastic_client.index,
+        query=query,
+        size=1000,
+        sort=sort,
+    )
     # checking that k8s_objects are being sent only by the leader node.
-    for resource in result['hits']['hits']:
-        assert leader_node == resource['_source']['agent']['name'], \
-            f"Multiple agents send k8s_objects, leader: {leader_node}, resource: {resource['_source']}"
+    for resource in result["hits"]["hits"]:
+        assert (
+            leader_node == resource["_source"]["agent"]["name"]
+        ), f"Multiple agents send k8s_objects, leader: {leader_node}, resource: {resource['_source']}"

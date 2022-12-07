@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: kube-system
 
 resources:
-  - manifests.yaml 
+  - manifests.yaml
 
 patches:
   - path: ./patches/patchs.yaml

@@ -42,4 +42,3 @@ k8s-app: {{ .Values.serviceAccount.name }}
 generator: helm
 date: {{ now | htmlDate }}
 {{- end }}
-
