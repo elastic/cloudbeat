@@ -55,6 +55,7 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 				serverVersion: version.Version{
 					Version: "testing_version",
 				},
+				clusterName: "cluster_name",
 			},
 			k8sCommonData: CommonK8sData{
 				clusterId: "testing_namespace_uid",
@@ -62,6 +63,7 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 				serverVersion: version.Version{
 					Version: "testing_version",
 				},
+				clusterName: "cluster_name",
 			},
 			wantErr: false,
 		},
@@ -74,6 +76,7 @@ func TestCommonDataProvider_FetchCommonData(t *testing.T) {
 				clusterId:     "",
 				nodeId:        "",
 				serverVersion: version.Version{},
+				clusterName:   "",
 			},
 			k8sCommonData: CommonK8sData{},
 			wantErr:       false,
@@ -172,6 +175,39 @@ func TestCommonData_GetResourceId(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCommonData_GetClusterName(t *testing.T) {
+	clusterName := "cluster-name"
+	commonK8sData := CommonData{
+		clusterId:   "",
+		nodeId:      "",
+		clusterName: clusterName,
+	}
+
+	assert.Equal(t, clusterName, commonK8sData.GetClusterName(), "cluster name is not correct")
+}
+
+func TestCommonData_GetVersionInfo(t *testing.T) {
+	cloudbeatVersion := version.CloudbeatVersionInfo{
+		Version:    version.Version{},
+		Policy:     version.Version{},
+		Kubernetes: version.Version{},
+	}
+	commonK8sData := CommonData{
+		versionInfo: cloudbeatVersion,
+	}
+
+	assert.Equal(t, cloudbeatVersion, commonK8sData.GetVersionInfo(), "cluster name is not correct")
+}
+
+func TestCommonData_GetCommonData(t *testing.T) {
+	commonK8sData := CommonData{
+		clusterId:   "cluster-id",
+		clusterName: "cluster-name",
+	}
+
+	assert.Equal(t, commonK8sData, commonK8sData.GetData(), "cluster name is not correct")
 }
 
 func createCommonDataProvider(mock *mockK8sDataProvider) CommonDataProvider {

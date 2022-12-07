@@ -15,11 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package add_cluster_id
+package providers
 
 import (
 	"fmt"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/cloudbeat/config"
 	"testing"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -30,15 +30,15 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 )
 
-type ClusterMetadataProviderTestSuite struct {
+type KubernetesClusterNameProviderTestSuite struct {
 	suite.Suite
 
 	log *logp.Logger
 }
 
-func TestClusterMetadataProviderTestSuite(t *testing.T) {
-	s := new(ClusterMetadataProviderTestSuite)
-	s.log = logp.NewLogger("cloudbeat_cluster_metadata_provider_test_suite")
+func TestKubernetesClusterNameProviderTestSuite(t *testing.T) {
+	s := new(KubernetesClusterNameProviderTestSuite)
+	s.log = logp.NewLogger("cloudbeat_cluster_name_provider_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -47,7 +47,7 @@ func TestClusterMetadataProviderTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *ClusterMetadataProviderTestSuite) TestGetClusterMetadata() {
+func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterName() {
 	kubeSystemNamespaceId := "123"
 	clusterName := "my-cluster-name"
 	configMapId := "123"
@@ -70,18 +70,16 @@ func (s *ClusterMetadataProviderTestSuite) TestGetClusterMetadata() {
 		},
 		BinaryData: nil,
 	}
-
-	cfg := agentconfig.NewConfig()
+	cfg := &config.Config{}
 	client := fake.NewSimpleClientset(ns, cfgMap)
-	provider, err := newClusterMetadataProvider(client, cfg, s.log)
-	s.NoError(err)
+	provider := KubernetesClusterNameProvider{}
 
-	res := provider.GetClusterMetadata()
-	s.Equal(kubeSystemNamespaceId, res.clusterId)
-	s.Equal(clusterName, res.clusterName)
+	res, err := provider.GetClusterName(cfg, client)
+	s.NoError(err)
+	s.Equal(clusterName, res)
 }
 
-func (s *ClusterMetadataProviderTestSuite) TestGetClusterMetadataNoClusterName() {
+func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterMetadataNoClusterName() {
 	kubeSystemNamespaceId := "123"
 	ns := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -89,26 +87,12 @@ func (s *ClusterMetadataProviderTestSuite) TestGetClusterMetadataNoClusterName()
 			UID:  types.UID(kubeSystemNamespaceId),
 		},
 	}
-	cfg := agentconfig.NewConfig()
+	cfg := &config.Config{}
 	client := fake.NewSimpleClientset(ns)
-	provider, err := newClusterMetadataProvider(client, cfg, s.log)
-	s.NoError(err)
+	provider := KubernetesClusterNameProvider{}
 
-	res := provider.GetClusterMetadata()
-	s.Equal(kubeSystemNamespaceId, res.clusterId)
-	s.Equal("", res.clusterName)
-}
-
-func (s *ClusterMetadataProviderTestSuite) TestGetClusterMetadataClusterIdNotFound() {
-	kubeSystemNamespaceId := "123"
-	ns := &v1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "kube-sys",
-			UID:  types.UID(kubeSystemNamespaceId),
-		},
-	}
-	client := fake.NewSimpleClientset(ns)
-	cfg := agentconfig.NewConfig()
-	_, err := newClusterMetadataProvider(client, cfg, s.log)
+	res, err := provider.GetClusterName(cfg, client)
+	s.Empty(res)
 	s.Error(err)
+	s.ErrorContains(err, "fail to resolve the name of the cluster")
 }
