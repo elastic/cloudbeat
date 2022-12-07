@@ -159,7 +159,7 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
     agents_cycles_count = 0
     num_cycles = 0
 
-    while num_cycles < required_cycles and not is_timeout(start_time, 45):
+    while num_cycles < required_cycles and not is_timeout(start_time, 65):
         for node in nodes:
             start_time_per_agent = time.time()
             query, sort = elastic_client.build_es_query(
@@ -205,8 +205,8 @@ def command_contains_arguments(command, arguments_dict):
     unset_list = arguments_dict.get("unset", [])
 
     for key, val in set_dict.items():
-        argval = args_dict.get(key)
-        if val != argval:
+        arg_val = args_dict.get(key)
+        if val != arg_val:
             return False
 
     for key in unset_list:

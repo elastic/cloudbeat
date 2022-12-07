@@ -103,15 +103,30 @@ jobs:
           kubectl cp $RESULTS_POD:/reports ${{ env.REPORTS_DIR }}
           kubectl exec $RESULTS_POD -- sh -c 'rm -rf /reports/*'
 
-      - name: Upload Test Results
-        if: success()
-        uses: actions/upload-artifact@v2
-        with:
-          name: allure_results-${{ matrix.test-target}}
-          path: ${{ env.REPORTS_DIR }}
+      # - name: Upload Test Results
+      #   if: success()
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: allure_results-${{ matrix.test-target}}
+      #     path: ${{ env.REPORTS_DIR }}
 
       - name: Purge tests environment
         id: purge_helm
         if: always()
         run: |
           just purge-tests
+
+      - name: Publish allure report
+        if: always()
+        uses: andrcuns/allure-publish-action@v1.0.1
+        with:
+          storageType: s3
+          resultsGlob: "${{ env.REPORTS_DIR }}*"
+          updatePr: actions
+          collapseSummary: false
+          summary: suites
+          summaryTableType: markdown
+          copyLatest: true
+          bucket: csp-allure-reports
+          prefix: allure_reports/cloudbeat/${{ github.ref_name }}
+          ignoreMissingResults: true

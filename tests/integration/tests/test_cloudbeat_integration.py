@@ -5,12 +5,30 @@ The following flow is tested:
 Cloudbeat -> ElasticSearch
 """
 import pytest
+import configuration
 
 from commonlib.utils import wait_for_cycle_completion, get_findings
 
-
-testdata = ["file", "process", "k8s_object"]
 CONFIG_TIMEOUT = 45
+
+
+def get_test_data() -> list:
+    """
+    This function retrieves test data that depends on cluster environment
+    @return: test data list
+    """
+    config = configuration.agent
+    if config.cluster_type == "vanilla":
+        return ["file", "process", "k8s_object"]
+    elif config.cluster_type == "eks":
+        return ["file", "process", "k8s_object", "load-balancer", "container-registry"]
+    else:
+        print("error: incorrect cluster type check env variables")
+
+    return []
+
+
+testdata = get_test_data()
 
 
 @pytest.mark.pre_merge
