@@ -175,11 +175,11 @@ def write_csv_file(csv_filename, modules_list):
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_deps_path = os.path.join(tmpdir, "dependencies.csv")
         go_license_detector("", tmp_deps_path, modules_list)
-        with open(tmp_deps_path, encoding="utf8") as csvfile:
+        with open(tmp_deps_path) as csvfile:
             reader = csv.DictReader(csvfile)
             fieldnames = reader.fieldnames
             rows = list(reader)
-        with open(csv_filename, "w", encoding="utf8") as csvfile:
+        with open(csv_filename, "w") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames)
             writer.writeheader()
             for row in rows:
@@ -195,8 +195,8 @@ def init_temp_file(beats_notice_template_path, beats_overrides_path):
     @param beats_overrides_path: Path to overrides.json file.
     @return: templates
     """
-    with open(beats_notice_template_path, encoding="utf8").read() as beats_notice_template:
-        with open(beats_overrides_path, encoding="utf8").read() as beats_overrides:
+    with open(beats_notice_template_path).read() as beats_notice_template:
+        with open(beats_overrides_path).read() as beats_overrides:
             with tempfile.TemporaryDirectory() as tmpdir:
                 return beats_notice_template, beats_overrides, tmpdir
 
