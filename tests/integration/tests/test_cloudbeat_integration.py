@@ -26,6 +26,7 @@ def get_test_data() -> list:
         return cluster_data_dict[configuration.agent.cluster_type]
     except KeyError as key:
         print(f" Key not found in cluster_data_dict: '{key}'")
+        return []
 
 
 testdata = get_test_data()
