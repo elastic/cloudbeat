@@ -72,7 +72,7 @@ jobs:
         if: success()
         run: |
           aws eks update-kubeconfig --name ${{ matrix.k8s_context }} --region ${{ env.AWS_REGION }} --alias ${{ matrix.k8s_context }}
-          echo "KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)" >> $GITHUB_ENV
+          echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
           kubectl config use-context ${{ matrix.k8s_context }}
           kubectl config set-context --current --namespace=${{ env.KUBE_NAMESPACE }}
 
@@ -119,6 +119,8 @@ jobs:
       - name: Publish allure report
         if: always()
         uses: andrcuns/allure-publish-action@v1.0.1
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           storageType: s3
           resultsGlob: "${{ env.REPORTS_DIR }}*"
