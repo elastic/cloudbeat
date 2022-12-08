@@ -159,13 +159,13 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
     agents_cycles_count = 0
     num_cycles = 0
 
-    while num_cycles < required_cycles and not is_timeout(start_time, 65):
+    while num_cycles < required_cycles and not is_timeout(start_time, 120):
         for node in nodes:
             start_time_per_agent = time.time()
             query, sort = elastic_client.build_es_query(
                 term={"agent.name": node.metadata.name},
             )
-            while not is_timeout(start_time_per_agent, 10):
+            while not is_timeout(start_time_per_agent, 60):
                 # keep query ES until the sequence has changed
                 result = elastic_client.get_index_data(
                     index_name=elastic_client.index,
