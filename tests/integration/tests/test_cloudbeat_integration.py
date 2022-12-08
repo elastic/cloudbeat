@@ -13,7 +13,7 @@ CONFIG_TIMEOUT = 45
 
 cluster_data_dict = {
     "vanilla": ["file", "process", "k8s_object"],
-    "eks": ["file", "process", "k8s_object", "load-balancer", "container-registry"]
+    "eks": ["file", "process", "k8s_object", "load-balancer", "container-registry"],
 }
 
 

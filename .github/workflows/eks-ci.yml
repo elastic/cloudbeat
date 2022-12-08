@@ -56,7 +56,7 @@ jobs:
           - test-target: pre_merge
             range: ''
             values_file: tests/deploy/values/ci-eks.yml
-            k8s_context: "test-eks-config-1"        
+            k8s_context: "test-eks-config-1"
     name: ${{ matrix.test-target }}-tests
     runs-on: ubuntu-20.04
     timeout-minutes: 90
