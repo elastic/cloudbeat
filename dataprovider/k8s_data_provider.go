@@ -21,6 +21,7 @@ import (
 	"context"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -29,9 +30,10 @@ import (
 )
 
 type k8sDataCollector struct {
-	kubeClient k8s.Interface
-	log        *logp.Logger
-	cfg        *config.Config
+	kubeClient          k8s.Interface
+	log                 *logp.Logger
+	cfg                 *config.Config
+	clusterNameProvider providers.ClusterNameProviderAPI
 }
 
 type k8sDataProvider interface {
@@ -44,10 +46,19 @@ func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) k8sDataProvider {
 		log.Warnf("Could not create Kubernetes client to provide common data: %v", err)
 	}
 
+	clusterNameProvider := providers.ClusterNameProvider{
+		KubernetesClusterNameProvider: providers.KubernetesClusterNameProvider{},
+		EKSMetadataProvider:           awslib.Ec2MetadataProvider{},
+		EKSClusterNameProvider:        awslib.EKSClusterNameProvider{},
+		KubeClient:                    kubeClient,
+		AwsConfigProvider:             awslib.ConfigProvider{},
+	}
+
 	return k8sDataCollector{
-		kubeClient: kubeClient,
-		log:        log,
-		cfg:        cfg,
+		kubeClient:          kubeClient,
+		log:                 log,
+		cfg:                 cfg,
+		clusterNameProvider: clusterNameProvider,
 	}
 }
 
@@ -62,6 +73,7 @@ func (k k8sDataCollector) CollectK8sData(ctx context.Context) *CommonK8sData {
 		clusterId:     k.getClusterId(ctx),
 		nodeId:        k.getNodeId(ctx),
 		serverVersion: k.fetchKubernetesVersion(),
+		clusterName:   k.getClusterName(ctx),
 	}
 }
 
@@ -72,6 +84,15 @@ func (k k8sDataCollector) getClusterId(ctx context.Context) string {
 		return ""
 	}
 	return string(n.ObjectMeta.UID)
+}
+
+func (k k8sDataCollector) getClusterName(ctx context.Context) string {
+	clusterName, err := k.clusterNameProvider.GetClusterName(ctx, k.cfg)
+	if err != nil {
+		k.log.Errorf("cloud not identify the cluster name: %v", err)
+		return ""
+	}
+	return clusterName
 }
 
 func (k k8sDataCollector) getNodeId(ctx context.Context) string {

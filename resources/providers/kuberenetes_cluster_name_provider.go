@@ -15,32 +15,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package providers
 
 import (
-	"context"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"fmt"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes/metadata"
+	agentcfg "github.com/elastic/elastic-agent-libs/config"
+	k8s "k8s.io/client-go/kubernetes"
 )
 
-type ConfigProvider struct {
-	MetadataProvider MetadataProvider
+type KubernetesClusterNameProviderApi interface {
+	GetClusterName(cfg *config.Config, client k8s.Interface) (string, error)
+}
+type KubernetesClusterNameProvider struct {
 }
 
-type ConfigProviderAPI interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error)
-}
-
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg)
+func (provider KubernetesClusterNameProvider) GetClusterName(cfg *config.Config, client k8s.Interface) (string, error) {
+	agentConfig, err := agentcfg.NewConfigFrom(cfg)
 	if err != nil {
-		return awssdk.Config{}, err
+		return "", fmt.Errorf("failed to create agent config: %v", err)
 	}
-	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
+	clusterIdentifier, err := metadata.GetKubernetesClusterIdentifier(agentConfig, client)
 	if err != nil {
-		return awssdk.Config{}, err
+		return "", fmt.Errorf("fail to resolve the name of the cluster: %v", err)
 	}
-	awsConfig.Region = metadata.Region
 
-	return awsConfig, nil
+	return clusterIdentifier.Name, nil
 }

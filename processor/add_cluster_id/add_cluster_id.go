@@ -19,8 +19,6 @@ package add_cluster_id
 
 import (
 	"fmt"
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	jsprocessor "github.com/elastic/beats/v7/libbeat/processors/script/javascript/module/processor"
@@ -29,9 +27,8 @@ import (
 )
 
 const (
-	processorName  = "add_cluster_id"
-	clusterNameKey = "orchestrator.cluster.name"
-	ClusterIdKey   = "cluster_id"
+	processorName = "add_cluster_id"
+	clusterIdKey  = "cluster_id"
 )
 
 func init() {
@@ -39,16 +36,14 @@ func init() {
 	jsprocessor.RegisterPlugin("AddClusterID", New)
 }
 
-type processor struct {
+type addClusterID struct {
 	config config
 	helper ClusterHelper
-	logger *logp.Logger
 }
 
 // New constructs a new Add ID processor.
-// This processor adds the cluster id along with some other orchestrator metadata fields.
 func New(cfg *agentconfig.C) (processors.Processor, error) {
-	config := defaultConfig()
+	config := config{}
 	if err := cfg.Unpack(&config); err != nil {
 		return nil, makeErrConfigUnpack(err)
 	}
@@ -58,40 +53,29 @@ func New(cfg *agentconfig.C) (processors.Processor, error) {
 		return nil, err
 	}
 
-	logger := logp.NewLogger(processorName)
-	clusterMetadataProvider, err := newClusterMetadataProvider(client, cfg, logger)
-
+	helper, err := newClusterHelper(client)
 	if err != nil {
 		return nil, err
 	}
-	p := &processor{
+	p := &addClusterID{
 		config,
-		clusterMetadataProvider,
-		logger,
+		helper,
 	}
 
 	return p, nil
 }
 
-// Run enriches the given event with an ID and the cluster.name
-func (p *processor) Run(event *beat.Event) (*beat.Event, error) {
-	clusterMetaData := p.helper.GetClusterMetadata()
+// Run enriches the given event with an ID
+func (p *addClusterID) Run(event *beat.Event) (*beat.Event, error) {
+	clusterId := p.helper.ClusterId()
 
-	if _, err := event.PutValue(ClusterIdKey, clusterMetaData.clusterId); err != nil {
+	if _, err := event.PutValue(clusterIdKey, clusterId); err != nil {
 		return nil, makeErrComputeID(err)
-	}
-
-	clusterName := clusterMetaData.clusterName
-	if clusterName != "" {
-		_, err := event.PutValue(clusterNameKey, clusterName)
-		if err != nil {
-			return nil, fmt.Errorf("failed to add cluster name to object: %v", err)
-		}
 	}
 
 	return event, nil
 }
 
-func (p *processor) String() string {
+func (p *addClusterID) String() string {
 	return fmt.Sprintf("%v=", processorName)
 }

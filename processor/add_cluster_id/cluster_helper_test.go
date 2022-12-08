@@ -20,21 +20,23 @@ package add_cluster_id
 import (
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/suite"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
-type AddClusterIdTestSuite struct {
+type ClusterHelperTestSuite struct {
 	suite.Suite
 
 	log *logp.Logger
 }
 
-func TestAddClusterIdTestSuite(t *testing.T) {
-	s := new(AddClusterIdTestSuite)
-	s.log = logp.NewLogger("cloudbeat_add_cluster_id_test_suite")
+func TestClusterHelperTestSuite(t *testing.T) {
+	s := new(ClusterHelperTestSuite)
+	s.log = logp.NewLogger("cloudbeat_cluster_helper_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -43,38 +45,30 @@ func TestAddClusterIdTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *AddClusterIdTestSuite) TestClusterIdProcessor() {
-	tests := []string{
-		"abc",
-		"some-cluster-id",
+func (s *ClusterHelperTestSuite) TestClusterId() {
+	kubeSystemNamespaceId := "123"
+	ns := &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "kube-system",
+			UID:  types.UID(kubeSystemNamespaceId),
+		},
 	}
+	client := fake.NewSimpleClientset(ns)
+	sut, err := newClusterHelper(client)
+	s.NoError(err)
 
-	for _, t := range tests {
-		mock := &clusterHelperMock{
-			id: t,
-		}
-
-		processor := &addClusterID{
-			helper: mock,
-			config: config{},
-		}
-
-		e := beat.Event{
-			Fields: make(mapstr.M),
-		}
-		event, err := processor.Run(&e)
-		s.NoError(err)
-
-		res, err := event.GetValue("cluster_id")
-		s.NoError(err)
-		s.Equal(t, res)
-	}
+	s.Equal(kubeSystemNamespaceId, sut.ClusterId())
 }
 
-type clusterHelperMock struct {
-	id string
-}
-
-func (m *clusterHelperMock) ClusterId() string {
-	return m.id
+func (s *ClusterHelperTestSuite) TestClusterIdNotFound() {
+	kubeSystemNamespaceId := "123"
+	ns := &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "kube-sys",
+			UID:  types.UID(kubeSystemNamespaceId),
+		},
+	}
+	client := fake.NewSimpleClientset(ns)
+	_, err := newClusterHelper(client)
+	s.Error(err)
 }
