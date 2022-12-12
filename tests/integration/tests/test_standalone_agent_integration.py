@@ -64,7 +64,6 @@ def test_elastic_index_exists(elastic_client, match_type):
 @pytest.mark.pre_merge_agent
 @pytest.mark.order(4)
 @pytest.mark.dependency(depends=["test_agent_pods_running"])
-@pytest.mark.skip(reason="Broken")
 def test_cloudbeat_status(k8s, cloudbeat_agent):
     """
     This test connects to all elastic agents, executes command to
