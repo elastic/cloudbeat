@@ -2,7 +2,7 @@ package compliance.lib.output_validations
 
 import future.keywords.every
 
-k8s_valid_metadata := {
+valid_metadata := {
 	"id": "rule id",
 	"name": "rule name",
 	"profile_applicability": "rule profile_applicability",
@@ -29,8 +29,9 @@ eks_valid_metadata := {
 }
 
 test_required_metadata_fields {
-	every key, _ in k8s_valid_metadata {
-		not validate_k8s_metadata(object.remove(k8s_valid_metadata, [key]))
+	every key, _ in valid_metadata {
+		not validate_k8s_metadata(object.remove(valid_metadata, [key]))
+		not validate_aws_metadata(object.remove(valid_metadata, [key]))
 	}
 
 	every key, _ in eks_valid_metadata {

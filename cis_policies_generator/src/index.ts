@@ -100,7 +100,7 @@ function normalizeResults(data: BenchmarksData[], benchmark_metadata: BenchmarkM
                 "benchmark": {
                     "name": benchmark_metadata.name,
                     "version": benchmark_metadata.version,
-                    "id": benchmark_metadata.filename
+                    "id": getBenchmarkAttr(benchmark_metadata, "id")
                 },
             }
         }

@@ -35,10 +35,17 @@ validate_eks_metadata(metadata) {
 	true
 }
 
+validate_aws_metadata(metadata) {
+	validate_common_kuberentes_provider_metadata(metadata)
+} else = false {
+	true
+}
+
 # validate every rule metadata
 test_validate_rule_metadata {
 	all_k8s_rules := [rule | rule := compliance.cis_k8s.rules[rule_id]]
 	all_eks_rules := [rule | rule := compliance.cis_eks.rules[rule_id]]
+	all_aws_rules := [rule | rule := compliance.cis_aws.rules[rule_id]]
 
 	every k8s_rule in all_k8s_rules {
 		validate_k8s_metadata(k8s_rule.metadata)
@@ -46,5 +53,9 @@ test_validate_rule_metadata {
 
 	every eks_rule in all_eks_rules {
 		validate_eks_metadata(eks_rule.metadata)
+	}
+
+	every aws_rule in all_aws_rules {
+		validate_aws_metadata(aws_rule.metadata)
 	}
 }

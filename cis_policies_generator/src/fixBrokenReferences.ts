@@ -37,7 +37,6 @@ async function checkReference(link: string): Promise<boolean> {
             // If we got here, it means that we failed to reach the server because of things that are IN OUR CONTROL
             // (e.g. timeout, socket reset)
             console.log(err);
-            process.abort();
         }
         return false;
     }
