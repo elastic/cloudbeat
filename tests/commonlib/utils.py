@@ -158,14 +158,19 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
     curr_sequence = ""
     agents_cycles_count = 0
     num_cycles = 0
+    cycle_timeout = 30  # change this timeout if cloudbeat fetching period changed
+    all_cycles_timeout = cycle_timeout * required_cycles * len(nodes)
+    node_cycle_timeout = cycle_timeout * required_cycles
 
-    while num_cycles < required_cycles and not is_timeout(start_time, 120):
+    # This 'while' is used for all cycles, all nodes
+    while num_cycles < required_cycles and not is_timeout(start_time, all_cycles_timeout):
         for node in nodes:
             start_time_per_agent = time.time()
             query, sort = elastic_client.build_es_query(
                 term={"agent.name": node.metadata.name},
             )
-            while not is_timeout(start_time_per_agent, 60):
+            # this 'while' used for single node all cycles timeout
+            while not is_timeout(start_time_per_agent, node_cycle_timeout):
                 # keep query ES until the sequence has changed
                 result = elastic_client.get_index_data(
                     index_name=elastic_client.index,

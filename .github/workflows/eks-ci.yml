@@ -31,30 +31,29 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     timeout-minutes: 15
     steps:
-    - id: Default
-      env:
-        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
-      run: |
-        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+      - id: set-default-matrix
+        env:
+          TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+        run: |
+          echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
 
-    - id: Dispatch
-      if: github.event_name == 'workflow_dispatch'
-      env:
-        TEST_TARGETS: ${{ github.event.inputs.test-targets }}
-      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+      - id: Dispatch
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TEST_TARGETS: ${{ github.event.inputs.test-targets }}
+        run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
-    - id: set-matrix
-      run: echo "::set-output name=matrix::${{ env.TEST_MATRIX}}"
+      - id: set-matrix
+        run: echo "matrix=${{ env.TEST_MATRIX}}" >> $GITHUB_OUTPUT
 
   Test_Matrix:
-    needs: ['Setup']
+    needs: ["Setup"]
     strategy:
       fail-fast: false
       matrix:
-        # test-target: ${{fromJson(needs.Setup.outputs.matrix)}}
         include:
           - test-target: pre_merge
-            range: ''
+            range: ""
             values_file: tests/deploy/values/ci-eks.yml
             k8s_context: "test-eks-config-1"
     name: ${{ matrix.test-target }}-tests
@@ -88,12 +87,6 @@ jobs:
         run: |
           just run-tests ${{ matrix.test-target }} ${{ matrix.k8s_context }}
 
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   if: failure()
-      #   with:
-      #     limit-access-to-actor: true
-
       - name: Copy test results
         id: copy_results
         if: always()
@@ -103,12 +96,12 @@ jobs:
           kubectl cp $RESULTS_POD:/reports ${{ env.REPORTS_DIR }}
           kubectl exec $RESULTS_POD -- sh -c 'rm -rf /reports/*'
 
-      # - name: Upload Test Results
-      #   if: success()
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: allure_results-${{ matrix.test-target}}
-      #     path: ${{ env.REPORTS_DIR }}
+      - name: Upload Test Results
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure_results-${{ matrix.test-target}}
+          path: ${{ env.REPORTS_DIR }}
 
       - name: Purge tests environment
         id: purge_helm
@@ -116,11 +109,28 @@ jobs:
         run: |
           just purge-tests
 
+  publish_results:
+    name: Publish Results
+    needs: Test_Matrix
+    if: always()
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Extract Artifacts
+        run: |
+          mkdir -p tests/allure/results
+          find artifacts/ -type f -print0 | xargs -0 mv -t tests/allure/results
+
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@v2.1.0
+        uses: andrcuns/allure-publish-action@v1.0.1
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_REGION: eu-west-1
         with:
           storageType: s3
           resultsGlob: "${{ env.REPORTS_DIR }}*"
