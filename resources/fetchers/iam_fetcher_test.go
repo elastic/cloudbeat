@@ -19,15 +19,14 @@ package fetchers
 
 import (
 	"context"
-	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
-	iam "github.com/elastic/cloudbeat/resources/providers/awslib/iam"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"testing"
-
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/mock"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
 type IamFetcherTestSuite struct {
@@ -35,6 +34,11 @@ type IamFetcherTestSuite struct {
 
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
+}
+
+type IamProviderReturnVals struct {
+	pwdPolicy awslib.AwsResource
+	err       error
 }
 
 func TestIamFetcherTestSuite(t *testing.T) {
@@ -57,50 +61,67 @@ func (s *IamFetcherTestSuite) TearDownTest() {
 }
 
 func (s *IamFetcherTestSuite) TestIamFetcherFetch() {
+	pwdPolicy := iam.PasswordPolicy{
+		ReusePreventionCount: 5,
+		RequireLowercase:     true,
+		RequireUppercase:     true,
+		RequireNumbers:       true,
+		RequireSymbols:       false,
+		MaxAgeDays:           90,
+		MinimumLength:        8,
+	}
+
+	testAccount := "test-account"
+
 	var tests = []struct {
-		role        string
-		iamResponse []iam.RolePolicyInfo
+		mockReturnVal      IamProviderReturnVals
+		account            string
+		numExpectedResults int
 	}{
 		{
-			role: "some_role",
-			iamResponse: []iam.RolePolicyInfo{
-				{
-					PolicyARN:           "arn:aws:iam::123456789012:policy/TestPolicy",
-					GetRolePolicyOutput: iamsdk.GetRolePolicyOutput{},
-				},
+			mockReturnVal: IamProviderReturnVals{
+				pwdPolicy: pwdPolicy,
+				err:       nil,
 			},
+			account:            testAccount,
+			numExpectedResults: 1,
+		},
+		{
+			mockReturnVal: IamProviderReturnVals{
+				pwdPolicy: nil,
+				err:       errors.New("Fail to fetch pwd policy"),
+			},
+			account:            testAccount,
+			numExpectedResults: 0,
 		},
 	}
 
 	for _, test := range tests {
-		eksConfig := IAMFetcherConfig{
+		iamCfg := IAMFetcherConfig{
 			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-			RoleName:             test.role,
 		}
 
 		iamProvider := &iam.MockAccessManagement{}
-		iamProvider.EXPECT().GetIAMRolePermissions(mock.Anything, test.role).
-			Return(test.iamResponse, nil)
-
-		expectedResource := IAMResource{
-			AwsResource: test.iamResponse[0],
-			identity:    nil,
-		}
+		iamProvider.EXPECT().GetPasswordPolicy(context.TODO()).Return(test.mockReturnVal.pwdPolicy, test.mockReturnVal.err)
 
 		eksFetcher := IAMFetcher{
 			log:         s.log,
-			cfg:         eksConfig,
 			iamProvider: iamProvider,
+			cfg:         iamCfg,
 			resourceCh:  s.resourceCh,
+			cloudIdentity: &awslib.Identity{
+				Account: &test.account,
+			},
 		}
 
 		ctx := context.Background()
 
 		err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
 		results := testhelper.CollectResources(s.resourceCh)
-		iamResource := results[0].Resource.(IAMResource)
 
-		s.Equal(expectedResource, iamResource)
-		s.NoError(err)
+		s.Equal(len(results), test.numExpectedResults)
+		if test.mockReturnVal.err == nil {
+			s.NoError(err)
+		}
 	}
 }

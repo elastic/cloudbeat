@@ -37,7 +37,6 @@ type IAMFetcher struct {
 
 type IAMFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
-	RoleName                      string `config:"roleName"`
 }
 
 type IAMResource struct {
@@ -67,7 +66,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 func (f IAMFetcher) Stop() {
 }
 
-func (r IAMResource) GetData() interface{} {
+func (r IAMResource) GetData() any {
 	return r.AwsResource
 }
 

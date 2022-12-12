@@ -29,7 +29,7 @@ func (p Provider) GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, er
 	output, err := p.client.GetAccountPasswordPolicy(ctx, &iam.GetAccountPasswordPolicyInput{})
 	if err != nil {
 		p.log.Debug("Failed to get account password policy: %v", err)
-		return PasswordPolicy{}, err
+		return nil, err
 	}
 
 	policy := output.PasswordPolicy
@@ -48,7 +48,7 @@ func (p Provider) GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, er
 		minimumLength = int(*policy.MinimumPasswordLength)
 	}
 
-	return PasswordPolicy{
+	return &PasswordPolicy{
 		ReusePreventionCount: reusePrevention,
 		RequireLowercase:     policy.RequireLowercaseCharacters,
 		RequireUppercase:     policy.RequireUppercaseCharacters,
