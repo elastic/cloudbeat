@@ -5,12 +5,31 @@ The following flow is tested:
 Cloudbeat -> ElasticSearch
 """
 import pytest
+import configuration
 
 from commonlib.utils import wait_for_cycle_completion, get_findings
 
-
-testdata = ["file", "process", "k8s_object"]
 CONFIG_TIMEOUT = 45
+
+cluster_data_dict = {
+    "vanilla": ["file", "process", "k8s_object"],
+    "eks": ["file", "process", "k8s_object", "load-balancer", "container-registry"],
+}
+
+
+def get_test_data() -> list:
+    """
+    This function retrieves test data that depends on cluster environment
+    @return: test data list
+    """
+    try:
+        return cluster_data_dict[configuration.agent.cluster_type]
+    except KeyError as key:
+        print(f"Key not found in cluster_data_dict: {key}")
+        return []
+
+
+testdata = get_test_data()
 
 
 @pytest.mark.pre_merge
