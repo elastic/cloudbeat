@@ -195,10 +195,14 @@ def init_temp_file(beats_notice_template_path, beats_overrides_path):
     @param beats_overrides_path: Path to overrides.json file.
     @return: templates
     """
-    with open(beats_notice_template_path).read() as beats_notice_template:
-        with open(beats_overrides_path).read() as beats_overrides:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                return beats_notice_template, beats_overrides, tmpdir
+    with open(beats_notice_template_path) as beats_notice_template:
+        notice_template_contents = beats_notice_template.read()
+    with open(beats_overrides_path) as beats_overrides:
+        overrides_contents = beats_overrides.read()
+
+    # Create a temporary directory
+    with tempfile.TemporaryDirectory() as tmpdir:
+        return notice_template_contents, overrides_contents, tmpdir
 
 
 if __name__ == "__main__":
