@@ -1,5 +1,5 @@
 resource "aws_security_group" "node_group_one" {
-  name_prefix = "${var.cluster_name_prefix}-node_group_one"
+  name_prefix = "${var.cluster_name_prefix}_1"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
@@ -14,7 +14,7 @@ resource "aws_security_group" "node_group_one" {
 }
 
 resource "aws_security_group" "node_group_two" {
-  name_prefix = "${var.cluster_name_prefix}-node_group_two"
+  name_prefix = "${var.cluster_name_prefix}_2"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
