@@ -18,6 +18,7 @@ env:
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
+  ELASTIC_AGENT_VERSION: "8.6.0-SNAPSHOT"
 
 jobs:
   Setup:
@@ -131,7 +132,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          ./.ci/scripts/ecr-images.sh ${{ env.CONTAINER_SUFFIX }}  ${{ env.ECR_REGISTRY}}
+          ./.ci/scripts/ecr-images.sh ${{ env.CONTAINER_SUFFIX }}  ${{ env.ECR_REGISTRY}} ${{ env.ELASTIC_AGENT_VERSION}}
         shell: bash
 
 
