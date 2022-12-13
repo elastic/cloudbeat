@@ -46,18 +46,27 @@ type IAMResource struct {
 
 func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
-
+	var iamResources []awslib.AwsResource
 	pwdPolicy, err := f.iamProvider.GetPasswordPolicy(ctx)
 	if err != nil {
 		return err
 	}
+	iamResources = append(iamResources, pwdPolicy)
 
-	f.resourceCh <- fetching.ResourceInfo{
-		Resource: IAMResource{
-			AwsResource: pwdPolicy,
-			identity:    f.cloudIdentity,
-		},
-		CycleMetadata: cMetadata,
+	users, err := f.iamProvider.GetUsers(ctx)
+	if err != nil {
+		return err
+	}
+	iamResources = append(iamResources, users...)
+
+	for _, iamResource := range iamResources {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource: IAMResource{
+				AwsResource: iamResource,
+				identity:    f.cloudIdentity,
+			},
+			CycleMetadata: cMetadata,
+		}
 	}
 
 	return nil

@@ -28,6 +28,7 @@ import (
 type AccessManagement interface {
 	GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error)
 	GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, error)
+	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
 type Provider struct {
