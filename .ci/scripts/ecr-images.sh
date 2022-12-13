@@ -8,7 +8,9 @@ ELASTIC_AGENT_DOCKER_TAG=$3
 
 load_and_push_image () {
     docker load -i /tmp/"$1"-"${IMAGE_SUFFIX}".tar
-    docker tag "$2" $ECR_REGISTRY/"$2"
+    if [ $1 != "elastic-agent" ]; then
+        docker tag "$2" $ECR_REGISTRY/"$2"
+    fi
     docker push $ECR_REGISTRY/"$2"
 }
 
