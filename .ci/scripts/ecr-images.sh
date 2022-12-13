@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euxo pipefail
-IMAGE_SUFFIX=$1 # ${{ github.run_id }}
-ECR_REGISTRY=$2 # aws ecr path
+IMAGE_SUFFIX=$1
+ECR_REGISTRY=$2
 
 
 load_and_push_image () {

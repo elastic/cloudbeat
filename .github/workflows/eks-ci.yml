@@ -115,11 +115,6 @@ jobs:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
-      - name: Move cache
-        run: |
-          ./.ci/scripts/gh-cache.sh
-        shell: bash
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -130,30 +125,20 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-
+        
       - name: Load images cloudbeat and cloudbeat-test to ECR
-        env: 
+        id: load-to-ecr
+        env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          ./.ci/scripts/ecr-images.sh ${{ env.CONTAINER_SUFFIX }} ${{ env.ECR_REGISTRY}}
+          ./.ci/scripts/ecr-images.sh ${{ env.CONTAINER_SUFFIX }}  ${{ env.ECR_REGISTRY}}
         shell: bash
 
-      # - name: Push Cloudbeat image to Amazon ECR
-      #   env:
-      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     ECR_CLOUDBEAT_REPOSITORY: cloudbeat
-      #     IMAGE_TAG: latest
-      #   run: |
-      #     docker tag docker.io/library/cloudbeat:$IMAGE_TAG $ECR_REGISTRY/$ECR_CLOUDBEAT_REPOSITORY:$IMAGE_TAG
-      #     docker push $ECR_REGISTRY/$ECR_CLOUDBEAT_REPOSITORY:$IMAGE_TAG
 
-      # - name: Push Cloudbeat Tests image to Amazon ECR
-      #   env:
-      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     ECR_CLOUDBEAT_TEST_REPOSITORY: cloudbeat-test
-      #   run: |
-      #     docker tag docker.io/library/cloudbeat-test:$IMAGE_TAG $ECR_REGISTRY/$ECR_CLOUDBEAT_TEST_REPOSITORY:$IMAGE_TAG
-      #     docker push $ECR_REGISTRY/$ECR_CLOUDBEAT_TEST_REPOSITORY:$IMAGE_TAG
+      - name: Move cache
+        run: |
+          ./.ci/scripts/gh-cache.sh
+        shell: bash
 
   Test_Matrix:
     needs: ["Setup", "Build"]
