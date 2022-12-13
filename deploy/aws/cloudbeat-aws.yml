@@ -17,7 +17,7 @@ cloudbeat:
 setup.kibana:
 
   # Kibana Host
-  host: "http://localhost:5601"
+  host: "http://host.docker.internal:5601"
 # =============================== Elastic Cloud ================================
 
 # These settings simplify using Cloudbeat with the Elastic Cloud (https://cloud.elastic.co/).
@@ -34,15 +34,15 @@ setup.kibana:
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: ["localhost:9200"]
+  hosts: ${ES_HOST}
 
   # Protocol - either `http` (default) or `https`.
 #  protocol: "https"
 
   # Authentication credentials - either API key or username/password.
   #api_key: "id:api_key"
-#  username: ${ES_USERNAME}
-#  password: ${ES_PASSWORD}
+  username: ${ES_USERNAME}
+  password: ${ES_PASSWORD}
 
   # Enable to allow sending output to older ES versions
   allow_older_versions: true
