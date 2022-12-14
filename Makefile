@@ -141,6 +141,11 @@ endif
 get-version:
 	@echo $(CLOUDBEAT_VERSION)
 
+## get-ci-agent-version : Get agent version used in CI
+.PHONY: get-ci-agent-version
+get-ci-agent-version:
+	@echo $(CI_ELASTIC_AGENT_DOCKER_TAG)
+
 ##############################################################################
 # Documentation.
 ##############################################################################

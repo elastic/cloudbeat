@@ -2,7 +2,7 @@
 set -euxo pipefail
 IMAGE_SUFFIX=$1
 ECR_REGISTRY=$2
-ELASTIC_AGENT_DOCKER_TAG=$3
+ELASTIC_AGENT_DOCKER_TAG=$(make get-ci-agent-version)
 
 
 
