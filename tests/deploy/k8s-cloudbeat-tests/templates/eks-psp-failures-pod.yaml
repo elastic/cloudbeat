@@ -1,3 +1,4 @@
+ {{- if eq .Values.testData.clusterType "eks" -}}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -23,3 +24,4 @@ spec:
         runAsUser: 0
         capabilities:
           add: [ "NET_ADMIN", "SYS_TIME", "NET_RAW" ]
+{{- end }}

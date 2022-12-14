@@ -22,6 +22,7 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	"testing"
 
@@ -53,7 +54,8 @@ func (s *IamFactoryTestSuite) SetupTest() {
 
 func (s *IamFactoryTestSuite) TestCreateFetcher() {
 	var tests = []struct {
-		config string
+		config  string
+		account string
 	}{
 		{
 			`
@@ -63,6 +65,7 @@ secret_access_key: secret
 session_token: session
 default_region: us1-east
 `,
+			"my_account",
 		},
 	}
 
@@ -79,7 +82,18 @@ default_region: us1-east
 					return nil
 				},
 			)
-		factory := &IAMFactory{mockedConfigGetter}
+		identity := awslib.Identity{
+			Account: &test.account,
+		}
+		mockedIdentityProvider := &awslib.MockIdentityProviderGetter{}
+		mockedIdentityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
+
+		factory := &IAMFactory{
+			AwsConfigProvider: mockedConfigGetter,
+			IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+				return mockedIdentityProvider
+			},
+		}
 
 		cfg, err := agentconfig.NewConfigFrom(test.config)
 		s.NoError(err)

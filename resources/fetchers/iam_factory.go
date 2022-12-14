@@ -20,23 +20,27 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const IAMType = "aws-iam"
-
 func init() {
-	fetchersManager.Factories.RegisterFactory(IAMType, &IAMFactory{AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}}})
+	fetchersManager.Factories.RegisterFactory(fetching.IAMType, &IAMFactory{
+		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+		IdentityProvider:  awslib.GetIdentityClient,
+	})
 }
 
 type IAMFactory struct {
 	AwsConfigProvider config.AwsConfigProvider
+	IdentityProvider  func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -53,17 +57,25 @@ func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 
 func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
-	provider := awslib.NewIAMProvider(log, awsConfig)
+
+	identityProvider := f.IdentityProvider(awsConfig)
+	identity, err := identityProvider.GetIdentity(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
+	}
+
+	provider := iam.NewIAMProvider(log, awsConfig)
 
 	return &IAMFetcher{
-		log:         log,
-		cfg:         cfg,
-		iamProvider: provider,
-		resourceCh:  ch,
+		log:           log,
+		cfg:           cfg,
+		iamProvider:   provider,
+		cloudIdentity: identity,
+		resourceCh:    ch,
 	}, nil
 
 }

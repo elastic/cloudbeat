@@ -21,10 +21,6 @@ package add_cluster_id
 type config struct {
 }
 
-func defaultConfig() config {
-	return config{}
-}
-
 func (c *config) Validate() error {
 	return nil
 }

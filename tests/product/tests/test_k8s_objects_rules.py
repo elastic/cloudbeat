@@ -15,7 +15,14 @@ from commonlib.framework.reporting import skip_param_case, SkipReportData
 
 
 @pytest.mark.k8s_object_rules
-def test_kube_resource_patch(elastic_client, test_env, rule_tag, resource_type, resource_body, expected):
+def test_kube_resource_patch(
+    elastic_client,
+    test_env,
+    rule_tag,
+    resource_type,
+    resource_body,
+    expected,
+):
     """
     Test kube resource
     @param test_env: pre step that set-ups a kube resources to test on
@@ -24,36 +31,40 @@ def test_kube_resource_patch(elastic_client, test_env, rule_tag, resource_type, 
     @param resource_body: a dict to represent the relevant properties of the resource
     @param expected: "failed" or "passed"
     """
+    # pylint: disable=duplicate-code
+
     k8s_client, _, agent_config = test_env
 
     # make sure resource exists
-    metadata = resource_body['metadata']
-    relevant_metadata = {k: metadata[k] for k in ('name', 'namespace') if k in metadata}
+    metadata = resource_body["metadata"]
+    relevant_metadata = {k: metadata[k] for k in ("name", "namespace") if k in metadata}
     try:
         resource = k8s_client.get_resource(resource_type=resource_type, **relevant_metadata)
     except TypeError as type_error:
         print(type_error)
-        resource = k8s_client.get_resource(resource_type=resource_type,
-                                           namespace=agent_config.namespace,
-                                           **relevant_metadata)
+        resource = k8s_client.get_resource(
+            resource_type=resource_type,
+            namespace=agent_config.namespace,
+            **relevant_metadata,
+        )
 
     assert resource, f"Resource {resource_type} not found"
 
     test_resource_id = str(uuid.uuid4())
 
-    labels = metadata.setdefault('labels', {})
-    labels['test_resource_id'] = test_resource_id
+    labels = metadata.setdefault("labels", {})
+    labels["test_resource_id"] = test_resource_id
 
     # patch resource
     resource = k8s_client.patch_resources(
         resource_type=resource_type,
         body=resource_body,
-        **relevant_metadata
+        **relevant_metadata,
     )
     if resource is None:
         raise ValueError(
-            f'Could not patch resource type {resource_type}:'
-            f' {relevant_metadata} with patch {resource_body}')
+            f"Could not patch resource type {resource_type}:" f" {relevant_metadata} with patch {resource_body}",
+        )
 
     def match_resource(ident_resource):
         try:
@@ -71,40 +82,45 @@ def test_kube_resource_patch(elastic_client, test_env, rule_tag, resource_type, 
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
-    assert evaluation == expected, f"Rule {rule_tag} verification failed, " \
-                                   f"expected: {expected} actual: {evaluation}"
+    assert evaluation == expected, f"Rule {rule_tag} verification failed, " f"expected: {expected} actual: {evaluation}"
 
 
-register_params(test_kube_resource_patch, Parameters(
-    ("rule_tag", "resource_type", "resource_body", "expected"),
-    [
-        *k8s_tc.cis_5_1_3.values(),
-        *k8s_tc.cis_5_1_5.values(),
-        *k8s_tc.cis_5_1_6.values(),
-        *k8s_tc.cis_5_2_3.values(),
-        *k8s_tc.cis_5_2_4.values(),
-        *k8s_tc.cis_5_2_5.values(),
-        *k8s_tc.cis_5_2_2.values(),
-        *k8s_tc.cis_5_2_6.values(),
-        *k8s_tc.cis_5_2_8.values(),
-        *skip_param_case(skip_list=[*k8s_tc.cis_5_2_7.values()],
-                         data_to_report=SkipReportData(
-                             url_title="security-team: #4540",
-                             url_link="https://github.com/elastic/security-team/issues/4540",
-                             skip_reason="Known issue: incorrect implementation"
-                         ))
-    ],
-    ids=[
-        *k8s_tc.cis_5_1_3.keys(),
-        *k8s_tc.cis_5_1_5.keys(),
-        *k8s_tc.cis_5_1_6.keys(),
-        *k8s_tc.cis_5_2_3.keys(),
-        *k8s_tc.cis_5_2_4.keys(),
-        *k8s_tc.cis_5_2_5.keys(),
-        *k8s_tc.cis_5_2_2.keys(),
-        *k8s_tc.cis_5_2_6.keys(),
-        *k8s_tc.cis_5_2_7.keys(),
-        *k8s_tc.cis_5_2_8.keys(),
-        # *k8s_tc.cis_5_2_9.keys(), - TODO: cases are not implemented
-        # *k8s_tc.cis_5_2_10.keys() - TODO: cases are not implemented
-    ]))
+register_params(
+    test_kube_resource_patch,
+    Parameters(
+        ("rule_tag", "resource_type", "resource_body", "expected"),
+        [
+            *k8s_tc.cis_5_1_3.values(),
+            *k8s_tc.cis_5_1_5.values(),
+            *k8s_tc.cis_5_1_6.values(),
+            *k8s_tc.cis_5_2_3.values(),
+            *k8s_tc.cis_5_2_4.values(),
+            *k8s_tc.cis_5_2_5.values(),
+            *k8s_tc.cis_5_2_2.values(),
+            *k8s_tc.cis_5_2_6.values(),
+            *k8s_tc.cis_5_2_8.values(),
+            *skip_param_case(
+                skip_list=[*k8s_tc.cis_5_2_7.values()],
+                data_to_report=SkipReportData(
+                    url_title="security-team: #4540",
+                    url_link="https://github.com/elastic/security-team/issues/4540",
+                    skip_reason="Known issue: incorrect implementation",
+                ),
+            ),
+        ],
+        ids=[
+            *k8s_tc.cis_5_1_3.keys(),
+            *k8s_tc.cis_5_1_5.keys(),
+            *k8s_tc.cis_5_1_6.keys(),
+            *k8s_tc.cis_5_2_3.keys(),
+            *k8s_tc.cis_5_2_4.keys(),
+            *k8s_tc.cis_5_2_5.keys(),
+            *k8s_tc.cis_5_2_2.keys(),
+            *k8s_tc.cis_5_2_6.keys(),
+            *k8s_tc.cis_5_2_7.keys(),
+            *k8s_tc.cis_5_2_8.keys(),
+            # *k8s_tc.cis_5_2_9.keys(), - TODO: cases are not implemented
+            # *k8s_tc.cis_5_2_10.keys() - TODO: cases are not implemented
+        ],
+    ),
+)

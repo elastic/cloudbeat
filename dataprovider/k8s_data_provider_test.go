@@ -36,8 +36,18 @@ var (
 	cfg    = &config.Config{}
 )
 
-func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
+type clusterNameProviderMock struct {
+	clusterName string
+}
 
+func (c clusterNameProviderMock) GetClusterName(ctx context.Context, cfg *config.Config, log *logp.Logger) (string, error) {
+	if c.clusterName == "error" {
+		return "", os.ErrNotExist
+	}
+	return c.clusterName, nil
+}
+
+func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 	tests := []struct {
 		collector k8sDataCollector
 		name      string
@@ -51,20 +61,40 @@ func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 				serverVersion: version.Version{
 					Version: ".",
 				},
+				clusterName: "cluster_name",
 			},
 			collector: k8sDataCollector{
-				kubeClient: k8sFake.NewSimpleClientset(),
-				log:        logger,
-				cfg:        cfg,
+				kubeClient:          k8sFake.NewSimpleClientset(),
+				log:                 logger,
+				cfg:                 cfg,
+				clusterNameProvider: clusterNameProviderMock{"cluster_name"},
+			},
+		},
+		{
+			name: "test k8s common data - error providing cluster name",
+			want: &CommonK8sData{
+				clusterId: "testing_namespace_uid",
+				nodeId:    "testing_node_uid",
+				serverVersion: version.Version{
+					Version: ".",
+				},
+				clusterName: "",
+			},
+			collector: k8sDataCollector{
+				kubeClient:          k8sFake.NewSimpleClientset(),
+				log:                 logger,
+				cfg:                 cfg,
+				clusterNameProvider: clusterNameProviderMock{"error"},
 			},
 		},
 		{
 			name: "test k8s common data with no k8s connection",
 			want: nil,
 			collector: k8sDataCollector{
-				kubeClient: nil,
-				log:        logger,
-				cfg:        cfg,
+				kubeClient:          nil,
+				log:                 logger,
+				cfg:                 cfg,
+				clusterNameProvider: clusterNameProviderMock{"some_name"},
 			},
 		},
 	}

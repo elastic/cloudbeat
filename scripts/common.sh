@@ -35,7 +35,7 @@ get_agent_sha() {
 }
 
 _kubectl_node_info() {
- kubectl get node -o go-template="{{(index .items 0 ).status.nodeInfo.$1}}" 
+ kubectl get node -o go-template="{{(index .items 0 ).status.nodeInfo.$1}}"
 }
 
 # Iterates over the agents, and copies a list of files into each one of them to the `components` folder
