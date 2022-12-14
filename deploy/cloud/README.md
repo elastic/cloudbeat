@@ -25,7 +25,7 @@ Delete environment
 
 # Examples
 
-## Spesific version
+## Specific version
 To create an environment with spesific version use `terraform apply --auto-approve -var="stack_version=8.5.1"`
 When working with non production versions it is required to also update the deployment regions.
 For example, to deploy `8.6.0-SNAPSHOT` use `terraform apply --auto-approve -var="stack_version=8.6.0-SNAPSHOT" -var="ess_region=gcp-us-west2"`
