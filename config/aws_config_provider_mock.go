@@ -22,6 +22,7 @@ package config
 import (
 	aws_sdk_go_v2aws "github.com/aws/aws-sdk-go-v2/aws"
 	aws "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	context "context"
 
@@ -42,7 +43,7 @@ func (_m *MockAwsConfigProvider) EXPECT() *MockAwsConfigProvider_Expecter {
 }
 
 // InitializeAWSConfig provides a mock function with given fields: ctx, cfg
-func (_m *MockAwsConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (aws_sdk_go_v2aws.Config, error) {
+func (_m *MockAwsConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (aws_sdk_go_v2aws.Config, error) {
 	ret := _m.Called(ctx, cfg)
 
 	var r0 aws_sdk_go_v2aws.Config

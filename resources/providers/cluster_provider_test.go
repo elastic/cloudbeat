@@ -89,7 +89,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 			Return(test.eksClusterName, nil)
 
 		configProviderMock := &awslib.MockConfigProviderAPI{}
-		configProviderMock.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
+		configProviderMock.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything, mock.Anything).
 			Return(awssdk.Config{}, nil)
 
 		kubeClient := k8sfake.NewSimpleClientset()
@@ -102,7 +102,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		}
 
 		ctx := context.Background()
-		clusterName, err := clusterProvider.GetClusterName(ctx, &test.config)
+		clusterName, err := clusterProvider.GetClusterName(ctx, &test.config, nil)
 
 		s.NoError(err)
 		s.Equal(test.expectedClusterName, clusterName)
@@ -116,5 +116,5 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 		Type:      "invalid-type",
 		AWSConfig: aws.ConfigAWS{},
 	}
-	s.Panics(func() { _, _ = clusterProvider.GetClusterName(ctx, &cfg) })
+	s.Panics(func() { _, _ = clusterProvider.GetClusterName(ctx, &cfg, nil) })
 }
