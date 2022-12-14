@@ -6,13 +6,13 @@ output "elasticsearch_url" {
 output "elasticsearch_username" {
   value       = module.ec_deployment.elasticsearch_username
   description = "The Elasticsearch username"
-  sensitive   = true
+  sensitive = true
 }
 
 output "elasticsearch_password" {
   value       = module.ec_deployment.elasticsearch_password
   description = "The Elasticsearch password"
-  sensitive   = true
+  sensitive = true
 }
 
 output "kibana_url" {

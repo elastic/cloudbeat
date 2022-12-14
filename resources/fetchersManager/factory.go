@@ -18,7 +18,6 @@
 package fetchersManager
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/elastic/cloudbeat/config"
@@ -54,7 +53,7 @@ func (fa *factories) RegisterFactory(name string, f fetching.Factory) {
 func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	factory, ok := fa.m[name]
 	if !ok {
-		return nil, errors.New("fetcher factory could not be found")
+		return nil, fmt.Errorf("fetcher %s could not be found", name)
 	}
 
 	return factory.Create(log, c, ch)
@@ -95,7 +94,7 @@ func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, c
 // This function takes the configuration file provided by the integration the `cfg` file
 // and depending on the input type, extract the relevant credentials and add them to the fetcher config
 func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg *config.Config, fcfg *agentconfig.C) {
-	if cfg.Type == config.InputTypeEks {
+	if cfg.Type == config.InputTypeEks || cfg.Type == config.InputTypeAws {
 		err := fcfg.Merge(cfg.AWSConfig)
 		if err != nil {
 			log.Errorf("Failed to merge aws configuration to fetcher configuration: %v", err)
