@@ -101,7 +101,7 @@ jobs:
           make build_elastic_agent_docker_image
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: ./tests/.
           push: false
