@@ -15,42 +15,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package iam
 
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
-
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 )
 
-type IamRolePermissionGetter interface {
-	GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error)
-}
-
-type IamProvider struct {
-	log    *logp.Logger
-	client *iam.Client
-}
-
-type RolePolicyInfo struct {
-	PolicyARN string
-	iam.GetRolePolicyOutput
-}
-
-func NewIAMProvider(log *logp.Logger, cfg aws.Config) *IamProvider {
-	svc := iam.NewFromConfig(cfg)
-	return &IamProvider{
-		log:    log,
-		client: svc,
-	}
-}
-
-func (p IamProvider) GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error) {
+func (p Provider) GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error) {
 	results := make([]RolePolicyInfo, 0)
 	policiesIdentifiers, err := p.getAllRolePolicies(ctx, roleName)
 	if err != nil {
@@ -79,7 +53,7 @@ func (p IamProvider) GetIAMRolePermissions(ctx context.Context, roleName string)
 	return results, nil
 }
 
-func (p IamProvider) getAllRolePolicies(ctx context.Context, roleName string) ([]types.AttachedPolicy, error) {
+func (p Provider) getAllRolePolicies(ctx context.Context, roleName string) ([]types.AttachedPolicy, error) {
 	input := &iam.ListAttachedRolePoliciesInput{
 		RoleName: &roleName,
 	}
@@ -89,4 +63,16 @@ func (p IamProvider) getAllRolePolicies(ctx context.Context, roleName string) ([
 	}
 
 	return allPolicies.AttachedPolicies, err
+}
+
+func (r RolePolicyInfo) GetResourceArn() string {
+	return ""
+}
+
+func (r RolePolicyInfo) GetResourceName() string {
+	return ""
+}
+
+func (r RolePolicyInfo) GetResourceType() string {
+	return ""
 }
