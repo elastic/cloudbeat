@@ -30,7 +30,9 @@ To create an environment with specific version use
 
 `terraform apply --auto-approve -var="stack_version=8.5.1"`
 When working with non production versions it is required to also update the deployment regions.
-For example, to deploy `8.6.0-SNAPSHOT` use `terraform apply --auto-approve -var="stack_version=8.6.0-SNAPSHOT" -var="ess_region=gcp-us-west2"`
+For example, to deploy `8.6.0-SNAPSHOT` use 
+
+`terraform apply --auto-approve -var="stack_version=8.6.0-SNAPSHOT" -var="ess_region=gcp-us-west2"`
 
 ## Named environment
 To give your environment a different prefix in the name use `terraform apply --auto-approve -var="deployment_name_prefix=elastic-deployment"`
