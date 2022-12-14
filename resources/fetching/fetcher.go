@@ -24,6 +24,21 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
+const (
+	KubeAPIType = "kube-api"
+
+	EcrType       = "aws-ecr"
+	IAMType       = "aws-iam"
+	ElbType       = "aws-elb"
+	PwdPolicyType = "aws-password-policy"
+	EksType       = "aws-eks"
+
+	CloudIdentity          = "identity-management"
+	CloudContainerMgmt     = "caas" // containers as a service
+	CloudLoadBalancer      = "load-balancer"
+	CloudContainerRegistry = "container-registry"
+)
+
 // Factory can create fetcher instances based on configuration
 type Factory interface {
 	Create(*logp.Logger, *config.C, chan ResourceInfo) (Fetcher, error)
@@ -84,17 +99,3 @@ type AwsBaseFetcherConfig struct {
 	BaseFetcherConfig `config:",inline"`
 	AwsConfig         aws.ConfigAWS `config:",inline"`
 }
-
-const (
-	KubeAPIType = "kube-api"
-
-	EcrType        = "aws-ecr"
-	ElbType        = "aws-elb"
-	RolePolicyType = "aws-role-policy"
-	EksType        = "aws-eks"
-
-	CloudIdentity          = "iam"
-	CloudContainerMgmt     = "caas" // containers as a service
-	CloudLoadBalancer      = "load-balancer"
-	CloudContainerRegistry = "container-registry"
-)
