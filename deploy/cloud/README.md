@@ -32,7 +32,7 @@ Delete environment
 
 **Next Steps**
 * [Setup](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/onboarding/deploy-agent-cloudbeat-on-eks.mdx) EKS cluster
-* Setup Vanilla cluster
+* Setup Self-Managed cluster
 * Enable rules add slack webhook to connector
 
 # Examples
