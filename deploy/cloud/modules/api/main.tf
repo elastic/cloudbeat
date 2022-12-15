@@ -1,6 +1,6 @@
 resource "restapi_object" "agent_policy" {
   provider     = restapi
-  path         = "/api/fleet/agent_policies"
+  path         = "/api/fleet/agent_policies?sys_monitoring=true"
   id_attribute = "item/id"
   data         = file("data/agent_policy.json")
 
