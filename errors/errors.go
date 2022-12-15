@@ -18,13 +18,20 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package config
+package errors
 
-// https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture/data_stream/findings/agent/stream
-const (
-	CIS_K8S = "cis_k8s"
-	CIS_EKS = "cis_eks"
-	CIS_AWS = "cis_aws"
-)
+// BeaterUnhealthyError error is an error that is desgined to have an information that
+// can help to end user to operate cloudbeat health issues.
+// For example, when a cloudbeat configuration is invalid, the error will include
+// more information about what is missing/expected and might have links to external sources as well
+type BeaterUnhealthyError struct {
+	msg string
+}
 
-var SupportedCIS = []string{CIS_AWS, CIS_K8S, CIS_EKS}
+func New(msg string) BeaterUnhealthyError {
+	return BeaterUnhealthyError{msg}
+}
+
+func (c BeaterUnhealthyError) Error() string {
+	return c.msg
+}

@@ -58,7 +58,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 	}{
 		{
 			config.Config{
-				Type:       config.CIS_K8S,
+				Benchmark:  config.CIS_K8S,
 				KubeConfig: "",
 			},
 			"vanilla-cluster",
@@ -67,7 +67,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		},
 		{
 			config.Config{
-				Type:      config.CIS_EKS,
+				Benchmark: config.CIS_EKS,
 				AWSConfig: aws.ConfigAWS{},
 			},
 			"vanilla-cluster",
@@ -114,7 +114,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	clusterProvider := ClusterNameProvider{}
 	ctx := context.Background()
 	cfg := config.Config{
-		Type:      "invalid-type",
+		Benchmark: "invalid-type",
 		AWSConfig: aws.ConfigAWS{},
 	}
 	s.Panics(func() { _, _ = clusterProvider.GetClusterName(ctx, &cfg, nil) })

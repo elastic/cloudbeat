@@ -28,7 +28,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/management"
-	cloudbeat_config "github.com/elastic/cloudbeat/config"
+	cb_errors "github.com/elastic/cloudbeat/errors"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/go-ucfg"
@@ -242,8 +242,9 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 				err := l.validator.Validate(update)
 				if err != nil {
 					l.log.Errorf("Config update validation failed: %v", err)
-					if errors.Is(err, cloudbeat_config.ErrBenchmarkNotSupported) {
-						l.beat.Manager.UpdateStatus(management.Degraded, cloudbeat_config.ErrBenchmarkNotSupported.Error())
+					heatlhErr := &cb_errors.BeaterUnhealthyError{}
+					if errors.As(err, heatlhErr) {
+						l.beat.Manager.UpdateStatus(management.Degraded, heatlhErr.Error())
 					}
 					continue
 				}

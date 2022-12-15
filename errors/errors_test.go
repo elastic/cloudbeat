@@ -18,13 +18,21 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package config
+package errors
 
-// https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture/data_stream/findings/agent/stream
-const (
-	CIS_K8S = "cis_k8s"
-	CIS_EKS = "cis_eks"
-	CIS_AWS = "cis_aws"
+import (
+	"errors"
+	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-var SupportedCIS = []string{CIS_AWS, CIS_K8S, CIS_EKS}
+func TestUnwrapError(t *testing.T) {
+	e1 := New("error_1")
+	e2 := fmt.Errorf("error 2 = %w", e1)
+	healthErr := &BeaterUnhealthyError{}
+	assert.False(t, errors.Is(e1, healthErr))
+	assert.True(t, errors.As(e2, healthErr))
+	assert.Equal(t, "error_1", healthErr.Error())
+}
