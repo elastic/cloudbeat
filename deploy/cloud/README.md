@@ -1,6 +1,6 @@
 # Cloud Deployment
 
-**Motivation**
+**Motivation**  
 Provide an easy and deterministic way to set up latest cloud environment, so it can be monitored and used properly.
 
 This guide deploys both an Elastic cloud environment, and an AWS EKS cluster. To only deploy specific resources, check out the examples section.
@@ -20,17 +20,22 @@ Create environment
 
 2. run `cd deploy/cloud`
 3. run `terraform init`
-4. run `terraform apply --auto-approve` to create the environment from the latest version (the latest version is varying in cloud/regions combinations).
-5. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
+2. to create the environment from the latest version (the latest version is varying in cloud/regions combinations).
+   ```bash
+   cd deploy/cloud
+   terraform init
+   terraform apply --auto-approve
+3. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
+   ```bash
+   aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
+       --name $(terraform output -raw eks_cluster_name)
+
+To connect to the environment use the console UI or see the details how to connect to the environment, using:
 ```bash
-aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
-    --name $(terraform output -raw eks_cluster_name)
-```
-
-To connect to the environment use the console ui or see the details how to connect to the environment, use `terraform output -json`
-
-Delete environment
-1. `terraform destroy --auto-approve`
+terraform output -json
+**Delete environment:**
+```bash
+terraform destroy --auto-approve
 
 **Next Steps**
 * [Setup](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/onboarding/deploy-agent-cloudbeat-on-eks.mdx) EKS cluster
