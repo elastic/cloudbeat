@@ -6,8 +6,8 @@ Provide an easy and deterministic way to set up latest cloud environment, so it 
 This guide deploys both an Elastic cloud environment, and an AWS EKS cluster. To only deploy specific resources, check out the examples section.
 
 **Prerequisite**
-Follow the [prerequisites](/README.md#prerequisites) chapter of our main README.
 
+Follow the [prerequisites](/README.md#prerequisites) chapter of our main README.
 
 **How To**
 Create environment
@@ -15,19 +15,17 @@ Create environment
 
     1.1 use the token `export TF_VAR_ec_api_key={TOKEN}`
 
-2. run `cd deploy/cloud`
-3. run `terraform init`
-4. To create an EKS cluster and the Elastic cloud environment from the latest version (the latest version is varying in cloud/regions combinations) run:
+2. To create an EKS cluster and the Elastic cloud environment from the latest version (the latest version is varying in cloud/regions combinations) run:
    ```bash
    cd deploy/cloud
    terraform init
    terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
    ```
-5. To create an agent policy and get deployment yaml, run:
+3. To create an agent policy and get deployment yaml, run:
    ```bash
    terraform apply --auto-approve -target "module.api"
    ```
-6. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
+4. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
    ```bash
    aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
        --name $(terraform output -raw eks_cluster_name)
