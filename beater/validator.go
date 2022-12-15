@@ -32,7 +32,7 @@ type validator struct{}
 func (v *validator) Validate(cfg *agentconfig.C) error {
 	c, err := config.New(cfg)
 	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
+		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
 	}
 
 	if c.RuntimeCfg == nil {

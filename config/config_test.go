@@ -170,6 +170,48 @@ not_runtime_cfg:
 	}
 }
 
+func (s *ConfigTestSuite) TestBenchmarkType() {
+	tests := []struct {
+		config    string
+		expected  string
+		wantError bool
+	}{
+		{
+			`
+config:
+  v1:
+    benchmark: cis_eks
+`,
+			"cis_eks",
+			false,
+		},
+		{
+			`
+config:
+  v1:
+    benchmark: cis_gcp
+`,
+			"",
+			true,
+		},
+	}
+
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			cfg, err := config.NewConfigFrom(test.config)
+			s.NoError(err)
+
+			c, err := New(cfg)
+			if test.wantError {
+				s.Error(err)
+				return
+			}
+			s.NoError(err)
+			s.Equal(test.expected, *c.Benchmark)
+		})
+	}
+}
+
 func (s *ConfigTestSuite) TestRuntimeConfig() {
 	tests := []struct {
 		config   string

@@ -20,6 +20,7 @@ package providers
 import (
 	"context"
 	"fmt"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -40,9 +41,9 @@ type ClusterNameProvider struct {
 
 func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg *config.Config, log *logp.Logger) (string, error) {
 	switch cfg.Type {
-	case config.InputTypeVanillaK8s:
+	case config.CIS_K8S:
 		return provider.KubernetesClusterNameProvider.GetClusterName(cfg, provider.KubeClient)
-	case config.InputTypeEks:
+	case config.CIS_EKS:
 		awsConfig, err := provider.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AWSConfig, log)
 		if err != nil {
 			return "", fmt.Errorf("failed to initialize aws configuration for identifying the cluster name: %v", err)
