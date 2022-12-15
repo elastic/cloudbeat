@@ -67,7 +67,7 @@ func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan 
 	if err != nil {
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
-	
+
 	provider := iam.NewIAMProvider(log, awsConfig)
 
 	return &IAMFetcher{

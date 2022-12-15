@@ -1,0 +1,18 @@
+elasticsearch:
+  volumeClaimTemplate:
+    storageClassName: gp2
+
+image:
+  repository: public.ecr.aws/z7e1r9l0/cloudbeat-test
+  pullPolicy: Always
+
+cloudbeat:
+  deploy: false
+
+standaloneAgent:
+  deploy: false
+
+testData:
+  marker: pre_merge
+  agentName: cloudbeat
+  clusterType: eks
