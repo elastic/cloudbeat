@@ -60,12 +60,33 @@ resource "null_resource" "rules" {
   }
 }
 
+provider "restapi" {
+  username = module.ec_deployment.elasticsearch_username
+  password = module.ec_deployment.elasticsearch_password
+  uri      = module.ec_deployment.kibana_url
+
+  debug                = true
+  write_returns_object = true
+
+  headers = {
+    kbn-xsrf     = true
+    content-type = "application/json"
+  }
+
+  # depends_on = [module.ec_deployment]
+  # Currently this is not possible, this is why we need to apply multiple times with different targets.
+  # See https://github.com/hashicorp/terraform/issues/2430 and https://github.com/Mastercard/terraform-provider-restapi/issues/20
+}
+
 module "api" {
   source = "./modules/api"
 
+  providers = {restapi: restapi}
+  depends_on = [module.ec_deployment]
+
   username = module.ec_deployment.elasticsearch_username
   password = module.ec_deployment.elasticsearch_password
-  url      = module.ec_deployment.kibana_url
+  uri      = module.ec_deployment.kibana_url
 }
 
 resource "random_string" "suffix" {

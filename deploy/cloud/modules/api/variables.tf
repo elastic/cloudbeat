@@ -10,7 +10,7 @@ variable "password" {
   type        = string
 }
 
-variable "url" {
-  description = "Elastic URL"
+variable "uri" {
+  description = "Kibana URL"
   type        = string
 }

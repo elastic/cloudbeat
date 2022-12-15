@@ -6,10 +6,7 @@ Provide an easy and deterministic way to set up latest cloud environment, so it 
 This guide deploys both an Elastic cloud environment, and an AWS EKS cluster. To only deploy specific resources, check out the examples section.
 
 **Prerequisite**
-* [Terraform](https://developer.hashicorp.com/terraform/downloads)
-* the AWS CLI, [installed](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
-* [AWS IAM Authenticator](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html)
-* the [Kubernetes CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/), also known as `kubectl`
+Follow the [prerequisites](/README.md#prerequisites) chapter of our main README.
 
 
 **How To**
@@ -20,8 +17,15 @@ Create environment
 
 2. run `cd deploy/cloud`
 3. run `terraform init`
-4. run `terraform apply --auto-approve` to create the environment from the latest version (the latest version is varying in cloud/regions combinations).
-5. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
+4. To create the Elastic cloud environment from the latest version (the latest version is varying in cloud/regions combinations) and an EKS cluster run:
+```bash
+terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
+```
+5. To create an agent policy and get deployment yaml
+```bash
+terraform apply --auto-approve -target "module.api"
+```
+6. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
 ```bash
 aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
     --name $(terraform output -raw eks_cluster_name)

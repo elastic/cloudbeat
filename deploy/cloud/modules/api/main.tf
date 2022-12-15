@@ -1,22 +1,7 @@
-provider "restapi" {
-  alias                = "restapi_headers"
-  username             = var.username
-  password             = var.password
-  uri                  = var.url
-  debug                = true
-  write_returns_object = true
-
-  headers = {
-    kbn-xsrf     = true
-    content-type = "application/json"
-  }
-}
-
 resource "restapi_object" "agent_policy" {
-  provider     = restapi.restapi_headers
+  provider     = restapi
   path         = "/api/fleet/agent_policies"
   id_attribute = "item/id"
-  #  data       = data.local_file.agent_policy.content
   data         = file("data/agent_policy.json")
 
   # destroy does not work :(
@@ -30,26 +15,27 @@ EOF
 }
 
 resource "restapi_object" "package_policy" {
-  provider   = restapi.restapi_headers
-  depends_on = [restapi_object.agent_policy]
-  path       = "/api/fleet/package_policies"
+  provider     = restapi
+  depends_on   = [restapi_object.agent_policy]
+  path         = "/api/fleet/package_policies"
   id_attribute = "item/id"
-  data       = templatefile("data/package_policy.json", {
+  data         = templatefile("data/package_policy.json", {
     agent_policy_id = restapi_object.agent_policy.id
   })
 }
 
 data "restapi_object" "enrollment_token" {
-  provider     = restapi.restapi_headers
+  provider     = restapi
   search_key   = "policy_id"
   search_value = restapi_object.agent_policy.id
   results_key  = "items"
-  depends_on   = [restapi_object.agent_policy]
   path         = "/api/fleet/enrollment_api_keys"
+
+   depends_on   = [restapi_object.agent_policy]
 }
 
 data "restapi_object" "fleet_url" {
-  provider     = restapi.restapi_headers
+  provider     = restapi
   depends_on   = [restapi_object.agent_policy]
   path         = "/api/fleet/outputs"
   search_key   = "id"
@@ -64,11 +50,11 @@ locals {
 }
 
 data "http" "yaml" {
-  url = "${var.url}/api/fleet/kubernetes?fleetServer=${local.fleet_url}&enrolToken=${local.enrollment_token}"
+  url = "${var.uri}/api/fleet/kubernetes?fleetServer=${local.fleet_url}&enrolToken=${local.enrollment_token}"
 
   request_headers = {
-    kbn-xsrf     = true
-    Authorization: "Basic ${base64encode("${var.username}:${var.password}")}"
+    kbn-xsrf = true
+    Authorization : "Basic ${base64encode("${var.username}:${var.password}")}"
   }
 }
 
