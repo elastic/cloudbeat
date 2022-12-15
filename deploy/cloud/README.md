@@ -17,24 +17,30 @@ Create environment
 
 2. run `cd deploy/cloud`
 3. run `terraform init`
-4. To create the Elastic cloud environment from the latest version (the latest version is varying in cloud/regions combinations) and an EKS cluster run:
-```bash
-terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
-```
-5. To create an agent policy and get deployment yaml
-```bash
-terraform apply --auto-approve -target "module.api"
-```
+4. To create an EKS cluster and the Elastic cloud environment from the latest version (the latest version is varying in cloud/regions combinations) run:
+   ```bash
+   cd deploy/cloud
+   terraform init
+   terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
+   ```
+5. To create an agent policy and get deployment yaml, run:
+   ```bash
+   terraform apply --auto-approve -target "module.api"
+   ```
 6. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
+   ```bash
+   aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
+       --name $(terraform output -raw eks_cluster_name)
+   ```
+To connect to the environment use the console UI or see the details how to connect to the environment, using:
+   ```bash
+   terraform output -json
+   ```
+
+**Delete environment:**
 ```bash
-aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
-    --name $(terraform output -raw eks_cluster_name)
+terraform destroy --auto-approve
 ```
-
-To connect to the environment use the console ui or see the details how to connect to the environment, use `terraform output -json`
-
-Delete environment
-1. `terraform destroy --auto-approve`
 
 **Next Steps**
 * [Setup](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/onboarding/deploy-agent-cloudbeat-on-eks.mdx) EKS cluster
