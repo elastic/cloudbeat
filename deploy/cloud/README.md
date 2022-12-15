@@ -10,14 +10,13 @@ This guide deploys both an Elastic cloud environment, and an AWS EKS cluster. To
 * the AWS CLI, [installed](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
 * [AWS IAM Authenticator](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html)
 * the [Kubernetes CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/), also known as `kubectl`
-* [jq](https://stedolan.github.io/jq/download/)
 
 
 **How To**
 Create environment
 1. Create an [API token](https://cloud.elastic.co/deployment-features/keys) from your cloud console account.
 
-    1.1 use the token `export EC_API_KEY={TOKEN}`
+    1.1 use the token `export TF_VAR_ec_api_key={TOKEN}`
 
 2. run `cd deploy/cloud`
 3. run `terraform init`

@@ -1,4 +1,6 @@
-provider "ec" {}
+provider "ec" {
+  apikey = var.ec_api_key
+}
 
 module "ec_deployment" {
   source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"

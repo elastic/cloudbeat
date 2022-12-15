@@ -33,6 +33,7 @@ resource "restapi_object" "package_policy" {
   provider   = restapi.restapi_headers
   depends_on = [restapi_object.agent_policy]
   path       = "/api/fleet/package_policies"
+  id_attribute = "item/id"
   data       = templatefile("data/package_policy.json", {
     agent_policy_id = restapi_object.agent_policy.id
   })
