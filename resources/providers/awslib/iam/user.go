@@ -28,11 +28,12 @@ import (
 )
 
 type User struct {
-	Name       string
-	AccessKeys []AccessKey
-	MFADevices []AuthDevice
-	LastAccess time.Time
-	Arn        string
+	Name        string
+	AccessKeys  []AccessKey
+	MFADevices  []AuthDevice
+	LastAccess  time.Time
+	Arn         string
+	HasLoggedIn bool
 }
 
 type AuthDevice struct {
@@ -45,6 +46,7 @@ type AccessKey struct {
 	Active       bool
 	CreationDate time.Time
 	LastAccess   time.Time
+	HasUsed      bool
 }
 
 func (p Provider) listUsers(ctx context.Context) ([]types.User, error) {
@@ -140,11 +142,12 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		}
 
 		users = append(users, User{
-			Name:       username,
-			Arn:        arn,
-			AccessKeys: keys,
-			MFADevices: mfaDevices,
-			LastAccess: lastAccess,
+			Name:        username,
+			Arn:         arn,
+			AccessKeys:  keys,
+			MFADevices:  mfaDevices,
+			LastAccess:  lastAccess,
+			HasLoggedIn: !lastAccess.IsZero(),
 		})
 	}
 
@@ -190,6 +193,7 @@ func (p Provider) getUserKeys(ctx context.Context, apiUser types.User) ([]Access
 				Active:       apiAccessKey.Status == types.StatusTypeActive,
 				CreationDate: creationDate,
 				LastAccess:   lastUsed,
+				HasUsed:      !lastUsed.IsZero(),
 			})
 		}
 

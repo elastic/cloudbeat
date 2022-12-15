@@ -13,6 +13,8 @@ cloudbeat:
       cis_aws:
         - cis_1_8
         - cis_1_9
+        - cis_1_10
+        - cis_1_11
         - cis_1_13
 # =================================== Kibana ===================================
 setup.kibana:
@@ -42,8 +44,8 @@ output.elasticsearch:
 
   # Authentication credentials - either API key or username/password.
   #api_key: "id:api_key"
-#  username: ${ES_USERNAME}
-#  password: ${ES_PASSWORD}
+  username: "elastic"
+  password: "changeme"
 
   # Enable to allow sending output to older ES versions
   allow_older_versions: true
