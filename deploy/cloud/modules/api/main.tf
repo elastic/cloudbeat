@@ -21,6 +21,7 @@ resource "restapi_object" "package_policy" {
   id_attribute = "item/id"
   data         = templatefile("data/package_policy.json", {
     agent_policy_id = restapi_object.agent_policy.id
+    role_arn = var.role_arn
   })
 }
 
@@ -34,19 +35,19 @@ data "restapi_object" "enrollment_token" {
    depends_on   = [restapi_object.agent_policy]
 }
 
-data "restapi_object" "fleet_url" {
-  provider     = restapi
-  depends_on   = [restapi_object.agent_policy]
-  path         = "/api/fleet/outputs"
-  search_key   = "id"
-  search_value = "fleet-default-output"
-  results_key  = "items"
-}
-
 locals {
   agent_policy_id  = restapi_object.agent_policy.id
   enrollment_token = regex("api_key:(.*\\=\\=)", data.restapi_object.enrollment_token.api_data.item)[0]
-  fleet_url        = regex("hosts:\\[(.*)\\] ", data.restapi_object.fleet_url.api_data.item)[0]
+  fleet_url       = jsondecode(data.http.fleet_url.response_body).item.fleet_server_hosts[0]
+}
+
+data "http" "fleet_url" {
+  url = "${var.uri}/api/fleet/settings"
+
+  request_headers = {
+    kbn-xsrf = true
+    Authorization : "Basic ${base64encode("${var.username}:${var.password}")}"
+  }
 }
 
 data "http" "yaml" {
@@ -56,5 +57,7 @@ data "http" "yaml" {
     kbn-xsrf = true
     Authorization : "Basic ${base64encode("${var.username}:${var.password}")}"
   }
+
+  depends_on   = [data.restapi_object.enrollment_token, data.http.fleet_url]
 }
 

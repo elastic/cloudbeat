@@ -14,3 +14,8 @@ variable "uri" {
   description = "Kibana URL"
   type        = string
 }
+
+variable "role_arn" {
+  description = "IAM Role ARN to use"
+  type        = string
+}

@@ -69,3 +69,7 @@ output "yaml" {
   description = "Kubernetes deployment YAML"
   value       = module.api.yaml
 }
+output "role_arn" {
+  description = "AWS role arn"
+  value = module.iam_eks_role.iam_role_arn
+}

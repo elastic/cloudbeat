@@ -31,6 +31,34 @@ module "eks" {
   cluster_name_prefix = "${var.deployment_name_prefix}-${random_string.suffix.result}"
 }
 
+# Retrieve EKS cluster information
+provider "aws" {
+  #  region = data.terraform_remote_state.eks.outputs.region
+  region = module.eks.region
+}
+
+data "aws_eks_cluster" "cluster" {
+  #  name = data.terraform_remote_state.eks.outputs.cluster_id
+  name = module.eks.cluster_id
+}
+
+module "iam_eks_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-eks-role"
+  depends_on = [module.eks]
+
+  role_name = "cloudbeat-tf-${random_string.suffix.result}"
+
+  role_policy_arns = {
+    Developers_eks = "arn:aws:iam::704479110758:policy/Developers_eks"
+    EKS_ReadAccess = "arn:aws:iam::704479110758:policy/EKS_ReadAccess"
+  }
+
+
+  cluster_service_accounts = {
+    (module.eks.cluster_name) = ["kube-system:elastic-agent"]
+  }
+}
+
 data "local_file" "dashboard" {
   filename = "data/dashboard.ndjson"
 }
@@ -81,12 +109,39 @@ provider "restapi" {
 module "api" {
   source = "./modules/api"
 
-  providers = {restapi: restapi}
-  depends_on = [module.ec_deployment]
+  providers  = { restapi : restapi }
+  depends_on = [module.ec_deployment, module.iam_eks_role]
 
   username = module.ec_deployment.elasticsearch_username
   password = module.ec_deployment.elasticsearch_password
   uri      = module.ec_deployment.kibana_url
+  role_arn = module.iam_eks_role.iam_role_arn
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = [
+      "eks",
+      "get-token",
+      "--cluster-name",
+      data.aws_eks_cluster.cluster.name
+    ]
+  }
+}
+
+locals {
+  yaml_manifests = compact(split("---\n", module.api.yaml))
+  manifests      = {for index, manifest in local.yaml_manifests : index => yamldecode(manifest)}
+}
+
+resource "kubernetes_manifest" "agent_yaml" {
+  depends_on = [module.eks, module.iam_eks_role, module.api]
+  for_each = local.manifests
+  manifest = each.value
 }
 
 resource "random_string" "suffix" {
