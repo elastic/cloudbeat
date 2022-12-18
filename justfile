@@ -30,6 +30,9 @@ build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-
 build-replace-cloudbeat: build-binary
   ./scripts/remote_replace_cloudbeat.sh
 
+build-replace-cloudbeat-eks: build-binary-eks
+  ./scripts/remote_replace_cloudbeat.sh
+
 build-replace-bundle: build-opa-bundle
   ./scripts/remote_replace_bundle.sh
 
@@ -42,6 +45,10 @@ build-opa-bundle:
 build-binary:
   GOOS=linux go mod vendor
   GOOS=linux go build -v
+
+build-binary-eks:
+  GOOS=linux go mod vendor
+  GOOS=linux GOARCH=amd64 go build -v
 
 build-cloudbeat: build-opa-bundle build-binary
   docker build -t cloudbeat .
