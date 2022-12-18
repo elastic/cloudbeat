@@ -27,7 +27,7 @@ Create environment
    ```
 4. Finally, to deploy the agent on EKS, run:
    ```bash
-   terraform apply
+   terraform apply --auto-approve
    ```
 5. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
    ```bash

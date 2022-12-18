@@ -33,18 +33,17 @@ module "eks" {
 
 # Retrieve EKS cluster information
 provider "aws" {
-  #  region = data.terraform_remote_state.eks.outputs.region
   region = module.eks.region
 }
 
 data "aws_eks_cluster" "cluster" {
-  #  name = data.terraform_remote_state.eks.outputs.cluster_id
   name = module.eks.cluster_id
 }
 
 module "iam_eks_role" {
-  source = "terraform-aws-modules/iam/aws//modules/iam-eks-role"
+  source     = "terraform-aws-modules/iam/aws//modules/iam-eks-role"
   depends_on = [module.eks]
+  allow_self_assume_role = true
 
   role_name = "cloudbeat-tf-${random_string.suffix.result}"
 
@@ -135,8 +134,21 @@ provider "kubernetes" {
 
 resource "kubernetes_manifest" "agent_yaml" {
   depends_on = [module.eks, module.iam_eks_role, module.api]
-  for_each = module.api.manifests
-  manifest = each.value
+  for_each   = module.api.manifests
+  manifest   = each.value
+}
+
+resource "kubernetes_annotations" "service_account" {
+  api_version = "v1"
+  kind        = "ServiceAccount"
+  metadata {
+    name      = "elastic-agent"
+    namespace = "kube-system"
+  }
+  annotations = {
+    "eks.amazonaws.com/role-arn" = module.iam_eks_role.iam_role_arn
+  }
+  depends_on = [kubernetes_manifest.agent_yaml]
 }
 
 resource "random_string" "suffix" {
