@@ -15,5 +15,11 @@ output "fleet_url" {
 
 output "yaml" {
   description = "Kubernetes deployment YAML"
-  value       = jsondecode(data.http.yaml.response_body).item
+  value       = local.yaml
 }
+
+output "manifests" {
+  description = "Kubernetes deployment hcl manifests"
+  value       = local.manifests
+}
+

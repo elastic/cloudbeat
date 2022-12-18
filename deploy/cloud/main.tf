@@ -133,14 +133,9 @@ provider "kubernetes" {
   }
 }
 
-locals {
-  yaml_manifests = compact(split("---\n", module.api.yaml))
-  manifests      = {for index, manifest in local.yaml_manifests : index => yamldecode(manifest)}
-}
-
 resource "kubernetes_manifest" "agent_yaml" {
   depends_on = [module.eks, module.iam_eks_role, module.api]
-  for_each = local.manifests
+  for_each = module.api.manifests
   manifest = each.value
 }
 

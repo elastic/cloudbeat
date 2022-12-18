@@ -1,6 +1,6 @@
 resource "restapi_object" "agent_policy" {
   provider     = restapi
-  path         = "/api/fleet/agent_policies?sys_monitoring=true"
+  path         = "/api/fleet/agent_policies"
   id_attribute = "item/id"
   data         = file("data/agent_policy.json")
 
@@ -21,7 +21,7 @@ resource "restapi_object" "package_policy" {
   id_attribute = "item/id"
   data         = templatefile("data/package_policy.json", {
     agent_policy_id = restapi_object.agent_policy.id
-    role_arn = var.role_arn
+    role_arn        = var.role_arn
   })
 }
 
@@ -32,13 +32,13 @@ data "restapi_object" "enrollment_token" {
   results_key  = "items"
   path         = "/api/fleet/enrollment_api_keys"
 
-   depends_on   = [restapi_object.agent_policy]
+  depends_on = [restapi_object.agent_policy]
 }
 
 locals {
   agent_policy_id  = restapi_object.agent_policy.id
   enrollment_token = regex("api_key:(.*\\=\\=)", data.restapi_object.enrollment_token.api_data.item)[0]
-  fleet_url       = jsondecode(data.http.fleet_url.response_body).item.fleet_server_hosts[0]
+  fleet_url        = jsondecode(data.http.fleet_url.response_body).item.fleet_server_hosts[0]
 }
 
 data "http" "fleet_url" {
@@ -58,6 +58,11 @@ data "http" "yaml" {
     Authorization : "Basic ${base64encode("${var.username}:${var.password}")}"
   }
 
-  depends_on   = [data.restapi_object.enrollment_token, data.http.fleet_url]
+  depends_on = [data.restapi_object.enrollment_token, data.http.fleet_url]
 }
 
+locals {
+  yaml = jsondecode(data.http.yaml.response_body).item
+  yaml_manifests = compact(split("---\n", local.yaml))
+  manifests      = {for index, manifest in local.yaml_manifests : index => yamldecode(manifest)}
+}

@@ -19,7 +19,7 @@ Create environment
    ```bash
    cd deploy/cloud
    terraform init
-   terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks" -target "module.iam_eks_role"
+   terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
    ```
 3. To create an agent policy and IAM role for EKS, run:
    ```bash
@@ -27,7 +27,7 @@ Create environment
    ```
 4. Finally, to deploy the agent on EKS, run:
    ```bash
-   terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
+   terraform apply
    ```
 5. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
    ```bash
