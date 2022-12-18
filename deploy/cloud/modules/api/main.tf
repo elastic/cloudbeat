@@ -65,4 +65,6 @@ locals {
   yaml = jsondecode(data.http.yaml.response_body).item
   yaml_manifests = compact(split("---\n", local.yaml))
   manifests      = {for index, manifest in local.yaml_manifests : index => yamldecode(manifest)}
+  other_manifests      = {for index, manifest in local.manifests : index => manifest if ! (manifest.kind == "ServiceAccount")}
+  service_account_manifests      = {for index, manifest in local.manifests : index => manifest if (manifest.kind == "ServiceAccount")}
 }

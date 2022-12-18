@@ -41,8 +41,8 @@ data "aws_eks_cluster" "cluster" {
 }
 
 module "iam_eks_role" {
-  source     = "terraform-aws-modules/iam/aws//modules/iam-eks-role"
-  depends_on = [module.eks]
+  source                 = "terraform-aws-modules/iam/aws//modules/iam-eks-role"
+  depends_on             = [module.eks]
   allow_self_assume_role = true
 
   role_name = "cloudbeat-tf-${random_string.suffix.result}"
@@ -132,9 +132,11 @@ provider "kubernetes" {
   }
 }
 
-resource "kubernetes_manifest" "agent_yaml" {
+# In order for Elastic agent to successfully assume the role,
+# it needs to be deployed (or restarted) after service account is created and annotated.
+resource "kubernetes_manifest" "agent_service_account" {
   depends_on = [module.eks, module.iam_eks_role, module.api]
-  for_each   = module.api.manifests
+  for_each   = module.api.service_account_manifests
   manifest   = each.value
 }
 
@@ -148,8 +150,15 @@ resource "kubernetes_annotations" "service_account" {
   annotations = {
     "eks.amazonaws.com/role-arn" = module.iam_eks_role.iam_role_arn
   }
-  depends_on = [kubernetes_manifest.agent_yaml]
+  depends_on = [kubernetes_manifest.agent_service_account]
 }
+
+resource "kubernetes_manifest" "agent_yaml" {
+  depends_on = [kubernetes_annotations.service_account]
+  for_each   = module.api.other_manifests
+  manifest   = each.value
+}
+
 
 resource "random_string" "suffix" {
   length  = 3
