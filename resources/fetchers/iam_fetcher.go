@@ -46,18 +46,21 @@ type IAMResource struct {
 
 func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
-	var iamResources []awslib.AwsResource
+	iamResources := make([]awslib.AwsResource, 0)
+
 	pwdPolicy, err := f.iamProvider.GetPasswordPolicy(ctx)
 	if err != nil {
-		return err
+		f.log.Errorf("Unable to fetch PasswordPolicy, error: %v", err)
+	} else {
+		iamResources = append(iamResources, pwdPolicy)
 	}
-	iamResources = append(iamResources, pwdPolicy)
 
 	users, err := f.iamProvider.GetUsers(ctx)
 	if err != nil {
-		return err
+		f.log.Errorf("Unable to fetch IAM users, error: %v", err)
+	} else {
+		iamResources = append(iamResources, users...)
 	}
-	iamResources = append(iamResources, users...)
 
 	for _, iamResource := range iamResources {
 		f.resourceCh <- fetching.ResourceInfo{
@@ -72,8 +75,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 	return nil
 }
 
-func (f IAMFetcher) Stop() {
-}
+func (f IAMFetcher) Stop() {}
 
 func (r IAMResource) GetData() any {
 	return r.AwsResource

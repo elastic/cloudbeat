@@ -49,6 +49,67 @@ type AccessKey struct {
 	HasUsed      bool
 }
 
+func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
+	var users []awslib.AwsResource
+	apiUsers, err := p.listUsers(ctx)
+	if err != nil {
+		p.log.Errorf("fail to list users, error: %v", err)
+		return nil, err
+	}
+
+	for _, apiUser := range apiUsers {
+		mfaDevices, err := p.getMFADevices(ctx, apiUser)
+		if err != nil {
+			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
+			return nil, err
+		}
+
+		keys, err := p.getUserKeys(ctx, apiUser)
+		if err != nil {
+			p.log.Errorf("fail to list access keys for user: %v, error: %v", apiUser, err)
+			return nil, err
+		}
+
+		var lastAccess time.Time
+		if apiUser.PasswordLastUsed != nil {
+			lastAccess = *apiUser.PasswordLastUsed
+		}
+
+		var username string
+		if apiUser.UserName != nil {
+			username = *apiUser.UserName
+		}
+
+		var arn string
+		if apiUser.Arn != nil {
+			arn = *apiUser.Arn
+		}
+
+		users = append(users, User{
+			Name:        username,
+			Arn:         arn,
+			AccessKeys:  keys,
+			MFADevices:  mfaDevices,
+			LastAccess:  lastAccess,
+			HasLoggedIn: !lastAccess.IsZero(),
+		})
+	}
+
+	return users, nil
+}
+
+func (u User) GetResourceArn() string {
+	return u.Arn
+}
+
+func (u User) GetResourceName() string {
+	return "iam-user"
+}
+
+func (u User) GetResourceType() string {
+	return fetching.IAMUserType
+}
+
 func (p Provider) listUsers(ctx context.Context) ([]types.User, error) {
 	p.log.Debug("IAMProvider.getUsers")
 	var nativeUsers []types.User
@@ -106,54 +167,6 @@ func (p Provider) getMFADevices(ctx context.Context, user types.User) ([]AuthDev
 	return devices, nil
 }
 
-func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
-	var users []awslib.AwsResource
-	apiUsers, err := p.listUsers(ctx)
-	if err != nil {
-		p.log.Errorf("fail to list users, error: %v", err)
-	}
-
-	for _, apiUser := range apiUsers {
-		mfaDevices, err := p.getMFADevices(ctx, apiUser)
-		if err != nil {
-			p.log.Errorf("fail to list mfa device for user: %s, error: %v", apiUser, err)
-			return nil, err
-		}
-
-		keys, err := p.getUserKeys(ctx, apiUser)
-		if err != nil {
-			p.log.Errorf("fail to list access keys for user: %s, error: %v", apiUser, err)
-			return nil, err
-		}
-
-		var lastAccess time.Time
-		if apiUser.PasswordLastUsed != nil {
-			lastAccess = *apiUser.PasswordLastUsed
-		}
-
-		var username string
-		if apiUser.UserName != nil {
-			username = *apiUser.UserName
-		}
-
-		var arn string
-		if apiUser.Arn != nil {
-			arn = *apiUser.Arn
-		}
-
-		users = append(users, User{
-			Name:        username,
-			Arn:         arn,
-			AccessKeys:  keys,
-			MFADevices:  mfaDevices,
-			LastAccess:  lastAccess,
-			HasLoggedIn: !lastAccess.IsZero(),
-		})
-	}
-
-	return users, nil
-}
-
 func (p Provider) getUserKeys(ctx context.Context, apiUser types.User) ([]AccessKey, error) {
 
 	var keys []AccessKey
@@ -206,156 +219,3 @@ func (p Provider) getUserKeys(ctx context.Context, apiUser types.User) ([]Access
 
 	return keys, nil
 }
-
-func (u User) GetResourceArn() string {
-	return u.Arn
-}
-
-func (u User) GetResourceName() string {
-	return "iam-user"
-}
-
-func (u User) GetResourceType() string {
-	return fetching.IAMUserType
-}
-
-//func (p Provider) getUserGroups(ctx context.Context, apiUser types.User) []iam.Group {
-//	var groups []iam.Group
-//
-//	input := &iam.ListGroupsForUserInput{
-//		UserName: apiUser.UserName,
-//	}
-//	for {
-//		output, err := p.client.ListGroupsForUser(ctx, input)
-//		if err != nil {
-//			p.log.Errorf("Failed to locate groups attached to user '%s': %v", *apiUser.UserName, err)
-//			break
-//		}
-//
-//		for _, apiGroup := range output.Groups {
-//			group, err := p.adaptGroup(apiGroup, nil)
-//			if err != nil {
-//				p.log.Errorf("Failed to adapt group attached to user '%s': %v", *apiUser.UserName, err)
-//				continue
-//			}
-//			groups = append(groups, *group)
-//		}
-//		if !output.IsTruncated {
-//			break
-//		}
-//		input.Marker = output.Marker
-//	}
-//	return groups
-//}
-//
-//func (p Provider) adaptGroup(ctx context.Context, apiGroup types.Group, state *state.State) (*iam.Group, error) {
-//	if apiGroup.Arn == nil {
-//		return nil, errors.New("group arn not specified")
-//	}
-//	if apiGroup.GroupName == nil {
-//		return nil, errors.New("group name not specified")
-//	}
-//
-//	var policies []iam.Policy
-//	{
-//		input := &iam.ListAttachedGroupPoliciesInput{
-//			GroupName: apiGroup.GroupName,
-//		}
-//		for {
-//			policiesOutput, err := p.client.ListAttachedGroupPolicies(ctx, input)
-//			if err != nil {
-//				p.log.Errorf("Failed to locate policies attached to group '%s': %v", *apiGroup.GroupName, err)
-//				break
-//			}
-//
-//			for _, apiPolicy := range policiesOutput.AttachedPolicies {
-//				policy, err := p.adaptAttachedPolicy(apiPolicy)
-//				if err != nil {
-//					a.Debug("Failed to adapt policy attached to group '%s': %s", *apiGroup.GroupName, err)
-//					continue
-//				}
-//				policies = append(policies, *policy)
-//			}
-//
-//			if !policiesOutput.IsTruncated {
-//				break
-//			}
-//			input.Marker = policiesOutput.Marker
-//		}
-//	}
-//
-//	var users []iam.User
-//	if state != nil {
-//		for _, user := range state.AWS.IAM.Users {
-//			for _, userGroup := range user.Groups {
-//				if userGroup.Name.EqualTo(*apiGroup.GroupName) {
-//					users = append(users, user)
-//				}
-//			}
-//		}
-//	}
-//
-//	return &iam.Group{
-//		Name:     types.String(*apiGroup.GroupName, metadata),
-//		Users:    users,
-//		Policies: policies,
-//	}, nil
-//}
-//
-//func (p Provider) adaptPolicy(ctx context.Context, apiPolicy types.Policy) (*iam.Policy, error) {
-//
-//	if apiPolicy.Arn == nil {
-//		return nil, errors.New("policy arn not specified")
-//	}
-//	if apiPolicy.PolicyName == nil {
-//		return nil, errors.New("policy name not specified")
-//	}
-//
-//	output, err := p.client.GetPolicyVersion(ctx, &iam.GetPolicyVersionInput{
-//		PolicyArn: apiPolicy.Arn,
-//		VersionId: apiPolicy.DefaultVersionId,
-//	})
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	document, err := iamgo.ParseString(*output.PolicyVersion.Document)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	name := defsecTypes.StringDefault("", metadata)
-//	if apiPolicy.PolicyName != nil {
-//		name = defsecTypes.String(*apiPolicy.PolicyName, metadata)
-//	}
-//
-//	return &iam.Policy{
-//		Metadata: metadata,
-//		Name:     name,
-//		Document: iam.Document{
-//			Metadata: metadata,
-//			Parsed:   *document,
-//		},
-//		Builtin: defsecTypes.Bool(strings.HasPrefix(*apiPolicy.Arn, "arn:aws:iam::aws:"), metadata),
-//	}, nil
-//}
-//
-//func (p Provider) adaptAttachedPolicy(ctx context.Context, apiPolicy types.AttachedPolicy) (*iam.Policy, error) {
-//
-//	if apiPolicy.PolicyArn == nil {
-//		return nil, errors.New("policy arn not specified")
-//	}
-//	if apiPolicy.PolicyName == nil {
-//		return nil, errors.New("policy name not specified")
-//	}
-//
-//	policyOutput, err := p.client.GetPolicy(ctx, &iam.GetPolicyInput{
-//		PolicyArn: apiPolicy.PolicyArn,
-//	})
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return p.adaptPolicy(*policyOutput.Policy)
-//}
