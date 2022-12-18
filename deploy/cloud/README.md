@@ -3,7 +3,7 @@
 **Motivation**
 Provide an easy and deterministic way to set up latest cloud environment, so it can be monitored and used properly.
 
-This guide deploys both an Elastic cloud environment, and an AWS EKS cluster. To only deploy specific resources, check out the examples section.
+This guide deploys both an Elastic cloud environment, an AWS EKS cluster, and an Elastic agent on that cluster. To only deploy specific resources, check out the examples section.
 
 **Prerequisite**
 
@@ -21,6 +21,7 @@ Create environment
    terraform init
    terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
    ```
+   (Note it may take more than 20 minutes to create all the resources)
 3. To create an agent policy and IAM role for EKS, run:
    ```bash
    terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
