@@ -153,9 +153,7 @@ func (p Provider) getMFADevices(ctx context.Context, user types.User) ([]AuthDev
 	var devices []AuthDevice
 	for _, apiDevice := range apiDevices {
 		isVirtual := true
-		//metadata := a.CreateMetadataFromARN(*apiDevice.SerialNumber)
 		if !strings.HasPrefix(*apiDevice.SerialNumber, "arn:") {
-			//metadata = a.CreateMetadataFromARN(*user.Arn)
 			isVirtual = false
 		}
 		devices = append(devices, AuthDevice{
