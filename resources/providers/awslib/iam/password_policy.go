@@ -48,7 +48,7 @@ func (p Provider) GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, er
 		minimumLength = int(*policy.MinimumPasswordLength)
 	}
 
-	return PasswordPolicy{
+	return &PasswordPolicy{
 		ReusePreventionCount: reusePrevention,
 		RequireLowercase:     policy.RequireLowercaseCharacters,
 		RequireUppercase:     policy.RequireUppercaseCharacters,
