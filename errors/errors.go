@@ -18,26 +18,20 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package beater
+package errors
 
-import (
-	"fmt"
+// BeaterUnhealthyError error is an error that is desgined to have an information that
+// can help to end user to operate cloudbeat health issues.
+// For example, when a cloudbeat configuration is invalid, the error will include
+// more information about what is missing/expected and might have links to external sources as well
+type BeaterUnhealthyError struct {
+	msg string
+}
 
-	"github.com/elastic/cloudbeat/config"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
-)
+func NewUnhealthyError(msg string) BeaterUnhealthyError {
+	return BeaterUnhealthyError{msg}
+}
 
-type validator struct{}
-
-func (v *validator) Validate(cfg *agentconfig.C) error {
-	c, err := config.New(cfg)
-	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
-	}
-
-	if c.RuntimeCfg == nil {
-		return fmt.Errorf("runtime configuration didn't exist in new configuration")
-	}
-
-	return nil
+func (c BeaterUnhealthyError) Error() string {
+	return c.msg
 }

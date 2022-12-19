@@ -19,13 +19,14 @@ package providers
 
 import (
 	"context"
+	"testing"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-	"testing"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
@@ -49,7 +50,7 @@ func TestClusterProviderTestSuite(t *testing.T) {
 }
 
 func (s *ClusterProviderTestSuite) TestGetClusterName() {
-	var tests = []struct {
+	tests := []struct {
 		config              config.Config
 		vanillaClusterName  string
 		eksClusterName      string
@@ -57,7 +58,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 	}{
 		{
 			config.Config{
-				Type:       config.InputTypeVanillaK8s,
+				Benchmark:  config.CIS_K8S,
 				KubeConfig: "",
 			},
 			"vanilla-cluster",
@@ -66,7 +67,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		},
 		{
 			config.Config{
-				Type:      config.InputTypeEks,
+				Benchmark: config.CIS_EKS,
 				AWSConfig: aws.ConfigAWS{},
 			},
 			"vanilla-cluster",
@@ -113,7 +114,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	clusterProvider := ClusterNameProvider{}
 	ctx := context.Background()
 	cfg := config.Config{
-		Type:      "invalid-type",
+		Benchmark: "invalid-type",
 		AWSConfig: aws.ConfigAWS{},
 	}
 	s.Panics(func() { _, _ = clusterProvider.GetClusterName(ctx, &cfg, nil) })

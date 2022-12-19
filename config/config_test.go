@@ -72,7 +72,7 @@ fetchers:
     directory: b
 `,
 			&Benchmarks{CisK8s: []string{"a", "b", "c", "d", "e"}},
-			"cloudbeat/cis_k8s",
+			"cis_k8s",
 			aws.ConfigAWS{},
 			2,
 		},
@@ -86,6 +86,9 @@ runtime_cfg:
       - c
       - d
       - e
+config:
+  v1:
+    benchmark: cis_eks
 access_key_id: key
 secret_access_key: secret
 session_token: session
@@ -101,7 +104,7 @@ fetchers:
     directory: c
 `,
 			&Benchmarks{CisEks: []string{"a", "b", "c", "d", "e"}},
-			"cloudbeat/cis_eks",
+			"cis_eks",
 			aws.ConfigAWS{
 				AccessKeyID:          "key",
 				SecretAccessKey:      "secret",
@@ -122,7 +125,7 @@ fetchers:
 			c, err := New(cfg)
 			s.NoError(err)
 
-			s.Equal(test.expectedType, c.Type)
+			s.Equal(test.expectedType, c.Benchmark)
 			s.EqualValues(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules)
 			s.Equal(test.expectedAWSConfig, c.AWSConfig)
 			s.Equal(test.expectedFetchers, len(c.Fetchers))
@@ -166,6 +169,48 @@ not_runtime_cfg:
 			s.NoError(err)
 
 			s.Equal(test.expected, c.RuntimeCfg != nil)
+		})
+	}
+}
+
+func (s *ConfigTestSuite) TestBenchmarkType() {
+	tests := []struct {
+		config    string
+		expected  string
+		wantError bool
+	}{
+		{
+			`
+config:
+  v1:
+    benchmark: cis_eks
+`,
+			"cis_eks",
+			false,
+		},
+		{
+			`
+config:
+  v1:
+    benchmark: cis_gcp
+`,
+			"",
+			true,
+		},
+	}
+
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			cfg, err := config.NewConfigFrom(test.config)
+			s.NoError(err)
+
+			c, err := New(cfg)
+			if test.wantError {
+				s.Error(err)
+				return
+			}
+			s.NoError(err)
+			s.Equal(test.expected, c.Benchmark)
 		})
 	}
 }
@@ -256,7 +301,7 @@ runtime_cfg:
 `,
 			[]string{"a", "b"},
 			nil,
-			"cloudbeat/cis_k8s",
+			"cis_k8s",
 		},
 		{
 			`
@@ -265,10 +310,13 @@ runtime_cfg:
     cis_eks:
       - a
       - b
+config:
+  v1:
+    benchmark: cis_eks
 `,
 			nil,
 			[]string{"a", "b"},
-			"cloudbeat/cis_eks",
+			"cis_eks",
 		},
 	}
 
@@ -280,7 +328,7 @@ runtime_cfg:
 			c, err := New(cfg)
 			s.NoError(err)
 
-			s.Equal(test.expectedType, c.Type)
+			s.Equal(test.expectedType, c.Benchmark)
 			s.Equal(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules.CisK8s)
 			s.Equal(test.expectedEksActivatedRules, c.RuntimeCfg.ActivatedRules.CisEks)
 		})
