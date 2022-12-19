@@ -29,7 +29,7 @@ import (
 )
 
 func TestUnwrapError(t *testing.T) {
-	e1 := New("error_1")
+	e1 := NewUnhealthyError("error_1")
 	e2 := fmt.Errorf("error 2 = %w", e1)
 	healthErr := &BeaterUnhealthyError{}
 	assert.False(t, errors.Is(e1, healthErr))

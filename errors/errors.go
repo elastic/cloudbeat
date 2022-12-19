@@ -28,7 +28,7 @@ type BeaterUnhealthyError struct {
 	msg string
 }
 
-func New(msg string) BeaterUnhealthyError {
+func NewUnhealthyError(msg string) BeaterUnhealthyError {
 	return BeaterUnhealthyError{msg}
 }
 

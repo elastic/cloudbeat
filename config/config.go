@@ -41,7 +41,7 @@ const DefaultNamespace = "default"
 
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
-var ErrBenchmarkNotSupported = cb_errors.New("benchmark is not supported")
+var ErrBenchmarkNotSupported = cb_errors.NewUnhealthyError("benchmark is not supported")
 
 type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
