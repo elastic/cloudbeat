@@ -32,7 +32,6 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.44.162
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.21
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.17
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.24.4

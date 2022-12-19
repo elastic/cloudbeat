@@ -33,7 +33,7 @@ type AccessManagement interface {
 
 type Provider struct {
 	log    *logp.Logger
-	client IAMClient
+	client Client
 }
 
 type RolePolicyInfo struct {
@@ -59,7 +59,7 @@ func NewIAMProvider(log *logp.Logger, cfg aws.Config) *Provider {
 	}
 }
 
-type IAMClient interface {
+type Client interface {
 	ListUsers(ctx context.Context, params *iamsdk.ListUsersInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListUsersOutput, error)
 	ListMFADevices(ctx context.Context, params *iamsdk.ListMFADevicesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListMFADevicesOutput, error)
 	ListAccessKeys(ctx context.Context, params *iamsdk.ListAccessKeysInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAccessKeysOutput, error)
