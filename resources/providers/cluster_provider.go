@@ -42,8 +42,10 @@ type ClusterNameProvider struct {
 func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg *config.Config, log *logp.Logger) (string, error) {
 	switch cfg.Benchmark {
 	case config.CIS_K8S:
+		log.Debugf("Trying to identify Kubernetes Vanilla cluster name")
 		return provider.KubernetesClusterNameProvider.GetClusterName(cfg, provider.KubeClient)
 	case config.CIS_EKS:
+		log.Debugf("Trying to identify EKS cluster name")
 		awsConfig, err := provider.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AWSConfig, log)
 		if err != nil {
 			return "", fmt.Errorf("failed to initialize aws configuration for identifying the cluster name: %v", err)

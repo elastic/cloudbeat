@@ -103,7 +103,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		}
 
 		ctx := context.Background()
-		clusterName, err := clusterProvider.GetClusterName(ctx, &test.config, nil)
+		clusterName, err := clusterProvider.GetClusterName(ctx, &test.config, s.log)
 
 		s.NoError(err)
 		s.Equal(test.expectedClusterName, clusterName)
