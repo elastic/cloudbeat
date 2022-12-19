@@ -44,27 +44,40 @@ type IAMResource struct {
 	identity *awslib.Identity
 }
 
+// Fetch collects IAM resources, such as password-policy and IAM users.
+// The resources are enriched by the provider and being send to evaluation.
 func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
+	iamResources := make([]awslib.AwsResource, 0)
 
 	pwdPolicy, err := f.iamProvider.GetPasswordPolicy(ctx)
 	if err != nil {
-		return err
+		f.log.Errorf("Unable to fetch PasswordPolicy, error: %v", err)
+	} else {
+		iamResources = append(iamResources, pwdPolicy)
 	}
 
-	f.resourceCh <- fetching.ResourceInfo{
-		Resource: IAMResource{
-			AwsResource: pwdPolicy,
-			identity:    f.cloudIdentity,
-		},
-		CycleMetadata: cMetadata,
+	users, err := f.iamProvider.GetUsers(ctx)
+	if err != nil {
+		f.log.Errorf("Unable to fetch IAM users, error: %v", err)
+	} else {
+		iamResources = append(iamResources, users...)
+	}
+
+	for _, iamResource := range iamResources {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource: IAMResource{
+				AwsResource: iamResource,
+				identity:    f.cloudIdentity,
+			},
+			CycleMetadata: cMetadata,
+		}
 	}
 
 	return nil
 }
 
-func (f IAMFetcher) Stop() {
-}
+func (f IAMFetcher) Stop() {}
 
 func (r IAMResource) GetData() any {
 	return r.AwsResource
