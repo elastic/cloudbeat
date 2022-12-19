@@ -1,66 +1,55 @@
-![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/oren-zohar/a7160df46e48dff45b24096de9302d38/raw/csp-security-policies_coverage.json)
-
 # Cloud Security Posture - Rego policies
 
+![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/oren-zohar/a7160df46e48dff45b24096de9302d38/raw/csp-security-policies_coverage.json)
+
+<details>
+<summary>Project structure</summary>  
+
     .
-    ├── README.md
     ├── bundle
-    │   ├── builder.go                            # Bundle building code
-    │   ├── compliance                            # Compliance policies
-    │   │   ├── cis_eks
-    │   │   │   ├── cis_eks.rego                  # Handles all EKS CIS rules evalutations
-    │   │   │   ├── data_adapter.rego
-    │   │   │   ├── rules
-    │   │   │   │   ├── cis_2_1_1                 # CIS EKS 2.1.1 rule package
-    │   │   │   │   │   ├── data.yaml             # Rule's metadata
-    │   │   │   │   │   ├── rule.rego             # Rule's rego
-    │   │   │   │   │   └── test.rego             # Rule's test
-    |   |   |   |   ├── ...
-    │   │   │   └── test_data.rego                # CIS EKS Test data generators
-    │   │   ├── cis_k8s
-    │   │   │   ├── cis_k8s.rego                  # Handles all Kubernetes CIS rules evalutations
-    │   │   │   ├── data_adapter.rego
-    │   │   │   ├── rules
-    │   │   │   │   ├── cis_1_1_1
-    │   │   │   │   │   ├── data.yaml
-    │   │   │   │   │   ├── rule.rego
-    │   │   │   │   │   └── test.rego
-    |   |   |   |   ├── ...
-    │   │   │   └── schemas                       # Benchmark's schemas
-    │   │   │   └── input_schema.json
-    │   │   ├── kubernetes_common
-    │   │   │   └── test_data.rego
-    │   │   ├── lib
-    │   │   │   ├── assert.rego
-    │   │   │   ├── common                        # Common functions and tests
-    │   │   │   │   ├── common.rego
-    │   │   │   │   └── test.rego
-    │   │   │   ├── data_adapter                  # Input data adapter and tests
-    │   │   │   │   ├── data_adapter.rego
-    │   │   │   │   └── test.rego
-    │   │   │   ├── output_validations            # Output validations for tests
-    │   │   │   │   ├── output_validations.rego
-    │   │   │   │   └── test.rego
-    │   │   │   └── test.rego
-    │   │   └── main.rego                         # Evaluates all policies and returns the findings
-    │   ├── embed.go                              # Embed of benchmarks
-    │   ├── server.go                             # Hosting and creation of bundle server functions
-    │   └── server_test.go
-    ├── main.go
+    │   ├── compliance                         # Compliance policies
+    │   │   ├── cis_aws
+    │   │   │   ├── rules
+    │   │   │   │   ├── cis_1_8                # CIS AWS 1.8 rule package
+    │   │   │   │   │   ├── data.yaml          # Rule's metadata
+    │   │   │   │   │   ├── rule.rego          # Rule's rego
+    │   │   │   │   │   └── test.rego          # Rule's test
+    │   │   │   │   ...
+    │   │   ├── cis_eks
+    │   │   │   ├── rules
+    │   │   ├── cis_k8s
+    │   │   │   ├── rules
+    │   │   │   ├── schemas                    # Benchmark's schemas
+    │   │   ├── kubernetes_common
+    │   │   ├── lib
+    │   │   │   ├── common                     # Common functions and tests
+    │   │   │   ├── output_validations
+    │   │   ├── policy                         # Common audit functions per input
+    │   │   │   ├── kube_api
+    │   │   │   ...
+    ├── cis_policies_generator
+    │   ├── config
+    │   ├── input
+    │   ├── src
+    ├── dev
     └── server
-    └── host.go                                   # Hosting and creation of bundle server for benchmarks
+
+</details>
 
 ## Local Evaluation
 
-##### `input.json`
+**`input.json`**
 
-should contain a beat/agent output and the `activated_rules` (not mandatory - without specifying rules all rules will apply), e.g. filesystem data
+should contain a beat/agent output and the `activated_rules` (not mandatory - without specifying rules all rules will
+apply), e.g. filesystem data  
 
 ```json
 {
   "type": "file",
   "activated_rules": {
-    "cis_k8s": ["cis_1_1_1"]
+    "cis_k8s": [
+      "cis_1_1_1"
+    ]
   },
   "sub_type": "file",
   "resource": {
@@ -77,20 +66,20 @@ should contain a beat/agent output and the `activated_rules` (not mandatory - wi
 
 ### Evaluate entire policy into output.json
 
-```console
+```bash
 opa eval data.main --format pretty -i input.json -b ./bundle > output.json
 ```
 
 ### Evaluate findings only
 
-```console
+```bash
 opa eval data.main.findings --format pretty -i input.json -b ./bundle > output.json
 ```
 
 <details>
 <summary>Example output</summary>
 
-````json
+```json
 {
   "result": {
     "evaluation": "failed",
@@ -127,14 +116,14 @@ opa eval data.main.findings --format pretty -i input.json -b ./bundle > output.j
     "version": "1.0"
   }
 }
-````
+```
 
 </details>
 
 ### Evaluate with input schema
 
-```console
-❯ opa eval data.main --format pretty -i input.json -b ./bundle -s bundle/compliance/cis_k8s/schemas/input_schema.json
+```bash
+opa eval data.main --format pretty -i input.json -b ./bundle -s bundle/compliance/cis_k8s/schemas/input_schema.json
 1 error occurred: bundle/compliance/lib/data_adapter.rego:11: rego_type_error: undefined ref: input.filenames
         input.filenames
               ^
@@ -147,17 +136,17 @@ opa eval data.main.findings --format pretty -i input.json -b ./bundle > output.j
 
 ### Test entire policy
 
-```console
+```bash
 opa build -b ./bundle -e ./bundle/compliance
 ```
 
-```console
+```bash
 opa test -b bundle.tar.gz -v
 ```
 
 ### Test specific rule
 
-```console
+```bash
 opa test -v bundle/compliance/kubernetes_common bundle/compliance/lib bundle/compliance/cis_k8s/test_data.rego bundle/compliance/cis_k8s/rules/cis_1_1_2 --ignore="common_tests.rego"
 ```
 
@@ -171,13 +160,13 @@ see [pre-commit](https://pre-commit.com/) package
 
 ### Running opa server with the compliance policy
 
-```console
+```bash
 docker run --rm -p 8181:8181 -v $(pwd):/bundle openpolicyagent/opa:0.36.1 run -s -b /bundle
 ```
 
 Test it 🚀
 
-```curl
+```bash
 curl --location --request POST 'http://localhost:8181/v1/data/main' \
 --header 'Content-Type: application/json' \
 --data-raw '{

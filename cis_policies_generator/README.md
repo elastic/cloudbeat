@@ -1,9 +1,10 @@
 # CIS Policies Generator
+
 Running the generator will create/modify a metadata file for each implemented rule of the provided benchmarks in the `input` folder.
 
 `npm start -- --help`
 
-```
+```bash
 Usage: cis-policies-generator [options]
 
 CIS Benchmark parser CLI
@@ -20,10 +21,9 @@ Options:
         $ npm start -- -t -b 'cis_eks'
 ```
 
-
 Example serialization of a single rule:
 
-```
+```yaml
 metadata:
   id: 883ab83b-8dbc-5072-aef7-0f4c4a7f4048
   name: Ensure that the API server pod specification file permissions are set to

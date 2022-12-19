@@ -9,14 +9,6 @@ repos:
         language: system
         files: (\.rego)$
 
-#      - id: opa-bundle
-#        name: OPA bundle
-#        description: Formats Rego policy using opa fmt
-#        entry: opa build
-#        args: [ -b, './bundle',  -e, './bundle/compliance' ]
-#        language: system
-#        files: (\.rego)$
-
       - id: opa-check
         name: OPA check
         description: Check syntax of staged Rego files
@@ -33,3 +25,21 @@ repos:
         args: [ -b, './bundle' ]
         pass_filenames: false
         language: system
+
+      - id: update-rules-status
+        name: Update rules status
+        description: Update rules status in rules_table.md
+        entry: python3 ./dev/update_rule_status.py
+        language: system
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.32.2
+    hooks:
+      - id: markdownlint
+        args: [ '--disable',
+                MD013,  # Line length can be ignored for now
+                MD033,  # Allow inline HTML
+                MD046,  # Allow code blocks to be fenced with backticks
+                MD041,  # Allow multiple top level headers
+                '--' ]
+        files: \.(md|markdown)$
