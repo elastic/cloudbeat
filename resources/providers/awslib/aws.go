@@ -21,8 +21,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
-const DefaultRegion = "us-east-1"
-
 type Config struct {
 	Config aws.Config
 }

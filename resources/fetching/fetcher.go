@@ -33,11 +33,13 @@ const (
 	IAMUserType   = "aws-iam-user"
 	PwdPolicyType = "aws-password-policy"
 	EksType       = "aws-eks"
+	S3Type        = "aws-s3"
 
 	CloudIdentity          = "identity-management"
 	CloudContainerMgmt     = "caas" // containers as a service
 	CloudLoadBalancer      = "load-balancer"
 	CloudContainerRegistry = "container-registry"
+	CloudStorage           = "cloud-storage"
 )
 
 // Factory can create fetcher instances based on configuration

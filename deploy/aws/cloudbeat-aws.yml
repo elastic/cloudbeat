@@ -2,10 +2,12 @@ cloudbeat:
   type: cloudbeat/cis_aws
   access_key_id: ${AWS_ACCESS_KEY_ID:""}
   secret_access_key: ${AWS_SECRET_ACCESS_KEY:""}
+  default_region: eu-west-1
   # Defines how often an event is sent to the output
   period: 30s
   fetchers:
     - name: aws-iam
+    - name: aws-s3
   evaluator:
     decision_logs: false
   runtime_cfg:
@@ -16,6 +18,7 @@ cloudbeat:
         - cis_1_10
         - cis_1_11
         - cis_1_13
+        - cis_2_1_1
 # =================================== Kibana ===================================
 setup.kibana:
 

@@ -39,8 +39,7 @@ func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigA
 
 	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
 	if err != nil {
-		log.Errorf("MetadataProvider.GetMetadata Error: %v, setting AWSConfig region to default - %s", err, DefaultRegion)
-		awsConfig.Region = DefaultRegion
+		log.Errorf("MetadataProvider.GetMetadata Error: %v, setting AWSConfig region to default - %s", err, awsConfig.Region)
 		return awsConfig, nil
 	}
 

@@ -1,6 +1,6 @@
 # Cloud Deployment
 
-**Motivation**  
+**Motivation**
 Provide an easy and deterministic way to set up latest cloud environment, so it can be monitored and used properly.
 
 This guide deploys both an Elastic cloud environment, and an AWS EKS cluster. To only deploy specific resources, check out the examples section.
