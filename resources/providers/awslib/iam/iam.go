@@ -72,11 +72,10 @@ type AuthDevice struct {
 }
 
 type AccessKey struct {
-	AccessKeyId  string `json:"access_key_id,omitempty"`
 	Active       bool   `json:"active,omitempty"`
-	CreationDate string `json:"creation_date,omitempty"`
 	LastAccess   string `json:"last_access,omitempty"`
 	HasUsed      bool   `json:"has_used,omitempty"`
+	RotationDate string `json:"rotation_date,omitempty"`
 }
 
 type PasswordPolicy struct {
@@ -101,8 +100,10 @@ type CredentialReport struct {
 	MfaActive             string `csv:"mfa_active"`
 	AccessKey1Active      string `csv:"access_key_1_active"`
 	AccessKey1LastRotated string `csv:"access_key_1_last_rotated"`
+	AccessKey1LastUsed    string `csv:"access_key_1_last_used_date"`
 	AccessKey2Active      string `csv:"access_key_2_active"`
 	AccessKey2LastRotated string `csv:"access_key_2_last_rotated"`
+	AccessKey2LastUsed    string `csv:"access_key_2_last_used_date"`
 	Cert1Active           string `csv:"cert_1_active"`
 	Cert2Active           string `csv:"cert_2_active"`
 }

@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/gocarina/gocsv"
 	"github.com/pkg/errors"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -54,16 +55,6 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 	apiUsers = append(apiUsers, *rootUser)
 
 	for _, apiUser := range apiUsers {
-		mfaDevices, err := p.getMFADevices(ctx, apiUser)
-		if err != nil {
-			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
-		}
-
-		keys, err := p.getUserKeys(ctx, apiUser)
-		if err != nil {
-			p.log.Errorf("fail to list access keys for user: %v, error: %v", apiUser, err)
-		}
-
 		var username string
 		if apiUser.UserName != nil {
 			username = *apiUser.UserName
@@ -73,6 +64,13 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		if apiUser.Arn != nil {
 			arn = *apiUser.Arn
 		}
+
+		mfaDevices, err := p.getMFADevices(ctx, apiUser)
+		if err != nil {
+			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
+		}
+
+		keys := p.getUserKeys(*apiUser.UserName, credentialReport)
 
 		userAccount := credentialReport[aws.ToString(apiUser.UserName)]
 		users = append(users, User{
@@ -157,56 +155,33 @@ func (p Provider) getMFADevices(ctx context.Context, user types.User) ([]AuthDev
 	return devices, nil
 }
 
-func (p Provider) getUserKeys(ctx context.Context, apiUser types.User) ([]AccessKey, error) {
-	var keys []AccessKey
-	input := iamsdk.ListAccessKeysInput{
-		UserName: apiUser.UserName,
-	}
-	for {
-		output, err := p.client.ListAccessKeys(ctx, &input)
-		if err != nil {
-			return nil, err
-		}
+func (p Provider) getUserKeys(username string, report map[string]*CredentialReport) []AccessKey {
+	p.log.Debugf("aggregate access keys data for user: %s", username)
+	entry := report[username]
 
-		for _, apiAccessKey := range output.AccessKeyMetadata {
-			output, err := p.client.GetAccessKeyLastUsed(ctx, &iamsdk.GetAccessKeyLastUsedInput{
-				AccessKeyId: apiAccessKey.AccessKeyId,
-			})
-
-			var lastUsed time.Time
-			if err == nil {
-				if output.AccessKeyLastUsed != nil && output.AccessKeyLastUsed.LastUsedDate != nil {
-					lastUsed = *output.AccessKeyLastUsed.LastUsedDate
-				}
-			}
-
-			var accessKeyId string
-			if apiAccessKey.AccessKeyId != nil {
-				accessKeyId = *apiAccessKey.AccessKeyId
-			}
-
-			creationDate := time.Now()
-			if apiAccessKey.CreateDate != nil {
-				creationDate = *apiAccessKey.CreateDate
-			}
-
-			keys = append(keys, AccessKey{
-				AccessKeyId:  accessKeyId,
-				Active:       apiAccessKey.Status == types.StatusTypeActive,
-				CreationDate: creationDate.String(),
-				LastAccess:   lastUsed.String(),
-				HasUsed:      !lastUsed.IsZero(),
-			})
-		}
-
-		if !output.IsTruncated {
-			break
-		}
-
-		input.Marker = output.Marker
+	if entry == nil {
+		p.log.Debugf("no entry for user: %s in credentials report", username)
+		return nil
 	}
 
-	return keys, nil
+	active1, _ := strconv.ParseBool(entry.AccessKey1Active)
+	active2, _ := strconv.ParseBool(entry.AccessKey2Active)
+
+	keys := []AccessKey{
+		{
+			Active:       active1,
+			LastAccess:   entry.AccessKey1LastUsed,
+			HasUsed:      entry.AccessKey1LastUsed != "N/A",
+			RotationDate: entry.AccessKey1LastRotated,
+		}, {
+			Active:       active2,
+			LastAccess:   entry.AccessKey2LastUsed,
+			HasUsed:      entry.AccessKey2LastUsed != "N/A",
+			RotationDate: entry.AccessKey2LastRotated,
+		},
+	}
+
+	return keys
 }
 
 func (p Provider) getCredentialReport(ctx context.Context) (map[string]*CredentialReport, error) {
@@ -292,7 +267,7 @@ func (p Provider) createRootAccountUser(rootAccount *CredentialReport) (*types.U
 	}
 
 	return &types.User{
-		UserName:         aws.String("root_account"),
+		UserName:         &rootAccount.User,
 		Arn:              &rootAccount.Arn,
 		CreateDate:       &rootDate,
 		PasswordLastUsed: &pwdLastUsed,
