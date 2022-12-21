@@ -23,6 +23,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"log"
 	"os"
 	"os/exec"
@@ -353,7 +354,6 @@ func BuildOpaBundle() error {
 		RefSpecs: []config.RefSpec{"refs/heads/*:refs/heads/*"},
 	})
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -364,8 +364,8 @@ func BuildOpaBundle() error {
 		return err
 	}
 
-	log.Printf("Latest production release commit hash:", ref.Hash())
-	// Check out the latest production release
+	log.Printf("Latest production release commit hash: %s", ref.Hash().String())
+	// Check out the provided release tag commit
 	wt, err := repo.Worktree()
 	if err != nil {
 		return err
@@ -375,7 +375,10 @@ func BuildOpaBundle() error {
 		return err
 	}
 
-	sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
+	if err = sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance"); err != nil {
+		deleteDirErr := sh.Run("rm", "-rf", cspPoliciesPkgDir)
+		return errors.Wrap(err, deleteDirErr.Error())
+	}
 
 	return sh.Run("rm", "-rf", cspPoliciesPkgDir)
 }
