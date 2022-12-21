@@ -45,15 +45,12 @@ func TestValidatorTestSuite(t *testing.T) {
 }
 
 func (s *ValidatorTestSuite) TestConfig() {
-	configWithRuntimeCfg := config.MustNewConfigFrom(`
-runtime_cfg:
-  activated_rules:
-    cis_k8s:
-      - a
-      - b
-      - c
-      - d
-      - e
+	configWithBenchmark := config.MustNewConfigFrom(`
+config:
+  v1:
+    posture: sloth
+    deployment: sloth
+    benchmark: cis_k8s
 `)
 
 	testcases := []struct {
@@ -66,7 +63,7 @@ runtime_cfg:
 		},
 		{
 			false,
-			configWithRuntimeCfg,
+			configWithBenchmark,
 		},
 	}
 
