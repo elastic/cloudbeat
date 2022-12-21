@@ -50,7 +50,7 @@ import (
 
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
 	// A required dependency for building cloudbeat
-	_ "github.com/elastic/csp-security-policies/bundle"
+	_ "github.com/elastic/csp-security-policies/server"
 )
 
 const (
@@ -340,11 +340,11 @@ func PythonEnv() error {
 }
 
 func BuildOpaBundle() error {
-	pkgName := "github.com/elastic/csp-security-policies"
-	cspPoliciesPkgDir, err := sh.Output("go", "list", "-mod=mod", "-m", "-f", "{{.Dir}}", pkgName)
-	if err != nil {
-		return err
-	}
+	pkgName := "/Users/uriweisman/development/csp/csp-security-policies"
+	//cspPoliciesPkgDir, err := sh.Output("go", "list", "-mod=mod", "-m", "-f", "{{.Dir}}", pkgName)
+	//if err != nil {
+	//	return err
+	//}
 
 	return sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
 }

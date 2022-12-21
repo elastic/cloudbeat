@@ -18,36 +18,21 @@
 package iam
 
 import (
+	"bytes"
 	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	smithy "github.com/aws/smithy-go"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/gocarina/gocsv"
+	"github.com/pkg/errors"
 	"strings"
 	"time"
 )
 
-type User struct {
-	Name        string
-	AccessKeys  []AccessKey
-	MFADevices  []AuthDevice
-	LastAccess  time.Time
-	Arn         string
-	HasLoggedIn bool
-}
-
-type AuthDevice struct {
-	types.MFADevice
-	IsVirtual bool
-}
-
-type AccessKey struct {
-	AccessKeyId  string
-	Active       bool
-	CreationDate time.Time
-	LastAccess   time.Time
-	HasUsed      bool
-}
+const dateLayout = "2006-01-02T15:04:05+00:00"
 
 func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 	var users []awslib.AwsResource
@@ -57,22 +42,26 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		return nil, err
 	}
 
+	credentialReport, err := p.getCredentialReport(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rootUser, err := p.createRootAccountUser(credentialReport["<root_account>"])
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to construct a root account user")
+	}
+	apiUsers = append(apiUsers, *rootUser)
+
 	for _, apiUser := range apiUsers {
 		mfaDevices, err := p.getMFADevices(ctx, apiUser)
 		if err != nil {
 			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
-			return nil, err
 		}
 
 		keys, err := p.getUserKeys(ctx, apiUser)
 		if err != nil {
 			p.log.Errorf("fail to list access keys for user: %v, error: %v", apiUser, err)
-			return nil, err
-		}
-
-		var lastAccess time.Time
-		if apiUser.PasswordLastUsed != nil {
-			lastAccess = *apiUser.PasswordLastUsed
 		}
 
 		var username string
@@ -85,13 +74,16 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 			arn = *apiUser.Arn
 		}
 
+		userAccount := credentialReport[aws.ToString(apiUser.UserName)]
 		users = append(users, User{
-			Name:        username,
-			Arn:         arn,
-			AccessKeys:  keys,
-			MFADevices:  mfaDevices,
-			LastAccess:  lastAccess,
-			HasLoggedIn: !lastAccess.IsZero(),
+			Name:                username,
+			Arn:                 arn,
+			AccessKeys:          keys,
+			MFADevices:          mfaDevices,
+			LastAccess:          userAccount.PasswordLastUsed,
+			PasswordEnabled:     userAccount.PasswordEnabled,
+			PasswordLastChanged: userAccount.PasswordLastChanged,
+			MfaActive:           userAccount.MfaActive,
 		})
 	}
 
@@ -103,7 +95,7 @@ func (u User) GetResourceArn() string {
 }
 
 func (u User) GetResourceName() string {
-	return "iam-user"
+	return u.Name
 }
 
 func (u User) GetResourceType() string {
@@ -166,7 +158,6 @@ func (p Provider) getMFADevices(ctx context.Context, user types.User) ([]AuthDev
 }
 
 func (p Provider) getUserKeys(ctx context.Context, apiUser types.User) ([]AccessKey, error) {
-
 	var keys []AccessKey
 	input := iamsdk.ListAccessKeysInput{
 		UserName: apiUser.UserName,
@@ -202,8 +193,8 @@ func (p Provider) getUserKeys(ctx context.Context, apiUser types.User) ([]Access
 			keys = append(keys, AccessKey{
 				AccessKeyId:  accessKeyId,
 				Active:       apiAccessKey.Status == types.StatusTypeActive,
-				CreationDate: creationDate,
-				LastAccess:   lastUsed,
+				CreationDate: creationDate.String(),
+				LastAccess:   lastUsed.String(),
 				HasUsed:      !lastUsed.IsZero(),
 			})
 		}
@@ -216,4 +207,95 @@ func (p Provider) getUserKeys(ctx context.Context, apiUser types.User) ([]Access
 	}
 
 	return keys, nil
+}
+
+func (p Provider) getCredentialReport(ctx context.Context) (map[string]*CredentialReport, error) {
+	var (
+		countRetries = 0
+		maxRetries   = 5
+		interval     = 3 * time.Second
+	)
+
+	var ae smithy.APIError
+	report, err := p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
+	if err != nil {
+		var awsFailErr *types.ServiceFailureException
+		if errors.As(err, &awsFailErr) {
+			return nil, errors.Wrap(err, "could not gather aws iam credential report")
+		}
+
+		// if we have an error, and it is not a server err we generate a report
+		if errors.As(err, &ae) {
+			if ae.ErrorCode() == "ReportNotPresent" || ae.ErrorCode() == "ReportExpired" {
+				// generate a new report
+				_, err := p.client.GenerateCredentialReport(ctx, &iamsdk.GenerateCredentialReportInput{})
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		// loop until max retires or till the report is ready
+		report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
+		if errors.As(err, &ae) {
+			for ae.ErrorCode() == "NoSuchEntity" || ae.ErrorCode() == "ReportInProgress" {
+				if countRetries >= maxRetries {
+					return nil, errors.Wrap(err, "reached to max retries")
+				}
+
+				report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
+				if err == nil {
+					break
+				}
+
+				countRetries++
+				time.Sleep(interval)
+			}
+		}
+	}
+
+	if report == nil {
+		return nil, errors.Wrap(err, "could not gather aws iam credential report")
+	}
+
+	parsedReport, err := parseCredentialsReport(report)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to parse credentials report")
+	}
+
+	return parsedReport, nil
+}
+
+func parseCredentialsReport(report *iamsdk.GetCredentialReportOutput) (map[string]*CredentialReport, error) {
+	var credentialReportCSV []*CredentialReport
+	if err := gocsv.Unmarshal(bytes.NewReader(report.Content), &credentialReportCSV); err != nil {
+		return nil, err
+	}
+
+	credentialReport := make(map[string]*CredentialReport)
+	for i := range credentialReportCSV {
+		credentialReport[credentialReportCSV[i].User] = credentialReportCSV[i]
+	}
+
+	return credentialReport, nil
+}
+
+func (p Provider) createRootAccountUser(rootAccount *CredentialReport) (*types.User, error) {
+	rootDate, err := time.Parse(dateLayout, rootAccount.UserCreation)
+	if err != nil {
+		return nil, err
+	}
+
+	pwdLastUsed, err := time.Parse(dateLayout, rootAccount.PasswordLastUsed)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.User{
+		UserName:         aws.String("root_account"),
+		Arn:              &rootAccount.Arn,
+		CreateDate:       &rootDate,
+		PasswordLastUsed: &pwdLastUsed,
+		UserId:           aws.String("0"),
+	}, nil
 }
