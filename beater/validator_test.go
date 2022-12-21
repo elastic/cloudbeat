@@ -48,8 +48,6 @@ func (s *ValidatorTestSuite) TestConfig() {
 	configWithBenchmark := config.MustNewConfigFrom(`
 config:
   v1:
-    posture: sloth
-    deployment: sloth
     benchmark: cis_k8s
 `)
 
@@ -58,7 +56,7 @@ config:
 		cfg *config.C
 	}{
 		{
-			true,
+			false,
 			config.NewConfig(),
 		},
 		{
