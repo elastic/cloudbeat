@@ -17,33 +17,11 @@
 
 package version
 
-import (
-	"runtime/debug"
-)
-
-var (
-	policyVersion string
-)
-
-func init() {
-	if info, ok := debug.ReadBuildInfo(); ok {
-		for _, dep := range info.Deps {
-			if dep.Path == "github.com/elastic/csp-security-policies" {
-				policyVersion = dep.Version
-				break
-			}
-		}
-	}
-}
-
-// PolicySemanticVersion returns the current cloudbeat version.
-func PolicySemanticVersion() string {
-	return policyVersion
-}
+const policyVersion = "v1.2.3"
 
 // PolicyVersion returns cloudbeat version info used for the build.
 func PolicyVersion() Version {
 	return Version{
-		Version: PolicySemanticVersion(),
+		Version: policyVersion,
 	}
 }

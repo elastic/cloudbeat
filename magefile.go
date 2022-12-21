@@ -36,11 +36,10 @@ import (
 	"github.com/elastic/beats/v7/dev-tools/mage"
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
+	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/e2e-testing/pkg/downloads"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
-	"github.com/google/go-github/v48/github"
-
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
 	// mage:import
@@ -358,12 +357,9 @@ func BuildOpaBundle() error {
 		return err
 	}
 
-	latestRelease, err := getLatestProdRelease(owner, r)
-	if err != nil {
-		return err
-	}
-	// Find the commit associated with the latest non-prerelease release
-	ref, err := repo.Tag(*latestRelease.TagName)
+	// Find the commit associated with the relevant policy version tag
+	policyVersion := version.PolicyVersion().Version
+	ref, err := repo.Tag(policyVersion)
 	if err != nil {
 		return err
 	}
@@ -382,28 +378,4 @@ func BuildOpaBundle() error {
 	sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
 
 	return sh.Run("rm", "-rf", cspPoliciesPkgDir)
-}
-
-func getLatestProdRelease(owner, repo string) (*github.RepositoryRelease, error) {
-	client := github.NewClient(nil)
-	releases, _, err := client.Repositories.ListReleases(context.Background(), owner, repo, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	var latestRelease *github.RepositoryRelease
-	for _, release := range releases {
-		if !*release.Prerelease && (latestRelease == nil || release.CreatedAt.After(latestRelease.CreatedAt.Time)) {
-			latestRelease = release
-		}
-	}
-
-	if latestRelease == nil {
-		log.Printf("No non-prerelease releases found")
-		return nil, err
-	}
-
-	log.Printf("Latest production release:", *latestRelease.TagName)
-
-	return latestRelease, nil
 }
