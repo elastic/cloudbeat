@@ -35,9 +35,11 @@ import (
 
 	"github.com/elastic/beats/v7/dev-tools/mage"
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
-	"github.com/elastic/e2e-testing/pkg/downloads"
-
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
+	"github.com/elastic/e2e-testing/pkg/downloads"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/google/go-github/v48/github"
 
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
@@ -49,8 +51,6 @@ import (
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
 
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
-	// A required dependency for building cloudbeat
-	_ "github.com/elastic/csp-security-policies/bundle"
 )
 
 const (
@@ -340,11 +340,70 @@ func PythonEnv() error {
 }
 
 func BuildOpaBundle() error {
-	pkgName := "github.com/elastic/csp-security-policies"
-	cspPoliciesPkgDir, err := sh.Output("go", "list", "-mod=mod", "-m", "-f", "{{.Dir}}", pkgName)
+	owner := "elastic"
+	r := "csp-security-policies"
+	cspPoliciesPkgDir := "/tmp/" + r
+
+	repo, err := git.PlainClone(cspPoliciesPkgDir, false, &git.CloneOptions{
+		URL:             fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
+		InsecureSkipTLS: true,
+	})
+
+	// Fetch the latest commits
+	err = repo.Fetch(&git.FetchOptions{
+		RefSpecs: []config.RefSpec{"refs/heads/*:refs/heads/*"},
+	})
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	latestRelease, err := getLatestProdRelease(owner, r)
+	if err != nil {
+		return err
+	}
+	// Find the commit associated with the latest non-prerelease release
+	ref, err := repo.Tag(*latestRelease.TagName)
 	if err != nil {
 		return err
 	}
 
-	return sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
+	log.Printf("Latest production release commit hash:", ref.Hash())
+	// Check out the latest production release
+	wt, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+
+	if err = wt.Checkout(&git.CheckoutOptions{Hash: ref.Hash()}); err != nil {
+		return err
+	}
+
+	sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
+
+	return sh.Run("rm", "-rf", cspPoliciesPkgDir)
+}
+
+func getLatestProdRelease(owner, repo string) (*github.RepositoryRelease, error) {
+	client := github.NewClient(nil)
+	releases, _, err := client.Repositories.ListReleases(context.Background(), owner, repo, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var latestRelease *github.RepositoryRelease
+	for _, release := range releases {
+		if !*release.Prerelease && (latestRelease == nil || release.CreatedAt.After(latestRelease.CreatedAt.Time)) {
+			latestRelease = release
+		}
+	}
+
+	if latestRelease == nil {
+		log.Printf("No non-prerelease releases found")
+		return nil, err
+	}
+
+	log.Printf("Latest production release:", *latestRelease.TagName)
+
+	return latestRelease, nil
 }
