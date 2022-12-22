@@ -18,26 +18,21 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package beater
+package errors
 
 import (
+	"errors"
 	"fmt"
+	"testing"
 
-	"github.com/elastic/cloudbeat/config"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/stretchr/testify/assert"
 )
 
-type validator struct{}
-
-func (v *validator) Validate(cfg *agentconfig.C) error {
-	c, err := config.New(cfg)
-	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
-	}
-
-	if c.RuntimeCfg == nil {
-		return fmt.Errorf("runtime configuration didn't exist in new configuration")
-	}
-
-	return nil
+func TestUnwrapError(t *testing.T) {
+	e1 := NewUnhealthyError("error_1")
+	e2 := fmt.Errorf("error 2 = %w", e1)
+	healthErr := &BeaterUnhealthyError{}
+	assert.False(t, errors.Is(e1, healthErr))
+	assert.True(t, errors.As(e2, healthErr))
+	assert.Equal(t, "error_1", healthErr.Error())
 }

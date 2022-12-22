@@ -20,7 +20,7 @@ package iam
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/iam"
+	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -28,16 +28,17 @@ import (
 type AccessManagement interface {
 	GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error)
 	GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, error)
+	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
 type Provider struct {
 	log    *logp.Logger
-	client *iam.Client
+	client Client
 }
 
 type RolePolicyInfo struct {
 	PolicyARN string
-	iam.GetRolePolicyOutput
+	iamsdk.GetRolePolicyOutput
 }
 
 type PasswordPolicy struct {
@@ -51,9 +52,19 @@ type PasswordPolicy struct {
 }
 
 func NewIAMProvider(log *logp.Logger, cfg aws.Config) *Provider {
-	svc := iam.NewFromConfig(cfg)
+	svc := iamsdk.NewFromConfig(cfg)
 	return &Provider{
 		log:    log,
 		client: svc,
 	}
+}
+
+type Client interface {
+	ListUsers(ctx context.Context, params *iamsdk.ListUsersInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListUsersOutput, error)
+	ListMFADevices(ctx context.Context, params *iamsdk.ListMFADevicesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListMFADevicesOutput, error)
+	ListAccessKeys(ctx context.Context, params *iamsdk.ListAccessKeysInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAccessKeysOutput, error)
+	GetAccessKeyLastUsed(ctx context.Context, params *iamsdk.GetAccessKeyLastUsedInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetAccessKeyLastUsedOutput, error)
+	GetAccountPasswordPolicy(ctx context.Context, params *iamsdk.GetAccountPasswordPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetAccountPasswordPolicyOutput, error)
+	GetRolePolicy(ctx context.Context, params *iamsdk.GetRolePolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetRolePolicyOutput, error)
+	ListAttachedRolePolicies(ctx context.Context, params *iamsdk.ListAttachedRolePoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAttachedRolePoliciesOutput, error)
 }

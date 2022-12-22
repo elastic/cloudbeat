@@ -30,6 +30,7 @@ const (
 	EcrType       = "aws-ecr"
 	IAMType       = "aws-iam"
 	ElbType       = "aws-elb"
+	IAMUserType   = "aws-iam-user"
 	PwdPolicyType = "aws-password-policy"
 	EksType       = "aws-eks"
 

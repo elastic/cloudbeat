@@ -1,7 +1,7 @@
 cloudbeat:
   type: cloudbeat/cis_aws
-  access_key_id: ""
-  secret_access_key: ""
+  access_key_id: ${AWS_ACCESS_KEY_ID:""}
+  secret_access_key: ${AWS_SECRET_ACCESS_KEY:""}
   # Defines how often an event is sent to the output
   period: 30s
   fetchers:
@@ -13,6 +13,9 @@ cloudbeat:
       cis_aws:
         - cis_1_8
         - cis_1_9
+        - cis_1_10
+        - cis_1_11
+        - cis_1_13
 # =================================== Kibana ===================================
 setup.kibana:
 

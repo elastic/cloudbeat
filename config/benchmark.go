@@ -18,26 +18,13 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package beater
+package config
 
-import (
-	"fmt"
-
-	"github.com/elastic/cloudbeat/config"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
+// https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture/data_stream/findings/agent/stream
+const (
+	CIS_K8S = "cis_k8s"
+	CIS_EKS = "cis_eks"
+	CIS_AWS = "cis_aws"
 )
 
-type validator struct{}
-
-func (v *validator) Validate(cfg *agentconfig.C) error {
-	c, err := config.New(cfg)
-	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
-	}
-
-	if c.RuntimeCfg == nil {
-		return fmt.Errorf("runtime configuration didn't exist in new configuration")
-	}
-
-	return nil
-}
+var SupportedCIS = []string{CIS_AWS, CIS_K8S, CIS_EKS}
