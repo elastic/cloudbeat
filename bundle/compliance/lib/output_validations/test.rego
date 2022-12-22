@@ -16,25 +16,16 @@ valid_metadata := {
 	"section": "rule section",
 	"version": "rule version",
 	"tags": ["tag 1", "tag 2"],
-	"benchmark": {"name": "benchmark", "version": "v1.0.0", "id": "cis_k8s"},
-}
-
-eks_valid_metadata := {
-	"name": "rule name",
-	"description": "rule description",
-	"impact": "rule impact",
-	"tags": ["tag 1", "tag 2"],
-	"benchmark": {"name": "benchmark", "version": "v1.0.0", "id": "cis_eks"},
-	"remediation": "rule remidiation",
+	"benchmark": {
+		"name": "benchmark",
+		"version": "v1.0.0",
+		"id": "cis_k8s",
+	},
+	"rule_number": "1.2.3",
 }
 
 test_required_metadata_fields {
 	every key, _ in valid_metadata {
-		not validate_k8s_metadata(object.remove(valid_metadata, [key]))
-		not validate_aws_metadata(object.remove(valid_metadata, [key]))
-	}
-
-	every key, _ in eks_valid_metadata {
-		not validate_eks_metadata(object.remove(eks_valid_metadata, [key]))
+		not validate_metadata(object.remove(valid_metadata, [key]))
 	}
 }

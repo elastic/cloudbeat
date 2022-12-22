@@ -163,7 +163,6 @@ function generateRulesMetadataFiles(benchmarks: BenchmarkSchema[]): void {
             const ruleNumber = rule.rule_number!.replaceAll(".", "_");
             const rule_folder = `../bundle/compliance/${benchmark_id}/rules/cis_${ruleNumber}`
             const metadata_file = rule_folder + "/data.yaml";
-            delete rule.rule_number;
 
             if (fs.existsSync(rule_folder)) {
                 _.assign(rule, getExistingValues(metadata_file));

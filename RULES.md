@@ -154,7 +154,6 @@
 | [3.2.7](bundle/compliance/cis_eks/rules/cis_3_2_7)   |       3.2 | Ensure that the --make-iptables-util-chains argument is set to true                                      | :white_check_mark: | Automated |
 | [3.2.8](bundle/compliance/cis_eks/rules/cis_3_2_8)   |       3.2 | Ensure that the --hostname-override argument is not set                                                  | :white_check_mark: | Manual    |
 | [3.2.9](bundle/compliance/cis_eks/rules/cis_3_2_9)   |       3.2 | Ensure that the --eventRecordQPS argument is set to 0 or a level which ensures appropriate event capture | :white_check_mark: | Automated |
-| 3.3.1                                                |       3.3 | Prefer using Container-Optimized OS when possible                                                        | :x:                | Manual    |
 | 4.1.1                                                |       4.1 | Ensure that the cluster-admin role is only used where required                                           | :x:                | Manual    |
 | 4.1.2                                                |       4.1 | Minimize access to secrets                                                                               | :x:                | Manual    |
 | 4.1.3                                                |       4.1 | Minimize wildcard use in Roles and ClusterRoles                                                          | :x:                | Manual    |
@@ -168,21 +167,22 @@
 | [4.2.5](bundle/compliance/cis_eks/rules/cis_4_2_5)   |       4.2 | Minimize the admission of containers with allowPrivilegeEscalation                                       | :white_check_mark: | Automated |
 | [4.2.6](bundle/compliance/cis_eks/rules/cis_4_2_6)   |       4.2 | Minimize the admission of root containers                                                                | :white_check_mark: | Automated |
 | [4.2.7](bundle/compliance/cis_eks/rules/cis_4_2_7)   |       4.2 | Minimize the admission of containers with the NET_RAW capability                                         | :white_check_mark: | Automated |
-| [4.2.8](bundle/compliance/cis_eks/rules/cis_4_2_8)   |       4.2 | Minimize the admission of containers with added capabilities                                             | :white_check_mark: | Manual    |
+| [4.2.8](bundle/compliance/cis_eks/rules/cis_4_2_8)   |       4.2 | Minimize the admission of containers with added capabilities                                             | :white_check_mark: | Automated |
 | [4.2.9](bundle/compliance/cis_eks/rules/cis_4_2_9)   |       4.2 | Minimize the admission of containers with capabilities assigned                                          | :white_check_mark: | Manual    |
 | 4.3.1                                                |       4.3 | Ensure latest CNI version is used                                                                        | :x:                | Manual    |
-| 4.3.2                                                |       4.3 | Ensure that all Namespaces have Network Policies defined                                                 | :x:                | Manual    |
+| 4.3.2                                                |       4.3 | Ensure that all Namespaces have Network Policies defined                                                 | :x:                | Automated |
 | 4.4.1                                                |       4.4 | Prefer using secrets as files over secrets as environment variables                                      | :x:                | Manual    |
 | 4.4.2                                                |       4.4 | Consider external secret storage                                                                         | :x:                | Manual    |
+| 4.5.1                                                |       4.5 | Configure Image Provenance using ImagePolicyWebhook admission controller                                 | :x:                | Manual    |
 | 4.6.1                                                |       4.6 | Create administrative boundaries between resources using namespaces                                      | :x:                | Manual    |
 | 4.6.2                                                |       4.6 | Apply Security Context to Your Pods and Containers                                                       | :x:                | Manual    |
-| 4.6.3                                                |       4.6 | The default namespace should not be used                                                                 | :x:                | Manual    |
+| 4.6.3                                                |       4.6 | The default namespace should not be used                                                                 | :x:                | Automated |
 | [5.1.1](bundle/compliance/cis_eks/rules/cis_5_1_1)   |       5.1 | Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third party provider            | :white_check_mark: | Manual    |
 | 5.1.2                                                |       5.1 | Minimize user access to Amazon ECR                                                                       | :x:                | Manual    |
 | 5.1.3                                                |       5.1 | Minimize cluster access to read-only for Amazon ECR                                                      | :x:                | Manual    |
 | 5.1.4                                                |       5.1 | Minimize Container Registries to only those approved                                                     | :x:                | Manual    |
-| 5.2.1                                                |       5.2 | Prefer using managed identities for workloads                                                            | :x:                | Manual    |
-| [5.3.1](bundle/compliance/cis_eks/rules/cis_5_3_1)   |       5.3 | Ensure Kubernetes Secrets are encrypted using Customer Master Keys (CMKs) managed in AWS KMS             | :white_check_mark: | Manual    |
+| 5.2.1                                                |       5.2 | Prefer using dedicated EKS Service Accounts                                                              | :x:                | Manual    |
+| [5.3.1](bundle/compliance/cis_eks/rules/cis_5_3_1)   |       5.3 | Ensure Kubernetes Secrets are encrypted using Customer Master Keys (CMKs) managed in AWS KMS             | :white_check_mark: | Automated |
 | [5.4.1](bundle/compliance/cis_eks/rules/cis_5_4_1)   |       5.4 | Restrict Access to the Control Plane Endpoint                                                            | :white_check_mark: | Manual    |
 | [5.4.2](bundle/compliance/cis_eks/rules/cis_5_4_2)   |       5.4 | Ensure clusters are created with Private Endpoint Enabled and Public Access Disabled                     | :white_check_mark: | Manual    |
 | [5.4.3](bundle/compliance/cis_eks/rules/cis_5_4_3)   |       5.4 | Ensure clusters are created with Private Nodes                                                           | :white_check_mark: | Manual    |

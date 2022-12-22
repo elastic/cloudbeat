@@ -1,37 +1,31 @@
 metadata:
-  id: f026b2aa-c739-5512-8d7a-eaa21de507c6
-  name: Ensure clusters are created with Private Nodes (Manual)
-  profile_applicability: |
-    * Level 1
-  description: >
-    Disable public IP addresses for cluster nodes, so that they only have
-    private IP addresses.
+  id: 76565652-57f3-586c-b702-379e39b65fb5
+  name: Ensure clusters are created with Private Nodes
+  rule_number: 5.4.3
+  profile_applicability: '* Level 1'
+  description: |-
+    Disable public IP addresses for cluster nodes, so that they only have private IP addresses.
     Private Nodes are nodes with no public IP addresses.
-  rationale: >
-    Disabling public IP addresses on cluster nodes restricts access to only
-    internal networks,
-    forcing attackers to obtain local network access before attempting to compromise the
-    underlying Kubernetes hosts.
-  audit: ""
-  remediation: ""
-  impact: >
-    To enable Private Nodes, the cluster has to also be configured with a
-    private master IP
-    range and IP Aliasing enabled.
-    Private Nodes do not have outbound access to the public internet. If you want to provide
-    outbound Internet access for your private nodes, you can use Cloud NAT or you can
-    manage your own NAT gateway.
+  rationale: |-
+    Disabling public IP addresses on cluster nodes restricts access to only internal networks, forcing attackers to obtain local network access before attempting to compromise the underlying Kubernetes hosts.
+  audit: nan
+  remediation: nan
+  impact: |-
+    To enable Private Nodes, the cluster has to also be configured with a private master IP range and IP Aliasing enabled.
+
+    Private Nodes do not have outbound access to the public internet. If you want to provide outbound Internet access for your private nodes, you can use Cloud NAT or you can manage your own NAT gateway.
   default_value: |
     By default, Private Nodes are disabled.
-  references: ""
+  references:
+  - nan
   section: Cluster Networking
-  version: "1.0"
+  version: '1.0'
   tags:
   - CIS
-  - EKS
+  - CIS_EKS
   - CIS 5.4.3
   - Cluster Networking
   benchmark:
-    name: CIS Amazon Elastic Kubernetes Service (EKS) Benchmark
+    name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks

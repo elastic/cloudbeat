@@ -3,7 +3,7 @@ package compliance.lib.output_validations
 import data.compliance
 import future.keywords.every
 
-validate_common_kuberentes_provider_metadata(metadata) {
+validate_common_provider_metadata(metadata) {
 	metadata.id
 	metadata.name
 	metadata.profile_applicability
@@ -21,22 +21,11 @@ validate_common_kuberentes_provider_metadata(metadata) {
 	metadata.benchmark.name
 	metadata.benchmark.version
 	metadata.benchmark.id
+	metadata.rule_number
 }
 
-validate_k8s_metadata(metadata) {
-	validate_common_kuberentes_provider_metadata(metadata)
-} else = false {
-	true
-}
-
-validate_eks_metadata(metadata) {
-	validate_common_kuberentes_provider_metadata(metadata)
-} else = false {
-	true
-}
-
-validate_aws_metadata(metadata) {
-	validate_common_kuberentes_provider_metadata(metadata)
+validate_metadata(metadata) {
+	validate_common_provider_metadata(metadata)
 } else = false {
 	true
 }
@@ -47,15 +36,18 @@ test_validate_rule_metadata {
 	all_eks_rules := [rule | rule := compliance.cis_eks.rules[rule_id]]
 	all_aws_rules := [rule | rule := compliance.cis_aws.rules[rule_id]]
 
+	print("Validating K8s rules")
 	every k8s_rule in all_k8s_rules {
-		validate_k8s_metadata(k8s_rule.metadata)
+		validate_metadata(k8s_rule.metadata)
 	}
 
+	print("Validating EKS rules")
 	every eks_rule in all_eks_rules {
-		validate_eks_metadata(eks_rule.metadata)
+		validate_metadata(eks_rule.metadata)
 	}
 
+	print("Validating AWS rules")
 	every aws_rule in all_aws_rules {
-		validate_aws_metadata(aws_rule.metadata)
+		validate_metadata(aws_rule.metadata)
 	}
 }

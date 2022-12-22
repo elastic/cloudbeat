@@ -1,60 +1,23 @@
 import os
-import pandas as pd
-import git
+import common
 
 """
 Generates Markdown tables with implemented rules status for all services.
 """
 
-repo = git.Repo('.', search_parent_directories=True)
-os.chdir(repo.working_dir + "/dev")
 
-benchmark = {
-    "k8s": "CIS_Kubernetes_V1.23_Benchmark_v1.0.1.xlsx",
-    "eks": "CIS_Amazon_Elastic_Kubernetes_Service_(EKS)_Benchmark_v1.1.0.xlsx",
-    "aws": "CIS_Amazon_Web_Services_Foundations_Benchmark_v1.5.0.xlsx",
-}
-
-relevant_sheets = {
-    "k8s": ["Level 1 - Master Node", "Level 2 - Master Node", "Level 1 - Worker Node", "Level 2 - Worker Node"],
-    "eks": ["Level 1", "Level 2"],
-    "aws": ["Level 1", "Level 2"],
-}
-
-selected_columns_map = {
-    "k8s": {
-        "Section #": "Section",
-        "Recommendation #": "Rule Number",
-        "Title": "Description",
-        "Assessment Status": "Type",
-    },
-    "eks": {
-        "section #": "Section",
-        "recommendation #": "Rule Number",
-        "title": "Description",
-        "assessment status": "Type",
-    },
-    "aws": {
-        "Section #": "Section",
-        "Recommendation #": "Rule Number",
-        "Title": "Description",
-        "Assessment Status": "Type",
-    },
-}
-
-
-def get_implemented_rules(all_rules, service):
+def get_implemented_rules(all_rules, benchmark_id):
     """
     Get list of implemented rules in the repository for current service.
     :param all_rules: List of all rules for specified benchmark
-    :param service: Service name (k8s, eks, aws)
+    :param benchmark_id: Benchmark ID
     :return: List of implemented rules
     """
     # Set all rules as not implemented by default
     implemented_rules = {str(rule): ":x:" for rule in all_rules}  # ❌
 
     # Construct path to rules directory for current service
-    rules_dir = os.path.join("../bundle", "compliance", f"cis_{service}", "rules")
+    rules_dir = os.path.join("../bundle", "compliance", f"{benchmark_id}", "rules")
 
     # Get list of all rule files in the rules directory
     rule_files = os.listdir(rules_dir)
@@ -70,50 +33,39 @@ def get_implemented_rules(all_rules, service):
     return implemented_rules
 
 
-def generate_md_table(service):
+def generate_md_table(benchmark_id):
     """
     Generate Markdown table with implemented rules status for current service.
-    :param service: Service name (k8s, eks, aws)
+    :param benchmark_id: Benchmark ID
     :return: Markdown table
     """
-    benchmark_name = benchmark[service]
-    data_path = f"../cis_policies_generator/input/{benchmark_name}"
+    rules_data, sections = common.parse_rules_data_from_excel(benchmark_id)
 
-    sheets = relevant_sheets[service]
-    full_data = pd.DataFrame()
-    for sheet_name in sheets:
-        print(f"Processing sheet '{sheet_name}'")
-        excel_file = pd.read_excel(data_path, sheet_name=sheet_name)
-
-        # Select only the columns you want to include in the Markdown table
-        data = excel_file[selected_columns_map[service].keys()]
-
-        # Update Table headers
-        data.columns = selected_columns_map[service].values()
-
-        # Remove rows with empty values in the "Rule Number" column and convert to string
-        data = data[data["Rule Number"].notna()].astype(str)
-
-        full_data = pd.concat([full_data, data]).drop_duplicates(subset="Rule Number").reset_index(drop=True)
+    # Rename "Title" column to "Description"
+    rules_data.rename(columns={'Title': 'Description'}, inplace=True)
 
     # Get list of all rules in sheet
-    all_rules = full_data["Rule Number"].to_list()
+    all_rules = rules_data["Rule Number"].to_list()
 
     # Get list of implemented rules
-    implemented_rules = get_implemented_rules(all_rules, service)
+    implemented_rules = get_implemented_rules(all_rules, benchmark_id)
 
     # Add implemented rules' column to the data
     for rule, status in implemented_rules.items():
-        full_data.loc[full_data["Rule Number"] == rule, "Implemented"] = status
+        rules_data.loc[rules_data["Rule Number"] == rule, "Implemented"] = status
 
     new_order = ["Rule Number", "Section", "Description", "Implemented", "Type"]
-    full_data = full_data.reindex(columns=new_order)
-    full_data = full_data.sort_values("Rule Number")
+    rules_data = rules_data.reindex(columns=new_order)
+    rules_data = rules_data.sort_values("Rule Number")
 
-    full_data["Rule Number"] = full_data["Rule Number"].apply(get_rule_path, service=service, implemented_rules=implemented_rules)
+    rules_data["Rule Number"] = rules_data["Rule Number"].apply(
+        get_rule_path,
+        benchmark_id=benchmark_id,
+        implemented_rules=implemented_rules
+    )
 
     # Convert DataFrame to Markdown table
-    table = full_data.to_markdown(index=False, tablefmt="github")
+    table = rules_data.to_markdown(index=False, tablefmt="github")
 
     # Add table title
     total_implemented = len([rule for rule, status in implemented_rules.items() if status == ":white_check_mark:"])
@@ -123,16 +75,16 @@ def generate_md_table(service):
     return table, description, status
 
 
-def get_rule_path(rule, service, implemented_rules):
+def get_rule_path(rule, benchmark_id, implemented_rules):
     """
     Get rule path for specified rule and service.
     :param implemented_rules: ‘Implemented’ column values
     :param rule: Rule number
-    :param service: Service name (k8s, eks, aws)
+    :param benchmark_id: Benchmark ID
     :return: Rule path in the repository
     """
     if implemented_rules[rule] == ":white_check_mark:":
-        return f"[{rule}](bundle/compliance/cis_{service}/rules/cis_{rule.replace('.', '_')})"
+        return f"[{rule}](bundle/compliance/{benchmark_id}/rules/cis_{rule.replace('.', '_')})"
     else:
         return rule
 
@@ -152,13 +104,13 @@ def update_main_readme_status_badge(percentage, service):
         readme = f.readlines()
 
         if service == "k8s":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-Kubernetes%20({percentage:.1f}%25)-326CE5?" \
+            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-Kubernetes%20({percentage:.0f}%25)-326CE5?" \
                     f"logo=Kubernetes)](RULES.md#k8s-cis-benchmark)\n"
         elif service == "eks":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-Amazon%20EKS%20({percentage:.1f}%25)-FF9900?" \
+            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-Amazon%20EKS%20({percentage:.0f}%25)-FF9900?" \
                     f"logo=Amazon+EKS)](RULES.md#eks-cis-benchmark)\n"
         elif service == "aws":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-AWS%20({percentage:.1f}%25)-232F3E?l" \
+            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-AWS%20({percentage:.0f}%25)-232F3E?l" \
                     f"ogo=Amazon+AWS)](RULES.md#aws-cis-benchmark)\n"
 
         badge_line = get_badge_line_number(readme, service)
@@ -180,13 +132,18 @@ def get_badge_line_number(readme, service):
             return i
 
 
-with open("../RULES.md", "w") as f:
-    f.write(f"# Rules Status")
-    for service in benchmark.keys():
-        print(f"Generating Markdown table for '{service}' service")
-        f.write(f"\n\n## {service.upper()} CIS Benchmark\n\n")
-        table, description, percentage = generate_md_table(service)
-        f.write(description)
-        f.write(table)
-        update_main_readme_status_badge(percentage * 100, service)
-    f.write("\n")
+if __name__ == "__main__":
+    # Set working directory to the dev directory
+    os.chdir(common.repo_root.working_dir + "/dev")
+
+    # Write Markdown table to file
+    with open("../RULES.md", "w") as f:
+        f.write(f"# Rules Status")
+        for benchmark_id in common.benchmark.keys():
+            print(f"Generating Markdown table for '{benchmark_id}' service")
+            f.write(f"\n\n## {benchmark_id.removeprefix('cis_').upper()} CIS Benchmark\n\n")
+            table, description, percentage = generate_md_table(benchmark_id)
+            f.write(description)
+            f.write(table)
+            update_main_readme_status_badge(percentage * 100, benchmark_id.removeprefix('cis_'))
+        f.write("\n")
