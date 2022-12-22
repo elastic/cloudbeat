@@ -15,22 +15,31 @@ Create environment
 
     1.1 use the token `export TF_VAR_ec_api_key={TOKEN}`
 
-2. To create an EKS cluster and the Elastic cloud environment from the latest version (the latest version is varying in cloud/regions combinations) run:
+2. In case you want to deploy a specific stack version, set the `TF_VAR_stack_version` variable to the desired version.
+
+    for `SNAPSHOT` version make sure to also set the region properly.
+    ```bash
+    export TF_VAR_stack_version=8.6.0-SNAPSHOT
+    export TF_VAR_ess_region=gcp-us-west2
+    ```
+    Note: if instead of using environment variables you want to use the `-var` flag, make sure to pass that same variable in all stages of the deployment.
+
+3. To create an EKS cluster and the Elastic cloud environment from the latest version (the latest version is varying in cloud/regions combinations) run:
    ```bash
    cd deploy/cloud
    terraform init
    terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
    ```
    (Note it may take more than 20 minutes to create all the resources)
-3. To create an agent policy and IAM role for EKS, run:
+4. To create an agent policy and IAM role for EKS, run:
    ```bash
    terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
    ```
-4. Finally, to deploy the agent on EKS, run:
+5. Finally, to deploy the agent on EKS, run:
    ```bash
    terraform apply --auto-approve
    ```
-5. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
+6. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
    ```bash
    aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
        --name $(terraform output -raw eks_cluster_name)
