@@ -8,15 +8,13 @@ import data.compliance.lib.common
 resource = input.resource
 
 findings = f {
-	input.activated_rules
+	input.benchmark
 
-	# iterate over activated benchmarks
-	benchmarks := [key | input.activated_rules[key]]
+	# iterate over activated benchmark rules
+	benchmark := input.benchmark
 
-	# aggregate findings from activated benchmarks
+	# aggregate findings from activated benchmark
 	f := {finding |
-		benchmark := benchmarks[_]
-		rule := input.activated_rules[benchmark][_]
 		result := compliance[benchmark].rules[rule].finding with data.benchmark_data_adapter as compliance[benchmark].data_adapter
 		finding = {
 			"result": result,
@@ -26,7 +24,7 @@ findings = f {
 }
 
 findings = f {
-	not input.activated_rules
+	not input.benchmark
 
 	# aggregate findings from all benchmarks
 	f := {finding |
