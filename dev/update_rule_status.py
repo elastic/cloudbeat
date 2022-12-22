@@ -5,6 +5,14 @@ import common
 Generates Markdown tables with implemented rules status for all services.
 """
 
+colalign = {
+    "Rule Number": "center",
+    "Section": "left",
+    "Description": "left",
+    "Status": "center",
+    "Type": "center"
+}
+
 
 def get_implemented_rules(all_rules, benchmark_id):
     """
@@ -52,9 +60,11 @@ def generate_md_table(benchmark_id):
 
     # Add implemented rules' column to the data
     for rule, status in implemented_rules.items():
-        rules_data.loc[rules_data["Rule Number"] == rule, "Implemented"] = status
+        rules_data.loc[rules_data["Rule Number"] == rule, "Status"] = status
 
-    new_order = ["Rule Number", "Section", "Description", "Implemented", "Type"]
+    rules_data["Section"] = rules_data["Section"].apply(lambda section_id: sections[section_id])
+
+    new_order = ["Rule Number", "Section", "Description", "Status", "Type"]
     rules_data = rules_data.reindex(columns=new_order)
     rules_data = rules_data.sort_values("Rule Number")
 
@@ -65,7 +75,7 @@ def generate_md_table(benchmark_id):
     )
 
     # Convert DataFrame to Markdown table
-    table = rules_data.to_markdown(index=False, tablefmt="github")
+    table = rules_data.to_markdown(index=False, tablefmt="pipe", colalign=colalign.values())
 
     # Add table title
     total_implemented = len([rule for rule, status in implemented_rules.items() if status == ":white_check_mark:"])
