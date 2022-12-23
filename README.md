@@ -22,14 +22,14 @@ ___
 ### Table of contents
 
 - [Prerequisites](#prerequisites)
-- [Deploying Cloudbeat as a process](#deploying-cloudbeat)
+- [Deploying Cloudbeat as a process](#deploying-cloudbeat-as-a-process)
     - [Unmanaged Kubernetes](#clean-up)
     - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-(EKS))
 - [Deploying Cloudbeat with Elastic-Agent](#running-cloudbeat-with-elastic-agent)
 
 ## Prerequisites
 
-1. We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to keep all our tooling in check. See our [README](bin/README.hermit.md) for more details.
+1. We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to keep all our tooling in check. See our [README](/bin/README.hermit.md) for more details.
    Install it
    with the following command:
     ```zsh
@@ -59,7 +59,7 @@ ___
 
 ## Deployment
 
-## Running Cloudbeat as a process
+## Deploying Cloudbeat as a process
 
 ### Self-Managed Kubernetes
 Build and deploying cloudbeat into your local kind cluster:
