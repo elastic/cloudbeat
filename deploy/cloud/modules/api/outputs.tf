@@ -32,4 +32,3 @@ output "service_account_manifests" {
   description = "Kubernetes deployment hcl manifests of the service account(s)"
   value       = local.service_account_manifests
 }
-
