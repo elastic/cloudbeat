@@ -38,7 +38,7 @@ additional_third_party_deps = [
         "url": "https://catalog.redhat.com/software/containers/ubi8/ubi-minimal/5c359a62bed8bd75a2c3fba8",
         "license": "Custom;https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf",
         "sourceURL": "https://oss-dependencies.elastic.co/red-hat-universal-base-image-minimal/8/ubi-minimal-8-source"
-        ".tar.gz",
+                     ".tar.gz",
     },
 ]
 
@@ -101,58 +101,62 @@ def go_license_detector(notice_out, deps_out, modules_list):
     )
     beats_rules_path = os.path.join(BEATS_DIR, "dev-tools", "notice", "rules.json")
 
-    beats_notice_template, beats_overrides, tmpdir = init_temp_file(
-        beats_notice_template_path,
-        beats_overrides_path,
-    )
-    # Create notice overrides.json by combining the overrides from beats with cloudbeat specific ones.
-    with open(
-        os.path.join(tmpdir, "overrides.json"),
-        "w",
-        encoding="utf8",
-    ) as overrides_file:
-        overrides_file.write(beats_overrides)
-        overrides_file.write("\n")
-        for entry in notice_overrides:
-            overrides_file.write("\n")
-            json.dump(entry, overrides_file)
-        overrides_file.close()
+    with (
+        open(beats_notice_template_path) as beats_notice_template,
+        open(beats_overrides_path) as beats_overrides,
+        tempfile.TemporaryDirectory() as tmpdir,
+    ):
+        notice_template_contents = beats_notice_template.read()
+        overrides_contents = beats_overrides.read()
 
-        # Replace "Elastic Beats" with "Elastic Cloudbeat" in the NOTICE.txt template.
+        # Create notice overrides.json by combining the overrides from beats with cloudbeat specific ones.
         with open(
-            os.path.join(tmpdir, "NOTICE.txt.tmpl"),
+            os.path.join(tmpdir, "overrides.json"),
             "w",
             encoding="utf8",
-        ) as notice_template_file:
-            notice_template_file.write(
-                beats_notice_template.replace("Elastic Beats", "Elastic Cloudbeat"),
-            )
-            notice_template_file.close()
+        ) as overrides_file:
+            overrides_file.write(overrides_contents)
+            overrides_file.write("\n")
+            for entry in notice_overrides:
+                overrides_file.write("\n")
+                json.dump(entry, overrides_file)
+            overrides_file.close()
 
-            args_list = [
-                "go",
-                "run",
-                "-modfile=go.mod",
-                "go.elastic.co/go-licence-detector",
-                "-includeIndirect",
-                "-overrides",
-                overrides_file.name,
-                "-rules",
-                beats_rules_path,
-                "-noticeTemplate",
-                notice_template_file.name,
-                "-depsTemplate",
-                beats_deps_template_path,
-                "-noticeOut",
-                notice_out,
-                "-depsOut",
-                deps_out,
-            ]
-            subprocess.run(
-                args_list,
-                check=True,
-                input=modules_json.encode("utf-8"),
-            )
+            # Replace "Elastic Beats" with "Elastic Cloudbeat" in the NOTICE.txt template.
+            with open(
+                os.path.join(tmpdir, "NOTICE.txt.tmpl"),
+                "w",
+                encoding="utf8",
+            ) as notice_template_file:
+                notice_template_file.write(
+                    notice_template_contents.replace("Elastic Beats", "Elastic Cloudbeat"),
+                )
+                notice_template_file.close()
+
+                args_list = [
+                    "go",
+                    "run",
+                    "-modfile=go.mod",
+                    "go.elastic.co/go-licence-detector",
+                    "-includeIndirect",
+                    "-overrides",
+                    overrides_file.name,
+                    "-rules",
+                    beats_rules_path,
+                    "-noticeTemplate",
+                    notice_template_file.name,
+                    "-depsTemplate",
+                    beats_deps_template_path,
+                    "-noticeOut",
+                    notice_out,
+                    "-depsOut",
+                    deps_out,
+                ]
+                subprocess.run(
+                    args_list,
+                    check=True,
+                    input=modules_json.encode("utf-8"),
+                )
 
 
 def write_notice_file(notice_out_name, modules_list):
@@ -186,23 +190,6 @@ def write_csv_file(csv_filename, modules_list):
                 writer.writerow(row)
             for dep in additional_third_party_deps:
                 writer.writerow(dep)
-
-
-def init_temp_file(beats_notice_template_path, beats_overrides_path):
-    """
-    initTempFile creates a temporary directory and copies the NOTICE.txt.tmpl and overrides.json files to it.
-    @param beats_notice_template_path: Path to NOTICE.txt.tmpl file.
-    @param beats_overrides_path: Path to overrides.json file.
-    @return: templates
-    """
-    with open(beats_notice_template_path) as beats_notice_template:
-        notice_template_contents = beats_notice_template.read()
-    with open(beats_overrides_path) as beats_overrides:
-        overrides_contents = beats_overrides.read()
-
-    # Create a temporary directory
-    with tempfile.TemporaryDirectory() as tmpdir:
-        return notice_template_contents, overrides_contents, tmpdir
 
 
 if __name__ == "__main__":
