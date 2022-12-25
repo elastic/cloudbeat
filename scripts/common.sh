@@ -59,6 +59,6 @@ copy_to_agents() {
 restart_agents() {
   for P in $(get_agents); do
     POD=$(echo $P | cut -d '/' -f 2)
-    exec_pod $POD "elastic-agent restart" 
+    exec_pod $POD "elastic-agent restart"
   done
 }
