@@ -28,8 +28,9 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/management"
+	cb_config "github.com/elastic/cloudbeat/config"
 	cb_errors "github.com/elastic/cloudbeat/errors"
-	"github.com/elastic/elastic-agent-libs/config"
+	agent_config "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/go-ucfg"
 )
@@ -44,28 +45,22 @@ type launcher struct {
 	beaterErr chan error
 	reloader  Reloader
 	log       *logp.Logger
-	latest    *config.C
+	latest    *agent_config.C
 	beat      *beat.Beat
 	creator   beat.Creator
-	validator Validator
 }
 
 type Reloader interface {
-	Channel() <-chan *config.C
+	Channel() <-chan *agent_config.C
 	Stop()
 }
 
-type Validator interface {
-	Validate(*config.C) error
-}
-
-func New(log *logp.Logger, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
+func New(log *logp.Logger, reloader Reloader, creator beat.Creator, cfg *agent_config.C) (*launcher, error) {
 	s := &launcher{
 		beaterErr: make(chan error, 1),
 		wg:        sync.WaitGroup{},
 		log:       log,
 		reloader:  reloader,
-		validator: validator,
 		creator:   creator,
 		latest:    cfg,
 	}
@@ -197,7 +192,7 @@ func (l *launcher) stopBeater() {
 // 1. The Stop function got called
 // 2. The beater run has returned
 // 3. A config update received
-func (l *launcher) waitForUpdates() (*config.C, error) {
+func (l *launcher) waitForUpdates() (*agent_config.C, error) {
 	select {
 	case err := <-l.beaterErr:
 		return nil, err
@@ -212,7 +207,7 @@ func (l *launcher) waitForUpdates() (*config.C, error) {
 }
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the beater config
-func (l *launcher) configUpdate(update *config.C) error {
+func (l *launcher) configUpdate(update *agent_config.C) error {
 	l.log.Infof("Got config update from fleet with %d keys", len(update.FlattenedKeys()))
 
 	return l.latest.MergeWithOpts(update, ucfg.ReplaceArrValues)
@@ -221,7 +216,7 @@ func (l *launcher) configUpdate(update *config.C) error {
 // reconfigureWait will wait for and consume incoming reconfuration from the Fleet server, and keep
 // discarding them until the incoming config contains the necessary information to start beater
 // properly, thereafter returning the valid config.
-func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
+func (l *launcher) reconfigureWait(timeout time.Duration) (*agent_config.C, error) {
 	start := time.Now()
 	timer := time.After(timeout)
 
@@ -238,16 +233,14 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 				return nil, fmt.Errorf("reconfiguration channel is closed")
 			}
 
-			if l.validator != nil {
-				err := l.validator.Validate(update)
-				if err != nil {
-					l.log.Errorf("Config update validation failed: %v", err)
-					heatlhErr := &cb_errors.BeaterUnhealthyError{}
-					if errors.As(err, heatlhErr) {
-						l.beat.Manager.UpdateStatus(management.Degraded, heatlhErr.Error())
-					}
-					continue
+			_, err := cb_config.New(update)
+			if err != nil {
+				l.log.Errorf("Config update validation failed: %v", err)
+				heatlhErr := &cb_errors.BeaterUnhealthyError{}
+				if errors.As(err, heatlhErr) {
+					l.beat.Manager.UpdateStatus(management.Degraded, heatlhErr.Error())
 				}
+				continue
 			}
 
 			l.log.Infof("Received valid reconfiguration after waiting for %s", time.Since(start))
