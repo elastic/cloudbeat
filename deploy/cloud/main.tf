@@ -16,7 +16,7 @@ module "ec_deployment" {
   elasticsearch_size       = var.elasticsearch_size
   elasticsearch_zone_count = var.elasticsearch_zone_count
 
-  docker_image              = var.docker_image_override
+  docker_image = var.docker_image_override
   docker_image_tag_override = {
     "elasticsearch" : "",
     "kibana" : "",
@@ -67,7 +67,7 @@ resource "null_resource" "store_local_dashboard" {
     command = "curl -X POST -u ${module.ec_deployment.elasticsearch_username}:${module.ec_deployment.elasticsearch_password} ${module.ec_deployment.kibana_url}/api/saved_objects/_import?overwrite=true -H \"kbn-xsrf: true\" --form file=@data/dashboard.ndjson"
   }
   depends_on = [module.ec_deployment]
-  triggers   = {
+  triggers = {
     dashboard_sha1 = sha1(file("data/dashboard.ndjson"))
   }
 }
@@ -82,7 +82,7 @@ resource "null_resource" "rules" {
     command = "curl -X POST -u ${module.ec_deployment.elasticsearch_username}:${module.ec_deployment.elasticsearch_password} ${module.ec_deployment.kibana_url}/api/saved_objects/_import?overwrite=true -H \"kbn-xsrf: true\" --form file=@data/rules.ndjson"
   }
   depends_on = [module.ec_deployment]
-  triggers   = {
+  triggers = {
     dashboard_sha1 = sha1(file("data/rules.ndjson"))
   }
 }
@@ -123,7 +123,7 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args        = [
+    args = [
       "eks",
       "get-token",
       "--cluster-name",
@@ -172,7 +172,7 @@ provider "helm" {
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      args        = [
+      args = [
         "eks",
         "get-token",
         "--cluster-name",
@@ -187,12 +187,21 @@ module "apps" {
 
   providers = {
     helm = helm
-   }
-  
+  }
+
   depends_on = [
     module.eks
   ]
-  
+
   # nginx ingress replica count
   replica_count = "5"
+}
+module "aws_ec2_with_agent" {
+  source    = "./modules/ec2"
+  providers = { aws : aws }
+  yml       = module.api.yaml
+  depends_on = [
+    module.ec_deployment,
+    module.api,
+  ]
 }

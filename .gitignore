@@ -25,6 +25,7 @@ vendor/*
 .secrets
 .env
 .github/act/*
+*.pem
 
 # tests:
 test-logs/*.log
@@ -37,7 +38,6 @@ tests/allure/reports/*
 bundle.tar.gz
 /deploy/eks/cloudbeat-ds.yaml
 /deploy/k8s/cloudbeat-ds.yaml
-/deploy/kustomize/overlays/cloudbeat-vanilla-agent/ca-cert.pem
 
 # terraform
 deploy/cloud/.terraform
