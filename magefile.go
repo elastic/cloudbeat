@@ -23,6 +23,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"log"
 	"os"
 	"os/exec"
@@ -35,10 +36,11 @@ import (
 
 	"github.com/elastic/beats/v7/dev-tools/mage"
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
-	"github.com/elastic/e2e-testing/pkg/downloads"
-
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
-
+	"github.com/elastic/cloudbeat/version"
+	"github.com/elastic/e2e-testing/pkg/downloads"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
 	// mage:import
@@ -49,8 +51,6 @@ import (
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
 
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
-	// A required dependency for building cloudbeat
-	_ "github.com/elastic/csp-security-policies/server"
 )
 
 const (
@@ -340,11 +340,45 @@ func PythonEnv() error {
 }
 
 func BuildOpaBundle() error {
-	pkgName := "/Users/uriweisman/development/csp/csp-security-policies"
-	//cspPoliciesPkgDir, err := sh.Output("go", "list", "-mod=mod", "-m", "-f", "{{.Dir}}", pkgName)
-	//if err != nil {
-	//	return err
-	//}
+	owner := "elastic"
+	r := "csp-security-policies"
+	cspPoliciesPkgDir := "/tmp/" + r
 
-	return sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance")
+	repo, err := git.PlainClone(cspPoliciesPkgDir, false, &git.CloneOptions{
+		URL:             fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
+		InsecureSkipTLS: true,
+	})
+
+	// Fetch the latest commits
+	err = repo.Fetch(&git.FetchOptions{
+		RefSpecs: []config.RefSpec{"refs/heads/*:refs/heads/*"},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Find the commit associated with the relevant policy version tag
+	policyVersion := version.PolicyVersion().Version
+	ref, err := repo.Tag(policyVersion)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Latest production release commit hash: %s", ref.Hash().String())
+	// Check out the provided release tag commit
+	wt, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+
+	if err = wt.Checkout(&git.CheckoutOptions{Hash: ref.Hash()}); err != nil {
+		return err
+	}
+
+	if err = sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance"); err != nil {
+		deleteDirErr := sh.Run("rm", "-rf", cspPoliciesPkgDir)
+		return errors.Wrap(err, deleteDirErr.Error())
+	}
+
+	return sh.Run("rm", "-rf", cspPoliciesPkgDir)
 }
