@@ -65,7 +65,7 @@ var (
 	}
 )
 
-const credentialsReportContent = `"user,arn,user_creation_time,password_enabled,password_last_used,password_last_changed,password_next_rotation,mfa_active,access_key_1_active,access_key_1_last_rotated,access_key_1_last_used_date,access_key_2_active,access_key_2_last_rotated,access_key_2_last_used_date,cert_1_active,cert_2_active\n
-				<root_account>,arn:aws:iam::1234567890:root,1970-01-01T00:00:00+00:00,true,2022-01-02T00:00:00+00:00,1970-01-01T00:00:00+00:00,2022-01-03T00:00:00+00:00,false,true,1970-01-01T00:00:00+00:00,2022-01-04T00:00:00+00:00,true,1970-01-01T00:00:00+00:00,2022-01-05T00:00:00+00:00,true,true\n
-				user1,arn:aws:iam::1234567890:user/user1,2022-01-01T00:00:00+00:00,true,2022-01-02T00:00:00+00:00,2022-01-03T00:00:00+00:00,2022-01-04T00:00:00+00:00,true,true,2022-01-05T00:00:00+00:00,2022-01-06T00:00:00+00:00,true,2022-01-07T00:00:00+00:00,2022-01-08T00:00:00+00:00,true,true\n
-				user2,arn:aws:iam::1234567890:user/user2,2022-01-09T00:00:00+00:00,false,,,2022-01-10T00:00:00+00:00,true,true,2022-01-11T00:00:00+00:00,2022-01-12T00:00:00+00:00,true,2022-01-13T00:00:00+00:00,2022-01-14T00:00:00+00:00,true,true"`
+const credentialsReportContent = `user,arn,user_creation_time,password_enabled,password_last_used,password_last_changed,password_next_rotation,mfa_active,access_key_1_active,access_key_1_last_rotated,access_key_1_last_used_date,access_key_2_active,access_key_2_last_rotated,access_key_2_last_used_date,cert_1_active,cert_2_active\n
+<root_account>,arn:aws:iam::1234567890:root,1970-01-01T00:00:00+00:00,true,2022-01-02T00:00:00+00:00,1970-01-01T00:00:00+00:00,2022-01-03T00:00:00+00:00,false,true,1970-01-01T00:00:00+00:00,2022-01-04T00:00:00+00:00,true,1970-01-01T00:00:00+00:00,2022-01-05T00:00:00+00:00,true,true\n
+user1,arn:aws:iam::1234567890:user/user1,2022-01-01T00:00:00+00:00,true,2022-01-02T00:00:00+00:00,2022-01-03T00:00:00+00:00,2022-01-04T00:00:00+00:00,true,true,2022-01-05T00:00:00+00:00,2022-01-06T00:00:00+00:00,true,2022-01-07T00:00:00+00:00,2022-01-08T00:00:00+00:00,true,true\n
+user2,arn:aws:iam::1234567890:user/user2,2022-01-09T00:00:00+00:00,false,,,2022-01-10T00:00:00+00:00,true,true,2022-01-11T00:00:00+00:00,2022-01-12T00:00:00+00:00,true,2022-01-13T00:00:00+00:00,2022-01-14T00:00:00+00:00,true,true`
