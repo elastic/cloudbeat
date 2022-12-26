@@ -423,7 +423,7 @@ class KubernetesHelper:
         )
         response = ""
         while resp.is_open():
-            resp.update(timeout=1)
+            resp.update(timeout=3)
             if resp.peek_stdout():
                 response = resp.read_stdout()
             if resp.peek_stderr():
@@ -431,7 +431,7 @@ class KubernetesHelper:
 
         resp.close()
         if resp.returncode != 0:
-            raise Exception("Response failure")
+            raise Exception(f"Response failure, response code: {resp.returncode}")
         return response
 
     def get_cluster_leader(self, namespace: str, pods: list) -> str:
