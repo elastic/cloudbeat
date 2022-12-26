@@ -56,36 +56,36 @@ type RolePolicyInfo struct {
 
 // User Override SDK User type
 type User struct {
-	Name                string       `json:"name,omitempty"`
 	AccessKeys          []AccessKey  `json:"access_keys,omitempty"`
 	MFADevices          []AuthDevice `json:"mfa_devices,omitempty"`
+	Name                string       `json:"name,omitempty"`
 	LastAccess          string       `json:"last_access,omitempty"`
 	Arn                 string       `json:"arn,omitempty"`
-	PasswordEnabled     string       `json:"password_enabled,omitempty"`
 	PasswordLastChanged string       `json:"password_last_changed,omitempty"`
-	MfaActive           string       `json:"mfa_active,omitempty"`
+	PasswordEnabled     bool         `json:"password_enabled"`
+	MfaActive           bool         `json:"mfa_active"`
 }
 
 type AuthDevice struct {
-	IsVirtual bool `json:"is_virtual,omitempty"`
+	IsVirtual bool `json:"is_virtual"`
 	types.MFADevice
 }
 
 type AccessKey struct {
-	Active       bool   `json:"active,omitempty"`
+	Active       bool   `json:"active"`
+	HasUsed      bool   `json:"has_used"`
 	LastAccess   string `json:"last_access,omitempty"`
-	HasUsed      bool   `json:"has_used,omitempty"`
 	RotationDate string `json:"rotation_date,omitempty"`
 }
 
 type PasswordPolicy struct {
-	ReusePreventionCount int  `json:"reuse_prevention_count,omitempty"`
-	RequireLowercase     bool `json:"require_lowercase,omitempty"`
-	RequireUppercase     bool `json:"require_uppercase,omitempty"`
-	RequireNumbers       bool `json:"require_numbers,omitempty"`
-	RequireSymbols       bool `json:"require_symbols,omitempty"`
-	MaxAgeDays           int  `json:"max_age_days,omitempty"`
-	MinimumLength        int  `json:"minimum_length,omitempty"`
+	ReusePreventionCount int  `json:"reuse_prevention_count"`
+	RequireLowercase     bool `json:"require_lowercase"`
+	RequireUppercase     bool `json:"require_uppercase"`
+	RequireNumbers       bool `json:"require_numbers"`
+	RequireSymbols       bool `json:"require_symbols"`
+	MaxAgeDays           int  `json:"max_age_days"`
+	MinimumLength        int  `json:"minimum_length"`
 }
 
 // CredentialReport credential report CSV output
@@ -93,19 +93,19 @@ type CredentialReport struct {
 	User                  string `csv:"user"`
 	Arn                   string `csv:"arn"`
 	UserCreation          string `csv:"user_creation_time"`
-	PasswordEnabled       string `csv:"password_enabled"`
+	PasswordEnabled       bool   `csv:"password_enabled"`
 	PasswordLastUsed      string `csv:"password_last_used"`
 	PasswordLastChanged   string `csv:"password_last_changed"`
 	PasswordNextRotation  string `csv:"password_next_rotation"`
-	MfaActive             string `csv:"mfa_active"`
-	AccessKey1Active      string `csv:"access_key_1_active"`
+	MfaActive             bool   `csv:"mfa_active"`
+	AccessKey1Active      bool   `csv:"access_key_1_active"`
 	AccessKey1LastRotated string `csv:"access_key_1_last_rotated"`
 	AccessKey1LastUsed    string `csv:"access_key_1_last_used_date"`
-	AccessKey2Active      string `csv:"access_key_2_active"`
+	AccessKey2Active      bool   `csv:"access_key_2_active"`
 	AccessKey2LastRotated string `csv:"access_key_2_last_rotated"`
 	AccessKey2LastUsed    string `csv:"access_key_2_last_used_date"`
-	Cert1Active           string `csv:"cert_1_active"`
-	Cert2Active           string `csv:"cert_2_active"`
+	Cert1Active           bool   `csv:"cert_1_active"`
+	Cert2Active           bool   `csv:"cert_2_active"`
 }
 
 func NewIAMProvider(log *logp.Logger, cfg aws.Config) *Provider {

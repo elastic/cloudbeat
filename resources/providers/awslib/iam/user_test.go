@@ -19,15 +19,11 @@ package iam
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
-	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"time"
-
 	"testing"
 )
 
@@ -35,9 +31,9 @@ type mocksReturnVals map[string][][]any
 
 type expectedResult struct {
 	HasUsed      bool
-	HasLoggedIn  bool
 	IsVirtualMFA bool
 	Arn          string
+	MfaActive    interface{}
 }
 
 func Test_GetUsers(t *testing.T) {
@@ -50,17 +46,17 @@ func Test_GetUsers(t *testing.T) {
 		{
 			name: "Test 1: Should not return users",
 			mocksReturnVals: mocksReturnVals{
-				"ListUsers":            {{&iamsdk.ListUsersOutput{}, nil}},
-				"ListMFADevices":       {nil, nil},
-				"ListAccessKeys":       {nil, nil},
-				"GetAccessKeyLastUsed": {nil, nil},
+				"ListUsers":                {{&iamsdk.ListUsersOutput{}, nil}},
+				"ListMFADevices":           {nil, nil},
+				"GenerateCredentialReport": {nil, nil},
+				"GetCredentialReport":      {{CredentialsReportOutput, nil}},
 			},
 			expected: []expectedResult{
 				{
 					HasUsed:      false,
-					HasLoggedIn:  false,
 					IsVirtualMFA: false,
 					Arn:          "",
+					MfaActive:    true,
 				},
 			},
 			wantErr: false,
@@ -72,29 +68,29 @@ func Test_GetUsers(t *testing.T) {
 				"ListMFADevices": {
 					{&iamsdk.ListMFADevicesOutput{MFADevices: virtualMfaDevices}, nil},
 					{&iamsdk.ListMFADevicesOutput{MFADevices: mfaDevices}, nil},
+					{nil, errors.New("no such user - root account")},
 				},
-				"ListAccessKeys": {
-					{&iamsdk.ListAccessKeysOutput{AccessKeyMetadata: keyMetadata}, nil},
-					{&iamsdk.ListAccessKeysOutput{AccessKeyMetadata: keyMetadata}, nil},
-				},
-				"GetAccessKeyLastUsed": {
-					{&iamsdk.GetAccessKeyLastUsedOutput{
-						AccessKeyLastUsed: &types.AccessKeyLastUsed{LastUsedDate: aws.Time(time.Now())}}, nil},
-					{&iamsdk.GetAccessKeyLastUsedOutput{}, nil},
-				},
+				"GenerateCredentialReport": {nil, nil},
+				"GetCredentialReport":      {{CredentialsReportOutput, nil}},
 			},
 			expected: []expectedResult{
 				{
 					HasUsed:      true,
-					HasLoggedIn:  true,
+					MfaActive:    true,
 					IsVirtualMFA: true,
-					Arn:          "arn:aws:iam::123456789012:user/test-user-1",
+					Arn:          "arn:aws:iam::123456789012:user/user1",
 				},
 				{
-					HasUsed:      false,
-					HasLoggedIn:  false,
+					HasUsed:      true,
+					MfaActive:    true,
 					IsVirtualMFA: false,
-					Arn:          "arn:aws:iam::123456789012:user/test-user-2",
+					Arn:          "arn:aws:iam::123456789012:user/user2",
+				},
+				{
+					HasUsed:      true,
+					MfaActive:    false,
+					IsVirtualMFA: false,
+					Arn:          "arn:aws:iam::1234567890:root",
 				},
 			},
 			wantErr: false,
@@ -102,15 +98,12 @@ func Test_GetUsers(t *testing.T) {
 		{
 			name: "Test 3: Error should not return users",
 			mocksReturnVals: mocksReturnVals{
-				"ListUsers":            {{&iamsdk.ListUsersOutput{}, errors.New("fail to list iam users")}},
-				"ListMFADevices":       {nil, nil},
-				"ListAccessKeys":       {nil, nil},
-				"GetAccessKeyLastUsed": {nil, nil},
+				"ListUsers": {{&iamsdk.ListUsersOutput{}, errors.New("fail to list iam users")}},
 			},
 			expected: []expectedResult{
 				{
 					HasUsed:      false,
-					HasLoggedIn:  false,
+					MfaActive:    true,
 					IsVirtualMFA: false,
 					Arn:          "",
 				},
@@ -120,7 +113,7 @@ func Test_GetUsers(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		mockedClient := &MockIAMClient{}
+		mockedClient := &MockClient{}
 		for funcName, returnVals := range test.mocksReturnVals {
 			for _, vals := range returnVals {
 				mockedClient.On(funcName, mock.Anything, mock.Anything).Return(vals...).Once()
@@ -141,10 +134,10 @@ func Test_GetUsers(t *testing.T) {
 		}
 
 		for i, user := range users {
-			assert.Equal(t, user.(User).Arn, test.expected[i].Arn)
-			assert.Equal(t, user.(User).AccessKeys[0].HasUsed, test.expected[i].HasUsed)
-			//assert.Equal(t, user.(User).HasLoggedIn, test.expected[i].HasLoggedIn)
-			assert.Equal(t, user.(User).MFADevices[0].IsVirtual, test.expected[i].IsVirtualMFA)
+			assert.Equal(t, test.expected[i].Arn, user.(User).Arn)
+			assert.Equal(t, test.expected[i].HasUsed, user.(User).AccessKeys[0].HasUsed)
+			assert.Equal(t, test.expected[i].MfaActive, user.(User).MfaActive)
+			assert.Equal(t, test.expected[i].IsVirtualMFA, user.(User).MFADevices[0].IsVirtual)
 		}
 	}
 }

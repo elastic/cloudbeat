@@ -28,12 +28,17 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/gocarina/gocsv"
 	"github.com/pkg/errors"
-	"strconv"
 	"strings"
 	"time"
 )
 
-const dateLayout = "2006-01-02T15:04:05+00:00"
+const (
+	rootAccount = "<root_account>"
+	maxRetries  = 5
+	interval    = 3 * time.Second
+)
+
+var countRetries = 0
 
 func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 	var users []awslib.AwsResource
@@ -48,12 +53,12 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		return nil, err
 	}
 
-	rootUser, err := p.createRootAccountUser(credentialReport["<root_account>"])
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to construct a root account user")
+	rootUser := p.createRootAccountUser(credentialReport[rootAccount])
+	if rootUser != nil {
+		apiUsers = append(apiUsers, *rootUser)
 	}
-	apiUsers = append(apiUsers, *rootUser)
 
+	var userAccount *CredentialReport
 	for _, apiUser := range apiUsers {
 		var username string
 		if apiUser.UserName != nil {
@@ -72,13 +77,16 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 
 		keys := p.getUserKeys(*apiUser.UserName, credentialReport)
 
-		userAccount := credentialReport[aws.ToString(apiUser.UserName)]
+		if userAccount = credentialReport[aws.ToString(apiUser.UserName)]; userAccount == nil {
+			continue
+		}
+
 		users = append(users, User{
-			Name:                username,
-			Arn:                 arn,
 			AccessKeys:          keys,
 			MFADevices:          mfaDevices,
+			Name:                username,
 			LastAccess:          userAccount.PasswordLastUsed,
+			Arn:                 arn,
 			PasswordEnabled:     userAccount.PasswordEnabled,
 			PasswordLastChanged: userAccount.PasswordLastChanged,
 			MfaActive:           userAccount.MfaActive,
@@ -123,7 +131,6 @@ func (p Provider) listUsers(ctx context.Context) ([]types.User, error) {
 
 func (p Provider) getMFADevices(ctx context.Context, user types.User) ([]AuthDevice, error) {
 	input := &iamsdk.ListMFADevicesInput{
-		Marker:   nil,
 		UserName: user.UserName,
 	}
 
@@ -164,33 +171,22 @@ func (p Provider) getUserKeys(username string, report map[string]*CredentialRepo
 		return nil
 	}
 
-	active1, _ := strconv.ParseBool(entry.AccessKey1Active)
-	active2, _ := strconv.ParseBool(entry.AccessKey2Active)
-
-	keys := []AccessKey{
+	return []AccessKey{
 		{
-			Active:       active1,
+			Active:       entry.AccessKey1Active,
 			LastAccess:   entry.AccessKey1LastUsed,
 			HasUsed:      entry.AccessKey1LastUsed != "N/A",
 			RotationDate: entry.AccessKey1LastRotated,
 		}, {
-			Active:       active2,
+			Active:       entry.AccessKey2Active,
 			LastAccess:   entry.AccessKey2LastUsed,
 			HasUsed:      entry.AccessKey2LastUsed != "N/A",
 			RotationDate: entry.AccessKey2LastRotated,
 		},
 	}
-
-	return keys
 }
 
 func (p Provider) getCredentialReport(ctx context.Context) (map[string]*CredentialReport, error) {
-	var (
-		countRetries = 0
-		maxRetries   = 5
-		interval     = 3 * time.Second
-	)
-
 	var ae smithy.APIError
 	report, err := p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
 	if err != nil {
@@ -255,15 +251,22 @@ func parseCredentialsReport(report *iamsdk.GetCredentialReportOutput) (map[strin
 	return credentialReport, nil
 }
 
-func (p Provider) createRootAccountUser(rootAccount *CredentialReport) (*types.User, error) {
-	rootDate, err := time.Parse(dateLayout, rootAccount.UserCreation)
-	if err != nil {
-		return nil, err
+func (p Provider) createRootAccountUser(rootAccount *CredentialReport) *types.User {
+	if rootAccount == nil {
+		p.log.Error("no root account entry was provided")
+		return nil
 	}
 
-	pwdLastUsed, err := time.Parse(dateLayout, rootAccount.PasswordLastUsed)
+	rootDate, err := time.Parse(time.RFC3339, rootAccount.UserCreation)
 	if err != nil {
-		return nil, err
+		p.log.Errorf("fail to parse root account user creation, error: %v", err)
+		return nil
+	}
+
+	pwdLastUsed, err := time.Parse(time.RFC3339, rootAccount.PasswordLastUsed)
+	if err != nil {
+		p.log.Errorf("fail to parse root account password last used, error: %v", err)
+		return nil
 	}
 
 	return &types.User{
@@ -272,5 +275,5 @@ func (p Provider) createRootAccountUser(rootAccount *CredentialReport) (*types.U
 		CreateDate:       &rootDate,
 		PasswordLastUsed: &pwdLastUsed,
 		UserId:           aws.String("0"),
-	}, nil
+	}
 }
