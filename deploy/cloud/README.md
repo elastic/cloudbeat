@@ -35,7 +35,7 @@ Create environment
    ```bash
    terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
    ```
-5. Finally, to deploy the agent on EKS, run:
+5. Finally, to deploy the agent on EKS, nginx ingress controller, and ebs csi driver, run:
    ```bash
    terraform apply --auto-approve
    ```
