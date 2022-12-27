@@ -35,11 +35,15 @@ Create environment
    ```bash
    terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
    ```
-5. Finally, to deploy the agent on EKS, nginx ingress controller, and ebs csi driver, run:
+5. To deploy the agent on EKS run:
    ```bash
    terraform apply --auto-approve
    ```
-6. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
+6. To deploy nginx ingress controller, and ebs csi driver run:
+   ```bash
+   terraform apply --auto-approve -target "module.apps"
+   ``` 
+7. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
    ```bash
    aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
        --name $(terraform output -raw eks_cluster_name)
