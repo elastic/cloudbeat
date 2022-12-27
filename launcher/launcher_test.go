@@ -29,26 +29,12 @@ import (
 	"github.com/elastic/beats/v7/libbeat/cmd/instance"
 	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/beats/v7/libbeat/management"
-	"github.com/elastic/elastic-agent-client/v7/pkg/client"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 )
-
-type managerMock struct {
-}
-
-func (m *managerMock) UpdateStatus(status management.Status, msg string) {}
-func (m *managerMock) Enabled() bool                                     { return true }
-func (m *managerMock) Start() error                                      { return nil }
-func (m *managerMock) Stop()                                             {}
-func (m *managerMock) SetStopCallback(f func())                          {}
-func (m *managerMock) CheckRawConfig(cfg *config.C) error                { return nil }
-func (m *managerMock) RegisterAction(action client.Action)               {}
-func (m *managerMock) UnregisterAction(action client.Action)             {}
-func (m *managerMock) SetPayload(map[string]interface{})                 {}
 
 type beaterMock struct {
 	cfg  *config.C
@@ -154,7 +140,7 @@ func (s *LauncherTestSuite) InitMocks() *launcherMocks {
 	mocks.reloader = &reloaderMock{
 		ch: make(chan *config.C),
 	}
-	mocks.beat = &beat.Beat{Manager: &managerMock{}}
+	mocks.beat = &beat.Beat{}
 	return &mocks
 }
 
@@ -438,7 +424,6 @@ func (s *LauncherTestSuite) TestLauncherConfig() {
 			mocks := s.InitMocks()
 			sut, err := New(s.log, mocks.reloader, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
-			sut.beat = mocks.beat
 
 			mocks.reloader.ch = make(chan *config.C, len(tcase.configs))
 			go func(ic incomingConfigs) {

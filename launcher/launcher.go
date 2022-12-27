@@ -236,8 +236,8 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*agent_config.C, erro
 			_, err := cb_config.New(update)
 			if err != nil {
 				l.log.Errorf("Config update validation failed: %v", err)
-				heatlhErr := cb_errors.NewUnhealthyError("config update validation failed")
-				if errors.As(err, &heatlhErr) {
+				heatlhErr := &cb_errors.BeaterUnhealthyError{}
+				if errors.As(err, heatlhErr) {
 					l.beat.Manager.UpdateStatus(management.Degraded, heatlhErr.Error())
 				}
 				continue

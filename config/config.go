@@ -69,7 +69,7 @@ func New(cfg *config.C) (*Config, error) {
 
 	if c.Benchmark != "" {
 		if !isSupportedBenchmark(c.Benchmark) {
-			return nil, ErrBenchmarkNotSupported
+			return c, ErrBenchmarkNotSupported
 		}
 	}
 	return c, nil
