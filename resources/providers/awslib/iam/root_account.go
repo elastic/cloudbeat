@@ -83,7 +83,7 @@ func (p Provider) listRootMFADevice(ctx context.Context, userAccount *Credential
 	for _, device := range virtualDevices {
 		if strings.HasSuffix(*device.SerialNumber, "root-account-mfa-device") {
 			rootMFADevice = AuthDevice{
-				IsVirtual: false,
+				IsVirtual: true,
 				MFADevice: types.MFADevice{
 					EnableDate:   device.EnableDate,
 					SerialNumber: device.SerialNumber,
@@ -97,7 +97,7 @@ func (p Provider) listRootMFADevice(ctx context.Context, userAccount *Credential
 
 	// represent a hardware mfa device assigned to the root account user
 	rootMFADevice = AuthDevice{
-		IsVirtual: true,
+		IsVirtual: false,
 		MFADevice: types.MFADevice{},
 	}
 
