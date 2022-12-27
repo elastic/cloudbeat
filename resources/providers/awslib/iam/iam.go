@@ -90,10 +90,11 @@ type PasswordPolicy struct {
 
 // CredentialReport credential report CSV output
 type CredentialReport struct {
-	User                  string `csv:"user"`
-	Arn                   string `csv:"arn"`
-	UserCreation          string `csv:"user_creation_time"`
-	PasswordEnabled       bool   `csv:"password_enabled"`
+	User         string `csv:"user"`
+	Arn          string `csv:"arn"`
+	UserCreation string `csv:"user_creation_time"`
+	// can't be parsed as a bool, the value for the AWS account root user is always not_supported
+	PasswordEnabled       string `csv:"password_enabled"`
 	PasswordLastUsed      string `csv:"password_last_used"`
 	PasswordLastChanged   string `csv:"password_last_changed"`
 	PasswordNextRotation  string `csv:"password_next_rotation"`

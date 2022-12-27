@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/gocarina/gocsv"
 	"github.com/pkg/errors"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -37,8 +38,6 @@ const (
 	maxRetries  = 5
 	interval    = 3 * time.Second
 )
-
-var countRetries = 0
 
 func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 	var users []awslib.AwsResource
@@ -81,13 +80,19 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 			continue
 		}
 
+		pwdEnabled, err := isPasswordEnabled(userAccount)
+		if err != nil {
+			p.log.Errorf("fail to parse PasswordEnabled for user: %v, error: %v", apiUser, err)
+			pwdEnabled = false
+		}
+
 		users = append(users, User{
 			AccessKeys:          keys,
 			MFADevices:          mfaDevices,
 			Name:                username,
 			LastAccess:          userAccount.PasswordLastUsed,
 			Arn:                 arn,
-			PasswordEnabled:     userAccount.PasswordEnabled,
+			PasswordEnabled:     pwdEnabled,
 			PasswordLastChanged: userAccount.PasswordLastChanged,
 			MfaActive:           userAccount.MfaActive,
 		})
@@ -187,7 +192,6 @@ func (p Provider) getUserKeys(username string, report map[string]*CredentialRepo
 }
 
 func (p Provider) getCredentialReport(ctx context.Context) (map[string]*CredentialReport, error) {
-	var ae smithy.APIError
 	report, err := p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
 	if err != nil {
 		var awsFailErr *types.ServiceFailureException
@@ -196,8 +200,9 @@ func (p Provider) getCredentialReport(ctx context.Context) (map[string]*Credenti
 		}
 
 		// if we have an error, and it is not a server err we generate a report
-		if errors.As(err, &ae) {
-			if ae.ErrorCode() == "ReportNotPresent" || ae.ErrorCode() == "ReportExpired" {
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == "ReportNotPresent" || apiErr.ErrorCode() == "ReportExpired" {
 				// generate a new report
 				_, err := p.client.GenerateCredentialReport(ctx, &iamsdk.GenerateCredentialReportInput{})
 				if err != nil {
@@ -207,9 +212,10 @@ func (p Provider) getCredentialReport(ctx context.Context) (map[string]*Credenti
 		}
 
 		// loop until max retires or till the report is ready
+		var countRetries = 0
 		report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
-		if errors.As(err, &ae) {
-			for ae.ErrorCode() == "NoSuchEntity" || ae.ErrorCode() == "ReportInProgress" {
+		if errors.As(err, &apiErr) {
+			for apiErr.ErrorCode() == "NoSuchEntity" || apiErr.ErrorCode() == "ReportInProgress" {
 				if countRetries >= maxRetries {
 					return nil, errors.Wrap(err, "reached to max retries")
 				}
@@ -276,4 +282,12 @@ func (p Provider) createRootAccountUser(rootAccount *CredentialReport) *types.Us
 		PasswordLastUsed: &pwdLastUsed,
 		UserId:           aws.String("0"),
 	}
+}
+
+func isPasswordEnabled(userAccount *CredentialReport) (bool, error) {
+	if userAccount.PasswordEnabled == "not_supported" {
+		return false, nil
+	}
+
+	return strconv.ParseBool(userAccount.PasswordEnabled)
 }
