@@ -15,32 +15,36 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package ec2
 
 import (
-	"context"
+	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type Ec2Metadata = ec2imds.InstanceIdentityDocument
-
-type Ec2MetadataProvider struct{}
-
-type MetadataProvider interface {
-	GetMetadata(ctx context.Context, cfg aws.Config) (Ec2Metadata, error)
+type NACLInfo struct {
+	types.NetworkAcl
+	awsAccount string
+	region     string
 }
 
-func (provider Ec2MetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (Ec2Metadata, error) {
-	svc := ec2imds.NewFromConfig(cfg)
-	input := &ec2imds.GetInstanceIdentityDocumentInput{}
-	// this call will fail running from local machine
-	// TODO: mock local struct
-	identityDocument, err := svc.GetInstanceIdentityDocument(ctx, input)
-	if err != nil {
-		return ec2imds.GetInstanceIdentityDocumentOutput{}.InstanceIdentityDocument, err
+func (r NACLInfo) GetResourceArn() string {
+	if r.NetworkAclId == nil {
+		return ""
 	}
+	//arn:aws:ec2:region:account-id:network-acl/network-acl-id
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:network-acl/%s", r.region, r.awsAccount, *r.NetworkAclId)
+}
 
-	return identityDocument.InstanceIdentityDocument, err
+func (r NACLInfo) GetResourceName() string {
+	if r.NetworkAclId == nil {
+		return ""
+	}
+	return *r.NetworkAclId
+}
+
+func (r NACLInfo) GetResourceType() string {
+	return fetching.NetworkNACLType
 }
