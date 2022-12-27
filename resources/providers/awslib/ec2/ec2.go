@@ -15,32 +15,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package ec2
 
 import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type Ec2Metadata = ec2imds.InstanceIdentityDocument
-
-type Ec2MetadataProvider struct{}
-
-type MetadataProvider interface {
-	GetMetadata(ctx context.Context, cfg aws.Config) (Ec2Metadata, error)
+type ElasticCompute interface {
+	DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func (provider Ec2MetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (Ec2Metadata, error) {
-	svc := ec2imds.NewFromConfig(cfg)
-	input := &ec2imds.GetInstanceIdentityDocumentInput{}
-	// this call will fail running from local machine
-	// TODO: mock local struct
-	identityDocument, err := svc.GetInstanceIdentityDocument(ctx, input)
-	if err != nil {
-		return ec2imds.GetInstanceIdentityDocumentOutput{}.InstanceIdentityDocument, err
+func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
+	svc := ec2.NewFromConfig(cfg)
+	return &Provider{
+		log:          log,
+		client:       svc,
+		awsAccountID: awsAccountID,
+		awsRegion:    cfg.Region,
 	}
-
-	return identityDocument.InstanceIdentityDocument, err
 }
