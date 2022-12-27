@@ -28,8 +28,7 @@ metadata:
   impact: None.
   default_value: |
     By default, `admin.conf` has permissions of `640`.
-  references:
-  - https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
+  references: 1. https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/
   section: Control Plane Node Configuration Files
   version: '1.0'
   tags:

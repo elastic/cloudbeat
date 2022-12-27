@@ -31,9 +31,9 @@ metadata:
   impact: None
   default_value: |
     By default, Application-layer Secrets Encryption is not enabled.
-  references:
-  - https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html
-  - https://eksworkshop.com/beginner/191_secrets/
+  references: |-
+    1. https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html
+    2. https://eksworkshop.com/beginner/191_secrets/
   section: AWS Key Management Service (KMS)
   version: '1.0'
   tags:

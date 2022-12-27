@@ -38,11 +38,11 @@ metadata:
   impact: None
   default_value: |
     By default, kubelet client certificate rotation is enabled.
-  references:
-  - https://github.com/kubernetes/kubernetes/pull/41912
-  - https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet-tls-bootstrapping/#kubelet-configuration
-  - https://kubernetes.io/docs/imported/release/notes/
-  - https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/
+  references: |-
+    1. https://github.com/kubernetes/kubernetes/pull/41912
+    2. https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet-tls-bootstrapping/#kubelet-configuration
+    3. https://kubernetes.io/docs/imported/release/notes/
+    4. https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/
   section: Kubelet
   version: '1.0'
   tags:

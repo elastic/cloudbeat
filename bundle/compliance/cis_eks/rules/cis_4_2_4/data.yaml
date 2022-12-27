@@ -31,8 +31,7 @@ metadata:
     Pods defined with `spec.hostNetwork: true` will not be permitted unless they are run under a specific PSP.
   default_value: |
     By default, PodSecurityPolicies are not defined.
-  references:
-  - https://kubernetes.io/docs/concepts/policy/pod-security-policy
+  references: 1. https://kubernetes.io/docs/concepts/policy/pod-security-policy
   section: Pod Security Policies
   version: '1.0'
   tags:

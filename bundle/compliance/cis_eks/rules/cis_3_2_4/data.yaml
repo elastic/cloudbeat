@@ -53,8 +53,7 @@ metadata:
     Removal of the read-only port will require that any service which made use of it will need to be re-configured to use the main Kubelet API.
   default_value: |
     See the Amazon EKS documentation for the default value.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
+  references: 1. https://kubernetes.io/docs/admin/kubelet/
   section: Kubelet
   version: '1.0'
   tags:

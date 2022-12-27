@@ -27,10 +27,10 @@ metadata:
     This admission controller should only be used where Pod Security Policies cannot be used on the cluster, as it can interact poorly with certain Pod Security Policies
   default_value: |
     By default, `SecurityContextDeny` is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/admission-controllers/#securitycontextdeny
-  - https://kubernetes.io/docs/user-guide/pod-security-policy/#working-with-rbac
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/admission-controllers/#securitycontextdeny
+    3. https://kubernetes.io/docs/user-guide/pod-security-policy/#working-with-rbac
   section: API Server
   version: '1.0'
   tags:

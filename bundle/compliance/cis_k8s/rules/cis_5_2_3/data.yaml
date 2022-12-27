@@ -21,8 +21,7 @@ metadata:
     Pods defined with `spec.hostPID: true` will not be permitted unless they are run under a specific policy.
   default_value: |
     By default, PodSecurityPolicies are not defined.
-  references:
-  - https://kubernetes.io/docs/concepts/security/pod-security-standards/
+  references: 1. https://kubernetes.io/docs/concepts/security/pod-security-standards/
   section: Pod Security Standards
   version: '1.0'
   tags:

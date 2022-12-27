@@ -26,8 +26,8 @@ metadata:
     API server clients that cannot support modern cryptographic ciphers will not be able to make connections to the API server.
   default_value: |
     By default the Kubernetes API server supports a wide range of TLS ciphers
-  references:
-  - https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices#23-use-secure-cipher-suites
+  references: |-
+    1. https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices#23-use-secure-cipher-suites
   section: API Server
   version: '1.0'
   tags:

@@ -39,8 +39,7 @@ metadata:
   default_value: |
     By default, `--read-only-port` is set to `10255/TCP`. However, if a config file
     is specified by --config the default value for `readOnlyPort` is `0`.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
+  references: 1. https://kubernetes.io/docs/admin/kubelet/
   section: Kubelet
   version: '1.0'
   tags:

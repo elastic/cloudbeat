@@ -23,11 +23,11 @@ metadata:
   impact: None
   default_value: |
     By default, `Node` authorization is not enabled.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/authorization/node/
-  - https://github.com/kubernetes/kubernetes/pull/46076
-  - https://acotten.com/post/kube17-security
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/authorization/node/
+    3. https://github.com/kubernetes/kubernetes/pull/46076
+    4. https://acotten.com/post/kube17-security
   section: API Server
   version: '1.0'
   tags:

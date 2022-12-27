@@ -91,10 +91,10 @@ metadata:
   impact: You require TLS to be configured on apiserver as well as kubelets.
   default_value: |
     See the EKS documentation for the default value.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet-authentication-authorization/
-  - https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet-authentication-authorization/
+    3. https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
   section: Kubelet
   version: '1.0'
   tags:

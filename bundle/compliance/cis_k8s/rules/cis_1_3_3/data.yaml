@@ -28,12 +28,12 @@ metadata:
     If using other authorization methods (ABAC, Webhook, etc), the cluster deployer is responsible for granting appropriate permissions to the service accounts (the required permissions can be seen by inspecting the `controller-roles.yaml` and `controller-role-bindings.yaml` files for the RBAC roles.
   default_value: |
     By default, `--use-service-account-credentials` is set to false.
-  references:
-  - https://kubernetes.io/docs/admin/kube-controller-manager/
-  - https://kubernetes.io/docs/admin/service-accounts-admin/
-  - https://github.com/kubernetes/kubernetes/blob/release-1.6/plugin/pkg/auth/authorizer/rbac/bootstrappolicy/testdata/controller-roles.yaml
-  - https://github.com/kubernetes/kubernetes/blob/release-1.6/plugin/pkg/auth/authorizer/rbac/bootstrappolicy/testdata/controller-role-bindings.yaml
-  - https://kubernetes.io/docs/admin/authorization/rbac/#controller-roles
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-controller-manager/
+    2. https://kubernetes.io/docs/admin/service-accounts-admin/
+    3. https://github.com/kubernetes/kubernetes/blob/release-1.6/plugin/pkg/auth/authorizer/rbac/bootstrappolicy/testdata/controller-roles.yaml
+    4. https://github.com/kubernetes/kubernetes/blob/release-1.6/plugin/pkg/auth/authorizer/rbac/bootstrappolicy/testdata/controller-role-bindings.yaml
+    5. https://kubernetes.io/docs/admin/authorization/rbac/#controller-roles
   section: Controller Manager
   version: '1.0'
   tags:

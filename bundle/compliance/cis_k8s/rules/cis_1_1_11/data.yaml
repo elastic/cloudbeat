@@ -37,9 +37,9 @@ metadata:
   impact: None
   default_value: |
     By default, etcd data directory has permissions of `755`.
-  references:
-  - https://coreos.com/etcd/docs/latest/op-guide/configuration.html#data-dir
-  - https://kubernetes.io/docs/admin/etcd/
+  references: |-
+    1. https://coreos.com/etcd/docs/latest/op-guide/configuration.html#data-dir
+    2. https://kubernetes.io/docs/admin/etcd/
   section: Control Plane Node Configuration Files
   version: '1.0'
   tags:

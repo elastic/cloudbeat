@@ -31,7 +31,7 @@ class Rule:
     remediation: str
     impact: str
     default_value: str
-    references: list[str]
+    references: str
     section: str
     version: str
     tags: list[str]
@@ -87,7 +87,7 @@ def parse_refs(refs: str):
     """
     ref = [f"http{ref}" for ref in refs.split(":http") if ref]
     ref[0] = ref[0].removeprefix("http")
-    return ref
+    return "\n".join(f"{i+1}. {s}" for i, s in enumerate(ref))
 
 
 def read_existing_default_value(rule_number, benchmark_id):
@@ -169,7 +169,7 @@ if __name__ == "__main__":
         "--benchmark",
         default=common.benchmark.keys(),
         choices=common.benchmark.keys(),
-        help="benchmark to be used for the rules template generation (default: all benchmarks). "
+        help="benchmark to be used for the rules metadata generation (default: all benchmarks). "
              "for example: `--benchmark cis_eks` or `--benchmark cis_eks cis_aws`",
         nargs="+",
     )

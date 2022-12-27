@@ -97,8 +97,7 @@ metadata:
     When implementing Endpoint Private Access, be careful to ensure all desired networks are on the allowlist (whitelist) to prevent inadvertently blocking external access to your cluster's control plane.
   default_value: |
     By default, Endpoint Private Access is disabled.
-  references:
-  - https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html
+  references: 1. https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html
   section: Cluster Networking
   version: '1.0'
   tags:

@@ -23,9 +23,9 @@ metadata:
     You will have to configure and use alternate authentication mechanisms such as certificates. Static token based authentication could not be used.
   default_value: |
     By default, `--token-auth-file` argument is not set.
-  references:
-  - https://kubernetes.io/docs/admin/authentication/#static-token-file
-  - https://kubernetes.io/docs/admin/kube-apiserver/
+  references: |-
+    1. https://kubernetes.io/docs/admin/authentication/#static-token-file
+    2. https://kubernetes.io/docs/admin/kube-apiserver/
   section: API Server
   version: '1.0'
   tags:

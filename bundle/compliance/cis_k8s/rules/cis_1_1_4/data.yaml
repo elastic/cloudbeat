@@ -30,8 +30,7 @@ metadata:
   default_value: >
     By default, `kube-controller-manager.yaml` file ownership is set to
     `root:root`.
-  references:
-  - https://kubernetes.io/docs/admin/kube-controller-manager
+  references: 1. https://kubernetes.io/docs/admin/kube-controller-manager
   section: Control Plane Node Configuration Files
   version: '1.0'
   tags:

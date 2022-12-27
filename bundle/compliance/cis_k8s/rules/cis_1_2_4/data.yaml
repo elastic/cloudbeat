@@ -20,9 +20,9 @@ metadata:
   impact: You require TLS to be configured on apiserver as well as kubelets.
   default_value: |
     By default, kubelet connections are over https.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/kubelet-authentication-authorization/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/kubelet-authentication-authorization/
   section: API Server
   version: '1.0'
   tags:

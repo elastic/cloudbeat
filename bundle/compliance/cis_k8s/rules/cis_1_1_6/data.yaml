@@ -28,8 +28,7 @@ metadata:
   impact: None
   default_value: |
     By default, `kube-scheduler.yaml` file ownership is set to `root:root`.
-  references:
-  - https://kubernetes.io/docs/admin/kube-scheduler/
+  references: 1. https://kubernetes.io/docs/admin/kube-scheduler/
   section: Control Plane Node Configuration Files
   version: '1.0'
   tags:

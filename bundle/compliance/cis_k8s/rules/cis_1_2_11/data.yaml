@@ -23,9 +23,9 @@ metadata:
     be served.
   default_value: |
     `AlwaysAdmit` is not in the list of default admission plugins.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/admission-controllers/#alwaysadmit
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/admission-controllers/#alwaysadmit
   section: API Server
   version: '1.0'
   tags:

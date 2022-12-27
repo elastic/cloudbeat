@@ -25,8 +25,7 @@ metadata:
     When RBAC is enabled you will need to ensure that appropriate RBAC settings (including Roles, RoleBindings and ClusterRoleBindings) are configured to allow appropriate access.
   default_value: |
     By default, `RBAC` authorization is not enabled.
-  references:
-  - https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+  references: 1. https://kubernetes.io/docs/reference/access-authn-authz/rbac/
   section: API Server
   version: '1.0'
   tags:

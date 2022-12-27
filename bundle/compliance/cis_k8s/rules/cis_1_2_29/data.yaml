@@ -27,9 +27,9 @@ metadata:
   impact: TLS and client certificate authentication must be configured for etcd.
   default_value: |
     By default, `--etcd-cafile` is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://coreos.com/etcd/docs/latest/op-guide/security.html
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://coreos.com/etcd/docs/latest/op-guide/security.html
   section: API Server
   version: '1.0'
   tags:

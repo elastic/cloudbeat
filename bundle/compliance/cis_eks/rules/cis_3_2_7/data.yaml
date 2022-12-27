@@ -91,9 +91,9 @@ metadata:
     Kubelet would manage the iptables on the system and keep it in sync. If you are using any other iptables management solution, then there might be some conflicts.
   default_value: |
     See the Amazon EKS documentation for the default value.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
   section: Kubelet
   version: '1.0'
   tags:

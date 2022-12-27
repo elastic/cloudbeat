@@ -31,10 +31,10 @@ metadata:
   impact: You need to carefully tune in limits as per your environment.
   default_value: |
     By default, `EventRateLimit` is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/admission-controllers/#eventratelimit
-  - https://github.com/staebler/community/blob/9873b632f4d99b5d99c38c9b15fe2f8b93d0a746/contributors/design-proposals/admission_control_event_rate_limit.md
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/admission-controllers/#eventratelimit
+    3. https://github.com/staebler/community/blob/9873b632f4d99b5d99c38c9b15fe2f8b93d0a746/contributors/design-proposals/admission_control_event_rate_limit.md
   section: API Server
   version: '1.0'
   tags:

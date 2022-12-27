@@ -40,8 +40,7 @@ metadata:
   impact: You would have to re-tune kernel parameters to match kubelet parameters.
   default_value: |
     By default, `--protect-kernel-defaults` is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
+  references: 1. https://kubernetes.io/docs/admin/kubelet/
   section: Kubelet
   version: '1.0'
   tags:

@@ -33,8 +33,7 @@ metadata:
   impact: Pods with containers which run as the root user will not be permitted.
   default_value: |
     By default, PodSecurityPolicies are not defined.
-  references:
-  - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies
+  references: 1. https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies
   section: Pod Security Policies
   version: '1.0'
   tags:

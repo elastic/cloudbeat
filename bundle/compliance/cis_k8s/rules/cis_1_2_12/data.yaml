@@ -29,9 +29,9 @@ metadata:
     This setting could impact offline or isolated clusters, which have images pre-loaded and do not have access to a registry to pull in-use images. This setting is not appropriate for clusters which use this configuration.
   default_value: |
     By default, AlwaysPullImages is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/admission-controllers/#alwayspullimages
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/admission-controllers/#alwayspullimages
   section: API Server
   version: '1.0'
   tags:

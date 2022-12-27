@@ -21,10 +21,10 @@ metadata:
   impact: None.
   default_value: |
     By default, `ServiceAccount` is set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/admission-controllers/#serviceaccount
-  - https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/admission-controllers/#serviceaccount
+    3. https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   section: API Server
   version: '1.0'
   tags:

@@ -51,11 +51,11 @@ metadata:
     http://docs.aws.amazon.com/AmazonS3/latest/dev/object-lifecycle-mgmt.html
   default_value: |
     By default, cluster control plane logs aren't sent to CloudWatch Logs. ... When you enable a log type, the logs are sent with a log verbosity level of 2 .  To enable or disable control plane logs with the console. Open the Amazon EKS console at https://console.aws.amazon.com/eks/home#/clusters . Amazon EKS Information in CloudTrail CloudTrail is enabled on your AWS account when you create the account. When activity occurs in Amazon EKS, that activity is recorded in a CloudTrail event along with other AWS service events in Event history.
-  references:
-  - https://kubernetes.io/docs/tasks/debug-application-cluster/audit/
-  - https://aws.github.io/aws-eks-best-practices/detective/
-  - https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
-  - https://docs.aws.amazon.com/eks/latest/userguide/logging-using-cloudtrail.html
+  references: |-
+    1. https://kubernetes.io/docs/tasks/debug-application-cluster/audit/
+    2. https://aws.github.io/aws-eks-best-practices/detective/
+    3. https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+    4. https://docs.aws.amazon.com/eks/latest/userguide/logging-using-cloudtrail.html
   section: Logging
   version: '1.0'
   tags:

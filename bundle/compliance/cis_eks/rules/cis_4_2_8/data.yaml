@@ -26,9 +26,9 @@ metadata:
     will not be permitted.
   default_value: |
     By default, PodSecurityPolicies are not defined.
-  references:
-  - https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies
-  - https://www.nccgroup.trust/uk/our-research/abusing-privileged-and-unprivileged-linux-containers/
+  references: |-
+    1. https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies
+    2. https://www.nccgroup.trust/uk/our-research/abusing-privileged-and-unprivileged-linux-containers/
   section: Pod Security Policies
   version: '1.0'
   tags:

@@ -30,9 +30,7 @@ metadata:
   default_value: >
     By default, `/etc/kubernetes/manifests/etcd.yaml` file ownership is set to
     `root:root`.
-  references:
-  - https://coreos.com/etcd
-  - https://kubernetes.io/docs/admin/etcd/
+  references: "1. https://coreos.com/etcd\n2. https://kubernetes.io/docs/admin/etcd/"
   section: Control Plane Node Configuration Files
   version: '1.0'
   tags:

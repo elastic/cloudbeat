@@ -38,8 +38,7 @@ metadata:
     By default, `/var/lib/kubelet/config.yaml` file as set up by `kubeadm` is
     owned by
     `root:root`.
-  references:
-  - https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/
+  references: 1. https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/
   section: Worker Node Configuration Files
   version: '1.0'
   tags:

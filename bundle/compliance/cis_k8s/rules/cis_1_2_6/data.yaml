@@ -26,10 +26,10 @@ metadata:
   impact: You require TLS to be configured on apiserver as well as kubelets.
   default_value: |
     By default, `--kubelet-certificate-authority` argument is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/kubelet-authentication-authorization/
-  - https://kubernetes.io/docs/concepts/cluster-administration/master-node-communication/#apiserver---kubelet
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/kubelet-authentication-authorization/
+    3. https://kubernetes.io/docs/concepts/cluster-administration/master-node-communication/#apiserver---kubelet
   section: API Server
   version: '1.0'
   tags:

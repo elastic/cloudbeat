@@ -25,11 +25,11 @@ metadata:
   impact: None
   default_value: |
     By default, `NodeRestriction` is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/admission-controllers/#noderestriction
-  - https://kubernetes.io/docs/admin/authorization/node/
-  - https://acotten.com/post/kube17-security
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/admission-controllers/#noderestriction
+    3. https://kubernetes.io/docs/admin/authorization/node/
+    4. https://acotten.com/post/kube17-security
   section: API Server
   version: '1.0'
   tags:

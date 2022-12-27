@@ -26,8 +26,7 @@ metadata:
     1. Configure public access with a set of whitelisted CIDR blocks and set private endpoint access to enabled. This will allow public access from a specific range of public IPs while forcing all network traffic between the kubelets (workers) and the Kubernetes API through the cross-account ENIs that get provisioned into the cluster VPC when the control plane is provisioned.
   default_value: |
     By default, the Private Endpoint is disabled.
-  references:
-  - https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html
+  references: 1. https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html
   section: Cluster Networking
   version: '1.0'
   tags:

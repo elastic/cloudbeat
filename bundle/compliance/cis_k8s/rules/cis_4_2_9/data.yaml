@@ -38,9 +38,9 @@ metadata:
     Setting this parameter to `0` could result in a denial of service condition due to excessive events being created. The cluster's event processing and storage systems should be scaled to handle expected event loads.
   default_value: |
     By default, `--event-qps` argument is set to `5`.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/apis/kubeletconfig/v1beta1/types.go
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/apis/kubeletconfig/v1beta1/types.go
   section: Kubelet
   version: '1.0'
   tags:

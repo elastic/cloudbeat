@@ -29,8 +29,7 @@ metadata:
     By default the `default` service account allows for its service account token
     to be mounted
     in pods in its namespace.
-  references:
-  - https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  references: 1. https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   section: RBAC and Service Accounts
   version: '1.0'
   tags:

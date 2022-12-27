@@ -36,10 +36,10 @@ metadata:
   impact: None
   default_value: |
     By default, `kubelet` service file ownership is set to `root:root`.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#44-joining-your-nodes
-  - https://kubernetes.io/docs/admin/kubeadm/#kubelet-drop-in
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#44-joining-your-nodes
+    3. https://kubernetes.io/docs/admin/kubeadm/#kubelet-drop-in
   section: Worker Node Configuration Files
   version: '1.0'
   tags:

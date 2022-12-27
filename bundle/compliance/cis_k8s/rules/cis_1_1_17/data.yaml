@@ -29,8 +29,7 @@ metadata:
   impact: None
   default_value: |
     By default, `controller-manager.conf` has permissions of `640`.
-  references:
-  - https://kubernetes.io/docs/admin/kube-controller-manager/
+  references: 1. https://kubernetes.io/docs/admin/kube-controller-manager/
   section: Control Plane Node Configuration Files
   version: '1.0'
   tags:

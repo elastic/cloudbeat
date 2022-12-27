@@ -42,8 +42,7 @@ metadata:
   impact: None.
   default_value: |
     See the AWS EKS documentation for the default value.
-  references:
-  - https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/
+  references: 1. https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/
   section: Worker Node Configuration Files
   version: '1.0'
   tags:

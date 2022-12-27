@@ -29,10 +29,10 @@ metadata:
   default_value: >
     By default, `--tls-cert-file` and `--tls-private-key-file` arguments are not
     set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - http://rootsquash.com/2016/05/10/securing-the-kubernetes-api/
-  - https://github.com/kelseyhightower/docker-kubernetes-tls-guide
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. http://rootsquash.com/2016/05/10/securing-the-kubernetes-api/
+    3. https://github.com/kelseyhightower/docker-kubernetes-tls-guide
   section: API Server
   version: '1.0'
   tags:

@@ -93,10 +93,10 @@ metadata:
     Setting this parameter to `0` could result in a denial of service condition due to excessive events being created. The cluster's event processing and storage systems should be scaled to handle expected event loads.
   default_value: |
     See the Amazon EKS documentation for the default value.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/apis/kubeletconfig/v1beta1/types.go
-  - https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://github.com/kubernetes/kubernetes/blob/master/pkg/kubelet/apis/kubeletconfig/v1beta1/types.go
+    3. https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
   section: Kubelet
   version: '1.0'
   tags:

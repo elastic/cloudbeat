@@ -27,9 +27,9 @@ metadata:
     The corresponding private key must be provided to the controller manager. You would need to securely maintain the key file and rotate the keys based on your organization's key rotation policy.
   default_value: |
     By default, `--service-account-key-file` argument is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://github.com/kubernetes/kubernetes/issues/24167
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://github.com/kubernetes/kubernetes/issues/24167
   section: API Server
   version: '1.0'
   tags:

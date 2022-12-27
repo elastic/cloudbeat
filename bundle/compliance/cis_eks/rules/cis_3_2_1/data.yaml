@@ -88,10 +88,10 @@ metadata:
   impact: Anonymous requests will be rejected.
   default_value: |
     See the EKS documentation for the default value.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://kubernetes.io/docs/admin/kubelet-authentication-authorization/#kubelet-authentication
-  - https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://kubernetes.io/docs/admin/kubelet-authentication-authorization/#kubelet-authentication
+    3. https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
   section: Kubelet
   version: '1.0'
   tags:

@@ -34,8 +34,7 @@ metadata:
     ```
   impact: None
   default_value:
-  references:
-  - nan
+  references: 1. nan
   section: Kubelet
   version: '1.0'
   tags:

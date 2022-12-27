@@ -39,8 +39,7 @@ metadata:
   impact: None
   default_value: |
     By default, `kubelet.conf` file has permissions of `640`.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
+  references: 1. https://kubernetes.io/docs/admin/kubelet/
   section: Worker Node Configuration Files
   version: '1.0'
   tags:

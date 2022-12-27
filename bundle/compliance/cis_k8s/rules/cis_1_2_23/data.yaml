@@ -27,9 +27,9 @@ metadata:
   impact: None
   default_value: |
     By default, `--request-timeout` is set to 60 seconds.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://github.com/kubernetes/kubernetes/pull/51415
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://github.com/kubernetes/kubernetes/pull/51415
   section: API Server
   version: '1.0'
   tags:

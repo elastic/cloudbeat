@@ -48,8 +48,7 @@ metadata:
     To determine the severity and description of a vulnerability, you can view the CVE directly from the source.
   default_value: |
     Images are not scanned by Default.
-  references:
-  - https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html
+  references: 1. https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html
   section: Image Registry and Image Scanning
   version: '1.0'
   tags:

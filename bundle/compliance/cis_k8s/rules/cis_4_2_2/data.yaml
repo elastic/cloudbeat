@@ -39,9 +39,9 @@ metadata:
   impact: Unauthorized requests will be denied.
   default_value: |
     By default, `--authorization-mode` argument is set to `AlwaysAllow`.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://kubernetes.io/docs/admin/kubelet-authentication-authorization/#kubelet-authentication
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://kubernetes.io/docs/admin/kubelet-authentication-authorization/#kubelet-authentication
   section: Kubelet
   version: '1.0'
   tags:

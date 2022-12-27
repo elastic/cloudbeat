@@ -27,8 +27,7 @@ metadata:
   impact: None.
   default_value: |
     By default, `admin.conf` file ownership is set to `root:root`.
-  references:
-  - https://kubernetes.io/docs/admin/kubeadm/
+  references: 1. https://kubernetes.io/docs/admin/kubeadm/
   section: Control Plane Node Configuration Files
   version: '1.0'
   tags:

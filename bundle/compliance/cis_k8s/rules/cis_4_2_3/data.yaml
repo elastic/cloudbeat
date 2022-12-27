@@ -39,9 +39,9 @@ metadata:
   impact: You require TLS to be configured on apiserver as well as kubelets.
   default_value: |
     By default, `--client-ca-file` argument is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet-authentication-authorization/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet-authentication-authorization/
   section: Kubelet
   version: '1.0'
   tags:

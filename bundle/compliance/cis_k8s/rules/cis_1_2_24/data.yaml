@@ -28,10 +28,10 @@ metadata:
   impact: None
   default_value: |
     By default, `--service-account-lookup` argument is set to `true`.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://github.com/kubernetes/kubernetes/issues/24167
-  - https://en.wikipedia.org/wiki/Time_of_check_to_time_of_use
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://github.com/kubernetes/kubernetes/issues/24167
+    3. https://en.wikipedia.org/wiki/Time_of_check_to_time_of_use
   section: API Server
   version: '1.0'
   tags:

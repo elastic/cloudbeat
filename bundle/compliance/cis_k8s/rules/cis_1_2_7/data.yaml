@@ -25,9 +25,9 @@ metadata:
   impact: Only authorized requests will be served.
   default_value: |
     By default, `AlwaysAllow` is not enabled.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/authorization/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/authorization/
   section: API Server
   version: '1.0'
   tags:

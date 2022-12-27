@@ -25,9 +25,9 @@ metadata:
   impact: Profiling information would not be available.
   default_value: |
     By default, profiling is enabled.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md
   section: API Server
   version: '1.0'
   tags:

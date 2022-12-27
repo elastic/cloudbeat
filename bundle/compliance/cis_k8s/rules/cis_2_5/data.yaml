@@ -31,10 +31,10 @@ metadata:
     are using only one etcd server in your environment then this recommendation
     is not applicable. By default, `--peer-client-cert-auth` argument is set to
     `false`.
-  references:
-  - https://coreos.com/etcd/docs/latest/op-guide/security.html
-  - https://kubernetes.io/docs/admin/etcd/
-  - https://coreos.com/etcd/docs/latest/op-guide/configuration.html#peer-client-cert-auth
+  references: |-
+    1. https://coreos.com/etcd/docs/latest/op-guide/security.html
+    2. https://kubernetes.io/docs/admin/etcd/
+    3. https://coreos.com/etcd/docs/latest/op-guide/configuration.html#peer-client-cert-auth
   section: etcd
   version: '1.0'
   tags:

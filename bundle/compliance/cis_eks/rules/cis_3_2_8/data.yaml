@@ -59,10 +59,10 @@ metadata:
     Some cloud providers may require this flag to ensure that hostname matches names issued by the cloud provider. In these environments, this recommendation should not apply.
   default_value: |
     See the Amazon EKS documentation for the default value.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://github.com/kubernetes/kubernetes/issues/22063
-  - https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://github.com/kubernetes/kubernetes/issues/22063
+    3. https://kubernetes.io/docs/tasks/administer-cluster/reconfigure-kubelet/
   section: Kubelet
   version: '1.0'
   tags:

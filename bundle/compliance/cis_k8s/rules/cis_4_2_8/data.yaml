@@ -32,9 +32,9 @@ metadata:
     Some cloud providers may require this flag to ensure that hostname matches names issued by the cloud provider. In these environments, this recommendation should not apply.
   default_value: |
     By default, `--hostname-override argument` is not set.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://github.com/kubernetes/kubernetes/issues/22063
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://github.com/kubernetes/kubernetes/issues/22063
   section: Kubelet
   version: '1.0'
   tags:

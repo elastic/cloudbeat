@@ -28,11 +28,11 @@ metadata:
   impact: None
   default_value: |
     By default, `RotateKubeletServerCertificate` is set to "true" this recommendation verifies that it has not been disabled.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet-tls-bootstrapping/#approval-controller
-  - https://github.com/kubernetes/features/issues/267
-  - https://github.com/kubernetes/kubernetes/pull/45059
-  - https://kubernetes.io/docs/admin/kube-controller-manager/
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet-tls-bootstrapping/#approval-controller
+    2. https://github.com/kubernetes/features/issues/267
+    3. https://github.com/kubernetes/kubernetes/pull/45059
+    4. https://kubernetes.io/docs/admin/kube-controller-manager/
   section: Controller Manager
   version: '1.0'
   tags:

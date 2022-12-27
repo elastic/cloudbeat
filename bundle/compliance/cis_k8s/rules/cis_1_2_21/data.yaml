@@ -25,10 +25,10 @@ metadata:
   impact: None
   default_value: |
     By default, auditing is not enabled.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/concepts/cluster-administration/audit/
-  - https://github.com/kubernetes/features/issues/22
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/concepts/cluster-administration/audit/
+    3. https://github.com/kubernetes/features/issues/22
   section: API Server
   version: '1.0'
   tags:

@@ -41,9 +41,7 @@ metadata:
   impact: Long-lived connections could be interrupted.
   default_value: |
     By default, `--streaming-connection-idle-timeout` is set to 4 hours.
-  references:
-  - https://kubernetes.io/docs/admin/kubelet/
-  - https://github.com/kubernetes/kubernetes/pull/18552
+  references: "1. https://kubernetes.io/docs/admin/kubelet/\n2. https://github.com/kubernetes/kubernetes/pull/18552"
   section: Kubelet
   version: '1.0'
   tags:

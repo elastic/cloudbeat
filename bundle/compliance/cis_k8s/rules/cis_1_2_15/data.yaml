@@ -20,9 +20,9 @@ metadata:
   impact: None
   default_value: |
     By default, `NamespaceLifecycle` is set.
-  references:
-  - https://kubernetes.io/docs/admin/kube-apiserver/
-  - https://kubernetes.io/docs/admin/admission-controllers/#namespacelifecycle
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://kubernetes.io/docs/admin/admission-controllers/#namespacelifecycle
   section: API Server
   version: '1.0'
   tags:

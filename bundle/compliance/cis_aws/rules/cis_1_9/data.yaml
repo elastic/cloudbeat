@@ -42,9 +42,9 @@ metadata:
     Note: All commands starting with "aws iam update-account-password-policy" can be combined into a single command.
   impact: None
   default_value: ''
-  references:
-  - https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html
-  - https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#configure-strong-password-policy
+  references: |-
+    1. https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html
+    2. https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#configure-strong-password-policy
   section: Identity and Access Management
   version: '1.0'
   tags:
