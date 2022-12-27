@@ -42,6 +42,7 @@ type Client interface {
 	ListAttachedRolePolicies(ctx context.Context, params *iamsdk.ListAttachedRolePoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAttachedRolePoliciesOutput, error)
 	GenerateCredentialReport(ctx context.Context, params *iamsdk.GenerateCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GenerateCredentialReportOutput, error)
 	GetCredentialReport(ctx context.Context, params *iamsdk.GetCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetCredentialReportOutput, error)
+	ListVirtualMFADevices(ctx context.Context, params *iamsdk.ListVirtualMFADevicesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListVirtualMFADevicesOutput, error)
 }
 
 type Provider struct {

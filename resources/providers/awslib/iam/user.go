@@ -69,15 +69,15 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 			arn = *apiUser.Arn
 		}
 
-		mfaDevices, err := p.getMFADevices(ctx, apiUser)
-		if err != nil {
-			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
-		}
-
 		keys := p.getUserKeys(*apiUser.UserName, credentialReport)
 
 		if userAccount = credentialReport[aws.ToString(apiUser.UserName)]; userAccount == nil {
 			continue
+		}
+
+		mfaDevices, err := p.getMFADevices(ctx, apiUser, userAccount)
+		if err != nil {
+			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
 		}
 
 		pwdEnabled, err := isPasswordEnabled(userAccount)
@@ -134,7 +134,18 @@ func (p Provider) listUsers(ctx context.Context) ([]types.User, error) {
 	return nativeUsers, nil
 }
 
-func (p Provider) getMFADevices(ctx context.Context, user types.User) ([]AuthDevice, error) {
+func (p Provider) getMFADevices(ctx context.Context, user types.User, userAccount *CredentialReport) ([]AuthDevice, error) {
+	// For the root user, it's not possible to list all the devices, so instead we check all the virtual devices
+	// to confirm if one is assigned the root user. If this is not the case, we can infer a hardware device is configured
+	// (since we know MFA is active for the root user but cannot find a virtual device).
+	if *user.UserName == rootAccount {
+		return p.listRootMFADevice(ctx, userAccount)
+	}
+
+	return p.listMFADevices(ctx, user)
+}
+
+func (p Provider) listMFADevices(ctx context.Context, user types.User) ([]AuthDevice, error) {
 	input := &iamsdk.ListMFADevicesInput{
 		UserName: user.UserName,
 	}
@@ -255,33 +266,6 @@ func parseCredentialsReport(report *iamsdk.GetCredentialReportOutput) (map[strin
 	}
 
 	return credentialReport, nil
-}
-
-func (p Provider) createRootAccountUser(rootAccount *CredentialReport) *types.User {
-	if rootAccount == nil {
-		p.log.Error("no root account entry was provided")
-		return nil
-	}
-
-	rootDate, err := time.Parse(time.RFC3339, rootAccount.UserCreation)
-	if err != nil {
-		p.log.Errorf("fail to parse root account user creation, error: %v", err)
-		return nil
-	}
-
-	pwdLastUsed, err := time.Parse(time.RFC3339, rootAccount.PasswordLastUsed)
-	if err != nil {
-		p.log.Errorf("fail to parse root account password last used, error: %v", err)
-		return nil
-	}
-
-	return &types.User{
-		UserName:         &rootAccount.User,
-		Arn:              &rootAccount.Arn,
-		CreateDate:       &rootDate,
-		PasswordLastUsed: &pwdLastUsed,
-		UserId:           aws.String("0"),
-	}
 }
 
 func isPasswordEnabled(userAccount *CredentialReport) (bool, error) {
