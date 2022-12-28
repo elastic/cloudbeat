@@ -31,18 +31,18 @@ Create environment
    terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
    ```
    (Note it may take more than 20 minutes to create all the resources)
-4. To create an agent policy and IAM role for EKS, run:
-   ```bash
-   terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
-   ```
-5. To deploy the agent on EKS run:
-   ```bash
-   terraform apply --auto-approve
-   ```
-6. To deploy nginx ingress controller, and ebs csi driver run:
+4. To deploy nginx ingress controller, and ebs csi driver run:
    ```bash
    terraform apply --auto-approve -target "module.apps"
    ``` 
+5. To create an agent policy and IAM role for EKS, run:
+   ```bash
+   terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
+   ```
+6. To deploy the agent on EKS run:
+   ```bash
+   terraform apply --auto-approve
+   ```
 7. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
    ```bash
    aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
