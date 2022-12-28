@@ -15,27 +15,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Config is put into a different package to prevent cyclic imports in case
-// it is needed in several locations
-
-package beater
+package ec2
 
 import (
-	"fmt"
+	"context"
 
-	"github.com/elastic/cloudbeat/config"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type validator struct{}
+type ElasticCompute interface {
+	DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
+}
 
-func (v *validator) Validate(cfg *agentconfig.C) error {
-	// TODO: Should we check something?
-	// Benchmark is being checked inside config.New
-	_, err := config.New(cfg)
-	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
+func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
+	svc := ec2.NewFromConfig(cfg)
+	return &Provider{
+		log:          log,
+		client:       svc,
+		awsAccountID: awsAccountID,
+		awsRegion:    cfg.Region,
 	}
-
-	return nil
 }

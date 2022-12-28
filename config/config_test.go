@@ -49,43 +49,25 @@ func (s *ConfigTestSuite) SetupTest() {
 
 func (s *ConfigTestSuite) TestNew() {
 	tests := []struct {
-		config                 string
-		expectedActivatedRules *Benchmarks
-		expectedType           string
-		expectedAWSConfig      aws.ConfigAWS
-		expectedFetchers       int
+		config            string
+		expectedType      string
+		expectedAWSConfig aws.ConfigAWS
+		expectedFetchers  int
 	}{
 		{
 			`
-runtime_cfg:
-  activated_rules:
-    cis_k8s:
-      - a
-      - b
-      - c
-      - d
-      - e
 fetchers:
   - name: a
     directory: b
   - name: b
     directory: b
 `,
-			&Benchmarks{CisK8s: []string{"a", "b", "c", "d", "e"}},
 			"cis_k8s",
 			aws.ConfigAWS{},
 			2,
 		},
 		{
 			`
-runtime_cfg:
-  activated_rules:
-    cis_eks:
-      - a
-      - b
-      - c
-      - d
-      - e
 config:
   v1:
     benchmark: cis_eks
@@ -103,7 +85,6 @@ fetchers:
   - name: c
     directory: c
 `,
-			&Benchmarks{CisEks: []string{"a", "b", "c", "d", "e"}},
 			"cis_eks",
 			aws.ConfigAWS{
 				AccessKeyID:          "key",
@@ -126,49 +107,8 @@ fetchers:
 			s.NoError(err)
 
 			s.Equal(test.expectedType, c.Benchmark)
-			s.EqualValues(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules)
 			s.Equal(test.expectedAWSConfig, c.AWSConfig)
 			s.Equal(test.expectedFetchers, len(c.Fetchers))
-		})
-	}
-}
-
-func (s *ConfigTestSuite) TestRuntimeCfgExists() {
-	tests := []struct {
-		config   string
-		expected bool
-	}{
-		{
-			`
-runtime_cfg:
-  activated_rules:
-    cis_k8s:
-      - a
-      - b
-      - c
-      - d
-      - e
-`,
-			true,
-		},
-		{
-			`
-not_runtime_cfg:
-  something: true
-`,
-			false,
-		},
-	}
-
-	for i, test := range tests {
-		s.Run(fmt.Sprint(i), func() {
-			cfg, err := config.NewConfigFrom(test.config)
-			s.NoError(err)
-
-			c, err := New(cfg)
-			s.NoError(err)
-
-			s.Equal(test.expected, c.RuntimeCfg != nil)
 		})
 	}
 }
@@ -215,39 +155,6 @@ config:
 	}
 }
 
-func (s *ConfigTestSuite) TestRuntimeConfig() {
-	tests := []struct {
-		config   string
-		expected []string
-	}{
-		{
-			`
-runtime_cfg:
-  activated_rules:
-    cis_k8s:
-      - a
-      - b
-      - c
-      - d
-`, []string{"a", "b", "c", "d"},
-		},
-	}
-
-	for i, test := range tests {
-		s.Run(fmt.Sprint(i), func() {
-			cfg, err := config.NewConfigFrom(test.config)
-			s.NoError(err)
-
-			c, err := New(cfg)
-			s.NoError(err)
-
-			rules := c.RuntimeCfg.ActivatedRules
-
-			s.Equal(test.expected, rules.CisK8s)
-		})
-	}
-}
-
 func (s *ConfigTestSuite) TestConfigPeriod() {
 	tests := []struct {
 		config         string
@@ -280,57 +187,6 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 			s.NoError(err)
 
 			s.Equal(test.expectedPeriod, c.Period)
-		})
-	}
-}
-
-func (s *ConfigTestSuite) TestActivatedRulesFrameWork() {
-	tests := []struct {
-		config                    string
-		expectedActivatedRules    []string
-		expectedEksActivatedRules []string
-		expectedType              string
-	}{
-		{
-			`
-runtime_cfg:
-  activated_rules:
-    cis_k8s:
-      - a
-      - b
-`,
-			[]string{"a", "b"},
-			nil,
-			"cis_k8s",
-		},
-		{
-			`
-runtime_cfg:
-  activated_rules:
-    cis_eks:
-      - a
-      - b
-config:
-  v1:
-    benchmark: cis_eks
-`,
-			nil,
-			[]string{"a", "b"},
-			"cis_eks",
-		},
-	}
-
-	for i, test := range tests {
-		s.Run(fmt.Sprint(i), func() {
-			cfg, err := config.NewConfigFrom(test.config)
-			s.NoError(err)
-
-			c, err := New(cfg)
-			s.NoError(err)
-
-			s.Equal(test.expectedType, c.Benchmark)
-			s.Equal(test.expectedActivatedRules, c.RuntimeCfg.ActivatedRules.CisK8s)
-			s.Equal(test.expectedEksActivatedRules, c.RuntimeCfg.ActivatedRules.CisEks)
 		})
 	}
 }
