@@ -58,21 +58,21 @@ type Result struct {
 }
 
 type Rule struct {
-	Id                   string    `json:"id"`
-	Name                 string    `json:"name"`
-	RuleNumber           string    `json:"rule_number"`
-	ProfileApplicability string    `json:"profile_applicability"`
-	Description          string    `json:"description"`
-	Rationale            string    `json:"rationale"`
-	Audit                string    `json:"audit"`
-	Remediation          string    `json:"remediation"`
-	Impact               string    `json:"impact"`
-	DefaultValue         string    `json:"default_value"`
-	References           string    `json:"references"`
-	Section              string    `json:"section"`
-	Version              string    `json:"version"`
-	Tags                 []string  `json:"tags"`
-	Benchmark            Benchmark `json:"benchmark"`
+	Id                    string    `json:"id"`
+	Name                  string    `json:"name"`
+	Rule_Number           string    `json:"rule_number"`
+	Profile_Applicability string    `json:"profile_applicability"`
+	Description           string    `json:"description"`
+	Rationale             string    `json:"rationale"`
+	Audit                 string    `json:"audit"`
+	Remediation           string    `json:"remediation"`
+	Impact                string    `json:"impact"`
+	Default_Value         string    `json:"default_value"`
+	References            string    `json:"references"`
+	Section               string    `json:"section"`
+	Version               string    `json:"version"`
+	Tags                  []string  `json:"tags"`
+	Benchmark             Benchmark `json:"benchmark"`
 }
 
 type Benchmark struct {
