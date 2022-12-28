@@ -26,7 +26,7 @@ import (
 	"time"
 )
 
-func (p Provider) createRootAccountUser(rootAccount *CredentialReport) *types.User {
+func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User {
 	if rootAccount == nil {
 		p.log.Error("no root account entry was provided")
 		return nil

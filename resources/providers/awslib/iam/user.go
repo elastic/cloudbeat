@@ -52,7 +52,7 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		return nil, err
 	}
 
-	rootUser := p.createRootAccountUser(credentialReport[rootAccount])
+	rootUser := p.getRootAccountUser(credentialReport[rootAccount])
 	if rootUser != nil {
 		apiUsers = append(apiUsers, *rootUser)
 	}
