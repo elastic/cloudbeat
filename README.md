@@ -19,10 +19,10 @@ ___
 
 ## Table of contents
 
-- [Prerequisites](#prerequisites)
 - [Local Deployment](#local-deployment)
-    - [Unmanaged Kubernetes](#clean-up)
-    - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-(EKS))
+    - [Unmanaged Kubernetes](#deploying-cloudbeat-as-a-process)
+      - [Self-Managed Kubernetes (Kind)](#self-managed-kubernetes)
+      - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-(EKS))
 - [Deploying Cloudbeat with Elastic-Agent](#running-cloudbeat-with-elastic-agent)
 
 ## Local Deployment
@@ -59,9 +59,10 @@ Cloudbeat can be deployed as a process, and will not be managed by Elastic Agent
 
 ### Self-Managed Kubernetes
 
+We use [Kind](https://kind.sigs.k8s.io/) to spin up a local kubernetes cluster, and deploy Cloudbeat as a process.
 Build and deploying cloudbeat into your local kind cluster:
 
-if you don't already have a kind cluster, you can create one with:
+if you don't already have a Kind cluster, you can create one with:
 
 ```zsh
 just create-kind-cluster
@@ -111,5 +112,5 @@ just deploy-eks-cloudbeat
 2. Create an agent policy and install the CSP integration (KSPM).
 3. Now, when adding a new agent, you will get the K8s deployment instructions of elastic-agent.
 
-> **Note** Are you a developer/contributor or just looking for more deployment types? check out
+> **Note** Are you a developer/contributor or just looking for more information check out
 > our [dev docs](dev-docs/Development.md)
