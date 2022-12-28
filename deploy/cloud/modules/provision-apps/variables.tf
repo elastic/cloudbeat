@@ -1,6 +1,6 @@
 variable "namespace" {
   type = string
-  default = "kube-system"
+  default = "default"
 }
 
 variable "replica_count" {
