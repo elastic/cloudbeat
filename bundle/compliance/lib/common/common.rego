@@ -77,6 +77,16 @@ duration_gte(duration, min_duration) {
 	true
 }
 
+# The function determines whether the given date occurs within the provided time period.
+# date: time in nanoseconds
+date_within_duration(date, duration) {
+	now = time.now_ns()
+	duration_ns := time.parse_duration_ns(duration)
+	date > now - duration_ns
+} else = false {
+	true
+}
+
 ranges_smaller_than(ranges, value) {
 	range := ranges[_]
 	range < value

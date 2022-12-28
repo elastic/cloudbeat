@@ -125,3 +125,13 @@ test_duration_lte_smaller {
 	min_duration := "10h30m15s10ns" # 10 hours 30 minutes 15 seconds 10 nano-seconds
 	duration_lte(duration, min_duration)
 }
+
+test_date_within_duration_later_than_threshold {
+	date := time.add_date(time.now_ns(), 0, 0, -1) # years, months, days
+	date_within_duration(date, "48h")
+}
+
+test_date_within_duration_earlier_than_threshold {
+	date := time.add_date(time.now_ns(), 0, 0, -3) # years, months, days
+	assert.is_false(date_within_duration(date, "48h"))
+}

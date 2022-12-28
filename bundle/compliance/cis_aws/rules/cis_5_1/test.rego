@@ -16,6 +16,7 @@ test_violation {
 		"RuleAction": "allow",
 		"RuleNumber": 100,
 	})
+
 	eval_fail with input as rule_input({
 		"CidrBlock": "0.0.0.0/0",
 		"Egress": false,
@@ -27,6 +28,7 @@ test_violation {
 		"RuleAction": "allow",
 		"RuleNumber": 100,
 	})
+
 	eval_fail with input as rule_input({
 		"CidrBlock": "0.0.0.0/0",
 		"Egress": false,
@@ -34,6 +36,7 @@ test_violation {
 		"RuleAction": "allow",
 		"RuleNumber": 32767,
 	})
+
 	eval_fail with input as rule_input({
 		"CidrBlock": "0.0.0.0/0",
 		"Egress": false,
@@ -55,6 +58,7 @@ test_pass {
 		"RuleAction": "deny",
 		"RuleNumber": 32767,
 	})
+
 	eval_pass with input as rule_input({
 		"CidrBlock": "0.0.0.0/0",
 		"Egress": false,
@@ -66,6 +70,7 @@ test_pass {
 		"RuleAction": "allow",
 		"RuleNumber": 100,
 	})
+
 	eval_pass with input as rule_input({})
 	eval_pass with input as rule_input({
 		"CidrBlock": "0.0.0.0/0",

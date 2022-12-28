@@ -12,7 +12,7 @@ finding = result {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(data_adapter.pwd_policy.ReusePreventionCount == 24),
+		common.calculate_result(data_adapter.pwd_policy.reuse_prevention_count == 24),
 		{"Password Policy:": data_adapter.pwd_policy},
 	)
 }

@@ -14,7 +14,7 @@ test_pass {
 }
 
 test_not_evaluated {
-	not_eval with input as test_data.not_evaluated_input
+	not_eval with input as test_data.not_evaluated_pwd_policy
 }
 
 rule_input(pwd_len, reuse_count) = test_data.generate_password_policy(pwd_len, reuse_count)

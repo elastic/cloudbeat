@@ -18,5 +18,5 @@ finding = result {
 
 rule_evaluation {
 	# verify password length is equal or above 14
-	common.greater_or_equal(data_adapter.pwd_policy.MinimumLength, 14)
+	common.greater_or_equal(data_adapter.pwd_policy.minimum_length, 14)
 }
