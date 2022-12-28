@@ -22,22 +22,21 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/aws/smithy-go"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"time"
-
 	"testing"
 )
 
 type mocksReturnVals map[string][][]any
 
 type expectedResult struct {
-	HasUsed      bool
-	HasLoggedIn  bool
-	IsVirtualMFA bool
 	Arn          string
+	HasUsed      bool
+	IsVirtualMFA bool
+	MfaActive    bool
 }
 
 func Test_GetUsers(t *testing.T) {
@@ -46,24 +45,26 @@ func Test_GetUsers(t *testing.T) {
 		mocksReturnVals mocksReturnVals
 		expected        []expectedResult
 		wantErr         bool
+		expectedUsers   int
 	}{
 		{
 			name: "Test 1: Should not return users",
 			mocksReturnVals: mocksReturnVals{
-				"ListUsers":            {{&iamsdk.ListUsersOutput{}, nil}},
-				"ListMFADevices":       {nil, nil},
-				"ListAccessKeys":       {nil, nil},
-				"GetAccessKeyLastUsed": {nil, nil},
+				"ListUsers":                {{&iamsdk.ListUsersOutput{}, nil}},
+				"ListMFADevices":           {{nil, nil}},
+				"GenerateCredentialReport": {{nil, nil}},
+				"GetCredentialReport":      {{nil, nil}},
 			},
 			expected: []expectedResult{
 				{
 					HasUsed:      false,
-					HasLoggedIn:  false,
 					IsVirtualMFA: false,
 					Arn:          "",
+					MfaActive:    true,
 				},
 			},
-			wantErr: false,
+			wantErr:       false,
+			expectedUsers: 0,
 		},
 		{
 			name: "Test 2: Should return two users",
@@ -72,55 +73,61 @@ func Test_GetUsers(t *testing.T) {
 				"ListMFADevices": {
 					{&iamsdk.ListMFADevicesOutput{MFADevices: virtualMfaDevices}, nil},
 					{&iamsdk.ListMFADevicesOutput{MFADevices: mfaDevices}, nil},
+					{nil, errors.New("no such user - root account")},
 				},
-				"ListAccessKeys": {
-					{&iamsdk.ListAccessKeysOutput{AccessKeyMetadata: keyMetadata}, nil},
-					{&iamsdk.ListAccessKeysOutput{AccessKeyMetadata: keyMetadata}, nil},
-				},
-				"GetAccessKeyLastUsed": {
-					{&iamsdk.GetAccessKeyLastUsedOutput{
-						AccessKeyLastUsed: &types.AccessKeyLastUsed{LastUsedDate: aws.Time(time.Now())}}, nil},
-					{&iamsdk.GetAccessKeyLastUsedOutput{}, nil},
-				},
+				"GenerateCredentialReport": {{&iamsdk.GenerateCredentialReportOutput{}, nil}},
+				"GetCredentialReport": {
+					{nil, &smithy.GenericAPIError{Code: "ReportNotPresent"}},
+					{CredentialsReportOutput, nil}},
 			},
 			expected: []expectedResult{
 				{
 					HasUsed:      true,
-					HasLoggedIn:  true,
+					MfaActive:    true,
 					IsVirtualMFA: true,
-					Arn:          "arn:aws:iam::123456789012:user/test-user-1",
+					Arn:          "arn:aws:iam::123456789012:user/user1",
 				},
 				{
-					HasUsed:      false,
-					HasLoggedIn:  false,
+					HasUsed:      true,
+					MfaActive:    true,
 					IsVirtualMFA: false,
-					Arn:          "arn:aws:iam::123456789012:user/test-user-2",
+					Arn:          "arn:aws:iam::123456789012:user/user2",
+				},
+				{
+					HasUsed:      true,
+					MfaActive:    false,
+					IsVirtualMFA: false,
+					Arn:          "arn:aws:iam::1234567890:root",
 				},
 			},
-			wantErr: false,
+			wantErr:       false,
+			expectedUsers: 3,
 		},
 		{
 			name: "Test 3: Error should not return users",
 			mocksReturnVals: mocksReturnVals{
-				"ListUsers":            {{&iamsdk.ListUsersOutput{}, errors.New("fail to list iam users")}},
-				"ListMFADevices":       {nil, nil},
-				"ListAccessKeys":       {nil, nil},
-				"GetAccessKeyLastUsed": {nil, nil},
+				"ListUsers": {{&iamsdk.ListUsersOutput{}, errors.New("fail to list iam users")}},
 			},
-			expected: []expectedResult{
-				{
-					HasUsed:      false,
-					HasLoggedIn:  false,
-					IsVirtualMFA: false,
-					Arn:          "",
-				},
+			expectedUsers: 0,
+			expected:      []expectedResult{},
+			wantErr:       true,
+		},
+		{
+			name: "Test 4: Error failed to generate credentials report",
+			mocksReturnVals: mocksReturnVals{
+				"ListUsers": {{&iamsdk.ListUsersOutput{Users: apiUsers}, nil}},
+				"GetCredentialReport": {{nil, &types.ServiceFailureException{
+					Message: aws.String("service err"),
+				}}},
 			},
-			wantErr: true,
+			expected:      []expectedResult{},
+			wantErr:       true,
+			expectedUsers: 0,
 		},
 	}
 
 	for _, test := range tests {
-		mockedClient := &MockIAMClient{}
+		mockedClient := &MockClient{}
 		for funcName, returnVals := range test.mocksReturnVals {
 			for _, vals := range returnVals {
 				mockedClient.On(funcName, mock.Anything, mock.Anything).Return(vals...).Once()
@@ -140,11 +147,15 @@ func Test_GetUsers(t *testing.T) {
 			assert.Error(t, err)
 		}
 
+		assert.Equal(t, test.expectedUsers, len(users))
 		for i, user := range users {
-			assert.Equal(t, user.(User).Arn, test.expected[i].Arn)
-			assert.Equal(t, user.(User).AccessKeys[0].HasUsed, test.expected[i].HasUsed)
-			assert.Equal(t, user.(User).HasLoggedIn, test.expected[i].HasLoggedIn)
-			assert.Equal(t, user.(User).MFADevices[0].IsVirtual, test.expected[i].IsVirtualMFA)
+			assert.Equal(t, test.expected[i].Arn, user.(User).Arn)
+			assert.Equal(t, test.expected[i].HasUsed, user.(User).AccessKeys[0].HasUsed)
+			assert.Equal(t, test.expected[i].MfaActive, user.(User).MfaActive)
+
+			if test.expected[i].MfaActive {
+				assert.Equal(t, test.expected[i].IsVirtualMFA, user.(User).MFADevices[0].IsVirtual)
+			}
 		}
 	}
 }

@@ -57,8 +57,8 @@ copy_to_agents() {
 }
 
 restart_agents() {
-  echo "Agent restart is not supported yet"
-  # for P in $(get_agents); do
-    # exec_pod $POD "elastic-agent restart" # https://github.com/elastic/cloudbeat/pull/458#issuecomment-1308837098
-  # done
+  for P in $(get_agents); do
+    POD=$(echo $P | cut -d '/' -f 2)
+    exec_pod $POD "elastic-agent restart"
+  done
 }
