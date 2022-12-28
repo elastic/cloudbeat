@@ -42,12 +42,14 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.14.8
 	github.com/aws/aws-sdk-go-v2/service/iam v1.18.23
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.19
+	github.com/aws/smithy-go v1.13.5
 	github.com/djherbis/times v1.5.0
 	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
 	github.com/elastic/elastic-agent-autodiscover v0.5.0
 	github.com/elastic/elastic-agent-libs v0.2.15
 	github.com/elastic/go-licenser v0.4.1
 	github.com/go-git/go-git/v5 v5.4.2
+	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
 	github.com/open-policy-agent/opa v0.44.1-0.20220927105354-00e835a7cc15
 	github.com/pkg/errors v0.9.1
 	go.elastic.co/go-licence-detector v0.5.0
@@ -67,7 +69,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.17 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.23 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.13.6 // indirect
-	github.com/aws/smithy-go v1.13.5 // indirect
 	github.com/elastic/elastic-agent-shipper-client v0.4.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect

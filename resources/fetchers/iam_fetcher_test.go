@@ -27,7 +27,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 	"testing"
-	"time"
 )
 
 type IamFetcherTestSuite struct {
@@ -71,18 +70,20 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 	}
 
 	iamUser := iam.User{
-		Name: "test",
 		AccessKeys: []iam.AccessKey{{
-			AccessKeyId:  "",
 			Active:       false,
-			CreationDate: time.Time{},
-			LastAccess:   time.Time{},
-			HasUsed:      false},
+			HasUsed:      false,
+			LastAccess:   "",
+			RotationDate: "",
 		},
-		MFADevices:  nil,
-		LastAccess:  time.Time{},
-		Arn:         "testArn",
-		HasLoggedIn: false,
+		},
+		MFADevices:          nil,
+		Name:                "test",
+		LastAccess:          "",
+		Arn:                 "testArn",
+		PasswordEnabled:     true,
+		PasswordLastChanged: "",
+		MfaActive:           true,
 	}
 
 	var tests = []struct {
