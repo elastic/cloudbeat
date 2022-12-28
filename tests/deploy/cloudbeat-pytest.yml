@@ -14,14 +14,14 @@ metadata:
   name: cloudbeat-kubeadm-config
   namespace: kube-system
 rules:
-- apiGroups:
-  - ""
-  resourceNames:
-  - kubeadm-config
-  resources:
-  - configmaps
-  verbs:
-  - get
+  - apiGroups:
+      - ""
+    resourceNames:
+      - kubeadm-config
+    resources:
+      - configmaps
+    verbs:
+      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -31,15 +31,15 @@ metadata:
   name: cloudbeat-role
   namespace: kube-system
 rules:
-- apiGroups:
-  - coordination.k8s.io
-  resources:
-  - leases
-  verbs:
-  - get
-  - create
-  - update
-  - list
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - create
+      - update
+      - list
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -48,54 +48,54 @@ metadata:
     k8s-app: cloudbeat
   name: cloudbeat
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - nodes
-  - namespaces
-  - events
-  - pods
-  - services
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - extensions
-  resources:
-  - replicasets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - statefulsets
-  - deployments
-  - replicasets
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - batch
-  resources:
-  - jobs
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - nodes/stats
-  verbs:
-  - get
-- nonResourceURLs:
-  - /metrics
-  verbs:
-  - get
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - namespaces
+      - events
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - replicasets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+      - deployments
+      - replicasets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/stats
+    verbs:
+      - get
+  - nonResourceURLs:
+      - /metrics
+    verbs:
+      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -107,9 +107,9 @@ roleRef:
   kind: Role
   name: cloudbeat-kubeadm-config
 subjects:
-- kind: ServiceAccount
-  name: cloudbeat
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -121,9 +121,9 @@ roleRef:
   kind: Role
   name: cloudbeat-role
 subjects:
-- kind: ServiceAccount
-  name: cloudbeat
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -134,14 +134,17 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
 subjects:
-- kind: ServiceAccount
-  name: cloudbeat
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
 ---
 apiVersion: v1
 data:
   cloudbeat.yml: |-
     cloudbeat:
+      config:
+        v1:
+          benchmark: cis_k8s
       type: cloudbeat/cis_k8s
       # Defines how often an event is sent to the output
       period: 45s
@@ -173,101 +176,6 @@ data:
             "/hostfs/var/lib/etcd",
             "/hostfs/etc/kubernetes/pki"
           ]
-      runtime_cfg:
-        activated_rules:
-          cis_k8s:
-            - cis_1_1_1
-            - cis_1_1_2
-            - cis_1_1_3
-            - cis_1_1_4
-            - cis_1_1_5
-            - cis_1_1_6
-            - cis_1_1_7
-            - cis_1_1_8
-            - cis_1_1_11
-            - cis_1_1_12
-            - cis_1_1_13
-            - cis_1_1_14
-            - cis_1_1_15
-            - cis_1_1_16
-            - cis_1_1_17
-            - cis_1_1_18
-            - cis_1_1_19
-            - cis_1_1_20
-            - cis_1_1_21
-            - cis_1_2_2
-            - cis_1_2_4
-            - cis_1_2_5
-            - cis_1_2_6
-            - cis_1_2_7
-            - cis_1_2_8
-            - cis_1_2_9
-            - cis_1_2_10
-            - cis_1_2_11
-            - cis_1_2_12
-            - cis_1_2_13
-            - cis_1_2_14
-            - cis_1_2_15
-            - cis_1_2_16
-            - cis_1_2_17
-            - cis_1_2_18
-            - cis_1_2_19
-            - cis_1_2_20
-            - cis_1_2_21
-            - cis_1_2_22
-            - cis_1_2_23
-            - cis_1_2_24
-            - cis_1_2_25
-            - cis_1_2_26
-            - cis_1_2_27
-            - cis_1_2_28
-            - cis_1_2_29
-            - cis_1_2_32
-            - cis_1_3_2
-            - cis_1_3_3
-            - cis_1_3_4
-            - cis_1_3_5
-            - cis_1_3_6
-            - cis_1_3_7
-            - cis_1_4_1
-            - cis_1_4_2
-            - cis_2_1
-            - cis_2_2
-            - cis_2_3
-            - cis_2_4
-            - cis_2_5
-            - cis_2_6
-            - cis_4_1_1
-            - cis_4_1_2
-            - cis_4_1_5
-            - cis_4_1_6
-            - cis_4_1_9
-            - cis_4_1_10
-            - cis_4_2_1
-            - cis_4_2_2
-            - cis_4_2_3
-            - cis_4_2_4
-            - cis_4_2_5
-            - cis_4_2_6
-            - cis_4_2_7
-            - cis_4_2_8
-            - cis_4_2_9
-            - cis_4_2_10
-            - cis_4_2_11
-            - cis_4_2_12
-            - cis_4_2_13
-            - cis_5_1_3
-            - cis_5_1_5
-            - cis_5_1_6
-            - cis_5_2_2
-            - cis_5_2_3
-            - cis_5_2_4
-            - cis_5_2_5
-            - cis_5_2_6
-            - cis_5_2_7
-            - cis_5_2_8
-            - cis_5_2_9
-            - cis_5_2_10
 
       #    # EKS Fetchers configuration
       #      - name: kube-api
@@ -364,108 +272,108 @@ spec:
         k8s-app: cloudbeat
     spec:
       containers:
-      - env:
-        - name: ES_HOST
-          value: elasticsearch-master.kube-system:9200
-        - name: ES_USERNAME
-          value: kibana_system
-        - name: ES_PASSWORD
-          value: changeme
-        - name: KIBANA_HOST
-          value: http://host.docker.internal:5601
-        - name: ELASTIC_CLOUD_ID
-          value: none
-        - name: ELASTIC_CLOUD_AUTH
-          value: none
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        image: cloudbeat:latest
-        imagePullPolicy: IfNotPresent
-        name: cloudbeat
-        resources:
-          requests:
-            cpu: 100m
-            memory: 100Mi
-          limits:
-            cpu: 1000m
-            memory: 1Gi
-        securityContext:
-          runAsUser: 0
-        volumeMounts:
-        - mountPath: /cloudbeat.yml
-          name: config
-          readOnly: true
-          subPath: cloudbeat.yml
-        - mountPath: /hostfs/proc
-          name: proc
-          readOnly: true
-        - mountPath: /hostfs/etc/kubernetes
-          name: etc-kubernetes
-        - mountPath: /hostfs/var/lib
-          name: var-lib
-          readOnly: true
-        - mountPath: /hostfs/sys/fs/cgroup
-          name: cgroup
-          readOnly: true
-        - mountPath: /var/lib/docker/containers
-          name: varlibdockercontainers
-          readOnly: true
-        - mountPath: /var/log
-          name: varlog
-          readOnly: true
-        - mountPath: /hostfs/etc/passwd
-          name: passwd
-          readOnly: true
-        - mountPath: /hostfs/etc/group
-          name: group
-          readOnly: true
-        - mountPath: /hostfs/etc/systemd
-          name: etcsysmd
-          readOnly: true
+        - env:
+            - name: ES_HOST
+              value: elasticsearch-master.kube-system:9200
+            - name: ES_USERNAME
+              value: kibana_system
+            - name: ES_PASSWORD
+              value: changeme
+            - name: KIBANA_HOST
+              value: http://host.docker.internal:5601
+            - name: ELASTIC_CLOUD_ID
+              value: none
+            - name: ELASTIC_CLOUD_AUTH
+              value: none
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          image: cloudbeat:latest
+          imagePullPolicy: IfNotPresent
+          name: cloudbeat
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /cloudbeat.yml
+              name: config
+              readOnly: true
+              subPath: cloudbeat.yml
+            - mountPath: /hostfs/proc
+              name: proc
+              readOnly: true
+            - mountPath: /hostfs/etc/kubernetes
+              name: etc-kubernetes
+            - mountPath: /hostfs/var/lib
+              name: var-lib
+              readOnly: true
+            - mountPath: /hostfs/sys/fs/cgroup
+              name: cgroup
+              readOnly: true
+            - mountPath: /var/lib/docker/containers
+              name: varlibdockercontainers
+              readOnly: true
+            - mountPath: /var/log
+              name: varlog
+              readOnly: true
+            - mountPath: /hostfs/etc/passwd
+              name: passwd
+              readOnly: true
+            - mountPath: /hostfs/etc/group
+              name: group
+              readOnly: true
+            - mountPath: /hostfs/etc/systemd
+              name: etcsysmd
+              readOnly: true
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       serviceAccountName: cloudbeat
       terminationGracePeriodSeconds: 30
       tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/master
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/control-plane
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/control-plane
       volumes:
-      - hostPath:
-          path: /proc
-        name: proc
-      - hostPath:
-          path: /etc/kubernetes
-        name: etc-kubernetes
-      - hostPath:
-          path: /var/lib
-        name: var-lib
-      - hostPath:
-          path: /etc/passwd
-        name: passwd
-      - hostPath:
-          path: /etc/group
-        name: group
-      - hostPath:
-          path: /sys/fs/cgroup
-        name: cgroup
-      - hostPath:
-          path: /var/lib/docker/containers
-        name: varlibdockercontainers
-      - hostPath:
-          path: /var/log
-        name: varlog
-      - hostPath:
-          path: /etc/systemd
-        name: etcsysmd
-      - configMap:
-          defaultMode: 416
-          name: cloudbeat-daemonset-config
-        name: config
+        - hostPath:
+            path: /proc
+          name: proc
+        - hostPath:
+            path: /etc/kubernetes
+          name: etc-kubernetes
+        - hostPath:
+            path: /var/lib
+          name: var-lib
+        - hostPath:
+            path: /etc/passwd
+          name: passwd
+        - hostPath:
+            path: /etc/group
+          name: group
+        - hostPath:
+            path: /sys/fs/cgroup
+          name: cgroup
+        - hostPath:
+            path: /var/lib/docker/containers
+          name: varlibdockercontainers
+        - hostPath:
+            path: /var/log
+          name: varlog
+        - hostPath:
+            path: /etc/systemd
+          name: etcsysmd
+        - configMap:
+            defaultMode: 416
+            name: cloudbeat-daemonset-config
+          name: config

@@ -15,27 +15,36 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Config is put into a different package to prevent cyclic imports in case
-// it is needed in several locations
-
-package beater
+package ec2
 
 import (
 	"fmt"
 
-	"github.com/elastic/cloudbeat/config"
-	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type validator struct{}
+type NACLInfo struct {
+	types.NetworkAcl
+	awsAccount string
+	region     string
+}
 
-func (v *validator) Validate(cfg *agentconfig.C) error {
-	// TODO: Should we check something?
-	// Benchmark is being checked inside config.New
-	_, err := config.New(cfg)
-	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
+func (r NACLInfo) GetResourceArn() string {
+	if r.NetworkAclId == nil {
+		return ""
 	}
+	//arn:aws:ec2:region:account-id:network-acl/network-acl-id
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:network-acl/%s", r.region, r.awsAccount, *r.NetworkAclId)
+}
 
-	return nil
+func (r NACLInfo) GetResourceName() string {
+	if r.NetworkAclId == nil {
+		return ""
+	}
+	return *r.NetworkAclId
+}
+
+func (r NACLInfo) GetResourceType() string {
+	return fetching.NetworkNACLType
 }
