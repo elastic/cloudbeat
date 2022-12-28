@@ -223,9 +223,6 @@ data:
               type: logs
               dataset: cloud_security_posture.findings
             name: Findings
-            config:
-              v1:
-                benchmark: cis_k8s
             fetchers:
               - name: kube-api
               - name: process
@@ -256,10 +253,13 @@ data:
                   - /hostfs/etc/kubernetes/pki
             processors:
               - add_cluster_id: null
+            config:
+              v1:
+                benchmark: cis_k8s
         meta:
           package:
             name: cloud_security_posture
-            version: 1.0.7
+            version: 1.1.2
     revision: 2
     agent:
       download:
