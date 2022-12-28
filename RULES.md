@@ -193,7 +193,7 @@
 
 ## AWS CIS Benchmark
 
-### 2/63 implemented rules (3%)
+### 3/63 implemented rules (5%)
 
 |                  Rule Number                   | Section                           | Description                                                                                                        |       Status       |   Type    |
 |:----------------------------------------------:|:----------------------------------|:-------------------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -255,7 +255,7 @@
 |                      4.7                       | Monitoring                        | Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs            |        :x:         | Automated |
 |                      4.8                       | Monitoring                        | Ensure a log metric filter and alarm exist for S3 bucket policy changes                                            |        :x:         | Automated |
 |                      4.9                       | Monitoring                        | Ensure a log metric filter and alarm exist for AWS Config configuration changes                                    |        :x:         | Automated |
-|                      5.1                       | Networking                        | Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration ports                          |        :x:         | Automated |
+| [5.1](bundle/compliance/cis_aws/rules/cis_5_1) | Networking                        | Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration ports                          | :white_check_mark: | Automated |
 |                      5.2                       | Networking                        | Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration ports                       |        :x:         | Automated |
 |                      5.3                       | Networking                        | Ensure no security groups allow ingress from ::/0 to remote server administration ports                            |        :x:         | Automated |
 |                      5.4                       | Networking                        | Ensure the default security group of every VPC restricts all traffic                                               |        :x:         | Automated |

@@ -27,3 +27,14 @@ not_evaluated_input = {
 		"ReusePreventionCount": 5,
 	},
 }
+
+generate_nacl(entry) = {
+	"resource": {
+		"Associations": [],
+		"Entries": [entry],
+		"IsDefault": false,
+		"Tags": [],
+	},
+	"type": "ec2",
+	"subType": "aws-nacl",
+}
