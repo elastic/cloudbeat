@@ -5,7 +5,9 @@ kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
 
-# General
+# use env vars if available
+export LOCAL_GOOS := `go env GOOS`
+export LOCAL_GOARCH := `go env GOARCH`
 
 create-kind-cluster kind='kind-multi':
   kind create cluster --config deploy/k8s/kind/{{kind}}.yml --wait 30s
@@ -21,16 +23,22 @@ linter-setup:
 create-vanilla-deployment-file:
    kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
-build-deploy-cloudbeat: build-cloudbeat load-cloudbeat-image deploy-cloudbeat
+build-deploy-cloudbeat $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: load-cloudbeat-image
+  build-cloudbeat $GOOS $GOARCH
+  deploy-cloudbeat
 
-build-load-both: build-deploy-cloudbeat load-pytest-kind
+build-deploy-cloudbeat-debug $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH:
+  build-cloudbeat-debug $GOOS $GOARCH
+  load-cloudbeat-image
+  deploy-cloudbeat
 
-build-deploy-cloudbeat-debug: build-cloudbeat-debug load-cloudbeat-image deploy-cloudbeat
-
-build-replace-cloudbeat: build-binary
+# Builds cloudbeat binary and replace it in the agents (in the current context - i.e. `kubectl config current-context`)
+# Set GOOS and GOARCH to the desired values (linux|darwin, amd64|arm64)
+build-replace-cloudbeat $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: build-opa-bundle
+  just build-binary $GOOS $GOARCH
+  # replace the cloudbeat binary in the agents
   ./scripts/remote_replace_cloudbeat.sh
-
-build-replace-bundle: build-opa-bundle
+  # Replace bundle in the agents
   ./scripts/remote_replace_bundle.sh
 
 load-cloudbeat-image kind='kind-multi':
@@ -39,11 +47,17 @@ load-cloudbeat-image kind='kind-multi':
 build-opa-bundle:
   mage BuildOpaBundle
 
-build-binary:
-  GOOS=linux go mod vendor
-  GOOS=linux go build -v
+# Builds cloudbeat binary
+# Set GOOS and GOARCH to the desired values (linux|darwin, amd64|arm64) by default, it will use local platform
+build-binary $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH:
+  @echo "Building cloudbeat binary for $GOOS/$GOARCH"
+  go mod vendor
+  go build -v
 
-build-cloudbeat: build-opa-bundle build-binary
+# Builds cloudbeat docker image with the OPA bundle included
+# Set GOOS and GOARCH to the desired values (linux|darwin, amd64|arm64)
+build-cloudbeat $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: build-opa-bundle
+  build-binary $GOOS $GOARCH
   docker build -t cloudbeat .
 
 deploy-cloudbeat:
@@ -51,9 +65,10 @@ deploy-cloudbeat:
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
-build-cloudbeat-debug: build-opa-bundle
-  GOOS=linux go mod vendor
-  GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
+# Builds cloudbeat docker image with the OPA bundle included and the debug flag
+build-cloudbeat-debug $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: build-opa-bundle
+  go mod vendor
+  CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 delete-cloudbeat:
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system
@@ -138,7 +153,9 @@ build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 delete-local-helm-cluster kind='kind-multi':
   kind delete cluster --name {{kind}}
 
-cleanup-create-local-helm-cluster target range='..': delete-local-helm-cluster create-kind-cluster build-cloudbeat load-cloudbeat-image
+cleanup-create-local-helm-cluster target range='..' $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: delete-local-helm-cluster create-kind-cluster
+  build-cloudbeat $GOOS $GOARCH
+  load-cloudbeat-image
   just deploy-tests-helm {{target}} tests/deploy/values/local-host.yml {{range}}
 
 
