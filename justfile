@@ -18,19 +18,19 @@ linter-setup:
   source {{hermitActivationScript}} || true
   pre-commit install -f
 
-# Vanilla
-
 create-vanilla-deployment-file:
-   kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
+  cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
+  kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
-build-deploy-cloudbeat $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: load-cloudbeat-image
-  build-cloudbeat $GOOS $GOARCH
-  deploy-cloudbeat
+build-deploy-cloudbeat $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH:
+  just build-cloudbeat-docker-image $GOOS $GOARCH
+  just load-cloudbeat-image
+  just deploy-cloudbeat
 
 build-deploy-cloudbeat-debug $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH:
-  build-cloudbeat-debug $GOOS $GOARCH
-  load-cloudbeat-image
-  deploy-cloudbeat
+  just build-cloudbeat-debug $GOOS $GOARCH
+  just load-cloudbeat-image
+  just deploy-cloudbeat
 
 # Builds cloudbeat binary and replace it in the agents (in the current context - i.e. `kubectl config current-context`)
 # Set GOOS and GOARCH to the desired values (linux|darwin, amd64|arm64)
@@ -45,6 +45,7 @@ load-cloudbeat-image kind='kind-multi':
   kind load docker-image cloudbeat:latest --name {{kind}}
 
 build-opa-bundle:
+  go mod vendor
   mage BuildOpaBundle
 
 # Builds cloudbeat binary
@@ -54,11 +55,15 @@ build-binary $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH:
   go mod vendor
   go build -v
 
+# For backwards compatibility
+alias build-cloudbeat := build-cloudbeat-docker-image
+
 # Builds cloudbeat docker image with the OPA bundle included
 # Set GOOS and GOARCH to the desired values (linux|darwin, amd64|arm64)
-build-cloudbeat $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: build-opa-bundle
-  build-binary $GOOS $GOARCH
-  docker build -t cloudbeat .
+build-cloudbeat-docker-image $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: build-opa-bundle
+  just build-binary $GOOS $GOARCH
+  @echo "Building cloudbeat docker image for $GOOS/$GOARCH"
+  docker build -t cloudbeat . --platform=$GOOS/$GOARCH
 
 deploy-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
@@ -75,7 +80,7 @@ delete-cloudbeat:
 
 # EKS
 create-eks-deployment-file:
-    kustomize build {{kustomizeEksOverlay}} --output deploy/eks/cloudbeat-ds.yaml
+  kustomize build {{kustomizeEksOverlay}} --output deploy/eks/cloudbeat-ds.yaml
 
 deploy-eks-cloudbeat:
   kubectl delete -k {{kustomizeEksOverlay}} -n kube-system & kubectl apply -k {{kustomizeEksOverlay}} -n kube-system
@@ -83,8 +88,8 @@ deploy-eks-cloudbeat:
 #General
 
 logs-cloudbeat:
-    CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
-    kubectl logs -f "${CLOUDBEAT_POD}" -n kube-system
+  CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
+  kubectl logs -f "${CLOUDBEAT_POD}" -n kube-system
 
 build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v
@@ -99,12 +104,12 @@ elastic-stack-connect-kind kind='kind-multi':
   ./.ci/scripts/connect_kind.sh {{kind}}
 
 ssh-cloudbeat:
-    CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
-    kubectl exec --stdin --tty "${CLOUDBEAT_POD}" -n kube-system -- /bin/bash
+  CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
+  kubectl exec --stdin --tty "${CLOUDBEAT_POD}" -n kube-system -- /bin/bash
 
 expose-ports:
-    CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
-    kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
+  CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
+  kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
 
 
 #### TESTS ####
@@ -140,7 +145,7 @@ deploy-tests-helm target values_file='tests/deploy/values/ci.yml' range='':
   helm upgrade --wait --timeout={{TIMEOUT}} --install --values {{values_file}} --set testData.marker={{target}} --set testData.range={{range}} --set elasticsearch.imageTag={{ELK_STACK_VERSION}} --set kibana.imageTag={{ELK_STACK_VERSION}} --namespace={{NAMESPACE}} {{TESTS_RELEASE}} tests/deploy/k8s-cloudbeat-tests/
 
 purge-tests:
-	helm del {{TESTS_RELEASE}} -n {{NAMESPACE}} & kubectl delete pvc --all -n {{NAMESPACE}}
+  helm del {{TESTS_RELEASE}} -n {{NAMESPACE}} & kubectl delete pvc --all -n {{NAMESPACE}}
 
 gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
@@ -154,8 +159,8 @@ delete-local-helm-cluster kind='kind-multi':
   kind delete cluster --name {{kind}}
 
 cleanup-create-local-helm-cluster target range='..' $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: delete-local-helm-cluster create-kind-cluster
-  build-cloudbeat $GOOS $GOARCH
-  load-cloudbeat-image
+  just build-cloudbeat-docker-image $GOOS $GOARCH
+  just load-cloudbeat-image
   just deploy-tests-helm {{target}} tests/deploy/values/local-host.yml {{range}}
 
 
