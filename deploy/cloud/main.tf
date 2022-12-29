@@ -199,7 +199,7 @@ module "apps" {
 module "aws_ec2_with_agent" {
   source    = "./modules/ec2"
   providers = { aws : aws }
-  yml       = module.api.yaml
+  yml       = module.api.yaml_vanilla
   depends_on = [
     module.ec_deployment,
     module.api,

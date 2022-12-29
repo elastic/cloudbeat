@@ -33,20 +33,24 @@ Create environment
    terraform init
    terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
    ```
+4. Create EC2 instance to run Cloudbeat on vanilla cluster
+   ```bash
+   terraform apply --auto-approve -target "module.aws_ec2_with_agent"
+   ```
    (Note it may take more than 20 minutes to create all the resources)
-4. To deploy nginx ingress controller, and ebs csi driver run:
+5. To deploy nginx ingress controller, and ebs csi driver run:
    ```bash
    terraform apply --auto-approve -target "module.apps"
    ```
-5. To create an agent policy and IAM role for EKS, run:
+6. To create an agent policy and IAM role for EKS, run:
    ```bash
    terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
    ```
-6. To deploy the agent on EKS run:
+7. To deploy the agent on EKS run:
    ```bash
    terraform apply --auto-approve
    ```
-7. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
+8. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
    ```bash
    aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
        --name $(terraform output -raw eks_cluster_name)
