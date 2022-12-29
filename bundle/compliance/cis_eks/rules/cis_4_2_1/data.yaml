@@ -80,7 +80,7 @@ metadata:
   version: '1.0'
   tags:
   - CIS
-  - CIS_EKS
+  - EKS
   - CIS 4.2.1
   - Pod Security Policies
   benchmark:

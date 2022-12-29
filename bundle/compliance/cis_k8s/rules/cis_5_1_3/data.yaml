@@ -26,9 +26,9 @@ metadata:
     ```
   remediation: |-
     Where possible replace any use of wildcards in clusterroles and roles with specific objects or actions.
-  impact: None
+  impact: ''
   default_value:
-  references: 1. nan
+  references: ''
   section: RBAC and Service Accounts
   version: '1.0'
   tags:

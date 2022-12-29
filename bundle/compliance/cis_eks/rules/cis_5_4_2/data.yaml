@@ -16,8 +16,8 @@ metadata:
     Although Kubernetes API requires an authorized token to perform sensitive actions, a vulnerability could potentially expose the Kubernetes publically with unrestricted access.
     Additionally, an attacker may be able to identify the current cluster and Kubernetes API version and determine whether it is vulnerable to an attack.
     Unless required, disabling public endpoint will help prevent such threats, and require the attacker to be on the master's VPC network to perform any attack on the Kubernetes API.
-  audit: nan
-  remediation: nan
+  audit: ''
+  remediation: ''
   impact: |-
     Configure the EKS cluster endpoint to be private. See [Modifying Cluster Endpoint Access](https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html) for further information on this topic.
 
@@ -31,7 +31,7 @@ metadata:
   version: '1.0'
   tags:
   - CIS
-  - CIS_EKS
+  - EKS
   - CIS 5.4.2
   - Cluster Networking
   benchmark:

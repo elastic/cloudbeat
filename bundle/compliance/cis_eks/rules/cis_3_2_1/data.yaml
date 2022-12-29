@@ -96,7 +96,7 @@ metadata:
   version: '1.0'
   tags:
   - CIS
-  - CIS_EKS
+  - EKS
   - CIS 3.2.1
   - Kubelet
   benchmark:

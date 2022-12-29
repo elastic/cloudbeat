@@ -6,16 +6,16 @@ metadata:
   description: Encrypt traffic to HTTPS load balancers using TLS certificates.
   rationale: |-
     Encrypting traffic between users and your Kubernetes workload is fundamental to protecting data sent over the web.
-  audit: nan
-  remediation: nan
-  impact: None
+  audit: ''
+  remediation: ''
+  impact: ''
   default_value: ''
   references: 1. https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/data-protection.html
   section: Cluster Networking
   version: '1.0'
   tags:
   - CIS
-  - CIS_EKS
+  - EKS
   - CIS 5.4.5
   - Cluster Networking
   benchmark:

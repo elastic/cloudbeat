@@ -33,16 +33,16 @@ metadata:
      - Click `Edit inbound rules`
      - Either A) update the Source field to a range other than 0.0.0.0/0, or, B) Click `Delete` to remove the offending inbound rule
      - Click `Save`
-  impact: None
+  impact: ''
   default_value: ''
-  references:
-  - https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html
-  - https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Security.html#VPC_Security_Comparison
+  references: |-
+    1. https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html
+    2. https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Security.html#VPC_Security_Comparison
   section: Networking
   version: '1.0'
   tags:
   - CIS
-  - CIS_AWS
+  - AWS
   - CIS 5.1
   - Networking
   benchmark:

@@ -53,7 +53,7 @@ metadata:
   version: '1.0'
   tags:
   - CIS
-  - CIS_EKS
+  - EKS
   - CIS 5.1.1
   - Image Registry and Image Scanning
   benchmark:

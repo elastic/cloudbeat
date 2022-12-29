@@ -60,3 +60,25 @@ jobs:
 
       - name: Fail Rules.md is not updated - to fix run our pre-commit hooks
         run: git diff --exit-code
+
+  update-rule-metadata:
+    name: Update rules metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          poetry install
+
+      - name: Update rule metadata
+        run: poetry run python ./dev/generate_rule_metadata.py
+
+      - name: Rule metadata mismatch - to fix run our pre-commit hooks
+        run: git diff --exit-code

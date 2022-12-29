@@ -40,7 +40,7 @@ metadata:
      aws iam update-account-password-policy --minimum-password-length 14
     ```
     Note: All commands starting with "aws iam update-account-password-policy" can be combined into a single command.
-  impact: None
+  impact: ''
   default_value: ''
   references: |-
     1. https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html
@@ -49,7 +49,7 @@ metadata:
   version: '1.0'
   tags:
   - CIS
-  - CIS_AWS
+  - AWS
   - CIS 1.8
   - Identity and Access Management
   benchmark:

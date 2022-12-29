@@ -47,7 +47,7 @@ metadata:
   version: '1.0'
   tags:
   - CIS
-  - CIS_EKS
+  - EKS
   - CIS 3.1.3
   - Worker Node Configuration Files
   benchmark:

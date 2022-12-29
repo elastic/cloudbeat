@@ -1,9 +1,12 @@
 package compliance.lib.common
 
-metadata = {"opa_version": opa_version}
-
 # get OPA version
 opa_version := opa.runtime().version
+
+metadata = {
+	"opa_version": opa_version,
+	"policy_version": "1.0.0",
+}
 
 # set the rule result
 calculate_result(evaluation) = "passed" {

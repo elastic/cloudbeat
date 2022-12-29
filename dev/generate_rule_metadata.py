@@ -85,9 +85,12 @@ def parse_refs(refs: str):
     """
     Parse references - they are split by `:` which is the worst token possible for urls...
     """
-    ref = [f"http{ref}" for ref in refs.split(":http") if ref]
-    ref[0] = ref[0].removeprefix("http")
-    return "\n".join(f"{i+1}. {s}" for i, s in enumerate(ref))
+    if refs != "":
+        ref = [f"http{ref}" for ref in refs.split(":http") if ref]
+        ref[0] = ref[0].removeprefix("http")
+        return "\n".join(f"{i + 1}. {s}" for i, s in enumerate(ref))
+
+    return refs
 
 
 def read_existing_default_value(rule_number, benchmark_id):
@@ -107,6 +110,15 @@ def read_existing_default_value(rule_number, benchmark_id):
         return ""
 
 
+def replace_nan_with_empty_string(data: pd.DataFrame):
+    """
+    Replace NaN values with empty strings (they are represented as `nan` in the Excel for some reason)
+    :param data: Dataframe
+    :return: Dataframe
+    """
+    return data.replace("nan", '')
+
+
 def generate_metadata(benchmark_id: str, raw_data: pd.DataFrame, benchmark_metadata: Benchmark, sections: dict):
     """
     Generate metadata for rules
@@ -116,9 +128,10 @@ def generate_metadata(benchmark_id: str, raw_data: pd.DataFrame, benchmark_metad
     :param sections: Section metadata
     :return: List of Rule objects
     """
+    normalized_data = replace_nan_with_empty_string(raw_data)
     metadata = []
-    benchmark_tag = benchmark_id.removesuffix("cis_").upper() if benchmark_id != "cis_k8s" else f"Kubernetes"
-    for rule in raw_data.to_dict(orient="records"):
+    benchmark_tag = benchmark_id.removeprefix("cis_").upper() if benchmark_id != "cis_k8s" else f"Kubernetes"
+    for rule in normalized_data.to_dict(orient="records"):
         r = Rule(
             id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{benchmark_metadata.name} {rule['Title']}")),
             name=rule["Title"],
@@ -128,7 +141,7 @@ def generate_metadata(benchmark_id: str, raw_data: pd.DataFrame, benchmark_metad
             rationale=common.fix_code_blocks(rule.get("rationale", "")),
             audit=common.fix_code_blocks(rule.get("audit", "")),
             remediation=common.fix_code_blocks(rule.get("remediation", "")),
-            impact=rule.get("impact", "") if rule.get("impact", "") != "nan" else "None",
+            impact=rule.get("impact", ""),
             default_value=rule.get("default_value", read_existing_default_value(rule["Rule Number"], benchmark_id)),
             references=parse_refs(rule.get("references", "")),
             section=sections[rule["Section"]],
