@@ -20,9 +20,9 @@ ___
 ## Table of contents
 
 - [Local Deployment](#local-deployment)
-    - [Unmanaged Kubernetes](#deploying-cloudbeat-as-a-process)
-      - [Self-Managed Kubernetes (Kind)](#self-managed-kubernetes)
-      - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-(EKS))
+  - [Deploying Cloudbeat as a process](#deploying-cloudbeat-as-a-process)
+    - [Self-Managed Kubernetes (Kind)](#self-managed-kubernetes)
+    - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-eks)
 - [Deploying Cloudbeat with Elastic-Agent](#running-cloudbeat-with-elastic-agent)
 
 ## Local Deployment
@@ -106,7 +106,6 @@ just deploy-eks-cloudbeat
 ````
 
 ## Running Cloudbeat with Elastic Agent
-
 
 1. Spin up Elastic stack (using [cloud](https://staging.found.no/home)/[staging](https://staging.found.no/home) is recommended, but using elastic-package is also supported, see [Local Deployment](#local-deployment))
 2. Create an agent policy and install the CSP integration (KSPM).
