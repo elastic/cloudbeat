@@ -39,6 +39,7 @@ import (
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
 	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/e2e-testing/pkg/downloads"
+	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
