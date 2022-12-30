@@ -49,7 +49,7 @@ depending on the deployment platform (Self-Managed kubernetes / EKS) you may nee
    For example, spinning up 8.6.0 stack locally:
 
     ```zsh
-    eval "$(elastic-package stack shellinit)" # load stack environment variables
+    eval "$(elastic-package stack shellinit --shell $(basename $SHELL))" # load stack environment variables
     elastic-package stack up --version 8.6.0 -v -d
     ```
 
