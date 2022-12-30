@@ -19,6 +19,7 @@ linter-setup:
   pre-commit install -f
 
 create-vanilla-deployment-file:
+  @echo "Make sure to run 'eval \$(elastic-package stack shellinit --shell \$(basename $SHELL))'"
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
@@ -80,6 +81,8 @@ delete-cloudbeat:
 
 # EKS
 create-eks-deployment-file:
+  @echo "Make sure to run 'eval \$(elastic-package stack shellinit --shell \$(basename $SHELL))'"
+  cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeEksOverlay}}
   kustomize build {{kustomizeEksOverlay}} --output deploy/eks/cloudbeat-ds.yaml
 
 deploy-eks-cloudbeat:
@@ -155,10 +158,10 @@ run-tests target='default' context='kind-kind-multi':
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 
-delete-local-helm-cluster kind='kind-multi':
+delete-kind-cluster kind='kind-multi':
   kind delete cluster --name {{kind}}
 
-cleanup-create-local-helm-cluster target range='..' $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: delete-local-helm-cluster create-kind-cluster
+cleanup-create-local-helm-cluster target range='..' $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: delete-kind-cluster create-kind-cluster
   just build-cloudbeat-docker-image $GOOS $GOARCH
   just load-cloudbeat-image
   just deploy-tests-helm {{target}} tests/deploy/values/local-host.yml {{range}}
