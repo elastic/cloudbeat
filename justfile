@@ -23,8 +23,8 @@ create-vanilla-deployment-file:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
-build-deploy-cloudbeat $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH:
-  just build-cloudbeat-docker-image $GOOS $GOARCH
+build-deploy-cloudbeat $GOARCH=LOCAL_GOARCH:
+  just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image
   just deploy-cloudbeat
 
@@ -61,10 +61,10 @@ alias build-cloudbeat := build-cloudbeat-docker-image
 
 # Builds cloudbeat docker image with the OPA bundle included
 # Set GOOS and GOARCH to the desired values (linux|darwin, amd64|arm64)
-build-cloudbeat-docker-image $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: build-opa-bundle
-  just build-binary $GOOS $GOARCH
-  @echo "Building cloudbeat docker image for $GOOS/$GOARCH"
-  docker build -t cloudbeat . --platform=$GOOS/$GOARCH
+build-cloudbeat-docker-image $GOARCH=LOCAL_GOARCH: build-opa-bundle
+  just build-binary linux $GOARCH
+  @echo "Building cloudbeat docker image for linux/$GOARCH"
+  docker build -t cloudbeat . --platform=linux/$GOARCH
 
 deploy-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
@@ -77,6 +77,7 @@ build-cloudbeat-debug $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: build-opa-bundle
   CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 delete-cloudbeat:
+  cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system
 
 # EKS
@@ -161,8 +162,8 @@ build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 delete-kind-cluster kind='kind-multi':
   kind delete cluster --name {{kind}}
 
-cleanup-create-local-helm-cluster target range='..' $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: delete-kind-cluster create-kind-cluster
-  just build-cloudbeat-docker-image $GOOS $GOARCH
+cleanup-create-local-helm-cluster target range='..' $GOARCH=LOCAL_GOARCH: delete-kind-cluster create-kind-cluster
+  just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image
   just deploy-tests-helm {{target}} tests/deploy/values/local-host.yml {{range}}
 
