@@ -11,14 +11,12 @@ export LOCAL_GOARCH := `go env GOARCH`
 create-kind-cluster kind='kind-multi':
   kind create cluster --config deploy/k8s/kind/{{kind}}.yml --wait 30s
 
-setup-env: create-kind-cluster elastic-stack-connect-kind
-
 linter-setup:
   source {{hermitActivationScript}} || true
   pre-commit install -f
 
 create-vanilla-deployment-file:
-  @echo "Make sure to run 'eval \$(elastic-package stack shellinit --shell \$(basename $SHELL))'"
+  @echo "Make sure to run 'eval \$(elastic-package stack shellinit --shell \$(basename \$SHELL))'"
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
@@ -81,7 +79,7 @@ delete-cloudbeat:
 
 # EKS
 create-eks-deployment-file:
-  @echo "Make sure to run 'eval \$(elastic-package stack shellinit --shell \$(basename $SHELL))'"
+  @echo "Make sure to run 'eval \$(elastic-package stack shellinit --shell \$(basename \$SHELL))'"
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeEksOverlay}}
   kustomize build {{kustomizeEksOverlay}} --output deploy/eks/cloudbeat-ds.yaml
 
