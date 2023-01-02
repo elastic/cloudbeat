@@ -15,7 +15,6 @@ Parameters:
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: SSH Keypair to login to the instance
-    Default: amir-build
   InstanceType:
     Type: String
     Default: t2.micro
@@ -33,7 +32,6 @@ Parameters:
   ElasticAgentVersion:
     Type: String
     Description: The version of elastic-agent to install
-    Default: elastic-agent-8.5.0-linux-x86_64
 
 Resources:
   # Security Group for EC2 instance
