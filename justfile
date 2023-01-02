@@ -5,8 +5,7 @@ kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
 
-# use env vars if available
-export LOCAL_GOOS := `go env GOOS`
+# use env var if available
 export LOCAL_GOARCH := `go env GOARCH`
 
 create-kind-cluster kind='kind-multi':
@@ -28,15 +27,15 @@ build-deploy-cloudbeat $GOARCH=LOCAL_GOARCH:
   just load-cloudbeat-image
   just deploy-cloudbeat
 
-build-deploy-cloudbeat-debug $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH:
-  just build-cloudbeat-debug $GOOS $GOARCH
+build-deploy-cloudbeat-debug $GOARCH=LOCAL_GOARCH:
+  just build-cloudbeat-debug $GOARCH
   just load-cloudbeat-image
   just deploy-cloudbeat
 
 # Builds cloudbeat binary and replace it in the agents (in the current context - i.e. `kubectl config current-context`)
-# Set GOOS and GOARCH to the desired values (linux|darwin, amd64|arm64)
-build-replace-cloudbeat $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: build-opa-bundle
-  just build-binary $GOOS $GOARCH
+# Set GOARCH to the desired values amd64|arm64
+build-replace-cloudbeat $GOARCH=LOCAL_GOARCH: build-opa-bundle
+  just build-binary $GOARCH
   # replace the cloudbeat binary in the agents
   ./scripts/remote_replace_cloudbeat.sh
   # Replace bundle in the agents
@@ -50,19 +49,19 @@ build-opa-bundle:
   mage BuildOpaBundle
 
 # Builds cloudbeat binary
-# Set GOOS and GOARCH to the desired values (linux|darwin, amd64|arm64) by default, it will use local platform
-build-binary $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH:
-  @echo "Building cloudbeat binary for $GOOS/$GOARCH"
-  go mod vendor
-  go build -v
+# Set GOARCH to the desired values amd64|arm64, by default, it will use local arch
+build-binary $GOARCH=LOCAL_GOARCH:
+  @echo "Building cloudbeat binary for linux/$GOARCH"
+  GOOS=linux go mod vendor
+  GOOS=linux go build -v
 
 # For backwards compatibility
 alias build-cloudbeat := build-cloudbeat-docker-image
 
 # Builds cloudbeat docker image with the OPA bundle included
-# Set GOOS and GOARCH to the desired values (linux|darwin, amd64|arm64)
+# Set GOARCH to the desired values amd64|arm64. by default, it will use local arch
 build-cloudbeat-docker-image $GOARCH=LOCAL_GOARCH: build-opa-bundle
-  just build-binary linux $GOARCH
+  just build-binary $GOARCH
   @echo "Building cloudbeat docker image for linux/$GOARCH"
   docker build -t cloudbeat . --platform=linux/$GOARCH
 
@@ -72,9 +71,9 @@ deploy-cloudbeat:
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
 # Builds cloudbeat docker image with the OPA bundle included and the debug flag
-build-cloudbeat-debug $GOOS=LOCAL_GOOS $GOARCH=LOCAL_GOARCH: build-opa-bundle
-  go mod vendor
-  CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
+build-cloudbeat-debug $GOARCH=LOCAL_GOARCH: build-opa-bundle
+  GOOS=linux go mod vendor
+  GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
 
 delete-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
