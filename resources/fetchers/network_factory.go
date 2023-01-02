@@ -33,19 +33,19 @@ import (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.NetworkNACLType, &ACLFactory{
+	fetchersManager.Factories.RegisterFactory(fetching.EC2NetworkingType, &EC2NetworkFactory{
 		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 		IdentityProvider:  awslib.GetIdentityClient,
 	})
 }
 
-type ACLFactory struct {
+type EC2NetworkFactory struct {
 	AwsConfigProvider config.AwsConfigProvider
 	IdentityProvider  func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
-func (f *ACLFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	log.Debug("Starting ACLFactory.Create")
+func (f *EC2NetworkFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting EC2NetworkFactory.Create")
 
 	cfg := ACLFetcherConfig{}
 	err := c.Unpack(&cfg)
@@ -56,7 +56,7 @@ func (f *ACLFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *ACLFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
 	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log)
 	if err != nil {
@@ -71,7 +71,7 @@ func (f *ACLFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, ch chan 
 
 	provider := ec2.NewEC2Provider(log, *identity.Account, awsConfig)
 
-	return &ACLFetcher{
+	return &NetworkFetcher{
 		log:           log,
 		cfg:           cfg,
 		aclProvider:   provider,

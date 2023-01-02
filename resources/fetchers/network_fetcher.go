@@ -27,7 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type ACLFetcher struct {
+type NetworkFetcher struct {
 	log           *logp.Logger
 	aclProvider   ec2.ElasticCompute
 	cfg           ACLFetcherConfig
@@ -39,24 +39,28 @@ type ACLFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
 }
 
-type ACLResource struct {
+type NetworkResource struct {
 	awslib.AwsResource
 	identity *awslib.Identity
 }
 
-// Fetch collects ACL resources
-// The resources are enriched by the provider and being send to evaluation.
-func (f ACLFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Debug("Starting ACLFetcher.Fetch")
+// Fetch collects network resource such as network acl and security groups
+func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting NetworkFetcher.Fetch")
 
-	resources, err := f.aclProvider.DescribeNeworkAcl(ctx)
+	nacl, err := f.aclProvider.DescribeNeworkAcl(ctx)
 	if err != nil {
 		return err
 	}
 
-	for _, resource := range resources {
+	securityGroups, err := f.aclProvider.DescribeSecurityGroups(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, resource := range append(nacl, securityGroups...) {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource: ACLResource{
+			Resource: NetworkResource{
 				AwsResource: resource,
 				identity:    f.cloudIdentity,
 			},
@@ -67,13 +71,13 @@ func (f ACLFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 	return nil
 }
 
-func (f ACLFetcher) Stop() {}
+func (f NetworkFetcher) Stop() {}
 
-func (r ACLResource) GetData() any {
+func (r NetworkResource) GetData() any {
 	return r.AwsResource
 }
 
-func (r ACLResource) GetMetadata() (fetching.ResourceMetadata, error) {
+func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	identifier := r.GetResourceArn()
 	return fetching.ResourceMetadata{
 		ID:      identifier,
@@ -82,4 +86,4 @@ func (r ACLResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Name:    r.GetResourceName(),
 	}, nil
 }
-func (r ACLResource) GetElasticCommonData() any { return nil }
+func (r NetworkResource) GetElasticCommonData() any { return nil }

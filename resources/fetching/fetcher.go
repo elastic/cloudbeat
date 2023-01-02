@@ -28,13 +28,15 @@ import (
 const (
 	KubeAPIType = "kube-api"
 
-	EcrType         = "aws-ecr"
-	IAMType         = "aws-iam"
-	NetworkNACLType = "aws-nacl"
-	ElbType         = "aws-elb"
-	IAMUserType     = "aws-iam-user"
-	PwdPolicyType   = "aws-password-policy"
-	EksType         = "aws-eks"
+	EcrType           = "aws-ecr"
+	IAMType           = "aws-iam"
+	EC2NetworkingType = "aws-ec2-network"
+	NetworkNACLType   = "aws-nacl"
+	SecurityGroupType = "aws-security-group"
+	ElbType           = "aws-elb"
+	IAMUserType       = "aws-iam-user"
+	PwdPolicyType     = "aws-password-policy"
+	EksType           = "aws-eks"
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"

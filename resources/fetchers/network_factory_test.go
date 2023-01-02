@@ -39,7 +39,7 @@ session_token: session
 default_region: us1-east
 `
 
-func TestACLFactory_Create(t *testing.T) {
+func TestNetworkFactory_Create(t *testing.T) {
 	identity := &awslib.MockIdentityProviderGetter{}
 	identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
 		Account: awssdk.String("test-account"),
@@ -54,7 +54,7 @@ func TestACLFactory_Create(t *testing.T) {
 				return nil
 			},
 		)
-	f := &ACLFactory{
+	f := &EC2NetworkFactory{
 		AwsConfigProvider: awsconfig,
 		IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 			return identity
@@ -65,7 +65,7 @@ func TestACLFactory_Create(t *testing.T) {
 	fetcher, err := f.Create(logp.NewLogger("test"), cfg, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, fetcher)
-	nacl, ok := fetcher.(*ACLFetcher)
+	nacl, ok := fetcher.(*NetworkFetcher)
 	assert.True(t, ok)
 	assert.Equal(t, nacl.cfg.AwsConfig.AccessKeyID, "key")
 	assert.Equal(t, nacl.cfg.AwsConfig.SecretAccessKey, "secret")
