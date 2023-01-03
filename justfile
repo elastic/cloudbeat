@@ -71,7 +71,7 @@ deploy-cloudbeat:
 # Builds cloudbeat docker image with the OPA bundle included and the debug flag
 build-cloudbeat-debug $GOARCH=LOCAL_GOARCH: build-opa-bundle
   GOOS=linux go mod vendor
-  GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat .
+  GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat . --platform=linux/$GOARCH
 
 delete-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
