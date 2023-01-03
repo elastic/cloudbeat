@@ -11,6 +11,7 @@ from kubernetes.watch import watch
 from kubernetes.stream import stream
 
 from commonlib.io_utils import get_k8s_yaml_objects
+from loguru import logger
 
 RESOURCE_POD = "Pod"
 RESOURCE_SERVICE_ACCOUNT = "ServiceAccount"
@@ -134,7 +135,7 @@ class KubernetesHelper:
                     result_dict[pod.metadata.name] = pod.spec.containers[0].image
             return result_dict
         except ValueError:
-            print("Warning: Cannot retrieve pod image version")
+            logger.warning("Cannot retrieve pod image version")
 
         return result_dict
 
@@ -149,7 +150,7 @@ class KubernetesHelper:
             for node in nodes:
                 nodes_data[node.metadata.name] = node.status.node_info.kubelet_version
         except ValueError:
-            print("Warning: Cannot retrieve nodes data")
+            logger.warning("Cannot retrieve nodes data")
 
         return nodes_data
 
@@ -233,7 +234,7 @@ class KubernetesHelper:
                     self.delete_resources(resource_type=yaml_object["kind"], **relevant_metadata),
                 )
             except ApiException as not_found:
-                print(f"{relevant_metadata['name']} not found {not_found.status}")
+                logger.exception(f"{relevant_metadata['name']} not found {not_found.status}")
 
         return result_list
 
@@ -363,7 +364,7 @@ class KubernetesHelper:
         try:
             return self.dispatch_get[resource_type](name, **kwargs)
         except ApiException as exc:
-            print(f"Resource not found: {exc.reason}")
+            logger.exception(f"Resource not found: {exc.reason}")
             raise exc
 
     def wait_for_resource(

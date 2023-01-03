@@ -6,6 +6,7 @@ from typing import Union
 
 import allure
 from commonlib.io_utils import get_logs_from_stream, get_events_from_index
+from loguru import logger
 
 
 def get_ES_evaluation(
@@ -36,7 +37,7 @@ def get_ES_evaluation(
                 latest_timestamp,
             )
         except Exception as e:
-            print(e)
+            logger.warning(e)
             continue
 
         for event in events:
@@ -50,7 +51,7 @@ def get_ES_evaluation(
             try:
                 evaluation = event.result.evaluation
             except AttributeError:
-                print("Warning: got finding with missing fields:", event)
+                logger.warning("got finding with missing fields:", event)
                 continue
 
             if resource_identifier(event):
@@ -91,7 +92,7 @@ def get_logs_evaluation(
                 ),
             )
         except Exception as e:
-            print(e)
+            logger.warning(e)
             continue
 
         for log in logs:
