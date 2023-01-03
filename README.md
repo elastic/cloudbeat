@@ -86,19 +86,19 @@ Or without certificate
 just build-deploy-cloudbeat-nocert
 ```
 
-> **Note** By default, cloudbeat binary will be built based on `GOOS` and `GOARCH` environment variables.
-> If you want to build cloudbeat for a different platform you can set them as following:
+> **Note** By default, cloudbeat binary will be built based on `GOARCH` environment variable.
+> If you want to build cloudbeat for a different platform you can set it as following:
 >
 > ```zsh
-> # just build-deploy-cloudbeat <Target OS> <Target Arch>
-> just build-deploy-cloudbeat linux amd64
+> # just build-deploy-cloudbeat <Target Arch>
+> just build-deploy-cloudbeat amd64
 > ```
 >
 > Or without certificate
 >
 > ```zsh
-> # just build-deploy-cloudbeat-nocert <Target OS> <Target Arch>
-> just build-deploy-cloudbeat-nocert linux amd64
+> # just build-deploy-cloudbeat-nocert <Target Arch>
+> just build-deploy-cloudbeat-nocert amd64
 > ```
 
 ### Amazon Elastic Kubernetes Service (EKS)
