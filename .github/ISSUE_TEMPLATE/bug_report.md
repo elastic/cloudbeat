@@ -2,7 +2,7 @@
 name: Bug report
 about: Report a bug to help us improve
 title:
-labels: ["bug", "Team:Cloud Security Posture"]
+labels: ["bug", "Team:Cloud Security"]
 assignees: ''
 ---
 
