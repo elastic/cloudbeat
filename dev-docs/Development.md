@@ -15,6 +15,51 @@ pre-commit install # install the pre commits hooks
 pre-commit run --all-files --verbose # run it!
 ```
 
+
+### Update default configurations
+
+If you need to change the default values in the configuration(`ES_HOST`, `ES_PORT`, `ES_USERNAME`, `ES_PASSWORD`), you
+can also create the deployment file yourself:
+
+Self-Managed Kubernetes
+```zsh
+just create-vanilla-deployment-file
+```
+
+EKS
+
+```zsh
+just create-eks-deployment-file
+```
+
+### Clean up
+
+To stop this example and clean up the pod, run:
+
+```zsh
+just delete-cloudbeat
+```
+
+### Remote Debugging
+
+Build & Deploy remote debug docker:
+
+```zsh
+just build-deploy-cloudbeat-debug
+```
+
+After running the pod, expose the relevant ports:
+
+```zsh
+just expose-ports
+```
+
+The app will wait for the debugger to connect before starting
+
+> **Note**
+> Use your favorite IDE to connect to the debugger on `localhost:40000` (for
+> example [Goland](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html#step-3-create-the-remote-run-debug-configuration-on-the-client-computer))
+
 ### Update Cloudbeat configuration on a running Elastic-Agent
 Update cloudbeat configuration on a running elastic-agent can be done by running the [script](/scripts/remote_edit_config.sh).
 The script still requires a second step of triggering the agent to re-run cloudbeat.

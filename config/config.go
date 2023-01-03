@@ -26,8 +26,7 @@ import (
 	"path/filepath"
 	"time"
 
-	cb_errors "github.com/elastic/cloudbeat/errors"
-
+	"github.com/elastic/cloudbeat/launcher"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
@@ -41,7 +40,7 @@ const DefaultNamespace = "default"
 
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
-var ErrBenchmarkNotSupported = cb_errors.NewUnhealthyError("benchmark is not supported")
+var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
 
 type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
