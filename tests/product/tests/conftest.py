@@ -140,7 +140,7 @@ def clean_test_env(cloudbeat_start_stop):
             )
         except ApiException as not_found:
             logger.error(
-                f"no {relevant_metadata['name']} online - setting up a new one: {not_found}"
+                f"no {relevant_metadata['name']} online - setting up a new one: {not_found}",
             )
             # create resource
 

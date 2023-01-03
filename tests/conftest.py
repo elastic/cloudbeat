@@ -1,8 +1,6 @@
 """
 Global pytest file for fixtures and test configs
 """
-import sys
-import os
 import pytest
 import configuration
 from commonlib.kubernetes import KubernetesHelper
@@ -19,7 +17,7 @@ def caplog(caplog: LogCaptureFixture) -> None:
     caplog which only works with Python's standard logging. This adds the same
     LogCaptureHandler being used by caplog to hook into loguru.
     Args:
-        caplog (LogCaptureFixture): caplog fixture
+        caplog_arg (LogCaptureFixture): caplog fixture
     Returns:
         None
     """
@@ -28,7 +26,10 @@ def caplog(caplog: LogCaptureFixture) -> None:
         return record["level"].no >= caplog.handler.level
 
     handler_id = logger.add(
-        caplog.handler, level=0, format="{message}", filter=filter_
+        caplog.handler,
+        level=0,
+        format="{message}",
+        filter=filter_,
     )
     yield caplog
     logger.remove(handler_id)
