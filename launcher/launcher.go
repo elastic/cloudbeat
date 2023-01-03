@@ -241,7 +241,7 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 				err := l.validator.Validate(update)
 				if err != nil {
 					l.log.Errorf("Config update validation failed: %v", err)
-					heatlhErr := &BeaterUnhealthyError{}
+					healthErr := &BeaterUnhealthyError{}
 					if errors.As(err, heatlhErr) {
 						l.beat.Manager.UpdateStatus(management.Degraded, heatlhErr.Error())
 					}
