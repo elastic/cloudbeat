@@ -43,5 +43,4 @@ markers = [
     "eks_process_rules",
     "eks_k8s_objects_rules",
     "eks_aws_service_rules",
-    "logger"
 ]
