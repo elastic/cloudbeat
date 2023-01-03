@@ -15,15 +15,19 @@ our [documentation](https://www.elastic.co/guide/en/security/master/get-started-
 
 - [Setup KSPM for unmanaged Kubernetes clusters](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#kspm-setup-unmanaged)
 
-___
+---
 
 ## Table of contents
 
-- [Local Deployment](#local-deployment)
+- [Cloudbeat](#cloudbeat)
+  - [Getting Started](#getting-started)
+  - [Table of contents](#table-of-contents)
+  - [Local Deployment](#local-deployment)
+    - [Prerequisites](#prerequisites)
   - [Deploying Cloudbeat as a process](#deploying-cloudbeat-as-a-process)
-    - [Self-Managed Kubernetes (Kind)](#self-managed-kubernetes)
+    - [Self-Managed Kubernetes](#self-managed-kubernetes)
     - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-eks)
-- [Deploying Cloudbeat with Elastic-Agent](#running-cloudbeat-with-elastic-agent)
+  - [Running Cloudbeat with Elastic Agent](#running-cloudbeat-with-elastic-agent)
 
 ## Local Deployment
 
@@ -34,13 +38,14 @@ depending on the deployment platform (Self-Managed kubernetes / EKS) you may nee
 
 1. We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to keep all our tooling in check. See our [README](/bin/README.hermit.md) for more details.
    Install it with the following commands:
-    ```zsh
-    curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
-    . ./bin/activate-hermit
-    ```
+
+   ```zsh
+   curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
+   . ./bin/activate-hermit
+   ```
 
    > **Note**
-   This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already.
+   > This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already.
 
    It is also recommended to add hermit's [shell integration](https://cashapp.github.io/hermit/usage/shell/)
 
@@ -48,10 +53,10 @@ depending on the deployment platform (Self-Managed kubernetes / EKS) you may nee
    may need to [authenticate](https://docker-auth.elastic.co/github_auth))
    For example, spinning up 8.6.0 stack locally:
 
-    ```zsh
-    eval "$(elastic-package stack shellinit --shell $(basename $SHELL))" # load stack environment variables
-    elastic-package stack up --version 8.6.0 -v -d
-    ```
+   ```zsh
+   eval "$(elastic-package stack shellinit --shell $(basename $SHELL))" # load stack environment variables
+   elastic-package stack up --version 8.6.0 -v -d
+   ```
 
 ## Deploying Cloudbeat as a process
 
@@ -75,11 +80,25 @@ Build and deploy cloudbeat on your local kind cluster:
 just build-deploy-cloudbeat
 ```
 
+Or without certificate
+
+```zsh
+just build-deploy-cloudbeat-nocert
+```
+
 > **Note** By default, cloudbeat binary will be built based on `GOOS` and `GOARCH` environment variables.
 > If you want to build cloudbeat for a different platform you can set them as following:
+>
 > ```zsh
 > # just build-deploy-cloudbeat <Target OS> <Target Arch>
 > just build-deploy-cloudbeat linux amd64
+> ```
+>
+> Or without certificate
+>
+> ```zsh
+> # just build-deploy-cloudbeat-nocert <Target OS> <Target Arch>
+> just build-deploy-cloudbeat-nocert linux amd64
 > ```
 
 ### Amazon Elastic Kubernetes Service (EKS)
@@ -103,7 +122,7 @@ Deploy cloudbeat on your EKS cluster
 
 ```zsh
 just deploy-eks-cloudbeat
-````
+```
 
 ## Running Cloudbeat with Elastic Agent
 
