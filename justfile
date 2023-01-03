@@ -162,7 +162,7 @@ delete-kind-cluster kind='kind-multi':
 cleanup-create-local-helm-cluster target range='..' $GOARCH=LOCAL_GOARCH: delete-kind-cluster create-kind-cluster
   just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image
-  just deploy-tests-helm {{target}} tests/deploy/values/local-host.yml {{range}}
+  just deploy-tests-helm {{target}} tests/deploy/values/ci.yml {{range}}
 
 
 test-pod-status:
