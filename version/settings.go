@@ -47,7 +47,7 @@ func cloudbeatCommitHash() string {
 
 // cloudbeatCommitTime returns the timestamp of the commit used for the build.
 func cloudbeatCommitTime() string {
-	return vcsTime.String()
+	return vcsTime.Format(time.RFC3339Nano)
 }
 
 // CloudbeatSemanticVersion returns the current cloudbeat version.
