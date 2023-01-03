@@ -32,7 +32,7 @@ Run `export FLEET_ENROLLMENT_TOKEN=$TOKEN`
 The SSL certificate was created by `elastic-package` and stored in `ELASTIC_PACKAGE_CA_CERT`.
 Run
 ```bash
-eval "$(elastic-package stack shellinit)"
+eval "$(elastic-package stack shellinit --shell $(basename $SHELL))"
 cp $ELASTIC_PACKAGE_CA_CERT deploy/kustomize/overlays/cloudbeat-vanilla-agent
 ```
 #### Step 4 - Complete ERP setup

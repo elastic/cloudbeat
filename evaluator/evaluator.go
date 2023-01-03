@@ -60,6 +60,7 @@ type Result struct {
 type Rule struct {
 	Id                    string    `json:"id"`
 	Name                  string    `json:"name"`
+	Rule_Number           string    `json:"rule_number"`
 	Profile_Applicability string    `json:"profile_applicability"`
 	Description           string    `json:"description"`
 	Rationale             string    `json:"rationale"`
