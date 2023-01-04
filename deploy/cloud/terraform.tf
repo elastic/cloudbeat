@@ -31,7 +31,12 @@ terraform {
     }
 
     restapi = {
-      source  = "mastercard/restapi"
+      source = "mastercard/restapi"
+    }
+
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">=2.8.0"
     }
   }
 

@@ -18,6 +18,11 @@ output "yaml" {
   value       = local.yaml
 }
 
+output "yaml_vanilla" {
+  description = "Kubernetes deployment YAML"
+  value       = local.yaml_vanilla
+}
+
 output "manifests" {
   description = "Kubernetes deployment hcl manifests"
   value       = local.manifests

@@ -18,21 +18,20 @@
 // Config is put into a different package to prevent cyclic imports in case
 // it is needed in several locations
 
-package errors
+package launcher
 
-import (
-	"errors"
-	"fmt"
-	"testing"
+// BeaterUnhealthyError error is an error that is desgined to have an information that
+// can help to end user to operate cloudbeat health issues.
+// For example, when a cloudbeat configuration is invalid, the error will include
+// more information about what is missing/expected and might have links to external sources as well
+type BeaterUnhealthyError struct {
+	msg string
+}
 
-	"github.com/stretchr/testify/assert"
-)
+func NewUnhealthyError(msg string) BeaterUnhealthyError {
+	return BeaterUnhealthyError{msg}
+}
 
-func TestUnwrapError(t *testing.T) {
-	e1 := NewUnhealthyError("error_1")
-	e2 := fmt.Errorf("error 2 = %w", e1)
-	healthErr := &BeaterUnhealthyError{}
-	assert.False(t, errors.Is(e1, healthErr))
-	assert.True(t, errors.As(e2, healthErr))
-	assert.Equal(t, "error_1", healthErr.Error())
+func (c BeaterUnhealthyError) Error() string {
+	return c.msg
 }

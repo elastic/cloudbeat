@@ -16,7 +16,7 @@ module "ec_deployment" {
   elasticsearch_size       = var.elasticsearch_size
   elasticsearch_zone_count = var.elasticsearch_zone_count
 
-  docker_image              = var.docker_image_override
+  docker_image = var.docker_image_override
   docker_image_tag_override = {
     "elasticsearch" : "",
     "kibana" : "",
@@ -67,7 +67,7 @@ resource "null_resource" "store_local_dashboard" {
     command = "curl -X POST -u ${module.ec_deployment.elasticsearch_username}:${module.ec_deployment.elasticsearch_password} ${module.ec_deployment.kibana_url}/api/saved_objects/_import?overwrite=true -H \"kbn-xsrf: true\" --form file=@data/dashboard.ndjson"
   }
   depends_on = [module.ec_deployment]
-  triggers   = {
+  triggers = {
     dashboard_sha1 = sha1(file("data/dashboard.ndjson"))
   }
 }
@@ -82,7 +82,7 @@ resource "null_resource" "rules" {
     command = "curl -X POST -u ${module.ec_deployment.elasticsearch_username}:${module.ec_deployment.elasticsearch_password} ${module.ec_deployment.kibana_url}/api/saved_objects/_import?overwrite=true -H \"kbn-xsrf: true\" --form file=@data/rules.ndjson"
   }
   depends_on = [module.ec_deployment]
-  triggers   = {
+  triggers = {
     dashboard_sha1 = sha1(file("data/rules.ndjson"))
   }
 }
@@ -123,7 +123,7 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args        = [
+    args = [
       "eks",
       "get-token",
       "--cluster-name",
@@ -163,4 +163,45 @@ resource "kubernetes_manifest" "agent_yaml" {
 resource "random_string" "suffix" {
   length  = 3
   special = false
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args = [
+        "eks",
+        "get-token",
+        "--cluster-name",
+        data.aws_eks_cluster.cluster.name
+      ]
+    }
+  }
+}
+
+module "apps" {
+  source = "./modules/provision-apps"
+
+  providers = {
+    helm = helm
+  }
+
+  depends_on = [
+    module.eks
+  ]
+
+  # nginx ingress replica count
+  replica_count = "5"
+}
+module "aws_ec2_with_agent" {
+  source    = "./modules/ec2"
+  providers = { aws : aws }
+  yml       = module.api.yaml_vanilla
+  depends_on = [
+    module.ec_deployment,
+    module.api,
+  ]
 }

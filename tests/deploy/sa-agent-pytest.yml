@@ -431,7 +431,8 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
-          image: docker.elastic.co/beats/elastic-agent:8.6.0-SNAPSHOT
+          image: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent:8.7.0-SNAPSHOT
+          imagePullPolicy: IfNotPresent
           args: ["-c", "/etc/agent.yml", "-e"]
           env:
             # The basic authentication username used to connect to Elasticsearch
