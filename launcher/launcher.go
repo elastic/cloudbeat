@@ -21,11 +21,13 @@
 package launcher
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/beats/v7/libbeat/management"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/go-ucfg"
@@ -239,6 +241,10 @@ func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
 				err := l.validator.Validate(update)
 				if err != nil {
 					l.log.Errorf("Config update validation failed: %v", err)
+					healthErr := &BeaterUnhealthyError{}
+					if errors.As(err, healthErr) {
+						l.beat.Manager.UpdateStatus(management.Degraded, healthErr.Error())
+					}
 					continue
 				}
 			}

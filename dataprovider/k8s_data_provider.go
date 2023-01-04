@@ -51,7 +51,9 @@ func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) k8sDataProvider {
 		EKSMetadataProvider:           awslib.Ec2MetadataProvider{},
 		EKSClusterNameProvider:        awslib.EKSClusterNameProvider{},
 		KubeClient:                    kubeClient,
-		AwsConfigProvider:             awslib.ConfigProvider{},
+		AwsConfigProvider: awslib.ConfigProvider{
+			MetadataProvider: awslib.Ec2MetadataProvider{},
+		},
 	}
 
 	return k8sDataCollector{

@@ -1,0 +1,8 @@
+{
+    "name": "tf-agent-policy-vanilla",
+    "namespace": "default",
+    "monitoring_enabled": [
+        "logs",
+        "metrics"
+    ]
+}

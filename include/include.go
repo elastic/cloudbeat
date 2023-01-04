@@ -19,5 +19,4 @@ package include
 
 import (
 	_ "github.com/elastic/cloudbeat/resources/fetchers"
-	_ "github.com/elastic/csp-security-policies/bundle"
 )

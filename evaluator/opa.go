@@ -36,14 +36,14 @@ import (
 var now = func() time.Time { return time.Now().UTC() }
 
 type OpaEvaluator struct {
-	log            *logp.Logger
-	opa            *sdk.OPA
-	activatedRules *config.Benchmarks
+	log       *logp.Logger
+	opa       *sdk.OPA
+	benchmark string
 }
 
 type OpaInput struct {
 	fetching.Result
-	ActivatedRules *config.Benchmarks `json:"activated_rules,omitempty"`
+	Benchmark string `json:"benchmark,omitempty"`
 }
 
 var opaConfig = `{
@@ -89,18 +89,21 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg *config.Config) 
 		return nil, fmt.Errorf("fail to init opa: %s", err.Error())
 	}
 
-	var rules *config.Benchmarks
-	if cfg.RuntimeCfg != nil {
-		rules = cfg.RuntimeCfg.ActivatedRules
+	// Newer cloudbeat versions shouldn't look at deprecated runtime config values
+	// and should always get benchmark values because the integration is auto updated with the stack
+	var benchmark string
+	if cfg.Benchmark != "" {
+		// Assume that isSupportedBenchmark ran in config creation
+		benchmark = cfg.Benchmark
 	} else {
-		log.Warn("no runtime config supplied")
+		log.Warn("no benchmark supplied")
 	}
 
 	log.Info("Successfully initiated OPA")
 	return &OpaEvaluator{
-		log:            log,
-		opa:            opa,
-		activatedRules: rules,
+		log:       log,
+		opa:       opa,
+		benchmark: benchmark,
 	}, nil
 }
 
@@ -117,8 +120,8 @@ func (o *OpaEvaluator) Eval(ctx context.Context, resourceInfo fetching.ResourceI
 	}
 
 	result, err := o.decision(ctx, OpaInput{
-		Result:         fetcherResult,
-		ActivatedRules: o.activatedRules,
+		Result:    fetcherResult,
+		Benchmark: o.benchmark,
 	})
 
 	if err != nil {

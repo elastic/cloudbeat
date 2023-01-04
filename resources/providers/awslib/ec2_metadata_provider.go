@@ -19,14 +19,14 @@ package awslib
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 )
 
 type Ec2Metadata = ec2imds.InstanceIdentityDocument
 
-type Ec2MetadataProvider struct {
-}
+type Ec2MetadataProvider struct{}
 
 type MetadataProvider interface {
 	GetMetadata(ctx context.Context, cfg aws.Config) (Ec2Metadata, error)
@@ -35,6 +35,8 @@ type MetadataProvider interface {
 func (provider Ec2MetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (Ec2Metadata, error) {
 	svc := ec2imds.NewFromConfig(cfg)
 	input := &ec2imds.GetInstanceIdentityDocumentInput{}
+	// this call will fail running from local machine
+	// TODO: mock local struct
 	identityDocument, err := svc.GetInstanceIdentityDocument(ctx, input)
 	if err != nil {
 		return ec2imds.GetInstanceIdentityDocumentOutput{}.InstanceIdentityDocument, err
