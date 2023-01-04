@@ -59,7 +59,7 @@ variable "security_team_repository" {
 }
 
 variable "deployment_name_prefix" {
-  default = "cloudbeat-tf"
+  default     = "cloudbeat-tf"
   description = "Optional set a prefix of the deployment. Defaults to cloudbeat-tf"
 }
 
@@ -68,3 +68,4 @@ variable "eks_region" {
   description = "Optional AWS region where the EKS cluster will be created. Defaults to eu-west-1"
   type        = string
 }
+
