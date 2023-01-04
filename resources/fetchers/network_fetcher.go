@@ -29,7 +29,7 @@ import (
 
 type NetworkFetcher struct {
 	log           *logp.Logger
-	aclProvider   ec2.ElasticCompute
+	provider      ec2.ElasticCompute
 	cfg           ACLFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
@@ -48,14 +48,14 @@ type NetworkResource struct {
 func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting NetworkFetcher.Fetch")
 
-	nacl, err := f.aclProvider.DescribeNeworkAcl(ctx)
+	nacl, err := f.provider.DescribeNeworkAcl(ctx)
 	if err != nil {
-		return err
+		f.log.Errorf("failed to describe network acl: %v", err)
 	}
 
-	securityGroups, err := f.aclProvider.DescribeSecurityGroups(ctx)
+	securityGroups, err := f.provider.DescribeSecurityGroups(ctx)
 	if err != nil {
-		return err
+		f.log.Errorf("failed to describe security groups: %v", err)
 	}
 
 	for _, resource := range append(nacl, securityGroups...) {

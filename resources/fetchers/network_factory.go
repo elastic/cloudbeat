@@ -74,7 +74,7 @@ func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, c
 	return &NetworkFetcher{
 		log:           log,
 		cfg:           cfg,
-		aclProvider:   provider,
+		provider:      provider,
 		cloudIdentity: identity,
 		resourceCh:    ch,
 	}, nil
