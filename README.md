@@ -2,7 +2,7 @@
 
 [![CIS K8S](https://img.shields.io/badge/CIS-Kubernetes%20(74%25)-326CE5?logo=Kubernetes)](RULES.md#k8s-cis-benchmark)
 [![CIS EKS](https://img.shields.io/badge/CIS-Amazon%20EKS%20(60%25)-FF9900?logo=Amazon+EKS)](RULES.md#eks-cis-benchmark)
-[![CIS AWS](https://img.shields.io/badge/CIS-AWS%20(14%25)-232F3E?logo=Amazon+AWS)](RULES.md#aws-cis-benchmark)
+[![CIS AWS](https://img.shields.io/badge/CIS-AWS%20(19%25)-232F3E?logo=Amazon+AWS)](RULES.md#aws-cis-benchmark)
 
 ![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/oren-zohar/a7160df46e48dff45b24096de9302d38/raw/csp-security-policies_coverage.json)
 

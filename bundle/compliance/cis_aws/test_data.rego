@@ -87,3 +87,9 @@ generate_s3_bucket(name, sse_algorithm) = {
 	"type": "cloud-storage",
 	"subType": "aws-s3",
 }
+
+generate_security_group(entry) = {
+	"resource": entry,
+	"type": "ec2",
+	"subType": "aws-security-group",
+}
