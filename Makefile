@@ -1,7 +1,7 @@
 ##############################################################################
 # Variables used for various build targets.
 ##############################################################################
-CI_ELASTIC_AGENT_DOCKER_TAG?=8.6.0-SNAPSHOT
+CI_ELASTIC_AGENT_DOCKER_TAG?=8.7.0-SNAPSHOT
 CI_ELASTIC_AGENT_DOCKER_IMAGE?=704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent
 
 # Ensure the Go version in .go_version is installed and used.
