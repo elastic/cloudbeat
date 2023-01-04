@@ -8,5 +8,5 @@ duration = sprintf("%dh", [90 * 24]) # 90 days converted to hours
 default verify_rotation = false
 
 verify_rotation {
-	common.are_credentials_valid(data_adapter.active_access_keys, "rotation_date", duration)
+	common.are_credentials_within_duration(data_adapter.active_access_keys, "rotation_date", duration)
 }

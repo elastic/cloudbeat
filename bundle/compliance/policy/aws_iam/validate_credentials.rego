@@ -12,7 +12,7 @@ default validate_credentials = false
 validate_credentials {
 	assert.array_is_empty(data_adapter.active_access_keys)
 	data_adapter.iam_user.password_enabled
-	common.are_credentials_valid([data_adapter.iam_user], "last_access", duration)
+	common.are_credentials_within_duration([data_adapter.iam_user], "last_access", duration)
 }
 
 # checks if the user does not have a password enabled and if all of the user's active access keys are valid.
@@ -24,7 +24,7 @@ validate_credentials {
 # checks if the user has a password enabled, if the user's last access date is within the specified duration, and if all of the user's active access keys are valid
 validate_credentials {
 	data_adapter.iam_user.password_enabled
-	common.are_credentials_valid([data_adapter.iam_user], "last_access", duration)
+	common.are_credentials_within_duration([data_adapter.iam_user], "last_access", duration)
 	validate_access_keys
 }
 
@@ -33,13 +33,13 @@ validate_credentials {
 validate_credentials {
 	data_adapter.iam_user.password_enabled
 	data_adapter.iam_user.last_access == "No_Information"
-	common.are_credentials_valid([data_adapter.iam_user], "password_last_changed", duration)
+	common.are_credentials_within_duration([data_adapter.iam_user], "password_last_changed", duration)
 	validate_access_keys
 }
 
 # The first rule checks if the last access date of the used active access keys is within the specified duration.
 # The second rule checks if the rotation date of the unused active access keys is within the specified duration.
 validate_access_keys {
-	common.are_credentials_valid(data_adapter.used_active_access_keys, "last_access", duration)
-	common.are_credentials_valid(data_adapter.unused_active_access_keys, "rotation_date", duration)
+	common.are_credentials_within_duration(data_adapter.used_active_access_keys, "last_access", duration)
+	common.are_credentials_within_duration(data_adapter.unused_active_access_keys, "rotation_date", duration)
 }

@@ -5,14 +5,14 @@ import data.compliance.cis_aws.data_adapter
 import data.lib.test
 
 test_violation {
-	eval_fail with input as rule_input([{"active": true, "has_used": false, "rotation_date": test_data.past_date}], false, true, test_data.future_date, test_data.future_date)
-	eval_fail with input as rule_input([{"active": true, "has_used": true, "rotation_date": "N/A"}], false, true, test_data.future_date, test_data.future_date)
+	eval_fail with input as rule_input([{"active": true, "has_used": false, "rotation_date": test_data.past_date}], false, true, test_data.current_date, test_data.current_date)
+	eval_fail with input as rule_input([{"active": true, "has_used": true, "rotation_date": "N/A"}], false, true, test_data.current_date, test_data.current_date)
 }
 
 test_pass {
 	eval_pass with input as rule_input([], false, false, "", "")
-	eval_pass with input as rule_input([{"active": false, "has_used": false, "rotation_date": test_data.past_date}], false, true, test_data.future_date, test_data.future_date)
-	eval_pass with input as rule_input([{"active": true, "has_used": false, "rotation_date": test_data.future_date, "last_access": "N/A"}], false, false, "", "")
+	eval_pass with input as rule_input([{"active": false, "has_used": false, "rotation_date": test_data.past_date}], false, true, test_data.current_date, test_data.current_date)
+	eval_pass with input as rule_input([{"active": true, "has_used": false, "rotation_date": test_data.current_date, "last_access": "N/A"}], false, false, "", "")
 }
 
 test_not_evaluated {
