@@ -8,6 +8,9 @@
 # https://www.elastic.co/guide/en/beats/cloudbeat/index.html
 
 cloudbeat:
+  config:
+    v1:
+      benchmark: cis_k8s
   type:
     cloudbeat/cis_k8s
     # Defines how often an event is sent to the output
