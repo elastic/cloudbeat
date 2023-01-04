@@ -20,8 +20,9 @@ package beater
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/providers"
 	"time"
+
+	"github.com/elastic/cloudbeat/resources/providers"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"

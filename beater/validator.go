@@ -30,13 +30,11 @@ import (
 type validator struct{}
 
 func (v *validator) Validate(cfg *agentconfig.C) error {
-	c, err := config.New(cfg)
+	// TODO: Should we check something?
+	// Benchmark is being checked inside config.New
+	_, err := config.New(cfg)
 	if err != nil {
-		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %v", cfg.FlattenedKeys(), err)
-	}
-
-	if c.RuntimeCfg == nil {
-		return fmt.Errorf("runtime configuration didn't exist in new configuration")
+		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
 	}
 
 	return nil

@@ -32,7 +32,7 @@ Before performing steps below verify that **just** tool is installed and your ro
 2. Build cloudbeat and upload docker image to kind
 
     ```shell
-    just build-cloudbeat
+    just build-cloudbeat-docker-image
     just load-cloudbeat-image
     ```
 
