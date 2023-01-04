@@ -11,27 +11,27 @@ from _pytest.logging import LogCaptureFixture
 from loguru import logger
 
 
-@pytest.fixture(autouse=True)
-def caplog(caplog: LogCaptureFixture) -> None:
+@pytest.fixture
+def caplog(_caplog: LogCaptureFixture) -> None:
     """Emitting logs from loguru's logger.log means that they will not show up in
     caplog which only works with Python's standard logging. This adds the same
     LogCaptureHandler being used by caplog to hook into loguru.
     Args:
-        caplog_arg (LogCaptureFixture): caplog fixture
+        _caplog (LogCaptureFixture): caplog fixture
     Returns:
         None
     """
 
     def filter_(record):
-        return record["level"].no >= caplog.handler.level
+        return record["level"].no >= _caplog.handler.level
 
     handler_id = logger.add(
-        caplog.handler,
+        _caplog.handler,
         level=0,
         format="{message}",
         filter=filter_,
     )
-    yield caplog
+    yield _caplog
     logger.remove(handler_id)
 
 
