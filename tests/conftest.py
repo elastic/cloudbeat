@@ -1,6 +1,7 @@
 """
 Global pytest file for fixtures and test configs
 """
+import functools
 import pytest
 import configuration
 from commonlib.kubernetes import KubernetesHelper
@@ -9,6 +10,33 @@ from commonlib.docker_wrapper import DockerWrapper
 from commonlib.io_utils import FsClient
 from _pytest.logging import LogCaptureFixture
 from loguru import logger
+
+
+def logger_wraps(*, entry=True, _exit=True, level="DEBUG"):
+    """
+    Adding logger wrapper for debugging functions
+    @param entry: Boolean, Display entry message or not
+    @param _exit: Boolean, Display exit message or not
+    @param level: Logging level, default DEBUG
+    @return:
+    """
+
+    def wrapper(func):
+        name = func.__name__
+
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            logger_ = logger.opt(depth=1)
+            if entry:
+                logger_.log(level, "Entering '{}' (args={}, kwargs={})", name, args, kwargs)
+            result = func(*args, **kwargs)
+            if _exit:
+                logger_.log(level, "Exiting '{}' (result={})", name, result)
+            return result
+
+        return wrapped
+
+    return wrapper
 
 
 @pytest.fixture
@@ -148,4 +176,4 @@ def pytest_sessionfinish(session):
                     [f"{key}:{value}\n" for key, value in report_data.items()],
                 )
     except ValueError:
-        logger.exception("Warning fail to create allure environment report")
+        logger.warning("Warning fail to create allure environment report")

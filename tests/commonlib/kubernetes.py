@@ -234,7 +234,7 @@ class KubernetesHelper:
                     self.delete_resources(resource_type=yaml_object["kind"], **relevant_metadata),
                 )
             except ApiException as not_found:
-                logger.exception(f"{relevant_metadata['name']} not found {not_found.status}")
+                logger.warning(f"{relevant_metadata['name']} not found {not_found.status}")
 
         return result_list
 
@@ -364,7 +364,7 @@ class KubernetesHelper:
         try:
             return self.dispatch_get[resource_type](name, **kwargs)
         except ApiException as exc:
-            logger.exception(f"Resource not found: {exc.reason}")
+            logger.warning(f"Resource not found: {exc.reason}")
             raise exc
 
     def wait_for_resource(
