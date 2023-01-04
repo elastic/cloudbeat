@@ -19,7 +19,8 @@ package fetching
 
 import (
 	"context"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+
+	awssdk "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -27,15 +28,17 @@ import (
 const (
 	KubeAPIType = "kube-api"
 
-	EcrType       = "aws-ecr"
-	IAMType       = "aws-iam"
-	ElbType       = "aws-elb"
-	IAMUserType   = "aws-iam-user"
-	PwdPolicyType = "aws-password-policy"
-	EksType       = "aws-eks"
-	S3Type        = "aws-s3"
+	EcrType         = "aws-ecr"
+	IAMType         = "aws-iam"
+	NetworkNACLType = "aws-nacl"
+	ElbType         = "aws-elb"
+	IAMUserType     = "aws-iam-user"
+	PwdPolicyType   = "aws-password-policy"
+	EksType         = "aws-eks"
+	S3Type          = "aws-s3"
 
 	CloudIdentity          = "identity-management"
+	EC2Identity            = "cloud-compute"
 	CloudContainerMgmt     = "caas" // containers as a service
 	CloudLoadBalancer      = "load-balancer"
 	CloudContainerRegistry = "container-registry"
@@ -100,5 +103,5 @@ type BaseFetcherConfig struct {
 
 type AwsBaseFetcherConfig struct {
 	BaseFetcherConfig `config:",inline"`
-	AwsConfig         aws.ConfigAWS `config:",inline"`
+	AwsConfig         awssdk.ConfigAWS `config:",inline"`
 }

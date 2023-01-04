@@ -1,4 +1,7 @@
 cloudbeat:
+  config:
+    v1:
+      benchmark: cis_aws
   type: cloudbeat/cis_aws
   access_key_id: ${AWS_ACCESS_KEY_ID:""}
   secret_access_key: ${AWS_SECRET_ACCESS_KEY:""}
@@ -10,18 +13,8 @@ cloudbeat:
     - name: aws-s3
   evaluator:
     decision_logs: false
-  runtime_cfg:
-    activated_rules:
-      cis_aws:
-        - cis_1_8
-        - cis_1_9
-        - cis_1_10
-        - cis_1_11
-        - cis_1_13
-        - cis_2_1_1
 # =================================== Kibana ===================================
 setup.kibana:
-
   # Kibana Host
   host: "http://host.docker.internal:5601"
 # =============================== Elastic Cloud ================================
@@ -43,7 +36,7 @@ output.elasticsearch:
   hosts: ${ES_HOST}
 
   # Protocol - either `http` (default) or `https`.
-#  protocol: "https"
+  #  protocol: "https"
 
   # Authentication credentials - either API key or username/password.
   #api_key: "id:api_key"
@@ -62,7 +55,6 @@ processors:
 # Sets log level. The default log level is info.
 # Available log levels are: error, warning, info, debug
 logging.level: debug
-
 # Enable debug output for selected components. To enable all selectors use ["*"]
 # Other available selectors are "beat", "publisher", "service"
 # Multiple selectors can be chained.

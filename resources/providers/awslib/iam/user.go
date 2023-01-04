@@ -18,36 +18,26 @@
 package iam
 
 import (
+	"bytes"
 	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	smithy "github.com/aws/smithy-go"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/gocarina/gocsv"
+	"github.com/pkg/errors"
+	"strconv"
 	"strings"
 	"time"
 )
 
-type User struct {
-	Name        string
-	AccessKeys  []AccessKey
-	MFADevices  []AuthDevice
-	LastAccess  time.Time
-	Arn         string
-	HasLoggedIn bool
-}
-
-type AuthDevice struct {
-	types.MFADevice
-	IsVirtual bool
-}
-
-type AccessKey struct {
-	AccessKeyId  string
-	Active       bool
-	CreationDate time.Time
-	LastAccess   time.Time
-	HasUsed      bool
-}
+const (
+	rootAccount = "<root_account>"
+	maxRetries  = 5
+	interval    = 3 * time.Second
+)
 
 func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 	var users []awslib.AwsResource
@@ -57,24 +47,18 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		return nil, err
 	}
 
+	credentialReport, err := p.getCredentialReport(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rootUser := p.getRootAccountUser(credentialReport[rootAccount])
+	if rootUser != nil {
+		apiUsers = append(apiUsers, *rootUser)
+	}
+
+	var userAccount *CredentialReport
 	for _, apiUser := range apiUsers {
-		mfaDevices, err := p.getMFADevices(ctx, apiUser)
-		if err != nil {
-			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
-			return nil, err
-		}
-
-		keys, err := p.getUserKeys(ctx, apiUser)
-		if err != nil {
-			p.log.Errorf("fail to list access keys for user: %v, error: %v", apiUser, err)
-			return nil, err
-		}
-
-		var lastAccess time.Time
-		if apiUser.PasswordLastUsed != nil {
-			lastAccess = *apiUser.PasswordLastUsed
-		}
-
 		var username string
 		if apiUser.UserName != nil {
 			username = *apiUser.UserName
@@ -85,13 +69,32 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 			arn = *apiUser.Arn
 		}
 
+		keys := p.getUserKeys(*apiUser.UserName, credentialReport)
+
+		if userAccount = credentialReport[aws.ToString(apiUser.UserName)]; userAccount == nil {
+			continue
+		}
+
+		mfaDevices, err := p.getMFADevices(ctx, apiUser, userAccount)
+		if err != nil {
+			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
+		}
+
+		pwdEnabled, err := isPasswordEnabled(userAccount)
+		if err != nil {
+			p.log.Errorf("fail to parse PasswordEnabled for user: %v, error: %v", apiUser, err)
+			pwdEnabled = false
+		}
+
 		users = append(users, User{
-			Name:        username,
-			Arn:         arn,
-			AccessKeys:  keys,
-			MFADevices:  mfaDevices,
-			LastAccess:  lastAccess,
-			HasLoggedIn: !lastAccess.IsZero(),
+			AccessKeys:          keys,
+			MFADevices:          mfaDevices,
+			Name:                username,
+			LastAccess:          userAccount.PasswordLastUsed,
+			Arn:                 arn,
+			PasswordEnabled:     pwdEnabled,
+			PasswordLastChanged: userAccount.PasswordLastChanged,
+			MfaActive:           userAccount.MfaActive,
 		})
 	}
 
@@ -103,7 +106,7 @@ func (u User) GetResourceArn() string {
 }
 
 func (u User) GetResourceName() string {
-	return "iam-user"
+	return u.Name
 }
 
 func (u User) GetResourceType() string {
@@ -131,9 +134,19 @@ func (p Provider) listUsers(ctx context.Context) ([]types.User, error) {
 	return nativeUsers, nil
 }
 
-func (p Provider) getMFADevices(ctx context.Context, user types.User) ([]AuthDevice, error) {
+func (p Provider) getMFADevices(ctx context.Context, user types.User, userAccount *CredentialReport) ([]AuthDevice, error) {
+	// For the root user, it's not possible to list all the devices, so instead we check all the virtual devices
+	// to confirm if one is assigned the root user. If this is not the case, we can infer a hardware device is configured
+	// (since we know MFA is active for the root user but cannot find a virtual device).
+	if *user.UserName == rootAccount {
+		return p.listRootMFADevice(ctx, userAccount)
+	}
+
+	return p.listMFADevices(ctx, user)
+}
+
+func (p Provider) listMFADevices(ctx context.Context, user types.User) ([]AuthDevice, error) {
 	input := &iamsdk.ListMFADevicesInput{
-		Marker:   nil,
 		UserName: user.UserName,
 	}
 
@@ -165,55 +178,100 @@ func (p Provider) getMFADevices(ctx context.Context, user types.User) ([]AuthDev
 	return devices, nil
 }
 
-func (p Provider) getUserKeys(ctx context.Context, apiUser types.User) ([]AccessKey, error) {
+func (p Provider) getUserKeys(username string, report map[string]*CredentialReport) []AccessKey {
+	p.log.Debugf("aggregate access keys data for user: %s", username)
+	entry := report[username]
 
-	var keys []AccessKey
-	input := iamsdk.ListAccessKeysInput{
-		UserName: apiUser.UserName,
+	if entry == nil {
+		p.log.Debugf("no entry for user: %s in credentials report", username)
+		return nil
 	}
-	for {
-		output, err := p.client.ListAccessKeys(ctx, &input)
-		if err != nil {
-			return nil, err
+
+	return []AccessKey{
+		{
+			Active:       entry.AccessKey1Active,
+			LastAccess:   entry.AccessKey1LastUsed,
+			HasUsed:      entry.AccessKey1LastUsed != "N/A",
+			RotationDate: entry.AccessKey1LastRotated,
+		}, {
+			Active:       entry.AccessKey2Active,
+			LastAccess:   entry.AccessKey2LastUsed,
+			HasUsed:      entry.AccessKey2LastUsed != "N/A",
+			RotationDate: entry.AccessKey2LastRotated,
+		},
+	}
+}
+
+func (p Provider) getCredentialReport(ctx context.Context) (map[string]*CredentialReport, error) {
+	report, err := p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
+	if err != nil {
+		var awsFailErr *types.ServiceFailureException
+		if errors.As(err, &awsFailErr) {
+			return nil, errors.Wrap(err, "could not gather aws iam credential report")
 		}
 
-		for _, apiAccessKey := range output.AccessKeyMetadata {
-			output, err := p.client.GetAccessKeyLastUsed(ctx, &iamsdk.GetAccessKeyLastUsedInput{
-				AccessKeyId: apiAccessKey.AccessKeyId,
-			})
-
-			var lastUsed time.Time
-			if err == nil {
-				if output.AccessKeyLastUsed != nil && output.AccessKeyLastUsed.LastUsedDate != nil {
-					lastUsed = *output.AccessKeyLastUsed.LastUsedDate
+		// if we have an error, and it is not a server err we generate a report
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == "ReportNotPresent" || apiErr.ErrorCode() == "ReportExpired" {
+				// generate a new report
+				_, err := p.client.GenerateCredentialReport(ctx, &iamsdk.GenerateCredentialReportInput{})
+				if err != nil {
+					return nil, err
 				}
 			}
-
-			var accessKeyId string
-			if apiAccessKey.AccessKeyId != nil {
-				accessKeyId = *apiAccessKey.AccessKeyId
-			}
-
-			creationDate := time.Now()
-			if apiAccessKey.CreateDate != nil {
-				creationDate = *apiAccessKey.CreateDate
-			}
-
-			keys = append(keys, AccessKey{
-				AccessKeyId:  accessKeyId,
-				Active:       apiAccessKey.Status == types.StatusTypeActive,
-				CreationDate: creationDate,
-				LastAccess:   lastUsed,
-				HasUsed:      !lastUsed.IsZero(),
-			})
 		}
 
-		if !output.IsTruncated {
-			break
-		}
+		// loop until max retires or till the report is ready
+		var countRetries = 0
+		report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
+		if errors.As(err, &apiErr) {
+			for apiErr.ErrorCode() == "NoSuchEntity" || apiErr.ErrorCode() == "ReportInProgress" {
+				if countRetries >= maxRetries {
+					return nil, errors.Wrap(err, "reached to max retries")
+				}
 
-		input.Marker = output.Marker
+				report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
+				if err == nil {
+					break
+				}
+
+				countRetries++
+				time.Sleep(interval)
+			}
+		}
 	}
 
-	return keys, nil
+	if report == nil {
+		return nil, errors.Wrap(err, "could not gather aws iam credential report")
+	}
+
+	parsedReport, err := parseCredentialsReport(report)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to parse credentials report")
+	}
+
+	return parsedReport, nil
+}
+
+func parseCredentialsReport(report *iamsdk.GetCredentialReportOutput) (map[string]*CredentialReport, error) {
+	var credentialReportCSV []*CredentialReport
+	if err := gocsv.Unmarshal(bytes.NewReader(report.Content), &credentialReportCSV); err != nil {
+		return nil, err
+	}
+
+	credentialReport := make(map[string]*CredentialReport)
+	for i := range credentialReportCSV {
+		credentialReport[credentialReportCSV[i].User] = credentialReportCSV[i]
+	}
+
+	return credentialReport, nil
+}
+
+func isPasswordEnabled(userAccount *CredentialReport) (bool, error) {
+	if userAccount.PasswordEnabled == "not_supported" {
+		return false, nil
+	}
+
+	return strconv.ParseBool(userAccount.PasswordEnabled)
 }

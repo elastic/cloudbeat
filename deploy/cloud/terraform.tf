@@ -29,6 +29,15 @@ terraform {
       source  = "elastic/ec"
       version = ">=0.5.0"
     }
+
+    restapi = {
+      source  = "mastercard/restapi"
+    }
+
+    helm = {
+      source = "hashicorp/helm"
+      version = ">=2.8.0"
+    }
   }
 
   required_version = ">= 1.3, <2.0.0"

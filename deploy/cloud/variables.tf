@@ -1,5 +1,10 @@
 ## Deployment configuration
 
+variable "ec_api_key" {
+  description = "Elastic cloud API key"
+  type        = string
+}
+
 variable "ess_region" {
   default     = "gcp-us-central1"
   description = "Optional ESS region where the deployment will be created. Defaults to gcp-us-west2"

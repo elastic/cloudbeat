@@ -3,39 +3,60 @@
 **Motivation**
 Provide an easy and deterministic way to set up latest cloud environment, so it can be monitored and used properly.
 
-This guide deploys both an Elastic cloud environment, and an AWS EKS cluster. To only deploy specific resources, check out the examples section.
+This guide deploys both an Elastic cloud environment, an AWS EKS cluster, and an Elastic agent on that cluster. To only deploy specific resources, check out the examples section.
 
 **Prerequisite**
-* [Terraform](https://developer.hashicorp.com/terraform/downloads)
-* the AWS CLI, [installed](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
-* [AWS IAM Authenticator](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html)
-* the [Kubernetes CLI](https://kubernetes.io/docs/tasks/tools/install-kubectl/), also known as `kubectl`
 
+Follow the [prerequisites](/README.md#prerequisites) chapter of our main README.
 
 **How To**
 Create environment
 1. Create an [API token](https://cloud.elastic.co/deployment-features/keys) from your cloud console account.
 
-    1.1 use the token `export EC_API_KEY={TOKEN}`
+    1.1 use the token `export TF_VAR_ec_api_key={TOKEN}`
 
-2. run `cd deploy/cloud`
-3. run `terraform init`
-2. to create the environment from the latest version (the latest version is varying in cloud/regions combinations).
+2. In case you want to deploy a specific stack version, set the `TF_VAR_stack_version` variable to the desired version.
+
+    for `SNAPSHOT` version make sure to also set the region properly.
+    ```bash
+    export TF_VAR_stack_version=8.6.0-SNAPSHOT
+    export TF_VAR_ess_region=gcp-us-west2
+    ```
+    Note: if instead of using environment variables you want to use the `-var` flag, make sure to pass that same variable in all stages of the deployment.
+
+3. To create an EKS cluster and the Elastic cloud environment from the latest version (the latest version is varying in cloud/regions combinations) run:
    ```bash
    cd deploy/cloud
    terraform init
+   terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
+   ```
+   (Note it may take more than 20 minutes to create all the resources)
+4. To deploy nginx ingress controller, and ebs csi driver run:
+   ```bash
+   terraform apply --auto-approve -target "module.apps"
+   ``` 
+5. To create an agent policy and IAM role for EKS, run:
+   ```bash
+   terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
+   ```
+6. To deploy the agent on EKS run:
+   ```bash
    terraform apply --auto-approve
-3. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
+   ```
+7. Run the following command to retrieve the access credentials for your EKS cluster and configure kubectl.
    ```bash
    aws eks --region $(terraform output -raw eks_region) update-kubeconfig \
        --name $(terraform output -raw eks_cluster_name)
-
+   ```
 To connect to the environment use the console UI or see the details how to connect to the environment, using:
-```bash
-terraform output -json
+   ```bash
+   terraform output -json
+   ```
+
 **Delete environment:**
 ```bash
 terraform destroy --auto-approve
+```
 
 **Next Steps**
 * [Setup](https://github.com/elastic/security-team/blob/main/docs/cloud-security-posture-team/onboarding/deploy-agent-cloudbeat-on-eks.mdx) EKS cluster

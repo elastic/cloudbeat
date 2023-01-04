@@ -26,8 +26,7 @@ import (
 	"path/filepath"
 	"time"
 
-	cb_errors "github.com/elastic/cloudbeat/errors"
-
+	"github.com/elastic/cloudbeat/launcher"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
@@ -41,7 +40,7 @@ const DefaultNamespace = "default"
 
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
-var ErrBenchmarkNotSupported = cb_errors.NewUnhealthyError("benchmark is not supported")
+var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
 
 type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
@@ -49,23 +48,12 @@ type Fetcher struct {
 
 type Config struct {
 	AWSConfig  aws.ConfigAWS           `config:",inline"`
-	RuntimeCfg *RuntimeConfig          `config:"runtime_cfg"`
 	Fetchers   []*config.C             `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
 	BundlePath string                  `config:"bundle_path"`
 	Benchmark  string                  `config:"config.v1.benchmark"`
-}
-
-type RuntimeConfig struct {
-	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
-}
-
-type Benchmarks struct {
-	CisK8s []string `config:"cis_k8s,omitempty" yaml:"cis_k8s,omitempty" json:"cis_k8s,omitempty"`
-	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
-	CisAws []string `config:"cis_aws,omitempty" yaml:"cis_aws,omitempty" json:"cis_aws,omitempty"`
 }
 
 func New(cfg *config.C) (*Config, error) {

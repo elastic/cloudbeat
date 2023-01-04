@@ -15,23 +15,36 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Config is put into a different package to prevent cyclic imports in case
-// it is needed in several locations
+package ec2
 
-package errors
+import (
+	"fmt"
 
-// BeaterUnhealthyError error is an error that is desgined to have an information that
-// can help to end user to operate cloudbeat health issues.
-// For example, when a cloudbeat configuration is invalid, the error will include
-// more information about what is missing/expected and might have links to external sources as well
-type BeaterUnhealthyError struct {
-	msg string
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
+)
+
+type NACLInfo struct {
+	types.NetworkAcl
+	awsAccount string
+	region     string
 }
 
-func NewUnhealthyError(msg string) BeaterUnhealthyError {
-	return BeaterUnhealthyError{msg}
+func (r NACLInfo) GetResourceArn() string {
+	if r.NetworkAclId == nil {
+		return ""
+	}
+	//arn:aws:ec2:region:account-id:network-acl/network-acl-id
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:network-acl/%s", r.region, r.awsAccount, *r.NetworkAclId)
 }
 
-func (c BeaterUnhealthyError) Error() string {
-	return c.msg
+func (r NACLInfo) GetResourceName() string {
+	if r.NetworkAclId == nil {
+		return ""
+	}
+	return *r.NetworkAclId
+}
+
+func (r NACLInfo) GetResourceType() string {
+	return fetching.NetworkNACLType
 }
