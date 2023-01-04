@@ -65,6 +65,10 @@ Resources:
             Resource: "*"
           - Effect: Allow
             Action:
+            - ec2:CreateTags
+            Resource: "*"
+          - Effect: Allow
+            Action:
             - ec2:DescribeSnapshots
             Resource: "*"
           - Effect: Allow
