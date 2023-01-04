@@ -69,3 +69,21 @@ generate_nacl(entry) = {
 	"type": "ec2",
 	"subType": "aws-nacl",
 }
+
+not_evaluated_s3_bucket = {
+	"resource": {
+		"Name": "my-bucket",
+		"SSEAlgorithm": "AES256",
+	},
+	"type": "wrong type",
+	"subType": "wrong sub type",
+}
+
+generate_s3_bucket(name, sse_algorithm) = {
+	"resource": {
+		"Name": name,
+		"SSEAlgorithm": sse_algorithm,
+	},
+	"type": "cloud-storage",
+	"subType": "aws-s3",
+}
