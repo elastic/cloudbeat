@@ -47,13 +47,29 @@ type Fetcher struct {
 }
 
 type Config struct {
-	AWSConfig  aws.ConfigAWS           `config:",inline"`
-	Fetchers   []*config.C             `config:"fetchers"`
-	KubeConfig string                  `config:"kube_config"`
-	Period     time.Duration           `config:"period"`
-	Processors processors.PluginConfig `config:"processors"`
-	BundlePath string                  `config:"bundle_path"`
-	Benchmark  string                  `config:"config.v1.benchmark"`
+	BenchmarkConfig BenchmarkConfig         `config:"config.v1"`
+	Fetchers        []*config.C             `config:"fetchers"`
+	KubeConfig      string                  `config:"kube_config"`
+	Period          time.Duration           `config:"period"`
+	Processors      processors.PluginConfig `config:"processors"`
+	BundlePath      string                  `config:"bundle_path"`
+	Benchmark       string                  `config:"config.v1.benchmark"`
+}
+
+type CloudCredentials struct {
+	Type        string        `config:"type"`
+	Credentials aws.ConfigAWS `config:",inline"`
+}
+
+type CloudConfig struct {
+	CloudCredentials `config:"credentials"`
+}
+
+type BenchmarkConfig struct {
+	Posture    string      `config:"posture"`
+	Deployment string      `config:"deployment"`
+	Benchmark  string      `config:"benchmark"`
+	AWSConfig  CloudConfig `config:"aws"`
 }
 
 func New(cfg *config.C) (*Config, error) {
