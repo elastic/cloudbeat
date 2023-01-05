@@ -1,7 +1,10 @@
 """
 Global pytest file for fixtures and test configs
 """
+import sys
 import functools
+import time
+
 import pytest
 import configuration
 from commonlib.kubernetes import KubernetesHelper
@@ -28,10 +31,13 @@ def logger_wraps(*, entry=True, _exit=True, level="DEBUG"):
         def wrapped(*args, **kwargs):
             logger_ = logger.opt(depth=1)
             if entry:
-                logger_.log(level, "Entering '{}' (args={}, kwargs={})", name, args, kwargs)
+                logger_.log(level, f"Entering '{name}' (args={args}, kwargs={kwargs})")
+            start = time.time()
             result = func(*args, **kwargs)
+            end = time.time()
+            logger_.log(level, "Function '{}' executed in {:f} s", func.__name__, end - start)
             if _exit:
-                logger_.log(level, "Exiting '{}' (result={})", name, result)
+                logger_.log(level, f"Exiting '{name}' (result={result})")
             return result
 
         return wrapped
@@ -63,6 +69,26 @@ def caplog(_caplog: LogCaptureFixture) -> None:
     logger.remove(handler_id)
 
 
+def pytest_configure():
+    """
+    Update framework configuration
+    Logger: set logger default format
+    @return:
+    """
+    fmt = (
+        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> "
+        "<level>[{level}]</level> | "
+        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+        "<level>{message}</level>"
+    )
+    config = {
+        "handlers": [
+            {"sink": sys.stderr, "format": fmt},
+        ],
+    }
+    logger.configure(**config)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def k8s():
     """
@@ -71,6 +97,7 @@ def k8s():
     When code executed as container (pod / job) in K8s cluster in cluster configuration is used.
     @return: Kubernetes Helper instance.
     """
+    logger.debug(f"Kubernetes 'in_cluster_config': {configuration.kubernetes.is_in_cluster_config}")
     return KubernetesHelper(
         is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
     )
