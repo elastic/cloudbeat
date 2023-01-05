@@ -61,6 +61,36 @@ func (_m *MockClient) DescribeNetworkAcls(ctx context.Context, params *serviceec
 	return r0, r1
 }
 
+// DescribeSecurityGroups provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) DescribeSecurityGroups(ctx context.Context, params *serviceec2.DescribeSecurityGroupsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeSecurityGroupsOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceec2.DescribeSecurityGroupsOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeSecurityGroupsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeSecurityGroupsOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceec2.DescribeSecurityGroupsOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeSecurityGroupsInput, ...func(*serviceec2.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 type mockConstructorTestingTNewMockClient interface {
 	mock.TestingT
 	Cleanup(func())
