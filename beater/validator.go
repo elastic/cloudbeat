@@ -37,5 +37,6 @@ func (v *validator) Validate(cfg *agentconfig.C) error {
 		return fmt.Errorf("could not parse reconfiguration %v, skipping with error: %w", cfg.FlattenedKeys(), err)
 	}
 
-	return nil
+	fmt.Println("JENIA PROOF THAT BINARY CHANGED")
+	return fmt.Errorf("JENIA PROOF THAT BINARY CHANGED %v, skipping with error: %w", cfg.FlattenedKeys(), err)
 }
