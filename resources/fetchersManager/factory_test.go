@@ -172,7 +172,11 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		err := numCfg.SetString("name", -1, test.key)
 		s.NoError(err, "Could not set name: %v", err)
 
-		conf := &config.Config{Benchmark: test.integrationType}
+		conf := &config.Config{
+			BenchmarkConfig: config.BenchmarkConfig{
+				ID: test.integrationType,
+			},
+		}
 		conf.Fetchers = []*agentconfig.C{numCfg}
 
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)

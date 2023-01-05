@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
@@ -58,7 +57,9 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 	}{
 		{
 			config.Config{
-				Benchmark:  config.CIS_K8S,
+				BenchmarkConfig: config.BenchmarkConfig{
+					ID: config.CIS_K8S,
+				},
 				KubeConfig: "",
 			},
 			"vanilla-cluster",
@@ -67,8 +68,9 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		},
 		{
 			config.Config{
-				Benchmark: config.CIS_EKS,
-				AWSConfig: aws.ConfigAWS{},
+				BenchmarkConfig: config.BenchmarkConfig{
+					ID: config.CIS_EKS,
+				},
 			},
 			"vanilla-cluster",
 			"eks-cluster",
@@ -114,8 +116,11 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	clusterProvider := ClusterNameProvider{}
 	ctx := context.Background()
 	cfg := config.Config{
-		Benchmark: "invalid-type",
-		AWSConfig: aws.ConfigAWS{},
+		BenchmarkConfig: config.BenchmarkConfig{
+			ID:        config.CIS_EKS,
+			AWSConfig: config.CloudConfig{},
+		},
 	}
+
 	s.Panics(func() { _, _ = clusterProvider.GetClusterName(ctx, &cfg, nil) })
 }

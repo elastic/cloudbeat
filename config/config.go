@@ -53,7 +53,6 @@ type Config struct {
 	Period          time.Duration           `config:"period"`
 	Processors      processors.PluginConfig `config:"processors"`
 	BundlePath      string                  `config:"bundle_path"`
-	Benchmark       string                  `config:"config.v1.benchmark"`
 }
 
 type CloudCredentials struct {
@@ -66,10 +65,8 @@ type CloudConfig struct {
 }
 
 type BenchmarkConfig struct {
-	Posture    string      `config:"posture"`
-	Deployment string      `config:"deployment"`
-	Benchmark  string      `config:"benchmark"`
-	AWSConfig  CloudConfig `config:"aws"`
+	ID        string      `config:"benchmark"`
+	AWSConfig CloudConfig `config:"aws"`
 }
 
 func New(cfg *config.C) (*Config, error) {
@@ -82,8 +79,8 @@ func New(cfg *config.C) (*Config, error) {
 		return nil, err
 	}
 
-	if c.Benchmark != "" {
-		if !isSupportedBenchmark(c.Benchmark) {
+	if c.BenchmarkConfig.ID != "" {
+		if !isSupportedBenchmark(c.BenchmarkConfig.ID) {
 			return c, ErrBenchmarkNotSupported
 		}
 	}
@@ -92,8 +89,10 @@ func New(cfg *config.C) (*Config, error) {
 
 func defaultConfig() (*Config, error) {
 	ret := &Config{
-		Period:    4 * time.Hour,
-		Benchmark: CIS_K8S,
+		Period: 4 * time.Hour,
+		BenchmarkConfig: BenchmarkConfig{
+			ID: CIS_K8S,
+		},
 	}
 
 	bundle, err := getBundlePath()
