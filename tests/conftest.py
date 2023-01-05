@@ -129,6 +129,7 @@ def elastic_client():
     """
     elastic_config = configuration.elasticsearch
     es_client = ElasticWrapper(elastic_params=elastic_config)
+    logger.info(f"ElasticSearch url: {elastic_config.url}")
     return es_client
 
 
