@@ -109,7 +109,7 @@ fetchers:
 			s.NoError(err)
 
 			s.Equal(test.expectedType, c.BenchmarkConfig.ID)
-			s.Equal(test.expectedAWSConfig, c.BenchmarkConfig.AWSConfig.Credentials)
+			s.Equal(test.expectedAWSConfig, c.BenchmarkConfig.AWSConfig)
 			s.Equal(test.expectedFetchers, len(c.Fetchers))
 		})
 	}
