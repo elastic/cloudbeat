@@ -14,6 +14,7 @@ from pathlib import Path
 
 import yaml
 from munch import Munch, munchify
+from loguru import logger
 
 
 def get_events_from_index(
@@ -75,7 +76,7 @@ def get_logs_from_stream(stream: str) -> list[Munch]:
             except json.decoder.JSONDecodeError:
                 result.append(munchify(json.loads(log.replace("'", '"'))))
             except AttributeError as exc:
-                print(exc)
+                logger.warning(exc)
                 continue
 
     return result
