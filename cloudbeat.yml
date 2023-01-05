@@ -11,10 +11,10 @@
 # configuration file.
 
 cloudbeat:
-  type: cloudbeat/cis_k8s
   config:
     v1:
       benchmark: cis_k8s
+  type: cloudbeat/cis_k8s
   # Defines how often an event is sent to the output
   period: 4h
   fetchers:
