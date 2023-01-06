@@ -49,7 +49,7 @@ jobs:
 
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@v2.1.0
+        uses: andrcuns/allure-publish-action@v2.2.2
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -73,9 +73,9 @@ jobs:
           jq '.[0].data' tests/allure/results/allure-report/history/history-trend.json -c
           OUTPUT=$(jq '.[0].data' tests/allure/results/allure-report/history/history-trend.json -c | npx tablemark-cli -)
           OUTPUT="${OUTPUT//'Failed'/'\![](https://placehold.co/7x7/fc593e/fc593e.png) Failed'}"
-          OUTPUT="${OUTPUT//'Broken'/'\![](https://placehold.co/7x7/ffd050/ffd050.png) Broken'}" 
-          OUTPUT="${OUTPUT//'Skipped'/'\![](https://placehold.co/7x7/aaaaaa/aaaaaa.png) Skipped'}" 
-          OUTPUT="${OUTPUT//'Passed'/'\![](https://placehold.co/7x7/97cc64/97cc64.png) Passed'}" 
+          OUTPUT="${OUTPUT//'Broken'/'\![](https://placehold.co/7x7/ffd050/ffd050.png) Broken'}"
+          OUTPUT="${OUTPUT//'Skipped'/'\![](https://placehold.co/7x7/aaaaaa/aaaaaa.png) Skipped'}"
+          OUTPUT="${OUTPUT//'Passed'/'\![](https://placehold.co/7x7/97cc64/97cc64.png) Passed'}"
           OUTPUT="${OUTPUT//'Unknown'/'\![](https://placehold.co/7x7/d35ebd/d35ebd.png) Unknown'}"
           OUTPUT="${OUTPUT//'%'/'%25'}​【7,6 m】"
           OUTPUT="${OUTPUT//$'\n'/'%0A'}"
