@@ -53,31 +53,6 @@ jobs:
           name: coverage-file
           path: cover.out
 
-  coverage:
-    name: Coverage report
-    needs: unit_tests
-    runs-on: ubuntu-20.04
-    timeout-minutes: 10
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
-
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
-
-      - name: Install goveralls
-        run: go install github.com/mattn/goveralls@latest
-
-      - name: Download coverage artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-file
-
-      - name: Send coverage
-        env:
-          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goveralls -coverprofile=cover.out -service=github
-
   manifest_tests:
     name: Manifest Tests
     runs-on: ubuntu-20.04
