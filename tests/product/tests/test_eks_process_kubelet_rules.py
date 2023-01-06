@@ -11,11 +11,13 @@ from product.tests.parameters import register_params, Parameters
 
 
 @pytest.mark.eks_process_rules
-def test_eks_process_rules(elastic_client,
-                           cloudbeat_agent,
-                           rule_tag,
-                           node_hostname,
-                           expected):
+def test_eks_process_rules(
+    elastic_client,
+    cloudbeat_agent,
+    rule_tag,
+    node_hostname,
+    expected,
+):
     """
     This data driven test verifies rules and findings return by cloudbeat agent.
     In order to add new cases @pytest.mark.parameterize section shall be updated.
@@ -26,6 +28,7 @@ def test_eks_process_rules(elastic_client,
     @param expected: Result to be found in finding evaluation field.
     @return: None - Test Pass / Fail result is generated.
     """
+    # pylint: disable=duplicate-code
 
     def identifier(eval_resource):
         try:
@@ -42,16 +45,14 @@ def test_eks_process_rules(elastic_client,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
-    assert evaluation == expected, f"Rule {rule_tag} verification failed," \
-                                   f"expected: {expected}, got: {evaluation}"
+    assert evaluation == expected, f"Rule {rule_tag} verification failed," f"expected: {expected}, got: {evaluation}"
 
 
-register_params(test_eks_process_rules, Parameters(
-    ("rule_tag", "node_hostname", "expected"),
-    [
-        *eks_proc_tc.cis_eks_kubelet_cases.values()
-    ],
-    ids=[
-        *eks_proc_tc.cis_eks_kubelet_cases.keys()
-    ]
-))
+register_params(
+    test_eks_process_rules,
+    Parameters(
+        ("rule_tag", "node_hostname", "expected"),
+        [*eks_proc_tc.cis_eks_kubelet_cases.values()],
+        ids=[*eks_proc_tc.cis_eks_kubelet_cases.keys()],
+    ),
+)

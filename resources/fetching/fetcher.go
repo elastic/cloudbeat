@@ -19,9 +19,30 @@ package fetching
 
 import (
 	"context"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+
+	awssdk "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+)
+
+const (
+	KubeAPIType = "kube-api"
+
+	EcrType           = "aws-ecr"
+	IAMType           = "aws-iam"
+	EC2NetworkingType = "aws-ec2-network"
+	NetworkNACLType   = "aws-nacl"
+	SecurityGroupType = "aws-security-group"
+	ElbType           = "aws-elb"
+	IAMUserType       = "aws-iam-user"
+	PwdPolicyType     = "aws-password-policy"
+	EksType           = "aws-eks"
+
+	CloudIdentity          = "identity-management"
+	EC2Identity            = "cloud-compute"
+	CloudContainerMgmt     = "caas" // containers as a service
+	CloudLoadBalancer      = "load-balancer"
+	CloudContainerRegistry = "container-registry"
 )
 
 // Factory can create fetcher instances based on configuration
@@ -82,19 +103,5 @@ type BaseFetcherConfig struct {
 
 type AwsBaseFetcherConfig struct {
 	BaseFetcherConfig `config:",inline"`
-	AwsConfig         aws.ConfigAWS `config:",inline"`
+	AwsConfig         awssdk.ConfigAWS `config:",inline"`
 }
-
-const (
-	KubeAPIType = "kube-api"
-
-	EcrType        = "aws-ecr"
-	ElbType        = "aws-elb"
-	RolePolicyType = "aws-role-policy"
-	EksType        = "aws-eks"
-
-	CloudIdentity          = "iam"
-	CloudContainerMgmt     = "caas" // containers as a service
-	CloudLoadBalancer      = "load-balancer"
-	CloudContainerRegistry = "container-registry"
-)

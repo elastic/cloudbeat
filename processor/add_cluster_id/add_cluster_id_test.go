@@ -43,89 +43,38 @@ func TestAddClusterIdTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *AddClusterIdTestSuite) TestAddClusterIdRun() {
-	var tests = []struct {
-		clusterName string
-		clusterId   string
-	}{
-		{
-			"some-cluster-name",
-			"some-cluster-id",
-		},
-		{
-			"some-cluster-name-2",
-			"some-cluster-id-2",
-		},
+func (s *AddClusterIdTestSuite) TestClusterIdProcessor() {
+	tests := []string{
+		"abc",
+		"some-cluster-id",
 	}
+
 	for _, t := range tests {
 		mock := &clusterHelperMock{
-			id:          t.clusterId,
-			clusterName: t.clusterName,
+			id: t,
 		}
-		processor := &processor{
+
+		processor := &addClusterID{
 			helper: mock,
+			config: config{},
 		}
 
 		e := beat.Event{
 			Fields: make(mapstr.M),
 		}
-
 		event, err := processor.Run(&e)
 		s.NoError(err)
 
-		res, err := event.GetValue("orchestrator.cluster.name")
+		res, err := event.GetValue("cluster_id")
 		s.NoError(err)
-		s.Equal(t.clusterName, res)
-
-		res, err = event.GetValue("cluster_id")
-		s.NoError(err)
-		s.Equal(t.clusterId, res)
-	}
-}
-
-func (s *AddClusterIdTestSuite) TestAddClusterIdRunWhenNoClusterName() {
-	var tests = []struct {
-		clusterName string
-		clusterId   string
-	}{
-		{
-			"",
-			"some-cluster-id",
-		},
-	}
-	for _, t := range tests {
-		mock := &clusterHelperMock{
-			id:          t.clusterId,
-			clusterName: t.clusterName,
-		}
-		processor := &processor{
-			helper: mock,
-		}
-
-		e := beat.Event{
-			Fields: make(mapstr.M),
-		}
-
-		event, err := processor.Run(&e)
-		s.NoError(err)
-
-		res, err := event.GetValue("orchestrator.cluster.name")
-		s.Error(err)
-		s.ErrorContains(err, "key not found")
-		s.Empty(res)
-
-		res, err = event.GetValue("cluster_id")
-		s.NoError(err)
-		s.Equal(t.clusterId, res)
-
+		s.Equal(t, res)
 	}
 }
 
 type clusterHelperMock struct {
-	id          string
-	clusterName string
+	id string
 }
 
-func (m *clusterHelperMock) GetClusterMetadata() ClusterMetadata {
-	return ClusterMetadata{clusterName: m.clusterName, clusterId: m.id}
+func (m *clusterHelperMock) ClusterId() string {
+	return m.id
 }

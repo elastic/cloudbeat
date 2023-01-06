@@ -151,6 +151,20 @@ disable=raw-checker-failed,
         deprecated-pragma,
         use-symbolic-message-instead,
         wildcard-import,
+        # The test environment is initialized during test setup and deployment steps,
+        # so pylint run locally reports misleading import errors.
+        # Any import problems will in any case be detected during test execution.
+        import-error,
+        # We track TODOs using project management tools, there's no need for pylint to
+        # throw them up as warnings.
+        fixme,
+        # The following checks are too opinionated.
+        too-few-public-methods,
+        too-many-instance-attributes,
+        too-many-branches,
+        too-many-arguments,
+        too-many-locals,
+        W1514 # we use default encoding from the env var
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

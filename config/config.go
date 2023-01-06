@@ -26,6 +26,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/elastic/cloudbeat/launcher"
+	"github.com/elastic/elastic-agent-libs/logp"
+
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
@@ -37,33 +40,20 @@ const DefaultNamespace = "default"
 
 const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 
-const (
-	InputTypeVanillaK8s = "cloudbeat/cis_k8s"
-	InputTypeEks        = "cloudbeat/cis_eks"
-)
+var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
 
 type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
 }
 
 type Config struct {
-	Type       string                  `config:"type"`
 	AWSConfig  aws.ConfigAWS           `config:",inline"`
-	RuntimeCfg *RuntimeConfig          `config:"runtime_cfg"`
 	Fetchers   []*config.C             `config:"fetchers"`
 	KubeConfig string                  `config:"kube_config"`
 	Period     time.Duration           `config:"period"`
 	Processors processors.PluginConfig `config:"processors"`
 	BundlePath string                  `config:"bundle_path"`
-}
-
-type RuntimeConfig struct {
-	ActivatedRules *Benchmarks `config:"activated_rules" yaml:"activated_rules" json:"activated_rules"`
-}
-
-type Benchmarks struct {
-	CisK8s []string `config:"cis_k8s,omitempty" yaml:"cis_k8s,omitempty" json:"cis_k8s,omitempty"`
-	CisEks []string `config:"cis_eks,omitempty" yaml:"cis_eks,omitempty" json:"cis_eks,omitempty"`
+	Benchmark  string                  `config:"config.v1.benchmark"`
 }
 
 func New(cfg *config.C) (*Config, error) {
@@ -76,16 +66,18 @@ func New(cfg *config.C) (*Config, error) {
 		return nil, err
 	}
 
-	if c.RuntimeCfg != nil && c.RuntimeCfg.ActivatedRules != nil && len(c.RuntimeCfg.ActivatedRules.CisEks) > 0 {
-		c.Type = InputTypeEks
+	if c.Benchmark != "" {
+		if !isSupportedBenchmark(c.Benchmark) {
+			return c, ErrBenchmarkNotSupported
+		}
 	}
 	return c, nil
 }
 
 func defaultConfig() (*Config, error) {
 	ret := &Config{
-		Period: 4 * time.Hour,
-		Type:   InputTypeVanillaK8s,
+		Period:    4 * time.Hour,
+		Benchmark: CIS_K8S,
 	}
 
 	bundle, err := getBundlePath()
@@ -115,5 +107,14 @@ func Datastream(namespace string, indexPrefix string) string {
 }
 
 type AwsConfigProvider interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error)
+	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error)
+}
+
+func isSupportedBenchmark(benchmark string) bool {
+	for _, s := range SupportedCIS {
+		if benchmark == s {
+			return true
+		}
+	}
+	return false
 }

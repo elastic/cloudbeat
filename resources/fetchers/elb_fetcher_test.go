@@ -36,12 +36,6 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 )
 
-var (
-	testAccount = "test-account"
-	testID      = "test-id"
-	testARN     = "test-arn"
-)
-
 const (
 	elbRegex = "([\\w-]+)-\\d+\\.us-east-2.elb.amazonaws.com"
 )
@@ -73,7 +67,13 @@ func (s *ElbFetcherTestSuite) TearDownTest() {
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
-	lbName := "adda9cdc89b13452e92d48be46858d37"
+	var (
+		testAccount = "test-account"
+		testID      = "test-id"
+		testARN     = "test-arn"
+		lbName      = "adda9cdc89b13452e92d48be46858d37"
+	)
+
 	var tests = []struct {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
@@ -126,8 +126,8 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
-		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
+		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		elbProvider := &awslib.MockElbLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
@@ -206,8 +206,8 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockedKubernetesClientGetter{}
-		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything).Return(kubeclient, nil)
+		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		elbProvider := &awslib.MockElbLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(nil, test.error)

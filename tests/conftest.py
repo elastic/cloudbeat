@@ -1,12 +1,92 @@
 """
 Global pytest file for fixtures and test configs
 """
+import sys
+import functools
+import time
+
 import pytest
 import configuration
 from commonlib.kubernetes import KubernetesHelper
 from commonlib.elastic_wrapper import ElasticWrapper
 from commonlib.docker_wrapper import DockerWrapper
 from commonlib.io_utils import FsClient
+from _pytest.logging import LogCaptureFixture
+from loguru import logger
+
+
+def logger_wraps(*, entry=True, _exit=True, level="DEBUG"):
+    """
+    Adding logger wrapper for debugging functions
+    @param entry: Boolean, Display entry message or not
+    @param _exit: Boolean, Display exit message or not
+    @param level: Logging level, default DEBUG
+    @return:
+    """
+
+    def wrapper(func):
+        name = func.__name__
+
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            logger_ = logger.opt(depth=1)
+            if entry:
+                logger_.log(level, f"Entering '{name}' (args={args}, kwargs={kwargs})")
+            start = time.time()
+            result = func(*args, **kwargs)
+            end = time.time()
+            logger_.log(level, "Function '{}' executed in {:f} s", func.__name__, end - start)
+            if _exit:
+                logger_.log(level, f"Exiting '{name}' (result={result})")
+            return result
+
+        return wrapped
+
+    return wrapper
+
+
+@pytest.fixture
+def caplog(_caplog: LogCaptureFixture) -> None:
+    """Emitting logs from loguru's logger.log means that they will not show up in
+    caplog which only works with Python's standard logging. This adds the same
+    LogCaptureHandler being used by caplog to hook into loguru.
+    Args:
+        _caplog (LogCaptureFixture): caplog fixture
+    Returns:
+        None
+    """
+
+    def filter_(record):
+        return record["level"].no >= _caplog.handler.level
+
+    handler_id = logger.add(
+        _caplog.handler,
+        level=0,
+        format="{message}",
+        filter=filter_,
+    )
+    yield _caplog
+    logger.remove(handler_id)
+
+
+def pytest_configure():
+    """
+    Update framework configuration
+    Logger: set logger default format
+    @return:
+    """
+    fmt = (
+        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> "
+        "<level>[{level}]</level> | "
+        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+        "<level>{message}</level>"
+    )
+    config = {
+        "handlers": [
+            {"sink": sys.stderr, "format": fmt},
+        ],
+    }
+    logger.configure(**config)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -17,7 +97,10 @@ def k8s():
     When code executed as container (pod / job) in K8s cluster in cluster configuration is used.
     @return: Kubernetes Helper instance.
     """
-    return KubernetesHelper(is_in_cluster_config=configuration.kubernetes.is_in_cluster_config)
+    logger.debug(f"Kubernetes 'in_cluster_config': {configuration.kubernetes.is_in_cluster_config}")
+    return KubernetesHelper(
+        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -46,6 +129,7 @@ def elastic_client():
     """
     elastic_config = configuration.elasticsearch
     es_client = ElasticWrapper(elastic_params=elastic_config)
+    logger.info(f"ElasticSearch url: {elastic_config.url}")
     return es_client
 
 
@@ -60,20 +144,29 @@ def api_client():
     docker_config = configuration.docker
     if docker_config.use_docker:
         client = DockerWrapper(config=docker_config)
+        logger.info("docker client")
     else:
         client = FsClient
+        logger.info("fs client")
     return client
 
 
 def pytest_addoption(parser):
+    """
+    Add custom options to the pytest commandline utility.
+    """
     parser.addoption(
-        '--range',
-        default='..',
-        help='range to run tests on',
+        "--range",
+        default="..",
+        help="range to run tests on",
     )
 
 
 def get_fixtures():
+    """
+    This function returns all fixtures in the current file.
+    @return: List of fixtures.
+    """
     return cloudbeat_agent, k8s
 
 
@@ -86,16 +179,29 @@ def pytest_sessionfinish(session):
 
     report_dir = session.config.option.allure_report_dir
     cloudbeat = configuration.agent
-    kube_client = KubernetesHelper(is_in_cluster_config=configuration.kubernetes.is_in_cluster_config)
-    app_list = [cloudbeat.name, 'kibana', 'elasticsearch']
+    kube_client = KubernetesHelper(
+        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
+    )
+    app_list = [cloudbeat.name, "kibana", "elasticsearch"]
     apps_dict = {}
     for app in app_list:
-        apps_dict.update(kube_client.get_pod_image_version(pod_name=app, namespace=cloudbeat.namespace))
+        apps_dict.update(
+            kube_client.get_pod_image_version(
+                pod_name=app,
+                namespace=cloudbeat.namespace,
+            ),
+        )
     kubernetes_data = kube_client.get_nodes_versions()
     report_data = {**apps_dict, **kubernetes_data}
     try:
         if report_dir:
-            with open('{}/{}'.format(report_dir, 'environment.properties'), 'w') as allure_env:
-                allure_env.writelines([f"{key}:{value}\n" for key, value in report_data.items()])
+            with open(
+                f"{report_dir}/{'environment.properties'}",
+                "w",
+                encoding="utf8",
+            ) as allure_env:
+                allure_env.writelines(
+                    [f"{key}:{value}\n" for key, value in report_data.items()],
+                )
     except ValueError:
-        print("Warning fail to create allure environment report")
+        logger.warning("Warning fail to create allure environment report")

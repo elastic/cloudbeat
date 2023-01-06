@@ -8,7 +8,11 @@
 # https://www.elastic.co/guide/en/beats/cloudbeat/index.html
 
 cloudbeat:
-  type: cloudbeat/cis_k8s
+  config:
+    v1:
+      benchmark: cis_k8s
+  type:
+    cloudbeat/cis_k8s
     # Defines how often an event is sent to the output
   period: 4h
   fetchers:
@@ -24,117 +28,22 @@ cloudbeat:
           config-file-arguments:
             - config
     - name: file-system
-      patterns: [
-        "/hostfs/etc/kubernetes/scheduler.conf",
-        "/hostfs/etc/kubernetes/controller-manager.conf",
-        "/hostfs/etc/kubernetes/admin.conf",
-        "/hostfs/etc/kubernetes/kubelet.conf",
-        "/hostfs/etc/kubernetes/manifests/etcd.yaml",
-        "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-        "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
-        "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
-        "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
-        "/hostfs/etc/kubernetes/pki/*",
-        "/hostfs/var/lib/kubelet/config.yaml",
-        "/hostfs/var/lib/etcd",
-        "/hostfs/etc/kubernetes/pki"
-      ]
-
-  runtime_cfg:
-    activated_rules:
-      cis_k8s:
-        - cis_1_1_1
-        - cis_1_1_2
-        - cis_1_1_3
-        - cis_1_1_4
-        - cis_1_1_5
-        - cis_1_1_6
-        - cis_1_1_7
-        - cis_1_1_8
-        - cis_1_1_11
-        - cis_1_1_12
-        - cis_1_1_13
-        - cis_1_1_14
-        - cis_1_1_15
-        - cis_1_1_16
-        - cis_1_1_17
-        - cis_1_1_18
-        - cis_1_1_19
-        - cis_1_1_20
-        - cis_1_1_21
-        - cis_1_2_2
-        - cis_1_2_4
-        - cis_1_2_5
-        - cis_1_2_6
-        - cis_1_2_7
-        - cis_1_2_8
-        - cis_1_2_9
-        - cis_1_2_10
-        - cis_1_2_11
-        - cis_1_2_12
-        - cis_1_2_13
-        - cis_1_2_14
-        - cis_1_2_15
-        - cis_1_2_16
-        - cis_1_2_17
-        - cis_1_2_18
-        - cis_1_2_19
-        - cis_1_2_20
-        - cis_1_2_21
-        - cis_1_2_22
-        - cis_1_2_23
-        - cis_1_2_24
-        - cis_1_2_25
-        - cis_1_2_26
-        - cis_1_2_27
-        - cis_1_2_28
-        - cis_1_2_29
-        - cis_1_2_32
-        - cis_1_3_2
-        - cis_1_3_3
-        - cis_1_3_4
-        - cis_1_3_5
-        - cis_1_3_6
-        - cis_1_3_7
-        - cis_1_4_1
-        - cis_1_4_2
-        - cis_2_1
-        - cis_2_2
-        - cis_2_3
-        - cis_2_4
-        - cis_2_5
-        - cis_2_6
-        - cis_4_1_1
-        - cis_4_1_2
-        - cis_4_1_5
-        - cis_4_1_6
-        - cis_4_1_9
-        - cis_4_1_10
-        - cis_4_2_1
-        - cis_4_2_2
-        - cis_4_2_3
-        - cis_4_2_4
-        - cis_4_2_5
-        - cis_4_2_6
-        - cis_4_2_7
-        - cis_4_2_8
-        - cis_4_2_9
-        - cis_4_2_10
-        - cis_4_2_11
-        - cis_4_2_12
-        - cis_4_2_13
-        - cis_5_1_3
-        - cis_5_1_5
-        - cis_5_1_6
-        - cis_5_2_2
-        - cis_5_2_3
-        - cis_5_2_4
-        - cis_5_2_5
-        - cis_5_2_6
-        - cis_5_2_7
-        - cis_5_2_8
-        - cis_5_2_9
-        - cis_5_2_10
+      patterns:
+        [
+          "/hostfs/etc/kubernetes/scheduler.conf",
+          "/hostfs/etc/kubernetes/controller-manager.conf",
+          "/hostfs/etc/kubernetes/admin.conf",
+          "/hostfs/etc/kubernetes/kubelet.conf",
+          "/hostfs/etc/kubernetes/manifests/etcd.yaml",
+          "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+          "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
+          "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
+          "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
+          "/hostfs/etc/kubernetes/pki/*",
+          "/hostfs/var/lib/kubelet/config.yaml",
+          "/hostfs/var/lib/etcd",
+          "/hostfs/etc/kubernetes/pki",
+        ]
 
 #    # EKS Fetchers configuration
 #      - name: kube-api
@@ -181,59 +90,59 @@ cloudbeat:
 
 # Internal queue configuration for buffering events to be published.
 #queue:
-  # Queue type by name (default 'mem')
-  # The memory queue will present all available events (up to the outputs
-  # bulk_max_size) to the output, the moment the output is ready to server
-  # another batch of events.
-  #mem:
-    # Max number of events the queue can buffer.
-    #events: 4096
+# Queue type by name (default 'mem')
+# The memory queue will present all available events (up to the outputs
+# bulk_max_size) to the output, the moment the output is ready to server
+# another batch of events.
+#mem:
+# Max number of events the queue can buffer.
+#events: 4096
 
-    # Hints the minimum number of events stored in the queue,
-    # before providing a batch of events to the outputs.
-    # The default value is set to 2048.
-    # A value of 0 ensures events are immediately available
-    # to be sent to the outputs.
-    #flush.min_events: 2048
+# Hints the minimum number of events stored in the queue,
+# before providing a batch of events to the outputs.
+# The default value is set to 2048.
+# A value of 0 ensures events are immediately available
+# to be sent to the outputs.
+#flush.min_events: 2048
 
-    # Maximum duration after which events are available to the outputs,
-    # if the number of events stored in the queue is < `flush.min_events`.
-    #flush.timeout: 1s
+# Maximum duration after which events are available to the outputs,
+# if the number of events stored in the queue is < `flush.min_events`.
+#flush.timeout: 1s
 
-  # The disk queue stores incoming events on disk until the output is
-  # ready for them. This allows a higher event limit than the memory-only
-  # queue and lets pending events persist through a restart.
-  #disk:
-    # The directory path to store the queue's data.
-    #path: "${path.data}/diskqueue"
+# The disk queue stores incoming events on disk until the output is
+# ready for them. This allows a higher event limit than the memory-only
+# queue and lets pending events persist through a restart.
+#disk:
+# The directory path to store the queue's data.
+#path: "${path.data}/diskqueue"
 
-    # The maximum space the queue should occupy on disk. Depending on
-    # input settings, events that exceed this limit are delayed or discarded.
-    #max_size: 10GB
+# The maximum space the queue should occupy on disk. Depending on
+# input settings, events that exceed this limit are delayed or discarded.
+#max_size: 10GB
 
-    # The maximum size of a single queue data file. Data in the queue is
-    # stored in smaller segments that are deleted after all their events
-    # have been processed.
-    #segment_size: 1GB
+# The maximum size of a single queue data file. Data in the queue is
+# stored in smaller segments that are deleted after all their events
+# have been processed.
+#segment_size: 1GB
 
-    # The number of events to read from disk to memory while waiting for
-    # the output to request them.
-    #read_ahead: 512
+# The number of events to read from disk to memory while waiting for
+# the output to request them.
+#read_ahead: 512
 
-    # The number of events to accept from inputs while waiting for them
-    # to be written to disk. If event data arrives faster than it
-    # can be written to disk, this setting prevents it from overflowing
-    # main memory.
-    #write_ahead: 2048
+# The number of events to accept from inputs while waiting for them
+# to be written to disk. If event data arrives faster than it
+# can be written to disk, this setting prevents it from overflowing
+# main memory.
+#write_ahead: 2048
 
-    # The duration to wait before retrying when the queue encounters a disk
-    # write error.
-    #retry_interval: 1s
+# The duration to wait before retrying when the queue encounters a disk
+# write error.
+#retry_interval: 1s
 
-    # The maximum length of time to wait before retrying on a disk write
-    # error. If the queue encounters repeated errors, it will double the
-    # length of its retry interval each time, up to this maximum.
-    #max_retry_interval: 30s
+# The maximum length of time to wait before retrying on a disk write
+# error. If the queue encounters repeated errors, it will double the
+# length of its retry interval each time, up to this maximum.
+#max_retry_interval: 30s
 
 # Sets the maximum number of CPUs that can be executing simultaneously. The
 # default is the number of logical CPUs available in the system.
@@ -446,8 +355,8 @@ output.elasticsearch:
 
   # Dictionary of HTTP parameters to pass within the URL with index operations.
   #parameters:
-    #param1: value1
-    #param2: value2
+  #param1: value1
+  #param2: value2
 
   # Number of workers per Elasticsearch host.
   #worker: 1
@@ -582,550 +491,548 @@ output.elasticsearch:
   # Kerberos realm.
   #kerberos.realm: ELASTIC
 
-
 # ------------------------------ Logstash Output -------------------------------
 #output.logstash:
-  # Boolean flag to enable or disable the output module.
-  #enabled: true
+# Boolean flag to enable or disable the output module.
+#enabled: true
 
-  # The Logstash hosts
-  #hosts: ["localhost:5044"]
+# The Logstash hosts
+#hosts: ["localhost:5044"]
 
-  # Number of workers per Logstash host.
-  #worker: 1
+# Number of workers per Logstash host.
+#worker: 1
 
-  # Set gzip compression level.
-  #compression_level: 3
+# Set gzip compression level.
+#compression_level: 3
 
-  # Configure escaping HTML symbols in strings.
-  #escape_html: false
+# Configure escaping HTML symbols in strings.
+#escape_html: false
 
-  # Optional maximum time to live for a connection to Logstash, after which the
-  # connection will be re-established.  A value of `0s` (the default) will
-  # disable this feature.
-  #
-  # Not yet supported for async connections (i.e. with the "pipelining" option set)
-  #ttl: 30s
+# Optional maximum time to live for a connection to Logstash, after which the
+# connection will be re-established.  A value of `0s` (the default) will
+# disable this feature.
+#
+# Not yet supported for async connections (i.e. with the "pipelining" option set)
+#ttl: 30s
 
-  # Optionally load-balance events between Logstash hosts. Default is false.
-  #loadbalance: false
+# Optionally load-balance events between Logstash hosts. Default is false.
+#loadbalance: false
 
-  # Number of batches to be sent asynchronously to Logstash while processing
-  # new batches.
-  #pipelining: 2
+# Number of batches to be sent asynchronously to Logstash while processing
+# new batches.
+#pipelining: 2
 
-  # If enabled only a subset of events in a batch of events is transferred per
-  # transaction.  The number of events to be sent increases up to `bulk_max_size`
-  # if no error is encountered.
-  #slow_start: false
+# If enabled only a subset of events in a batch of events is transferred per
+# transaction.  The number of events to be sent increases up to `bulk_max_size`
+# if no error is encountered.
+#slow_start: false
 
-  # The number of seconds to wait before trying to reconnect to Logstash
-  # after a network error. After waiting backoff.init seconds, the Beat
-  # tries to reconnect. If the attempt fails, the backoff timer is increased
-  # exponentially up to backoff.max. After a successful connection, the backoff
-  # timer is reset. The default is 1s.
-  #backoff.init: 1s
+# The number of seconds to wait before trying to reconnect to Logstash
+# after a network error. After waiting backoff.init seconds, the Beat
+# tries to reconnect. If the attempt fails, the backoff timer is increased
+# exponentially up to backoff.max. After a successful connection, the backoff
+# timer is reset. The default is 1s.
+#backoff.init: 1s
 
-  # The maximum number of seconds to wait before attempting to connect to
-  # Logstash after a network error. The default is 60s.
-  #backoff.max: 60s
+# The maximum number of seconds to wait before attempting to connect to
+# Logstash after a network error. The default is 60s.
+#backoff.max: 60s
 
-  # Optional index name. The default index name is set to cloudbeat
-  # in all lowercase.
-  #index: 'cloudbeat'
+# Optional index name. The default index name is set to cloudbeat
+# in all lowercase.
+#index: 'cloudbeat'
 
-  # SOCKS5 proxy server URL
-  #proxy_url: socks5://user:password@socks5-server:2233
+# SOCKS5 proxy server URL
+#proxy_url: socks5://user:password@socks5-server:2233
 
-  # Resolve names locally when using a proxy server. Defaults to false.
-  #proxy_use_local_resolver: false
+# Resolve names locally when using a proxy server. Defaults to false.
+#proxy_use_local_resolver: false
 
-  # Use SSL settings for HTTPS.
-  #ssl.enabled: true
+# Use SSL settings for HTTPS.
+#ssl.enabled: true
 
-  # Controls the verification of certificates. Valid values are:
-  # * full, which verifies that the provided certificate is signed by a trusted
-  # authority (CA) and also verifies that the server's hostname (or IP address)
-  # matches the names identified within the certificate.
-  # * strict, which verifies that the provided certificate is signed by a trusted
-  # authority (CA) and also verifies that the server's hostname (or IP address)
-  # matches the names identified within the certificate. If the Subject Alternative
-  # Name is empty, it returns an error.
-  # * certificate, which verifies that the provided certificate is signed by a
-  # trusted authority (CA), but does not perform any hostname verification.
-  #  * none, which performs no verification of the server's certificate. This
-  # mode disables many of the security benefits of SSL/TLS and should only be used
-  # after very careful consideration. It is primarily intended as a temporary
-  # diagnostic mechanism when attempting to resolve TLS errors; its use in
-  # production environments is strongly discouraged.
-  # The default value is full.
-  #ssl.verification_mode: full
+# Controls the verification of certificates. Valid values are:
+# * full, which verifies that the provided certificate is signed by a trusted
+# authority (CA) and also verifies that the server's hostname (or IP address)
+# matches the names identified within the certificate.
+# * strict, which verifies that the provided certificate is signed by a trusted
+# authority (CA) and also verifies that the server's hostname (or IP address)
+# matches the names identified within the certificate. If the Subject Alternative
+# Name is empty, it returns an error.
+# * certificate, which verifies that the provided certificate is signed by a
+# trusted authority (CA), but does not perform any hostname verification.
+#  * none, which performs no verification of the server's certificate. This
+# mode disables many of the security benefits of SSL/TLS and should only be used
+# after very careful consideration. It is primarily intended as a temporary
+# diagnostic mechanism when attempting to resolve TLS errors; its use in
+# production environments is strongly discouraged.
+# The default value is full.
+#ssl.verification_mode: full
 
-  # List of supported/valid TLS versions. By default all TLS versions from 1.1
-  # up to 1.3 are enabled.
-  #ssl.supported_protocols: [TLSv1.1, TLSv1.2, TLSv1.3]
+# List of supported/valid TLS versions. By default all TLS versions from 1.1
+# up to 1.3 are enabled.
+#ssl.supported_protocols: [TLSv1.1, TLSv1.2, TLSv1.3]
 
-  # List of root certificates for HTTPS server verifications
-  #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
+# List of root certificates for HTTPS server verifications
+#ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
 
-  # Certificate for SSL client authentication
-  #ssl.certificate: "/etc/pki/client/cert.pem"
+# Certificate for SSL client authentication
+#ssl.certificate: "/etc/pki/client/cert.pem"
 
-  # Client certificate key
-  #ssl.key: "/etc/pki/client/cert.key"
+# Client certificate key
+#ssl.key: "/etc/pki/client/cert.key"
 
-  # Optional passphrase for decrypting the certificate key.
-  #ssl.key_passphrase: ''
+# Optional passphrase for decrypting the certificate key.
+#ssl.key_passphrase: ''
 
-  # Configure cipher suites to be used for SSL connections
-  #ssl.cipher_suites: []
+# Configure cipher suites to be used for SSL connections
+#ssl.cipher_suites: []
 
-  # Configure curve types for ECDHE-based cipher suites
-  #ssl.curve_types: []
+# Configure curve types for ECDHE-based cipher suites
+#ssl.curve_types: []
 
-  # Configure what types of renegotiation are supported. Valid options are
-  # never, once, and freely. Default is never.
-  #ssl.renegotiation: never
+# Configure what types of renegotiation are supported. Valid options are
+# never, once, and freely. Default is never.
+#ssl.renegotiation: never
 
-  # Configure a pin that can be used to do extra validation of the verified certificate chain,
-  # this allow you to ensure that a specific certificate is used to validate the chain of trust.
-  #
-  # The pin is a base64 encoded string of the SHA-256 fingerprint.
-  #ssl.ca_sha256: ""
+# Configure a pin that can be used to do extra validation of the verified certificate chain,
+# this allow you to ensure that a specific certificate is used to validate the chain of trust.
+#
+# The pin is a base64 encoded string of the SHA-256 fingerprint.
+#ssl.ca_sha256: ""
 
-  # A root CA HEX encoded fingerprint. During the SSL handshake if the
-  # fingerprint matches the root CA certificate, it will be added to
-  # the provided list of root CAs (`certificate_authorities`), if the
-  # list is empty or not defined, the matching certificate will be the
-  # only one in the list. Then the normal SSL validation happens.
-  #ssl.ca_trusted_fingerprint: ""
+# A root CA HEX encoded fingerprint. During the SSL handshake if the
+# fingerprint matches the root CA certificate, it will be added to
+# the provided list of root CAs (`certificate_authorities`), if the
+# list is empty or not defined, the matching certificate will be the
+# only one in the list. Then the normal SSL validation happens.
+#ssl.ca_trusted_fingerprint: ""
 
-  # The number of times to retry publishing an event after a publishing failure.
-  # After the specified number of retries, the events are typically dropped.
-  # Some Beats, such as Filebeat and Winlogbeat, ignore the max_retries setting
-  # and retry until all events are published.  Set max_retries to a value less
-  # than 0 to retry until all events are published. The default is 3.
-  #max_retries: 3
+# The number of times to retry publishing an event after a publishing failure.
+# After the specified number of retries, the events are typically dropped.
+# Some Beats, such as Filebeat and Winlogbeat, ignore the max_retries setting
+# and retry until all events are published.  Set max_retries to a value less
+# than 0 to retry until all events are published. The default is 3.
+#max_retries: 3
 
-  # The maximum number of events to bulk in a single Logstash request. The
-  # default is 2048.
-  #bulk_max_size: 2048
+# The maximum number of events to bulk in a single Logstash request. The
+# default is 2048.
+#bulk_max_size: 2048
 
-  # The number of seconds to wait for responses from the Logstash server before
-  # timing out. The default is 30s.
-  #timeout: 30s
+# The number of seconds to wait for responses from the Logstash server before
+# timing out. The default is 30s.
+#timeout: 30s
 
 # -------------------------------- Kafka Output --------------------------------
 #output.kafka:
-  # Boolean flag to enable or disable the output module.
-  #enabled: true
+# Boolean flag to enable or disable the output module.
+#enabled: true
 
-  # The list of Kafka broker addresses from which to fetch the cluster metadata.
-  # The cluster metadata contain the actual Kafka brokers events are published
-  # to.
-  #hosts: ["localhost:9092"]
+# The list of Kafka broker addresses from which to fetch the cluster metadata.
+# The cluster metadata contain the actual Kafka brokers events are published
+# to.
+#hosts: ["localhost:9092"]
 
-  # The Kafka topic used for produced events. The setting can be a format string
-  # using any event field. To set the topic from document type use `%{[type]}`.
-  #topic: beats
+# The Kafka topic used for produced events. The setting can be a format string
+# using any event field. To set the topic from document type use `%{[type]}`.
+#topic: beats
 
-  # The Kafka event key setting. Use format string to create a unique event key.
-  # By default no event key will be generated.
-  #key: ''
+# The Kafka event key setting. Use format string to create a unique event key.
+# By default no event key will be generated.
+#key: ''
 
-  # The Kafka event partitioning strategy. Default hashing strategy is `hash`
-  # using the `output.kafka.key` setting or randomly distributes events if
-  # `output.kafka.key` is not configured.
-  #partition.hash:
-    # If enabled, events will only be published to partitions with reachable
-    # leaders. Default is false.
-    #reachable_only: false
+# The Kafka event partitioning strategy. Default hashing strategy is `hash`
+# using the `output.kafka.key` setting or randomly distributes events if
+# `output.kafka.key` is not configured.
+#partition.hash:
+# If enabled, events will only be published to partitions with reachable
+# leaders. Default is false.
+#reachable_only: false
 
-    # Configure alternative event field names used to compute the hash value.
-    # If empty `output.kafka.key` setting will be used.
-    # Default value is empty list.
-    #hash: []
+# Configure alternative event field names used to compute the hash value.
+# If empty `output.kafka.key` setting will be used.
+# Default value is empty list.
+#hash: []
 
-  # Authentication details. Password is required if username is set.
-  #username: ''
-  #password: ''
+# Authentication details. Password is required if username is set.
+#username: ''
+#password: ''
 
-  # SASL authentication mechanism used. Can be one of PLAIN, SCRAM-SHA-256 or SCRAM-SHA-512.
-  # Defaults to PLAIN when `username` and `password` are configured.
-  #sasl.mechanism: ''
+# SASL authentication mechanism used. Can be one of PLAIN, SCRAM-SHA-256 or SCRAM-SHA-512.
+# Defaults to PLAIN when `username` and `password` are configured.
+#sasl.mechanism: ''
 
-  # Kafka version Cloudbeat is assumed to run against. Defaults to the "1.0.0".
-  #version: '1.0.0'
+# Kafka version Cloudbeat is assumed to run against. Defaults to the "1.0.0".
+#version: '1.0.0'
 
-  # Configure JSON encoding
-  #codec.json:
-    # Pretty-print JSON event
-    #pretty: false
+# Configure JSON encoding
+#codec.json:
+# Pretty-print JSON event
+#pretty: false
 
-    # Configure escaping HTML symbols in strings.
-    #escape_html: false
+# Configure escaping HTML symbols in strings.
+#escape_html: false
 
-  # Metadata update configuration. Metadata contains leader information
-  # used to decide which broker to use when publishing.
-  #metadata:
-    # Max metadata request retry attempts when cluster is in middle of leader
-    # election. Defaults to 3 retries.
-    #retry.max: 3
+# Metadata update configuration. Metadata contains leader information
+# used to decide which broker to use when publishing.
+#metadata:
+# Max metadata request retry attempts when cluster is in middle of leader
+# election. Defaults to 3 retries.
+#retry.max: 3
 
-    # Wait time between retries during leader elections. Default is 250ms.
-    #retry.backoff: 250ms
+# Wait time between retries during leader elections. Default is 250ms.
+#retry.backoff: 250ms
 
-    # Refresh metadata interval. Defaults to every 10 minutes.
-    #refresh_frequency: 10m
+# Refresh metadata interval. Defaults to every 10 minutes.
+#refresh_frequency: 10m
 
-    # Strategy for fetching the topics metadata from the broker. Default is false.
-    #full: false
+# Strategy for fetching the topics metadata from the broker. Default is false.
+#full: false
 
-  # The number of times to retry publishing an event after a publishing failure.
-  # After the specified number of retries, events are typically dropped.
-  # Some Beats, such as Filebeat, ignore the max_retries setting and retry until
-  # all events are published.  Set max_retries to a value less than 0 to retry
-  # until all events are published. The default is 3.
-  #max_retries: 3
+# The number of times to retry publishing an event after a publishing failure.
+# After the specified number of retries, events are typically dropped.
+# Some Beats, such as Filebeat, ignore the max_retries setting and retry until
+# all events are published.  Set max_retries to a value less than 0 to retry
+# until all events are published. The default is 3.
+#max_retries: 3
 
-  # The number of seconds to wait before trying to republish to Kafka
-  # after a network error. After waiting backoff.init seconds, the Beat
-  # tries to republish. If the attempt fails, the backoff timer is increased
-  # exponentially up to backoff.max. After a successful publish, the backoff
-  # timer is reset. The default is 1s.
-  #backoff.init: 1s
+# The number of seconds to wait before trying to republish to Kafka
+# after a network error. After waiting backoff.init seconds, the Beat
+# tries to republish. If the attempt fails, the backoff timer is increased
+# exponentially up to backoff.max. After a successful publish, the backoff
+# timer is reset. The default is 1s.
+#backoff.init: 1s
 
-  # The maximum number of seconds to wait before attempting to republish to
-  # Kafka after a network error. The default is 60s.
-  #backoff.max: 60s
+# The maximum number of seconds to wait before attempting to republish to
+# Kafka after a network error. The default is 60s.
+#backoff.max: 60s
 
-  # The maximum number of events to bulk in a single Kafka request. The default
-  # is 2048.
-  #bulk_max_size: 2048
+# The maximum number of events to bulk in a single Kafka request. The default
+# is 2048.
+#bulk_max_size: 2048
 
-  # Duration to wait before sending bulk Kafka request. 0 is no delay. The default
-  # is 0.
-  #bulk_flush_frequency: 0s
+# Duration to wait before sending bulk Kafka request. 0 is no delay. The default
+# is 0.
+#bulk_flush_frequency: 0s
 
-  # The number of seconds to wait for responses from the Kafka brokers before
-  # timing out. The default is 30s.
-  #timeout: 30s
+# The number of seconds to wait for responses from the Kafka brokers before
+# timing out. The default is 30s.
+#timeout: 30s
 
-  # The maximum duration a broker will wait for number of required ACKs. The
-  # default is 10s.
-  #broker_timeout: 10s
+# The maximum duration a broker will wait for number of required ACKs. The
+# default is 10s.
+#broker_timeout: 10s
 
-  # The number of messages buffered for each Kafka broker. The default is 256.
-  #channel_buffer_size: 256
+# The number of messages buffered for each Kafka broker. The default is 256.
+#channel_buffer_size: 256
 
-  # The keep-alive period for an active network connection. If 0s, keep-alives
-  # are disabled. The default is 0 seconds.
-  #keep_alive: 0
+# The keep-alive period for an active network connection. If 0s, keep-alives
+# are disabled. The default is 0 seconds.
+#keep_alive: 0
 
-  # Sets the output compression codec. Must be one of none, snappy and gzip. The
-  # default is gzip.
-  #compression: gzip
+# Sets the output compression codec. Must be one of none, snappy and gzip. The
+# default is gzip.
+#compression: gzip
 
-  # Set the compression level. Currently only gzip provides a compression level
-  # between 0 and 9. The default value is chosen by the compression algorithm.
-  #compression_level: 4
+# Set the compression level. Currently only gzip provides a compression level
+# between 0 and 9. The default value is chosen by the compression algorithm.
+#compression_level: 4
 
-  # The maximum permitted size of JSON-encoded messages. Bigger messages will be
-  # dropped. The default value is 1000000 (bytes). This value should be equal to
-  # or less than the broker's message.max.bytes.
-  #max_message_bytes: 1000000
+# The maximum permitted size of JSON-encoded messages. Bigger messages will be
+# dropped. The default value is 1000000 (bytes). This value should be equal to
+# or less than the broker's message.max.bytes.
+#max_message_bytes: 1000000
 
-  # The ACK reliability level required from broker. 0=no response, 1=wait for
-  # local commit, -1=wait for all replicas to commit. The default is 1.  Note:
-  # If set to 0, no ACKs are returned by Kafka. Messages might be lost silently
-  # on error.
-  #required_acks: 1
+# The ACK reliability level required from broker. 0=no response, 1=wait for
+# local commit, -1=wait for all replicas to commit. The default is 1.  Note:
+# If set to 0, no ACKs are returned by Kafka. Messages might be lost silently
+# on error.
+#required_acks: 1
 
-  # The configurable ClientID used for logging, debugging, and auditing
-  # purposes.  The default is "beats".
-  #client_id: beats
+# The configurable ClientID used for logging, debugging, and auditing
+# purposes.  The default is "beats".
+#client_id: beats
 
-  # Use SSL settings for HTTPS.
-  #ssl.enabled: true
+# Use SSL settings for HTTPS.
+#ssl.enabled: true
 
-  # Controls the verification of certificates. Valid values are:
-  # * full, which verifies that the provided certificate is signed by a trusted
-  # authority (CA) and also verifies that the server's hostname (or IP address)
-  # matches the names identified within the certificate.
-  # * strict, which verifies that the provided certificate is signed by a trusted
-  # authority (CA) and also verifies that the server's hostname (or IP address)
-  # matches the names identified within the certificate. If the Subject Alternative
-  # Name is empty, it returns an error.
-  # * certificate, which verifies that the provided certificate is signed by a
-  # trusted authority (CA), but does not perform any hostname verification.
-  #  * none, which performs no verification of the server's certificate. This
-  # mode disables many of the security benefits of SSL/TLS and should only be used
-  # after very careful consideration. It is primarily intended as a temporary
-  # diagnostic mechanism when attempting to resolve TLS errors; its use in
-  # production environments is strongly discouraged.
-  # The default value is full.
-  #ssl.verification_mode: full
+# Controls the verification of certificates. Valid values are:
+# * full, which verifies that the provided certificate is signed by a trusted
+# authority (CA) and also verifies that the server's hostname (or IP address)
+# matches the names identified within the certificate.
+# * strict, which verifies that the provided certificate is signed by a trusted
+# authority (CA) and also verifies that the server's hostname (or IP address)
+# matches the names identified within the certificate. If the Subject Alternative
+# Name is empty, it returns an error.
+# * certificate, which verifies that the provided certificate is signed by a
+# trusted authority (CA), but does not perform any hostname verification.
+#  * none, which performs no verification of the server's certificate. This
+# mode disables many of the security benefits of SSL/TLS and should only be used
+# after very careful consideration. It is primarily intended as a temporary
+# diagnostic mechanism when attempting to resolve TLS errors; its use in
+# production environments is strongly discouraged.
+# The default value is full.
+#ssl.verification_mode: full
 
-  # List of supported/valid TLS versions. By default all TLS versions from 1.1
-  # up to 1.3 are enabled.
-  #ssl.supported_protocols: [TLSv1.1, TLSv1.2, TLSv1.3]
+# List of supported/valid TLS versions. By default all TLS versions from 1.1
+# up to 1.3 are enabled.
+#ssl.supported_protocols: [TLSv1.1, TLSv1.2, TLSv1.3]
 
-  # List of root certificates for HTTPS server verifications
-  #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
+# List of root certificates for HTTPS server verifications
+#ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
 
-  # Certificate for SSL client authentication
-  #ssl.certificate: "/etc/pki/client/cert.pem"
+# Certificate for SSL client authentication
+#ssl.certificate: "/etc/pki/client/cert.pem"
 
-  # Client certificate key
-  #ssl.key: "/etc/pki/client/cert.key"
+# Client certificate key
+#ssl.key: "/etc/pki/client/cert.key"
 
-  # Optional passphrase for decrypting the certificate key.
-  #ssl.key_passphrase: ''
+# Optional passphrase for decrypting the certificate key.
+#ssl.key_passphrase: ''
 
-  # Configure cipher suites to be used for SSL connections
-  #ssl.cipher_suites: []
+# Configure cipher suites to be used for SSL connections
+#ssl.cipher_suites: []
 
-  # Configure curve types for ECDHE-based cipher suites
-  #ssl.curve_types: []
+# Configure curve types for ECDHE-based cipher suites
+#ssl.curve_types: []
 
-  # Configure what types of renegotiation are supported. Valid options are
-  # never, once, and freely. Default is never.
-  #ssl.renegotiation: never
+# Configure what types of renegotiation are supported. Valid options are
+# never, once, and freely. Default is never.
+#ssl.renegotiation: never
 
-  # Configure a pin that can be used to do extra validation of the verified certificate chain,
-  # this allow you to ensure that a specific certificate is used to validate the chain of trust.
-  #
-  # The pin is a base64 encoded string of the SHA-256 fingerprint.
-  #ssl.ca_sha256: ""
+# Configure a pin that can be used to do extra validation of the verified certificate chain,
+# this allow you to ensure that a specific certificate is used to validate the chain of trust.
+#
+# The pin is a base64 encoded string of the SHA-256 fingerprint.
+#ssl.ca_sha256: ""
 
-  # A root CA HEX encoded fingerprint. During the SSL handshake if the
-  # fingerprint matches the root CA certificate, it will be added to
-  # the provided list of root CAs (`certificate_authorities`), if the
-  # list is empty or not defined, the matching certificate will be the
-  # only one in the list. Then the normal SSL validation happens.
-  #ssl.ca_trusted_fingerprint: ""
+# A root CA HEX encoded fingerprint. During the SSL handshake if the
+# fingerprint matches the root CA certificate, it will be added to
+# the provided list of root CAs (`certificate_authorities`), if the
+# list is empty or not defined, the matching certificate will be the
+# only one in the list. Then the normal SSL validation happens.
+#ssl.ca_trusted_fingerprint: ""
 
-  # Enable Kerberos support. Kerberos is automatically enabled if any Kerberos setting is set.
-  #kerberos.enabled: true
+# Enable Kerberos support. Kerberos is automatically enabled if any Kerberos setting is set.
+#kerberos.enabled: true
 
-  # Authentication type to use with Kerberos. Available options: keytab, password.
-  #kerberos.auth_type: password
+# Authentication type to use with Kerberos. Available options: keytab, password.
+#kerberos.auth_type: password
 
-  # Path to the keytab file. It is used when auth_type is set to keytab.
-  #kerberos.keytab: /etc/security/keytabs/kafka.keytab
+# Path to the keytab file. It is used when auth_type is set to keytab.
+#kerberos.keytab: /etc/security/keytabs/kafka.keytab
 
-  # Path to the Kerberos configuration.
-  #kerberos.config_path: /etc/krb5.conf
+# Path to the Kerberos configuration.
+#kerberos.config_path: /etc/krb5.conf
 
-  # The service name. Service principal name is contructed from
-  # service_name/hostname@realm.
-  #kerberos.service_name: kafka
+# The service name. Service principal name is contructed from
+# service_name/hostname@realm.
+#kerberos.service_name: kafka
 
-  # Name of the Kerberos user.
-  #kerberos.username: elastic
+# Name of the Kerberos user.
+#kerberos.username: elastic
 
-  # Password of the Kerberos user. It is used when auth_type is set to password.
-  #kerberos.password: changeme
+# Password of the Kerberos user. It is used when auth_type is set to password.
+#kerberos.password: changeme
 
-  # Kerberos realm.
-  #kerberos.realm: ELASTIC
+# Kerberos realm.
+#kerberos.realm: ELASTIC
 
-  # Enables Kerberos FAST authentication. This may
-  # conflict with certain Active Directory configurations.
-  #kerberos.enable_krb5_fast: false
+# Enables Kerberos FAST authentication. This may
+# conflict with certain Active Directory configurations.
+#kerberos.enable_krb5_fast: false
 
 # -------------------------------- Redis Output --------------------------------
 #output.redis:
-  # Boolean flag to enable or disable the output module.
-  #enabled: true
+# Boolean flag to enable or disable the output module.
+#enabled: true
 
-  # Configure JSON encoding
-  #codec.json:
-    # Pretty print json event
-    #pretty: false
+# Configure JSON encoding
+#codec.json:
+# Pretty print json event
+#pretty: false
 
-    # Configure escaping HTML symbols in strings.
-    #escape_html: false
+# Configure escaping HTML symbols in strings.
+#escape_html: false
 
-  # The list of Redis servers to connect to. If load-balancing is enabled, the
-  # events are distributed to the servers in the list. If one server becomes
-  # unreachable, the events are distributed to the reachable servers only.
-  # The hosts setting supports redis and rediss urls with custom password like
-  # redis://:password@localhost:6379.
-  #hosts: ["localhost:6379"]
+# The list of Redis servers to connect to. If load-balancing is enabled, the
+# events are distributed to the servers in the list. If one server becomes
+# unreachable, the events are distributed to the reachable servers only.
+# The hosts setting supports redis and rediss urls with custom password like
+# redis://:password@localhost:6379.
+#hosts: ["localhost:6379"]
 
-  # The name of the Redis list or channel the events are published to. The
-  # default is cloudbeat.
-  #key: cloudbeat
+# The name of the Redis list or channel the events are published to. The
+# default is cloudbeat.
+#key: cloudbeat
 
-  # The password to authenticate to Redis with. The default is no authentication.
-  #password:
+# The password to authenticate to Redis with. The default is no authentication.
+#password:
 
-  # The Redis database number where the events are published. The default is 0.
-  #db: 0
+# The Redis database number where the events are published. The default is 0.
+#db: 0
 
-  # The Redis data type to use for publishing events. If the data type is list,
-  # the Redis RPUSH command is used. If the data type is channel, the Redis
-  # PUBLISH command is used. The default value is list.
-  #datatype: list
+# The Redis data type to use for publishing events. If the data type is list,
+# the Redis RPUSH command is used. If the data type is channel, the Redis
+# PUBLISH command is used. The default value is list.
+#datatype: list
 
-  # The number of workers to use for each host configured to publish events to
-  # Redis. Use this setting along with the loadbalance option. For example, if
-  # you have 2 hosts and 3 workers, in total 6 workers are started (3 for each
-  # host).
-  #worker: 1
+# The number of workers to use for each host configured to publish events to
+# Redis. Use this setting along with the loadbalance option. For example, if
+# you have 2 hosts and 3 workers, in total 6 workers are started (3 for each
+# host).
+#worker: 1
 
-  # If set to true and multiple hosts or workers are configured, the output
-  # plugin load balances published events onto all Redis hosts. If set to false,
-  # the output plugin sends all events to only one host (determined at random)
-  # and will switch to another host if the currently selected one becomes
-  # unreachable. The default value is true.
-  #loadbalance: true
+# If set to true and multiple hosts or workers are configured, the output
+# plugin load balances published events onto all Redis hosts. If set to false,
+# the output plugin sends all events to only one host (determined at random)
+# and will switch to another host if the currently selected one becomes
+# unreachable. The default value is true.
+#loadbalance: true
 
-  # The Redis connection timeout in seconds. The default is 5 seconds.
-  #timeout: 5s
+# The Redis connection timeout in seconds. The default is 5 seconds.
+#timeout: 5s
 
-  # The number of times to retry publishing an event after a publishing failure.
-  # After the specified number of retries, the events are typically dropped.
-  # Some Beats, such as Filebeat, ignore the max_retries setting and retry until
-  # all events are published. Set max_retries to a value less than 0 to retry
-  # until all events are published. The default is 3.
-  #max_retries: 3
+# The number of times to retry publishing an event after a publishing failure.
+# After the specified number of retries, the events are typically dropped.
+# Some Beats, such as Filebeat, ignore the max_retries setting and retry until
+# all events are published. Set max_retries to a value less than 0 to retry
+# until all events are published. The default is 3.
+#max_retries: 3
 
-  # The number of seconds to wait before trying to reconnect to Redis
-  # after a network error. After waiting backoff.init seconds, the Beat
-  # tries to reconnect. If the attempt fails, the backoff timer is increased
-  # exponentially up to backoff.max. After a successful connection, the backoff
-  # timer is reset. The default is 1s.
-  #backoff.init: 1s
+# The number of seconds to wait before trying to reconnect to Redis
+# after a network error. After waiting backoff.init seconds, the Beat
+# tries to reconnect. If the attempt fails, the backoff timer is increased
+# exponentially up to backoff.max. After a successful connection, the backoff
+# timer is reset. The default is 1s.
+#backoff.init: 1s
 
-  # The maximum number of seconds to wait before attempting to connect to
-  # Redis after a network error. The default is 60s.
-  #backoff.max: 60s
+# The maximum number of seconds to wait before attempting to connect to
+# Redis after a network error. The default is 60s.
+#backoff.max: 60s
 
-  # The maximum number of events to bulk in a single Redis request or pipeline.
-  # The default is 2048.
-  #bulk_max_size: 2048
+# The maximum number of events to bulk in a single Redis request or pipeline.
+# The default is 2048.
+#bulk_max_size: 2048
 
-  # The URL of the SOCKS5 proxy to use when connecting to the Redis servers. The
-  # value must be a URL with a scheme of socks5://.
-  #proxy_url:
+# The URL of the SOCKS5 proxy to use when connecting to the Redis servers. The
+# value must be a URL with a scheme of socks5://.
+#proxy_url:
 
-  # This option determines whether Redis hostnames are resolved locally when
-  # using a proxy. The default value is false, which means that name resolution
-  # occurs on the proxy server.
-  #proxy_use_local_resolver: false
+# This option determines whether Redis hostnames are resolved locally when
+# using a proxy. The default value is false, which means that name resolution
+# occurs on the proxy server.
+#proxy_use_local_resolver: false
 
-  # Use SSL settings for HTTPS.
-  #ssl.enabled: true
+# Use SSL settings for HTTPS.
+#ssl.enabled: true
 
-  # Controls the verification of certificates. Valid values are:
-  # * full, which verifies that the provided certificate is signed by a trusted
-  # authority (CA) and also verifies that the server's hostname (or IP address)
-  # matches the names identified within the certificate.
-  # * strict, which verifies that the provided certificate is signed by a trusted
-  # authority (CA) and also verifies that the server's hostname (or IP address)
-  # matches the names identified within the certificate. If the Subject Alternative
-  # Name is empty, it returns an error.
-  # * certificate, which verifies that the provided certificate is signed by a
-  # trusted authority (CA), but does not perform any hostname verification.
-  #  * none, which performs no verification of the server's certificate. This
-  # mode disables many of the security benefits of SSL/TLS and should only be used
-  # after very careful consideration. It is primarily intended as a temporary
-  # diagnostic mechanism when attempting to resolve TLS errors; its use in
-  # production environments is strongly discouraged.
-  # The default value is full.
-  #ssl.verification_mode: full
+# Controls the verification of certificates. Valid values are:
+# * full, which verifies that the provided certificate is signed by a trusted
+# authority (CA) and also verifies that the server's hostname (or IP address)
+# matches the names identified within the certificate.
+# * strict, which verifies that the provided certificate is signed by a trusted
+# authority (CA) and also verifies that the server's hostname (or IP address)
+# matches the names identified within the certificate. If the Subject Alternative
+# Name is empty, it returns an error.
+# * certificate, which verifies that the provided certificate is signed by a
+# trusted authority (CA), but does not perform any hostname verification.
+#  * none, which performs no verification of the server's certificate. This
+# mode disables many of the security benefits of SSL/TLS and should only be used
+# after very careful consideration. It is primarily intended as a temporary
+# diagnostic mechanism when attempting to resolve TLS errors; its use in
+# production environments is strongly discouraged.
+# The default value is full.
+#ssl.verification_mode: full
 
-  # List of supported/valid TLS versions. By default all TLS versions from 1.1
-  # up to 1.3 are enabled.
-  #ssl.supported_protocols: [TLSv1.1, TLSv1.2, TLSv1.3]
+# List of supported/valid TLS versions. By default all TLS versions from 1.1
+# up to 1.3 are enabled.
+#ssl.supported_protocols: [TLSv1.1, TLSv1.2, TLSv1.3]
 
-  # List of root certificates for HTTPS server verifications
-  #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
+# List of root certificates for HTTPS server verifications
+#ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
 
-  # Certificate for SSL client authentication
-  #ssl.certificate: "/etc/pki/client/cert.pem"
+# Certificate for SSL client authentication
+#ssl.certificate: "/etc/pki/client/cert.pem"
 
-  # Client certificate key
-  #ssl.key: "/etc/pki/client/cert.key"
+# Client certificate key
+#ssl.key: "/etc/pki/client/cert.key"
 
-  # Optional passphrase for decrypting the certificate key.
-  #ssl.key_passphrase: ''
+# Optional passphrase for decrypting the certificate key.
+#ssl.key_passphrase: ''
 
-  # Configure cipher suites to be used for SSL connections
-  #ssl.cipher_suites: []
+# Configure cipher suites to be used for SSL connections
+#ssl.cipher_suites: []
 
-  # Configure curve types for ECDHE-based cipher suites
-  #ssl.curve_types: []
+# Configure curve types for ECDHE-based cipher suites
+#ssl.curve_types: []
 
-  # Configure what types of renegotiation are supported. Valid options are
-  # never, once, and freely. Default is never.
-  #ssl.renegotiation: never
+# Configure what types of renegotiation are supported. Valid options are
+# never, once, and freely. Default is never.
+#ssl.renegotiation: never
 
-  # Configure a pin that can be used to do extra validation of the verified certificate chain,
-  # this allow you to ensure that a specific certificate is used to validate the chain of trust.
-  #
-  # The pin is a base64 encoded string of the SHA-256 fingerprint.
-  #ssl.ca_sha256: ""
+# Configure a pin that can be used to do extra validation of the verified certificate chain,
+# this allow you to ensure that a specific certificate is used to validate the chain of trust.
+#
+# The pin is a base64 encoded string of the SHA-256 fingerprint.
+#ssl.ca_sha256: ""
 
-  # A root CA HEX encoded fingerprint. During the SSL handshake if the
-  # fingerprint matches the root CA certificate, it will be added to
-  # the provided list of root CAs (`certificate_authorities`), if the
-  # list is empty or not defined, the matching certificate will be the
-  # only one in the list. Then the normal SSL validation happens.
-  #ssl.ca_trusted_fingerprint: ""
-
+# A root CA HEX encoded fingerprint. During the SSL handshake if the
+# fingerprint matches the root CA certificate, it will be added to
+# the provided list of root CAs (`certificate_authorities`), if the
+# list is empty or not defined, the matching certificate will be the
+# only one in the list. Then the normal SSL validation happens.
+#ssl.ca_trusted_fingerprint: ""
 
 # -------------------------------- File Output ---------------------------------
 #output.file:
-  # Boolean flag to enable or disable the output module.
-  #enabled: true
+# Boolean flag to enable or disable the output module.
+#enabled: true
 
-  # Configure JSON encoding
-  #codec.json:
-    # Pretty-print JSON event
-    #pretty: false
+# Configure JSON encoding
+#codec.json:
+# Pretty-print JSON event
+#pretty: false
 
-    # Configure escaping HTML symbols in strings.
-    #escape_html: false
+# Configure escaping HTML symbols in strings.
+#escape_html: false
 
-  # Path to the directory where to save the generated files. The option is
-  # mandatory.
-  #path: "/tmp/cloudbeat"
+# Path to the directory where to save the generated files. The option is
+# mandatory.
+#path: "/tmp/cloudbeat"
 
-  # Name of the generated files. The default is `cloudbeat` and it generates
-  # files: `cloudbeat-{datetime}.ndjson`, `cloudbeat-{datetime}-1.ndjson`, etc.
-  #filename: cloudbeat
+# Name of the generated files. The default is `cloudbeat` and it generates
+# files: `cloudbeat-{datetime}.ndjson`, `cloudbeat-{datetime}-1.ndjson`, etc.
+#filename: cloudbeat
 
-  # Maximum size in kilobytes of each file. When this size is reached, and on
-  # every Cloudbeat restart, the files are rotated. The default value is 10240
-  # kB.
-  #rotate_every_kb: 10000
+# Maximum size in kilobytes of each file. When this size is reached, and on
+# every Cloudbeat restart, the files are rotated. The default value is 10240
+# kB.
+#rotate_every_kb: 10000
 
-  # Maximum number of files under path. When this number of files is reached,
-  # the oldest file is deleted and the rest are shifted from last to first. The
-  # default is 7 files.
-  #number_of_files: 7
+# Maximum number of files under path. When this number of files is reached,
+# the oldest file is deleted and the rest are shifted from last to first. The
+# default is 7 files.
+#number_of_files: 7
 
-  # Permissions to use for file creation. The default is 0600.
-  #permissions: 0600
-  
-  # Configure automatic file rotation on every startup. The default is true.
-  #rotate_on_startup: true
+# Permissions to use for file creation. The default is 0600.
+#permissions: 0600
+
+# Configure automatic file rotation on every startup. The default is true.
+#rotate_on_startup: true
 
 # ------------------------------- Console Output -------------------------------
 #output.console:
-  # Boolean flag to enable or disable the output module.
-  #enabled: true
+# Boolean flag to enable or disable the output module.
+#enabled: true
 
-  # Configure JSON encoding
-  #codec.json:
-    # Pretty-print JSON event
-    #pretty: false
+# Configure JSON encoding
+#codec.json:
+# Pretty-print JSON event
+#pretty: false
 
-    # Configure escaping HTML symbols in strings.
-    #escape_html: false
+# Configure escaping HTML symbols in strings.
+#escape_html: false
 
 # =================================== Paths ====================================
 
@@ -1253,13 +1160,13 @@ setup.template.settings:
   # of the Elasticsearch template. For more details, please check
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
   #index:
-    #number_of_shards: 1
-    #codec: best_compression
+  #number_of_shards: 1
+  #codec: best_compression
 
   # A dictionary of settings for the _source field. For more details, please check
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-source-field.html
   #_source:
-    #enabled: false
+  #enabled: false
 
 # ====================== Index Lifecycle Management (ILM) ======================
 
@@ -1372,7 +1279,6 @@ setup.kibana:
   # only one in the list. Then the normal SSL validation happens.
   #ssl.ca_trusted_fingerprint: ""
 
-
 # ================================== Logging ===================================
 
 # There are four options for the log output: file, stderr, syslog, eventlog
@@ -1442,7 +1348,6 @@ logging.files:
   # Rotate existing logs on startup rather than appending to the existing
   # file. Defaults to true.
   # rotateonstartup: true
-
 # ============================= X-Pack Monitoring ==============================
 # Cloudbeat can export internal metrics to a central Elasticsearch monitoring
 # cluster.  This requires xpack monitoring to be enabled in Elasticsearch.  The
@@ -1465,141 +1370,141 @@ logging.files:
 # uncomment the following line.
 #monitoring.elasticsearch:
 
-  # Array of hosts to connect to.
-  # Scheme and port can be left out and will be set to the default (http and 9200)
-  # In case you specify and additional path, the scheme is required: http://localhost:9200/path
-  # IPv6 addresses should always be defined as: https://[2001:db8::1]:9200
-  #hosts: ["localhost:9200"]
+# Array of hosts to connect to.
+# Scheme and port can be left out and will be set to the default (http and 9200)
+# In case you specify and additional path, the scheme is required: http://localhost:9200/path
+# IPv6 addresses should always be defined as: https://[2001:db8::1]:9200
+#hosts: ["localhost:9200"]
 
-  # Set gzip compression level.
-  #compression_level: 0
+# Set gzip compression level.
+#compression_level: 0
 
-  # Protocol - either `http` (default) or `https`.
-  #protocol: "https"
+# Protocol - either `http` (default) or `https`.
+#protocol: "https"
 
-  # Authentication credentials - either API key or username/password.
-  #api_key: "id:api_key"
-  #username: "beats_system"
-  #password: "changeme"
+# Authentication credentials - either API key or username/password.
+#api_key: "id:api_key"
+#username: "beats_system"
+#password: "changeme"
 
-  # Dictionary of HTTP parameters to pass within the URL with index operations.
-  #parameters:
-    #param1: value1
-    #param2: value2
+# Dictionary of HTTP parameters to pass within the URL with index operations.
+#parameters:
+#param1: value1
+#param2: value2
 
-  # Custom HTTP headers to add to each request
-  #headers:
-  #  X-My-Header: Contents of the header
+# Custom HTTP headers to add to each request
+#headers:
+#  X-My-Header: Contents of the header
 
-  # Proxy server url
-  #proxy_url: http://proxy:3128
+# Proxy server url
+#proxy_url: http://proxy:3128
 
-  # The number of times a particular Elasticsearch index operation is attempted. If
-  # the indexing operation doesn't succeed after this many retries, the events are
-  # dropped. The default is 3.
-  #max_retries: 3
+# The number of times a particular Elasticsearch index operation is attempted. If
+# the indexing operation doesn't succeed after this many retries, the events are
+# dropped. The default is 3.
+#max_retries: 3
 
-  # The maximum number of events to bulk in a single Elasticsearch bulk API index request.
-  # The default is 50.
-  #bulk_max_size: 50
+# The maximum number of events to bulk in a single Elasticsearch bulk API index request.
+# The default is 50.
+#bulk_max_size: 50
 
-  # The number of seconds to wait before trying to reconnect to Elasticsearch
-  # after a network error. After waiting backoff.init seconds, the Beat
-  # tries to reconnect. If the attempt fails, the backoff timer is increased
-  # exponentially up to backoff.max. After a successful connection, the backoff
-  # timer is reset. The default is 1s.
-  #backoff.init: 1s
+# The number of seconds to wait before trying to reconnect to Elasticsearch
+# after a network error. After waiting backoff.init seconds, the Beat
+# tries to reconnect. If the attempt fails, the backoff timer is increased
+# exponentially up to backoff.max. After a successful connection, the backoff
+# timer is reset. The default is 1s.
+#backoff.init: 1s
 
-  # The maximum number of seconds to wait before attempting to connect to
-  # Elasticsearch after a network error. The default is 60s.
-  #backoff.max: 60s
+# The maximum number of seconds to wait before attempting to connect to
+# Elasticsearch after a network error. The default is 60s.
+#backoff.max: 60s
 
-  # Configure HTTP request timeout before failing an request to Elasticsearch.
-  #timeout: 90
+# Configure HTTP request timeout before failing an request to Elasticsearch.
+#timeout: 90
 
-  # Use SSL settings for HTTPS.
-  #ssl.enabled: true
+# Use SSL settings for HTTPS.
+#ssl.enabled: true
 
-  # Controls the verification of certificates. Valid values are:
-  # * full, which verifies that the provided certificate is signed by a trusted
-  # authority (CA) and also verifies that the server's hostname (or IP address)
-  # matches the names identified within the certificate.
-  # * strict, which verifies that the provided certificate is signed by a trusted
-  # authority (CA) and also verifies that the server's hostname (or IP address)
-  # matches the names identified within the certificate. If the Subject Alternative
-  # Name is empty, it returns an error.
-  # * certificate, which verifies that the provided certificate is signed by a
-  # trusted authority (CA), but does not perform any hostname verification.
-  #  * none, which performs no verification of the server's certificate. This
-  # mode disables many of the security benefits of SSL/TLS and should only be used
-  # after very careful consideration. It is primarily intended as a temporary
-  # diagnostic mechanism when attempting to resolve TLS errors; its use in
-  # production environments is strongly discouraged.
-  # The default value is full.
-  #ssl.verification_mode: full
+# Controls the verification of certificates. Valid values are:
+# * full, which verifies that the provided certificate is signed by a trusted
+# authority (CA) and also verifies that the server's hostname (or IP address)
+# matches the names identified within the certificate.
+# * strict, which verifies that the provided certificate is signed by a trusted
+# authority (CA) and also verifies that the server's hostname (or IP address)
+# matches the names identified within the certificate. If the Subject Alternative
+# Name is empty, it returns an error.
+# * certificate, which verifies that the provided certificate is signed by a
+# trusted authority (CA), but does not perform any hostname verification.
+#  * none, which performs no verification of the server's certificate. This
+# mode disables many of the security benefits of SSL/TLS and should only be used
+# after very careful consideration. It is primarily intended as a temporary
+# diagnostic mechanism when attempting to resolve TLS errors; its use in
+# production environments is strongly discouraged.
+# The default value is full.
+#ssl.verification_mode: full
 
-  # List of supported/valid TLS versions. By default all TLS versions from 1.1
-  # up to 1.3 are enabled.
-  #ssl.supported_protocols: [TLSv1.1, TLSv1.2, TLSv1.3]
+# List of supported/valid TLS versions. By default all TLS versions from 1.1
+# up to 1.3 are enabled.
+#ssl.supported_protocols: [TLSv1.1, TLSv1.2, TLSv1.3]
 
-  # List of root certificates for HTTPS server verifications
-  #ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
+# List of root certificates for HTTPS server verifications
+#ssl.certificate_authorities: ["/etc/pki/root/ca.pem"]
 
-  # Certificate for SSL client authentication
-  #ssl.certificate: "/etc/pki/client/cert.pem"
+# Certificate for SSL client authentication
+#ssl.certificate: "/etc/pki/client/cert.pem"
 
-  # Client certificate key
-  #ssl.key: "/etc/pki/client/cert.key"
+# Client certificate key
+#ssl.key: "/etc/pki/client/cert.key"
 
-  # Optional passphrase for decrypting the certificate key.
-  #ssl.key_passphrase: ''
+# Optional passphrase for decrypting the certificate key.
+#ssl.key_passphrase: ''
 
-  # Configure cipher suites to be used for SSL connections
-  #ssl.cipher_suites: []
+# Configure cipher suites to be used for SSL connections
+#ssl.cipher_suites: []
 
-  # Configure curve types for ECDHE-based cipher suites
-  #ssl.curve_types: []
+# Configure curve types for ECDHE-based cipher suites
+#ssl.curve_types: []
 
-  # Configure what types of renegotiation are supported. Valid options are
-  # never, once, and freely. Default is never.
-  #ssl.renegotiation: never
+# Configure what types of renegotiation are supported. Valid options are
+# never, once, and freely. Default is never.
+#ssl.renegotiation: never
 
-  # Configure a pin that can be used to do extra validation of the verified certificate chain,
-  # this allow you to ensure that a specific certificate is used to validate the chain of trust.
-  #
-  # The pin is a base64 encoded string of the SHA-256 fingerprint.
-  #ssl.ca_sha256: ""
+# Configure a pin that can be used to do extra validation of the verified certificate chain,
+# this allow you to ensure that a specific certificate is used to validate the chain of trust.
+#
+# The pin is a base64 encoded string of the SHA-256 fingerprint.
+#ssl.ca_sha256: ""
 
-  # A root CA HEX encoded fingerprint. During the SSL handshake if the
-  # fingerprint matches the root CA certificate, it will be added to
-  # the provided list of root CAs (`certificate_authorities`), if the
-  # list is empty or not defined, the matching certificate will be the
-  # only one in the list. Then the normal SSL validation happens.
-  #ssl.ca_trusted_fingerprint: ""
+# A root CA HEX encoded fingerprint. During the SSL handshake if the
+# fingerprint matches the root CA certificate, it will be added to
+# the provided list of root CAs (`certificate_authorities`), if the
+# list is empty or not defined, the matching certificate will be the
+# only one in the list. Then the normal SSL validation happens.
+#ssl.ca_trusted_fingerprint: ""
 
-  # Enable Kerberos support. Kerberos is automatically enabled if any Kerberos setting is set.
-  #kerberos.enabled: true
+# Enable Kerberos support. Kerberos is automatically enabled if any Kerberos setting is set.
+#kerberos.enabled: true
 
-  # Authentication type to use with Kerberos. Available options: keytab, password.
-  #kerberos.auth_type: password
+# Authentication type to use with Kerberos. Available options: keytab, password.
+#kerberos.auth_type: password
 
-  # Path to the keytab file. It is used when auth_type is set to keytab.
-  #kerberos.keytab: /etc/elastic.keytab
+# Path to the keytab file. It is used when auth_type is set to keytab.
+#kerberos.keytab: /etc/elastic.keytab
 
-  # Path to the Kerberos configuration.
-  #kerberos.config_path: /etc/krb5.conf
+# Path to the Kerberos configuration.
+#kerberos.config_path: /etc/krb5.conf
 
-  # Name of the Kerberos user.
-  #kerberos.username: elastic
+# Name of the Kerberos user.
+#kerberos.username: elastic
 
-  # Password of the Kerberos user. It is used when auth_type is set to password.
-  #kerberos.password: changeme
+# Password of the Kerberos user. It is used when auth_type is set to password.
+#kerberos.password: changeme
 
-  # Kerberos realm.
-  #kerberos.realm: ELASTIC
+# Kerberos realm.
+#kerberos.realm: ELASTIC
 
-  #metrics.period: 10s
-  #state.period: 1m
+#metrics.period: 10s
+#state.period: 1m
 
 # The `monitoring.cloud.id` setting overwrites the `monitoring.elasticsearch.hosts`
 # setting. You can find the value for this setting in the Elastic Cloud web UI.
@@ -1647,39 +1552,38 @@ logging.files:
 
 # Instrumentation support for the cloudbeat.
 #instrumentation:
-    # Set to true to enable instrumentation of cloudbeat.
-    #enabled: false
+# Set to true to enable instrumentation of cloudbeat.
+#enabled: false
 
-    # Environment in which cloudbeat is running on (eg: staging, production, etc.)
-    #environment: ""
+# Environment in which cloudbeat is running on (eg: staging, production, etc.)
+#environment: ""
 
-    # APM Server hosts to report instrumentation results to.
-    #hosts:
-    #  - http://localhost:8200
+# APM Server hosts to report instrumentation results to.
+#hosts:
+#  - http://localhost:8200
 
-    # API Key for the APM Server(s).
-    # If api_key is set then secret_token will be ignored.
-    #api_key:
+# API Key for the APM Server(s).
+# If api_key is set then secret_token will be ignored.
+#api_key:
 
-    # Secret token for the APM Server(s).
-    #secret_token:
+# Secret token for the APM Server(s).
+#secret_token:
 
-    # Enable profiling of the server, recording profile samples as events.
-    #
-    # This feature is experimental.
-    #profiling:
-        #cpu:
-            # Set to true to enable CPU profiling.
-            #enabled: false
-            #interval: 60s
-            #duration: 10s
-        #heap:
-            # Set to true to enable heap profiling.
-            #enabled: false
-            #interval: 60s
+# Enable profiling of the server, recording profile samples as events.
+#
+# This feature is experimental.
+#profiling:
+#cpu:
+# Set to true to enable CPU profiling.
+#enabled: false
+#interval: 60s
+#duration: 10s
+#heap:
+# Set to true to enable heap profiling.
+#enabled: false
+#interval: 60s
 
 # ================================= Migration ==================================
 
 # This allows to enable 6.7 migration aliases
 #migration.6_to_7.enabled: false
-

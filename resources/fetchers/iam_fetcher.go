@@ -19,41 +19,57 @@ package fetchers
 
 import (
 	"context"
-	"github.com/pkg/errors"
-
+	"fmt"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type IAMFetcher struct {
-	log         *logp.Logger
-	iamProvider awslib.IamRolePermissionGetter
-	cfg         IAMFetcherConfig
-	resourceCh  chan fetching.ResourceInfo
+	log           *logp.Logger
+	iamProvider   iam.AccessManagement
+	cfg           IAMFetcherConfig
+	resourceCh    chan fetching.ResourceInfo
+	cloudIdentity *awslib.Identity
 }
 
 type IAMFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
-	RoleName                      string `config:"roleName"`
 }
 
 type IAMResource struct {
-	awslib.RolePolicyInfo
+	awslib.AwsResource
+	identity *awslib.Identity
 }
 
+// Fetch collects IAM resources, such as password-policy and IAM users.
+// The resources are enriched by the provider and being send to evaluation.
 func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
+	iamResources := make([]awslib.AwsResource, 0)
 
-	results, err := f.iamProvider.GetIAMRolePermissions(ctx, f.cfg.RoleName)
+	pwdPolicy, err := f.iamProvider.GetPasswordPolicy(ctx)
 	if err != nil {
-		return err
+		f.log.Errorf("Unable to fetch PasswordPolicy, error: %v", err)
+	} else {
+		iamResources = append(iamResources, pwdPolicy)
 	}
 
-	for _, rolePermission := range results {
+	users, err := f.iamProvider.GetUsers(ctx)
+	if err != nil {
+		f.log.Errorf("Unable to fetch IAM users, error: %v", err)
+	} else {
+		iamResources = append(iamResources, users...)
+	}
+
+	for _, iamResource := range iamResources {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      IAMResource{rolePermission},
+			Resource: IAMResource{
+				AwsResource: iamResource,
+				identity:    f.cloudIdentity,
+			},
 			CycleMetadata: cMetadata,
 		}
 	}
@@ -61,23 +77,23 @@ func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 	return nil
 }
 
-func (f IAMFetcher) Stop() {
-}
+func (f IAMFetcher) Stop() {}
 
-func (r IAMResource) GetData() interface{} {
-	return r
+func (r IAMResource) GetData() any {
+	return r.AwsResource
 }
 
 func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	if r.PolicyName == nil {
-		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
+	identifier := r.GetResourceArn()
+	if identifier == "" {
+		identifier = fmt.Sprintf("%s-%s", *r.identity.Account, r.GetResourceName())
 	}
 
 	return fetching.ResourceMetadata{
-		ID:      r.PolicyARN,
+		ID:      identifier,
 		Type:    fetching.CloudIdentity,
-		SubType: fetching.RolePolicyType,
-		Name:    *r.PolicyName,
+		SubType: r.GetResourceType(),
+		Name:    r.GetResourceName(),
 	}, nil
 }
 func (r IAMResource) GetElasticCommonData() any { return nil }

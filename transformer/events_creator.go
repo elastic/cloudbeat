@@ -24,6 +24,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
+	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -41,7 +42,7 @@ const (
 type Transformer struct {
 	log        *logp.Logger
 	index      string
-	commonData CommonDataInterface
+	commonData dataprovider.CommonDataInterface
 }
 
 type ECSEvent struct {
@@ -54,7 +55,7 @@ type ECSEvent struct {
 	Type     []string  `json:"type"`
 }
 
-func NewTransformer(log *logp.Logger, cd CommonDataInterface, index string) Transformer {
+func NewTransformer(log *logp.Logger, cd dataprovider.CommonDataInterface, index string) Transformer {
 	return Transformer{
 		log:        log,
 		index:      index,
@@ -73,6 +74,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
 	}
 	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
+	clusterName := t.commonData.GetClusterName()
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
@@ -92,6 +94,12 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
 				"cloudbeat":           t.commonData.GetVersionInfo(),
 			},
+		}
+		if clusterName != "" {
+			_, err := event.Fields.Put("orchestrator.cluster.name", clusterName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to add cluster name to object: %v", err)
+			}
 		}
 
 		events = append(events, event)

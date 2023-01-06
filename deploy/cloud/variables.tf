@@ -1,5 +1,10 @@
 ## Deployment configuration
 
+variable "ec_api_key" {
+  description = "Elastic cloud API key"
+  type        = string
+}
+
 variable "ess_region" {
   default     = "gcp-us-central1"
   description = "Optional ESS region where the deployment will be created. Defaults to gcp-us-west2"
@@ -54,6 +59,13 @@ variable "security_team_repository" {
 }
 
 variable "deployment_name_prefix" {
-  default = "cloudbeat"
-  description = "Optional set a prefix of the deployment"
+  default     = "cloudbeat-tf"
+  description = "Optional set a prefix of the deployment. Defaults to cloudbeat-tf"
 }
+
+variable "eks_region" {
+  default     = "eu-west-1"
+  description = "Optional AWS region where the EKS cluster will be created. Defaults to eu-west-1"
+  type        = string
+}
+

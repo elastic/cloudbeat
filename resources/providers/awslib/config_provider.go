@@ -21,22 +21,29 @@ import (
 	"context"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type ConfigProvider struct {
 	MetadataProvider MetadataProvider
 }
+type ConfigProviderAPI interface {
+	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error)
+}
 
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error) {
+func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error) {
 	awsConfig, err := aws.InitializeAWSConfig(cfg)
 	if err != nil {
 		return awssdk.Config{}, err
 	}
+
 	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
 	if err != nil {
-		return awssdk.Config{}, err
+		log.Errorf("MetadataProvider.GetMetadata Error: %v, setting AWSConfig region to default - %s", err, DefaultRegion)
+		awsConfig.Region = DefaultRegion
+		return awsConfig, nil
 	}
-	awsConfig.Region = metadata.Region
 
+	awsConfig.Region = metadata.Region
 	return awsConfig, nil
 }
