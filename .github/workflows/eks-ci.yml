@@ -1,4 +1,4 @@
-name: EKS-CI
+name: EKS Functional tests
 
 on:
   # On demand execution of workflow will run all suites.
@@ -125,7 +125,7 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        
+
       - name: Load images cloudbeat and cloudbeat-test to ECR
         id: load-to-ecr
         env:

@@ -79,7 +79,7 @@ PackageAgent: $(MAGE)
 	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
 
 # elastic_agent_docker_image builds the Cloud Elastic Agent image
-# with the local APM Server binary injected. The image will be based
+# with the local cloudbeat binary injected. The image will be based
 # off the stack version defined in ${REPO_ROOT}/docker-compose.yml,
 # unless overridden.
 .PHONY: build_elastic_agent_docker_image

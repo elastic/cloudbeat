@@ -1,4 +1,4 @@
-name: UnitTests
+name: Unit Tests
 
 on:
   pull_request:
@@ -9,7 +9,6 @@ on:
 
 env:
   K8S_MANIFEST_DIR: deploy
-
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -22,7 +21,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -53,38 +52,13 @@ jobs:
           name: coverage-file
           path: cover.out
 
-  coverage:
-    name: Coverage report
-    needs: unit_tests
-    runs-on: ubuntu-20.04
-    timeout-minutes: 10
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
-
-      - name: Install goveralls
-        run: go install github.com/mattn/goveralls@latest
-
-      - name: Download coverage artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-file
-
-      - name: Send coverage
-        env:
-          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goveralls -coverprofile=cover.out -service=github
-
   manifest_tests:
     name: Manifest Tests
     runs-on: ubuntu-20.04
     timeout-minutes: 15
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get diff k8s manifests
         uses: technote-space/get-diff-action@v4

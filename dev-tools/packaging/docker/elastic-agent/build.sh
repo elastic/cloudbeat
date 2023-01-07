@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # This script builds an image from the elastic-agent image
-# with a locally built apm-server binary injected. Additional
+# with a locally built cloudbeat binary injected. Additional
 # flags (e.g. -t <name>) will be passed to `docker build`.
 
 set -eu
