@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+env:
+  CONTAINER_SUFFIX: ${{ github.run_id }}
+
 jobs:
   Test_Matrix:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
