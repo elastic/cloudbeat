@@ -21,8 +21,10 @@ jobs:
         run: go install github.com/mattn/goveralls@latest
 
       - name: Download coverage artifact
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
         with:
+          workflow: ${{ github.event.workflow_run.workflow_id }}
+          workflow_conclusion: success
           name: coverage-file
 
       - name: Send coverage
