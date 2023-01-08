@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CONTAINER_SUFFIX: ${{ github.run_id }}
+  CONTAINER_SUFFIX: ${{ github.event.workflow_run.workflow_id }}
 
 jobs:
   Test_Matrix:
@@ -184,6 +184,7 @@ jobs:
           just create-kind-cluster
 
       - name: Cache docker images
+        if: ${{ !env.ACT }} # skip caching if running on ACT
         uses: actions/cache@v3
         with:
           path: /tmp/*.tar
@@ -210,8 +211,3 @@ jobs:
         with:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
-
-      - name: clear cache
-        id: clear_cache
-        if: always()
-        run: rm -rf /tmp/*-${{ env.CONTAINER_SUFFIX }}.tar
