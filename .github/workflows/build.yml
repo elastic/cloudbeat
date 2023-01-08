@@ -24,14 +24,14 @@ jobs:
         uses: actions/checkout@v3
 
       # This actions also handles the caching of go dependencies
-      - name: Setup Go
+      - name: Setup Go & Hermit
         uses: actions/setup-go@v3
         with:
           go-version-file: .go-version
-      - run: go version
-
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+          cache: true
+      - run: |
+          go version
+          ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: build cloudbeat binary
         uses: magefile/mage-action@v2
@@ -49,7 +49,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Cache Build dependencies
-#        if: ${{ !env.ACT }} # skip caching if running on ACT
+        #        if: ${{ !env.ACT }} # skip caching if running on ACT
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
@@ -82,14 +82,14 @@ jobs:
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Cache docker images
-#        if: ${{ !env.ACT }} # skip caching if running on ACT
+        #        if: ${{ !env.ACT }} # skip caching if running on ACT
         uses: actions/cache@v3
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Move cache
-#        if: ${{ !env.ACT }} # skip caching if running on ACT
+        #        if: ${{ !env.ACT }} # skip caching if running on ACT
         run: |
           ./.ci/scripts/gh-cache.sh
         shell: bash
