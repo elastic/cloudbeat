@@ -55,9 +55,18 @@ type Config struct {
 	BundlePath      string                  `config:"bundle_path"`
 }
 
+type CloudCredentials struct {
+	Type        string        `config:"type"`
+	Credentials aws.ConfigAWS `config:",inline"`
+}
+
+type CloudConfig struct {
+	CloudCredentials `config:"credentials"`
+}
+
 type BenchmarkConfig struct {
-	ID        string        `config:"benchmark"`
-	AWSConfig aws.ConfigAWS `config:"aws.credentials"`
+	ID        string      `config:"benchmark"`
+	AWSConfig CloudConfig `config:"aws"`
 }
 
 func New(cfg *config.C) (*Config, error) {

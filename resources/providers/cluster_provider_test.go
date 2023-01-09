@@ -22,10 +22,8 @@ import (
 	"testing"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-
 	"github.com/stretchr/testify/mock"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
@@ -120,7 +118,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	cfg := config.Config{
 		BenchmarkConfig: config.BenchmarkConfig{
 			ID:        config.CIS_EKS,
-			AWSConfig: aws.ConfigAWS{},
+			AWSConfig: config.CloudConfig{},
 		},
 	}
 
