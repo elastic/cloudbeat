@@ -35,6 +35,7 @@ type Provider struct {
 
 type Client interface {
 	DescribeNetworkAcls(ctx context.Context, params *ec2.DescribeNetworkAclsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeNetworkAclsOutput, error)
+	DescribeSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error)
 }
 
 func (p *Provider) DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -55,6 +56,28 @@ func (p *Provider) DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource,
 	result := []awslib.AwsResource{}
 	for _, nacl := range allAcls {
 		result = append(result, NACLInfo{nacl, p.awsAccountID, p.awsRegion})
+	}
+	return result, nil
+}
+
+func (p *Provider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
+	all := []types.SecurityGroup{}
+	input := &ec2.DescribeSecurityGroupsInput{}
+	for {
+		output, err := p.client.DescribeSecurityGroups(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, output.SecurityGroups...)
+		if output.NextToken == nil {
+			break
+		}
+		input.NextToken = output.NextToken
+	}
+
+	result := []awslib.AwsResource{}
+	for _, sg := range all {
+		result = append(result, SecurityGroup{sg, p.awsAccountID, p.awsRegion})
 	}
 	return result, nil
 }

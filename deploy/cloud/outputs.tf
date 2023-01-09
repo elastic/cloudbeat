@@ -71,5 +71,9 @@ output "yaml" {
 }
 output "role_arn" {
   description = "AWS role arn"
-  value = module.iam_eks_role.iam_role_arn
+  value       = module.iam_eks_role.iam_role_arn
+}
+
+output "cloudbeat_ssh_cmd" {
+  value = module.aws_ec2_with_agent.cloudbeat_ssh_cmd
 }

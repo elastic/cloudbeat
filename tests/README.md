@@ -130,6 +130,23 @@ The project main folders are:
 - Product tests folder is **product/tests**.</br>
 - Integration tests folder is **intergration/tests**.
 
+#### Logging
+
+This project uses [loguru](https://github.com/Delgan/loguru) for logging.
+To start logging, just import logger from loguru lib
+```shell
+from loguru import logger
+
+logger.info("Start logging")
+```
+
+Basic logging configuration is realized through [environment variables](https://github.com/Delgan/loguru/blob/master/loguru/_defaults.py)
+
+Additional functionality
+- **caplog fixture** - add a sink that propagates Loguru to the caplog handler.
+- **logger_wraps** - useful to log entry and exit values of a function
+
+
 ### Building
 
 Test framework output is a docker image that encapsulates python framework and tests.
