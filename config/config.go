@@ -47,26 +47,21 @@ type Fetcher struct {
 }
 
 type Config struct {
-	BenchmarkConfig BenchmarkConfig         `config:"config.v1"`
-	Fetchers        []*config.C             `config:"fetchers"`
-	KubeConfig      string                  `config:"kube_config"`
-	Period          time.Duration           `config:"period"`
-	Processors      processors.PluginConfig `config:"processors"`
-	BundlePath      string                  `config:"bundle_path"`
-}
-
-type CloudCredentials struct {
-	Type        string        `config:"type"`
-	Credentials aws.ConfigAWS `config:",inline"`
+	IntegrationConfig IntegrationConfig       `config:"config.v1"`
+	Fetchers          []*config.C             `config:"fetchers"`
+	KubeConfig        string                  `config:"kube_config"`
+	Period            time.Duration           `config:"period"`
+	Processors        processors.PluginConfig `config:"processors"`
+	BundlePath        string                  `config:"bundle_path"`
 }
 
 type CloudConfig struct {
-	CloudCredentials `config:"credentials"`
+	AwsCred aws.ConfigAWS `config:"aws.credentials"`
 }
 
-type BenchmarkConfig struct {
-	ID        string      `config:"benchmark"`
-	AWSConfig CloudConfig `config:"aws"`
+type IntegrationConfig struct {
+	ID          string `config:"benchmark"`
+	CloudConfig `config:",inline"`
 }
 
 func New(cfg *config.C) (*Config, error) {
@@ -79,8 +74,8 @@ func New(cfg *config.C) (*Config, error) {
 		return nil, err
 	}
 
-	if c.BenchmarkConfig.ID != "" {
-		if !isSupportedBenchmark(c.BenchmarkConfig.ID) {
+	if c.IntegrationConfig.ID != "" {
+		if !isSupportedBenchmark(c.IntegrationConfig.ID) {
 			return c, ErrBenchmarkNotSupported
 		}
 	}
@@ -90,7 +85,7 @@ func New(cfg *config.C) (*Config, error) {
 func defaultConfig() (*Config, error) {
 	ret := &Config{
 		Period: 4 * time.Hour,
-		BenchmarkConfig: BenchmarkConfig{
+		IntegrationConfig: IntegrationConfig{
 			ID: CIS_K8S,
 		},
 	}

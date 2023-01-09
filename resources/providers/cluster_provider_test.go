@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
@@ -57,7 +58,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 	}{
 		{
 			config.Config{
-				BenchmarkConfig: config.BenchmarkConfig{
+				IntegrationConfig: config.IntegrationConfig{
 					ID: config.CIS_K8S,
 				},
 				KubeConfig: "",
@@ -68,7 +69,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		},
 		{
 			config.Config{
-				BenchmarkConfig: config.BenchmarkConfig{
+				IntegrationConfig: config.IntegrationConfig{
 					ID: config.CIS_EKS,
 				},
 			},
@@ -116,9 +117,11 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	clusterProvider := ClusterNameProvider{}
 	ctx := context.Background()
 	cfg := config.Config{
-		BenchmarkConfig: config.BenchmarkConfig{
-			ID:        config.CIS_EKS,
-			AWSConfig: config.CloudConfig{},
+		IntegrationConfig: config.IntegrationConfig{
+			ID: "invalid-type",
+			CloudConfig: config.CloudConfig{
+				AwsCred: aws.ConfigAWS{},
+			},
 		},
 	}
 

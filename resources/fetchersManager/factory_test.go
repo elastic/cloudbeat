@@ -173,7 +173,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		s.NoError(err, "Could not set name: %v", err)
 
 		conf := &config.Config{
-			BenchmarkConfig: config.BenchmarkConfig{
+			IntegrationConfig: config.IntegrationConfig{
 				ID: test.integrationType,
 			},
 		}

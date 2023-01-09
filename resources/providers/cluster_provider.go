@@ -40,13 +40,13 @@ type ClusterNameProvider struct {
 }
 
 func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg *config.Config, log *logp.Logger) (string, error) {
-	switch cfg.BenchmarkConfig.ID {
+	switch cfg.IntegrationConfig.ID {
 	case config.CIS_K8S:
 		log.Debugf("Trying to identify Kubernetes Vanilla cluster name")
 		return provider.KubernetesClusterNameProvider.GetClusterName(cfg, provider.KubeClient)
 	case config.CIS_EKS:
 		log.Debugf("Trying to identify EKS cluster name")
-		awsConfig, err := provider.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.BenchmarkConfig.AWSConfig.Credentials, log)
+		awsConfig, err := provider.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.IntegrationConfig.AwsCred, log)
 		if err != nil {
 			return "", fmt.Errorf("failed to initialize aws configuration for identifying the cluster name: %v", err)
 		}
@@ -57,6 +57,6 @@ func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg *con
 		instanceId := metadata.InstanceID
 		return provider.EKSClusterNameProvider.GetClusterName(ctx, awsConfig, instanceId)
 	default:
-		panic(fmt.Sprintf("cluster name provider encountered an unknown cluster type: %s, please implement the relevant cluster name provider", cfg.BenchmarkConfig.ID))
+		panic(fmt.Sprintf("cluster name provider encountered an unknown cluster type: %s, please implement the relevant cluster name provider", cfg.IntegrationConfig.ID))
 	}
 }
