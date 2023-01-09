@@ -37,7 +37,7 @@ func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Prov
 	svc := ec2.NewFromConfig(cfg)
 	regions, err := awslib.GetRegions(log, svc)
 	if err != nil {
-		log.Errorf("NewEC2Provider error, %w", err)
+		log.Errorf("NewEC2Provider error, %v", err)
 		clients = append(clients, svc)
 	}
 
