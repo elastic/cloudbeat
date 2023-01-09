@@ -108,8 +108,8 @@ fetchers:
 			c, err := New(cfg)
 			s.NoError(err)
 
-			s.Equal(test.expectedType, c.IntegrationConfig.ID)
-			s.Equal(test.expectedAWSConfig, c.IntegrationConfig.AwsCred)
+			s.Equal(test.expectedType, c.Benchmark)
+			s.Equal(test.expectedAWSConfig, c.CloudConfig.AwsCred)
 			s.Equal(test.expectedFetchers, len(c.Fetchers))
 		})
 	}
@@ -152,7 +152,7 @@ config:
 				return
 			}
 			s.NoError(err)
-			s.Equal(test.expected, c.IntegrationConfig.ID)
+			s.Equal(test.expected, c.Benchmark)
 		})
 	}
 }

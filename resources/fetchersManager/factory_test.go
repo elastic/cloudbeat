@@ -173,9 +173,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		s.NoError(err, "Could not set name: %v", err)
 
 		conf := &config.Config{
-			IntegrationConfig: config.IntegrationConfig{
-				ID: test.integrationType,
-			},
+			Benchmark: test.integrationType,
 		}
 		conf.Fetchers = []*agentconfig.C{numCfg}
 

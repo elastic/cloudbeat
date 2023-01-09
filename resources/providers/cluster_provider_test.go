@@ -58,9 +58,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 	}{
 		{
 			config.Config{
-				IntegrationConfig: config.IntegrationConfig{
-					ID: config.CIS_K8S,
-				},
+				Benchmark:  config.CIS_K8S,
 				KubeConfig: "",
 			},
 			"vanilla-cluster",
@@ -69,9 +67,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		},
 		{
 			config.Config{
-				IntegrationConfig: config.IntegrationConfig{
-					ID: config.CIS_EKS,
-				},
+				Benchmark: config.CIS_EKS,
 			},
 			"vanilla-cluster",
 			"eks-cluster",
@@ -117,11 +113,9 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	clusterProvider := ClusterNameProvider{}
 	ctx := context.Background()
 	cfg := config.Config{
-		IntegrationConfig: config.IntegrationConfig{
-			ID: "invalid-type",
-			CloudConfig: config.CloudConfig{
-				AwsCred: aws.ConfigAWS{},
-			},
+		Benchmark: "invalid-type",
+		CloudConfig: config.CloudConfig{
+			AwsCred: aws.ConfigAWS{},
 		},
 	}
 

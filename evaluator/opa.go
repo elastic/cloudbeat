@@ -92,9 +92,9 @@ func NewOpaEvaluator(ctx context.Context, log *logp.Logger, cfg *config.Config) 
 	// Newer cloudbeat versions shouldn't look at deprecated runtime config values
 	// and should always get benchmark values because the integration is auto updated with the stack
 	var benchmark string
-	if cfg.IntegrationConfig.ID != "" {
+	if cfg.Benchmark != "" {
 		// Assume that isSupportedBenchmark ran in config creation
-		benchmark = cfg.IntegrationConfig.ID
+		benchmark = cfg.Benchmark
 	} else {
 		log.Warn("no benchmark supplied")
 	}

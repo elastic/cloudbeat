@@ -47,21 +47,17 @@ type Fetcher struct {
 }
 
 type Config struct {
-	IntegrationConfig IntegrationConfig       `config:"config.v1"`
-	Fetchers          []*config.C             `config:"fetchers"`
-	KubeConfig        string                  `config:"kube_config"`
-	Period            time.Duration           `config:"period"`
-	Processors        processors.PluginConfig `config:"processors"`
-	BundlePath        string                  `config:"bundle_path"`
+	Benchmark   string                  `config:"config.v1.benchmark"`
+	CloudConfig CloudConfig             `config:"config.v1"`
+	Fetchers    []*config.C             `config:"fetchers"`
+	KubeConfig  string                  `config:"kube_config"`
+	Period      time.Duration           `config:"period"`
+	Processors  processors.PluginConfig `config:"processors"`
+	BundlePath  string                  `config:"bundle_path"`
 }
 
 type CloudConfig struct {
 	AwsCred aws.ConfigAWS `config:"aws.credentials"`
-}
-
-type IntegrationConfig struct {
-	ID          string `config:"benchmark"`
-	CloudConfig `config:",inline"`
 }
 
 func New(cfg *config.C) (*Config, error) {
@@ -74,8 +70,8 @@ func New(cfg *config.C) (*Config, error) {
 		return nil, err
 	}
 
-	if c.IntegrationConfig.ID != "" {
-		if !isSupportedBenchmark(c.IntegrationConfig.ID) {
+	if c.Benchmark != "" {
+		if !isSupportedBenchmark(c.Benchmark) {
 			return c, ErrBenchmarkNotSupported
 		}
 	}
@@ -84,10 +80,8 @@ func New(cfg *config.C) (*Config, error) {
 
 func defaultConfig() (*Config, error) {
 	ret := &Config{
-		Period: 4 * time.Hour,
-		IntegrationConfig: IntegrationConfig{
-			ID: CIS_K8S,
-		},
+		Period:    4 * time.Hour,
+		Benchmark: CIS_K8S,
 	}
 
 	bundle, err := getBundlePath()

@@ -169,11 +169,9 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 
 func createEksAgentConfig(awsConfig aws.ConfigAWS, fetcherName string) *config.Config {
 	conf := &config.Config{
-		IntegrationConfig: config.IntegrationConfig{
-			ID: config.CIS_EKS,
-			CloudConfig: config.CloudConfig{
-				AwsCred: awsConfig,
-			},
+		Benchmark: config.CIS_EKS,
+		CloudConfig: config.CloudConfig{
+			AwsCred: awsConfig,
 		},
 		Fetchers: []*agentconfig.C{agentconfig.MustNewConfigFrom(fmt.Sprint("name: ", fetcherName))},
 	}
