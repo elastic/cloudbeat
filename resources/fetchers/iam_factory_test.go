@@ -21,7 +21,6 @@ import (
 	"context"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -70,9 +69,9 @@ default_region: us1-east
 	}
 
 	for _, test := range tests {
-		mockedConfigGetter := &config.MockAwsConfigProvider{}
+		mockedConfigGetter := &awslib.MockConfigProviderAPI{}
 		mockedConfigGetter.EXPECT().
-			InitializeAWSConfig(mock.Anything, mock.Anything).
+			InitializeAWSConfig(mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Call.
 			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
 

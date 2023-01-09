@@ -22,7 +22,6 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"testing"
@@ -81,9 +80,9 @@ default_region: us1-east
 		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		mockedConfigGetter := &config.MockAwsConfigProvider{}
+		mockedConfigGetter := &awslib.MockConfigProviderAPI{}
 		mockedConfigGetter.EXPECT().
-			InitializeAWSConfig(mock.Anything, mock.Anything).
+			InitializeAWSConfig(mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 			Call.
 			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
 				return CreateSdkConfig(config, "us1-east")

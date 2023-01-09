@@ -33,10 +33,11 @@ type ElasticCompute interface {
 
 func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
 	var clients []Client
-	regions, err := awslib.GetRegions(cfg)
+
+	svc := ec2.NewFromConfig(cfg)
+	regions, err := awslib.GetRegions(log, svc)
 	if err != nil {
 		log.Errorf("NewEC2Provider error, %w", err)
-		svc := ec2.NewFromConfig(cfg)
 		clients = append(clients, svc)
 	}
 
