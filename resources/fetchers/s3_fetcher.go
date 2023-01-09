@@ -21,13 +21,14 @@ import (
 	"context"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type S3Fetcher struct {
 	log        *logp.Logger
 	cfg        S3FetcherConfig
-	s3Provider awslib.S3BucketDescriber
+	s3         s3.S3
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -42,7 +43,7 @@ type S3Resource struct {
 func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting S3Fetcher.Fetch")
 
-	buckets, err := f.s3Provider.DescribeS3Buckets(ctx)
+	buckets, err := f.s3.DescribeBuckets(ctx)
 	if err != nil {
 		f.log.Errorf("failed to load buckets from S3: %v", err)
 	} else {

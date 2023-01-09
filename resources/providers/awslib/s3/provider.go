@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package s3
 
 import (
 	"context"
@@ -23,51 +23,52 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"gotest.tools/gotestsum/log"
 )
 
-type S3BucketDescription struct {
+type BucketDescription struct {
 	Name         string
 	SSEAlgorithm string
 }
 
-type S3BucketDescriber interface {
-	DescribeS3Buckets(ctx context.Context) ([]AwsResource, error)
+type S3 interface {
+	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-type S3Provider struct {
+type Provider struct {
 	log    *logp.Logger
 	client *s3.Client
 }
 
-func NewS3Provider(cfg aws.Config, log *logp.Logger) *S3Provider {
+func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
 	client := s3.NewFromConfig(cfg)
-	return &S3Provider{
+	return &Provider{
 		log,
 		client,
 	}
 }
 
-func (p S3Provider) DescribeS3Buckets(ctx context.Context) ([]AwsResource, error) {
+func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
 	clientBuckets, err := p.client.ListBuckets(ctx, &s3.ListBucketsInput{})
 	if err != nil {
 		log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
 	}
 
-	var result []AwsResource
+	var result []awslib.AwsResource
 
 	for _, clientBucket := range clientBuckets.Buckets {
 		sseAlgorithm := p.getBucketEncryptionAlgorithm(ctx, clientBucket.Name)
 
-		result = append(result, S3BucketDescription{*clientBucket.Name, sseAlgorithm})
+		result = append(result, BucketDescription{*clientBucket.Name, sseAlgorithm})
 	}
 
 	return result, nil
 }
 
-func (p S3Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string) string {
+func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string) string {
 	encryption, err := p.client.GetBucketEncryption(ctx, &s3.GetBucketEncryptionInput{Bucket: bucketName})
 
 	if err != nil {
@@ -81,14 +82,14 @@ func (p S3Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName
 	return ""
 }
 
-func (b S3BucketDescription) GetResourceArn() string {
+func (b BucketDescription) GetResourceArn() string {
 	return fmt.Sprintf("arn:aws:s3:::%s", b.Name)
 }
 
-func (b S3BucketDescription) GetResourceName() string {
+func (b BucketDescription) GetResourceName() string {
 	return b.Name
 }
 
-func (b S3BucketDescription) GetResourceType() string {
+func (b BucketDescription) GetResourceType() string {
 	return fetching.S3Type
 }

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
@@ -65,14 +66,14 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 		{
 			name: "Should not get any S3 buckets",
 			s3mocksReturnVals: s3mocksReturnVals{
-				"DescribeS3Buckets": {nil, errors.New("bad, very bad")},
+				"DescribeBuckets": {nil, errors.New("bad, very bad")},
 			},
 			numExpectedResults: 0,
 		},
 		{
 			name: "Should get an S3 bucket",
 			s3mocksReturnVals: s3mocksReturnVals{
-				"DescribeS3Buckets": {[]awslib.AwsResource{awslib.S3BucketDescription{Name: "my test bucket", SSEAlgorithm: ""}}, nil},
+				"DescribeBuckets": {[]awslib.AwsResource{s3.BucketDescription{Name: "my test bucket", SSEAlgorithm: ""}}, nil},
 			},
 			numExpectedResults: 1,
 		},
@@ -83,7 +84,7 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
 		}
 
-		s3ProviderMock := &awslib.MockS3BucketDescriber{}
+		s3ProviderMock := &s3.MockS3{}
 		for funcName, returnVals := range test.s3mocksReturnVals {
 			s3ProviderMock.On(funcName, context.TODO()).Return(returnVals...)
 		}
@@ -91,7 +92,7 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 		s3Fetcher := S3Fetcher{
 			log:        s.log,
 			cfg:        s3FetcherCfg,
-			s3Provider: s3ProviderMock,
+			s3:         s3ProviderMock,
 			resourceCh: s.resourceCh,
 		}
 

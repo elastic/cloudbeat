@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	agentConfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -57,12 +58,12 @@ func (f *S3Factory) CreateFrom(log *logp.Logger, cfg S3FetcherConfig, ch chan fe
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	s3Provider := awslib.NewS3Provider(awsConfig, log)
+	s3Provider := s3.NewProvider(awsConfig, log)
 
 	return &S3Fetcher{
 		log:        log,
 		cfg:        cfg,
-		s3Provider: s3Provider,
+		s3:         s3Provider,
 		resourceCh: ch,
 	}, nil
 }
