@@ -46,14 +46,15 @@ func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 	buckets, err := f.s3.DescribeBuckets(ctx)
 	if err != nil {
 		f.log.Errorf("failed to load buckets from S3: %v", err)
-	} else {
-		for _, bucket := range buckets {
-			resource := S3Resource{bucket}
-			f.log.Debugf("Fetched bucket: %s", bucket.GetResourceName())
-			f.resourceCh <- fetching.ResourceInfo{
-				Resource:      resource,
-				CycleMetadata: cMetadata,
-			}
+		return nil
+	}
+
+	for _, bucket := range buckets {
+		resource := S3Resource{bucket}
+		f.log.Debugf("Fetched bucket: %s", bucket.GetResourceName())
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      resource,
+			CycleMetadata: cMetadata,
 		}
 	}
 

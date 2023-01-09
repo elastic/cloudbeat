@@ -19,39 +19,28 @@ package s3
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/smithy-go"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"gotest.tools/gotestsum/log"
 )
 
-type BucketDescription struct {
-	Name         string
-	SSEAlgorithm string
-}
-
-type S3 interface {
-	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
-}
-
-type Provider struct {
-	log    *logp.Logger
-	client *s3.Client
-}
-
 func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
-	client := s3.NewFromConfig(cfg)
+	client := s3Client.NewFromConfig(cfg)
 	return &Provider{
-		log,
-		client,
+		log:    log,
+		client: client,
+		region: cfg.Region,
 	}
 }
 
 func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
-	clientBuckets, err := p.client.ListBuckets(ctx, &s3.ListBucketsInput{})
+	clientBuckets, err := p.client.ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
 		log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
@@ -60,26 +49,57 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 	var result []awslib.AwsResource
 
 	for _, clientBucket := range clientBuckets.Buckets {
-		sseAlgorithm := p.getBucketEncryptionAlgorithm(ctx, clientBucket.Name)
+		bucketRegion := p.getBucketRegion(ctx, clientBucket.Name)
+		if bucketRegion == p.region {
+			sseAlgorithm := p.getBucketEncryptionAlgorithm(ctx, clientBucket.Name)
 
-		result = append(result, BucketDescription{*clientBucket.Name, sseAlgorithm})
+			result = append(result, BucketDescription{*clientBucket.Name, sseAlgorithm})
+		}
 	}
 
 	return result, nil
 }
 
 func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string) string {
-	encryption, err := p.client.GetBucketEncryption(ctx, &s3.GetBucketEncryptionInput{Bucket: bucketName})
+	encryption, err := p.client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
 
 	if err != nil {
-		p.log.Warnf("Could not get encryption for bucket %s. Error: %v", *bucketName, err)
-	} else {
-		if len(encryption.ServerSideEncryptionConfiguration.Rules) > 0 {
-			return string(encryption.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm)
+		shouldLogError := true
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == "ServerSideEncryptionConfigurationNotFoundError" {
+				shouldLogError = false
+			}
 		}
+
+		if shouldLogError {
+			p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucketName, err)
+		}
+
+		return ""
 	}
 
-	return ""
+	if len(encryption.ServerSideEncryptionConfiguration.Rules) <= 0 {
+		return ""
+	}
+
+	return string(encryption.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm)
+}
+
+func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) string {
+	location, err := p.client.GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
+	if err != nil {
+		p.log.Errorf("Could not get bucket location for bucket %s. Error: %v", *bucketName, err)
+		return ""
+	}
+
+	region := string(location.LocationConstraint)
+	// Region us-east-1 have a LocationConstraint of null.
+	if region == "" {
+		region = "us-east-1"
+	}
+
+	return region
 }
 
 func (b BucketDescription) GetResourceArn() string {
