@@ -27,15 +27,29 @@ import (
 )
 
 type ElasticCompute interface {
-	DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
+	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
 	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
 func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
-	svc := ec2.NewFromConfig(cfg)
+	var clients []Client
+	regions, err := awslib.GetRegions(cfg)
+	if err != nil {
+		log.Errorf("NewEC2Provider error, %w", err)
+		svc := ec2.NewFromConfig(cfg)
+		clients = append(clients, svc)
+	}
+
+	log.Debugf("Enabled regions for AWS account, %v", regions)
+	for _, region := range regions {
+		cfg.Region = region
+		svc := ec2.NewFromConfig(cfg)
+		clients = append(clients, svc)
+	}
+
 	return &Provider{
 		log:          log,
-		client:       svc,
+		clients:      clients,
 		awsAccountID: awsAccountID,
 		awsRegion:    cfg.Region,
 	}

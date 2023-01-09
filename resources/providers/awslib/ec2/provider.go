@@ -28,7 +28,7 @@ import (
 
 type Provider struct {
 	log          *logp.Logger
-	client       Client
+	clients      []Client
 	awsAccountID string
 	awsRegion    string
 }
@@ -38,22 +38,25 @@ type Client interface {
 	DescribeSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error)
 }
 
-func (p *Provider) DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
-	allAcls := []types.NetworkAcl{}
-	input := ec2.DescribeNetworkAclsInput{}
-	for {
-		output, err := p.client.DescribeNetworkAcls(ctx, &input)
-		if err != nil {
-			return nil, err
+func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
+	var allAcls []types.NetworkAcl
+	for _, client := range p.clients {
+		input := ec2.DescribeNetworkAclsInput{}
+
+		for {
+			output, err := client.DescribeNetworkAcls(ctx, &input)
+			if err != nil {
+				return nil, err
+			}
+			allAcls = append(allAcls, output.NetworkAcls...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
 		}
-		allAcls = append(allAcls, output.NetworkAcls...)
-		if output.NextToken == nil {
-			break
-		}
-		input.NextToken = output.NextToken
 	}
 
-	result := []awslib.AwsResource{}
+	var result []awslib.AwsResource
 	for _, nacl := range allAcls {
 		result = append(result, NACLInfo{nacl, p.awsAccountID, p.awsRegion})
 	}
@@ -61,21 +64,24 @@ func (p *Provider) DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource,
 }
 
 func (p *Provider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
-	all := []types.SecurityGroup{}
-	input := &ec2.DescribeSecurityGroupsInput{}
-	for {
-		output, err := p.client.DescribeSecurityGroups(ctx, input)
-		if err != nil {
-			return nil, err
+	var all []types.SecurityGroup
+	for _, client := range p.clients {
+		input := &ec2.DescribeSecurityGroupsInput{}
+
+		for {
+			output, err := client.DescribeSecurityGroups(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.SecurityGroups...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
 		}
-		all = append(all, output.SecurityGroups...)
-		if output.NextToken == nil {
-			break
-		}
-		input.NextToken = output.NextToken
 	}
 
-	result := []awslib.AwsResource{}
+	var result []awslib.AwsResource
 	for _, sg := range all {
 		result = append(result, SecurityGroup{sg, p.awsAccountID, p.awsRegion})
 	}

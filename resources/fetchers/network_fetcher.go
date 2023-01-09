@@ -48,7 +48,7 @@ type NetworkResource struct {
 func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting NetworkFetcher.Fetch")
 
-	nacl, err := f.provider.DescribeNeworkAcl(ctx)
+	nacl, err := f.provider.DescribeNetworkAcl(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe network acl: %v", err)
 	}

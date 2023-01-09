@@ -27,7 +27,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"regexp"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -47,7 +46,7 @@ func init() {
 type ElbFactory struct {
 	KubernetesProvider providers.KubernetesClientGetter
 	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
-	AwsConfigProvider  config.AwsConfigProvider
+	AwsConfigProvider  awslib.ConfigProviderAPI
 }
 
 func (f *ElbFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -65,7 +64,7 @@ func (f *ElbFactory) CreateFrom(log *logp.Logger, cfg ElbFetcherConfig, ch chan 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log)
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log, false)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}

@@ -18,7 +18,11 @@
 package awslib
 
 import (
+	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"sync"
 )
 
 const DefaultRegion = "us-east-1"
@@ -27,13 +31,40 @@ type Config struct {
 	Config aws.Config
 }
 
-type Metadata struct {
-	Resource string
-	Arn      string
-}
-
 type AwsResource interface {
 	GetResourceArn() string
 	GetResourceName() string
 	GetResourceType() string
+}
+
+type singleton struct {
+	awsConfig aws.Config
+	regions   []string
+}
+
+var (
+	instance *singleton
+	once     *sync.Once
+)
+
+// GetRegions will initialize the singleton instance and perform the API request to retrieve the regions list only once, even if the function is called multiple times.
+// Subsequent calls to the function will return the stored regions list without making another API request.
+func GetRegions(awsConfig aws.Config) ([]string, error) {
+	var initErr error
+	once.Do(func() {
+		instance = &singleton{awsConfig: awsConfig}
+		svc := ec2.NewFromConfig(instance.awsConfig)
+		input := &ec2.DescribeRegionsInput{}
+
+		output, err := svc.DescribeRegions(context.TODO(), input)
+		if err != nil {
+			initErr = fmt.Errorf("failed DescribeRegions: %w", err)
+			return
+		}
+
+		for _, region := range output.Regions {
+			instance.regions = append(instance.regions, *region.RegionName)
+		}
+	})
+	return instance.regions, initErr
 }

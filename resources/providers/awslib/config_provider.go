@@ -28,22 +28,25 @@ type ConfigProvider struct {
 	MetadataProvider MetadataProvider
 }
 type ConfigProviderAPI interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error)
+	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) (awssdk.Config, error)
 }
 
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error) {
+func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) (awssdk.Config, error) {
 	awsConfig, err := aws.InitializeAWSConfig(cfg)
 	if err != nil {
 		return awssdk.Config{}, err
 	}
 
-	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
-	if err != nil {
-		log.Errorf("MetadataProvider.GetMetadata Error: %v, setting AWSConfig region to default - %s", err, DefaultRegion)
-		awsConfig.Region = DefaultRegion
-		return awsConfig, nil
+	awsConfig.Region = DefaultRegion
+	// Retrieve the region from instance metadata - useful for EKS
+	if !useDefaultRegion {
+		metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
+		if err != nil {
+			log.Errorf("MetadataProvider.GetMetadata Error: %v, using default region for config - %s", err, DefaultRegion)
+			return awsConfig, nil
+		}
+		awsConfig.Region = metadata.Region
 	}
 
-	awsConfig.Region = metadata.Region
 	return awsConfig, nil
 }

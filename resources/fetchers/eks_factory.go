@@ -24,7 +24,6 @@ import (
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
@@ -36,7 +35,7 @@ func init() {
 }
 
 type EksFactory struct {
-	AwsConfigProvider config.AwsConfigProvider
+	AwsConfigProvider awslib.ConfigProviderAPI
 }
 
 func (f *EksFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -53,7 +52,7 @@ func (f *EksFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 
 func (f *EksFactory) CreateFrom(log *logp.Logger, cfg EksFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log)
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log, false)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}

@@ -21,19 +21,14 @@
 package config
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/elastic/cloudbeat/launcher"
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/launcher"
 	"github.com/elastic/elastic-agent-libs/config"
-
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
 
 const DefaultNamespace = "default"
@@ -104,10 +99,6 @@ func Datastream(namespace string, indexPrefix string) string {
 		namespace = DefaultNamespace
 	}
 	return indexPrefix + "-" + namespace
-}
-
-type AwsConfigProvider interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error)
 }
 
 func isSupportedBenchmark(benchmark string) bool {

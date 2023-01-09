@@ -22,7 +22,6 @@ import (
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
@@ -40,7 +39,7 @@ func init() {
 }
 
 type EC2NetworkFactory struct {
-	AwsConfigProvider config.AwsConfigProvider
+	AwsConfigProvider awslib.ConfigProviderAPI
 	IdentityProvider  func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
@@ -58,7 +57,7 @@ func (f *EC2NetworkFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan f
 
 func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log)
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
