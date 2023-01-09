@@ -70,8 +70,24 @@ func (p *plugin) Log(ctx context.Context, event logs.EventV1) error {
 		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
 		return nil
 	}
+
+	messageFields := createMessage(event)
+	messageBytes, err := json.Marshal(messageFields)
+	if err != nil {
+		p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateErr})
+		return nil
+	}
 	p.manager.ConsoleLogger().WithFields(fields).WithFields(map[string]interface{}{
 		"type": "openpolicyagent.org/decision_logs",
-	}).Debug("Decision Log")
+	}).Debug(string(messageBytes))
 	return nil
+}
+
+func createMessage(event logs.EventV1) map[string]interface{} {
+	return map[string]interface{}{
+		"decision_id": event.DecisionID,
+		"message":     "Decision Log",
+		"input":       event.Input,
+		"result":      event.Result,
+	}
 }
