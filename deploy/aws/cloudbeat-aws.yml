@@ -5,7 +5,6 @@ cloudbeat:
   type: cloudbeat/cis_aws
   access_key_id: ${AWS_ACCESS_KEY_ID:""}
   secret_access_key: ${AWS_SECRET_ACCESS_KEY:""}
-  default_region: eu-west-1
   # Defines how often an event is sent to the output
   period: 30s
   fetchers:
