@@ -68,7 +68,6 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		{
 			config.Config{
 				Benchmark: config.CIS_EKS,
-				AWSConfig: aws.ConfigAWS{},
 			},
 			"vanilla-cluster",
 			"eks-cluster",
@@ -115,7 +114,10 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	ctx := context.Background()
 	cfg := config.Config{
 		Benchmark: "invalid-type",
-		AWSConfig: aws.ConfigAWS{},
+		CloudConfig: config.CloudConfig{
+			AwsCred: aws.ConfigAWS{},
+		},
 	}
+
 	s.Panics(func() { _, _ = clusterProvider.GetClusterName(ctx, &cfg, nil) })
 }

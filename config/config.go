@@ -42,13 +42,17 @@ type Fetcher struct {
 }
 
 type Config struct {
-	AWSConfig  aws.ConfigAWS           `config:",inline"`
-	Fetchers   []*config.C             `config:"fetchers"`
-	KubeConfig string                  `config:"kube_config"`
-	Period     time.Duration           `config:"period"`
-	Processors processors.PluginConfig `config:"processors"`
-	BundlePath string                  `config:"bundle_path"`
-	Benchmark  string                  `config:"config.v1.benchmark"`
+	Benchmark   string                  `config:"config.v1.benchmark"`
+	CloudConfig CloudConfig             `config:"config.v1"`
+	Fetchers    []*config.C             `config:"fetchers"`
+	KubeConfig  string                  `config:"kube_config"`
+	Period      time.Duration           `config:"period"`
+	Processors  processors.PluginConfig `config:"processors"`
+	BundlePath  string                  `config:"bundle_path"`
+}
+
+type CloudConfig struct {
+	AwsCred aws.ConfigAWS `config:"aws.credentials"`
 }
 
 func New(cfg *config.C) (*Config, error) {

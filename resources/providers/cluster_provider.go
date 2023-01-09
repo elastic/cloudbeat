@@ -46,7 +46,8 @@ func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg *con
 		return provider.KubernetesClusterNameProvider.GetClusterName(cfg, provider.KubeClient)
 	case config.CIS_EKS:
 		log.Debugf("Trying to identify EKS cluster name")
-		awsConfig, err := provider.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AWSConfig, log, false)
+		
+		awsConfig, err := provider.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.CloudConfig.AwsCred, log, false)
 		if err != nil {
 			return "", fmt.Errorf("failed to initialize aws configuration for identifying the cluster name: %v", err)
 		}

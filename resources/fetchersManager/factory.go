@@ -95,7 +95,7 @@ func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, c
 // and depending on the input type, extract the relevant credentials and add them to the fetcher config
 func addCredentialsToFetcherConfiguration(log *logp.Logger, cfg *config.Config, fcfg *agentconfig.C) {
 	if cfg.Benchmark == config.CIS_EKS || cfg.Benchmark == config.CIS_AWS {
-		err := fcfg.Merge(cfg.AWSConfig)
+		err := fcfg.Merge(cfg.CloudConfig.AwsCred)
 		if err != nil {
 			log.Errorf("Failed to merge aws configuration to fetcher configuration: %v", err)
 		}
