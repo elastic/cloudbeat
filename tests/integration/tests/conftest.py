@@ -6,6 +6,7 @@ import time
 import pytest
 from commonlib.io_utils import get_k8s_yaml_objects
 from commonlib.kubernetes import ApiException
+from loguru import logger
 
 DEPLOY_YML_DICT = {
     "cloudbeat_vanilla": "../../deploy/cloudbeat-pytest.yml",
@@ -43,6 +44,7 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
             status_list=["DELETED"],
             namespace=cloudbeat_agent.namespace,
         )
+    logger.info(f"Start '{cloudbeat_agent.name}' pod")
     k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
     k8s.wait_for_resource(
         resource_type="Pod",
@@ -55,6 +57,7 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     # the k8s.wait_for_resoruce waits for only the first pod it founds
     # see more details https://github.com/elastic/cloudbeat/pull/422
     time.sleep(10)
+    logger.info(f"'{cloudbeat_agent.name}' pod started")
     yield k8s, api_client, cloudbeat_agent
     k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
     k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent

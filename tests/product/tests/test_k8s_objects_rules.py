@@ -7,6 +7,7 @@ import uuid
 
 import pytest
 
+from loguru import logger
 from product.tests.data.k8s_object import k8s_object_rules as k8s_tc
 from product.tests.parameters import register_params, Parameters
 
@@ -41,7 +42,7 @@ def test_kube_resource_patch(
     try:
         resource = k8s_client.get_resource(resource_type=resource_type, **relevant_metadata)
     except TypeError as type_error:
-        print(type_error)
+        logger.error(type_error)
         resource = k8s_client.get_resource(
             resource_type=resource_type,
             namespace=agent_config.namespace,

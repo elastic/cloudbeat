@@ -6,6 +6,7 @@ from pathlib import Path
 import time
 import json
 import pytest
+from loguru import logger
 from kubernetes.client import ApiException
 from kubernetes.utils import FailToCreateError
 from commonlib.io_utils import get_k8s_yaml_objects
@@ -138,7 +139,7 @@ def clean_test_env(cloudbeat_start_stop):
                 **relevant_metadata,
             )
         except ApiException as not_found:
-            print(
+            logger.error(
                 f"no {relevant_metadata['name']} online - setting up a new one: {not_found}",
             )
             # create resource
@@ -163,7 +164,7 @@ def test_env(cloudbeat_start_stop):
     try:
         k8s.create_from_yaml(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
     except FailToCreateError as conflict:
-        print([json.loads(c.body)["message"] for c in conflict.api_exceptions])
+        logger.error([json.loads(c.body)["message"] for c in conflict.api_exceptions])
 
     for yml_resource in k8s_resources:
         resource_type, metadata = yml_resource["kind"], yml_resource["metadata"]
