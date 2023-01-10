@@ -175,9 +175,10 @@ data:
       config:
         v1:
           benchmark: cis_eks
-      type: cloudbeat/cis_eks
-      access_key_id: ${AWS_ACCESS_KEY_ID:no_access_key_was_set}
-      secret_access_key: ${AWS_SECRET_ACCESS_KEY:no_secret_was_set}
+          aws:
+            credentials:
+              access_key_id: ${AWS_ACCESS_KEY_ID:no_access_key_was_set}
+              secret_access_key: ${AWS_SECRET_ACCESS_KEY:no_secret_was_set}
       # Defines how often an event is sent to the output
       period: 30s
       fetchers:
