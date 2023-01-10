@@ -51,16 +51,26 @@ type AWSCommonUtil interface {
 	DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 }
 
+type CommonUtility struct {
+	AWSCommonUtil
+}
+
 // GetRegions will initialize the singleton instance and perform the API request to retrieve the regions list only once, even if the function is called multiple times.
 // Subsequent calls to the function will return the stored regions list without making another API request.
-func GetRegions(log *logp.Logger, client AWSCommonUtil) ([]string, error) {
+func (c *CommonUtility) GetRegions(log *logp.Logger, cfg awssdk.Config) ([]string, error) {
 	log.Debug("GetRegions starting...")
 
 	var initErr error
 	once.Do(func() {
 		log.Debug("Get aws regions for the first time")
+
 		instance = &singleton{}
-		output, err := client.DescribeRegions(context.Background(), nil)
+		// For testing purposes
+		if c.AWSCommonUtil == nil {
+			c.AWSCommonUtil = ec2.NewFromConfig(cfg)
+		}
+
+		output, err := c.DescribeRegions(context.Background(), nil)
 		if err != nil {
 			initErr = fmt.Errorf("failed DescribeRegions: %w", err)
 			once = &sync.Once{} // reset singleton upon error

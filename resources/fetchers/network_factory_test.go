@@ -46,10 +46,10 @@ func TestNetworkFactory_Create(t *testing.T) {
 	awsconfig := &awslib.MockConfigProviderAPI{}
 	awsconfig.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Call.
-		Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
-			return CreateSdkConfig(config, "us1-east")
+		Return(func(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) awssdk.Config {
+			return CreateSdkConfig(cfg, "us1-east")
 		},
-			func(ctx context.Context, config aws.ConfigAWS) error {
+			func(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) error {
 				return nil
 			},
 		)

@@ -35,7 +35,8 @@ func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Prov
 	var clients []Client
 
 	svc := ec2.NewFromConfig(cfg)
-	regions, err := awslib.GetRegions(log, svc)
+	awsUtil := &awslib.CommonUtility{}
+	regions, err := awsUtil.GetRegions(log, cfg)
 	if err != nil {
 		log.Errorf("NewEC2Provider error, %v", err)
 		clients = append(clients, svc)
@@ -44,7 +45,7 @@ func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Prov
 	log.Debugf("Enabled regions for AWS account, %v", regions)
 	for _, region := range regions {
 		cfg.Region = region
-		svc := ec2.NewFromConfig(cfg)
+		svc = ec2.NewFromConfig(cfg)
 		clients = append(clients, svc)
 	}
 

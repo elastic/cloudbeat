@@ -18,7 +18,7 @@
 package awslib
 
 import (
-	"github.com/aws/aws-sdk-go-v2/aws"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -31,10 +31,10 @@ import (
 var successfulOutput = &ec2.DescribeRegionsOutput{
 	Regions: []types.Region{
 		{
-			RegionName: aws.String("us-east-1"),
+			RegionName: awssdk.String("us-east-1"),
 		},
 		{
-			RegionName: aws.String("eu-west-1"),
+			RegionName: awssdk.String("eu-west-1"),
 		},
 	},
 }
@@ -42,6 +42,7 @@ var successfulOutput = &ec2.DescribeRegionsOutput{
 func TestGetRegions(t *testing.T) {
 	type args struct {
 		client func() AWSCommonUtil
+		cfg    awssdk.Config
 		log    *logp.Logger
 	}
 	tests := []struct {
@@ -58,6 +59,7 @@ func TestGetRegions(t *testing.T) {
 					m.On("DescribeRegions", mock.Anything, mock.Anything).Return(nil, errors.New("fail to query endpoint"))
 					return m
 				},
+				cfg: awssdk.Config{},
 				log: logp.NewLogger("aws-test"),
 			},
 			want:    nil,
@@ -71,6 +73,7 @@ func TestGetRegions(t *testing.T) {
 					m.On("DescribeRegions", mock.Anything, mock.Anything).Return(successfulOutput, nil)
 					return m
 				},
+				cfg: awssdk.Config{},
 				log: logp.NewLogger("aws-test"),
 			},
 			want:    []string{"us-east-1", "eu-west-1"},
@@ -80,7 +83,8 @@ func TestGetRegions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetRegions(tt.args.log, tt.args.client())
+			awsUtil := &CommonUtility{AWSCommonUtil: tt.args.client()}
+			got, err := awsUtil.GetRegions(tt.args.log, tt.args.cfg)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetRegions() error = %v, wantErr %v", err, tt.wantErr)
 				return

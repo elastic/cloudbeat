@@ -61,21 +61,16 @@ func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig
 
 func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
 	var arr []*ParsedFetcher
-	c := agentconfig.NewConfig()
-	err := c.SetString("name", -1, "aws-ec2-network")
-	if err != nil {
-		return nil, err
-	}
 
-	//for _, fcfg := range cfg.Fetchers {
-	addCredentialsToFetcherConfiguration(log, cfg, c)
-	p, err := fa.parseConfigFetcher(log, c, ch)
-	if err != nil {
-		return nil, err
-	}
+	for _, fcfg := range cfg.Fetchers {
+		addCredentialsToFetcherConfiguration(log, cfg, fcfg)
+		p, err := fa.parseConfigFetcher(log, fcfg, ch)
+		if err != nil {
+			return nil, err
+		}
 
-	arr = append(arr, p)
-	//}
+		arr = append(arr, p)
+	}
 
 	return arr, nil
 }
