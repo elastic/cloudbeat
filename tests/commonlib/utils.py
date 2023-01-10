@@ -37,7 +37,8 @@ def get_ES_evaluation(
                 latest_timestamp,
             )
         except Exception as e:
-            logger.warning(e)
+            time.sleep(1)
+            logger.debug(e)
             continue
 
         for event in events:
