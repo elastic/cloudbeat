@@ -65,8 +65,8 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 		}
 
 		sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, clientBucket.Name)
-		// Getting the bucket encryption is not critical for the rest of the flow, so we should keep describe the bucket
-		//  even if it fails.
+		// Getting the bucket encryption is not critical for the rest of the flow, so we should keep describing the
+		//	bucket even if getting the bucket encryption fails.
 		if encryptionErr != nil {
 			p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *clientBucket.Name, encryptionErr)
 		}
