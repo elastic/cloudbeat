@@ -103,10 +103,10 @@ Resources:
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
-    Properties: 
+    Properties:
       InstanceProfileName: elastic-agent-instance-profile
       Path: /
-      Roles: 
+      Roles:
        - !Ref ElasticAgentRole
 
   # EC2 Instance to run elastic-agent
@@ -120,7 +120,7 @@ Resources:
       SecurityGroupIds:
         - !Ref ElasticAgentSecurityGroup
       UserData:
-        Fn::Base64: 
+        Fn::Base64:
           !Sub |
             #!/bin/bash
             curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/${ElasticAgentVersion}.tar.gz

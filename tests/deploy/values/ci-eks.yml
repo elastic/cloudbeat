@@ -16,3 +16,4 @@ testData:
   marker: pre_merge
   agentName: cloudbeat
   clusterType: eks
+  markerCmd: -k
