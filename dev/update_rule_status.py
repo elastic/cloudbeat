@@ -1,5 +1,6 @@
 import os
 import common
+import yaml
 
 """
 Generates Markdown tables with implemented rules status for all services.
@@ -59,8 +60,8 @@ def generate_md_table(benchmark_id):
     implemented_rules = get_implemented_rules(all_rules, benchmark_id)
 
     # Add implemented rules' column to the data
-    for rule, status in implemented_rules.items():
-        rules_data.loc[rules_data["Rule Number"] == rule, "Status"] = status
+    for rule, total_status in implemented_rules.items():
+        rules_data.loc[rules_data["Rule Number"] == rule, "Status"] = total_status
 
     rules_data["Section"] = rules_data["Section"].apply(lambda section_id: sections[section_id])
 
@@ -78,11 +79,50 @@ def generate_md_table(benchmark_id):
     table = rules_data.to_markdown(index=False, tablefmt="pipe", colalign=colalign.values())
 
     # Add table title
-    total_implemented = len([rule for rule, status in implemented_rules.items() if status == ":white_check_mark:"])
-    status = total_implemented / len(implemented_rules)
-    description = f"### {total_implemented}/{len(implemented_rules)} implemented rules ({status:.0%})\n\n"
+    total_rules, total_implemented, total_status = total_rules_status(rules_data)
+    total_automated, automated_implemented, automated_status = automated_rules_status(rules_data)
+    total_manual, manual_implemented, manual_status = manual_rules_status(rules_data)
 
-    return table, description, status
+    description = f"### {total_implemented}/{total_rules} implemented rules ({total_status:.0%})\n\n"
+    description += f"#### Automated rules: {automated_implemented}/{total_automated} ({automated_status:.0%})\n\n"
+    description += f"#### Manual rules: {manual_implemented}/{total_manual} ({manual_status:.0%})\n\n"
+
+    return table, description, total_status
+
+
+def total_rules_status(rules_data):
+    """
+    Get number of total rules and number of implemented rules.
+    :param rules_data: Rules data
+    :return: Number of total rules and number of implemented rules
+    """
+    implemented_rules = rules_data[rules_data["Status"] == ":white_check_mark:"]
+    status = len(implemented_rules) / len(rules_data)
+    return len(rules_data), len(implemented_rules), status
+
+
+def automated_rules_status(rules_data):
+    """
+    Get number of automated rules and number of implemented automated rules.
+    :param rules_data: Rules data
+    :return: Number of automated rules and number of implemented automated rules
+    """
+    automated_rules = rules_data[rules_data["Type"] == "Automated"]
+    automated_implemented = automated_rules[automated_rules["Status"] == ":white_check_mark:"]
+    status = len(automated_implemented) / len(automated_rules)
+    return len(automated_rules), len(automated_implemented), status
+
+
+def manual_rules_status(rules_data):
+    """
+    Get number of manual rules and number of implemented manual rules.
+    :param rules_data: Rules data
+    :return: Number of manual rules and number of implemented manual rules
+    """
+    manual_rules = rules_data[rules_data["Type"] == "Manual"]
+    manual_implemented = manual_rules[manual_rules["Status"] == ":white_check_mark:"]
+    status = len(manual_implemented) / len(manual_rules)
+    return len(manual_rules), len(manual_implemented), status
 
 
 def get_rule_path(rule, benchmark_id, implemented_rules):

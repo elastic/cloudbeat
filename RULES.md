@@ -4,6 +4,10 @@
 
 ### 92/125 implemented rules (74%)
 
+#### Automated rules: 73/74 (99%)
+
+#### Manual rules: 19/51 (37%)
+
 |                     Rule Number                      | Section                                | Description                                                                                              |       Status       |   Type    |
 |:----------------------------------------------------:|:---------------------------------------|:---------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
 |  [1.1.1](bundle/compliance/cis_k8s/rules/cis_1_1_1)  | Control Plane Node Configuration Files | Ensure that the API server pod specification file permissions are set to 644 or more restrictive         | :white_check_mark: | Automated |
@@ -136,6 +140,10 @@
 
 ### 31/52 implemented rules (60%)
 
+#### Automated rules: 14/16 (88%)
+
+#### Manual rules: 17/36 (47%)
+
 |                     Rule Number                      | Section                              | Description                                                                                              |       Status       |   Type    |
 |:----------------------------------------------------:|:-------------------------------------|:---------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
 |  [2.1.1](bundle/compliance/cis_eks/rules/cis_2_1_1)  | Logging                              | Enable audit Logs                                                                                        | :white_check_mark: |  Manual   |
@@ -194,6 +202,10 @@
 ## AWS CIS Benchmark
 
 ### 16/63 implemented rules (25%)
+
+#### Automated rules: 16/55 (29%)
+
+#### Manual rules: 0/8 (0%)
 
 |                    Rule Number                     | Section                           | Description                                                                                                        |       Status       |   Type    |
 |:--------------------------------------------------:|:----------------------------------|:-------------------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
