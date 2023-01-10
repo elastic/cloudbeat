@@ -125,7 +125,7 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        
+
       - name: Load images cloudbeat and cloudbeat-test to ECR
         id: load-to-ecr
         env:
@@ -146,10 +146,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - test-target: pre_merge
+          - test-target: eks
             range: ""
             values_file: tests/deploy/values/ci-eks.yml
             k8s_context: "test-eks-config-1"
+          - test-target: eks
+            range: ""
+            values_file: tests/deploy/values/ci-eks.yml
+            k8s_context: "test-eks-config-2"
     name: ${{ matrix.test-target }}-tests
     runs-on: ubuntu-20.04
     timeout-minutes: 90
