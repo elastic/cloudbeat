@@ -46,37 +46,59 @@ func TestEcrFactoryTestSuite(t *testing.T) {
 
 func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 	var tests = []struct {
-		accessKey string
-		secret    string
-		session   string
-		region    string
+		accessKey        string
+		secret           string
+		session          string
+		region           string
+		useDefaultRegion bool
+		mock             func() MetadataProvider
 	}{
 		{
-
-			"key",
-			"secret",
-			"session",
-			"us1-east",
+			accessKey:        "key",
+			secret:           "secret",
+			session:          "session",
+			region:           "us-east-1",
+			useDefaultRegion: false,
+			mock: func() MetadataProvider {
+				m := &MockMetadataProvider{}
+				m.EXPECT().
+					GetMetadata(mock.Anything, mock.Anything).
+					Return(Ec2Metadata{
+						Region: "us-east-1",
+					}, nil)
+				return m
+			},
 		},
 		{
-
-			"key-1",
-			"secret-1",
-			"session-1",
-			"us2-east",
+			accessKey:        "key-1",
+			secret:           "secret-1",
+			session:          "session-1",
+			region:           "us-east-2",
+			useDefaultRegion: false,
+			mock: func() MetadataProvider {
+				m := &MockMetadataProvider{}
+				m.EXPECT().
+					GetMetadata(mock.Anything, mock.Anything).
+					Return(Ec2Metadata{
+						Region: "us-east-2",
+					}, nil)
+				return m
+			},
+		},
+		{
+			accessKey:        "key-1",
+			secret:           "secret-1",
+			session:          "session-1",
+			region:           "us-east-1",
+			useDefaultRegion: true,
+			mock:             func() MetadataProvider { return nil },
 		},
 	}
 
 	for _, test := range tests {
-		metaDataGetter := &MockMetadataProvider{}
-		metaDataGetter.EXPECT().
-			GetMetadata(mock.Anything, mock.Anything).
-			Return(Ec2Metadata{
-				Region: test.region,
-			}, nil)
 
 		configProvider := ConfigProvider{
-			metaDataGetter,
+			MetadataProvider: test.mock(),
 		}
 
 		agentAwsConfig := aws.ConfigAWS{
@@ -84,7 +106,7 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 			SecretAccessKey: test.secret,
 			SessionToken:    test.session,
 		}
-		awsConfig, err := configProvider.InitializeAWSConfig(context.Background(), agentAwsConfig, s.log, false)
+		awsConfig, err := configProvider.InitializeAWSConfig(context.Background(), agentAwsConfig, s.log, test.useDefaultRegion)
 		s.NoError(err)
 
 		cred, err := awsConfig.Credentials.Retrieve(context.Background())
