@@ -191,9 +191,9 @@ def pytest_generate_tests(metafunc):
             metafunc.config.getoption("markexpr", default=None),
         )
         is None
+        and metafunc.config.getoption("keyword", default=None) is None
     ):
         return
-
     params = TEST_PARAMETERS.get(metafunc.function)
     if params is None:
         raise ValueError(f"Params for function {metafunc.function} are not registered.")
