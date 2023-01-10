@@ -13,6 +13,7 @@ cloudbeat-test
 *local.yaml
 *local.yml
 fields.yml
+.hermit/
 
 *-result.json
 *test.dummy
