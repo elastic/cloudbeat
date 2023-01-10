@@ -8,3 +8,4 @@ testData:
   marker: pre_merge
   agentName: cloudbeat
   clusterType: vanilla
+  markerCmd: -m
