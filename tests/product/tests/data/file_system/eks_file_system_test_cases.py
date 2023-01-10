@@ -80,3 +80,15 @@ cis_eks_3_1_4 = {
     "3.1.4 Kubelet-config ownership invalid user evaluation failed": cis_eks_3_1_4_user_fail,
     "3.1.4 Kubelet-config ownership invalid group evaluation failed": cis_eks_3_1_4_group_fail,
 }
+
+cis_eks_all = {
+    "test-eks-config-1": {
+        **cis_eks_3_1_1,
+        **cis_eks_3_1_2,
+        **cis_eks_3_1_3,
+        **cis_eks_3_1_4,
+    },
+    "test-eks-config-2": {},
+}
+
+cis_eks_file_system_cases = cis_eks_all[eks.current_config]
