@@ -20,3 +20,4 @@ testData:
   agentName: cloudbeat
   clusterType: eks
   markerCmd: -k
+  clusterConfig: test-eks-config-2

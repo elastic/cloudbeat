@@ -11,6 +11,7 @@ agent = Munch()
 agent.name = os.getenv("AGENT_NAME", "cloudbeat")
 agent.namespace = os.getenv("AGENT_NAMESPACE", "kube-system")
 agent.findings_timeout = 500
+agent.eks_timeout = 30
 agent.cluster_type = os.getenv("CLUSTER_TYPE", "eks")  # options: vanilla / eks
 
 # The K8S Node on which the test Pod is running.

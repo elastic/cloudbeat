@@ -148,11 +148,11 @@ jobs:
         include:
           - test-target: eks
             range: ""
-            values_file: tests/deploy/values/ci-eks.yml
+            values_file: tests/deploy/values/ci-eks-config-1.yml
             k8s_context: "test-eks-config-1"
           - test-target: eks
             range: ""
-            values_file: tests/deploy/values/ci-eks.yml
+            values_file: tests/deploy/values/ci-eks-config-2.yml
             k8s_context: "test-eks-config-2"
     name: ${{ matrix.test-target }}-tests
     runs-on: ubuntu-20.04

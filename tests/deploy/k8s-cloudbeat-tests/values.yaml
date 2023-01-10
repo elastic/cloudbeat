@@ -15,6 +15,7 @@ testData:
   marker: rules
   agentName: cloudbeat
   markerCmd: -m
+  clusterConfig: test-eks-config-1
 
 imagePullSecrets: []
 nameOverride: ""
