@@ -104,7 +104,9 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 		return nil, err
 	}
 
-	data, err := fetchersManager.NewData(log, c.Period, time.Minute, fetchersRegistry)
+	// TODO: timeout should be configurable and not hard-coded. Setting to 5 minutes for now to account for CSPM fetchers
+	// 	https://github.com/elastic/cloudbeat/issues/653
+	data, err := fetchersManager.NewData(log, c.Period, time.Minute*5, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err

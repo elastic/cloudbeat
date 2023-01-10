@@ -11,6 +11,7 @@ cloudbeat:
   period: 30s
   fetchers:
     - name: aws-iam
+    - name: aws-s3
   evaluator:
     decision_logs: false
 # =================================== Kibana ===================================

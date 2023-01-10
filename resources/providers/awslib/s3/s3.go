@@ -15,34 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package s3
 
 import (
 	"context"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type ConfigProvider struct {
-	MetadataProvider MetadataProvider
-}
-type ConfigProviderAPI interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error)
+type BucketDescription struct {
+	Name         string
+	SSEAlgorithm string
 }
 
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg)
-	if err != nil {
-		return awssdk.Config{}, err
-	}
+type S3 interface {
+	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
+}
 
-	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
-	if err != nil {
-		log.Errorf("MetadataProvider.GetMetadata Error: %v, setting AWSConfig region to default - %s", err, awsConfig.Region)
-		return awsConfig, nil
-	}
+type Provider struct {
+	log    *logp.Logger
+	client Client
+	region string
+}
 
-	awsConfig.Region = metadata.Region
-	return awsConfig, nil
+type Client interface {
+	ListBuckets(ctx context.Context, params *s3.ListBucketsInput, optFns ...func(*s3.Options)) (*s3.ListBucketsOutput, error)
+	GetBucketEncryption(ctx context.Context, params *s3.GetBucketEncryptionInput, optFns ...func(*s3.Options)) (*s3.GetBucketEncryptionOutput, error)
+	GetBucketLocation(ctx context.Context, params *s3.GetBucketLocationInput, optFns ...func(*s3.Options)) (*s3.GetBucketLocationOutput, error)
 }
