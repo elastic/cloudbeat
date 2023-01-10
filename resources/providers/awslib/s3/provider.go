@@ -49,48 +49,60 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 	var result []awslib.AwsResource
 
 	for _, clientBucket := range clientBuckets.Buckets {
-		bucketRegion := p.getBucketRegion(ctx, clientBucket.Name)
-		if bucketRegion == p.region {
-			sseAlgorithm := p.getBucketEncryptionAlgorithm(ctx, clientBucket.Name)
-
-			result = append(result, BucketDescription{*clientBucket.Name, sseAlgorithm})
+		bucketRegion, regionErr := p.getBucketRegion(ctx, clientBucket.Name)
+		// If we could not get the region for a bucket, additional API calls for resources will probably fail, we should
+		//	not describe this bucket.
+		if regionErr != nil {
+			p.log.Errorf("Could not get bucket location for bucket %s. Not describing this bucket. Error: %v", *clientBucket.Name, regionErr)
+			continue
 		}
+
+		// If the bucket is not in the configured region additional API calls for resources will fail, we should not
+		//  describe this bucket.
+		if bucketRegion != p.region {
+			log.Debugf("Bucket %s is in region %s and not in the configured region %s. Not describing this bucket", *clientBucket.Name, bucketRegion, p.region)
+			continue
+		}
+
+		sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, clientBucket.Name)
+		// Getting the bucket encryption is not critical for the rest of the flow, so we should keep describe the bucket
+		//  even if it fails.
+		if encryptionErr != nil {
+			p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *clientBucket.Name, encryptionErr)
+		}
+
+		result = append(result, BucketDescription{*clientBucket.Name, sseAlgorithm})
 	}
 
 	return result, nil
 }
 
-func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string) string {
+func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string) (string, error) {
 	encryption, err := p.client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
 
 	if err != nil {
-		shouldLogError := true
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
 			if apiErr.ErrorCode() == "ServerSideEncryptionConfigurationNotFoundError" {
-				shouldLogError = false
+				p.log.Debugf("Bucket encryption for bucket %s does not exist", *bucketName)
+				return "", nil
 			}
 		}
 
-		if shouldLogError {
-			p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucketName, err)
-		}
-
-		return ""
+		return "", err
 	}
 
 	if len(encryption.ServerSideEncryptionConfiguration.Rules) <= 0 {
-		return ""
+		return "", nil
 	}
 
-	return string(encryption.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm)
+	return string(encryption.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm), nil
 }
 
-func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) string {
+func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (string, error) {
 	location, err := p.client.GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
 	if err != nil {
-		p.log.Errorf("Could not get bucket location for bucket %s. Error: %v", *bucketName, err)
-		return ""
+		return "", err
 	}
 
 	region := string(location.LocationConstraint)
@@ -99,7 +111,7 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) strin
 		region = "us-east-1"
 	}
 
-	return region
+	return region, nil
 }
 
 func (b BucketDescription) GetResourceArn() string {
