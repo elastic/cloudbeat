@@ -68,4 +68,3 @@ variable "eks_region" {
   description = "Optional AWS region where the EKS cluster will be created. Defaults to eu-west-1"
   type        = string
 }
-
