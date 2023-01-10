@@ -9,6 +9,9 @@ image:
 cloudbeat:
   deploy: false
 
+cloudbeatEks:
+  deploy: true
+
 standaloneAgent:
   deploy: false
 

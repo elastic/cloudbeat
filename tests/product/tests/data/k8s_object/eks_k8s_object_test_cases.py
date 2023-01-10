@@ -3,7 +3,8 @@ This module provides eks file system rule test cases.
 Cases are organized as rules.
 Each rule has one or more test cases.
 """
-
+from configuration import eks
+from commonlib.framework.reporting import skip_param_case, SkipReportData
 from ..eks_test_case import EksKubeObjectCase
 from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
@@ -160,3 +161,63 @@ cis_eks_4_2_9 = {
     '4.2.9 PSP spec.securityContext.capabilities.drop==["ALL"] eval passed': cis_eks_4_2_9_pass,
     '4.2.9 PSP spec.securityContext.capabilities.add==["NET_ADMIN", "SYS_TIME"] eval failed': cis_eks_4_2_9_fail,
 }
+
+cis_eks_all = {
+    "test-eks-config-1": {
+        **cis_eks_4_2_1,
+        **cis_eks_4_2_2,
+        **cis_eks_4_2_3,
+        **cis_eks_4_2_4,
+        **cis_eks_4_2_5,
+        **cis_eks_4_2_6,
+        **cis_eks_4_2_7,
+        **dict(
+            zip(
+                cis_eks_4_2_7.keys(),
+                skip_param_case(
+                    skip_list=[*cis_eks_4_2_7.values()],
+                    data_to_report=SkipReportData(
+                        skip_reason=(
+                            "Cloudbeat set rule evaluation to fail even though "
+                            "the capabilities.drop ALL is defined in the pod spec."
+                        ),
+                        url_title="cloudbeat: #635",
+                        url_link="https://github.com/elastic/cloudbeat/issues/635",
+                    ),
+                ),
+            ),
+        ),
+        **dict(
+            zip(
+                cis_eks_4_2_8.keys(),
+                skip_param_case(
+                    skip_list=[*cis_eks_4_2_8.values()],
+                    data_to_report=SkipReportData(
+                        skip_reason="Retest after testing configuration will be fixed.",
+                        url_title="cloudbeat: #500",
+                        url_link="https://github.com/elastic/cloudbeat/issues/500",
+                    ),
+                ),
+            ),
+        ),
+        **dict(
+            zip(
+                cis_eks_4_2_9.keys(),
+                skip_param_case(
+                    skip_list=[*cis_eks_4_2_9.values()],
+                    data_to_report=SkipReportData(
+                        skip_reason=(
+                            "Cloudbeat set rule evaluation to fail even though "
+                            "the capabilities.drop ALL is defined in the pod spec."
+                        ),
+                        url_title="cloudbeat: #636",
+                        url_link="https://github.com/elastic/cloudbeat/issues/636",
+                    ),
+                ),
+            ),
+        ),
+    },
+    "test-eks-config-2": {},
+}
+
+cis_eks_k8s_object_cases = cis_eks_all[eks.current_config]

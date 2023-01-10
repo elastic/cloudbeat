@@ -99,6 +99,9 @@ job:
 cloudbeat:
   deploy: false
 
+cloudbeatEks:
+  deploy: false
+
 standaloneAgent:
   deploy: false
 

@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 import pytest
 
 from commonlib.utils import get_ES_evaluation
-from commonlib.framework.reporting import skip_param_case, SkipReportData
 
 from product.tests.data.k8s_object import eks_k8s_object_test_cases as eks_k8s_object_tc
 from product.tests.parameters import register_params, Parameters
@@ -51,38 +50,47 @@ def test_eks_kube_objects(
     assert evaluation == expected, f"Rule {rule_tag} verification failed," f"expected: {expected}, got: {evaluation}"
 
 
+# register_params(
+#     test_eks_kube_objects,
+#     Parameters(
+#         ("rule_tag", "test_resource_id", "expected"),
+#         [
+#             *eks_k8s_object_tc.cis_eks_4_2_1.values(),
+#             *eks_k8s_object_tc.cis_eks_4_2_2.values(),
+#             *eks_k8s_object_tc.cis_eks_4_2_3.values(),
+#             *eks_k8s_object_tc.cis_eks_4_2_4.values(),
+#             *eks_k8s_object_tc.cis_eks_4_2_5.values(),
+#             *eks_k8s_object_tc.cis_eks_4_2_6.values(),
+#             *eks_k8s_object_tc.cis_eks_4_2_7.values(),
+#             *skip_param_case(
+#                 skip_list=[*eks_k8s_object_tc.cis_eks_4_2_8.values()],
+#                 data_to_report=SkipReportData(
+#                     url_title="cloudbeat: #500",
+#                     url_link="https://github.com/elastic/cloudbeat/issues/500",
+#                     skip_reason="Retest after testing configuration will be fixed.",
+#                 ),
+#             ),
+#             *eks_k8s_object_tc.cis_eks_4_2_9.values(),
+#         ],
+#         ids=[
+#             *eks_k8s_object_tc.cis_eks_4_2_1.keys(),
+#             *eks_k8s_object_tc.cis_eks_4_2_2.keys(),
+#             *eks_k8s_object_tc.cis_eks_4_2_3.keys(),
+#             *eks_k8s_object_tc.cis_eks_4_2_4.keys(),
+#             *eks_k8s_object_tc.cis_eks_4_2_5.keys(),
+#             *eks_k8s_object_tc.cis_eks_4_2_6.keys(),
+#             *eks_k8s_object_tc.cis_eks_4_2_7.keys(),
+#             *eks_k8s_object_tc.cis_eks_4_2_8.keys(),
+#             *eks_k8s_object_tc.cis_eks_4_2_9.keys(),
+#         ],
+#     ),
+# )
+
 register_params(
     test_eks_kube_objects,
     Parameters(
         ("rule_tag", "test_resource_id", "expected"),
-        [
-            *eks_k8s_object_tc.cis_eks_4_2_1.values(),
-            *eks_k8s_object_tc.cis_eks_4_2_2.values(),
-            *eks_k8s_object_tc.cis_eks_4_2_3.values(),
-            *eks_k8s_object_tc.cis_eks_4_2_4.values(),
-            *eks_k8s_object_tc.cis_eks_4_2_5.values(),
-            *eks_k8s_object_tc.cis_eks_4_2_6.values(),
-            *eks_k8s_object_tc.cis_eks_4_2_7.values(),
-            *skip_param_case(
-                skip_list=[*eks_k8s_object_tc.cis_eks_4_2_8.values()],
-                data_to_report=SkipReportData(
-                    url_title="cloudbeat: #500",
-                    url_link="https://github.com/elastic/cloudbeat/issues/500",
-                    skip_reason="Retest after testing configuration will be fixed.",
-                ),
-            ),
-            *eks_k8s_object_tc.cis_eks_4_2_9.values(),
-        ],
-        ids=[
-            *eks_k8s_object_tc.cis_eks_4_2_1.keys(),
-            *eks_k8s_object_tc.cis_eks_4_2_2.keys(),
-            *eks_k8s_object_tc.cis_eks_4_2_3.keys(),
-            *eks_k8s_object_tc.cis_eks_4_2_4.keys(),
-            *eks_k8s_object_tc.cis_eks_4_2_5.keys(),
-            *eks_k8s_object_tc.cis_eks_4_2_6.keys(),
-            *eks_k8s_object_tc.cis_eks_4_2_7.keys(),
-            *eks_k8s_object_tc.cis_eks_4_2_8.keys(),
-            *eks_k8s_object_tc.cis_eks_4_2_9.keys(),
-        ],
+        [*eks_k8s_object_tc.cis_eks_k8s_object_cases.values()],
+        ids=[*eks_k8s_object_tc.cis_eks_k8s_object_cases.keys()],
     ),
 )

@@ -195,7 +195,7 @@ jobs:
           kubectl exec $RESULTS_POD -- sh -c 'rm -rf /reports/*'
 
       - name: Upload Test Results
-        if: success()
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: allure_results-${{ matrix.test-target}}
