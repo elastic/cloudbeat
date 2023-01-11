@@ -71,7 +71,7 @@ default_region: eu-west-2
 			Return(func(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) awssdk.Config {
 				return CreateSdkConfig(cfg, "eu-west-2")
 			},
-				func(ctx context.Context, config aws.ConfigAWS) error {
+				func(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) error {
 					return nil
 				},
 			)
