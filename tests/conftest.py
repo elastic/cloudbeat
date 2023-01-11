@@ -194,6 +194,23 @@ def get_fixtures():
     return cloudbeat_agent, k8s
 
 
+def pytest_sessionstart():
+    """
+    Called after the Session object has been created and before performing collection and entering the run test loop.
+    @return:
+    """
+
+    configs = {
+        "Cloudbeat": configuration.agent,
+        "Kubernetes": configuration.kubernetes,
+    }
+    if configuration.agent.cluster_type == "eks":
+        configs["EKS"] = configuration.eks
+
+    for key, val in configs.items():
+        configuration.print_environment(name=key, config_object=val)
+
+
 def pytest_sessionfinish(session):
     """
     Called after whole test run finished, right before returning the exit status to the system.

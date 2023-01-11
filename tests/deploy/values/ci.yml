@@ -9,4 +9,3 @@ testData:
   agentName: cloudbeat
   clusterType: vanilla
   markerCmd: -m
-

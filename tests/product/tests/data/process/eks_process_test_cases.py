@@ -339,6 +339,19 @@ cis_eks_all = {
         ),
         **cis_eks_3_2_8_config_1,
         **cis_eks_3_2_9_config_1,
+        **dict(
+            zip(
+                cis_eks_3_2_9_config_1.keys(),
+                skip_param_case(
+                    skip_list=[*cis_eks_3_2_9_config_1.values()],
+                    data_to_report=SkipReportData(
+                        skip_reason="Rule 3.2.9 - unclear CIS definition and implementation",
+                        url_title="security-team: #4947",
+                        url_link="https://github.com/elastic/security-team/issues/4947",
+                    ),
+                ),
+            ),
+        ),
         **cis_eks_3_2_10_config_1,
         **dict(
             zip(

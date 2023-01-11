@@ -38,7 +38,7 @@ def test_eks_process_rules(
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
-        timeout=cloudbeat_agent.eks_timeout,
+        timeout=cloudbeat_agent.eks_findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow() - timedelta(hours=4),
         resource_identifier=identifier,
