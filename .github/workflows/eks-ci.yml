@@ -185,6 +185,12 @@ jobs:
         run: |
           just run-tests ${{ matrix.test-target }} ${{ matrix.k8s_context }}
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
+
       - name: Copy test results
         id: copy_results
         if: always()
