@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -31,25 +32,58 @@ import (
 )
 
 func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
+	var clientsMap = make(map[string]Client, 0)
+
 	client := s3Client.NewFromConfig(cfg)
+	awsUtil := &awslib.CommonUtility{}
+	regions, err := awsUtil.GetRegions(log, cfg)
+	if err != nil {
+		log.Errorf("NewS3Provider error, %v", err)
+		clientsMap[awslib.DefaultRegion] = client
+	}
+
+	log.Debugf("Enabled regions for AWS account, %v", regions)
+	for _, region := range regions {
+		cfg.Region = region
+		client = s3Client.NewFromConfig(cfg)
+		clientsMap[region] = client
+	}
+
 	return &Provider{
-		log:    log,
-		client: client,
-		region: cfg.Region,
+		log:     log,
+		clients: clientsMap,
 	}
 }
 
 func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
-	clientBuckets, err := p.client.ListBuckets(ctx, &s3Client.ListBucketsInput{})
+	clientBuckets, err := p.clients[awslib.DefaultRegion].ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
 		log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
 	}
 
 	var result []awslib.AwsResource
+	bucketsRegionsMapping := p.getBucketsRegionMapping(ctx, clientBuckets.Buckets)
+	for region, buckets := range bucketsRegionsMapping {
+		for _, bucket := range buckets {
+			sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, bucket.Name, region)
+			// Getting the bucket encryption is not critical for the rest of the flow, so we should keep describing the
+			//	bucket even if getting the bucket encryption fails.
+			if encryptionErr != nil {
+				p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
+			}
 
-	for _, clientBucket := range clientBuckets.Buckets {
-		bucketRegion, regionErr := p.getBucketRegion(ctx, clientBucket.Name)
+			result = append(result, BucketDescription{*bucket.Name, sseAlgorithm})
+		}
+	}
+
+	return result, nil
+}
+
+func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.Bucket) map[string][]types.Bucket {
+	var bucketsRegionMap = make(map[string][]types.Bucket, 0)
+	for _, clientBucket := range buckets {
+		region, regionErr := p.getBucketRegion(ctx, clientBucket.Name)
 		// If we could not get the region for a bucket, additional API calls for resources will probably fail, we should
 		//	not describe this bucket.
 		if regionErr != nil {
@@ -57,29 +91,19 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 			continue
 		}
 
-		// If the bucket is not in the configured region additional API calls for resources will fail, we should not
-		//  describe this bucket.
-		if bucketRegion != p.region {
-			log.Debugf("Bucket %s is in region %s and not in the configured region %s. Not describing this bucket", *clientBucket.Name, bucketRegion, p.region)
-			continue
-		}
-
-		sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, clientBucket.Name)
-		// Getting the bucket encryption is not critical for the rest of the flow, so we should keep describing the
-		//	bucket even if getting the bucket encryption fails.
-		if encryptionErr != nil {
-			p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *clientBucket.Name, encryptionErr)
-		}
-
-		result = append(result, BucketDescription{*clientBucket.Name, sseAlgorithm})
+		bucketsRegionMap[region] = append(bucketsRegionMap[region], clientBucket)
 	}
 
-	return result, nil
+	return bucketsRegionMap
 }
 
-func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string) (string, error) {
-	encryption, err := p.client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
+func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string, region string) (string, error) {
+	client := p.clients[region]
+	if client == nil {
+		return "", fmt.Errorf("no intialize client exists in %s region", region)
+	}
 
+	encryption, err := client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
@@ -100,7 +124,7 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 }
 
 func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (string, error) {
-	location, err := p.client.GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
+	location, err := p.clients[awslib.DefaultRegion].GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
 	if err != nil {
 		return "", err
 	}
