@@ -23,18 +23,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 )
 
-type PolicyDocument struct {
-	PolicyName string `json:"PolicyName,omitempty"`
-	Policy     string `json:"policy,omitempty"`
-}
-
 func (p Provider) listAttachedPolicies(ctx context.Context, identity *string) ([]types.AttachedPolicy, error) {
+	p.log.Debugf("listAttachedPolicies for user: %s", *identity)
 	input := &iamsdk.ListAttachedUserPoliciesInput{UserName: identity}
 	var policies []types.AttachedPolicy
 	for {
 		output, err := p.client.ListAttachedUserPolicies(ctx, input)
 		if err != nil {
-			return nil, err
+			return []types.AttachedPolicy{}, err
 		}
 		policies = append(policies, output.AttachedPolicies...)
 		if !output.IsTruncated {
@@ -43,10 +39,13 @@ func (p Provider) listAttachedPolicies(ctx context.Context, identity *string) ([
 		input.Marker = output.Marker
 	}
 
+	p.log.Debugf("attached policies for user: %s, policies: %v", *identity, policies)
 	return policies, nil
 }
 
 func (p Provider) listInlinePolicies(ctx context.Context, identity *string) ([]PolicyDocument, error) {
+	p.log.Debugf("listInlinePolicies for user: %s", *identity)
+
 	input := &iamsdk.ListUserPoliciesInput{
 		UserName: identity,
 	}
@@ -54,7 +53,7 @@ func (p Provider) listInlinePolicies(ctx context.Context, identity *string) ([]P
 	for {
 		output, err := p.client.ListUserPolicies(ctx, input)
 		if err != nil {
-			return nil, err
+			return []PolicyDocument{}, err
 		}
 		policyNames = append(policyNames, output.PolicyNames...)
 		if !output.IsTruncated {
@@ -70,7 +69,7 @@ func (p Provider) listInlinePolicies(ctx context.Context, identity *string) ([]P
 			UserName:   identity,
 		})
 
-		if err != nil {
+		if err != nil && !p.isRootUser(*identity) {
 			p.log.Errorf("fail to get inline policy for user: %s, policy name: %s", *identity, policyNames[i])
 			policies = append(policies, PolicyDocument{PolicyName: policyNames[i]})
 			continue
@@ -79,5 +78,6 @@ func (p Provider) listInlinePolicies(ctx context.Context, identity *string) ([]P
 		policies = append(policies, PolicyDocument{PolicyName: policyNames[i], Policy: *inlinePolicy.PolicyDocument})
 	}
 
+	p.log.Debugf("inline policies for user: %s, policies: %v", *identity, policies)
 	return policies, nil
 }

@@ -62,8 +62,8 @@ type RolePolicyInfo struct {
 type User struct {
 	AccessKeys          []AccessKey            `json:"access_keys,omitempty"`
 	MFADevices          []AuthDevice           `json:"mfa_devices,omitempty"`
-	InlinePolicies      []PolicyDocument       `json:"inline_policies,omitempty"`
-	AttachedPolicies    []types.AttachedPolicy `json:"attached_policies,omitempty"`
+	InlinePolicies      []PolicyDocument       `json:"inline_policies"`
+	AttachedPolicies    []types.AttachedPolicy `json:"attached_policies"`
 	Name                string                 `json:"name,omitempty"`
 	LastAccess          string                 `json:"last_access,omitempty"`
 	Arn                 string                 `json:"arn,omitempty"`
@@ -113,6 +113,11 @@ type CredentialReport struct {
 	AccessKey2LastUsed    string `csv:"access_key_2_last_used_date"`
 	Cert1Active           bool   `csv:"cert_1_active"`
 	Cert2Active           bool   `csv:"cert_2_active"`
+}
+
+type PolicyDocument struct {
+	PolicyName string `json:"PolicyName,omitempty"`
+	Policy     string `json:"policy,omitempty"`
 }
 
 func NewIAMProvider(log *logp.Logger, cfg aws.Config) *Provider {
