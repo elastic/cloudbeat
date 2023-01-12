@@ -5,6 +5,7 @@ This module verifies correctness of retrieved findings by manipulating audit and
 from datetime import datetime, timedelta
 import pytest
 
+from loguru import logger
 from commonlib.utils import get_ES_evaluation
 
 from product.tests.data.k8s_object import eks_k8s_object_test_cases as eks_k8s_object_tc
@@ -34,6 +35,7 @@ def test_eks_kube_objects(
     def identifier(eval_resource):
         try:
             eval_resource = eval_resource.resource.raw
+            logger.debug(eval_resource.metadata.labels)
             return eval_resource.metadata.labels.testResourceId == test_resource_id
         except AttributeError:
             return False

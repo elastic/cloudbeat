@@ -164,9 +164,6 @@ cis_eks_4_2_9 = {
 
 cis_eks_all = {
     "test-eks-config-1": {
-        **cis_eks_4_2_2,
-        **cis_eks_4_2_3,
-        **cis_eks_4_2_4,
         **cis_eks_4_2_5,
         **cis_eks_4_2_6,
         **cis_eks_4_2_7,
@@ -218,6 +215,9 @@ cis_eks_all = {
     },
     "test-eks-config-2": {
         **cis_eks_4_2_1,
+        **cis_eks_4_2_2,
+        **cis_eks_4_2_3,
+        **cis_eks_4_2_4,
     },
 }
 
