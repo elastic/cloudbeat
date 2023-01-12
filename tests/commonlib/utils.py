@@ -30,6 +30,7 @@ def get_ES_evaluation(
 
     while time.time() - start_time < timeout:
         try:
+            time.sleep(2)
             events = get_events_from_index(
                 elastic_client,
                 elastic_client.index,
@@ -41,12 +42,12 @@ def get_ES_evaluation(
             continue
 
         for event in events:
-            findings_timestamp = datetime.datetime.strptime(
-                getattr(event, "@timestamp"),
-                "%Y-%m-%dT%H:%M:%S.%fZ",
-            )
-            if findings_timestamp > latest_timestamp:
-                latest_timestamp = findings_timestamp
+            # findings_timestamp = datetime.datetime.strptime(
+            #     getattr(event, "@timestamp"),
+            #     "%Y-%m-%dT%H:%M:%S.%fZ",
+            # )
+            # if findings_timestamp > latest_timestamp:
+            #     latest_timestamp = findings_timestamp
 
             try:
                 evaluation = event.result.evaluation
