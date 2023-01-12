@@ -19,7 +19,7 @@ package awslib
 
 import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
@@ -28,7 +28,7 @@ import (
 	"testing"
 )
 
-var successfulOutput = &ec2.DescribeRegionsOutput{
+var successfulOutput = &ec2sdk.DescribeRegionsOutput{
 	Regions: []types.Region{
 		{
 			RegionName: awssdk.String("us-east-1"),
@@ -46,10 +46,9 @@ func TestGetRegions(t *testing.T) {
 		log    *logp.Logger
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    []string
-		wantErr bool
+		name string
+		args args
+		want []string
 	}{
 		{
 			name: "Error - return no regions",
@@ -62,8 +61,7 @@ func TestGetRegions(t *testing.T) {
 				cfg: awssdk.Config{},
 				log: logp.NewLogger("aws-test"),
 			},
-			want:    nil,
-			wantErr: true,
+			want: nil,
 		},
 		{
 			name: "Should return enabled regions",
@@ -76,19 +74,18 @@ func TestGetRegions(t *testing.T) {
 				cfg: awssdk.Config{},
 				log: logp.NewLogger("aws-test"),
 			},
-			want:    []string{"us-east-1", "eu-west-1"},
-			wantErr: false,
+			want: []string{"us-east-1", "eu-west-1"},
 		},
 	}
 
 	for _, tt := range tests {
+		factory := func(cfg awssdk.Config) *ec2sdk.Client {
+			return ec2sdk.NewFromConfig(cfg)
+		}
+
 		t.Run(tt.name, func(t *testing.T) {
-			awsUtil := &CommonUtility{AWSCommonUtil: tt.args.client()}
-			got, err := awsUtil.GetRegions(tt.args.log, tt.args.cfg)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetRegions() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := ToMultiRegionClient(tt.args.client(), tt.args.cfg, factory, tt.args.log)
+
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetRegions() got = %v, want %v", got, tt.want)
 			}

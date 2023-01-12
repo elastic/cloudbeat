@@ -19,9 +19,9 @@ package ec2
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -32,27 +32,15 @@ type ElasticCompute interface {
 }
 
 func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
-	var clients []Client
-
-	svc := ec2.NewFromConfig(cfg)
-	awsUtil := &awslib.CommonUtility{}
-	regions, err := awsUtil.GetRegions(log, cfg)
-	if err != nil {
-		log.Errorf("NewEC2Provider error, %v", err)
-		clients = append(clients, svc)
+	factory := func(cfg aws.Config) Client {
+		return ec2.NewFromConfig(cfg)
 	}
-
-	log.Debugf("Enabled regions for AWS account, %v", regions)
-	for _, region := range regions {
-		cfg.Region = region
-		svc = ec2.NewFromConfig(cfg)
-		clients = append(clients, svc)
-	}
+	m := awslib.ToMultiRegionClient(ec2.NewFromConfig(cfg), cfg, factory, log)
 
 	return &Provider{
-		log:          log,
-		clients:      clients,
-		awsAccountID: awsAccountID,
-		awsRegion:    cfg.Region,
+		log:                log,
+		MultiRegionWrapper: m,
+		awsAccountID:       awsAccountID,
+		awsRegion:          cfg.Region,
 	}
 }

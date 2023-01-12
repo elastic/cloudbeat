@@ -191,8 +191,10 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		}
 
 		s3Provider := Provider{
-			log:     s.log,
-			clients: createMockClients(s3ClientMock, test.regions),
+			log: s.log,
+			MultiRegionWrapper: &awslib.MultiRegionWrapper[Client]{
+				Clients: createMockClients(s3ClientMock, test.regions),
+			},
 		}
 
 		ctx := context.Background()

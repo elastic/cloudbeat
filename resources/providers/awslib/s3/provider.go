@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
@@ -32,31 +33,19 @@ import (
 )
 
 func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
-	var clientsMap = make(map[string]Client, 0)
-
-	client := s3Client.NewFromConfig(cfg)
-	awsUtil := &awslib.CommonUtility{}
-	regions, err := awsUtil.GetRegions(log, cfg)
-	if err != nil {
-		log.Errorf("NewS3Provider error, %v", err)
-		clientsMap[awslib.DefaultRegion] = client
+	factory := func(cfg aws.Config) Client {
+		return s3Client.NewFromConfig(cfg)
 	}
-
-	log.Debugf("Enabled regions for AWS account, %v", regions)
-	for _, region := range regions {
-		cfg.Region = region
-		client = s3Client.NewFromConfig(cfg)
-		clientsMap[region] = client
-	}
+	m := awslib.ToMultiRegionClient(ec2.NewFromConfig(cfg), cfg, factory, log)
 
 	return &Provider{
-		log:     log,
-		clients: clientsMap,
+		log:                log,
+		MultiRegionWrapper: m,
 	}
 }
 
 func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
-	clientBuckets, err := p.clients[awslib.DefaultRegion].ListBuckets(ctx, &s3Client.ListBucketsInput{})
+	clientBuckets, err := p.Clients[awslib.DefaultRegion].ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
 		log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
@@ -98,7 +87,7 @@ func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.B
 }
 
 func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string, region string) (string, error) {
-	client := p.clients[region]
+	client := p.Clients[region]
 	if client == nil {
 		return "", fmt.Errorf("no intialize client exists in %s region", region)
 	}
@@ -124,7 +113,7 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 }
 
 func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (string, error) {
-	location, err := p.clients[awslib.DefaultRegion].GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
+	location, err := p.Clients[awslib.DefaultRegion].GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
 	if err != nil {
 		return "", err
 	}

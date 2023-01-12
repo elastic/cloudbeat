@@ -34,8 +34,8 @@ type S3 interface {
 }
 
 type Provider struct {
-	log     *logp.Logger
-	clients map[string]Client
+	log *logp.Logger
+	*awslib.MultiRegionWrapper[Client]
 }
 
 type Client interface {

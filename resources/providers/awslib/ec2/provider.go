@@ -27,8 +27,8 @@ import (
 )
 
 type Provider struct {
-	log          *logp.Logger
-	clients      []Client
+	log *logp.Logger
+	*awslib.MultiRegionWrapper[Client]
 	awsAccountID string
 	awsRegion    string
 }
@@ -40,7 +40,7 @@ type Client interface {
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
 	var allAcls []types.NetworkAcl
-	for _, client := range p.clients {
+	for _, client := range p.Clients {
 		input := ec2.DescribeNetworkAclsInput{}
 
 		for {
@@ -65,7 +65,7 @@ func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource
 
 func (p *Provider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
 	var all []types.SecurityGroup
-	for _, client := range p.clients {
+	for _, client := range p.Clients {
 		input := &ec2.DescribeSecurityGroupsInput{}
 
 		for {
