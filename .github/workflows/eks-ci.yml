@@ -7,7 +7,7 @@ on:
       test-targets:
         required: true
         description: "Specify test markers to run"
-        default: '[\"pre_merge\"]'
+        default: '[\"eks\"]'
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
