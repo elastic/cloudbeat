@@ -62,7 +62,7 @@ class ElasticWrapper:
         try:
             ret_value = data["hits"]["hits"][index]["_source"]
         except IndexError as ex:
-            logger.warning(ex)
+            # logger.warning(ex)
             return {}
         return ret_value
 
