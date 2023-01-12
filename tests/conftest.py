@@ -110,7 +110,7 @@ def pytest_configure():
     }
 
     logger.configure(**config)
-    logging.getLogger(None).setLevel(logging.INFO)
+    # logging.getLogger(None).setLevel(logging.INFO)
 
 
 @pytest.fixture(scope="session", autouse=True)

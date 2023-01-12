@@ -30,7 +30,6 @@ def get_ES_evaluation(
 
     while time.time() - start_time < timeout:
         try:
-            time.sleep(2)
             events = get_events_from_index(
                 elastic_client,
                 elastic_client.index,
