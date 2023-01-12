@@ -36,7 +36,7 @@ func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
 	factory := func(cfg aws.Config) Client {
 		return s3Client.NewFromConfig(cfg)
 	}
-	m := awslib.ToMultiRegionClient(ec2.NewFromConfig(cfg), cfg, factory, log)
+	m := awslib.CreateMultiRegionClients(ec2.NewFromConfig(cfg), cfg, factory, log)
 
 	return &Provider{
 		log:                log,

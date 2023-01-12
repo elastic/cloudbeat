@@ -55,8 +55,8 @@ type MultiRegionWrapper[T any] struct {
 	Clients map[string]T
 }
 
-// ToMultiRegionClient is a utility function that is used to create a map of client instances of a given type T for multiple regions.
-func ToMultiRegionClient[T any](client AWSCommonUtil, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) *MultiRegionWrapper[T] {
+// CreateMultiRegionClients is a utility function that is used to create a map of client instances of a given type T for multiple regions.
+func CreateMultiRegionClients[T any](client AWSCommonUtil, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) *MultiRegionWrapper[T] {
 	var clientsMap = make(map[string]T, 0)
 	for _, region := range getRegions(client, log) {
 		cfg.Region = region

@@ -35,7 +35,7 @@ func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Prov
 	factory := func(cfg aws.Config) Client {
 		return ec2.NewFromConfig(cfg)
 	}
-	m := awslib.ToMultiRegionClient(ec2.NewFromConfig(cfg), cfg, factory, log)
+	m := awslib.CreateMultiRegionClients(ec2.NewFromConfig(cfg), cfg, factory, log)
 
 	return &Provider{
 		log:                log,

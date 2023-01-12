@@ -39,7 +39,9 @@ var successfulOutput = &ec2sdk.DescribeRegionsOutput{
 	},
 }
 
-func TestGetRegions(t *testing.T) {
+var ec2Client = ec2sdk.NewFromConfig(awssdk.Config{})
+
+func TestCreateMultiRegionClients(t *testing.T) {
 	type args struct {
 		client func() AWSCommonUtil
 		cfg    awssdk.Config
@@ -48,7 +50,7 @@ func TestGetRegions(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want []string
+		want map[string]*ec2sdk.Client
 	}{
 		{
 			name: "Error - return no regions",
@@ -61,7 +63,7 @@ func TestGetRegions(t *testing.T) {
 				cfg: awssdk.Config{},
 				log: logp.NewLogger("aws-test"),
 			},
-			want: nil,
+			want: map[string]*ec2sdk.Client{DefaultRegion: ec2Client},
 		},
 		{
 			name: "Should return enabled regions",
@@ -74,20 +76,19 @@ func TestGetRegions(t *testing.T) {
 				cfg: awssdk.Config{},
 				log: logp.NewLogger("aws-test"),
 			},
-			want: []string{"us-east-1", "eu-west-1"},
+			want: map[string]*ec2sdk.Client{DefaultRegion: ec2Client, "eu-west-1": ec2Client},
 		},
 	}
 
 	for _, tt := range tests {
 		factory := func(cfg awssdk.Config) *ec2sdk.Client {
-			return ec2sdk.NewFromConfig(cfg)
+			return ec2Client
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			got := ToMultiRegionClient(tt.args.client(), tt.args.cfg, factory, tt.args.log)
-
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetRegions() got = %v, want %v", got, tt.want)
+			got := CreateMultiRegionClients(tt.args.client(), tt.args.cfg, factory, tt.args.log)
+			if !reflect.DeepEqual(got.Clients, tt.want) {
+				t.Errorf("GetRegions() got = %v, want %v", got.Clients, tt.want)
 			}
 		})
 	}
