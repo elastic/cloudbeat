@@ -150,11 +150,13 @@ jobs:
             range: ""
             values_file: tests/deploy/values/ci-eks-config-1.yml
             k8s_context: "test-eks-config-1"
+            label: "eks-config-1: functional tests"
           - test-target: eks
             range: ""
             values_file: tests/deploy/values/ci-eks-config-2.yml
             k8s_context: "test-eks-config-2"
-    name: ${{ matrix.test-target }}-tests
+            label: "eks-config-1: functional tests"
+    name: ${{ matrix.label }}
     runs-on: ubuntu-20.04
     timeout-minutes: 90
     steps:
