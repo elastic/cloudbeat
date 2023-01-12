@@ -164,7 +164,6 @@ cis_eks_4_2_9 = {
 
 cis_eks_all = {
     "test-eks-config-1": {
-        **cis_eks_4_2_1,
         **cis_eks_4_2_2,
         **cis_eks_4_2_3,
         **cis_eks_4_2_4,
@@ -217,7 +216,9 @@ cis_eks_all = {
             ),
         ),
     },
-    "test-eks-config-2": {},
+    "test-eks-config-2": {
+        **cis_eks_4_2_1,
+    },
 }
 
 cis_eks_k8s_object_cases = cis_eks_all[eks.current_config]

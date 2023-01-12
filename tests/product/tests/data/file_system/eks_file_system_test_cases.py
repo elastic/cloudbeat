@@ -11,6 +11,7 @@ from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 config_1_node_1 = eks.config_1_node_1
 config_1_node_2 = eks.config_1_node_2
+config_2_node_1 = eks.config_2_node_1
 
 cis_eks_3_1_1_pass = EksTestCase(
     rule_tag="CIS 3.1.1",
@@ -24,10 +25,21 @@ cis_eks_3_1_1_fail = EksTestCase(
     expected=RULE_FAIL_STATUS,
 )
 
+cis_eks_3_1_1_pass_2 = EksTestCase(
+    rule_tag="CIS 3.1.1",
+    node_hostname=config_2_node_1,
+    expected=RULE_PASS_STATUS,
+)
+
 cis_eks_3_1_1 = {
     "3.1.1 Kubeconfig file permissions 644 evaluation passed": cis_eks_3_1_1_pass,
     "3.1.1 Kubeconfig file permissions 700 evaluation failed": cis_eks_3_1_1_fail,
 }
+
+cis_eks_3_1_1_conf_2 = {
+    "3.1.1 Kubeconfig file permissions 644 evaluation passed": cis_eks_3_1_1_pass_2,
+}
+
 
 cis_eks_3_1_2_user_fail = EksTestCase(
     rule_tag="CIS 3.1.2",
@@ -88,7 +100,9 @@ cis_eks_all = {
         **cis_eks_3_1_3,
         **cis_eks_3_1_4,
     },
-    "test-eks-config-2": {},
+    "test-eks-config-2": {
+        **cis_eks_3_1_1_conf_2,
+    },
 }
 
 cis_eks_file_system_cases = cis_eks_all[eks.current_config]
