@@ -77,23 +77,35 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 
 		mfaDevices, err := p.getMFADevices(ctx, apiUser, userAccount)
 		if err != nil {
-			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
+			p.log.Errorf("fail to list mfa device for user: %s, error: %v", username, err)
 		}
 
 		pwdEnabled, err := isPasswordEnabled(userAccount)
 		if err != nil {
-			p.log.Errorf("fail to parse PasswordEnabled for user: %v, error: %v", apiUser, err)
+			p.log.Errorf("fail to parse PasswordEnabled for user: %s, error: %v", username, err)
 			pwdEnabled = false
+		}
+
+		inlinePolicies, err := p.listInlinePolicies(ctx, apiUser.UserName)
+		if err != nil {
+			p.log.Errorf("fail to list inline policies for user: %s, error: %v", username, err)
+		}
+
+		attachedPolicies, err := p.listAttachedPolicies(ctx, apiUser.UserName)
+		if err != nil {
+			p.log.Errorf("fail to list attached policies for user: %s, error: %v", username, err)
 		}
 
 		users = append(users, User{
 			AccessKeys:          keys,
 			MFADevices:          mfaDevices,
+			InlinePolicies:      inlinePolicies,
+			AttachedPolicies:    attachedPolicies,
 			Name:                username,
 			LastAccess:          userAccount.PasswordLastUsed,
 			Arn:                 arn,
-			PasswordEnabled:     pwdEnabled,
 			PasswordLastChanged: userAccount.PasswordLastChanged,
+			PasswordEnabled:     pwdEnabled,
 			MfaActive:           userAccount.MfaActive,
 		})
 	}

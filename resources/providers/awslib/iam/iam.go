@@ -36,13 +36,16 @@ type Client interface {
 	ListUsers(ctx context.Context, params *iamsdk.ListUsersInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListUsersOutput, error)
 	ListMFADevices(ctx context.Context, params *iamsdk.ListMFADevicesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListMFADevicesOutput, error)
 	ListAccessKeys(ctx context.Context, params *iamsdk.ListAccessKeysInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAccessKeysOutput, error)
+	ListAttachedRolePolicies(ctx context.Context, params *iamsdk.ListAttachedRolePoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAttachedRolePoliciesOutput, error)
+	ListVirtualMFADevices(ctx context.Context, params *iamsdk.ListVirtualMFADevicesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListVirtualMFADevicesOutput, error)
+	ListAttachedUserPolicies(ctx context.Context, params *iamsdk.ListAttachedUserPoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAttachedUserPoliciesOutput, error)
+	ListUserPolicies(ctx context.Context, params *iamsdk.ListUserPoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListUserPoliciesOutput, error)
 	GetAccessKeyLastUsed(ctx context.Context, params *iamsdk.GetAccessKeyLastUsedInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetAccessKeyLastUsedOutput, error)
 	GetAccountPasswordPolicy(ctx context.Context, params *iamsdk.GetAccountPasswordPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetAccountPasswordPolicyOutput, error)
 	GetRolePolicy(ctx context.Context, params *iamsdk.GetRolePolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetRolePolicyOutput, error)
-	ListAttachedRolePolicies(ctx context.Context, params *iamsdk.ListAttachedRolePoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAttachedRolePoliciesOutput, error)
-	GenerateCredentialReport(ctx context.Context, params *iamsdk.GenerateCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GenerateCredentialReportOutput, error)
 	GetCredentialReport(ctx context.Context, params *iamsdk.GetCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetCredentialReportOutput, error)
-	ListVirtualMFADevices(ctx context.Context, params *iamsdk.ListVirtualMFADevicesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListVirtualMFADevicesOutput, error)
+	GetUserPolicy(ctx context.Context, params *iamsdk.GetUserPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetUserPolicyOutput, error)
+	GenerateCredentialReport(ctx context.Context, params *iamsdk.GenerateCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GenerateCredentialReportOutput, error)
 }
 
 type Provider struct {
@@ -57,14 +60,16 @@ type RolePolicyInfo struct {
 
 // User Override SDK User type
 type User struct {
-	AccessKeys          []AccessKey  `json:"access_keys,omitempty"`
-	MFADevices          []AuthDevice `json:"mfa_devices,omitempty"`
-	Name                string       `json:"name,omitempty"`
-	LastAccess          string       `json:"last_access,omitempty"`
-	Arn                 string       `json:"arn,omitempty"`
-	PasswordLastChanged string       `json:"password_last_changed,omitempty"`
-	PasswordEnabled     bool         `json:"password_enabled"`
-	MfaActive           bool         `json:"mfa_active"`
+	AccessKeys          []AccessKey            `json:"access_keys,omitempty"`
+	MFADevices          []AuthDevice           `json:"mfa_devices,omitempty"`
+	InlinePolicies      []PolicyDocument       `json:"inline_policies,omitempty"`
+	AttachedPolicies    []types.AttachedPolicy `json:"attached_policies,omitempty"`
+	Name                string                 `json:"name,omitempty"`
+	LastAccess          string                 `json:"last_access,omitempty"`
+	Arn                 string                 `json:"arn,omitempty"`
+	PasswordLastChanged string                 `json:"password_last_changed,omitempty"`
+	PasswordEnabled     bool                   `json:"password_enabled"`
+	MfaActive           bool                   `json:"mfa_active"`
 }
 
 type AuthDevice struct {
