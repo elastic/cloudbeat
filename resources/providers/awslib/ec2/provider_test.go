@@ -20,7 +20,6 @@ package ec2
 import (
 	"context"
 	"errors"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -64,10 +63,8 @@ func TestProvider_DescribeNetworkAcl(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Provider{
-				log: logp.NewLogger(tt.name),
-				MultiRegionWrapper: &awslib.MultiRegionWrapper[Client]{
-					Clients: map[string]Client{awslib.DefaultRegion: tt.client()},
-				},
+				log:    logp.NewLogger(tt.name),
+				client: tt.client(),
 			}
 			got, err := p.DescribeNetworkAcl(context.Background())
 			if tt.wantErr {
@@ -115,10 +112,8 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Provider{
-				log: logp.NewLogger(tt.name),
-				MultiRegionWrapper: &awslib.MultiRegionWrapper[Client]{
-					Clients: map[string]Client{awslib.DefaultRegion: tt.client()},
-				},
+				log:    logp.NewLogger(tt.name),
+				client: tt.client(),
 			}
 
 			got, err := p.DescribeSecurityGroups(context.Background())

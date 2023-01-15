@@ -52,7 +52,7 @@ func (f *EksFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 
 func (f *EksFactory) CreateFrom(log *logp.Logger, cfg EksFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log, false)
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}

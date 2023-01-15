@@ -71,13 +71,13 @@ default_region: us1-east
 	for _, test := range tests {
 		mockedConfigGetter := &awslib.MockConfigProviderAPI{}
 		mockedConfigGetter.EXPECT().
-			InitializeAWSConfig(mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			InitializeAWSConfig(mock.Anything, mock.Anything).
 			Call.
-			Return(func(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) awssdk.Config {
+			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
 
-				return CreateSdkConfig(cfg, "us1-east")
+				return CreateSdkConfig(config, "us1-east")
 			},
-				func(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) error {
+				func(ctx context.Context, config aws.ConfigAWS) error {
 					return nil
 				},
 			)

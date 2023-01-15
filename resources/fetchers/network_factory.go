@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
@@ -57,7 +58,7 @@ func (f *EC2NetworkFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan f
 
 func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log, true)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
@@ -68,7 +69,7 @@ func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, c
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
-	provider := ec2.NewEC2Provider(log, *identity.Account, awsConfig)
+	provider := ec2.NewCrossEC2Provider(log, *identity.Account, awsConfig)
 
 	return &NetworkFetcher{
 		log:           log,

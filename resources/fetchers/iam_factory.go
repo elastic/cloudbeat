@@ -21,6 +21,8 @@ import (
 	"context"
 	"fmt"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
@@ -56,7 +58,7 @@ func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 
 func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log, true)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}

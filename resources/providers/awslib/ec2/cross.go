@@ -19,24 +19,36 @@ package ec2
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type ElasticCompute interface {
-	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
-	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
+type crossRegionElasticCompute struct {
+	*awslib.MultiRegionWrapper[ElasticCompute]
 }
 
-func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
-	svc := ec2.NewFromConfig(cfg)
-	return &Provider{
-		log:          log,
-		client:       svc,
-		awsAccountID: awsAccountID,
-		awsRegion:    cfg.Region,
+func (c *crossRegionElasticCompute) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
+	return c.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
+		return ec.DescribeNetworkAcl(ctx)
+	})
+}
+
+func (c *crossRegionElasticCompute) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
+	return c.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
+		return ec.DescribeSecurityGroups(ctx)
+	})
+}
+
+func NewCrossEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) ElasticCompute {
+	factory := func(cfg aws.Config) ElasticCompute {
+		return NewEC2Provider(log, awsAccountID, cfg)
+	}
+
+	wrapper := awslib.CreateMultiRegionClients(ec2.NewFromConfig(cfg), cfg, factory, log)
+	return &crossRegionElasticCompute{
+		MultiRegionWrapper: wrapper,
 	}
 }

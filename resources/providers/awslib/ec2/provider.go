@@ -27,8 +27,8 @@ import (
 )
 
 type Provider struct {
-	log *logp.Logger
-	*awslib.MultiRegionWrapper[Client]
+	log          *logp.Logger
+	client       Client
 	awsAccountID string
 	awsRegion    string
 }
@@ -40,20 +40,17 @@ type Client interface {
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
 	var allAcls []types.NetworkAcl
-	for _, client := range p.Clients {
-		input := ec2.DescribeNetworkAclsInput{}
-
-		for {
-			output, err := client.DescribeNetworkAcls(ctx, &input)
-			if err != nil {
-				return nil, err
-			}
-			allAcls = append(allAcls, output.NetworkAcls...)
-			if output.NextToken == nil {
-				break
-			}
-			input.NextToken = output.NextToken
+	input := ec2.DescribeNetworkAclsInput{}
+	for {
+		output, err := p.client.DescribeNetworkAcls(ctx, &input)
+		if err != nil {
+			return nil, err
 		}
+		allAcls = append(allAcls, output.NetworkAcls...)
+		if output.NextToken == nil {
+			break
+		}
+		input.NextToken = output.NextToken
 	}
 
 	var result []awslib.AwsResource
@@ -65,20 +62,17 @@ func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource
 
 func (p *Provider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
 	var all []types.SecurityGroup
-	for _, client := range p.Clients {
-		input := &ec2.DescribeSecurityGroupsInput{}
-
-		for {
-			output, err := client.DescribeSecurityGroups(ctx, input)
-			if err != nil {
-				return nil, err
-			}
-			all = append(all, output.SecurityGroups...)
-			if output.NextToken == nil {
-				break
-			}
-			input.NextToken = output.NextToken
+	input := &ec2.DescribeSecurityGroupsInput{}
+	for {
+		output, err := p.client.DescribeSecurityGroups(ctx, input)
+		if err != nil {
+			return nil, err
 		}
+		all = append(all, output.SecurityGroups...)
+		if output.NextToken == nil {
+			break
+		}
+		input.NextToken = output.NextToken
 	}
 
 	var result []awslib.AwsResource

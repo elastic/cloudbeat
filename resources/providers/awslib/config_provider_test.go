@@ -46,19 +46,17 @@ func TestEcrFactoryTestSuite(t *testing.T) {
 
 func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 	var tests = []struct {
-		accessKey        string
-		secret           string
-		session          string
-		region           string
-		useDefaultRegion bool
-		mock             func() MetadataProvider
+		accessKey string
+		secret    string
+		session   string
+		region    string
+		mock      func() MetadataProvider
 	}{
 		{
-			accessKey:        "key",
-			secret:           "secret",
-			session:          "session",
-			region:           "us-east-1",
-			useDefaultRegion: false,
+			accessKey: "key",
+			secret:    "secret",
+			session:   "session",
+			region:    "us-east-1",
 			mock: func() MetadataProvider {
 				m := &MockMetadataProvider{}
 				m.EXPECT().
@@ -70,11 +68,10 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 			},
 		},
 		{
-			accessKey:        "key-1",
-			secret:           "secret-1",
-			session:          "session-1",
-			region:           "us-east-2",
-			useDefaultRegion: false,
+			accessKey: "key-1",
+			secret:    "secret-1",
+			session:   "session-1",
+			region:    "us-east-2",
 			mock: func() MetadataProvider {
 				m := &MockMetadataProvider{}
 				m.EXPECT().
@@ -86,12 +83,11 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 			},
 		},
 		{
-			accessKey:        "key-1",
-			secret:           "secret-1",
-			session:          "session-1",
-			region:           "us-east-1",
-			useDefaultRegion: true,
-			mock:             func() MetadataProvider { return nil },
+			accessKey: "key-1",
+			secret:    "secret-1",
+			session:   "session-1",
+			region:    "us-east-1",
+			mock:      func() MetadataProvider { return nil },
 		},
 	}
 
@@ -106,7 +102,7 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 			SecretAccessKey: test.secret,
 			SessionToken:    test.session,
 		}
-		awsConfig, err := configProvider.InitializeAWSConfig(context.Background(), agentAwsConfig, s.log, test.useDefaultRegion)
+		awsConfig, err := configProvider.InitializeAWSConfig(context.Background(), agentAwsConfig)
 		s.NoError(err)
 
 		cred, err := awsConfig.Credentials.Retrieve(context.Background())

@@ -19,7 +19,7 @@ package fetchers
 
 import (
 	"context"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	awsSdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/mock"
@@ -66,12 +66,13 @@ default_region: eu-west-2
 	for _, test := range tests {
 		mockedConfigGetter := &awslib.MockConfigProviderAPI{}
 		mockedConfigGetter.EXPECT().
-			InitializeAWSConfig(mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+			InitializeAWSConfig(mock.Anything, mock.Anything).
 			Call.
-			Return(func(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) awssdk.Config {
-				return CreateSdkConfig(cfg, "eu-west-2")
+			Return(func(ctx context.Context, config aws.ConfigAWS) awsSdk.Config {
+
+				return CreateSdkConfig(config, "eu-west-2")
 			},
-				func(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger, useDefaultRegion bool) error {
+				func(ctx context.Context, config aws.ConfigAWS) error {
 					return nil
 				},
 			)

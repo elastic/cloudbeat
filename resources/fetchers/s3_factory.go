@@ -18,8 +18,8 @@
 package fetchers
 
 import (
-	"context"
 	"fmt"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	agentConfig "github.com/elastic/elastic-agent-libs/config"
@@ -51,8 +51,7 @@ func (f *S3Factory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.
 }
 
 func (f *S3Factory) CreateFrom(log *logp.Logger, cfg S3FetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log, true)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
