@@ -42,12 +42,12 @@ def get_ES_evaluation(
             continue
 
         for event in events:
-            # findings_timestamp = datetime.datetime.strptime(
-            #     getattr(event, "@timestamp"),
-            #     "%Y-%m-%dT%H:%M:%S.%fZ",
-            # )
-            # if findings_timestamp > latest_timestamp:
-            #     latest_timestamp = findings_timestamp
+            findings_timestamp = datetime.datetime.strptime(
+                getattr(event, "@timestamp"),
+                "%Y-%m-%dT%H:%M:%S.%fZ",
+            )
+            if findings_timestamp > latest_timestamp:
+                latest_timestamp = findings_timestamp
 
             try:
                 evaluation = event.result.evaluation
