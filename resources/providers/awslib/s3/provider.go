@@ -29,7 +29,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"gotest.tools/gotestsum/log"
 )
 
 func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
@@ -47,7 +46,7 @@ func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
 func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
 	clientBuckets, err := p.Clients[awslib.DefaultRegion].ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
-		log.Errorf("Could not list s3 buckets: %v", err)
+		p.log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
 	}
 

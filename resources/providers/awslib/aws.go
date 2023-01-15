@@ -23,10 +23,6 @@ import (
 
 const DefaultRegion = "us-east-1"
 
-type singleton struct {
-	regions []string
-}
-
 type Config struct {
 	Config awssdk.Config
 }

@@ -50,51 +50,33 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 		secret    string
 		session   string
 		region    string
-		mock      func() MetadataProvider
 	}{
 		{
-			accessKey: "key",
-			secret:    "secret",
-			session:   "session",
-			region:    "us-east-1",
-			mock: func() MetadataProvider {
-				m := &MockMetadataProvider{}
-				m.EXPECT().
-					GetMetadata(mock.Anything, mock.Anything).
-					Return(Ec2Metadata{
-						Region: "us-east-1",
-					}, nil)
-				return m
-			},
+
+			"key",
+			"secret",
+			"session",
+			"us1-east",
 		},
 		{
-			accessKey: "key-1",
-			secret:    "secret-1",
-			session:   "session-1",
-			region:    "us-east-2",
-			mock: func() MetadataProvider {
-				m := &MockMetadataProvider{}
-				m.EXPECT().
-					GetMetadata(mock.Anything, mock.Anything).
-					Return(Ec2Metadata{
-						Region: "us-east-2",
-					}, nil)
-				return m
-			},
-		},
-		{
-			accessKey: "key-1",
-			secret:    "secret-1",
-			session:   "session-1",
-			region:    "us-east-1",
-			mock:      func() MetadataProvider { return nil },
+
+			"key-1",
+			"secret-1",
+			"session-1",
+			"us2-east",
 		},
 	}
 
 	for _, test := range tests {
+		metaDataGetter := &MockMetadataProvider{}
+		metaDataGetter.EXPECT().
+			GetMetadata(mock.Anything, mock.Anything).
+			Return(Ec2Metadata{
+				Region: test.region,
+			}, nil)
 
 		configProvider := ConfigProvider{
-			MetadataProvider: test.mock(),
+			metaDataGetter,
 		}
 
 		agentAwsConfig := aws.ConfigAWS{

@@ -31,6 +31,10 @@ var (
 	once     = &sync.Once{}
 )
 
+type singleton struct {
+	regions []string
+}
+
 type AWSCommonUtil interface {
 	DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 }
