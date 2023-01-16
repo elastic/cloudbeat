@@ -60,7 +60,7 @@ func TestNetworkFactory_Create(t *testing.T) {
 	}
 	cfg, err := agentconfig.NewConfigFrom(awsConfig)
 	assert.NoError(t, err)
-	fetcher, err := f.Create(logp.NewLogger("test"), cfg, nil)
+	fetcher, err := f.Create(logp.NewLogger("network-factory-test"), cfg, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, fetcher)
 	nacl, ok := fetcher.(*NetworkFetcher)
