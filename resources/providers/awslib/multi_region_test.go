@@ -159,7 +159,7 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 				t.Errorf("Fetch() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !assert.Equal(t, got, tt.want) {
+			if !assert.ElementsMatch(t, got, tt.want) {
 				t.Errorf("Fetch() got = %v, want %v", got, tt.want)
 			}
 		})
