@@ -18,6 +18,9 @@
 package fetchers
 
 import (
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
+	"github.com/stretchr/testify/mock"
 	"testing"
 
 	agentConfig "github.com/elastic/elastic-agent-libs/config"
@@ -59,7 +62,19 @@ default_region: eu-west-2
 	}
 
 	for _, test := range tests {
-		factory := &S3Factory{}
+		mockCrossRegionUtil := &awslib.MockCrossRegionUtil[s3.Client]{}
+		mockCrossRegionUtil.On(
+			"NewMultiRegionClients",
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+		).Return(&awslib.MultiRegionWrapper[s3.Client]{})
+
+		factory := &S3Factory{
+			CrossRegionUtil: mockCrossRegionUtil,
+		}
+		
 		cfg, err := agentConfig.NewConfigFrom(test.config)
 		s.NoError(err)
 

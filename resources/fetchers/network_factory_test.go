@@ -18,6 +18,7 @@
 package fetchers
 
 import (
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"testing"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -42,7 +43,17 @@ func TestNetworkFactory_Create(t *testing.T) {
 		Account: awssdk.String("test-account"),
 	}, nil)
 
+	mockCrossRegionUtil := &awslib.MockCrossRegionUtil[ec2.ElasticCompute]{}
+	mockCrossRegionUtil.On(
+		"NewMultiRegionClients",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(&awslib.MultiRegionWrapper[ec2.ElasticCompute]{})
+
 	f := &EC2NetworkFactory{
+		CrossRegionUtil: mockCrossRegionUtil,
 		IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 			return identity
 		},
