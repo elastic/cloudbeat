@@ -19,15 +19,16 @@ package s3
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"gotest.tools/gotestsum/log"
 )
 
 func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
@@ -42,7 +43,7 @@ func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
 func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
 	clientBuckets, err := p.client.ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
-		log.Errorf("Could not list s3 buckets: %v", err)
+		p.log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
 	}
 
@@ -60,18 +61,28 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 		// If the bucket is not in the configured region additional API calls for resources will fail, we should not
 		//  describe this bucket.
 		if bucketRegion != p.region {
-			log.Debugf("Bucket %s is in region %s and not in the configured region %s. Not describing this bucket", *clientBucket.Name, bucketRegion, p.region)
+			p.log.Debugf("Bucket %s is in region %s and not in the configured region %s. Not describing this bucket", *clientBucket.Name, bucketRegion, p.region)
 			continue
 		}
 
+		// Getting the bucket encryption, policy and versioning is not critical for the rest of the flow, so we should
+		//	keep describing the bucket even if getting these objects fails.
 		sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, clientBucket.Name)
-		// Getting the bucket encryption is not critical for the rest of the flow, so we should keep describing the
-		//	bucket even if getting the bucket encryption fails.
 		if encryptionErr != nil {
 			p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *clientBucket.Name, encryptionErr)
 		}
 
-		result = append(result, BucketDescription{*clientBucket.Name, sseAlgorithm})
+		bucketPolicy, policyErr := p.getBucketPolicy(ctx, clientBucket.Name)
+		if policyErr != nil {
+			p.log.Errorf("Could not get bucket policy for bucket %s. Error: %v", *clientBucket.Name, policyErr)
+		}
+
+		bucketVersioning, versioningErr := p.getBucketVersioning(ctx, clientBucket.Name)
+		if versioningErr != nil {
+			p.log.Errorf("Could not get bucket versioning for bucket %s. Err: %v", *clientBucket.Name, versioningErr)
+		}
+
+		result = append(result, BucketDescription{*clientBucket.Name, sseAlgorithm, bucketPolicy, bucketVersioning})
 	}
 
 	return result, nil
@@ -112,6 +123,47 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (stri
 	}
 
 	return region, nil
+}
+
+func (p Provider) getBucketPolicy(ctx context.Context, bucketName *string) (BucketPolicy, error) {
+	rawPolicy, err := p.client.GetBucketPolicy(ctx, &s3Client.GetBucketPolicyInput{Bucket: bucketName})
+	if err != nil {
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == "NoSuchBucketPolicy" {
+				p.log.Debugf("Bucket policy for bucket %s does not exist", *bucketName)
+				return nil, nil
+			}
+		}
+
+		return nil, err
+	}
+
+	var bucketPolicy BucketPolicy
+	jsonErr := json.Unmarshal([]byte(*rawPolicy.Policy), &bucketPolicy)
+	if jsonErr != nil {
+		return nil, jsonErr
+	}
+
+	return bucketPolicy, nil
+}
+
+func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string) (BucketVersioning, error) {
+	bucketVersioning := BucketVersioning{false, false}
+	bucketVersioningResponse, err := p.client.GetBucketVersioning(ctx, &s3Client.GetBucketVersioningInput{Bucket: bucketName})
+	if err != nil {
+		return bucketVersioning, err
+	}
+
+	if bucketVersioningResponse.Status == types.BucketVersioningStatusEnabled {
+		bucketVersioning.Enabled = true
+	}
+
+	if bucketVersioningResponse.MFADelete == types.MFADeleteStatusEnabled {
+		bucketVersioning.MfaDelete = true
+	}
+
+	return bucketVersioning, nil
 }
 
 func (b BucketDescription) GetResourceArn() string {
