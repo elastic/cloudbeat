@@ -19,6 +19,7 @@ package awslib
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -27,20 +28,41 @@ import (
 )
 
 var (
-	instance *singleton
-	once     = &sync.Once{}
+	awsRegions *cachedRegions
+	once       = &sync.Once{}
 )
 
-type singleton struct {
-	regions []string
+type cachedRegions struct {
+	enabledRegions []string
 }
 
-type AWSCommonUtil interface {
+type CrossRegionUtil[T any] interface {
+	NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) *MultiRegionWrapper[T]
+	Fetch(fetcher func(T) ([]AwsResource, error)) ([]AwsResource, error)
+	GetMultiRegionsClientMap() map[string]T
+}
+
+type DescribeCloudRegions interface {
 	DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 }
 
 type MultiRegionWrapper[T any] struct {
-	Clients map[string]T
+	clients map[string]T
+}
+
+// NewMultiRegionClients is a utility function that is used to create a map of client instances of a given type T for multiple regions.
+func (w *MultiRegionWrapper[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) *MultiRegionWrapper[T] {
+	var clientsMap = make(map[string]T, 0)
+	for _, region := range getRegions(client, log) {
+		cfg.Region = region
+		clientsMap[region] = factory(cfg)
+	}
+
+	wrapper := &MultiRegionWrapper[T]{
+		clients: clientsMap,
+	}
+
+	return wrapper
 }
 
 // Fetch retrieves resources from multiple regions concurrently using the provided fetcher function.
@@ -50,7 +72,11 @@ func (w *MultiRegionWrapper[T]) Fetch(fetcher func(T) ([]AwsResource, error)) ([
 	var mux sync.Mutex
 	var crossRegionResources []AwsResource
 
-	for region, client := range w.Clients {
+	if w.clients == nil {
+		return nil, errors.New("multi region clients have not been initialize")
+	}
+
+	for region, client := range w.clients {
 		wg.Add(1)
 		go func(client T, region string) {
 			defer wg.Done()
@@ -69,25 +95,14 @@ func (w *MultiRegionWrapper[T]) Fetch(fetcher func(T) ([]AwsResource, error)) ([
 	return crossRegionResources, err
 }
 
-// CreateMultiRegionClients is a utility function that is used to create a map of client instances of a given type T for multiple regions.
-func CreateMultiRegionClients[T any](client AWSCommonUtil, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) *MultiRegionWrapper[T] {
-	var clientsMap = make(map[string]T, 0)
-	for _, region := range getRegions(client, log) {
-		cfg.Region = region
-		clientsMap[region] = factory(cfg)
-	}
-
-	w := &MultiRegionWrapper[T]{
-		Clients: clientsMap,
-	}
-
-	return w
+func (w *MultiRegionWrapper[T]) GetMultiRegionsClientMap() map[string]T {
+	return w.clients
 }
 
 // GetRegions will initialize the singleton instance and perform the API request to retrieve the regions list only once, even if the function is called multiple times.
 // Subsequent calls to the function will return the stored regions list without making another API request.
 // In case of a failure the function returns the default region.
-func getRegions(client AWSCommonUtil, log *logp.Logger) []string {
+func getRegions(client DescribeCloudRegions, log *logp.Logger) []string {
 	log.Debug("GetRegions starting...")
 	var mu sync.Mutex
 	var initErr error
@@ -96,7 +111,7 @@ func getRegions(client AWSCommonUtil, log *logp.Logger) []string {
 	defer mu.Unlock()
 	once.Do(func() {
 		log.Debug("Get aws regions for the first time")
-		instance = &singleton{}
+		awsRegions = &cachedRegions{}
 
 		output, err := client.DescribeRegions(context.Background(), nil)
 		if err != nil {
@@ -106,15 +121,15 @@ func getRegions(client AWSCommonUtil, log *logp.Logger) []string {
 		}
 
 		for _, region := range output.Regions {
-			instance.regions = append(instance.regions, *region.RegionName)
+			awsRegions.enabledRegions = append(awsRegions.enabledRegions, *region.RegionName)
 		}
 	})
 
 	if initErr != nil {
 		log.Errorf("Error: %v, init client only for the default region: %s", initErr, DefaultRegion)
-		instance.regions = append(instance.regions, DefaultRegion)
+		awsRegions.enabledRegions = append(awsRegions.enabledRegions, DefaultRegion)
 	}
 
-	log.Debugf("enabled regions for aws account, %v", instance.regions)
-	return instance.regions
+	log.Debugf("enabled regions for aws account, %v", awsRegions.enabledRegions)
+	return awsRegions.enabledRegions
 }

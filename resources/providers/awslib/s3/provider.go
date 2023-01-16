@@ -31,20 +31,20 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
+func NewProvider(cfg aws.Config, log *logp.Logger, util awslib.CrossRegionUtil[Client]) *Provider {
 	factory := func(cfg aws.Config) Client {
 		return s3Client.NewFromConfig(cfg)
 	}
-	m := awslib.CreateMultiRegionClients(ec2.NewFromConfig(cfg), cfg, factory, log)
+	m := util.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, factory, log)
 
 	return &Provider{
-		log:                log,
-		MultiRegionWrapper: m,
+		log:     log,
+		clients: m.GetMultiRegionsClientMap(),
 	}
 }
 
 func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
-	clientBuckets, err := p.Clients[awslib.DefaultRegion].ListBuckets(ctx, &s3Client.ListBucketsInput{})
+	clientBuckets, err := p.clients[awslib.DefaultRegion].ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
 		p.log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
@@ -86,7 +86,7 @@ func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.B
 }
 
 func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string, region string) (string, error) {
-	client := p.Clients[region]
+	client := p.clients[region]
 	if client == nil {
 		return "", fmt.Errorf("no intialize client exists in %s region", region)
 	}
@@ -112,7 +112,7 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 }
 
 func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (string, error) {
-	location, err := p.Clients[awslib.DefaultRegion].GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
+	location, err := p.clients[awslib.DefaultRegion].GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
 	if err != nil {
 		return "", err
 	}

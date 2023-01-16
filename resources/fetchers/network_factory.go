@@ -34,14 +34,14 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.EC2NetworkingType, &EC2NetworkFactory{
-		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
-		IdentityProvider:  awslib.GetIdentityClient,
+		CrossRegionUtil:  &awslib.MultiRegionWrapper[ec2.ElasticCompute]{},
+		IdentityProvider: awslib.GetIdentityClient,
 	})
 }
 
 type EC2NetworkFactory struct {
-	AwsConfigProvider awslib.ConfigProviderAPI
-	IdentityProvider  func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	CrossRegionUtil  awslib.CrossRegionUtil[ec2.ElasticCompute]
+	IdentityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *EC2NetworkFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -69,7 +69,7 @@ func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, c
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
-	provider := ec2.NewCrossEC2Provider(log, *identity.Account, awsConfig)
+	provider := ec2.NewCrossEC2Provider(log, *identity.Account, awsConfig, f.CrossRegionUtil)
 
 	return &NetworkFetcher{
 		log:           log,

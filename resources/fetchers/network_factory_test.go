@@ -18,11 +18,9 @@
 package fetchers
 
 import (
-	"context"
 	"testing"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -43,18 +41,8 @@ func TestNetworkFactory_Create(t *testing.T) {
 	identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
 		Account: awssdk.String("test-account"),
 	}, nil)
-	awsconfig := &awslib.MockConfigProviderAPI{}
-	awsconfig.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
-		Call.
-		Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
-			return CreateSdkConfig(config, "us1-east")
-		},
-			func(ctx context.Context, config aws.ConfigAWS) error {
-				return nil
-			},
-		)
+
 	f := &EC2NetworkFactory{
-		AwsConfigProvider: awsconfig,
 		IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 			return identity
 		},

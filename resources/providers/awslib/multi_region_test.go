@@ -45,9 +45,9 @@ var successfulOutput = &ec2sdk.DescribeRegionsOutput{
 	},
 }
 
-func TestMultiRegionWrapper_CreateMultiRegionClients(t *testing.T) {
+func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 	type args struct {
-		client func() AWSCommonUtil
+		client func() DescribeCloudRegions
 		cfg    awssdk.Config
 		log    *logp.Logger
 	}
@@ -59,8 +59,8 @@ func TestMultiRegionWrapper_CreateMultiRegionClients(t *testing.T) {
 		{
 			name: "Error - return no regions",
 			args: args{
-				client: func() AWSCommonUtil {
-					m := &MockAWSCommonUtil{}
+				client: func() DescribeCloudRegions {
+					m := &MockDescribeCloudRegions{}
 					m.On("DescribeRegions", mock.Anything, mock.Anything).Return(nil, errors.New("fail to query endpoint"))
 					return m
 				},
@@ -72,8 +72,8 @@ func TestMultiRegionWrapper_CreateMultiRegionClients(t *testing.T) {
 		{
 			name: "Should return enabled regions",
 			args: args{
-				client: func() AWSCommonUtil {
-					m := &MockAWSCommonUtil{}
+				client: func() DescribeCloudRegions {
+					m := &MockDescribeCloudRegions{}
 					m.On("DescribeRegions", mock.Anything, mock.Anything).Return(successfulOutput, nil)
 					return m
 				},
@@ -84,15 +84,16 @@ func TestMultiRegionWrapper_CreateMultiRegionClients(t *testing.T) {
 		},
 	}
 
+	wrapper := MultiRegionWrapper[string]{}
 	for _, tt := range tests {
 		factory := func(cfg awssdk.Config) string {
 			return cfg.Region
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			got := CreateMultiRegionClients(tt.args.client(), tt.args.cfg, factory, tt.args.log)
-			if !reflect.DeepEqual(got.Clients, tt.want) {
-				t.Errorf("GetRegions() got = %v, want %v", got.Clients, tt.want)
+			multiRegionClients := wrapper.NewMultiRegionClients(tt.args.client(), tt.args.cfg, factory, tt.args.log)
+			if !reflect.DeepEqual(multiRegionClients.clients, tt.want) {
+				t.Errorf("GetRegions() got = %v, want %v", multiRegionClients.clients, tt.want)
 			}
 		})
 	}
@@ -113,7 +114,7 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 		{
 			name: "Fetch resources from multiple regions",
 			w: MultiRegionWrapper[testClient]{
-				Clients: map[string]testClient{euRegion: &dummyTester{euRegion}, usRegion: &dummyTester{usRegion}},
+				clients: map[string]testClient{euRegion: &dummyTester{euRegion}, usRegion: &dummyTester{usRegion}},
 			},
 			args: args[testClient]{
 				fetcher: func(c testClient) ([]AwsResource, error) {
@@ -126,7 +127,7 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 		{
 			name: "Error from a single region",
 			w: MultiRegionWrapper[testClient]{
-				Clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
+				clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
 			},
 			args: args[testClient]{
 				fetcher: func(c testClient) ([]AwsResource, error) {
@@ -139,7 +140,7 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 		{
 			name: "Error from all regions",
 			w: MultiRegionWrapper[testClient]{
-				Clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
+				clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
 			},
 			args: args[testClient]{
 				fetcher: func(c testClient) ([]AwsResource, error) {

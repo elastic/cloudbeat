@@ -34,14 +34,12 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.IAMType, &IAMFactory{
-		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
-		IdentityProvider:  awslib.GetIdentityClient,
+		IdentityProvider: awslib.GetIdentityClient,
 	})
 }
 
 type IAMFactory struct {
-	AwsConfigProvider awslib.ConfigProviderAPI
-	IdentityProvider  func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	IdentityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {

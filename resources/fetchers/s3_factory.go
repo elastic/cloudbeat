@@ -31,12 +31,12 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.S3Type, &S3Factory{
-		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+		CrossRegionUtil: &awslib.MultiRegionWrapper[s3.Client]{},
 	})
 }
 
 type S3Factory struct {
-	AwsConfigProvider awslib.ConfigProviderAPI
+	CrossRegionUtil awslib.CrossRegionUtil[s3.Client]
 }
 
 func (f *S3Factory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -56,7 +56,7 @@ func (f *S3Factory) CreateFrom(log *logp.Logger, cfg S3FetcherConfig, ch chan fe
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	s3Provider := s3.NewProvider(awsConfig, log)
+	s3Provider := s3.NewProvider(awsConfig, log, f.CrossRegionUtil)
 
 	return &S3Fetcher{
 		log:        log,

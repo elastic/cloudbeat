@@ -27,28 +27,28 @@ import (
 )
 
 type crossRegionElasticCompute struct {
-	*awslib.MultiRegionWrapper[ElasticCompute]
+	crossRegionUtil awslib.CrossRegionUtil[ElasticCompute]
 }
 
 func (c *crossRegionElasticCompute) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
-	return c.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
+	return c.crossRegionUtil.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
 		return ec.DescribeNetworkAcl(ctx)
 	})
 }
 
 func (c *crossRegionElasticCompute) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
-	return c.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
+	return c.crossRegionUtil.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
 		return ec.DescribeSecurityGroups(ctx)
 	})
 }
 
-func NewCrossEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) ElasticCompute {
+func NewCrossEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, util awslib.CrossRegionUtil[ElasticCompute]) ElasticCompute {
 	factory := func(cfg aws.Config) ElasticCompute {
 		return NewEC2Provider(log, awsAccountID, cfg)
 	}
 
-	wrapper := awslib.CreateMultiRegionClients(ec2.NewFromConfig(cfg), cfg, factory, log)
+	m := util.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, factory, log)
 	return &crossRegionElasticCompute{
-		MultiRegionWrapper: wrapper,
+		crossRegionUtil: m,
 	}
 }
