@@ -23,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"reflect"
 	"testing"
@@ -65,7 +66,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 					return m
 				},
 				cfg: awssdk.Config{},
-				log: logp.NewLogger("aws-test"),
+				log: logp.NewLogger("multi-region-test"),
 			},
 			want: map[string]string{DefaultRegion: DefaultRegion},
 		},
@@ -78,7 +79,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 					return m
 				},
 				cfg: awssdk.Config{},
-				log: logp.NewLogger("aws-test"),
+				log: logp.NewLogger("multi-region-test"),
 			},
 			want: map[string]string{DefaultRegion: DefaultRegion, euRegion: euRegion},
 		},
@@ -158,7 +159,7 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 				t.Errorf("Fetch() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
+			if !assert.Equal(t, got, tt.want) {
 				t.Errorf("Fetch() got = %v, want %v", got, tt.want)
 			}
 		})

@@ -74,7 +74,7 @@ default_region: eu-west-2
 		factory := &S3Factory{
 			CrossRegionUtil: mockCrossRegionUtil,
 		}
-		
+
 		cfg, err := agentConfig.NewConfigFrom(test.config)
 		s.NoError(err)
 
