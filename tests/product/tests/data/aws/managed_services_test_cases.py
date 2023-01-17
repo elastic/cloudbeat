@@ -117,7 +117,7 @@ aws_test_config_2 = {
 
 cis_eks_all = {
     "test-eks-config-1": aws_test_config_1,
-    "test-eks-config-2": aws_test_config_2
+    "test-eks-config-2": aws_test_config_2,
 }
 
 cis_eks_aws_cases = cis_eks_all[eks.current_config]

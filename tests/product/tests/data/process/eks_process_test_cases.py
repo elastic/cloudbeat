@@ -281,9 +281,7 @@ eks_process_config_1 = {
             skip_param_case(
                 skip_list=[*cis_eks_3_2_3_config_1_skip.values()],
                 data_to_report=SkipReportData(
-                    skip_reason=(
-                        "When argument x509.clientCAFile does not exist, Cloudbeat evaluates result to pass"
-                    ),
+                    skip_reason="When argument x509.clientCAFile does not exist, Cloudbeat evaluates result to pass",
                     url_title="cloudbeat: #629",
                     url_link="https://github.com/elastic/cloudbeat/issues/629",
                 ),
@@ -327,9 +325,7 @@ eks_process_config_1 = {
             skip_param_case(
                 skip_list=[*cis_eks_3_2_7_config_1_skip.values()],
                 data_to_report=SkipReportData(
-                    skip_reason=(
-                        "Cloudbeat evaluates rule to pass even --make-iptables-util-chains is set to false."
-                    ),
+                    skip_reason="Cloudbeat evaluates rule to pass even --make-iptables-util-chains is set to false.",
                     url_title="cloudbeat: #633",
                     url_link="https://github.com/elastic/cloudbeat/issues/633",
                 ),
@@ -392,7 +388,7 @@ eks_process_config_2 = {
 
 cis_eks_all = {
     "test-eks-config-1": eks_process_config_1,
-    "test-eks-config-2": eks_process_config_2
+    "test-eks-config-2": eks_process_config_2,
 }
 
 cis_eks_kubelet_cases = cis_eks_all[eks.current_config]
