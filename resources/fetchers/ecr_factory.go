@@ -70,7 +70,7 @@ func (f *EcrFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}
 
-	identityProvider := f.IdentityProvider(awsConfig)
+	identityProvider := f.IdentityProvider(*awsConfig)
 	identity, err := identityProvider.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
@@ -90,7 +90,7 @@ func (f *EcrFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan 
 		kubeClient:   kubeClient,
 		PodDescriber: ecrPodDescriber,
 		resourceCh:   ch,
-		awsConfig:    awsConfig,
+		awsConfig:    *awsConfig,
 	}
 	return fe, nil
 }

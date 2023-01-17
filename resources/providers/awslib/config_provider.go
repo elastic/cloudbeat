@@ -28,19 +28,19 @@ type ConfigProvider struct {
 }
 
 type ConfigProviderAPI interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error)
+	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error)
 }
 
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (awssdk.Config, error) {
+func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error) {
 	awsConfig, err := aws.InitializeAWSConfig(cfg)
 	if err != nil {
-		return awssdk.Config{}, err
+		return nil, err
 	}
 	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
 	if err != nil {
-		return awssdk.Config{}, err
+		return nil, err
 	}
 	awsConfig.Region = metadata.Region
 
-	return awsConfig, nil
+	return &awsConfig, nil
 }

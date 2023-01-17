@@ -50,12 +50,12 @@ func (provider ClusterNameProvider) GetClusterName(ctx context.Context, cfg *con
 		if err != nil {
 			return "", fmt.Errorf("failed to initialize aws configuration for identifying the cluster name: %v", err)
 		}
-		metadata, err := provider.EKSMetadataProvider.GetMetadata(ctx, awsConfig)
+		metadata, err := provider.EKSMetadataProvider.GetMetadata(ctx, *awsConfig)
 		if err != nil {
 			return "", fmt.Errorf("failed to get the ec2 metadata required for identifying the cluster name: %v", err)
 		}
 		instanceId := metadata.InstanceID
-		return provider.EKSClusterNameProvider.GetClusterName(ctx, awsConfig, instanceId)
+		return provider.EKSClusterNameProvider.GetClusterName(ctx, *awsConfig, instanceId)
 	default:
 		panic(fmt.Sprintf("cluster name provider encountered an unknown cluster type: %s, please implement the relevant cluster name provider", cfg.Benchmark))
 	}

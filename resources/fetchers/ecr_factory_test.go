@@ -84,7 +84,7 @@ default_region: us1-east
 		mockedConfigGetter.EXPECT().
 			InitializeAWSConfig(mock.Anything, mock.Anything).
 			Call.
-			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
+			Return(func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
 				return CreateSdkConfig(config, "us1-east")
 			},
 				func(ctx context.Context, config aws.ConfigAWS) error {
@@ -121,7 +121,7 @@ default_region: us1-east
 	}
 }
 
-func CreateSdkConfig(config aws.ConfigAWS, region string) awssdk.Config {
+func CreateSdkConfig(config aws.ConfigAWS, region string) *awssdk.Config {
 	awsConfig := awssdk.NewConfig()
 	awsCredentials := awssdk.Credentials{
 		AccessKeyID:     config.AccessKeyID,
@@ -133,5 +133,5 @@ func CreateSdkConfig(config aws.ConfigAWS, region string) awssdk.Config {
 		Value: awsCredentials,
 	}
 	awsConfig.Region = region
-	return *awsConfig
+	return awsConfig
 }

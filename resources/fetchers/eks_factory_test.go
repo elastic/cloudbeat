@@ -67,7 +67,7 @@ session_token: session
 		mockedConfigGetter.EXPECT().
 			InitializeAWSConfig(mock.Anything, mock.Anything).
 			Call.
-			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
+			Return(func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
 
 				return CreateSdkConfig(config, "us1-east")
 			},

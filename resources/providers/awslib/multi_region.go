@@ -30,6 +30,7 @@ import (
 var (
 	awsRegions *cachedRegions
 	once       = &sync.Once{}
+	mu         = &sync.Mutex{}
 )
 
 type cachedRegions struct {
@@ -104,7 +105,6 @@ func (w *MultiRegionWrapper[T]) GetMultiRegionsClientMap() map[string]T {
 // In case of a failure the function returns the default region.
 func getRegions(client DescribeCloudRegions, log *logp.Logger) []string {
 	log.Debug("GetRegions starting...")
-	var mu sync.Mutex
 	var initErr error
 
 	mu.Lock()

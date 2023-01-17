@@ -86,7 +86,7 @@ default_region: us2-east
 		mockedConfigGetter.EXPECT().
 			InitializeAWSConfig(mock.Anything, mock.Anything).
 			Call.
-			Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
+			Return(func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
 				return CreateSdkConfig(config, "us2-east")
 			},
 				func(ctx context.Context, config aws.ConfigAWS) error {

@@ -56,7 +56,7 @@ func (f *EksFactory) CreateFrom(log *logp.Logger, cfg EksFetcherConfig, ch chan 
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
-	eksProvider := awslib.NewEksProvider(awsConfig)
+	eksProvider := awslib.NewEksProvider(*awsConfig)
 
 	fe := &EksFetcher{
 		log:         log,
