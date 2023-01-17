@@ -204,9 +204,6 @@ def pytest_generate_tests(metafunc):
         raise ValueError(f"Params for function {metafunc.function} are not registered.")
 
     test_range = metafunc.config.getoption("range")
-    if "eks" in metafunc.config.getoption("markexpr", default=None):
-        test_range = ".."
-
     test_range_start, test_range_end = test_range.split("..")
 
     if test_range_end != "" and int(test_range_end) < len(params.argvalues):
