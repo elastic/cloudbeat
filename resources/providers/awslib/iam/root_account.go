@@ -104,6 +104,6 @@ func (p Provider) listRootMFADevice(ctx context.Context, userAccount *Credential
 	return append(devices, rootMFADevice), nil
 }
 
-func (p Provider) isRootUser(username string) bool {
+func isRootUser(username string) bool {
 	return username == rootAccount
 }

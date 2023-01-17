@@ -87,12 +87,12 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 		}
 
 		inlinePolicies, err := p.listInlinePolicies(ctx, apiUser.UserName)
-		if err != nil && !p.isRootUser(username) {
+		if err != nil && !isRootUser(username) {
 			p.log.Errorf("fail to list inline policies for user: %s, error: %v", username, err)
 		}
 
 		attachedPolicies, err := p.listAttachedPolicies(ctx, apiUser.UserName)
-		if err != nil && !p.isRootUser(username) {
+		if err != nil && !isRootUser(username) {
 			p.log.Errorf("fail to list attached policies for user: %s, error: %v", username, err)
 		}
 
