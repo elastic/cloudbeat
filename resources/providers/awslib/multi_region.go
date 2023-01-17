@@ -30,7 +30,6 @@ import (
 var (
 	awsRegions *cachedRegions
 	once       = &sync.Once{}
-	mu         = &sync.Mutex{}
 )
 
 type cachedRegions struct {
@@ -38,28 +37,32 @@ type cachedRegions struct {
 }
 
 type CrossRegionUtil[T any] interface {
-	NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) *MultiRegionWrapper[T]
 	Fetch(fetcher func(T) ([]AwsResource, error)) ([]AwsResource, error)
 	GetMultiRegionsClientMap() map[string]T
+}
+
+type CrossRegionFactory[T any] interface {
+	NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionUtil[T]
 }
 
 type DescribeCloudRegions interface {
 	DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 }
 
-type MultiRegionWrapper[T any] struct {
+type MultiRegionClientFactory[T any] struct{}
+type multiRegionWrapper[T any] struct {
 	clients map[string]T
 }
 
 // NewMultiRegionClients is a utility function that is used to create a map of client instances of a given type T for multiple regions.
-func (w *MultiRegionWrapper[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) *MultiRegionWrapper[T] {
+func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionUtil[T] {
 	var clientsMap = make(map[string]T, 0)
 	for _, region := range getRegions(client, log) {
 		cfg.Region = region
 		clientsMap[region] = factory(cfg)
 	}
 
-	wrapper := &MultiRegionWrapper[T]{
+	wrapper := &multiRegionWrapper[T]{
 		clients: clientsMap,
 	}
 
@@ -67,7 +70,7 @@ func (w *MultiRegionWrapper[T]) NewMultiRegionClients(client DescribeCloudRegion
 }
 
 // Fetch retrieves resources from multiple regions concurrently using the provided fetcher function.
-func (w *MultiRegionWrapper[T]) Fetch(fetcher func(T) ([]AwsResource, error)) ([]AwsResource, error) {
+func (w *multiRegionWrapper[T]) Fetch(fetcher func(T) ([]AwsResource, error)) ([]AwsResource, error) {
 	var err error
 	var wg sync.WaitGroup
 	var mux sync.Mutex
@@ -96,7 +99,7 @@ func (w *MultiRegionWrapper[T]) Fetch(fetcher func(T) ([]AwsResource, error)) ([
 	return crossRegionResources, err
 }
 
-func (w *MultiRegionWrapper[T]) GetMultiRegionsClientMap() map[string]T {
+func (w *multiRegionWrapper[T]) GetMultiRegionsClientMap() map[string]T {
 	return w.clients
 }
 
@@ -107,8 +110,6 @@ func getRegions(client DescribeCloudRegions, log *logp.Logger) []string {
 	log.Debug("GetRegions starting...")
 	var initErr error
 
-	mu.Lock()
-	defer mu.Unlock()
 	once.Do(func() {
 		log.Debug("Get aws regions for the first time")
 		awsRegions = &cachedRegions{}

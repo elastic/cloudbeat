@@ -34,13 +34,13 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.EC2NetworkingType, &EC2NetworkFactory{
-		CrossRegionUtil:  &awslib.MultiRegionWrapper[ec2.ElasticCompute]{},
+		CrossRegionUtil:  &awslib.MultiRegionClientFactory[ec2.ElasticCompute]{},
 		IdentityProvider: awslib.GetIdentityClient,
 	})
 }
 
 type EC2NetworkFactory struct {
-	CrossRegionUtil  awslib.CrossRegionUtil[ec2.ElasticCompute]
+	CrossRegionUtil  awslib.CrossRegionFactory[ec2.ElasticCompute]
 	IdentityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 

@@ -42,7 +42,7 @@ func (c *crossRegionElasticCompute) DescribeSecurityGroups(ctx context.Context) 
 	})
 }
 
-func NewCrossEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, util awslib.CrossRegionUtil[ElasticCompute]) ElasticCompute {
+func NewCrossEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, util awslib.CrossRegionFactory[ElasticCompute]) ElasticCompute {
 	factory := func(cfg aws.Config) ElasticCompute {
 		return NewEC2Provider(log, awsAccountID, cfg)
 	}

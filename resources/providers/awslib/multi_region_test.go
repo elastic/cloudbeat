@@ -85,7 +85,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 		},
 	}
 
-	wrapper := MultiRegionWrapper[string]{}
+	wrapper := MultiRegionClientFactory[string]{}
 	for _, tt := range tests {
 		factory := func(cfg awssdk.Config) string {
 			return cfg.Region
@@ -93,8 +93,9 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			multiRegionClients := wrapper.NewMultiRegionClients(tt.args.client(), tt.args.cfg, factory, tt.args.log)
-			if !reflect.DeepEqual(multiRegionClients.clients, tt.want) {
-				t.Errorf("GetRegions() got = %v, want %v", multiRegionClients.clients, tt.want)
+			clients := multiRegionClients.GetMultiRegionsClientMap()
+			if !reflect.DeepEqual(clients, tt.want) {
+				t.Errorf("GetRegions() got = %v, want %v", clients, tt.want)
 			}
 		})
 	}
@@ -106,7 +107,7 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 	}
 	type testCase[T any] struct {
 		name    string
-		w       MultiRegionWrapper[testClient]
+		w       multiRegionWrapper[testClient]
 		args    args[testClient]
 		want    []AwsResource
 		wantErr bool
@@ -114,7 +115,7 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 	tests := []testCase[testClient]{
 		{
 			name: "Fetch resources from multiple regions",
-			w: MultiRegionWrapper[testClient]{
+			w: multiRegionWrapper[testClient]{
 				clients: map[string]testClient{euRegion: &dummyTester{euRegion}, usRegion: &dummyTester{usRegion}},
 			},
 			args: args[testClient]{
@@ -127,7 +128,7 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 		},
 		{
 			name: "Error from a single region",
-			w: MultiRegionWrapper[testClient]{
+			w: multiRegionWrapper[testClient]{
 				clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
 			},
 			args: args[testClient]{
@@ -140,7 +141,7 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 		},
 		{
 			name: "Error from all regions",
-			w: MultiRegionWrapper[testClient]{
+			w: multiRegionWrapper[testClient]{
 				clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
 			},
 			args: args[testClient]{

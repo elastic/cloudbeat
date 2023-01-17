@@ -63,16 +63,19 @@ default_region: eu-west-2
 
 	for _, test := range tests {
 		mockCrossRegionUtil := &awslib.MockCrossRegionUtil[s3.Client]{}
-		mockCrossRegionUtil.On(
+		mockCrossRegionUtil.On("GetMultiRegionsClientMap").Return(nil)
+
+		mockCrossRegionFactory := &awslib.MockCrossRegionFactory[s3.Client]{}
+		mockCrossRegionFactory.On(
 			"NewMultiRegionClients",
 			mock.Anything,
 			mock.Anything,
 			mock.Anything,
 			mock.Anything,
-		).Return(&awslib.MultiRegionWrapper[s3.Client]{})
+		).Return(mockCrossRegionUtil)
 
 		factory := &S3Factory{
-			CrossRegionUtil: mockCrossRegionUtil,
+			CrossRegionUtil: mockCrossRegionFactory,
 		}
 
 		cfg, err := agentConfig.NewConfigFrom(test.config)

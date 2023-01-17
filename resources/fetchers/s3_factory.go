@@ -31,12 +31,12 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.S3Type, &S3Factory{
-		CrossRegionUtil: &awslib.MultiRegionWrapper[s3.Client]{},
+		CrossRegionUtil: &awslib.MultiRegionClientFactory[s3.Client]{},
 	})
 }
 
 type S3Factory struct {
-	CrossRegionUtil awslib.CrossRegionUtil[s3.Client]
+	CrossRegionUtil awslib.CrossRegionFactory[s3.Client]
 }
 
 func (f *S3Factory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {

@@ -43,17 +43,17 @@ func TestNetworkFactory_Create(t *testing.T) {
 		Account: awssdk.String("test-account"),
 	}, nil)
 
-	mockCrossRegionUtil := &awslib.MockCrossRegionUtil[ec2.ElasticCompute]{}
-	mockCrossRegionUtil.On(
+	mockCrossRegion := &awslib.MockCrossRegionFactory[ec2.ElasticCompute]{}
+	mockCrossRegion.On(
 		"NewMultiRegionClients",
 		mock.Anything,
 		mock.Anything,
 		mock.Anything,
 		mock.Anything,
-	).Return(&awslib.MultiRegionWrapper[ec2.ElasticCompute]{})
+	).Return(&awslib.MockCrossRegionUtil[ec2.ElasticCompute]{})
 
 	f := &EC2NetworkFactory{
-		CrossRegionUtil: mockCrossRegionUtil,
+		CrossRegionUtil: mockCrossRegion,
 		IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 			return identity
 		},
