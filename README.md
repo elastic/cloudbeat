@@ -31,10 +31,6 @@
     │   │   ├── policy                         # Common audit functions per input
     │   │   │   ├── kube_api
     │   │   │   ...
-    ├── cis_policies_generator
-    │   ├── config
-    │   ├── input
-    │   ├── src
     ├── dev
     └── server
 
@@ -183,3 +179,11 @@ curl --location --request POST 'http://localhost:8181/v1/data/main' \
     }
 }'
 ```
+
+### Adding new rules
+
+Add a new rule package to `/bundle/compliance/<benchmark>/rules/<rule_name>`
+
+1. Add `rule.rego` file that will contain the rule evaluation logic.
+2. Add `test.rego` file that will contain the rule tests.
+3. Generate rule metadata (`data.yaml`) and templates following the steps in the [README](dev/README.md)

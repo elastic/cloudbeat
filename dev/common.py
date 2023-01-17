@@ -58,14 +58,14 @@ def parse_rules_data_from_excel(benchmark_id, selected_columns=None, selected_ru
         selected_columns = default_selected_columns_map
 
     benchmark_name = benchmark[benchmark_id]
-    data_path = f"../cis_policies_generator/input/{benchmark_name}"
+    input_path = f"input/{benchmark_name}"
 
     sheets = relevant_sheets[benchmark_id]
     rules_data = pd.DataFrame()
     sections_df = pd.DataFrame()
     for sheet_name in sheets:
         print(f"Processing sheet '{sheet_name}'")
-        excel_file = pd.read_excel(data_path, sheet_name=sheet_name)
+        excel_file = pd.read_excel(input_path, sheet_name=sheet_name)
 
         # Select only the columns you want to include in the Markdown table
         data = excel_file[selected_columns[benchmark_id].keys()]

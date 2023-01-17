@@ -1,8 +1,0 @@
-{
-    "version": 0.1,
-    "output_folder": "output",
-    "output_filename": "combined.yaml",
-    "benchmarks_folder": "input",
-    "uuid_seed": "5d8d0dd5-acd2-4c46-b565-aa1fb03617af",
-    "check_for_broken_references": true
-}
