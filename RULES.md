@@ -201,9 +201,9 @@
 
 ## AWS CIS Benchmark
 
-### 16/63 implemented rules (25%)
+### 17/63 implemented rules (27%)
 
-#### Automated rules: 16/55 (29%)
+#### Automated rules: 17/55 (31%)
 
 #### Manual rules: 0/8 (0%)
 
@@ -215,7 +215,7 @@
 |  [1.12](bundle/compliance/cis_aws/rules/cis_1_12)  | Identity and Access Management    | Ensure credentials unused for 45 days or greater are disabled                                                      | :white_check_mark: | Automated |
 |  [1.13](bundle/compliance/cis_aws/rules/cis_1_13)  | Identity and Access Management    | Ensure there is only one active access key available for any single IAM user                                       | :white_check_mark: | Automated |
 |  [1.14](bundle/compliance/cis_aws/rules/cis_1_14)  | Identity and Access Management    | Ensure access keys are rotated every 90 days or less                                                               | :white_check_mark: | Automated |
-|                        1.15                        | Identity and Access Management    | Ensure IAM Users Receive Permissions Only Through Groups                                                           |        :x:         | Automated |
+|  [1.15](bundle/compliance/cis_aws/rules/cis_1_15)  | Identity and Access Management    | Ensure IAM Users Receive Permissions Only Through Groups                                                           | :white_check_mark: | Automated |
 |                        1.16                        | Identity and Access Management    | Ensure IAM policies that allow full "*:*" administrative privileges are not attached                               |        :x:         | Automated |
 |                        1.17                        | Identity and Access Management    | Ensure a support role has been created to manage incidents with AWS Support                                        |        :x:         | Automated |
 |                        1.18                        | Identity and Access Management    | Ensure IAM instance roles are used for AWS resource access from instances                                          |        :x:         |  Manual   |

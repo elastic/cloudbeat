@@ -59,6 +59,16 @@ generate_iam_user(access_keys, mfa_active, has_logged_in, last_access, password_
 	},
 }
 
+generate_iam_user_with_policies(inline_policies, attached_policies) = {
+	"type": "identity-management",
+	"subType": "aws-iam-user",
+	"resource": {
+		"name": "test",
+		"inline_policies": inline_policies,
+		"attached_policies": attached_policies,
+	},
+}
+
 generate_root_user(access_keys, mfa_active, last_access, mfa_devices) = {
 	"type": "identity-management",
 	"subType": "aws-iam-user",
