@@ -68,52 +68,56 @@ cis_eks_5_4_5_config_1 = {
     "5.4.5 ELB - TCP traffic no encryption evaluation failed": cis_eks_5_4_5_fail,
 }
 
+aws_test_config_1 = {
+    **cis_eks_5_1_1,
+    **dict(
+        zip(
+            cis_eks_5_4_3_config_1.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_5_4_3_config_1.values()],
+                data_to_report=SkipReportData(
+                    skip_reason="Retest after testing configuration will be fixed.",
+                    url_title="cloudbeat: #500",
+                    url_link="https://github.com/elastic/cloudbeat/issues/500",
+                ),
+            ),
+        ),
+    ),
+    **cis_eks_5_4_5_config_1,
+    **dict(
+        zip(
+            cis_eks_2_1_1_config_1.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_2_1_1_config_1.values()],
+                data_to_report=SkipReportData(
+                    skip_reason="This rule is implemented partially",
+                    url_title="security-team: #3929",
+                    url_link="https://github.com/elastic/security-team/issues/3929",
+                ),
+            ),
+        ),
+    ),
+}
+
+aws_test_config_2 = {
+    **dict(
+        zip(
+            cis_eks_2_1_1_config_2.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_2_1_1_config_2.values()],
+                data_to_report=SkipReportData(
+                    skip_reason="This rule is implemented partially",
+                    url_title="security-team: #3929",
+                    url_link="https://github.com/elastic/security-team/issues/3929",
+                ),
+            ),
+        ),
+    ),
+}
+
 cis_eks_all = {
-    "test-eks-config-1": {
-        **cis_eks_5_1_1,
-        **dict(
-            zip(
-                cis_eks_5_4_3_config_1.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_5_4_3_config_1.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason="Retest after testing configuration will be fixed.",
-                        url_title="cloudbeat: #500",
-                        url_link="https://github.com/elastic/cloudbeat/issues/500",
-                    ),
-                ),
-            ),
-        ),
-        **cis_eks_5_4_5_config_1,
-        **dict(
-            zip(
-                cis_eks_2_1_1_config_1.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_2_1_1_config_1.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason="This rule is implemented partially",
-                        url_title="security-team: #3929",
-                        url_link="https://github.com/elastic/security-team/issues/3929",
-                    ),
-                ),
-            ),
-        ),
-    },
-    "test-eks-config-2": {
-        **dict(
-            zip(
-                cis_eks_2_1_1_config_2.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_2_1_1_config_2.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason="This rule is implemented partially",
-                        url_title="security-team: #3929",
-                        url_link="https://github.com/elastic/security-team/issues/3929",
-                    ),
-                ),
-            ),
-        ),
-    },
+    "test-eks-config-1": aws_test_config_1,
+    "test-eks-config-2": aws_test_config_2
 }
 
 cis_eks_aws_cases = cis_eks_all[eks.current_config]

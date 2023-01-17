@@ -271,124 +271,128 @@ cis_eks_3_2_11_config_1 = {
     "3.2.11 Kubelet config featureGates.RotateKubeletServerCertificate default, eval passed": cis_eks_3_2_11_pass,
 }
 
+eks_process_config_1 = {
+    **cis_eks_3_2_1_config_1,
+    **cis_eks_3_2_2_config_1,
+    **cis_eks_3_2_3_config_1,
+    **dict(
+        zip(
+            cis_eks_3_2_3_config_1_skip.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_3_2_3_config_1_skip.values()],
+                data_to_report=SkipReportData(
+                    skip_reason=(
+                        "When argument x509.clientCAFile does not exist, Cloudbeat evaluates result to pass"
+                    ),
+                    url_title="cloudbeat: #629",
+                    url_link="https://github.com/elastic/cloudbeat/issues/629",
+                ),
+            ),
+        ),
+    ),
+    **dict(
+        zip(
+            cis_eks_3_2_4_config_1.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_3_2_4_config_1.values()],
+                data_to_report=SkipReportData(
+                    skip_reason="Cloudbeat evaluates rule to pass even --read-only-port is not equal to 0.",
+                    url_title="cloudbeat: #631",
+                    url_link="https://github.com/elastic/cloudbeat/issues/631",
+                ),
+            ),
+        ),
+    ),
+    **dict(
+        zip(
+            cis_eks_3_2_5_config_1.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_3_2_5_config_1.values()],
+                data_to_report=SkipReportData(
+                    skip_reason=(
+                        "When streamingConnectionIdleTimeout or "
+                        "--streaming-connection-idle-timeout equals 0 evaluation is passed "
+                    ),
+                    url_title="cloudbeat: #632",
+                    url_link="https://github.com/elastic/cloudbeat/issues/632",
+                ),
+            ),
+        ),
+    ),
+    **cis_eks_3_2_6_config_1,
+    **cis_eks_3_2_7_config_1,
+    **dict(
+        zip(
+            cis_eks_3_2_7_config_1_skip.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_3_2_7_config_1_skip.values()],
+                data_to_report=SkipReportData(
+                    skip_reason=(
+                        "Cloudbeat evaluates rule to pass even --make-iptables-util-chains is set to false."
+                    ),
+                    url_title="cloudbeat: #633",
+                    url_link="https://github.com/elastic/cloudbeat/issues/633",
+                ),
+            ),
+        ),
+    ),
+    **cis_eks_3_2_8_config_1,
+    **cis_eks_3_2_9_config_1,
+    **dict(
+        zip(
+            cis_eks_3_2_9_config_1.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_3_2_9_config_1.values()],
+                data_to_report=SkipReportData(
+                    skip_reason="Rule 3.2.9 - unclear CIS definition and implementation",
+                    url_title="security-team: #4947",
+                    url_link="https://github.com/elastic/security-team/issues/4947",
+                ),
+            ),
+        ),
+    ),
+    **cis_eks_3_2_10_config_1,
+    **dict(
+        zip(
+            cis_eks_3_2_11_config_1.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_3_2_11_config_1.values()],
+                data_to_report=SkipReportData(
+                    skip_reason="When RotateKubeletServerCertificate does not exist evaluation is passed.",
+                    url_title="cloudbeat: #634",
+                    url_link="https://github.com/elastic/cloudbeat/issues/634",
+                ),
+            ),
+        ),
+    ),
+}
+
+eks_process_config_2 = {
+    **cis_eks_3_2_4_config_2,
+    **cis_eks_3_2_5_config_2,
+    **dict(
+        zip(
+            cis_eks_3_2_5_config_2_skip.keys(),
+            skip_param_case(
+                skip_list=[*cis_eks_3_2_5_config_2_skip.values()],
+                data_to_report=SkipReportData(
+                    skip_reason=(
+                        "When streamingConnectionIdleTimeout or "
+                        "--streaming-connection-idle-timeout equals 0 evaluation is passed "
+                    ),
+                    url_title="cloudbeat: #632",
+                    url_link="https://github.com/elastic/cloudbeat/issues/632",
+                ),
+            ),
+        ),
+    ),
+    **cis_eks_3_2_7_config_2,
+    **cis_eks_3_2_9_config_2,
+}
+
 cis_eks_all = {
-    "test-eks-config-1": {
-        **cis_eks_3_2_1_config_1,
-        **cis_eks_3_2_2_config_1,
-        **cis_eks_3_2_3_config_1,
-        **dict(
-            zip(
-                cis_eks_3_2_3_config_1_skip.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_3_2_3_config_1_skip.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason=(
-                            "When argument x509.clientCAFile does not exist, Cloudbeat evaluates result to pass"
-                        ),
-                        url_title="cloudbeat: #629",
-                        url_link="https://github.com/elastic/cloudbeat/issues/629",
-                    ),
-                ),
-            ),
-        ),
-        **dict(
-            zip(
-                cis_eks_3_2_4_config_1.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_3_2_4_config_1.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason="Cloudbeat evaluates rule to pass even --read-only-port is not equal to 0.",
-                        url_title="cloudbeat: #631",
-                        url_link="https://github.com/elastic/cloudbeat/issues/631",
-                    ),
-                ),
-            ),
-        ),
-        **dict(
-            zip(
-                cis_eks_3_2_5_config_1.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_3_2_5_config_1.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason=(
-                            "When streamingConnectionIdleTimeout or "
-                            "--streaming-connection-idle-timeout equals 0 evaluation is passed "
-                        ),
-                        url_title="cloudbeat: #632",
-                        url_link="https://github.com/elastic/cloudbeat/issues/632",
-                    ),
-                ),
-            ),
-        ),
-        **cis_eks_3_2_6_config_1,
-        **cis_eks_3_2_7_config_1,
-        **dict(
-            zip(
-                cis_eks_3_2_7_config_1_skip.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_3_2_7_config_1_skip.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason=(
-                            "Cloudbeat evaluates rule to pass even --make-iptables-util-chains is set to false."
-                        ),
-                        url_title="cloudbeat: #633",
-                        url_link="https://github.com/elastic/cloudbeat/issues/633",
-                    ),
-                ),
-            ),
-        ),
-        **cis_eks_3_2_8_config_1,
-        **cis_eks_3_2_9_config_1,
-        **dict(
-            zip(
-                cis_eks_3_2_9_config_1.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_3_2_9_config_1.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason="Rule 3.2.9 - unclear CIS definition and implementation",
-                        url_title="security-team: #4947",
-                        url_link="https://github.com/elastic/security-team/issues/4947",
-                    ),
-                ),
-            ),
-        ),
-        **cis_eks_3_2_10_config_1,
-        **dict(
-            zip(
-                cis_eks_3_2_11_config_1.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_3_2_11_config_1.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason="When RotateKubeletServerCertificate does not exist evaluation is passed.",
-                        url_title="cloudbeat: #634",
-                        url_link="https://github.com/elastic/cloudbeat/issues/634",
-                    ),
-                ),
-            ),
-        ),
-    },
-    "test-eks-config-2": {
-        **cis_eks_3_2_4_config_2,
-        **cis_eks_3_2_5_config_2,
-        **dict(
-            zip(
-                cis_eks_3_2_5_config_2_skip.keys(),
-                skip_param_case(
-                    skip_list=[*cis_eks_3_2_5_config_2_skip.values()],
-                    data_to_report=SkipReportData(
-                        skip_reason=(
-                            "When streamingConnectionIdleTimeout or "
-                            "--streaming-connection-idle-timeout equals 0 evaluation is passed "
-                        ),
-                        url_title="cloudbeat: #632",
-                        url_link="https://github.com/elastic/cloudbeat/issues/632",
-                    ),
-                ),
-            ),
-        ),
-        **cis_eks_3_2_7_config_2,
-        **cis_eks_3_2_9_config_2,
-    },
+    "test-eks-config-1": eks_process_config_1,
+    "test-eks-config-2": eks_process_config_2
 }
 
 cis_eks_kubelet_cases = cis_eks_all[eks.current_config]

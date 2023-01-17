@@ -30,6 +30,7 @@ def get_ES_evaluation(
 
     while time.time() - start_time < timeout:
         try:
+            # timeout used for reducing requests frequency to ElasticSearch
             time.sleep(2)
             events = get_events_from_index(
                 elastic_client,

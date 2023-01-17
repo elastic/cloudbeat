@@ -20,7 +20,6 @@ class InterceptHandler(logging.Handler):
     """
     This class intercepts standard logging messages toward Loguru sinks
     """
-
     def emit(self, record):
         # Get corresponding Loguru level if it exists
         try:

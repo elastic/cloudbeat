@@ -48,25 +48,6 @@ def test_eks_file_system_configuration(
     assert evaluation == expected, f"Rule {rule_tag} verification failed," f"expected: {expected}, got: {evaluation}"
 
 
-# register_params(
-#     test_eks_file_system_configuration,
-#     Parameters(
-#         ("rule_tag", "node_hostname", "expected"),
-#         [
-#             *eks_fs_tc.cis_eks_3_1_1.values(),
-#             *eks_fs_tc.cis_eks_3_1_2.values(),
-#             *eks_fs_tc.cis_eks_3_1_3.values(),
-#             *eks_fs_tc.cis_eks_3_1_4.values(),
-#         ],
-#         ids=[
-#             *eks_fs_tc.cis_eks_3_1_1.keys(),
-#             *eks_fs_tc.cis_eks_3_1_2.keys(),
-#             *eks_fs_tc.cis_eks_3_1_3.keys(),
-#             *eks_fs_tc.cis_eks_3_1_4.keys(),
-#         ],
-#     ),
-# )
-
 register_params(
     test_eks_file_system_configuration,
     Parameters(

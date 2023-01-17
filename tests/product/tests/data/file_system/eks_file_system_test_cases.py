@@ -93,16 +93,24 @@ cis_eks_3_1_4 = {
     "3.1.4 Kubelet-config ownership invalid group evaluation failed": cis_eks_3_1_4_group_fail,
 }
 
+file_system_config_1 = {
+    **cis_eks_3_1_1,
+    **cis_eks_3_1_2,
+    **cis_eks_3_1_3,
+    **cis_eks_3_1_4,
+}
+
+file_system_config_2 = {
+    **cis_eks_3_1_1_conf_2,
+}
+
+# Each rule may contain several test cases depended on configuration
+# The configuration is provided through environment var and known when the test execution starts.
+# This dictionary summarizes all cases and all configurations.
+# But during runtime only one of them may be used (test-eks-config-1 / test-eks-config-2)
 cis_eks_all = {
-    "test-eks-config-1": {
-        **cis_eks_3_1_1,
-        **cis_eks_3_1_2,
-        **cis_eks_3_1_3,
-        **cis_eks_3_1_4,
-    },
-    "test-eks-config-2": {
-        **cis_eks_3_1_1_conf_2,
-    },
+    "test-eks-config-1": file_system_config_1,
+    "test-eks-config-2": file_system_config_2
 }
 
 cis_eks_file_system_cases = cis_eks_all[eks.current_config]
