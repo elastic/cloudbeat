@@ -17,7 +17,7 @@
 
 package version
 
-const policyVersion = "v1.2.9"
+const policyVersion = "v1.2.11"
 
 // PolicyVersion returns cloudbeat version info used for the build.
 func PolicyVersion() Version {
