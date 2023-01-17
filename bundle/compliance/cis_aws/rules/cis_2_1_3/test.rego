@@ -1,24 +1,24 @@
-package compliance.cis_aws.rules.cis_2_1_1
+package compliance.cis_aws.rules.cis_2_1_3
 
 import data.cis_aws.test_data
 import data.compliance.cis_aws.data_adapter
 import data.lib.test
 
 test_violation {
-	eval_fail with input as rule_input("my bucket", "")
-	eval_fail with input as rule_input("my bucket", "FakeAlgorithm")
+	eval_fail with input as rule_input(false, false)
+	eval_fail with input as rule_input(false, true)
+	eval_fail with input as rule_input(true, false)
 }
 
 test_pass {
-	eval_pass with input as rule_input("my bucket", "AES256")
-	eval_pass with input as rule_input("my bucket", "aws:kms")
+	eval_pass with input as rule_input(true, true)
 }
 
 test_not_evaluated {
 	not_eval with input as test_data.not_evaluated_s3_bucket
 }
 
-rule_input(name, sse_algorithm) = test_data.generate_s3_bucket(name, sse_algorithm, null, null)
+rule_input(enabled, mfa_delete) = test_data.generate_s3_bucket("Bucket", "", null, test_data.generate_s3_bucket_versioning(enabled, mfa_delete))
 
 eval_fail {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

@@ -201,9 +201,9 @@
 
 ## AWS CIS Benchmark
 
-### 17/63 implemented rules (27%)
+### 19/63 implemented rules (30%)
 
-#### Automated rules: 17/55 (31%)
+#### Automated rules: 19/55 (35%)
 
 #### Manual rules: 0/8 (0%)
 
@@ -231,8 +231,8 @@
 |   [1.8](bundle/compliance/cis_aws/rules/cis_1_8)   | Identity and Access Management    | Ensure IAM password policy requires minimum length of 14 or greater                                                | :white_check_mark: | Automated |
 |   [1.9](bundle/compliance/cis_aws/rules/cis_1_9)   | Identity and Access Management    | Ensure IAM password policy prevents password reuse                                                                 | :white_check_mark: | Automated |
 | [2.1.1](bundle/compliance/cis_aws/rules/cis_2_1_1) | Simple Storage Service (S3)       | Ensure all S3 buckets employ encryption-at-rest                                                                    | :white_check_mark: | Automated |
-|                       2.1.2                        | Simple Storage Service (S3)       | Ensure S3 Bucket Policy is set to deny HTTP requests                                                               |        :x:         | Automated |
-|                       2.1.3                        | Simple Storage Service (S3)       | Ensure MFA Delete is enabled on S3 buckets                                                                         |        :x:         | Automated |
+| [2.1.2](bundle/compliance/cis_aws/rules/cis_2_1_2) | Simple Storage Service (S3)       | Ensure S3 Bucket Policy is set to deny HTTP requests                                                               | :white_check_mark: | Automated |
+| [2.1.3](bundle/compliance/cis_aws/rules/cis_2_1_3) | Simple Storage Service (S3)       | Ensure MFA Delete is enabled on S3 buckets                                                                         | :white_check_mark: | Automated |
 |                       2.1.4                        | Simple Storage Service (S3)       | Ensure all data in Amazon S3 has been discovered, classified and secured when required.                            |        :x:         |  Manual   |
 |                       2.1.5                        | Simple Storage Service (S3)       | Ensure that S3 Buckets are configured with 'Block public access (bucket settings)'                                 |        :x:         | Automated |
 |                       2.2.1                        | Elastic Compute Cloud (EC2)       | Ensure EBS Volume Encryption is Enabled in all Regions                                                             |        :x:         | Automated |
