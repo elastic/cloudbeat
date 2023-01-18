@@ -31,11 +31,11 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger, util awslib.CrossRegionFactory[Client]) *Provider {
-	factory := func(cfg aws.Config) Client {
+func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
 		return s3Client.NewFromConfig(cfg)
 	}
-	m := util.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, factory, log)
+	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
 
 	return &Provider{
 		log:     log,

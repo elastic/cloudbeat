@@ -26,29 +26,29 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type crossRegionElasticCompute struct {
-	crossRegionUtil awslib.CrossRegionUtil[ElasticCompute]
+type crossRegionProvider struct {
+	CrossRegionFetcher awslib.CrossRegionFetcher[ElasticCompute]
 }
 
-func (c *crossRegionElasticCompute) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
-	return c.crossRegionUtil.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
+func (c *crossRegionProvider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
+	return c.CrossRegionFetcher.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
 		return ec.DescribeNetworkAcl(ctx)
 	})
 }
 
-func (c *crossRegionElasticCompute) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
-	return c.crossRegionUtil.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
+func (c *crossRegionProvider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
+	return c.CrossRegionFetcher.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
 		return ec.DescribeSecurityGroups(ctx)
 	})
 }
 
-func NewCrossEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, util awslib.CrossRegionFactory[ElasticCompute]) ElasticCompute {
-	factory := func(cfg aws.Config) ElasticCompute {
+func NewCrossRegionProvider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[ElasticCompute]) ElasticCompute {
+	f := func(cfg aws.Config) ElasticCompute {
 		return NewEC2Provider(log, awsAccountID, cfg)
 	}
 
-	m := util.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, factory, log)
-	return &crossRegionElasticCompute{
-		crossRegionUtil: m,
+	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+	return &crossRegionProvider{
+		CrossRegionFetcher: m,
 	}
 }

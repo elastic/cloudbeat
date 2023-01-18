@@ -36,13 +36,13 @@ type cachedRegions struct {
 	enabledRegions []string
 }
 
-type CrossRegionUtil[T any] interface {
+type CrossRegionFetcher[T any] interface {
 	Fetch(fetcher func(T) ([]AwsResource, error)) ([]AwsResource, error)
 	GetMultiRegionsClientMap() map[string]T
 }
 
 type CrossRegionFactory[T any] interface {
-	NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionUtil[T]
+	NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionFetcher[T]
 }
 
 type DescribeCloudRegions interface {
@@ -55,7 +55,7 @@ type multiRegionWrapper[T any] struct {
 }
 
 // NewMultiRegionClients is a utility function that is used to create a map of client instances of a given type T for multiple regions.
-func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionUtil[T] {
+func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
 	var clientsMap = make(map[string]T, 0)
 	for _, region := range getRegions(client, log) {
 		cfg.Region = region

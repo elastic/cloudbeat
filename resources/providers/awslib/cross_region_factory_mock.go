@@ -32,15 +32,15 @@ type MockCrossRegionFactory[T interface{}] struct {
 }
 
 // NewMultiRegionClients provides a mock function with given fields: client, cfg, factory, log
-func (_m *MockCrossRegionFactory[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg aws.Config, factory func(aws.Config) T, log *logp.Logger) CrossRegionUtil[T] {
+func (_m *MockCrossRegionFactory[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg aws.Config, factory func(aws.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
 	ret := _m.Called(client, cfg, factory, log)
 
-	var r0 CrossRegionUtil[T]
-	if rf, ok := ret.Get(0).(func(DescribeCloudRegions, aws.Config, func(aws.Config) T, *logp.Logger) CrossRegionUtil[T]); ok {
+	var r0 CrossRegionFetcher[T]
+	if rf, ok := ret.Get(0).(func(DescribeCloudRegions, aws.Config, func(aws.Config) T, *logp.Logger) CrossRegionFetcher[T]); ok {
 		r0 = rf(client, cfg, factory, log)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(CrossRegionUtil[T])
+			r0 = ret.Get(0).(CrossRegionFetcher[T])
 		}
 	}
 
