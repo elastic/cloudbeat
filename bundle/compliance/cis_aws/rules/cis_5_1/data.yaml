@@ -2,7 +2,6 @@ metadata:
   id: 5dc677bc-80c7-5043-80a2-5c99667cdb90
   name: Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration
     ports
-  rule_number: '5.1'
   profile_applicability: '* Level 1'
   description: |-
     The Network Access Control List (NACL) function provide stateless filtering of ingress and egress network traffic to AWS resources.
@@ -49,4 +48,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: '5.1'
     posture_type: cspm

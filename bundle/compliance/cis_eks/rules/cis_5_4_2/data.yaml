@@ -2,7 +2,6 @@ metadata:
   id: 4c198b47-5e4f-559d-be67-cbd5b8c3ebcd
   name: Ensure clusters are created with Private Endpoint Enabled and Public Access
     Disabled
-  rule_number: 5.4.2
   profile_applicability: '* Level 2'
   description: Disable access to the Kubernetes API from outside the node network
     if it is not required.
@@ -38,4 +37,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 5.4.2
     posture_type: kspm

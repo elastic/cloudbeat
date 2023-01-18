@@ -1,7 +1,6 @@
 metadata:
   id: 7dcb6273-247f-5398-9732-1c3f2ce0b98b
   name: Ensure that the scheduler pod specification file ownership is set to root:root
-  rule_number: 1.1.6
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the scheduler pod specification file ownership is set to
     `root:root`.
@@ -40,4 +39,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.6
     posture_type: kspm

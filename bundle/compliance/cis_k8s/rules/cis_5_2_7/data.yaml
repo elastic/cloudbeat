@@ -1,7 +1,6 @@
 metadata:
   id: 847fd97a-ec24-556d-b7d6-ceaa3dd27106
   name: Minimize the admission of root containers
-  rule_number: 5.2.7
   profile_applicability: '* Level 2 - Master Node'
   description: Do not generally permit containers to be run as the root user.
   rationale: |-
@@ -33,4 +32,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 5.2.7
     posture_type: kspm

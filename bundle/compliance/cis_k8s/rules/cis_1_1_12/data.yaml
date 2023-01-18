@@ -1,7 +1,6 @@
 metadata:
   id: 29b0f497-6bbf-5991-8173-279b97004fd6
   name: Ensure that the etcd data directory ownership is set to etcd:etcd
-  rule_number: 1.1.12
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the etcd data directory ownership is set to `etcd:etcd`.
   rationale: |-
@@ -50,4 +49,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.12
     posture_type: kspm

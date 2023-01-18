@@ -1,7 +1,6 @@
 metadata:
   id: ef45d674-b20a-509a-8d95-15142c89c3d0
   name: Restrict Access to the Control Plane Endpoint
-  rule_number: 5.4.1
   profile_applicability: '* Level 1'
   description: |-
     Enable Endpoint Private Access to restrict access to the cluster's control plane to only an allowlist of authorized IPs.
@@ -109,4 +108,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 5.4.1
     posture_type: kspm

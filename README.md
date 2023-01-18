@@ -80,34 +80,43 @@ opa eval data.main.findings --format pretty -i input.json -b ./bundle > output.j
   "result": {
     "evaluation": "failed",
     "evidence": {
-      "filemode": "700"
-    },
-    "expected": {
-      "filemode": "644"
+      "containers": [
+        {
+          "name": "aws-node",
+          "securityContext": {
+            "capabilities": {
+              "add": [
+                "NET_ADMIN"
+              ]
+            }
+          }
+        }
+      ]
     }
   },
   "rule": {
-    "audit": "Run the below command (based on the file location on your system) on the\ncontrol plane node.\nFor example,\n```\nstat -c %a /etc/kubernetes/manifests/kube-apiserver.yaml\n```\nVerify that the permissions are `644` or more restrictive.\n",
+    "audit": "Get the set of PSPs with the following command:\n\n```\nkubectl get psp\n```\n\nFor each PSP, check whether capabilities have been forbidden:\n\n```\nkubectl get psp \u003cname\u003e -o=jsonpath='{.spec.requiredDropCapabilities}'\n```",
     "benchmark": {
-      "id": "cis_k8s",
-      "name": "CIS Kubernetes V1.23",
-      "version": "v1.0.0"
+      "id": "cis_eks",
+      "name": "CIS Amazon Elastic Kubernetes Service (EKS)",
+      "rule_number": "4.2.9",
+      "version": "v1.0.1"
     },
-    "default_value": "By default, the `kube-apiserver.yaml` file has permissions of `640`.\n",
-    "description": "Ensure that the API server pod specification file has permissions of `644` or more restrictive.\n",
-    "id": "6664c1b8-05f2-5872-a516-4b2c3c36d2d7",
-    "impact": "None\n",
-    "name": "Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Automated)",
-    "profile_applicability": "* Level 1 - Master Node\n",
-    "rationale": "The API server pod specification file controls various parameters that set the behavior of the API server. You should restrict its file permissions to maintain the integrity of the file. The file should be writable by only the administrators on the system.\n",
-    "references": "1. [https://kubernetes.io/docs/admin/kube-apiserver/](https://kubernetes.io/docs/admin/kube-apiserver/)\n",
-    "remediation": "Run the below command (based on the file location on your system) on the\ncontrol plane node.\nFor example,\n```\nchmod 644 /etc/kubernetes/manifests/kube-apiserver.yaml\n```\n",
-    "section": "Control Plane Node Configuration Files",
+    "default_value": "By default, PodSecurityPolicies are not defined.\n",
+    "description": "Do not generally permit containers with capabilities",
+    "id": "b28f5d7c-3db2-58cf-8704-b8e922e236b7",
+    "impact": "Pods with containers require capabilities to operate will not be permitted.",
+    "name": "Minimize the admission of containers with capabilities assigned",
+    "profile_applicability": "* Level 2",
+    "rationale": "Containers run with a default set of capabilities as assigned by the Container Runtime.\nCapabilities are parts of the rights generally granted on a Linux system to the root user.\n\nIn many cases applications running in containers do not require any capabilities to operate, so from the perspective of the principal of least privilege use of capabilities should be minimized.",
+    "references": "1. https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies\n2. https://www.nccgroup.trust/uk/our-research/abusing-privileged-and-unprivileged-linux-containers/",
+    "remediation": "Review the use of capabilites in applications runnning on your cluster.\nWhere a namespace contains applicaions which do not require any Linux capabities to operate consider adding a PSP which forbids the admission of containers which do not drop all capabilities.",
+    "section": "Pod Security Policies",
     "tags": [
       "CIS",
-      "Kubernetes",
-      "CIS 1.1.1",
-      "Control Plane Node Configuration Files"
+      "EKS",
+      "CIS 4.2.9",
+      "Pod Security Policies"
     ],
     "version": "1.0"
   }

@@ -1,7 +1,6 @@
 metadata:
   id: 2b5d962b-52a6-558f-beed-6da38c4af362
   name: Ensure that the RotateKubeletServerCertificate argument is set to true
-  rule_number: 1.3.6
   profile_applicability: '* Level 2 - Master Node'
   description: Enable kubelet server certificate rotation on controller-manager.
   rationale: |-
@@ -44,4 +43,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.3.6
     posture_type: kspm

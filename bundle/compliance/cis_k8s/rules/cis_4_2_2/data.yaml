@@ -1,7 +1,6 @@
 metadata:
   id: 3781a71f-54e5-5987-9da2-d72a7d139af7
   name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
-  rule_number: 4.2.2
   profile_applicability: '* Level 1 - Worker Node'
   description: "Do not allow all requests.\nEnable explicit authorization."
   rationale: |-
@@ -53,4 +52,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.2
     posture_type: kspm

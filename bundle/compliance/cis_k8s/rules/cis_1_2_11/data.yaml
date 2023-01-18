@@ -1,7 +1,6 @@
 metadata:
   id: 848c3124-9dd0-5590-9338-82de21c1df9f
   name: Ensure that the admission control plugin AlwaysAdmit is not set
-  rule_number: 1.2.11
   profile_applicability: '* Level 1 - Master Node'
   description: Do not allow all requests.
   rationale: |-
@@ -37,4 +36,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.11
     posture_type: kspm

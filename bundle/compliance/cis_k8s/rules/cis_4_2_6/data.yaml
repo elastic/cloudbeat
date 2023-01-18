@@ -1,7 +1,6 @@
 metadata:
   id: 0a2bee94-296f-56da-b5a5-308e81517990
   name: Ensure that the --protect-kernel-defaults argument is set to true
-  rule_number: 4.2.6
   profile_applicability: '* Level 1 - Worker Node'
   description: Protect tuned kernel parameters from overriding kubelet default kernel
     parameter values.
@@ -52,4 +51,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.6
     posture_type: kspm

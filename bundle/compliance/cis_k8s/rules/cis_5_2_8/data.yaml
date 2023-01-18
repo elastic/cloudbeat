@@ -1,7 +1,6 @@
 metadata:
   id: cef6324e-75cf-522f-b527-92c29bdc8986
   name: Minimize the admission of containers with the NET_RAW capability
-  rule_number: 5.2.8
   profile_applicability: '* Level 1 - Master Node'
   description: Do not generally permit containers with the potentially dangerous NET_RAW
     capability.
@@ -37,4 +36,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 5.2.8
     posture_type: kspm

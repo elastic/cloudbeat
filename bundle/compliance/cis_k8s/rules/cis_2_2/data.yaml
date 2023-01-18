@@ -1,7 +1,6 @@
 metadata:
   id: 8e4b745a-d2db-5fe5-9a60-7c5029599d27
   name: Ensure that the --client-cert-auth argument is set to true
-  rule_number: '2.2'
   profile_applicability: '* Level 1 - Master Node'
   description: Enable client authentication on etcd service.
   rationale: |-
@@ -41,4 +40,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: '2.2'
     posture_type: kspm

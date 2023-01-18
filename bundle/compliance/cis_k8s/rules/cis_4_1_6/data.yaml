@@ -1,7 +1,6 @@
 metadata:
   id: 37ad604b-0db6-5227-bd00-9bfde1253a82
   name: Ensure that the --kubeconfig kubelet.conf file ownership is set to root:root
-  rule_number: 4.1.6
   profile_applicability: '* Level 1 - Worker Node'
   description: Ensure that the `kubelet.conf` file ownership is set to `root:root`.
   rationale: |-
@@ -49,4 +48,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.1.6
     posture_type: kspm

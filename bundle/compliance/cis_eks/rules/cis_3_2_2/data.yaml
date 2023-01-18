@@ -1,7 +1,6 @@
 metadata:
   id: 78ba925d-bea7-5b17-b0db-9ee592faf10c
   name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
-  rule_number: 3.2.2
   profile_applicability: '* Level 1'
   description: "Do not allow all requests.\nEnable explicit authorization."
   rationale: |-
@@ -105,4 +104,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.2
     posture_type: kspm

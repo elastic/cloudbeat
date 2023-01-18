@@ -1,7 +1,6 @@
 metadata:
   id: 06ee416f-aadc-5ac5-807e-39c16c52e985
   name: Ensure that the --hostname-override argument is not set
-  rule_number: 3.2.8
   profile_applicability: '* Level 1'
   description: Do not override node hostnames.
   rationale: |-
@@ -74,4 +73,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.8
     posture_type: kspm

@@ -2,7 +2,6 @@ metadata:
   id: 918459ca-19ff-5d1f-9291-d1ba7964a140
   name: Ensure multi-factor authentication (MFA) is enabled for all IAM users that
     have a console password
-  rule_number: '1.10'
   profile_applicability: '* Level 1'
   description: |-
     Multi-Factor Authentication (MFA) adds an extra layer of authentication assurance beyond traditional credentials.
@@ -86,4 +85,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: '1.10'
     posture_type: cspm

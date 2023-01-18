@@ -1,7 +1,6 @@
 metadata:
   id: 4fc4a2f3-bd99-517f-abca-2a35540432d0
   name: Ensure that the --read-only-port is secured
-  rule_number: 3.2.4
   profile_applicability: '* Level 1'
   description: Disable the read-only port.
   rationale: |-
@@ -65,4 +64,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.4
     posture_type: kspm

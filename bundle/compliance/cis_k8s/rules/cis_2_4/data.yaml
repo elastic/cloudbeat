@@ -2,7 +2,6 @@ metadata:
   id: 16d8e9bd-f09c-5195-b474-7d0861150d44
   name: Ensure that the --peer-cert-file and --peer-key-file arguments are set as
     appropriate
-  rule_number: '2.4'
   profile_applicability: '* Level 1 - Master Node'
   description: etcd should be configured to make use of TLS encryption for peer connections.
   rationale: |-
@@ -48,4 +47,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: '2.4'
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: 789d5b9b-b96f-5bc0-8e37-dd12530eae65
   name: Ensure that the --client-ca-file argument is set as appropriate
-  rule_number: 3.2.3
   profile_applicability: '* Level 1'
   description: Enable Kubelet authentication using certificates.
   rationale: |-
@@ -106,4 +105,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.3
     posture_type: kspm

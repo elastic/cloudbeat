@@ -1,7 +1,6 @@
 metadata:
   id: 5b3b7bd3-eff9-5f9b-8456-2c880cbdb0b0
   name: Enable audit Logs
-  rule_number: 2.1.1
   profile_applicability: '* Level 1'
   description: |-
     The audit logs are part of the EKS managed Kubernetes control plane logs that are managed by Amazon EKS.
@@ -67,4 +66,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 2.1.1
     posture_type: kspm

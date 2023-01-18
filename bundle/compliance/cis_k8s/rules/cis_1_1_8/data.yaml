@@ -1,7 +1,6 @@
 metadata:
   id: d023f3a1-548d-5fb8-a664-31c1d9113d47
   name: Ensure that the etcd pod specification file ownership is set to root:root
-  rule_number: 1.1.8
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `/etc/kubernetes/manifests/etcd.yaml` file ownership
     is set to `root:root`.
@@ -42,4 +41,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.8
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: 58a8587b-2c3a-5bd0-9097-42fdfa2801aa
   name: Ensure that the Kubernetes PKI key file permissions are set to 600
-  rule_number: 1.1.21
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that Kubernetes PKI key files have permissions of `600`.
   rationale: |-
@@ -38,4 +37,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.21
     posture_type: kspm

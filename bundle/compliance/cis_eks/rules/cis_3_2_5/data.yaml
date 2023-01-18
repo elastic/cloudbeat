@@ -2,7 +2,6 @@ metadata:
   id: 863f315d-739a-5995-843c-1ab6f9e2bac4
   name: Ensure that the --streaming-connection-idle-timeout argument is not set to
     0
-  rule_number: 3.2.5
   profile_applicability: '* Level 1'
   description: Do not disable timeouts on streaming connections.
   rationale: |-
@@ -106,4 +105,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.5
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: 15413809-b667-59d0-a54a-972ba4826eb4
   name: Ensure that the --cert-file and --key-file arguments are set as appropriate
-  rule_number: '2.1'
   profile_applicability: '* Level 1 - Master Node'
   description: Configure TLS encryption for the etcd service.
   rationale: |-
@@ -41,4 +40,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: '2.1'
     posture_type: kspm

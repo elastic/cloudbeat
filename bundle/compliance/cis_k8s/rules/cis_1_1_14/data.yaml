@@ -1,7 +1,6 @@
 metadata:
   id: e3b1c434-02ca-5c23-83c7-767e692545f9
   name: Ensure that the admin.conf file ownership is set to root:root
-  rule_number: 1.1.14
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `admin.conf` file ownership is set to `root:root`.
   rationale: |-
@@ -39,4 +38,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.14
     posture_type: kspm

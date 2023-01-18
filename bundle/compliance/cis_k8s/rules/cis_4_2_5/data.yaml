@@ -2,7 +2,6 @@ metadata:
   id: 5f80fd5e-772e-5562-a310-be9b33d1f9d3
   name: Ensure that the --streaming-connection-idle-timeout argument is not set to
     0
-  rule_number: 4.2.5
   profile_applicability: '* Level 1 - Worker Node'
   description: Do not disable timeouts on streaming connections.
   rationale: |-
@@ -53,4 +52,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.5
     posture_type: kspm

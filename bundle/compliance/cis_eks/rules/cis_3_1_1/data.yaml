@@ -1,7 +1,6 @@
 metadata:
   id: 8f843abe-1720-5ee5-a3ae-a1fd773d2bec
   name: Ensure that the kubeconfig file permissions are set to 644 or more restrictive
-  rule_number: 3.1.1
   profile_applicability: '* Level 1'
   description: |-
     If `kubelet` is running, and if it is using a file-based kubeconfig file, ensure that the proxy kubeconfig file has permissions of `644` or more restrictive.
@@ -58,4 +57,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.1.1
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: 1635eab6-ee81-5075-a0bc-8e56a9f16a88
   name: Ensure that the --etcd-certfile and --etcd-keyfile arguments are set as appropriate
-  rule_number: 1.2.26
   profile_applicability: '* Level 1 - Master Node'
   description: etcd should be configured to make use of TLS encryption for client
     connections.
@@ -42,4 +41,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.26
     posture_type: kspm

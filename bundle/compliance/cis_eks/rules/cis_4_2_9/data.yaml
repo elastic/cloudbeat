@@ -1,7 +1,6 @@
 metadata:
   id: b28f5d7c-3db2-58cf-8704-b8e922e236b7
   name: Minimize the admission of containers with capabilities assigned
-  rule_number: 4.2.9
   profile_applicability: '* Level 2'
   description: Do not generally permit containers with capabilities
   rationale: |-
@@ -41,4 +40,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 4.2.9
     posture_type: kspm

@@ -2,7 +2,6 @@ metadata:
   id: ec063233-fc31-5f50-8ecd-ada8cba33192
   name: Ensure that the --event-qps argument is set to 0 or a level which ensures
     appropriate event capture
-  rule_number: 4.2.9
   profile_applicability: '* Level 2 - Worker Node'
   description: |-
     Security relevant information should be captured.
@@ -52,4 +51,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.9
     posture_type: kspm

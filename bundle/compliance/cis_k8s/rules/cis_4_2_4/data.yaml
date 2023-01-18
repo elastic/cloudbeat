@@ -1,7 +1,6 @@
 metadata:
   id: c29d500e-8baf-5dad-b985-935be71d042f
   name: Verify that the --read-only-port argument is set to 0
-  rule_number: 4.2.4
   profile_applicability: '* Level 1 - Worker Node'
   description: Disable the read-only port.
   rationale: |-
@@ -51,4 +50,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.4
     posture_type: kspm

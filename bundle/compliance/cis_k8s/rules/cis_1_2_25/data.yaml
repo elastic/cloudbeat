@@ -1,7 +1,6 @@
 metadata:
   id: 645144dd-f578-5e76-9251-1679bc027910
   name: Ensure that the --service-account-key-file argument is set as appropriate
-  rule_number: 1.2.25
   profile_applicability: '* Level 1 - Master Node'
   description: Explicitly set a service account public key file for service accounts
     on the apiserver.
@@ -41,4 +40,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.25
     posture_type: kspm

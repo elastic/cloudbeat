@@ -1,7 +1,6 @@
 metadata:
   id: 03b75f04-40a0-5b43-becb-8227b24eea5d
   name: Minimize the admission of containers wishing to share the host network namespace
-  rule_number: 5.2.5
   profile_applicability: '* Level 1 - Master Node'
   description: Do not generally permit containers to be run with the `hostNetwork`
     flag set to true.
@@ -31,4 +30,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 5.2.5
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: fee5a5eb-0e97-5a20-aec0-eda1fd6b3580
   name: Ensure access keys are rotated every 90 days or less
-  rule_number: '1.14'
   profile_applicability: '* Level 1'
   description: |-
     Access keys consist of an access key ID and secret access key, which are used to sign programmatic requests that you make to AWS.
@@ -91,4 +90,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: '1.14'
     posture_type: cspm

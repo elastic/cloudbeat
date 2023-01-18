@@ -2,7 +2,6 @@ metadata:
   id: 73926a71-4298-505a-a3d4-6131ab97a9f4
   name: Ensure that the controller-manager.conf file permissions are set to 644 or
     more restrictive
-  rule_number: 1.1.17
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `controller-manager.conf` file has permissions of 644
     or more restrictive.
@@ -41,4 +40,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.17
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: 5097a7f7-be0e-57f1-81d7-665334381426
   name: Ensure that the --client-ca-file argument is set as appropriate
-  rule_number: 4.2.3
   profile_applicability: '* Level 1 - Worker Node'
   description: Enable Kubelet authentication using certificates.
   rationale: |-
@@ -53,4 +52,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.3
     posture_type: kspm

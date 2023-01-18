@@ -1,7 +1,6 @@
 metadata:
   id: 145d13e1-a792-5070-bf34-68d90fcd90dd
   name: Ensure that the admission control plugin ServiceAccount is set
-  rule_number: 1.2.14
   profile_applicability: '* Level 1 - Master Node'
   description: Automate service accounts management.
   rationale: |-
@@ -36,4 +35,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.14
     posture_type: kspm

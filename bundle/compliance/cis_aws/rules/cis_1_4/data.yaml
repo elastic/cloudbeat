@@ -1,7 +1,6 @@
 metadata:
   id: 44f6fd7c-0c0f-55f7-84b3-7fa73b31b7e5
   name: Ensure no 'root' user account access key exists
-  rule_number: '1.4'
   profile_applicability: '* Level 1'
   description: |-
     The 'root' user account is the most privileged user in an AWS account.
@@ -62,4 +61,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: '1.4'
     posture_type: cspm

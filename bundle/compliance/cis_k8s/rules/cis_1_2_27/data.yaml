@@ -2,7 +2,6 @@ metadata:
   id: 719ccb48-0106-5c2a-a563-b31620da736a
   name: Ensure that the --tls-cert-file and --tls-private-key-file arguments are set
     as appropriate
-  rule_number: 1.2.27
   profile_applicability: '* Level 1 - Master Node'
   description: Setup TLS connection on the API server.
   rationale: |-
@@ -44,4 +43,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.27
     posture_type: kspm

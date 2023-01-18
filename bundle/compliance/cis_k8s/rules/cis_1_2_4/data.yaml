@@ -1,7 +1,6 @@
 metadata:
   id: 697cc9f6-28dd-51a5-934c-b6cc3922a6db
   name: Ensure that the --kubelet-https argument is set to true
-  rule_number: 1.2.4
   profile_applicability: '* Level 1 - Master Node'
   description: Use https for kubelet connections.
   rationale: |-
@@ -34,4 +33,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.4
     posture_type: kspm

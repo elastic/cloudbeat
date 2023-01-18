@@ -1,7 +1,6 @@
 metadata:
   id: b7515b92-10ec-5218-94b4-b10de05fd90f
   name: Ensure that the --audit-log-maxage argument is set to 30 or as appropriate
-  rule_number: 1.2.20
   profile_applicability: '* Level 1 - Master Node'
   description: Retain the logs for at least 30 days or as appropriate.
   rationale: |-
@@ -39,4 +38,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.20
     posture_type: kspm

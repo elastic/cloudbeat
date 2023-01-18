@@ -1,7 +1,6 @@
 metadata:
   id: 98547a10-464e-5b9f-9a80-6b254cb621a3
   name: Ensure that the --service-account-lookup argument is set to true
-  rule_number: 1.2.24
   profile_applicability: '* Level 1 - Master Node'
   description: Validate service account before validating token.
   rationale: |-
@@ -43,4 +42,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.24
     posture_type: kspm

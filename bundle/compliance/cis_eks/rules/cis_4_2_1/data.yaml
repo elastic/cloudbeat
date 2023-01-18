@@ -1,7 +1,6 @@
 metadata:
   id: 9be37569-9f32-51b7-978c-556a2d7d207a
   name: Minimize the admission of privileged containers
-  rule_number: 4.2.1
   profile_applicability: '* Level 1'
   description: |-
     Do not generally permit containers to be run with the `securityContext.privileged` flag set to `true`.
@@ -87,4 +86,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 4.2.1
     posture_type: kspm

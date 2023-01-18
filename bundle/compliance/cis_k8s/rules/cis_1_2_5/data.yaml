@@ -2,7 +2,6 @@ metadata:
   id: 6f90e227-03d9-5a1b-bf87-b13c45b23182
   name: |-
     Ensure that the --kubelet-client-certificate and --kubelet-client-key arguments are set as appropriate
-  rule_number: 1.2.5
   profile_applicability: '* Level 1 - Master Node'
   description: Enable certificate based kubelet authentication.
   rationale: |-
@@ -43,4 +42,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.5
     posture_type: kspm

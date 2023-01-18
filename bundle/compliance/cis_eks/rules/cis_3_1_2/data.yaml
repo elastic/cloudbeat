@@ -1,7 +1,6 @@
 metadata:
   id: be9d43ae-4355-51ed-8ea7-dfd9b30e9d07
   name: Ensure that the kubelet kubeconfig file ownership is set to root:root
-  rule_number: 3.1.2
   profile_applicability: '* Level 1'
   description: |-
     If `kubelet` is running, ensure that the file ownership of its kubeconfig file is set to `root:root`.
@@ -55,4 +54,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.1.2
     posture_type: kspm

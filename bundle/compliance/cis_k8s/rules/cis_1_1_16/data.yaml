@@ -1,7 +1,6 @@
 metadata:
   id: 6a676e26-ad2f-53a2-9968-1a075a70a84b
   name: Ensure that the scheduler.conf file ownership is set to root:root
-  rule_number: 1.1.16
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `scheduler.conf` file ownership is set to `root:root`.
   rationale: |-
@@ -39,4 +38,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.16
     posture_type: kspm

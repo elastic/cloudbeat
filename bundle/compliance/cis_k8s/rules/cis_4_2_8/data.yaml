@@ -1,7 +1,6 @@
 metadata:
   id: 6f2e9eb5-d55f-5eaa-9f8d-472f246d1343
   name: Ensure that the --hostname-override argument is not set
-  rule_number: 4.2.8
   profile_applicability: '* Level 1 - Worker Node'
   description: Do not override node hostnames.
   rationale: |-
@@ -46,4 +45,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.8
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: b38efe94-7174-5e1d-8f32-14ec97aa9d47
   name: Ensure that the --secure-port argument is not set to 0
-  rule_number: 1.2.17
   profile_applicability: '* Level 1 - Master Node'
   description: Do not disable the secure port.
   rationale: |-
@@ -32,4 +31,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.17
     posture_type: kspm

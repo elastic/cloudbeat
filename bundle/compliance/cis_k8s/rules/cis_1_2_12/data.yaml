@@ -1,7 +1,6 @@
 metadata:
   id: 73fa944c-a62c-5371-a011-0e17bf85f79f
   name: Ensure that the admission control plugin AlwaysPullImages is set
-  rule_number: 1.2.12
   profile_applicability: '* Level 1 - Master Node'
   description: Always pull images.
   rationale: |-
@@ -43,4 +42,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.12
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: 75faeb95-6d19-5205-85b9-4bb1471292c4
   name: Ensure that the --profiling argument is set to false
-  rule_number: 1.4.1
   profile_applicability: '* Level 1 - Master Node'
   description: Disable profiling, if not needed.
   rationale: |-
@@ -39,4 +38,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.4.1
     posture_type: kspm

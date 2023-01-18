@@ -1,7 +1,6 @@
 metadata:
   id: bc294f39-513a-528c-8207-72ddd221054d
   name: Ensure that the --authorization-mode argument includes Node
-  rule_number: 1.2.8
   profile_applicability: '* Level 1 - Master Node'
   description: Restrict kubelet nodes to reading only objects associated with them.
   rationale: |-
@@ -39,4 +38,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.8
     posture_type: kspm

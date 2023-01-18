@@ -1,7 +1,6 @@
 metadata:
   id: d6fa5f41-3671-563a-ba35-a7494223273a
   name: Minimize the admission of containers with allowPrivilegeEscalation
-  rule_number: 4.2.5
   profile_applicability: '* Level 1'
   description: Do not generally permit containers to be run with the `allowPrivilegeEscalation`
     flag set to true.
@@ -45,4 +44,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 4.2.5
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: 091b1308-4f72-59ef-9103-4b548386ae27
   name: Ensure that the --bind-address argument is set to 127.0.0.1
-  rule_number: 1.4.2
   profile_applicability: '* Level 1 - Master Node'
   description: Do not bind the scheduler service to non-loopback insecure addresses.
   rationale: |-
@@ -32,4 +31,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.4.2
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: be86166d-d578-5af3-a36c-fabca73ff99c
   name: Ensure that the --peer-client-cert-auth argument is set to true
-  rule_number: '2.5'
   profile_applicability: '* Level 1 - Master Node'
   description: etcd should be configured for peer authentication.
   rationale: |-
@@ -46,4 +45,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: '2.5'
     posture_type: kspm

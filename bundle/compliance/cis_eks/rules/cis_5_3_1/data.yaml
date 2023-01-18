@@ -2,7 +2,6 @@ metadata:
   id: 8b6bfb52-9051-5863-baef-2c4eaa6a5eb1
   name: Ensure Kubernetes Secrets are encrypted using Customer Master Keys (CMKs)
     managed in AWS KMS
-  rule_number: 5.3.1
   profile_applicability: '* Level 1'
   description: |-
     Encrypt Kubernetes secrets, stored in etcd, using secrets encryption feature during Amazon EKS cluster creation.
@@ -45,4 +44,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 5.3.1
     posture_type: kspm

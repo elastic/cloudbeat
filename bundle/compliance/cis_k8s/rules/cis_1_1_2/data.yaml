@@ -1,7 +1,6 @@
 metadata:
   id: ffcb9161-0ec8-5c29-9856-9626556e8f12
   name: Ensure that the API server pod specification file ownership is set to root:root
-  rule_number: 1.1.2
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the API server pod specification file ownership is set
     to `root:root`.
@@ -40,4 +39,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.2
     posture_type: kspm

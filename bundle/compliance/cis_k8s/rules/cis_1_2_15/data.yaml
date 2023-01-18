@@ -1,7 +1,6 @@
 metadata:
   id: c2cd82d0-2ded-593d-8231-9c643c40ed73
   name: Ensure that the admission control plugin NamespaceLifecycle is set
-  rule_number: 1.2.15
   profile_applicability: '* Level 1 - Master Node'
   description: Reject creating objects in a namespace that is undergoing termination.
   rationale: |-
@@ -34,4 +33,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.15
     posture_type: kspm

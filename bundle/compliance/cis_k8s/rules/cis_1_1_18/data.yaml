@@ -1,7 +1,6 @@
 metadata:
   id: 76c4a120-d350-5958-a585-0f8b9d581652
   name: Ensure that the controller-manager.conf file ownership is set to root:root
-  rule_number: 1.1.18
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `controller-manager.conf` file ownership is set to
     `root:root`.
@@ -40,4 +39,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.18
     posture_type: kspm

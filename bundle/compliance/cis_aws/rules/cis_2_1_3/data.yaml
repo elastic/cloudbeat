@@ -1,7 +1,6 @@
 metadata:
   id: 50732c73-5ea9-5cea-af10-7c2cde7b3fa3
   name: Ensure MFA Delete is enabled on S3 buckets
-  rule_number: 2.1.3
   profile_applicability: '* Level 1'
   description: |-
     Once MFA Delete is enabled on your sensitive and classified S3 bucket it requires the user to have two forms of authentication.
@@ -71,4 +70,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: 2.1.3
     posture_type: cspm

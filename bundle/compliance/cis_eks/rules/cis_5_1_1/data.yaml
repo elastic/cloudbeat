@@ -2,7 +2,6 @@ metadata:
   id: d062432b-6804-5626-9953-1de08c4f8ccb
   name: Ensure Image Vulnerability Scanning using Amazon ECR image scanning or a third
     party provider
-  rule_number: 5.1.1
   profile_applicability: '* Level 1'
   description: Scan images being deployed to Amazon EKS for vulnerabilities.
   rationale: |-
@@ -60,4 +59,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 5.1.1
     posture_type: kspm

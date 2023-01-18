@@ -1,7 +1,6 @@
 metadata:
   id: ece0af5a-5d66-5032-b16e-2c6547079d5a
   name: Ensure S3 Bucket Policy is set to deny HTTP requests
-  rule_number: 2.1.2
   profile_applicability: '* Level 2'
   description: |-
     At the Amazon S3 bucket level, you can configure permissions through a bucket policy making the objects accessible only through HTTPS.
@@ -133,4 +132,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: 2.1.2
     posture_type: cspm

@@ -1,7 +1,6 @@
 metadata:
   id: 4dda78b5-7d6e-52fb-8faa-998ac97fa4ef
   name: Ensure that the --rotate-certificates argument is not set to false
-  rule_number: 3.2.10
   profile_applicability: '* Level 2'
   description: Enable kubelet client certificate rotation.
   rationale: |-
@@ -71,4 +70,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.10
     posture_type: kspm

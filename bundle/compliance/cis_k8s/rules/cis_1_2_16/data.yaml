@@ -1,7 +1,6 @@
 metadata:
   id: 0a9250ba-0634-567c-bd6d-63dbab03d83b
   name: Ensure that the admission control plugin NodeRestriction is set
-  rule_number: 1.2.16
   profile_applicability: '* Level 1 - Master Node'
   description: Limit the `Node` and `Pod` objects that a kubelet could modify.
   rationale: |-
@@ -41,4 +40,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.16
     posture_type: kspm

@@ -2,7 +2,6 @@ metadata:
   id: 7b8b0bbb-e4ca-5279-a60a-7e1957f1c0ee
   name: |-
     Ensure that the --eventRecordQPS argument is set to 0 or a level which ensures appropriate event capture
-  rule_number: 3.2.9
   profile_applicability: '* Level 2'
   description: |-
     Security relevant information should be captured.
@@ -108,4 +107,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.9
     posture_type: kspm

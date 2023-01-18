@@ -1,7 +1,6 @@
 metadata:
   id: bce28b5e-2f2c-5c57-960e-5385341b2f2b
   name: Ensure that the --protect-kernel-defaults argument is set to true
-  rule_number: 3.2.6
   profile_applicability: '* Level 1'
   description: Protect tuned kernel parameters from overriding kubelet default kernel
     parameter values.
@@ -105,4 +104,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.6
     posture_type: kspm

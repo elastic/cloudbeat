@@ -1,7 +1,6 @@
 metadata:
   id: 2ebc00e8-2e43-5828-a5bb-b56c81733ec6
   name: Minimize the admission of privileged containers
-  rule_number: 5.2.2
   profile_applicability: '* Level 1 - Master Node'
   description: |-
     Do not generally permit containers to be run with the `securityContext.privileged` flag set to `true`.
@@ -35,4 +34,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 5.2.2
     posture_type: kspm

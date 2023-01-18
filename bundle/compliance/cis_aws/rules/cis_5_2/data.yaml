@@ -2,7 +2,6 @@ metadata:
   id: 100d2822-9a4c-5b86-9f57-5152f64e23fb
   name: Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration
     ports
-  rule_number: '5.2'
   profile_applicability: '* Level 1'
   description: |-
     Security groups provide stateful filtering of ingress and egress network traffic to AWS resources.
@@ -48,4 +47,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: '5.2'
     posture_type: cspm

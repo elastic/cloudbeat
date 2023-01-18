@@ -1,7 +1,6 @@
 metadata:
   id: c21c1512-65e5-5831-9b94-2e2653ee84a4
   name: Ensure credentials unused for 45 days or greater are disabled
-  rule_number: '1.12'
   profile_applicability: '* Level 1'
   description: |-
     AWS IAM users can access AWS resources using different types of credentials, such as passwords or access keys.
@@ -93,4 +92,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: '1.12'
     posture_type: cspm

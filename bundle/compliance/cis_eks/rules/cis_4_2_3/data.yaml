@@ -1,7 +1,6 @@
 metadata:
   id: c44797fd-3b88-51d4-b4e7-164695073447
   name: Minimize the admission of containers wishing to share the host IPC namespace
-  rule_number: 4.2.3
   profile_applicability: '* Level 1'
   description: Do not generally permit containers to be run with the `hostIPC` flag
     set to true.
@@ -43,4 +42,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 4.2.3
     posture_type: kspm

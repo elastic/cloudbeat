@@ -1,7 +1,6 @@
 metadata:
   id: a1bfd354-721a-5038-a7f3-0a38e9232304
   name: Ensure that the etcd data directory permissions are set to 700 or more restrictive
-  rule_number: 1.1.11
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the etcd data directory has permissions of `700` or more
     restrictive.
@@ -51,4 +50,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.11
     posture_type: kspm

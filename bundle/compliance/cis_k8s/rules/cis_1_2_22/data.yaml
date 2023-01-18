@@ -1,7 +1,6 @@
 metadata:
   id: 9629f363-8475-5939-8432-ae72e223a892
   name: Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate
-  rule_number: 1.2.22
   profile_applicability: '* Level 1 - Master Node'
   description: Rotate log files on reaching 100 MB or as appropriate.
   rationale: |-
@@ -41,4 +40,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.22
     posture_type: kspm

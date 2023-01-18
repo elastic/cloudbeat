@@ -2,7 +2,6 @@ metadata:
   id: 406fd115-6c53-5bed-b8d6-b5def651b284
   name: Ensure that the --kubeconfig kubelet.conf file permissions are set to 644
     or more restrictive
-  rule_number: 4.1.5
   profile_applicability: '* Level 1 - Worker Node'
   description: Ensure that the `kubelet.conf` file has permissions of `644` or more
     restrictive.
@@ -51,4 +50,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.1.5
     posture_type: kspm

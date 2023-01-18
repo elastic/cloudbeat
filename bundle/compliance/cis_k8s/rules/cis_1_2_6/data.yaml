@@ -1,7 +1,6 @@
 metadata:
   id: 53095c31-20ab-5659-a8e6-3e1b505c6984
   name: Ensure that the --kubelet-certificate-authority argument is set as appropriate
-  rule_number: 1.2.6
   profile_applicability: '* Level 1 - Master Node'
   description: Verify kubelet's certificate before establishing connection.
   rationale: |-
@@ -41,4 +40,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.6
     posture_type: kspm

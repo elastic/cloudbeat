@@ -1,7 +1,6 @@
 metadata:
   id: 8bc174f7-9a5b-5599-bc64-22f8ea0b28f5
   name: Minimize the admission of containers wishing to share the host IPC namespace
-  rule_number: 5.2.4
   profile_applicability: '* Level 1 - Master Node'
   description: Do not generally permit containers to be run with the `hostIPC` flag
     set to true.
@@ -31,4 +30,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 5.2.4
     posture_type: kspm

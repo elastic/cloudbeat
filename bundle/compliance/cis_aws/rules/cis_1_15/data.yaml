@@ -1,7 +1,6 @@
 metadata:
   id: d44d0d65-8a4d-5739-8d9a-c61ad8dbc3d5
   name: Ensure IAM Users Receive Permissions Only Through Groups
-  rule_number: '1.15'
   profile_applicability: '* Level 1'
   description: |-
     IAM users are granted access to services, functions, and data through IAM policies.
@@ -68,4 +67,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: '1.15'
     posture_type: cspm

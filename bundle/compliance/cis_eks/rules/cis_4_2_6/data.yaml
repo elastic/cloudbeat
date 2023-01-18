@@ -1,7 +1,6 @@
 metadata:
   id: 77bc9d3b-7f54-5149-8430-9c0222184f32
   name: Minimize the admission of root containers
-  rule_number: 4.2.6
   profile_applicability: '* Level 2'
   description: Do not generally permit containers to be run as the root user.
   rationale: |-
@@ -45,4 +44,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 4.2.6
     posture_type: kspm

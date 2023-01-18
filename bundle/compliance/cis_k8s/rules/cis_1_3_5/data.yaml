@@ -1,7 +1,6 @@
 metadata:
   id: 2cb45802-52cb-582a-a6f2-0d19e1903cf1
   name: Ensure that the --root-ca-file argument is set as appropriate
-  rule_number: 1.3.5
   profile_applicability: '* Level 1 - Master Node'
   description: Allow pods to verify the API server's serving certificate before establishing
     connections.
@@ -41,4 +40,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.3.5
     posture_type: kspm

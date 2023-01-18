@@ -1,7 +1,6 @@
 metadata:
   id: 84c66732-9c11-5a66-9bf9-e65f06e08171
   name: Ensure that the scheduler.conf file permissions are set to 644 or more restrictive
-  rule_number: 1.1.15
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `scheduler.conf` file has permissions of `644` or more
     restrictive.
@@ -40,4 +39,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.15
     posture_type: kspm

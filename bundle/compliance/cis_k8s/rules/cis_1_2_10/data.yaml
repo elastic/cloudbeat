@@ -1,7 +1,6 @@
 metadata:
   id: ca5b005f-9922-5cdc-a664-7b8f33e20f00
   name: Ensure that the admission control plugin EventRateLimit is set
-  rule_number: 1.2.10
   profile_applicability: '* Level 1 - Master Node'
   description: Limit the rate at which the API server accepts requests.
   rationale: |-
@@ -46,4 +45,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.10
     posture_type: kspm

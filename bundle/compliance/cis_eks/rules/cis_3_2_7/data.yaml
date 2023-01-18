@@ -1,7 +1,6 @@
 metadata:
   id: bfe7e23b-0a7f-5530-a986-0b06fab6f274
   name: Ensure that the --make-iptables-util-chains argument is set to true
-  rule_number: 3.2.7
   profile_applicability: '* Level 1'
   description: Allow Kubelet to manage iptables.
   rationale: |-
@@ -105,4 +104,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.7
     posture_type: kspm

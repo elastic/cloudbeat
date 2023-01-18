@@ -1,7 +1,6 @@
 metadata:
   id: b7a0af34-6b0b-5d6c-ade0-40e78890db00
   name: Ensure IAM password policy prevents password reuse
-  rule_number: '1.9'
   profile_applicability: '* Level 1'
   description: |-
     IAM password policies can prevent the reuse of a given password by the same user.
@@ -56,4 +55,5 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    rule_number: '1.9'
     posture_type: cspm

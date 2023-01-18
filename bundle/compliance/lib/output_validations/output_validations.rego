@@ -21,8 +21,8 @@ validate_common_provider_metadata(metadata) {
 	metadata.benchmark.name
 	metadata.benchmark.version
 	metadata.benchmark.id
+	metadata.benchmark.rule_number
 	metadata.benchmark.posture_type
-	metadata.rule_number
 }
 
 validate_metadata(metadata) {

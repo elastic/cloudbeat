@@ -1,7 +1,6 @@
 metadata:
   id: 5316a432-8098-500b-ab01-f13d37e2d66e
   name: Ensure that the kubelet service file ownership is set to root:root
-  rule_number: 4.1.2
   profile_applicability: '* Level 1 - Worker Node'
   description: Ensure that the `kubelet` service file ownership is set to `root:root`.
   rationale: |-
@@ -51,4 +50,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.1.2
     posture_type: kspm

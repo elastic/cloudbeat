@@ -1,7 +1,6 @@
 metadata:
   id: 21ef8d8e-ac0d-57e4-805f-30817ec1500b
   name: Ensure that the --request-timeout argument is set as appropriate
-  rule_number: 1.2.23
   profile_applicability: '* Level 1 - Master Node'
   description: Set global request timeout for API server requests as appropriate.
   rationale: |-
@@ -41,4 +40,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.23
     posture_type: kspm

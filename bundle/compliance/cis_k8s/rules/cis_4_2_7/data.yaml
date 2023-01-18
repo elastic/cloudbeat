@@ -1,7 +1,6 @@
 metadata:
   id: d649c9bf-85a8-5247-9ac0-53635680af10
   name: Ensure that the --make-iptables-util-chains argument is set to true
-  rule_number: 4.2.7
   profile_applicability: '* Level 1 - Worker Node'
   description: Allow Kubelet to manage iptables.
   rationale: |-
@@ -48,4 +47,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.7
     posture_type: kspm

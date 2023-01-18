@@ -1,7 +1,6 @@
 metadata:
   id: 0c11cba6-a115-5485-bf50-f7f57a7deffa
   name: Ensure that the --auto-tls argument is not set to true
-  rule_number: '2.3'
   profile_applicability: '* Level 1 - Master Node'
   description: Do not use self-signed certificates for TLS.
   rationale: |-
@@ -40,4 +39,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: '2.3'
     posture_type: kspm

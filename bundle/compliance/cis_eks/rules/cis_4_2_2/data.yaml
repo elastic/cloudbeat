@@ -2,7 +2,6 @@ metadata:
   id: f7c69dc3-fbdd-5a04-b4fe-38550e586f7e
   name: Minimize the admission of containers wishing to share the host process ID
     namespace
-  rule_number: 4.2.2
   profile_applicability: '* Level 1'
   description: Do not generally permit containers to be run with the `hostPID` flag
     set to true.
@@ -45,4 +44,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 4.2.2
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: bc4855e5-8921-5622-9784-5723c6d56091
   name: Ensure that the --rotate-certificates argument is not set to false
-  rule_number: 4.2.11
   profile_applicability: '* Level 1 - Worker Node'
   description: Enable kubelet client certificate rotation.
   rationale: |-
@@ -54,4 +53,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.11
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: 340b6012-9394-569d-ac5a-74745dae70cb
   name: Ensure that the --anonymous-auth argument is set to false
-  rule_number: 3.2.1
   profile_applicability: '* Level 1'
   description: Disable anonymous requests to the Kubelet server.
   rationale: |-
@@ -103,4 +102,5 @@ metadata:
     name: CIS Amazon Elastic Kubernetes Service (EKS)
     version: v1.0.1
     id: cis_eks
+    rule_number: 3.2.1
     posture_type: kspm

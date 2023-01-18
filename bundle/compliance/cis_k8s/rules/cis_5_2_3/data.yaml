@@ -2,7 +2,6 @@ metadata:
   id: 9e2858f0-3e6b-571e-b675-3de189ef13e9
   name: Minimize the admission of containers wishing to share the host process ID
     namespace
-  rule_number: 5.2.3
   profile_applicability: '* Level 1 - Master Node'
   description: Do not generally permit containers to be run with the `hostPID` flag
     set to true.
@@ -33,4 +32,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 5.2.3
     posture_type: kspm

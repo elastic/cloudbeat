@@ -1,7 +1,6 @@
 metadata:
   id: 6fa22113-1614-5998-94c8-7fba2c6d151f
   name: Ensure that the --peer-auto-tls argument is not set to true
-  rule_number: '2.6'
   profile_applicability: '* Level 1 - Master Node'
   description: Do not use automatically generated self-signed certificates for TLS
     connections between peers.
@@ -46,4 +45,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: '2.6'
     posture_type: kspm

@@ -1,7 +1,6 @@
 metadata:
   id: 33d1b3cc-7d61-5940-9b67-bd3bdf1372c0
   name: Ensure that the admin.conf file permissions are set to 600
-  rule_number: 1.1.13
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `admin.conf` file has permissions of `600`.
   rationale: |-
@@ -40,4 +39,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.1.13
     posture_type: kspm

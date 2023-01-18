@@ -1,7 +1,6 @@
 metadata:
   id: 5bf4df2b-2758-5dfc-b670-74faf135e437
   name: Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate
-  rule_number: 1.2.21
   profile_applicability: '* Level 1 - Master Node'
   description: Retain 10 or an appropriate number of old log files.
   rationale: |-
@@ -40,4 +39,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 1.2.21
     posture_type: kspm

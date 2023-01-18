@@ -1,7 +1,6 @@
 metadata:
   id: 05afb6ee-e198-5d85-97e4-05d86c73b1e4
   name: Ensure that the Kubelet only makes use of Strong Cryptographic Ciphers
-  rule_number: 4.2.13
   profile_applicability: '* Level 1 - Worker Node'
   description: Ensure that the Kubelet is configured to only use strong cryptographic
     ciphers.
@@ -64,4 +63,5 @@ metadata:
     name: CIS Kubernetes V1.23
     version: v1.0.1
     id: cis_k8s
+    rule_number: 4.2.13
     posture_type: kspm
