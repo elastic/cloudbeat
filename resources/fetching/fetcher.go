@@ -32,6 +32,7 @@ const (
 	IAMType           = "aws-iam"
 	EC2NetworkingType = "aws-ec2-network"
 	NetworkNACLType   = "aws-nacl"
+	TrailType         = "aws-trail"
 	SecurityGroupType = "aws-security-group"
 	ElbType           = "aws-elb"
 	IAMUserType       = "aws-iam-user"
