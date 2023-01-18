@@ -108,7 +108,6 @@ func (w *multiRegionWrapper[T]) GetMultiRegionsClientMap() map[string]T {
 // In case of a failure the function returns the default region.
 func getRegions(client DescribeCloudRegions, log *logp.Logger) []string {
 	log.Debug("GetRegions starting...")
-	var initErr error
 
 	once.Do(func() {
 		log.Debug("Get aws regions for the first time")
@@ -116,7 +115,8 @@ func getRegions(client DescribeCloudRegions, log *logp.Logger) []string {
 
 		output, err := client.DescribeRegions(context.Background(), nil)
 		if err != nil {
-			initErr = fmt.Errorf("failed DescribeRegions: %w", err)
+			log.Errorf("failed DescribeRegions: %v", err)
+			awsRegions.enabledRegions = []string{DefaultRegion}
 			once = &sync.Once{} // reset singleton upon error
 			return
 		}
@@ -125,11 +125,6 @@ func getRegions(client DescribeCloudRegions, log *logp.Logger) []string {
 			awsRegions.enabledRegions = append(awsRegions.enabledRegions, *region.RegionName)
 		}
 	})
-
-	if initErr != nil {
-		log.Errorf("Error: %v, init client only for the default region: %s", initErr, DefaultRegion)
-		awsRegions.enabledRegions = append(awsRegions.enabledRegions, DefaultRegion)
-	}
 
 	log.Debugf("enabled regions for aws account, %v", awsRegions.enabledRegions)
 	return awsRegions.enabledRegions
