@@ -344,8 +344,7 @@ func BuildOpaBundle() error {
 	cspPoliciesPkgDir := "/tmp/" + r
 
 	repo, err := git.PlainClone(cspPoliciesPkgDir, false, &git.CloneOptions{
-		URL:             fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
-		InsecureSkipTLS: true,
+		URL: fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
 	})
 	if err != nil {
 		return err
