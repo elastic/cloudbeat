@@ -11,12 +11,15 @@ from ruamel.yaml import YAML
 
 yml = YAML()
 
+KSPM_POSTURE_TYPE = "kspm"
+CSPM_POSTURE_TYPE = "cspm"
 
 @dataclass
 class Benchmark:
     name: str
     version: str
     id: str
+    posture_type: str
 
 
 @dataclass
@@ -80,6 +83,11 @@ selected_columns_map = {
     }
 }
 
+benchmark_to_posture_type = {
+    "cis_k8s": KSPM_POSTURE_TYPE,
+    "cis_eks": KSPM_POSTURE_TYPE,
+    "cis_aws": CSPM_POSTURE_TYPE,
+}
 
 def parse_refs(refs: str):
     """
@@ -211,6 +219,8 @@ if __name__ == "__main__":
             name=common.benchmark[benchmark_id].split("Benchmark")[0].replace("_", " ").removesuffix(" "),
             version=common.benchmark[benchmark_id].split("Benchmark")[1].removeprefix("_").removesuffix(".xlsx"),
             id=f"{benchmark_id}",
+            posture_type=benchmark_to_posture_type[benchmark_id],
+
         )
         metadata = generate_metadata(benchmark_id, raw_data, benchmark_metadata, sections)
         save_metadata(metadata, benchmark_id)

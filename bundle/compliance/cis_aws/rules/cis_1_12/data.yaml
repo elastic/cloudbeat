@@ -93,3 +93,4 @@ metadata:
     name: CIS Amazon Web Services Foundations
     version: v1.5.0
     id: cis_aws
+    posture_type: cspm
