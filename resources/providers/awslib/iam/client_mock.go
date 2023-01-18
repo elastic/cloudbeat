@@ -349,6 +349,68 @@ func (_c *MockClient_GetRolePolicy_Call) Return(_a0 *serviceiam.GetRolePolicyOut
 	return _c
 }
 
+// GetUserPolicy provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) GetUserPolicy(ctx context.Context, params *serviceiam.GetUserPolicyInput, optFns ...func(*serviceiam.Options)) (*serviceiam.GetUserPolicyOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceiam.GetUserPolicyOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceiam.GetUserPolicyInput, ...func(*serviceiam.Options)) *serviceiam.GetUserPolicyOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceiam.GetUserPolicyOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceiam.GetUserPolicyInput, ...func(*serviceiam.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_GetUserPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserPolicy'
+type MockClient_GetUserPolicy_Call struct {
+	*mock.Call
+}
+
+// GetUserPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceiam.GetUserPolicyInput
+//   - optFns ...func(*serviceiam.Options)
+func (_e *MockClient_Expecter) GetUserPolicy(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetUserPolicy_Call {
+	return &MockClient_GetUserPolicy_Call{Call: _e.mock.On("GetUserPolicy",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_GetUserPolicy_Call) Run(run func(ctx context.Context, params *serviceiam.GetUserPolicyInput, optFns ...func(*serviceiam.Options))) *MockClient_GetUserPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceiam.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceiam.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceiam.GetUserPolicyInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_GetUserPolicy_Call) Return(_a0 *serviceiam.GetUserPolicyOutput, _a1 error) *MockClient_GetUserPolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // ListAccessKeys provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) ListAccessKeys(ctx context.Context, params *serviceiam.ListAccessKeysInput, optFns ...func(*serviceiam.Options)) (*serviceiam.ListAccessKeysOutput, error) {
 	_va := make([]interface{}, len(optFns))
@@ -473,6 +535,68 @@ func (_c *MockClient_ListAttachedRolePolicies_Call) Return(_a0 *serviceiam.ListA
 	return _c
 }
 
+// ListAttachedUserPolicies provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) ListAttachedUserPolicies(ctx context.Context, params *serviceiam.ListAttachedUserPoliciesInput, optFns ...func(*serviceiam.Options)) (*serviceiam.ListAttachedUserPoliciesOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceiam.ListAttachedUserPoliciesOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceiam.ListAttachedUserPoliciesInput, ...func(*serviceiam.Options)) *serviceiam.ListAttachedUserPoliciesOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceiam.ListAttachedUserPoliciesOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceiam.ListAttachedUserPoliciesInput, ...func(*serviceiam.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_ListAttachedUserPolicies_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListAttachedUserPolicies'
+type MockClient_ListAttachedUserPolicies_Call struct {
+	*mock.Call
+}
+
+// ListAttachedUserPolicies is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceiam.ListAttachedUserPoliciesInput
+//   - optFns ...func(*serviceiam.Options)
+func (_e *MockClient_Expecter) ListAttachedUserPolicies(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListAttachedUserPolicies_Call {
+	return &MockClient_ListAttachedUserPolicies_Call{Call: _e.mock.On("ListAttachedUserPolicies",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_ListAttachedUserPolicies_Call) Run(run func(ctx context.Context, params *serviceiam.ListAttachedUserPoliciesInput, optFns ...func(*serviceiam.Options))) *MockClient_ListAttachedUserPolicies_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceiam.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceiam.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceiam.ListAttachedUserPoliciesInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_ListAttachedUserPolicies_Call) Return(_a0 *serviceiam.ListAttachedUserPoliciesOutput, _a1 error) *MockClient_ListAttachedUserPolicies_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // ListMFADevices provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) ListMFADevices(ctx context.Context, params *serviceiam.ListMFADevicesInput, optFns ...func(*serviceiam.Options)) (*serviceiam.ListMFADevicesOutput, error) {
 	_va := make([]interface{}, len(optFns))
@@ -531,6 +655,68 @@ func (_c *MockClient_ListMFADevices_Call) Run(run func(ctx context.Context, para
 }
 
 func (_c *MockClient_ListMFADevices_Call) Return(_a0 *serviceiam.ListMFADevicesOutput, _a1 error) *MockClient_ListMFADevices_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+// ListUserPolicies provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) ListUserPolicies(ctx context.Context, params *serviceiam.ListUserPoliciesInput, optFns ...func(*serviceiam.Options)) (*serviceiam.ListUserPoliciesOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceiam.ListUserPoliciesOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceiam.ListUserPoliciesInput, ...func(*serviceiam.Options)) *serviceiam.ListUserPoliciesOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceiam.ListUserPoliciesOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceiam.ListUserPoliciesInput, ...func(*serviceiam.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_ListUserPolicies_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListUserPolicies'
+type MockClient_ListUserPolicies_Call struct {
+	*mock.Call
+}
+
+// ListUserPolicies is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceiam.ListUserPoliciesInput
+//   - optFns ...func(*serviceiam.Options)
+func (_e *MockClient_Expecter) ListUserPolicies(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListUserPolicies_Call {
+	return &MockClient_ListUserPolicies_Call{Call: _e.mock.On("ListUserPolicies",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_ListUserPolicies_Call) Run(run func(ctx context.Context, params *serviceiam.ListUserPoliciesInput, optFns ...func(*serviceiam.Options))) *MockClient_ListUserPolicies_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceiam.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceiam.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceiam.ListUserPoliciesInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_ListUserPolicies_Call) Return(_a0 *serviceiam.ListUserPoliciesOutput, _a1 error) *MockClient_ListUserPolicies_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
