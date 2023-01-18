@@ -35,7 +35,7 @@ type ProviderTestSuite struct {
 	log *logp.Logger
 }
 
-type s3ClientMockReturnVals map[string][]any
+type s3ClientMockReturnVals map[string][][]any
 
 func TestProviderTestSuite(t *testing.T) {
 	s := new(ProviderTestSuite)
@@ -53,11 +53,13 @@ func (s *ProviderTestSuite) SetupTest() {}
 func (s *ProviderTestSuite) TearDownTest() {}
 
 var bucketName = "MyBucket"
+var secondBucketName = "MyAnotherBucket"
 var region types.BucketLocationConstraint = "eu-west-1"
 
 func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 	var tests = []struct {
 		name                   string
+		regions                []string
 		s3ClientMockReturnVals s3ClientMockReturnVals
 		expected               []awslib.AwsResource
 		expectError            bool
@@ -65,77 +67,132 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should not return any S3 buckets when there aren't any",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets": {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{}}, nil},
+				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{}}, nil}},
 			},
 			expected:    []awslib.AwsResource(nil),
 			expectError: false,
+			regions:     []string{awslib.DefaultRegion},
 		},
 		{
 			name: "Should not return any S3 buckets when there is an error",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets": {nil, errors.New("error")},
+				"ListBuckets": {{nil, errors.New("error")}},
 			},
 			expected:    nil,
 			expectError: true,
-		},
-		{
-			name: "Should not return any S3 buckets when the region is wrong",
-			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil},
-				"GetBucketEncryption": {nil, errors.New("bla")},
-				"GetBucketLocation":   {&s3Client.GetBucketLocationOutput{LocationConstraint: "made-up-region"}, nil},
-			},
-			expected:    nil,
-			expectError: false,
+			regions:     []string{awslib.DefaultRegion},
 		},
 		{
 			name: "Should not return any S3 buckets when the region can not be fetched",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil},
-				"GetBucketEncryption": {nil, errors.New("bla")},
-				"GetBucketLocation":   {nil, errors.New("bla")},
+				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
+				"GetBucketEncryption": {{nil, errors.New("bla")}},
+				"GetBucketLocation":   {{nil, errors.New("bla")}},
 			},
 			expected:    nil,
 			expectError: false,
+			regions:     []string{awslib.DefaultRegion},
 		},
 		{
 			name: "Should return an S3 bucket without encryption",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil},
-				"GetBucketEncryption": {nil, errors.New("bla")},
-				"GetBucketLocation":   {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil},
+				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
+				"GetBucketEncryption": {{nil, errors.New("bla")}},
+				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: ""}},
 			expectError: false,
+			regions:     []string{awslib.DefaultRegion},
+		},
+		{
+			name: "Should not return an S3 bucket with encryption due to regions mismatch",
+			s3ClientMockReturnVals: s3ClientMockReturnVals{
+				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
+				"GetBucketEncryption": {{nil, errors.New("regions mismatch")}},
+				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+			},
+			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: ""}},
+			expectError: false,
+			regions:     []string{awslib.DefaultRegion},
 		},
 		{
 			name: "Should return an S3 bucket with encryption",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets": {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil},
-				"GetBucketEncryption": {&s3Client.GetBucketEncryptionOutput{
+				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
+				"GetBucketEncryption": {{&s3Client.GetBucketEncryptionOutput{
+					ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
+						Rules: []types.ServerSideEncryptionRule{
+							{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
+						},
+					},
+				}, nil}},
+				"GetBucketLocation": {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+			},
+			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "AES256"}},
+			expectError: false,
+			regions:     []string{awslib.DefaultRegion, string(region)},
+		},
+		{
+			name: "Should return two S3 buckets from different regions with encryption",
+			s3ClientMockReturnVals: s3ClientMockReturnVals{
+				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}, {Name: &secondBucketName}}}, nil}},
+				"GetBucketEncryption": {{&s3Client.GetBucketEncryptionOutput{
 					ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
 						Rules: []types.ServerSideEncryptionRule{
 							{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
 						},
 					},
 				}, nil},
-				"GetBucketLocation": {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil},
+					{&s3Client.GetBucketEncryptionOutput{
+						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
+							Rules: []types.ServerSideEncryptionRule{
+								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
+							},
+						},
+					}, nil}},
+				"GetBucketLocation": {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "AES256"}},
+			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "AES256"}, BucketDescription{Name: secondBucketName, SSEAlgorithm: "AES256"}},
 			expectError: false,
+			regions:     []string{awslib.DefaultRegion, string(region)},
+		},
+		{
+			name: "Should return two S3 buckets from the same region with encryption",
+			s3ClientMockReturnVals: s3ClientMockReturnVals{
+				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}, {Name: &secondBucketName}}}, nil}},
+				"GetBucketEncryption": {{&s3Client.GetBucketEncryptionOutput{
+					ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
+						Rules: []types.ServerSideEncryptionRule{
+							{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
+						},
+					},
+				}, nil},
+					{&s3Client.GetBucketEncryptionOutput{
+						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
+							Rules: []types.ServerSideEncryptionRule{
+								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
+							},
+						},
+					}, nil}},
+				"GetBucketLocation": {{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
+			},
+			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "AES256"}, BucketDescription{Name: secondBucketName, SSEAlgorithm: "AES256"}},
+			expectError: false,
+			regions:     []string{awslib.DefaultRegion},
 		},
 	}
 
 	for _, test := range tests {
 		s3ClientMock := &MockClient{}
 		for funcName, returnVals := range test.s3ClientMockReturnVals {
-			s3ClientMock.On(funcName, context.TODO(), mock.Anything).Return(returnVals...)
+			for _, vals := range returnVals {
+				s3ClientMock.On(funcName, context.TODO(), mock.Anything).Return(vals...).Once()
+			}
 		}
 
 		s3Provider := Provider{
-			log:    s.log,
-			client: s3ClientMock,
-			region: string(region),
+			log:     s.log,
+			clients: createMockClients(s3ClientMock, test.regions),
 		}
 
 		ctx := context.Background()
@@ -149,4 +206,13 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 
 		s.Equal(test.expected, results)
 	}
+}
+
+func createMockClients(c Client, regions []string) map[string]Client {
+	var m = make(map[string]Client, 0)
+	for _, clientRegion := range regions {
+		m[clientRegion] = c
+	}
+
+	return m
 }

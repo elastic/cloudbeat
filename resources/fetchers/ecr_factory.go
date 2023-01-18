@@ -26,7 +26,6 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 
 	"github.com/docker/distribution/context"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
@@ -45,7 +44,7 @@ func init() {
 type EcrFactory struct {
 	KubernetesProvider providers.KubernetesClientGetter
 	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
-	AwsConfigProvider  config.AwsConfigProvider
+	AwsConfigProvider  awslib.ConfigProviderAPI
 }
 
 func (f *EcrFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -61,7 +60,7 @@ func (f *EcrFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 
 func (f *EcrFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log)
+	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
@@ -71,7 +70,7 @@ func (f *EcrFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not initate Kubernetes client: %w", err)
 	}
 
-	identityProvider := f.IdentityProvider(awsConfig)
+	identityProvider := f.IdentityProvider(*awsConfig)
 	identity, err := identityProvider.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not retrieve user identity for ECR fetcher: %w", err)
@@ -91,7 +90,7 @@ func (f *EcrFactory) CreateFrom(log *logp.Logger, cfg EcrFetcherConfig, ch chan 
 		kubeClient:   kubeClient,
 		PodDescriber: ecrPodDescriber,
 		resourceCh:   ch,
-		awsConfig:    awsConfig,
+		awsConfig:    *awsConfig,
 	}
 	return fe, nil
 }

@@ -32,8 +32,8 @@ type MockElasticCompute struct {
 	mock.Mock
 }
 
-// DescribeNeworkAcl provides a mock function with given fields: ctx
-func (_m *MockElasticCompute) DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
+// DescribeNetworkAcl provides a mock function with given fields: ctx
+func (_m *MockElasticCompute) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
 	ret := _m.Called(ctx)
 
 	var r0 []awslib.AwsResource

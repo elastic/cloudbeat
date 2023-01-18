@@ -20,9 +20,9 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
@@ -34,14 +34,14 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.EC2NetworkingType, &EC2NetworkFactory{
-		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
-		IdentityProvider:  awslib.GetIdentityClient,
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[ec2.ElasticCompute]{},
+		IdentityProvider:   awslib.GetIdentityClient,
 	})
 }
 
 type EC2NetworkFactory struct {
-	AwsConfigProvider config.AwsConfigProvider
-	IdentityProvider  func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	CrossRegionFactory awslib.CrossRegionFactory[ec2.ElasticCompute]
+	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *EC2NetworkFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -58,7 +58,7 @@ func (f *EC2NetworkFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan f
 
 func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
@@ -69,7 +69,7 @@ func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, c
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
-	provider := ec2.NewEC2Provider(log, *identity.Account, awsConfig)
+	provider := ec2.NewCrossRegionProvider(log, *identity.Account, awsConfig, f.CrossRegionFactory)
 
 	return &NetworkFetcher{
 		log:           log,
