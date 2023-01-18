@@ -40,7 +40,6 @@ import (
 	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/e2e-testing/pkg/downloads"
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/config"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
 	// mage:import
@@ -352,14 +351,6 @@ func BuildOpaBundle() error {
 		return err
 	}
 
-	// Fetch the latest commits
-	err = repo.Fetch(&git.FetchOptions{
-		RefSpecs: []config.RefSpec{"refs/heads/*:refs/heads/*"},
-	})
-
-	if err != nil && err != git.NoErrAlreadyUpToDate {
-		return err
-	}
 	// Find the commit associated with the relevant policy version tag
 	policyVersion := version.PolicyVersion().Version
 	ref, err := repo.Tag(policyVersion)
