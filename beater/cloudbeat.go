@@ -146,7 +146,7 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 
 // Run starts cloudbeat.
 func (bt *cloudbeat) Run(b *beat.Beat) error {
-	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it.")
+	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it")
 
 	if err := bt.leader.Run(bt.ctx); err != nil {
 		return err
