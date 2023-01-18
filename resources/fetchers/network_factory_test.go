@@ -53,7 +53,7 @@ func TestNetworkFactory_Create(t *testing.T) {
 	).Return(&awslib.MockCrossRegionFetcher[ec2.ElasticCompute]{})
 
 	f := &EC2NetworkFactory{
-		CrossRegionFetcher: mockCrossRegion,
+		CrossRegionFactory: mockCrossRegion,
 		IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 			return identity
 		},
