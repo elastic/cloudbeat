@@ -63,13 +63,13 @@ jobs:
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: build cloudbeat binary
-        uses: magefile/mage-action@v2
+        uses: magefile/mage-action@v2.1.0
         with:
           version: latest
           args: build
 
       - name: build opa bundle
-        uses: magefile/mage-action@v2
+        uses: magefile/mage-action@v2.1.0
         with:
           version: latest
           args: BuildOpaBundle
@@ -125,7 +125,7 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        
+
       - name: Load images cloudbeat and cloudbeat-test to ECR
         id: load-to-ecr
         env:

@@ -59,13 +59,13 @@ jobs:
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: build cloudbeat binary
-        uses: magefile/mage-action@v2
+        uses: magefile/mage-action@v2.1.0
         with:
           version: latest
           args: build
 
       - name: build opa bundle
-        uses: magefile/mage-action@v2
+        uses: magefile/mage-action@v2.1.0
         with:
           version: latest
           args: BuildOpaBundle
