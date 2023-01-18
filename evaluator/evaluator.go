@@ -75,8 +75,9 @@ type Rule struct {
 }
 
 type Benchmark struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Version     string `json:"version"`
-	Rule_Number string `json:"rule_number"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	Version      string `json:"version"`
+	Rule_Number  string `json:"rule_number"`
+	Posture_Type string `json:"posture_type"`
 }
