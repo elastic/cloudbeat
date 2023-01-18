@@ -34,9 +34,8 @@ type S3 interface {
 }
 
 type Provider struct {
-	log    *logp.Logger
-	client Client
-	region string
+	log     *logp.Logger
+	clients map[string]Client
 }
 
 type Client interface {
