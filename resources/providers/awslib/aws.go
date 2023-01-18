@@ -18,16 +18,13 @@
 package awslib
 
 import (
-	"github.com/aws/aws-sdk-go-v2/aws"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
 
-type Config struct {
-	Config aws.Config
-}
+const DefaultRegion = "us-east-1"
 
-type Metadata struct {
-	Resource string
-	Arn      string
+type Config struct {
+	Config awssdk.Config
 }
 
 type AwsResource interface {

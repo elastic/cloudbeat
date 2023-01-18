@@ -12,6 +12,7 @@ cloudbeat:
   fetchers:
     - name: aws-iam
     - name: aws-s3
+    - name: aws-ec2-network
   evaluator:
     decision_logs: false
 # =================================== Kibana ===================================
