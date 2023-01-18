@@ -348,15 +348,18 @@ func BuildOpaBundle() error {
 		URL:             fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
 		InsecureSkipTLS: true,
 	})
+	if err != nil {
+		return err
+	}
 
 	// Fetch the latest commits
 	err = repo.Fetch(&git.FetchOptions{
 		RefSpecs: []config.RefSpec{"refs/heads/*:refs/heads/*"},
 	})
-	if err != nil {
+
+	if err != nil && err != git.NoErrAlreadyUpToDate {
 		return err
 	}
-
 	// Find the commit associated with the relevant policy version tag
 	policyVersion := version.PolicyVersion().Version
 	ref, err := repo.Tag(policyVersion)
