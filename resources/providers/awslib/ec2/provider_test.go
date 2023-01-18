@@ -29,7 +29,7 @@ import (
 	mock "github.com/stretchr/testify/mock"
 )
 
-func TestProvider_DescribeNeworkAcl(t *testing.T) {
+func TestProvider_DescribeNetworkAcl(t *testing.T) {
 	tests := []struct {
 		name            string
 		client          func() Client
@@ -66,7 +66,7 @@ func TestProvider_DescribeNeworkAcl(t *testing.T) {
 				log:    logp.NewLogger(tt.name),
 				client: tt.client(),
 			}
-			got, err := p.DescribeNeworkAcl(context.Background())
+			got, err := p.DescribeNetworkAcl(context.Background())
 			if tt.wantErr {
 				assert.Error(t, err)
 				return

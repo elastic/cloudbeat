@@ -18,10 +18,8 @@
 package fetchers
 
 import (
-	"context"
-	awsSdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/stretchr/testify/mock"
 	"testing"
 
@@ -64,21 +62,20 @@ default_region: eu-west-2
 	}
 
 	for _, test := range tests {
-		mockedConfigGetter := &config.MockAwsConfigProvider{}
-		mockedConfigGetter.EXPECT().
-			InitializeAWSConfig(mock.Anything, mock.Anything).
-			Call.
-			Return(func(ctx context.Context, config aws.ConfigAWS) awsSdk.Config {
+		mockCrossRegionFetcher := &awslib.MockCrossRegionFetcher[s3.Client]{}
+		mockCrossRegionFetcher.On("GetMultiRegionsClientMap").Return(nil)
 
-				return CreateSdkConfig(config, "eu-west-2")
-			},
-				func(ctx context.Context, config aws.ConfigAWS) error {
-					return nil
-				},
-			)
+		mockCrossRegionFactory := &awslib.MockCrossRegionFactory[s3.Client]{}
+		mockCrossRegionFactory.On(
+			"NewMultiRegionClients",
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+		).Return(mockCrossRegionFetcher)
 
 		factory := &S3Factory{
-			AwsConfigProvider: mockedConfigGetter,
+			CrossRegionFactory: mockCrossRegionFactory,
 		}
 
 		cfg, err := agentConfig.NewConfigFrom(test.config)

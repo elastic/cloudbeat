@@ -43,7 +43,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			name: "no resources found",
 			networkProvider: func() ec2.ElasticCompute {
 				m := ec2.MockElasticCompute{}
-				m.On("DescribeNeworkAcl", mock.Anything).Return([]awslib.AwsResource{}, nil)
+				m.On("DescribeNetworkAcl", mock.Anything).Return([]awslib.AwsResource{}, nil)
 				m.On("DescribeSecurityGroups", mock.Anything).Return([]awslib.AwsResource{}, nil)
 				return &m
 			},
@@ -52,7 +52,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			name: "with error to describe nacl",
 			networkProvider: func() ec2.ElasticCompute {
 				m := ec2.MockElasticCompute{}
-				m.On("DescribeNeworkAcl", mock.Anything).Return(nil, errors.New("failed to get nacl"))
+				m.On("DescribeNetworkAcl", mock.Anything).Return(nil, errors.New("failed to get nacl"))
 				m.On("DescribeSecurityGroups", mock.Anything).Return([]awslib.AwsResource{
 					ec2.SecurityGroup{},
 					ec2.SecurityGroup{},
@@ -66,7 +66,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			name: "with error to describe security groups",
 			networkProvider: func() ec2.ElasticCompute {
 				m := ec2.MockElasticCompute{}
-				m.On("DescribeNeworkAcl", mock.Anything).Return([]awslib.AwsResource{
+				m.On("DescribeNetworkAcl", mock.Anything).Return([]awslib.AwsResource{
 					ec2.NACLInfo{},
 					ec2.NACLInfo{},
 				}, nil)
@@ -80,7 +80,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			name: "with resources",
 			networkProvider: func() ec2.ElasticCompute {
 				m := ec2.MockElasticCompute{}
-				m.On("DescribeNeworkAcl", mock.Anything).Return([]awslib.AwsResource{
+				m.On("DescribeNetworkAcl", mock.Anything).Return([]awslib.AwsResource{
 					ec2.NACLInfo{},
 					ec2.NACLInfo{},
 				}, nil)
