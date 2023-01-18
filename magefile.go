@@ -40,7 +40,6 @@ import (
 	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/e2e-testing/pkg/downloads"
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/config"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
 	// mage:import
@@ -345,13 +344,7 @@ func BuildOpaBundle() error {
 	cspPoliciesPkgDir := "/tmp/" + r
 
 	repo, err := git.PlainClone(cspPoliciesPkgDir, false, &git.CloneOptions{
-		URL:             fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
-		InsecureSkipTLS: true,
-	})
-
-	// Fetch the latest commits
-	err = repo.Fetch(&git.FetchOptions{
-		RefSpecs: []config.RefSpec{"refs/heads/*:refs/heads/*"},
+		URL: fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
 	})
 	if err != nil {
 		return err
