@@ -141,14 +141,14 @@ func (m *LeaderelectionManager) buildConfig(ctx context.Context) (le.LeaderElect
 				m.log.Infof("leader election lock GAINED, id: %v", id)
 			},
 			OnStoppedLeading: func() {
-				// OnStoppedLeading gets called even if cloudbeat wasn't the leader, for example, if the context is cancelled due to reconfiguration from fleet.
+				// OnStoppedLeading gets called even if cloudbeat wasn't the leader, for example, if the context is canceled due to reconfiguration from fleet.
 				// We re-run the manager to keep following leader status except for context cancellation events.
 				m.log.Infof("leader election lock LOST, id: %v", id)
 				defer m.wg.Done()
 
 				select {
 				case <-ctx.Done():
-					m.log.Info("Context is cancelled - should not re-run leader election")
+					m.log.Info("Context is canceled - should not re-run leader election")
 					return
 				default:
 					go m.leader.Run(ctx)
