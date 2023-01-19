@@ -69,11 +69,14 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.24 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.0.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.22.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.24.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.19.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.18.20 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.9.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.17 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.13.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sns v1.19.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.23 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.13.6 // indirect
 	github.com/elastic/elastic-agent-shipper-client v0.4.0 // indirect
