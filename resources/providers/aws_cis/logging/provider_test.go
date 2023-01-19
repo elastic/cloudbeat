@@ -19,15 +19,18 @@ package logging
 
 import (
 	"context"
+	"testing"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
-	"github.com/stretchr/testify/mock"
-	"reflect"
-	"testing"
+	"github.com/stretchr/testify/assert"
+	mock "github.com/stretchr/testify/mock"
 )
 
 func TestProvider_DescribeTrails(t *testing.T) {
@@ -81,13 +84,17 @@ func TestProvider_DescribeTrails(t *testing.T) {
 				},
 				"cloudTrailProvider": func() any {
 					m := &cloudtrail.MockTrailService{}
-					m.On("DescribeTrails", context.Background()).Return([]cloudtrail.TrailInfo{{Name: "test-trail"}}, nil)
+					m.On("DescribeTrails", context.Background()).Return([]cloudtrail.TrailInfo{{Trail: types.Trail{
+						TrailARN: aws.String("test-arn"),
+					}}}, nil)
 					return m
 				},
 			},
 			want: []awslib.AwsResource{
 				EnrichedTrail{
-					TrailInfo:  cloudtrail.TrailInfo{Name: "test-trail"},
+					TrailInfo: cloudtrail.TrailInfo{Trail: types.Trail{
+						TrailARN: aws.String("test-arn"),
+					}},
 					BucketInfo: TrailBucket{},
 				},
 			},
@@ -105,13 +112,21 @@ func TestProvider_DescribeTrails(t *testing.T) {
 				},
 				"cloudTrailProvider": func() any {
 					m := &cloudtrail.MockTrailService{}
-					m.On("DescribeTrails", context.Background()).Return([]cloudtrail.TrailInfo{{Name: "test-trail"}}, nil)
+					m.On("DescribeTrails", context.Background()).Return([]cloudtrail.TrailInfo{
+						{
+							Trail: types.Trail{
+								TrailARN: aws.String("test-arn"),
+							},
+						},
+					}, nil)
 					return m
 				},
 			},
 			want: []awslib.AwsResource{
 				EnrichedTrail{
-					TrailInfo: cloudtrail.TrailInfo{Name: "test-trail"},
+					TrailInfo: cloudtrail.TrailInfo{Trail: types.Trail{
+						TrailARN: aws.String("test-arn"),
+					}},
 					BucketInfo: TrailBucket{
 						Grants: []s3Types.Grant{},
 						Policy: s3.BucketPolicy{},
@@ -133,12 +148,13 @@ func TestProvider_DescribeTrails(t *testing.T) {
 			}
 
 			got, err := p.DescribeTrails(context.TODO())
-			if (err != nil) != tt.wantErr {
-				t.Errorf("DescribeTrails() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DescribeTrails() got = %v, want %v", got, tt.want)
+			assert.NoError(t, err)
+			for i, g := range got {
+				assert.Equal(t, tt.want[i], g)
 			}
 		})
 	}

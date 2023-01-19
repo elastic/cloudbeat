@@ -20,6 +20,7 @@ package cloudtrail
 import (
 	"context"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
@@ -63,17 +64,9 @@ func (p Provider) DescribeTrails(ctx context.Context) ([]TrailInfo, error) {
 		}
 
 		result = append(result, TrailInfo{
-			TrailARN:                  getValue(trail.TrailARN),
-			Name:                      getValue(trail.Name),
-			Region:                    getValue(trail.HomeRegion),
-			LogFileValidationEnabled:  getValue(trail.LogFileValidationEnabled),
-			IsMultiRegion:             getValue(trail.IsMultiRegionTrail),
-			KMSKeyID:                  getValue(trail.KmsKeyId),
-			CloudWatchLogsLogGroupArn: getValue(trail.CloudWatchLogsLogGroupArn),
-			IsLogging:                 getValue(status.IsLogging),
-			BucketName:                getValue(trail.S3BucketName),
-			SnsTopicARN:               getValue(trail.SnsTopicARN),
-			EventSelectors:            selectors,
+			Trail:          trail,
+			Status:         status,
+			EventSelectors: selectors,
 		})
 	}
 	return result, nil
@@ -88,36 +81,19 @@ func (p Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*cloud
 	return client.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{Name: trail.Name})
 }
 
-func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]EventSelector, error) {
+func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]types.EventSelector, error) {
 	client, err := p.getClient(*trail.HomeRegion)
 	if err != nil {
 		return nil, err
 	}
 
-	var eventSelectors []EventSelector
+	var eventSelectors []types.EventSelector
 	if trail.HasCustomEventSelectors != nil && *trail.HasCustomEventSelectors {
 		output, err := client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{TrailName: trail.Name})
 		if err != nil {
-			return []EventSelector{}, err
+			return []types.EventSelector{}, err
 		}
-
-		for _, eventSelector := range output.EventSelectors {
-			var resources []DataResource
-			for _, dataResource := range eventSelector.DataResources {
-				var values []string
-				values = append(values, dataResource.Values...)
-
-				resources = append(resources, DataResource{
-					Type:   getValue(dataResource.Type),
-					Values: values,
-				})
-			}
-
-			eventSelectors = append(eventSelectors, EventSelector{
-				DataResources: resources,
-				ReadWriteType: eventSelector.ReadWriteType,
-			})
-		}
+		eventSelectors = output.EventSelectors
 	}
 
 	return eventSelectors, nil
@@ -130,12 +106,4 @@ func (p Provider) getClient(region string) (Client, error) {
 	}
 
 	return client, nil
-}
-
-func getValue[T any](ptr *T) T {
-	var initVal T
-	if ptr != nil {
-		return *ptr
-	}
-	return initVal
 }

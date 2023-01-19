@@ -19,6 +19,7 @@ package logging
 
 import (
 	"context"
+
 	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -45,19 +46,22 @@ func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, er
 
 	var enrichedTrails []awslib.AwsResource
 	for _, trail := range trails {
-		bucketPolicy, policyErr := p.s3Provider.GetBucketPolicy(ctx, &trail.BucketName, trail.Region)
+		if trail.Trail.S3BucketName == nil {
+			continue
+		}
+		bucketPolicy, policyErr := p.s3Provider.GetBucketPolicy(ctx, trail.Trail.S3BucketName, *trail.Trail.HomeRegion)
 		if policyErr != nil {
-			p.log.Errorf("Error getting bucket policy for bucket %s: %v", trail.BucketName, policyErr)
+			p.log.Errorf("Error getting bucket policy for bucket %s: %v", *trail.Trail.S3BucketName, policyErr)
 		}
 
-		aclGrants, aclErr := p.s3Provider.GetBucketACL(ctx, &trail.BucketName, trail.Region)
+		aclGrants, aclErr := p.s3Provider.GetBucketACL(ctx, trail.Trail.S3BucketName, *trail.Trail.HomeRegion)
 		if aclErr != nil {
-			p.log.Errorf("Error getting bucket ACL for bucket %s: %v", trail.BucketName, aclErr)
+			p.log.Errorf("Error getting bucket ACL for bucket %s: %v", *trail.Trail.S3BucketName, aclErr)
 		}
 
-		bucketLogging, loggingErr := p.s3Provider.GetBucketLogging(ctx, &trail.BucketName, trail.Region)
+		bucketLogging, loggingErr := p.s3Provider.GetBucketLogging(ctx, trail.Trail.S3BucketName, *trail.Trail.HomeRegion)
 		if loggingErr != nil {
-			p.log.Errorf("Error getting bucket logging for bucket %s: %v", trail.BucketName, loggingErr)
+			p.log.Errorf("Error getting bucket logging for bucket %s: %v", *trail.Trail.S3BucketName, loggingErr)
 		}
 
 		enrichedTrails = append(enrichedTrails, EnrichedTrail{
@@ -74,11 +78,17 @@ func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, er
 }
 
 func (e EnrichedTrail) GetResourceArn() string {
-	return e.TrailARN
+	if e.Trail.TrailARN == nil {
+		return ""
+	}
+	return *e.Trail.TrailARN
 }
 
 func (e EnrichedTrail) GetResourceName() string {
-	return e.Name
+	if e.Trail.Name == nil {
+		return ""
+	}
+	return *e.Trail.Name
 }
 
 func (e EnrichedTrail) GetResourceType() string {

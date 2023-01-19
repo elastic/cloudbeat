@@ -46,34 +46,45 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 			regions: []string{"us-east-1", "us-west-1"},
 			want: []TrailInfo{
 				{
-					TrailARN:                  "arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail",
-					Name:                      "trail",
-					LogFileValidationEnabled:  true,
-					IsMultiRegion:             true,
-					KMSKeyID:                  "kmsKey_123",
-					CloudWatchLogsLogGroupArn: "arn:aws:logs:us-east-1:123456789012:log-group:my-log-group",
-					IsLogging:                 true,
-					Region:                    "us-east-1",
-					BucketName:                "trails_bucket",
-					SnsTopicARN:               "arn:aws:sns:us-east-1:123456789012:my-topic",
-					EventSelectors: []EventSelector{{DataResources: []DataResource{
+					Trail: types.Trail{
+						TrailARN:                  aws.String("arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail"),
+						Name:                      aws.String("trail"),
+						LogFileValidationEnabled:  aws.Bool(true),
+						IsMultiRegionTrail:        aws.Bool(true),
+						HasCustomEventSelectors:   aws.Bool(true),
+						KmsKeyId:                  aws.String("kmsKey_123"),
+						CloudWatchLogsLogGroupArn: aws.String("arn:aws:logs:us-east-1:123456789012:log-group:my-log-group"),
+						HomeRegion:                aws.String("us-east-1"),
+						S3BucketName:              aws.String("trails_bucket"),
+						SnsTopicARN:               aws.String("arn:aws:sns:us-east-1:123456789012:my-topic"),
+					},
+					Status: &cloudtrail.GetTrailStatusOutput{
+						IsLogging: aws.Bool(true),
+					},
+					EventSelectors: []types.EventSelector{{DataResources: []types.DataResource{
 						{
-							Type:   "AWS::S3::Object",
+							Type:   aws.String("AWS::S3::Object"),
 							Values: []string{"bucket"},
-						}}, ReadWriteType: types.ReadWriteTypeAll}},
+						},
+					}, ReadWriteType: types.ReadWriteTypeAll}},
 				},
 				{
-					TrailARN:                  "arn:aws:cloudtrail:us-west-1:123456789012:trail/mytrail",
-					Name:                      "trail",
-					LogFileValidationEnabled:  true,
-					IsMultiRegion:             true,
-					Region:                    "us-west-1",
-					KMSKeyID:                  "kmsKey_123",
-					CloudWatchLogsLogGroupArn: "arn:aws:logs:us-west-1:123456789012:log-group:my-log-group",
-					IsLogging:                 false,
-					BucketName:                "trails_bucket",
-					SnsTopicARN:               "arn:aws:sns:us-west-1:123456789012:my-topic",
-					EventSelectors:            nil,
+					Trail: types.Trail{
+						TrailARN:                  aws.String("arn:aws:cloudtrail:us-west-1:123456789012:trail/mytrail"),
+						Name:                      aws.String("trail"),
+						LogFileValidationEnabled:  aws.Bool(true),
+						IsMultiRegionTrail:        aws.Bool(true),
+						HomeRegion:                aws.String("us-west-1"),
+						HasCustomEventSelectors:   aws.Bool(true),
+						KmsKeyId:                  aws.String("kmsKey_123"),
+						CloudWatchLogsLogGroupArn: aws.String("arn:aws:logs:us-west-1:123456789012:log-group:my-log-group"),
+						S3BucketName:              aws.String("trails_bucket"),
+						SnsTopicARN:               aws.String("arn:aws:sns:us-west-1:123456789012:my-topic"),
+					},
+					Status: &cloudtrail.GetTrailStatusOutput{
+						IsLogging: aws.Bool(false),
+					},
+					EventSelectors: nil,
 				},
 			},
 			wantErr: false,
@@ -82,13 +93,13 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 					{&cloudtrail.DescribeTrailsOutput{
 						TrailList: []types.Trail{
 							{
+								TrailARN:                  aws.String("arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail"),
+								Name:                      aws.String("trail"),
 								CloudWatchLogsLogGroupArn: aws.String("arn:aws:logs:us-east-1:123456789012:log-group:my-log-group"),
 								HasCustomEventSelectors:   aws.Bool(true),
 								IsMultiRegionTrail:        aws.Bool(true),
 								KmsKeyId:                  aws.String("kmsKey_123"),
-								TrailARN:                  aws.String("arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail"),
 								LogFileValidationEnabled:  aws.Bool(true),
-								Name:                      aws.String("trail"),
 								S3BucketName:              aws.String("trails_bucket"),
 								SnsTopicARN:               aws.String("arn:aws:sns:us-east-1:123456789012:my-topic"),
 								HomeRegion:                aws.String("us-east-1"),
@@ -121,7 +132,8 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 									Values: []string{"bucket"},
 								}},
 								ReadWriteType: types.ReadWriteTypeAll,
-							}},
+							},
+						},
 					}, nil}, {&cloudtrail.GetEventSelectorsOutput{}, nil},
 				},
 			},
@@ -142,11 +154,11 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 			}
 
 			trails, err := p.DescribeTrails(context.Background())
-			if (err != nil) != tt.wantErr {
-				t.Errorf("DescribeCloudTrails() error = %v, wantErr %v", err, tt.wantErr)
+			if tt.wantErr {
+				assert.Error(t, err)
 				return
 			}
-
+			assert.NoError(t, err)
 			for i, trail := range trails {
 				assert.Equal(t, tt.want[i], trail)
 			}
@@ -155,7 +167,7 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 }
 
 func createMockClients(c Client, regions []string) map[string]Client {
-	var m = make(map[string]Client, 0)
+	m := make(map[string]Client, 0)
 	for _, clientRegion := range regions {
 		m[clientRegion] = c
 	}
