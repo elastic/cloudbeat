@@ -43,7 +43,7 @@ require (
 	github.com/djherbis/times v1.5.0
 	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
 	github.com/elastic/elastic-agent-autodiscover v0.5.0
-	github.com/elastic/elastic-agent-libs v0.2.15
+	github.com/elastic/elastic-agent-libs v0.2.16
 	github.com/elastic/go-licenser v0.4.1
 	github.com/open-policy-agent/opa v0.43.1
 	github.com/pkg/errors v0.9.1
@@ -81,7 +81,7 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20221221115313-255028c4cb3b
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20221222172013-15d9a8760574
 	github.com/elastic/csp-security-policies v1.2.3
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.6 // indirect
@@ -268,4 +268,4 @@ replace (
 	github.com/google/gopacket => github.com/elastic/gopacket v1.1.20-0.20211202005954-d412fca7f83a
 )
 
-exclude github.com/elastic/elastic-agent v0.0.0-20220831162706-5f1e54f40d3e
+// exclude github.com/elastic/elastic-agent v0.0.0-20220831162706-5f1e54f40d3e
