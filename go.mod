@@ -81,12 +81,8 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-<<<<<<< HEAD
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20221221115313-255028c4cb3b
-	github.com/elastic/csp-security-policies v1.2.3
-=======
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20221222172013-15d9a8760574
->>>>>>> c0a256e (chore: update libbeat (#663))
+	github.com/elastic/csp-security-policies v1.2.3
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.66.6 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
