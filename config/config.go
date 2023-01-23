@@ -31,9 +31,11 @@ import (
 	"github.com/elastic/elastic-agent-libs/config"
 )
 
-const DefaultNamespace = "default"
-
-const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
+const (
+	DefaultNamespace             = "default"
+	VulnerabilityType            = "cloudbeat/vulnerability"
+	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
+)
 
 var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
 
@@ -49,6 +51,7 @@ type Config struct {
 	Period      time.Duration           `config:"period"`
 	Processors  processors.PluginConfig `config:"processors"`
 	BundlePath  string                  `config:"bundle_path"`
+	Type        string                  `config:"type"`
 }
 
 type CloudConfig struct {
