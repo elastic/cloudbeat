@@ -20,6 +20,7 @@ package s3
 import (
 	"context"
 	"errors"
+	"fmt"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -102,7 +103,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
 				"GetBucketEncryption": {{nil, errors.New("bla")}},
-				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
 				"GetBucketPolicy":     {{nil, errors.New("bla")}},
 				"GetBucketVersioning": {{nil, errors.New("bla")}},
 			},
@@ -271,7 +272,9 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			s.NoError(err)
 		}
 
-		s.Equal(test.expected, results)
+		// Using `ElementsMatch` instead of the usual `Equals` since iterating over the regions map does not produce a
+		//	guaranteed order
+		s.ElementsMatch(test.expected, results, fmt.Sprintf("Test '%s' failed, elements do not match", test.name))
 	}
 }
 
