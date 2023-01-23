@@ -19,25 +19,21 @@ package cloudtrail
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type CloudTrail interface {
-	DescribeCloudTrails(ctx context.Context) ([]awslib.AwsResource, error)
-	GetTrailStatus(ctx context.Context, name string) (awslib.AwsResource, error)
-	GetEventSelectors(ctx context.Context, name string) (awslib.AwsResource, error)
+type TrailService interface {
+	ListTrails(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewCloudtrailProvider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
+func NewProvider(log *logp.Logger, cfg aws.Config) *Provider {
 	svc := cloudtrail.NewFromConfig(cfg)
 	return &Provider{
-		log:          log,
-		client:       svc,
-		awsAccountID: awsAccountID,
-		awsRegion:    cfg.Region,
+		log:    log,
+		client: svc,
 	}
 }

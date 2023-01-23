@@ -29,6 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"strings"
 )
 
 func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
@@ -61,7 +62,14 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 				p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
 			}
 
-			result = append(result, BucketDescription{*bucket.Name, sseAlgorithm})
+			aclGrants, aclErr := p.getBucketACL(ctx, bucket.Name, region)
+			// Getting the bucket ACL is not critical for the rest of the flow, so we should keep describing the
+			//	bucket even if getting the bucket ACL fails.
+			if aclErr != nil {
+				p.log.Errorf("Could not get ACL for bucket %s. Error: %v", *bucket.Name, aclErr)
+			}
+
+			result = append(result, BucketDescription{*bucket.Name, sseAlgorithm, aclGrants})
 		}
 	}
 
@@ -124,6 +132,30 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (stri
 	}
 
 	return region, nil
+}
+
+func (p Provider) getBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error) {
+	client := p.clients[region]
+	if client == nil {
+		return []types.Grant{}, fmt.Errorf("no intialize client exists in %s region", region)
+	}
+
+	acl, err := client.GetBucketAcl(ctx, &s3Client.GetBucketAclInput{Bucket: bucketName})
+	if err != nil {
+		p.log.Debugf("Error getting bucket ACL: %s", err)
+		return []types.Grant{}, err
+	}
+
+	grants := []types.Grant{}
+	for _, grant := range acl.Grants {
+		if grant.Grantee != nil && grant.Grantee.Type == types.TypeGroup {
+			if strings.HasSuffix(*grant.Grantee.URI, "AuthenticatedUsers") || strings.HasSuffix(*grant.Grantee.URI, "AllUsers") {
+				grants = append(grants, grant)
+			}
+		}
+	}
+
+	return grants, nil
 }
 
 func (b BucketDescription) GetResourceArn() string {

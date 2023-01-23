@@ -48,27 +48,55 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 					{&cloudtrail.DescribeTrailsOutput{
 						TrailList: []types.Trail{
 							{
-								Name: aws.String("trail"),
+								CloudWatchLogsLogGroupArn: aws.String("arn:aws:logs:us-east-1:123456789012:log-group:my-log-group"),
+								HasCustomEventSelectors:   aws.Bool(true),
+								IsMultiRegionTrail:        aws.Bool(true),
+								KmsKeyId:                  aws.String("kmsKey_123"),
+								TrailARN:                  aws.String("arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail"),
+								LogFileValidationEnabled:  aws.Bool(true),
+								Name:                      aws.String("trail"),
+								S3BucketName:              aws.String("trails_bucket"),
+								SnsTopicARN:               aws.String("arn:aws:sns:us-east-1:123456789012:my-topic"),
 							},
 						},
 					}, nil},
 				},
 				"GetTrailStatus": [2]mocks{
 					{mock.Anything, mock.Anything},
-					{&cloudtrail.GetTrailStatusOutput{}, nil},
+					{&cloudtrail.GetTrailStatusOutput{
+						IsLogging: aws.Bool(true),
+					}, nil},
 				},
 				"GetEventSelectors": [2]mocks{
 					{mock.Anything, mock.Anything},
-					{&cloudtrail.GetEventSelectorsOutput{}, nil},
+					{&cloudtrail.GetEventSelectorsOutput{
+						EventSelectors: []types.EventSelector{
+							{
+								DataResources: []types.DataResource{{
+									Type:   aws.String("AWS::S3::Object"),
+									Values: []string{"bucket"},
+								}},
+								ReadWriteType: types.ReadWriteTypeAll,
+							}},
+					}, nil},
 				},
 			},
 			want: []TrailInfo{
 				{
-					trail: types.Trail{
-						Name: aws.String("trail"),
-					},
-					status:        &cloudtrail.GetTrailStatusOutput{},
-					eventSelector: &cloudtrail.GetEventSelectorsOutput{},
+					TrailARN:                  "arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail",
+					Name:                      "trail",
+					EnableLogFileValidation:   true,
+					IsMultiRegion:             true,
+					KMSKeyID:                  "kmsKey_123",
+					CloudWatchLogsLogGroupArn: "arn:aws:logs:us-east-1:123456789012:log-group:my-log-group",
+					IsLogging:                 true,
+					BucketName:                "trails_bucket",
+					SnsTopicARN:               "arn:aws:sns:us-east-1:123456789012:my-topic",
+					EventSelectors: []EventSelector{{DataResources: []DataResource{
+						{
+							Type:   "AWS::S3::Object",
+							Values: []string{"bucket"},
+						}}, ReadWriteType: types.ReadWriteTypeAll}},
 				},
 			},
 		},
@@ -79,18 +107,20 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 			for name, call := range tt.cloudtrailClientMockReturnVals {
 				mock.On(name, call[0]...).Return(call[1]...)
 			}
+
 			p := &Provider{
 				log:    logp.NewLogger("TestProvider_DescribeCloudTrails"),
 				client: mock,
 			}
-			got, err := p.DescribeCloudTrails(context.Background())
-			if tt.wantErr {
-				assert.Error(t, err)
+
+			trails, err := p.DescribeCloudTrails(context.Background())
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DescribeCloudTrails() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			assert.NoError(t, err)
-			for i, g := range got {
-				assert.Equal(t, tt.want[i], g)
+
+			for i, trail := range trails {
+				assert.Equal(t, tt.want[i], trail)
 			}
 		})
 	}

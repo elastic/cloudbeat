@@ -19,40 +19,38 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
+
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type S3Fetcher struct {
+type CloudTrailFetcher struct {
 	log        *logp.Logger
-	cfg        S3FetcherConfig
-	s3         s3.S3
+	provider   cloudtrail.TrailService
+	cfg        fetching.AwsBaseFetcherConfig
 	resourceCh chan fetching.ResourceInfo
 }
 
-type S3FetcherConfig struct {
-	fetching.AwsBaseFetcherConfig `config:",inline"`
+type TrailResource struct {
+	awslib.AwsResource
 }
 
-type S3Resource struct {
-	bucket awslib.AwsResource
-}
+func (f CloudTrailFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting CloudTrailFetcher.Fetch")
 
-func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Info("Starting S3Fetcher.Fetch")
-	buckets, err := f.s3.DescribeBuckets(ctx)
+	trails, err := f.provider.ListTrails(ctx)
 	if err != nil {
-		f.log.Errorf("failed to load buckets from S3: %v", err)
-		return nil
+		f.log.Errorf("failed to describe cloud trails: %v", err)
 	}
 
-	for _, bucket := range buckets {
-		resource := S3Resource{bucket}
-		f.log.Debugf("Fetched bucket: %s", bucket.GetResourceName())
+	for _, resource := range trails {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      resource,
+			Resource: TrailResource{
+				AwsResource: resource,
+			},
 			CycleMetadata: cMetadata,
 		}
 	}
@@ -60,19 +58,18 @@ func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 	return nil
 }
 
-func (f *S3Fetcher) Stop() {}
+func (f CloudTrailFetcher) Stop() {}
 
-func (r S3Resource) GetData() interface{} {
-	return r.bucket
+func (r TrailResource) GetData() any {
+	return r.AwsResource
 }
 
-func (r S3Resource) GetMetadata() (fetching.ResourceMetadata, error) {
+func (r TrailResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:      r.bucket.GetResourceArn(),
-		Type:    fetching.CloudStorage,
-		SubType: r.bucket.GetResourceType(),
-		Name:    r.bucket.GetResourceName(),
+		ID:      r.GetResourceArn(),
+		Type:    fetching.CloudAudit,
+		SubType: r.GetResourceType(),
+		Name:    r.GetResourceName(),
 	}, nil
 }
-
-func (r S3Resource) GetElasticCommonData() any { return nil }
+func (r TrailResource) GetElasticCommonData() any { return nil }
