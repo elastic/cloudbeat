@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
@@ -31,26 +32,58 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
-	client := s3Client.NewFromConfig(cfg)
+func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return s3Client.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+
 	return &Provider{
-		log:    log,
-		client: client,
-		region: cfg.Region,
+		log:     log,
+		clients: m.GetMultiRegionsClientMap(),
 	}
 }
 
 func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
-	clientBuckets, err := p.client.ListBuckets(ctx, &s3Client.ListBucketsInput{})
+	clientBuckets, err := p.clients[awslib.DefaultRegion].ListBuckets(ctx, &s3Client.ListBucketsInput{})
 	if err != nil {
 		p.log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
 	}
 
 	var result []awslib.AwsResource
+	bucketsRegionsMapping := p.getBucketsRegionMapping(ctx, clientBuckets.Buckets)
+	for region, buckets := range bucketsRegionsMapping {
+		for _, bucket := range buckets {
+			// Getting the bucket encryption, policy and versioning is not critical for the rest of the flow, so we
+			//	should keep describing the bucket even if getting these objects fails.
+			sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, bucket.Name, region)
+			if encryptionErr != nil {
+				p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
+			}
 
-	for _, clientBucket := range clientBuckets.Buckets {
-		bucketRegion, regionErr := p.getBucketRegion(ctx, clientBucket.Name)
+			bucketPolicy, policyErr := p.getBucketPolicy(ctx, bucket.Name, region)
+
+			if policyErr != nil {
+				p.log.Errorf("Could not get bucket policy for bucket %s. Error: %v", *bucket.Name, policyErr)
+			}
+
+			bucketVersioning, versioningErr := p.getBucketVersioning(ctx, bucket.Name, region)
+			if versioningErr != nil {
+				p.log.Errorf("Could not get bucket versioning for bucket %s. Err: %v", *bucket.Name, versioningErr)
+			}
+
+			result = append(result, BucketDescription{*bucket.Name, sseAlgorithm, bucketPolicy, bucketVersioning})
+		}
+	}
+
+	return result, nil
+}
+
+func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.Bucket) map[string][]types.Bucket {
+	var bucketsRegionMap = make(map[string][]types.Bucket, 0)
+	for _, clientBucket := range buckets {
+		region, regionErr := p.getBucketRegion(ctx, clientBucket.Name)
 		// If we could not get the region for a bucket, additional API calls for resources will probably fail, we should
 		//	not describe this bucket.
 		if regionErr != nil {
@@ -58,39 +91,28 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 			continue
 		}
 
-		// If the bucket is not in the configured region additional API calls for resources will fail, we should not
-		//  describe this bucket.
-		if bucketRegion != p.region {
-			p.log.Debugf("Bucket %s is in region %s and not in the configured region %s. Not describing this bucket", *clientBucket.Name, bucketRegion, p.region)
-			continue
-		}
-
-		// Getting the bucket encryption, policy and versioning is not critical for the rest of the flow, so we should
-		//	keep describing the bucket even if getting these objects fails.
-		sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, clientBucket.Name)
-		if encryptionErr != nil {
-			p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *clientBucket.Name, encryptionErr)
-		}
-
-		bucketPolicy, policyErr := p.getBucketPolicy(ctx, clientBucket.Name)
-		if policyErr != nil {
-			p.log.Errorf("Could not get bucket policy for bucket %s. Error: %v", *clientBucket.Name, policyErr)
-		}
-
-		bucketVersioning, versioningErr := p.getBucketVersioning(ctx, clientBucket.Name)
-		if versioningErr != nil {
-			p.log.Errorf("Could not get bucket versioning for bucket %s. Err: %v", *clientBucket.Name, versioningErr)
-		}
-
-		result = append(result, BucketDescription{*clientBucket.Name, sseAlgorithm, bucketPolicy, bucketVersioning})
+		bucketsRegionMap[region] = append(bucketsRegionMap[region], clientBucket)
 	}
 
-	return result, nil
+	return bucketsRegionMap
 }
 
-func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string) (string, error) {
-	encryption, err := p.client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
+func (p Provider) getClient(region string) (Client, error) {
+	client := p.clients[region]
+	if client == nil {
+		return nil, fmt.Errorf("no intialize client exists in %s region", region)
+	}
 
+	return client, nil
+}
+
+func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string, region string) (string, error) {
+	client, clientErr := p.getClient(region)
+	if clientErr != nil {
+		return "", clientErr
+	}
+
+	encryption, err := client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
@@ -111,7 +133,7 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 }
 
 func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (string, error) {
-	location, err := p.client.GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
+	location, err := p.clients[awslib.DefaultRegion].GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
 	if err != nil {
 		return "", err
 	}
@@ -125,8 +147,13 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (stri
 	return region, nil
 }
 
-func (p Provider) getBucketPolicy(ctx context.Context, bucketName *string) (BucketPolicy, error) {
-	rawPolicy, err := p.client.GetBucketPolicy(ctx, &s3Client.GetBucketPolicyInput{Bucket: bucketName})
+func (p Provider) getBucketPolicy(ctx context.Context, bucketName *string, region string) (BucketPolicy, error) {
+	client, clientErr := p.getClient(region)
+	if clientErr != nil {
+		return nil, clientErr
+	}
+
+	rawPolicy, err := client.GetBucketPolicy(ctx, &s3Client.GetBucketPolicyInput{Bucket: bucketName})
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
@@ -148,9 +175,15 @@ func (p Provider) getBucketPolicy(ctx context.Context, bucketName *string) (Buck
 	return bucketPolicy, nil
 }
 
-func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string) (BucketVersioning, error) {
+func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, region string) (BucketVersioning, error) {
 	bucketVersioning := BucketVersioning{false, false}
-	bucketVersioningResponse, err := p.client.GetBucketVersioning(ctx, &s3Client.GetBucketVersioningInput{Bucket: bucketName})
+
+	client, clientErr := p.getClient(region)
+	if clientErr != nil {
+		return bucketVersioning, clientErr
+	}
+
+	bucketVersioningResponse, err := client.GetBucketVersioning(ctx, &s3Client.GetBucketVersioningInput{Bucket: bucketName})
 	if err != nil {
 		return bucketVersioning, err
 	}

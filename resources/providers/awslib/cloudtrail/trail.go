@@ -15,32 +15,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package cloudtrail
 
 import (
-	"context"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type ConfigProvider struct {
-	MetadataProvider MetadataProvider
+type TrailInfo struct {
+	trail         types.Trail
+	status        *cloudtrail.GetTrailStatusOutput
+	eventSelector *cloudtrail.GetEventSelectorsOutput
 }
 
-type ConfigProviderAPI interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error)
+func (t TrailInfo) GetResourceArn() string {
+	if t.trail.TrailARN == nil {
+		return ""
+	}
+	return *t.trail.TrailARN
 }
 
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg)
-	if err != nil {
-		return nil, err
+func (t TrailInfo) GetResourceName() string {
+	if t.trail.Name == nil {
+		return ""
 	}
-	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
-	if err != nil {
-		return nil, err
-	}
-	awsConfig.Region = metadata.Region
+	return *t.trail.Name
+}
 
-	return &awsConfig, nil
+func (t TrailInfo) GetResourceType() string {
+	return fetching.TrailType
 }

@@ -27,7 +27,7 @@ import (
 )
 
 type ElasticCompute interface {
-	DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
+	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
 	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
 }
 

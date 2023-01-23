@@ -11,9 +11,9 @@ the [Cloud Security Posture](https://www.elastic.co/blog/secure-your-cloud-with-
 To get started with Cloud Security Posture on your cluster, see
 our [documentation](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#kspm-setup-unmanaged).
 
-- [Setup KSPM for Amazon EKS clusters](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#kspm-setup-unmanaged)
+- [Setup KSPM for Amazon EKS clusters](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#kspm-setup-eks-start)
 
-- [Setup KSPM for unmanaged Kubernetes clusters](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#kspm-setup-eks-start)
+- [Setup KSPM for unmanaged Kubernetes clusters](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#kspm-setup-unmanaged)
 
 ___
 

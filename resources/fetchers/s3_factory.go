@@ -18,9 +18,8 @@
 package fetchers
 
 import (
-	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	agentConfig "github.com/elastic/elastic-agent-libs/config"
@@ -32,12 +31,12 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.S3Type, &S3Factory{
-		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[s3.Client]{},
 	})
 }
 
 type S3Factory struct {
-	AwsConfigProvider config.AwsConfigProvider
+	CrossRegionFactory awslib.CrossRegionFactory[s3.Client]
 }
 
 func (f *S3Factory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -52,13 +51,12 @@ func (f *S3Factory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.
 }
 
 func (f *S3Factory) CreateFrom(log *logp.Logger, cfg S3FetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	s3Provider := s3.NewProvider(awsConfig, log)
+	s3Provider := s3.NewProvider(awsConfig, log, f.CrossRegionFactory)
 
 	return &S3Fetcher{
 		log:        log,

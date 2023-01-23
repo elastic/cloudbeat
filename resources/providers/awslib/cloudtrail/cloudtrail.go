@@ -15,32 +15,29 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package cloudtrail
 
 import (
 	"context"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type ConfigProvider struct {
-	MetadataProvider MetadataProvider
+type CloudTrail interface {
+	DescribeCloudTrails(ctx context.Context) ([]awslib.AwsResource, error)
+	GetTrailStatus(ctx context.Context, name string) (awslib.AwsResource, error)
+	GetEventSelectors(ctx context.Context, name string) (awslib.AwsResource, error)
 }
 
-type ConfigProviderAPI interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error)
-}
-
-func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg)
-	if err != nil {
-		return nil, err
+func NewCloudtrailProvider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
+	svc := cloudtrail.NewFromConfig(cfg)
+	return &Provider{
+		log:          log,
+		client:       svc,
+		awsAccountID: awsAccountID,
+		awsRegion:    cfg.Region,
 	}
-	metadata, err := p.MetadataProvider.GetMetadata(ctx, awsConfig)
-	if err != nil {
-		return nil, err
-	}
-	awsConfig.Region = metadata.Region
-
-	return &awsConfig, nil
 }

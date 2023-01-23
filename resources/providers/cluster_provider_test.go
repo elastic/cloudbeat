@@ -89,8 +89,8 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 			Return(test.eksClusterName, nil)
 
 		configProviderMock := &awslib.MockConfigProviderAPI{}
-		configProviderMock.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything, mock.Anything).
-			Return(awssdk.Config{}, nil)
+		configProviderMock.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
+			Return(&awssdk.Config{}, nil)
 
 		kubeClient := k8sfake.NewSimpleClientset()
 		clusterProvider := ClusterNameProvider{
