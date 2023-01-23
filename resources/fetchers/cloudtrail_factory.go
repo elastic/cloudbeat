@@ -20,6 +20,7 @@ package fetchers
 import (
 	"fmt"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
@@ -30,10 +31,14 @@ import (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.TrailType, &CloudTrailFactory{})
+	fetchersManager.Factories.RegisterFactory(fetching.TrailType, &CloudTrailFactory{
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[cloudtrail.Client]{},
+	})
 }
 
-type CloudTrailFactory struct{}
+type CloudTrailFactory struct {
+	CrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client]
+}
 
 func (f *CloudTrailFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	log.Debug("Starting EC2NetworkFactory.Create")
@@ -53,7 +58,7 @@ func (f *CloudTrailFactory) CreateFrom(log *logp.Logger, cfg fetching.AwsBaseFet
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	provider := cloudtrail.NewProvider(log, awsConfig)
+	provider := cloudtrail.NewProvider(log, awsConfig, f.CrossRegionFactory)
 
 	return &CloudTrailFetcher{
 		log:        log,

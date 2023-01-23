@@ -41,7 +41,7 @@ type TrailResource struct {
 func (f CloudTrailFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting CloudTrailFetcher.Fetch")
 
-	trails, err := f.provider.ListTrails(ctx)
+	trails, err := f.provider.DescribeTrails(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe cloud trails: %v", err)
 	}

@@ -24,15 +24,15 @@ import (
 
 type TrailInfo struct {
 	TrailARN                  string          `json:"trail_arn"`
-	Name                      string          `json:"name" json:"name"`
-	EnableLogFileValidation   bool            `json:"enable_log_file_validation" json:"enable_log_file_validation"`
-	IsMultiRegion             bool            `json:"is_multi_region" json:"is_multi_region"`
-	KMSKeyID                  string          `json:"kms_key_id" json:"kms_key_id"`
-	CloudWatchLogsLogGroupArn string          `json:"cloud_watch_logs_log_group_arn" json:"cloud_watch_logs_log_group_arn"`
-	IsLogging                 bool            `json:"is_logging" json:"is_logging"`
-	BucketName                string          `json:"bucket_name" json:"bucket_name"`
-	SnsTopicARN               string          `json:"sns_topic_arn" json:"sns_topic_arn"`
-	EventSelectors            []EventSelector `json:"event_selectors" json:"event_selectors"`
+	Name                      string          `json:"name"`
+	EnableLogFileValidation   bool            `json:"enable_log_file_validation"`
+	IsMultiRegion             bool            `json:"is_multi_region"`
+	KMSKeyID                  string          `json:"kms_key_id"`
+	CloudWatchLogsLogGroupArn string          `json:"cloud_watch_logs_log_group_arn"`
+	IsLogging                 bool            `json:"is_logging"`
+	BucketName                string          `json:"bucket_name"`
+	SnsTopicARN               string          `json:"sns_topic_arn"`
+	EventSelectors            []EventSelector `json:"event_selectors"`
 }
 
 type DataResource struct {

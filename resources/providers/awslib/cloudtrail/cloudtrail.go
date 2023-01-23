@@ -19,21 +19,26 @@ package cloudtrail
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	trailClient "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type TrailService interface {
-	ListTrails(ctx context.Context) ([]awslib.AwsResource, error)
+	DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewProvider(log *logp.Logger, cfg aws.Config) *Provider {
-	svc := cloudtrail.NewFromConfig(cfg)
+func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return trailClient.NewFromConfig(cfg)
+	}
+
+	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
 	return &Provider{
-		log:    log,
-		client: svc,
+		log:     log,
+		clients: m.GetMultiRegionsClientMap(),
 	}
 }

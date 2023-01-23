@@ -19,6 +19,7 @@ package cloudtrail
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
@@ -27,45 +28,36 @@ import (
 )
 
 type Provider struct {
-	log    *logp.Logger
-	client TrailClient
+	log     *logp.Logger
+	clients map[string]Client
 }
 
-type TrailClient interface {
-	ListTrails(ctx context.Context, params *cloudtrail.ListTrailsInput, optFns ...func(*cloudtrail.Options)) (*cloudtrail.ListTrailsOutput, error)
-	GetTrail(ctx context.Context, params *cloudtrail.GetTrailInput, optFns ...func(*cloudtrail.Options)) (*cloudtrail.GetTrailOutput, error)
+type Client interface {
 	DescribeTrails(ctx context.Context, params *cloudtrail.DescribeTrailsInput, optFns ...func(*cloudtrail.Options)) (*cloudtrail.DescribeTrailsOutput, error)
 	GetTrailStatus(ctx context.Context, params *cloudtrail.GetTrailStatusInput, optFns ...func(*cloudtrail.Options)) (*cloudtrail.GetTrailStatusOutput, error)
 	GetEventSelectors(ctx context.Context, params *cloudtrail.GetEventSelectorsInput, optFns ...func(*cloudtrail.Options)) (*cloudtrail.GetEventSelectorsOutput, error)
 }
 
-func (p *Provider) ListTrails(ctx context.Context) ([]awslib.AwsResource, error) {
-	output, err := p.client.ListTrails(ctx, nil)
+func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error) {
+	input := cloudtrail.DescribeTrailsInput{}
+	output, err := p.clients[awslib.DefaultRegion].DescribeTrails(ctx, &input)
 	if err != nil {
 		return nil, err
 	}
 
 	var result []awslib.AwsResource
-	for _, trail := range output.Trails {
-
+	for _, trail := range output.TrailList {
 		if trail.Name == nil {
 			continue
 		}
 
-		response, err := p.client.GetTrail(ctx, &cloudtrail.GetTrailInput{Name: trail.Name})
-		if err != nil || response.Trail == nil {
-			p.log.Errorf("fail to get trail info %s %s", *trail.TrailARN, err.Error())
-			continue
-		}
-		tailInfo := response.Trail
-
-		status, err := p.client.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{Name: trail.Name})
-		if err != nil {
+		status, trailStatusErr := p.getTrailStatus(ctx, trail)
+		if trailStatusErr != nil {
 			p.log.Errorf("fail to get trail status %s %s", *trail.TrailARN, err.Error())
 			status = &cloudtrail.GetTrailStatusOutput{}
 		}
 
-		selectors, err := p.getEventSelectors(ctx, tailInfo)
+		selectors, err := p.getEventSelectors(ctx, trail)
 		if err != nil {
 			p.log.Errorf("fail to get trail event selector %s %s", *trail.TrailARN, err.Error())
 		}
@@ -73,23 +65,37 @@ func (p *Provider) ListTrails(ctx context.Context) ([]awslib.AwsResource, error)
 		result = append(result, TrailInfo{
 			TrailARN:                  getValue(trail.TrailARN),
 			Name:                      getValue(trail.Name),
-			EnableLogFileValidation:   getValue(tailInfo.LogFileValidationEnabled),
-			IsMultiRegion:             getValue(tailInfo.IsMultiRegionTrail),
-			KMSKeyID:                  getValue(tailInfo.KmsKeyId),
-			CloudWatchLogsLogGroupArn: getValue(tailInfo.CloudWatchLogsLogGroupArn),
+			EnableLogFileValidation:   getValue(trail.LogFileValidationEnabled),
+			IsMultiRegion:             getValue(trail.IsMultiRegionTrail),
+			KMSKeyID:                  getValue(trail.KmsKeyId),
+			CloudWatchLogsLogGroupArn: getValue(trail.CloudWatchLogsLogGroupArn),
 			IsLogging:                 getValue(status.IsLogging),
-			SnsTopicARN:               getValue(tailInfo.SnsTopicARN),
-			BucketName:                getValue(tailInfo.S3BucketName),
+			SnsTopicARN:               getValue(trail.SnsTopicARN),
+			BucketName:                getValue(trail.S3BucketName),
 			EventSelectors:            selectors,
 		})
 	}
 	return result, nil
 }
 
-func (p *Provider) getEventSelectors(ctx context.Context, trail *types.Trail) ([]EventSelector, error) {
+func (p *Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*cloudtrail.GetTrailStatusOutput, error) {
+	client, err := p.getClient(*trail.HomeRegion)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{Name: trail.Name})
+}
+
+func (p *Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]EventSelector, error) {
+	client, err := p.getClient(*trail.HomeRegion)
+	if err != nil {
+		return nil, err
+	}
+
 	var eventSelectors []EventSelector
 	if trail.HasCustomEventSelectors != nil && *trail.HasCustomEventSelectors {
-		output, err := p.client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{TrailName: trail.Name})
+		output, err := client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{TrailName: trail.Name})
 		if err != nil {
 			return []EventSelector{}, err
 		}
@@ -116,6 +122,15 @@ func (p *Provider) getEventSelectors(ctx context.Context, trail *types.Trail) ([
 	}
 
 	return eventSelectors, nil
+}
+
+func (p *Provider) getClient(region string) (Client, error) {
+	client := p.clients[region]
+	if client == nil {
+		return nil, fmt.Errorf("no intialize client exists in %s region", region)
+	}
+
+	return client, nil
 }
 
 func getValue[T any](ptr *T) T {
