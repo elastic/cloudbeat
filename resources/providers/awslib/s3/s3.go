@@ -26,9 +26,19 @@ import (
 )
 
 type BucketDescription struct {
-	Name         string
-	SSEAlgorithm string
-	Grantees     []types.Grant
+	Name             string
+	SSEAlgorithm     string
+	BucketPolicy     BucketPolicy
+	BucketVersioning BucketVersioning
+	Grants           []types.Grant
+}
+
+// TODO: This can be better typed, but this is a complex object. See this library for example: https://github.com/liamg/iamgo/
+type BucketPolicy map[string]any
+
+type BucketVersioning struct {
+	Enabled   bool
+	MfaDelete bool
 }
 
 type S3 interface {
@@ -44,5 +54,7 @@ type Client interface {
 	ListBuckets(ctx context.Context, params *s3.ListBucketsInput, optFns ...func(*s3.Options)) (*s3.ListBucketsOutput, error)
 	GetBucketEncryption(ctx context.Context, params *s3.GetBucketEncryptionInput, optFns ...func(*s3.Options)) (*s3.GetBucketEncryptionOutput, error)
 	GetBucketLocation(ctx context.Context, params *s3.GetBucketLocationInput, optFns ...func(*s3.Options)) (*s3.GetBucketLocationOutput, error)
+	GetBucketPolicy(ctx context.Context, params *s3.GetBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.GetBucketPolicyOutput, error)
+	GetBucketVersioning(ctx context.Context, params *s3.GetBucketVersioningInput, optFns ...func(*s3.Options)) (*s3.GetBucketVersioningOutput, error)
 	GetBucketAcl(ctx context.Context, params *s3.GetBucketAclInput, optFns ...func(*s3.Options)) (*s3.GetBucketAclOutput, error)
 }

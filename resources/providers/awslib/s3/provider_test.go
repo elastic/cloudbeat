@@ -20,6 +20,7 @@ package s3
 import (
 	"context"
 	"errors"
+	"fmt"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -55,6 +56,8 @@ func (s *ProviderTestSuite) TearDownTest() {}
 var bucketName = "MyBucket"
 var secondBucketName = "MyAnotherBucket"
 var region types.BucketLocationConstraint = "eu-west-1"
+var bucketPolicy BucketPolicy = map[string]any{"foo": "bar"}
+var bucketPolicyString = "{\"foo\": \"bar\"}"
 
 func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 	var tests = []struct {
@@ -88,30 +91,36 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
 				"GetBucketEncryption": {{nil, errors.New("bla")}},
 				"GetBucketLocation":   {{nil, errors.New("bla")}},
+				"GetBucketPolicy":     {{nil, errors.New("bla")}},
+				"GetBucketVersioning": {{nil, errors.New("bla")}},
 			},
 			expected:    nil,
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion},
 		},
 		{
-			name: "Should return an S3 bucket without encryption",
+			name: "Should return an S3 bucket without encryption, versioning, and policy",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
 				"GetBucketEncryption": {{nil, errors.New("bla")}},
-				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
+				"GetBucketPolicy":     {{nil, errors.New("bla")}},
+				"GetBucketVersioning": {{nil, errors.New("bla")}},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: ""}},
+			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{false, false}}},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion},
 		},
 		{
-			name: "Should not return an S3 bucket with encryption due to regions mismatch",
+			name: "Should return an S3 bucket without encryption, policy, and versioning due to regions mismatch",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
 				"GetBucketEncryption": {{nil, errors.New("regions mismatch")}},
 				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+				"GetBucketPolicy":     {{nil, errors.New("regions mismatch")}},
+				"GetBucketVersioning": {{nil, errors.New("regions mismatch")}},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: ""}},
+			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{false, false}}},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion},
 		},
@@ -126,57 +135,116 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 						},
 					},
 				}, nil}},
-				"GetBucketLocation": {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+				"GetBucketPolicy":     {{nil, errors.New("bla")}},
+				"GetBucketVersioning": {{nil, errors.New("bla")}},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "AES256"}},
+			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "AES256", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{false, false}}},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion, string(region)},
 		},
 		{
-			name: "Should return two S3 buckets from different regions with encryption",
+			name: "Should return an S3 bucket with bucket policy",
+			s3ClientMockReturnVals: s3ClientMockReturnVals{
+				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
+				"GetBucketEncryption": {{nil, errors.New("bla")}},
+				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+				"GetBucketPolicy":     {{&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil}},
+				"GetBucketVersioning": {{nil, errors.New("bla")}},
+			},
+			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "", BucketPolicy: bucketPolicy, BucketVersioning: BucketVersioning{false, false}}},
+			expectError: false,
+			regions:     []string{awslib.DefaultRegion, string(region)},
+		},
+		{
+			name: "Should return an S3 bucket with bucket versioning",
+			s3ClientMockReturnVals: s3ClientMockReturnVals{
+				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
+				"GetBucketEncryption": {{nil, errors.New("bla")}},
+				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+				"GetBucketPolicy":     {{nil, errors.New("bla")}},
+				"GetBucketVersioning": {{&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}},
+			},
+			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{true, true}}},
+			expectError: false,
+			regions:     []string{awslib.DefaultRegion, string(region)},
+		},
+		{
+			name: "Should return two S3 buckets from different regions",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}, {Name: &secondBucketName}}}, nil}},
-				"GetBucketEncryption": {{&s3Client.GetBucketEncryptionOutput{
-					ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
-						Rules: []types.ServerSideEncryptionRule{
-							{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
-						},
-					},
-				}, nil},
+				"GetBucketEncryption": {
 					{&s3Client.GetBucketEncryptionOutput{
 						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
 							Rules: []types.ServerSideEncryptionRule{
 								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
 							},
 						},
-					}, nil}},
-				"GetBucketLocation": {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
+					}, nil},
+					{&s3Client.GetBucketEncryptionOutput{
+						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
+							Rules: []types.ServerSideEncryptionRule{
+								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "aws:kms"}},
+							},
+						},
+					}, nil},
+				},
+				"GetBucketLocation": {
+					{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil},
+					{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil},
+				},
+				"GetBucketPolicy": {
+					{&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil},
+					{nil, errors.New("bla")},
+				},
+				"GetBucketVersioning": {
+					{&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil},
+					{&s3Client.GetBucketVersioningOutput{Status: "Suspended", MFADelete: "Disabled"}, nil},
+				},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "AES256"}, BucketDescription{Name: secondBucketName, SSEAlgorithm: "AES256"}},
+			expected: []awslib.AwsResource{
+				BucketDescription{Name: bucketName, SSEAlgorithm: "AES256", BucketPolicy: bucketPolicy, BucketVersioning: BucketVersioning{true, true}},
+				BucketDescription{Name: secondBucketName, SSEAlgorithm: "aws:kms", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{false, false}},
+			},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion, string(region)},
 		},
 		{
-			name: "Should return two S3 buckets from the same region with encryption",
+			name: "Should return two S3 buckets from the same region",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}, {Name: &secondBucketName}}}, nil}},
-				"GetBucketEncryption": {{&s3Client.GetBucketEncryptionOutput{
-					ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
-						Rules: []types.ServerSideEncryptionRule{
-							{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
-						},
-					},
-				}, nil},
+				"GetBucketEncryption": {
 					{&s3Client.GetBucketEncryptionOutput{
 						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
 							Rules: []types.ServerSideEncryptionRule{
 								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
 							},
 						},
+					}, nil},
+					{&s3Client.GetBucketEncryptionOutput{
+						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
+							Rules: []types.ServerSideEncryptionRule{
+								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "aws:kms"}},
+							},
+						},
 					}, nil}},
-				"GetBucketLocation": {{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
+				"GetBucketLocation": {
+					{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil},
+					{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil},
+				},
+				"GetBucketPolicy": {
+					{&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil},
+					{nil, errors.New("bla")},
+				},
+				"GetBucketVersioning": {
+					{&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil},
+					{&s3Client.GetBucketVersioningOutput{Status: "Suspended", MFADelete: "Disabled"}, nil},
+				},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "AES256"}, BucketDescription{Name: secondBucketName, SSEAlgorithm: "AES256"}},
+			expected: []awslib.AwsResource{
+				BucketDescription{Name: bucketName, SSEAlgorithm: "AES256", BucketPolicy: bucketPolicy, BucketVersioning: BucketVersioning{true, true}},
+				BucketDescription{Name: secondBucketName, SSEAlgorithm: "aws:kms", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{false, false}},
+			},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion},
 		},
@@ -204,7 +272,9 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			s.NoError(err)
 		}
 
-		s.Equal(test.expected, results)
+		// Using `ElementsMatch` instead of the usual `Equals` since iterating over the regions map does not produce a
+		//	guaranteed order
+		s.ElementsMatch(test.expected, results, fmt.Sprintf("Test '%s' failed, elements do not match", test.name))
 	}
 }
 
