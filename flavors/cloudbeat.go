@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package beater
+package flavors
 
 import (
 	"context"
@@ -27,7 +27,6 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/cloudbeat/launcher"
 	"github.com/elastic/cloudbeat/pipeline"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
@@ -36,53 +35,22 @@ import (
 	"github.com/elastic/cloudbeat/uniqueness"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/beats/v7/libbeat/processors"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-const (
-	beaterName       = "Cloudbeat"
-	flushInterval    = 10 * time.Second
-	eventsThreshold  = 75
-	resourceChBuffer = 10000
-)
-
 // cloudbeat configuration.
 type cloudbeat struct {
-	ctx         context.Context
-	cancel      context.CancelFunc
-	config      *config.Config
-	client      beat.Client
-	data        *fetchersManager.Data
-	evaluator   evaluator.Evaluator
-	transformer transformer.Transformer
-	log         *logp.Logger
-	resourceCh  chan fetching.ResourceInfo
-	leader      uniqueness.Manager
-}
-
-func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
-	log := logp.NewLogger("launcher")
-	reloader := launcher.NewListener(log)
-	validator := &validator{}
-
-	s, err := launcher.New(log, beaterName, reloader, validator, NewCloudbeat, cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	reload.RegisterV2.MustRegisterInput(reloader)
-	return s, nil
+	flavorBase
+	data       *fetchersManager.Data
+	evaluator  evaluator.Evaluator
+	resourceCh chan fetching.ResourceInfo
+	leader     uniqueness.Manager
 }
 
 // NewCloudbeat creates an instance of cloudbeat.
-func NewCloudbeat(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
-	return newCloudbeat(b, cfg)
-}
-
-func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
+func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	log := logp.NewLogger("cloudbeat")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -132,16 +100,20 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 
 	t := transformer.NewTransformer(log, commonData, resultsIndex)
 
-	bt := &cloudbeat{
+	base := flavorBase{
 		ctx:         ctx,
 		cancel:      cancel,
 		config:      c,
-		evaluator:   eval,
-		data:        data,
 		transformer: t,
 		log:         log,
-		resourceCh:  resourceCh,
-		leader:      le,
+	}
+
+	bt := &cloudbeat{
+		flavorBase: base,
+		evaluator:  eval,
+		data:       data,
+		resourceCh: resourceCh,
+		leader:     le,
 	}
 	return bt, nil
 }
