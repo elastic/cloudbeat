@@ -28,10 +28,10 @@ import (
 )
 
 type TrailService interface {
-	DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error)
+	DescribeTrails(ctx context.Context) ([]TrailInfo, error)
 }
 
-func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return trailClient.NewFromConfig(cfg)
 	}

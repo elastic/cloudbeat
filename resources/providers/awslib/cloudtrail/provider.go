@@ -38,14 +38,14 @@ type Client interface {
 	GetEventSelectors(ctx context.Context, params *cloudtrail.GetEventSelectorsInput, optFns ...func(*cloudtrail.Options)) (*cloudtrail.GetEventSelectorsOutput, error)
 }
 
-func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error) {
+func (p Provider) DescribeTrails(ctx context.Context) ([]TrailInfo, error) {
 	input := cloudtrail.DescribeTrailsInput{}
 	output, err := p.clients[awslib.DefaultRegion].DescribeTrails(ctx, &input)
 	if err != nil {
 		return nil, err
 	}
 
-	var result []awslib.AwsResource
+	var result []TrailInfo
 	for _, trail := range output.TrailList {
 		if trail.Name == nil {
 			continue
@@ -65,20 +65,21 @@ func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, er
 		result = append(result, TrailInfo{
 			TrailARN:                  getValue(trail.TrailARN),
 			Name:                      getValue(trail.Name),
-			EnableLogFileValidation:   getValue(trail.LogFileValidationEnabled),
+			Region:                    getValue(trail.HomeRegion),
+			LogFileValidationEnabled:  getValue(trail.LogFileValidationEnabled),
 			IsMultiRegion:             getValue(trail.IsMultiRegionTrail),
 			KMSKeyID:                  getValue(trail.KmsKeyId),
 			CloudWatchLogsLogGroupArn: getValue(trail.CloudWatchLogsLogGroupArn),
 			IsLogging:                 getValue(status.IsLogging),
-			SnsTopicARN:               getValue(trail.SnsTopicARN),
 			BucketName:                getValue(trail.S3BucketName),
+			SnsTopicARN:               getValue(trail.SnsTopicARN),
 			EventSelectors:            selectors,
 		})
 	}
 	return result, nil
 }
 
-func (p *Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*cloudtrail.GetTrailStatusOutput, error) {
+func (p Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*cloudtrail.GetTrailStatusOutput, error) {
 	client, err := p.getClient(*trail.HomeRegion)
 	if err != nil {
 		return nil, err
@@ -87,7 +88,7 @@ func (p *Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*clou
 	return client.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{Name: trail.Name})
 }
 
-func (p *Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]EventSelector, error) {
+func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]EventSelector, error) {
 	client, err := p.getClient(*trail.HomeRegion)
 	if err != nil {
 		return nil, err
@@ -124,7 +125,7 @@ func (p *Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]
 	return eventSelectors, nil
 }
 
-func (p *Provider) getClient(region string) (Client, error) {
+func (p Provider) getClient(region string) (Client, error) {
 	client := p.clients[region]
 	if client == nil {
 		return nil, fmt.Errorf("no intialize client exists in %s region", region)

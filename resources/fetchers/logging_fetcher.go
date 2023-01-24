@@ -19,36 +19,35 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
-
+	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type CloudTrailFetcher struct {
+type LoggingFetcher struct {
 	log        *logp.Logger
-	provider   cloudtrail.TrailService
+	provider   logging.Client
 	cfg        fetching.AwsBaseFetcherConfig
 	resourceCh chan fetching.ResourceInfo
 }
 
-type TrailResource struct {
+type LoggingResource struct {
 	awslib.AwsResource
 }
 
-func (f CloudTrailFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Debug("Starting CloudTrailFetcher.Fetch")
+func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Debug("Starting LoggingFetcher.Fetch")
 
 	trails, err := f.provider.DescribeTrails(ctx)
 	if err != nil {
-		f.log.Errorf("failed to describe cloud trails: %v", err)
+		return err
 	}
 
 	for _, resource := range trails {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource: TrailResource{
+			Resource: LoggingResource{
 				AwsResource: resource,
 			},
 			CycleMetadata: cMetadata,
@@ -58,13 +57,13 @@ func (f CloudTrailFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 	return nil
 }
 
-func (f CloudTrailFetcher) Stop() {}
+func (f LoggingFetcher) Stop() {}
 
-func (r TrailResource) GetData() any {
+func (r LoggingResource) GetData() any {
 	return r.AwsResource
 }
 
-func (r TrailResource) GetMetadata() (fetching.ResourceMetadata, error) {
+func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      r.GetResourceArn(),
 		Type:    fetching.CloudAudit,
@@ -72,4 +71,4 @@ func (r TrailResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Name:    r.GetResourceName(),
 	}, nil
 }
-func (r TrailResource) GetElasticCommonData() any { return nil }
+func (r LoggingResource) GetElasticCommonData() any { return nil }

@@ -30,7 +30,6 @@ type BucketDescription struct {
 	SSEAlgorithm     string
 	BucketPolicy     BucketPolicy
 	BucketVersioning BucketVersioning
-	Grants           []types.Grant
 }
 
 // TODO: This can be better typed, but this is a complex object. See this library for example: https://github.com/liamg/iamgo/
@@ -43,6 +42,7 @@ type BucketVersioning struct {
 
 type S3 interface {
 	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
+	GetBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error)
 }
 
 type Provider struct {

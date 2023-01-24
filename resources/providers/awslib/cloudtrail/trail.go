@@ -25,7 +25,8 @@ import (
 type TrailInfo struct {
 	TrailARN                  string          `json:"trail_arn"`
 	Name                      string          `json:"name"`
-	EnableLogFileValidation   bool            `json:"enable_log_file_validation"`
+	Region                    string          `json:"region"`
+	LogFileValidationEnabled  bool            `json:"log_file_validation_enabled"`
 	IsMultiRegion             bool            `json:"is_multi_region"`
 	KMSKeyID                  string          `json:"kms_key_id"`
 	CloudWatchLogsLogGroupArn string          `json:"cloud_watch_logs_log_group_arn"`

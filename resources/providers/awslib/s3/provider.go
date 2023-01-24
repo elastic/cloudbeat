@@ -74,14 +74,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 				p.log.Errorf("Could not get bucket versioning for bucket %s. Err: %v", *bucket.Name, versioningErr)
 			}
 
-			aclGrants, aclErr := p.getBucketACL(ctx, bucket.Name, region)
-			// Getting the bucket ACL is not critical for the rest of the flow, so we should keep describing the
-			//	bucket even if getting the bucket ACL fails.
-			if aclErr != nil {
-				p.log.Errorf("Could not get ACL for bucket %s. Error: %v", *bucket.Name, aclErr)
-			}
-
-			result = append(result, BucketDescription{*bucket.Name, sseAlgorithm, bucketPolicy, bucketVersioning, aclGrants})
+			result = append(result, BucketDescription{*bucket.Name, sseAlgorithm, bucketPolicy, bucketVersioning})
 		}
 	}
 
@@ -155,7 +148,7 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (stri
 	return region, nil
 }
 
-func (p Provider) getBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error) {
+func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error) {
 	client, clientErr := p.getClient(region)
 	if clientErr != nil {
 		return []types.Grant{}, clientErr

@@ -20,8 +20,10 @@ package fetchers
 import (
 	"fmt"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
@@ -31,17 +33,19 @@ import (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.TrailType, &CloudTrailFactory{
-		CrossRegionFactory: &awslib.MultiRegionClientFactory[cloudtrail.Client]{},
+	fetchersManager.Factories.RegisterFactory(fetching.TrailType, &LoggingFactory{
+		TrailCrossRegionFactory: &awslib.MultiRegionClientFactory[cloudtrail.Client]{},
+		S3CrossRegionFactory:    &awslib.MultiRegionClientFactory[s3.Client]{},
 	})
 }
 
-type CloudTrailFactory struct {
-	CrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client]
+type LoggingFactory struct {
+	TrailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client]
+	S3CrossRegionFactory    awslib.CrossRegionFactory[s3.Client]
 }
 
-func (f *CloudTrailFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	log.Debug("Starting EC2NetworkFactory.Create")
+func (f *LoggingFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting LoggingFactory.Create")
 
 	cfg := fetching.AwsBaseFetcherConfig{}
 	err := c.Unpack(&cfg)
@@ -52,15 +56,15 @@ func (f *CloudTrailFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan f
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *CloudTrailFactory) CreateFrom(log *logp.Logger, cfg fetching.AwsBaseFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *LoggingFactory) CreateFrom(log *logp.Logger, cfg fetching.AwsBaseFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	provider := cloudtrail.NewProvider(log, awsConfig, f.CrossRegionFactory)
+	provider := logging.NewProvider(log, awsConfig, f.TrailCrossRegionFactory, f.S3CrossRegionFactory)
 
-	return &CloudTrailFetcher{
+	return &LoggingFetcher{
 		log:        log,
 		cfg:        cfg,
 		provider:   provider,
