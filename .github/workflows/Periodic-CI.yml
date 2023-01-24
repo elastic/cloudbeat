@@ -66,7 +66,7 @@ jobs:
       run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
     - id: set-matrix
-      run: echo "::set-output name=matrix::${{ env.TEST_MATRIX}}"
+      run: echo "{matrix}={${{ env.TEST_MATRIX}}}" >> $GITHUB_OUTPUT
 
   Build:
     name: Build
@@ -85,12 +85,12 @@ jobs:
         run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
 
       - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v1
+        uses: open-policy-agent/setup-opa@v2
         with:
           version: ${{ env.OPA_VERSION }}
 
       - name: cache go dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/go/pkg/mod
@@ -109,10 +109,10 @@ jobs:
           args: BuildOpaBundle
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Cache Build dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.workflow }}
@@ -120,7 +120,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: false
@@ -130,7 +130,7 @@ jobs:
           outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: ./tests/.
           push: false
@@ -140,7 +140,7 @@ jobs:
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Cache docker images
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
@@ -163,7 +163,7 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - uses: azure/setup-helm@v1
         id: install
@@ -173,12 +173,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.2.0
+        uses: helm/kind-action@v1.5.0
         with:
           config: deploy/k8s/kind/kind-mono.yml
 
       - name: Cache docker images
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
@@ -201,7 +201,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
@@ -229,7 +229,7 @@ jobs:
 
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@v1.0.1
+        uses: andrcuns/allure-publish-action@v2.2.3
         with:
           storageType: s3
           resultsGlob: "tests/allure/results/*"
