@@ -19,3 +19,12 @@ package aws_cis
 
 // UnauthorizedAPICallsMetric it is a filter to monitor the API calls that are not authorized and/or denied.
 const UnauthorizedAPICallsPattern = "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"
+
+const (
+	// NonMFAConsoleLoginPattern it is a filter to monitor the console login attempts that are done without using Multi-factor authentication.
+	NonMFAConsoleLoginPattern = "{ ($.eventName = \"ConsoleLogin\") && ($.additionalEventData.MFAUsed != \"Yes\") }"
+	// SSONonMFAConsoleLoginPattern it is a filter to monitor the successful console login attempts that are done by an IAM user without using Multi-factor authentication.
+	SSONonMFAConsoleLoginPattern = "{ ($.eventName = \"ConsoleLogin\") && ($.additionalEventData.MFAUsed != \"Yes\") && ($.userIdentity.type = \"IAMUser\") && ($.responseElements.ConsoleLogin = \"Success\") }"
+)
+
+// TODO: check opa
