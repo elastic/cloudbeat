@@ -48,7 +48,7 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 				{
 					TrailARN:                  "arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail",
 					Name:                      "trail",
-					EnableLogFileValidation:   true,
+					LogFileValidationEnabled:  true,
 					IsMultiRegion:             true,
 					KMSKeyID:                  "kmsKey_123",
 					CloudWatchLogsLogGroupArn: "arn:aws:logs:us-east-1:123456789012:log-group:my-log-group",
@@ -65,7 +65,7 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 				{
 					TrailARN:                  "arn:aws:cloudtrail:us-west-1:123456789012:trail/mytrail",
 					Name:                      "trail",
-					EnableLogFileValidation:   true,
+					LogFileValidationEnabled:  true,
 					IsMultiRegion:             true,
 					Region:                    "us-west-1",
 					KMSKeyID:                  "kmsKey_123",

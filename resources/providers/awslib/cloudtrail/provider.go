@@ -105,9 +105,7 @@ func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]E
 			var resources []DataResource
 			for _, dataResource := range eventSelector.DataResources {
 				var values []string
-				for _, value := range dataResource.Values {
-					values = append(values, value)
-				}
+				values = append(values, dataResource.Values...)
 
 				resources = append(resources, DataResource{
 					Type:   getValue(dataResource.Type),
