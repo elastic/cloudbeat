@@ -46,6 +46,7 @@ const (
 	CloudLoadBalancer      = "load-balancer"
 	CloudContainerRegistry = "container-registry"
 	CloudStorage           = "cloud-storage"
+	CloudAudit             = "cloud-audit"
 )
 
 // Factory can create fetcher instances based on configuration

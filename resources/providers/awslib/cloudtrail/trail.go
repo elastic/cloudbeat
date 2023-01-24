@@ -18,29 +18,40 @@
 package cloudtrail
 
 import (
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type TrailInfo struct {
-	trail         types.Trail
-	status        *cloudtrail.GetTrailStatusOutput
-	eventSelector *cloudtrail.GetEventSelectorsOutput
+	TrailARN                  string          `json:"trail_arn"`
+	Name                      string          `json:"name"`
+	Region                    string          `json:"region"`
+	LogFileValidationEnabled  bool            `json:"log_file_validation_enabled"`
+	IsMultiRegion             bool            `json:"is_multi_region"`
+	KMSKeyID                  string          `json:"kms_key_id"`
+	CloudWatchLogsLogGroupArn string          `json:"cloud_watch_logs_log_group_arn"`
+	IsLogging                 bool            `json:"is_logging"`
+	BucketName                string          `json:"bucket_name"`
+	SnsTopicARN               string          `json:"sns_topic_arn"`
+	EventSelectors            []EventSelector `json:"event_selectors"`
+}
+
+type DataResource struct {
+	Type   string   `json:"type"`
+	Values []string `json:"values"`
+}
+
+type EventSelector struct {
+	DataResources []DataResource      `json:"data_resources"`
+	ReadWriteType types.ReadWriteType `json:"read_write_type"`
 }
 
 func (t TrailInfo) GetResourceArn() string {
-	if t.trail.TrailARN == nil {
-		return ""
-	}
-	return *t.trail.TrailARN
+	return t.TrailARN
 }
 
 func (t TrailInfo) GetResourceName() string {
-	if t.trail.Name == nil {
-		return ""
-	}
-	return *t.trail.Name
+	return t.Name
 }
 
 func (t TrailInfo) GetResourceType() string {

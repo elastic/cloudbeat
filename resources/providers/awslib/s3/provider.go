@@ -30,6 +30,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"strings"
 )
 
 func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
@@ -62,7 +63,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 				p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
 			}
 
-			bucketPolicy, policyErr := p.getBucketPolicy(ctx, bucket.Name, region)
+			bucketPolicy, policyErr := p.GetBucketPolicy(ctx, bucket.Name, region)
 
 			if policyErr != nil {
 				p.log.Errorf("Could not get bucket policy for bucket %s. Error: %v", *bucket.Name, policyErr)
@@ -78,6 +79,79 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 	}
 
 	return result, nil
+}
+
+func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error) {
+	client, clientErr := p.getClient(region)
+	if clientErr != nil {
+		return nil, clientErr
+	}
+
+	acl, err := client.GetBucketAcl(ctx, &s3Client.GetBucketAclInput{Bucket: bucketName})
+	if err != nil {
+		p.log.Debugf("Error getting bucket ACL: %s", err)
+		return nil, err
+	}
+
+	grants := []types.Grant{}
+	for _, grant := range acl.Grants {
+		if grant.Grantee != nil && grant.Grantee.Type == types.TypeGroup {
+			if strings.HasSuffix(*grant.Grantee.URI, "AuthenticatedUsers") || strings.HasSuffix(*grant.Grantee.URI, "AllUsers") {
+				grants = append(grants, grant)
+			}
+		}
+	}
+
+	return grants, nil
+}
+
+func (p Provider) GetBucketPolicy(ctx context.Context, bucketName *string, region string) (BucketPolicy, error) {
+	client, clientErr := p.getClient(region)
+	if clientErr != nil {
+		return nil, clientErr
+	}
+
+	rawPolicy, err := client.GetBucketPolicy(ctx, &s3Client.GetBucketPolicyInput{Bucket: bucketName})
+	if err != nil {
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == "NoSuchBucketPolicy" {
+				p.log.Debugf("Bucket policy for bucket %s does not exist", *bucketName)
+				return nil, nil
+			}
+		}
+
+		return nil, err
+	}
+
+	var bucketPolicy BucketPolicy
+	jsonErr := json.Unmarshal([]byte(*rawPolicy.Policy), &bucketPolicy)
+	if jsonErr != nil {
+		return nil, jsonErr
+	}
+
+	return bucketPolicy, nil
+}
+
+func (p Provider) GetBucketLogging(ctx context.Context, bucketName *string, region string) (Logging, error) {
+	client, clientErr := p.getClient(region)
+	if clientErr != nil {
+		return Logging{}, clientErr
+	}
+
+	logging, err := client.GetBucketLogging(ctx, &s3Client.GetBucketLoggingInput{Bucket: bucketName})
+	if err != nil {
+		p.log.Debugf("Error getting bucket logging: %s", err)
+		return Logging{}, err
+	}
+
+	bucketLogging := Logging{}
+	if logging.LoggingEnabled != nil {
+		bucketLogging.Enabled = true
+		bucketLogging.TargetBucket = *logging.LoggingEnabled.TargetBucket
+	}
+
+	return bucketLogging, nil
 }
 
 func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.Bucket) map[string][]types.Bucket {
@@ -145,34 +219,6 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (stri
 	}
 
 	return region, nil
-}
-
-func (p Provider) getBucketPolicy(ctx context.Context, bucketName *string, region string) (BucketPolicy, error) {
-	client, clientErr := p.getClient(region)
-	if clientErr != nil {
-		return nil, clientErr
-	}
-
-	rawPolicy, err := client.GetBucketPolicy(ctx, &s3Client.GetBucketPolicyInput{Bucket: bucketName})
-	if err != nil {
-		var apiErr smithy.APIError
-		if errors.As(err, &apiErr) {
-			if apiErr.ErrorCode() == "NoSuchBucketPolicy" {
-				p.log.Debugf("Bucket policy for bucket %s does not exist", *bucketName)
-				return nil, nil
-			}
-		}
-
-		return nil, err
-	}
-
-	var bucketPolicy BucketPolicy
-	jsonErr := json.Unmarshal([]byte(*rawPolicy.Policy), &bucketPolicy)
-	if jsonErr != nil {
-		return nil, jsonErr
-	}
-
-	return bucketPolicy, nil
 }
 
 func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, region string) (BucketVersioning, error) {

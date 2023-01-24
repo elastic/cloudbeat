@@ -30,68 +30,135 @@ import (
 )
 
 type (
-	mocks                 []any
-	cloudtrailClientMocks map[string][2]mocks
+	cloudtrailClientMocks map[string][][]any
 )
 
 func TestProvider_DescribeCloudTrails(t *testing.T) {
 	tests := []struct {
 		name                           string
+		regions                        []string
 		want                           []TrailInfo
 		wantErr                        bool
 		cloudtrailClientMockReturnVals cloudtrailClientMocks
 	}{
 		{
+			name:    "Retrieve trail info from all regions",
+			regions: []string{"us-east-1", "us-west-1"},
+			want: []TrailInfo{
+				{
+					TrailARN:                  "arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail",
+					Name:                      "trail",
+					LogFileValidationEnabled:  true,
+					IsMultiRegion:             true,
+					KMSKeyID:                  "kmsKey_123",
+					CloudWatchLogsLogGroupArn: "arn:aws:logs:us-east-1:123456789012:log-group:my-log-group",
+					IsLogging:                 true,
+					Region:                    "us-east-1",
+					BucketName:                "trails_bucket",
+					SnsTopicARN:               "arn:aws:sns:us-east-1:123456789012:my-topic",
+					EventSelectors: []EventSelector{{DataResources: []DataResource{
+						{
+							Type:   "AWS::S3::Object",
+							Values: []string{"bucket"},
+						}}, ReadWriteType: types.ReadWriteTypeAll}},
+				},
+				{
+					TrailARN:                  "arn:aws:cloudtrail:us-west-1:123456789012:trail/mytrail",
+					Name:                      "trail",
+					LogFileValidationEnabled:  true,
+					IsMultiRegion:             true,
+					Region:                    "us-west-1",
+					KMSKeyID:                  "kmsKey_123",
+					CloudWatchLogsLogGroupArn: "arn:aws:logs:us-west-1:123456789012:log-group:my-log-group",
+					IsLogging:                 false,
+					BucketName:                "trails_bucket",
+					SnsTopicARN:               "arn:aws:sns:us-west-1:123456789012:my-topic",
+					EventSelectors:            nil,
+				},
+			},
+			wantErr: false,
 			cloudtrailClientMockReturnVals: cloudtrailClientMocks{
-				"DescribeTrails": [2]mocks{
-					{mock.Anything, mock.Anything},
+				"DescribeTrails": {
 					{&cloudtrail.DescribeTrailsOutput{
 						TrailList: []types.Trail{
 							{
-								Name: aws.String("trail"),
+								CloudWatchLogsLogGroupArn: aws.String("arn:aws:logs:us-east-1:123456789012:log-group:my-log-group"),
+								HasCustomEventSelectors:   aws.Bool(true),
+								IsMultiRegionTrail:        aws.Bool(true),
+								KmsKeyId:                  aws.String("kmsKey_123"),
+								TrailARN:                  aws.String("arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail"),
+								LogFileValidationEnabled:  aws.Bool(true),
+								Name:                      aws.String("trail"),
+								S3BucketName:              aws.String("trails_bucket"),
+								SnsTopicARN:               aws.String("arn:aws:sns:us-east-1:123456789012:my-topic"),
+								HomeRegion:                aws.String("us-east-1"),
+							},
+							{
+								CloudWatchLogsLogGroupArn: aws.String("arn:aws:logs:us-west-1:123456789012:log-group:my-log-group"),
+								HasCustomEventSelectors:   aws.Bool(true),
+								IsMultiRegionTrail:        aws.Bool(true),
+								KmsKeyId:                  aws.String("kmsKey_123"),
+								TrailARN:                  aws.String("arn:aws:cloudtrail:us-west-1:123456789012:trail/mytrail"),
+								LogFileValidationEnabled:  aws.Bool(true),
+								Name:                      aws.String("trail"),
+								S3BucketName:              aws.String("trails_bucket"),
+								SnsTopicARN:               aws.String("arn:aws:sns:us-west-1:123456789012:my-topic"),
+								HomeRegion:                aws.String("us-west-1"),
 							},
 						},
 					}, nil},
 				},
-				"GetTrailStatus": [2]mocks{
-					{mock.Anything, mock.Anything},
-					{&cloudtrail.GetTrailStatusOutput{}, nil},
+				"GetTrailStatus": {
+					{&cloudtrail.GetTrailStatusOutput{IsLogging: aws.Bool(true)}, nil},
+					{&cloudtrail.GetTrailStatusOutput{IsLogging: aws.Bool(false)}, nil},
 				},
-				"GetEventSelectors": [2]mocks{
-					{mock.Anything, mock.Anything},
-					{&cloudtrail.GetEventSelectorsOutput{}, nil},
-				},
-			},
-			want: []TrailInfo{
-				{
-					trail: types.Trail{
-						Name: aws.String("trail"),
-					},
-					status:        &cloudtrail.GetTrailStatusOutput{},
-					eventSelector: &cloudtrail.GetEventSelectorsOutput{},
+				"GetEventSelectors": {
+					{&cloudtrail.GetEventSelectorsOutput{
+						EventSelectors: []types.EventSelector{
+							{
+								DataResources: []types.DataResource{{
+									Type:   aws.String("AWS::S3::Object"),
+									Values: []string{"bucket"},
+								}},
+								ReadWriteType: types.ReadWriteTypeAll,
+							}},
+					}, nil}, {&cloudtrail.GetEventSelectorsOutput{}, nil},
 				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mock := &MockClient{}
-			for name, call := range tt.cloudtrailClientMockReturnVals {
-				mock.On(name, call[0]...).Return(call[1]...)
+			clientMock := &MockClient{}
+			for funcName, calls := range tt.cloudtrailClientMockReturnVals {
+				for _, returnVals := range calls {
+					clientMock.On(funcName, context.TODO(), mock.Anything).Return(returnVals...).Once()
+				}
 			}
+
 			p := &Provider{
-				log:    logp.NewLogger("TestProvider_DescribeCloudTrails"),
-				client: mock,
+				log:     logp.NewLogger("TestProvider_DescribeCloudTrails"),
+				clients: createMockClients(clientMock, tt.regions),
 			}
-			got, err := p.DescribeCloudTrails(context.Background())
-			if tt.wantErr {
-				assert.Error(t, err)
+
+			trails, err := p.DescribeTrails(context.Background())
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DescribeCloudTrails() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			assert.NoError(t, err)
-			for i, g := range got {
-				assert.Equal(t, tt.want[i], g)
+
+			for i, trail := range trails {
+				assert.Equal(t, tt.want[i], trail)
 			}
 		})
 	}
+}
+
+func createMockClients(c Client, regions []string) map[string]Client {
+	var m = make(map[string]Client, 0)
+	for _, clientRegion := range regions {
+		m[clientRegion] = c
+	}
+
+	return m
 }

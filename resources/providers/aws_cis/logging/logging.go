@@ -15,30 +15,38 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cloudtrail
+package logging
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
-	trailClient "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type TrailService interface {
-	DescribeTrails(ctx context.Context) ([]TrailInfo, error)
+type Client interface {
+	DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return trailClient.NewFromConfig(cfg)
-	}
+type Provider struct {
+	log           *logp.Logger
+	s3Provider    s3.S3
+	trailProvider cloudtrail.TrailService
+}
 
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+func NewProvider(
+	log *logp.Logger,
+	cfg aws.Config,
+	multiRegionTrailFactory awslib.CrossRegionFactory[cloudtrail.Client],
+	multiRegionS3Factory awslib.CrossRegionFactory[s3.Client],
+) *Provider {
+
 	return &Provider{
-		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
+		log:           log,
+		s3Provider:    s3.NewProvider(cfg, log, multiRegionS3Factory),
+		trailProvider: cloudtrail.NewProvider(cfg, log, multiRegionTrailFactory),
 	}
 }

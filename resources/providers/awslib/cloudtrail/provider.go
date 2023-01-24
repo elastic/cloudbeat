@@ -19,17 +19,17 @@ package cloudtrail
 
 import (
 	"context"
+	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Provider struct {
-	log          *logp.Logger
-	client       Client
-	awsAccountID string
-	awsRegion    string
+	log     *logp.Logger
+	clients map[string]Client
 }
 
 type Client interface {
@@ -38,37 +38,104 @@ type Client interface {
 	GetEventSelectors(ctx context.Context, params *cloudtrail.GetEventSelectorsInput, optFns ...func(*cloudtrail.Options)) (*cloudtrail.GetEventSelectorsOutput, error)
 }
 
-func (p *Provider) DescribeCloudTrails(ctx context.Context) ([]awslib.AwsResource, error) {
+func (p Provider) DescribeTrails(ctx context.Context) ([]TrailInfo, error) {
 	input := cloudtrail.DescribeTrailsInput{}
-	output, err := p.client.DescribeTrails(ctx, &input)
+	output, err := p.clients[awslib.DefaultRegion].DescribeTrails(ctx, &input)
 	if err != nil {
 		return nil, err
 	}
-	result := []awslib.AwsResource{}
+
+	var result []TrailInfo
 	for _, trail := range output.TrailList {
 		if trail.Name == nil {
 			continue
 		}
-		input := cloudtrail.GetTrailStatusInput{
-			Name: trail.Name,
-		}
-		status, err := p.client.GetTrailStatus(ctx, &input)
-		if err != nil {
-			p.log.Errorf("fail to get trail status %s %v", *trail.TrailARN, err.Error())
+
+		status, trailStatusErr := p.getTrailStatus(ctx, trail)
+		if trailStatusErr != nil {
+			p.log.Errorf("fail to get trail status %s %s", *trail.TrailARN, err.Error())
+			status = &cloudtrail.GetTrailStatusOutput{}
 		}
 
-		selector, err := p.client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{
-			TrailName: trail.Name,
-		})
+		selectors, err := p.getEventSelectors(ctx, trail)
 		if err != nil {
-			p.log.Errorf("fail to get trail event selector %s %v", *trail.TrailARN, err.Error())
+			p.log.Errorf("fail to get trail event selector %s %s", *trail.TrailARN, err.Error())
 		}
 
 		result = append(result, TrailInfo{
-			trail:         trail,
-			status:        status,
-			eventSelector: selector,
+			TrailARN:                  getValue(trail.TrailARN),
+			Name:                      getValue(trail.Name),
+			Region:                    getValue(trail.HomeRegion),
+			LogFileValidationEnabled:  getValue(trail.LogFileValidationEnabled),
+			IsMultiRegion:             getValue(trail.IsMultiRegionTrail),
+			KMSKeyID:                  getValue(trail.KmsKeyId),
+			CloudWatchLogsLogGroupArn: getValue(trail.CloudWatchLogsLogGroupArn),
+			IsLogging:                 getValue(status.IsLogging),
+			BucketName:                getValue(trail.S3BucketName),
+			SnsTopicARN:               getValue(trail.SnsTopicARN),
+			EventSelectors:            selectors,
 		})
 	}
 	return result, nil
+}
+
+func (p Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*cloudtrail.GetTrailStatusOutput, error) {
+	client, err := p.getClient(*trail.HomeRegion)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{Name: trail.Name})
+}
+
+func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]EventSelector, error) {
+	client, err := p.getClient(*trail.HomeRegion)
+	if err != nil {
+		return nil, err
+	}
+
+	var eventSelectors []EventSelector
+	if trail.HasCustomEventSelectors != nil && *trail.HasCustomEventSelectors {
+		output, err := client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{TrailName: trail.Name})
+		if err != nil {
+			return []EventSelector{}, err
+		}
+
+		for _, eventSelector := range output.EventSelectors {
+			var resources []DataResource
+			for _, dataResource := range eventSelector.DataResources {
+				var values []string
+				values = append(values, dataResource.Values...)
+
+				resources = append(resources, DataResource{
+					Type:   getValue(dataResource.Type),
+					Values: values,
+				})
+			}
+
+			eventSelectors = append(eventSelectors, EventSelector{
+				DataResources: resources,
+				ReadWriteType: eventSelector.ReadWriteType,
+			})
+		}
+	}
+
+	return eventSelectors, nil
+}
+
+func (p Provider) getClient(region string) (Client, error) {
+	client := p.clients[region]
+	if client == nil {
+		return nil, fmt.Errorf("no intialize client exists in %s region", region)
+	}
+
+	return client, nil
+}
+
+func getValue[T any](ptr *T) T {
+	var initVal T
+	if ptr != nil {
+		return *ptr
+	}
+	return initVal
 }
