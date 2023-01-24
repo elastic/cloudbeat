@@ -34,7 +34,7 @@ jobs:
         run: mage checkLicenseHeaders
 
       - name: Mage build bundle before unit tests
-        uses: magefile/mage-action@v1.6.0
+        uses: magefile/mage-action@v2
         with:
           args: buildOpaBundle
 

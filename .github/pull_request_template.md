@@ -6,7 +6,7 @@ Provide a description of the main changes, as well as any additional information
 
 ### Screenshot/Data
 <!--
-If this PR adds a new feature, please add an example screenshot or data (findings json for exmaple).
+If this PR adds a new feature, please add an example screenshot or data (findings json for example).
 -->
 
 
