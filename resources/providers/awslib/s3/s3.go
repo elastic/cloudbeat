@@ -40,9 +40,16 @@ type BucketVersioning struct {
 	MfaDelete bool
 }
 
+type Logging struct {
+	Enabled      bool   `json:"Enabled"`
+	TargetBucket string `json:"TargetBucket"`
+}
+
 type S3 interface {
 	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
 	GetBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error)
+	GetBucketPolicy(ctx context.Context, bucketName *string, region string) (BucketPolicy, error)
+	GetBucketLogging(ctx context.Context, bucketName *string, region string) (Logging, error)
 }
 
 type Provider struct {
@@ -57,4 +64,5 @@ type Client interface {
 	GetBucketPolicy(ctx context.Context, params *s3.GetBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.GetBucketPolicyOutput, error)
 	GetBucketVersioning(ctx context.Context, params *s3.GetBucketVersioningInput, optFns ...func(*s3.Options)) (*s3.GetBucketVersioningOutput, error)
 	GetBucketAcl(ctx context.Context, params *s3.GetBucketAclInput, optFns ...func(*s3.Options)) (*s3.GetBucketAclOutput, error)
+	GetBucketLogging(ctx context.Context, params *s3.GetBucketLoggingInput, optFns ...func(*s3.Options)) (*s3.GetBucketLoggingOutput, error)
 }

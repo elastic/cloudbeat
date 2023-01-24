@@ -33,8 +33,8 @@ type Client interface {
 
 type Provider struct {
 	log           *logp.Logger
-	s3Provider    *s3.Provider
-	trailProvider *cloudtrail.Provider
+	s3Provider    s3.S3
+	trailProvider cloudtrail.TrailService
 }
 
 func NewProvider(

@@ -23,11 +23,18 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 )
 
 type EnrichedTrail struct {
 	cloudtrail.TrailInfo
-	grants []s3Types.Grant
+	BucketInfo TrailBucket `json:"bucket_info"`
+}
+
+type TrailBucket struct {
+	Grants  []s3Types.Grant `json:"grants,omitempty"`
+	Policy  s3.BucketPolicy `json:"policy,omitempty"`
+	Logging s3.Logging      `json:"logging,omitempty"`
 }
 
 func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -38,15 +45,28 @@ func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, er
 
 	var enrichedTrails []awslib.AwsResource
 	for _, trail := range trails {
+		bucketPolicy, policyErr := p.s3Provider.GetBucketPolicy(ctx, &trail.BucketName, trail.Region)
+		if policyErr != nil {
+			p.log.Errorf("Error getting bucket policy for bucket %s: %v", trail.BucketName, policyErr)
+		}
+
 		aclGrants, aclErr := p.s3Provider.GetBucketACL(ctx, &trail.BucketName, trail.Region)
 		if aclErr != nil {
-			aclGrants = []s3Types.Grant{}
 			p.log.Errorf("Error getting bucket ACL for bucket %s: %v", trail.BucketName, aclErr)
+		}
+
+		bucketLogging, loggingErr := p.s3Provider.GetBucketLogging(ctx, &trail.BucketName, trail.Region)
+		if loggingErr != nil {
+			p.log.Errorf("Error getting bucket logging for bucket %s: %v", trail.BucketName, loggingErr)
 		}
 
 		enrichedTrails = append(enrichedTrails, EnrichedTrail{
 			TrailInfo: trail,
-			grants:    aclGrants,
+			BucketInfo: TrailBucket{
+				Grants:  aclGrants,
+				Policy:  bucketPolicy,
+				Logging: bucketLogging,
+			},
 		})
 	}
 

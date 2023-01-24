@@ -224,6 +224,68 @@ func (_c *MockClient_GetBucketLocation_Call) Return(_a0 *services3.GetBucketLoca
 	return _c
 }
 
+// GetBucketLogging provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) GetBucketLogging(ctx context.Context, params *services3.GetBucketLoggingInput, optFns ...func(*services3.Options)) (*services3.GetBucketLoggingOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *services3.GetBucketLoggingOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *services3.GetBucketLoggingInput, ...func(*services3.Options)) *services3.GetBucketLoggingOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services3.GetBucketLoggingOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *services3.GetBucketLoggingInput, ...func(*services3.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_GetBucketLogging_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBucketLogging'
+type MockClient_GetBucketLogging_Call struct {
+	*mock.Call
+}
+
+// GetBucketLogging is a helper method to define mock.On call
+//  - ctx context.Context
+//  - params *services3.GetBucketLoggingInput
+//  - optFns ...func(*services3.Options)
+func (_e *MockClient_Expecter) GetBucketLogging(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetBucketLogging_Call {
+	return &MockClient_GetBucketLogging_Call{Call: _e.mock.On("GetBucketLogging",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_GetBucketLogging_Call) Run(run func(ctx context.Context, params *services3.GetBucketLoggingInput, optFns ...func(*services3.Options))) *MockClient_GetBucketLogging_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*services3.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*services3.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*services3.GetBucketLoggingInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_GetBucketLogging_Call) Return(_a0 *services3.GetBucketLoggingOutput, _a1 error) *MockClient_GetBucketLogging_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // GetBucketPolicy provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) GetBucketPolicy(ctx context.Context, params *services3.GetBucketPolicyInput, optFns ...func(*services3.Options)) (*services3.GetBucketPolicyOutput, error) {
 	_va := make([]interface{}, len(optFns))
