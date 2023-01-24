@@ -10,9 +10,9 @@ cloudbeat:
   # Defines how often an event is sent to the output
   period: 30s
   fetchers:
-#    - name: aws-iam
-#    - name: aws-s3
-#    - name: aws-ec2-network
+    - name: aws-iam
+    - name: aws-s3
+    - name: aws-ec2-network
     - name: aws-trail
   evaluator:
     decision_logs: false
@@ -36,15 +36,15 @@ setup.kibana:
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: "http://host.docker.internal:9200"
+  hosts: ${ES_HOST}
 
   # Protocol - either `http` (default) or `https`.
   #  protocol: "https"
 
   # Authentication credentials - either API key or username/password.
   #api_key: "id:api_key"
-  username: elastic
-  password: changeme
+  username: ${ES_USERNAME}
+  password: ${ES_PASSWORD}
 
   # Enable to allow sending output to older ES versions
   allow_older_versions: true
