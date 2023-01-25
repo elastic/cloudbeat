@@ -46,7 +46,7 @@ jobs:
       - name: Change working directory
         run: cd deploy/cloud
 
-      - name: List all files
+      - name: List all files in deploy/cloud
         run: ls -la
 
       - name: Terraform Format
