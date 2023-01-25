@@ -20,15 +20,18 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: deploy/cloud
     steps:
       - name: Echo test completed
         run: echo "test completed"
 
       - name: Check out the repo
         uses: actions/checkout@v2
+
+      - name: List all files before setting directory
+        run: ls -la
+
+      - name: Set working directory
+        working-directory: cloudbeat/deploy/cloud
 
       - name: List all files
         run: ls -la
