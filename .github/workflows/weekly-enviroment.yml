@@ -18,8 +18,10 @@ on:
         type: boolean
       environment:
         description: 'Environment to run tests against'
-        type: environment
-        required: true
+        type: choice
+        options:
+          - weekly environment
+          - local environment
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
