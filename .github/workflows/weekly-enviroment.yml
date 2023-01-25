@@ -1,0 +1,13 @@
+name: Weekly environment deployment
+
+on:
+  push:
+    tags:
+      - weekly-deployment
+
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo test completed
+        run: echo "test completed"
