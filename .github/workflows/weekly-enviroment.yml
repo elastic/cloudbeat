@@ -20,9 +20,19 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ../deploy/cloud
     steps:
       - name: Echo test completed
         run: echo "test completed"
+
+      - name: List all files
+        run: ls -la
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -check
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
