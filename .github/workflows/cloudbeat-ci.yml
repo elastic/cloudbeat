@@ -19,6 +19,7 @@ jobs:
     # for more information see .pre-commit-config.yaml
     name: Lint
     runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/tags/') != true || !contains(github.ref, 'skip-ci')
     timeout-minutes: 10
     steps:
       - name: Check out the repo
