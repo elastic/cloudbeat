@@ -31,6 +31,7 @@ env:
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
+  WORKING_DIR: deploy/cloud
 
 jobs:
   deploy:
@@ -42,18 +43,19 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: List all files before setting directory
-        run: ls -la
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 1.3.5
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: ${{ env.WORKING_DIR }}
+          tf_actions_comment: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Change working directory
-        run: cd deploy/cloud
-
-      - name: List all files in deploy/cloud
-        run: ls -la
-
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
+#      - name: Terraform Format
+#        id: fmt
+#        run: terraform fmt -check
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
