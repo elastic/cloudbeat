@@ -51,16 +51,14 @@ func (p Provider) DescribeTrails(ctx context.Context) ([]TrailInfo, error) {
 		if trail.Name == nil {
 			continue
 		}
-
-		status, trailStatusErr := p.getTrailStatus(ctx, trail)
-		if trailStatusErr != nil {
-			p.log.Errorf("fail to get trail status %s %s", *trail.TrailARN, err.Error())
-			status = &cloudtrail.GetTrailStatusOutput{}
+		status, err := p.getTrailStatus(ctx, trail)
+		if err != nil {
+			p.log.Errorf("failed to get trail status %s %v", *trail.TrailARN, err.Error())
 		}
 
 		selectors, err := p.getEventSelectors(ctx, trail)
 		if err != nil {
-			p.log.Errorf("fail to get trail event selector %s %s", *trail.TrailARN, err.Error())
+			p.log.Errorf("failed to get trail event selector %s %v", *trail.TrailARN, err.Error())
 		}
 
 		result = append(result, TrailInfo{

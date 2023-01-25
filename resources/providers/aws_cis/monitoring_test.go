@@ -44,11 +44,10 @@ type (
 var (
 	metricFilterWithExpectedFilter = cloudwatchlogs_types.MetricFilter{
 		FilterName:    aws.String("metric-filter-name"),
-		FilterPattern: aws.String(UnauthorizedAPICallsPattern),
+		FilterPattern: aws.String("some-filter-pattern"),
 	}
 	metricFilterWithoutFilter = cloudwatchlogs_types.MetricFilter{
-		FilterName:    aws.String("metric-filter-name"),
-		FilterPattern: aws.String("{}"),
+		FilterName: aws.String("metric-filter-name"),
 	}
 	logGroupArn = "arn:aws:logs:us-east-1:account:log-group:cloudwatchlogs-log-group-arn"
 	snsTopicArn = "sns-topic-arn"
@@ -61,8 +60,8 @@ var (
 					CloudWatchLogsLogGroupArn: aws.String(logGroupArn),
 					IsMultiRegionTrail:        aws.Bool(true),
 				},
-				Status:        expectedCommonTrailStatus,
-				EventSelector: expectedCommonTrailEventSelector,
+				Status:         expectedCommonTrailStatus,
+				EventSelectors: expectedCommonTrailEventSelector,
 			},
 		}, nil},
 	}
@@ -101,35 +100,41 @@ var (
 	expectedCommonTrailStatus = &cloudtrail_aws.GetTrailStatusOutput{
 		IsLogging: aws.Bool(true),
 	}
-	expectedCommonTrailEventSelector = &cloudtrail_aws.GetEventSelectorsOutput{
-		EventSelectors: []cloudtrail_types.EventSelector{
-			{
-				IncludeManagementEvents: aws.Bool(true),
-				ReadWriteType:           cloudtrail_types.ReadWriteTypeAll,
-			},
+	expectedCommonTrailEventSelector = []cloudtrail_types.EventSelector{
+		{
+			IncludeManagementEvents: aws.Bool(true),
+			ReadWriteType:           cloudtrail_types.ReadWriteTypeAll,
 		},
 	}
 )
 
-func TestProvider_Rule41(t *testing.T) {
+func TestProvider_Rules41_415(t *testing.T) {
 	type fields struct {
 		cloudtrailMocks     clientMocks
 		cloudwatchMocks     clientMocks
 		cloudwatchlogsMocks clientMocks
 		snsMocks            clientMocks
 	}
-
 	tests := []struct {
 		name    string
 		fields  fields
-		want    Rule41Output
+		want    Output
 		wantErr bool
 	}{
 		{
-			name: "one trail with authorization filter and sns setup",
+			name: "no trails found",
 			fields: fields{
 				cloudtrailMocks: clientMocks{
-					"DescribeCloudTrails": describeCloudTrailWithResults,
+					"DescribeTrails": describeCloudTrailWithoutResults,
+				},
+			},
+			want: Output{Items: []Item{}},
+		},
+		{
+			name: "one trail with filter and sns setup",
+			fields: fields{
+				cloudtrailMocks: clientMocks{
+					"DescribeTrails": describeCloudTrailWithResults,
 				},
 				cloudwatchlogsMocks: clientMocks{
 					"DescribeMetricFilters": metricFilterCallWithExpectedFilter,
@@ -141,48 +146,42 @@ func TestProvider_Rule41(t *testing.T) {
 					"ListSubscriptionsByTopic": listSubscriptionCallWithResult,
 				},
 			},
-			want: Rule41Output{
-				Items: []Rule41Item{
+			want: Output{
+				Items: []Item{
 					{
 						TrailInfo: cloudtrail.TrailInfo{
-							Trail:         expectedCommonTrail,
-							Status:        expectedCommonTrailStatus,
-							EventSelector: expectedCommonTrailEventSelector,
+							Trail:          expectedCommonTrail,
+							Status:         expectedCommonTrailStatus,
+							EventSelectors: expectedCommonTrailEventSelector,
 						},
-						Topics:                    []string{snsTopicArn},
-						AuthorizationFilterExists: true,
+						MetricFilters: []cloudwatchlogs_types.MetricFilter{
+							metricFilterWithExpectedFilter,
+						},
+						Topics: []string{snsTopicArn},
 					},
 				},
 			},
 		},
 		{
-			name: "no trails found",
-			fields: fields{
-				cloudtrailMocks: clientMocks{
-					"DescribeCloudTrails": describeCloudTrailWithoutResults,
-				},
-			},
-			want: Rule41Output{Items: []Rule41Item{}},
-		},
-		{
 			name: "trail with no associated filter",
 			fields: fields{
 				cloudtrailMocks: clientMocks{
-					"DescribeCloudTrails": describeCloudTrailWithResults,
+					"DescribeTrails": describeCloudTrailWithResults,
 				},
 				cloudwatchlogsMocks: clientMocks{
 					"DescribeMetricFilters": metricFilterCallWithoutFilter,
 				},
 			},
-			want: Rule41Output{
-				Items: []Rule41Item{
+			want: Output{
+				Items: []Item{
 					{
 						TrailInfo: cloudtrail.TrailInfo{
-							Trail:         expectedCommonTrail,
-							Status:        expectedCommonTrailStatus,
-							EventSelector: expectedCommonTrailEventSelector,
+							Trail:          expectedCommonTrail,
+							Status:         expectedCommonTrailStatus,
+							EventSelectors: expectedCommonTrailEventSelector,
 						},
-						AuthorizationFilterExists: false,
+						Topics:        []string{},
+						MetricFilters: []cloudwatchlogs_types.MetricFilter{metricFilterWithoutFilter},
 					},
 				},
 			},
@@ -190,7 +189,7 @@ func TestProvider_Rule41(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ct := &cloudtrail.MockCloudTrail{}
+			ct := &cloudtrail.MockTrailService{}
 			for name, call := range tt.fields.cloudtrailMocks {
 				ct.On(name, call[0]...).Return(call[1]...)
 			}
@@ -213,7 +212,7 @@ func TestProvider_Rule41(t *testing.T) {
 				Sns:            sns,
 				Log:            logp.NewLogger("TestProvider_Rule_4_1"),
 			}
-			got, err := p.Rule41(context.Background())
+			got, err := p.Rules41_415(context.Background())
 			if tt.wantErr {
 				assert.Error(t, err)
 				return

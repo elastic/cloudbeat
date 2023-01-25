@@ -36,12 +36,14 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.MonitoringType, &MonitoringFactory{
-		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+		AwsConfigProvider:       awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+		TrailCrossRegionFactory: &awslib.MultiRegionClientFactory[cloudtrail.Client]{},
 	})
 }
 
 type MonitoringFactory struct {
-	AwsConfigProvider awslib.ConfigProviderAPI
+	AwsConfigProvider       awslib.ConfigProviderAPI
+	TrailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client]
 }
 
 func (f *MonitoringFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -64,7 +66,7 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 	}
 
 	provider := aws_cis.Provider{
-		Cloudtrail:     cloudtrail.NewCloudtrailProvider(log, *awsConfig),
+		Cloudtrail:     cloudtrail.NewProvider(*awsConfig, log, f.TrailCrossRegionFactory),
 		Cloudwatch:     cloudwatch.NewCloudwatchProvider(log, *awsConfig),
 		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, *awsConfig),
 		Sns:            sns.NewSNSProvider(log, *awsConfig),

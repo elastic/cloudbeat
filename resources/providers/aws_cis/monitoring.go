@@ -31,7 +31,7 @@ import (
 )
 
 type Provider struct {
-	Cloudtrail     cloudtrail.CloudTrail
+	Cloudtrail     cloudtrail.TrailService
 	Cloudwatch     cloudwatch.Cloudwatch
 	Cloudwatchlogs logs.CloudwatchLogs
 	Sns            sns.SNS
@@ -39,30 +39,39 @@ type Provider struct {
 }
 
 type Client interface {
-	Rule41(ctx context.Context) (Rule41Output, error)
+	Rules41_415(ctx context.Context) (Output, error)
 }
 
 type (
-	Rule41Output struct {
-		Items []Rule41Item
+	Rule   string
+	Output struct {
+		Items []Item
 	}
-	Rule41Item struct {
-		TrailInfo                 cloudtrail.TrailInfo
-		Topics                    []string
-		AuthorizationFilterExists bool
+
+	Item struct {
+		TrailInfo     cloudtrail.TrailInfo
+		MetricFilters []cloudwatchlogs_types.MetricFilter
+		Topics        []string
 	}
 )
 
-// Rule41 (4.1)
-func (p *Provider) Rule41(ctx context.Context) (Rule41Output, error) {
-	trails, err := p.Cloudtrail.DescribeCloudTrails(ctx)
+// Rules41_415 run all the rules 4.1 ... 4.15
+func (p *Provider) Rules41_415(ctx context.Context) (Output, error) {
+	trails, err := p.Cloudtrail.DescribeTrails(ctx)
+	out := Output{}
+
 	if err != nil {
-		return Rule41Output{}, err
+		return out, err
 	}
 
-	items := []Rule41Item{}
+	items := []Item{}
 	for _, trail := range trails {
 		if trail.Trail.CloudWatchLogsLogGroupArn == nil {
+			items = append(items, Item{
+				TrailInfo:     trail,
+				MetricFilters: []cloudwatchlogs_types.MetricFilter{},
+				Topics:        []string{},
+			})
 			continue
 		}
 		filter := filterNameFromARN(trail.Trail.CloudWatchLogsLogGroupArn)
@@ -75,29 +84,31 @@ func (p *Provider) Rule41(ctx context.Context) (Rule41Output, error) {
 			p.Log.Errorf("failed to describe metric filters for cloudwatchlog log group arn %s: %v", *trail.Trail.CloudWatchLogsLogGroupArn, err)
 			continue
 		}
-		filters := metricsMatchToPattern(metrics, []string{UnauthorizedAPICallsPattern})
-		if len(filters) == 0 {
-			items = append(items, Rule41Item{
-				TrailInfo:                 trail,
-				AuthorizationFilterExists: false,
+
+		names := filterNamesFromMetrics(metrics)
+		if len(names) == 0 {
+			items = append(items, Item{
+				TrailInfo:     trail,
+				MetricFilters: metrics,
+				Topics:        []string{},
 			})
 			continue
 		}
-
-		alarms, err := p.Cloudwatch.DescribeAlarms(ctx, filterNamesFromMetrics(filters))
+		alarms, err := p.Cloudwatch.DescribeAlarms(ctx, names)
 		if err != nil {
-			p.Log.Errorf("failed to describe alarms for cloudwatch filter %v: %v", filters, err)
+			p.Log.Errorf("failed to describe alarms for cloudwatch filter %v: %v", names, err)
 			continue
 		}
 		topics := p.getSubscriptionForAlarms(ctx, alarms)
-		items = append(items, Rule41Item{
-			TrailInfo:                 trail,
-			Topics:                    topics,
-			AuthorizationFilterExists: true,
+		items = append(items, Item{
+			TrailInfo:     trail,
+			MetricFilters: metrics,
+			Topics:        topics,
 		})
+
 	}
 
-	return Rule41Output{Items: items}, nil
+	return Output{Items: items}, nil
 }
 
 func (p *Provider) getSubscriptionForAlarms(ctx context.Context, alarms []cloudwatch_types.MetricAlarm) []string {
@@ -117,26 +128,10 @@ func (p *Provider) getSubscriptionForAlarms(ctx context.Context, alarms []cloudw
 	return topics
 }
 
-func metricsMatchToPattern(list []cloudwatchlogs_types.MetricFilter, patterns []string) []cloudwatchlogs_types.MetricFilter {
-	filters := []cloudwatchlogs_types.MetricFilter{}
-	for _, metric := range list {
-		if metric.FilterPattern == nil {
-			continue
-		}
-		for _, p := range patterns {
-			if *metric.FilterPattern == p {
-				filters = append(filters, metric)
-				break
-			}
-		}
-	}
-	return filters
-}
-
 func filterNamesFromMetrics(list []cloudwatchlogs_types.MetricFilter) []string {
 	names := []string{}
 	for _, filter := range list {
-		if filter.FilterName != nil {
+		if filter.FilterName != nil && filter.FilterPattern != nil {
 			names = append(names, *filter.FilterName)
 		}
 	}

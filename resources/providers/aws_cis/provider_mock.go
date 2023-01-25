@@ -30,15 +30,15 @@ type MockClient struct {
 	mock.Mock
 }
 
-// Rule_4_1 provides a mock function with given fields: ctx
-func (_m *MockClient) Rule41(ctx context.Context) (Rule41Output, error) {
+// Rules41_415 provides a mock function with given fields: ctx
+func (_m *MockClient) Rules41_415(ctx context.Context) (Output, error) {
 	ret := _m.Called(ctx)
 
-	var r0 Rule41Output
-	if rf, ok := ret.Get(0).(func(context.Context) Rule41Output); ok {
+	var r0 Output
+	if rf, ok := ret.Get(0).(func(context.Context) Output); ok {
 		r0 = rf(ctx)
 	} else {
-		r0 = ret.Get(0).(Rule41Output)
+		r0 = ret.Get(0).(Output)
 	}
 
 	var r1 error

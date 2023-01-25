@@ -24,6 +24,7 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
@@ -41,8 +42,21 @@ func TestMonitoringFactory_Create(t *testing.T) {
 				return nil
 			},
 		)
+
+	mockCrossRegionTrailFetcher := &awslib.MockCrossRegionFetcher[cloudtrail.Client]{}
+	mockCrossRegionTrailFetcher.On("GetMultiRegionsClientMap").Return(nil)
+
+	mockCrossRegionTrailFactory := &awslib.MockCrossRegionFactory[cloudtrail.Client]{}
+	mockCrossRegionTrailFactory.On(
+		"NewMultiRegionClients",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(mockCrossRegionTrailFetcher)
 	f := &MonitoringFactory{
-		AwsConfigProvider: awsconfig,
+		AwsConfigProvider:       awsconfig,
+		TrailCrossRegionFactory: mockCrossRegionTrailFactory,
 	}
 	cfg, err := agentconfig.NewConfigFrom(awsConfig)
 	assert.NoError(t, err)

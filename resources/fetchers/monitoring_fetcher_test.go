@@ -46,24 +46,24 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 		{
 			name: "with resources",
 			mocks: clientMocks{
-				"Rule_4_1": [2]mocks{
+				"Rules41_415": [2]mocks{
 					{mock.Anything},
-					{aws_cis.Rule41Output{
-						Items: []aws_cis.Rule41Item{
+					{aws_cis.Output{
+						Items: []aws_cis.Item{
 							{},
 							{},
 						},
 					}, nil},
 				},
 			},
-			expectedResources: 2,
+			expectedResources: 1,
 		},
 		{
 			name: "with error",
 			mocks: clientMocks{
-				"Rule_4_1": [2]mocks{
+				"Rules41_415": [2]mocks{
 					{mock.Anything},
-					{aws_cis.Rule41Output{}, fmt.Errorf("failed to run provider")},
+					{aws_cis.Output{}, fmt.Errorf("failed to run provider")},
 				},
 			},
 			wantErr: true,

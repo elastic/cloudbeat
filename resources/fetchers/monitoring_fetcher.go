@@ -38,12 +38,12 @@ type MonitoringFetcherConfig struct {
 }
 
 type MonitoringResource struct {
-	aws_cis.Rule41Output
+	aws_cis.Output
 }
 
 func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	m.log.Debug("Starting MonitoringFetcher.Fetch")
-	out, err := m.provider.Rule41(ctx)
+	out, err := m.provider.Rules41_415(ctx)
 	if err != nil {
 		return err
 	}
