@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -34,7 +34,7 @@ jobs:
         run: mage checkLicenseHeaders
 
       - name: Mage build bundle before unit tests
-        uses: magefile/mage-action@v1.6.0
+        uses: magefile/mage-action@v2
         with:
           args: buildOpaBundle
 
@@ -60,7 +60,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -84,10 +84,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get diff k8s manifests
-        uses: technote-space/get-diff-action@v4
+        uses: technote-space/get-diff-action@v6
         with:
           PATTERNS: ${{ env.K8S_MANIFEST_DIR }}/**
 
@@ -131,4 +131,4 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Dependency Review
-        uses: actions/dependency-review-action@v2
+        uses: actions/dependency-review-action@v3
