@@ -8,6 +8,12 @@ on:
   push:
     tags:
       - weekly-deployment
+  workflow_dispatch:
+    inputs:
+      test-targets:
+        required: true
+        description: "Run it on demand"
+        default: '[\"pre_merge\"]'
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
