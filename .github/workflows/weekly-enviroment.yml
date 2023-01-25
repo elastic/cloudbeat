@@ -15,3 +15,13 @@ jobs:
     steps:
       - name: Echo test completed
         run: echo "test completed"
+
+      - name: Comment test success result
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: Test Results
+          number: ${{ env.PR_NUMBER }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ## Cloudbeat CI :robot:
+            Hello from Ofir
