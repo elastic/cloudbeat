@@ -10,7 +10,7 @@ on:
       - weekly-deployment
 
 jobs:
-  Explore-GitHub-Actions:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Echo test completed
