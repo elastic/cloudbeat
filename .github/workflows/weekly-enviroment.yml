@@ -53,9 +53,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-#      - name: Terraform Format
-#        id: fmt
-#        run: terraform fmt -check
+      - name: 'Terraform Plan'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 1.3.5
+          tf_actions_subcommand: 'plan'
+          tf_actions_working_dir: ${{ env.WORKING_DIR }}
+          tf_actions_comment: true
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
