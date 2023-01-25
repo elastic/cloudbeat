@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ../deploy/cloud
+        working-directory: ./deploy/cloud
     steps:
       - name: Echo test completed
         run: echo "test completed"
