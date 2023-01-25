@@ -36,8 +36,8 @@ jobs:
       - name: List all files before setting directory
         run: ls -la
 
-      - name: Set working directory
-        working-directory: cloudbeat/deploy/cloud
+      - name: Change working directory
+        run: cd cloudbeat/deploy/cloud
 
       - name: List all files
         run: ls -la
