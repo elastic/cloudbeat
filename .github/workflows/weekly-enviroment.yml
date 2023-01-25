@@ -1,13 +1,13 @@
 name: Weekly environment deployment
 
 on:
-  pull_request:
-    types: [labeled]
-    labels:
-      - weekly deployment
-  push:
-    tags:
-      - weekly-deployment
+#  pull_request:
+#    types: [labeled]
+#    labels:
+#      - weekly deployment
+#  push:
+#    tags:
+#      - weekly-deployment
   workflow_dispatch:
     inputs:
       test-targets:
@@ -37,7 +37,7 @@ jobs:
         run: ls -la
 
       - name: Change working directory
-        run: cd cloudbeat/deploy/cloud
+        run: cd deploy/cloud
 
       - name: List all files
         run: ls -la
