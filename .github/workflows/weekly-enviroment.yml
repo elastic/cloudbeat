@@ -20,9 +20,9 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-#    defaults:
-#      run:
-#        working-directory: deploy/cloud
+    defaults:
+      run:
+        working-directory: deploy/cloud
     steps:
       - name: Echo test completed
         run: echo "test completed"
@@ -41,7 +41,6 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: Test Results
-          number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Weekly environment :man_dancing:
