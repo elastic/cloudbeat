@@ -31,7 +31,7 @@ jobs:
           number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ## Weekly environment :face_with_cowboy_hat:
+            ## Weekly environment :man_dancing:
             A new environment has been deployed to the elastic cloud. :tada:
             You can access it at _______.
             :warning: This environment will be deleted in 7 days.
