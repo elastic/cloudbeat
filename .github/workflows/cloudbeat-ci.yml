@@ -1,11 +1,7 @@
 name: Cloudbeat-CI
 
-on:
-  pull_request:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
-    types: [opened, synchronize, reopened]
+#  TODO - revert
+
 
 env:
   CONTAINER_SUFFIX: ${{ github.run_id }}

@@ -1,20 +1,6 @@
 name: Periodic-CI
 
-on:
-  # On demand execution of workflow will run all suites.
-  workflow_dispatch:
-    inputs:
-      test-targets:
-        required: true
-        description: 'Specify test markers to run'
-        default: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
-
-  schedule:
-    # Nightly job. Running every day at 2 am
-    - cron: '00 02 * * 0-4'
-
-    # Weekly job running every saturday at 2 am
-    - cron: '00 02 * * 6'
+  #  TODO - revert
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
