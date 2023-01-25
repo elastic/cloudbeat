@@ -20,12 +20,15 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: deploy/cloud
+#    defaults:
+#      run:
+#        working-directory: deploy/cloud
     steps:
       - name: Echo test completed
         run: echo "test completed"
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
 
       - name: List all files
         run: ls -la
