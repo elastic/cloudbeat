@@ -6,7 +6,7 @@
 // not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
@@ -14,7 +14,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 package dataprovider
 
 import (
@@ -40,22 +39,22 @@ type clusterNameProviderMock struct {
 	clusterName string
 }
 
-func (c clusterNameProviderMock) GetClusterName(ctx context.Context, cfg *config.Config, log *logp.Logger) (string, error) {
+func (c clusterNameProviderMock) GetClusterName(_ context.Context, _ *config.Config, _ *logp.Logger) (string, error) {
 	if c.clusterName == "error" {
 		return "", os.ErrNotExist
 	}
 	return c.clusterName, nil
 }
 
-func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
+func Test_k8sDataProvider_CollectK8sData(t *testing.T) {
 	tests := []struct {
-		collector k8sDataCollector
+		collector k8sDataProvider
 		name      string
-		want      *CommonK8sData
+		want      *commonK8sData
 	}{
 		{
 			name: "test k8s common data",
-			want: &CommonK8sData{
+			want: &commonK8sData{
 				clusterId: "testing_namespace_uid",
 				nodeId:    "testing_node_uid",
 				serverVersion: version.Version{
@@ -63,7 +62,7 @@ func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 				},
 				clusterName: "cluster_name",
 			},
-			collector: k8sDataCollector{
+			collector: k8sDataProvider{
 				kubeClient:          k8sFake.NewSimpleClientset(),
 				log:                 logger,
 				cfg:                 cfg,
@@ -72,7 +71,7 @@ func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 		},
 		{
 			name: "test k8s common data - error providing cluster name",
-			want: &CommonK8sData{
+			want: &commonK8sData{
 				clusterId: "testing_namespace_uid",
 				nodeId:    "testing_node_uid",
 				serverVersion: version.Version{
@@ -80,7 +79,7 @@ func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 				},
 				clusterName: "",
 			},
-			collector: k8sDataCollector{
+			collector: k8sDataProvider{
 				kubeClient:          k8sFake.NewSimpleClientset(),
 				log:                 logger,
 				cfg:                 cfg,
@@ -90,7 +89,7 @@ func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 		{
 			name: "test k8s common data with no k8s connection",
 			want: nil,
-			collector: k8sDataCollector{
+			collector: k8sDataProvider{
 				kubeClient:          nil,
 				log:                 logger,
 				cfg:                 cfg,
@@ -102,13 +101,15 @@ func Test_k8sDataCollector_CollectK8sData(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			adjustK8sCluster(t, &tt.collector)
-			assert.Equal(t, tt.want, tt.collector.CollectK8sData(ctxBg))
+			data, err := tt.collector.GetData(ctxBg)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, data)
 		})
 	}
 }
 
-func adjustK8sCluster(t *testing.T, k8sDataCollector *k8sDataCollector) {
-	if k8sDataCollector.kubeClient == nil {
+func adjustK8sCluster(t *testing.T, k8sDataProvider *k8sDataProvider) {
+	if k8sDataProvider.kubeClient == nil {
 		return
 	}
 
@@ -137,9 +138,9 @@ func adjustK8sCluster(t *testing.T, k8sDataCollector *k8sDataCollector) {
 		},
 	}
 
-	_, err := k8sDataCollector.kubeClient.CoreV1().Namespaces().Create(ctxBg, namespace, metav1.CreateOptions{})
+	_, err := k8sDataProvider.kubeClient.CoreV1().Namespaces().Create(ctxBg, namespace, metav1.CreateOptions{})
 	assert.NoError(t, err)
 
-	_, err = k8sDataCollector.kubeClient.CoreV1().Nodes().Create(ctxBg, node, metav1.CreateOptions{})
+	_, err = k8sDataProvider.kubeClient.CoreV1().Nodes().Create(ctxBg, node, metav1.CreateOptions{})
 	assert.NoError(t, err)
 }
