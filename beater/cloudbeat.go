@@ -43,7 +43,7 @@ import (
 )
 
 const (
-	name             = "Cloudbeat"
+	beaterName       = "Cloudbeat"
 	flushInterval    = 10 * time.Second
 	eventsThreshold  = 75
 	resourceChBuffer = 10000
@@ -68,7 +68,7 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	reloader := launcher.NewListener(log)
 	validator := &validator{}
 
-	s, err := launcher.New(log, name, reloader, validator, NewCloudbeat, cfg)
+	s, err := launcher.New(log, beaterName, reloader, validator, NewCloudbeat, cfg)
 	if err != nil {
 		return nil, err
 	}
