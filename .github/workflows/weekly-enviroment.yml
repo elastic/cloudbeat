@@ -33,7 +33,6 @@ env:
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CONTAINER_SUFFIX: ${{ github.run_id }}
   AWS_REGION: eu-west-2
-  REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
   WORKING_DIR: deploy/cloud
 
@@ -80,8 +79,8 @@ jobs:
 
       - name: Call terraform output url parameter
         run: |
-            output=$(terraform output elasticsearch_url)
-            echo $elasticsearch_url
+            output=$(terraform output kibana_url)
+            echo $output
 
       - name: Call terraform output no parameter
         run: |
