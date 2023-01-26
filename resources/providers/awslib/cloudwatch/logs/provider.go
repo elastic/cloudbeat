@@ -41,9 +41,9 @@ func (p *Provider) DescribeMetricFilters(ctx context.Context, region *string, lo
 	input := cloudwatchlogs.DescribeMetricFiltersInput{
 		LogGroupName: aws.String(logGroup),
 	}
-	client, ok := p.clients[awslib.GetRegion(region)]
-	if !ok {
-		return nil, awslib.ErrRegionNotFound
+	client, err := awslib.GetClient(region, p.clients)
+	if err != nil {
+		return nil, err
 	}
 	for {
 		output, err := client.DescribeMetricFilters(ctx, &input)

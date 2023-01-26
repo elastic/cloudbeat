@@ -19,7 +19,6 @@ package cloudtrail
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -71,7 +70,7 @@ func (p Provider) DescribeTrails(ctx context.Context) ([]TrailInfo, error) {
 }
 
 func (p Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*cloudtrail.GetTrailStatusOutput, error) {
-	client, err := p.getClient(*trail.HomeRegion)
+	client, err := awslib.GetClient(trail.HomeRegion, p.clients)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +79,7 @@ func (p Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*cloud
 }
 
 func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]types.EventSelector, error) {
-	client, err := p.getClient(*trail.HomeRegion)
+	client, err := awslib.GetClient(trail.HomeRegion, p.clients)
 	if err != nil {
 		return nil, err
 	}
@@ -91,13 +90,4 @@ func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]t
 	}
 
 	return output.EventSelectors, nil
-}
-
-func (p Provider) getClient(region string) (Client, error) {
-	client := p.clients[region]
-	if client == nil {
-		return nil, fmt.Errorf("no intialize client exists in %s region", region)
-	}
-
-	return client, nil
 }

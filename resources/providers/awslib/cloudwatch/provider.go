@@ -38,9 +38,9 @@ type Client interface {
 func (p *Provider) DescribeAlarms(ctx context.Context, region *string, filters []string) ([]types.MetricAlarm, error) {
 	all := []types.MetricAlarm{}
 	input := cloudwatch.DescribeAlarmsInput{}
-	client, ok := p.clients[awslib.GetRegion(region)]
-	if !ok {
-		return nil, awslib.ErrRegionNotFound
+	client, err := awslib.GetClient(region, p.clients)
+	if err != nil {
+		return nil, err
 	}
 	for {
 		output, err := client.DescribeAlarms(ctx, &input)

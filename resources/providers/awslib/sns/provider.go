@@ -41,9 +41,9 @@ func (p *Provider) ListSubscriptionsByTopic(ctx context.Context, region *string,
 		TopicArn: aws.String(topic),
 	}
 	all := []types.Subscription{}
-	client, ok := p.clients[awslib.GetRegion(region)]
-	if !ok {
-		return nil, awslib.ErrRegionNotFound
+	client, err := awslib.GetClient(region, p.clients)
+	if err != nil {
+		return nil, err
 	}
 	for {
 		output, err := client.ListSubscriptionsByTopic(ctx, &input)
