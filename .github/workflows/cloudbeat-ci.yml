@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -43,13 +43,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: cache go dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/go/pkg/mod
@@ -96,7 +96,7 @@ jobs:
           make build_elastic_agent_docker_image
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: ./tests/.
           push: false
@@ -106,7 +106,7 @@ jobs:
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Cache docker images
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
@@ -277,7 +277,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -287,7 +287,7 @@ jobs:
           just create-kind-cluster
 
       - name: Cache docker images
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
@@ -309,7 +309,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
