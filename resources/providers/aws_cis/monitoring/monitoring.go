@@ -39,6 +39,7 @@ type Provider struct {
 }
 
 type Client interface {
+	// AggregateResources will gather all the resource to be used for aws cis 4.1 ... 4.15 rules
 	AggregateResources(ctx context.Context) (*Resource, error)
 }
 

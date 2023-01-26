@@ -108,7 +108,7 @@ var (
 	}
 )
 
-func TestProvider_Rules41_415(t *testing.T) {
+func TestProvider_AggregateResources(t *testing.T) {
 	type fields struct {
 		cloudtrailMocks     clientMocks
 		cloudwatchMocks     clientMocks
@@ -118,7 +118,7 @@ func TestProvider_Rules41_415(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    Resource
+		want    *Resource
 		wantErr bool
 	}{
 		{
@@ -128,7 +128,7 @@ func TestProvider_Rules41_415(t *testing.T) {
 					"DescribeTrails": describeCloudTrailWithoutResults,
 				},
 			},
-			want: Resource{Items: []MonitoringItem{}},
+			want: &Resource{Items: []MonitoringItem{}},
 		},
 		{
 			name: "one trail with filter and sns setup",
@@ -146,7 +146,7 @@ func TestProvider_Rules41_415(t *testing.T) {
 					"ListSubscriptionsByTopic": listSubscriptionCallWithResult,
 				},
 			},
-			want: Resource{
+			want: &Resource{
 				Items: []MonitoringItem{
 					{
 						TrailInfo: cloudtrail.TrailInfo{
@@ -172,7 +172,7 @@ func TestProvider_Rules41_415(t *testing.T) {
 					"DescribeMetricFilters": metricFilterCallWithoutFilter,
 				},
 			},
-			want: Resource{
+			want: &Resource{
 				Items: []MonitoringItem{
 					{
 						TrailInfo: cloudtrail.TrailInfo{
@@ -210,7 +210,7 @@ func TestProvider_Rules41_415(t *testing.T) {
 				Cloudwatch:     cw,
 				Cloudwatchlogs: cwl,
 				Sns:            sns,
-				Log:            logp.NewLogger("TestProvider_Rule_4_1"),
+				Log:            logp.NewLogger("TestProvider_AggregateResources"),
 			}
 			got, err := p.AggregateResources(context.Background())
 			if tt.wantErr {

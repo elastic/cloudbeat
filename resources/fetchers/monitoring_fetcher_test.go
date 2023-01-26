@@ -23,8 +23,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
@@ -46,9 +48,9 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 		{
 			name: "with resources",
 			mocks: clientMocks{
-				"Rules41_415": [2]mocks{
+				"AggregateResources": [2]mocks{
 					{mock.Anything},
-					{monitoring.Resource{
+					{&monitoring.Resource{
 						Items: []monitoring.MonitoringItem{
 							{},
 							{},
@@ -61,9 +63,9 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 		{
 			name: "with error",
 			mocks: clientMocks{
-				"Rules41_415": [2]mocks{
+				"AggregateResources": [2]mocks{
 					{mock.Anything},
-					{monitoring.Resource{}, fmt.Errorf("failed to run provider")},
+					{nil, fmt.Errorf("failed to run provider")},
 				},
 			},
 			wantErr: true,
@@ -79,10 +81,11 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 				client.On(name, call[0]...).Return(call[1]...)
 			}
 			m := MonitoringFetcher{
-				log:        logp.NewLogger("TestMonitoringFetcher_Fetch"),
-				provider:   &client,
-				cfg:        MonitoringFetcherConfig{},
-				resourceCh: ch,
+				log:           logp.NewLogger("TestMonitoringFetcher_Fetch"),
+				provider:      &client,
+				cfg:           MonitoringFetcherConfig{},
+				resourceCh:    ch,
+				cloudIdentity: &awslib.Identity{Account: aws.String("account")},
 			}
 
 			err := m.Fetch(ctx, fetching.CycleMetadata{})

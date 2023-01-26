@@ -19,18 +19,21 @@ package fetchers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type MonitoringFetcher struct {
-	log        *logp.Logger
-	provider   monitoring.Client
-	cfg        MonitoringFetcherConfig
-	resourceCh chan fetching.ResourceInfo
+	log           *logp.Logger
+	provider      monitoring.Client
+	cfg           MonitoringFetcherConfig
+	resourceCh    chan fetching.ResourceInfo
+	cloudIdentity *awslib.Identity
 }
 
 type MonitoringFetcherConfig struct {
@@ -39,6 +42,7 @@ type MonitoringFetcherConfig struct {
 
 type MonitoringResource struct {
 	monitoring.Resource
+	identity *awslib.Identity
 }
 
 func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -48,7 +52,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 		return err
 	}
 	m.resourceCh <- fetching.ResourceInfo{
-		Resource:      MonitoringResource{*out},
+		Resource:      MonitoringResource{*out, m.cloudIdentity},
 		CycleMetadata: cMetadata,
 	}
 	return nil
@@ -64,12 +68,12 @@ func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if len(r.Items) == 0 {
 		return fetching.ResourceMetadata{}, nil
 	}
-	item := r.Items[0]
+	id := fmt.Sprintf("cloudtrail-%d", r.identity.Account)
 	return fetching.ResourceMetadata{
-		ID:      *item.TrailInfo.Trail.TrailARN,
+		ID:      id,
 		Type:    fetching.MonitoringIdentity,
 		SubType: fetching.TrailType,
-		Name:    *item.TrailInfo.Trail.Name,
+		Name:    id,
 	}, nil
 }
 func (r MonitoringResource) GetElasticCommonData() any { return nil }

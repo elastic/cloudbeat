@@ -18,8 +18,10 @@
 package fetchers
 
 import (
+	"context"
 	"fmt"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
@@ -41,6 +43,7 @@ func init() {
 		CloudwatchCrossRegionFactory:     &awslib.MultiRegionClientFactory[cloudwatch.Client]{},
 		CloudwatchlogsCrossRegionFactory: &awslib.MultiRegionClientFactory[logs.Client]{},
 		SNSCrossRegionFactory:            &awslib.MultiRegionClientFactory[sns.Client]{},
+		IdentityProvider:                 awslib.GetIdentityClient,
 	})
 }
 
@@ -50,6 +53,7 @@ type MonitoringFactory struct {
 	CloudwatchCrossRegionFactory     awslib.CrossRegionFactory[cloudwatch.Client]
 	CloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client]
 	SNSCrossRegionFactory            awslib.CrossRegionFactory[sns.Client]
+	IdentityProvider                 func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *MonitoringFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -78,10 +82,17 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 		Log:            log,
 	}
 
+	identityProvider := f.IdentityProvider(awsConfig)
+	identity, err := identityProvider.GetIdentity(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
+	}
+
 	return &MonitoringFetcher{
-		log:        log,
-		cfg:        cfg,
-		provider:   &provider,
-		resourceCh: ch,
+		log:           log,
+		cfg:           cfg,
+		provider:      &provider,
+		resourceCh:    ch,
+		cloudIdentity: identity,
 	}, nil
 }

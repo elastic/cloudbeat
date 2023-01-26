@@ -90,12 +90,20 @@ func TestMonitoringFactory_Create(t *testing.T) {
 		mock.Anything,
 	).Return(mockCrossRegionSNSFetcher)
 
+	identity := &awslib.MockIdentityProviderGetter{}
+	identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
+		Account: awssdk.String("test-account"),
+	}, nil)
+
 	f := &MonitoringFactory{
 		AwsConfigProvider:                awsconfig,
 		TrailCrossRegionFactory:          mockCrossRegionTrailFactory,
 		CloudwatchCrossRegionFactory:     mockCrossRegionCloudwatchFactory,
 		CloudwatchlogsCrossRegionFactory: mockCrossRegionCloudwatchlogsFactory,
 		SNSCrossRegionFactory:            mockCrossRegionSNSFactory,
+		IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+			return identity
+		},
 	}
 	cfg, err := agentconfig.NewConfigFrom(awsConfig)
 	assert.NoError(t, err)
