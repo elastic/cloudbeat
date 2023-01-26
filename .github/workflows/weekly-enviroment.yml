@@ -38,26 +38,30 @@ env:
   WORKING_DIR: deploy/cloud
 
 jobs:
-  deploy:
+  terraform:
+    name: Deploy KSPM/CSPM cloud environment
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: 'Terraform Init'
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+           terraform_version: 1.3.5
+
+      - name: Terraform Init
         uses: hashicorp/terraform-github-actions@master
         with:
-          tf_actions_version: 1.3.5
           tf_actions_subcommand: 'init'
           tf_actions_working_dir: ${{ env.WORKING_DIR }}
           tf_actions_comment: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 'Terraform Plan'
+      - name: Terraform Plan
         uses: hashicorp/terraform-github-actions@master
         with:
-          tf_actions_version: 1.3.5
           tf_actions_subcommand: 'plan'
           tf_actions_working_dir: ${{ env.WORKING_DIR }}
           tf_actions_comment: true
@@ -65,11 +69,9 @@ jobs:
         env:
           TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
 
-      - name: 'Terraform Apply'
-        id: terraform_apply
+      - name: Terraform Apply
         uses: hashicorp/terraform-github-actions@master
         with:
-          tf_actions_version: 1.3.5
           tf_actions_subcommand: 'apply'
           tf_actions_working_dir: ${{ env.WORKING_DIR }}
           tf_actions_comment: true
