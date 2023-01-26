@@ -43,7 +43,7 @@ type MonitoringResource struct {
 
 func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	m.log.Debug("Starting MonitoringFetcher.Fetch")
-	out, err := m.provider.Rules41_415(ctx)
+	out, err := m.provider.AggregateResources(ctx)
 	if err != nil {
 		return err
 	}

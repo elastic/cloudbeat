@@ -76,7 +76,7 @@ var (
 	}
 
 	metricFilterCallWithoutFilter = [2]mocks{
-		{mock.Anything, mock.Anything},
+		{mock.Anything, mock.Anything, mock.Anything},
 		{[]cloudwatchlogs_types.MetricFilter{metricFilterWithoutFilter}, nil},
 	}
 
@@ -121,15 +121,15 @@ func TestProvider_Rules41_415(t *testing.T) {
 		want    Output
 		wantErr bool
 	}{
-		// {
-		// 	name: "no trails found",
-		// 	fields: fields{
-		// 		cloudtrailMocks: clientMocks{
-		// 			"DescribeTrails": describeCloudTrailWithoutResults,
-		// 		},
-		// 	},
-		// 	want: Output{Items: []Item{}},
-		// },
+		{
+			name: "no trails found",
+			fields: fields{
+				cloudtrailMocks: clientMocks{
+					"DescribeTrails": describeCloudTrailWithoutResults,
+				},
+			},
+			want: Output{Items: []Item{}},
+		},
 		{
 			name: "one trail with filter and sns setup",
 			fields: fields{
@@ -162,30 +162,30 @@ func TestProvider_Rules41_415(t *testing.T) {
 				},
 			},
 		},
-		// {
-		// 	name: "trail with no associated filter",
-		// 	fields: fields{
-		// 		cloudtrailMocks: clientMocks{
-		// 			"DescribeTrails": describeCloudTrailWithResults,
-		// 		},
-		// 		cloudwatchlogsMocks: clientMocks{
-		// 			"DescribeMetricFilters": metricFilterCallWithoutFilter,
-		// 		},
-		// 	},
-		// 	want: Output{
-		// 		Items: []Item{
-		// 			{
-		// 				TrailInfo: cloudtrail.TrailInfo{
-		// 					Trail:          expectedCommonTrail,
-		// 					Status:         expectedCommonTrailStatus,
-		// 					EventSelectors: expectedCommonTrailEventSelector,
-		// 				},
-		// 				Topics:        []string{},
-		// 				MetricFilters: []cloudwatchlogs_types.MetricFilter{metricFilterWithoutFilter},
-		// 			},
-		// 		},
-		// 	},
-		// },
+		{
+			name: "trail with no associated filter",
+			fields: fields{
+				cloudtrailMocks: clientMocks{
+					"DescribeTrails": describeCloudTrailWithResults,
+				},
+				cloudwatchlogsMocks: clientMocks{
+					"DescribeMetricFilters": metricFilterCallWithoutFilter,
+				},
+			},
+			want: Output{
+				Items: []Item{
+					{
+						TrailInfo: cloudtrail.TrailInfo{
+							Trail:          expectedCommonTrail,
+							Status:         expectedCommonTrailStatus,
+							EventSelectors: expectedCommonTrailEventSelector,
+						},
+						Topics:        []string{},
+						MetricFilters: []cloudwatchlogs_types.MetricFilter{metricFilterWithoutFilter},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -212,7 +212,7 @@ func TestProvider_Rules41_415(t *testing.T) {
 				Sns:            sns,
 				Log:            logp.NewLogger("TestProvider_Rule_4_1"),
 			}
-			got, err := p.Rules41_415(context.Background())
+			got, err := p.AggregateResources(context.Background())
 			if tt.wantErr {
 				assert.Error(t, err)
 				return

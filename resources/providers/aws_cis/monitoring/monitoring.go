@@ -39,11 +39,10 @@ type Provider struct {
 }
 
 type Client interface {
-	Rules41_415(ctx context.Context) (Output, error)
+	AggregateResources(ctx context.Context) (Output, error)
 }
 
 type (
-	Rule   string
 	Output struct {
 		Items []Item
 	}
@@ -55,8 +54,8 @@ type (
 	}
 )
 
-// Rules41_415 run all the rules 4.1 ... 4.15
-func (p *Provider) Rules41_415(ctx context.Context) (Output, error) {
+// AggregateResources will gather all the resource to be used for aws cis 4.1 ... 4.15 rules
+func (p *Provider) AggregateResources(ctx context.Context) (Output, error) {
 	trails, err := p.Cloudtrail.DescribeTrails(ctx)
 	out := Output{}
 

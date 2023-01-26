@@ -30,8 +30,8 @@ type MockClient struct {
 	mock.Mock
 }
 
-// Rules41_415 provides a mock function with given fields: ctx
-func (_m *MockClient) Rules41_415(ctx context.Context) (Output, error) {
+// AggregateResources provides a mock function with given fields: ctx
+func (_m *MockClient) AggregateResources(ctx context.Context) (Output, error) {
 	ret := _m.Called(ctx)
 
 	var r0 Output
