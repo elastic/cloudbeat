@@ -66,6 +66,7 @@ jobs:
           TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
 
       - name: 'Terraform Apply'
+        id: terraform_apply
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 1.3.5
@@ -75,6 +76,9 @@ jobs:
           args: '-target=module.ec_deployment -auto-approve'
         env:
             TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
+
+      - name: 'Output Terraform Output'
+        run: echo ${{ steps.terraform_apply.outputs.kibana_url  }}
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
