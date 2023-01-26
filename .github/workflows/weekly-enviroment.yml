@@ -86,7 +86,7 @@ jobs:
       - name: Call terraform output no parameter
         run: |
           output1=$(terraform output )
-          echo $elasticsearch_url1
+          echo $output1
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
