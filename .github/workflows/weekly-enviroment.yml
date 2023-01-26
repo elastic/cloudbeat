@@ -77,8 +77,15 @@ jobs:
         env:
             TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
 
-      - name: 'Output Terraform Output'
-        run: echo ${{ steps.terraform_apply.outputs.kibana_url  }}
+      - name: Call terraform output url parameter
+        run: |
+            output=$(terraform output elasticsearch_url)
+            echo $elasticsearch_url
+
+      - name: Call terraform output no parameter
+        run: |
+          output1=$(terraform output )
+          echo $elasticsearch_url1
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
