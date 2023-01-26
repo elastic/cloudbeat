@@ -23,25 +23,30 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Provider struct {
-	log    *logp.Logger
-	client Client
+	log     *logp.Logger
+	clients map[string]Client
 }
 
 type Client interface {
 	ListSubscriptionsByTopic(ctx context.Context, params *sns.ListSubscriptionsByTopicInput, optFns ...func(*sns.Options)) (*sns.ListSubscriptionsByTopicOutput, error)
 }
 
-func (p *Provider) ListSubscriptionsByTopic(ctx context.Context, topic string) ([]types.Subscription, error) {
+func (p *Provider) ListSubscriptionsByTopic(ctx context.Context, region *string, topic string) ([]types.Subscription, error) {
 	input := sns.ListSubscriptionsByTopicInput{
 		TopicArn: aws.String(topic),
 	}
 	all := []types.Subscription{}
+	client, ok := p.clients[awslib.GetRegion(region)]
+	if !ok {
+		return nil, awslib.ErrRegionNotFound
+	}
 	for {
-		output, err := p.client.ListSubscriptionsByTopic(ctx, &input)
+		output, err := client.ListSubscriptionsByTopic(ctx, &input)
 		if err != nil {
 			return nil, err
 		}

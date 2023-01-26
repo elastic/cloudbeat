@@ -25,6 +25,9 @@ import (
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch/logs"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
@@ -45,7 +48,6 @@ func TestMonitoringFactory_Create(t *testing.T) {
 
 	mockCrossRegionTrailFetcher := &awslib.MockCrossRegionFetcher[cloudtrail.Client]{}
 	mockCrossRegionTrailFetcher.On("GetMultiRegionsClientMap").Return(nil)
-
 	mockCrossRegionTrailFactory := &awslib.MockCrossRegionFactory[cloudtrail.Client]{}
 	mockCrossRegionTrailFactory.On(
 		"NewMultiRegionClients",
@@ -54,9 +56,46 @@ func TestMonitoringFactory_Create(t *testing.T) {
 		mock.Anything,
 		mock.Anything,
 	).Return(mockCrossRegionTrailFetcher)
+
+	mockCrossRegionCloudwatchFetcher := &awslib.MockCrossRegionFetcher[cloudwatch.Client]{}
+	mockCrossRegionCloudwatchFetcher.On("GetMultiRegionsClientMap").Return(nil)
+	mockCrossRegionCloudwatchFactory := &awslib.MockCrossRegionFactory[cloudwatch.Client]{}
+	mockCrossRegionCloudwatchFactory.On(
+		"NewMultiRegionClients",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(mockCrossRegionCloudwatchFetcher)
+
+	mockCrossRegionCloudwatchlogsFetcher := &awslib.MockCrossRegionFetcher[logs.Client]{}
+	mockCrossRegionCloudwatchlogsFetcher.On("GetMultiRegionsClientMap").Return(nil)
+	mockCrossRegionCloudwatchlogsFactory := &awslib.MockCrossRegionFactory[logs.Client]{}
+	mockCrossRegionCloudwatchlogsFactory.On(
+		"NewMultiRegionClients",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(mockCrossRegionCloudwatchlogsFetcher)
+
+	mockCrossRegionSNSFetcher := &awslib.MockCrossRegionFetcher[sns.Client]{}
+	mockCrossRegionSNSFetcher.On("GetMultiRegionsClientMap").Return(nil)
+	mockCrossRegionSNSFactory := &awslib.MockCrossRegionFactory[sns.Client]{}
+	mockCrossRegionSNSFactory.On(
+		"NewMultiRegionClients",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(mockCrossRegionSNSFetcher)
+
 	f := &MonitoringFactory{
-		AwsConfigProvider:       awsconfig,
-		TrailCrossRegionFactory: mockCrossRegionTrailFactory,
+		AwsConfigProvider:                awsconfig,
+		TrailCrossRegionFactory:          mockCrossRegionTrailFactory,
+		CloudwatchCrossRegionFactory:     mockCrossRegionCloudwatchFactory,
+		CloudwatchlogsCrossRegionFactory: mockCrossRegionCloudwatchlogsFactory,
+		SNSCrossRegionFactory:            mockCrossRegionSNSFactory,
 	}
 	cfg, err := agentconfig.NewConfigFrom(awsConfig)
 	assert.NoError(t, err)

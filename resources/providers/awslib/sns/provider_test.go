@@ -34,6 +34,8 @@ type (
 	clientMocks map[string][2]mocks
 )
 
+var regions = []string{"us-east-1"}
+
 func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -71,10 +73,10 @@ func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
-				log:    logp.NewLogger("TestProvider_ListSubscriptionsByTopic"),
-				client: c,
+				log:     logp.NewLogger("TestProvider_ListSubscriptionsByTopic"),
+				clients: createMockClients(c, regions),
 			}
-			got, err := p.ListSubscriptionsByTopic(context.Background(), tt.topic)
+			got, err := p.ListSubscriptionsByTopic(context.Background(), &regions[0], tt.topic)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -83,4 +85,13 @@ func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func createMockClients(c Client, regions []string) map[string]Client {
+	m := make(map[string]Client, 0)
+	for _, clientRegion := range regions {
+		m[clientRegion] = c
+	}
+
+	return m
 }

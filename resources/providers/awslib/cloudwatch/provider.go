@@ -22,23 +22,28 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Provider struct {
-	log    *logp.Logger
-	client Client
+	log     *logp.Logger
+	clients map[string]Client
 }
 
 type Client interface {
 	DescribeAlarms(ctx context.Context, params *cloudwatch.DescribeAlarmsInput, optFns ...func(*cloudwatch.Options)) (*cloudwatch.DescribeAlarmsOutput, error)
 }
 
-func (p *Provider) DescribeAlarms(ctx context.Context, filters []string) ([]types.MetricAlarm, error) {
+func (p *Provider) DescribeAlarms(ctx context.Context, region *string, filters []string) ([]types.MetricAlarm, error) {
 	all := []types.MetricAlarm{}
 	input := cloudwatch.DescribeAlarmsInput{}
+	client, ok := p.clients[awslib.GetRegion(region)]
+	if !ok {
+		return nil, awslib.ErrRegionNotFound
+	}
 	for {
-		output, err := p.client.DescribeAlarms(ctx, &input)
+		output, err := client.DescribeAlarms(ctx, &input)
 		if err != nil {
 			return nil, err
 		}

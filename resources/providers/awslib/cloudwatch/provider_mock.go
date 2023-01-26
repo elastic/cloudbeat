@@ -31,13 +31,13 @@ type MockCloudwatch struct {
 	mock.Mock
 }
 
-// DescribeAlarms provides a mock function with given fields: ctx, filters
-func (_m *MockCloudwatch) DescribeAlarms(ctx context.Context, filters []string) ([]types.MetricAlarm, error) {
-	ret := _m.Called(ctx, filters)
+// DescribeAlarms provides a mock function with given fields: ctx, region, filters
+func (_m *MockCloudwatch) DescribeAlarms(ctx context.Context, region *string, filters []string) ([]types.MetricAlarm, error) {
+	ret := _m.Called(ctx, region, filters)
 
 	var r0 []types.MetricAlarm
-	if rf, ok := ret.Get(0).(func(context.Context, []string) []types.MetricAlarm); ok {
-		r0 = rf(ctx, filters)
+	if rf, ok := ret.Get(0).(func(context.Context, *string, []string) []types.MetricAlarm); ok {
+		r0 = rf(ctx, region, filters)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]types.MetricAlarm)
@@ -45,8 +45,8 @@ func (_m *MockCloudwatch) DescribeAlarms(ctx context.Context, filters []string) 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, []string) error); ok {
-		r1 = rf(ctx, filters)
+	if rf, ok := ret.Get(1).(func(context.Context, *string, []string) error); ok {
+		r1 = rf(ctx, region, filters)
 	} else {
 		r1 = ret.Error(1)
 	}

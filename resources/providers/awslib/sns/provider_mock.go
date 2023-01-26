@@ -31,13 +31,13 @@ type MockSNS struct {
 	mock.Mock
 }
 
-// ListSubscriptionsByTopic provides a mock function with given fields: ctx, topic
-func (_m *MockSNS) ListSubscriptionsByTopic(ctx context.Context, topic string) ([]types.Subscription, error) {
-	ret := _m.Called(ctx, topic)
+// ListSubscriptionsByTopic provides a mock function with given fields: ctx, region, topic
+func (_m *MockSNS) ListSubscriptionsByTopic(ctx context.Context, region *string, topic string) ([]types.Subscription, error) {
+	ret := _m.Called(ctx, region, topic)
 
 	var r0 []types.Subscription
-	if rf, ok := ret.Get(0).(func(context.Context, string) []types.Subscription); ok {
-		r0 = rf(ctx, topic)
+	if rf, ok := ret.Get(0).(func(context.Context, *string, string) []types.Subscription); ok {
+		r0 = rf(ctx, region, topic)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]types.Subscription)
@@ -45,8 +45,8 @@ func (_m *MockSNS) ListSubscriptionsByTopic(ctx context.Context, topic string) (
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, topic)
+	if rf, ok := ret.Get(1).(func(context.Context, *string, string) error); ok {
+		r1 = rf(ctx, region, topic)
 	} else {
 		r1 = ret.Error(1)
 	}

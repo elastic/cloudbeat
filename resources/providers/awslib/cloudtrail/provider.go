@@ -85,16 +85,12 @@ func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]t
 		return nil, err
 	}
 
-	var eventSelectors []types.EventSelector
-	if trail.HasCustomEventSelectors != nil && *trail.HasCustomEventSelectors {
-		output, err := client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{TrailName: trail.Name})
-		if err != nil {
-			return []types.EventSelector{}, err
-		}
-		eventSelectors = output.EventSelectors
+	output, err := client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{TrailName: trail.Name})
+	if err != nil {
+		return []types.EventSelector{}, err
 	}
 
-	return eventSelectors, nil
+	return output.EventSelectors, nil
 }
 
 func (p Provider) getClient(region string) (Client, error) {

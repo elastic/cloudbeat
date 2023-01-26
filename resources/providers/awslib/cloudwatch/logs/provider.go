@@ -23,25 +23,30 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Provider struct {
-	log    *logp.Logger
-	client Client
+	log     *logp.Logger
+	clients map[string]Client
 }
 
 type Client interface {
 	DescribeMetricFilters(ctx context.Context, params *cloudwatchlogs.DescribeMetricFiltersInput, optFns ...func(*cloudwatchlogs.Options)) (*cloudwatchlogs.DescribeMetricFiltersOutput, error)
 }
 
-func (p *Provider) DescribeMetricFilters(ctx context.Context, logGroup string) ([]types.MetricFilter, error) {
+func (p *Provider) DescribeMetricFilters(ctx context.Context, region *string, logGroup string) ([]types.MetricFilter, error) {
 	all := []types.MetricFilter{}
 	input := cloudwatchlogs.DescribeMetricFiltersInput{
 		LogGroupName: aws.String(logGroup),
 	}
+	client, ok := p.clients[awslib.GetRegion(region)]
+	if !ok {
+		return nil, awslib.ErrRegionNotFound
+	}
 	for {
-		output, err := p.client.DescribeMetricFilters(ctx, &input)
+		output, err := client.DescribeMetricFilters(ctx, &input)
 		if err != nil {
 			return nil, err
 		}

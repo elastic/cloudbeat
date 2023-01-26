@@ -79,7 +79,7 @@ func (p *Provider) Rules41_415(ctx context.Context) (Output, error) {
 			p.Log.Warnf("cloudwatchlogs log group arn has no log group name %s", *trail.Trail.CloudWatchLogsLogGroupArn)
 			continue
 		}
-		metrics, err := p.Cloudwatchlogs.DescribeMetricFilters(ctx, filter)
+		metrics, err := p.Cloudwatchlogs.DescribeMetricFilters(ctx, trail.Trail.HomeRegion, filter)
 		if err != nil {
 			p.Log.Errorf("failed to describe metric filters for cloudwatchlog log group arn %s: %v", *trail.Trail.CloudWatchLogsLogGroupArn, err)
 			continue
@@ -94,12 +94,12 @@ func (p *Provider) Rules41_415(ctx context.Context) (Output, error) {
 			})
 			continue
 		}
-		alarms, err := p.Cloudwatch.DescribeAlarms(ctx, names)
+		alarms, err := p.Cloudwatch.DescribeAlarms(ctx, trail.Trail.HomeRegion, names)
 		if err != nil {
 			p.Log.Errorf("failed to describe alarms for cloudwatch filter %v: %v", names, err)
 			continue
 		}
-		topics := p.getSubscriptionForAlarms(ctx, alarms)
+		topics := p.getSubscriptionForAlarms(ctx, trail.Trail.HomeRegion, alarms)
 		items = append(items, Item{
 			TrailInfo:     trail,
 			MetricFilters: metrics,
@@ -111,11 +111,11 @@ func (p *Provider) Rules41_415(ctx context.Context) (Output, error) {
 	return Output{Items: items}, nil
 }
 
-func (p *Provider) getSubscriptionForAlarms(ctx context.Context, alarms []cloudwatch_types.MetricAlarm) []string {
+func (p *Provider) getSubscriptionForAlarms(ctx context.Context, region *string, alarms []cloudwatch_types.MetricAlarm) []string {
 	topics := []string{}
 	for _, alarm := range alarms {
 		for _, action := range alarm.AlarmActions {
-			subscriptions, err := p.Sns.ListSubscriptionsByTopic(ctx, action)
+			subscriptions, err := p.Sns.ListSubscriptionsByTopic(ctx, region, action)
 			if err != nil {
 				p.Log.Errorf("failed to list subscriptions for topic %s: %v", action, err)
 				continue

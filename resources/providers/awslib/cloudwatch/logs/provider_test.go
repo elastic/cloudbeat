@@ -34,6 +34,8 @@ type (
 	clientMocks map[string][2]mocks
 )
 
+var regions = []string{"us-east-1"}
+
 func TestProvider_DescribeMetricFilters(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -73,10 +75,10 @@ func TestProvider_DescribeMetricFilters(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
-				log:    logp.NewLogger("TestProvider_DescribeMetricFilters"),
-				client: c,
+				log:     logp.NewLogger("TestProvider_DescribeMetricFilters"),
+				clients: createMockClients(c, regions),
 			}
-			got, err := p.DescribeMetricFilters(context.Background(), tt.logGroup)
+			got, err := p.DescribeMetricFilters(context.Background(), &regions[0], tt.logGroup)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -85,4 +87,13 @@ func TestProvider_DescribeMetricFilters(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func createMockClients(c Client, regions []string) map[string]Client {
+	m := make(map[string]Client, 0)
+	for _, clientRegion := range regions {
+		m[clientRegion] = c
+	}
+
+	return m
 }

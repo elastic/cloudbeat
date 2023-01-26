@@ -31,13 +31,13 @@ type MockCloudwatchLogs struct {
 	mock.Mock
 }
 
-// DescribeMetricFilters provides a mock function with given fields: ctx, logGroup
-func (_m *MockCloudwatchLogs) DescribeMetricFilters(ctx context.Context, logGroup string) ([]types.MetricFilter, error) {
-	ret := _m.Called(ctx, logGroup)
+// DescribeMetricFilters provides a mock function with given fields: ctx, region, logGroup
+func (_m *MockCloudwatchLogs) DescribeMetricFilters(ctx context.Context, region *string, logGroup string) ([]types.MetricFilter, error) {
+	ret := _m.Called(ctx, region, logGroup)
 
 	var r0 []types.MetricFilter
-	if rf, ok := ret.Get(0).(func(context.Context, string) []types.MetricFilter); ok {
-		r0 = rf(ctx, logGroup)
+	if rf, ok := ret.Get(0).(func(context.Context, *string, string) []types.MetricFilter); ok {
+		r0 = rf(ctx, region, logGroup)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]types.MetricFilter)
@@ -45,8 +45,8 @@ func (_m *MockCloudwatchLogs) DescribeMetricFilters(ctx context.Context, logGrou
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, logGroup)
+	if rf, ok := ret.Get(1).(func(context.Context, *string, string) error); ok {
+		r1 = rf(ctx, region, logGroup)
 	} else {
 		r1 = ret.Error(1)
 	}

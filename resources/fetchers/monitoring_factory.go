@@ -18,9 +18,9 @@
 package fetchers
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -36,14 +36,20 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.MonitoringType, &MonitoringFactory{
-		AwsConfigProvider:       awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
-		TrailCrossRegionFactory: &awslib.MultiRegionClientFactory[cloudtrail.Client]{},
+		AwsConfigProvider:                awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+		TrailCrossRegionFactory:          &awslib.MultiRegionClientFactory[cloudtrail.Client]{},
+		CloudwatchCrossRegionFactory:     &awslib.MultiRegionClientFactory[cloudwatch.Client]{},
+		CloudwatchlogsCrossRegionFactory: &awslib.MultiRegionClientFactory[logs.Client]{},
+		SNSCrossRegionFactory:            &awslib.MultiRegionClientFactory[sns.Client]{},
 	})
 }
 
 type MonitoringFactory struct {
-	AwsConfigProvider       awslib.ConfigProviderAPI
-	TrailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client]
+	AwsConfigProvider                awslib.ConfigProviderAPI
+	TrailCrossRegionFactory          awslib.CrossRegionFactory[cloudtrail.Client]
+	CloudwatchCrossRegionFactory     awslib.CrossRegionFactory[cloudwatch.Client]
+	CloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client]
+	SNSCrossRegionFactory            awslib.CrossRegionFactory[sns.Client]
 }
 
 func (f *MonitoringFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -59,17 +65,16 @@ func (f *MonitoringFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan f
 }
 
 func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
 	provider := monitoring.Provider{
-		Cloudtrail:     cloudtrail.NewProvider(*awsConfig, log, f.TrailCrossRegionFactory),
-		Cloudwatch:     cloudwatch.NewCloudwatchProvider(log, *awsConfig),
-		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, *awsConfig),
-		Sns:            sns.NewSNSProvider(log, *awsConfig),
+		Cloudtrail:     cloudtrail.NewProvider(awsConfig, log, f.TrailCrossRegionFactory),
+		Cloudwatch:     cloudwatch.NewProvider(log, awsConfig, f.CloudwatchCrossRegionFactory),
+		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, awsConfig, f.CloudwatchlogsCrossRegionFactory),
+		Sns:            sns.NewSNSProvider(log, awsConfig, f.SNSCrossRegionFactory),
 		Log:            log,
 	}
 
