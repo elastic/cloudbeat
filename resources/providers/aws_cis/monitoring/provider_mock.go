@@ -31,7 +31,7 @@ type MockClient struct {
 }
 
 // AggregateResources provides a mock function with given fields: ctx
-func (_m *MockClient) AggregateResources(ctx context.Context) (Output, error) {
+func (_m *MockClient) AggregateResources(ctx context.Context) (*Output, error) {
 	ret := _m.Called(ctx)
 
 	var r0 Output
@@ -48,7 +48,7 @@ func (_m *MockClient) AggregateResources(ctx context.Context) (Output, error) {
 		r1 = ret.Error(1)
 	}
 
-	return r0, r1
+	return &r0, r1
 }
 
 type mockConstructorTestingTNewMockClient interface {

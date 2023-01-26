@@ -48,7 +48,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 		return err
 	}
 	m.resourceCh <- fetching.ResourceInfo{
-		Resource:      MonitoringResource{out},
+		Resource:      MonitoringResource{*out},
 		CycleMetadata: cMetadata,
 	}
 	return nil

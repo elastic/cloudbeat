@@ -39,7 +39,7 @@ type Provider struct {
 }
 
 type Client interface {
-	AggregateResources(ctx context.Context) (Output, error)
+	AggregateResources(ctx context.Context) (*Output, error)
 }
 
 type (
@@ -55,59 +55,57 @@ type (
 )
 
 // AggregateResources will gather all the resource to be used for aws cis 4.1 ... 4.15 rules
-func (p *Provider) AggregateResources(ctx context.Context) (Output, error) {
+func (p *Provider) AggregateResources(ctx context.Context) (*Output, error) {
 	trails, err := p.Cloudtrail.DescribeTrails(ctx)
-	out := Output{}
-
 	if err != nil {
-		return out, err
+		return nil, err
 	}
 
 	items := []Item{}
-	for _, trail := range trails {
-		if trail.Trail.CloudWatchLogsLogGroupArn == nil {
+	for _, info := range trails {
+		if info.Trail.CloudWatchLogsLogGroupArn == nil {
 			items = append(items, Item{
-				TrailInfo:     trail,
+				TrailInfo:     info,
 				MetricFilters: []cloudwatchlogs_types.MetricFilter{},
 				Topics:        []string{},
 			})
 			continue
 		}
-		filter := filterNameFromARN(trail.Trail.CloudWatchLogsLogGroupArn)
-		if filter == "" {
-			p.Log.Warnf("cloudwatchlogs log group arn has no log group name %s", *trail.Trail.CloudWatchLogsLogGroupArn)
+		logGroup := getLogGroupFromARN(info.Trail.CloudWatchLogsLogGroupArn)
+		if logGroup == "" {
+			p.Log.Warnf("cloudwatchlogs log group arn has no log group name %s", *info.Trail.CloudWatchLogsLogGroupArn)
 			continue
 		}
-		metrics, err := p.Cloudwatchlogs.DescribeMetricFilters(ctx, trail.Trail.HomeRegion, filter)
+		metrics, err := p.Cloudwatchlogs.DescribeMetricFilters(ctx, info.Trail.HomeRegion, logGroup)
 		if err != nil {
-			p.Log.Errorf("failed to describe metric filters for cloudwatchlog log group arn %s: %v", *trail.Trail.CloudWatchLogsLogGroupArn, err)
+			p.Log.Errorf("failed to describe metric filters for cloudwatchlog log group arn %s: %v", *info.Trail.CloudWatchLogsLogGroupArn, err)
 			continue
 		}
 
 		names := filterNamesFromMetrics(metrics)
 		if len(names) == 0 {
 			items = append(items, Item{
-				TrailInfo:     trail,
+				TrailInfo:     info,
 				MetricFilters: metrics,
 				Topics:        []string{},
 			})
 			continue
 		}
-		alarms, err := p.Cloudwatch.DescribeAlarms(ctx, trail.Trail.HomeRegion, names)
+		alarms, err := p.Cloudwatch.DescribeAlarms(ctx, info.Trail.HomeRegion, names)
 		if err != nil {
 			p.Log.Errorf("failed to describe alarms for cloudwatch filter %v: %v", names, err)
 			continue
 		}
-		topics := p.getSubscriptionForAlarms(ctx, trail.Trail.HomeRegion, alarms)
+		topics := p.getSubscriptionForAlarms(ctx, info.Trail.HomeRegion, alarms)
 		items = append(items, Item{
-			TrailInfo:     trail,
+			TrailInfo:     info,
 			MetricFilters: metrics,
 			Topics:        topics,
 		})
 
 	}
 
-	return Output{Items: items}, nil
+	return &Output{Items: items}, nil
 }
 
 func (p *Provider) getSubscriptionForAlarms(ctx context.Context, region *string, alarms []cloudwatch_types.MetricAlarm) []string {
@@ -137,7 +135,7 @@ func filterNamesFromMetrics(list []cloudwatchlogs_types.MetricFilter) []string {
 	return names
 }
 
-func filterNameFromARN(arn *string) string {
+func getLogGroupFromARN(arn *string) string {
 	if arn == nil {
 		return ""
 	}
