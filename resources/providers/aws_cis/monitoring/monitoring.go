@@ -39,15 +39,15 @@ type Provider struct {
 }
 
 type Client interface {
-	AggregateResources(ctx context.Context) (*Output, error)
+	AggregateResources(ctx context.Context) (*Resource, error)
 }
 
 type (
-	Output struct {
-		Items []Item
+	Resource struct {
+		Items []MonitoringItem
 	}
 
-	Item struct {
+	MonitoringItem struct {
 		TrailInfo     cloudtrail.TrailInfo
 		MetricFilters []cloudwatchlogs_types.MetricFilter
 		Topics        []string
@@ -55,16 +55,16 @@ type (
 )
 
 // AggregateResources will gather all the resource to be used for aws cis 4.1 ... 4.15 rules
-func (p *Provider) AggregateResources(ctx context.Context) (*Output, error) {
+func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 	trails, err := p.Cloudtrail.DescribeTrails(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	items := []Item{}
+	items := []MonitoringItem{}
 	for _, info := range trails {
 		if info.Trail.CloudWatchLogsLogGroupArn == nil {
-			items = append(items, Item{
+			items = append(items, MonitoringItem{
 				TrailInfo:     info,
 				MetricFilters: []cloudwatchlogs_types.MetricFilter{},
 				Topics:        []string{},
@@ -84,7 +84,7 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Output, error) {
 
 		names := filterNamesFromMetrics(metrics)
 		if len(names) == 0 {
-			items = append(items, Item{
+			items = append(items, MonitoringItem{
 				TrailInfo:     info,
 				MetricFilters: metrics,
 				Topics:        []string{},
@@ -97,7 +97,7 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Output, error) {
 			continue
 		}
 		topics := p.getSubscriptionForAlarms(ctx, info.Trail.HomeRegion, alarms)
-		items = append(items, Item{
+		items = append(items, MonitoringItem{
 			TrailInfo:     info,
 			MetricFilters: metrics,
 			Topics:        topics,
@@ -105,7 +105,7 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Output, error) {
 
 	}
 
-	return &Output{Items: items}, nil
+	return &Resource{Items: items}, nil
 }
 
 func (p *Provider) getSubscriptionForAlarms(ctx context.Context, region *string, alarms []cloudwatch_types.MetricAlarm) []string {

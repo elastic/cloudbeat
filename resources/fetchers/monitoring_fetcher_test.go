@@ -48,8 +48,8 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			mocks: clientMocks{
 				"Rules41_415": [2]mocks{
 					{mock.Anything},
-					{monitoring.Output{
-						Items: []monitoring.Item{
+					{monitoring.Resource{
+						Items: []monitoring.MonitoringItem{
 							{},
 							{},
 						},
@@ -63,7 +63,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			mocks: clientMocks{
 				"Rules41_415": [2]mocks{
 					{mock.Anything},
-					{monitoring.Output{}, fmt.Errorf("failed to run provider")},
+					{monitoring.Resource{}, fmt.Errorf("failed to run provider")},
 				},
 			},
 			wantErr: true,

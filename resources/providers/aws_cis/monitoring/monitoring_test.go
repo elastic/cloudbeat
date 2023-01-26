@@ -118,7 +118,7 @@ func TestProvider_Rules41_415(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  fields
-		want    Output
+		want    Resource
 		wantErr bool
 	}{
 		{
@@ -128,7 +128,7 @@ func TestProvider_Rules41_415(t *testing.T) {
 					"DescribeTrails": describeCloudTrailWithoutResults,
 				},
 			},
-			want: Output{Items: []Item{}},
+			want: Resource{Items: []MonitoringItem{}},
 		},
 		{
 			name: "one trail with filter and sns setup",
@@ -146,8 +146,8 @@ func TestProvider_Rules41_415(t *testing.T) {
 					"ListSubscriptionsByTopic": listSubscriptionCallWithResult,
 				},
 			},
-			want: Output{
-				Items: []Item{
+			want: Resource{
+				Items: []MonitoringItem{
 					{
 						TrailInfo: cloudtrail.TrailInfo{
 							Trail:          expectedCommonTrail,
@@ -172,8 +172,8 @@ func TestProvider_Rules41_415(t *testing.T) {
 					"DescribeMetricFilters": metricFilterCallWithoutFilter,
 				},
 			},
-			want: Output{
-				Items: []Item{
+			want: Resource{
+				Items: []MonitoringItem{
 					{
 						TrailInfo: cloudtrail.TrailInfo{
 							Trail:          expectedCommonTrail,

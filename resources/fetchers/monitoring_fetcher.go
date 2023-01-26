@@ -38,7 +38,7 @@ type MonitoringFetcherConfig struct {
 }
 
 type MonitoringResource struct {
-	monitoring.Output
+	monitoring.Resource
 }
 
 func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
