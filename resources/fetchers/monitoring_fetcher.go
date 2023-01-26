@@ -20,7 +20,7 @@ package fetchers
 import (
 	"context"
 
-	"github.com/elastic/cloudbeat/resources/providers/aws_cis"
+	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -28,7 +28,7 @@ import (
 
 type MonitoringFetcher struct {
 	log        *logp.Logger
-	provider   aws_cis.Client
+	provider   monitoring.Client
 	cfg        MonitoringFetcherConfig
 	resourceCh chan fetching.ResourceInfo
 }
@@ -38,7 +38,7 @@ type MonitoringFetcherConfig struct {
 }
 
 type MonitoringResource struct {
-	aws_cis.Output
+	monitoring.Output
 }
 
 func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {

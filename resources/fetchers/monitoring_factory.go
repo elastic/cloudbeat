@@ -22,7 +22,7 @@ import (
 	"fmt"
 
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
-	"github.com/elastic/cloudbeat/resources/providers/aws_cis"
+	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch"
@@ -65,7 +65,7 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	provider := aws_cis.Provider{
+	provider := monitoring.Provider{
 		Cloudtrail:     cloudtrail.NewProvider(*awsConfig, log, f.TrailCrossRegionFactory),
 		Cloudwatch:     cloudwatch.NewCloudwatchProvider(log, *awsConfig),
 		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, *awsConfig),

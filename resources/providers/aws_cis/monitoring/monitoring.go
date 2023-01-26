@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws_cis
+package monitoring
 
 import (
 	"context"

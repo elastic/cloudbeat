@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/aws_cis"
+	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
@@ -48,8 +48,8 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			mocks: clientMocks{
 				"Rules41_415": [2]mocks{
 					{mock.Anything},
-					{aws_cis.Output{
-						Items: []aws_cis.Item{
+					{monitoring.Output{
+						Items: []monitoring.Item{
 							{},
 							{},
 						},
@@ -63,7 +63,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			mocks: clientMocks{
 				"Rules41_415": [2]mocks{
 					{mock.Anything},
-					{aws_cis.Output{}, fmt.Errorf("failed to run provider")},
+					{monitoring.Output{}, fmt.Errorf("failed to run provider")},
 				},
 			},
 			wantErr: true,
@@ -74,7 +74,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
-			client := aws_cis.MockClient{}
+			client := monitoring.MockClient{}
 			for name, call := range tt.mocks {
 				client.On(name, call[0]...).Return(call[1]...)
 			}
