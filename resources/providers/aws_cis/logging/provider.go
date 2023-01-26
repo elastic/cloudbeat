@@ -45,27 +45,27 @@ func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, er
 	}
 
 	var enrichedTrails []awslib.AwsResource
-	for _, trail := range trails {
-		if trail.Trail.S3BucketName == nil {
+	for _, info := range trails {
+		if info.Trail.S3BucketName == nil {
 			continue
 		}
-		bucketPolicy, policyErr := p.s3Provider.GetBucketPolicy(ctx, trail.Trail.S3BucketName, *trail.Trail.HomeRegion)
+		bucketPolicy, policyErr := p.s3Provider.GetBucketPolicy(ctx, info.Trail.S3BucketName, *info.Trail.HomeRegion)
 		if policyErr != nil {
-			p.log.Errorf("Error getting bucket policy for bucket %s: %v", *trail.Trail.S3BucketName, policyErr)
+			p.log.Errorf("Error getting bucket policy for bucket %s: %v", *info.Trail.S3BucketName, policyErr)
 		}
 
-		aclGrants, aclErr := p.s3Provider.GetBucketACL(ctx, trail.Trail.S3BucketName, *trail.Trail.HomeRegion)
+		aclGrants, aclErr := p.s3Provider.GetBucketACL(ctx, info.Trail.S3BucketName, *info.Trail.HomeRegion)
 		if aclErr != nil {
-			p.log.Errorf("Error getting bucket ACL for bucket %s: %v", *trail.Trail.S3BucketName, aclErr)
+			p.log.Errorf("Error getting bucket ACL for bucket %s: %v", *info.Trail.S3BucketName, aclErr)
 		}
 
-		bucketLogging, loggingErr := p.s3Provider.GetBucketLogging(ctx, trail.Trail.S3BucketName, *trail.Trail.HomeRegion)
+		bucketLogging, loggingErr := p.s3Provider.GetBucketLogging(ctx, info.Trail.S3BucketName, *info.Trail.HomeRegion)
 		if loggingErr != nil {
-			p.log.Errorf("Error getting bucket logging for bucket %s: %v", *trail.Trail.S3BucketName, loggingErr)
+			p.log.Errorf("Error getting bucket logging for bucket %s: %v", *info.Trail.S3BucketName, loggingErr)
 		}
 
 		enrichedTrails = append(enrichedTrails, EnrichedTrail{
-			TrailInfo: trail,
+			TrailInfo: info,
 			BucketInfo: TrailBucket{
 				Grants:  aclGrants,
 				Policy:  bucketPolicy,
