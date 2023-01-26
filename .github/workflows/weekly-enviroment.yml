@@ -54,9 +54,10 @@ jobs:
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 1.3.5
-          tf_actions_subcommand: 'plan -target=module.ec_deployment'
+          tf_actions_subcommand: 'plan'
           tf_actions_working_dir: ${{ env.WORKING_DIR }}
           tf_actions_comment: true
+          tf_actions_args: '-target=module.ec_deployment'
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
