@@ -43,6 +43,7 @@ import (
 )
 
 const (
+	beaterName       = "Cloudbeat"
 	flushInterval    = 10 * time.Second
 	eventsThreshold  = 75
 	resourceChBuffer = 10000
@@ -67,7 +68,7 @@ func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	reloader := launcher.NewListener(log)
 	validator := &validator{}
 
-	s, err := launcher.New(log, reloader, validator, NewCloudbeat, cfg)
+	s, err := launcher.New(log, beaterName, reloader, validator, NewCloudbeat, cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +181,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	for {
 		select {
 		case <-bt.ctx.Done():
-			bt.log.Warn("cloudbeat context is done")
+			bt.log.Warn("Cloudbeat context is done")
 			return nil
 
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
