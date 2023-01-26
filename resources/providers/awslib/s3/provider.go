@@ -22,6 +22,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
@@ -30,7 +32,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"strings"
 )
 
 func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
@@ -82,9 +83,9 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 }
 
 func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error) {
-	client, clientErr := p.getClient(region)
-	if clientErr != nil {
-		return nil, clientErr
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return nil, err
 	}
 
 	acl, err := client.GetBucketAcl(ctx, &s3Client.GetBucketAclInput{Bucket: bucketName})
@@ -106,9 +107,9 @@ func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region s
 }
 
 func (p Provider) GetBucketPolicy(ctx context.Context, bucketName *string, region string) (BucketPolicy, error) {
-	client, clientErr := p.getClient(region)
-	if clientErr != nil {
-		return nil, clientErr
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return nil, err
 	}
 
 	rawPolicy, err := client.GetBucketPolicy(ctx, &s3Client.GetBucketPolicyInput{Bucket: bucketName})
@@ -134,9 +135,9 @@ func (p Provider) GetBucketPolicy(ctx context.Context, bucketName *string, regio
 }
 
 func (p Provider) GetBucketLogging(ctx context.Context, bucketName *string, region string) (Logging, error) {
-	client, clientErr := p.getClient(region)
-	if clientErr != nil {
-		return Logging{}, clientErr
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return Logging{}, err
 	}
 
 	logging, err := client.GetBucketLogging(ctx, &s3Client.GetBucketLoggingInput{Bucket: bucketName})
@@ -155,7 +156,7 @@ func (p Provider) GetBucketLogging(ctx context.Context, bucketName *string, regi
 }
 
 func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.Bucket) map[string][]types.Bucket {
-	var bucketsRegionMap = make(map[string][]types.Bucket, 0)
+	bucketsRegionMap := make(map[string][]types.Bucket, 0)
 	for _, clientBucket := range buckets {
 		region, regionErr := p.getBucketRegion(ctx, clientBucket.Name)
 		// If we could not get the region for a bucket, additional API calls for resources will probably fail, we should
@@ -171,19 +172,10 @@ func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.B
 	return bucketsRegionMap
 }
 
-func (p Provider) getClient(region string) (Client, error) {
-	client := p.clients[region]
-	if client == nil {
-		return nil, fmt.Errorf("no intialize client exists in %s region", region)
-	}
-
-	return client, nil
-}
-
 func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string, region string) (string, error) {
-	client, clientErr := p.getClient(region)
-	if clientErr != nil {
-		return "", clientErr
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return "", err
 	}
 
 	encryption, err := client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
@@ -224,9 +216,9 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (stri
 func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, region string) (BucketVersioning, error) {
 	bucketVersioning := BucketVersioning{false, false}
 
-	client, clientErr := p.getClient(region)
-	if clientErr != nil {
-		return bucketVersioning, clientErr
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return bucketVersioning, err
 	}
 
 	bucketVersioningResponse, err := client.GetBucketVersioning(ctx, &s3Client.GetBucketVersioningInput{Bucket: bucketName})

@@ -19,10 +19,13 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"testing"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
+	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -102,7 +105,9 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 	r := LoggingResource{
 		AwsResource: logging.EnrichedTrail{
 			TrailInfo: cloudtrail.TrailInfo{
-				TrailARN: "test-arn",
+				Trail: types.Trail{
+					TrailARN: aws.String("test-arn"),
+				},
 			},
 		},
 	}
@@ -111,6 +116,8 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, fetching.ResourceMetadata{ID: "test-arn", Type: "cloud-audit", SubType: "aws-trail", Name: "", ECSFormat: ""}, meta)
-	assert.Equal(t, logging.EnrichedTrail{TrailInfo: cloudtrail.TrailInfo{TrailARN: "test-arn"}}, r.GetData())
+	assert.Equal(t, logging.EnrichedTrail{TrailInfo: cloudtrail.TrailInfo{Trail: types.Trail{
+		TrailARN: aws.String("test-arn"),
+	}}}, r.GetData())
 	assert.Equal(t, nil, r.GetElasticCommonData())
 }

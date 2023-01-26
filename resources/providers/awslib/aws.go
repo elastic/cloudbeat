@@ -18,10 +18,14 @@
 package awslib
 
 import (
+	"errors"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
 
 const DefaultRegion = "us-east-1"
+
+var ErrClientNotFound = errors.New("aws client not found")
 
 type Config struct {
 	Config awssdk.Config
@@ -31,4 +35,20 @@ type AwsResource interface {
 	GetResourceArn() string
 	GetResourceName() string
 	GetResourceType() string
+}
+
+func GetClient[T any](region *string, list map[string]T) (T, error) {
+	c, ok := list[getRegion(region)]
+	if !ok {
+		return c, ErrClientNotFound
+	}
+	return c, nil
+}
+
+func getRegion(region *string) string {
+	if region == nil {
+		return DefaultRegion
+	}
+
+	return *region
 }
