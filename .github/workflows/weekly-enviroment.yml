@@ -37,9 +37,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Echo test completed
-        run: echo "test completed"
-
       - name: Check out the repo
         uses: actions/checkout@v2
 
@@ -57,7 +54,7 @@ jobs:
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 1.3.5
-          tf_actions_subcommand: 'plan'
+          tf_actions_subcommand: 'plan -target=module.ec_deployment'
           tf_actions_working_dir: ${{ env.WORKING_DIR }}
           tf_actions_comment: true
 
@@ -72,3 +69,4 @@ jobs:
             You can access it at _______.
             :warning: This environment will be deleted in 7 days.
 
+#  terraform apply --auto-approve -target "module.ec_deployment"
