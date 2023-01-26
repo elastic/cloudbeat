@@ -58,6 +58,8 @@ jobs:
           tf_actions_working_dir: ${{ env.WORKING_DIR }}
           tf_actions_comment: true
           args: '-target=module.ec_deployment'
+        env:
+          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
