@@ -19,16 +19,22 @@ package dataprovider
 
 import (
 	"context"
+	"testing"
+
+	"github.com/elastic/cloudbeat/version"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
-var k8sData = commonK8sData{clusterId: "clusterId", nodeId: "nodeId", serverVersion: version.Version{}, clusterName: "clusterName"}
-var awsData = commonAwsData{accountId: "accountId", accountName: "string"}
+var (
+	k8sData = commonK8sData{clusterId: "clusterId", nodeId: "nodeId", serverVersion: version.Version{}, clusterName: "clusterName"}
+	awsData = commonAwsData{accountId: "accountId", accountName: "string"}
+)
 
 type DataProviderTestSuite struct {
 	suite.Suite
@@ -65,7 +71,7 @@ func (s *DataProviderTestSuite) SetupTest() {}
 func (s *DataProviderTestSuite) TearDownTest() {}
 
 func (s *DataProviderTestSuite) TestDataProvider_FetchCommonData() {
-	var tests = []struct {
+	tests := []struct {
 		name        string
 		commonData  CommonData
 		benchmark   string
