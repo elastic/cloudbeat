@@ -45,10 +45,13 @@ jobs:
         run: |
           cp bundle.tar.gz evaluator/
 
+      - name: Validate mocks
+        run: ./scripts/make/validate-mocks.sh
+
       - name: Unit-Test Cloudbeat
         run: |
           GOOS=linux go test -v -coverpkg=./... -coverprofile=cover.out.tmp ./...
-          cat cover.out.tmp | grep -v "_mock.go" > cover.out # remove mock files from coverage report
+          cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v3
