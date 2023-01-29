@@ -186,7 +186,8 @@ def pytest_generate_tests(metafunc):
     test cases registered in TEST_PARAMETERS and the values passed to
     relevant custom cmdline parameters such as --range.
     """
-
+    # -k command line option to specify an expression which implements a substring match on the test names
+    # instead of the exact match on markers that -m provides. This makes it easy to select tests based on their names
     if "-k" in metafunc.config.invocation_params.args:
         parametrize_eks_params(metafunc)
         return
@@ -230,7 +231,6 @@ def parametrize_eks_params(func_details):
     @param func_details: metafunc
     @return:
     """
-
     params = TEST_PARAMETERS.get(func_details.function)
     if params is None:
         raise ValueError(f"Params for function {func_details.function} are not registered.")

@@ -1,4 +1,3 @@
-# {{- if eq .Values.testData.clusterType "eks" -}}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -26,4 +25,3 @@ spec:
         runAsUser: 10001
         capabilities:
           drop: ["ALL"]
-# {{- end }}

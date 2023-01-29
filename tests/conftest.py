@@ -20,7 +20,6 @@ class InterceptHandler(logging.Handler):
     """
     This class intercepts standard logging messages toward Loguru sinks
     """
-
     def emit(self, record):
         # Get corresponding Loguru level if it exists
         try:
@@ -198,7 +197,6 @@ def pytest_sessionstart():
     Called after the Session object has been created and before performing collection and entering the run test loop.
     @return:
     """
-
     configs = {
         "Cloudbeat": configuration.agent,
         "Kubernetes": configuration.kubernetes,
@@ -216,7 +214,6 @@ def pytest_sessionfinish(session):
     @param session: The pytest session object.
     @return:
     """
-
     report_dir = session.config.option.allure_report_dir
     cloudbeat = configuration.agent
     kube_client = KubernetesHelper(
