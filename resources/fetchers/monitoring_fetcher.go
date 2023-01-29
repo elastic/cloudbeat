@@ -23,6 +23,7 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -34,6 +35,7 @@ type MonitoringFetcher struct {
 	cfg           MonitoringFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
+	securityhub   map[string]securityhub.Service
 }
 
 type MonitoringFetcherConfig struct {
@@ -45,16 +47,37 @@ type MonitoringResource struct {
 	identity *awslib.Identity
 }
 
+type SecurityHubResource struct {
+	securityhub.SecurityHub
+}
+
 func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	m.log.Debug("Starting MonitoringFetcher.Fetch")
 	out, err := m.provider.AggregateResources(ctx)
 	if err != nil {
-		return err
+		m.log.Error("failed to aggregate monitoring resources: %v", err)
 	}
-	m.resourceCh <- fetching.ResourceInfo{
-		Resource:      MonitoringResource{*out, m.cloudIdentity},
-		CycleMetadata: cMetadata,
+	if out != nil {
+		m.resourceCh <- fetching.ResourceInfo{
+			Resource:      MonitoringResource{*out, m.cloudIdentity},
+			CycleMetadata: cMetadata,
+		}
 	}
+
+	for _, client := range m.securityhub {
+		hub, err := client.Describe(ctx)
+		if err != nil {
+			m.log.Error("failed to describe securityhab: %v", err)
+			continue
+		}
+		m.resourceCh <- fetching.ResourceInfo{
+			Resource: SecurityHubResource{
+				SecurityHub: hub,
+			},
+			CycleMetadata: cMetadata,
+		}
+	}
+
 	return nil
 }
 
@@ -77,3 +100,26 @@ func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 func (r MonitoringResource) GetElasticCommonData() any { return nil }
+
+func (s SecurityHubResource) GetData() any {
+	return s
+}
+
+func (s SecurityHubResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	if s.DescribeHubOutput == nil || s.HubArn == nil {
+		return fetching.ResourceMetadata{
+			ID:      "",
+			Name:    "",
+			Type:    fetching.MonitoringIdentity,
+			SubType: fetching.SecurityHubType,
+		}, nil
+	}
+	return fetching.ResourceMetadata{
+		ID:      *s.HubArn,
+		Name:    *s.HubArn,
+		Type:    fetching.MonitoringIdentity,
+		SubType: fetching.SecurityHubType,
+	}, nil
+}
+
+func (s SecurityHubResource) GetElasticCommonData() any { return nil }

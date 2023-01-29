@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch/logs"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -90,6 +91,17 @@ func TestMonitoringFactory_Create(t *testing.T) {
 		mock.Anything,
 	).Return(mockCrossRegionSNSFetcher)
 
+	mockCrossRegionSecurityHubFetcher := &awslib.MockCrossRegionFetcher[securityhub.Service]{}
+	mockCrossRegionSecurityHubFetcher.On("GetMultiRegionsClientMap").Return(nil)
+	mockCrossRegionSecurityHubFactory := &awslib.MockCrossRegionFactory[securityhub.Service]{}
+	mockCrossRegionSecurityHubFactory.On(
+		"NewMultiRegionClients",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(mockCrossRegionSecurityHubFetcher)
+
 	identity := &awslib.MockIdentityProviderGetter{}
 	identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
 		Account: awssdk.String("test-account"),
@@ -101,6 +113,7 @@ func TestMonitoringFactory_Create(t *testing.T) {
 		CloudwatchCrossRegionFactory:     mockCrossRegionCloudwatchFactory,
 		CloudwatchlogsCrossRegionFactory: mockCrossRegionCloudwatchlogsFactory,
 		SNSCrossRegionFactory:            mockCrossRegionSNSFactory,
+		SecurityhubRegionFactory:         mockCrossRegionSecurityHubFactory,
 		IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 			return identity
 		},

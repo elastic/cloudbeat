@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
@@ -29,6 +30,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch/logs"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -43,6 +45,7 @@ func init() {
 		CloudwatchCrossRegionFactory:     &awslib.MultiRegionClientFactory[cloudwatch.Client]{},
 		CloudwatchlogsCrossRegionFactory: &awslib.MultiRegionClientFactory[logs.Client]{},
 		SNSCrossRegionFactory:            &awslib.MultiRegionClientFactory[sns.Client]{},
+		SecurityhubRegionFactory:         &awslib.MultiRegionClientFactory[securityhub.Service]{},
 		IdentityProvider:                 awslib.GetIdentityClient,
 	})
 }
@@ -53,6 +56,7 @@ type MonitoringFactory struct {
 	CloudwatchCrossRegionFactory     awslib.CrossRegionFactory[cloudwatch.Client]
 	CloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client]
 	SNSCrossRegionFactory            awslib.CrossRegionFactory[sns.Client]
+	SecurityhubRegionFactory         awslib.CrossRegionFactory[securityhub.Service]
 	IdentityProvider                 func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
@@ -88,11 +92,17 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
+	ff := func(cfg awssdk.Config) securityhub.Service {
+		return securityhub.NewProvider(cfg, log)
+	}
+	m := f.SecurityhubRegionFactory.NewMultiRegionClients(ec2.NewFromConfig(awsConfig), awsConfig, ff, log)
+
 	return &MonitoringFetcher{
 		log:           log,
 		cfg:           cfg,
 		provider:      &provider,
 		resourceCh:    ch,
 		cloudIdentity: identity,
+		securityhub:   m.GetMultiRegionsClientMap(),
 	}, nil
 }

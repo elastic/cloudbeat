@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
@@ -41,13 +42,14 @@ type (
 func TestMonitoringFetcher_Fetch(t *testing.T) {
 	tests := []struct {
 		name              string
-		mocks             clientMocks
+		monitoring        clientMocks
+		securityhub       clientMocks
 		wantErr           bool
 		expectedResources int
 	}{
 		{
 			name: "with resources",
-			mocks: clientMocks{
+			monitoring: clientMocks{
 				"AggregateResources": [2]mocks{
 					{mock.Anything},
 					{&monitoring.Resource{
@@ -58,17 +60,44 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 					}, nil},
 				},
 			},
-			expectedResources: 1,
+			securityhub: clientMocks{
+				"Describe": [2]mocks{
+					{mock.Anything},
+					{securityhub.SecurityHub{}, nil},
+				},
+			},
+			expectedResources: 2,
 		},
 		{
 			name: "with error",
-			mocks: clientMocks{
+			monitoring: clientMocks{
 				"AggregateResources": [2]mocks{
 					{mock.Anything},
 					{nil, fmt.Errorf("failed to run provider")},
 				},
 			},
-			wantErr: true,
+			securityhub: clientMocks{
+				"Describe": [2]mocks{
+					{mock.Anything},
+					{securityhub.SecurityHub{}, fmt.Errorf("failed to run provider")},
+				},
+			},
+		},
+		{
+			name: "with securityhub",
+			monitoring: clientMocks{
+				"AggregateResources": [2]mocks{
+					{mock.Anything},
+					{nil, fmt.Errorf("failed to run provider")},
+				},
+			},
+			securityhub: clientMocks{
+				"Describe": [2]mocks{
+					{mock.Anything},
+					{securityhub.SecurityHub{}, nil},
+				},
+			},
+			expectedResources: 1,
 		},
 	}
 	for _, tt := range tests {
@@ -76,13 +105,21 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
-			client := monitoring.MockClient{}
-			for name, call := range tt.mocks {
-				client.On(name, call[0]...).Return(call[1]...)
+			monitoring := &monitoring.MockClient{}
+			for name, call := range tt.monitoring {
+				monitoring.On(name, call[0]...).Return(call[1]...)
+			}
+
+			hub := &securityhub.MockService{}
+			for name, call := range tt.securityhub {
+				hub.On(name, call[0]...).Return(call[1]...)
 			}
 			m := MonitoringFetcher{
-				log:           logp.NewLogger("TestMonitoringFetcher_Fetch"),
-				provider:      &client,
+				log:      logp.NewLogger("TestMonitoringFetcher_Fetch"),
+				provider: monitoring,
+				securityhub: map[string]securityhub.Service{
+					"eu-west-1": hub,
+				},
 				cfg:           MonitoringFetcherConfig{},
 				resourceCh:    ch,
 				cloudIdentity: &awslib.Identity{Account: aws.String("account")},
