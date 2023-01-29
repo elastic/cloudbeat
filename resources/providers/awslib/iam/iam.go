@@ -30,6 +30,7 @@ type AccessManagement interface {
 	GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error)
 	GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, error)
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
+	GetAccountAlias(ctx context.Context) (string, error)
 }
 
 type Client interface {
@@ -46,6 +47,7 @@ type Client interface {
 	GetCredentialReport(ctx context.Context, params *iamsdk.GetCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetCredentialReportOutput, error)
 	GetUserPolicy(ctx context.Context, params *iamsdk.GetUserPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetUserPolicyOutput, error)
 	GenerateCredentialReport(ctx context.Context, params *iamsdk.GenerateCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GenerateCredentialReportOutput, error)
+	ListAccountAliases(ctx context.Context, params *iamsdk.ListAccountAliasesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAccountAliasesOutput, error)
 }
 
 type Provider struct {

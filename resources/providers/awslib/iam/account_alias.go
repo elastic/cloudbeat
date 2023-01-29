@@ -15,29 +15,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package dataprovider
+package iam
 
 import (
 	"context"
-	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/version"
-	"github.com/elastic/elastic-agent-libs/logp"
+	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 )
 
-type CommonDataProvider interface {
-	FetchCommonData(ctx context.Context) (CommonData, error)
-}
+func (p Provider) GetAccountAlias(ctx context.Context) (string, error) {
+	aliases, err := p.client.ListAccountAliases(ctx, &iamsdk.ListAccountAliasesInput{})
+	if err != nil {
+		return "", err
+	}
 
-type CommonData interface {
-	GetResourceId(fetching.ResourceMetadata) string
-	GetVersionInfo() version.CloudbeatVersionInfo
-	EnrichEvent(beat.Event) error
-}
+	if len(aliases.AccountAliases) > 0 {
+		return aliases.AccountAliases[0], nil
+	}
 
-type EnvironmentCommonDataProvider interface {
-	FetchData(context.Context) (CommonData, error)
+	return "", nil
 }
-
-type EnvironmentDataProviderInit = func(*logp.Logger, *config.Config) (EnvironmentCommonDataProvider, error)
