@@ -19,201 +19,95 @@ package dataprovider
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/version"
-	"github.com/stretchr/testify/mock"
-	"testing"
-
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetchers"
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
+	"testing"
 )
 
-var bgCtx = context.Background()
+var k8sData = commonK8sData{clusterId: "clusterId", nodeId: "nodeId", serverVersion: version.Version{}, clusterName: "clusterName"}
+var awsData = commonAwsData{accountId: "accountId", accountName: "string"}
 
-func TestCommonDataProvider_FetchCommonData(t *testing.T) {
-	type args struct {
-		ctx context.Context
+type DataProviderTestSuite struct {
+	suite.Suite
+	log                 *logp.Logger
+	awsDataProviderInit EnvironmentDataProviderInit
+	k8sDataProviderInit EnvironmentDataProviderInit
+}
+
+func TestDataProviderTestSuite(t *testing.T) {
+	s := new(DataProviderTestSuite)
+	s.log = logp.NewLogger("cloudbeat_data_provider_test_suite")
+
+	k8sDataProviderMock := &MockEnvironmentCommonDataProvider{}
+	k8sDataProviderMock.On("FetchData", mock.Anything).Return(k8sData, nil)
+	s.k8sDataProviderInit = func(l *logp.Logger, c *config.Config) (EnvironmentCommonDataProvider, error) {
+		return k8sDataProviderMock, nil
 	}
-	tests := []struct {
-		name          string
-		args          args
-		want          CommonK8sData
-		wantErr       bool
-		k8sCommonData CommonK8sData
+
+	awsDataProviderMock := &MockEnvironmentCommonDataProvider{}
+	awsDataProviderMock.On("FetchData", mock.Anything).Return(awsData, nil)
+	s.awsDataProviderInit = func(l *logp.Logger, c *config.Config) (EnvironmentCommonDataProvider, error) {
+		return awsDataProviderMock, nil
+	}
+
+	if err := logp.TestingSetup(); err != nil {
+		t.Error(err)
+	}
+
+	suite.Run(t, s)
+}
+
+func (s *DataProviderTestSuite) SetupTest() {}
+
+func (s *DataProviderTestSuite) TearDownTest() {}
+
+func (s *DataProviderTestSuite) TestDataProvider_FetchCommonData() {
+	var tests = []struct {
+		name        string
+		commonData  CommonData
+		benchmark   string
+		expectError bool
 	}{
 		{
-			name: "test common data",
-			args: args{
-				ctx: bgCtx,
-			},
-			want: CommonK8sData{
-				clusterId: "testing_namespace_uid",
-				nodeId:    "testing_node_uid",
-				serverVersion: version.Version{
-					Version: "testing_version",
-				},
-				clusterName: "cluster_name",
-			},
-			k8sCommonData: CommonK8sData{
-				clusterId: "testing_namespace_uid",
-				nodeId:    "testing_node_uid",
-				serverVersion: version.Version{
-					Version: "testing_version",
-				},
-				clusterName: "cluster_name",
-			},
-			wantErr: false,
+			name:        "should return k8s data for cis_k8s benchmark",
+			commonData:  k8sData,
+			benchmark:   "cis_k8s",
+			expectError: false,
 		},
 		{
-			name: "test common data without k8s",
-			args: args{
-				ctx: bgCtx,
-			},
-			want: CommonK8sData{
-				clusterId:     "",
-				nodeId:        "",
-				serverVersion: version.Version{},
-				clusterName:   "",
-			},
-			k8sCommonData: CommonK8sData{},
-			wantErr:       false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			k8sDataProviderMock := &mockK8sDataProvider{}
-			k8sDataProviderMock.EXPECT().CollectK8sData(mock.Anything).Return(&tt.k8sCommonData)
-			cdProvider := createCommonDataProvider(k8sDataProviderMock)
-
-			got, err := cdProvider.FetchCommonData(tt.args.ctx)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("FetchCommonData() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			assert.Equal(t, tt.want.clusterId, got.GetData().clusterId, "commonData clusterId is not correct")
-			assert.Equal(t, tt.want.nodeId, got.GetData().nodeId, "commonData nodeId is not correct")
-			assert.Equal(t, tt.want.serverVersion.Version, got.GetData().versionInfo.Kubernetes.Version, "k8s server version is empty")
-			assert.NotEmpty(t, got.GetData().versionInfo.Version, "Beat's version is empty")
-		})
-	}
-}
-
-func TestCommonData_GetResourceId(t *testing.T) {
-	type CDFields struct {
-		clusterId string
-		nodeId    string
-	}
-	type args struct {
-		metadata fetching.ResourceMetadata
-	}
-	tests := []struct {
-		name       string
-		commonData CDFields
-		args       args
-		want       string
-	}{
-		{
-			name: "Get kube api resource id",
-			commonData: CDFields{
-				clusterId: "cluster-test",
-				nodeId:    "nodeid-test",
-			},
-			args: args{
-				metadata: fetching.ResourceMetadata{
-					ID:      "uuid-test",
-					Type:    fetchers.K8sObjType,
-					SubType: "pod",
-					Name:    "pod-test-123",
-				},
-			},
-			want: "uuid-test",
+			name:        "should return k8s data for cis_eks benchmark",
+			commonData:  k8sData,
+			benchmark:   "cis_eks",
+			expectError: false,
 		},
 		{
-			name: "Get FS resource id",
-			commonData: CDFields{
-				clusterId: "cluster-test",
-				nodeId:    "nodeid-test",
-			},
-			args: args{
-				metadata: fetching.ResourceMetadata{
-					ID:      "1234",
-					Type:    "file",
-					SubType: "file",
-					Name:    "/etc/passwd",
-				},
-			},
-			want: uuid.NewV5(uuidNamespace, "cluster-test"+"nodeid-test"+"1234").String(),
+			name:        "should return aws data for cis_aws benchmark",
+			commonData:  awsData,
+			benchmark:   "cis_aws",
+			expectError: false,
 		},
 		{
-			name: "Get AWS resource id",
-			commonData: CDFields{
-				clusterId: "cluster-test",
-			},
-			args: args{
-				metadata: fetching.ResourceMetadata{
-					ID:   "1234",
-					Type: "load-balancer",
-					Name: "aws-loadbalancer",
-				},
-			},
-			want: uuid.NewV5(uuidNamespace, "cluster-test"+"1234").String(),
+			name:        "should return an error for an unknown benchmark",
+			commonData:  k8sData,
+			benchmark:   "fake",
+			expectError: true,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			cd := CommonData{
-				clusterId: tt.commonData.clusterId,
-				nodeId:    tt.commonData.nodeId,
-			}
-			if got := cd.GetResourceId(tt.args.metadata); got != tt.want {
-				t.Errorf("GetResourceId() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
-func TestCommonData_GetClusterName(t *testing.T) {
-	clusterName := "cluster-name"
-	commonK8sData := CommonData{
-		clusterId:   "",
-		nodeId:      "",
-		clusterName: clusterName,
-	}
+	for _, test := range tests {
+		conf := &config.Config{Benchmark: test.benchmark}
+		ctx := context.Background()
 
-	assert.Equal(t, clusterName, commonK8sData.GetClusterName(), "cluster name is not correct")
-}
-
-func TestCommonData_GetVersionInfo(t *testing.T) {
-	cloudbeatVersion := version.CloudbeatVersionInfo{
-		Version:    version.Version{},
-		Policy:     version.Version{},
-		Kubernetes: version.Version{},
-	}
-	commonK8sData := CommonData{
-		versionInfo: cloudbeatVersion,
-	}
-
-	assert.Equal(t, cloudbeatVersion, commonK8sData.GetVersionInfo(), "cluster name is not correct")
-}
-
-func TestCommonData_GetCommonData(t *testing.T) {
-	commonK8sData := CommonData{
-		clusterId:   "cluster-id",
-		clusterName: "cluster-name",
-	}
-
-	assert.Equal(t, commonK8sData, commonK8sData.GetData(), "cluster name is not correct")
-}
-
-func createCommonDataProvider(mock *mockK8sDataProvider) CommonDataProvider {
-	return CommonDataProvider{
-		log:             logp.NewLogger("cloudbeat_common_data_provider_test"),
-		cfg:             &config.Config{},
-		k8sDataProvider: mock,
+		commonDataProvider := commonDataProvider{s.log, conf, s.k8sDataProviderInit, s.awsDataProviderInit}
+		result, err := commonDataProvider.FetchCommonData(ctx)
+		if test.expectError {
+			s.Error(err)
+		} else {
+			s.NoError(err)
+			s.Equal(result, test.commonData)
+		}
 	}
 }
