@@ -44,9 +44,7 @@ cloudbeat:
       ]
   config:
     v1:
-
       benchmark: cis_k8s
-
 #    # EKS Fetchers configuration
 #      - name: kube-api
 #      - name: process
@@ -161,7 +159,8 @@ processors:
   - add_host_metadata: ~
   - add_cloud_metadata: ~
   - add_docker_metadata: ~
-  - add_cluster_id: ~
+  # in case you run in EKS/Kubernetes environment, you can use the following processor to add cluster id
+#  - add_cluster_id: ~
 
 # ================================== Logging ===================================
 

@@ -39,9 +39,9 @@ cloudbeat:
       ]
   config:
     v1:
-{{if eq $type $SELF_MANAGED_TYPE }}
+{{- if eq $type $SELF_MANAGED_TYPE }}
       benchmark: cis_k8s
-{{else if eq $type $EKS_TYPE}}
+{{- else if eq $type $EKS_TYPE }}
       benchmark: cis_eks
 {{end}}
 #    # EKS Fetchers configuration

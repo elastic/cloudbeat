@@ -41,9 +41,7 @@ cloudbeat:
       ]
   config:
     v1:
-
       benchmark: cis_k8s
-
 #    # EKS Fetchers configuration
 #      - name: kube-api
 #      - name: process
