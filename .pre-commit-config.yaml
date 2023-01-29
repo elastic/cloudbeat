@@ -4,12 +4,10 @@ repos:
     rev: v4.4.0
     hooks:
       - id: check-merge-conflict
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
       - id: check-added-large-files
       - id: check-yaml
         args: [--allow-multiple-documents, --unsafe]
-        exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*|dev-tools/packaging/packages.yml)$
+        exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*)$
       - id: check-json
 
       ## Security
