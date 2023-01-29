@@ -15,31 +15,54 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cloudtrail
+package awslib
 
 import (
-	"context"
-
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	trailClient "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/assert"
 )
 
-type TrailService interface {
-	DescribeTrails(ctx context.Context) ([]TrailInfo, error)
-}
-
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return trailClient.NewFromConfig(cfg)
+func TestGetClient(t *testing.T) {
+	type args struct {
+		region *string
+		list   map[string]interface{}
 	}
-
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
-	return &Provider{
-		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
+	tests := []struct {
+		name    string
+		args    args
+		want    interface{}
+		wantErr bool
+	}{
+		{
+			name:    "Client not found",
+			wantErr: true,
+			args: args{
+				region: aws.String("eu-east-1"),
+				list:   map[string]interface{}{},
+			},
+		},
+		{
+			name: "Client found",
+			args: args{
+				region: aws.String("eu-east-1"),
+				list: map[string]interface{}{
+					"eu-east-1": struct{}{},
+				},
+			},
+			want: struct{}{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := GetClient(tt.args.region, tt.args.list)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
 	}
 }

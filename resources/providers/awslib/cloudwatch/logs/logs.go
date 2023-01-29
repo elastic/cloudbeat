@@ -15,28 +15,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cloudtrail
+package logs
 
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	cloudwatchlogs "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-
-	"github.com/aws/aws-sdk-go-v2/aws"
-	trailClient "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type TrailService interface {
-	DescribeTrails(ctx context.Context) ([]TrailInfo, error)
+type CloudwatchLogs interface {
+	DescribeMetricFilters(ctx context.Context, region *string, logGroup string) ([]types.MetricFilter, error)
 }
 
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewCloudwatchLogsProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
-		return trailClient.NewFromConfig(cfg)
+		return cloudwatchlogs.NewFromConfig(cfg)
 	}
-
 	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
 	return &Provider{
 		log:     log,
