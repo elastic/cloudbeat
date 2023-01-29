@@ -42,7 +42,6 @@ type S3Resource struct {
 
 func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting S3Fetcher.Fetch")
-
 	buckets, err := f.s3.DescribeBuckets(ctx)
 	if err != nil {
 		f.log.Errorf("failed to load buckets from S3: %v", err)

@@ -18,35 +18,26 @@
 package dataprovider
 
 import (
+	"context"
+	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type CommonDataProvider struct {
-	log             *logp.Logger
-	cfg             *config.Config
-	k8sDataProvider k8sDataProvider
+type CommonDataProvider interface {
+	FetchCommonData(ctx context.Context) (CommonData, error)
 }
 
-type CommonData struct {
-	clusterName string
-	clusterId   string
-	nodeId      string
-	versionInfo version.CloudbeatVersionInfo
-}
-
-type CommonK8sData struct {
-	clusterId     string
-	nodeId        string
-	serverVersion version.Version
-	clusterName   string
-}
-
-type CommonDataInterface interface {
-	GetData() CommonData
+type CommonData interface {
 	GetResourceId(fetching.ResourceMetadata) string
 	GetVersionInfo() version.CloudbeatVersionInfo
-	GetClusterName() string
+	EnrichEvent(beat.Event) error
 }
+
+type EnvironmentCommonDataProvider interface {
+	FetchData(context.Context) (CommonData, error)
+}
+
+type EnvironmentDataProviderInit = func(*logp.Logger, *config.Config) (EnvironmentCommonDataProvider, error)

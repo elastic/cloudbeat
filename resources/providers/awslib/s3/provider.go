@@ -19,8 +19,11 @@ package s3
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
@@ -54,22 +57,106 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 	bucketsRegionsMapping := p.getBucketsRegionMapping(ctx, clientBuckets.Buckets)
 	for region, buckets := range bucketsRegionsMapping {
 		for _, bucket := range buckets {
+			// Getting the bucket encryption, policy and versioning is not critical for the rest of the flow, so we
+			//	should keep describing the bucket even if getting these objects fails.
 			sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, bucket.Name, region)
-			// Getting the bucket encryption is not critical for the rest of the flow, so we should keep describing the
-			//	bucket even if getting the bucket encryption fails.
 			if encryptionErr != nil {
 				p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
 			}
 
-			result = append(result, BucketDescription{*bucket.Name, sseAlgorithm})
+			bucketPolicy, policyErr := p.GetBucketPolicy(ctx, bucket.Name, region)
+
+			if policyErr != nil {
+				p.log.Errorf("Could not get bucket policy for bucket %s. Error: %v", *bucket.Name, policyErr)
+			}
+
+			bucketVersioning, versioningErr := p.getBucketVersioning(ctx, bucket.Name, region)
+			if versioningErr != nil {
+				p.log.Errorf("Could not get bucket versioning for bucket %s. Err: %v", *bucket.Name, versioningErr)
+			}
+
+			result = append(result, BucketDescription{*bucket.Name, sseAlgorithm, bucketPolicy, bucketVersioning})
 		}
 	}
 
 	return result, nil
 }
 
+func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error) {
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return nil, err
+	}
+
+	acl, err := client.GetBucketAcl(ctx, &s3Client.GetBucketAclInput{Bucket: bucketName})
+	if err != nil {
+		p.log.Debugf("Error getting bucket ACL: %s", err)
+		return nil, err
+	}
+
+	grants := []types.Grant{}
+	for _, grant := range acl.Grants {
+		if grant.Grantee != nil && grant.Grantee.Type == types.TypeGroup {
+			if strings.HasSuffix(*grant.Grantee.URI, "AuthenticatedUsers") || strings.HasSuffix(*grant.Grantee.URI, "AllUsers") {
+				grants = append(grants, grant)
+			}
+		}
+	}
+
+	return grants, nil
+}
+
+func (p Provider) GetBucketPolicy(ctx context.Context, bucketName *string, region string) (BucketPolicy, error) {
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return nil, err
+	}
+
+	rawPolicy, err := client.GetBucketPolicy(ctx, &s3Client.GetBucketPolicyInput{Bucket: bucketName})
+	if err != nil {
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == "NoSuchBucketPolicy" {
+				p.log.Debugf("Bucket policy for bucket %s does not exist", *bucketName)
+				return nil, nil
+			}
+		}
+
+		return nil, err
+	}
+
+	var bucketPolicy BucketPolicy
+	jsonErr := json.Unmarshal([]byte(*rawPolicy.Policy), &bucketPolicy)
+	if jsonErr != nil {
+		return nil, jsonErr
+	}
+
+	return bucketPolicy, nil
+}
+
+func (p Provider) GetBucketLogging(ctx context.Context, bucketName *string, region string) (Logging, error) {
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return Logging{}, err
+	}
+
+	logging, err := client.GetBucketLogging(ctx, &s3Client.GetBucketLoggingInput{Bucket: bucketName})
+	if err != nil {
+		p.log.Debugf("Error getting bucket logging: %s", err)
+		return Logging{}, err
+	}
+
+	bucketLogging := Logging{}
+	if logging.LoggingEnabled != nil {
+		bucketLogging.Enabled = true
+		bucketLogging.TargetBucket = *logging.LoggingEnabled.TargetBucket
+	}
+
+	return bucketLogging, nil
+}
+
 func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.Bucket) map[string][]types.Bucket {
-	var bucketsRegionMap = make(map[string][]types.Bucket, 0)
+	bucketsRegionMap := make(map[string][]types.Bucket, 0)
 	for _, clientBucket := range buckets {
 		region, regionErr := p.getBucketRegion(ctx, clientBucket.Name)
 		// If we could not get the region for a bucket, additional API calls for resources will probably fail, we should
@@ -86,9 +173,9 @@ func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.B
 }
 
 func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string, region string) (string, error) {
-	client := p.clients[region]
-	if client == nil {
-		return "", fmt.Errorf("no intialize client exists in %s region", region)
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return "", err
 	}
 
 	encryption, err := client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
@@ -124,6 +211,30 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (stri
 	}
 
 	return region, nil
+}
+
+func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, region string) (BucketVersioning, error) {
+	bucketVersioning := BucketVersioning{false, false}
+
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return bucketVersioning, err
+	}
+
+	bucketVersioningResponse, err := client.GetBucketVersioning(ctx, &s3Client.GetBucketVersioningInput{Bucket: bucketName})
+	if err != nil {
+		return bucketVersioning, err
+	}
+
+	if bucketVersioningResponse.Status == types.BucketVersioningStatusEnabled {
+		bucketVersioning.Enabled = true
+	}
+
+	if bucketVersioningResponse.MFADelete == types.MFADeleteStatusEnabled {
+		bucketVersioning.MfaDelete = true
+	}
+
+	return bucketVersioning, nil
 }
 
 func (b BucketDescription) GetResourceArn() string {

@@ -31,6 +31,7 @@ const (
 	EcrType           = "aws-ecr"
 	IAMType           = "aws-iam"
 	EC2NetworkingType = "aws-ec2-network"
+	MonitoringType    = "aws-monitoring"
 	NetworkNACLType   = "aws-nacl"
 	TrailType         = "aws-trail"
 	SecurityGroupType = "aws-security-group"
@@ -42,10 +43,12 @@ const (
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"
+	MonitoringIdentity     = "monitoring"
 	CloudContainerMgmt     = "caas" // containers as a service
 	CloudLoadBalancer      = "load-balancer"
 	CloudContainerRegistry = "container-registry"
 	CloudStorage           = "cloud-storage"
+	CloudAudit             = "cloud-audit"
 )
 
 // Factory can create fetcher instances based on configuration
