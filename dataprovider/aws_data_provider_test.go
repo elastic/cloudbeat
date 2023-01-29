@@ -33,22 +33,12 @@ var accountId = "accountId"
 
 type AwsDataProviderTestSuite struct {
 	suite.Suite
-	log             *logp.Logger
-	awsDataProvider EnvironmentCommonDataProvider
-	k8sDataProvider EnvironmentCommonDataProvider
+	log *logp.Logger
 }
 
 func TestAwsDataProviderTestSuite(t *testing.T) {
 	s := new(AwsDataProviderTestSuite)
-	s.log = logp.NewLogger("cloudbeat_data_provider_test_suite")
-
-	k8sDataProviderMock := &MockEnvironmentCommonDataProvider{}
-	k8sDataProviderMock.On("FetchData", mock.Anything).Return(k8sData, nil)
-	s.k8sDataProvider = k8sDataProviderMock
-
-	awsDataProviderMock := &MockEnvironmentCommonDataProvider{}
-	awsDataProviderMock.On("FetchData", mock.Anything).Return(awsData, nil)
-	s.awsDataProvider = awsDataProviderMock
+	s.log = logp.NewLogger("cloudbeat_aws_data_provider_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)

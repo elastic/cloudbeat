@@ -101,7 +101,7 @@ func (s *DataProviderTestSuite) TestDataProvider_FetchCommonData() {
 		conf := &config.Config{Benchmark: test.benchmark}
 		ctx := context.Background()
 
-		commonDataProvider := CommonDataProvider{s.log, conf, s.k8sDataProviderInit, s.awsDataProviderInit}
+		commonDataProvider := commonDataProvider{s.log, conf, s.k8sDataProviderInit, s.awsDataProviderInit}
 		result, err := commonDataProvider.FetchCommonData(ctx)
 		if test.expectError {
 			s.Error(err)

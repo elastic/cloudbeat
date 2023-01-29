@@ -20,24 +20,11 @@ package dataprovider
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type EnvironmentCommonDataProvider interface {
-	FetchData(context.Context) (CommonData, error)
-}
-
-type CommonData interface {
-	GetResourceId(fetching.ResourceMetadata) string
-	GetVersionInfo() version.CloudbeatVersionInfo
-	EnrichEvent(beat.Event) error
-}
-
-type CommonDataProvider struct {
+type commonDataProvider struct {
 	log                 *logp.Logger
 	cfg                 *config.Config
 	k8sDataProviderInit func(*logp.Logger, *config.Config) EnvironmentCommonDataProvider
@@ -45,10 +32,10 @@ type CommonDataProvider struct {
 }
 
 func NewCommonDataProvider(log *logp.Logger, cfg *config.Config) CommonDataProvider {
-	return CommonDataProvider{log, cfg, NewK8sDataProvider, NewAwsDataProvider}
+	return commonDataProvider{log, cfg, NewK8sDataProvider, NewAwsDataProvider}
 }
 
-func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonData, error) {
+func (c commonDataProvider) FetchCommonData(ctx context.Context) (CommonData, error) {
 	if c.cfg.Benchmark == "cis_eks" || c.cfg.Benchmark == "cis_k8s" {
 		return c.k8sDataProviderInit(c.log, c.cfg).FetchData(ctx)
 	}
