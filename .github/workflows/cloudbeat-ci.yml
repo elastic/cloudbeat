@@ -17,7 +17,7 @@ concurrency:
 jobs:
   Lint:
     # for more information see .pre-commit-config.yaml
-    name: Lint
+    name: Pre-commit Hooks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -27,14 +27,9 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Python lints
+      - name: Pre-commit Hooks
         run: |
-          git ls-files -- '*.py' | xargs pre-commit run --file
-        shell: bash
-
-      - name: Go lints
-        run: |
-          git ls-files -- '*.go' | xargs pre-commit run --file
+          pre-commit run --all-files
         shell: bash
 
   Build:
