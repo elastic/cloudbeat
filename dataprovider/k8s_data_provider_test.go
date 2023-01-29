@@ -6,7 +6,7 @@
 // not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//	http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
@@ -14,6 +14,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 package dataprovider
 
 import (
@@ -46,11 +47,11 @@ func (c clusterNameProviderMock) GetClusterName(_ context.Context, _ *config.Con
 	return c.clusterName, nil
 }
 
-func Test_k8sDataProvider_CollectK8sData(t *testing.T) {
+func Test_k8sDataProvider_FetchData(t *testing.T) {
 	tests := []struct {
 		collector k8sDataProvider
 		name      string
-		want      *commonK8sData
+		want      CommonData
 	}{
 		{
 			name: "test k8s common data",
@@ -101,7 +102,7 @@ func Test_k8sDataProvider_CollectK8sData(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			adjustK8sCluster(t, &tt.collector)
-			data, err := tt.collector.GetData(ctxBg)
+			data, err := tt.collector.FetchData(ctxBg)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, data)
 		})

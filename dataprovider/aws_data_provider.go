@@ -60,7 +60,7 @@ func NewAwsDataProvider(log *logp.Logger, cfg *config.Config) (EnvironmentCommon
 	return &awsDataProvider{log, identityClient, iamProvider}, nil
 }
 
-func (a awsDataProvider) GetData(ctx context.Context) (CommonData, error) {
+func (a awsDataProvider) FetchData(ctx context.Context) (CommonData, error) {
 	identity, err := a.identityProvider.GetIdentity(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get AWS identity: %w", err)
@@ -71,7 +71,7 @@ func (a awsDataProvider) GetData(ctx context.Context) (CommonData, error) {
 		return nil, fmt.Errorf("failed to get AWS account alias: %w", err)
 	}
 
-	return commonAwsData{
+	return &commonAwsData{
 		accountId:   *identity.Account,
 		accountName: alias,
 	}, nil

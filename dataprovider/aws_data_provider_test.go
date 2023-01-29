@@ -43,11 +43,11 @@ func TestAwsDataProviderTestSuite(t *testing.T) {
 	s.log = logp.NewLogger("cloudbeat_data_provider_test_suite")
 
 	k8sDataProviderMock := &MockEnvironmentCommonDataProvider{}
-	k8sDataProviderMock.On("GetData", mock.Anything).Return(k8sData, nil)
+	k8sDataProviderMock.On("FetchData", mock.Anything).Return(k8sData, nil)
 	s.k8sDataProvider = k8sDataProviderMock
 
 	awsDataProviderMock := &MockEnvironmentCommonDataProvider{}
-	awsDataProviderMock.On("GetData", mock.Anything).Return(awsData, nil)
+	awsDataProviderMock.On("FetchData", mock.Anything).Return(awsData, nil)
 	s.awsDataProvider = awsDataProviderMock
 
 	if err := logp.TestingSetup(); err != nil {
@@ -71,12 +71,12 @@ type aliasMock struct {
 	error error
 }
 
-func (s *AwsDataProviderTestSuite) TestAwsDataProvider_GetData() {
+func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 	var tests = []struct {
 		name         string
 		identityMock identityMock
 		aliasMock    aliasMock
-		expected     commonAwsData
+		expected     *commonAwsData
 		expectError  bool
 	}{
 		{
@@ -86,7 +86,7 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_GetData() {
 				error:    nil,
 			},
 			aliasMock:   aliasMock{accountName, nil},
-			expected:    commonAwsData{accountId: accountId, accountName: accountName},
+			expected:    &commonAwsData{accountId: accountId, accountName: accountName},
 			expectError: false,
 		},
 		{
@@ -96,7 +96,7 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_GetData() {
 				error:    errors.New("bla"),
 			},
 			aliasMock:   aliasMock{accountName, nil},
-			expected:    commonAwsData{accountId: accountId, accountName: accountName},
+			expected:    &commonAwsData{accountId: accountId, accountName: accountName},
 			expectError: true,
 		},
 		{
@@ -106,7 +106,7 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_GetData() {
 				error:    nil,
 			},
 			aliasMock:   aliasMock{"", errors.New("bla")},
-			expected:    commonAwsData{accountId: accountId, accountName: accountName},
+			expected:    &commonAwsData{accountId: accountId, accountName: accountName},
 			expectError: true,
 		},
 	}
@@ -121,7 +121,7 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_GetData() {
 		dataProvider := awsDataProvider{log: s.log, identityProvider: identityProvider, iamProvider: iamProvider}
 		ctx := context.Background()
 
-		result, err := dataProvider.GetData(ctx)
+		result, err := dataProvider.FetchData(ctx)
 		if test.expectError {
 			s.Error(err)
 		} else {

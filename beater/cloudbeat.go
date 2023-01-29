@@ -123,7 +123,7 @@ func newCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
 	commonDataProvider := dataprovider.NewCommonDataProvider(log, c)
-	commonData, err := commonDataProvider.GetCommonData(ctx)
+	commonData, err := commonDataProvider.FetchCommonData(ctx)
 	if err != nil {
 		log.Errorf("could not get common data from common data providers. Error: %v", err)
 		cancel()

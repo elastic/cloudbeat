@@ -78,7 +78,7 @@ func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) EnvironmentCommonD
 	}
 }
 
-func (k k8sDataProvider) GetData(ctx context.Context) (CommonData, error) {
+func (k k8sDataProvider) FetchData(ctx context.Context) (CommonData, error) {
 	if k.kubeClient == nil {
 		k.log.Debug("Could not collect Kubernetes common data as the client was not provided")
 		return nil, nil

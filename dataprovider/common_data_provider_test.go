@@ -42,13 +42,13 @@ func TestDataProviderTestSuite(t *testing.T) {
 	s.log = logp.NewLogger("cloudbeat_data_provider_test_suite")
 
 	k8sDataProviderMock := &MockEnvironmentCommonDataProvider{}
-	k8sDataProviderMock.On("GetData", mock.Anything).Return(k8sData, nil)
+	k8sDataProviderMock.On("FetchData", mock.Anything).Return(k8sData, nil)
 	s.k8sDataProviderInit = func(l *logp.Logger, c *config.Config) EnvironmentCommonDataProvider {
 		return k8sDataProviderMock
 	}
 
 	awsDataProviderMock := &MockEnvironmentCommonDataProvider{}
-	awsDataProviderMock.On("GetData", mock.Anything).Return(awsData, nil)
+	awsDataProviderMock.On("FetchData", mock.Anything).Return(awsData, nil)
 	s.awsDataProviderInit = func(l *logp.Logger, c *config.Config) (EnvironmentCommonDataProvider, error) {
 		return awsDataProviderMock, nil
 	}
@@ -64,7 +64,7 @@ func (s *DataProviderTestSuite) SetupTest() {}
 
 func (s *DataProviderTestSuite) TearDownTest() {}
 
-func (s *DataProviderTestSuite) TestDataProvider_GetCommonData() {
+func (s *DataProviderTestSuite) TestDataProvider_FetchCommonData() {
 	var tests = []struct {
 		name        string
 		commonData  CommonData
@@ -102,7 +102,7 @@ func (s *DataProviderTestSuite) TestDataProvider_GetCommonData() {
 		ctx := context.Background()
 
 		commonDataProvider := CommonDataProvider{s.log, conf, s.k8sDataProviderInit, s.awsDataProviderInit}
-		result, err := commonDataProvider.GetCommonData(ctx)
+		result, err := commonDataProvider.FetchCommonData(ctx)
 		if test.expectError {
 			s.Error(err)
 		} else {

@@ -28,7 +28,7 @@ import (
 )
 
 type EnvironmentCommonDataProvider interface {
-	GetData(context.Context) (CommonData, error)
+	FetchData(context.Context) (CommonData, error)
 }
 
 type CommonData interface {
@@ -48,9 +48,9 @@ func NewCommonDataProvider(log *logp.Logger, cfg *config.Config) CommonDataProvi
 	return CommonDataProvider{log, cfg, NewK8sDataProvider, NewAwsDataProvider}
 }
 
-func (c CommonDataProvider) GetCommonData(ctx context.Context) (CommonData, error) {
+func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonData, error) {
 	if c.cfg.Benchmark == "cis_eks" || c.cfg.Benchmark == "cis_k8s" {
-		return c.k8sDataProviderInit(c.log, c.cfg).GetData(ctx)
+		return c.k8sDataProviderInit(c.log, c.cfg).FetchData(ctx)
 	}
 
 	if c.cfg.Benchmark == "cis_aws" {
@@ -59,7 +59,7 @@ func (c CommonDataProvider) GetCommonData(ctx context.Context) (CommonData, erro
 			return nil, err
 		}
 
-		return dataProvider.GetData(ctx)
+		return dataProvider.FetchData(ctx)
 	}
 
 	return nil, fmt.Errorf("could not get common data provider for benchmark %s", c.cfg.Benchmark)

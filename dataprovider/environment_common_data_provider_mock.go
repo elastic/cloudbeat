@@ -38,8 +38,8 @@ func (_m *MockEnvironmentCommonDataProvider) EXPECT() *MockEnvironmentCommonData
 	return &MockEnvironmentCommonDataProvider_Expecter{mock: &_m.Mock}
 }
 
-// GetData provides a mock function with given fields: _a0
-func (_m *MockEnvironmentCommonDataProvider) GetData(_a0 context.Context) (CommonData, error) {
+// FetchData provides a mock function with given fields: _a0
+func (_m *MockEnvironmentCommonDataProvider) FetchData(_a0 context.Context) (CommonData, error) {
 	ret := _m.Called(_a0)
 
 	var r0 CommonData
@@ -61,25 +61,25 @@ func (_m *MockEnvironmentCommonDataProvider) GetData(_a0 context.Context) (Commo
 	return r0, r1
 }
 
-// MockEnvironmentCommonDataProvider_GetData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetData'
-type MockEnvironmentCommonDataProvider_GetData_Call struct {
+// MockEnvironmentCommonDataProvider_FetchData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FetchData'
+type MockEnvironmentCommonDataProvider_FetchData_Call struct {
 	*mock.Call
 }
 
-// GetData is a helper method to define mock.On call
+// FetchData is a helper method to define mock.On call
 //   - _a0 context.Context
-func (_e *MockEnvironmentCommonDataProvider_Expecter) GetData(_a0 interface{}) *MockEnvironmentCommonDataProvider_GetData_Call {
-	return &MockEnvironmentCommonDataProvider_GetData_Call{Call: _e.mock.On("GetData", _a0)}
+func (_e *MockEnvironmentCommonDataProvider_Expecter) FetchData(_a0 interface{}) *MockEnvironmentCommonDataProvider_FetchData_Call {
+	return &MockEnvironmentCommonDataProvider_FetchData_Call{Call: _e.mock.On("FetchData", _a0)}
 }
 
-func (_c *MockEnvironmentCommonDataProvider_GetData_Call) Run(run func(_a0 context.Context)) *MockEnvironmentCommonDataProvider_GetData_Call {
+func (_c *MockEnvironmentCommonDataProvider_FetchData_Call) Run(run func(_a0 context.Context)) *MockEnvironmentCommonDataProvider_FetchData_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context))
 	})
 	return _c
 }
 
-func (_c *MockEnvironmentCommonDataProvider_GetData_Call) Return(_a0 CommonData, _a1 error) *MockEnvironmentCommonDataProvider_GetData_Call {
+func (_c *MockEnvironmentCommonDataProvider_FetchData_Call) Return(_a0 CommonData, _a1 error) *MockEnvironmentCommonDataProvider_FetchData_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
