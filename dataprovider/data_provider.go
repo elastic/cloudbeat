@@ -20,8 +20,10 @@ package dataprovider
 import (
 	"context"
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/version"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type CommonDataProvider interface {
@@ -37,3 +39,5 @@ type CommonData interface {
 type EnvironmentCommonDataProvider interface {
 	FetchData(context.Context) (CommonData, error)
 }
+
+type EnvironmentDataProviderInit = func(*logp.Logger, *config.Config) (EnvironmentCommonDataProvider, error)

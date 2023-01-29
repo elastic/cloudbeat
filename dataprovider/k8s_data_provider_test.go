@@ -87,16 +87,6 @@ func Test_k8sDataProvider_FetchData(t *testing.T) {
 				clusterNameProvider: clusterNameProviderMock{"error"},
 			},
 		},
-		{
-			name: "test k8s common data with no k8s connection",
-			want: nil,
-			collector: k8sDataProvider{
-				kubeClient:          nil,
-				log:                 logger,
-				cfg:                 cfg,
-				clusterNameProvider: clusterNameProviderMock{"some_name"},
-			},
-		},
 	}
 
 	for _, tt := range tests {

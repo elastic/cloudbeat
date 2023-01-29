@@ -27,8 +27,8 @@ import (
 type commonDataProvider struct {
 	log                 *logp.Logger
 	cfg                 *config.Config
-	k8sDataProviderInit func(*logp.Logger, *config.Config) EnvironmentCommonDataProvider
-	awsDataProviderInit func(*logp.Logger, *config.Config) (EnvironmentCommonDataProvider, error)
+	k8sDataProviderInit EnvironmentDataProviderInit
+	awsDataProviderInit EnvironmentDataProviderInit
 }
 
 func NewCommonDataProvider(log *logp.Logger, cfg *config.Config) CommonDataProvider {
@@ -36,18 +36,22 @@ func NewCommonDataProvider(log *logp.Logger, cfg *config.Config) CommonDataProvi
 }
 
 func (c commonDataProvider) FetchCommonData(ctx context.Context) (CommonData, error) {
-	if c.cfg.Benchmark == "cis_eks" || c.cfg.Benchmark == "cis_k8s" {
-		return c.k8sDataProviderInit(c.log, c.cfg).FetchData(ctx)
+	var dataProviderInit EnvironmentDataProviderInit
+	switch c.cfg.Benchmark {
+	case "cis_eks", "cis_k8s":
+		dataProviderInit = c.k8sDataProviderInit
+
+	case "cis_aws":
+		dataProviderInit = c.awsDataProviderInit
+
+	default:
+		return nil, fmt.Errorf("could not get common data provider for benchmark %s", c.cfg.Benchmark)
 	}
 
-	if c.cfg.Benchmark == "cis_aws" {
-		dataProvider, err := c.awsDataProviderInit(c.log, c.cfg)
-		if err != nil {
-			return nil, err
-		}
-
-		return dataProvider.FetchData(ctx)
+	dataProvider, err := dataProviderInit(c.log, c.cfg)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, fmt.Errorf("could not get common data provider for benchmark %s", c.cfg.Benchmark)
+	return dataProvider.FetchData(ctx)
 }

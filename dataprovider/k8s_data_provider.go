@@ -19,6 +19,7 @@ package dataprovider
 
 import (
 	"context"
+	"fmt"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchers"
@@ -54,10 +55,10 @@ type commonK8sData struct {
 	clusterName   string
 }
 
-func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) EnvironmentCommonDataProvider {
+func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) (EnvironmentCommonDataProvider, error) {
 	kubeClient, err := providers.KubernetesProvider{}.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
-		log.Warnf("Could not create Kubernetes client to provide common data: %v", err)
+		return nil, fmt.Errorf("could not create Kubernetes client to provide common data: %v", err)
 	}
 
 	clusterNameProvider := providers.ClusterNameProvider{
@@ -75,15 +76,10 @@ func NewK8sDataProvider(log *logp.Logger, cfg *config.Config) EnvironmentCommonD
 		log:                 log,
 		cfg:                 cfg,
 		clusterNameProvider: clusterNameProvider,
-	}
+	}, nil
 }
 
 func (k k8sDataProvider) FetchData(ctx context.Context) (CommonData, error) {
-	if k.kubeClient == nil {
-		k.log.Debug("Could not collect Kubernetes common data as the client was not provided")
-		return nil, nil
-	}
-
 	return &commonK8sData{
 		clusterId:     k.getClusterId(ctx),
 		nodeId:        k.getNodeId(ctx),

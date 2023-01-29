@@ -33,8 +33,8 @@ var awsData = commonAwsData{accountId: "accountId", accountName: "string"}
 type DataProviderTestSuite struct {
 	suite.Suite
 	log                 *logp.Logger
-	awsDataProviderInit func(*logp.Logger, *config.Config) (EnvironmentCommonDataProvider, error)
-	k8sDataProviderInit func(*logp.Logger, *config.Config) EnvironmentCommonDataProvider
+	awsDataProviderInit EnvironmentDataProviderInit
+	k8sDataProviderInit EnvironmentDataProviderInit
 }
 
 func TestDataProviderTestSuite(t *testing.T) {
@@ -43,8 +43,8 @@ func TestDataProviderTestSuite(t *testing.T) {
 
 	k8sDataProviderMock := &MockEnvironmentCommonDataProvider{}
 	k8sDataProviderMock.On("FetchData", mock.Anything).Return(k8sData, nil)
-	s.k8sDataProviderInit = func(l *logp.Logger, c *config.Config) EnvironmentCommonDataProvider {
-		return k8sDataProviderMock
+	s.k8sDataProviderInit = func(l *logp.Logger, c *config.Config) (EnvironmentCommonDataProvider, error) {
+		return k8sDataProviderMock, nil
 	}
 
 	awsDataProviderMock := &MockEnvironmentCommonDataProvider{}
