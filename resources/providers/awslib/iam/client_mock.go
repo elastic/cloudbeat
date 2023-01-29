@@ -473,6 +473,68 @@ func (_c *MockClient_ListAccessKeys_Call) Return(_a0 *serviceiam.ListAccessKeysO
 	return _c
 }
 
+// ListAccountAliases provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) ListAccountAliases(ctx context.Context, params *serviceiam.ListAccountAliasesInput, optFns ...func(*serviceiam.Options)) (*serviceiam.ListAccountAliasesOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceiam.ListAccountAliasesOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceiam.ListAccountAliasesInput, ...func(*serviceiam.Options)) *serviceiam.ListAccountAliasesOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceiam.ListAccountAliasesOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceiam.ListAccountAliasesInput, ...func(*serviceiam.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_ListAccountAliases_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListAccountAliases'
+type MockClient_ListAccountAliases_Call struct {
+	*mock.Call
+}
+
+// ListAccountAliases is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceiam.ListAccountAliasesInput
+//   - optFns ...func(*serviceiam.Options)
+func (_e *MockClient_Expecter) ListAccountAliases(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListAccountAliases_Call {
+	return &MockClient_ListAccountAliases_Call{Call: _e.mock.On("ListAccountAliases",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_ListAccountAliases_Call) Run(run func(ctx context.Context, params *serviceiam.ListAccountAliasesInput, optFns ...func(*serviceiam.Options))) *MockClient_ListAccountAliases_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceiam.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceiam.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceiam.ListAccountAliasesInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_ListAccountAliases_Call) Return(_a0 *serviceiam.ListAccountAliasesOutput, _a1 error) *MockClient_ListAccountAliases_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // ListAttachedRolePolicies provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) ListAttachedRolePolicies(ctx context.Context, params *serviceiam.ListAttachedRolePoliciesInput, optFns ...func(*serviceiam.Options)) (*serviceiam.ListAttachedRolePoliciesOutput, error) {
 	_va := make([]interface{}, len(optFns))

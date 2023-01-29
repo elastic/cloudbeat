@@ -40,6 +40,50 @@ func (_m *MockAccessManagement) EXPECT() *MockAccessManagement_Expecter {
 	return &MockAccessManagement_Expecter{mock: &_m.Mock}
 }
 
+// GetAccountAlias provides a mock function with given fields: ctx
+func (_m *MockAccessManagement) GetAccountAlias(ctx context.Context) (string, error) {
+	ret := _m.Called(ctx)
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func(context.Context) string); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAccessManagement_GetAccountAlias_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAccountAlias'
+type MockAccessManagement_GetAccountAlias_Call struct {
+	*mock.Call
+}
+
+// GetAccountAlias is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockAccessManagement_Expecter) GetAccountAlias(ctx interface{}) *MockAccessManagement_GetAccountAlias_Call {
+	return &MockAccessManagement_GetAccountAlias_Call{Call: _e.mock.On("GetAccountAlias", ctx)}
+}
+
+func (_c *MockAccessManagement_GetAccountAlias_Call) Run(run func(ctx context.Context)) *MockAccessManagement_GetAccountAlias_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockAccessManagement_GetAccountAlias_Call) Return(_a0 string, _a1 error) *MockAccessManagement_GetAccountAlias_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // GetIAMRolePermissions provides a mock function with given fields: ctx, roleName
 func (_m *MockAccessManagement) GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error) {
 	ret := _m.Called(ctx, roleName)

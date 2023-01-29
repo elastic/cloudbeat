@@ -19,64 +19,39 @@ package dataprovider
 
 import (
 	"context"
+	"fmt"
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetchers"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/gofrs/uuid"
 )
 
-const (
-	namespace = "kube-system"
-)
-
-var uuidNamespace = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
+type commonDataProvider struct {
+	log                 *logp.Logger
+	cfg                 *config.Config
+	k8sDataProviderInit EnvironmentDataProviderInit
+	awsDataProviderInit EnvironmentDataProviderInit
+}
 
 func NewCommonDataProvider(log *logp.Logger, cfg *config.Config) CommonDataProvider {
-	return CommonDataProvider{
-		log:             log,
-		cfg:             cfg,
-		k8sDataProvider: NewK8sDataProvider(log, cfg),
-	}
+	return commonDataProvider{log, cfg, NewK8sDataProvider, NewAwsDataProvider}
 }
 
-// FetchCommonData fetches cluster id, node id and version info
-func (c CommonDataProvider) FetchCommonData(ctx context.Context) (CommonDataInterface, error) {
-	cm := CommonData{}
-	cm.versionInfo.Version = version.CloudbeatVersion()
-	cm.versionInfo.Policy = version.PolicyVersion()
+func (c commonDataProvider) FetchCommonData(ctx context.Context) (CommonData, error) {
+	var dataProviderInit EnvironmentDataProviderInit
+	switch c.cfg.Benchmark {
+	case "cis_eks", "cis_k8s":
+		dataProviderInit = c.k8sDataProviderInit
 
-	k8sCommonData := c.k8sDataProvider.CollectK8sData(ctx)
-	if k8sCommonData != nil {
-		cm.versionInfo.Kubernetes = k8sCommonData.serverVersion
-		cm.clusterId = k8sCommonData.clusterId
-		cm.nodeId = k8sCommonData.nodeId
-		cm.clusterName = k8sCommonData.clusterName
-	}
+	case "cis_aws":
+		dataProviderInit = c.awsDataProviderInit
 
-	return cm, nil
-}
-
-func (cd CommonData) GetResourceId(metadata fetching.ResourceMetadata) string {
-	switch metadata.Type {
-	case fetchers.ProcessResourceType, fetchers.FSResourceType:
-		return uuid.NewV5(uuidNamespace, cd.clusterId+cd.nodeId+metadata.ID).String()
-	case fetching.CloudContainerMgmt, fetching.CloudIdentity, fetching.CloudLoadBalancer, fetching.CloudContainerRegistry:
-		return uuid.NewV5(uuidNamespace, cd.clusterId+metadata.ID).String()
 	default:
-		return metadata.ID
+		return nil, fmt.Errorf("could not get common data provider for benchmark %s", c.cfg.Benchmark)
 	}
-}
 
-func (cd CommonData) GetData() CommonData {
-	return cd
-}
+	dataProvider, err := dataProviderInit(c.log, c.cfg)
+	if err != nil {
+		return nil, err
+	}
 
-func (cd CommonData) GetVersionInfo() version.CloudbeatVersionInfo {
-	return cd.versionInfo
-}
-
-func (cd CommonData) GetClusterName() string {
-	return cd.clusterName
+	return dataProvider.FetchData(ctx)
 }
