@@ -107,10 +107,12 @@ jobs:
       - name: Set sensitive terraform output as env variable
         id: set_sensitive_output
         run: |
-          SWA_DEPLOYMENT_TOKEN="Lapid"
-          echo "::add-mask::$SWA_DEPLOYMENT_TOKEN"
-          echo SWA_DEPLOYMENT_TOKEN=$SWA_DEPLOYMENT_TOKEN >> $GITHUB_ENV
-
+          ELASTICSEARCH_USERNAME= $(jq -r '.elasticsearch_username.value' output.json)
+          echo "::add-mask::ELASTICSEARCH_USERNAME"
+          echo ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME >> $GITHUB_ENV
+          ELASTIC_SEARCH_PASSWORD= $(jq -r '.elasticsearch_password.value' output.json)
+          echo "::add-mask::ELASTIC_SEARCH_PASSWORD"
+          echo ELASTIC_SEARCH_PASSWORD=$ELASTIC_SEARCH_PASSWORD >> $GITHUB_ENV
 
 #      Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
@@ -150,8 +152,13 @@ jobs:
                       "short": true
                     },
                     {
-                      "title": "Sensetive output",
-                      "value": "${{ env.SWA_DEPLOYMENT_TOKEN }}",
+                      "title": "ElasticSearch username",
+                      "value": "${{ env.ELASTICSEARCH_USERNAME }}",
+                      "short": true
+                    },
+                    {
+                      "title": "ElasticSearch password",
+                      "value": "${{ env.ELASTICSEARCH_PASSWORD }}",
                       "short": true
                     }
                   ]
