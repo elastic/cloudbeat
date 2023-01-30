@@ -8,26 +8,5 @@
                 "text": ":rocket: *A new Deployment was Created!* :rocket:"
             }
         },
-        {
-            "type": "section",
-            "fields": [
-                {
-                    "type": "mrkdwn",
-                    "text": "*Environment:*\n Weekly enviroment"
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": "*Kibana URL:*\n https://example.com"
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": "*Username:*\n deployuser"
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": "*Password:*\n *****"
-                }
-            ]
-        }
     ]
 }
