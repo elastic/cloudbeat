@@ -99,6 +99,13 @@ jobs:
       - name: Terraform Output
         run: terraform output -json > output.json
 
+      - name: Get Kibana URL
+        id: kibana_url
+        run: |
+          kibana_url=$(jq -r '.kibana_url.value' output.json)
+          echo "::set-output name=kibana_url::$kibana_url"
+          echo $kibana_url
+
 #      Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
         id: slack
@@ -133,7 +140,7 @@ jobs:
                     },
                     {
                       "title": "Kibana URL",
-                      "value": "$( jq -r '.kibana_url' output.json )",
+                      "value": "${{ kibana_url }}",
                       "short": true
                     }
                   ]
