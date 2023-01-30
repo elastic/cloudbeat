@@ -95,12 +95,12 @@ jobs:
 #          echo "::set-output name=tf_output::$tf_output"
 #          echo $output1
 
-      - name: Comment test success result
-        uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@v2
         with:
-          header: Test Results
+          append: true
           message: |
-            ## Weekly environment :man_dancing:
-            A new environment has been deployed to the elastic cloud. :tada:
-
+            Test with ${{ github.sha }}.
+            ```
+            ${{ steps.test.outputs.result }}
+            ```
 
