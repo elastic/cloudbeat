@@ -35,6 +35,7 @@ env:
   AWS_REGION: eu-west-2
   KUBE_NAMESPACE: kube-system
   WORKING_DIR: deploy/cloud
+  SLACK_MESSAGE_PAYLOAD_PATH: ".github/workflows/weekly-environment-slack-payload.json"
 
 jobs:
   terraform:
@@ -99,6 +100,6 @@ jobs:
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          payload-file-path: "./weekly-enviroment-slack-payload.json"
+          payload-file-path: ${{ env.SLACK_MESSAGE_PAYLOAD_PATH }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
