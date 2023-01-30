@@ -17,7 +17,7 @@
                 },
                 {
                     "type": "mrkdwn",
-                    "text": "*Kibana URL:*\n ${{terraform output kibana_url}}"
+                    "text": "*Kibana URL:*\n ${{PATH}}"
                 },
                 {
                     "type": "mrkdwn",
