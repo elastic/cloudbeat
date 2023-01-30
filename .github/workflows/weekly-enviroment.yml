@@ -102,7 +102,9 @@ jobs:
       - name: Get Kibana URL
         id: kibana_url
         run: |
-          echo "KIBANA_URL=$(jq -r '.kibana_url' output.json)" >> $GITHUB_ENV
+          echo "KIBANA_URL=$(jq -r '.kibana_url.value' output.json)" >> $GITHUB_ENV
+          echo "OFIR_VAR=LAPID" >> $GITHUB_ENV
+
 
 #      Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
@@ -140,7 +142,16 @@ jobs:
                       "title": "Kibana URL",
                       "value": "${{ env.KIBANA_URL }}",
                       "short": true
-                    }
+                    },
+                    {
+                      "title": "Region",
+                      "value": "${{ env.AWS_REGION }}",
+                      "short": true
+                    },
+                    {
+                      title: "Ofir variable",
+                      value: "${{ env.OFIR_VAR }}",
+                      "short": true
                   ]
                 }
               ]
