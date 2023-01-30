@@ -1,33 +1,44 @@
 {
-    "text": "",
+    "text": ":rocket: *A new Deployment was Created!* :rocket:",
+    "attachments": [
+        {
+            "color": "#36a64f",
+            "fields": [
+                {
+                    "title": "Environment",
+                    "value": "${{ github.event.inputs.environment }}",
+                    "short": true
+                },
+                {
+                    "title": "Benchmark",
+                    "value": "${{ github.event.inputs.benchmark }}",
+                    "short": true
+                },
+                {
+                    "title": "Alerts",
+                    "value": "${{ github.event.inputs.alerts }}",
+                    "short": true
+                },
+                {
+                    "title": "Log level",
+                    "value": "${{ github.event.inputs.logLevel }}",
+                    "short": true
+                },
+                {
+                    "title": "Kibana URL",
+                    "value": "${{ steps.terraform_output.outputs.tf_output }}",
+                    "short": true
+                }
+            ]
+        }
+    ],
     "blocks": [
         {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": ":rocket: *A new Deployment was Created!* :rocket:"
+                "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
             }
-        },
-        {
-            "type": "section",
-            "fields": [
-                {
-                    "type": "mrkdwn",
-                    "text": "*Environment:*\n Weekly environment ${{terraform output kibana_url}}"
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": "*Kibana URL:*\n ${{Ofir}}"
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": "*Username:*\n ${{ job.status }}"
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": "*Password:*\n *****"
-                }
-            ]
         }
     ]
 }
