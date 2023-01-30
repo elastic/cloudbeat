@@ -17,7 +17,7 @@
                 },
                 {
                     "type": "mrkdwn",
-                    "text": "*Kibana URL:*\n ${{PATH}}"
+                    "text": "*Kibana URL:*\n ${{Ofir}}"
                 },
                 {
                     "type": "mrkdwn",
