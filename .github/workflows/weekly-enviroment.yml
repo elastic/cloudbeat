@@ -96,23 +96,20 @@ jobs:
 #          echo "::set-output name=tf_output::$tf_output"
 #          echo $output1
 
-      - name: Terraform Output
-        run: terraform output -json > output.json
-
       - name: Set terraform output as env variable
         id: kibana_url
         run: |
-          echo "KIBANA_URL=$(jq -r '.kibana_url.value' output.json)" >> $GITHUB_ENV
+          echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
 
       - name: Set sensitive terraform output as env variable
         id: set_sensitive_output
         run: |
-          export ELASTICSEARCH_USERNAME=$(jq -r '.elasticsearch_username.value' output.json)
+          export ELASTICSEARCH_USERNAME=$(terraform output elasticsearch_username)
           echo "::add-mask::$ELASTICSEARCH_USERNAME"
           echo "ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME" >> $GITHUB_ENV
-          export ELASTICSEARCH_PASSWORD=$(jq -r '.elasticsearch_password.value' output.json)
+          export ELASTICSEARCH_PASSWORD=$(terraform output elasticsearch_password)
           echo "::add-mask::ELASTICSEARCH_PASSWORD"
-          echo "ELASTICSEARCH_PASSWORD=ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
+          echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
 
 #      Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
