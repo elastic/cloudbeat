@@ -108,11 +108,8 @@ jobs:
         id: set_sensitive_output
         run: |
           export ELASTICSEARCH_USERNAME=$(jq -r '.elasticsearch_username.value' output.json)
-          echo "::add-mask::ELASTICSEARCH_USERNAME"
-          echo ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME >> $GITHUB_ENV
-          export ELASTIC_SEARCH_PASSWORD= $(jq -r '.elasticsearch_password.value' output.json)
-          echo "::add-mask::ELASTIC_SEARCH_PASSWORD"
-          echo ELASTIC_SEARCH_PASSWORD=$ELASTIC_SEARCH_PASSWORD >> $GITHUB_ENV
+          echo "::add-mask::$ELASTICSEARCH_USERNAME"
+          echo "ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME" >> $GITHUB_ENV
 
 #      Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
