@@ -106,7 +106,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "Weekly environment deployed",
+              "text": "A new deployment job has been triggered",
               "attachments": [
                 {
                   "color": "#36a64f",
@@ -133,7 +133,7 @@ jobs:
                     },
                     {
                       "title": "Kibana URL",
-                      "value": "${{ steps.terraform_output.outputs.tf_output }}",
+                      "value": "${{ terraform output }}",
                       "short": true
                     }
                   ]
