@@ -100,11 +100,12 @@ jobs:
         uses: slackapi/slack-github-action@v1.23.0
         with:
           # This data can be any valid JSON from a previous step in the GitHub Action
-          payload: |
-            {
-              "text": "GitHub Action build result:",
-              "key": "value",
-              "foo": "bar"
-            }
+          slack-message: "GitHub build result 111:"
+#          payload: |
+#            {
+#              "text": "GitHub Action build result:",
+#              "key": "value",
+#              "foo": "bar"
+#            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
