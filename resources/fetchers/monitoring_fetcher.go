@@ -55,7 +55,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 	m.log.Debug("Starting MonitoringFetcher.Fetch")
 	out, err := m.provider.AggregateResources(ctx)
 	if err != nil {
-		m.log.Error("failed to aggregate monitoring resources: %v", err)
+		m.log.Errorf("failed to aggregate monitoring resources: %v", err)
 	}
 	if out != nil {
 		m.resourceCh <- fetching.ResourceInfo{
@@ -63,13 +63,15 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 			CycleMetadata: cMetadata,
 		}
 	}
+	hubs, err := awslib.MultiRegionFetch(ctx, m.securityhub, func(ctx context.Context, client securityhub.Service) (securityhub.SecurityHub, error) {
+		return client.Describe(ctx)
+	})
+	if err != nil {
+		m.log.Errorf("failed to describe security hub: %v", err)
+		return nil
+	}
 
-	for _, client := range m.securityhub {
-		hub, err := client.Describe(ctx)
-		if err != nil {
-			m.log.Error("failed to describe securityhab: %v", err)
-			continue
-		}
+	for _, hub := range hubs {
 		m.resourceCh <- fetching.ResourceInfo{
 			Resource: SecurityHubResource{
 				SecurityHub: hub,
@@ -89,9 +91,12 @@ func (r MonitoringResource) GetData() any {
 
 func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if len(r.Items) == 0 {
-		return fetching.ResourceMetadata{}, nil
+		return fetching.ResourceMetadata{
+			Type:    fetching.MonitoringIdentity,
+			SubType: fetching.TrailType,
+		}, nil
 	}
-	id := fmt.Sprintf("cloudtrail-%d", r.identity.Account)
+	id := fmt.Sprintf("cloudtrail-%s", *r.identity.Account)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    fetching.MonitoringIdentity,

@@ -100,8 +100,10 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 			f := NetworkFetcher{
-				log:           logp.NewLogger(tt.name),
-				provider:      tt.networkProvider(),
+				log: logp.NewLogger(tt.name),
+				ec2Clients: map[string]ec2.ElasticCompute{
+					"eu-west-1": tt.networkProvider(),
+				},
 				cfg:           ACLFetcherConfig{},
 				resourceCh:    ch,
 				cloudIdentity: &awslib.Identity{Account: &tt.name},

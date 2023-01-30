@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	aws_securityhub "github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -133,6 +134,126 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			resources := testhelper.CollectResources(ch)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedResources, len(resources))
+		})
+	}
+}
+
+func TestMonitoringResource_GetMetadata(t *testing.T) {
+	type fields struct {
+		Resource monitoring.Resource
+		identity *awslib.Identity
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    fetching.ResourceMetadata
+		wantErr bool
+	}{
+		{
+			name: "without trails",
+			fields: fields{
+				identity: &awslib.Identity{},
+				Resource: monitoring.Resource{
+					Items: []monitoring.MonitoringItem{},
+				},
+			},
+			want: fetching.ResourceMetadata{
+				ID:      "",
+				Name:    "",
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.TrailType,
+			},
+		},
+		{
+			name: "with trails",
+			fields: fields{
+				identity: &awslib.Identity{Account: aws.String("aws-account-id")},
+				Resource: monitoring.Resource{
+					Items: []monitoring.MonitoringItem{
+						{},
+						{},
+					},
+				},
+			},
+			want: fetching.ResourceMetadata{
+				ID:      "cloudtrail-aws-account-id",
+				Name:    "cloudtrail-aws-account-id",
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.TrailType,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := MonitoringResource{
+				Resource: tt.fields.Resource,
+				identity: tt.fields.identity,
+			}
+			got, err := r.GetMetadata()
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestSecurityHubResource_GetMetadata(t *testing.T) {
+	type fields struct {
+		SecurityHub securityhub.SecurityHub
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    fetching.ResourceMetadata
+		wantErr bool
+	}{
+		{
+			name: "enabled",
+			fields: fields{
+				SecurityHub: securityhub.SecurityHub{
+					Enabled: true,
+					DescribeHubOutput: &aws_securityhub.DescribeHubOutput{
+						HubArn: aws.String("hub:arn"),
+					},
+				},
+			},
+			want: fetching.ResourceMetadata{
+				ID:      "hub:arn",
+				Name:    "hub:arn",
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.SecurityHubType,
+			},
+		},
+		{
+			name: "disabled",
+			fields: fields{
+				SecurityHub: securityhub.SecurityHub{
+					Enabled: false,
+				},
+			},
+			want: fetching.ResourceMetadata{
+				ID:      "",
+				Name:    "",
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.SecurityHubType,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := SecurityHubResource{
+				SecurityHub: tt.fields.SecurityHub,
+			}
+			got, err := s.GetMetadata()
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

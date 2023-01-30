@@ -91,8 +91,12 @@ func TestMonitoringFactory_Create(t *testing.T) {
 		mock.Anything,
 	).Return(mockCrossRegionSNSFetcher)
 
+	mockSecurityhubService := &securityhub.MockService{}
+	mockSecurityhubService.On("Describe").Return(securityhub.SecurityHub{}, nil)
 	mockCrossRegionSecurityHubFetcher := &awslib.MockCrossRegionFetcher[securityhub.Service]{}
-	mockCrossRegionSecurityHubFetcher.On("GetMultiRegionsClientMap").Return(nil)
+	mockCrossRegionSecurityHubFetcher.On("GetMultiRegionsClientMap").Return(map[string]securityhub.Service{
+		"eu-east-1": mockSecurityhubService,
+	})
 	mockCrossRegionSecurityHubFactory := &awslib.MockCrossRegionFactory[securityhub.Service]{}
 	mockCrossRegionSecurityHubFactory.On(
 		"NewMultiRegionClients",

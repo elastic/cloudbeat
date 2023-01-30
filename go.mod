@@ -89,9 +89,11 @@ require (
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
+	github.com/samber/lo v1.37.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tchap/go-patricia/v2 v2.3.1 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
+	golang.org/x/exp v0.0.0-20220921023135-46d9e7742f1e // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
