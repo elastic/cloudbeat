@@ -103,9 +103,5 @@ jobs:
           message: |
             ## Weekly environment :man_dancing:
             A new environment has been deployed to the elastic cloud. :tada:
-            You can access it at $output1.
-            Or you can use ${{ steps.terraform_output.outputs.output1 }}
-            Or you can use 2 ${{ steps.terraform_output.outputs.tf_output }}
-            :warning: This environment will be deleted in 7 days.
 
-#  terraform apply --auto-approve -target "module.ec_deployment"
+
