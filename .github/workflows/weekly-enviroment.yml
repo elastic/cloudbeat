@@ -165,7 +165,7 @@ jobs:
                     },
                     {
                       "title": "Some property",
-                      "value": "${{ jq -r '.elasticsearch_username.value' output.json }}",
+                      "value": "$(jq -r '.elasticsearch_username.value' output.json)",
                       "short": true
                     }
                   ]
