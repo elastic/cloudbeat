@@ -102,15 +102,15 @@ jobs:
       - name: Set terraform output as env variable
         id: kibana_url
         run: |
-          echo "::add-mask::KIBANA_URL=$(jq -r '.elasticsearch_username.value' output.json)" >> $GITHUB_ENV
+          echo "KIBANA_URL=$(jq -r '.elasticsearch_username.value' output.json)" >> $GITHUB_ENV
 
       - name: Set sensitive terraform output as env variable
         id: set_sensitive_output
         run: |
-          ELASTICSEARCH_USERNAME=$(jq -r '.elasticsearch_username.value' output.json)
+          export ELASTICSEARCH_USERNAME=$(jq -r '.elasticsearch_username.value' output.json)
           echo "::add-mask::ELASTICSEARCH_USERNAME"
           echo ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME >> $GITHUB_ENV
-          ELASTIC_SEARCH_PASSWORD= $(jq -r '.elasticsearch_password.value' output.json)
+          export ELASTIC_SEARCH_PASSWORD= $(jq -r '.elasticsearch_password.value' output.json)
           echo "::add-mask::ELASTIC_SEARCH_PASSWORD"
           echo ELASTIC_SEARCH_PASSWORD=$ELASTIC_SEARCH_PASSWORD >> $GITHUB_ENV
 
