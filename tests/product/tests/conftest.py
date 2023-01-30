@@ -186,6 +186,12 @@ def pytest_generate_tests(metafunc):
     test cases registered in TEST_PARAMETERS and the values passed to
     relevant custom cmdline parameters such as --range.
     """
+    # -k command line option to specify an expression which implements a substring match on the test names
+    # instead of the exact match on markers that -m provides. This makes it easy to select tests based on their names
+    if "-k" in metafunc.config.invocation_params.args:
+        parametrize_eks_params(metafunc)
+        return
+
     if (
         metafunc.definition.get_closest_marker(
             metafunc.config.getoption("markexpr", default=None),
@@ -217,3 +223,16 @@ def pytest_generate_tests(metafunc):
             params.ids = params.ids[int(test_range_start) :]
 
     metafunc.parametrize(params.argnames, params.argvalues, ids=params.ids)
+
+
+def parametrize_eks_params(func_details):
+    """
+    This function creates parametrization for EKS test cases
+    @param func_details: metafunc
+    @return:
+    """
+    params = TEST_PARAMETERS.get(func_details.function)
+    if params is None:
+        raise ValueError(f"Params for function {func_details.function} are not registered.")
+
+    func_details.parametrize(params.argnames, params.argvalues, ids=params.ids)
