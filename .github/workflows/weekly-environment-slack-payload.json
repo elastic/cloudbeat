@@ -1,31 +1,33 @@
 {
-    "text": "",
-    "blocks": [
+    "text": "Weekly environment deployed",
+    "attachments": [
         {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": ":rocket: *A new Deployment was Created!* :rocket:"
-            }
-        },
-        {
-            "type": "section",
+            "color": "#36a64f",
             "fields": [
                 {
-                    "type": "mrkdwn",
-                    "text": "*Environment:*\n Weekly environment ${{terraform output kibana_url}}"
+                    "title": "Environment",
+                    "value": "${{ github.event.inputs.environment }}",
+                    "short": true
                 },
                 {
-                    "type": "mrkdwn",
-                    "text": "*Kibana URL:*\n ${{Ofir}}"
+                    "title": "Benchmark",
+                    "value": "${{ github.event.inputs.benchmark }}",
+                    "short": true
                 },
                 {
-                    "type": "mrkdwn",
-                    "text": "*Username:*\n ${{ job.status }}"
+                    "title": "Alerts",
+                    "value": "${{ github.event.inputs.alerts }}",
+                    "short": true
                 },
                 {
-                    "type": "mrkdwn",
-                    "text": "*Password:*\n *****"
+                    "title": "Log level",
+                    "value": "${{ github.event.inputs.logLevel }}",
+                    "short": true
+                },
+                {
+                    "title": "Kibana URL",
+                    "value": "${{ steps.terraform_output.outputs.tf_output }}",
+                    "short": true
                 }
             ]
         }
