@@ -102,6 +102,7 @@ jobs:
           # This data can be any valid JSON from a previous step in the GitHub Action
           payload: |
             {
+              "text": "GitHub Action build result:",
               "key": "value",
               "foo": "bar"
             }
