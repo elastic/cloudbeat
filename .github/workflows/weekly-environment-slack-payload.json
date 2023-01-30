@@ -1,5 +1,5 @@
 {
-    "text": ":rocket: *A new Deployment was Created!* :rocket:",
+    "text": "A new deployment job has been triggered",
     "attachments": [
         {
             "color": "#36a64f",
@@ -26,19 +26,10 @@
                 },
                 {
                     "title": "Kibana URL",
-                    "value": "${{ steps.terraform_output.outputs.tf_output }}",
+                    "value": "${{ env.KIBANA_URL }}",
                     "short": true
                 }
             ]
-        }
-    ],
-    "blocks": [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-            }
         }
     ]
 }
