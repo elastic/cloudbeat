@@ -72,11 +72,11 @@ jobs:
         env:
           TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
 
-      - name: Terraform Apply
-        id: apply
-        run: terraform apply -auto-approve -target=module.ec_deployment -no-color
-        env:
-          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
+#      - name: Terraform Apply
+#        id: apply
+#        run: terraform apply -auto-approve -target=module.ec_deployment -no-color
+#        env:
+#          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
 #
 #      - name: Call terraform output url parameter
 #        run: |
@@ -103,6 +103,13 @@ jobs:
         id: kibana_url
         run: |
           echo "KIBANA_URL=$(jq -r '.kibana_url.value' output.json)" >> $GITHUB_ENV
+
+      - name: Set sensitive output
+        id: set_sensitive_output
+        run: |
+          SWA_DEPLOYMENT_TOKEN="Lapid"
+          echo "::add-mask::$SWA_DEPLOYMENT_TOKEN"
+          echo SWA_DEPLOYMENT_TOKEN=$SWA_DEPLOYMENT_TOKEN >> $GITHUB_ENV
 
 
 #      Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
@@ -140,6 +147,11 @@ jobs:
                     {
                       "title": "Kibana URL",
                       "value": "${{ env.KIBANA_URL }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Sensetive output",
+                      "value": "${{ env.SWA_DEPLOYMENT_TOKEN }}",
                       "short": true
                     }
                   ]
