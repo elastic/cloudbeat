@@ -160,6 +160,16 @@ jobs:
                       "title": "ElasticSearch password",
                       "value": "${{ env.ELASTICSEARCH_PASSWORD }}",
                       "short": true
+                    },
+                    {
+                      "title": "Some property",
+                      "value": "${{ terraform output rgname }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Some property",
+                      "value": "${{ jq -r '.elasticsearch_username.value' output.json }}",
+                      "short": true
                     }
                   ]
                 }
