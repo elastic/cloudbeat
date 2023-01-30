@@ -163,7 +163,7 @@ jobs:
                     },
                     {
                       "title": "Some property",
-                      "value": "${{ terraform output rgname }}",
+                      "value": "$( terraform output rgname )",
                       "short": true
                     },
                     {
