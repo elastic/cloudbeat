@@ -95,12 +95,12 @@ jobs:
 #          echo "::set-output name=tf_output::$tf_output"
 #          echo $output1
 
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - name: Comment test success result
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ github.event.workflow_run.event == 'pull_request' }}
         with:
-          append: true
+          header: Test Results
+          number: ${{ env.PR_NUMBER }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            Test with ${{ github.sha }}.
-            ```
-            ${{ steps.test.outputs.result }}
-            ```
-
+            ## Cloudbeat CI :robot:
