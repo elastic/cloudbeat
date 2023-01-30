@@ -71,29 +71,29 @@ jobs:
         env:
           TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
 
-      - name: Terraform Apply
-        id: apply
-        run: terraform apply -auto-approve -target=module.ec_deployment -no-color
-        env:
-          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
-
-      - name: Call terraform output url parameter
-        run: |
-            output=$(terraform output kibana_url)
-            echo $output
-
-      - name: Call terraform output no parameter
-        run: |
-          output1=$(terraform output )
-          echo "::set-output name=tf_output::$tf_output"
-          echo $output1
-
-      - name: Get terraform output
-        id: terraform_output
-        run: |
-          output1=$(terraform output)
-          echo "::set-output name=tf_output::$tf_output"
-          echo $output1
+#      - name: Terraform Apply
+#        id: apply
+#        run: terraform apply -auto-approve -target=module.ec_deployment -no-color
+#        env:
+#          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
+#
+#      - name: Call terraform output url parameter
+#        run: |
+#            output=$(terraform output kibana_url)
+#            echo $output
+#
+#      - name: Call terraform output no parameter
+#        run: |
+#          output1=$(terraform output )
+#          echo "::set-output name=tf_output::$tf_output"
+#          echo $output1
+#
+#      - name: Get terraform output
+#        id: terraform_output
+#        run: |
+#          output1=$(terraform output)
+#          echo "::set-output name=tf_output::$tf_output"
+#          echo $output1
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
