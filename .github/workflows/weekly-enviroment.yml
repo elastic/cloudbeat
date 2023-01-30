@@ -102,20 +102,44 @@ jobs:
           # This data can be any valid JSON from a previous step in the GitHub Action
           payload: |
             {
-              "text": "Deployment started (In Progress)",
-              "attachments": [
+              "blocks": [
                 {
-                  "pretext": "Deployment started",
-                  "color": "dbab09",
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: *New Deployment Created!* :rocket:"
+                  }
+                },
+                {
+                  "type": "section",
                   "fields": [
                     {
-                      "title": "Status",
-                      "short": true,
-                      "value": "In Progress"
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\n Production"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*URL:*\n https://example.com"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Username:*\n deployuser"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Password:*\n *****"
                     }
                   ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":warning: *Access these credentials securely and keep them confidential!* :warning:"
+                  }
                 }
               ]
             }
+
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
