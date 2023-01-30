@@ -152,6 +152,7 @@ jobs:
                       title: "Ofir variable",
                       value: "${{ env.OFIR_VAR }}",
                       "short": true
+                    }
                   ]
                 }
               ]
