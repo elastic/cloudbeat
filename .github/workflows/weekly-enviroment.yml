@@ -102,7 +102,6 @@ jobs:
       - name: Set terraform output as env variable
         id: kibana_url
         run: |
-#          echo "KIBANA_URL=$(jq -r '.kibana_url.value' output.json)" >> $GITHUB_ENV
           echo "::add-mask::KIBANA_URL=$(jq -r '.elasticsearch_username.value' output.json)" >> $GITHUB_ENV
 
       - name: Set sensitive terraform output as env variable
