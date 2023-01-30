@@ -105,51 +105,41 @@ jobs:
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
+            {
+              "text": "Weekly environment deployed",
+              "attachments": [
+                {
+                  "color": "#36a64f",
+                  "fields": [
                     {
-            "text": ":rocket: *A new Deployment was Created!* :rocket:",
-            "attachments": [
-              {
-                "color": "#36a64f",
-                "fields": [
-                  {
-                    "title": "Environment",
-                    "value": "${{ github.event.inputs.environment }}",
-                    "short": true
-                  },
-                  {
-                    "title": "Benchmark",
-                    "value": "${{ github.event.inputs.benchmark }}",
-                    "short": true
-                  },
-                  {
-                    "title": "Alerts",
-                    "value": "${{ github.event.inputs.alerts }}",
-                    "short": true
-                  },
-                  {
-                    "title": "Log level",
-                    "value": "${{ github.event.inputs.logLevel }}",
-                    "short": true
-                  },
-                  {
-                    "title": "Kibana URL",
-                    "value": "${{ steps.terraform_output.outputs.tf_output }}",
-                    "short": true
-                  }
-                ]
-              }
-            ],
-            "blocks": [
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+                      "title": "Environment",
+                      "value": "${{ github.event.inputs.environment }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Benchmark",
+                      "value": "${{ github.event.inputs.benchmark }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Alerts",
+                      "value": "${{ github.event.inputs.alerts }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Log level",
+                      "value": "${{ github.event.inputs.logLevel }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Kibana URL",
+                      "value": "${{ steps.terraform_output.outputs.tf_output }}",
+                      "short": true
+                    }
+                  ]
                 }
-              }
-            ]
-        }
-
+              ]
+            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
