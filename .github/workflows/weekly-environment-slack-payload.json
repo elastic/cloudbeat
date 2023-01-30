@@ -1,38 +1,31 @@
 {
-    "text": ":rocket: *A new Deployment was Created!* :rocket:",
+    "text": "",
     "blocks": [
         {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "Danny Torrence left the following review for your property: \n"
+                "text": ":rocket: *A new Deployment was Created!* :rocket:"
             }
         },
         {
             "type": "section",
-            "block_id": "section567",
-            "text": {
-                "type": "mrkdwn",
-                "text": "Kibana URL: https://needs_to_be_added /n"
-            }
-        },
-        {
-            "type": "section",
-            "block_id": "section789",
             "fields": [
                 {
                     "type": "mrkdwn",
-                    "text": "Kibana username: needs_to_be_added /n"
-                }
-            ]
-        },
-        {
-            "type": "section",
-            "block_id": "section789",
-            "fields": [
+                    "text": "*Environment:*\n Weekly enviroment"
+                },
                 {
                     "type": "mrkdwn",
-                    "text": "kibana password: needs_to_be_added /n"
+                    "text": "*Kibana URL:*\n https://example.com"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": "*Username:*\n deployuser"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": "*Password:*\n *****"
                 }
             ]
         }
