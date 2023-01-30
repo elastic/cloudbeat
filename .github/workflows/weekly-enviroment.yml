@@ -99,7 +99,6 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: Test Results
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ## Weekly environment :man_dancing:
             A new environment has been deployed to the elastic cloud. :tada:
