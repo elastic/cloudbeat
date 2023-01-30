@@ -99,11 +99,59 @@ jobs:
       - name: Terraform Output
         run: terraform output -json > output.json
 
+#      Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          payload-file-path: ${{ env.SLACK_MESSAGE_PAYLOAD_PATH }}
+          payload: |
+            {
+              "text": ":rocket: *A new Deployment was Created!* :rocket:",
+              "attachments": [
+                {
+                  "color": "#36a64f",
+                  "fields": [
+                    {
+                      "title": "Environment",
+                      "value": "${{ github.event.inputs.environment }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Benchmark",
+                      "value": "${{ github.event.inputs.benchmark }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Alerts",
+                      "value": "${{ github.event.inputs.alerts }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Log level",
+                      "value": "${{ github.event.inputs.logLevel }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Kibana URL",
+                      "value": "${{ steps.terraform_output.outputs.tf_output }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+            {
+              "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+                  }
+                }
+              ]
+            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
