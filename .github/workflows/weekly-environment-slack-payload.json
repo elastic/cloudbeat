@@ -13,7 +13,7 @@
             "fields": [
                 {
                     "type": "mrkdwn",
-                    "text": "*Environment:*\n Weekly enviroment"
+                    "text": "*Environment:*\n Weekly environment"
                 },
                 {
                     "type": "mrkdwn",
