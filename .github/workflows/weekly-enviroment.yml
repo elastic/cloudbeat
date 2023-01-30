@@ -96,6 +96,9 @@ jobs:
 #          echo "::set-output name=tf_output::$tf_output"
 #          echo $output1
 
+      - name: Terraform Output
+        run: terraform output -json > output.json
+
       - name: Send custom JSON data to Slack workflow
         id: slack
         uses: slackapi/slack-github-action@v1.23.0

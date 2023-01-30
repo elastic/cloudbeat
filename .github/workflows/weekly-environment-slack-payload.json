@@ -13,15 +13,15 @@
             "fields": [
                 {
                     "type": "mrkdwn",
-                    "text": "*Environment:*\n Weekly environment"
+                    "text": "*Environment:*\n Weekly environment ${{terraform output kibana_url}}"
                 },
                 {
                     "type": "mrkdwn",
-                    "text": "*Kibana URL:*\n https://example.com"
+                    "text": "*Kibana URL:*\n ${{terraform output kibana_url}}"
                 },
                 {
                     "type": "mrkdwn",
-                    "text": "*Username:*\n deployuser"
+                    "text": "*Username:*\n ${{ job.status }}"
                 },
                 {
                     "type": "mrkdwn",
