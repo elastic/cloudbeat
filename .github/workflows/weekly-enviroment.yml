@@ -107,7 +107,7 @@ jobs:
       - name: Set sensitive terraform output as env variable
         id: set_sensitive_output
         run: |
-          export ELASTICSEARCH_USERNAME=$(jq -r '.elasticsearch_username.value' output.json)
+          export ELASTICSEARCH_USERNAME="ofir"
           echo "::add-mask::$ELASTICSEARCH_USERNAME"
           echo "ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME" >> $GITHUB_ENV
 
