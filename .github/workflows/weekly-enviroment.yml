@@ -72,11 +72,11 @@ jobs:
         env:
           TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
 
-#      - name: Terraform Apply
-#        id: apply
-#        run: terraform apply -auto-approve -target=module.ec_deployment -no-color
-#        env:
-#          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve -target=module.ec_deployment -no-color
+        env:
+          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
 #
 #      - name: Call terraform output url parameter
 #        run: |
