@@ -103,7 +103,42 @@ jobs:
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          payload-file-path: ${{ env.SLACK_MESSAGE_PAYLOAD_PATH }}
+          payload: |
+            {
+              "text": "Weekly environment deployed",
+              "attachments": [
+                {
+                  "color": "#36a64f",
+                  "fields": [
+                    {
+                      "title": "Environment",
+                      "value": "${{ github.event.inputs.environment }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Benchmark",
+                      "value": "${{ github.event.inputs.benchmark }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Alerts",
+                      "value": "${{ github.event.inputs.alerts }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Log level",
+                      "value": "${{ github.event.inputs.logLevel }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Kibana URL",
+                      "value": "${{ steps.terraform_output.outputs.tf_output }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
