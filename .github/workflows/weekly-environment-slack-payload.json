@@ -1,31 +1,40 @@
 {
-    "text": "some text",
-    "blocks": [
+    "attachments": [
         {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": ":rocket: *A new Deployment was Created!* :rocket:"
-            }
-        },
-        {
-            "type": "section",
-            "fields": [
+            "color": "#d90000",
+            "blocks": [
                 {
-                    "type": "mrkdwn",
-                    "text": "*Environment:*\n Weekly enviroment"
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "${{ github.workflow }} workflow failed on ${{ env.DEFAULT_BRANCH }} branch in the ${{ github.event.repository.name }} repository!"
+                    }
                 },
                 {
-                    "type": "mrkdwn",
-                    "text": "*Kibana URL:*\n https://example.com"
+                    "type": "divider"
                 },
                 {
-                    "type": "mrkdwn",
-                    "text": "*Username:*\n deployuser"
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": "*Password:*\n *****"
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Build",
+                                "emoji": true
+                            },
+                            "url": "${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}"
+                        },
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Commit",
+                                "emoji": true
+                            },
+                            "url": "${{ env.REPO_URL }}/commit/${{ github.sha }}"
+                        }
+                    ]
                 }
             ]
         }
