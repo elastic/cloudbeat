@@ -133,7 +133,7 @@ jobs:
                     },
                     {
                       "title": "Kibana URL",
-                      "value": "${{ terraform output }}",
+                      "value": "${{ jq -r '.kibana_url' output.json }}",
                       "short": true
                     }
                   ]
