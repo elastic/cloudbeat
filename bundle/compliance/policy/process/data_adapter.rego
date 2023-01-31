@@ -18,16 +18,15 @@ process_args_list = args_list {
 	args_list := split(input.resource.command, " --")
 }
 
-# # This method creates a process args object
-# # The object will contain all the process `flags` and their matching values as object key,value accordingly
-# process_args(delimiter) = {flag: value | [flag, value] = parse_argument(process_args_list[_], delimiter)}
-
-parse_argument(argument, delimiter) = [flag, value] {
-	splitted_argument = split(argument, delimiter)
+# Parses a single argument and returns a tuple of the flag and the value
+parse_argument(argument) = [flag, value] {
+	# We would like to split the argument by the first delimiter
+	# The dilimiter can be either a space or an equal sign
+	splitted_argument := regex.split("\\s|\\=", argument)
 	flag = concat("", ["--", splitted_argument[0]])
 
 	# We would like to take the entire string after the first delimiter
-	value = concat(delimiter, array.slice(splitted_argument, 1, count(splitted_argument) + 1))
+	value = concat("=", array.slice(splitted_argument, 1, count(splitted_argument) + 1))
 }
 
 process_config = config {
@@ -55,4 +54,4 @@ is_kubelet {
 	process_name == "kubelet"
 }
 
-process_args(seperator) = {flag: value | [flag, value] = parse_argument(process_args_list[_], seperator)}
+process_args = {flag: value | [flag, value] = parse_argument(process_args_list[_])}
