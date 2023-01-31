@@ -92,10 +92,10 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
-	ff := func(cfg awssdk.Config) securityhub.Service {
+	fn := func(cfg awssdk.Config) securityhub.Service {
 		return securityhub.NewProvider(cfg, log)
 	}
-	m := f.SecurityhubRegionFactory.NewMultiRegionClients(ec2.NewFromConfig(awsConfig), awsConfig, ff, log)
+	m := f.SecurityhubRegionFactory.NewMultiRegionClients(ec2.NewFromConfig(awsConfig), awsConfig, fn, log)
 
 	return &MonitoringFetcher{
 		log:           log,
@@ -103,6 +103,6 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 		provider:      &provider,
 		resourceCh:    ch,
 		cloudIdentity: identity,
-		securityhub:   m.GetMultiRegionsClientMap(),
+		securityhubs:  m.GetMultiRegionsClientMap(),
 	}, nil
 }

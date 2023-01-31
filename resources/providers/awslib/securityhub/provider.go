@@ -34,6 +34,7 @@ type (
 	Provider struct {
 		log    *logp.Logger
 		client Client
+		region string
 	}
 )
 
@@ -41,6 +42,7 @@ func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
 	return &Provider{
 		log:    log,
 		client: securityhub.NewFromConfig(cfg),
+		region: cfg.Region,
 	}
 }
 
@@ -50,6 +52,7 @@ func (p *Provider) Describe(ctx context.Context) (SecurityHub, error) {
 		res := SecurityHub{
 			Enabled:           false,
 			DescribeHubOutput: out,
+			Region:            p.region,
 		}
 		if strings.Contains(err.Error(), "is not subscribed to AWS Security Hub") {
 			return res, nil
@@ -59,5 +62,6 @@ func (p *Provider) Describe(ctx context.Context) (SecurityHub, error) {
 	return SecurityHub{
 		Enabled:           true,
 		DescribeHubOutput: out,
+		Region:            p.region,
 	}, nil
 }

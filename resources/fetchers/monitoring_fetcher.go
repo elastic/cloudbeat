@@ -35,7 +35,7 @@ type MonitoringFetcher struct {
 	cfg           MonitoringFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
-	securityhub   map[string]securityhub.Service
+	securityhubs  map[string]securityhub.Service
 }
 
 type MonitoringFetcherConfig struct {
@@ -63,7 +63,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 			CycleMetadata: cMetadata,
 		}
 	}
-	hubs, err := awslib.MultiRegionFetch(ctx, m.securityhub, func(ctx context.Context, client securityhub.Service) (securityhub.SecurityHub, error) {
+	hubs, err := awslib.MultiRegionFetch(ctx, m.securityhubs, func(ctx context.Context, client securityhub.Service) (securityhub.SecurityHub, error) {
 		return client.Describe(ctx)
 	})
 	if err != nil {

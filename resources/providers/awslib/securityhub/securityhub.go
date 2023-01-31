@@ -19,6 +19,7 @@ package securityhub
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -31,21 +32,22 @@ type (
 
 	SecurityHub struct {
 		Enabled bool
+		Region  string
 		*securityhub.DescribeHubOutput
 	}
 )
 
-func (b SecurityHub) GetResourceArn() string {
-	if b.HubArn == nil {
+func (s SecurityHub) GetResourceArn() string {
+	if s.HubArn == nil {
 		return ""
 	}
-	return *b.HubArn
+	return *s.HubArn
 }
 
-func (b SecurityHub) GetResourceName() string {
-	return ""
+func (s SecurityHub) GetResourceName() string {
+	return fmt.Sprintf("securityhub - %s", s.Region)
 }
 
-func (b SecurityHub) GetResourceType() string {
+func (s SecurityHub) GetResourceType() string {
 	return fetching.SecurityHubType
 }

@@ -118,7 +118,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			m := MonitoringFetcher{
 				log:      logp.NewLogger("TestMonitoringFetcher_Fetch"),
 				provider: monitoring,
-				securityhub: map[string]securityhub.Service{
+				securityhubs: map[string]securityhub.Service{
 					"eu-west-1": hub,
 				},
 				cfg:           MonitoringFetcherConfig{},
