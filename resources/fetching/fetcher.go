@@ -40,6 +40,7 @@ const (
 	PwdPolicyType     = "aws-password-policy"
 	EksType           = "aws-eks"
 	S3Type            = "aws-s3"
+	RdsType           = "aws-rds"
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"
@@ -49,6 +50,7 @@ const (
 	CloudContainerRegistry = "container-registry"
 	CloudStorage           = "cloud-storage"
 	CloudAudit             = "cloud-audit"
+	CloudDatabase          = "cloud-database"
 )
 
 // Factory can create fetcher instances based on configuration
