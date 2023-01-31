@@ -391,6 +391,22 @@ cis_5_2_8_pod_container_fail = KubeTestCase(
     expected=RULE_FAIL_STATUS,
 )
 
+# CIS 5.2.8
+cis_5_2_8_pod_container_pass = KubeTestCase(
+    rule_tag="CIS 5.2.8",
+    resource_type="Pod",
+    resource_body={
+        "metadata": {"name": TEST_POD_NAME, "namespace": KUBE_SYSTEM_NAMESPACE},
+        "spec": {
+            "containers": [
+                {"name": TEST_CONTAINER_NAME,  "securityContext": {"capabilities": {"drop": ["ALL"]}}},
+            ],
+        },
+    },
+    expected=RULE_PASS_STATUS,
+)
+
 cis_5_2_8 = {
     "5.2.8 Pod.container.spec.securityContext.runAsUser == root": cis_5_2_8_pod_container_fail,
+    "5.2.8 Pod.container.spec.securityContext.capabilities drop all": cis_5_2_8_pod_container_pass,
 }

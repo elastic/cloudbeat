@@ -20,9 +20,9 @@ create-vanilla-deployment-file:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
-build-deploy-cloudbeat $GOARCH=LOCAL_GOARCH:
+build-deploy-cloudbeat kind='kind-multi' $GOARCH=LOCAL_GOARCH:
   just build-cloudbeat-docker-image $GOARCH
-  just load-cloudbeat-image
+  just load-cloudbeat-image {{kind}}
   just deploy-cloudbeat
 
 build-deploy-cloudbeat-debug $GOARCH=LOCAL_GOARCH:
