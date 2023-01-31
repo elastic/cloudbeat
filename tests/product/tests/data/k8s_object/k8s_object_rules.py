@@ -399,7 +399,7 @@ cis_5_2_8_pod_container_pass = KubeTestCase(
         "metadata": {"name": TEST_POD_NAME, "namespace": KUBE_SYSTEM_NAMESPACE},
         "spec": {
             "containers": [
-                {"name": TEST_CONTAINER_NAME,  "securityContext": {"capabilities": {"drop": ["ALL"]}}},
+                {"name": TEST_CONTAINER_NAME, "securityContext": {"capabilities": {"drop": ["ALL"]}}},
             ],
         },
     },
