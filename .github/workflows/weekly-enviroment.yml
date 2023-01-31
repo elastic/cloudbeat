@@ -145,17 +145,17 @@ jobs:
                     },
                     {
                       "title": "Kibana URL",
-                      "value": "${{ env.KIBANA_URL }}",
+                      "value": ${{ env.KIBANA_URL }},
                       "short": true
                     },
                     {
                       "title": "ElasticSearch username",
-                      "value": "${{ env.ELASTICSEARCH_USERNAME }}",
+                      "value": ${{ env.ELASTICSEARCH_USERNAME }},
                       "short": true
                     },
                     {
                       "title": "ElasticSearch password",
-                      "value": "${{ env.ELASTICSEARCH_PASSWORD }}",
+                      "value": ${{ env.ELASTICSEARCH_PASSWORD }},
                       "short": true
                     }
                   ]
