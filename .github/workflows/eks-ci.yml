@@ -24,6 +24,7 @@ env:
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
 
+# run only a single job at a time
 concurrency: EKS-Functional-Tests
 
 jobs:
