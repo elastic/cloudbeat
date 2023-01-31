@@ -7,17 +7,25 @@ on:
       test-targets:
         required: true
         description: "Specify test markers to run"
-        default: '[\"pre_merge\"]'
+        default: '["eks"]'
+  
+  # On post-merge execution running eks tests
+  push:
+    branches:
+      - main
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CONTAINER_SUFFIX: ${{ github.run_id }}
-  TEST_TARGETS_DEFAULT: '[\"pre_merge\"]'
+  TEST_TARGETS_DEFAULT: '["pre_merge"]'
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
+
+# run only a single job at a time
+concurrency: EKS-Functional-Tests
 
 jobs:
   Setup:
@@ -75,7 +83,7 @@ jobs:
           args: BuildOpaBundle
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Cache Build dependencies
         uses: actions/cache@v3
@@ -86,7 +94,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: false
@@ -116,7 +124,7 @@ jobs:
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -146,11 +154,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - test-target: pre_merge
+          - test-target: eks
             range: ""
-            values_file: tests/deploy/values/ci-eks.yml
+            values_file: tests/deploy/values/ci-eks-config-1.yml
             k8s_context: "test-eks-config-1"
-    name: ${{ matrix.test-target }}-tests
+            label: "EKS functional tests: config 1"
+          - test-target: eks
+            range: ""
+            values_file: tests/deploy/values/ci-eks-config-2.yml
+            k8s_context: "test-eks-config-2"
+            label: "EKS functional tests: config 2"
+    name: ${{ matrix.label }}
     runs-on: ubuntu-20.04
     timeout-minutes: 90
     steps:
@@ -191,7 +205,7 @@ jobs:
           kubectl exec $RESULTS_POD -- sh -c 'rm -rf /reports/*'
 
       - name: Upload Test Results
-        if: success()
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: allure_results-${{ matrix.test-target}}

@@ -1,10 +1,10 @@
- {{- if eq .Values.testData.clusterType "eks" -}}
 apiVersion: v1
 kind: Pod
 metadata:
   name: test-eks-good-pod
   namespace: kube-system
   labels:
+    app: eks-good-pod
     testResourceId: eks-psp-pass
 spec:
   hostPID: false
@@ -25,4 +25,3 @@ spec:
         runAsUser: 10001
         capabilities:
           drop: ["ALL"]
-{{- end }}

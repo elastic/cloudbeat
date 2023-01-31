@@ -1,10 +1,10 @@
- {{- if eq .Values.testData.clusterType "eks" -}}
 apiVersion: v1
 kind: Pod
 metadata:
   name: test-eks-bad-pod
   namespace: kube-system
   labels:
+    app: eks-bad-pod
     testResourceId: eks-psp-failures
 spec:
   hostPID: true
@@ -23,5 +23,4 @@ spec:
         allowPrivilegeEscalation: true
         runAsUser: 0
         capabilities:
-          add: [ "NET_ADMIN", "SYS_TIME", "NET_RAW" ]
-{{- end }}
+          add: ["NET_ADMIN", "SYS_TIME", "NET_RAW"]
