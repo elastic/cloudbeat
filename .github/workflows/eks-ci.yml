@@ -24,6 +24,8 @@ env:
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
 
+concurrency: EKS-Functional-Tests
+
 jobs:
   Setup:
     runs-on: ubuntu-20.04
@@ -145,15 +147,8 @@ jobs:
           ./.ci/scripts/gh-cache.sh
         shell: bash
 
-  Consecutiveness:
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: mktcode/consecutive-workflow-action@v1
-      with:
-        token: ${{ env.GITHUB_AUTH_TOKEN }}
-
   Test_Matrix:
-    needs: ["Setup", "Build", "Consecutiveness"]
+    needs: ["Setup", "Build"]
     strategy:
       fail-fast: false
       matrix:
