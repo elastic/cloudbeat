@@ -10,6 +10,7 @@ test_violation {
 test_pass {
 	test.assert_pass(finding) with input as rule_input(non_violating_psp)
 	test.assert_pass(finding) with input as rule_input(non_violating_psp2)
+	test.assert_pass(finding) with input as rule_input(non_violating_psp3)
 }
 
 test_not_evaluated {
@@ -22,7 +23,7 @@ rule_input(resource) = test_data.kube_api_input(resource)
 violating_psp = {
 	"kind": "Pod",
 	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
-	"spec": {"containers": [{"securityContext": {"capabilities": ["NET_RAW"]}}]},
+	"spec": {"containers": [{"securityContext": {"capabilities": {"add": ["NET_RAW"]}}}]},
 }
 
 non_violating_psp = {
@@ -34,5 +35,11 @@ non_violating_psp = {
 non_violating_psp2 = {
 	"kind": "Pod",
 	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
-	"spec": {"containers": [{"securityContext": {"capabilities": []}}]},
+	"spec": {"containers": [{"securityContext": {"capabilities": {}}}]},
+}
+
+non_violating_psp3 = {
+	"kind": "Pod",
+	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
+	"spec": {"containers": [{"securityContext": {"capabilities": {"drop": ["ALL"]}}}]},
 }

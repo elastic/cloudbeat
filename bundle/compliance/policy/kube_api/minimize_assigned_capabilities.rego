@@ -3,13 +3,14 @@ package compliance.policy.kube_api.minimize_assigned_capabilities
 import data.compliance.lib.assert
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.kube_api.data_adapter
+import future.keywords.every
 
-default rule_evaluation = true
+default rule_evaluation = false
 
-rule_evaluation = false {
-	container := data_adapter.containers.app_containers[_]
-	capabilities := object.get(container.securityContext, "capabilities", [])
-	not assert.array_is_empty(capabilities)
+rule_evaluation {
+	every container in data_adapter.containers.app_containers {
+		capabilities_restricted(container)
+	}
 }
 
 finding := result {
@@ -21,4 +22,10 @@ finding := result {
 		lib_common.calculate_result(rule_evaluation),
 		{"containers": {json.filter(c, ["name", "securityContext"]) | c := data_adapter.containers.app_containers[_]}},
 	)
+}
+
+capabilities_restricted(container) {
+	assert.array_is_empty(object.get(container, ["securityContext", "capabilities", "add"], []))
+} else {
+	object.get(container, ["securityContext", "capabilities", "drop"], []) == ["ALL"]
 }
