@@ -150,7 +150,7 @@ jobs:
     steps:
     - uses: mktcode/consecutive-workflow-action@v1
       with:
-        token: ${{ GITHUB_AUTH_TOKEN }}
+        token: ${{ env.GITHUB_AUTH_TOKEN }}
 
   Test_Matrix:
     needs: ["Setup", "Build", "Consecutiveness"]
