@@ -1,15 +1,20 @@
 package compliance.cis_eks.rules.cis_4_2_7
 
 import data.kubernetes_common.test_data
+import data.kubernetes_common.test_data as common_test_data
 import data.lib.test
 
 test_violation {
-	test.assert_fail(finding) with input as rule_input(violating_psp)
+	test.assert_fail(finding) with input as rule_input(common_test_data.pod_security_ctx({"containers": [{"securityContext": {}}]}))
+	test.assert_fail(finding) with input as rule_input(common_test_data.pod_security_ctx({"containers": [{"securityContext": {"capabilities": {}}}]}))
+	test.assert_fail(finding) with input as rule_input(common_test_data.pod_security_ctx({"containers": [{"securityContext": {"capabilities": {"add": ["NET_RAW"]}}}]}))
 }
 
 test_pass {
-	test.assert_pass(finding) with input as rule_input(non_violating_psp)
-	test.assert_pass(finding) with input as rule_input(non_violating_psp2)
+	test.assert_pass(finding) with input as rule_input(common_test_data.pod_security_ctx({"containers": [{"name": "container_1", "securityContext": {"capabilities": {"drop": ["ALL"]}}}]}))
+	test.assert_pass(finding) with input as rule_input(common_test_data.pod_security_ctx({"containers": [{"securityContext": {"capabilities": {"drop": ["NET_RAW"]}}}]}))
+	test.assert_pass(finding) with input as rule_input(common_test_data.pod_security_ctx({"containers": [{"securityContext": {"capabilities": {"drop": ["ALL", "NET_RAW"]}}}]}))
+	test.assert_pass(finding) with input as rule_input(common_test_data.pod_security_ctx({"containers": [{"securityContext": {"capabilities": {"drop": ["ALL"]}}}, {"securityContext": {"capabilities": {"drop": ["ALL"]}}}]}))
 }
 
 test_not_evaluated {
@@ -17,21 +22,3 @@ test_not_evaluated {
 }
 
 rule_input(resource) = test_data.kube_api_input(resource)
-
-violating_psp = {
-	"kind": "Pod",
-	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
-	"spec": {"requiredDropCapabilities": []},
-}
-
-non_violating_psp = {
-	"kind": "Pod",
-	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
-	"spec": {"requiredDropCapabilities": ["ALL"]},
-}
-
-non_violating_psp2 = {
-	"kind": "Pod",
-	"metadata": {"uid": "00000aa0-0aa0-00aa-00aa-00aa000a0000"},
-	"spec": {"requiredDropCapabilities": ["NET_RAW"]},
-}

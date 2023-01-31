@@ -80,3 +80,9 @@ kube_api_service_account_input(name, automount_setting) = {
 		"automountServiceAccountToken": automount_setting,
 	},
 }
+
+pod_security_ctx(entry) = {
+	"kind": "Pod",
+	"metadata": {"name": "pod-name"},
+	"spec": entry,
+}
