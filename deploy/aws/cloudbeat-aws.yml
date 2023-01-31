@@ -14,6 +14,7 @@ cloudbeat:
     - name: aws-s3
     - name: aws-ec2-network
     - name: aws-trail
+    - name: aws-monitoring
   evaluator:
     decision_logs: false
 # =================================== Kibana ===================================

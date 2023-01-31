@@ -40,6 +40,7 @@ const (
 	PwdPolicyType     = "aws-password-policy"
 	EksType           = "aws-eks"
 	S3Type            = "aws-s3"
+	SecurityHubType   = "aws-securityhub"
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"
