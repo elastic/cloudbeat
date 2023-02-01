@@ -149,3 +149,15 @@ generate_security_group(entry) = {
 	"type": "ec2",
 	"subType": "aws-security-group",
 }
+
+generate_monitoring_resources(items) = {
+	"resource": {"Items": items},
+	"type": "monitoring",
+	"subType": "aws-trail",
+}
+
+generate_securityhub(sb) = {
+	"resource": sb,
+	"type": "monitoring",
+	"subType": "aws-securityhub",
+}
