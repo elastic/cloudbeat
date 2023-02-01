@@ -34,52 +34,6 @@ func (_m *MockCrossRegionFetcher[T]) EXPECT() *MockCrossRegionFetcher_Expecter[T
 	return &MockCrossRegionFetcher_Expecter[T]{mock: &_m.Mock}
 }
 
-// Fetch provides a mock function with given fields: fetcher
-func (_m *MockCrossRegionFetcher[T]) Fetch(fetcher func(T) ([]AwsResource, error)) ([]AwsResource, error) {
-	ret := _m.Called(fetcher)
-
-	var r0 []AwsResource
-	if rf, ok := ret.Get(0).(func(func(T) ([]AwsResource, error)) []AwsResource); ok {
-		r0 = rf(fetcher)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]AwsResource)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(func(T) ([]AwsResource, error)) error); ok {
-		r1 = rf(fetcher)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockCrossRegionFetcher_Fetch_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Fetch'
-type MockCrossRegionFetcher_Fetch_Call[T interface{}] struct {
-	*mock.Call
-}
-
-// Fetch is a helper method to define mock.On call
-//   - fetcher func(T)([]AwsResource , error)
-func (_e *MockCrossRegionFetcher_Expecter[T]) Fetch(fetcher interface{}) *MockCrossRegionFetcher_Fetch_Call[T] {
-	return &MockCrossRegionFetcher_Fetch_Call[T]{Call: _e.mock.On("Fetch", fetcher)}
-}
-
-func (_c *MockCrossRegionFetcher_Fetch_Call[T]) Run(run func(fetcher func(T) ([]AwsResource, error))) *MockCrossRegionFetcher_Fetch_Call[T] {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(func(T) ([]AwsResource, error)))
-	})
-	return _c
-}
-
-func (_c *MockCrossRegionFetcher_Fetch_Call[T]) Return(_a0 []AwsResource, _a1 error) *MockCrossRegionFetcher_Fetch_Call[T] {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
 // GetMultiRegionsClientMap provides a mock function with given fields:
 func (_m *MockCrossRegionFetcher[T]) GetMultiRegionsClientMap() map[string]T {
 	ret := _m.Called()
