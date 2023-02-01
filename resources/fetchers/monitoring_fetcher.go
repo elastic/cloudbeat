@@ -23,6 +23,7 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -34,6 +35,7 @@ type MonitoringFetcher struct {
 	cfg           MonitoringFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
+	securityhubs  map[string]securityhub.Service
 }
 
 type MonitoringFetcherConfig struct {
@@ -45,16 +47,39 @@ type MonitoringResource struct {
 	identity *awslib.Identity
 }
 
+type SecurityHubResource struct {
+	securityhub.SecurityHub
+}
+
 func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	m.log.Debug("Starting MonitoringFetcher.Fetch")
 	out, err := m.provider.AggregateResources(ctx)
 	if err != nil {
-		return err
+		m.log.Errorf("failed to aggregate monitoring resources: %v", err)
 	}
-	m.resourceCh <- fetching.ResourceInfo{
-		Resource:      MonitoringResource{*out, m.cloudIdentity},
-		CycleMetadata: cMetadata,
+	if out != nil {
+		m.resourceCh <- fetching.ResourceInfo{
+			Resource:      MonitoringResource{*out, m.cloudIdentity},
+			CycleMetadata: cMetadata,
+		}
 	}
+	hubs, err := awslib.MultiRegionFetch(ctx, m.securityhubs, func(ctx context.Context, client securityhub.Service) (securityhub.SecurityHub, error) {
+		return client.Describe(ctx)
+	})
+	if err != nil {
+		m.log.Errorf("failed to describe security hub: %v", err)
+		return nil
+	}
+
+	for _, hub := range hubs {
+		m.resourceCh <- fetching.ResourceInfo{
+			Resource: SecurityHubResource{
+				SecurityHub: hub,
+			},
+			CycleMetadata: cMetadata,
+		}
+	}
+
 	return nil
 }
 
@@ -66,9 +91,12 @@ func (r MonitoringResource) GetData() any {
 
 func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if len(r.Items) == 0 {
-		return fetching.ResourceMetadata{}, nil
+		return fetching.ResourceMetadata{
+			Type:    fetching.MonitoringIdentity,
+			SubType: fetching.TrailType,
+		}, nil
 	}
-	id := fmt.Sprintf("cloudtrail-%d", r.identity.Account)
+	id := fmt.Sprintf("cloudtrail-%s", *r.identity.Account)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    fetching.MonitoringIdentity,
@@ -77,3 +105,26 @@ func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 func (r MonitoringResource) GetElasticCommonData() any { return nil }
+
+func (s SecurityHubResource) GetData() any {
+	return s
+}
+
+func (s SecurityHubResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	if s.DescribeHubOutput == nil || s.HubArn == nil {
+		return fetching.ResourceMetadata{
+			ID:      "",
+			Name:    "",
+			Type:    fetching.MonitoringIdentity,
+			SubType: fetching.SecurityHubType,
+		}, nil
+	}
+	return fetching.ResourceMetadata{
+		ID:      *s.HubArn,
+		Name:    *s.HubArn,
+		Type:    fetching.MonitoringIdentity,
+		SubType: fetching.SecurityHubType,
+	}, nil
+}
+
+func (s SecurityHubResource) GetElasticCommonData() any { return nil }

@@ -24,9 +24,11 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	aws_securityhub "github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
@@ -41,13 +43,14 @@ type (
 func TestMonitoringFetcher_Fetch(t *testing.T) {
 	tests := []struct {
 		name              string
-		mocks             clientMocks
+		monitoring        clientMocks
+		securityhub       clientMocks
 		wantErr           bool
 		expectedResources int
 	}{
 		{
 			name: "with resources",
-			mocks: clientMocks{
+			monitoring: clientMocks{
 				"AggregateResources": [2]mocks{
 					{mock.Anything},
 					{&monitoring.Resource{
@@ -58,17 +61,44 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 					}, nil},
 				},
 			},
-			expectedResources: 1,
+			securityhub: clientMocks{
+				"Describe": [2]mocks{
+					{mock.Anything},
+					{securityhub.SecurityHub{}, nil},
+				},
+			},
+			expectedResources: 2,
 		},
 		{
 			name: "with error",
-			mocks: clientMocks{
+			monitoring: clientMocks{
 				"AggregateResources": [2]mocks{
 					{mock.Anything},
 					{nil, fmt.Errorf("failed to run provider")},
 				},
 			},
-			wantErr: true,
+			securityhub: clientMocks{
+				"Describe": [2]mocks{
+					{mock.Anything},
+					{securityhub.SecurityHub{}, fmt.Errorf("failed to run provider")},
+				},
+			},
+		},
+		{
+			name: "with securityhub",
+			monitoring: clientMocks{
+				"AggregateResources": [2]mocks{
+					{mock.Anything},
+					{nil, fmt.Errorf("failed to run provider")},
+				},
+			},
+			securityhub: clientMocks{
+				"Describe": [2]mocks{
+					{mock.Anything},
+					{securityhub.SecurityHub{}, nil},
+				},
+			},
+			expectedResources: 1,
 		},
 	}
 	for _, tt := range tests {
@@ -76,13 +106,21 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
-			client := monitoring.MockClient{}
-			for name, call := range tt.mocks {
-				client.On(name, call[0]...).Return(call[1]...)
+			monitoring := &monitoring.MockClient{}
+			for name, call := range tt.monitoring {
+				monitoring.On(name, call[0]...).Return(call[1]...)
+			}
+
+			hub := &securityhub.MockService{}
+			for name, call := range tt.securityhub {
+				hub.On(name, call[0]...).Return(call[1]...)
 			}
 			m := MonitoringFetcher{
-				log:           logp.NewLogger("TestMonitoringFetcher_Fetch"),
-				provider:      &client,
+				log:      logp.NewLogger("TestMonitoringFetcher_Fetch"),
+				provider: monitoring,
+				securityhubs: map[string]securityhub.Service{
+					"eu-west-1": hub,
+				},
 				cfg:           MonitoringFetcherConfig{},
 				resourceCh:    ch,
 				cloudIdentity: &awslib.Identity{Account: aws.String("account")},
@@ -96,6 +134,126 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			resources := testhelper.CollectResources(ch)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedResources, len(resources))
+		})
+	}
+}
+
+func TestMonitoringResource_GetMetadata(t *testing.T) {
+	type fields struct {
+		Resource monitoring.Resource
+		identity *awslib.Identity
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    fetching.ResourceMetadata
+		wantErr bool
+	}{
+		{
+			name: "without trails",
+			fields: fields{
+				identity: &awslib.Identity{},
+				Resource: monitoring.Resource{
+					Items: []monitoring.MonitoringItem{},
+				},
+			},
+			want: fetching.ResourceMetadata{
+				ID:      "",
+				Name:    "",
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.TrailType,
+			},
+		},
+		{
+			name: "with trails",
+			fields: fields{
+				identity: &awslib.Identity{Account: aws.String("aws-account-id")},
+				Resource: monitoring.Resource{
+					Items: []monitoring.MonitoringItem{
+						{},
+						{},
+					},
+				},
+			},
+			want: fetching.ResourceMetadata{
+				ID:      "cloudtrail-aws-account-id",
+				Name:    "cloudtrail-aws-account-id",
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.TrailType,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := MonitoringResource{
+				Resource: tt.fields.Resource,
+				identity: tt.fields.identity,
+			}
+			got, err := r.GetMetadata()
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestSecurityHubResource_GetMetadata(t *testing.T) {
+	type fields struct {
+		SecurityHub securityhub.SecurityHub
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    fetching.ResourceMetadata
+		wantErr bool
+	}{
+		{
+			name: "enabled",
+			fields: fields{
+				SecurityHub: securityhub.SecurityHub{
+					Enabled: true,
+					DescribeHubOutput: &aws_securityhub.DescribeHubOutput{
+						HubArn: aws.String("hub:arn"),
+					},
+				},
+			},
+			want: fetching.ResourceMetadata{
+				ID:      "hub:arn",
+				Name:    "hub:arn",
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.SecurityHubType,
+			},
+		},
+		{
+			name: "disabled",
+			fields: fields{
+				SecurityHub: securityhub.SecurityHub{
+					Enabled: false,
+				},
+			},
+			want: fetching.ResourceMetadata{
+				ID:      "",
+				Name:    "",
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.SecurityHubType,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := SecurityHubResource{
+				SecurityHub: tt.fields.SecurityHub,
+			}
+			got, err := s.GetMetadata()
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
