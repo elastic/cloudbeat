@@ -1,6 +1,7 @@
 # Variables
 CLOUDBEAT_VERSION := ''
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
+kustomizeVanillaNoCertOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla-nocert"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
@@ -20,15 +21,28 @@ create-vanilla-deployment-file:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
+create-vanilla-deployment-file-nocert:
+  kustomize build {{kustomizeVanillaNoCertOverlay}} --output deploy/k8s/cloudbeat-ds-nocert.yaml
+
 build-deploy-cloudbeat kind='kind-multi' $GOARCH=LOCAL_GOARCH:
   just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image {{kind}}
   just deploy-cloudbeat
 
+build-deploy-cloudbeat-nocert $GOARCH=LOCAL_GOARCH:
+  just build-cloudbeat-docker-image $GOARCH
+  just load-cloudbeat-image
+  just deploy-cloudbeat-nocert
+
 build-deploy-cloudbeat-debug $GOARCH=LOCAL_GOARCH:
   just build-cloudbeat-debug $GOARCH
   just load-cloudbeat-image
   just deploy-cloudbeat
+
+build-deploy-cloudbeat-debug-nocert $GOARCH=LOCAL_GOARCH:
+  just build-cloudbeat-debug $GOARCH
+  just load-cloudbeat-image
+  just deploy-cloudbeat-nocert
 
 # Builds cloudbeat binary and replace it in the agents (in the current context - i.e. `kubectl config current-context`)
 # Set GOARCH to the desired values amd64|arm64
@@ -68,6 +82,9 @@ deploy-cloudbeat:
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
+deploy-cloudbeat-nocert:
+  kubectl delete -k {{kustomizeVanillaNoCertOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaNoCertOverlay}} -n kube-system
+
 # Builds cloudbeat docker image with the OPA bundle included and the debug flag
 build-cloudbeat-debug $GOARCH=LOCAL_GOARCH: build-opa-bundle
   GOOS=linux go mod vendor
@@ -76,6 +93,9 @@ build-cloudbeat-debug $GOARCH=LOCAL_GOARCH: build-opa-bundle
 delete-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system
+
+delete-cloudbeat-nocert:
+  kubectl delete -k {{kustomizeVanillaNoCertOverlay}} -n kube-system
 
 # EKS
 create-eks-deployment-file:
