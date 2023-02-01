@@ -69,11 +69,15 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.24 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.0.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.22.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.24.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.19.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.18.20 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.9.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.17 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.13.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.27.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sns v1.19.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.23 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.13.6 // indirect
 	github.com/elastic/elastic-agent-shipper-client v0.4.0 // indirect
@@ -85,9 +89,11 @@ require (
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
+	github.com/samber/lo v1.37.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tchap/go-patricia/v2 v2.3.1 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
+	golang.org/x/exp v0.0.0-20220921023135-46d9e7742f1e // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
@@ -103,7 +109,7 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20221222172013-15d9a8760574
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20230123163047-5b1f82813200
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect

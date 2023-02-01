@@ -47,6 +47,7 @@ type launcher struct {
 	beat      *beat.Beat
 	creator   beat.Creator
 	validator Validator
+	name      string
 }
 
 type Reloader interface {
@@ -58,11 +59,12 @@ type Validator interface {
 	Validate(*config.C) error
 }
 
-func New(log *logp.Logger, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
+func New(log *logp.Logger, name string, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
 	s := &launcher{
 		beaterErr: make(chan error, 1),
 		wg:        sync.WaitGroup{},
 		log:       log,
+		name:      name,
 		reloader:  reloader,
 		validator: validator,
 		creator:   creator,
@@ -138,7 +140,7 @@ func (l *launcher) runLoop() error {
 			if err != nil {
 				return fmt.Errorf("failed to update Beater config: %w", err)
 			}
-			l.log.Infof("Restart the Beater with the new configuration of %d keys", len(l.latest.FlattenedKeys()))
+			l.log.Infof("Restart %s with the new configuration of %d keys", l.name, len(l.latest.FlattenedKeys()))
 			continue
 		}
 
@@ -155,7 +157,7 @@ func (l *launcher) Stop() {
 // runBeater creates a new beater and starts a goroutine for running it
 // It is protected from panics and ship errors back to beaterErr
 func (l *launcher) runBeater() error {
-	l.log.Info("Launcher is creating a new Beater")
+	l.log.Infof("Launcher is creating a new %s", l.name)
 	var err error
 	l.beater, err = l.creator(l.beat, l.latest)
 	if err != nil {
@@ -171,24 +173,24 @@ func (l *launcher) runBeater() error {
 		}()
 		defer l.wg.Done()
 
-		l.log.Info("Launcher is running the new created Beater")
+		l.log.Infof("Launcher is running the new created %s", l.name)
 		err := l.beater.Run(l.beat)
 		if err != nil {
 			l.beaterErr <- fmt.Errorf("beater returned an error: %w", err)
 		}
-		l.log.Info("Beater run has finished")
+		l.log.Infof("%s run has finished", l.name)
 	}()
 	return nil
 }
 
 // stopBeater only returns after the beater truely stopped running
 func (l *launcher) stopBeater() {
-	l.log.Info("Launcher is shutting the Beater down gracefully")
+	l.log.Infof("Launcher is shutting %s down gracefully", l.name)
 	l.beater.Stop()
 
 	// By waiting to the wait group, it make sure that the old beater has really stopped
 	l.wg.Wait()
-	l.log.Info("Launcher shutted the Beater down gracefully")
+	l.log.Infof("Launcher shutted %s down gracefully", l.name)
 }
 
 // waitForUpdates is the function that keeps Launcher runLoop busy
@@ -206,13 +208,14 @@ func (l *launcher) waitForUpdates() (*config.C, error) {
 			return nil, fmt.Errorf("reloader channel unexpectedly closed")
 		}
 
+		l.log.Infof("Launcher will restart %s to apply the configuration update", l.name)
 		return update, nil
 	}
 }
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the beater config
 func (l *launcher) configUpdate(update *config.C) error {
-	l.log.Infof("Got config update from fleet with %d keys", len(update.FlattenedKeys()))
+	l.log.Infof("Merging config update from fleet with %d keys", len(update.FlattenedKeys()))
 
 	return l.latest.MergeWithOpts(update, ucfg.ReplaceArrValues)
 }

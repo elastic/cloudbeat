@@ -1,3 +1,4 @@
+{{- if .Values.cloudbeatEks.deploy -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -305,7 +306,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-          image: public.ecr.aws/z7e1r9l0/cloudbeat:latest
+          image: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat:latest
           name: cloudbeat
           resources:
             requests:
@@ -383,3 +384,4 @@ spec:
             defaultMode: 416
             name: cloudbeat-daemonset-config
           name: config
+{{- end }}

@@ -38,7 +38,7 @@ def test_eks_file_system_configuration(
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
-        timeout=cloudbeat_agent.findings_timeout,
+        timeout=cloudbeat_agent.eks_findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow() - timedelta(hours=1),
         resource_identifier=identifier,
@@ -52,17 +52,7 @@ register_params(
     test_eks_file_system_configuration,
     Parameters(
         ("rule_tag", "node_hostname", "expected"),
-        [
-            *eks_fs_tc.cis_eks_3_1_1.values(),
-            *eks_fs_tc.cis_eks_3_1_2.values(),
-            *eks_fs_tc.cis_eks_3_1_3.values(),
-            *eks_fs_tc.cis_eks_3_1_4.values(),
-        ],
-        ids=[
-            *eks_fs_tc.cis_eks_3_1_1.keys(),
-            *eks_fs_tc.cis_eks_3_1_2.keys(),
-            *eks_fs_tc.cis_eks_3_1_3.keys(),
-            *eks_fs_tc.cis_eks_3_1_4.keys(),
-        ],
+        [*eks_fs_tc.cis_eks_file_system_cases.values()],
+        ids=[*eks_fs_tc.cis_eks_file_system_cases.keys()],
     ),
 )

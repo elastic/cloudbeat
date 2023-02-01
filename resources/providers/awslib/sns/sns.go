@@ -15,40 +15,30 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ec2
+package sns
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
+	"github.com/aws/aws-sdk-go-v2/service/sns/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type crossRegionProvider struct {
-	CrossRegionFetcher awslib.CrossRegionFetcher[ElasticCompute]
+type SNS interface {
+	ListSubscriptionsByTopic(ctx context.Context, region *string, topic string) ([]types.Subscription, error)
 }
 
-func (c *crossRegionProvider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
-	return c.CrossRegionFetcher.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
-		return ec.DescribeNetworkAcl(ctx)
-	})
-}
-
-func (c *crossRegionProvider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
-	return c.CrossRegionFetcher.Fetch(func(ec ElasticCompute) ([]awslib.AwsResource, error) {
-		return ec.DescribeSecurityGroups(ctx)
-	})
-}
-
-func NewCrossRegionProvider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[ElasticCompute]) ElasticCompute {
-	f := func(cfg aws.Config) ElasticCompute {
-		return NewEC2Provider(log, awsAccountID, cfg)
+func NewSNSProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return sns.NewFromConfig(cfg)
 	}
-
 	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
-	return &crossRegionProvider{
-		CrossRegionFetcher: m,
+	return &Provider{
+		log:     log,
+		clients: m.GetMultiRegionsClientMap(),
 	}
 }

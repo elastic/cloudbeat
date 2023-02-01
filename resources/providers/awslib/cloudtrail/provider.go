@@ -20,16 +20,16 @@ package cloudtrail
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Provider struct {
-	log          *logp.Logger
-	client       Client
-	awsAccountID string
-	awsRegion    string
+	log     *logp.Logger
+	clients map[string]Client
 }
 
 type Client interface {
@@ -38,37 +38,56 @@ type Client interface {
 	GetEventSelectors(ctx context.Context, params *cloudtrail.GetEventSelectorsInput, optFns ...func(*cloudtrail.Options)) (*cloudtrail.GetEventSelectorsOutput, error)
 }
 
-func (p *Provider) DescribeCloudTrails(ctx context.Context) ([]awslib.AwsResource, error) {
+func (p Provider) DescribeTrails(ctx context.Context) ([]TrailInfo, error) {
 	input := cloudtrail.DescribeTrailsInput{}
-	output, err := p.client.DescribeTrails(ctx, &input)
+	output, err := p.clients[awslib.DefaultRegion].DescribeTrails(ctx, &input)
 	if err != nil {
 		return nil, err
 	}
-	result := []awslib.AwsResource{}
+
+	var result []TrailInfo
 	for _, trail := range output.TrailList {
 		if trail.Name == nil {
 			continue
 		}
-		input := cloudtrail.GetTrailStatusInput{
-			Name: trail.Name,
-		}
-		status, err := p.client.GetTrailStatus(ctx, &input)
+		status, err := p.getTrailStatus(ctx, trail)
 		if err != nil {
-			p.log.Errorf("fail to get trail status %s %v", *trail.TrailARN, err.Error())
+			p.log.Errorf("failed to get trail status %s %v", *trail.TrailARN, err.Error())
 		}
 
-		selector, err := p.client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{
-			TrailName: trail.Name,
-		})
+		selectors, err := p.getEventSelectors(ctx, trail)
 		if err != nil {
-			p.log.Errorf("fail to get trail event selector %s %v", *trail.TrailARN, err.Error())
+			p.log.Errorf("failed to get trail event selector %s %v", *trail.TrailARN, err.Error())
 		}
 
 		result = append(result, TrailInfo{
-			trail:         trail,
-			status:        status,
-			eventSelector: selector,
+			Trail:          trail,
+			Status:         status,
+			EventSelectors: selectors,
 		})
 	}
 	return result, nil
+}
+
+func (p Provider) getTrailStatus(ctx context.Context, trail types.Trail) (*cloudtrail.GetTrailStatusOutput, error) {
+	client, err := awslib.GetClient(trail.HomeRegion, p.clients)
+	if err != nil {
+		return nil, err
+	}
+
+	return client.GetTrailStatus(ctx, &cloudtrail.GetTrailStatusInput{Name: trail.Name})
+}
+
+func (p Provider) getEventSelectors(ctx context.Context, trail types.Trail) ([]types.EventSelector, error) {
+	client, err := awslib.GetClient(trail.HomeRegion, p.clients)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := client.GetEventSelectors(ctx, &cloudtrail.GetEventSelectorsInput{TrailName: trail.Name})
+	if err != nil {
+		return []types.EventSelector{}, err
+	}
+
+	return output.EventSelectors, nil
 }

@@ -5,12 +5,14 @@ and also mapping environment variables
 """
 import os
 from munch import Munch
+from loguru import logger
 
 # --- Cloudbeat agent environment definition ----------------
 agent = Munch()
 agent.name = os.getenv("AGENT_NAME", "cloudbeat")
 agent.namespace = os.getenv("AGENT_NAMESPACE", "kube-system")
 agent.findings_timeout = 500
+agent.eks_findings_timeout = 120
 agent.cluster_type = os.getenv("CLUSTER_TYPE", "eks")  # options: vanilla / eks
 
 # The K8S Node on which the test Pod is running.
@@ -59,3 +61,15 @@ elasticsearch.cis_index = os.getenv("CIS_INDEX", "*cloud_security_posture.findin
 docker = Munch()
 docker.base_url = os.getenv("DOCKER_URL", "")
 docker.use_docker = bool(os.getenv("USE_DOCKER", "true") == "true")
+
+
+def print_environment(name: str, config_object: Munch):
+    """
+    C-ATF configuration environment printer
+    @param name: Config object name
+    @param config_object: Object to be printed
+    @return:
+    """
+    logger.info(f"==== Test Config Environment: {name} ====")
+    for item in config_object:
+        logger.info(f"{item}='{config_object[item]}'")

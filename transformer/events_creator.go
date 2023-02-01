@@ -42,7 +42,7 @@ const (
 type Transformer struct {
 	log        *logp.Logger
 	index      string
-	commonData dataprovider.CommonDataInterface
+	commonData dataprovider.CommonData
 }
 
 type ECSEvent struct {
@@ -55,7 +55,7 @@ type ECSEvent struct {
 	Type     []string  `json:"type"`
 }
 
-func NewTransformer(log *logp.Logger, cd dataprovider.CommonDataInterface, index string) Transformer {
+func NewTransformer(log *logp.Logger, cd dataprovider.CommonData, index string) Transformer {
 	return Transformer{
 		log:        log,
 		index:      index,
@@ -74,7 +74,6 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
 	}
 	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
-	clusterName := t.commonData.GetClusterName()
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
@@ -95,11 +94,10 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 				"cloudbeat":           t.commonData.GetVersionInfo(),
 			},
 		}
-		if clusterName != "" {
-			_, err := event.Fields.Put("orchestrator.cluster.name", clusterName)
-			if err != nil {
-				return nil, fmt.Errorf("failed to add cluster name to object: %v", err)
-			}
+
+		err := t.commonData.EnrichEvent(event)
+		if err != nil {
+			return nil, fmt.Errorf("failed to enrich event: %v", err)
 		}
 
 		events = append(events, event)

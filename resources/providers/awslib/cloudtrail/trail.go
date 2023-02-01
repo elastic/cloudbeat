@@ -24,23 +24,23 @@ import (
 )
 
 type TrailInfo struct {
-	trail         types.Trail
-	status        *cloudtrail.GetTrailStatusOutput
-	eventSelector *cloudtrail.GetEventSelectorsOutput
+	Trail          types.Trail
+	Status         *cloudtrail.GetTrailStatusOutput
+	EventSelectors []types.EventSelector
 }
 
 func (t TrailInfo) GetResourceArn() string {
-	if t.trail.TrailARN == nil {
+	if t.Trail.TrailARN == nil {
 		return ""
 	}
-	return *t.trail.TrailARN
+	return *t.Trail.TrailARN
 }
 
 func (t TrailInfo) GetResourceName() string {
-	if t.trail.Name == nil {
+	if t.Trail.Name == nil {
 		return ""
 	}
-	return *t.trail.Name
+	return *t.Trail.Name
 }
 
 func (t TrailInfo) GetResourceType() string {
