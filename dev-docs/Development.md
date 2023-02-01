@@ -115,7 +115,7 @@ For more information, see our [testing docs](/tests/README.md)
 Cloudbeat uses [`mockery`](https://github.com/vektra/mockery) as its mocking test framework.
 `Mockery` provides an easy way to generate mocks for golang interfaces.
 
-Some tests use the new [expecter](<(https://github.com/vektra/mockery#expecter-interfaces)>) interface the library provides.
+Some tests use the new [expecter](https://github.com/vektra/mockery#expecter-interfaces) interface the library provides.
 For example, given an interface such as
 
 ```go
