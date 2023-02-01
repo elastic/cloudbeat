@@ -20,6 +20,7 @@ package dataprovider
 import (
 	"context"
 	"fmt"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetchers"
@@ -170,6 +171,9 @@ func (c commonK8sData) GetVersionInfo() version.CloudbeatVersionInfo {
 }
 
 func (c commonK8sData) EnrichEvent(event beat.Event) error {
+	if c.clusterName == "" {
+		return nil
+	}
 	_, err := event.Fields.Put(clusterNameField, c.clusterName)
 	return err
 }
