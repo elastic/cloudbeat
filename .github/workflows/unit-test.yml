@@ -46,7 +46,7 @@ jobs:
           cp bundle.tar.gz evaluator/
 
       - name: Validate mocks
-        run: ./scripts/make/validate-mocks.sh
+        run: just validate-mocks
 
       - name: Unit-Test Cloudbeat
         run: |

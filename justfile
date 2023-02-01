@@ -132,6 +132,18 @@ expose-ports:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
 
+#### MOCKS #####
+
+# generate new and update existing mocks from golang interfaces
+# and update the license header
+generate-mocks:
+  mockery --dir . --inpackage --all --with-expecter --case underscore --recursive
+  mage AddLicenseHeaders
+
+# run to validate no mocks are missing
+validate-mocks:
+  ./.ci/scripts/validate-mocks.sh
+
 
 #### TESTS ####
 
