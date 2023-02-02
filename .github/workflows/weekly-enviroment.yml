@@ -28,8 +28,11 @@ env:
   AWS_REGION: eu-north-1
   KUBE_NAMESPACE: kube-system
   WORKING_DIR: deploy/cloud
-  SLACK_MESSAGE_PAYLOAD_PATH: ".github/workflows/weekly-environment-slack-payload.json"
   ENVIRONMENT: "weekly-environment"
+  TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
+  TF_VAR_environment: ${{ github.event.inputs.logLevel }}
+  TF_VAR_eks_region: eu-north-1
+  TF_LOG: ${{ github.event.inputs.logLevel }}
 
 jobs:
   terraform:
@@ -63,20 +66,9 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: terraform plan -target=module.ec_deployment -no-color
-        env:
-          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
-          TF_VAR_environment: ${{ env.ENVIRONMENT }}
-          TF_VAR_eks_region: ${{ env.AWS_REGION }}
-          TF_LOG: ${{ github.event.inputs.logLevel }}
-
-
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -target=module.ec_deployment -no-color
-        env:
-          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
-          TF_VAR_environment: ${{ env.ENVIRONMENT }}
-          TF_VAR_eks_region: ${{ env.AWS_REGION }}
 
       - name: Set terraform output as env variable
         id: kibana_url
@@ -103,15 +95,8 @@ jobs:
         id: deploy_ec2_instance
         run: |
           terraform apply -auto-approve -no-color
-        env:
-          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
-          TF_VAR_environment_tag_name: ${{ env.ENVIRONMENT }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          TF_VAR_eks_region: ${{ env.AWS_REGION }}
 
-
-      #      Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
+      # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
