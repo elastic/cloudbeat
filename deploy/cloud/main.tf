@@ -34,6 +34,12 @@ module "eks" {
 # Retrieve EKS cluster information
 provider "aws" {
   region = module.eks.region
+
+  default_tags {
+    tags = {
+      Environment = var.environment
+    }
+  }
 }
 
 data "aws_eks_cluster" "cluster" {

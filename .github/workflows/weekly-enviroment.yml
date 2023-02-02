@@ -36,6 +36,7 @@ env:
   KUBE_NAMESPACE: kube-system
   WORKING_DIR: deploy/cloud
   SLACK_MESSAGE_PAYLOAD_PATH: ".github/workflows/weekly-environment-slack-payload.json"
+  ENVIRONMENT: "weekly-environment"
 
 jobs:
   terraform:
@@ -71,12 +72,15 @@ jobs:
         run: terraform plan -target=module.ec_deployment -no-color
         env:
           TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
+          TF_VAR_environment: ${{ env.ENVIRONMENT }}
+
 
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -target=module.ec_deployment -no-color
         env:
           TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
+          TF_VAR_environment: ${{ env.ENVIRONMENT }}
 
       - name: Set terraform output as env variable
         id: kibana_url
@@ -105,6 +109,7 @@ jobs:
           terraform apply -auto-approve -target=module.aws_ec2_with_agent -no-color
         env:
           TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
+          TF_VAR_environment: ${{ env.ENVIRONMENT }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 

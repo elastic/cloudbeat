@@ -69,3 +69,9 @@ variable "eks_region" {
   type        = string
 }
 
+variable environment {
+  default     = "local environment"
+  description = "Optional environment name"
+  type        = string
+}
+
