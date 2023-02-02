@@ -7,22 +7,19 @@ import data.lib.test
 test_violation {
 	eval_fail with input as rule_input("")
 	eval_fail with input as rule_input("--feature-gates RotateKubeletServerCertificate=false")
-	eval_fail with input as rule_input_with_external("", create_process_config(false, false))
-	eval_fail with input as rule_input_with_external("--feature-gates RotateKubeletServerCertificate false", create_process_config(false, false))
-	eval_fail with input as rule_input_with_external("--feature-gates RotateKubeletServerCertificate false", create_process_config(true, false))
-	eval_fail with input as rule_input_with_external("--feature-gates RotateKubeletServerCertificate false", create_process_config(true, false))
+	eval_fail with input as rule_input_with_external("", create_process_config(false))
+	eval_fail with input as rule_input_with_external("--feature-gates RotateKubeletServerCertificate false", create_process_config(false))
+	eval_fail with input as rule_input_with_external("--feature-gates RotateKubeletServerCertificate false", create_process_config(true))
+	eval_fail with input as rule_input_with_external("", create_process_config_without_proprerty)
 }
 
 test_pass {
 	eval_pass with input as rule_input("--feature-gates RotateKubeletServerCertificate=true")
-	eval_pass with input as rule_input("--rotate-server-certificates true")
-	eval_pass with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=true", create_process_config(true, false))
-	eval_pass with input as rule_input_with_external("--feature-gates RotateKubeletServerCertificate=true", create_process_config(false, false))
-	eval_pass with input as rule_input_with_external("--feature-gates RotateKubeletServerCertificate=true", create_process_config(false, true))
-	eval_pass with input as rule_input_with_external("--feature-gates Rotate=true", create_process_config(true, false))
-	eval_pass with input as rule_input_with_external("", create_process_config(true, false))
-	eval_pass with input as rule_input_with_external("", create_process_config(false, true))
-	eval_pass with input as rule_input_with_external("", create_process_config(true, true))
+	eval_pass with input as rule_input_with_external("--feature-gates=RotateKubeletServerCertificate=true", create_process_config(true))
+	eval_pass with input as rule_input_with_external("--feature-gates RotateKubeletServerCertificate=true", create_process_config(false))
+	eval_pass with input as rule_input_with_external("--feature-gates RotateKubeletServerCertificate=true", create_process_config(false))
+	eval_pass with input as rule_input_with_external("--feature-gates Rotate=true", create_process_config(true))
+	eval_pass with input as rule_input_with_external("", create_process_config(true))
 }
 
 test_not_evaluated {
@@ -33,7 +30,9 @@ rule_input(argument) = test_data.process_input("kubelet", [argument])
 
 rule_input_with_external(argument, external_data) = test_data.process_input_with_external_data("kubelet", [argument], external_data)
 
-create_process_config(rotateCertificates, serverTLSBootstrap) = {"config": {"serverTLSBootstrap": serverTLSBootstrap, "featureGates": {"RotateKubeletServerCertificate": rotateCertificates}}}
+create_process_config(rotateCertificates) = {"config": {"featureGates": {"RotateKubeletServerCertificate": rotateCertificates}}}
+
+create_process_config_without_proprerty = {"config": {"featureGates": {}}}
 
 eval_fail {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

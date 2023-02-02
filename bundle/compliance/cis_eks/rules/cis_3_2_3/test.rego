@@ -6,6 +6,7 @@ import data.lib.test
 
 test_violation {
 	eval_fail with input as rule_input("")
+	eval_fail with input as rule_input_with_external("", create_process_config_empty)
 }
 
 test_pass {
@@ -24,6 +25,15 @@ rule_input_with_external(argument, external_data) = test_data.process_input_with
 
 create_process_config(client_CA_path) = {"config": {"authentication": {
 	"x509": {"clientCAFile": client_CA_path},
+	"anonymous": {"enabled": false},
+	"webhook": {
+		"cacheTTL": "0s",
+		"enabled": true,
+	},
+}}}
+
+create_process_config_empty = {"config": {"authentication": {
+	"x509": {},
 	"anonymous": {"enabled": false},
 	"webhook": {
 		"cacheTTL": "0s",

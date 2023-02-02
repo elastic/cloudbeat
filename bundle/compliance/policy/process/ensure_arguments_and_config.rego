@@ -78,9 +78,12 @@ process_filter_variable_multi_comparison(f_variable, s_variable, value) {
 get_from_config(path) = r {
 	# TODO: object.get needs to be provided with a default value to assign
 	# Decided to assign undefined string for non-existing process flag values
-	# Another option was to assign a  non-string undefined value via "hack" (assign non-existent variable)
+	# Another option was to assign a non-string undefined value via "hack" (assign non-existent variable)
 	# Did not see a direct option to assign undefined values in rego as of current
 	# Rego also has a unique behavior with undefined values that I wanted to avoid
 	# Assuming that process flags won't have undefined string values and will be empty or non-existent
 	r := object.get(data_adapter.process_config.config, path, "undefined")
+
+	# TODO: This is a "hack" to avoid returning undefined values and recognize when there is no value
+	r != "undefined"
 }

@@ -18,12 +18,4 @@ rule_evaluation {
 	audit.not_process_contains_variable("--feature-gates", "RotateKubeletServerCertificate", ["featureGates", "RotateKubeletServerCertificate"])
 }
 
-rule_evaluation {
-	audit.process_contains_key_with_value("--rotate-server-certificates", "true")
-}
-
-rule_evaluation {
-	audit.get_from_config(["serverTLSBootstrap"])
-}
-
 finding = audit.finding(rule_evaluation)
