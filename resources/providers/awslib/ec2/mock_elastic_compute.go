@@ -132,6 +132,52 @@ func (_c *MockElasticCompute_DescribeSecurityGroups_Call) Return(_a0 []awslib.Aw
 	return _c
 }
 
+// DescribeVPCs provides a mock function with given fields: ctx
+func (_m *MockElasticCompute) DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error) {
+	ret := _m.Called(ctx)
+
+	var r0 []awslib.AwsResource
+	if rf, ok := ret.Get(0).(func(context.Context) []awslib.AwsResource); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]awslib.AwsResource)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockElasticCompute_DescribeVPCs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeVPCs'
+type MockElasticCompute_DescribeVPCs_Call struct {
+	*mock.Call
+}
+
+// DescribeVPCs is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockElasticCompute_Expecter) DescribeVPCs(ctx interface{}) *MockElasticCompute_DescribeVPCs_Call {
+	return &MockElasticCompute_DescribeVPCs_Call{Call: _e.mock.On("DescribeVPCs", ctx)}
+}
+
+func (_c *MockElasticCompute_DescribeVPCs_Call) Run(run func(ctx context.Context)) *MockElasticCompute_DescribeVPCs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockElasticCompute_DescribeVPCs_Call) Return(_a0 []awslib.AwsResource, _a1 error) *MockElasticCompute_DescribeVPCs_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 type mockConstructorTestingTNewMockElasticCompute interface {
 	mock.TestingT
 	Cleanup(func())

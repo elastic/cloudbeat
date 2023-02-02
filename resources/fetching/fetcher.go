@@ -41,6 +41,7 @@ const (
 	EksType           = "aws-eks"
 	S3Type            = "aws-s3"
 	SecurityHubType   = "aws-securityhub"
+	VpcType           = "aws-vpc"
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"

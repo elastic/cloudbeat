@@ -19,13 +19,12 @@ package fetchers
 
 import (
 	"context"
-
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type NetworkFetcher struct {
@@ -48,22 +47,11 @@ type NetworkResource struct {
 // Fetch collects network resource such as network acl and security groups
 func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting NetworkFetcher.Fetch")
-
-	nacl, err := awslib.MultiRegionFetch(ctx, f.ec2Clients, func(ctx context.Context, client ec2.ElasticCompute) ([]awslib.AwsResource, error) {
-		return client.DescribeNetworkAcl(ctx)
+	resources, _ := awslib.MultiRegionFetch(ctx, f.ec2Clients, func(ctx context.Context, client ec2.ElasticCompute) ([]awslib.AwsResource, error) {
+		return f.aggregateResources(ctx, client)
 	})
-	if err != nil {
-		f.log.Errorf("failed to describe network acl: %v", err)
-	}
 
-	securityGroups, err := awslib.MultiRegionFetch(ctx, f.ec2Clients, func(ctx context.Context, client ec2.ElasticCompute) ([]awslib.AwsResource, error) {
-		return client.DescribeSecurityGroups(ctx)
-	})
-	if err != nil {
-		f.log.Errorf("failed to describe security groups: %v", err)
-	}
-
-	for _, resource := range append(lo.Flatten(nacl), lo.Flatten(securityGroups)...) {
+	for _, resource := range lo.Flatten(resources) {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource: NetworkResource{
 				AwsResource: resource,
@@ -91,4 +79,36 @@ func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Name:    r.GetResourceName(),
 	}, nil
 }
+
 func (r NetworkResource) GetElasticCommonData() any { return nil }
+
+func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.ElasticCompute) ([]awslib.AwsResource, error) {
+	var resources []awslib.AwsResource
+	nacl, err := client.DescribeNetworkAcl(ctx)
+	if err != nil {
+		f.log.Errorf("failed to describe network acl: %v", err)
+	}
+	resources = appendList(resources, nacl)
+
+	securityGroups, err := client.DescribeSecurityGroups(ctx)
+	if err != nil {
+		f.log.Errorf("failed to describe security groups: %v", err)
+	}
+	resources = appendList(resources, securityGroups)
+
+	vpcs, err := client.DescribeVPCs(ctx)
+	if err != nil {
+		f.log.Errorf("failed to describe vpcs: %v", err)
+	}
+	resources = appendList(resources, vpcs)
+
+	return resources, nil
+}
+
+func appendList(list []awslib.AwsResource, resources []awslib.AwsResource) []awslib.AwsResource {
+	if resources != nil {
+		return append(list, resources...)
+	}
+
+	return list
+}
