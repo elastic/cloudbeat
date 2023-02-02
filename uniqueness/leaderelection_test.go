@@ -20,6 +20,13 @@ package uniqueness
 import (
 	"context"
 	"fmt"
+	"os"
+	"reflect"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -33,12 +40,6 @@ import (
 	k8sFake "k8s.io/client-go/kubernetes/fake"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
-	"os"
-	"reflect"
-	"strings"
-	"sync"
-	"testing"
-	"time"
 )
 
 type LeaderElectionTestSuite struct {
