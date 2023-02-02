@@ -8,7 +8,7 @@ default rule_evaluation = false
 
 finding = result {
 	# filter 
-	data_adapter.is_monitoring_type
+	data_adapter.is_trail_type
 
 	# set result
 	result := common.generate_result_without_expected(

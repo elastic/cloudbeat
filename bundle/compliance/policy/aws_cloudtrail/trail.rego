@@ -10,9 +10,18 @@ import data.compliance.policy.aws_cloudtrail.pattern
 # 4. has metric filter as expected
 # 5. has sns topic subscription
 at_least_one_trail_satisfied(metric_filter_patterns) {
-	some i, j
+	some i
 	trail := data_adapter.trail_items[i]
+	cloudtrail_enabled(trail)
 
+	# and the metric filter pattern is as expected
+	pattern.at_least_one_metric_exists(trail, metric_filter_patterns)
+
+	# and it has at least one subscription
+	count(trail.Topics) > 0
+}
+
+cloudtrail_enabled(trail) {
 	# is multi region trail
 	trail.TrailInfo.Trail.IsMultiRegionTrail
 
@@ -20,13 +29,8 @@ at_least_one_trail_satisfied(metric_filter_patterns) {
 	trail.TrailInfo.Status.IsLogging
 
 	# and it captures all management events 
-	selector := trail.TrailInfo.EventSelectors[j]
+	some i
+	selector := trail.TrailInfo.EventSelectors[i]
 	selector.IncludeManagementEvents
 	selector.ReadWriteType == "All"
-
-	# and the metric filter pattern is as expected
-	pattern.at_least_one_metric_exists(trail, metric_filter_patterns)
-
-	# and it has at least one subscription
-	count(trail.Topics) > 0
 }

@@ -1,4 +1,4 @@
-package compliance.cis_aws.rules.cis_4_9
+package compliance.cis_aws.rules.cis_3_1
 
 import data.compliance.lib.common
 import data.compliance.policy.aws_cloudtrail.data_adapter
@@ -17,6 +17,8 @@ finding = result {
 	)
 }
 
-required_patterns = ["{ ($.eventSource = config.amazonaws.com) && (($.eventName=StopConfigurationRecorder)||($.eventName=DeleteDeliveryChannel) ||($.eventName=PutDeliveryChannel)||($.eventName=PutConfigurationRecorder)) }"]
-
-rule_evaluation = trail.at_least_one_trail_satisfied(required_patterns)
+rule_evaluation {
+	some i
+	t := data_adapter.trail_items[i]
+	trail.cloudtrail_enabled(t)
+}

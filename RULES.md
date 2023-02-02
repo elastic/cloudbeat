@@ -201,9 +201,9 @@
 
 ## AWS CIS Benchmark
 
-### 35/63 implemented rules (56%)
+### 36/63 implemented rules (57%)
 
-#### Automated rules: 35/55 (64%)
+#### Automated rules: 36/55 (65%)
 
 #### Manual rules: 0/8 (0%)
 
@@ -240,7 +240,7 @@
 |                       2.3.2                        | Relational Database Service (RDS) | Ensure Auto Minor Version Upgrade feature is Enabled for RDS Instances                                             |        :x:         | Automated |
 |                       2.3.3                        | Relational Database Service (RDS) | Ensure that public access is not given to RDS Instance                                                             |        :x:         | Automated |
 |                       2.4.1                        | Elastic File System (EFS)         | Ensure that encryption is enabled for EFS file systems                                                             |        :x:         |  Manual   |
-|                        3.1                         | Logging                           | Ensure CloudTrail is enabled in all regions                                                                        |        :x:         | Automated |
+|   [3.1](bundle/compliance/cis_aws/rules/cis_3_1)   | Logging                           | Ensure CloudTrail is enabled in all regions                                                                        | :white_check_mark: | Automated |
 |                        3.10                        | Logging                           | Ensure that Object-level logging for write events is enabled for S3 bucket                                         |        :x:         | Automated |
 |                        3.11                        | Logging                           | Ensure that Object-level logging for read events is enabled for S3 bucket                                          |        :x:         | Automated |
 |                        3.2                         | Logging                           | Ensure CloudTrail log file validation is enabled                                                                   |        :x:         | Automated |
