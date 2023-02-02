@@ -52,9 +52,10 @@ jobs:
         uses: andrcuns/allure-publish-action@v2.2.3
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_REGION: eu-west-1
         with:
           storageType: s3
-          resultsGlob: "tests/allure/results/*"
+          resultsGlob: "tests/allure/results"
           updatePr: actions
           collapseSummary: false
           summary: suites
