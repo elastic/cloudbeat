@@ -24,9 +24,9 @@ create-vanilla-deployment-file:
 create-vanilla-deployment-file-nocert:
   kustomize build {{kustomizeVanillaNoCertOverlay}} --output deploy/k8s/cloudbeat-ds-nocert.yaml
 
-build-deploy-cloudbeat $GOARCH=LOCAL_GOARCH:
+build-deploy-cloudbeat kind='kind-multi' $GOARCH=LOCAL_GOARCH:
   just build-cloudbeat-docker-image $GOARCH
-  just load-cloudbeat-image
+  just load-cloudbeat-image {{kind}}
   just deploy-cloudbeat
 
 build-deploy-cloudbeat-nocert $GOARCH=LOCAL_GOARCH:

@@ -35,8 +35,8 @@ type ProviderTestSuite struct {
 
 	log *logp.Logger
 }
-
-type s3ClientMockReturnVals map[string][][]any
+type mocks [2][]any
+type s3ClientMockReturnVals map[string][]mocks
 
 func TestProviderTestSuite(t *testing.T) {
 	s := new(ProviderTestSuite)
@@ -70,7 +70,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should not return any S3 buckets when there aren't any",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{}}, nil}},
+				"ListBuckets": {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{}}, nil}}},
 			},
 			expected:    []awslib.AwsResource(nil),
 			expectError: false,
@@ -79,7 +79,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should not return any S3 buckets when there is an error",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets": {{nil, errors.New("error")}},
+				"ListBuckets": {{{mock.Anything, mock.Anything}, {nil, errors.New("error")}}},
 			},
 			expected:    nil,
 			expectError: true,
@@ -88,11 +88,11 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should not return any S3 buckets when the region can not be fetched",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
-				"GetBucketEncryption": {{nil, errors.New("bla")}},
-				"GetBucketLocation":   {{nil, errors.New("bla")}},
-				"GetBucketPolicy":     {{nil, errors.New("bla")}},
-				"GetBucketVersioning": {{nil, errors.New("bla")}},
+				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
 			expected:    nil,
 			expectError: false,
@@ -101,11 +101,11 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should return an S3 bucket without encryption, versioning, and policy",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
-				"GetBucketEncryption": {{nil, errors.New("bla")}},
-				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
-				"GetBucketPolicy":     {{nil, errors.New("bla")}},
-				"GetBucketVersioning": {{nil, errors.New("bla")}},
+				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}}},
+				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{false, false}}},
 			expectError: false,
@@ -114,11 +114,11 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should return an S3 bucket without encryption, policy, and versioning due to regions mismatch",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
-				"GetBucketEncryption": {{nil, errors.New("regions mismatch")}},
-				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
-				"GetBucketPolicy":     {{nil, errors.New("regions mismatch")}},
-				"GetBucketVersioning": {{nil, errors.New("regions mismatch")}},
+				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, errors.New("regions mismatch")}}},
+				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("regions mismatch")}}},
+				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("regions mismatch")}}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{false, false}}},
 			expectError: false,
@@ -127,17 +127,17 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should return an S3 bucket with encryption",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
-				"GetBucketEncryption": {{&s3Client.GetBucketEncryptionOutput{
+				"ListBuckets": {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketEncryptionOutput{
 					ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
 						Rules: []types.ServerSideEncryptionRule{
 							{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
 						},
 					},
-				}, nil}},
-				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
-				"GetBucketPolicy":     {{nil, errors.New("bla")}},
-				"GetBucketVersioning": {{nil, errors.New("bla")}},
+				}, nil}}},
+				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "AES256", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{false, false}}},
 			expectError: false,
@@ -146,11 +146,11 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should return an S3 bucket with bucket policy",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
-				"GetBucketEncryption": {{nil, errors.New("bla")}},
-				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
-				"GetBucketPolicy":     {{&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil}},
-				"GetBucketVersioning": {{nil, errors.New("bla")}},
+				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil}}},
+				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "", BucketPolicy: bucketPolicy, BucketVersioning: BucketVersioning{false, false}}},
 			expectError: false,
@@ -159,11 +159,11 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should return an S3 bucket with bucket versioning",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}},
-				"GetBucketEncryption": {{nil, errors.New("bla")}},
-				"GetBucketLocation":   {{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
-				"GetBucketPolicy":     {{nil, errors.New("bla")}},
-				"GetBucketVersioning": {{&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}},
+				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: "", BucketPolicy: map[string]any(nil), BucketVersioning: BucketVersioning{true, true}}},
 			expectError: false,
@@ -172,34 +172,34 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should return two S3 buckets from different regions",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}, {Name: &secondBucketName}}}, nil}},
+				"ListBuckets": {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}, {Name: &secondBucketName}}}, nil}}},
 				"GetBucketEncryption": {
-					{&s3Client.GetBucketEncryptionOutput{
+					{{mock.Anything, &s3Client.GetBucketEncryptionInput{Bucket: &bucketName}}, {&s3Client.GetBucketEncryptionOutput{
 						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
 							Rules: []types.ServerSideEncryptionRule{
 								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
 							},
 						},
-					}, nil},
-					{&s3Client.GetBucketEncryptionOutput{
+					}, nil}},
+					{{mock.Anything, &s3Client.GetBucketEncryptionInput{Bucket: &secondBucketName}}, {&s3Client.GetBucketEncryptionOutput{
 						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
 							Rules: []types.ServerSideEncryptionRule{
 								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "aws:kms"}},
 							},
 						},
-					}, nil},
+					}, nil}},
 				},
 				"GetBucketLocation": {
-					{&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil},
-					{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil},
+					{{mock.Anything, &s3Client.GetBucketLocationInput{Bucket: &bucketName}}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+					{{mock.Anything, &s3Client.GetBucketLocationInput{Bucket: &secondBucketName}}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
 				},
 				"GetBucketPolicy": {
-					{&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil},
-					{nil, errors.New("bla")},
+					{{mock.Anything, &s3Client.GetBucketPolicyInput{Bucket: &bucketName}}, {&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil}},
+					{{mock.Anything, &s3Client.GetBucketPolicyInput{Bucket: &secondBucketName}}, {nil, errors.New("bla")}},
 				},
 				"GetBucketVersioning": {
-					{&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil},
-					{&s3Client.GetBucketVersioningOutput{Status: "Suspended", MFADelete: "Disabled"}, nil},
+					{{mock.Anything, &s3Client.GetBucketVersioningInput{Bucket: &bucketName}}, {&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}},
+					{{mock.Anything, &s3Client.GetBucketVersioningInput{Bucket: &secondBucketName}}, {&s3Client.GetBucketVersioningOutput{Status: "Suspended", MFADelete: "Disabled"}, nil}},
 				},
 			},
 			expected: []awslib.AwsResource{
@@ -212,33 +212,34 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		{
 			name: "Should return two S3 buckets from the same region",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets": {{&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}, {Name: &secondBucketName}}}, nil}},
+				"ListBuckets": {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}, {Name: &secondBucketName}}}, nil}}},
 				"GetBucketEncryption": {
-					{&s3Client.GetBucketEncryptionOutput{
+					{{mock.Anything, &s3Client.GetBucketEncryptionInput{Bucket: &bucketName}}, {&s3Client.GetBucketEncryptionOutput{
 						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
 							Rules: []types.ServerSideEncryptionRule{
 								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "AES256"}},
 							},
 						},
-					}, nil},
-					{&s3Client.GetBucketEncryptionOutput{
+					}, nil}},
+					{{mock.Anything, &s3Client.GetBucketEncryptionInput{Bucket: &secondBucketName}}, {&s3Client.GetBucketEncryptionOutput{
 						ServerSideEncryptionConfiguration: &types.ServerSideEncryptionConfiguration{
 							Rules: []types.ServerSideEncryptionRule{
 								{ApplyServerSideEncryptionByDefault: &types.ServerSideEncryptionByDefault{SSEAlgorithm: "aws:kms"}},
 							},
 						},
 					}, nil}},
+				},
 				"GetBucketLocation": {
-					{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil},
-					{&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil},
+					{{mock.Anything, &s3Client.GetBucketLocationInput{Bucket: &bucketName}}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
+					{{mock.Anything, &s3Client.GetBucketLocationInput{Bucket: &secondBucketName}}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
 				},
 				"GetBucketPolicy": {
-					{&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil},
-					{nil, errors.New("bla")},
+					{{mock.Anything, &s3Client.GetBucketPolicyInput{Bucket: &bucketName}}, {&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil}},
+					{{mock.Anything, &s3Client.GetBucketPolicyInput{Bucket: &secondBucketName}}, {nil, errors.New("bla")}},
 				},
 				"GetBucketVersioning": {
-					{&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil},
-					{&s3Client.GetBucketVersioningOutput{Status: "Suspended", MFADelete: "Disabled"}, nil},
+					{{mock.Anything, &s3Client.GetBucketVersioningInput{Bucket: &bucketName}}, {&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}},
+					{{mock.Anything, &s3Client.GetBucketVersioningInput{Bucket: &secondBucketName}}, {&s3Client.GetBucketVersioningOutput{Status: "Suspended", MFADelete: "Disabled"}, nil}},
 				},
 			},
 			expected: []awslib.AwsResource{
@@ -254,7 +255,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		s3ClientMock := &MockClient{}
 		for funcName, returnVals := range test.s3ClientMockReturnVals {
 			for _, vals := range returnVals {
-				s3ClientMock.On(funcName, context.TODO(), mock.Anything).Return(vals...).Once()
+				s3ClientMock.On(funcName, vals[0]...).Return(vals[1]...).Once()
 			}
 		}
 
