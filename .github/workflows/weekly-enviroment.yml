@@ -63,12 +63,21 @@ jobs:
         id: init
         run: terraform init -no-color
 
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -target=module.ec_deployment -no-color
-      - name: Terraform Apply
+      - name: Deploy EKS cluster and Elastic Cloud
         id: apply
-        run: terraform apply -auto-approve -target=module.ec_deployment -no-color
+        run: terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
+
+      - name: Create IAM role for EKS
+        id: kspm
+        run: terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
+
+      - name : Deploy EC2 instance to run Cloudbeat on vanilla cluster
+        id: ec2
+        run: terraform apply --auto-approve -target "module.aws_ec2_with_agent"
+
+      - name: Deploy agent on EKS
+        id: eks
+        run: terraform apply --auto-approve
 
       - name: Set terraform output as env variable
         id: kibana_url
