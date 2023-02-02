@@ -34,12 +34,6 @@ module "eks" {
 # Retrieve EKS cluster information
 provider "aws" {
   region = module.eks.region
-
-  default_tags {
-    tags = {
-      Environment = var.environment
-    }
-  }
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -206,6 +200,8 @@ module "aws_ec2_with_agent" {
   source    = "./modules/ec2"
   providers = { aws : aws }
   yml       = module.api.yaml_vanilla
+  environment_tag_name = var.environment_tag_name
+
   depends_on = [
     module.ec_deployment,
     module.api,

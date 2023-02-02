@@ -15,3 +15,8 @@ variable "yml" {
   type        = string
 
 }
+
+variable "environment_tag_name" {
+  description = "Environment tag name to be used"
+  type        = string
+}

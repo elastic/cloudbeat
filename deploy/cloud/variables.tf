@@ -69,9 +69,9 @@ variable "eks_region" {
   type        = string
 }
 
-variable environment {
+variable "environment_tag_name" {
   default     = "local environment"
-  description = "Optional environment name"
+  description = "Environment tag name to be used"
   type        = string
 }
 
