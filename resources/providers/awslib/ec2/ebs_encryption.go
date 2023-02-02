@@ -18,27 +18,24 @@
 package ec2
 
 import (
-	"context"
+	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type ElasticCompute interface {
-	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
-	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
-	DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error)
-	GetEbsEncryptionByDefault(ctx context.Context) (*EBSEncryption, error)
+type EBSEncryption struct {
+	Enabled bool
+	region  string
 }
 
-func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
-	svc := ec2.NewFromConfig(cfg)
-	return &Provider{
-		log:          log,
-		client:       svc,
-		awsAccountID: awsAccountID,
-		awsRegion:    cfg.Region,
-	}
+func (e EBSEncryption) GetResourceArn() string {
+	return fmt.Sprintf("ebs-encryption-by-default-%s", e.region)
+}
+
+func (e EBSEncryption) GetResourceName() string {
+	return fmt.Sprintf("ebs-encryption-by-default-%s", e.region)
+}
+
+func (e EBSEncryption) GetResourceType() string {
+	return fetching.EBSType
 }

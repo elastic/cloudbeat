@@ -39,6 +39,7 @@ type Client interface {
 	DescribeSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error)
 	DescribeVpcs(ctx context.Context, params *ec2.DescribeVpcsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeVpcsOutput, error)
 	DescribeFlowLogs(ctx context.Context, params *ec2.DescribeFlowLogsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeFlowLogsOutput, error)
+	GetEbsEncryptionByDefault(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options)) (*ec2.GetEbsEncryptionByDefaultOutput, error)
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -122,4 +123,10 @@ func (p *Provider) DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, erro
 		})
 	}
 	return result, nil
+func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) (*EBSEncryption, error) {
+	res, err := p.client.GetEbsEncryptionByDefault(ctx, &ec2.GetEbsEncryptionByDefaultInput{})
+	if err != nil {
+		return nil, err
+	}
+	return &EBSEncryption{Enabled: *res.EbsEncryptionByDefault, region: p.awsRegion}, nil
 }

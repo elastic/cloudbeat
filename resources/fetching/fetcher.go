@@ -35,6 +35,7 @@ const (
 	NetworkNACLType   = "aws-nacl"
 	TrailType         = "aws-trail"
 	SecurityGroupType = "aws-security-group"
+	EBSType           = "aws-ebs"
 	ElbType           = "aws-elb"
 	IAMUserType       = "aws-iam-user"
 	PwdPolicyType     = "aws-password-policy"
