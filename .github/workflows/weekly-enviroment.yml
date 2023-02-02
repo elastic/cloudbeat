@@ -77,24 +77,6 @@ jobs:
         run: terraform apply -auto-approve -target=module.ec_deployment -no-color
         env:
           TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
-#
-#      - name: Call terraform output url parameter
-#        run: |
-#            output=$(terraform output kibana_url)
-#            echo $output
-#
-#      - name: Call terraform output no parameter
-#        run: |
-#          output1=$(terraform output )
-#          echo "::set-output name=tf_output::$tf_output"
-#          echo $output1
-#
-#      - name: Get terraform output
-#        id: terraform_output
-#        run: |
-#          output1=$(terraform output)
-#          echo "::set-output name=tf_output::$tf_output"
-#          echo $output1
 
       - name: Set terraform output as env variable
         id: kibana_url
@@ -107,9 +89,15 @@ jobs:
           export ELASTICSEARCH_USERNAME=$(terraform output elasticsearch_username)
           echo "::add-mask::$ELASTICSEARCH_USERNAME"
           echo "ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME" >> $GITHUB_ENV
+
           export ELASTICSEARCH_PASSWORD=$(terraform output elasticsearch_password)
           echo "::add-mask::ELASTICSEARCH_PASSWORD"
           echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
+
+          export EC2_PRIVATE_KEY=$(terraform output ec2_private_key)
+          echo "::add-mask::EC2_PRIVATE_KEY"
+          echo "EC2_PRIVATE_KEY=$EC2_PRIVATE_KEY" >> $GITHUB_ENV
+
 
       - name: Deploy EC2 instance
         id: deploy_ec2_instance
@@ -167,6 +155,10 @@ jobs:
                       "title": "ElasticSearch password",
                       "value": ${{ env.ELASTICSEARCH_PASSWORD }},
                       "short": true
+                    },
+                    {
+                      "title": "EC2 private key",
+                      "value": ${{ env.EC2_PRIVATE_KEY }},
                     }
                   ]
                 }

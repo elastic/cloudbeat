@@ -8,3 +8,8 @@ output "cloudbeat_ssh_cmd" {
   value       = "ssh -i ${local.cloudbeat_private_key_file} ${local.ec2_username}@${aws_instance.cloudbeat.public_ip}"
 }
 
+output "ec2_private_key" {
+  description = "Use this private key to SSH into the ec2 instance"
+  value = file(local.cloudbeat_private_key_file)
+  sensitive = true
+}
