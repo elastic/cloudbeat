@@ -1,6 +1,7 @@
 """
 Global pytest file for fixtures and test configs
 """
+import logging
 import sys
 import functools
 import time
@@ -13,6 +14,27 @@ from commonlib.docker_wrapper import DockerWrapper
 from commonlib.io_utils import FsClient
 from _pytest.logging import LogCaptureFixture
 from loguru import logger
+
+
+class InterceptHandler(logging.Handler):
+    """
+    This class intercepts standard logging messages toward Loguru sinks
+    """
+
+    def emit(self, record):
+        # Get corresponding Loguru level if it exists
+        try:
+            level = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        # Find caller from where originated the logged message
+        frame, depth = logging.currentframe(), 2
+        while frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
 def logger_wraps(*, entry=True, _exit=True, level="DEBUG"):
@@ -86,6 +108,7 @@ def pytest_configure():
             {"sink": sys.stderr, "format": fmt},
         ],
     }
+
     logger.configure(**config)
 
 
@@ -170,13 +193,28 @@ def get_fixtures():
     return cloudbeat_agent, k8s
 
 
+def pytest_sessionstart():
+    """
+    Called after the Session object has been created and before performing collection and entering the run test loop.
+    @return:
+    """
+    configs = {
+        "Cloudbeat": configuration.agent,
+        "Kubernetes": configuration.kubernetes,
+    }
+    if configuration.agent.cluster_type == "eks":
+        configs["EKS"] = configuration.eks
+
+    for key, val in configs.items():
+        configuration.print_environment(name=key, config_object=val)
+
+
 def pytest_sessionfinish(session):
     """
     Called after whole test run finished, right before returning the exit status to the system.
     @param session: The pytest session object.
     @return:
     """
-
     report_dir = session.config.option.allure_report_dir
     cloudbeat = configuration.agent
     kube_client = KubernetesHelper(

@@ -23,13 +23,14 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type NetworkFetcher struct {
 	log           *logp.Logger
-	provider      ec2.ElasticCompute
+	ec2Clients    map[string]ec2.ElasticCompute
 	cfg           ACLFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
@@ -48,17 +49,21 @@ type NetworkResource struct {
 func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting NetworkFetcher.Fetch")
 
-	nacl, err := f.provider.DescribeNetworkAcl(ctx)
+	nacl, err := awslib.MultiRegionFetch(ctx, f.ec2Clients, func(ctx context.Context, client ec2.ElasticCompute) ([]awslib.AwsResource, error) {
+		return client.DescribeNetworkAcl(ctx)
+	})
 	if err != nil {
 		f.log.Errorf("failed to describe network acl: %v", err)
 	}
 
-	securityGroups, err := f.provider.DescribeSecurityGroups(ctx)
+	securityGroups, err := awslib.MultiRegionFetch(ctx, f.ec2Clients, func(ctx context.Context, client ec2.ElasticCompute) ([]awslib.AwsResource, error) {
+		return client.DescribeSecurityGroups(ctx)
+	})
 	if err != nil {
 		f.log.Errorf("failed to describe security groups: %v", err)
 	}
 
-	for _, resource := range append(nacl, securityGroups...) {
+	for _, resource := range append(lo.Flatten(nacl), lo.Flatten(securityGroups)...) {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource: NetworkResource{
 				AwsResource: resource,

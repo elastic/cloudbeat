@@ -18,8 +18,9 @@
 package fetchers
 
 import (
-	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"testing"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -43,6 +44,14 @@ func TestNetworkFactory_Create(t *testing.T) {
 		Account: awssdk.String("test-account"),
 	}, nil)
 
+	mockEc2Compute := &ec2.MockElasticCompute{}
+	mockEc2Compute.On("DescribeNetworkAcl", mock.Anything).Return(nil, nil)
+	mockEc2Compute.On("DescribeSecurityGroups", mock.Anything).Return(nil, nil)
+	ec2Mock := &awslib.MockCrossRegionFetcher[ec2.ElasticCompute]{}
+	ec2Mock.On("GetMultiRegionsClientMap").Return(map[string]ec2.ElasticCompute{
+		"eu-east-1": mockEc2Compute,
+	})
+
 	mockCrossRegion := &awslib.MockCrossRegionFactory[ec2.ElasticCompute]{}
 	mockCrossRegion.On(
 		"NewMultiRegionClients",
@@ -50,7 +59,7 @@ func TestNetworkFactory_Create(t *testing.T) {
 		mock.Anything,
 		mock.Anything,
 		mock.Anything,
-	).Return(&awslib.MockCrossRegionFetcher[ec2.ElasticCompute]{})
+	).Return(ec2Mock)
 
 	f := &EC2NetworkFactory{
 		CrossRegionFactory: mockCrossRegion,

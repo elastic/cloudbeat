@@ -18,15 +18,18 @@
 package awslib
 
 import (
+	"context"
+	"reflect"
+	"testing"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	ec2sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"reflect"
-	"testing"
 )
 
 const (
@@ -101,53 +104,38 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 	}
 }
 
-func TestMultiRegionWrapper_Fetch(t *testing.T) {
-	type args[T any] struct {
-		fetcher func(T) ([]AwsResource, error)
-	}
+func TestMultiRegionFetch(t *testing.T) {
 	type testCase[T any] struct {
 		name    string
-		w       multiRegionWrapper[testClient]
-		args    args[testClient]
+		clients map[string]testClient
+		fetcher func(context.Context, T) ([]AwsResource, error)
 		want    []AwsResource
 		wantErr bool
 	}
 	tests := []testCase[testClient]{
 		{
-			name: "Fetch resources from multiple regions",
-			w: multiRegionWrapper[testClient]{
-				clients: map[string]testClient{euRegion: &dummyTester{euRegion}, usRegion: &dummyTester{usRegion}},
-			},
-			args: args[testClient]{
-				fetcher: func(c testClient) ([]AwsResource, error) {
-					return c.DummyFunc()
-				},
+			name:    "Fetch resources from multiple regions",
+			clients: map[string]testClient{euRegion: &dummyTester{euRegion}, usRegion: &dummyTester{usRegion}},
+			fetcher: func(ctx context.Context, c testClient) ([]AwsResource, error) {
+				return c.DummyFunc()
 			},
 			want:    []AwsResource{testAwsResource{resRegion: usRegion}, testAwsResource{resRegion: euRegion}},
 			wantErr: false,
 		},
 		{
-			name: "Error from a single region",
-			w: multiRegionWrapper[testClient]{
-				clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
-			},
-			args: args[testClient]{
-				fetcher: func(c testClient) ([]AwsResource, error) {
-					return c.DummyFunc()
-				},
+			name:    "Error from a single region",
+			clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
+			fetcher: func(ctx context.Context, c testClient) ([]AwsResource, error) {
+				return c.DummyFunc()
 			},
 			want:    []AwsResource{testAwsResource{resRegion: usRegion}},
 			wantErr: true,
 		},
 		{
-			name: "Error from all regions",
-			w: multiRegionWrapper[testClient]{
-				clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
-			},
-			args: args[testClient]{
-				fetcher: func(c testClient) ([]AwsResource, error) {
-					return nil, errors.New("service unavailable")
-				},
+			name:    "Error from all regions",
+			clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
+			fetcher: func(ctx context.Context, c testClient) ([]AwsResource, error) {
+				return nil, errors.New("service unavailable")
 			},
 			want:    nil,
 			wantErr: true,
@@ -155,12 +143,13 @@ func TestMultiRegionWrapper_Fetch(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.w.Fetch(tt.args.fetcher)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Fetch() error = %v, wantErr %v", err, tt.wantErr)
+			got, err := MultiRegionFetch(context.Background(), tt.clients, tt.fetcher)
+			if tt.wantErr {
+				assert.Error(t, err)
 				return
 			}
-			if !assert.ElementsMatch(t, got, tt.want) {
+			assert.NoError(t, err)
+			if !assert.ElementsMatch(t, lo.Flatten(got), tt.want) {
 				t.Errorf("Fetch() got = %v, want %v", got, tt.want)
 			}
 		})

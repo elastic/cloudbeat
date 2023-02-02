@@ -3,17 +3,8 @@
 
 # Infra & ops related
 /deploy/ @elastic/csp-ops
-/.github/workflows  @elastic/csp-ops
 .ci/  @elastic/csp-ops
-/scripts/ @elastic/csp-ops
-Makefile  @elastic/csp-ops
-justfile  @elastic/csp-ops
 Jenkinsfile  @elastic/csp-ops
-
-# Beats related
-*.go @elastic/cloudbeat
-go.mod @elastic/cloudbeat
-go.sum @elastic/cloudbeat
 
 # Automation tests
 /tests/ @elastic/csp-automation
