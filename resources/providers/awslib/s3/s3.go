@@ -20,7 +20,6 @@ package s3
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -47,7 +46,7 @@ type Logging struct {
 
 type S3 interface {
 	DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error)
-	GetBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error)
+	GetBucketACL(ctx context.Context, bucketName *string, region string) (*s3.GetBucketAclOutput, error)
 	GetBucketPolicy(ctx context.Context, bucketName *string, region string) (BucketPolicy, error)
 	GetBucketLogging(ctx context.Context, bucketName *string, region string) (Logging, error)
 }
