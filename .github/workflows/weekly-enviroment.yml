@@ -92,11 +92,11 @@ jobs:
           echo "ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME" >> $GITHUB_ENV
 
           export ELASTICSEARCH_PASSWORD=$(terraform output elasticsearch_password)
-          echo "::add-mask::ELASTICSEARCH_PASSWORD"
+          echo "::add-mask::$ELASTICSEARCH_PASSWORD"
           echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
 
           export EC2_PRIVATE_KEY=$(terraform output ec2_private_key)
-          echo "::add-mask::EC2_PRIVATE_KEY"
+          echo "::add-mask::$EC2_PRIVATE_KEY"
           echo "EC2_PRIVATE_KEY=$EC2_PRIVATE_KEY" >> $GITHUB_ENV
 
 
@@ -155,6 +155,7 @@ jobs:
                     {
                       "title": "EC2 private key",
                       "value": ${{ env.EC2_PRIVATE_KEY }},
+                      "short": true
                     }
                   ]
                 }
