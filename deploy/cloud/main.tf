@@ -201,6 +201,7 @@ module "aws_ec2_with_agent" {
   providers = { aws : aws }
   yml       = module.api.yaml_vanilla
   environment_tag_name = var.environment_tag_name
+  aws_ami = "ami-03260a5267db32f55"
 
   depends_on = [
     module.ec_deployment,
