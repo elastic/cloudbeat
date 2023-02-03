@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"sync"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -92,13 +93,48 @@ func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetch
 			}
 
 			mux.Lock()
+			defer mux.Unlock()
+			// K might be an slice, struct or pointer
+			// since slice is not comparable we cant just do
+			// var zero K; results == zero
+			// also we cant check if results == nil
+			if shouldDrop(results) {
+				return
+			}
 			crossRegionResources = append(crossRegionResources, results)
-			mux.Unlock()
 		}(client, region)
 	}
 
 	wg.Wait()
 	return crossRegionResources, err
+}
+
+// shouldDrop checks the target type and return true if
+// type is pointer -> the pointer is nil
+// type is struct -> the type zero value
+// type is slice -> len(slice) == 0
+// and false otherwise
+func shouldDrop(t interface{}) bool {
+	v := reflect.ValueOf(t)
+	kind := v.Kind()
+	if kind == reflect.Ptr && v.IsNil() {
+		return true
+	}
+
+	// shouldDrop(nil) case
+	if kind == reflect.Invalid && t == nil {
+		return true
+	}
+
+	if kind == reflect.Slice {
+		return v.Cap() == 0
+	}
+
+	if kind == reflect.Struct {
+		return v.Elem().IsZero()
+	}
+
+	return false
 }
 
 func (w *multiRegionWrapper[T]) GetMultiRegionsClientMap() map[string]T {

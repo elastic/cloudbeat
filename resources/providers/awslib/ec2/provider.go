@@ -19,6 +19,7 @@ package ec2
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -109,7 +110,6 @@ func (p *Provider) DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, erro
 				Values: []string{*vpc.VpcId},
 			},
 		}})
-
 		if err != nil {
 			p.log.Errorf("Error fetching flow logs for VPC %s: %v", *vpc.VpcId, err.Error())
 			continue
@@ -123,6 +123,8 @@ func (p *Provider) DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, erro
 		})
 	}
 	return result, nil
+}
+
 func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) (*EBSEncryption, error) {
 	res, err := p.client.GetEbsEncryptionByDefault(ctx, &ec2.GetEbsEncryptionByDefaultInput{})
 	if err != nil {
