@@ -10,6 +10,6 @@ output "cloudbeat_ssh_cmd" {
 
 output "ec2_private_key" {
   description = "Use this private key to SSH into the ec2 instance"
-  value = local.cloudbeat_private_key_file
+  value = tls_private_key.cloudbeat_key.private_key_pem
   sensitive = true
 }
