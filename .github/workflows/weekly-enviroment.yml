@@ -83,6 +83,8 @@ jobs:
         id: kibana_url
         run: |
           echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
+          echo "EKS_CLUSTER_NAME=$(terraform output eks_cluster_name)" >> $GITHUB_ENV
+          echo "EKS_REGION=$(terraform output eks_region)" >> $GITHUB_ENV
 
       - name: Set sensitive terraform output as env variable
         id: set_sensitive_output
@@ -99,6 +101,9 @@ jobs:
           echo "::add-mask::$EC2_PRIVATE_KEY"
           echo "EC2_PRIVATE_KEY=$EC2_PRIVATE_KEY" >> $GITHUB_ENV
 
+          export SSH_CMD=$(terraform output cloudbeat_ssh_cmd)
+          echo "::add-mask::$SSH_CMD"
+          echo "SSH_CMD=$SSH_CMD" >> $GITHUB_ENV
 
       - name: Deploy Agents
         id: deploy_ec2_instance
@@ -155,6 +160,21 @@ jobs:
                     {
                       "title": "EC2 private key",
                       "value": ${{ env.EC2_PRIVATE_KEY }},
+                      "short": true
+                    },
+                    {
+                      "title": "SSH command",
+                      "value": ${{ env.SSH_CMD }},
+                      "short": true
+                    },
+                    {
+                      "title": "EKS cluster name",
+                      "value": ${{ env.EKS_CLUSTER_NAME }},
+                      "short": true
+                    },
+                    {
+                      "title": "EKS region",
+                      "value": ${{ env.EKS_REGION }},
                       "short": true
                     }
                   ]
