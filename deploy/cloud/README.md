@@ -14,7 +14,7 @@ Create environment
 
 1. Create an [API token](https://cloud.elastic.co/deployment-features/keys) from your cloud console account.
 
-   1.1 use the token `export TF_VAR_ec_api_key={T OKEN}`
+   1.1 use the token `export TF_VAR_ec_api_key={TOKEN}`
 
 2. In case you want to deploy a specific stack version, set the `TF_VAR_stack_version` variable to the desired version.
 
