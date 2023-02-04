@@ -37,7 +37,7 @@ provider "aws" {
 }
 
 data "aws_eks_cluster" "cluster" {
-  name = module.eks.cluster_id
+  name = module.eks.cluster_name
 }
 
 module "iam_eks_role" {
