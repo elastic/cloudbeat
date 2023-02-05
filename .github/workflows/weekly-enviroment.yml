@@ -148,6 +148,11 @@ jobs:
                       "short": true
                     },
                     {
+                      "title": "SSH command",
+                      "value": "${{ env.SSH_CMD }}",
+                      "short": true
+                    },
+                    {
                       "title": "EKS cluster name",
                       "value": ${{ env.EKS_CLUSTER_NAME }},
                       "short": true
