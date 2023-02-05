@@ -146,26 +146,6 @@ jobs:
                       "title": "ElasticSearch password",
                       "value": ${{ env.ELASTICSEARCH_PASSWORD }},
                       "short": true
-                    },
-                    {
-                      "title": "EC2 private key",
-                      "value": "${{ env.EC2_PRIVATE_KEY }}",
-                      "short": true
-                    },
-                    {
-                      "title": "SSH command",
-                      "value": "${{ env.SSH_CMD }}",
-                      "short": true
-                    },
-                    {
-                      "title": "EKS cluster name",
-                      "value": ${{ env.EKS_CLUSTER_NAME }},
-                      "short": true
-                    },
-                    {
-                      "title": "EKS region",
-                      "value": ${{ env.EKS_REGION }},
-                      "short": true
                     }
                   ]
                 }
