@@ -146,6 +146,16 @@ jobs:
                       "title": "ElasticSearch password",
                       "value": ${{ env.ELASTICSEARCH_PASSWORD }},
                       "short": true
+                    },
+                    {
+                      "title": "EKS cluster name",
+                      "value": ${{ env.EKS_CLUSTER_NAME }},
+                      "short": true
+                    },
+                    {
+                      "title": "EKS region",
+                      "value": ${{ env.EKS_REGION }},
+                      "short": true
                     }
                   ]
                 }
