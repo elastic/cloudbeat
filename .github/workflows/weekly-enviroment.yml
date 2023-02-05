@@ -128,16 +128,6 @@ jobs:
                       "short": true
                     },
                     {
-                      "title": "Benchmark",
-                      "value": "${{ github.event.inputs.benchmark }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Alerts",
-                      "value": "${{ github.event.inputs.alerts }}",
-                      "short": true
-                    },
-                    {
                       "title": "Log level",
                       "value": "${{ github.event.inputs.logLevel }}",
                       "short": true
@@ -159,12 +149,12 @@ jobs:
                     },
                     {
                       "title": "EC2 private key",
-                      "value": ${{ env.EC2_PRIVATE_KEY }},
+                      "value": "${{ env.EC2_PRIVATE_KEY }}",
                       "short": true
                     },
                     {
                       "title": "SSH command",
-                      "value": ${{ env.SSH_CMD }},
+                      "value": "${{ env.SSH_CMD }}",
                       "short": true
                     },
                     {
