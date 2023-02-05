@@ -88,27 +88,19 @@ func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.Elast
 	if err != nil {
 		f.log.Errorf("failed to describe network acl: %v", err)
 	}
-	resources = appendList(resources, nacl)
+	resources = append(resources, nacl...)
 
 	securityGroups, err := client.DescribeSecurityGroups(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe security groups: %v", err)
 	}
-	resources = appendList(resources, securityGroups)
+	resources = append(resources, securityGroups...)
 
 	vpcs, err := client.DescribeVPCs(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe vpcs: %v", err)
 	}
-	resources = appendList(resources, vpcs)
+	resources = append(resources, vpcs...)
 
 	return resources, nil
-}
-
-func appendList(list []awslib.AwsResource, resources []awslib.AwsResource) []awslib.AwsResource {
-	if resources != nil {
-		return append(list, resources...)
-	}
-
-	return list
 }
