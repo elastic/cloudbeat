@@ -42,5 +42,5 @@ func (provider Ec2MetadataProvider) GetMetadata(ctx context.Context, cfg aws.Con
 		return ec2imds.GetInstanceIdentityDocumentOutput{}.InstanceIdentityDocument, err
 	}
 
-	return identityDocument.InstanceIdentityDocument, err
+	return identityDocument.InstanceIdentityDocument, nil
 }
