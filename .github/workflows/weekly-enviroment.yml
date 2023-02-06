@@ -135,22 +135,22 @@ jobs:
                     {
                       "title": "Kibana URL",
                       "value": ${{ env.KIBANA_URL }},
-                      "short": true
+                      "short": false
                     },
                     {
                       "title": "ElasticSearch username",
                       "value": ${{ env.ELASTICSEARCH_USERNAME }},
-                      "short": true
+                      "short": false
                     },
                     {
                       "title": "ElasticSearch password",
                       "value": ${{ env.ELASTICSEARCH_PASSWORD }},
-                      "short": true
+                      "short": false
                     },
                     {
                       "title": "EC2 private key",
                       "value": "${{ env.EC2_PRIVATE_KEY }}",
-                      "short": true
+                      "short": false
                     },
                     {
                       "title": "EKS cluster name",
