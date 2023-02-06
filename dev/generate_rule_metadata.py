@@ -113,10 +113,14 @@ def read_existing_default_value(rule_number, benchmark_id):
     rule_dir = os.path.join(common.rules_dir, f"{benchmark_id}/rules", f"cis_{rule_number.replace('.', '_')}")
     try:
         with open(os.path.join(rule_dir, "data.yaml"), "r") as f:
-            default_value = yml.load(f)["metadata"]["default_value"]
-            return default_value
+            data = yml.load(f)
+            default_value = data["metadata"]["default_value"]
+            if default_value is None or default_value == "":
+                print(f"{benchmark_id}/{rule_number} is missing default value - please make sure to add it manually")
+                return ""
+            return data["metadata"]["default_value"]
     except FileNotFoundError:
-        print(f"{benchmark_id}/{rule_number} is missing default value - please make sure to add it manually")
+        print(f"Rule implementation for {benchmark_id}/{rule_number} is missing")
         return ""
 
 
@@ -142,6 +146,17 @@ def replace_nan_with_empty_string(data: pd.DataFrame):
     return data.replace("nan", '')
 
 
+def rule_is_implemented(rule_number: str, benchmark_id: str):
+    """
+    Check if rule was implemented
+    :param rule_number: Rule number
+    :param benchmark_id: Benchmark ID
+    :return: True if rule was implemented, False otherwise
+    """
+    rule_path = os.path.join(common.rules_dir, f"{benchmark_id}/rules", f"cis_{rule_number.replace('.', '_')}")
+    return os.path.isdir(rule_path)
+
+
 def generate_metadata(benchmark_id: str, raw_data: pd.DataFrame, sections: dict):
     """
     Generate metadata for rules
@@ -154,6 +169,10 @@ def generate_metadata(benchmark_id: str, raw_data: pd.DataFrame, sections: dict)
     metadata = []
     benchmark_tag = benchmark_id.removeprefix("cis_").upper() if benchmark_id != "cis_k8s" else f"Kubernetes"
     for rule in normalized_data.to_dict(orient="records"):
+        # Check if rule was implemented
+        if not rule_is_implemented(rule["Rule Number"], benchmark_id):
+            continue
+
         benchmark_metadata = generate_rule_benchmark_metadata(benchmark_id, rule["Rule Number"])
         r = Rule(
             id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{benchmark_metadata.name} {rule['Title']}")),

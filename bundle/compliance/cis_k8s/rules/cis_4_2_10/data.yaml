@@ -32,7 +32,7 @@ metadata:
     systemctl restart kubelet.service
     ```
   impact: ''
-  default_value:
+  default_value: ''
   references: ''
   section: Kubelet
   version: '1.0'
