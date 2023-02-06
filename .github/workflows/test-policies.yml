@@ -13,31 +13,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: OPA format
-        uses: docker://openpolicyagent/opa:0.45.0
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
         with:
-          args: "fmt ./bundle --fail=true --diff"
+          version: 0.48.0
+
+      - name: OPA format
+        run: opa fmt ./bundle --fail=true --diff
 
       - name: OPA format list failed files
-        uses: docker://openpolicyagent/opa
-        if: always()
-        with:
-          args: "fmt ./bundle --list"
+        run: opa fmt ./bundle --list
 
       - name: OPA build
-        uses: docker://openpolicyagent/opa
-        with:
-          args: "build -b ./bundle -e ./bundle/compliance"
+        run: opa build -b ./bundle -e ./bundle/compliance
 
       - name: OPA test
-        uses: docker://openpolicyagent/opa
-        with:
-          args: "test -b ./bundle -v"
+        run: opa test -b ./bundle -v
 
       - name: OPA check -strict
-        uses: docker://openpolicyagent/opa
-        with:
-          args: "check --strict --bundle ./bundle"
+        run: opa check --strict --bundle ./bundle
 
   update-rules-status:
     name: Update rules status

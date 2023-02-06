@@ -19,6 +19,4 @@ ensure_s3_object_logging(allowed_types) {
 
 	partialARN := dataResource.Values[k]
 	partialARN == "arn:aws:s3"
-} else = false {
-	true
-}
+} else = false

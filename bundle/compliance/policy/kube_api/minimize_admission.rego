@@ -22,6 +22,4 @@ rule_evaluation(entity) = false {
 	some container_type # "containers", "init_containers", "ephemeral_containers"
 	container := data_adapter.containers[container_type][_]
 	lib_common.contains_key_with_value(container.securityContext, entity, true)
-} else = true {
-	true
-}
+} else = true

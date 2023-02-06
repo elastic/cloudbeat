@@ -19,6 +19,4 @@ finding(entity, value) = result {
 rule_evaluation(entity, value) {
 	e := process_args[entity]
 	lib_common.greater_or_equal(e, value)
-} else = false {
-	true
-}
+} else = false

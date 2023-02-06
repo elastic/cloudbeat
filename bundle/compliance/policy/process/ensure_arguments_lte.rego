@@ -19,6 +19,4 @@ finding(entity, value) = result {
 rule_evaluation(entity, value) = false {
 	e := process_args[entity]
 	lib_common.duration_lte(e, value)
-} else = true {
-	true
-}
+} else = true

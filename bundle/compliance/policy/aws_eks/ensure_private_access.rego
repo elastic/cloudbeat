@@ -7,9 +7,7 @@ import data.compliance.policy.aws_eks.data_adapter
 is_only_private(cluster, cidr_allowed) {
 	cluster.ResourcesVpcConfig.EndpointPrivateAccess
 	public_access_is_restricted(cluster, cidr_allowed)
-} else = false {
-	true
-}
+} else = false
 
 public_access_is_restricted(cluster, cidr_allowed) {
 	not cluster.ResourcesVpcConfig.EndpointPublicAccess
@@ -51,6 +49,4 @@ finding(cidr_allowed) = result {
 cidr_evidence(config, cidr_allowed) = result {
 	cidr_allowed
 	result := {"public_access_cidrs": config.PublicAccessCidrs}
-} else = {} {
-	true
-}
+} else = {}

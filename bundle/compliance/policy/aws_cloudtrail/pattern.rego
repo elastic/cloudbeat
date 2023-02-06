@@ -6,6 +6,4 @@ at_least_one_metric_exists(trail, patterns) {
 	filter := trail.MetricFilters[i]
 	pattern := patterns[j]
 	filter.FilterPattern == pattern
-} else = false {
-	true
-}
+} else = false

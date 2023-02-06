@@ -5,9 +5,7 @@ arg_values_contains(arguments, key, value) {
 	argument := arguments[key]
 	values := split(argument, ",")
 	value == values[_]
-} else = false {
-	true
-}
+} else = false
 
 # splits key value string by first occurrence of =
 split_key_value(key_value_string, delimiter) = [key, value] {

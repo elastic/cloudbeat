@@ -20,6 +20,4 @@ finding(entity, value) = result {
 rule_evaluation(entity, value) {
 	process_args[entity]
 	not process_common.arg_values_contains(process_args, entity, value)
-} else = false {
-	true
-}
+} else = false

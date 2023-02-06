@@ -18,9 +18,7 @@ finding(entities) = result {
 rule_evaluation(entities) {
 	process_args[entities[0]]
 	process_args[entities[1]]
-} else = false {
-	true
-}
+} else = false
 
 apiserver_filter := data_adapter.is_kube_apiserver
 

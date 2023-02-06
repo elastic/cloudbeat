@@ -27,9 +27,7 @@ validate_common_provider_metadata(metadata) {
 
 validate_metadata(metadata) {
 	validate_common_provider_metadata(metadata)
-} else = false {
-	true
-}
+} else = false
 
 # validate every rule metadata
 test_validate_rule_metadata {

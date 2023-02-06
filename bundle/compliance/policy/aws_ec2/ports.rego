@@ -8,6 +8,4 @@ admin_ports = {22, 23, 25, 53, 80, 110, 143, 389, 443, 465, 587, 636, 993, 995, 
 in_range(from, to, candidate) {
 	candidate >= from
 	candidate <= to
-} else = false {
-	true
-}
+} else = false

@@ -7,9 +7,7 @@ import data.compliance.policy.aws_eks.data_adapter
 is_encrypted(cluster) {
 	cluster.EncryptionConfig
 	count(cluster.EncryptionConfig) > 0
-} else = false {
-	true
-}
+} else = false
 
 # Ensure there Kuberenetes secrets are encrypted
 finding = result {

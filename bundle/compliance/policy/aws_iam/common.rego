@@ -7,6 +7,4 @@ are_credentials_within_duration(keys, field, duration) {
 	every key in keys {
 		common.date_within_duration(time.parse_rfc3339_ns(key[field]), duration)
 	}
-} else = false {
-	true
-}
+} else = false

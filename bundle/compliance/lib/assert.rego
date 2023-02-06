@@ -6,9 +6,7 @@ is_true(value) {
 
 is_false(value) {
 	value == false
-} else = false {
-	true
-}
+} else = false
 
 all_true(values) {
 	not some_false(values)
@@ -30,6 +28,4 @@ some_true(values) {
 
 array_is_empty(array) {
 	count(array) == 0
-} else = false {
-	true
-}
+} else = false
