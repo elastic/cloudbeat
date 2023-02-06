@@ -193,17 +193,17 @@ func (d dummyTester) DummyFunc() ([]AwsResource, error) {
 func Test_shouldDrop(t *testing.T) {
 	var s1 *string
 	assert.True(t, shouldDrop(s1))
+	assert.True(t, shouldDrop(func() *string { return nil }()))
 	assert.True(t, shouldDrop(nil))
-	assert.True(t, shouldDrop([]string{}))
-	var s2 []string
-	assert.True(t, shouldDrop(s2))
 
+	assert.False(t, shouldDrop([]string{}))
+	var s2 []string
+	assert.False(t, shouldDrop(s2))
 	assert.False(t, shouldDrop(""))
 	assert.False(t, shouldDrop(aws.String("")))
 
 	type test struct{}
-
 	assert.False(t, shouldDrop(&test{}))
-	// assert.True(t, shouldDrop(test{}))
+	assert.False(t, shouldDrop(test{}))
 	//
 }

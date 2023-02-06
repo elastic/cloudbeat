@@ -24,16 +24,17 @@ import (
 )
 
 type EBSEncryption struct {
-	Enabled bool
-	region  string
+	Enabled    bool `json:"enabled"`
+	region     string
+	awsAccount string
 }
 
 func (e EBSEncryption) GetResourceArn() string {
-	return fmt.Sprintf("ebs-encryption-by-default-%s", e.region)
+	return fmt.Sprintf("ebs-encryption-by-default-%s-%s", e.awsAccount, e.region)
 }
 
 func (e EBSEncryption) GetResourceName() string {
-	return fmt.Sprintf("ebs-encryption-by-default-%s", e.region)
+	return fmt.Sprintf("ebs-encryption-by-default-%s-%s", e.awsAccount, e.region)
 }
 
 func (e EBSEncryption) GetResourceType() string {

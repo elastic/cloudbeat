@@ -95,9 +95,7 @@ func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetch
 			mux.Lock()
 			defer mux.Unlock()
 			// K might be an slice, struct or pointer
-			// since slice is not comparable we cant just do
-			// var zero K; results == zero
-			// also we cant check if results == nil
+			// in case of pointer we do not want to return a slice with nils
 			if shouldDrop(results) {
 				return
 			}
@@ -110,9 +108,7 @@ func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetch
 }
 
 // shouldDrop checks the target type and return true if
-// type is pointer -> the pointer is nil
-// type is struct -> the type zero value
-// type is slice -> len(slice) == 0
+// the type is pointer -> the pointer is nil
 // and false otherwise
 func shouldDrop(t interface{}) bool {
 	v := reflect.ValueOf(t)
@@ -124,14 +120,6 @@ func shouldDrop(t interface{}) bool {
 	// shouldDrop(nil) case
 	if kind == reflect.Invalid && t == nil {
 		return true
-	}
-
-	if kind == reflect.Slice {
-		return v.Cap() == 0
-	}
-
-	if kind == reflect.Struct {
-		return v.Elem().IsZero()
 	}
 
 	return false

@@ -93,6 +93,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 				}, nil)
 				m.On("DescribeSecurityGroups", mock.Anything).Return([]awslib.AwsResource{ec2.SecurityGroup{}}, nil)
 				m.On("DescribeVPCs", mock.Anything).Return(nil, errors.New("failed to get VPCs"))
+				m.On("GetEbsEncryptionByDefault", mock.Anything).Return(nil, errors.New("failed to get GetEbsEncryptionByDefault"))
 				return &m
 			},
 			wantErr:           false,
@@ -114,15 +115,11 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 					ec2.VpcInfo{},
 					ec2.VpcInfo{},
 				}, nil)
+				m.On("GetEbsEncryptionByDefault", mock.Anything).Return(&ec2.EBSEncryption{}, nil)
 				return &m
 			},
 			wantErr:           false,
-			expectedResources: 6,
-				m.On("GetEbsEncryptionByDefault", mock.Anything).Return(&ec2.EBSEncryption{}, nil),
-				return &m
-			},
-			wantErr:           false,
-			expectedResources: 5,
+			expectedResources: 7,
 		},
 	}
 	for _, tt := range tests {

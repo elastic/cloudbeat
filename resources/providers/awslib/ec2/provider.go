@@ -130,5 +130,9 @@ func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) (*EBSEncryptio
 	if err != nil {
 		return nil, err
 	}
-	return &EBSEncryption{Enabled: *res.EbsEncryptionByDefault, region: p.awsRegion}, nil
+	return &EBSEncryption{
+		Enabled:    *res.EbsEncryptionByDefault,
+		region:     p.awsRegion,
+		awsAccount: p.awsAccountID,
+	}, nil
 }
