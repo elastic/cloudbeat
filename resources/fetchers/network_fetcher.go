@@ -105,7 +105,10 @@ func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.Elast
 	if err != nil {
 		f.log.Errorf("failed to get ebs encryption by default: %v", err)
 	}
-	resources = append(resources, ebsEncryption)
+
+	if ebsEncryption != nil {
+		resources = append(resources, ebsEncryption)
+	}
 
 	return resources, nil
 }
