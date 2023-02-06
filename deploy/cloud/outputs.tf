@@ -75,11 +75,18 @@ output "role_arn" {
 }
 
 output "cloudbeat_ssh_cmd" {
-  value = module.aws_ec2_with_agent.cloudbeat_ssh_cmd
+  value     = module.aws_ec2_with_agent.cloudbeat_ssh_cmd
   sensitive = true
 }
 
 output "ec2_private_key" {
-  value = module.aws_ec2_with_agent.ec2_private_key
+  value     = module.aws_ec2_with_agent.ec2_private_key
   sensitive = true
 }
+
+output "ec2_instance_id" {
+  description = "EC2 instance ID"
+  value       = module.aws_ec2_with_agent.ec2_instance_id
+}
+
+

@@ -85,6 +85,7 @@ jobs:
           echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
           echo "EKS_CLUSTER_NAME=$(terraform output eks_cluster_name)" >> $GITHUB_ENV
           echo "EKS_REGION=$(terraform output eks_region)" >> $GITHUB_ENV
+          echo "EC2_INSTANCE_ID=$(terraform output ec2_instance_id)" >> $GITHUB_ENV
 
       - name: Set sensitive terraform output as env variable
         id: set_sensitive_output
@@ -148,9 +149,9 @@ jobs:
                       "short": false
                     },
                     {
-                      "title": "EC2 private key",
-                      "value": "${{ env.EC2_PRIVATE_KEY }}",
-                      "short": false
+                      "title": "EKS region",
+                      "value": ${{ env.EKS_REGION }},
+                      "short": true
                     },
                     {
                       "title": "EKS cluster name",
@@ -158,9 +159,14 @@ jobs:
                       "short": true
                     },
                     {
-                      "title": "EKS region",
-                      "value": ${{ env.EKS_REGION }},
-                      "short": true
+                      "title": "Instance ID",
+                      "value": "${{ env.EC2_INSTANCE_ID }}",
+                      "short": false
+                    },
+                    {
+                      "title": "EC2 private key",
+                      "value": "${{ env.EC2_PRIVATE_KEY }}",
+                      "short": false
                     }
                   ]
                 }

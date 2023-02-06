@@ -13,3 +13,9 @@ output "ec2_private_key" {
   value = tls_private_key.cloudbeat_key.private_key_pem
   sensitive = true
 }
+
+output "ec2_instance_id" {
+  description = "Use this private key to SSH into the ec2 instance"
+  value = aws_instance.cloudbeat.id
+  sensitive = true
+}
