@@ -201,9 +201,9 @@
 
 ## AWS CIS Benchmark
 
-### 44/63 implemented rules (70%)
+### 45/63 implemented rules (71%)
 
-#### Automated rules: 44/55 (80%)
+#### Automated rules: 45/55 (82%)
 
 #### Manual rules: 0/8 (0%)
 
@@ -235,7 +235,7 @@
 | [2.1.3](bundle/compliance/cis_aws/rules/cis_2_1_3) | Simple Storage Service (S3)       | Ensure MFA Delete is enabled on S3 buckets                                                                         | :white_check_mark: | Automated |
 |                       2.1.4                        | Simple Storage Service (S3)       | Ensure all data in Amazon S3 has been discovered, classified and secured when required.                            |        :x:         |  Manual   |
 |                       2.1.5                        | Simple Storage Service (S3)       | Ensure that S3 Buckets are configured with 'Block public access (bucket settings)'                                 |        :x:         | Automated |
-|                       2.2.1                        | Elastic Compute Cloud (EC2)       | Ensure EBS Volume Encryption is Enabled in all Regions                                                             |        :x:         | Automated |
+| [2.2.1](bundle/compliance/cis_aws/rules/cis_2_2_1) | Elastic Compute Cloud (EC2)       | Ensure EBS Volume Encryption is Enabled in all Regions                                                             | :white_check_mark: | Automated |
 |                       2.3.1                        | Relational Database Service (RDS) | Ensure that encryption is enabled for RDS Instances                                                                |        :x:         | Automated |
 |                       2.3.2                        | Relational Database Service (RDS) | Ensure Auto Minor Version Upgrade feature is Enabled for RDS Instances                                             |        :x:         | Automated |
 |                       2.3.3                        | Relational Database Service (RDS) | Ensure that public access is not given to RDS Instance                                                             |        :x:         | Automated |

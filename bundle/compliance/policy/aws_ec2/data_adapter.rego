@@ -12,6 +12,10 @@ is_vpc_policy {
 	input.subType == "aws-vpc"
 }
 
+is_ebs_policy {
+	input.subType == "aws-ebs"
+}
+
 nacl_entries = entries {
 	entries := input.resource.Entries
 }

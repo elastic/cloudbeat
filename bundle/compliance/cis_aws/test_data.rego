@@ -220,6 +220,12 @@ generate_vpc_resource(flow_logs) = {
 	"subType": "aws-vpc",
 }
 
+generate_ebs_encryption_resource(encryption_enabled) = {
+	"resource": {"enabled": encryption_enabled},
+	"type": "cloud-compute",
+	"subType": "aws-ebs",
+}
+
 not_evaluated_trail = {
 	"type": "cloud-audit",
 	"subType": "not-an-aws-trail",
