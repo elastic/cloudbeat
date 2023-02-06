@@ -8,6 +8,10 @@ is_security_group_policy {
 	input.subType == "aws-security-group"
 }
 
+is_vpc_policy {
+	input.subType == "aws-vpc"
+}
+
 nacl_entries = entries {
 	entries := input.resource.Entries
 }

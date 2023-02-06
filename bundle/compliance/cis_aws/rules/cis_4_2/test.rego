@@ -14,6 +14,7 @@ test_pass {
 		"MetricFilters": [{"FilterPattern": "{ ($.eventName = \"ConsoleLogin\") && ($.additionalEventData.MFAUsed != \"Yes\") }"}],
 		"Topics": ["arn:aws:...sns"],
 	}])
+
 	eval_pass with input as rule_input([{
 		"TrailInfo": {
 			"Trail": {"IsMultiRegionTrail": true},

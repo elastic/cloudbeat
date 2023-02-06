@@ -201,9 +201,9 @@
 
 ## AWS CIS Benchmark
 
-### 36/63 implemented rules (57%)
+### 44/63 implemented rules (70%)
 
-#### Automated rules: 36/55 (65%)
+#### Automated rules: 44/55 (80%)
 
 #### Manual rules: 0/8 (0%)
 
@@ -241,16 +241,16 @@
 |                       2.3.3                        | Relational Database Service (RDS) | Ensure that public access is not given to RDS Instance                                                             |        :x:         | Automated |
 |                       2.4.1                        | Elastic File System (EFS)         | Ensure that encryption is enabled for EFS file systems                                                             |        :x:         |  Manual   |
 |   [3.1](bundle/compliance/cis_aws/rules/cis_3_1)   | Logging                           | Ensure CloudTrail is enabled in all regions                                                                        | :white_check_mark: | Automated |
-|                        3.10                        | Logging                           | Ensure that Object-level logging for write events is enabled for S3 bucket                                         |        :x:         | Automated |
-|                        3.11                        | Logging                           | Ensure that Object-level logging for read events is enabled for S3 bucket                                          |        :x:         | Automated |
-|                        3.2                         | Logging                           | Ensure CloudTrail log file validation is enabled                                                                   |        :x:         | Automated |
-|                        3.3                         | Logging                           | Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible                                      |        :x:         | Automated |
-|                        3.4                         | Logging                           | Ensure CloudTrail trails are integrated with CloudWatch Logs                                                       |        :x:         | Automated |
+|  [3.10](bundle/compliance/cis_aws/rules/cis_3_10)  | Logging                           | Ensure that Object-level logging for write events is enabled for S3 bucket                                         | :white_check_mark: | Automated |
+|  [3.11](bundle/compliance/cis_aws/rules/cis_3_11)  | Logging                           | Ensure that Object-level logging for read events is enabled for S3 bucket                                          | :white_check_mark: | Automated |
+|   [3.2](bundle/compliance/cis_aws/rules/cis_3_2)   | Logging                           | Ensure CloudTrail log file validation is enabled                                                                   | :white_check_mark: | Automated |
+|   [3.3](bundle/compliance/cis_aws/rules/cis_3_3)   | Logging                           | Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible                                      | :white_check_mark: | Automated |
+|   [3.4](bundle/compliance/cis_aws/rules/cis_3_4)   | Logging                           | Ensure CloudTrail trails are integrated with CloudWatch Logs                                                       | :white_check_mark: | Automated |
 |                        3.5                         | Logging                           | Ensure AWS Config is enabled in all regions                                                                        |        :x:         | Automated |
-|                        3.6                         | Logging                           | Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket                                             |        :x:         | Automated |
-|                        3.7                         | Logging                           | Ensure CloudTrail logs are encrypted at rest using KMS CMKs                                                        |        :x:         | Automated |
+|   [3.6](bundle/compliance/cis_aws/rules/cis_3_6)   | Logging                           | Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket                                             | :white_check_mark: | Automated |
+|   [3.7](bundle/compliance/cis_aws/rules/cis_3_7)   | Logging                           | Ensure CloudTrail logs are encrypted at rest using KMS CMKs                                                        | :white_check_mark: | Automated |
 |                        3.8                         | Logging                           | Ensure rotation for customer created symmetric CMKs is enabled                                                     |        :x:         | Automated |
-|                        3.9                         | Logging                           | Ensure VPC flow logging is enabled in all VPCs                                                                     |        :x:         | Automated |
+|   [3.9](bundle/compliance/cis_aws/rules/cis_3_9)   | Logging                           | Ensure VPC flow logging is enabled in all VPCs                                                                     | :white_check_mark: | Automated |
 |   [4.1](bundle/compliance/cis_aws/rules/cis_4_1)   | Monitoring                        | Ensure a log metric filter and alarm exist for unauthorized API calls                                              | :white_check_mark: | Automated |
 |  [4.10](bundle/compliance/cis_aws/rules/cis_4_10)  | Monitoring                        | Ensure a log metric filter and alarm exist for security group changes                                              | :white_check_mark: | Automated |
 |  [4.11](bundle/compliance/cis_aws/rules/cis_4_11)  | Monitoring                        | Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL)                      | :white_check_mark: | Automated |

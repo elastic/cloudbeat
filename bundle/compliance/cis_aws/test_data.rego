@@ -161,3 +161,67 @@ generate_securityhub(sb) = {
 	"type": "monitoring",
 	"subType": "aws-securityhub",
 }
+
+generate_enriched_trail(is_log_validation_enabled, cloudwatch_log_group_arn, log_delivery_time, is_bucket_logging_enabled, kms_key_id) = {
+	"type": "cloud-audit",
+	"subType": "aws-trail",
+	"resource": {
+		"Trail": {
+			"LogFileValidationEnabled": is_log_validation_enabled,
+			"CloudWatchLogsLogGroupArn": cloudwatch_log_group_arn,
+			"KmsKeyId": kms_key_id,
+		},
+		"Status": {"LatestcloudwatchLogdDeliveryTime": log_delivery_time},
+		"bucket_info": {"logging": {"enabled": is_bucket_logging_enabled}},
+	},
+}
+
+create_bucket_acl(principal_uri) = {
+	"Owner": {
+		"ID": "f5c5b99a8f5c5b99a8f5c5b99a8f5c5b99a8f5c5b99a8f5c5b99a8",
+		"DisplayName": "exampleuser",
+	},
+	"Grants": [
+		{
+			"Grantee": {
+				"Type": "CanonicalUser",
+				"ID": "f5c5b99a8f5c5b99a8f5c5b99a8f5c5b99a8f5c5b99a8f5c5b99a8",
+				"DisplayName": "exampleuser",
+			},
+			"Permission": "FULL_CONTROL",
+		},
+		{
+			"Grantee": {
+				"Type": "Group",
+				"ID": "f5c5b99a8f5c5b99a8f5c5b99a8f5c5b99a8f5c5b99a8f5c5b99a8",
+				"DisplayName": "exampleuser",
+				"URI": principal_uri,
+			},
+			"Permission": "FULL_CONTROL",
+		},
+	],
+}
+
+generate_trail_bucket_info(principal_uri, policy_statements) = {
+	"type": "cloud-audit",
+	"subType": "aws-trail",
+	"resource": {"bucket_info": {"acl": create_bucket_acl(principal_uri), "policy": {"Version": "2012-10-17", "Statement": policy_statements}}},
+}
+
+generate_event_selectors(entries, is_multi_region) = {
+	"type": "cloud-audit",
+	"subType": "aws-trail",
+	"resource": {"Trail": {"IsMultiRegionTrail": is_multi_region}, "EventSelectors": entries},
+}
+
+generate_vpc_resource(flow_logs) = {
+	"resource": {"flow_logs": flow_logs},
+	"type": "ec2",
+	"subType": "aws-vpc",
+}
+
+not_evaluated_trail = {
+	"type": "cloud-audit",
+	"subType": "not-an-aws-trail",
+	"resource": {"log_file_validation_enabled": false},
+}

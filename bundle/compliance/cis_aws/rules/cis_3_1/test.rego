@@ -28,6 +28,7 @@ test_violation {
 		"Status": {"IsLogging": true},
 		"EventSelectors": [{"IncludeManagementEvents": false, "ReadWriteType": "All"}],
 	}}])
+
 	eval_fail with input as rule_input([{"TrailInfo": {
 		"Trail": {"IsMultiRegionTrail": true},
 		"Status": {"IsLogging": true},
