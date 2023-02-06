@@ -18,26 +18,33 @@
 package ec2
 
 import (
-	"context"
+	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type ElasticCompute interface {
-	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
-	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
-	DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error)
+type VpcInfo struct {
+	Vpc        types.Vpc       `json:"vpc"`
+	FlowLogs   []types.FlowLog `json:"flow_logs"`
+	awsAccount string
+	region     string
 }
 
-func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
-	svc := ec2.NewFromConfig(cfg)
-	return &Provider{
-		log:          log,
-		client:       svc,
-		awsAccountID: awsAccountID,
-		awsRegion:    cfg.Region,
+func (v VpcInfo) GetResourceArn() string {
+	if v.Vpc.VpcId == nil {
+		return ""
 	}
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc/%s", v.region, v.awsAccount, *v.Vpc.VpcId)
+}
+
+func (v VpcInfo) GetResourceName() string {
+	if v.Vpc.VpcId == nil {
+		return ""
+	}
+	return *v.Vpc.VpcId
+}
+
+func (v VpcInfo) GetResourceType() string {
+	return fetching.VpcType
 }

@@ -71,7 +71,7 @@ func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, c
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 	ff := func(cfg awssdk.Config) ec2.ElasticCompute {
-		return ec2.NewEC2Provider(log, *identity.Account, awsConfig)
+		return ec2.NewEC2Provider(log, *identity.Account, cfg)
 	}
 
 	return &NetworkFetcher{

@@ -71,7 +71,7 @@ func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(client DescribeCloud
 	return wrapper
 }
 
-// Fetch retrieves resources from multiple regions concurrently using the provided fetcher function.
+// MultiRegionFetch retrieves resources from multiple regions concurrently using the provided fetcher function.
 func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetcher func(ctx context.Context, client T) (K, error)) ([]K, error) {
 	var err error
 	var wg sync.WaitGroup

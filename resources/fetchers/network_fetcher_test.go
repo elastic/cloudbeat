@@ -45,6 +45,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 				m := ec2.MockElasticCompute{}
 				m.On("DescribeNetworkAcl", mock.Anything).Return([]awslib.AwsResource{}, nil)
 				m.On("DescribeSecurityGroups", mock.Anything).Return([]awslib.AwsResource{}, nil)
+				m.On("DescribeVPCs", mock.Anything).Return([]awslib.AwsResource{}, nil)
 				return &m
 			},
 		},
@@ -57,10 +58,12 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 					ec2.SecurityGroup{},
 					ec2.SecurityGroup{},
 				}, nil)
+				m.On("DescribeVPCs", mock.Anything).Return([]awslib.AwsResource{ec2.VpcInfo{}}, nil)
+
 				return &m
 			},
 			wantErr:           false,
-			expectedResources: 2,
+			expectedResources: 3,
 		},
 		{
 			name: "with error to describe security groups",
@@ -71,10 +74,26 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 					ec2.NACLInfo{},
 				}, nil)
 				m.On("DescribeSecurityGroups", mock.Anything).Return(nil, errors.New("failed to get security groups"))
+				m.On("DescribeVPCs", mock.Anything).Return([]awslib.AwsResource{ec2.VpcInfo{}}, nil)
 				return &m
 			},
 			wantErr:           false,
-			expectedResources: 2,
+			expectedResources: 3,
+		},
+		{
+			name: "with error to describe VPCs",
+			networkProvider: func() ec2.ElasticCompute {
+				m := ec2.MockElasticCompute{}
+				m.On("DescribeNetworkAcl", mock.Anything).Return([]awslib.AwsResource{
+					ec2.NACLInfo{},
+					ec2.NACLInfo{},
+				}, nil)
+				m.On("DescribeSecurityGroups", mock.Anything).Return([]awslib.AwsResource{ec2.SecurityGroup{}}, nil)
+				m.On("DescribeVPCs", mock.Anything).Return(nil, errors.New("failed to get VPCs"))
+				return &m
+			},
+			wantErr:           false,
+			expectedResources: 3,
 		},
 		{
 			name: "with resources",
@@ -88,10 +107,14 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 					ec2.SecurityGroup{},
 					ec2.SecurityGroup{},
 				}, nil)
+				m.On("DescribeVPCs", mock.Anything).Return([]awslib.AwsResource{
+					ec2.VpcInfo{},
+					ec2.VpcInfo{},
+				}, nil)
 				return &m
 			},
 			wantErr:           false,
-			expectedResources: 4,
+			expectedResources: 6,
 		},
 	}
 	for _, tt := range tests {
