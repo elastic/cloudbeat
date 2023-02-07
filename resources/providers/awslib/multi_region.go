@@ -21,10 +21,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
+	"sync"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"sync"
 )
 
 var (
@@ -37,7 +39,6 @@ type cachedRegions struct {
 }
 
 type CrossRegionFetcher[T any] interface {
-	Fetch(fetcher func(T) ([]AwsResource, error)) ([]AwsResource, error)
 	GetMultiRegionsClientMap() map[string]T
 }
 
@@ -49,14 +50,16 @@ type DescribeCloudRegions interface {
 	DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 }
 
-type MultiRegionClientFactory[T any] struct{}
-type multiRegionWrapper[T any] struct {
-	clients map[string]T
-}
+type (
+	MultiRegionClientFactory[T any] struct{}
+	multiRegionWrapper[T any]       struct {
+		clients map[string]T
+	}
+)
 
 // NewMultiRegionClients is a utility function that is used to create a map of client instances of a given type T for multiple regions.
 func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
-	var clientsMap = make(map[string]T, 0)
+	clientsMap := make(map[string]T, 0)
 	for _, region := range getRegions(client, log) {
 		cfg.Region = region
 		clientsMap[region] = factory(cfg)
@@ -69,34 +72,57 @@ func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(client DescribeCloud
 	return wrapper
 }
 
-// Fetch retrieves resources from multiple regions concurrently using the provided fetcher function.
-func (w *multiRegionWrapper[T]) Fetch(fetcher func(T) ([]AwsResource, error)) ([]AwsResource, error) {
+// MultiRegionFetch retrieves resources from multiple regions concurrently using the provided fetcher function.
+func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetcher func(ctx context.Context, client T) (K, error)) ([]K, error) {
 	var err error
 	var wg sync.WaitGroup
 	var mux sync.Mutex
-	var crossRegionResources []AwsResource
+	var crossRegionResources []K
 
-	if w.clients == nil {
+	if set == nil {
 		return nil, errors.New("multi region clients have not been initialize")
 	}
 
-	for region, client := range w.clients {
+	for region, client := range set {
 		wg.Add(1)
 		go func(client T, region string) {
 			defer wg.Done()
-			results, fetchErr := fetcher(client)
+			results, fetchErr := fetcher(ctx, client)
 			if fetchErr != nil {
-				err = fmt.Errorf("Fail to retrieve aws resources for region: %s, error: %v, ", region, fetchErr)
+				err = fmt.Errorf("fail to retrieve aws resources for region: %s, error: %v, ", region, fetchErr)
 			}
 
 			mux.Lock()
-			crossRegionResources = append(crossRegionResources, results...)
-			mux.Unlock()
+			defer mux.Unlock()
+			// K might be an slice, struct or pointer
+			// in case of pointer we do not want to return a slice with nils
+			if shouldDrop(results) {
+				return
+			}
+			crossRegionResources = append(crossRegionResources, results)
 		}(client, region)
 	}
 
 	wg.Wait()
 	return crossRegionResources, err
+}
+
+// shouldDrop checks the target type and return true if
+// the type is pointer -> the pointer is nil
+// and false otherwise
+func shouldDrop(t interface{}) bool {
+	v := reflect.ValueOf(t)
+	kind := v.Kind()
+	if kind == reflect.Ptr && v.IsNil() {
+		return true
+	}
+
+	// shouldDrop(nil) case
+	if kind == reflect.Invalid && t == nil {
+		return true
+	}
+
+	return false
 }
 
 func (w *multiRegionWrapper[T]) GetMultiRegionsClientMap() map[string]T {

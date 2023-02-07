@@ -30,6 +30,7 @@ type RdsFetcher struct {
 	cfg        RdsFetcherConfig
 	rds        rds.Rds
 	resourceCh chan fetching.ResourceInfo
+	clients    map[string]rds.Client
 }
 
 type RdsFetcherConfig struct {
@@ -42,18 +43,23 @@ type RdsResource struct {
 
 func (f *RdsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting RdsFetcher.Fetch")
-	dbInstances, err := f.rds.DescribeDBInstances(ctx)
+	dbInstances, err := awslib.MultiRegionFetch(ctx, f.clients, func(ctx context.Context, client rds.Client) ([]awslib.AwsResource, error) {
+		return f.rds.DescribeDBInstances(ctx, client)
+	})
+
 	if err != nil {
 		f.log.Errorf("failed to load DB instances from rds: %v", err)
 		return nil
 	}
 
-	for _, dbInstance := range dbInstances {
-		resource := RdsResource{dbInstance}
-		f.log.Debugf("Fetched DB instance: %s", dbInstance.GetResourceName())
-		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      resource,
-			CycleMetadata: cMetadata,
+	for _, dbInstancesPerRegion := range dbInstances {
+		for _, dbInstance := range dbInstancesPerRegion {
+			resource := RdsResource{dbInstance}
+			f.log.Debugf("Fetched DB instance: %s", dbInstance.GetResourceName())
+			f.resourceCh <- fetching.ResourceInfo{
+				Resource:      resource,
+				CycleMetadata: cMetadata,
+			}
 		}
 	}
 

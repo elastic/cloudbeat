@@ -22,8 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
@@ -82,7 +80,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 	return result, nil
 }
 
-func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region string) ([]types.Grant, error) {
+func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region string) (*s3Client.GetBucketAclOutput, error) {
 	client, err := awslib.GetClient(&region, p.clients)
 	if err != nil {
 		return nil, err
@@ -94,16 +92,7 @@ func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region s
 		return nil, err
 	}
 
-	grants := []types.Grant{}
-	for _, grant := range acl.Grants {
-		if grant.Grantee != nil && grant.Grantee.Type == types.TypeGroup {
-			if strings.HasSuffix(*grant.Grantee.URI, "AuthenticatedUsers") || strings.HasSuffix(*grant.Grantee.URI, "AllUsers") {
-				grants = append(grants, grant)
-			}
-		}
-	}
-
-	return grants, nil
+	return acl, nil
 }
 
 func (p Provider) GetBucketPolicy(ctx context.Context, bucketName *string, region string) (BucketPolicy, error) {

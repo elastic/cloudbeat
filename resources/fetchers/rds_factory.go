@@ -19,6 +19,9 @@ package fetchers
 
 import (
 	"fmt"
+	awsSdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
@@ -56,12 +59,19 @@ func (f *RdsFactory) CreateFrom(log *logp.Logger, cfg RdsFetcherConfig, ch chan 
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	rdsProvider := rds.NewProvider(awsConfig, log, f.CrossRegionFactory)
+	clientFactory := func(cfg awsSdk.Config) rds.Client {
+		return rdsClient.NewFromConfig(cfg)
+	}
+
+	clients := f.CrossRegionFactory.NewMultiRegionClients(ec2.NewFromConfig(awsConfig), awsConfig, clientFactory, log)
+
+	rdsProvider := rds.NewProvider(log)
 
 	return &RdsFetcher{
 		log:        log,
 		cfg:        cfg,
 		rds:        rdsProvider,
 		resourceCh: ch,
+		clients:    clients.GetMultiRegionsClientMap(),
 	}, nil
 }

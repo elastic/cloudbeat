@@ -19,42 +19,31 @@ package rds
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return rdsClient.NewFromConfig(cfg)
-	}
-
-	fetcher := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
-
+func NewProvider(log *logp.Logger) *Provider {
 	return &Provider{
-		log:     log,
-		fetcher: fetcher,
+		log: log,
 	}
 }
 
-func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error) {
-	return p.fetcher.Fetch(func(c Client) ([]awslib.AwsResource, error) {
-		var result []awslib.AwsResource
-		dbInstances, err := c.DescribeDBInstances(ctx, &rdsClient.DescribeDBInstancesInput{})
-		if err != nil {
-			p.log.Errorf("Could not describe DB instances. Error: %v", err)
-			return result, err
-		}
+func (p Provider) DescribeDBInstances(ctx context.Context, c Client) ([]awslib.AwsResource, error) {
+	var result []awslib.AwsResource
+	dbInstances, err := c.DescribeDBInstances(ctx, &rdsClient.DescribeDBInstancesInput{})
+	if err != nil {
+		p.log.Errorf("Could not describe DB instances. Error: %v", err)
+		return result, err
+	}
 
-		for _, dbInstance := range dbInstances.DBInstances {
-			result = append(result, DBInstance{*dbInstance.DBInstanceIdentifier, *dbInstance.DBInstanceArn, dbInstance.StorageEncrypted, dbInstance.AutoMinorVersionUpgrade})
-		}
+	for _, dbInstance := range dbInstances.DBInstances {
+		result = append(result, DBInstance{Identifier: *dbInstance.DBInstanceIdentifier, Arn: *dbInstance.DBInstanceArn, StorageEncrypted: dbInstance.StorageEncrypted, AutoMinorVersionUpgrade: dbInstance.AutoMinorVersionUpgrade})
+	}
 
-		return result, nil
-	})
+	return result, nil
 }
 
 func (d DBInstance) GetResourceArn() string {

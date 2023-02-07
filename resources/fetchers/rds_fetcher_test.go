@@ -84,9 +84,12 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
 		}
 
+		mockClient := &rds.MockClient{}
+		clients := map[string]rds.Client{"us-east-1": mockClient}
+
 		rdsProviderMock := &rds.MockRds{}
 		for funcName, returnVals := range test.rdsMocksReturnVals {
-			rdsProviderMock.On(funcName, context.TODO()).Return(returnVals...)
+			rdsProviderMock.On(funcName, context.TODO(), mockClient).Return(returnVals...)
 		}
 
 		rdsFetcher := RdsFetcher{
@@ -94,6 +97,7 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 			cfg:        rdsFetcherCfg,
 			rds:        rdsProviderMock,
 			resourceCh: s.resourceCh,
+			clients:    clients,
 		}
 
 		ctx := context.Background()

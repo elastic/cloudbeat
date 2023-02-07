@@ -45,6 +45,8 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 				m := ec2.MockElasticCompute{}
 				m.On("DescribeNetworkAcl", mock.Anything).Return([]awslib.AwsResource{}, nil)
 				m.On("DescribeSecurityGroups", mock.Anything).Return([]awslib.AwsResource{}, nil)
+				m.On("DescribeVPCs", mock.Anything).Return([]awslib.AwsResource{}, nil)
+				m.On("GetEbsEncryptionByDefault", mock.Anything).Return(nil, nil)
 				return &m
 			},
 		},
@@ -57,13 +59,16 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 					ec2.SecurityGroup{},
 					ec2.SecurityGroup{},
 				}, nil)
+				m.On("DescribeVPCs", mock.Anything).Return([]awslib.AwsResource{ec2.VpcInfo{}}, nil)
+
+				m.On("GetEbsEncryptionByDefault", mock.Anything).Return(nil, nil)
 				return &m
 			},
 			wantErr:           false,
-			expectedResources: 2,
+			expectedResources: 3,
 		},
 		{
-			name: "with error to describe security groups",
+			name: "with errors",
 			networkProvider: func() ec2.ElasticCompute {
 				m := ec2.MockElasticCompute{}
 				m.On("DescribeNetworkAcl", mock.Anything).Return([]awslib.AwsResource{
@@ -71,10 +76,28 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 					ec2.NACLInfo{},
 				}, nil)
 				m.On("DescribeSecurityGroups", mock.Anything).Return(nil, errors.New("failed to get security groups"))
+				m.On("DescribeVPCs", mock.Anything).Return([]awslib.AwsResource{ec2.VpcInfo{}}, nil)
+				m.On("GetEbsEncryptionByDefault", mock.Anything).Return(nil, errors.New("failed to get GetEbsEncryptionByDefault"))
 				return &m
 			},
 			wantErr:           false,
-			expectedResources: 2,
+			expectedResources: 3,
+		},
+		{
+			name: "with error to describe VPCs",
+			networkProvider: func() ec2.ElasticCompute {
+				m := ec2.MockElasticCompute{}
+				m.On("DescribeNetworkAcl", mock.Anything).Return([]awslib.AwsResource{
+					ec2.NACLInfo{},
+					ec2.NACLInfo{},
+				}, nil)
+				m.On("DescribeSecurityGroups", mock.Anything).Return([]awslib.AwsResource{ec2.SecurityGroup{}}, nil)
+				m.On("DescribeVPCs", mock.Anything).Return(nil, errors.New("failed to get VPCs"))
+				m.On("GetEbsEncryptionByDefault", mock.Anything).Return(nil, errors.New("failed to get GetEbsEncryptionByDefault"))
+				return &m
+			},
+			wantErr:           false,
+			expectedResources: 3,
 		},
 		{
 			name: "with resources",
@@ -88,10 +111,15 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 					ec2.SecurityGroup{},
 					ec2.SecurityGroup{},
 				}, nil)
+				m.On("DescribeVPCs", mock.Anything).Return([]awslib.AwsResource{
+					ec2.VpcInfo{},
+					ec2.VpcInfo{},
+				}, nil)
+				m.On("GetEbsEncryptionByDefault", mock.Anything).Return(&ec2.EBSEncryption{}, nil)
 				return &m
 			},
 			wantErr:           false,
-			expectedResources: 4,
+			expectedResources: 7,
 		},
 	}
 	for _, tt := range tests {
@@ -100,8 +128,10 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 			f := NetworkFetcher{
-				log:           logp.NewLogger(tt.name),
-				provider:      tt.networkProvider(),
+				log: logp.NewLogger(tt.name),
+				ec2Clients: map[string]ec2.ElasticCompute{
+					"eu-west-1": tt.networkProvider(),
+				},
 				cfg:           ACLFetcherConfig{},
 				resourceCh:    ch,
 				cloudIdentity: &awslib.Identity{Account: &tt.name},

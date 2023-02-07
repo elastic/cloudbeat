@@ -19,7 +19,6 @@ package rds
 
 import (
 	"context"
-	"fmt"
 	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -93,24 +92,15 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 				rdsClientMock.On(funcName, context.TODO(), mock.Anything).Return(vals...).Once()
 			}
 		}
-		mockFetcher := awslib.MockCrossRegionFetcher[Client]{}
-		mockFetcher.On("Fetch", mock.Anything).Return(
-			func(fetcher func(Client) ([]awslib.AwsResource, error)) []awslib.AwsResource {
-				result, _ := fetcher(rdsClientMock)
-				return result
-			}, nil,
-		)
+
 		rdsProvider := Provider{
-			log:     s.log,
-			fetcher: &mockFetcher,
+			log: s.log,
 		}
 
 		ctx := context.Background()
 
-		results, err := rdsProvider.DescribeDBInstances(ctx)
+		results, err := rdsProvider.DescribeDBInstances(ctx, rdsClientMock)
 		s.NoError(err)
-		// Using `ElementsMatch` instead of the usual `Equals` since iterating over the regions map does not produce a
-		//	guaranteed order
-		s.ElementsMatch(test.expected, results, fmt.Sprintf("Test '%s' failed, elements do not match", test.name))
+		s.Equal(test.expected, results)
 	}
 }
