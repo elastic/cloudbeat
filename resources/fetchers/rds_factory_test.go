@@ -61,10 +61,10 @@ secret_access_key: secret
 	}
 
 	for _, test := range tests {
-		mockCrossRegionFetcher := &awslib.MockCrossRegionFetcher[rds.Client]{}
+		mockCrossRegionFetcher := &awslib.MockCrossRegionFetcher[rds.Rds]{}
 		mockCrossRegionFetcher.On("GetMultiRegionsClientMap").Return(nil)
 
-		mockCrossRegionFactory := &awslib.MockCrossRegionFactory[rds.Client]{}
+		mockCrossRegionFactory := &awslib.MockCrossRegionFactory[rds.Rds]{}
 		mockCrossRegionFactory.On(
 			"NewMultiRegionClients",
 			mock.Anything,

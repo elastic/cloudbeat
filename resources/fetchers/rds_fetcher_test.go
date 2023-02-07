@@ -36,7 +36,10 @@ type RdsFetcherTestSuite struct {
 	resourceCh chan fetching.ResourceInfo
 }
 
-type rdsMocksReturnVals map[string][]any
+type rdsMocksReturnVals map[string]map[string][]any
+
+var dbInstance1 = rds.DBInstance{Identifier: "id", Arn: "arn", StorageEncrypted: true, AutoMinorVersionUpgrade: true}
+var dbInstance2 = rds.DBInstance{Identifier: "id2", Arn: "arn2", StorageEncrypted: false, AutoMinorVersionUpgrade: false}
 
 func TestRdsFetcherTestSuite(t *testing.T) {
 	s := new(RdsFetcherTestSuite)
@@ -61,21 +64,40 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 	var tests = []struct {
 		name               string
 		rdsMocksReturnVals rdsMocksReturnVals
-		numExpectedResults int
+		expected           []fetching.ResourceInfo
 	}{
 		{
 			name: "Should not get any DB instances",
 			rdsMocksReturnVals: rdsMocksReturnVals{
-				"DescribeDBInstances": {nil, errors.New("bad, very bad")},
+				"us-east-1": {
+					"DescribeDBInstances": {nil, errors.New("bad, very bad")},
+				},
 			},
-			numExpectedResults: 0,
+			expected: []fetching.ResourceInfo(nil),
 		},
 		{
-			name: "Should get an Rds bucket",
+			name: "Should get an RDS DB instance",
 			rdsMocksReturnVals: rdsMocksReturnVals{
-				"DescribeDBInstances": {[]awslib.AwsResource{rds.DBInstance{Identifier: "id", Arn: "arn", StorageEncrypted: true, AutoMinorVersionUpgrade: true}}, nil},
+				"us-east-1": {
+					"DescribeDBInstances": {[]awslib.AwsResource{dbInstance1}, nil},
+				},
 			},
-			numExpectedResults: 1,
+			expected: []fetching.ResourceInfo{{Resource: RdsResource{dbInstance: dbInstance1}}},
+		},
+		{
+			name: "Should get RDS DB instances from different regions",
+			rdsMocksReturnVals: rdsMocksReturnVals{
+				"us-east-1": {
+					"DescribeDBInstances": {[]awslib.AwsResource{dbInstance1}, nil},
+				},
+				"eu-west-1": {
+					"DescribeDBInstances": {[]awslib.AwsResource{dbInstance2}, nil},
+				},
+				"ap-east-1": {
+					"DescribeDBInstances": {nil, errors.New("bla")},
+				},
+			},
+			expected: []fetching.ResourceInfo{{Resource: RdsResource{dbInstance: dbInstance1}}, {Resource: RdsResource{dbInstance: dbInstance2}}},
 		},
 	}
 
@@ -84,20 +106,20 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
 		}
 
-		mockClient := &rds.MockClient{}
-		clients := map[string]rds.Client{"us-east-1": mockClient}
-
-		rdsProviderMock := &rds.MockRds{}
-		for funcName, returnVals := range test.rdsMocksReturnVals {
-			rdsProviderMock.On(funcName, context.TODO(), mockClient).Return(returnVals...)
+		providers := map[string]rds.Rds{}
+		for region, rdsMocksReturnVals := range test.rdsMocksReturnVals {
+			rdsProviderMock := &rds.MockRds{}
+			for funcName, returnVals := range rdsMocksReturnVals {
+				rdsProviderMock.On(funcName, context.TODO()).Return(returnVals...)
+			}
+			providers[region] = rdsProviderMock
 		}
 
 		rdsFetcher := RdsFetcher{
 			log:        s.log,
 			cfg:        rdsFetcherCfg,
-			rds:        rdsProviderMock,
 			resourceCh: s.resourceCh,
-			clients:    clients,
+			providers:  providers,
 		}
 
 		ctx := context.Background()
@@ -106,6 +128,6 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 		s.NoError(err)
 
 		results := testhelper.CollectResources(s.resourceCh)
-		s.Equal(test.numExpectedResults, len(results))
+		s.ElementsMatch(test.expected, results)
 	}
 }

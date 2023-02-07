@@ -23,14 +23,14 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/samber/lo"
 )
 
 type RdsFetcher struct {
 	log        *logp.Logger
 	cfg        RdsFetcherConfig
-	rds        rds.Rds
 	resourceCh chan fetching.ResourceInfo
-	clients    map[string]rds.Client
+	providers  map[string]rds.Rds
 }
 
 type RdsFetcherConfig struct {
@@ -43,23 +43,20 @@ type RdsResource struct {
 
 func (f *RdsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting RdsFetcher.Fetch")
-	dbInstances, err := awslib.MultiRegionFetch(ctx, f.clients, func(ctx context.Context, client rds.Client) ([]awslib.AwsResource, error) {
-		return f.rds.DescribeDBInstances(ctx, client)
+	dbInstances, err := awslib.MultiRegionFetch(ctx, f.providers, func(ctx context.Context, provider rds.Rds) ([]awslib.AwsResource, error) {
+		return provider.DescribeDBInstances(ctx)
 	})
 
 	if err != nil {
-		f.log.Errorf("failed to load DB instances from rds: %v", err)
-		return nil
+		f.log.Errorf("failed to load some DB instances from rds: %v", err)
 	}
 
-	for _, dbInstancesPerRegion := range dbInstances {
-		for _, dbInstance := range dbInstancesPerRegion {
-			resource := RdsResource{dbInstance}
-			f.log.Debugf("Fetched DB instance: %s", dbInstance.GetResourceName())
-			f.resourceCh <- fetching.ResourceInfo{
-				Resource:      resource,
-				CycleMetadata: cMetadata,
-			}
+	for _, dbInstance := range lo.Flatten[awslib.AwsResource](dbInstances) {
+		resource := RdsResource{dbInstance}
+		f.log.Debugf("Fetched DB instance: %s", dbInstance.GetResourceName())
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      resource,
+			CycleMetadata: cMetadata,
 		}
 	}
 

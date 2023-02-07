@@ -32,11 +32,12 @@ type DBInstance struct {
 }
 
 type Rds interface {
-	DescribeDBInstances(ctx context.Context, c Client) ([]awslib.AwsResource, error)
+	DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
 type Provider struct {
-	log *logp.Logger
+	log    *logp.Logger
+	client Client
 }
 
 type Client interface {

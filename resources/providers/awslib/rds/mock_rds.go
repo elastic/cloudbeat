@@ -40,13 +40,13 @@ func (_m *MockRds) EXPECT() *MockRds_Expecter {
 	return &MockRds_Expecter{mock: &_m.Mock}
 }
 
-// DescribeDBInstances provides a mock function with given fields: ctx, c
-func (_m *MockRds) DescribeDBInstances(ctx context.Context, c Client) ([]awslib.AwsResource, error) {
-	ret := _m.Called(ctx, c)
+// DescribeDBInstances provides a mock function with given fields: ctx
+func (_m *MockRds) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error) {
+	ret := _m.Called(ctx)
 
 	var r0 []awslib.AwsResource
-	if rf, ok := ret.Get(0).(func(context.Context, Client) []awslib.AwsResource); ok {
-		r0 = rf(ctx, c)
+	if rf, ok := ret.Get(0).(func(context.Context) []awslib.AwsResource); ok {
+		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]awslib.AwsResource)
@@ -54,8 +54,8 @@ func (_m *MockRds) DescribeDBInstances(ctx context.Context, c Client) ([]awslib.
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, Client) error); ok {
-		r1 = rf(ctx, c)
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -70,14 +70,13 @@ type MockRds_DescribeDBInstances_Call struct {
 
 // DescribeDBInstances is a helper method to define mock.On call
 //   - ctx context.Context
-//   - c Client
-func (_e *MockRds_Expecter) DescribeDBInstances(ctx interface{}, c interface{}) *MockRds_DescribeDBInstances_Call {
-	return &MockRds_DescribeDBInstances_Call{Call: _e.mock.On("DescribeDBInstances", ctx, c)}
+func (_e *MockRds_Expecter) DescribeDBInstances(ctx interface{}) *MockRds_DescribeDBInstances_Call {
+	return &MockRds_DescribeDBInstances_Call{Call: _e.mock.On("DescribeDBInstances", ctx)}
 }
 
-func (_c *MockRds_DescribeDBInstances_Call) Run(run func(ctx context.Context, c Client)) *MockRds_DescribeDBInstances_Call {
+func (_c *MockRds_DescribeDBInstances_Call) Run(run func(ctx context.Context)) *MockRds_DescribeDBInstances_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(Client))
+		run(args[0].(context.Context))
 	})
 	return _c
 }

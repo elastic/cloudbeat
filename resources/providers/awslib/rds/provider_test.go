@@ -94,12 +94,13 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 		}
 
 		rdsProvider := Provider{
-			log: s.log,
+			log:    s.log,
+			client: rdsClientMock,
 		}
 
 		ctx := context.Background()
 
-		results, err := rdsProvider.DescribeDBInstances(ctx, rdsClientMock)
+		results, err := rdsProvider.DescribeDBInstances(ctx)
 		s.NoError(err)
 		s.Equal(test.expected, results)
 	}

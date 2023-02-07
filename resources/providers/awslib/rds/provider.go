@@ -25,15 +25,16 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-func NewProvider(log *logp.Logger) *Provider {
+func NewProvider(log *logp.Logger, client Client) *Provider {
 	return &Provider{
-		log: log,
+		log:    log,
+		client: client,
 	}
 }
 
-func (p Provider) DescribeDBInstances(ctx context.Context, c Client) ([]awslib.AwsResource, error) {
+func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error) {
 	var result []awslib.AwsResource
-	dbInstances, err := c.DescribeDBInstances(ctx, &rdsClient.DescribeDBInstancesInput{})
+	dbInstances, err := p.client.DescribeDBInstances(ctx, &rdsClient.DescribeDBInstancesInput{})
 	if err != nil {
 		p.log.Errorf("Could not describe DB instances. Error: %v", err)
 		return result, err

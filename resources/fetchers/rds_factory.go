@@ -34,12 +34,12 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.RdsType, &RdsFactory{
-		CrossRegionFactory: &awslib.MultiRegionClientFactory[rds.Client]{},
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[rds.Rds]{},
 	})
 }
 
 type RdsFactory struct {
-	CrossRegionFactory awslib.CrossRegionFactory[rds.Client]
+	CrossRegionFactory awslib.CrossRegionFactory[rds.Rds]
 }
 
 func (f *RdsFactory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -59,19 +59,17 @@ func (f *RdsFactory) CreateFrom(log *logp.Logger, cfg RdsFetcherConfig, ch chan 
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	clientFactory := func(cfg awsSdk.Config) rds.Client {
-		return rdsClient.NewFromConfig(cfg)
+	providerFactory := func(cfg awsSdk.Config) rds.Rds {
+		client := rdsClient.NewFromConfig(cfg)
+		return *rds.NewProvider(log, client)
 	}
 
-	clients := f.CrossRegionFactory.NewMultiRegionClients(ec2.NewFromConfig(awsConfig), awsConfig, clientFactory, log)
-
-	rdsProvider := rds.NewProvider(log)
+	crossRegionFetcher := f.CrossRegionFactory.NewMultiRegionClients(ec2.NewFromConfig(awsConfig), awsConfig, providerFactory, log)
 
 	return &RdsFetcher{
 		log:        log,
 		cfg:        cfg,
-		rds:        rdsProvider,
 		resourceCh: ch,
-		clients:    clients.GetMultiRegionsClientMap(),
+		providers:  crossRegionFetcher.GetMultiRegionsClientMap(),
 	}, nil
 }
