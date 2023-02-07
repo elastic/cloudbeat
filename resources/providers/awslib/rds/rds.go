@@ -15,13 +15,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package version
+package rds
 
-const policyVersion = "v1.3.3"
+import (
+	"context"
+	"github.com/aws/aws-sdk-go-v2/service/rds"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
+)
 
-// PolicyVersion returns cloudbeat version info used for the build.
-func PolicyVersion() Version {
-	return Version{
-		Version: policyVersion,
-	}
+type DBInstance struct {
+	Identifier              string `json:"identifier"`
+	Arn                     string `json:"arn"`
+	StorageEncrypted        bool   `json:"storage_encrypted"`
+	AutoMinorVersionUpgrade bool   `json:"auto_minor_version_upgrade"`
+}
+
+type Rds interface {
+	DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error)
+}
+
+type Provider struct {
+	log    *logp.Logger
+	client Client
+}
+
+type Client interface {
+	DescribeDBInstances(ctx context.Context, params *rds.DescribeDBInstancesInput, optFns ...func(*rds.Options)) (*rds.DescribeDBInstancesOutput, error)
 }
