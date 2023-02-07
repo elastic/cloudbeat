@@ -101,13 +101,14 @@ func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.Elast
 		f.log.Errorf("failed to describe vpcs: %v", err)
 	}
 	resources = append(resources, vpcs...)
-	ebsEncryptionEnabledAllRegions, err := awslib.MultiRegionFetch(ctx, f.ec2Clients, func(ctx context.Context, client ec2.ElasticCompute) (awslib.AwsResource, error) {
-		return client.GetEbsEncryptionByDefault(ctx)
-	})
+	ebsEncryption, err := client.GetEbsEncryptionByDefault(ctx)
 	if err != nil {
 		f.log.Errorf("failed to get ebs encryption by default: %v", err)
 	}
-	resources = append(resources, ebsEncryptionEnabledAllRegions...)
+
+	if ebsEncryption != nil {
+		resources = append(resources, ebsEncryption)
+	}
 
 	return resources, nil
 }
