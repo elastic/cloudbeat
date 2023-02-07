@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/samber/lo"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
@@ -30,9 +31,8 @@ import (
 
 type Provider struct {
 	log          *logp.Logger
-	client       Client
+	clients      map[string]Client
 	awsAccountID string
-	awsRegion    string
 }
 
 type Client interface {
@@ -44,95 +44,110 @@ type Client interface {
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
-	var allAcls []types.NetworkAcl
-	input := ec2.DescribeNetworkAclsInput{}
-	for {
-		output, err := p.client.DescribeNetworkAcls(ctx, &input)
-		if err != nil {
-			return nil, err
+	nacl, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		var allAcls []types.NetworkAcl
+		input := ec2.DescribeNetworkAclsInput{}
+		for {
+			output, err := c.DescribeNetworkAcls(ctx, &input)
+			if err != nil {
+				return nil, err
+			}
+			allAcls = append(allAcls, output.NetworkAcls...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
 		}
-		allAcls = append(allAcls, output.NetworkAcls...)
-		if output.NextToken == nil {
-			break
-		}
-		input.NextToken = output.NextToken
-	}
 
-	var result []awslib.AwsResource
-	for _, nacl := range allAcls {
-		result = append(result, NACLInfo{nacl, p.awsAccountID, p.awsRegion})
-	}
-	return result, nil
+		var result []awslib.AwsResource
+		for _, nacl := range allAcls {
+			result = append(result, NACLInfo{
+				nacl,
+				p.awsAccountID,
+				region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(nacl), err
 }
 
 func (p *Provider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error) {
-	var all []types.SecurityGroup
-	input := &ec2.DescribeSecurityGroupsInput{}
-	for {
-		output, err := p.client.DescribeSecurityGroups(ctx, input)
-		if err != nil {
-			return nil, err
+	securityGroups, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		var all []types.SecurityGroup
+		input := &ec2.DescribeSecurityGroupsInput{}
+		for {
+			output, err := c.DescribeSecurityGroups(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.SecurityGroups...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
 		}
-		all = append(all, output.SecurityGroups...)
-		if output.NextToken == nil {
-			break
-		}
-		input.NextToken = output.NextToken
-	}
 
-	var result []awslib.AwsResource
-	for _, sg := range all {
-		result = append(result, SecurityGroup{sg, p.awsAccountID, p.awsRegion})
-	}
-	return result, nil
+		var result []awslib.AwsResource
+		for _, sg := range all {
+			result = append(result, SecurityGroup{sg, p.awsAccountID, region})
+		}
+		return result, nil
+	})
+	return lo.Flatten(securityGroups), err
 }
 
 func (p *Provider) DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error) {
-	var all []types.Vpc
-	input := &ec2.DescribeVpcsInput{}
-	for {
-		output, err := p.client.DescribeVpcs(ctx, input)
+	vpcs, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		var all []types.Vpc
+		input := &ec2.DescribeVpcsInput{}
+		for {
+			output, err := c.DescribeVpcs(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			all = append(all, output.Vpcs...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []awslib.AwsResource
+		for _, vpc := range all {
+			logs, err := c.DescribeFlowLogs(ctx, &ec2.DescribeFlowLogsInput{Filter: []types.Filter{
+				{
+					Name:   aws.String("resource-id"),
+					Values: []string{*vpc.VpcId},
+				},
+			}})
+			if err != nil {
+				p.log.Errorf("Error fetching flow logs for VPC %s: %v", *vpc.VpcId, err.Error())
+				continue
+			}
+
+			result = append(result, VpcInfo{
+				Vpc:        vpc,
+				FlowLogs:   logs.FlowLogs,
+				awsAccount: p.awsAccountID,
+				region:     region,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(vpcs), err
+}
+
+func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error) {
+	return awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) (awslib.AwsResource, error) {
+		res, err := c.GetEbsEncryptionByDefault(ctx, &ec2.GetEbsEncryptionByDefaultInput{})
 		if err != nil {
 			return nil, err
 		}
-		all = append(all, output.Vpcs...)
-		if output.NextToken == nil {
-			break
-		}
-		input.NextToken = output.NextToken
-	}
-
-	var result []awslib.AwsResource
-	for _, vpc := range all {
-		logs, err := p.client.DescribeFlowLogs(ctx, &ec2.DescribeFlowLogsInput{Filter: []types.Filter{
-			{
-				Name:   aws.String("resource-id"),
-				Values: []string{*vpc.VpcId},
-			},
-		}})
-		if err != nil {
-			p.log.Errorf("Error fetching flow logs for VPC %s: %v", *vpc.VpcId, err.Error())
-			continue
-		}
-
-		result = append(result, VpcInfo{
-			Vpc:        vpc,
-			FlowLogs:   logs.FlowLogs,
+		return &EBSEncryption{
+			Enabled:    *res.EbsEncryptionByDefault,
+			region:     region,
 			awsAccount: p.awsAccountID,
-			region:     p.awsRegion,
-		})
-	}
-	return result, nil
-}
-
-func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) (*EBSEncryption, error) {
-	res, err := p.client.GetEbsEncryptionByDefault(ctx, &ec2.GetEbsEncryptionByDefaultInput{})
-	if err != nil {
-		return nil, err
-	}
-	return &EBSEncryption{
-		Enabled:    *res.EbsEncryptionByDefault,
-		region:     p.awsRegion,
-		awsAccount: p.awsAccountID,
-	}, nil
+		}, nil
+	})
 }
