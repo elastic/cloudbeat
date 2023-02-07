@@ -231,3 +231,25 @@ not_evaluated_trail = {
 	"subType": "not-an-aws-trail",
 	"resource": {"log_file_validation_enabled": false},
 }
+
+not_evaluated_rds_db_instance = {
+	"resource": {
+		"identifier": "test-db",
+		"arn": "arn:aws:rds:eu-west-1:704479110758:db:devops-postgres-rds",
+		"storage_encrypted": true,
+		"auto_minor_version_upgrade": true,
+	},
+	"type": "wrong type",
+	"subType": "wrong sub type",
+}
+
+generate_rds_db_instance(encryption_enabled, auto_minor_version_upgrade_enabled) = {
+	"resource": {
+		"identifier": "test-db",
+		"arn": "arn:aws:rds:eu-west-1:704479110758:db:devops-postgres-rds",
+		"storage_encrypted": encryption_enabled,
+		"auto_minor_version_upgrade": auto_minor_version_upgrade_enabled,
+	},
+	"type": "cloud-database",
+	"subType": "aws-rds",
+}
