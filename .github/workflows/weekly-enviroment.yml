@@ -98,7 +98,7 @@ jobs:
           echo "::add-mask::$ELASTICSEARCH_PASSWORD"
           echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
 
-          export EC2_PRIVATE_KEY=$(echo $(terraform output cloudbeat_private_key) | base64 -w0)
+          export EC2_PRIVATE_KEY=$(echo $(terraform output cloudbeat_private_key) | base64)
           echo "::add-mask::$EC2_PRIVATE_KEY"
           echo "EC2_PRIVATE_KEY=$EC2_PRIVATE_KEY" >> $GITHUB_ENV
 
