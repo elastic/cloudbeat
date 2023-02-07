@@ -45,3 +45,4 @@ deploy/cloud/.terraform
 deploy/cloud/.terraform.lock.hcl
 deploy/cloud/terraform.tfstate
 deploy/cloud/terraform.tfstate.backup
+/terraform.tfstate
