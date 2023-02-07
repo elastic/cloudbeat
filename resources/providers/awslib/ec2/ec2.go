@@ -30,6 +30,7 @@ type ElasticCompute interface {
 	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
 	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
 	DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error)
+	GetEbsEncryptionByDefault(ctx context.Context) (*EBSEncryption, error)
 }
 
 func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {

@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -95,12 +96,19 @@ func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.Elast
 		f.log.Errorf("failed to describe security groups: %v", err)
 	}
 	resources = append(resources, securityGroups...)
-
 	vpcs, err := client.DescribeVPCs(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe vpcs: %v", err)
 	}
 	resources = append(resources, vpcs...)
+	ebsEncryption, err := client.GetEbsEncryptionByDefault(ctx)
+	if err != nil {
+		f.log.Errorf("failed to get ebs encryption by default: %v", err)
+	}
+
+	if ebsEncryption != nil {
+		resources = append(resources, ebsEncryption)
+	}
 
 	return resources, nil
 }
