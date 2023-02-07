@@ -39,6 +39,68 @@ func (_m *MockClient) EXPECT() *MockClient_Expecter {
 	return &MockClient_Expecter{mock: &_m.Mock}
 }
 
+// DescribeFlowLogs provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) DescribeFlowLogs(ctx context.Context, params *serviceec2.DescribeFlowLogsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeFlowLogsOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceec2.DescribeFlowLogsOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeFlowLogsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeFlowLogsOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceec2.DescribeFlowLogsOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeFlowLogsInput, ...func(*serviceec2.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_DescribeFlowLogs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeFlowLogs'
+type MockClient_DescribeFlowLogs_Call struct {
+	*mock.Call
+}
+
+// DescribeFlowLogs is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceec2.DescribeFlowLogsInput
+//   - optFns ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeFlowLogs(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeFlowLogs_Call {
+	return &MockClient_DescribeFlowLogs_Call{Call: _e.mock.On("DescribeFlowLogs",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_DescribeFlowLogs_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeFlowLogsInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeFlowLogs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceec2.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceec2.DescribeFlowLogsInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_DescribeFlowLogs_Call) Return(_a0 *serviceec2.DescribeFlowLogsOutput, _a1 error) *MockClient_DescribeFlowLogs_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // DescribeNetworkAcls provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) DescribeNetworkAcls(ctx context.Context, params *serviceec2.DescribeNetworkAclsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeNetworkAclsOutput, error) {
 	_va := make([]interface{}, len(optFns))
@@ -159,6 +221,130 @@ func (_c *MockClient_DescribeSecurityGroups_Call) Run(run func(ctx context.Conte
 }
 
 func (_c *MockClient_DescribeSecurityGroups_Call) Return(_a0 *serviceec2.DescribeSecurityGroupsOutput, _a1 error) *MockClient_DescribeSecurityGroups_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+// DescribeVpcs provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) DescribeVpcs(ctx context.Context, params *serviceec2.DescribeVpcsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeVpcsOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceec2.DescribeVpcsOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeVpcsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeVpcsOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceec2.DescribeVpcsOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeVpcsInput, ...func(*serviceec2.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_DescribeVpcs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeVpcs'
+type MockClient_DescribeVpcs_Call struct {
+	*mock.Call
+}
+
+// DescribeVpcs is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceec2.DescribeVpcsInput
+//   - optFns ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeVpcs(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeVpcs_Call {
+	return &MockClient_DescribeVpcs_Call{Call: _e.mock.On("DescribeVpcs",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_DescribeVpcs_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeVpcsInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeVpcs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceec2.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceec2.DescribeVpcsInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_DescribeVpcs_Call) Return(_a0 *serviceec2.DescribeVpcsOutput, _a1 error) *MockClient_DescribeVpcs_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+// GetEbsEncryptionByDefault provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) GetEbsEncryptionByDefault(ctx context.Context, params *serviceec2.GetEbsEncryptionByDefaultInput, optFns ...func(*serviceec2.Options)) (*serviceec2.GetEbsEncryptionByDefaultOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceec2.GetEbsEncryptionByDefaultOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.GetEbsEncryptionByDefaultInput, ...func(*serviceec2.Options)) *serviceec2.GetEbsEncryptionByDefaultOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceec2.GetEbsEncryptionByDefaultOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.GetEbsEncryptionByDefaultInput, ...func(*serviceec2.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_GetEbsEncryptionByDefault_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetEbsEncryptionByDefault'
+type MockClient_GetEbsEncryptionByDefault_Call struct {
+	*mock.Call
+}
+
+// GetEbsEncryptionByDefault is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceec2.GetEbsEncryptionByDefaultInput
+//   - optFns ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) GetEbsEncryptionByDefault(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetEbsEncryptionByDefault_Call {
+	return &MockClient_GetEbsEncryptionByDefault_Call{Call: _e.mock.On("GetEbsEncryptionByDefault",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_GetEbsEncryptionByDefault_Call) Run(run func(ctx context.Context, params *serviceec2.GetEbsEncryptionByDefaultInput, optFns ...func(*serviceec2.Options))) *MockClient_GetEbsEncryptionByDefault_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceec2.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceec2.GetEbsEncryptionByDefaultInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_GetEbsEncryptionByDefault_Call) Return(_a0 *serviceec2.GetEbsEncryptionByDefaultOutput, _a1 error) *MockClient_GetEbsEncryptionByDefault_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }

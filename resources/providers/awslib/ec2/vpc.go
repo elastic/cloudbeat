@@ -15,13 +15,36 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package version
+package ec2
 
-const policyVersion = "v1.3.2"
+import (
+	"fmt"
 
-// PolicyVersion returns cloudbeat version info used for the build.
-func PolicyVersion() Version {
-	return Version{
-		Version: policyVersion,
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
+)
+
+type VpcInfo struct {
+	Vpc        types.Vpc       `json:"vpc"`
+	FlowLogs   []types.FlowLog `json:"flow_logs"`
+	awsAccount string
+	region     string
+}
+
+func (v VpcInfo) GetResourceArn() string {
+	if v.Vpc.VpcId == nil {
+		return ""
 	}
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:vpc/%s", v.region, v.awsAccount, *v.Vpc.VpcId)
+}
+
+func (v VpcInfo) GetResourceName() string {
+	if v.Vpc.VpcId == nil {
+		return ""
+	}
+	return *v.Vpc.VpcId
+}
+
+func (v VpcInfo) GetResourceType() string {
+	return fetching.VpcType
 }

@@ -15,13 +15,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package version
+package ec2
 
-const policyVersion = "v1.3.2"
+import (
+	"fmt"
 
-// PolicyVersion returns cloudbeat version info used for the build.
-func PolicyVersion() Version {
-	return Version{
-		Version: policyVersion,
-	}
+	"github.com/elastic/cloudbeat/resources/fetching"
+)
+
+type EBSEncryption struct {
+	Enabled    bool `json:"enabled"`
+	region     string
+	awsAccount string
+}
+
+func (e EBSEncryption) GetResourceArn() string {
+	return fmt.Sprintf("ebs-encryption-by-default-%s-%s", e.awsAccount, e.region)
+}
+
+func (e EBSEncryption) GetResourceName() string {
+	return fmt.Sprintf("ebs-encryption-by-default-%s-%s", e.awsAccount, e.region)
+}
+
+func (e EBSEncryption) GetResourceType() string {
+	return fetching.EBSType
 }

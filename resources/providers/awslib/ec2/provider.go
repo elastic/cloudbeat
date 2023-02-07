@@ -20,6 +20,8 @@ package ec2
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -36,6 +38,9 @@ type Provider struct {
 type Client interface {
 	DescribeNetworkAcls(ctx context.Context, params *ec2.DescribeNetworkAclsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeNetworkAclsOutput, error)
 	DescribeSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error)
+	DescribeVpcs(ctx context.Context, params *ec2.DescribeVpcsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeVpcsOutput, error)
+	DescribeFlowLogs(ctx context.Context, params *ec2.DescribeFlowLogsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeFlowLogsOutput, error)
+	GetEbsEncryptionByDefault(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options)) (*ec2.GetEbsEncryptionByDefaultOutput, error)
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -80,4 +85,54 @@ func (p *Provider) DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsReso
 		result = append(result, SecurityGroup{sg, p.awsAccountID, p.awsRegion})
 	}
 	return result, nil
+}
+
+func (p *Provider) DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error) {
+	var all []types.Vpc
+	input := &ec2.DescribeVpcsInput{}
+	for {
+		output, err := p.client.DescribeVpcs(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, output.Vpcs...)
+		if output.NextToken == nil {
+			break
+		}
+		input.NextToken = output.NextToken
+	}
+
+	var result []awslib.AwsResource
+	for _, vpc := range all {
+		logs, err := p.client.DescribeFlowLogs(ctx, &ec2.DescribeFlowLogsInput{Filter: []types.Filter{
+			{
+				Name:   aws.String("resource-id"),
+				Values: []string{*vpc.VpcId},
+			},
+		}})
+		if err != nil {
+			p.log.Errorf("Error fetching flow logs for VPC %s: %v", *vpc.VpcId, err.Error())
+			continue
+		}
+
+		result = append(result, VpcInfo{
+			Vpc:        vpc,
+			FlowLogs:   logs.FlowLogs,
+			awsAccount: p.awsAccountID,
+			region:     p.awsRegion,
+		})
+	}
+	return result, nil
+}
+
+func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) (*EBSEncryption, error) {
+	res, err := p.client.GetEbsEncryptionByDefault(ctx, &ec2.GetEbsEncryptionByDefaultInput{})
+	if err != nil {
+		return nil, err
+	}
+	return &EBSEncryption{
+		Enabled:    *res.EbsEncryptionByDefault,
+		region:     p.awsRegion,
+		awsAccount: p.awsAccountID,
+	}, nil
 }
