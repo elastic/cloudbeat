@@ -140,7 +140,7 @@ jobs:
         uses: actions/dependency-review-action@v3
 
   cloudformation-validation:
-    name: Validate cloudfomration templates have valid structure
+    name: cloudfomration-lint
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repository
@@ -151,7 +151,7 @@ jobs:
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: eu-west-2
 
       - name: Validate
         run: |
