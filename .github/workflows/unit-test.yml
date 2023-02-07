@@ -138,3 +138,21 @@ jobs:
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v3
+
+  cloudformation-validation:
+    name: Validate cloudfomration templates have valid structure
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Validate
+        run: |
+          aws cloudformation validate-template --template-body file://${PWD}/deploy/cloudformation/elastic-agent-ec2.yml
