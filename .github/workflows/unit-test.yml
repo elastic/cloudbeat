@@ -148,4 +148,4 @@ jobs:
 
       - name: Validate Cloudformation
         run: |
-          aws cloudformation validate-template --template-body file://${PWD}/deploy/cloudformation/elastic-agent-ec2.yml
+          aws cloudformation validate-template --template-body file://deploy/cloudformation/elastic-agent-ec2.yml
