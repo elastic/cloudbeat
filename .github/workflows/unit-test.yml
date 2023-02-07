@@ -148,4 +148,5 @@ jobs:
 
       - name: Validate Cloudformation
         run: |
+          aws --version
           AWS_REGION=eu-west-2 aws cloudformation validate-template --template-body file://deploy/cloudformation/elastic-agent-ec2.yml
