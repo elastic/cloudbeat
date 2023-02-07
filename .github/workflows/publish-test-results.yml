@@ -1,0 +1,85 @@
+name: Publish-Test-Results
+
+on:
+  workflow_run:
+    workflows: ["Cloudbeat-CI"]
+    types:
+      - completed
+
+jobs:
+  publish_results:
+    timeout-minutes: 15
+    name: Publish Results
+    runs-on: ubuntu-20.04
+    if: github.event.workflow_run.conclusion != 'skipped'
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    permissions:
+      checks: write
+      # needed unless run with comment_mode: off
+      pull-requests: write
+      # required by download step to access artifacts API
+      actions: read
+    steps:
+
+      - name: Download and Extract Artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p tests/allure/results
+          mkdir -p artifacts && cd artifacts
+
+          artifacts_url=${{ github.event.workflow_run.artifacts_url }}
+
+          gh api "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
+          do
+            IFS=$'\t' read name url <<< "$artifact"
+            gh api $url > "$name.zip"
+            unzip -o "$name.zip" -d "../tests/allure/results"
+          done
+
+      - name: Get pr info
+        id: pr_info
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUM=$(gh api -X GET search/issues -f q='elastic/cloudbeat is:open is:pr is:unmerged ${{ github.event.workflow_run.head_sha }}' | jq  '.items[0].number' )
+          echo "PR_NUMBER=$PR_NUM" >> $GITHUB_ENV
+
+      - name: Publish allure report
+        if: always()
+        uses: andrcuns/allure-publish-action@v1.0.1
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          storageType: s3
+          resultsGlob: "tests/allure/results/*"
+          updatePr: actions
+          collapseSummary: false
+          summary: suites
+          summaryTableType: markdown
+          copyLatest: true
+          bucket: csp-allure-reports
+          prefix: allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}
+          ignoreMissingResults: true
+
+      - name: Output to Job Summary
+        if: ${{ github.event.workflow_run.event == 'pull_request' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "### Run Summary :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment test success result
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ github.event.workflow_run.event == 'pull_request' }}
+        with:
+          header: Test Results
+          number: ${{ env.PR_NUMBER }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ## Cloudbeat CI :robot:
+            Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html
