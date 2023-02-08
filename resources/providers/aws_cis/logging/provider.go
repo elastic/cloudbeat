@@ -19,8 +19,8 @@ package logging
 
 import (
 	"context"
+	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 
-	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
@@ -33,9 +33,9 @@ type EnrichedTrail struct {
 }
 
 type TrailBucket struct {
-	Grants  []s3Types.Grant `json:"grants,omitempty"`
-	Policy  s3.BucketPolicy `json:"policy,omitempty"`
-	Logging s3.Logging      `json:"logging,omitempty"`
+	Policy  s3.BucketPolicy              `json:"policy,omitempty"`
+	Logging s3.Logging                   `json:"logging,omitempty"`
+	ACL     *s3Client.GetBucketAclOutput `json:"acl,omitempty"`
 }
 
 func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -67,7 +67,7 @@ func (p *Provider) DescribeTrails(ctx context.Context) ([]awslib.AwsResource, er
 		enrichedTrails = append(enrichedTrails, EnrichedTrail{
 			TrailInfo: info,
 			BucketInfo: TrailBucket{
-				Grants:  aclGrants,
+				ACL:     aclGrants,
 				Policy:  bucketPolicy,
 				Logging: bucketLogging,
 			},

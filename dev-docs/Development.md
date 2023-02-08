@@ -136,16 +136,7 @@ requesterMock.EXPECT().
 	Call.Return(func(path string) string { return "result for " + path }, nil)
 ```
 
-Notes
-
-- Place the test in the same package as the code it meant to test.
-- File name should be aligned with the convention `original_file_mock`. For example: ecr_provider -> ecr_provider_mock.
-
-Command example:
-
-```
-mockery --name=<interface_name> --with-expecter  --case underscore  --inpackage --recursive
-```
+To easily generate mocks run `just generate-mocks`
 
 ### Running CI Locally - GitHub Act
 

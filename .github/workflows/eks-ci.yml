@@ -94,7 +94,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: false
@@ -108,7 +108,7 @@ jobs:
           make build_elastic_agent_docker_image
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: ./tests/.
           push: false
@@ -241,7 +241,7 @@ jobs:
           AWS_REGION: eu-west-1
         with:
           storageType: s3
-          resultsGlob: "${{ env.REPORTS_DIR }}*"
+          resultsGlob: "tests/allure/results"
           updatePr: actions
           collapseSummary: false
           summary: suites

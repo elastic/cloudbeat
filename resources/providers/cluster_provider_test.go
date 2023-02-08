@@ -73,6 +73,14 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 			"eks-cluster",
 			"eks-cluster",
 		},
+		{
+			config.Config{
+				Benchmark: config.CIS_AWS,
+			},
+			"",
+			"",
+			"",
+		},
 	}
 
 	for _, test := range tests {
