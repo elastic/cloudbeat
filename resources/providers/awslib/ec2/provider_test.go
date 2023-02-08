@@ -20,14 +20,19 @@ package ec2
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	mock "github.com/stretchr/testify/mock"
 )
+
+var onlyDefaultRegion = []string{awslib.DefaultRegion}
 
 func TestProvider_DescribeNetworkAcl(t *testing.T) {
 	tests := []struct {
@@ -35,6 +40,7 @@ func TestProvider_DescribeNetworkAcl(t *testing.T) {
 		client          func() Client
 		expectedResults int
 		wantErr         bool
+		regions         []string
 	}{
 		{
 			name: "with error",
@@ -44,6 +50,7 @@ func TestProvider_DescribeNetworkAcl(t *testing.T) {
 				return m
 			},
 			wantErr: true,
+			regions: onlyDefaultRegion,
 		},
 		{
 			name: "with resources",
@@ -57,14 +64,19 @@ func TestProvider_DescribeNetworkAcl(t *testing.T) {
 				}, nil)
 				return m
 			},
+			regions:         onlyDefaultRegion,
 			expectedResults: 2,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
 			p := &Provider{
-				log:    logp.NewLogger(tt.name),
-				client: tt.client(),
+				log:     logp.NewLogger(tt.name),
+				clients: clients,
 			}
 			got, err := p.DescribeNetworkAcl(context.Background())
 			if tt.wantErr {
@@ -84,6 +96,7 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 		client          func() Client
 		expectedResults int
 		wantErr         bool
+		regions         []string
 	}{
 		{
 			name: "with error",
@@ -92,6 +105,7 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 				m.On("DescribeSecurityGroups", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
 				return m
 			},
+			regions: onlyDefaultRegion,
 			wantErr: true,
 		},
 		{
@@ -106,14 +120,19 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 				}, nil)
 				return m
 			},
+			regions:         onlyDefaultRegion,
 			expectedResults: 2,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
 			p := &Provider{
-				log:    logp.NewLogger(tt.name),
-				client: tt.client(),
+				log:     logp.NewLogger(tt.name),
+				clients: clients,
 			}
 
 			got, err := p.DescribeSecurityGroups(context.Background())
@@ -124,6 +143,126 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedResults, len(got))
+		})
+	}
+}
+
+func TestProvider_DescribeVPCs(t *testing.T) {
+	tests := []struct {
+		name            string
+		client          func() Client
+		expectedResults int
+		wantErr         bool
+		regions         []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeVpcs", mock.Anything, mock.Anything).Return(nil, errors.New("failed"))
+				return m
+			},
+			regions: onlyDefaultRegion,
+			wantErr: true,
+		},
+		{
+			name: "with resources",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeVpcs", mock.Anything, mock.Anything).Return(&ec2.DescribeVpcsOutput{
+					Vpcs: []types.Vpc{{VpcId: aws.String("vpc-123")}},
+				}, nil)
+
+				m.On("DescribeFlowLogs", mock.Anything, mock.Anything).Return(&ec2.DescribeFlowLogsOutput{
+					FlowLogs: []types.FlowLog{{FlowLogId: aws.String("fl-123")}},
+				}, nil)
+
+				return m
+			},
+			regions:         onlyDefaultRegion,
+			expectedResults: 1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:     logp.NewLogger(tt.name),
+				clients: clients,
+			}
+
+			got, err := p.DescribeVPCs(context.Background())
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expectedResults, len(got))
+		})
+	}
+}
+
+func TestProvider_GetEbsEncryptionByDefault(t *testing.T) {
+	tests := []struct {
+		name    string
+		client  func() Client
+		want    []awslib.AwsResource
+		wantErr bool
+		regions []string
+	}{
+		{
+			name: "with error",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("GetEbsEncryptionByDefault", mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed to get ebs"))
+				return m
+			},
+			regions: onlyDefaultRegion,
+			wantErr: true,
+		},
+		{
+			name: "with resource",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("GetEbsEncryptionByDefault", mock.Anything, mock.Anything).Return(&ec2.GetEbsEncryptionByDefaultOutput{
+					EbsEncryptionByDefault: aws.Bool(true),
+				}, nil)
+				return m
+			},
+			want: []awslib.AwsResource{
+				&EBSEncryption{
+					Enabled:    true,
+					region:     awslib.DefaultRegion,
+					awsAccount: "aws-account",
+				},
+			},
+			regions: onlyDefaultRegion,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:          logp.NewLogger(tt.name),
+				clients:      clients,
+				awsAccountID: "aws-account",
+			}
+			got, err := p.GetEbsEncryptionByDefault(context.Background())
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

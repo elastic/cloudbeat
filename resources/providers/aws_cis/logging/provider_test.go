@@ -23,7 +23,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	s3Types "github.com/aws/aws-sdk-go-v2/service/s3/types"
+	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
@@ -106,7 +106,7 @@ func TestProvider_DescribeTrails(t *testing.T) {
 				"s3Provider": func() any {
 					m := &s3.MockS3{}
 					m.On("GetBucketPolicy", context.Background(), mock.Anything, mock.Anything).Return(s3.BucketPolicy{}, nil)
-					m.On("GetBucketACL", context.Background(), mock.Anything, mock.Anything).Return([]s3Types.Grant{}, nil)
+					m.On("GetBucketACL", context.Background(), mock.Anything, mock.Anything).Return(&s3Client.GetBucketAclOutput{}, nil)
 					m.On("GetBucketLogging", context.Background(), mock.Anything, mock.Anything).Return(s3.Logging{Enabled: true}, nil)
 					return m
 				},
@@ -128,7 +128,7 @@ func TestProvider_DescribeTrails(t *testing.T) {
 						TrailARN: aws.String("test-arn"),
 					}},
 					BucketInfo: TrailBucket{
-						Grants: []s3Types.Grant{},
+						ACL:    &s3Client.GetBucketAclOutput{},
 						Policy: s3.BucketPolicy{},
 						Logging: s3.Logging{
 							Enabled: true,

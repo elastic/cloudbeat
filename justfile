@@ -24,9 +24,9 @@ create-vanilla-deployment-file:
 create-vanilla-deployment-file-nocert:
   kustomize build {{kustomizeVanillaNoCertOverlay}} --output deploy/k8s/cloudbeat-ds-nocert.yaml
 
-build-deploy-cloudbeat $GOARCH=LOCAL_GOARCH:
+build-deploy-cloudbeat kind='kind-multi' $GOARCH=LOCAL_GOARCH:
   just build-cloudbeat-docker-image $GOARCH
-  just load-cloudbeat-image
+  just load-cloudbeat-image {{kind}}
   just deploy-cloudbeat
 
 build-deploy-cloudbeat-nocert $GOARCH=LOCAL_GOARCH:
@@ -131,6 +131,18 @@ ssh-cloudbeat:
 expose-ports:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
+
+#### MOCKS #####
+
+# generate new and update existing mocks from golang interfaces
+# and update the license header
+generate-mocks:
+  mockery --dir . --inpackage --all --with-expecter --case underscore --recursive
+  mage AddLicenseHeaders
+
+# run to validate no mocks are missing
+validate-mocks:
+  ./.ci/scripts/validate-mocks.sh
 
 
 #### TESTS ####

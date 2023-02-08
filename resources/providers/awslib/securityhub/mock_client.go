@@ -31,6 +31,14 @@ type MockClient struct {
 	mock.Mock
 }
 
+type MockClient_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *MockClient) EXPECT() *MockClient_Expecter {
+	return &MockClient_Expecter{mock: &_m.Mock}
+}
+
 // DescribeHub provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) DescribeHub(ctx context.Context, params *servicesecurityhub.DescribeHubInput, optFns ...func(*servicesecurityhub.Options)) (*servicesecurityhub.DescribeHubOutput, error) {
 	_va := make([]interface{}, len(optFns))
@@ -59,6 +67,38 @@ func (_m *MockClient) DescribeHub(ctx context.Context, params *servicesecurityhu
 	}
 
 	return r0, r1
+}
+
+// MockClient_DescribeHub_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeHub'
+type MockClient_DescribeHub_Call struct {
+	*mock.Call
+}
+
+// DescribeHub is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *servicesecurityhub.DescribeHubInput
+//   - optFns ...func(*servicesecurityhub.Options)
+func (_e *MockClient_Expecter) DescribeHub(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeHub_Call {
+	return &MockClient_DescribeHub_Call{Call: _e.mock.On("DescribeHub",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_DescribeHub_Call) Run(run func(ctx context.Context, params *servicesecurityhub.DescribeHubInput, optFns ...func(*servicesecurityhub.Options))) *MockClient_DescribeHub_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*servicesecurityhub.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*servicesecurityhub.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*servicesecurityhub.DescribeHubInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_DescribeHub_Call) Return(_a0 *servicesecurityhub.DescribeHubOutput, _a1 error) *MockClient_DescribeHub_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
 }
 
 type mockConstructorTestingTNewMockClient interface {
