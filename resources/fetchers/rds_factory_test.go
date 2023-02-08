@@ -18,10 +18,11 @@
 package fetchers
 
 import (
+	"testing"
+
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
 	"github.com/stretchr/testify/mock"
-	"testing"
 
 	agentConfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -48,7 +49,7 @@ func TestRdsFactoryTestSuite(t *testing.T) {
 func (s *RdsFactoryTestSuite) SetupTest() {}
 
 func (s *RdsFactoryTestSuite) TestCreateFetcher() {
-	var tests = []struct {
+	tests := []struct {
 		config string
 	}{
 		{
@@ -61,10 +62,10 @@ secret_access_key: secret
 	}
 
 	for _, test := range tests {
-		mockCrossRegionFetcher := &awslib.MockCrossRegionFetcher[rds.Rds]{}
+		mockCrossRegionFetcher := &awslib.MockCrossRegionFetcher[rds.Client]{}
 		mockCrossRegionFetcher.On("GetMultiRegionsClientMap").Return(nil)
 
-		mockCrossRegionFactory := &awslib.MockCrossRegionFactory[rds.Rds]{}
+		mockCrossRegionFactory := &awslib.MockCrossRegionFactory[rds.Client]{}
 		mockCrossRegionFactory.On(
 			"NewMultiRegionClients",
 			mock.Anything,

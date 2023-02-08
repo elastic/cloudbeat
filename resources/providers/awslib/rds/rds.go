@@ -19,6 +19,7 @@ package rds
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -36,8 +37,8 @@ type Rds interface {
 }
 
 type Provider struct {
-	log    *logp.Logger
-	client Client
+	log     *logp.Logger
+	clients map[string]Client
 }
 
 type Client interface {

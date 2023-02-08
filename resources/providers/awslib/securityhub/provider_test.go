@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -36,34 +37,58 @@ type (
 func TestProvider_Describe(t *testing.T) {
 	tests := []struct {
 		name    string
-		want    SecurityHub
+		want    []SecurityHub
 		wantErr bool
 		mocks   clientMocks
+		regions []string
 	}{
 		{
 			name: "enabled",
-			want: SecurityHub{
+			want: []SecurityHub{{
 				Enabled:           true,
 				DescribeHubOutput: &securityhub.DescribeHubOutput{},
-			},
+				Region:            awslib.DefaultRegion,
+			}},
 			mocks: clientMocks{
 				"DescribeHub": [2]mocks{
 					{mock.Anything, mock.Anything},
 					{&securityhub.DescribeHubOutput{}, nil},
 				},
 			},
+			regions: []string{awslib.DefaultRegion},
 		},
 		{
 			name: "disabled",
-			want: SecurityHub{
+			want: []SecurityHub{{
 				Enabled: false,
-			},
+				Region:  awslib.DefaultRegion,
+			}},
 			mocks: clientMocks{
 				"DescribeHub": [2]mocks{
 					{mock.Anything, mock.Anything},
 					{nil, fmt.Errorf("is not subscribed to AWS Security Hub")},
 				},
 			},
+			regions: []string{awslib.DefaultRegion},
+		},
+		{
+			name: "multi region",
+			want: []SecurityHub{{
+				Enabled:           true,
+				DescribeHubOutput: &securityhub.DescribeHubOutput{},
+				Region:            awslib.DefaultRegion,
+			}, {
+				Enabled:           true,
+				DescribeHubOutput: &securityhub.DescribeHubOutput{},
+				Region:            "eu-west-1",
+			}},
+			mocks: clientMocks{
+				"DescribeHub": [2]mocks{
+					{mock.Anything, mock.Anything},
+					{&securityhub.DescribeHubOutput{}, nil},
+				},
+			},
+			regions: []string{awslib.DefaultRegion, "eu-west-1"},
 		},
 		{
 			name:    "with error",
@@ -74,6 +99,7 @@ func TestProvider_Describe(t *testing.T) {
 					{nil, fmt.Errorf("error")},
 				},
 			},
+			regions: []string{awslib.DefaultRegion},
 		},
 	}
 	for _, tt := range tests {
@@ -82,9 +108,13 @@ func TestProvider_Describe(t *testing.T) {
 			for name, call := range tt.mocks {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = c
+			}
 			p := &Provider{
-				log:    logp.NewLogger("TestProvider_Describe"),
-				client: c,
+				log:     logp.NewLogger("TestProvider_Describe"),
+				clients: clients,
 			}
 			got, err := p.Describe(context.Background())
 			if tt.wantErr {
@@ -92,7 +122,14 @@ func TestProvider_Describe(t *testing.T) {
 				return
 			}
 			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
+			assert.ElementsMatch(t, tt.want, got)
+			names := []string{}
+			for _, r := range tt.regions {
+				names = append(names, fmt.Sprintf("securityhub - %s", r))
+			}
+			for _, s := range got {
+				assert.Contains(t, names, s.GetResourceName())
+			}
 		})
 	}
 }
