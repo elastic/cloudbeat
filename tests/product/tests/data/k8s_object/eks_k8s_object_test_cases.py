@@ -163,22 +163,23 @@ cis_eks_4_2_9 = {
 }
 
 k8s_object_config_1 = {
-    **dict(
-        zip(
-            cis_eks_4_2_7.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_4_2_7.values()],
-                data_to_report=SkipReportData(
-                    skip_reason=(
-                        "Cloudbeat set rule evaluation to fail even though "
-                        "the capabilities.drop ALL is defined in the pod spec."
-                    ),
-                    url_title="cloudbeat: #635",
-                    url_link="https://github.com/elastic/cloudbeat/issues/635",
-                ),
-            ),
-        ),
-    ),
+    **cis_eks_4_2_7,
+    # **dict(
+    #     zip(
+    #         cis_eks_4_2_7.keys(),
+    #         skip_param_case(
+    #             skip_list=[*cis_eks_4_2_7.values()],
+    #             data_to_report=SkipReportData(
+    #                 skip_reason=(
+    #                     "Cloudbeat set rule evaluation to fail even though "
+    #                     "the capabilities.drop ALL is defined in the pod spec."
+    #                 ),
+    #                 url_title="cloudbeat: #635",
+    #                 url_link="https://github.com/elastic/cloudbeat/issues/635",
+    #             ),
+    #         ),
+    #     ),
+    # ),
     **dict(
         zip(
             cis_eks_4_2_8.keys(),
@@ -192,22 +193,23 @@ k8s_object_config_1 = {
             ),
         ),
     ),
-    **dict(
-        zip(
-            cis_eks_4_2_9.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_4_2_9.values()],
-                data_to_report=SkipReportData(
-                    skip_reason=(
-                        "Cloudbeat set rule evaluation to fail even though "
-                        "the capabilities.drop ALL is defined in the pod spec."
-                    ),
-                    url_title="cloudbeat: #636",
-                    url_link="https://github.com/elastic/cloudbeat/issues/636",
-                ),
-            ),
-        ),
-    ),
+    **cis_eks_4_2_9,
+    # **dict(
+    #     zip(
+    #         cis_eks_4_2_9.keys(),
+    #         skip_param_case(
+    #             skip_list=[*cis_eks_4_2_9.values()],
+    #             data_to_report=SkipReportData(
+    #                 skip_reason=(
+    #                     "Cloudbeat set rule evaluation to fail even though "
+    #                     "the capabilities.drop ALL is defined in the pod spec."
+    #                 ),
+    #                 url_title="cloudbeat: #636",
+    #                 url_link="https://github.com/elastic/cloudbeat/issues/636",
+    #             ),
+    #         ),
+    #     ),
+    # ),
 }
 
 k8s_object_config_2 = {
