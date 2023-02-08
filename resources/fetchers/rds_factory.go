@@ -19,9 +19,7 @@ package fetchers
 
 import (
 	"fmt"
-	awsSdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
+
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
@@ -34,12 +32,12 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.RdsType, &RdsFactory{
-		CrossRegionFactory: &awslib.MultiRegionClientFactory[rds.Rds]{},
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[rds.Client]{},
 	})
 }
 
 type RdsFactory struct {
-	CrossRegionFactory awslib.CrossRegionFactory[rds.Rds]
+	CrossRegionFactory awslib.CrossRegionFactory[rds.Client]
 }
 
 func (f *RdsFactory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -58,18 +56,10 @@ func (f *RdsFactory) CreateFrom(log *logp.Logger, cfg RdsFetcherConfig, ch chan 
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
-
-	providerFactory := func(cfg awsSdk.Config) rds.Rds {
-		client := rdsClient.NewFromConfig(cfg)
-		return *rds.NewProvider(log, client)
-	}
-
-	crossRegionFetcher := f.CrossRegionFactory.NewMultiRegionClients(ec2.NewFromConfig(awsConfig), awsConfig, providerFactory, log)
-
 	return &RdsFetcher{
 		log:        log,
 		cfg:        cfg,
 		resourceCh: ch,
-		providers:  crossRegionFetcher.GetMultiRegionsClientMap(),
+		provider:   rds.NewProvider(log, awsConfig, f.CrossRegionFactory),
 	}, nil
 }

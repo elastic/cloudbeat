@@ -27,7 +27,7 @@ import (
 
 type (
 	Service interface {
-		Describe(ctx context.Context) (SecurityHub, error)
+		Describe(ctx context.Context) ([]SecurityHub, error)
 	}
 
 	SecurityHub struct {

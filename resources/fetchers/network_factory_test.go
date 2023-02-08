@@ -47,12 +47,10 @@ func TestNetworkFactory_Create(t *testing.T) {
 	mockEc2Compute := &ec2.MockElasticCompute{}
 	mockEc2Compute.On("DescribeNetworkAcl", mock.Anything).Return(nil, nil)
 	mockEc2Compute.On("DescribeSecurityGroups", mock.Anything).Return(nil, nil)
-	ec2Mock := &awslib.MockCrossRegionFetcher[ec2.ElasticCompute]{}
-	ec2Mock.On("GetMultiRegionsClientMap").Return(map[string]ec2.ElasticCompute{
-		"eu-east-1": mockEc2Compute,
-	})
+	ec2Mock := &awslib.MockCrossRegionFetcher[ec2.Client]{}
+	ec2Mock.On("GetMultiRegionsClientMap").Return(nil)
 
-	mockCrossRegion := &awslib.MockCrossRegionFactory[ec2.ElasticCompute]{}
+	mockCrossRegion := &awslib.MockCrossRegionFactory[ec2.Client]{}
 	mockCrossRegion.On(
 		"NewMultiRegionClients",
 		mock.Anything,

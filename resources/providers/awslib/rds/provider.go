@@ -19,32 +19,44 @@ package rds
 
 import (
 	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/rds"
 	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/samber/lo"
 )
 
-func NewProvider(log *logp.Logger, client Client) *Provider {
+func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return rds.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
 	return &Provider{
-		log:    log,
-		client: client,
+		log:     log,
+		clients: m.GetMultiRegionsClientMap(),
 	}
 }
 
 func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error) {
-	var result []awslib.AwsResource
-	dbInstances, err := p.client.DescribeDBInstances(ctx, &rdsClient.DescribeDBInstancesInput{})
-	if err != nil {
-		p.log.Errorf("Could not describe DB instances. Error: %v", err)
-		return result, err
-	}
+	rdss, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
+		var result []awslib.AwsResource
+		dbInstances, err := c.DescribeDBInstances(ctx, &rdsClient.DescribeDBInstancesInput{})
+		if err != nil {
+			p.log.Errorf("Could not describe DB instances. Error: %v", err)
+			return result, err
+		}
 
-	for _, dbInstance := range dbInstances.DBInstances {
-		result = append(result, DBInstance{Identifier: *dbInstance.DBInstanceIdentifier, Arn: *dbInstance.DBInstanceArn, StorageEncrypted: dbInstance.StorageEncrypted, AutoMinorVersionUpgrade: dbInstance.AutoMinorVersionUpgrade})
-	}
+		for _, dbInstance := range dbInstances.DBInstances {
+			result = append(result, DBInstance{Identifier: *dbInstance.DBInstanceIdentifier, Arn: *dbInstance.DBInstanceArn, StorageEncrypted: dbInstance.StorageEncrypted, AutoMinorVersionUpgrade: dbInstance.AutoMinorVersionUpgrade})
+		}
 
-	return result, nil
+		return result, nil
+	})
+	return lo.Flatten(rdss), err
 }
 
 func (d DBInstance) GetResourceArn() string {
