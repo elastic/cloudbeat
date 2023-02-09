@@ -24,6 +24,7 @@ import (
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -261,7 +262,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 
 		s3Provider := Provider{
 			log:     s.log,
-			clients: createMockClients(s3ClientMock, test.regions),
+			clients: testhelper.CreateMockClients[Client](s3ClientMock, test.regions),
 		}
 
 		ctx := context.Background()
@@ -277,13 +278,4 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		//	guaranteed order
 		s.ElementsMatch(test.expected, results, fmt.Sprintf("Test '%s' failed, elements do not match", test.name))
 	}
-}
-
-func createMockClients(c Client, regions []string) map[string]Client {
-	var m = make(map[string]Client, 0)
-	for _, clientRegion := range regions {
-		m[clientRegion] = c
-	}
-
-	return m
 }
