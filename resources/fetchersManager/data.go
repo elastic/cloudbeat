@@ -30,40 +30,56 @@ import (
 // Data maintains a cache that is updated by Fetcher implementations registered
 // against it. It sends the cache to an output channel at the defined interval.
 type Data struct {
-	log      *logp.Logger
-	timeout  time.Duration
-	interval time.Duration
-	fetchers FetchersRegistry
-	// Wait for completion of fetcher's fetchSingle
-	wg   sync.WaitGroup
-	stop chan struct{}
+	log        *logp.Logger
+	timeout    time.Duration
+	interval   time.Duration
+	fetchers   FetchersRegistry
+	stop       chan struct{}
+	stopNotice chan time.Duration
 }
+
+type Stop func(context.Context, time.Duration)
 
 // NewData returns a new Data instance.
 // interval is the duration the manager wait between two consecutive cycles.
 // timeout is the maximum duration the manager wait for a single fetcher to return results.
 func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
 	return &Data{
-		log:      log,
-		timeout:  timeout,
-		interval: interval,
-		fetchers: fetchers,
-		wg:       sync.WaitGroup{},
-		stop:     make(chan struct{}),
+		log:        log,
+		timeout:    timeout,
+		interval:   interval,
+		fetchers:   fetchers,
+		stop:       make(chan struct{}),
+		stopNotice: make(chan time.Duration),
 	}, nil
 }
 
 // Run starts all configured fetchers to collect resources.
-func (d *Data) Run(ctx context.Context) error {
+func (d *Data) Run(ctx context.Context) Stop {
 	go d.fetchAndSleep(ctx)
-	return nil
+	called := false
+	return func(ctx context.Context, grace time.Duration) {
+		if called {
+			return
+		}
+		called = true
+		d.stopData(ctx, grace)
+	}
 }
 
 func (d *Data) fetchAndSleep(ctx context.Context) {
+	ctx, cancel := context.WithCancel(ctx)
 	// Happens once in a lifetime of cloudbeat and then enters the loop
-	d.fetchIteration(ctx)
+	go d.fetchIteration(ctx)
+	defer func() {
+		cancel()
+	}()
+	run := true
 	for {
 		select {
+		case grace := <-d.stopNotice:
+			d.log.Infof("Received stop notice with grace period of %s, fetchers will not be executing from now on", grace.String())
+			run = false
 		case <-d.stop:
 			d.log.Info("Fetchers manager stopped")
 			return
@@ -71,7 +87,10 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 			d.log.Info("Fetchers manager canceled")
 			return
 		case <-time.After(d.interval):
-			d.fetchIteration(ctx)
+			if !run {
+				return
+			}
+			go d.fetchIteration(ctx)
 		}
 	}
 }
@@ -85,11 +104,11 @@ func (d *Data) fetchIteration(ctx context.Context) {
 
 	seq := time.Now().Unix()
 	d.log.Infof("Cycle %d has started", seq)
-
+	wg := &sync.WaitGroup{}
 	for _, key := range d.fetchers.Keys() {
-		d.wg.Add(1)
+		wg.Add(1)
 		go func(k string) {
-			defer d.wg.Done()
+			defer wg.Done()
 			err := d.fetchSingle(ctx, k, fetching.CycleMetadata{Sequence: seq})
 			if err != nil {
 				d.log.Errorf("Error running fetcher for key %s: %v", k, err)
@@ -97,7 +116,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 		}(key)
 	}
 
-	d.wg.Wait()
+	wg.Wait()
 	d.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
 	d.log.Infof("Cycle %d resource fetching has ended", seq)
 }
@@ -138,8 +157,11 @@ func (d *Data) fetchProtected(ctx context.Context, k string, metadata fetching.C
 }
 
 // Stop cleans up Data resources gracefully.
-func (d *Data) Stop() {
+func (d *Data) stopData(ctx context.Context, grace time.Duration) {
+	d.stopNotice <- grace
+	ctx, cancel := context.WithTimeout(ctx, grace)
+	defer cancel()
+	<-ctx.Done()
 	d.fetchers.Stop()
 	close(d.stop)
-	d.wg.Wait()
 }
