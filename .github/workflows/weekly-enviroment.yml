@@ -39,6 +39,7 @@ env:
   AWS_REGION: eu-north-1
   KUBE_NAMESPACE: kube-system
   WORKING_DIR: deploy/weekly-environment
+  SCRIPTS_DIR: ${{WORKING_DIR}}/scripts/benchmarks/kspm_vanilla
   ENVIRONMENT: "weekly-environment"
   TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
@@ -97,11 +98,13 @@ jobs:
 
       - name: Install KSPM vanilla integration
         id: install_vanilla_integration
+        working-directory: {{env.SCRIPTS_DIR}}
         run: |
-          ./scripts/benchmarks/kspm_vanilla/install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
+          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
 
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
+        working-directory: {{ env.SCRIPTS_DIR }}
         run: |
           cat manifest.yaml
           cat ./scripts/benchmarks/kspm_vanilla/manifest.yaml
