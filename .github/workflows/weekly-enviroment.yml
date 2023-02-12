@@ -38,7 +38,7 @@ env:
   CONTAINER_SUFFIX: ${{ github.run_id }}
   AWS_REGION: eu-north-1
   KUBE_NAMESPACE: kube-system
-  WORKING_DIR: deploy/cloud/modules/weekly-environment
+  WORKING_DIR: deploy/weekly-environment
   ENVIRONMENT: "weekly-environment"
   TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
@@ -94,6 +94,19 @@ jobs:
           export ELASTICSEARCH_PASSWORD=$(terraform output elasticsearch_password)
           echo "::add-mask::$ELASTICSEARCH_PASSWORD"
           echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
+
+      - name: Install KSPM vanilla integration
+        id: install_vanilla_integration
+        run: |
+          ./scripts/benchmarks/kspm_vanilla/install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
+
+      - name: Deploy KSPM vanilla Agent to EC2
+        id: deploy_ksmp
+        run: |
+          cat manifest.yaml
+          cat ./scripts/benchmarks/kspm_vanilla/manifest.yaml
+          cat ./scripts/benchmarks/manifest.yaml
+
 
       # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow

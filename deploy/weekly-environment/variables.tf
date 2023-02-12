@@ -55,6 +55,6 @@ variable "docker_image_override" {
 }
 
 variable "deployment_name_prefix" {
-  default     = "weekly environment"
-  description = "Optional set a prefix of the deployment. Defaults to cloudbeat-tf"
+  default     = "weekly-environment"
+  description = "Optional set a prefix of the deployment. Defaults to weekly-environment"
 }
