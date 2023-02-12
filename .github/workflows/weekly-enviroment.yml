@@ -4,25 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to run tests against'
+        description: 'Environment to deploy'
         type: choice
         options:
           - weekly environment
       logLevel:
         description: 'Log level'
         required: true
-        default: 'warning'
-        type: choice
-        options:
-          - TRACE
-          - DEBUG
-          - INFO
-          - WARN
-          - ERROR
-      StackVersion:
-        description: 'Stack version'
-        required: true
-        default: 'warning'
+        default: 'INFO'
         type: choice
         options:
           - TRACE
@@ -32,12 +21,8 @@ on:
           - ERROR
 
 env:
-  GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  CONTAINER_SUFFIX: ${{ github.run_id }}
-  KUBE_NAMESPACE: kube-system
   WORKING_DIR: deploy/weekly-environment
   SCRIPTS_DIR: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
-  ENVIRONMENT: "weekly-environment"
   TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
@@ -103,8 +88,6 @@ jobs:
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
           cat manifest.yaml
-          cat ./scripts/benchmarks/kspm_vanilla/manifest.yaml
-          cat ./scripts/benchmarks/manifest.yaml
 
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
