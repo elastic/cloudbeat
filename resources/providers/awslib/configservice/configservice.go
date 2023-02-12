@@ -74,10 +74,7 @@ func (c Config) GetResourceArn() string {
 }
 
 func (c Config) GetResourceName() string {
-	if c.Recorders == nil || len(c.Recorders) == 0 || c.Recorders[0].Name == nil {
-		return ""
-	}
-	return *c.Recorders[0].Name
+	return fmt.Sprintf("config-service-%s-%s", c.region, c.accountId)
 }
 
 func (c Config) GetResourceType() string {
