@@ -98,13 +98,13 @@ jobs:
 
       - name: Install KSPM vanilla integration
         id: install_vanilla_integration
-        working-directory: {{env.SCRIPTS_DIR}}
+        working-directory: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
         run: |
           ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
 
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
-        working-directory: {{ env.SCRIPTS_DIR }}
+        working-directory: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
         run: |
           cat manifest.yaml
           cat ./scripts/benchmarks/kspm_vanilla/manifest.yaml
