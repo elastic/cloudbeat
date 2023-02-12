@@ -155,4 +155,4 @@ jobs:
       - name: Print the Cloud Formation Linter Version & run Linter.
         run: |
           cfn-lint --version
-          cfn-lint -t ./deploy/cloudformation/elastic-agent-ec2.yml
+          cfn-lint -I -t ./deploy/cloudformation/elastic-agent-ec2.yml
