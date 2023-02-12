@@ -98,7 +98,7 @@ jobs:
 
       - name: Install KSPM vanilla integration
         id: install_vanilla_integration
-        working-directory: ${{ env.WORKING_DIR }}
+        working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
           ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
 
