@@ -34,9 +34,7 @@ type Data struct {
 	timeout  time.Duration
 	interval time.Duration
 	fetchers FetchersRegistry
-	// Wait for completion of fetcher's fetchSingle
-	wg   sync.WaitGroup
-	stop chan struct{}
+	stop     chan struct{}
 }
 
 // NewData returns a new Data instance.
@@ -48,7 +46,6 @@ func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fe
 		timeout:  timeout,
 		interval: interval,
 		fetchers: fetchers,
-		wg:       sync.WaitGroup{},
 		stop:     make(chan struct{}),
 	}, nil
 }
@@ -61,6 +58,8 @@ func (d *Data) Run(ctx context.Context) error {
 
 func (d *Data) fetchAndSleep(ctx context.Context) {
 	// Happens once in a lifetime of cloudbeat and then enters the loop
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	d.fetchIteration(ctx)
 	for {
 		select {
@@ -85,11 +84,11 @@ func (d *Data) fetchIteration(ctx context.Context) {
 
 	seq := time.Now().Unix()
 	d.log.Infof("Cycle %d has started", seq)
-
+	wg := &sync.WaitGroup{}
 	for _, key := range d.fetchers.Keys() {
-		d.wg.Add(1)
+		wg.Add(1)
 		go func(k string) {
-			defer d.wg.Done()
+			defer wg.Done()
 			err := d.fetchSingle(ctx, k, fetching.CycleMetadata{Sequence: seq})
 			if err != nil {
 				d.log.Errorf("Error running fetcher for key %s: %v", k, err)
@@ -97,7 +96,7 @@ func (d *Data) fetchIteration(ctx context.Context) {
 		}(key)
 	}
 
-	d.wg.Wait()
+	wg.Wait()
 	d.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
 	d.log.Infof("Cycle %d resource fetching has ended", seq)
 }
@@ -141,5 +140,4 @@ func (d *Data) fetchProtected(ctx context.Context, k string, metadata fetching.C
 func (d *Data) Stop() {
 	d.fetchers.Stop()
 	close(d.stop)
-	d.wg.Wait()
 }
