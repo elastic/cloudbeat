@@ -40,8 +40,8 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-// cloudbeat configuration.
-type cloudbeat struct {
+// posture configuration.
+type posture struct {
 	flavorBase
 	data       *fetchersManager.Data
 	evaluator  evaluator.Evaluator
@@ -49,9 +49,9 @@ type cloudbeat struct {
 	leader     uniqueness.Manager
 }
 
-// NewCloudbeat creates an instance of cloudbeat.
-func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
-	log := logp.NewLogger("cloudbeat")
+// NewPosture creates an instance of posture.
+func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
+	log := logp.NewLogger("posture")
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -108,7 +108,7 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 		log:         log,
 	}
 
-	bt := &cloudbeat{
+	bt := &posture{
 		flavorBase: base,
 		evaluator:  eval,
 		data:       data,
@@ -118,9 +118,9 @@ func NewCloudbeat(_ *beat.Beat, cfg *agentconfig.C) (*cloudbeat, error) {
 	return bt, nil
 }
 
-// Run starts cloudbeat.
-func (bt *cloudbeat) Run(b *beat.Beat) error {
-	bt.log.Info("cloudbeat is running! Hit CTRL-C to stop it")
+// Run starts posture.
+func (bt *posture) Run(b *beat.Beat) error {
+	bt.log.Info("posture is running! Hit CTRL-C to stop it")
 
 	if err := bt.leader.Run(bt.ctx); err != nil {
 		return err
@@ -134,7 +134,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	if err != nil {
 		return err
 	}
-	bt.log.Debugf("cloudbeat configured %d processors", len(bt.config.Processors))
+	bt.log.Debugf("posture configured %d processors", len(bt.config.Processors))
 
 	// Connect publisher (with beat's processors)
 	if bt.client, err = b.Publisher.ConnectWith(beat.ClientConfig{
@@ -154,7 +154,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 	for {
 		select {
 		case <-bt.ctx.Done():
-			bt.log.Warn("Cloudbeat context is done")
+			bt.log.Warn("Posture context is done")
 			return nil
 
 		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
@@ -163,7 +163,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 				continue
 			}
 
-			bt.log.Infof("Publishing %d cloudbeat events to elasticsearch, time interval reached", len(eventsToSend))
+			bt.log.Infof("Publishing %d posture events to elasticsearch, time interval reached", len(eventsToSend))
 			bt.client.PublishAll(eventsToSend)
 			eventsToSend = nil
 
@@ -174,7 +174,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 				continue
 			}
 
-			bt.log.Infof("Publishing %d cloudbeat events to elasticsearch, buffer threshold reached", len(eventsToSend))
+			bt.log.Infof("Publishing %d posture events to elasticsearch, buffer threshold reached", len(eventsToSend))
 			bt.client.PublishAll(eventsToSend)
 			eventsToSend = nil
 		}
@@ -196,8 +196,8 @@ func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.Resourc
 	return registry, nil
 }
 
-// Stop stops cloudbeat.
-func (bt *cloudbeat) Stop() {
+// Stop stops posture.
+func (bt *posture) Stop() {
 	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
 	bt.leader.Stop()
@@ -210,6 +210,6 @@ func (bt *cloudbeat) Stop() {
 }
 
 // configureProcessors configure processors to be used by the beat
-func (bt *cloudbeat) configureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
+func (bt *posture) configureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
 	return processors.New(processorsList)
 }
