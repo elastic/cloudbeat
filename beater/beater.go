@@ -54,6 +54,6 @@ func NewBeater(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	case config.VulnerabilityType:
 		return flavors.NewVulnerability(b, cfg)
 	default:
-		return flavors.NewCloudbeat(b, cfg)
+		return flavors.NewPosture(b, cfg)
 	}
 }
