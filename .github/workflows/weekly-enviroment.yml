@@ -89,6 +89,15 @@ jobs:
         run: |
           cat manifest.yaml
 
+      - name: Replace the agent image
+        id: replace_agent_image
+        working-directory: ${{ env.SCRIPTS_DIR }}
+        run: |
+          cp manifest.yaml manifest-2.yaml
+          sed -i '' "s/^\( *image: *\).*/\1ofir_image/" manifest-2.yaml
+          cat manifest-2.yaml
+          diff manifest.yaml manifest-2.yaml
+
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
         working-directory: ${{ env.SCRIPTS_DIR }}
@@ -98,9 +107,9 @@ jobs:
         run: |
           echo "$EC2_SECRET" > weekly-key.pem && chmod 600 weekly-key.pem
           touch from_ci.txt
-          scp -i weekly-key.pem from_ci.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
-          scp -i weekly-key.pem manifest.yaml "ubuntu@${EC2_PUBLIC_IP}:~/."
-          ssh -i weekly-key.pem "ubuntu@${EC2_PUBLIC_IP}" "ls -l"
+          scp -i "$EC2_SECRET" from_ci.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
+          scp -i "$EC2_SECRET" manifest.yaml "ubuntu@${EC2_PUBLIC_IP}:~/."
+          ssh -i "$EC2_SECRET" "ubuntu@${EC2_PUBLIC_IP}" "ls -l"
 
       # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
