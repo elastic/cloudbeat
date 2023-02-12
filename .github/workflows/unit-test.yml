@@ -142,21 +142,17 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v3
 
-  cloudformation-validation:
+  cloudformation-linter:
     name: cloudfomration-lint
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+      - name: Setup Cloud Formation Linter with Latest Version
+        uses: scottbrenner/cfn-lint-action@v2
 
-      - name: Validate Cloudformation
+      - name: Print the Cloud Formation Linter Version & run Linter.
         run: |
-          aws --version
-          aws cloudformation validate-template --template-body file://deploy/cloudformation/elastic-agent-ec2.yml
+          cfn-lint --version
+          cfn-lint -t ./deploy/cloudformation/elastic-agent-ec2.yml
