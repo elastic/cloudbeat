@@ -89,14 +89,14 @@ jobs:
         run: |
           cat manifest.yaml
 
-      - name: Replace the agent image
-        id: replace_agent_image
-        working-directory: ${{ env.SCRIPTS_DIR }}
-        run: |
-          cp manifest.yaml manifest-2.yaml
-          sed -i '' "s/^\( *image: *\).*/\1ofir_image/" manifest-2.yaml
-          cat manifest-2.yaml
-          diff manifest.yaml manifest-2.yaml
+#      - name: Replace the agent image
+#        id: replace_agent_image
+#        working-directory: ${{ env.SCRIPTS_DIR }}
+#        run: |
+#          cp manifest.yaml manifest-2.yaml
+#          sed -i '' "s/^\( *image: *\).*/\1ofir_image/" manifest-2.yaml
+#          cat manifest-2.yaml
+#          diff manifest.yaml manifest-2.yaml
 
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
