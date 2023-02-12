@@ -18,8 +18,8 @@ create_a_new_agent_policy() {
 
   check_status_code_of_curl "$installAgentResponse"
 
-  policy_id=$(echo "$installAgentResponse" | jq -r '.item.id')
-  echo "Creating a new agent policy has completed successfully: New policy id: $policy_id"
+  POLICY_ID=$(echo "$installAgentResponse" | jq -r '.item.id')
+  echo "Creating a new agent policy has completed successfully: New policy id: $POLICY_ID"
 }
 
 # create a new vanilla integration and set INTEGRATION_ID to the new integration id

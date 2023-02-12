@@ -8,9 +8,6 @@ KIBANA_AUTH=elastic:${KIBANA_PASSWORD}
 AGENT_POLICY=data/agent_policy_vanilla.json
 INTEGRATION_POLICY=data/package_policy_vanilla.json
 
-echo "I am here"
-pwd
-
 ## Create a new agent policy And get the agent id
 create_a_new_agent_policy "$KIBANA_URL" "$KIBANA_AUTH" "$AGENT_POLICY"
 
