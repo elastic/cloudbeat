@@ -22,7 +22,6 @@ import (
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
@@ -45,7 +44,7 @@ func init() {
 		CloudwatchCrossRegionFactory:     &awslib.MultiRegionClientFactory[cloudwatch.Client]{},
 		CloudwatchlogsCrossRegionFactory: &awslib.MultiRegionClientFactory[logs.Client]{},
 		SNSCrossRegionFactory:            &awslib.MultiRegionClientFactory[sns.Client]{},
-		SecurityhubRegionFactory:         &awslib.MultiRegionClientFactory[securityhub.Service]{},
+		SecurityhubRegionFactory:         &awslib.MultiRegionClientFactory[securityhub.Client]{},
 		IdentityProvider:                 awslib.GetIdentityClient,
 	})
 }
@@ -56,7 +55,7 @@ type MonitoringFactory struct {
 	CloudwatchCrossRegionFactory     awslib.CrossRegionFactory[cloudwatch.Client]
 	CloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client]
 	SNSCrossRegionFactory            awslib.CrossRegionFactory[sns.Client]
-	SecurityhubRegionFactory         awslib.CrossRegionFactory[securityhub.Service]
+	SecurityhubRegionFactory         awslib.CrossRegionFactory[securityhub.Client]
 	IdentityProvider                 func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
@@ -92,17 +91,12 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
-	fn := func(cfg awssdk.Config) securityhub.Service {
-		return securityhub.NewProvider(cfg, log)
-	}
-	m := f.SecurityhubRegionFactory.NewMultiRegionClients(ec2.NewFromConfig(awsConfig), awsConfig, fn, log)
-
 	return &MonitoringFetcher{
 		log:           log,
 		cfg:           cfg,
 		provider:      &provider,
 		resourceCh:    ch,
 		cloudIdentity: identity,
-		securityhubs:  m.GetMultiRegionsClientMap(),
+		securityhub:   securityhub.NewProvider(awsConfig, log, f.SecurityhubRegionFactory),
 	}, nil
 }

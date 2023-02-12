@@ -15,32 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package ec2
+package rds
 
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type ElasticCompute interface {
-	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
-	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
-	DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error)
-	GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error)
+type DBInstance struct {
+	Identifier              string `json:"identifier"`
+	Arn                     string `json:"arn"`
+	StorageEncrypted        bool   `json:"storage_encrypted"`
+	AutoMinorVersionUpgrade bool   `json:"auto_minor_version_upgrade"`
 }
 
-func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return ec2.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
-	return &Provider{
-		log:          log,
-		clients:      m.GetMultiRegionsClientMap(),
-		awsAccountID: awsAccountID,
-	}
+type Rds interface {
+	DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error)
+}
+
+type Provider struct {
+	log     *logp.Logger
+	clients map[string]Client
+}
+
+type Client interface {
+	DescribeDBInstances(ctx context.Context, params *rds.DescribeDBInstancesInput, optFns ...func(*rds.Options)) (*rds.DescribeDBInstancesOutput, error)
 }

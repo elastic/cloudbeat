@@ -115,7 +115,9 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 					ec2.VpcInfo{},
 					ec2.VpcInfo{},
 				}, nil)
-				m.On("GetEbsEncryptionByDefault", mock.Anything).Return(&ec2.EBSEncryption{}, nil)
+				m.On("GetEbsEncryptionByDefault", mock.Anything).Return([]awslib.AwsResource{
+					ec2.EBSEncryption{},
+				}, nil)
 				return &m
 			},
 			wantErr:           false,
@@ -128,10 +130,8 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 			f := NetworkFetcher{
-				log: logp.NewLogger(tt.name),
-				ec2Clients: map[string]ec2.ElasticCompute{
-					"eu-west-1": tt.networkProvider(),
-				},
+				log:           logp.NewLogger(tt.name),
+				ec2Client:     tt.networkProvider(),
 				cfg:           ACLFetcherConfig{},
 				resourceCh:    ch,
 				cloudIdentity: &awslib.Identity{Account: &tt.name},

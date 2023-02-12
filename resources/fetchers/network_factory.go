@@ -30,19 +30,18 @@ import (
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	aws_ec2 "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.EC2NetworkingType, &EC2NetworkFactory{
-		CrossRegionFactory: &awslib.MultiRegionClientFactory[ec2.ElasticCompute]{},
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[ec2.Client]{},
 		IdentityProvider:   awslib.GetIdentityClient,
 	})
 }
 
 type EC2NetworkFactory struct {
-	CrossRegionFactory awslib.CrossRegionFactory[ec2.ElasticCompute]
+	CrossRegionFactory awslib.CrossRegionFactory[ec2.Client]
 	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
@@ -70,14 +69,11 @@ func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, c
 	if err != nil {
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
-	ff := func(cfg awssdk.Config) ec2.ElasticCompute {
-		return ec2.NewEC2Provider(log, *identity.Account, cfg)
-	}
 
 	return &NetworkFetcher{
 		log:           log,
 		cfg:           cfg,
-		ec2Clients:    f.CrossRegionFactory.NewMultiRegionClients(aws_ec2.NewFromConfig(awsConfig), awsConfig, ff, log).GetMultiRegionsClientMap(),
+		ec2Client:     ec2.NewEC2Provider(log, *identity.Account, awsConfig, f.CrossRegionFactory),
 		cloudIdentity: identity,
 		resourceCh:    ch,
 	}, nil

@@ -179,15 +179,15 @@ func (_c *MockElasticCompute_DescribeVPCs_Call) Return(_a0 []awslib.AwsResource,
 }
 
 // GetEbsEncryptionByDefault provides a mock function with given fields: ctx
-func (_m *MockElasticCompute) GetEbsEncryptionByDefault(ctx context.Context) (*EBSEncryption, error) {
+func (_m *MockElasticCompute) GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error) {
 	ret := _m.Called(ctx)
 
-	var r0 *EBSEncryption
-	if rf, ok := ret.Get(0).(func(context.Context) *EBSEncryption); ok {
+	var r0 []awslib.AwsResource
+	if rf, ok := ret.Get(0).(func(context.Context) []awslib.AwsResource); ok {
 		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*EBSEncryption)
+			r0 = ret.Get(0).([]awslib.AwsResource)
 		}
 	}
 
@@ -219,7 +219,7 @@ func (_c *MockElasticCompute_GetEbsEncryptionByDefault_Call) Run(run func(ctx co
 	return _c
 }
 
-func (_c *MockElasticCompute_GetEbsEncryptionByDefault_Call) Return(_a0 *EBSEncryption, _a1 error) *MockElasticCompute_GetEbsEncryptionByDefault_Call {
+func (_c *MockElasticCompute_GetEbsEncryptionByDefault_Call) Return(_a0 []awslib.AwsResource, _a1 error) *MockElasticCompute_GetEbsEncryptionByDefault_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }

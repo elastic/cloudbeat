@@ -64,7 +64,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			securityhub: clientMocks{
 				"Describe": [2]mocks{
 					{mock.Anything},
-					{securityhub.SecurityHub{}, nil},
+					{[]securityhub.SecurityHub{{}}, nil},
 				},
 			},
 			expectedResources: 2,
@@ -80,7 +80,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			securityhub: clientMocks{
 				"Describe": [2]mocks{
 					{mock.Anything},
-					{securityhub.SecurityHub{}, fmt.Errorf("failed to run provider")},
+					{[]securityhub.SecurityHub{{}}, fmt.Errorf("failed to run provider")},
 				},
 			},
 		},
@@ -95,7 +95,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			securityhub: clientMocks{
 				"Describe": [2]mocks{
 					{mock.Anything},
-					{securityhub.SecurityHub{}, nil},
+					{[]securityhub.SecurityHub{{}}, nil},
 				},
 			},
 			expectedResources: 1,
@@ -116,11 +116,9 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 				hub.On(name, call[0]...).Return(call[1]...)
 			}
 			m := MonitoringFetcher{
-				log:      logp.NewLogger("TestMonitoringFetcher_Fetch"),
-				provider: monitoring,
-				securityhubs: map[string]securityhub.Service{
-					"eu-west-1": hub,
-				},
+				log:           logp.NewLogger("TestMonitoringFetcher_Fetch"),
+				provider:      monitoring,
+				securityhub:   hub,
 				cfg:           MonitoringFetcherConfig{},
 				resourceCh:    ch,
 				cloudIdentity: &awslib.Identity{Account: aws.String("account")},
