@@ -39,7 +39,7 @@ env:
   AWS_REGION: eu-north-1
   KUBE_NAMESPACE: kube-system
   WORKING_DIR: deploy/weekly-environment
-  SCRIPTS_DIR: ${{env.WORKING_DIR}}/scripts/benchmarks/kspm_vanilla
+  SCRIPTS_DIR: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
   ENVIRONMENT: "weekly-environment"
   TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
