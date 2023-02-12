@@ -93,10 +93,11 @@ jobs:
         id: deploy_ksmp
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
-          echo {{secrets.EC2_SECRET}} > weekly-key.pem && chmod 600 weekly-key.pem
+          echo ${{secrets.EC2_SECRET}} > weekly-key.pem && chmod 600 weekly-key.pem
           touch from_ci.txt
-          scp -i ${weekly-key.pem} from_ci.txt "ubuntu@${{secrets.EC2_PUBLIC_IP}}:~/."
-          ssh -i ${weekly-key.pem} "ubuntu@${{secrets.EC2_PUBLIC_IP}}" "ls -l"
+          scp -i weekly-key.pem from_ci.txt "ubuntu@${{secrets.EC2_PUBLIC_IP}}:~/."
+          scp -i weekly-key.pem manifest.yaml "ubuntu@${{secrets.EC2_PUBLIC_IP}}:~/."
+          ssh -i weekly-key.pem "ubuntu@${{secrets.EC2_PUBLIC_IP}}" "ls -l"
 
       # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
