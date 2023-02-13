@@ -126,7 +126,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -v -i weekly-key.pem from_ci.txt "ubuntu@${{ secrets.EC2_PUBLIC_IP }}:~/."
 
       - name: Deploy Agent on EC2 instance
-        id: copy_manifest_file
+        id: deploy_manifest_file
         working-directory: ${{ env.SCRIPTS_DIR }}
         env:
           EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
