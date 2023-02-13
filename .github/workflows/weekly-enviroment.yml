@@ -124,7 +124,6 @@ jobs:
 #          source: "from_ci.txt"
 #          target: "."
 #          strip_components: 1
-
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
         working-directory: ${{ env.SCRIPTS_DIR }}
