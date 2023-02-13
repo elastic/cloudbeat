@@ -133,7 +133,11 @@ jobs:
           EC2_SECRET: ${{ secrets.EC2_SECRET }}
         run: |
           touch from_ci.txt
+          pwd
+          ll
+          echo "ofirrrr"
           echo {{ secrets.EC2_SECRET }} > weekly-key.pem
+          cat weekly-key.pem
           chmod 600 weekly-key.pem
           ssh-keygen -y -f weekly-key.pem
           scp -i weekly-key.pem -o StrictHostKeyChecking=no from_ci.txt "ubuntu@ec2-13-51-85-190.eu-north-1.compute.amazonaws.com:~/."
