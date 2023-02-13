@@ -113,8 +113,8 @@ jobs:
           target: "ci.txt"
         continue-on-error: true
 
-      - name: Deploy KSPM vanilla Agent to EC2
-        id: deploy_ksmp
+      - name: Copy Vanilla Manifest file to EC2 instance
+        id: copy_manifest_file
         working-directory: ${{ env.SCRIPTS_DIR }}
         env:
           EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
@@ -125,7 +125,16 @@ jobs:
           chmod 600 weekly-key.pem
           scp -o StrictHostKeyChecking=no -v -i weekly-key.pem from_ci.txt "ubuntu@${{ secrets.EC2_PUBLIC_IP }}:~/."
 
-#          scp -i ${{ secrets.EC2_SECRET }} -o StrictHostKeyChecking=no from_ci_1.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
+      - name: Deploy Agent on EC2 instance
+        id: copy_manifest_file
+        working-directory: ${{ env.SCRIPTS_DIR }}
+        env:
+          EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
+          EC2_SECRET: ${{ secrets.EC2_SECRET }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i weekly-key.pem "ubuntu@${EC2_PUBLIC_IP}" "touch from_ci_apply.text"
+
+#          scp -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SECRET }}  from_ci_1.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
 #
 #          scp -i "$EC2_SECRET" -o StrictHostKeyChecking=no manifest.yaml "ubuntu@${EC2_PUBLIC_IP}:~/."
 #          ssh -i "$EC2_SECRET" -o StrictHostKeyChecking=no "ubuntu@${EC2_PUBLIC_IP}" "ls -l"
