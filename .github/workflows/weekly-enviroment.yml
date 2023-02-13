@@ -109,7 +109,7 @@ jobs:
           host: "ec2-13-51-85-190.eu-north-1.compute.amazonaws.com"
           username: "ubuntu"
           port: "22"
-          privateKey: ${{ secrets.EC2_SECRET }}
+          key: ${{ secrets.EC2_SECRET }}
           source: "from_ci.txt"
           target: "test"
 
