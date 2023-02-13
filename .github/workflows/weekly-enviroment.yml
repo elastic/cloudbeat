@@ -114,6 +114,12 @@ jobs:
           target: "ci.txt"
         continue-on-error: true
 
+      - name: SCP help
+        id: deploy_ksmp
+        working-directory: ${{ env.SCRIPTS_DIR }}
+        run: |
+          scp -h
+
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
         working-directory: ${{ env.SCRIPTS_DIR }}
