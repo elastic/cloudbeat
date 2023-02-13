@@ -21,28 +21,33 @@ import (
 	"context"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type LoggingFetcher struct {
-	log        *logp.Logger
-	provider   logging.Client
-	cfg        fetching.AwsBaseFetcherConfig
-	resourceCh chan fetching.ResourceInfo
+	log                   *logp.Logger
+	loggingProvider       logging.Client
+	configserviceProvider configservice.ConfigService
+	cfg                   fetching.AwsBaseFetcherConfig
+	resourceCh            chan fetching.ResourceInfo
 }
 
 type LoggingResource struct {
 	awslib.AwsResource
 }
 
+type ConfigResource struct {
+	awslib.AwsResource
+}
+
 func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting LoggingFetcher.Fetch")
-
-	trails, err := f.provider.DescribeTrails(ctx)
+	trails, err := f.loggingProvider.DescribeTrails(ctx)
 	if err != nil {
-		return err
+		f.log.Errorf("failed to describe trails: %v", err)
 	}
 
 	for _, resource := range trails {
@@ -50,6 +55,18 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetad
 			Resource: LoggingResource{
 				AwsResource: resource,
 			},
+			CycleMetadata: cMetadata,
+		}
+	}
+
+	configs, err := f.configserviceProvider.DescribeConfigRecorders(ctx)
+	if err != nil {
+		f.log.Errorf("failed to describe config recorders: %v", err)
+	}
+
+	for _, resource := range configs {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      ConfigResource{AwsResource: resource},
 			CycleMetadata: cMetadata,
 		}
 	}
@@ -72,3 +89,18 @@ func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 func (r LoggingResource) GetElasticCommonData() any { return nil }
+
+func (c ConfigResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	return fetching.ResourceMetadata{
+		ID:      c.GetResourceArn(),
+		Type:    fetching.CloudConfig,
+		SubType: c.GetResourceType(),
+		Name:    c.GetResourceName(),
+	}, nil
+}
+
+func (c ConfigResource) GetData() any {
+	return c.AwsResource
+}
+
+func (c ConfigResource) GetElasticCommonData() any { return nil }

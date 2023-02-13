@@ -19,7 +19,6 @@ package fetchers
 
 import (
 	"context"
-	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -29,7 +28,7 @@ import (
 
 type NetworkFetcher struct {
 	log           *logp.Logger
-	ec2Clients    map[string]ec2.ElasticCompute
+	ec2Client     ec2.ElasticCompute
 	cfg           ACLFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
@@ -47,11 +46,12 @@ type NetworkResource struct {
 // Fetch collects network resource such as network acl and security groups
 func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting NetworkFetcher.Fetch")
-	resources, _ := awslib.MultiRegionFetch(ctx, f.ec2Clients, func(ctx context.Context, client ec2.ElasticCompute) ([]awslib.AwsResource, error) {
-		return f.aggregateResources(ctx, client)
-	})
+	resources, err := f.aggregateResources(ctx, f.ec2Client)
+	if err != nil {
+		return err
+	}
 
-	for _, resource := range lo.Flatten(resources) {
+	for _, resource := range resources {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource: NetworkResource{
 				AwsResource: resource,
@@ -95,12 +95,19 @@ func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.Elast
 		f.log.Errorf("failed to describe security groups: %v", err)
 	}
 	resources = append(resources, securityGroups...)
-
 	vpcs, err := client.DescribeVPCs(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe vpcs: %v", err)
 	}
 	resources = append(resources, vpcs...)
+	ebsEncryption, err := client.GetEbsEncryptionByDefault(ctx)
+	if err != nil {
+		f.log.Errorf("failed to get ebs encryption by default: %v", err)
+	}
+
+	if ebsEncryption != nil {
+		resources = append(resources, ebsEncryption...)
+	}
 
 	return resources, nil
 }

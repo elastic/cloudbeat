@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 	"testing"
 	"time"
 
@@ -38,10 +39,10 @@ import (
 
 func TestLoggingFetcher_Fetch(t *testing.T) {
 	tests := []struct {
-		name              string
-		loggingProvider   func() logging.Client
-		wantErr           bool
-		expectedResources int
+		name                  string
+		loggingProvider       func() logging.Client
+		configServiceProvider func() configservice.ConfigService
+		expectedResources     int
 	}{
 		{
 			name: "no resources found",
@@ -50,7 +51,11 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				m.On("DescribeTrails", mock.Anything).Return([]awslib.AwsResource{}, nil)
 				return &m
 			},
-			wantErr:           false,
+			configServiceProvider: func() configservice.ConfigService {
+				m := configservice.MockConfigService{}
+				m.On("DescribeConfigRecorders", mock.Anything).Return([]awslib.AwsResource{}, nil)
+				return &m
+			},
 			expectedResources: 0,
 		},
 		{
@@ -60,8 +65,28 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				m.On("DescribeTrails", mock.Anything).Return(nil, errors.New("failed to get trails"))
 				return &m
 			},
-			wantErr:           true,
-			expectedResources: 0,
+			configServiceProvider: func() configservice.ConfigService {
+				m := configservice.MockConfigService{}
+				m.On("DescribeConfigRecorders", mock.Anything).Return([]awslib.AwsResource{
+					configservice.Config{},
+				}, nil)
+				return &m
+			},
+			expectedResources: 1,
+		},
+		{
+			name: "with error to describe config recorders",
+			loggingProvider: func() logging.Client {
+				m := logging.MockClient{}
+				m.On("DescribeTrails", mock.Anything).Return([]awslib.AwsResource{&logging.EnrichedTrail{}}, nil)
+				return &m
+			},
+			configServiceProvider: func() configservice.ConfigService {
+				m := configservice.MockConfigService{}
+				m.On("DescribeConfigRecorders", mock.Anything).Return(nil, errors.New("failed to get config recorders"))
+				return &m
+			},
+			expectedResources: 1,
 		},
 		{
 			name: "with resources",
@@ -73,8 +98,14 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				}, nil)
 				return &m
 			},
-			wantErr:           false,
-			expectedResources: 2,
+			configServiceProvider: func() configservice.ConfigService {
+				m := configservice.MockConfigService{}
+				m.On("DescribeConfigRecorders", mock.Anything).Return([]awslib.AwsResource{
+					configservice.Config{},
+				}, nil)
+				return &m
+			},
+			expectedResources: 3,
 		},
 	}
 	for _, tt := range tests {
@@ -83,17 +114,14 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 			f := LoggingFetcher{
-				log:        logp.NewLogger(tt.name),
-				provider:   tt.loggingProvider(),
-				cfg:        fetching.AwsBaseFetcherConfig{},
-				resourceCh: ch,
+				log:                   logp.NewLogger(tt.name),
+				loggingProvider:       tt.loggingProvider(),
+				configserviceProvider: tt.configServiceProvider(),
+				cfg:                   fetching.AwsBaseFetcherConfig{},
+				resourceCh:            ch,
 			}
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})
-			if tt.wantErr {
-				assert.Error(t, err)
-				return
-			}
 			resources := testhelper.CollectResources(ch)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedResources, len(resources))

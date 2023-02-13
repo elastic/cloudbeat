@@ -19,14 +19,15 @@ package awslib
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	ec2sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -108,7 +109,7 @@ func TestMultiRegionFetch(t *testing.T) {
 	type testCase[T any] struct {
 		name    string
 		clients map[string]testClient
-		fetcher func(context.Context, T) ([]AwsResource, error)
+		fetcher func(context.Context, string, T) ([]AwsResource, error)
 		want    []AwsResource
 		wantErr bool
 	}
@@ -116,7 +117,7 @@ func TestMultiRegionFetch(t *testing.T) {
 		{
 			name:    "Fetch resources from multiple regions",
 			clients: map[string]testClient{euRegion: &dummyTester{euRegion}, usRegion: &dummyTester{usRegion}},
-			fetcher: func(ctx context.Context, c testClient) ([]AwsResource, error) {
+			fetcher: func(ctx context.Context, region string, c testClient) ([]AwsResource, error) {
 				return c.DummyFunc()
 			},
 			want:    []AwsResource{testAwsResource{resRegion: usRegion}, testAwsResource{resRegion: euRegion}},
@@ -125,7 +126,7 @@ func TestMultiRegionFetch(t *testing.T) {
 		{
 			name:    "Error from a single region",
 			clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
-			fetcher: func(ctx context.Context, c testClient) ([]AwsResource, error) {
+			fetcher: func(ctx context.Context, region string, c testClient) ([]AwsResource, error) {
 				return c.DummyFunc()
 			},
 			want:    []AwsResource{testAwsResource{resRegion: usRegion}},
@@ -134,7 +135,7 @@ func TestMultiRegionFetch(t *testing.T) {
 		{
 			name:    "Error from all regions",
 			clients: map[string]testClient{afRegion: &dummyTester{afRegion}, usRegion: &dummyTester{usRegion}},
-			fetcher: func(ctx context.Context, c testClient) ([]AwsResource, error) {
+			fetcher: func(ctx context.Context, region string, c testClient) ([]AwsResource, error) {
 				return nil, errors.New("service unavailable")
 			},
 			want:    nil,
@@ -187,4 +188,22 @@ func (d dummyTester) DummyFunc() ([]AwsResource, error) {
 	}
 
 	return nil, nil
+}
+
+func Test_shouldDrop(t *testing.T) {
+	var s1 *string
+	assert.True(t, shouldDrop(s1))
+	assert.True(t, shouldDrop(func() *string { return nil }()))
+	assert.True(t, shouldDrop(nil))
+
+	assert.False(t, shouldDrop([]string{}))
+	var s2 []string
+	assert.False(t, shouldDrop(s2))
+	assert.False(t, shouldDrop(""))
+	assert.False(t, shouldDrop(aws.String("")))
+
+	type test struct{}
+	assert.False(t, shouldDrop(&test{}))
+	assert.False(t, shouldDrop(test{}))
+	//
 }

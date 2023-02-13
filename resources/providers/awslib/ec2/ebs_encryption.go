@@ -15,20 +15,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package version
+package ec2
 
-// name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
-const defaultBeatVersion = "8.8.0"
+import (
+	"fmt"
 
-// Version represents version information for a package
-type Version struct {
-	Version    string `json:"version,omitempty"`     // Version is the semantic version of the package
-	CommitHash string `json:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
-	CommitTime string `json:"commit_time,omitempty"` // CommitTime is the git commit time of the package
+	"github.com/elastic/cloudbeat/resources/fetching"
+)
+
+type EBSEncryption struct {
+	Enabled    bool `json:"enabled"`
+	region     string
+	awsAccount string
 }
 
-type CloudbeatVersionInfo struct {
-	Version
-	Policy     Version `json:"policy,omitempty"`     // Policy version info for the rules policy
-	Kubernetes Version `json:"kubernetes,omitempty"` // Kubernetes version info for the rules policy
+func (e EBSEncryption) GetResourceArn() string {
+	return fmt.Sprintf("ebs-encryption-by-default-%s-%s", e.awsAccount, e.region)
+}
+
+func (e EBSEncryption) GetResourceName() string {
+	return fmt.Sprintf("ebs-encryption-by-default-%s-%s", e.awsAccount, e.region)
+}
+
+func (e EBSEncryption) GetResourceType() string {
+	return fetching.EBSType
 }
