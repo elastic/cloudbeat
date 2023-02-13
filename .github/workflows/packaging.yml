@@ -1,0 +1,50 @@
+name: Packaging
+
+on:
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+    types: [opened, synchronize, reopened]
+
+env:
+  DEV: true
+  SNAPSHOT: true
+  PLATFORMS: linux/amd64
+  GOPATH: /home/runner/go
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  package_beat:
+    name: Package Cloudbeat
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        types: [ tar.gz, docker ]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: cache go dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
+
+      - name: Packaging
+        run: |
+          mage -v package
+        env:
+          TYPES: ${{ matrix.types }}
