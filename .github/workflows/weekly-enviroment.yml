@@ -135,7 +135,6 @@ jobs:
 #          echo "ofirrrr"
           echo {{ secrets.EC2_SECRET }} > weekly-key.pem
           ll
-
 #          cat weekly-key.pem
 #          chmod 600 weekly-key.pem
 #          ssh-keygen -y -f weekly-key.pem
