@@ -110,7 +110,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SECRET }}
           source: "from_ci.txt"
-          target: "test"
+          target: "."
 
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
