@@ -135,6 +135,7 @@ jobs:
           echo {{ secrets.EC2_SECRET }} > weekly-key.pem
           chmod 600 weekly-key.pem
           ls -a
+          cat weekly-key.pem
 
 #          touch from_ci.txt
 #          ll
