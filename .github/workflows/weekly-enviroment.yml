@@ -26,7 +26,7 @@ env:
   TF_VAR_ec_api_key: ${{ secrets.TF_VAR_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
-
+  TF_VAR: 8.6.1
 
 jobs:
   terraform:
