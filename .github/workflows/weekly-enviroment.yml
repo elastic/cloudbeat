@@ -113,7 +113,6 @@ jobs:
 #          source: "from_ci.txt"
 #          target: "."
 #          strip_components: 1
-
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
         working-directory: ${{ env.SCRIPTS_DIR }}
@@ -125,9 +124,10 @@ jobs:
           echo {{ secrets.EC2_SECRET }} > weekly-key.txt
           ls weekly-key.txt
           head -n 3 weekly-key.txt
+          scp -i weekly-key.txt -o StrictHostKeyChecking=no from_ci.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
+
 #          scp -i ${{ secrets.EC2_SECRET }} -o StrictHostKeyChecking=no from_ci_1.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
 #
-          scp -i weekly-key.txt -o StrictHostKeyChecking=no from_ci.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
 #          scp -i "$EC2_SECRET" -o StrictHostKeyChecking=no manifest.yaml "ubuntu@${EC2_PUBLIC_IP}:~/."
 #          ssh -i "$EC2_SECRET" -o StrictHostKeyChecking=no "ubuntu@${EC2_PUBLIC_IP}" "ls -l"
 
