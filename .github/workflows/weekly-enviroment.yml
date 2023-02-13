@@ -84,14 +84,8 @@ jobs:
         run: |
           ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
 
-      - name: Show manifest file
-        id: manifest_file
-        working-directory: ${{ env.SCRIPTS_DIR }}
-        run: |
-          cat manifest.yaml
-
       - name: Deploy agent on EC2
-        id: copy_manifest_file
+        id: deploy_agent_on_ec2
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
           echo -e "${{ secrets.EC2_SECRET }}" > weekly-key.pem

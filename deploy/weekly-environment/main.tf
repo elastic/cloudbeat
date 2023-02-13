@@ -2,11 +2,6 @@ provider "ec" {
   apikey = var.ec_api_key
 }
 
-resource "random_string" "suffix" {
-  length  = 3
-  special = false
-}
-
 module "ec_deployment" {
   source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
 
@@ -14,7 +9,7 @@ module "ec_deployment" {
   stack_version = var.stack_version
 
   deployment_template    = var.deployment_template
-  deployment_name_prefix = "${var.deployment_name_prefix}-${random_string.suffix.result}"
+  deployment_name_prefix = "${var.deployment_name_prefix}-${formatdate("MMM DD, YYYY", timestamp())}"
 
   integrations_server = true
 

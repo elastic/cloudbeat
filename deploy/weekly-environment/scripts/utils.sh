@@ -1,108 +1,155 @@
 #!/bin/bash
 
-# creates a new agent policy and set the new POLICY_ID to the policy id
+# This utility script contains functions that are used by the benchmark scripts.
+
+#######################################
+# Creates a new agent policy and set the new POLICY_ID as the new integration policy id
+# Globals:
+#   POLICY_ID
+# Arguments:
+#   $1: Kibana URL
+#   $2: Kibana auth
+#   $3: Agent policy
+# Returns:
+#   None
+#######################################
 create_a_new_agent_policy() {
   local kibana_url=$1
   local kibana_auth=$2
   local agent_policy=$3
 
   # Install Agent policy
-  installAgentResponse=$(curl -X POST \
+  local install_agent_response
+  install_agent_response="$(curl -X POST \
     --url "${kibana_url}/api/fleet/agent_policies?sys_monitoring=true" \
-    -u "$kibana_auth" \
+    -u "${kibana_auth}" \
     -H 'Cache-Control: no-cache' \
     -H 'Connection: keep-alive' \
     -H 'Content-Type: application/json' \
     -H 'kbn-xsrf: true' \
-    -d "@$agent_policy")
+    -d "@${agent_policy}")"
 
-  check_status_code_of_curl "$installAgentResponse"
+  echo "Install agent response: ${install_agent_response}"
+  check_status_code_of_curl "${install_agent_response}"
 
-  POLICY_ID=$(echo "$installAgentResponse" | jq -r '.item.id')
-  echo "Creating a new agent policy has completed successfully: New policy id: $POLICY_ID"
+  POLICY_ID=$(echo "${install_agent_response}" | jq -r '.item.id')
+  echo "Creating a new agent policy has completed successfully: New policy id: ${POLICY_ID}"
 }
 
-# creates a new vanilla integration and set INTEGRATION_ID to the new integration id
+#######################################
+# Creates a new vanilla integration on the given policy id
+# Arguments:
+#   $1: Kibana URL
+#   $2: Kibana auth
+#   $3: Policy id
+#   $4: Integration policy
+# Returns:
+#   None
+#######################################
 create_a_new_vanilla_integration() {
   local kibana_url=$1
   local kibana_auth=$2
   local policy_id=$3
   local integration_policy=$4
-  local updated_policy
 
   # Updating the new integration policy with the policy id
-  updated_policy="$(jq --arg policy_id "$policy_id" '.policy_id |= $policy_id' "$integration_policy")"
-  echo "New integration policy: $updated_policy"
+  local updated_policy
+  updated_policy="$(jq --arg policy_id "${policy_id}" '.policy_id |= $policy_id' "${integration_policy}")"
+  echo "New integration policy: ${updated_policy}"
 
-  PACKAGE_POLICY_RESPONSE=$(curl -X POST \
+  package_policy_response="$(curl -X POST \
     --url "${kibana_url}/api/fleet/package_policies" \
-    -u "$kibana_auth" \
+    -u "${kibana_auth}" \
     -H 'Cache-Control: no-cache' \
     -H 'Connection: keep-alive' \
     -H 'Content-Type: application/json' \
     -H 'kbn-xsrf: true' \
-    -d "${updated_policy}")
+    -d "${updated_policy}")"
 
-  check_status_code_of_curl "$PACKAGE_POLICY_RESPONSE"
+  check_status_code_of_curl "${package_policy_response}"
 
-  echo "Creating a new a new vanilla integration with policy id: $policy_id has completed successfully.Integration policy: $updated_policy "
+  echo "Creating a new a new vanilla integration with policy id: ${policy_id} has completed successfully.Integration policy: ${updated_policy}"
 }
 
-# creates a new vanilla integration manifest file named manifest.yaml
+#######################################
+# Creates a new vanilla integration manifest file manifest.yaml
+# Globals:
+#   MANIFEST_FILE
+# Arguments:
+#   $1: Kibana URL
+#   $2: Kibana auth
+#   $3: Policy id
+# Returns:
+#   None
+#######################################
 create_new_vanilla_integration_manifest_file() {
   local kibana_url=$1
   local kibana_auth=$2
   local policy_id=$3
 
-  ENROLMENT_TOKEN_RESPONSE=$(curl -X GET \
+  local enrolment_token_response
+  enrolment_token_response="$(curl -X GET \
     --url "${kibana_url}/api/fleet/enrollment_api_keys" \
-    -u "$kibana_auth" \
+    -u "${kibana_auth}" \
     -H 'Cache-Control: no-cache' \
     -H 'Connection: keep-alive' \
     -H 'Content-Type: application/json' \
-    -H 'kbn-xsrf: true')
+    -H 'kbn-xsrf: true')"
 
-  check_status_code_of_curl "$ENROLMENT_TOKEN_RESPONSE"
+  check_status_code_of_curl "${enrolment_token_response}"
 
-  ENROLMENT_TOKEN=$(echo "$ENROLMENT_TOKEN_RESPONSE" | jq --arg policy "$policy_id" '.list[] | select(.policy_id == $policy)' | jq -r '.api_key')
-  echo "ENROLMENT_TOKEN: $ENROLMENT_TOKEN"
+  local enrolment_token
+  enrolment_token="$(echo "${enrolment_token_response}" | jq --arg policy "${policy_id}" '.list[] | select(.policy_id == $policy)' | jq -r '.api_key')"
+  echo "enrolment_token: ${enrolment_token}"
 
-  FLEET_DATA_RESPONSE=$(curl -X GET \
+  local fleet_data_response
+  fleet_data_response="$(curl -X GET \
     --url "${kibana_url}/api/fleet/settings" \
-    -u "$kibana_auth" \
+    -u "${kibana_auth}" \
     -H 'Cache-Control: no-cache' \
     -H 'Connection: keep-alive' \
     -H 'Content-Type: application/json' \
-    -H 'kbn-xsrf: true')
+    -H 'kbn-xsrf: true')"
 
-  check_status_code_of_curl "$FLEET_DATA_RESPONSE"
-  FLEET_SERVER_HOST=$(echo "$FLEET_DATA_RESPONSE" | jq -r '.item.fleet_server_hosts[0]')
-  echo "FLEET_SERVER_HOST: $FLEET_SERVER_HOST"
+  check_status_code_of_curl "${fleet_data_response}"
+
+  local fleet_server_host
+  fleet_server_host="$(echo "${fleet_data_response}" | jq -r '.item.fleet_server_hosts[0]')"
+  echo "fleet_server_host: ${fleet_server_host}"
 
   # Create the manifest file
-  MANIFEST_CREATION_RESPONSE=$(curl -X GET \
-    --url "${kibana_url}/api/fleet/kubernetes?fleetServer=${FLEET_SERVER_HOST}&enrolToken=${ENROLMENT_TOKEN}" \
-    -u "$kibana_auth" \
+  local manifest_creation_response
+  manifest_creation_response="$(curl -X GET \
+    --url "${kibana_url}/api/fleet/kubernetes?fleetServer=${fleet_server_host}&enrolToken=${enrolment_token}" \
+    -u "${kibana_auth}" \
     -H 'Cache-Control: no-cache' \
     -H 'Connection: keep-alive' \
     -H 'Content-Type: application/json' \
-    -H 'kbn-xsrf: true')
+    -H 'kbn-xsrf: true')"
 
-  check_status_code_of_curl "$MANIFEST_CREATION_RESPONSE"
+  check_status_code_of_curl "${manifest_creation_response}"
 
   # write the manifest file to the file system
   # get the item field from the response
-  MANIFEST_FILE=$(echo "$MANIFEST_CREATION_RESPONSE" | jq -r '.item')
+  MANIFEST_FILE=$(echo "$manifest_creation_response" | jq -r '.item')
   echo "$MANIFEST_FILE" > manifest.yaml
 }
 
+#######################################
+# Checks the status code of the curl response and exits if the status code is not 200
+# Globals:
+# Arguments:
+#   $1: Curl response
+# Returns:
+#   None
+#######################################
 check_status_code_of_curl() {
-  local CURL_RESPONSE=$1
-  error_code=$(echo "$CURL_RESPONSE" | jq -r '.statusCode')
+  local curl_response=$1
+  error_code=$(echo "$curl_response" | jq -r '.statusCode')
   if [ "$error_code" != "null" ] && [ "$error_code" != "200" ]; then
     echo "Error code: $error_code"
-    echo "Error message: $(echo "$CURL_RESPONSE" | jq -r '.message')"
-    echo "Error full response: $CURL_RESPONSE"
+    echo "Error message: $(echo "$curl_response" | jq -r '.message')"
+    echo "Error full response: $curl_response"
     exit 1
   fi
 }
