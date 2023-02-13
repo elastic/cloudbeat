@@ -44,7 +44,6 @@ bundle.tar.gz
 .terraform
 .terraform.lock.hcl
 .tfstate.backup
-/terraform.tfstate
 
 # .tfstate files
 *.tfstate
