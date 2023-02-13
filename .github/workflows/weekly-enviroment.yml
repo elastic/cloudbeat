@@ -103,22 +103,13 @@ jobs:
         run: |
           touch from_ci.txt
 
-      - name: Copy single file to remote
-        uses: appleboy/scp-action@master
-        with:
-          local: from_ci.txt
-          remote: from_ci.txt
-          host: "ec2-13-51-85-190.eu-north-1.compute.amazonaws.com"
-          username: "ubuntu"
-          privateKey: ${{ secrets.EC2_SECRET}}
-
       - name: copy file via ssh key
         uses: appleboy/scp-action@master
         with:
           host: "ec2-13-51-85-190.eu-north-1.compute.amazonaws.com"
           username: "ubuntu"
           port: "22"
-          key: ${{ secrets.EC2_SECRET }}
+          privateKey: ${{ secrets.EC2_SECRET }}
           source: "from_ci.txt"
           target: "test"
 
