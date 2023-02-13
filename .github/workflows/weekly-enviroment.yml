@@ -130,47 +130,47 @@ jobs:
 #          scp -i "$EC2_SECRET" -o StrictHostKeyChecking=no manifest.yaml "ubuntu@${EC2_PUBLIC_IP}:~/."
 #          ssh -i "$EC2_SECRET" -o StrictHostKeyChecking=no "ubuntu@${EC2_PUBLIC_IP}" "ls -l"
 
-      # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
-      - name: Send custom JSON data to Slack workflow
-        id: slack
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "text": "A new deployment job has been triggered",
-              "attachments": [
-                {
-                  "color": "#36a64f",
-                  "fields": [
-                    {
-                      "title": "Environment",
-                      "value": "${{ github.event.inputs.environment }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Log level",
-                      "value": "${{ github.event.inputs.logLevel }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Kibana URL",
-                      "value": ${{ env.KIBANA_URL }},
-                      "short": false
-                    },
-                    {
-                      "title": "ElasticSearch username",
-                      "value": ${{ env.ELASTICSEARCH_USERNAME }},
-                      "short": false
-                    },
-                    {
-                      "title": "ElasticSearch password",
-                      "value": ${{ env.ELASTICSEARCH_PASSWORD }},
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+#      # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
+#      - name: Send custom JSON data to Slack workflow
+#        id: slack
+#        uses: slackapi/slack-github-action@v1.23.0
+#        with:
+#          payload: |
+#            {
+#              "text": "A new deployment job has been triggered",
+#              "attachments": [
+#                {
+#                  "color": "#36a64f",
+#                  "fields": [
+#                    {
+#                      "title": "Environment",
+#                      "value": "${{ github.event.inputs.environment }}",
+#                      "short": true
+#                    },
+#                    {
+#                      "title": "Log level",
+#                      "value": "${{ github.event.inputs.logLevel }}",
+#                      "short": true
+#                    },
+#                    {
+#                      "title": "Kibana URL",
+#                      "value": ${{ env.KIBANA_URL }},
+#                      "short": false
+#                    },
+#                    {
+#                      "title": "ElasticSearch username",
+#                      "value": ${{ env.ELASTICSEARCH_USERNAME }},
+#                      "short": false
+#                    },
+#                    {
+#                      "title": "ElasticSearch password",
+#                      "value": ${{ env.ELASTICSEARCH_PASSWORD }},
+#                      "short": false
+#                    }
+#                  ]
+#                }
+#              ]
+#            }
+#        env:
+#          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+#          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
