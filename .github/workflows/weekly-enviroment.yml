@@ -108,7 +108,7 @@ jobs:
         env:
           HOST: ${{ secrets.EC2_PUBLIC_IP }}
           USERNAME: "ubuntu"
-          KEY: ${{ secrets.EC2_SECRET }
+          KEY: ${{ secrets.EC2_SECRET }}
         with:
           source: "from_ci.txt"
           target: "."
