@@ -105,10 +105,11 @@ jobs:
 
       - name: Copy file to EC2
         uses: appleboy/scp-action@master
+        env:
+          HOST: ${{ secrets.EC2_PUBLIC_IP }}
+          USERNAME: "ubuntu"
+          KEY: ${{ secrets.EC2_SECRET }
         with:
-          host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SECRET }}
           source: "from_ci.txt"
           target: "."
 
