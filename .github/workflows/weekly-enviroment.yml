@@ -115,7 +115,7 @@ jobs:
         continue-on-error: true
 
       - name: SCP help
-        id: deploy_ksmp
+        id: deploy_ksmp_1
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
           scp -h
