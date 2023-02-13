@@ -122,7 +122,7 @@ jobs:
           EC2_SECRET: ${{ secrets.EC2_SECRET }}
         run: |
           touch from_ci_1.txt
-          scp -i ${{ secrets.EC2_PEM_KEY }} -o StrictHostKeyChecking=no from_ci_1.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
+          scp -i ${{ secrets.EC2_SECRET }} -o StrictHostKeyChecking=no from_ci_1.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
 
           scp -i "$EC2_SECRET" -o StrictHostKeyChecking=no from_ci.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
           scp -i "$EC2_SECRET" -o StrictHostKeyChecking=no manifest.yaml "ubuntu@${EC2_PUBLIC_IP}:~/."
