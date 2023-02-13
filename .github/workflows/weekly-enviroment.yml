@@ -44,50 +44,50 @@ jobs:
            terraform_version: 1.3.5
            terraform_wrapper: false
 
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: true
+#      - name: Terraform fmt
+#        id: fmt
+#        run: terraform fmt -check
+#        continue-on-error: true
+#
+#      - name: Terraform Init
+#        id: init
+#        run: terraform init -no-color
+#
+#      - name: Terraform Validate
+#        id: validate
+#        run: terraform validate -no-color
+#
+#      - name: Deploy Elastic Cloud
+#        id: apply
+#        run: terraform apply --auto-approve
+#
+#      - name: Set terraform output as env variable
+#        id: kibana_url
+#        run: |
+#          echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
+#
+#      - name: Set sensitive terraform output as env variable
+#        id: set_sensitive_output
+#        run: |
+#          export ELASTICSEARCH_USERNAME=$(terraform output elasticsearch_username)
+#          echo "::add-mask::$ELASTICSEARCH_USERNAME"
+#          echo "ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME" >> $GITHUB_ENV
+#
+#          export ELASTICSEARCH_PASSWORD=$(terraform output elasticsearch_password)
+#          echo "::add-mask::$ELASTICSEARCH_PASSWORD"
+#          echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
+#
+#      - name: Install KSPM vanilla integration
+#        id: install_vanilla_integration
+#        working-directory: ${{ env.SCRIPTS_DIR }}
+#        run: |
+#          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
 
-      - name: Terraform Init
-        id: init
-        run: terraform init -no-color
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      - name: Deploy Elastic Cloud
-        id: apply
-        run: terraform apply --auto-approve
-
-      - name: Set terraform output as env variable
-        id: kibana_url
-        run: |
-          echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
-
-      - name: Set sensitive terraform output as env variable
-        id: set_sensitive_output
-        run: |
-          export ELASTICSEARCH_USERNAME=$(terraform output elasticsearch_username)
-          echo "::add-mask::$ELASTICSEARCH_USERNAME"
-          echo "ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME" >> $GITHUB_ENV
-
-          export ELASTICSEARCH_PASSWORD=$(terraform output elasticsearch_password)
-          echo "::add-mask::$ELASTICSEARCH_PASSWORD"
-          echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
-
-      - name: Install KSPM vanilla integration
-        id: install_vanilla_integration
-        working-directory: ${{ env.SCRIPTS_DIR }}
-        run: |
-          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
-
-      - name: Show manifest file
-        id: manifest_file
-        working-directory: ${{ env.SCRIPTS_DIR }}
-        run: |
-          cat manifest.yaml
+#      - name: Show manifest file
+#        id: manifest_file
+#        working-directory: ${{ env.SCRIPTS_DIR }}
+#        run: |
+#          cat manifest.yaml
 
 #      - name: Replace the agent image
 #        id: replace_agent_image
@@ -106,9 +106,9 @@ jobs:
           EC2_SECRET: ${{ secrets.EC2_SECRET }}
         run: |
           touch from_ci.txt
-          scp -i "$EC2_SECRET" from_ci.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
-          scp -i "$EC2_SECRET" manifest.yaml "ubuntu@${EC2_PUBLIC_IP}:~/."
-          ssh -i "$EC2_SECRET" "ubuntu@${EC2_PUBLIC_IP}" "ls -l"
+          scp -i "$EC2_SECRET" -o StrictHostKeyChecking=no from_ci.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
+#          scp -i "$EC2_SECRET" manifest.yaml "ubuntu@${EC2_PUBLIC_IP}:~/."
+          ssh -i "$EC2_SECRET" -o StrictHostKeyChecking=no "ubuntu@${EC2_PUBLIC_IP}" "ls -l"
 
       # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
