@@ -121,8 +121,8 @@ jobs:
           EC2_SECRET: ${{ secrets.EC2_SECRET }}
         run: |
           touch from_ci_1.txt
-          echo {{ secrets.EC2_SECRET }} > weekly-key.txt
-          chmod 600 weekly-key.txt
+          echo {{ secrets.EC2_SECRET }} > weekly-key.pem
+          chmod 600 weekly-key.pem
           ls weekly-key.txt
           head -n 3 weekly-key.txt
           scp -i weekly-key.txt -o StrictHostKeyChecking=no from_ci.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
