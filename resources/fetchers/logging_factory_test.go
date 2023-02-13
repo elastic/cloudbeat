@@ -18,7 +18,9 @@
 package fetchers
 
 import (
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"testing"
 
@@ -60,9 +62,31 @@ session_token: session
 		mock.Anything,
 	).Return(mockCrossRegionS3Fetcher)
 
+	mockCrossRegionConfigFetcher := &awslib.MockCrossRegionFetcher[configservice.Client]{}
+	mockCrossRegionConfigFetcher.On("GetMultiRegionsClientMap").Return(nil)
+
+	mockCrossRegionConfigFactory := &awslib.MockCrossRegionFactory[configservice.Client]{}
+	mockCrossRegionConfigFactory.On(
+		"NewMultiRegionClients",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(mockCrossRegionConfigFetcher)
+
+	identity := awslib.Identity{
+		Account: aws.String("123456789012"),
+	}
+	identityProvider := &awslib.MockIdentityProviderGetter{}
+	identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
+
 	f := &LoggingFactory{
-		TrailCrossRegionFactory: mockCrossRegionTrailFactory,
-		S3CrossRegionFactory:    mockCrossRegionS3Factory,
+		TrailCrossRegionFactory:  mockCrossRegionTrailFactory,
+		S3CrossRegionFactory:     mockCrossRegionS3Factory,
+		ConfigCrossRegionFactory: mockCrossRegionConfigFactory,
+		IdentityProvider: func(cfg aws.Config) awslib.IdentityProviderGetter {
+			return identityProvider
+		},
 	}
 
 	cfg, err := agentconfig.NewConfigFrom(config)
