@@ -112,6 +112,7 @@ jobs:
           key: ${{ secrets.EC2_SECRET }}
           source: "from_ci.txt"
           target: "test"
+        continue-on-error: true
 
 #      - name: Copy file to EC2
 #        uses: appleboy/scp-action@master
@@ -134,6 +135,7 @@ jobs:
           touch from_ci.txt
           echo {{ secrets.EC2_SECRET }} > weekly-key.pem
           chmod 600 weekly-key.pem
+          ssh-keygen -y -f weekly-key.pem
           scp -i weekly-key.pem -o StrictHostKeyChecking=no from_ci.txt "ubuntu@ec2-13-51-85-190.eu-north-1.compute.amazonaws.com:~/."
 
 #          scp -i ${{ secrets.EC2_SECRET }} -o StrictHostKeyChecking=no from_ci_1.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
