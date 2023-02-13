@@ -27,6 +27,7 @@ env:
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
 
+
 jobs:
   terraform:
     name: Deploy KSPM/CSPM cloud environment
