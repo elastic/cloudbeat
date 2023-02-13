@@ -98,6 +98,21 @@ jobs:
 #          sed -i '' "s/^\( *image: *\).*/\1ofir_image/" manifest-2.yaml
 #          cat manifest-2.yaml
 #          diff manifest.yaml manifest-2.yaml
+#
+      - name: Copy file to EC2
+        working-directory: ${{ env.SCRIPTS_DIR }}
+        run: |
+          touch from_ci.txt
+
+      - name: Copy file to EC2
+        uses: appleboy/scp-action@master
+        working-directory: ${{ env.SCRIPTS_DIR }}
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SECRET }}
+          source: "from_ci.txt"
+          target: "test"
 
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
