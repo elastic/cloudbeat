@@ -105,7 +105,6 @@ jobs:
           EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
           EC2_SECRET: ${{ secrets.EC2_SECRET }}
         run: |
-          echo "$EC2_SECRET" > weekly-key.pem && chmod 600 weekly-key.pem
           touch from_ci.txt
           scp -i "$EC2_SECRET" from_ci.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
           scp -i "$EC2_SECRET" manifest.yaml "ubuntu@${EC2_PUBLIC_IP}:~/."
