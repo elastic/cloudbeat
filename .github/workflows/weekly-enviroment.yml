@@ -131,11 +131,11 @@ jobs:
           EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
           EC2_SECRET: ${{ secrets.EC2_SECRET }}
         run: |
-          pwd
-#          touch from_ci.txt
-#          ll
+          touch from_ci.txt
 #          echo "ofirrrr"
-#          echo {{ secrets.EC2_SECRET }} > weekly-key.pem
+          echo {{ secrets.EC2_SECRET }} > weekly-key.pem
+          ll
+
 #          cat weekly-key.pem
 #          chmod 600 weekly-key.pem
 #          ssh-keygen -y -f weekly-key.pem
