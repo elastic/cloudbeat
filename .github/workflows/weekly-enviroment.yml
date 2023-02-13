@@ -106,24 +106,14 @@ jobs:
       - name: copy file via ssh key
         uses: appleboy/scp-action@master
         with:
-          host: "ec2-13-51-85-190.eu-north-1.compute.amazonaws.com"
+          host: ${{ secrets.EC2_PUBLIC_IP }}
           username: "ubuntu"
           port: "22"
           key: ${{ secrets.EC2_SECRET }}
           source: "from_ci.txt"
-          target: "test"
+          target: "ci.txt"
         continue-on-error: true
 
-#      - name: Copy file to EC2
-#        uses: appleboy/scp-action@master
-#        env:
-#          HOST: ${{ secrets.EC2_PUBLIC_IP }}
-#          USERNAME: "ubuntu"
-#          KEY: ${{ secrets.EC2_SECRET }}
-#        with:
-#          source: "from_ci.txt"
-#          target: "."
-#          strip_components: 1
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
         working-directory: ${{ env.SCRIPTS_DIR }}
@@ -131,19 +121,11 @@ jobs:
           EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
           EC2_SECRET: ${{ secrets.EC2_SECRET }}
         run: |
+          touch from_ci.txt
           pwd
           echo ${{ secrets.EC2_SECRET }} > weekly-key.pem
           chmod 600 weekly-key.pem
-          ls -a
-          cat weekly-key.pem
-
-#          touch from_ci.txt
-#          ll
-#          echo "ofirrrr"
-#          cat weekly-key.pem
-#          chmod 600 weekly-key.pem
-#          ssh-keygen -y -f weekly-key.pem
-#          scp -i weekly-key.pem -o StrictHostKeyChecking=no from_ci.txt "ubuntu@ec2-13-51-85-190.eu-north-1.compute.amazonaws.com:~/."
+          scp -i weekly-key.pem -o StrictHostKeyChecking=no from_ci.txt "ubuntu@ec2-13-51-85-190.eu-north-1.compute.amazonaws.com:~/."
 
 #          scp -i ${{ secrets.EC2_SECRET }} -o StrictHostKeyChecking=no from_ci_1.txt "ubuntu@${EC2_PUBLIC_IP}:~/."
 #
