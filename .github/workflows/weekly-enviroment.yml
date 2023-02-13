@@ -99,7 +99,7 @@ jobs:
 #          cat manifest-2.yaml
 #          diff manifest.yaml manifest-2.yaml
 #
-      - name: Copy file to EC2
+      - name: Create new file
         run: |
           touch from_ci.txt
 
@@ -112,6 +112,7 @@ jobs:
         with:
           source: "from_ci.txt"
           target: "."
+          strip_components: 1
 
       - name: Deploy KSPM vanilla Agent to EC2
         id: deploy_ksmp
