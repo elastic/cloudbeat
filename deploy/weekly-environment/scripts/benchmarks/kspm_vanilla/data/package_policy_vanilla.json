@@ -1,5 +1,5 @@
 {
-    "name": "weekly-environment-vanilla-integration-package-full-flow-1",
+    "name": "weekly-environment-vanilla-integration-package",
     "description": "",
     "namespace": "default",
     "policy_id": "${agent_policy_id}",

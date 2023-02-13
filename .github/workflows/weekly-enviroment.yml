@@ -102,13 +102,12 @@ jobs:
         id: copy_manifest_file
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
-          touch from_ci.txt
           echo -e "${{ secrets.EC2_SECRET }}" > weekly-key.pem
           chmod 600 weekly-key.pem
           # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i manifest.yaml "ubuntu@${{ secrets.EC2_PUBLIC_IP }}:~/."
+          scp -o StrictHostKeyChecking=no -v -i weekly-key.pem manifest.yaml "ubuntu@${{ secrets.EC2_PUBLIC_IP }}:~/."
           # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i manifest.yaml "ubuntu@${{ secrets.EC2_PUBLIC_IP }}" "kubectl apply -f manifest.yaml"
+          ssh -o StrictHostKeyChecking=no -v -i weekly-key.pem manifest.yaml "ubuntu@${{ secrets.EC2_PUBLIC_IP }}" "kubectl apply -f manifest.yaml"
 
       # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow

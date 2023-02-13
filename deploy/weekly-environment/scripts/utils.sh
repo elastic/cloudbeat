@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# create a new agent policy and set policy_id to the new agent id
+# creates a new agent policy and set the new POLICY_ID to the policy id
 create_a_new_agent_policy() {
   local kibana_url=$1
   local kibana_auth=$2
@@ -22,13 +22,15 @@ create_a_new_agent_policy() {
   echo "Creating a new agent policy has completed successfully: New policy id: $POLICY_ID"
 }
 
-# create a new vanilla integration and set INTEGRATION_ID to the new integration id
+# creates a new vanilla integration and set INTEGRATION_ID to the new integration id
 create_a_new_vanilla_integration() {
   local kibana_url=$1
   local kibana_auth=$2
   local policy_id=$3
   local integration_policy=$4
   local updated_policy
+
+  # Updating the new integration policy with the policy id
   updated_policy="$(jq --arg policy_id "$policy_id" '.policy_id |= $policy_id' "$integration_policy")"
   echo "New integration policy: $updated_policy"
 
@@ -46,7 +48,7 @@ create_a_new_vanilla_integration() {
   echo "Creating a new a new vanilla integration with policy id: $policy_id has completed successfully.Integration policy: $updated_policy "
 }
 
-# create a new vanilla integration manifest file named manifest.yaml
+# creates a new vanilla integration manifest file named manifest.yaml
 create_new_vanilla_integration_manifest_file() {
   local kibana_url=$1
   local kibana_auth=$2

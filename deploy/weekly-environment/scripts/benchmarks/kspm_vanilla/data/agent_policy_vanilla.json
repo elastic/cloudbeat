@@ -1,5 +1,5 @@
 {
-    "name": "weekly-environment-vanilla-policy-full-flow-1",
+    "name": "weekly-environment-vanilla-policy",
     "namespace": "default",
     "monitoring_enabled": [
         "logs",
