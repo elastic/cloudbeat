@@ -132,8 +132,8 @@ jobs:
           EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
           EC2_SECRET: ${{ secrets.EC2_SECRET }}
         run: |
-#          touch from_ci.txt
           pwd
+#          touch from_ci.txt
 #          ll
 #          echo "ofirrrr"
 #          echo {{ secrets.EC2_SECRET }} > weekly-key.pem
