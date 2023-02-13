@@ -132,10 +132,13 @@ jobs:
           EC2_SECRET: ${{ secrets.EC2_SECRET }}
         run: |
           pwd
+          echo {{ secrets.EC2_SECRET }} > weekly-key.pem
+          chmod 600 weekly-key.pem
+          ll
+
 #          touch from_ci.txt
 #          ll
 #          echo "ofirrrr"
-#          echo {{ secrets.EC2_SECRET }} > weekly-key.pem
 #          cat weekly-key.pem
 #          chmod 600 weekly-key.pem
 #          ssh-keygen -y -f weekly-key.pem
