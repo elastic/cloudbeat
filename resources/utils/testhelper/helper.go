@@ -26,3 +26,12 @@ func CollectResources[T any](ch chan T) []T {
 
 	return results
 }
+
+func CreateMockClients[T any](client T, regions []string) map[string]T {
+	var m = make(map[string]T, 0)
+	for _, clientRegion := range regions {
+		m[clientRegion] = client
+	}
+
+	return m
+}

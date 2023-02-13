@@ -35,7 +35,7 @@ type MonitoringFetcher struct {
 	cfg           MonitoringFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
-	securityhubs  map[string]securityhub.Service
+	securityhub   securityhub.Service
 }
 
 type MonitoringFetcherConfig struct {
@@ -63,9 +63,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 			CycleMetadata: cMetadata,
 		}
 	}
-	hubs, err := awslib.MultiRegionFetch(ctx, m.securityhubs, func(ctx context.Context, client securityhub.Service) (securityhub.SecurityHub, error) {
-		return client.Describe(ctx)
-	})
+	hubs, err := m.securityhub.Describe(ctx)
 	if err != nil {
 		m.log.Errorf("failed to describe security hub: %v", err)
 		return nil

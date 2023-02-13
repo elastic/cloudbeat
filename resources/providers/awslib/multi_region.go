@@ -73,7 +73,7 @@ func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(client DescribeCloud
 }
 
 // MultiRegionFetch retrieves resources from multiple regions concurrently using the provided fetcher function.
-func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetcher func(ctx context.Context, client T) (K, error)) ([]K, error) {
+func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetcher func(ctx context.Context, region string, client T) (K, error)) ([]K, error) {
 	var err error
 	var wg sync.WaitGroup
 	var mux sync.Mutex
@@ -87,7 +87,7 @@ func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetch
 		wg.Add(1)
 		go func(client T, region string) {
 			defer wg.Done()
-			results, fetchErr := fetcher(ctx, client)
+			results, fetchErr := fetcher(ctx, region, client)
 			if fetchErr != nil {
 				err = fmt.Errorf("fail to retrieve aws resources for region: %s, error: %v, ", region, fetchErr)
 			}
