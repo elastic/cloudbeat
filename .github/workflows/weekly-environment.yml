@@ -19,3 +19,15 @@ on:
           - INFO
           - WARN
           - ERROR
+
+
+jobs:
+  terraform:
+    name: Deploy KSPM/CSPM cloud environment
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
