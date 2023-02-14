@@ -22,7 +22,9 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -32,36 +34,42 @@ type (
 	}
 
 	Provider struct {
-		log    *logp.Logger
-		client Client
-		region string
+		log     *logp.Logger
+		clients map[string]Client
+		region  string
 	}
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger) *Provider {
+func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return securityhub.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
 	return &Provider{
-		log:    log,
-		client: securityhub.NewFromConfig(cfg),
-		region: cfg.Region,
+		log:     log,
+		region:  cfg.Region,
+		clients: m.GetMultiRegionsClientMap(),
 	}
 }
 
-func (p *Provider) Describe(ctx context.Context) (SecurityHub, error) {
-	out, err := p.client.DescribeHub(ctx, &securityhub.DescribeHubInput{})
-	if err != nil {
-		res := SecurityHub{
-			Enabled:           false,
+func (p *Provider) Describe(ctx context.Context) ([]SecurityHub, error) {
+	return awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) (SecurityHub, error) {
+		out, err := c.DescribeHub(ctx, &securityhub.DescribeHubInput{})
+		if err != nil {
+			res := SecurityHub{
+				Enabled:           false,
+				DescribeHubOutput: out,
+				Region:            region,
+			}
+			if strings.Contains(err.Error(), "is not subscribed to AWS Security Hub") {
+				return res, nil
+			}
+			return res, err
+		}
+		return SecurityHub{
+			Enabled:           true,
 			DescribeHubOutput: out,
-			Region:            p.region,
-		}
-		if strings.Contains(err.Error(), "is not subscribed to AWS Security Hub") {
-			return res, nil
-		}
-		return res, err
-	}
-	return SecurityHub{
-		Enabled:           true,
-		DescribeHubOutput: out,
-		Region:            p.region,
-	}, nil
+			Region:            region,
+		}, nil
+	})
 }
