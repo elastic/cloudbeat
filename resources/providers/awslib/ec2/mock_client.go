@@ -39,6 +39,68 @@ func (_m *MockClient) EXPECT() *MockClient_Expecter {
 	return &MockClient_Expecter{mock: &_m.Mock}
 }
 
+// CreateSnapshots provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) CreateSnapshots(ctx context.Context, params *serviceec2.CreateSnapshotsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.CreateSnapshotsOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceec2.CreateSnapshotsOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.CreateSnapshotsInput, ...func(*serviceec2.Options)) *serviceec2.CreateSnapshotsOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceec2.CreateSnapshotsOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.CreateSnapshotsInput, ...func(*serviceec2.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_CreateSnapshots_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateSnapshots'
+type MockClient_CreateSnapshots_Call struct {
+	*mock.Call
+}
+
+// CreateSnapshots is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceec2.CreateSnapshotsInput
+//   - optFns ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) CreateSnapshots(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_CreateSnapshots_Call {
+	return &MockClient_CreateSnapshots_Call{Call: _e.mock.On("CreateSnapshots",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_CreateSnapshots_Call) Run(run func(ctx context.Context, params *serviceec2.CreateSnapshotsInput, optFns ...func(*serviceec2.Options))) *MockClient_CreateSnapshots_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceec2.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceec2.CreateSnapshotsInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_CreateSnapshots_Call) Return(_a0 *serviceec2.CreateSnapshotsOutput, _a1 error) *MockClient_CreateSnapshots_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // DescribeFlowLogs provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) DescribeFlowLogs(ctx context.Context, params *serviceec2.DescribeFlowLogsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeFlowLogsOutput, error) {
 	_va := make([]interface{}, len(optFns))
@@ -97,6 +159,68 @@ func (_c *MockClient_DescribeFlowLogs_Call) Run(run func(ctx context.Context, pa
 }
 
 func (_c *MockClient_DescribeFlowLogs_Call) Return(_a0 *serviceec2.DescribeFlowLogsOutput, _a1 error) *MockClient_DescribeFlowLogs_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+// DescribeInstances provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) DescribeInstances(ctx context.Context, params *serviceec2.DescribeInstancesInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeInstancesOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceec2.DescribeInstancesOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeInstancesInput, ...func(*serviceec2.Options)) *serviceec2.DescribeInstancesOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceec2.DescribeInstancesOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeInstancesInput, ...func(*serviceec2.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_DescribeInstances_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeInstances'
+type MockClient_DescribeInstances_Call struct {
+	*mock.Call
+}
+
+// DescribeInstances is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceec2.DescribeInstancesInput
+//   - optFns ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeInstances(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeInstances_Call {
+	return &MockClient_DescribeInstances_Call{Call: _e.mock.On("DescribeInstances",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_DescribeInstances_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeInstancesInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeInstances_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceec2.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceec2.DescribeInstancesInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_DescribeInstances_Call) Return(_a0 *serviceec2.DescribeInstancesOutput, _a1 error) *MockClient_DescribeInstances_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
@@ -221,6 +345,68 @@ func (_c *MockClient_DescribeSecurityGroups_Call) Run(run func(ctx context.Conte
 }
 
 func (_c *MockClient_DescribeSecurityGroups_Call) Return(_a0 *serviceec2.DescribeSecurityGroupsOutput, _a1 error) *MockClient_DescribeSecurityGroups_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+// DescribeSnapshots provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) DescribeSnapshots(ctx context.Context, params *serviceec2.DescribeSnapshotsInput, optFns ...func(*serviceec2.Options)) (*serviceec2.DescribeSnapshotsOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceec2.DescribeSnapshotsOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceec2.DescribeSnapshotsInput, ...func(*serviceec2.Options)) *serviceec2.DescribeSnapshotsOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceec2.DescribeSnapshotsOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceec2.DescribeSnapshotsInput, ...func(*serviceec2.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_DescribeSnapshots_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeSnapshots'
+type MockClient_DescribeSnapshots_Call struct {
+	*mock.Call
+}
+
+// DescribeSnapshots is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceec2.DescribeSnapshotsInput
+//   - optFns ...func(*serviceec2.Options)
+func (_e *MockClient_Expecter) DescribeSnapshots(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_DescribeSnapshots_Call {
+	return &MockClient_DescribeSnapshots_Call{Call: _e.mock.On("DescribeSnapshots",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_DescribeSnapshots_Call) Run(run func(ctx context.Context, params *serviceec2.DescribeSnapshotsInput, optFns ...func(*serviceec2.Options))) *MockClient_DescribeSnapshots_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceec2.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceec2.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceec2.DescribeSnapshotsInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_DescribeSnapshots_Call) Return(_a0 *serviceec2.DescribeSnapshotsOutput, _a1 error) *MockClient_DescribeSnapshots_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
