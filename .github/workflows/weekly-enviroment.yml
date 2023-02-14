@@ -23,6 +23,7 @@ on:
 env:
   WORKING_DIR: deploy/weekly-environment
   SCRIPTS_DIR: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
+  AGENT_IMAGE: cisofir/elastic-agent:8.0.0-SNAPSHOT
   TF_VAR_ec_api_key: ${{ secrets.WEEKLY_ENVIRONMENT_KIBANA_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
@@ -84,6 +85,7 @@ jobs:
 #        run: |
 #          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
 
+
       - name: cat manifest file
         id: cat_manifest_file_1
         working-directory: ${{ env.SCRIPTS_DIR }}
@@ -94,7 +96,7 @@ jobs:
         id: replace_manifest_file
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
-          sed -i "s/^\( *image: *\).*/\1ofir_image/" manifest.yaml
+          sed -i "s/^\( *image: *\).*/\1${{env.AGENT_IMAGE}}/" manifest.yaml
 
 
       - name: cat manifest file
