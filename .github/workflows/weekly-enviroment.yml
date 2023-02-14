@@ -96,7 +96,7 @@ jobs:
         id: replace_manifest_file
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
-          sed -i "s/^\( *image: *\).*/\1${{env.AGENT_IMAGE}}/" manifest.yaml
+          sed -i "s/^\( *image: *\).*/\1${{ env.IMAGE_NAME }}/" manifest.yaml
 
 
       - name: cat manifest file
