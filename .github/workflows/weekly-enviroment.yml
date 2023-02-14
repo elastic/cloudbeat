@@ -84,12 +84,17 @@ jobs:
 #        run: |
 #          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
 
+      - name: cat manifest file
+        id: cat_manifest_file_1
+        working-directory: ${{ env.SCRIPTS_DIR }}
+        run: |
+          cat manifest.yaml
+
       - name : Replace the manifest file with the correct values
         id: replace_manifest_file
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
-          sed -i '' "s/^\( *image: *\).*/\\1ofir_image/" manifest.yaml
-
+          sed -i '' "s/^\( *image: *\).*/\1ofir_image/" manifest.yaml
 
 
       - name: cat manifest file
