@@ -20,13 +20,15 @@ package fetchers
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type RdsFetcherTestSuite struct {
@@ -36,10 +38,12 @@ type RdsFetcherTestSuite struct {
 	resourceCh chan fetching.ResourceInfo
 }
 
-type rdsMocksReturnVals map[string]map[string][]any
+type rdsMocksReturnVals map[string][]any
 
-var dbInstance1 = rds.DBInstance{Identifier: "id", Arn: "arn", StorageEncrypted: true, AutoMinorVersionUpgrade: true}
-var dbInstance2 = rds.DBInstance{Identifier: "id2", Arn: "arn2", StorageEncrypted: false, AutoMinorVersionUpgrade: false}
+var (
+	dbInstance1 = rds.DBInstance{Identifier: "id", Arn: "arn", StorageEncrypted: true, AutoMinorVersionUpgrade: true}
+	dbInstance2 = rds.DBInstance{Identifier: "id2", Arn: "arn2", StorageEncrypted: false, AutoMinorVersionUpgrade: false}
+)
 
 func TestRdsFetcherTestSuite(t *testing.T) {
 	s := new(RdsFetcherTestSuite)
@@ -61,7 +65,7 @@ func (s *RdsFetcherTestSuite) TearDownTest() {
 }
 
 func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
-	var tests = []struct {
+	tests := []struct {
 		name               string
 		rdsMocksReturnVals rdsMocksReturnVals
 		expected           []fetching.ResourceInfo
@@ -69,33 +73,14 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 		{
 			name: "Should not get any DB instances",
 			rdsMocksReturnVals: rdsMocksReturnVals{
-				"us-east-1": {
-					"DescribeDBInstances": {nil, errors.New("bad, very bad")},
-				},
+				"DescribeDBInstances": {nil, errors.New("bad, very bad")},
 			},
 			expected: []fetching.ResourceInfo(nil),
 		},
 		{
 			name: "Should get an RDS DB instance",
 			rdsMocksReturnVals: rdsMocksReturnVals{
-				"us-east-1": {
-					"DescribeDBInstances": {[]awslib.AwsResource{dbInstance1}, nil},
-				},
-			},
-			expected: []fetching.ResourceInfo{{Resource: RdsResource{dbInstance: dbInstance1}}},
-		},
-		{
-			name: "Should get RDS DB instances from different regions",
-			rdsMocksReturnVals: rdsMocksReturnVals{
-				"us-east-1": {
-					"DescribeDBInstances": {[]awslib.AwsResource{dbInstance1}, nil},
-				},
-				"eu-west-1": {
-					"DescribeDBInstances": {[]awslib.AwsResource{dbInstance2}, nil},
-				},
-				"ap-east-1": {
-					"DescribeDBInstances": {nil, errors.New("bla")},
-				},
+				"DescribeDBInstances": {[]awslib.AwsResource{dbInstance1, dbInstance2}, nil},
 			},
 			expected: []fetching.ResourceInfo{{Resource: RdsResource{dbInstance: dbInstance1}}, {Resource: RdsResource{dbInstance: dbInstance2}}},
 		},
@@ -106,20 +91,16 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
 		}
 
-		providers := map[string]rds.Rds{}
-		for region, rdsMocksReturnVals := range test.rdsMocksReturnVals {
-			rdsProviderMock := &rds.MockRds{}
-			for funcName, returnVals := range rdsMocksReturnVals {
-				rdsProviderMock.On(funcName, context.TODO()).Return(returnVals...)
-			}
-			providers[region] = rdsProviderMock
+		m := &rds.MockRds{}
+		for fn, rdsMocksReturnVals := range test.rdsMocksReturnVals {
+			m.On(fn, mock.Anything).Return(rdsMocksReturnVals...)
 		}
 
 		rdsFetcher := RdsFetcher{
 			log:        s.log,
 			cfg:        rdsFetcherCfg,
 			resourceCh: s.resourceCh,
-			providers:  providers,
+			provider:   m,
 		}
 
 		ctx := context.Background()

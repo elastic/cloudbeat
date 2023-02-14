@@ -19,13 +19,14 @@ package rds
 
 import (
 	"context"
+	"testing"
+
 	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type ProviderTestSuite struct {
@@ -34,12 +35,14 @@ type ProviderTestSuite struct {
 	log *logp.Logger
 }
 
-type rdsClientMockReturnVals map[string][][]any
+type rdsClientMockReturnVals map[string]map[string][]any
 
-var identifier = "identifier"
-var identifier2 = "identifier2"
-var arn = "arn"
-var arn2 = "arn2"
+var (
+	identifier  = "identifier"
+	identifier2 = "identifier2"
+	arn         = "arn"
+	arn2        = "arn2"
+)
 
 func TestProviderTestSuite(t *testing.T) {
 	s := new(ProviderTestSuite)
@@ -57,27 +60,32 @@ func (s *ProviderTestSuite) SetupTest() {}
 func (s *ProviderTestSuite) TearDownTest() {}
 
 func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
-	var tests = []struct {
+	tests := []struct {
 		name                    string
 		rdsClientMockReturnVals rdsClientMockReturnVals
 		expected                []awslib.AwsResource
 	}{
 		{
 			name: "Should not return any DB instances when there aren't any",
-			rdsClientMockReturnVals: rdsClientMockReturnVals{"DescribeDBInstances": {
-				{&rdsClient.DescribeDBInstancesOutput{DBInstances: []types.DBInstance{}}, nil},
-			}},
-			expected: []awslib.AwsResource(nil),
+			rdsClientMockReturnVals: rdsClientMockReturnVals{
+				"DescribeDBInstances": {
+					awslib.DefaultRegion: {&rdsClient.DescribeDBInstancesOutput{DBInstances: []types.DBInstance{}}, nil},
+				},
+			},
+			expected: []awslib.AwsResource{},
 		},
 		{
 			name: "Should return DB instances",
-			rdsClientMockReturnVals: rdsClientMockReturnVals{"DescribeDBInstances": {
-				{&rdsClient.DescribeDBInstancesOutput{DBInstances: []types.DBInstance{{
-					DBInstanceIdentifier: &identifier, DBInstanceArn: &arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false,
-				}, {
-					DBInstanceIdentifier: &identifier2, DBInstanceArn: &arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true,
-				}}}, nil},
-			}},
+			rdsClientMockReturnVals: rdsClientMockReturnVals{
+				"DescribeDBInstances": {
+					awslib.DefaultRegion: {&rdsClient.DescribeDBInstancesOutput{
+						DBInstances: []types.DBInstance{
+							{DBInstanceIdentifier: &identifier, DBInstanceArn: &arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false},
+							{DBInstanceIdentifier: &identifier2, DBInstanceArn: &arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true},
+						},
+					}, nil},
+				},
+			},
 			expected: []awslib.AwsResource{
 				DBInstance{Identifier: identifier, Arn: arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false},
 				DBInstance{Identifier: identifier2, Arn: arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true},
@@ -86,16 +94,17 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 	}
 
 	for _, test := range tests {
-		rdsClientMock := &MockClient{}
-		for funcName, returnVals := range test.rdsClientMockReturnVals {
-			for _, vals := range returnVals {
-				rdsClientMock.On(funcName, context.TODO(), mock.Anything).Return(vals...).Once()
+		clients := map[string]Client{}
+		for fn, e := range test.rdsClientMockReturnVals {
+			for region, calls := range e {
+				m := &MockClient{}
+				m.On(fn, mock.Anything, mock.Anything).Return(calls...).Once()
+				clients[region] = m
 			}
 		}
-
 		rdsProvider := Provider{
-			log:    s.log,
-			client: rdsClientMock,
+			log:     s.log,
+			clients: clients,
 		}
 
 		ctx := context.Background()

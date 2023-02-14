@@ -30,15 +30,17 @@ type ElasticCompute interface {
 	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
 	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
 	DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error)
-	GetEbsEncryptionByDefault(ctx context.Context) (*EBSEncryption, error)
+	GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
-	svc := ec2.NewFromConfig(cfg)
+func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return ec2.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
 	return &Provider{
 		log:          log,
-		client:       svc,
+		clients:      m.GetMultiRegionsClientMap(),
 		awsAccountID: awsAccountID,
-		awsRegion:    cfg.Region,
 	}
 }
