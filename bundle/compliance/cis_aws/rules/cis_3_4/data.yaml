@@ -1,5 +1,5 @@
 metadata:
-  id: 63413a69-d879-5b0e-8f9e-d70cd4fc49fa
+  id: c1581c69-3e5c-5ab2-bdde-3619955a1dcf
   name: Ensure CloudTrail trails are integrated with CloudWatch Logs
   profile_applicability: '* Level 1'
   description: |-

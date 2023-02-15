@@ -1,5 +1,5 @@
 metadata:
-  id: 15413809-b667-59d0-a54a-972ba4826eb4
+  id: 067385c5-d3a0-536a-bd4f-ed7c1f4033ce
   name: Ensure that the --cert-file and --key-file arguments are set as appropriate
   profile_applicability: '* Level 1 - Master Node'
   description: Configure TLS encryption for the etcd service.

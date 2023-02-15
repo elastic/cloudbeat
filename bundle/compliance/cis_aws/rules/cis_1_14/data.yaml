@@ -1,5 +1,5 @@
 metadata:
-  id: fee5a5eb-0e97-5a20-aec0-eda1fd6b3580
+  id: edccbc31-3c4d-5d38-af6a-7fd1d9860bff
   name: Ensure access keys are rotated every 90 days or less
   profile_applicability: '* Level 1'
   description: |-

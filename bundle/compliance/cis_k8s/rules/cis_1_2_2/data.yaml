@@ -1,5 +1,5 @@
 metadata:
-  id: 6d342ec7-132b-5764-92df-89d4018f632d
+  id: eeb00e89-7125-58e8-9248-b9f429583277
   name: Ensure that the --token-auth-file parameter is not set
   profile_applicability: '* Level 1 - Master Node'
   description: Do not use token based authentication.

@@ -1,5 +1,5 @@
 metadata:
-  id: 547de8ba-1a23-5dca-88c2-19483b03afc6
+  id: 5411a1e9-a529-5512-b556-93178e544c9e
   name: Ensure CloudTrail log file validation is enabled
   profile_applicability: '* Level 2'
   description: |-

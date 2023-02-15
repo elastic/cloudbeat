@@ -1,5 +1,5 @@
 metadata:
-  id: 1ec2536b-6215-5b0b-b48e-0e272c4873e3
+  id: 91d52d43-da61-5ba2-a4d4-1018fee84559
   name: Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket
   profile_applicability: '* Level 1'
   description: |-

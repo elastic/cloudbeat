@@ -1,5 +1,5 @@
 metadata:
-  id: b7a0af34-6b0b-5d6c-ade0-40e78890db00
+  id: 3760ac17-de0b-537d-8e74-455d132d19d2
   name: Ensure IAM password policy prevents password reuse
   profile_applicability: '* Level 1'
   description: |-

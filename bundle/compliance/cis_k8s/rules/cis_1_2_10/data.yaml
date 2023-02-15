@@ -1,5 +1,5 @@
 metadata:
-  id: ca5b005f-9922-5cdc-a664-7b8f33e20f00
+  id: 29cefccd-77fe-5428-8bea-3fc1390d5d1e
   name: Ensure that the admission control plugin EventRateLimit is set
   profile_applicability: '* Level 1 - Master Node'
   description: Limit the rate at which the API server accepts requests.

@@ -1,5 +1,5 @@
 metadata:
-  id: ee7b40c4-abf3-53f1-b938-aa982a416ad4
+  id: 1b89acc6-978c-57c3-b319-680e5251d6f6
   name: Ensure that the admission control plugin SecurityContextDeny is set if PodSecurityPolicy
     is not used
   profile_applicability: '* Level 1 - Master Node'

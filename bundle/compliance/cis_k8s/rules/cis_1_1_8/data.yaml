@@ -1,5 +1,5 @@
 metadata:
-  id: d023f3a1-548d-5fb8-a664-31c1d9113d47
+  id: 129b07b7-4470-5224-8246-6ae975d6304b
   name: Ensure that the etcd pod specification file ownership is set to root:root
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `/etc/kubernetes/manifests/etcd.yaml` file ownership

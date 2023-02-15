@@ -1,5 +1,5 @@
 metadata:
-  id: 8e4b745a-d2db-5fe5-9a60-7c5029599d27
+  id: 1ea2df8f-a973-561b-a1f9-a0bea9cfba36
   name: Ensure that the --client-cert-auth argument is set to true
   profile_applicability: '* Level 1 - Master Node'
   description: Enable client authentication on etcd service.

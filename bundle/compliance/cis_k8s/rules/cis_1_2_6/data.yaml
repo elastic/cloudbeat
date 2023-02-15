@@ -1,5 +1,5 @@
 metadata:
-  id: 53095c31-20ab-5659-a8e6-3e1b505c6984
+  id: 5cdc703f-54ea-5de6-97c4-9fdb495725ef
   name: Ensure that the --kubelet-certificate-authority argument is set as appropriate
   profile_applicability: '* Level 1 - Master Node'
   description: Verify kubelet's certificate before establishing connection.

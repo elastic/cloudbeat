@@ -1,5 +1,5 @@
 metadata:
-  id: 97715f58-2692-5308-8a72-92e56a03259f
+  id: dfc4b9b5-43dc-5ec2-97b4-76a71621fa40
   name: Ensure a log metric filter and alarm exist for CloudTrail configuration changes
   profile_applicability: '* Level 1'
   description: |-

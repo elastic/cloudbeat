@@ -1,5 +1,5 @@
 metadata:
-  id: 78ba925d-bea7-5b17-b0db-9ee592faf10c
+  id: 1706a986-39d7-5900-93eb-f191f6a40892
   name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
   profile_applicability: '* Level 1'
   description: "Do not allow all requests.\nEnable explicit authorization."

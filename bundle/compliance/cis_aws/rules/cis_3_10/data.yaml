@@ -1,5 +1,5 @@
 metadata:
-  id: 4dedc85c-b967-59be-91d6-bfe08905d2b5
+  id: 3ed0b9d8-c5f2-55e2-92a5-2531868e79ca
   name: Ensure that Object-level logging for write events is enabled for S3 bucket
   profile_applicability: '* Level 2'
   description: |-

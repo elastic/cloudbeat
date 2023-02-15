@@ -1,5 +1,5 @@
 metadata:
-  id: 0a9250ba-0634-567c-bd6d-63dbab03d83b
+  id: 7eebf1d9-7a68-54fd-89b7-0f8b1441a179
   name: Ensure that the admission control plugin NodeRestriction is set
   profile_applicability: '* Level 1 - Master Node'
   description: Limit the `Node` and `Pod` objects that a kubelet could modify.

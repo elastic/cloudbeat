@@ -1,5 +1,5 @@
 metadata:
-  id: ab7e9325-5225-507b-bafc-d6650d216851
+  id: 47ee9344-791e-50e4-a266-ee2ebce093a7
   name: Ensure there is only one active access key available for any single IAM user
   profile_applicability: '* Level 1'
   description: |-

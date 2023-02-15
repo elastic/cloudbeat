@@ -1,5 +1,5 @@
 metadata:
-  id: 50ebf148-b0a8-5d12-a761-a4e79cb68b37
+  id: 9ef34b4f-b9e1-566b-8a2b-69f8933fa852
   name: Ensure that the --audit-log-path argument is set
   profile_applicability: '* Level 1 - Master Node'
   description: Enable auditing on the Kubernetes API Server and set the desired audit

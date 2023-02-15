@@ -1,5 +1,5 @@
 metadata:
-  id: ece0af5a-5d66-5032-b16e-2c6547079d5a
+  id: 1d6ff20d-4803-574b-80d2-e47031d9baa2
   name: Ensure S3 Bucket Policy is set to deny HTTP requests
   profile_applicability: '* Level 2'
   description: |-

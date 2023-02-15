@@ -1,5 +1,5 @@
 metadata:
-  id: 3781a71f-54e5-5987-9da2-d72a7d139af7
+  id: c006dbcb-dbaf-5bf5-886a-e05d7e5e6e1b
   name: Ensure that the --authorization-mode argument is not set to AlwaysAllow
   profile_applicability: '* Level 1 - Master Node'
   description: Do not always authorize all requests.

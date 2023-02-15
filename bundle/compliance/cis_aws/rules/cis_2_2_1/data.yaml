@@ -1,5 +1,5 @@
 metadata:
-  id: ea9c1ce3-40f7-5bee-896f-75ec82c84a1a
+  id: b78aca72-f2c1-5cc2-b481-3f056f91bf4b
   name: Ensure EBS Volume Encryption is Enabled in all Regions
   profile_applicability: '* Level 1'
   description: |-

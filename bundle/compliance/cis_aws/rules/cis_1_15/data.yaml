@@ -1,5 +1,5 @@
 metadata:
-  id: d44d0d65-8a4d-5739-8d9a-c61ad8dbc3d5
+  id: a72cb3ec-36ae-56b0-815f-9f986f0d499f
   name: Ensure IAM Users Receive Permissions Only Through Groups
   profile_applicability: '* Level 1'
   description: |-

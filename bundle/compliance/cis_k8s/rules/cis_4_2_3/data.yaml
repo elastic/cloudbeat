@@ -1,5 +1,5 @@
 metadata:
-  id: 5097a7f7-be0e-57f1-81d7-665334381426
+  id: 551e7bcf-b231-500d-a193-d0a98163a680
   name: Ensure that the --client-ca-file argument is set as appropriate
   profile_applicability: '* Level 1 - Worker Node'
   description: Enable Kubelet authentication using certificates.

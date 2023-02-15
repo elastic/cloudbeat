@@ -1,5 +1,5 @@
 metadata:
-  id: bce28b5e-2f2c-5c57-960e-5385341b2f2b
+  id: d1d73385-2909-598a-acf7-bf1d8130f314
   name: Ensure that the --protect-kernel-defaults argument is set to true
   profile_applicability: '* Level 1'
   description: Protect tuned kernel parameters from overriding kubelet default kernel

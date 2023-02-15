@@ -1,5 +1,5 @@
 metadata:
-  id: fb88f47c-1309-5fa3-af23-499c217cb70a
+  id: 6de73498-23d7-537f-83f3-08c660217e7e
   name: Ensure that the --service-account-private-key-file  argument is set as appropriate
   profile_applicability: '* Level 1 - Master Node'
   description: Explicitly set a service account private key file for service accounts

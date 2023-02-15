@@ -1,5 +1,5 @@
 metadata:
-  id: 2b5d962b-52a6-558f-beed-6da38c4af362
+  id: 8d3f2919-da46-5502-b48b-9ba41d03281b
   name: Ensure that the RotateKubeletServerCertificate argument is set to true
   profile_applicability: '* Level 2 - Master Node'
   description: Enable kubelet server certificate rotation on controller-manager.

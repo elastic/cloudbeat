@@ -1,5 +1,5 @@
 metadata:
-  id: 5097a7f7-be0e-57f1-81d7-665334381426
+  id: 328a73c3-011d-5827-ae86-4e323739e4e1
   name: Ensure that the --client-ca-file argument is set as appropriate
   profile_applicability: '* Level 1 - Master Node'
   description: Setup TLS connection on the API server.

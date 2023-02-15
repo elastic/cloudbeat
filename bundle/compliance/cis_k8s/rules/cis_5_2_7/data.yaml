@@ -1,5 +1,5 @@
 metadata:
-  id: 847fd97a-ec24-556d-b7d6-ceaa3dd27106
+  id: aa4374f0-adab-580c-ac9d-907fd2783219
   name: Minimize the admission of root containers
   profile_applicability: '* Level 2 - Master Node'
   description: Do not generally permit containers to be run as the root user.

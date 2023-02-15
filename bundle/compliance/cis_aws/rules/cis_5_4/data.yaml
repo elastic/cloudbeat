@@ -1,5 +1,5 @@
 metadata:
-  id: 131caf34-f2a8-52a2-ae39-95c47e407186
+  id: bbc219e5-75d8-55d6-bccb-7d1acef796bf
   name: Ensure the default security group of every VPC restricts all traffic
   profile_applicability: '* Level 2'
   description: |-

@@ -1,5 +1,5 @@
 metadata:
-  id: 98547a10-464e-5b9f-9a80-6b254cb621a3
+  id: e92ddce9-3cba-5e3d-adac-53df0350eca0
   name: Ensure that the --service-account-lookup argument is set to true
   profile_applicability: '* Level 1 - Master Node'
   description: Validate service account before validating token.

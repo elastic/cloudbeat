@@ -1,5 +1,5 @@
 metadata:
-  id: 5f80fd5e-772e-5562-a310-be9b33d1f9d3
+  id: 374309b1-b87a-58bd-b795-1067d2e8ee9f
   name: Ensure that the --streaming-connection-idle-timeout argument is not set to
     0
   profile_applicability: '* Level 1 - Worker Node'

@@ -1,5 +1,5 @@
 metadata:
-  id: 406fd115-6c53-5bed-b8d6-b5def651b284
+  id: ee5ea7e5-dcb4-5abc-ab8c-58b3223669ce
   name: Ensure that the --kubeconfig kubelet.conf file permissions are set to 644
     or more restrictive
   profile_applicability: '* Level 1 - Worker Node'

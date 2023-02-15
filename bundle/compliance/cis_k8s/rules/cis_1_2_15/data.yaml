@@ -1,5 +1,5 @@
 metadata:
-  id: c2cd82d0-2ded-593d-8231-9c643c40ed73
+  id: c53dab24-a23f-53c6-8d36-f64cc03ab277
   name: Ensure that the admission control plugin NamespaceLifecycle is set
   profile_applicability: '* Level 1 - Master Node'
   description: Reject creating objects in a namespace that is undergoing termination.

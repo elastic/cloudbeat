@@ -1,5 +1,5 @@
 metadata:
-  id: 7dd9fde2-7160-5313-be4c-a26f9d705808
+  id: ab555e6d-b77e-5c85-b6a8-333f7e567b6b
   name: Ensure that the kubelet configuration file ownership is set to root:root
   profile_applicability: '* Level 1'
   description: |-

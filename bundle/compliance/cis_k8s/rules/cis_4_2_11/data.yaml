@@ -1,5 +1,5 @@
 metadata:
-  id: bc4855e5-8921-5622-9784-5723c6d56091
+  id: 05f0c324-5c11-576f-b7a2-35ebf66f084b
   name: Ensure that the --rotate-certificates argument is not set to false
   profile_applicability: '* Level 1 - Worker Node'
   description: Enable kubelet client certificate rotation.

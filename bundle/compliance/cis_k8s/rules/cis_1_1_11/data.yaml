@@ -1,5 +1,5 @@
 metadata:
-  id: a1bfd354-721a-5038-a7f3-0a38e9232304
+  id: 4f7354df-2e3b-5acf-9ba7-d6b5cfd12e35
   name: Ensure that the etcd data directory permissions are set to 700 or more restrictive
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the etcd data directory has permissions of `700` or more

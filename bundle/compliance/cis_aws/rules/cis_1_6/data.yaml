@@ -1,5 +1,5 @@
 metadata:
-  id: c3d7eec5-1b67-53ac-aa33-dacb214e4a52
+  id: 741aa940-22a7-5015-95d5-f94b331d774e
   name: Ensure hardware MFA is enabled for the 'root' user account
   profile_applicability: '* Level 2'
   description: |-

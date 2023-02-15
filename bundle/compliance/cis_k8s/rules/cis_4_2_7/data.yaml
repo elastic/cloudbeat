@@ -1,5 +1,5 @@
 metadata:
-  id: d649c9bf-85a8-5247-9ac0-53635680af10
+  id: 5382994d-59e0-54d9-a32b-dd860c467813
   name: Ensure that the --make-iptables-util-chains argument is set to true
   profile_applicability: '* Level 1 - Worker Node'
   description: Allow Kubelet to manage iptables.

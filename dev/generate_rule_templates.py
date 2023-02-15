@@ -41,6 +41,7 @@ def generate_rule_templates(benchmark: str, selected_rules: list, rule_template_
             rules_templates.append(rule_template)
 
     # Write templates into file
+    print(f"Processed {len(rules_templates)} rules for {benchmark} benchmark")
     save_rule_templates(rules_templates, rule_template_dir)
 
 
@@ -64,7 +65,7 @@ def migrate_csp_rule_metadata(doc: dict) -> dict:
     Migrate rule metadata to integration format
     """
     attributes = doc["attributes"]
-    print(attributes.get("rule_number"))
+    print(f"Processing {attributes['benchmark']['rule_number']}")
     metadata = {
         "impact": attributes.pop("impact", None),
         "default_value": attributes.pop("default_value", None),

@@ -1,5 +1,5 @@
 metadata:
-  id: c29d500e-8baf-5dad-b985-935be71d042f
+  id: 95e368ec-eebe-5aa1-bc86-9fa532a82d3a
   name: Verify that the --read-only-port argument is set to 0
   profile_applicability: '* Level 1 - Worker Node'
   description: Disable the read-only port.

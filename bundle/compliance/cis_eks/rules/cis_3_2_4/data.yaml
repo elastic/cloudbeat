@@ -1,5 +1,5 @@
 metadata:
-  id: 4fc4a2f3-bd99-517f-abca-2a35540432d0
+  id: db28165f-6f7c-5450-b9f3-61c7b897d833
   name: Ensure that the --read-only-port is secured
   profile_applicability: '* Level 1'
   description: Disable the read-only port.

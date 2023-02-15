@@ -1,5 +1,5 @@
 metadata:
-  id: cef6324e-75cf-522f-b527-92c29bdc8986
+  id: 05c4bd94-162d-53e8-b112-e617ce74f8f6
   name: Minimize the admission of containers with the NET_RAW capability
   profile_applicability: '* Level 1 - Master Node'
   description: Do not generally permit containers with the potentially dangerous NET_RAW

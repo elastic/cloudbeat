@@ -1,5 +1,5 @@
 metadata:
-  id: b10e1f96-660c-501e-81e4-9ceac82a9907
+  id: 555cf8d5-f963-5574-a856-e06614cf9341
   name: Ensure that the --authorization-mode argument includes RBAC
   profile_applicability: '* Level 1 - Master Node'
   description: Turn on Role Based Access Control.

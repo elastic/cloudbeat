@@ -1,5 +1,5 @@
 metadata:
-  id: c44797fd-3b88-51d4-b4e7-164695073447
+  id: 934583bd-306a-51d9-a730-020bd45f7f01
   name: Minimize the admission of containers wishing to share the host IPC namespace
   profile_applicability: '* Level 1'
   description: Do not generally permit containers to be run with the `hostIPC` flag

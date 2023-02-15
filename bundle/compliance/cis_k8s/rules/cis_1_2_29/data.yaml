@@ -1,5 +1,5 @@
 metadata:
-  id: 174c9892-d459-584c-9407-b69e848bdd2c
+  id: 08d850ca-c1be-57e2-ac39-5e38f8750cf6
   name: Ensure that the --etcd-cafile argument is set as appropriate
   profile_applicability: '* Level 1 - Master Node'
   description: etcd should be configured to make use of TLS encryption for client

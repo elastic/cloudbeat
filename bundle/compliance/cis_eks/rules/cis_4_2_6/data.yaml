@@ -1,5 +1,5 @@
 metadata:
-  id: 77bc9d3b-7f54-5149-8430-9c0222184f32
+  id: 668cee84-c115-5166-a422-05c4d3e88c2c
   name: Minimize the admission of root containers
   profile_applicability: '* Level 2'
   description: Do not generally permit containers to be run as the root user.

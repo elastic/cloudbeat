@@ -1,5 +1,5 @@
 metadata:
-  id: 091b1308-4f72-59ef-9103-4b548386ae27
+  id: 89a294ae-d736-51ca-99d4-0ea4782caed0
   name: Ensure that the --bind-address argument is set to 127.0.0.1
   profile_applicability: '* Level 1 - Master Node'
   description: Do not bind the Controller Manager service to non-loopback insecure

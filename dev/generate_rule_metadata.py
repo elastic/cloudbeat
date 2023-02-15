@@ -175,7 +175,7 @@ def generate_metadata(benchmark_id: str, raw_data: pd.DataFrame, sections: dict)
 
         benchmark_metadata = generate_rule_benchmark_metadata(benchmark_id, rule["Rule Number"])
         r = Rule(
-            id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{benchmark_metadata.name} {rule['Title']}")),
+            id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{benchmark_metadata.name} {rule['Title']} {rule['Rule Number']}")),
             name=rule["Title"],
             profile_applicability=f"* {rule['profile_applicability']}",
             description=common.fix_code_blocks(rule["description"]),

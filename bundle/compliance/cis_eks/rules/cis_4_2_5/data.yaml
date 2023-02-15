@@ -1,5 +1,5 @@
 metadata:
-  id: d6fa5f41-3671-563a-ba35-a7494223273a
+  id: 882ffc80-73e9-56aa-ae72-73b39af6702f
   name: Minimize the admission of containers with allowPrivilegeEscalation
   profile_applicability: '* Level 1'
   description: Do not generally permit containers to be run with the `allowPrivilegeEscalation`

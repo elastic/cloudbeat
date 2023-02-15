@@ -1,5 +1,5 @@
 metadata:
-  id: 84c66732-9c11-5a66-9bf9-e65f06e08171
+  id: 6b3b122f-ac19-5a57-b6d0-131daf3fbf6d
   name: Ensure that the scheduler.conf file permissions are set to 644 or more restrictive
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `scheduler.conf` file has permissions of `644` or more

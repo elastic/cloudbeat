@@ -1,5 +1,5 @@
 metadata:
-  id: 6fa22113-1614-5998-94c8-7fba2c6d151f
+  id: 506b205e-9b6a-5d6e-b136-3e5d7101b1bc
   name: Ensure that the --peer-auto-tls argument is not set to true
   profile_applicability: '* Level 1 - Master Node'
   description: Do not use automatically generated self-signed certificates for TLS

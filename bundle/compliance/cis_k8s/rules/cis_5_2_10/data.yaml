@@ -1,5 +1,5 @@
 metadata:
-  id: b193abe9-297a-5650-8740-939e9fd3bd8f
+  id: b96194c6-8eb7-5835-852d-47b84db83697
   name: Minimize the admission of containers with capabilities assigned
   profile_applicability: '* Level 2 - Master Node'
   description: Do not generally permit containers with capabilities

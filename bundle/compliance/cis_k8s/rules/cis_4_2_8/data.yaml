@@ -1,5 +1,5 @@
 metadata:
-  id: 6f2e9eb5-d55f-5eaa-9f8d-472f246d1343
+  id: f6d0110b-51c5-54db-a531-29b0cb58d0f2
   name: Ensure that the --hostname-override argument is not set
   profile_applicability: '* Level 1 - Worker Node'
   description: Do not override node hostnames.

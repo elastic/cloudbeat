@@ -1,5 +1,5 @@
 metadata:
-  id: 848c3124-9dd0-5590-9338-82de21c1df9f
+  id: a6a43181-3a24-5ead-b845-1f1b56c95ad5
   name: Ensure that the admission control plugin AlwaysAdmit is not set
   profile_applicability: '* Level 1 - Master Node'
   description: Do not allow all requests.

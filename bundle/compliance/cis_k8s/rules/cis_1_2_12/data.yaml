@@ -1,5 +1,5 @@
 metadata:
-  id: 73fa944c-a62c-5371-a011-0e17bf85f79f
+  id: 9718b528-8327-5eef-ad21-c8bed5532429
   name: Ensure that the admission control plugin AlwaysPullImages is set
   profile_applicability: '* Level 1 - Master Node'
   description: Always pull images.

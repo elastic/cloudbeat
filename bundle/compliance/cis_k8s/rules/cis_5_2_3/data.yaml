@@ -1,5 +1,5 @@
 metadata:
-  id: 9e2858f0-3e6b-571e-b675-3de189ef13e9
+  id: 38535c6f-a478-5cbb-82de-9417a3968bd6
   name: Minimize the admission of containers wishing to share the host process ID
     namespace
   profile_applicability: '* Level 1 - Master Node'

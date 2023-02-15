@@ -1,5 +1,5 @@
 metadata:
-  id: 56f66a4d-0bec-5ec5-bc6d-2d0ae33a0635
+  id: c444d9e3-d3de-5598-90e7-95a922b51664
   name: Ensure that the API server pod specification file permissions are set to 644
     or more restrictive
   profile_applicability: '* Level 1 - Master Node'

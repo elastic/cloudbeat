@@ -1,5 +1,5 @@
 metadata:
-  id: 340b6012-9394-569d-ac5a-74745dae70cb
+  id: 06635c87-1e11-59c3-9eba-b4d8a08ba899
   name: Ensure that the --anonymous-auth argument is set to false
   profile_applicability: '* Level 1'
   description: Disable anonymous requests to the Kubelet server.

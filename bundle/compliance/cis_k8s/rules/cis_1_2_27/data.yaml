@@ -1,5 +1,5 @@
 metadata:
-  id: 719ccb48-0106-5c2a-a563-b31620da736a
+  id: ef3852ff-b0f9-51d5-af6d-b1b1fed72005
   name: Ensure that the --tls-cert-file and --tls-private-key-file arguments are set
     as appropriate
   profile_applicability: '* Level 1 - Master Node'

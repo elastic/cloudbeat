@@ -1,5 +1,5 @@
 metadata:
-  id: 9629f363-8475-5939-8432-ae72e223a892
+  id: c455dba0-a768-5c76-8509-3484ec33102f
   name: Ensure that the --audit-log-maxsize argument is set to 100 or as appropriate
   profile_applicability: '* Level 1 - Master Node'
   description: Rotate log files on reaching 100 MB or as appropriate.

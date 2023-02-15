@@ -1,5 +1,5 @@
 metadata:
-  id: bec347e5-b056-5104-9199-eca9e264983a
+  id: 3ef4430e-2829-576a-a813-edc766625ea9
   name: Ensure that the etcd pod specification file permissions are set to 644 or
     more restrictive
   profile_applicability: '* Level 1 - Master Node'

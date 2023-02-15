@@ -1,5 +1,5 @@
 metadata:
-  id: c4978061-8644-5d22-a5d5-16f63af61c09
+  id: 151312c8-7e97-5420-ac05-5a916b3c1feb
   name: Ensure that the controller manager pod specification file ownership is set
     to root:root
   profile_applicability: '* Level 1 - Master Node'

@@ -1,5 +1,5 @@
 metadata:
-  id: ec063233-fc31-5f50-8ecd-ada8cba33192
+  id: b2909440-5ad0-522e-8db0-9439d573b7d5
   name: Ensure that the --event-qps argument is set to 0 or a level which ensures
     appropriate event capture
   profile_applicability: '* Level 2 - Worker Node'

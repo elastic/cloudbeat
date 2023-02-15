@@ -1,5 +1,5 @@
 metadata:
-  id: ba803c66-9d80-5c30-b951-35b54a3bde31
+  id: ba545cc3-f447-5d14-8841-d3d3c05024e8
   name: Verify that the RotateKubeletServerCertificate argument is set to true
   profile_applicability: '* Level 1 - Worker Node'
   description: Enable kubelet server certificate rotation.

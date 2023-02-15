@@ -1,5 +1,5 @@
 metadata:
-  id: ce0e1284-a518-5fcc-99b6-9d9d1b532679
+  id: eda32e5d-3684-5205-b3a4-bbddacddc60f
   name: Ensure CloudTrail logs are encrypted at rest using KMS CMKs
   profile_applicability: '* Level 2'
   description: |-

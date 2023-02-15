@@ -1,5 +1,5 @@
 metadata:
-  id: 719ccb48-0106-5c2a-a563-b31620da736a
+  id: f78dad83-1fe2-5aba-8507-64ea9efb53d6
   name: Ensure that the --tls-cert-file and --tls-private-key-file arguments are set
     as appropriate
   profile_applicability: '* Level 1 - Worker Node'

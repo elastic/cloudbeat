@@ -1,5 +1,5 @@
 metadata:
-  id: 9870ae7a-8c40-5f47-a482-355a720b01db
+  id: 551d3a0b-36f6-51c6-ba8b-0a83926b1864
   name: Minimize the admission of containers with added capabilities
   profile_applicability: '* Level 1'
   description: Do not generally permit containers with capabilities assigned beyond

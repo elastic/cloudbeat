@@ -1,5 +1,5 @@
 metadata:
-  id: 4c198b47-5e4f-559d-be67-cbd5b8c3ebcd
+  id: 1b112bf6-61ad-5b08-888b-7b6c86b3526c
   name: Ensure clusters are created with Private Endpoint Enabled and Public Access
     Disabled
   profile_applicability: '* Level 2'

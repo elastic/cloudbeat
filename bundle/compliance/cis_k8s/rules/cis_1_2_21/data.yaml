@@ -1,5 +1,5 @@
 metadata:
-  id: 5bf4df2b-2758-5dfc-b670-74faf135e437
+  id: 5dd8b281-9a80-50a7-a03d-fe462a5a2ba0
   name: Ensure that the --audit-log-maxbackup argument is set to 10 or as appropriate
   profile_applicability: '* Level 1 - Master Node'
   description: Retain 10 or an appropriate number of old log files.

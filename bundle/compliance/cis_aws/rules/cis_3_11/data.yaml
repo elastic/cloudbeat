@@ -1,5 +1,5 @@
 metadata:
-  id: f23d42c5-ca52-5208-83b0-adbf3f942a49
+  id: 15c6f217-2ae2-5bb4-8ebe-f40adf02910d
   name: Ensure that Object-level logging for read events is enabled for S3 bucket
   profile_applicability: '* Level 2'
   description: |-

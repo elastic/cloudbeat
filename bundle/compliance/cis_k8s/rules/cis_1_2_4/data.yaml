@@ -1,5 +1,5 @@
 metadata:
-  id: 697cc9f6-28dd-51a5-934c-b6cc3922a6db
+  id: 88634421-e47c-59fb-9466-a86023f20dd5
   name: Ensure that the --kubelet-https argument is set to true
   profile_applicability: '* Level 1 - Master Node'
   description: Use https for kubelet connections.

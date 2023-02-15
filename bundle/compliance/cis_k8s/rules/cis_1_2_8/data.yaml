@@ -1,5 +1,5 @@
 metadata:
-  id: bc294f39-513a-528c-8207-72ddd221054d
+  id: c43a57db-5248-5855-a613-2a05d0a42768
   name: Ensure that the --authorization-mode argument includes Node
   profile_applicability: '* Level 1 - Master Node'
   description: Restrict kubelet nodes to reading only objects associated with them.

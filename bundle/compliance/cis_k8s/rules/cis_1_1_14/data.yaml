@@ -1,5 +1,5 @@
 metadata:
-  id: e3b1c434-02ca-5c23-83c7-767e692545f9
+  id: e24bf247-bfdc-5bbf-9813-165b905b52e6
   name: Ensure that the admin.conf file ownership is set to root:root
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the `admin.conf` file ownership is set to `root:root`.

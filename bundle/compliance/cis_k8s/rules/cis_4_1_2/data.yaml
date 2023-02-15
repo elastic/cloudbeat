@@ -1,5 +1,5 @@
 metadata:
-  id: 5316a432-8098-500b-ab01-f13d37e2d66e
+  id: 919ef7a7-126c-517e-aa35-fb251b1ad587
   name: Ensure that the kubelet service file ownership is set to root:root
   profile_applicability: '* Level 1 - Worker Node'
   description: Ensure that the `kubelet` service file ownership is set to `root:root`.

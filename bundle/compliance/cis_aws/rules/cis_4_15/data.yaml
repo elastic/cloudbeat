@@ -1,5 +1,5 @@
 metadata:
-  id: 61ef788d-74f2-5273-b19a-1318b9543fc2
+  id: a2447c19-a799-5270-9e03-ac322c2396d5
   name: Ensure a log metric filter and alarm exists for AWS Organizations changes
   profile_applicability: '* Level 1'
   description: |-

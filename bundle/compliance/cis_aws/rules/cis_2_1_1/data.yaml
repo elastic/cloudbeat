@@ -1,5 +1,5 @@
 metadata:
-  id: 8a6fd4b0-1903-5afb-b3f8-0495a4caf49a
+  id: 76be4dd2-a77a-5981-a893-db6770b35911
   name: Ensure all S3 buckets employ encryption-at-rest
   profile_applicability: '* Level 2'
   description: Amazon S3 provides a variety of no, or low, cost encryption options

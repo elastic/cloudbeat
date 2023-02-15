@@ -1,5 +1,5 @@
 metadata:
-  id: f27cc67c-f10f-58bf-aff1-821ebf399b35
+  id: 49c71814-2dbe-5204-ad07-879a80503fbc
   name: Ensure the S3 bucket used to store CloudTrail logs is not publicly accessible
   profile_applicability: '* Level 1'
   description: |-

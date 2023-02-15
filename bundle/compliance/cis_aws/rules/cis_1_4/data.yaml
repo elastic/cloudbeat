@@ -1,5 +1,5 @@
 metadata:
-  id: 44f6fd7c-0c0f-55f7-84b3-7fa73b31b7e5
+  id: 7a2ab526-3440-5a0f-804c-c5eea8158053
   name: Ensure no 'root' user account access key exists
   profile_applicability: '* Level 1'
   description: |-

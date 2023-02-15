@@ -1,5 +1,5 @@
 metadata:
-  id: 73926a71-4298-505a-a3d4-6131ab97a9f4
+  id: b5493b70-e25f-54e6-9931-36138c33f775
   name: Ensure that the controller-manager.conf file permissions are set to 644 or
     more restrictive
   profile_applicability: '* Level 1 - Master Node'

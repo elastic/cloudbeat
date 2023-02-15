@@ -1,5 +1,5 @@
 metadata:
-  id: b7a17fac-ac87-5dbe-8b1e-f2565cd2427d
+  id: 04e01d1a-d7d4-5020-a398-8aadd3fe32ae
   name: |-
     Ensure that the controller manager pod specification file permissions are set to 644 or more restrictive
   profile_applicability: '* Level 1 - Master Node'

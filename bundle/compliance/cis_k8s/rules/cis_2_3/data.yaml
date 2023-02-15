@@ -1,5 +1,5 @@
 metadata:
-  id: 0c11cba6-a115-5485-bf50-f7f57a7deffa
+  id: f507bb23-1a9d-55dd-8edc-19a33e64d646
   name: Ensure that the --auto-tls argument is not set to true
   profile_applicability: '* Level 1 - Master Node'
   description: Do not use self-signed certificates for TLS.

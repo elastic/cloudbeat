@@ -1,5 +1,5 @@
 metadata:
-  id: 03b75f04-40a0-5b43-becb-8227b24eea5d
+  id: 28f96eda-c94e-597c-aef0-0bceee085540
   name: Minimize the admission of containers wishing to share the host network namespace
   profile_applicability: '* Level 1 - Master Node'
   description: Do not generally permit containers to be run with the `hostNetwork`

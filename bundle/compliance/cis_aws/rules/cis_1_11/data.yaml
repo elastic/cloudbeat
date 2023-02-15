@@ -1,5 +1,5 @@
 metadata:
-  id: 68d542ca-5524-5f53-b168-4622b51f7568
+  id: 394963fa-63fd-5e81-82eb-ea1b8dfacd53
   name: Do not setup access keys during initial user setup for all IAM users that
     have a console password
   profile_applicability: '* Level 1'

@@ -1,5 +1,5 @@
 metadata:
-  id: 06f347db-c8b9-52bb-8e44-8f4af01d2a4f
+  id: b6189255-e8a5-5a01-87a6-a1b408a0d92a
   name: Ensure that Service Account Tokens are only mounted where necessary
   profile_applicability: '* Level 1 - Master Node'
   description: |-

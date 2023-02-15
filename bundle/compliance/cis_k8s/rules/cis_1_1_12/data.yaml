@@ -1,5 +1,5 @@
 metadata:
-  id: 29b0f497-6bbf-5991-8173-279b97004fd6
+  id: f512a987-4f86-5fb3-b202-6b5de22a739f
   name: Ensure that the etcd data directory ownership is set to etcd:etcd
   profile_applicability: '* Level 1 - Master Node'
   description: Ensure that the etcd data directory ownership is set to `etcd:etcd`.
