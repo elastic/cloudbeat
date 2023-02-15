@@ -24,7 +24,7 @@ env:
   WORKING_DIR: deploy/weekly-environment
   SCRIPTS_DIR: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
   AGENT_IMAGE: cisofir/elastic-agent:8.0.0-SNAPSHOT
-  TF_VAR_ec_api_key: ${{ secrets.WEEKLY_ENVIRONMENT_KIBANA_API_KEY }}
+  TF_VAR_ec_api_key: ${{ secrets.WEEKLY_ENVIRONMENT_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
   TF_VAR: 8.6.1
@@ -38,7 +38,7 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
