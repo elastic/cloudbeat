@@ -1,6 +1,6 @@
 ## Deployment configuration
 
-  variable "ec_api_key" {
+variable "ec_api_key" {
   description = "Elastic cloud API key"
   type        = string
 }
