@@ -23,7 +23,7 @@ on:
 env:
   WORKING_DIR: deploy/weekly-environment
   SCRIPTS_DIR: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
-  TF_VAR_ec_api_key: ${{ secrets.WEEKLY_ENVIRONMENT_KIBANA_API_KEY }}
+  TF_VAR_ec_api_key: ${{ secrets.WEEKLY_ENVIRONMENT_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
   TF_VAR: 8.6.1
