@@ -88,7 +88,7 @@ jobs:
         id: deploy_agent_on_ec2
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
-          echo -e "${{ secrets.WEEKLY_ENVIRONMENT_EC2_SECRET }}" > weekly-key.pem
+          echo -e "${{ secrets.WEEKLY_ENVIRONMENT_EC2_PRIVATE_KEY }}" > weekly-key.pem
           chmod 600 weekly-key.pem
           # Copy the manifest file to the EC2 instance
           scp -o StrictHostKeyChecking=no -v -i weekly-key.pem manifest.yaml "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}:~/."
