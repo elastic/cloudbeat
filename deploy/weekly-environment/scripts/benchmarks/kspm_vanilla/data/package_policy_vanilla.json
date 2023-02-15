@@ -15,8 +15,7 @@
                     "data_stream": {
                         "type": "logs",
                         "dataset": "cloud_security_posture.findings"
-                    },
-                    "release": "ga"
+                    }
                 }
             ]
         },
@@ -31,7 +30,6 @@
                         "type": "logs",
                         "dataset": "cloud_security_posture.findings"
                     },
-                    "release": "ga",
                     "vars": {
                         "access_key_id": {
                             "type": "text"
@@ -50,7 +48,75 @@
                         },
                         "role_arn": {
                             "type": "text"
+                        },
+                        "aws.credentials.type": {
+                            "type": "text"
                         }
+                    }
+                }
+            ]
+        },
+        {
+            "type": "cloudbeat/cis_aws",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.findings"
+                    },
+                    "vars": {
+                        "access_key_id": {
+                            "type": "text"
+                        },
+                        "secret_access_key": {
+                            "type": "text"
+                        },
+                        "session_token": {
+                            "type": "text"
+                        },
+                        "shared_credential_file": {
+                            "type": "text"
+                        },
+                        "credential_profile_name": {
+                            "type": "text"
+                        },
+                        "role_arn": {
+                            "type": "text"
+                        },
+                        "aws.credentials.type": {
+                            "type": "text"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "type": "cloudbeat/cis_gcp",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.findings"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "cloudbeat/cis_azure",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.findings"
                     }
                 }
             ]
@@ -58,7 +124,17 @@
     ],
     "package": {
         "name": "cloud_security_posture",
-        "title": "Kubernetes Security Posture Management (KSPM)",
-        "version": "1.1.1"
+        "title": "Security Posture Management (CSPM/KSPM)",
+        "version": "1.2.10"
+    },
+    "vars": {
+        "posture": {
+            "value": "kspm",
+            "type": "text"
+        },
+        "deployment": {
+            "value": "cloudbeat/cis_k8s",
+            "type": "text"
+        }
     }
 }
