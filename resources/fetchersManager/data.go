@@ -69,10 +69,11 @@ func (d *Data) Run(ctx context.Context) Stop {
 
 func (d *Data) fetchAndSleep(ctx context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
-	// Happens once in a lifetime of cloudbeat and then enters the loop
-	go d.fetchIteration(ctx)
+	// set immidiate exec for first time run
+	timer := time.NewTimer(0)
 	defer func() {
 		cancel()
+		timer.Stop()
 	}()
 	run := true
 	for {
@@ -86,10 +87,14 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 		case <-ctx.Done():
 			d.log.Info("Fetchers manager canceled")
 			return
-		case <-time.After(d.interval):
+		case <-timer.C:
 			if !run {
 				return
 			}
+			// upadte the interval
+			timer.Reset(d.interval)
+			// this is blocking so the stop will not be called until all the fetchers are finished
+			// in case there is a blocking fetcher it will halt (til the d.timeout)
 			go d.fetchIteration(ctx)
 		}
 	}
