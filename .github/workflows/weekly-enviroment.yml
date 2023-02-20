@@ -26,11 +26,11 @@ env:
   TF_VAR_ec_api_key: ${{ secrets.WEEKLY_ENVIRONMENT_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
-  TF_VAR: 8.6.1
+  TF_VAR_stack_version: 8.6.1
 
 jobs:
   terraform:
-    name: Deploy KSPM/CSPM cloud environment
+    name: Deploy KSPM cloud environment
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,30 +45,20 @@ jobs:
           terraform_version: 1.3.5
           terraform_wrapper: false
 
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: true
-
       - name: Terraform Init
-        id: init
         run: terraform init -no-color
 
       - name: Terraform Validate
-        id: validate
         run: terraform validate -no-color
 
       - name: Deploy Elastic Cloud
-        id: apply
         run: terraform apply --auto-approve
 
       - name: Set terraform output as env variable
-        id: kibana_url
         run: |
           echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
 
       - name: Set sensitive terraform output as env variable
-        id: set_sensitive_output
         run: |
           export ELASTICSEARCH_USERNAME=$(terraform output elasticsearch_username)
           echo "::add-mask::$ELASTICSEARCH_USERNAME"
@@ -79,13 +69,11 @@ jobs:
           echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
 
       - name: Install KSPM vanilla integration
-        id: install_vanilla_integration
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
           ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
 
       - name: Deploy agent on EC2
-        id: deploy_agent_on_ec2
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
           echo -e "${{ secrets.WEEKLY_ENVIRONMENT_EC2_PRIVATE_KEY }}" > weekly-key.pem
@@ -97,7 +85,6 @@ jobs:
 
       # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
-        id: slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
