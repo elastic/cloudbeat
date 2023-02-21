@@ -134,66 +134,6 @@ create_new_vanilla_integration_manifest_file() {
   MANIFEST_FILE=$(echo "$manifest_creation_response" | jq -r '.item')
   echo "$MANIFEST_FILE" > manifest.yaml
 }
-#######################################
-# Creates new alerts for the vanilla integration
-# Arguments:
-#   $1: Kibana URL
-#   $2: Kibana auth
-#   $3: Agent policy
-#   $4: Integration policy
-# Returns:
-#   None
-#######################################
-create_alerts_for_the_vanilla_integration() {
-  local kibana_url=$1
-  local kibana_auth=$2
-  local alerts_file=$3
-  local slack_webhook_url=$4
-  local slack_configuration_file=$5
-
-  # Imports the slack connector and the rule alerts from a saved object file
-  local import_alerts_response
-  import_alerts_response=$(curl -X POST \
-    "${kibana_url}/api/saved_objects/_import?overwrite=true" \
-    -u "${kibana_auth}" \
-    -H 'Cache-Control: no-cache' \
-    -H 'Connection: keep-alive' \
-    -H "kbn-xsrf: true" \
-    --form file="@${alerts_file}")
-  check_status_code_of_curl "${import_alerts_response}"
-
-  # Get the connector id
-  local connector_response
-  connector_response=$(curl -X GET \
-      "${kibana_url}/api/actions/connectors" \
-      -u "${kibana_auth}" \
-      -H 'Cache-Control: no-cache' \
-      -H 'Connection: keep-alive' \
-      -H "kbn-xsrf: true" \
-      -H 'Content-Type: application/json')
-  check_status_code_of_curl "${connector_response}"
-
-  # Extracts the connector id of the slack connector
-  local connector_id
-  connector_id="$(echo "${connector_response}" |  jq '.[]  | select(.name == "#cloud-security-posture")' | jq -r '.id')"
-  echo "Connector id: ${connector_id}"
-
-  # Updates the slack connector with the webhook url
-  local connector_configuration
-  connector_configuration="$(jq --arg slack_webhook_url "${slack_webhook_url}" '.secrets.webhookUrl |= $slack_webhook_url' "${slack_configuration_file}")"
-  echo "New connector configuration: ${connector_configuration}"
-  local update_connector_response
-  update_connector_response=$(curl -X PUT \
-    "${kibana_url}/api/actions/connector/${connector_id}" \
-    -u "${kibana_auth}" \
-    -H 'Cache-Control: no-cache' \
-    -H 'Connection: keep-alive' \
-    -H "kbn-xsrf: true" \
-    -H 'Content-Type: application/json' \
-    -d "${connector_configuration}")
-
-  check_status_code_of_curl "${update_connector_response}"
-}
 
 #######################################
 # Checks the status code of the curl response and exits if the status code is not 200

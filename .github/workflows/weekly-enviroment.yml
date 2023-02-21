@@ -23,6 +23,7 @@ on:
 env:
   WORKING_DIR: deploy/weekly-environment
   SCRIPTS_DIR: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
+  ALERTS_DIR: deploy/weekly-environment/scripts/alerts
   TF_VAR_ec_api_key: ${{ secrets.WEEKLY_ENVIRONMENT_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
@@ -82,7 +83,7 @@ jobs:
         id: install_vanilla_integration
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
-          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }} ${{ secrets.SLACK_WEBHOOK_URL }}
+          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
 
       - name: Deploy agent on EC2
         id: deploy_agent_on_ec2
@@ -94,6 +95,12 @@ jobs:
           scp -o StrictHostKeyChecking=no -v -i weekly-key.pem manifest.yaml "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}:~/."
           # Apply the manifest file
           ssh -o StrictHostKeyChecking=no -v -i weekly-key.pem "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}" "kubectl apply -f manifest.yaml"
+
+      - name: Install KSPM vanilla alerts
+        id: install_vanilla_alerts
+        working-directory: ${{ env.ALERTS_DIR }}
+        run: |
+          ./create_alerts.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }} ${{ secrets.SLACK_WEBHOOK_URL }}
 
       # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
       - name: Send custom JSON data to Slack workflow
