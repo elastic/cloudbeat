@@ -18,7 +18,7 @@ test_pass {
 }
 
 test_not_evaluated {
-	not finding with input as {"type": "no-kube-api"}
+	not finding with input as {"type": "k8s_object", "resource": {"kind": "Node"}}
 }
 
 rule_input(resource) = test_data.kube_api_input(resource)

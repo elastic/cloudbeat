@@ -17,7 +17,7 @@ rule_evaluation {
 }
 
 finding := result {
-	data_adapter.is_kube_api
+	data_adapter.is_kube_pod
 
 	# set result
 	result := common.generate_result_without_expected(
