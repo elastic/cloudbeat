@@ -20,14 +20,16 @@ package transformer
 import (
 	"context"
 	"encoding/json"
-	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/cloudbeat/dataprovider"
-	"github.com/elastic/cloudbeat/version"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"os"
 	"regexp"
 	"testing"
+
+	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/dataprovider/types"
+	"github.com/elastic/cloudbeat/version"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -130,14 +132,16 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
-			dataProviderMock := dataprovider.MockCommonData{}
-			dataProviderMock.EXPECT().GetResourceId(mock.Anything).Return(resourceId)
-			dataProviderMock.EXPECT().GetVersionInfo().Return(versionInfo)
-			mockEnrichEvent := func(event beat.Event) error {
+			dataProviderMock := dataprovider.MockCommonDataProvider{}
+			mockEnrichEvent := func(event *beat.Event) error {
 				_, err := event.Fields.Put(enrichedKey, enrichedValue)
 				return err
 			}
-			dataProviderMock.On("EnrichEvent", mock.Anything).Return(mockEnrichEvent)
+			dataProviderMock.EXPECT().FetchData(mock.Anything, mock.Anything).Return(types.Data{
+				ResourceID:  resourceId,
+				VersionInfo: versionInfo,
+			}, nil)
+			dataProviderMock.On("EnrichEvent", mock.Anything, mock.Anything).Return(mockEnrichEvent)
 
 			transformer := NewTransformer(s.log, &dataProviderMock, testIndex)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
