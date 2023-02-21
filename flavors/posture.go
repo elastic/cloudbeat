@@ -47,6 +47,7 @@ type posture struct {
 	evaluator  evaluator.Evaluator
 	resourceCh chan fetching.ResourceInfo
 	leader     uniqueness.Manager
+	dataStop   fetchersManager.Stop
 }
 
 // NewPosture creates an instance of posture.
@@ -126,9 +127,7 @@ func (bt *posture) Run(b *beat.Beat) error {
 		return err
 	}
 
-	if err := bt.data.Run(bt.ctx); err != nil {
-		return err
-	}
+	bt.dataStop = bt.data.Run(bt.ctx)
 
 	procs, err := bt.configureProcessors(bt.config.Processors)
 	if err != nil {
@@ -198,7 +197,9 @@ func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.Resourc
 
 // Stop stops posture.
 func (bt *posture) Stop() {
-	bt.data.Stop()
+	if bt.dataStop != nil {
+		bt.dataStop(bt.ctx, shutdownGracePeriod)
+	}
 	bt.evaluator.Stop(bt.ctx)
 	bt.leader.Stop()
 	close(bt.resourceCh)

@@ -30,9 +30,10 @@ import (
 )
 
 const (
-	flushInterval    = 10 * time.Second
-	eventsThreshold  = 75
-	resourceChBuffer = 10000
+	flushInterval       = 10 * time.Second
+	eventsThreshold     = 75
+	resourceChBuffer    = 10000
+	shutdownGracePeriod = 30 * time.Second
 )
 
 // flavorBase configuration.
