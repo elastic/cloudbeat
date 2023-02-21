@@ -135,6 +135,41 @@ create_new_vanilla_integration_manifest_file() {
   echo "$MANIFEST_FILE" > manifest.yaml
 }
 
+create_alerts_for_the_vanilla_integration() {
+  local kibana_url=$1
+  local kibana_auth=$2
+  local alerts_file=$3
+  local connector_id=$4
+  local slack_webhook_url=$5
+  local slack_configuration_file=$6
+
+  local import_alerts_response
+  import_alerts_response=$(curl -X POST \
+  "${kibana_url}/api/saved_objects/_import?overwrite=true" \
+   -u "${kibana_auth}" \
+   -H 'Cache-Control: no-cache' \
+   -H 'Connection: keep-alive' \
+   -H "kbn-xsrf: true" \
+   --form file="@${alerts_file}")
+  check_status_code_of_curl "${import_alerts_response}"
+
+  local connector_configuration
+  connector_configuration="$(jq --arg slack_webhook_url "${slack_webhook_url}" '.secrets.webhookUrl |= $slack_webhook_url' "${slack_configuration_file}")"
+  echo "New connector configuration: ${connector_configuration}"
+
+  local update_connector_response
+  update_connector_response=$(curl -X PUT \
+  "${kibana_url}/api/actions/connector/${connector_id}" \
+   -u "${kibana_auth}" \
+   -H 'Cache-Control: no-cache' \
+   -H 'Connection: keep-alive' \
+   -H "kbn-xsrf: true" \
+   -H 'Content-Type: application/json' \
+   -d "${connector_configuration}")
+
+  check_status_code_of_curl "${update_connector_response}"
+}
+
 #######################################
 # Checks the status code of the curl response and exits if the status code is not 200
 # Globals:

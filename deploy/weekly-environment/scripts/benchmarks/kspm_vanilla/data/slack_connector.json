@@ -1,0 +1,8 @@
+{
+    "name": "#cloud-security-posture",
+    "config": {},
+    "secrets": {
+        "webhookUrl": "${slack_webhook_url}"
+    }
+}
+

@@ -10,10 +10,14 @@ source ../../utils.sh
 
 KIBANA_URL=$1
 KIBANA_PASSWORD=$2
+SLACK_WEBHOOK=$3
 KIBANA_AUTH=elastic:${KIBANA_PASSWORD}
 
 readonly AGENT_POLICY=data/agent_policy_vanilla.json
 readonly INTEGRATION_POLICY=data/package_policy_vanilla.json
+readonly SLACK_CONNECTOR_FILE=data/slack_connector.json
+readonly VANILLA_ALERTS_FILE=data/vanilla_rules.ndjson
+readonly CONNECTOR_ID=015cccd0-6588-11ed-98ea-a7ce41bfaa36
 
 # Check if input is empty
 if [ -z "$KIBANA_URL" ] || [ -z "$KIBANA_PASSWORD" ]; then
@@ -21,7 +25,7 @@ if [ -z "$KIBANA_URL" ] || [ -z "$KIBANA_PASSWORD" ]; then
   exit 1
 fi
 
-## Create a new agent policy And get the agent id
+# Create a new agent policy And get the agent id
 create_a_new_agent_policy "$KIBANA_URL" "$KIBANA_AUTH" "$AGENT_POLICY"
 if [ -z "$POLICY_ID" ]; then
   echo "Agent policy id is empty"
@@ -37,3 +41,6 @@ if [ -z "$MANIFEST_FILE" ]; then
   echo "Manifest file is empty"
   exit 1
 fi
+
+# Create and enable alerts for the vanilla integration
+create_alerts_for_the_vanilla_integration "$KIBANA_URL" "$KIBANA_AUTH" "$VANILLA_ALERTS_FILE" "$CONNECTOR_ID" "$SLACK_WEBHOOK" "$SLACK_CONNECTOR_FILE"
