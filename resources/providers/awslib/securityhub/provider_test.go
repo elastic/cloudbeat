@@ -119,7 +119,7 @@ func TestProvider_Describe(t *testing.T) {
 			}
 			p := &Provider{
 				log:       logp.NewLogger("TestProvider_Describe"),
-				AccountId: accountId,
+				accountId: accountId,
 				clients:   clients,
 			}
 			got, err := p.Describe(context.Background())
@@ -131,7 +131,7 @@ func TestProvider_Describe(t *testing.T) {
 			assert.ElementsMatch(t, tt.want, got)
 			names := []string{}
 			for _, r := range tt.regions {
-				names = append(names, fmt.Sprintf("securityhub-%s-%s", r, p.AccountId))
+				names = append(names, fmt.Sprintf("securityhub-%s-%s", r, p.accountId))
 			}
 			for _, s := range got {
 				assert.Contains(t, names, s.GetResourceName())

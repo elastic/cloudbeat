@@ -37,7 +37,7 @@ type (
 		log       *logp.Logger
 		clients   map[string]Client
 		region    string
-		AccountId string
+		accountId string
 	}
 )
 
@@ -49,7 +49,7 @@ func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFac
 	return &Provider{
 		log:       log,
 		region:    cfg.Region,
-		AccountId: accountId,
+		accountId: accountId,
 		clients:   m.GetMultiRegionsClientMap(),
 	}
 }
@@ -61,7 +61,7 @@ func (p *Provider) Describe(ctx context.Context) ([]SecurityHub, error) {
 			res := SecurityHub{
 				Enabled:           false,
 				Region:            region,
-				AccountId:         p.AccountId,
+				AccountId:         p.accountId,
 				DescribeHubOutput: out,
 			}
 			if strings.Contains(err.Error(), "is not subscribed to AWS Security Hub") {
@@ -72,7 +72,7 @@ func (p *Provider) Describe(ctx context.Context) ([]SecurityHub, error) {
 		return SecurityHub{
 			Enabled:           true,
 			DescribeHubOutput: out,
-			AccountId:         p.AccountId,
+			AccountId:         p.accountId,
 			Region:            region,
 		}, nil
 	})
