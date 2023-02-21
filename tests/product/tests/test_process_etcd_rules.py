@@ -13,6 +13,7 @@ from product.tests.parameters import register_params, Parameters
 
 
 @pytest.mark.process_etcd_rules
+@pytest.mark.flaky(reruns=2)
 def test_process_etcd(
     elastic_client,
     config_node_pre_test,

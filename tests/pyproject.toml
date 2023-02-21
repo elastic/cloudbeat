@@ -17,6 +17,7 @@ pytest-order = "^1.0.1"
 pytest-dependency = "^0.5.1"
 pylint = "^2.14.2"
 loguru = "^0.6.0"
+pytest-rerunfailures = "^11.1.1"
 
 [tool.poetry.dev-dependencies]
 
