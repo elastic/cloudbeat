@@ -38,8 +38,8 @@ type (
 )
 
 func (s SecurityHub) GetResourceArn() string {
-	if s.HubArn == nil {
-		return ""
+	if s.DescribeHubOutput == nil || s.HubArn == nil {
+		return fmt.Sprintf("securityhub - %s", s.Region)
 	}
 	return *s.HubArn
 }
