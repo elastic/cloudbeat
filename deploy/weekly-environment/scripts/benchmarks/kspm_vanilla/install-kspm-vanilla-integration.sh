@@ -17,7 +17,6 @@ readonly AGENT_POLICY=data/agent_policy_vanilla.json
 readonly INTEGRATION_POLICY=data/package_policy_vanilla.json
 readonly SLACK_CONNECTOR_FILE=data/slack_connector.json
 readonly VANILLA_ALERTS_FILE=data/vanilla_rules.ndjson
-readonly CONNECTOR_ID=015cccd0-6588-11ed-98ea-a7ce41bfaa36
 
 # Check if input is empty
 if [ -z "$KIBANA_URL" ] || [ -z "$KIBANA_PASSWORD" ]; then
@@ -43,4 +42,4 @@ if [ -z "$MANIFEST_FILE" ]; then
 fi
 
 # Create and enable alerts for the vanilla integration
-create_alerts_for_the_vanilla_integration "$KIBANA_URL" "$KIBANA_AUTH" "$VANILLA_ALERTS_FILE" "$CONNECTOR_ID" "$SLACK_WEBHOOK" "$SLACK_CONNECTOR_FILE"
+create_alerts_for_the_vanilla_integration "$KIBANA_URL" "$KIBANA_AUTH" "$VANILLA_ALERTS_FILE" "$SLACK_WEBHOOK" "$SLACK_CONNECTOR_FILE"

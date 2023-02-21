@@ -82,7 +82,7 @@ jobs:
         id: install_vanilla_integration
         working-directory: ${{ env.SCRIPTS_DIR }}
         run: |
-          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
+          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }} ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Deploy agent on EC2
         id: deploy_agent_on_ec2
