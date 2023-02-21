@@ -153,7 +153,7 @@ generate_security_group(entry) = {
 generate_monitoring_resources(items) = {
 	"resource": {"Items": items},
 	"type": "monitoring",
-	"subType": "aws-trail",
+	"subType": "aws-multi-trails",
 }
 
 generate_securityhub(sb) = {

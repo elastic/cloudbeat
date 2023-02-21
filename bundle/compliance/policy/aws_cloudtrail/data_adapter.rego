@@ -1,12 +1,11 @@
 package compliance.policy.aws_cloudtrail.data_adapter
 
-is_trail_type {
-	input.subType = "aws-trail"
+is_multi_trails_type {
+	input.subType = "aws-multi-trails"
 }
 
 is_single_trail {
 	input.subType == "aws-trail"
-	not trail_items
 }
 
 trail = input.resource.Trail
