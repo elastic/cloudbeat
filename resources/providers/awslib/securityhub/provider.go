@@ -34,21 +34,23 @@ type (
 	}
 
 	Provider struct {
-		log     *logp.Logger
-		clients map[string]Client
-		region  string
+		log       *logp.Logger
+		clients   map[string]Client
+		region    string
+		AccountId string
 	}
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
 	f := func(cfg aws.Config) Client {
 		return securityhub.NewFromConfig(cfg)
 	}
 	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
 	return &Provider{
-		log:     log,
-		region:  cfg.Region,
-		clients: m.GetMultiRegionsClientMap(),
+		log:       log,
+		region:    cfg.Region,
+		AccountId: accountId,
+		clients:   m.GetMultiRegionsClientMap(),
 	}
 }
 
@@ -58,8 +60,9 @@ func (p *Provider) Describe(ctx context.Context) ([]SecurityHub, error) {
 		if err != nil {
 			res := SecurityHub{
 				Enabled:           false,
-				DescribeHubOutput: out,
 				Region:            region,
+				AccountId:         p.AccountId,
+				DescribeHubOutput: out,
 			}
 			if strings.Contains(err.Error(), "is not subscribed to AWS Security Hub") {
 				return res, nil
@@ -69,6 +72,7 @@ func (p *Provider) Describe(ctx context.Context) ([]SecurityHub, error) {
 		return SecurityHub{
 			Enabled:           true,
 			DescribeHubOutput: out,
+			AccountId:         p.AccountId,
 			Region:            region,
 		}, nil
 	})

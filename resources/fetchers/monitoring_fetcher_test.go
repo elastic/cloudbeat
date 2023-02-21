@@ -199,6 +199,8 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 }
 
 func TestSecurityHubResource_GetMetadata(t *testing.T) {
+	accountId := "dummy-account-id"
+
 	type fields struct {
 		SecurityHub securityhub.SecurityHub
 	}
@@ -212,8 +214,9 @@ func TestSecurityHubResource_GetMetadata(t *testing.T) {
 			name: "enabled",
 			fields: fields{
 				SecurityHub: securityhub.SecurityHub{
-					Enabled: true,
-					Region:  "us-east-1",
+					Enabled:   true,
+					Region:    "us-east-1",
+					AccountId: accountId,
 					DescribeHubOutput: &aws_securityhub.DescribeHubOutput{
 						HubArn: aws.String("hub:arn"),
 					},
@@ -221,7 +224,7 @@ func TestSecurityHubResource_GetMetadata(t *testing.T) {
 			},
 			want: fetching.ResourceMetadata{
 				ID:      "hub:arn",
-				Name:    "securityhub - us-east-1",
+				Name:    "securityhub-us-east-1-" + accountId,
 				Type:    fetching.MonitoringIdentity,
 				SubType: fetching.SecurityHubType,
 			},
@@ -230,13 +233,14 @@ func TestSecurityHubResource_GetMetadata(t *testing.T) {
 			name: "disabled",
 			fields: fields{
 				SecurityHub: securityhub.SecurityHub{
-					Enabled: false,
-					Region:  "us-east-2",
+					Enabled:   false,
+					AccountId: accountId,
+					Region:    "us-east-2",
 				},
 			},
 			want: fetching.ResourceMetadata{
-				ID:      "securityhub - us-east-2",
-				Name:    "securityhub - us-east-2",
+				ID:      "securityhub-us-east-2-" + accountId,
+				Name:    "securityhub-us-east-2-" + accountId,
 				Type:    fetching.MonitoringIdentity,
 				SubType: fetching.SecurityHubType,
 			},

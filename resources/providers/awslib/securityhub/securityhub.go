@@ -31,21 +31,22 @@ type (
 	}
 
 	SecurityHub struct {
-		Enabled bool
-		Region  string
+		Enabled   bool
+		Region    string
+		AccountId string
 		*securityhub.DescribeHubOutput
 	}
 )
 
 func (s SecurityHub) GetResourceArn() string {
 	if s.DescribeHubOutput == nil || s.HubArn == nil {
-		return fmt.Sprintf("securityhub - %s", s.Region)
+		return s.GetResourceName()
 	}
 	return *s.HubArn
 }
 
 func (s SecurityHub) GetResourceName() string {
-	return fmt.Sprintf("securityhub - %s", s.Region)
+	return fmt.Sprintf("securityhub-%s-%s", s.Region, s.AccountId)
 }
 
 func (s SecurityHub) GetResourceType() string {
