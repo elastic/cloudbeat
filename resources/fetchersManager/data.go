@@ -23,6 +23,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/elastic/beats/v7/libbeat/common/atomic"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -57,12 +58,12 @@ func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fe
 // Run starts all configured fetchers to collect resources.
 func (d *Data) Run(ctx context.Context) Stop {
 	go d.fetchAndSleep(ctx)
-	called := false
+	called := atomic.NewBool(false)
 	return func(ctx context.Context, grace time.Duration) {
-		if called {
+		defer called.Store(true)
+		if called.Load() {
 			return
 		}
-		called = true
 		d.stopData(ctx, grace)
 	}
 }
@@ -75,12 +76,12 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 		cancel()
 		timer.Stop()
 	}()
-	run := true
+	run := atomic.NewBool(true)
 	for {
 		select {
 		case grace := <-d.stopNotice:
 			d.log.Infof("Received stop notice with grace period of %s, fetchers will not be executing from now on", grace.String())
-			run = false
+			run.Store(false)
 		case <-d.stop:
 			d.log.Info("Fetchers manager stopped")
 			return
@@ -88,7 +89,7 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 			d.log.Info("Fetchers manager canceled")
 			return
 		case <-timer.C:
-			if !run {
+			if !run.Load() {
 				return
 			}
 			// upadte the interval
