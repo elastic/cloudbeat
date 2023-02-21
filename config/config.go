@@ -33,7 +33,7 @@ import (
 
 const (
 	DefaultNamespace             = "default"
-	VulnerabilityType            = "cloudbeat/vulnerability"
+	VulnerabilityType            = "cloudbeat/vuln_mgmt_aws"
 	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 )
 
