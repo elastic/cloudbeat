@@ -159,7 +159,7 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 				ID:      "",
 				Name:    "",
 				Type:    fetching.MonitoringIdentity,
-				SubType: fetching.TrailType,
+				SubType: fetching.MultiTrailsType,
 			},
 		},
 		{
@@ -177,7 +177,7 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 				ID:      "cloudtrail-aws-account-id",
 				Name:    "cloudtrail-aws-account-id",
 				Type:    fetching.MonitoringIdentity,
-				SubType: fetching.TrailType,
+				SubType: fetching.MultiTrailsType,
 			},
 		},
 	}
@@ -213,6 +213,7 @@ func TestSecurityHubResource_GetMetadata(t *testing.T) {
 			fields: fields{
 				SecurityHub: securityhub.SecurityHub{
 					Enabled: true,
+					Region:  "us-east-1",
 					DescribeHubOutput: &aws_securityhub.DescribeHubOutput{
 						HubArn: aws.String("hub:arn"),
 					},
@@ -220,7 +221,7 @@ func TestSecurityHubResource_GetMetadata(t *testing.T) {
 			},
 			want: fetching.ResourceMetadata{
 				ID:      "hub:arn",
-				Name:    "hub:arn",
+				Name:    "securityhub - us-east-1",
 				Type:    fetching.MonitoringIdentity,
 				SubType: fetching.SecurityHubType,
 			},
@@ -230,11 +231,12 @@ func TestSecurityHubResource_GetMetadata(t *testing.T) {
 			fields: fields{
 				SecurityHub: securityhub.SecurityHub{
 					Enabled: false,
+					Region:  "us-east-2",
 				},
 			},
 			want: fetching.ResourceMetadata{
-				ID:      "",
-				Name:    "",
+				ID:      "securityhub - us-east-2",
+				Name:    "securityhub - us-east-2",
 				Type:    fetching.MonitoringIdentity,
 				SubType: fetching.SecurityHubType,
 			},
