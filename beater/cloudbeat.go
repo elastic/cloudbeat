@@ -43,10 +43,11 @@ import (
 )
 
 const (
-	beaterName       = "Cloudbeat"
-	flushInterval    = 10 * time.Second
-	eventsThreshold  = 75
-	resourceChBuffer = 10000
+	beaterName          = "Cloudbeat"
+	flushInterval       = 10 * time.Second
+	eventsThreshold     = 75
+	resourceChBuffer    = 10000
+	shutdownGracePeriod = 30 * time.Second
 )
 
 // cloudbeat configuration.
@@ -61,6 +62,7 @@ type cloudbeat struct {
 	log         *logp.Logger
 	resourceCh  chan fetching.ResourceInfo
 	leader      uniqueness.Manager
+	dataStop    fetchersManager.Stop
 }
 
 func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
@@ -154,9 +156,7 @@ func (bt *cloudbeat) Run(b *beat.Beat) error {
 		return err
 	}
 
-	if err := bt.data.Run(bt.ctx); err != nil {
-		return err
-	}
+	bt.dataStop = bt.data.Run(bt.ctx)
 
 	procs, err := bt.configureProcessors(bt.config.Processors)
 	if err != nil {
@@ -226,7 +226,9 @@ func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.Resourc
 
 // Stop stops cloudbeat.
 func (bt *cloudbeat) Stop() {
-	bt.data.Stop()
+	if bt.dataStop != nil {
+		bt.dataStop(bt.ctx, shutdownGracePeriod)
+	}
 	bt.evaluator.Stop(bt.ctx)
 	bt.leader.Stop()
 	close(bt.resourceCh)
