@@ -11,15 +11,6 @@
 # configuration file.
 
 cloudbeat:
-  config:
-    v1:
-      benchmark: cis_k8s
-      # aws:
-      #   credentials:
-      #     access_key_id: AKIA
-      #     secret_access_key: SECRET
-      #     default_region: eu-west-1
-  # type: cloudbeat/vuln_mgmt_aws
   type: cloudbeat/cis_k8s
   # Defines how often an event is sent to the output
   period: 4h
