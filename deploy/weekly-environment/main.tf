@@ -1,5 +1,6 @@
 provider "ec" {
   apikey = var.ec_api_key
+  endpoint= var.endpoint
 }
 
 module "ec_deployment" {
