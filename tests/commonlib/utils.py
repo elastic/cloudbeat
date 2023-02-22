@@ -57,6 +57,15 @@ def get_ES_evaluation(
                 continue
 
             if resource_identifier(event):
+                allure.attach(
+                    json.dumps(
+                        event,
+                        indent=4,
+                        sort_keys=True,
+                    ),
+                    rule_tag,
+                    attachment_type=allure.attachment_type.JSON,
+                )
                 return evaluation
 
     return None
