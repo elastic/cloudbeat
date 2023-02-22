@@ -27,25 +27,6 @@ import (
 
 const (
 	KubeAPIType = "kube-api"
-
-<<<<<<< HEAD
-	EcrType           = "aws-ecr"
-	IAMType           = "aws-iam"
-	EC2NetworkingType = "aws-ec2-network"
-	MonitoringType    = "aws-monitoring"
-	NetworkNACLType   = "aws-nacl"
-	TrailType         = "aws-trail"
-	SecurityGroupType = "aws-security-group"
-	EBSType           = "aws-ebs"
-	ElbType           = "aws-elb"
-	IAMUserType       = "aws-iam-user"
-	PwdPolicyType     = "aws-password-policy"
-	EksType           = "aws-eks"
-	S3Type            = "aws-s3"
-	SecurityHubType   = "aws-securityhub"
-	VpcType           = "aws-vpc"
-	RdsType           = "aws-rds"
-=======
 	EcrType                   = "aws-ecr"
 	IAMType                   = "aws-iam"
 	EC2NetworkingType         = "aws-ec2-network"
@@ -63,8 +44,6 @@ const (
 	SecurityHubType           = "aws-securityhub"
 	VpcType                   = "aws-vpc"
 	RdsType                   = "aws-rds"
-	ConfigServiceResourceType = "aws-config"
->>>>>>> 7831201 ([CIS AWS] Fix multiple bugs (#761))
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"
