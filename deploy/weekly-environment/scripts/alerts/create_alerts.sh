@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ../../utils.sh
+source ../utils.sh
 
 # This script is used to create alerts for the vanilla integration.
 # It will create a new slack connector and a new vanilla integration alerts.
