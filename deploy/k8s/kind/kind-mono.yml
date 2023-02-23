@@ -7,5 +7,12 @@ nodes:
   extraMounts:
   - hostPath: ./tests/allure/results
     containerPath: /tmp/data
+  extraPortMappings:
+  - containerPort: 9200
+    hostPort: 9200
+    listenAddress: "127.0.0.1"
+  - containerPort: 5601
+    hostPort: 5601
+    listenAddress: "127.0.0.1"
 
 # Todo Enable EphemeralContainers on kind config for debug
