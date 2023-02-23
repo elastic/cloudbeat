@@ -117,22 +117,23 @@ create_alerts_from_saved_object_file() {
   check_status_code_of_curl "${enable_rule_response}"
 
 
-#  for rule_id in ${rules_ids}; do
-#    echo "Enabling rule: ${rule_id}"
-#    local enable_rule_response
-#    enable_rule_response=$(curl -X PATCH \
-#      "${kibana_url}/internal/alerting/rules/_bulk_enable" \
-#      -u "${kibana_auth}" \
-#      -H 'Cache-Control: no-cache' \
-#      -H 'Connection: keep-alive' \
-#      -H "kbn-xsrf: true" \
-#      -H 'Content-Type: application/json' \
-#      -d "{\"ids\": ${rules_ids}}")
-#
-#    echo "Enable rule response: ${enable_rule_response}"
-#    check_status_code_of_curl "${enable_rule_response}"
-#  done
-#  echo "Rules response: ${rules_response}"
+  for rule_id in ${rules_ids}; do
+    echo "Enabling rule: ${rule_id}"
+    local enable_rule_response
+    enable_rule_response=$(curl -X PATCH \
+      "${kibana_url}/internal/alerting/rules/_bulk_enable" \
+      -u "${kibana_auth}" \
+      -H 'Cache-Control: no-cache' \
+      -H 'Connection: keep-alive' \
+      -H "kbn-xsrf: true" \
+      -H 'Content-Type: application/json' \
+      -d "{\"ids\": ${rules_ids}}")
+
+    echo "Enable rule response: ${enable_rule_response}"
+    check_status_code_of_curl "${enable_rule_response}"
+  done
+
+  echo "Rules response: ${rules_response}"
   echo "Rules ids: ${rules_ids}"
 
 }
