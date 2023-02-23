@@ -70,47 +70,32 @@ cis_eks_5_4_5_config_1 = {
 
 aws_test_config_1 = {
     **cis_eks_5_1_1,
-    **dict(
-        zip(
-            cis_eks_5_4_3_config_1.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_5_4_3_config_1.values()],
-                data_to_report=SkipReportData(
-                    skip_reason="Retest after testing configuration will be fixed.",
-                    url_title="cloudbeat: #500",
-                    url_link="https://github.com/elastic/cloudbeat/issues/500",
-                ),
-            ),
+    **skip_param_case(
+        cis_eks_5_4_3_config_1,
+        data_to_report=SkipReportData(
+            skip_reason="Retest after testing configuration will be fixed.",
+            url_title="cloudbeat: #500",
+            url_link="https://github.com/elastic/cloudbeat/issues/500",
         ),
     ),
     **cis_eks_5_4_5_config_1,
-    **dict(
-        zip(
-            cis_eks_2_1_1_config_1.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_2_1_1_config_1.values()],
-                data_to_report=SkipReportData(
-                    skip_reason="This rule is implemented partially",
-                    url_title="security-team: #3929",
-                    url_link="https://github.com/elastic/security-team/issues/3929",
-                ),
-            ),
+    **skip_param_case(
+        cis_eks_2_1_1_config_1,
+        data_to_report=SkipReportData(
+            skip_reason="This rule is implemented partially",
+            url_title="security-team: #3929",
+            url_link="https://github.com/elastic/security-team/issues/3929",
         ),
     ),
 }
 
 aws_test_config_2 = {
-    **dict(
-        zip(
-            cis_eks_2_1_1_config_2.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_2_1_1_config_2.values()],
-                data_to_report=SkipReportData(
-                    skip_reason="This rule is implemented partially",
-                    url_title="security-team: #3929",
-                    url_link="https://github.com/elastic/security-team/issues/3929",
-                ),
-            ),
+    **skip_param_case(
+        cis_eks_2_1_1_config_2,
+        data_to_report=SkipReportData(
+            skip_reason="This rule is implemented partially",
+            url_title="security-team: #3929",
+            url_link="https://github.com/elastic/security-team/issues/3929",
         ),
     ),
 }

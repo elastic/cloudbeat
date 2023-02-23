@@ -947,7 +947,7 @@ etcd_rules = [
     *cis_2_1,
     *cis_2_2,
     *skip_param_case(
-        skip_list=[*cis_2_5],
+        skip_objects=[*cis_2_5],
         data_to_report=SkipReportData(
             url_title="cloudbeat: #512",
             url_link="https://github.com/elastic/cloudbeat/issues/512",
@@ -960,7 +960,7 @@ etcd_rules = [
 api_server_rules = [
     *cis_1_2_2,
     *skip_param_case(
-        skip_list=[*cis_1_2_3],
+        skip_objects=[*cis_1_2_3],
         data_to_report=SkipReportData(
             url_title="security-team: #4975",
             url_link="https://github.com/elastic/security-team/issues/4975",
@@ -973,7 +973,7 @@ api_server_rules = [
     *cis_1_2_7,
     *cis_1_2_8,
     *skip_param_case(
-        skip_list=[*cis_1_2_9],
+        skip_objects=[*cis_1_2_9],
         data_to_report=SkipReportData(
             url_title="security-team: #5128",
             url_link="https://github.com/elastic/security-team/issues/5128",
@@ -1021,7 +1021,7 @@ kubelet_rules = [
     *cis_4_2_1,
     *cis_4_2_2,
     *skip_param_case(
-        skip_list=[*cis_4_2_3],
+        skip_objects=[*cis_4_2_3],
         data_to_report=SkipReportData(
             skip_reason="Known issue",
             url_link="https://github.com/elastic/security-team/issues/5106",

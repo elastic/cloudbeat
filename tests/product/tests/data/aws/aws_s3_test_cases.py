@@ -30,7 +30,7 @@ cis_aws_s3_2_1_1_fail = EksAwsServiceCase(
 cis_aws_s3_2_1_1 = {
     "2.1.1 Ensure S3 bucket encryption: SSEAlgorithm=AES256 expect: passed": cis_aws_s3_2_1_1_pass,
     "2.1.1 Ensure S3 bucket encryption: SSEAlgorithm=aws:kms expect: passed": cis_aws_s3_2_1_1_pass_2,
-    "2.1.1 Ensure S3 bucket encryption: encryption disabled - expect: failed": cis_aws_s3_2_1_1_fail
+    "2.1.1 Ensure S3 bucket encryption: encryption disabled - expect: failed": cis_aws_s3_2_1_1_fail,
 }
 
 cis_aws_s3_cases = {
