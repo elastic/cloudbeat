@@ -105,11 +105,11 @@ jobs:
               echo "The latest elastic index has less than $MINIMAL_VALUE results"
               exit 1
             fi
-          env:
-            elastic_url: ${{ env.ELASTICSEARCH_URL }}
-            index_name: 'logs-cloud_security_posture.findings_latest-default'
-            kibana_auth: "${{ env.ELASTICSEARCH_USERNAME }}:${{ env.ELASTICSEARCH_PASSWORD }}"
-            MINIMAL_VALUE: 200
+        env:
+          elastic_url: ${{ env.ELASTICSEARCH_URL }}
+          index_name: 'logs-cloud_security_posture.findings_latest-default'
+          kibana_auth: "${{ env.ELASTICSEARCH_USERNAME }}:${{ env.ELASTICSEARCH_PASSWORD }}"
+          MINIMAL_VALUE: 200
 
       - name: Install KSPM vanilla alerts
         id: install_vanilla_alerts
