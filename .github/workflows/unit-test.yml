@@ -119,6 +119,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version-file: .go-version
+
       - name: Check out the repo
         uses: actions/checkout@v3
         with:
@@ -156,3 +157,16 @@ jobs:
         run: |
           cfn-lint --version
           cfn-lint -I -t ./deploy/cloudformation/elastic-agent-ec2.yml
+
+  terraform-linter:
+    name: terraform-lint
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
