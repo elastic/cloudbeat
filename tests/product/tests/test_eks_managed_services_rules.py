@@ -10,8 +10,8 @@ from product.tests.data.aws import managed_services_test_cases as ms_tc
 from product.tests.parameters import register_params, Parameters
 
 
-@pytest.mark.eks_aws_service_rules
-def test_eks_aws_service_rules(
+@pytest.mark.eks_service_rules
+def test_eks_service_rules(
     elastic_client,
     cloudbeat_agent,
     rule_tag,
@@ -50,7 +50,7 @@ def test_eks_aws_service_rules(
 
 
 register_params(
-    test_eks_aws_service_rules,
+    test_eks_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
         [*ms_tc.cis_eks_aws_cases.values()],
