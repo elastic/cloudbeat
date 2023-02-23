@@ -34,6 +34,7 @@ const (
 	MonitoringType            = "aws-monitoring"
 	NetworkNACLType           = "aws-nacl"
 	TrailType                 = "aws-trail"
+	MultiTrailsType           = "aws-multi-trails"
 	SecurityGroupType         = "aws-security-group"
 	EBSType                   = "aws-ebs"
 	ElbType                   = "aws-elb"

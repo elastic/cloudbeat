@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-      - '[0-9]+.[0-9]+'
+      - "[0-9]+.[0-9]+"
     types: [opened, synchronize, reopened]
   push:
     branches:
@@ -12,7 +12,6 @@ on:
 
 env:
   K8S_MANIFEST_DIR: deploy
-
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -22,7 +21,7 @@ jobs:
   unit_tests:
     name: Unit Tests
     runs-on: ubuntu-20.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -52,6 +51,10 @@ jobs:
         run: |
           GOOS=linux go test -v -coverpkg=./... -coverprofile=cover.out.tmp ./...
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
+
+      - name: Unit-Test with Race Detector
+        run: |
+          GOOS=linux go test -v -race ./...
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v3
@@ -116,6 +119,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version-file: .go-version
+
       - name: Check out the repo
         uses: actions/checkout@v3
         with:
@@ -138,3 +142,31 @@ jobs:
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v3
+
+  cloudformation-linter:
+    name: cloudfomration-lint
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Cloud Formation Linter with Latest Version
+        uses: scottbrenner/cfn-lint-action@v2
+
+      - name: Print the Cloud Formation Linter Version & run Linter.
+        run: |
+          cfn-lint --version
+          cfn-lint -I -t ./deploy/cloudformation/elastic-agent-ec2.yml
+
+  terraform-linter:
+    name: terraform-lint
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive

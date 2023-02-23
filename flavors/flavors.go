@@ -15,40 +15,33 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package securityhub
+package flavors
 
 import (
 	"context"
-	"fmt"
+	"time"
 
-	"github.com/aws/aws-sdk-go-v2/service/securityhub"
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/config"
+	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/transformer"
+
+	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type (
-	Service interface {
-		Describe(ctx context.Context) ([]SecurityHub, error)
-	}
-
-	SecurityHub struct {
-		Enabled   bool
-		Region    string
-		AccountId string
-		*securityhub.DescribeHubOutput
-	}
+const (
+	flushInterval       = 10 * time.Second
+	eventsThreshold     = 75
+	resourceChBuffer    = 10000
+	shutdownGracePeriod = 30 * time.Second
 )
 
-func (s SecurityHub) GetResourceArn() string {
-	if s.DescribeHubOutput == nil || s.HubArn == nil {
-		return s.GetResourceName()
-	}
-	return *s.HubArn
-}
-
-func (s SecurityHub) GetResourceName() string {
-	return fmt.Sprintf("securityhub-%s-%s", s.Region, s.AccountId)
-}
-
-func (s SecurityHub) GetResourceType() string {
-	return fetching.SecurityHubType
+// flavorBase configuration.
+type flavorBase struct {
+	ctx         context.Context
+	cancel      context.CancelFunc
+	config      *config.Config
+	client      beat.Client
+	transformer transformer.Transformer
+	log         *logp.Logger
 }
