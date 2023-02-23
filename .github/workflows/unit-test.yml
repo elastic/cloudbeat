@@ -29,9 +29,6 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Mage Check
-        run: mage check
-
       - name: Mage checkLicenseHeaders
         run: mage checkLicenseHeaders
 
