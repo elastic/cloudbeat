@@ -65,6 +65,10 @@ create_alerts_from_saved_object_file() {
   local connector_id
   connector_id="$(echo "${connector_response}" |  jq '.[]  | select(.name == "#cloud-security-posture")' | jq -r '.id')"
   echo "Connector id: ${connector_id}"
+  if [ -z "${connector_id}" ]; then
+    echo "Connector id is empty"
+    exit 1
+  fi
 
   # Updates the slack connector with the webhook url
   local connector_configuration
@@ -81,6 +85,56 @@ create_alerts_from_saved_object_file() {
     -d "${connector_configuration}")
 
   check_status_code_of_curl "${update_connector_response}"
+
+  # Get All rules
+  local rules_response
+  rules_response=$(curl -X GET \
+      "${kibana_url}/api/alerts/_find" \
+      -u "${kibana_auth}" \
+      -H 'Cache-Control: no-cache' \
+      -H 'Connection: keep-alive' \
+      -H "kbn-xsrf: true" \
+      -H 'Content-Type: application/json')
+
+  # Covert to rules ids to array
+  rules_ids=$(echo "${rules_response}" | jq -r '.data[].id')
+  rules_ids=$(echo "${rules_ids}" | tr ' ' '\n' | jq -R . | jq -s .)
+
+  echo "Rules ids: ${rules_ids}"
+
+  # Enable all rules
+  local enable_rule_response
+  enable_rule_response=$(curl -X PATCH \
+    "${kibana_url}/internal/alerting/rules/_bulk_enable" \
+    -u "${kibana_auth}" \
+    -H 'Cache-Control: no-cache' \
+    -H 'Connection: keep-alive' \
+    -H "kbn-xsrf: true" \
+    -H 'Content-Type: application/json' \
+    -d "{\"ids\": ${rules_ids}}")
+
+  echo "Enable rule response: ${enable_rule_response}"
+  check_status_code_of_curl "${enable_rule_response}"
+
+
+#  for rule_id in ${rules_ids}; do
+#    echo "Enabling rule: ${rule_id}"
+#    local enable_rule_response
+#    enable_rule_response=$(curl -X PATCH \
+#      "${kibana_url}/internal/alerting/rules/_bulk_enable" \
+#      -u "${kibana_auth}" \
+#      -H 'Cache-Control: no-cache' \
+#      -H 'Connection: keep-alive' \
+#      -H "kbn-xsrf: true" \
+#      -H 'Content-Type: application/json' \
+#      -d "{\"ids\": ${rules_ids}}")
+#
+#    echo "Enable rule response: ${enable_rule_response}"
+#    check_status_code_of_curl "${enable_rule_response}"
+#  done
+#  echo "Rules response: ${rules_response}"
+  echo "Rules ids: ${rules_ids}"
+
 }
 
 # Create and enable alerts for the vanilla integration
