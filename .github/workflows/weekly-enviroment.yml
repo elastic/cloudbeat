@@ -56,6 +56,7 @@ jobs:
       - name: Set terraform output as env variable
         run: |
           echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
+          echo "ELASTICSEARCH_URL=$(terraform output elasticsearch_url)" >> $GITHUB_ENV
 
       - name: Set sensitive terraform output as env variable
         run: |
@@ -81,6 +82,34 @@ jobs:
           scp -o StrictHostKeyChecking=no -v -i weekly-key.pem manifest.yaml "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}:~/."
           # Apply the manifest file
           ssh -o StrictHostKeyChecking=no -v -i weekly-key.pem "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}" "kubectl apply -f manifest.yaml"
+
+      - name: Check if the latest index was updated
+        uses: nick-fields/retry@v2
+        with:
+          timeout-minutes: 10m
+          max-attempts: 10
+          retry-wait-seconds: 60
+          run: |
+            local install_agent_response
+            install_agent_response="$(curl -X GET \
+              --url "${elastic_url}/${index_name}/_count" \
+              -u "${kibana_auth}" \
+              -H 'Cache-Control: no-cache' \
+              -H 'Connection: keep-alive' \
+              -H 'Content-Type: application/json' \
+              -H 'kbn-xsrf: true')"
+            local count
+            count=$(echo "${install_agent_response}" | jq -r '.count')
+            echo "The latest elastic index has $count results"
+            if [ "$count" -lt "$MINIMAL_VALUE" ]; then
+              echo "The latest elastic index has less than $MINIMAL_VALUE results"
+              exit 1
+            fi
+          env:
+            elastic_url: ${{ env.ELASTICSEARCH_URL }}
+            index_name: 'logs-cloud_security_posture.findings_latest-default'
+            kibana_auth: "${{ env.ELASTICSEARCH_USERNAME }}:${{ env.ELASTICSEARCH_PASSWORD }}"
+            MINIMAL_VALUE: 200
 
       - name: Install KSPM vanilla alerts
         id: install_vanilla_alerts
