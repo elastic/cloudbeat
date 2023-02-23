@@ -86,10 +86,10 @@ jobs:
       - name: Check if the latest index was updated
         uses: nick-fields/retry@v2
         with:
-          timeout-minutes: 10m
-          max-attempts: 10
-          retry-wait-seconds: 60
-          run: |
+          timeout_minutes: 10m
+          max_attempts: 10
+          retry_wait_seconds: 60
+          command: |
             local install_agent_response
             install_agent_response="$(curl -X GET \
               --url "${elastic_url}/${index_name}/_count" \
