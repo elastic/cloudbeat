@@ -31,9 +31,11 @@ import (
 	"github.com/elastic/elastic-agent-libs/config"
 )
 
-const DefaultNamespace = "default"
-
-const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
+const (
+	DefaultNamespace             = "default"
+	VulnerabilityType            = "cloudbeat/vuln_mgmt_aws"
+	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
+)
 
 var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
 
@@ -43,6 +45,7 @@ type Fetcher struct {
 
 type Config struct {
 	Benchmark   string                  `config:"config.v1.benchmark"`
+	Deployment  string                  `config:"config.v1.deployment"`
 	CloudConfig CloudConfig             `config:"config.v1"`
 	Fetchers    []*config.C             `config:"fetchers"`
 	KubeConfig  string                  `config:"kube_config"`

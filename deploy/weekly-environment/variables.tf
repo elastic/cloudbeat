@@ -6,8 +6,8 @@ variable "ec_api_key" {
 }
 
 variable "ess_region" {
-  default     = "gcp-us-west2"
-  description = "Optional ESS region where the deployment will be created. Defaults to gcp-us-west2"
+  default     = "gcp-us-central1"
+  description = "Optional ESS region where the deployment will be created. Defaults to gcp-us-central1"
   type        = string
 }
 
@@ -57,4 +57,9 @@ variable "docker_image_override" {
 variable "deployment_name_prefix" {
   default     = "weekly-environment"
   description = "Optional set a prefix of the deployment. Defaults to weekly-environment"
+}
+
+variable "endpoint" {
+    default     = "https://staging.found.no/"
+    description = "Optional endpoint for the Elastic Cloud API"
 }

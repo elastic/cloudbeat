@@ -41,6 +41,9 @@ type Client interface {
 	DescribeVpcs(ctx context.Context, params *ec2.DescribeVpcsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeVpcsOutput, error)
 	DescribeFlowLogs(ctx context.Context, params *ec2.DescribeFlowLogsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeFlowLogsOutput, error)
 	GetEbsEncryptionByDefault(ctx context.Context, params *ec2.GetEbsEncryptionByDefaultInput, optFns ...func(*ec2.Options)) (*ec2.GetEbsEncryptionByDefaultOutput, error)
+	DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
+	CreateSnapshots(ctx context.Context, params *ec2.CreateSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.CreateSnapshotsOutput, error)
+	DescribeSnapshots(ctx context.Context, params *ec2.DescribeSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSnapshotsOutput, error)
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -150,4 +153,59 @@ func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsR
 			awsAccount: p.awsAccountID,
 		}, nil
 	})
+}
+
+func (p *Provider) DescribeInstances(ctx context.Context) ([]types.Instance, error) {
+	ins, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]types.Instance, error) {
+		input := &ec2.DescribeInstancesInput{}
+		allInstances := []types.Instance{}
+		for {
+			output, err := c.DescribeInstances(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			for _, reservation := range output.Reservations {
+				allInstances = append(allInstances, reservation.Instances...)
+			}
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+		return allInstances, nil
+	})
+	return lo.Flatten(ins), err
+}
+
+func (p *Provider) CreateSnapshots(ctx context.Context, ins types.Instance) ([]types.SnapshotInfo, error) {
+	snaps, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]types.SnapshotInfo, error) {
+		input := &ec2.CreateSnapshotsInput{
+			InstanceSpecification: &types.InstanceSpecification{
+				InstanceId: ins.InstanceId,
+			},
+			Description: aws.String("Cloudbeat Vulnerability Snapshot."),
+		}
+		result, err := c.CreateSnapshots(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return result.Snapshots, nil
+	})
+	return lo.Flatten(snaps), err
+}
+
+// TODO: Maybe we should bulk request snapshots?
+// This will limit us scaling the pipeline
+func (p *Provider) DescribeSnapshots(ctx context.Context, snap types.SnapshotInfo) ([]types.Snapshot, error) {
+	snaps, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]types.Snapshot, error) {
+		input := &ec2.DescribeSnapshotsInput{
+			SnapshotIds: []string{*snap.SnapshotId},
+		}
+		result, err := c.DescribeSnapshots(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		return result.Snapshots, nil
+	})
+	return lo.Flatten(snaps), err
 }
