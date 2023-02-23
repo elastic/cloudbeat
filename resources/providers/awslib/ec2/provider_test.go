@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -263,6 +264,119 @@ func TestProvider_GetEbsEncryptionByDefault(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestProvider_DescribeInstances(t *testing.T) {
+	type fields struct {
+		log          *logp.Logger
+		clients      map[string]Client
+		awsAccountID string
+	}
+	type args struct {
+		ctx context.Context
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []types.Instance
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Provider{
+				log:          tt.fields.log,
+				clients:      tt.fields.clients,
+				awsAccountID: tt.fields.awsAccountID,
+			}
+			got, err := p.DescribeInstances(tt.args.ctx)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Provider.DescribeInstances() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Provider.DescribeInstances() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestProvider_CreateSnapshots(t *testing.T) {
+	type fields struct {
+		log          *logp.Logger
+		clients      map[string]Client
+		awsAccountID string
+	}
+	type args struct {
+		ctx context.Context
+		ins types.Instance
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []types.SnapshotInfo
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Provider{
+				log:          tt.fields.log,
+				clients:      tt.fields.clients,
+				awsAccountID: tt.fields.awsAccountID,
+			}
+			got, err := p.CreateSnapshots(tt.args.ctx, tt.args.ins)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Provider.CreateSnapshots() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Provider.CreateSnapshots() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestProvider_DescribeSnapshots(t *testing.T) {
+	type fields struct {
+		log          *logp.Logger
+		clients      map[string]Client
+		awsAccountID string
+	}
+	type args struct {
+		ctx  context.Context
+		snap types.SnapshotInfo
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []types.Snapshot
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Provider{
+				log:          tt.fields.log,
+				clients:      tt.fields.clients,
+				awsAccountID: tt.fields.awsAccountID,
+			}
+			got, err := p.DescribeSnapshots(tt.args.ctx, tt.args.snap)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Provider.DescribeSnapshots() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Provider.DescribeSnapshots() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
