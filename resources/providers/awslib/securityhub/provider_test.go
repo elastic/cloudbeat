@@ -35,6 +35,7 @@ type (
 )
 
 func TestProvider_Describe(t *testing.T) {
+	accountId := "dummy-id"
 	tests := []struct {
 		name    string
 		want    []SecurityHub
@@ -48,6 +49,7 @@ func TestProvider_Describe(t *testing.T) {
 				Enabled:           true,
 				DescribeHubOutput: &securityhub.DescribeHubOutput{},
 				Region:            awslib.DefaultRegion,
+				AccountId:         accountId,
 			}},
 			mocks: clientMocks{
 				"DescribeHub": [2]mocks{
@@ -60,8 +62,9 @@ func TestProvider_Describe(t *testing.T) {
 		{
 			name: "disabled",
 			want: []SecurityHub{{
-				Enabled: false,
-				Region:  awslib.DefaultRegion,
+				Enabled:   false,
+				Region:    awslib.DefaultRegion,
+				AccountId: accountId,
 			}},
 			mocks: clientMocks{
 				"DescribeHub": [2]mocks{
@@ -77,10 +80,12 @@ func TestProvider_Describe(t *testing.T) {
 				Enabled:           true,
 				DescribeHubOutput: &securityhub.DescribeHubOutput{},
 				Region:            awslib.DefaultRegion,
+				AccountId:         accountId,
 			}, {
 				Enabled:           true,
 				DescribeHubOutput: &securityhub.DescribeHubOutput{},
 				Region:            "eu-west-1",
+				AccountId:         accountId,
 			}},
 			mocks: clientMocks{
 				"DescribeHub": [2]mocks{
@@ -113,8 +118,9 @@ func TestProvider_Describe(t *testing.T) {
 				clients[r] = c
 			}
 			p := &Provider{
-				log:     logp.NewLogger("TestProvider_Describe"),
-				clients: clients,
+				log:       logp.NewLogger("TestProvider_Describe"),
+				accountId: accountId,
+				clients:   clients,
 			}
 			got, err := p.Describe(context.Background())
 			if tt.wantErr {
@@ -125,7 +131,7 @@ func TestProvider_Describe(t *testing.T) {
 			assert.ElementsMatch(t, tt.want, got)
 			names := []string{}
 			for _, r := range tt.regions {
-				names = append(names, fmt.Sprintf("securityhub - %s", r))
+				names = append(names, fmt.Sprintf("securityhub-%s-%s", r, p.accountId))
 			}
 			for _, s := range got {
 				assert.Contains(t, names, s.GetResourceName())
