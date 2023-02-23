@@ -8,6 +8,6 @@ sse_algorithm := input.resource.SSEAlgorithm
 
 bucket_policy := input.resource.BucketPolicy
 
-bucket_policy_statement := bucket_policy.Statement[_]
+bucket_policy_statements := object.get(bucket_policy, "Statement", {})
 
 bucket_versioning := input.resource.BucketVersioning

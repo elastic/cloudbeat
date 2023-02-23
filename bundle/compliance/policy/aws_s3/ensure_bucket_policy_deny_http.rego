@@ -6,7 +6,7 @@ import data.compliance.policy.aws_s3.data_adapter
 default rule_evaluation = false
 
 rule_evaluation {
-	statement := data_adapter.bucket_policy_statement
+	statement := data_adapter.bucket_policy_statements[_]
 	statement.Condition.Bool["aws:SecureTransport"] == "false"
 	statement.Action == "s3:*"
 	statement.Effect == "Deny"

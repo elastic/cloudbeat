@@ -20,7 +20,7 @@ test_not_evaluated {
 	not_eval with input as test_data.not_evaluated_s3_bucket
 }
 
-rule_input(effect, principal, action, is_secure_transport) = test_data.generate_s3_bucket("Bucket", "", test_data.generate_s3_bucket_policy_statement(effect, principal, action, is_secure_transport), null)
+rule_input(effect, principal, action, is_secure_transport) = test_data.generate_s3_bucket("Bucket", "", [test_data.generate_s3_bucket_policy_statement(effect, principal, action, is_secure_transport)], null)
 
 eval_fail {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

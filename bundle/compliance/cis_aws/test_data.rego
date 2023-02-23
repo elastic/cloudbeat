@@ -122,7 +122,7 @@ generate_s3_bucket(name, sse_algorithm, bucket_policy_statement, bucket_versioni
 		"SSEAlgorithm": sse_algorithm,
 		"BucketPolicy": {
 			"Version": "1",
-			"Statement": [bucket_policy_statement],
+			"Statement": bucket_policy_statement,
 		},
 		"BucketVersioning": bucket_versioning,
 	},
