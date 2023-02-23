@@ -100,7 +100,7 @@ register_params(
             *k8s_tc.cis_5_2_2.values(),
             *k8s_tc.cis_5_2_6.values(),
             *skip_param_case(
-                skip_list=[*k8s_tc.cis_5_2_7.values()],
+                skip_objects=[*k8s_tc.cis_5_2_7.values()],
                 data_to_report=SkipReportData(
                     url_title="security-team: #4540",
                     url_link="https://github.com/elastic/security-team/issues/4540",
