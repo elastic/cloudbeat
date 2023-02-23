@@ -1,5 +1,12 @@
 # Cloudbeat Deployment
 
+## Table of Contents
+- [Deploying Cloudbeat as a process](#deploying-cloudbeat-as-a-process)
+   - [Self-Managed Kubernetes](#self-managed-kubernetes)
+   - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-eks)
+- [Deploying Cloudbeat with managed Elastic Agent](#deploying-cloudbeat-with-managed-elastic-agent)
+- [Deploying Cloudbeat with standalone Elastic Agent](#deploying-cloudbeat-with-standalone-elastic-agent)
+
 ## Deploying Cloudbeat as a process
 
 Cloudbeat can be deployed as a process, and will not be managed by Elastic Agent. (the fastest way to get started, getting findings)
@@ -85,7 +92,7 @@ This is useful for testing and development purposes.
 2. Collect the relevant information from the Fleet UI:
    - Fleet URL
    - Enrollment token
-3. Use docker to run the standalone agent, for exmaple:
+3. It's recommended to use docker to run the standalone agent, for example:
    ```zsh
    docker run -d --platform=linux/x86_64 -e "FLEET_URL=<FLEET_URL>" -e "FLEET_ENROLLMENT_TOKEN=<FLEET_ENROLLMENT_TOKEN>" -e "FLEET_ENROLL=1" docker.elastic.co/beats/elastic-agent:8.7.0-SNAPSHOT
    ```
