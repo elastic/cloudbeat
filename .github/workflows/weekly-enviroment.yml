@@ -85,15 +85,15 @@ jobs:
 
       - name: Check if the latest index was updated
         uses: nick-fields/retry@v2
+        env:
+          ELASTICSEARCH_URL: ${{ env.ELASTICSEARCH_URL }}
+          INDEX_NAME: logs-cloud_security_posture.findings_latest-default
+          KIBANA_PASSWORD: ${{ env.ELASTICSEARCH_PASSWORD }},
+          MINIMAL_VALUE: 200
         with:
           timeout_minutes: 10m
           max_attempts: 10
           retry_wait_seconds: 60
-          env:
-            ELASTICSEARCH_URL: ${{ env.ELASTICSEARCH_URL }}
-            INDEX_NAME: logs-cloud_security_posture.findings_latest-default
-            KIBANA_PASSWORD: ${{ env.ELASTICSEARCH_PASSWORD }},
-            MINIMAL_VALUE: 200
           command: |
             KIBANA_AUTH=elastic:${KIBANA_PASSWORD}
 
