@@ -133,6 +133,10 @@ create_new_vanilla_integration_manifest_file() {
   # get the item field from the response
   MANIFEST_FILE=$(echo "$manifest_creation_response" | jq -r '.item')
   echo "$MANIFEST_FILE" > manifest.yaml
+
+  # Update the imagePullPolicy to Always
+  yq e -i '.spec.template.spec.containers[0].imagePullPolicy = "Always"' manifest.yaml
+  cat manifest.yaml
 }
 
 #######################################
