@@ -1,4 +1,4 @@
-name: Publish Cloudbeat artifacts
+name: Publish-Cloudbeat-Artifacts
 
 on:
   push:
