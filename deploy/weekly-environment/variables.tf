@@ -60,6 +60,6 @@ variable "deployment_name_prefix" {
 }
 
 variable "endpoint" {
-    default     = "https://staging.found.no/"
-    description = "Optional endpoint for the Elastic Cloud API"
+  default     = "https://staging.found.no/"
+  description = "Optional endpoint for the Elastic Cloud API"
 }
