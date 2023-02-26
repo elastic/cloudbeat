@@ -90,7 +90,6 @@ jobs:
           max_attempts: 10
           retry_wait_seconds: 60
           command: |
-            local install_agent_response
             install_agent_response="$(curl -X GET \
               --url "${elastic_url}/${index_name}/_count" \
               -u "${kibana_auth}" \
@@ -98,10 +97,12 @@ jobs:
               -H 'Connection: keep-alive' \
               -H 'Content-Type: application/json' \
               -H 'kbn-xsrf: true')"
-            local count
+            echo "install_agent_response: $install_agent_response"
             count=$(echo "${install_agent_response}" | jq -r '.count')
             echo "The latest elastic index has $count results"
-            if [ "$count" -lt "$MINIMAL_VALUE" ]; then
+            ## If count is null or less than 200, exit with error
+
+            if [ "$count" == "null" ] || [ -z "$count"] || [ "$count" -lt "$MINIMAL_VALUE" ]; then
               echo "The latest elastic index has less than $MINIMAL_VALUE results"
               exit 1
             fi
