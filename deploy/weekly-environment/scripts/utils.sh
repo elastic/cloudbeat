@@ -135,7 +135,7 @@ create_new_vanilla_integration_manifest_file() {
   echo "$MANIFEST_FILE" > manifest.yaml
 
   # Update the imagePullPolicy to Always
-  yq e -i '.spec.template.spec.containers[0].imagePullPolicy = "Always"' manifest.yaml
+  yq e -i 'select(.kind == "DaemonSet").spec.template.spec.containers[0].imagePullPolicy = "Always"' manifest.yaml
   cat manifest.yaml
 }
 
