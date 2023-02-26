@@ -109,7 +109,6 @@ Resources:
       Roles:
        - !Ref ElasticAgentRole
 
-
   # EC2 Instance to run elastic-agent
   ElasticAgentEc2Instance:
     Type: AWS::EC2::Instance
