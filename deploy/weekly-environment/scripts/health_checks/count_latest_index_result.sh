@@ -4,9 +4,10 @@ ELASTICSEARCH_URL=$1
 KIBANA_PASSWORD=$2
 REQUEST_COUNT=$3
 REQUEST_INTERVAL=$4
-INDEX_NAME=logs-cloud_security_posture.findings_latest-default
 KIBANA_AUTH=elastic:${KIBANA_PASSWORD}
-MINIMAL_VALUE=200
+
+readonly MINIMAL_VALUE=200
+readonly INDEX_NAME=logs-cloud_security_posture.findings_latest-default
 
 
 for i in $(seq 1 "$REQUEST_COUNT"); do
@@ -27,4 +28,4 @@ for i in $(seq 1 "$REQUEST_COUNT"); do
 done
 
 echo "The latest elastic index has less than $MINIMAL_VALUE results for $REQUEST_COUNT consecutive requests made within $REQUEST_INTERVAL"
-exit
+exit 1

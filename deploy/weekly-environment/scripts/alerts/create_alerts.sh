@@ -30,6 +30,7 @@ fi
 #   $2: Kibana auth
 #   $3: Alerts file
 #   $4: Slack webhook url
+#   $5: Slack configuration file
 # Returns:
 #   None
 #######################################
@@ -73,7 +74,6 @@ create_alerts_from_saved_object_file() {
   # Updates the slack connector with the webhook url
   local connector_configuration
   connector_configuration="$(jq --arg slack_webhook_url "${slack_webhook_url}" '.secrets.webhookUrl |= $slack_webhook_url' "${slack_configuration_file}")"
-  echo "New connector configuration: ${connector_configuration}"
   local update_connector_response
   update_connector_response=$(curl -X PUT \
     "${kibana_url}/api/actions/connector/${connector_id}" \
@@ -100,8 +100,6 @@ create_alerts_from_saved_object_file() {
   rules_ids=$(echo "${rules_response}" | jq -r '.data[].id')
   rules_ids=$(echo "${rules_ids}" | tr ' ' '\n' | jq -R . | jq -s .)
 
-  echo "Rules ids: ${rules_ids}"
-
   # Enable all rules
   local enable_rule_response
   enable_rule_response=$(curl -X PATCH \
@@ -113,28 +111,7 @@ create_alerts_from_saved_object_file() {
     -H 'Content-Type: application/json' \
     -d "{\"ids\": ${rules_ids}}")
 
-  echo "Enable rule response: ${enable_rule_response}"
   check_status_code_of_curl "${enable_rule_response}"
-
-
-  for rule_id in ${rules_ids}; do
-    echo "Enabling rule: ${rule_id}"
-    local enable_rule_response
-    enable_rule_response=$(curl -X PATCH \
-      "${kibana_url}/internal/alerting/rules/_bulk_enable" \
-      -u "${kibana_auth}" \
-      -H 'Cache-Control: no-cache' \
-      -H 'Connection: keep-alive' \
-      -H "kbn-xsrf: true" \
-      -H 'Content-Type: application/json' \
-      -d "{\"ids\": ${rules_ids}}")
-
-    echo "Enable rule response: ${enable_rule_response}"
-    check_status_code_of_curl "${enable_rule_response}"
-  done
-
-  echo "Rules response: ${rules_response}"
-  echo "Rules ids: ${rules_ids}"
 
 }
 
