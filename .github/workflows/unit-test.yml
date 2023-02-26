@@ -57,7 +57,7 @@ jobs:
       - name: Validate mocks
         run: just validate-mocks
 
-      - name: Unit-Test with Race Detector
+      - name: Unit-Test
         run: |
           GOOS=linux go test -v -coverpkg=./... -coverprofile=cover.out.tmp ./...
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
