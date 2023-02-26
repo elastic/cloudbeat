@@ -141,7 +141,7 @@ jobs:
                       "value": "${{ github.event.inputs.logLevel }}",
                       "short": true
                     },
-                    {s
+                    {
                       "title": "Kibana URL",
                       "value": ${{ env.KIBANA_URL }},
                       "short": false
