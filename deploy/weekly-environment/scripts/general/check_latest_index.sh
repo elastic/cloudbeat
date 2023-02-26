@@ -7,7 +7,7 @@ KIBANA_AUTH=elastic:${KIBANA_PASSWORD}
 MINIMAL_VALUE=200
 
 default_index_count_response="$(curl -X GET \
-  --url "${ELASTICSEARCH_URL}/${INDEX_NAME}/_search" \
+  --url "${ELASTICSEARCH_URL}/${INDEX_NAME}/_count" \
   -u "${KIBANA_AUTH}" \
   -H 'Cache-Control: no-cache' \
   -H 'Connection: keep-alive' \
