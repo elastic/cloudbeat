@@ -30,18 +30,14 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Setup GO (with caching)
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: .go-version
+          cache: true
+
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
-
-      - name: cache go dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: Packaging
         run: |
