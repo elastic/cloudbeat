@@ -99,7 +99,6 @@ jobs:
 
             default_index_count_response="$(curl -X GET \
               --url "${ELASTICSEARCH_URL}/${INDEX_NAME}/_count" \
-              -u "${KIBANA_AUTH}" \
               -H 'Cache-Control: no-cache' \
               -H 'Connection: keep-alive' \
               -H 'Content-Type: application/json' \
@@ -110,8 +109,8 @@ jobs:
             echo "The latest elastic index has $count results"
 
             if [ "$count" == "null" ] || [ "$count" -lt "$MINIMAL_VALUE" ]; then
-            echo "The latest elastic index has less than $MINIMAL_VALUE results"
-            exit 1
+              echo "The latest elastic index has less than $MINIMAL_VALUE results"
+              exit 1
             fi
 
       - name: Install KSPM vanilla alerts
