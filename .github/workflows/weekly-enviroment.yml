@@ -93,6 +93,8 @@ jobs:
             echo "elastic_url: ${elastic_url}"
             echo "index_name: ${index_name}"
 
+            kibana_auth=elastic:${kibana_password}
+
             install_agent_response="$(curl -X GET \
               --url "${elastic_url}/${index_name}/_count" \
               -u "${kibana_auth}" \
@@ -113,7 +115,7 @@ jobs:
         env:
           elastic_url: ${{ env.ELASTICSEARCH_URL }}
           index_name: 'logs-cloud_security_posture.findings_latest-default'
-          kibana_auth: ${{ env.ELASTICSEARCH_USERNAME }}:{{ env.ELASTICSEARCH_PASSWORD }}
+          kibana_password: ${{ env.ELASTICSEARCH_PASSWORD }}
           MINIMAL_VALUE: 200
 
       - name: Install KSPM vanilla alerts
