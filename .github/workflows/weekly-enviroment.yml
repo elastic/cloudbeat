@@ -68,20 +68,20 @@ jobs:
           echo "::add-mask::$ELASTICSEARCH_PASSWORD"
           echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
 
-      - name: Install KSPM vanilla integration
-        working-directory: ${{ env.SCRIPTS_DIR }}
-        run: |
-          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
-
-      - name: Deploy agent on EC2
-        working-directory: ${{ env.SCRIPTS_DIR }}
-        run: |
-          echo -e "${{ secrets.WEEKLY_ENVIRONMENT_EC2_PRIVATE_KEY }}" > weekly-key.pem
-          chmod 600 weekly-key.pem
-          # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i weekly-key.pem manifest.yaml "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}:~/."
-          # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i weekly-key.pem "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}" "kubectl apply -f manifest.yaml"
+#      - name: Install KSPM vanilla integration
+#        working-directory: ${{ env.SCRIPTS_DIR }}
+#        run: |
+#          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
+#
+#      - name: Deploy agent on EC2
+#        working-directory: ${{ env.SCRIPTS_DIR }}
+#        run: |
+#          echo -e "${{ secrets.WEEKLY_ENVIRONMENT_EC2_PRIVATE_KEY }}" > weekly-key.pem
+#          chmod 600 weekly-key.pem
+#          # Copy the manifest file to the EC2 instance
+#          scp -o StrictHostKeyChecking=no -v -i weekly-key.pem manifest.yaml "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}:~/."
+#          # Apply the manifest file
+#          ssh -o StrictHostKeyChecking=no -v -i weekly-key.pem "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}" "kubectl apply -f manifest.yaml"
 
       - name: Check if the latest index was updated
         uses: nick-fields/retry@v2
@@ -90,6 +90,9 @@ jobs:
           max_attempts: 10
           retry_wait_seconds: 60
           command: |
+            echo "elastic_url: ${elastic_url}"
+            echo "index_name: ${index_name}"
+
             install_agent_response="$(curl -X GET \
               --url "${elastic_url}/${index_name}/_count" \
               -u "${kibana_auth}" \
@@ -97,6 +100,7 @@ jobs:
               -H 'Connection: keep-alive' \
               -H 'Content-Type: application/json' \
               -H 'kbn-xsrf: true')"
+
             echo "install_agent_response: $install_agent_response"
             count=$(echo "${install_agent_response}" | jq -r '.count')
             echo "The latest elastic index has $count results"
@@ -109,7 +113,7 @@ jobs:
         env:
           elastic_url: ${{ env.ELASTICSEARCH_URL }}
           index_name: 'logs-cloud_security_posture.findings_latest-default'
-          kibana_auth: "${{ env.ELASTICSEARCH_USERNAME }}:${{ env.ELASTICSEARCH_PASSWORD }}"
+          kibana_auth: ${{ env.ELASTICSEARCH_USERNAME }}:{{ env.ELASTICSEARCH_PASSWORD }}
           MINIMAL_VALUE: 200
 
       - name: Install KSPM vanilla alerts
