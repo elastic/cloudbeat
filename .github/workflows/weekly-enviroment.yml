@@ -93,9 +93,12 @@ jobs:
             echo "elastic_url: ${elastic_url}"
             echo "index_name: ${index_name}"
 
+            testA = curl https://www.keycdn.com
+            echo "testA: $testA"
+
             kibana_auth=elastic:${kibana_password}
 
-            install_agent_response="$(curl -X GET \
+            install_agent_response="$(curl -v -X GET \
               --url "${elastic_url}/${index_name}/_count" \
               -u "${kibana_auth}" \
               -H 'Cache-Control: no-cache' \
