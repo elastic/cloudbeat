@@ -24,6 +24,7 @@ env:
   WORKING_DIR: deploy/weekly-environment
   SCRIPTS_DIR: deploy/weekly-environment/scripts/benchmarks/kspm_vanilla
   ALERTS_DIR: deploy/weekly-environment/scripts/alerts
+  HC_DIR: deploy/weekly-environment/scripts/health_checks
   TF_VAR_ec_api_key: ${{ secrets.WEEKLY_ENVIRONMENT_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
@@ -84,34 +85,13 @@ jobs:
           ssh -o StrictHostKeyChecking=no -v -i weekly-key.pem "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}" "kubectl apply -f manifest.yaml"
 
       - name: Check if the latest index was updated
-        uses: nick-fields/retry@v2
+        working-directory: ${{ env.HC_DIR }}
         env:
-          ELASTICSEARCH_URL: ${{ env.ELASTICSEARCH_URL }}
-          INDEX_NAME: logs-cloud_security_posture.findings_latest-default
-          KIBANA_PASSWORD: ${{ env.ELASTICSEARCH_PASSWORD }},
-          MINIMAL_VALUE: 200
-        with:
-          timeout_minutes: 10m
           max_attempts: 10
           retry_wait_seconds: 60
-          command: |
-            KIBANA_AUTH=elastic:${KIBANA_PASSWORD}
+        run: |
+          ./count_latest_index_result.sh ${{ env.ELASTICSEARCH_URL }} ${{ env.ELASTICSEARCH_PASSWORD }} ${{ env.max_attempts }} ${{ env.retry_wait_seconds }}
 
-            default_index_count_response="$(curl -X GET \
-              --url "${ELASTICSEARCH_URL}/${INDEX_NAME}/_count" \
-              -H 'Cache-Control: no-cache' \
-              -H 'Connection: keep-alive' \
-              -H 'Content-Type: application/json' \
-              -H 'kbn-xsrf: true')"
-
-            echo "The default index has $default_index_count_response results"
-            count=$(echo "${default_index_count_response}" | jq -r '.count')
-            echo "The latest elastic index has $count results"
-
-            if [ "$count" == "null" ] || [ "$count" -lt "$MINIMAL_VALUE" ]; then
-              echo "The latest elastic index has less than $MINIMAL_VALUE results"
-              exit 1
-            fi
 
       - name: Install KSPM vanilla alerts
         id: install_vanilla_alerts
