@@ -32,6 +32,8 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
+const EncryptionNotFound = "ServerSideEncryptionConfigurationNotFoundError"
+
 func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return s3Client.NewFromConfig(cfg)
@@ -63,7 +65,6 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 			}
 
 			bucketPolicy, policyErr := p.GetBucketPolicy(ctx, bucket.Name, region)
-
 			if policyErr != nil {
 				p.log.Errorf("Could not get bucket policy for bucket %s. Error: %v", *bucket.Name, policyErr)
 			}
@@ -171,13 +172,13 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
-			if apiErr.ErrorCode() == "ServerSideEncryptionConfigurationNotFoundError" {
+			if apiErr.ErrorCode() == EncryptionNotFound {
 				p.log.Debugf("Bucket encryption for bucket %s does not exist", *bucketName)
 				return "", nil
 			}
 		}
 
-		return "", err
+		return "UnknownEncryptionAlgorithm", err
 	}
 
 	if len(encryption.ServerSideEncryptionConfiguration.Rules) <= 0 {
@@ -202,17 +203,17 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (stri
 	return region, nil
 }
 
-func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, region string) (BucketVersioning, error) {
-	bucketVersioning := BucketVersioning{false, false}
+func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, region string) (*BucketVersioning, error) {
+	bucketVersioning := &BucketVersioning{false, false}
 
 	client, err := awslib.GetClient(&region, p.clients)
 	if err != nil {
-		return bucketVersioning, err
+		return nil, err
 	}
 
 	bucketVersioningResponse, err := client.GetBucketVersioning(ctx, &s3Client.GetBucketVersioningInput{Bucket: bucketName})
 	if err != nil {
-		return bucketVersioning, err
+		return nil, err
 	}
 
 	if bucketVersioningResponse.Status == types.BucketVersioningStatusEnabled {

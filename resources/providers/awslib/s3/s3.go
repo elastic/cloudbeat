@@ -28,7 +28,7 @@ type BucketDescription struct {
 	Name             string
 	SSEAlgorithm     string
 	BucketPolicy     BucketPolicy
-	BucketVersioning BucketVersioning
+	BucketVersioning *BucketVersioning
 }
 
 // TODO: This can be better typed, but this is a complex object. See this library for example: https://github.com/liamg/iamgo/
