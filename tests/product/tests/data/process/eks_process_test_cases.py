@@ -281,36 +281,26 @@ eks_process_config_1 = {
     **cis_eks_3_2_3_config_1,
     **cis_eks_3_2_4_config_1,
     **cis_eks_3_2_5_config_1,
-    **dict(
-        zip(
-            cis_eks_3_2_5_config_1_skip.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_3_2_5_config_1_skip.values()],
-                data_to_report=SkipReportData(
-                    skip_reason=(
-                        "When streamingConnectionIdleTimeout or "
-                        "--streaming-connection-idle-timeout equals 0 evaluation is passed "
-                    ),
-                    url_title="cloudbeat: #632",
-                    url_link="https://github.com/elastic/cloudbeat/issues/632",
-                ),
+    **skip_param_case(
+        cis_eks_3_2_5_config_1_skip,
+        data_to_report=SkipReportData(
+            skip_reason=(
+                "When streamingConnectionIdleTimeout or "
+                "--streaming-connection-idle-timeout equals 0 evaluation is passed "
             ),
+            url_title="cloudbeat: #632",
+            url_link="https://github.com/elastic/cloudbeat/issues/632",
         ),
     ),
     **cis_eks_3_2_6_config_1,
     **cis_eks_3_2_7_config_1,
     **cis_eks_3_2_8_config_1,
-    **dict(
-        zip(
-            cis_eks_3_2_9_config_1.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_3_2_9_config_1.values()],
-                data_to_report=SkipReportData(
-                    skip_reason="Rule 3.2.9 - unclear CIS definition and implementation",
-                    url_title="security-team: #4947",
-                    url_link="https://github.com/elastic/security-team/issues/4947",
-                ),
-            ),
+    **skip_param_case(
+        skip_objects=cis_eks_3_2_9_config_1,
+        data_to_report=SkipReportData(
+            skip_reason="Rule 3.2.9 - unclear CIS definition and implementation",
+            url_title="security-team: #4947",
+            url_link="https://github.com/elastic/security-team/issues/4947",
         ),
     ),
     **cis_eks_3_2_10_config_1,
@@ -319,61 +309,41 @@ eks_process_config_1 = {
 
 eks_process_config_2 = {
     **cis_eks_3_2_4_config_2,
-    **dict(
-        zip(
-            cis_eks_3_2_4_config_2_skip.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_3_2_4_config_2_skip.values()],
-                data_to_report=SkipReportData(
-                    skip_reason="Rule 3.2.4 - When multiple args provided cloudbeat evaluates results incorrectly.",
-                    url_title="cloudbeat: #719",
-                    url_link="https://github.com/elastic/cloudbeat/issues/719",
-                ),
-            ),
+    **skip_param_case(
+        cis_eks_3_2_4_config_2_skip,
+        data_to_report=SkipReportData(
+            skip_reason="Rule 3.2.4 - When multiple args provided cloudbeat evaluates results incorrectly.",
+            url_title="cloudbeat: #719",
+            url_link="https://github.com/elastic/cloudbeat/issues/719",
         ),
     ),
     **cis_eks_3_2_5_config_2,
-    **dict(
-        zip(
-            cis_eks_3_2_5_config_2_skip.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_3_2_5_config_2_skip.values()],
-                data_to_report=SkipReportData(
-                    skip_reason=(
-                        "When streamingConnectionIdleTimeout or "
-                        "--streaming-connection-idle-timeout equals 0 evaluation is passed "
-                    ),
-                    url_title="cloudbeat: #632",
-                    url_link="https://github.com/elastic/cloudbeat/issues/632",
-                ),
+    **skip_param_case(
+        cis_eks_3_2_5_config_2_skip,
+        data_to_report=SkipReportData(
+            skip_reason=(
+                "When streamingConnectionIdleTimeout or "
+                "--streaming-connection-idle-timeout equals 0 evaluation is passed"
             ),
+            url_title="cloudbeat: #632",
+            url_link="https://github.com/elastic/cloudbeat/issues/632",
         ),
     ),
     **cis_eks_3_2_7_config_2,
-    **dict(
-        zip(
-            cis_eks_3_2_7_config_2_skip.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_3_2_7_config_2_skip.values()],
-                data_to_report=SkipReportData(
-                    skip_reason="Rule 3.2.7 - When multiple args provided cloudbeat evaluates results incorrectly.",
-                    url_title="cloudbeat: #719",
-                    url_link="https://github.com/elastic/cloudbeat/issues/719",
-                ),
-            ),
+    **skip_param_case(
+        cis_eks_3_2_7_config_2_skip,
+        data_to_report=SkipReportData(
+            skip_reason="Rule 3.2.7 - When multiple args provided cloudbeat evaluates results incorrectly.",
+            url_title="cloudbeat: #719",
+            url_link="https://github.com/elastic/cloudbeat/issues/719",
         ),
     ),
-    **dict(
-        zip(
-            cis_eks_3_2_9_config_2.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_3_2_9_config_2.values()],
-                data_to_report=SkipReportData(
-                    skip_reason="Rule 3.2.9 - unclear CIS definition and implementation",
-                    url_title="security-team: #4947",
-                    url_link="https://github.com/elastic/security-team/issues/4947",
-                ),
-            ),
+    **skip_param_case(
+        cis_eks_3_2_9_config_2,
+        data_to_report=SkipReportData(
+            skip_reason="Rule 3.2.9 - unclear CIS definition and implementation",
+            url_title="security-team: #4947",
+            url_link="https://github.com/elastic/security-team/issues/4947",
         ),
     ),
 }

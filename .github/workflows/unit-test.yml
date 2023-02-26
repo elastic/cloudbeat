@@ -49,12 +49,8 @@ jobs:
 
       - name: Unit-Test Cloudbeat
         run: |
-          GOOS=linux go test -v -coverpkg=./... -coverprofile=cover.out.tmp ./...
+          GOOS=linux go test -v -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
-
-      - name: Unit-Test with Race Detector
-        run: |
-          GOOS=linux go test -v -race ./...
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v3
