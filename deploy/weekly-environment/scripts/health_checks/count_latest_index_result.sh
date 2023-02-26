@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# This script is used to check if the latest elastic index has at least 200 results.
+# It will make a request to the findings latest index and check if the response has at least 200 results.
+# The script requires four arguments:
+# 1. Elasticsearch URL
+# 2. Kibana password
+# 3. Request count
+# 4. Request interval
+
 ELASTICSEARCH_URL=$1
 KIBANA_PASSWORD=$2
 REQUEST_COUNT=$3

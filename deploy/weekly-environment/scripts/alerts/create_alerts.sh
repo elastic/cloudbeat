@@ -96,6 +96,7 @@ create_alerts_from_saved_object_file() {
       -H "kbn-xsrf: true" \
       -H 'Content-Type: application/json')
 
+  check_status_code_of_curl "${rules_response}"
   # Covert to rules ids to array
   rules_ids=$(echo "${rules_response}" | jq -r '.data[].id')
   rules_ids=$(echo "${rules_ids}" | tr ' ' '\n' | jq -R . | jq -s .)
