@@ -45,44 +45,44 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
 
-      - name: Terraform Init
-        run: terraform init -no-color
-
-      - name: Terraform Validate
-        run: terraform validate -no-color
-
-      - name: Deploy Elastic Cloud
-        run: terraform apply --auto-approve
-
-      - name: Set terraform output as env variable
-        run: |
-          echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
-          echo "ELASTICSEARCH_URL=$(terraform output elasticsearch_url)" >> $GITHUB_ENV
-
-      - name: Set sensitive terraform output as env variable
-        run: |
-          export ELASTICSEARCH_USERNAME=$(terraform output elasticsearch_username)
-          echo "::add-mask::$ELASTICSEARCH_USERNAME"
-          echo "ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME" >> $GITHUB_ENV
-
-          export ELASTICSEARCH_PASSWORD=$(terraform output elasticsearch_password)
-          echo "::add-mask::$ELASTICSEARCH_PASSWORD"
-          echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
-
-      - name: Install KSPM vanilla integration
-        working-directory: ${{ env.SCRIPTS_DIR }}
-        run: |
-          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
-
-      - name: Deploy agent on EC2
-        working-directory: ${{ env.SCRIPTS_DIR }}
-        run: |
-          echo -e "${{ secrets.WEEKLY_ENVIRONMENT_EC2_PRIVATE_KEY }}" > weekly-key.pem
-          chmod 600 weekly-key.pem
-          # Copy the manifest file to the EC2 instance
-          scp -o StrictHostKeyChecking=no -v -i weekly-key.pem manifest.yaml "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}:~/."
-          # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i weekly-key.pem "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}" "kubectl apply -f manifest.yaml"
+#      - name: Terraform Init
+#        run: terraform init -no-color
+#
+#      - name: Terraform Validate
+#        run: terraform validate -no-color
+#
+#      - name: Deploy Elastic Cloud
+#        run: terraform apply --auto-approve
+#
+#      - name: Set terraform output as env variable
+#        run: |
+#          echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
+#          echo "ELASTICSEARCH_URL=$(terraform output elasticsearch_url)" >> $GITHUB_ENV
+#
+#      - name: Set sensitive terraform output as env variable
+#        run: |
+#          export ELASTICSEARCH_USERNAME=$(terraform output elasticsearch_username)
+#          echo "::add-mask::$ELASTICSEARCH_USERNAME"
+#          echo "ELASTICSEARCH_USERNAME=$ELASTICSEARCH_USERNAME" >> $GITHUB_ENV
+#
+#          export ELASTICSEARCH_PASSWORD=$(terraform output elasticsearch_password)
+#          echo "::add-mask::$ELASTICSEARCH_PASSWORD"
+#          echo "ELASTICSEARCH_PASSWORD=$ELASTICSEARCH_PASSWORD" >> $GITHUB_ENV
+#
+#      - name: Install KSPM vanilla integration
+#        working-directory: ${{ env.SCRIPTS_DIR }}
+#        run: |
+#          ./install-kspm-vanilla-integration.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
+#
+#      - name: Deploy agent on EC2
+#        working-directory: ${{ env.SCRIPTS_DIR }}
+#        run: |
+#          echo -e "${{ secrets.WEEKLY_ENVIRONMENT_EC2_PRIVATE_KEY }}" > weekly-key.pem
+#          chmod 600 weekly-key.pem
+#          # Copy the manifest file to the EC2 instance
+#          scp -o StrictHostKeyChecking=no -v -i weekly-key.pem manifest.yaml "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}:~/."
+#          # Apply the manifest file
+#          ssh -o StrictHostKeyChecking=no -v -i weekly-key.pem "ubuntu@${{ secrets.WEEKLY_ENVIRONMENT_EC2_PUBLIC_IP }}" "kubectl apply -f manifest.yaml"
 
       - name: Check if the latest index was updated
         uses: nick-fields/retry@v2
@@ -92,54 +92,75 @@ jobs:
           max_attempts: 10
           retry_wait_seconds: 60
           command: |
-            ./check_latest_index.sh ${{ env.ELASTICSEARCH_URL }} ${{ env.ELASTICSEARCH_PASSWORD }}
+            ELASTICSEARCH_URL=https://snapshot-8-7-manifest-checks.es.us-central1.gcp.foundit.no
+            INDEX_NAME=logs-cloud_security_posture.findings_latest-default
+            KIBANA_PASSWORD=GlveuWm1gvheHSo5KlzOzpfZ
+            KIBANA_AUTH=elastic:${KIBANA_PASSWORD}
+            MINIMAL_VALUE=200
 
-      - name: Install KSPM vanilla alerts
-        id: install_vanilla_alerts
-        working-directory: ${{ env.ALERTS_DIR }}
-        run: |
-          ./create_alerts.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }} ${{ secrets.SLACK_WEBHOOK_URL }}
+            default_index_count_response="$(curl -X GET \
+              --url "${ELASTICSEARCH_URL}/${INDEX_NAME}/_search" \
+              -u "${KIBANA_AUTH}" \
+              -H 'Cache-Control: no-cache' \
+              -H 'Connection: keep-alive' \
+              -H 'Content-Type: application/json' \
+              -H 'kbn-xsrf: true')"
 
-      # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
-      - name: Send custom JSON data to Slack workflow
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "text": "A new deployment job has been triggered",
-              "attachments": [
-                {
-                  "color": "#36a64f",
-                  "fields": [
-                    {
-                      "title": "Environment",
-                      "value": "${{ github.event.inputs.environment }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Log level",
-                      "value": "${{ github.event.inputs.logLevel }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Kibana URL",
-                      "value": ${{ env.KIBANA_URL }},
-                      "short": false
-                    },
-                    {
-                      "title": "ElasticSearch username",
-                      "value": ${{ env.ELASTICSEARCH_USERNAME }},
-                      "short": false
-                    },
-                    {
-                      "title": "ElasticSearch password",
-                      "value": ${{ env.ELASTICSEARCH_PASSWORD }},
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+            echo "The default index has $default_index_count_response results"
+            count=$(echo "${default_index_count_response}" | jq -r '.count')
+            echo "The latest elastic index has $count results"
+
+            if [ "$count" == "null" ] || [ "$count" -lt "$MINIMAL_VALUE" ]; then
+            echo "The latest elastic index has less than $MINIMAL_VALUE results"
+            exit 1
+            fi
+
+#      - name: Install KSPM vanilla alerts
+#        id: install_vanilla_alerts
+#        working-directory: ${{ env.ALERTS_DIR }}
+#        run: |
+#          ./create_alerts.sh ${{ env.KIBANA_URL }} ${{ env.ELASTICSEARCH_PASSWORD }} ${{ secrets.SLACK_WEBHOOK_URL }}
+#
+#      # Once https://github.com/slackapi/slack-github-action/issues/84 will be resolved we can push the payload to a different file
+#      - name: Send custom JSON data to Slack workflow
+#        uses: slackapi/slack-github-action@v1.23.0
+#        with:
+#          payload: |
+#            {
+#              "text": "A new deployment job has been triggered",
+#              "attachments": [
+#                {
+#                  "color": "#36a64f",
+#                  "fields": [
+#                    {
+#                      "title": "Environment",
+#                      "value": "${{ github.event.inputs.environment }}",
+#                      "short": true
+#                    },
+#                    {
+#                      "title": "Log level",
+#                      "value": "${{ github.event.inputs.logLevel }}",
+#                      "short": true
+#                    },
+#                    {
+#                      "title": "Kibana URL",
+#                      "value": ${{ env.KIBANA_URL }},
+#                      "short": false
+#                    },
+#                    {
+#                      "title": "ElasticSearch username",
+#                      "value": ${{ env.ELASTICSEARCH_USERNAME }},
+#                      "short": false
+#                    },
+#                    {
+#                      "title": "ElasticSearch password",
+#                      "value": ${{ env.ELASTICSEARCH_PASSWORD }},
+#                      "short": false
+#                    }
+#                  ]
+#                }
+#              ]
+#            }
+#        env:
+#          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+#          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
