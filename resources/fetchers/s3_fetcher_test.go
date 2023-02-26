@@ -73,7 +73,7 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 		{
 			name: "Should get an S3 bucket",
 			s3mocksReturnVals: s3mocksReturnVals{
-				"DescribeBuckets": {[]awslib.AwsResource{s3.BucketDescription{Name: "my test bucket", SSEAlgorithm: ""}}, nil},
+				"DescribeBuckets": {[]awslib.AwsResource{s3.BucketDescription{Name: "my test bucket", SSEAlgorithm: nil}}, nil},
 			},
 			numExpectedResults: 1,
 		},

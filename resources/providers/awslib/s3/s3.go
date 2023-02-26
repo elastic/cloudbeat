@@ -25,10 +25,10 @@ import (
 )
 
 type BucketDescription struct {
-	Name             string
-	SSEAlgorithm     string
-	BucketPolicy     BucketPolicy
-	BucketVersioning *BucketVersioning
+	Name             string            `json:"name"`
+	SSEAlgorithm     *string           `json:"sse_algorithm,omitempty"`
+	BucketPolicy     BucketPolicy      `json:"bucket_policy,omitempty"`
+	BucketVersioning *BucketVersioning `json:"bucket_versioning,omitempty"`
 }
 
 // TODO: This can be better typed, but this is a complex object. See this library for example: https://github.com/liamg/iamgo/
