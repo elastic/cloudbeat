@@ -76,11 +76,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Set up GO (with caching)
+      - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version-file: .go-version
-          cache: true
 
       - name: Fetch OPA version
         run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
@@ -89,6 +88,16 @@ jobs:
         uses: open-policy-agent/setup-opa@v2
         with:
           version: ${{ env.OPA_VERSION }}
+
+      - name: cache go dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: build cloudbeat
         run: make

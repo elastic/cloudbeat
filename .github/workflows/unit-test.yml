@@ -26,12 +26,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Set up GO (with caching)
-        uses: actions/setup-go@v3
-        with:
-          go-version-file: .go-version
-          cache: true
-
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
@@ -53,7 +47,7 @@ jobs:
       - name: Validate mocks
         run: just validate-mocks
 
-      - name: Unit-Test
+      - name: Unit-Test Cloudbeat
         run: |
           GOOS=linux go test -v -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
@@ -118,12 +112,9 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-
-      - name: Set up GO (with caching)
-        uses: actions/setup-go@v3
+      - uses: actions/setup-go@v3
         with:
           go-version-file: .go-version
-          cache: true
 
       - name: Check out the repo
         uses: actions/checkout@v3
