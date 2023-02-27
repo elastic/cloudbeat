@@ -52,8 +52,8 @@ jobs:
           go-version-file: .go-version
           cache: true
 
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+#      - name: Init Hermit
+#        run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: build cloudbeat binary
         uses: magefile/mage-action@v2
