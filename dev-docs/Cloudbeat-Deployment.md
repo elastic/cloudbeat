@@ -86,7 +86,7 @@ This is useful for testing and development purposes.
    - For CSPM it's recommended to use the run the agent as a linux binary (darwin is not supported yet).
 
 
-## Deploying Cloudbeat with standalone Elastic Agent
+## Deploying Fleet enrolled Elastic Agent in a container
 
 1. Spin up Elastic stack (See [ELK stack setup](ELK-Deployment.md))
 2. Collect the relevant information from the Fleet UI:
@@ -94,5 +94,11 @@ This is useful for testing and development purposes.
    - Enrollment token
 3. It's recommended to use docker to run the standalone agent, for example:
    ```zsh
-   docker run -d --platform=linux/x86_64 -e "FLEET_URL=<FLEET_URL>" -e "FLEET_ENROLLMENT_TOKEN=<FLEET_ENROLLMENT_TOKEN>" -e "FLEET_ENROLL=1" docker.elastic.co/beats/elastic-agent:8.7.0-SNAPSHOT
+   docker run -d --platform=linux/x86_64 \
+   -e "FLEET_URL=<fleet-server-host-url>" \
+   -e "FLEET_ENROLLMENT_TOKEN=<enrollment-token>" \
+   -e "FLEET_ENROLL=1" \
+   docker.elastic.co/beats/elastic-agent:8.7.0-SNAPSHOT
    ```
+
+For more information see [Run Elastic Agent in a container](https://www.elastic.co/guide/en/fleet/current/elastic-agent-container.html#elastic-agent-container).
