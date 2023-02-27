@@ -1,9 +1,9 @@
 variable "namespace" {
-  type = string
+  type    = string
   default = "default"
 }
 
 variable "replica_count" {
-  type = string
+  type    = string
   default = "2"
 }

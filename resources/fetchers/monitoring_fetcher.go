@@ -91,14 +91,14 @@ func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if len(r.Items) == 0 {
 		return fetching.ResourceMetadata{
 			Type:    fetching.MonitoringIdentity,
-			SubType: fetching.TrailType,
+			SubType: fetching.MultiTrailsType,
 		}, nil
 	}
 	id := fmt.Sprintf("cloudtrail-%s", *r.identity.Account)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    fetching.MonitoringIdentity,
-		SubType: fetching.TrailType,
+		SubType: fetching.MultiTrailsType,
 		Name:    id,
 	}, nil
 }
@@ -109,17 +109,9 @@ func (s SecurityHubResource) GetData() any {
 }
 
 func (s SecurityHubResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	if s.DescribeHubOutput == nil || s.HubArn == nil {
-		return fetching.ResourceMetadata{
-			ID:      "",
-			Name:    "",
-			Type:    fetching.MonitoringIdentity,
-			SubType: fetching.SecurityHubType,
-		}, nil
-	}
 	return fetching.ResourceMetadata{
-		ID:      *s.HubArn,
-		Name:    *s.HubArn,
+		ID:      s.GetResourceArn(),
+		Name:    s.GetResourceName(),
 		Type:    fetching.MonitoringIdentity,
 		SubType: fetching.SecurityHubType,
 	}, nil
