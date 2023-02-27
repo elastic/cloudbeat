@@ -7,6 +7,7 @@ import data.lib.test
 test_violation {
 	eval_fail with input as rule_input("my bucket", "")
 	eval_fail with input as rule_input("my bucket", "FakeAlgorithm")
+	eval_fail with input as rule_input("my bucket", "NoEncryption")
 }
 
 test_pass {
@@ -16,6 +17,7 @@ test_pass {
 
 test_not_evaluated {
 	not_eval with input as test_data.not_evaluated_s3_bucket
+	not_eval with input as rule_input("my bucket", null)
 }
 
 rule_input(name, sse_algorithm) = test_data.generate_s3_bucket(name, sse_algorithm, null, null)

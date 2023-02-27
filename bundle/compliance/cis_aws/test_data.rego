@@ -104,13 +104,13 @@ create_date_from_ns(x) = time_str {
 
 not_evaluated_s3_bucket = {
 	"resource": {
-		"Name": "my-bucket",
-		"SSEAlgorithm": "AES256",
-		"BucketPolicy": {
+		"name": "my-bucket",
+		"sse_algorithm": "AES256",
+		"bucket_policy": {
 			"Version": "2012-10-17",
 			"Statement": [generate_s3_bucket_policy_statement("Deny", "*", "s3:*", "true")],
 		},
-		"BucketVersioning": generate_s3_bucket_versioning(true, true),
+		"bucket_versioning": generate_s3_bucket_versioning(true, true),
 	},
 	"type": "wrong type",
 	"subType": "wrong sub type",
@@ -118,13 +118,13 @@ not_evaluated_s3_bucket = {
 
 generate_s3_bucket(name, sse_algorithm, bucket_policy_statement, bucket_versioning) = {
 	"resource": {
-		"Name": name,
-		"SSEAlgorithm": sse_algorithm,
-		"BucketPolicy": {
+		"name": name,
+		"sse_algorithm": sse_algorithm,
+		"bucket_policy": {
 			"Version": "1",
 			"Statement": bucket_policy_statement,
 		},
-		"BucketVersioning": bucket_versioning,
+		"bucket_versioning": bucket_versioning,
 	},
 	"type": "cloud-storage",
 	"subType": "aws-s3",
@@ -142,6 +142,16 @@ generate_s3_bucket_policy_statement(effect, principal, action, is_secure_transpo
 generate_s3_bucket_versioning(enabled, mfa_delete) = {
 	"Enabled": enabled,
 	"MfaDelete": mfa_delete,
+}
+
+s3_bucket_without_policy = {
+	"resource": {
+		"name": "my-bucket",
+		"sse_algorithm": "AES256",
+		"bucket_versioning": "",
+	},
+	"type": "cloud-storage",
+	"subType": "aws-s3",
 }
 
 generate_security_group(entry) = {

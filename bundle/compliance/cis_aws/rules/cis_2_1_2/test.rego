@@ -10,14 +10,29 @@ test_violation {
 	eval_fail with input as rule_input("Deny", "*", "wrong", "false")
 	eval_fail with input as rule_input("Deny", "wrong", "s3:*", "false")
 	eval_fail with input as rule_input("Allow", "*", "s3:*", "false")
+	eval_fail with input as test_data.generate_s3_bucket(
+		"Bucket", "", [
+			test_data.generate_s3_bucket_policy_statement("Allow", "*", "s3:*", "false"),
+			test_data.generate_s3_bucket_policy_statement("Allow", "*", "s3:*", "false"),
+		],
+		null,
+	)
 }
 
 test_pass {
 	eval_pass with input as rule_input("Deny", "*", "s3:*", "false")
+	eval_pass with input as test_data.generate_s3_bucket(
+		"Bucket", "", [
+			test_data.generate_s3_bucket_policy_statement("Deny", "*", "s3:*", "false"),
+			test_data.generate_s3_bucket_policy_statement("Allow", "*", "s3:*", "false"),
+		],
+		null,
+	)
 }
 
 test_not_evaluated {
 	not_eval with input as test_data.not_evaluated_s3_bucket
+	not_eval with input as test_data.s3_bucket_without_policy
 }
 
 rule_input(effect, principal, action, is_secure_transport) = test_data.generate_s3_bucket("Bucket", "", [test_data.generate_s3_bucket_policy_statement(effect, principal, action, is_secure_transport)], null)

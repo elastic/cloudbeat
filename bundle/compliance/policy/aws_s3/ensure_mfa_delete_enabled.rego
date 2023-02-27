@@ -13,6 +13,7 @@ rule_evaluation {
 
 finding = result {
 	data_adapter.is_s3
+	not data_adapter.bucket_versioning == null
 
 	result := lib_common.generate_result_without_expected(
 		lib_common.calculate_result(rule_evaluation),
