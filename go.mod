@@ -475,7 +475,7 @@ replace (
 
 )
 
-replace github.com/aquasecurity/trivy => github.com/jeniawhite/trivy v0.0.2
+replace github.com/aquasecurity/trivy => github.com/jeniawhite/trivy v0.0.0
 
 // exclude github.com/elastic/elastic-agent v0.0.0-20220831162706-5f1e54f40d3e
 
