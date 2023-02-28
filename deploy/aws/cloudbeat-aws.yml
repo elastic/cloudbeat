@@ -16,6 +16,7 @@ cloudbeat:
     - name: aws-trail
     - name: aws-monitoring
     - name: aws-rds
+    - name: aws-kms
   evaluator:
     decision_logs: false
 # =================================== Kibana ===================================
