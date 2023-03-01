@@ -113,3 +113,6 @@ jobs:
 
       - name: Mage checkLicenseHeaders
         run: mage checkLicenseHeaders
+
+      - name: Validate mocks
+        run: just validate-mocks

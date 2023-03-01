@@ -40,9 +40,6 @@ jobs:
         run: |
           cp bundle.tar.gz evaluator/
 
-      - name: Validate mocks
-        run: just validate-mocks
-
       - name: Unit-Test
         run: |
           GOOS=linux go test -v -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
