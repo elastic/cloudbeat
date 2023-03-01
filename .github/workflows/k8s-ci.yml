@@ -93,7 +93,7 @@ jobs:
 
   k8s_functional_tests:
     # Run only selected tests on PRs
-    if: github.event.pull_request
+    if: github.event_name == 'pull_request'
     name: ${{ matrix.test-target }-tests
     needs: [Build]
     runs-on: ubuntu-20.04
