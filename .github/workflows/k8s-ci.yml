@@ -32,7 +32,6 @@ jobs:
         uses: magnetikonline/action-golang-cache@v3
         with:
           go-version-file: .go-version
-          cache: true
 
       - name: build cloudbeat binary
         uses: magefile/mage-action@v2

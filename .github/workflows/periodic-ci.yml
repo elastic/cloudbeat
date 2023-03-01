@@ -80,7 +80,6 @@ jobs:
         uses: magnetikonline/action-golang-cache@v3
         with:
           go-version-file: .go-version
-          cache: true
 
       - name: Fetch OPA version
         run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
