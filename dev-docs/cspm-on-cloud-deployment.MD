@@ -6,7 +6,8 @@ Log into with your elastic account
 Click on `Create Deployment`
 Adjust the settings for your need, note that certain versions only exist on certain regions. 
 At the time of writing this, `latest` and `snapshot` versions are avilable on `us-west2` 
-![image](https://user-images.githubusercontent.com/51442161/222231445-5033bd97-9f19-4241-9784-876e92417a23.png)
+<img width="600" alt="image" src="https://user-images.githubusercontent.com/51442161/222231445-5033bd97-9f19-4241-9784-876e92417a23.png">
+
 
 Launch your Cloud Deployment
 
@@ -15,18 +16,18 @@ Launch your Cloud Deployment
 
 ## Create Agent Policy
 Navigate to Fleet>Agent policies and click on `Create agent policy`
-<img width="1254" alt="image" src="https://user-images.githubusercontent.com/51442161/222233724-fcdc7d5d-d35b-4fb8-aed9-c157471c789d.png">
+<img width="600" alt="image" src="https://user-images.githubusercontent.com/51442161/222233724-fcdc7d5d-d35b-4fb8-aed9-c157471c789d.png">
 
 In the Flyout, give it a name (you'll need it later) and click on `Create agent policy`
 A new policy has been added to your list of agent policies, click on its name and then on `Add integration`
 In the intergations screen, select the needed integration, for this tutorial, we will use CSPM
-<img width="1703" alt="image" src="https://user-images.githubusercontent.com/51442161/222234500-39dbda6c-8880-4f43-99f4-9cc2d3c7a655.png">
+<img width="600" alt="image" src="https://user-images.githubusercontent.com/51442161/222234500-39dbda6c-8880-4f43-99f4-9cc2d3c7a655.png">
 
 Click on `Add Cloud Security Posture Management (CSPM)`
 In the configurations screen, select the Amazon Web Services provider and add your `Access Key ID` and `Secret Access Key` in the `Direct access keys` option.
 
 Run `cat ~/.aws/credentials` to get the keys
-![image](https://user-images.githubusercontent.com/51442161/222235991-5ea07776-d5fe-4a9c-9629-a619c5326970.png)
+<img width="600" alt="image" src="https://user-images.githubusercontent.com/51442161/222235991-5ea07776-d5fe-4a9c-9629-a619c5326970.png">
 
 Save the intergation
 
