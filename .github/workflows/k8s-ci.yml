@@ -6,7 +6,7 @@ on:
       - main
       - '[0-9]+.[0-9]+'
     types: [opened, synchronize, reopened]
-  # On post-merge execution running eks tests
+
   push:
     branches:
       - main
@@ -20,8 +20,157 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  Build:
+    name: Build
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Setup GO (with caching)
+        uses: magnetikonline/action-golang-cache@v3
+        with:
+          go-version-file: .go-version
+          cache: true
+
+      - name: build cloudbeat binary
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: build
+
+      - name: build opa bundle
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: BuildOpaBundle
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Build dependencies
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.workflow }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build cloudbeat-docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: cloudbeat:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
+
+      - name: Build elastic-agent
+        run: |
+          make build_elastic_agent_docker_image
+
+      - name: Build pytest-docker
+        uses: docker/build-push-action@v4
+        with:
+          context: ./tests/.
+          push: false
+          tags: cloudbeat-test:latest
+          cache-from: type=local,mode=max,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
+
+      - name: Cache docker images
+        uses: actions/cache@v3
+        with:
+          path: /tmp/*.tar
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
+
+      - name: Move cache
+        run: |
+          ./.ci/scripts/gh-cache.sh
+        shell: bash
+
   k8s_functional_tests:
+    # Run only selected tests on PRs
+    if: github.event.pull_request
+    name: ${{ matrix.test-target }-tests
+    needs: [Build]
+    runs-on: ubuntu-20.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        values_file: tests/deploy/values/ci.yml  # default values file
+        range: ''                                # default range
+        include:
+          - test-target: pre_merge_agent
+            values_file: tests/deploy/values/ci-sa-agent.yml
+          - test-target: pre_merge
+          - test-target: file_system_rules
+            range: '0..4'
+          - test-target: k8s_object_rules
+            range: '0..4'
+          - test-target: process_scheduler_rules
+            range: '0..4'
+          - test-target: process_api_server_rules
+            range: '0..4'
+          - test-target: process_controller_manager_rules
+            range: '0..4'
+          - test-target: process_etcd_rules
+            range: '0..4'
+          - test-target: process_kubelet_rules
+            range: '0..4'
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Create k8s Kind Cluster
+        run: |
+          just create-kind-cluster
+
+      - name: Cache docker images
+        uses: actions/cache@v3
+        with:
+          path: /tmp/*.tar
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
+
+      - name: Load images to kind
+        run: |
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
+        shell: bash
+
+      - name: Deploy tests Helm chart
+        id: deploy_helm
+        run: |
+          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
+
+      - name: Run Tests
+        id: run_tests
+        run: |
+          just run-tests ${{ matrix.test-target }}
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure_results-${{ matrix.test-target}}
+          path: tests/allure/results/
+
+      - name: clear cache
+        id: clear_cache
+        if: always()
+        run: rm -rf /tmp/*-${{ env.CONTAINER_SUFFIX }}.tar
+
+
+  k8s_functional_tests_full:
+    # Run full test suit on post-merge
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
+    if: github.event_name == 'push'
     needs: [Build]
     runs-on: ubuntu-20.04
     timeout-minutes: 55
