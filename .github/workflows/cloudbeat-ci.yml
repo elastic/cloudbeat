@@ -107,3 +107,9 @@ jobs:
         run: |
           ./.ci/scripts/gh-cache.sh
         shell: bash
+
+      - name: Mage Check
+        run: mage check
+
+      - name: Mage checkLicenseHeaders
+        run: mage checkLicenseHeaders

@@ -34,12 +34,6 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Mage Check
-        run: mage check
-
-      - name: Mage checkLicenseHeaders
-        run: mage checkLicenseHeaders
-
       - name: Mage build bundle before unit tests
         uses: magefile/mage-action@v2
         with:
