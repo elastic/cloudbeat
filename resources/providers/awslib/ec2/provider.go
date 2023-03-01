@@ -157,7 +157,6 @@ func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsR
 }
 
 func (p *Provider) DescribeInstances(ctx context.Context, region string) ([]types.Instance, error) {
-	// ins, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]types.Instance, error) {
 	client := p.clients[region]
 	if client == nil {
 		return nil, fmt.Errorf("error in DescribeInstances no client for region %s", region)
@@ -178,12 +177,9 @@ func (p *Provider) DescribeInstances(ctx context.Context, region string) ([]type
 		input.NextToken = output.NextToken
 	}
 	return allInstances, nil
-	// })
-	// return lo.Flatten(ins), err
 }
 
 func (p *Provider) CreateSnapshots(ctx context.Context, ins types.Instance, region string) ([]types.SnapshotInfo, error) {
-	// snaps, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]types.SnapshotInfo, error) {
 	client := p.clients[region]
 	if client == nil {
 		return nil, fmt.Errorf("error in CreateSnapshots no client for region %s", region)
@@ -199,14 +195,11 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins types.Instance, regi
 		return nil, err
 	}
 	return result.Snapshots, nil
-	// })
-	// return lo.Flatten(snaps), err
 }
 
 // TODO: Maybe we should bulk request snapshots?
 // This will limit us scaling the pipeline
 func (p *Provider) DescribeSnapshots(ctx context.Context, snap types.SnapshotInfo, region string) ([]types.Snapshot, error) {
-	// snaps, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]types.Snapshot, error) {
 	client := p.clients[region]
 	if client == nil {
 		return nil, fmt.Errorf("error in DescribeSnapshots no client for region %s", region)
@@ -219,6 +212,4 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snap types.SnapshotInf
 		return nil, err
 	}
 	return result.Snapshots, nil
-	// })
-	// return lo.Flatten(snaps), err
 }
