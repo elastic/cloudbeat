@@ -101,8 +101,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        values_file: tests/deploy/values/ci.yml  # default values file
-        range: ''                                # default range
+        # default values file
+        values_file: tests/deploy/values/ci.yml
+        # default range
+        range: ''
         include:
           - test-target: pre_merge_agent
             values_file: tests/deploy/values/ci-sa-agent.yml
