@@ -1,12 +1,12 @@
-name: Publish-Cloudbeat-Artifacts
+name: Publish-Artifacts
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
-      - cft-upload-s3
+  # push:
+  #   branches:
+  #     - main
+  #     - '[0-9]+.[0-9]+'
+  #     - cft-upload-s3
 
 jobs:
   Cloudformation:
