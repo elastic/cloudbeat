@@ -37,6 +37,15 @@ jobs:
           pre-commit run --all-files
         shell: bash
 
+      - name: Mage Check
+        run: mage check
+
+      - name: Mage checkLicenseHeaders
+        run: mage checkLicenseHeaders
+
+      - name: Validate mocks
+        run: just validate-mocks
+
   Build:
     name: Build
     runs-on: ubuntu-20.04
@@ -107,12 +116,3 @@ jobs:
         run: |
           ./.ci/scripts/gh-cache.sh
         shell: bash
-
-      - name: Mage Check
-        run: mage check
-
-      - name: Mage checkLicenseHeaders
-        run: mage checkLicenseHeaders
-
-      - name: Validate mocks
-        run: just validate-mocks
