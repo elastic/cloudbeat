@@ -2,7 +2,7 @@
 
 ## Prerequiste
 1. Docker
-2. AWS Account
+2. Connect to AWS account using the CLI
 
 ## 1. Deploy Cloud Environment
 - Go to https://cloud.elastic.co/home
@@ -16,14 +16,34 @@
 Launch your Cloud Deployment
 
 ## 2. Optional Step - Verify Cloud Deployment Commit
+In order to confirm that the commit SHA of your deployment is matching the commit SHA of in the DRA
 - In your deployment, navigate to `/app/status`, the commit of your Kibana version will be displayed at the top
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222398648-348cae1d-2a5e-4039-aa3b-4ce9983d3b04.png">
 
 - Navigate to https://artifacts-staging.elastic.co/dra-info/index.html, here you can see all the latest commit for all snapshot and staging versions
-- Click on the version matching your deployment version, down in the project list make sure Kibana's commit is matching the commit displayed in your deployment status 
+- Click on `JSON report` next to the version you are checking
 
-<img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222399185-110cc7fc-b8d5-4f4a-9a2f-e6998fc0fe28.png">
+<img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222493787-c2a3c2ae-72d4-44e6-9a40-ef7334090c44.png">
+
+- A new tab should open, navigate to the `summary url` provided
+
+```
+{
+  "version" : "8.7.0",
+  "build_id" : "8.7.0-046d305b",
+  "manifest_url" : "https://staging.elastic.co/8.7.0-046d305b/manifest-8.7.0.json",
+  "summary_url" : "https://staging.elastic.co/8.7.0-046d305b/summary-8.7.0.html" // <-- Navigate to this URL
+}
+```
+
+- In the Elastic Stack Release page, click on `kibana`
+
+<img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222495735-dea09020-3e08-45d9-8d2d-4edc6a9d5ee7.png">
+
+- The commit SHA displayed should match the commit SHA from your deployment status that we checked at the first stage
+
+<img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222495899-7164a25f-b8e6-4970-8b83-a39a3e1d094a.png">
 
 ## 3. Create Agent Policy
 - Navigate to Fleet>Agent policies and click on `Create agent policy`
