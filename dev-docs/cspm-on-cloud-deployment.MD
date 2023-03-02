@@ -12,7 +12,14 @@
 Launch your Cloud Deployment
 
 ## Optional Step - Verify Cloud Deployment Commit
+- In your deployment, navigate to `/app/status`, the commit of your Kibana version will be displayed at the top
 
+<img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222398648-348cae1d-2a5e-4039-aa3b-4ce9983d3b04.png">
+
+- Navigate to https://artifacts-staging.elastic.co/dra-info/index.html, here you can see all the latest commit for all snapshot and staging versions
+- Click on the version matching your deployment version, down in the project list make sure Kibana's commit is matching the commit displayed in your deployment status 
+
+<img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222399185-110cc7fc-b8d5-4f4a-9a2f-e6998fc0fe28.png">
 
 ## Create Agent Policy
 - Navigate to Fleet>Agent policies and click on `Create agent policy`
