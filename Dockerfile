@@ -1,4 +1,4 @@
-FROM debian
+FROM debian:11
 RUN set -x && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
