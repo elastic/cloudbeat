@@ -32,7 +32,7 @@ Launch your Cloud Deployment
 
 - In the Flyout, give it a name (you'll need it later) and click on `Create agent policy`
 - A new policy has been added to your list of agent policies, click on its name and then on `Add integration`
-- In the intergations screen, select the needed integration, for this tutorial, we will use CSPM
+- In the intergations screen, select the needed integration. For this tutorial, we will use CSPM
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222234500-39dbda6c-8880-4f43-99f4-9cc2d3c7a655.png">
 
@@ -58,7 +58,7 @@ sudo ./elastic-agent install --url=https://901181905d2049f98455066cda0e6717.flee
 ```
 
 - Since we want to deploy the agent in docker we will need to run a different command.
-- Extract the `fleet-server-host-url` and `enrollment-token` values from the provided command and use them in the following command instead:
+- Extract the `fleet-server-host-url`(--url) and `enrollment-token`(--enrollment-token) values from the provided command and use them in the following command instead:
 
 ```
 docker run -d --platform=linux/x86_64 \
