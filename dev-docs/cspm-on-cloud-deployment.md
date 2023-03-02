@@ -1,5 +1,9 @@
 # Install CSPM integration on a cloud deployment with standalone docker agent
 
+## Prerequiste
+1. Docker
+2. AWS Account
+
 ## 1. Deploy Cloud Environment
 - Go to https://cloud.elastic.co/home
 - Log into with your elastic account
