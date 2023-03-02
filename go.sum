@@ -243,8 +243,6 @@ github.com/aquasecurity/table v1.8.0/go.mod h1:eqOmvjjB7AhXFgFqpJUEE/ietg7RrMSJZ
 github.com/aquasecurity/testdocker v0.0.0-20210911155206-e1e85f5a1516 h1:moQmzbpLo5dxHQCyEhqzizsDSNrNhn/7uRTCZzo4A1o=
 github.com/aquasecurity/tml v0.6.1 h1:y2ZlGSfrhnn7t4ZJ/0rotuH+v5Jgv6BDDO5jB6A9gwo=
 github.com/aquasecurity/tml v0.6.1/go.mod h1:OnYMWY5lvI9ejU7yH9LCberWaaTBW7hBFsITiIMY2yY=
-github.com/aquasecurity/trivy v0.35.0 h1:qtSn7MSLjRRmUOTI7UbGOlT3NVk/Zcv2/m19kD4EjIY=
-github.com/aquasecurity/trivy v0.35.0/go.mod h1:gwkdeoZUwAxDrwBVD6EmCDHPVo+nkMxeudy06HiWkcA=
 github.com/aquasecurity/trivy-db v0.0.0-20221227141502-af78ecb7db4c h1:CgJiXxVxgFOQ4btP97LEYqEHnx++FRpf2IJEXJV+xHs=
 github.com/aquasecurity/trivy-db v0.0.0-20221227141502-af78ecb7db4c/go.mod h1:/nULgnDeq/JMPMVwE1dmf4kWlYn++7VrM3O2naj4BHA=
 github.com/arbovm/levenshtein v0.0.0-20160628152529-48b4e1c0c4d0 h1:jfIu9sQUG6Ig+0+Ap1h4unLjW6YQJpKZVmUzxsD4E/Q=
@@ -1177,6 +1175,8 @@ github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/golang-lru v0.5.4 h1:YDjusn29QI/Das2iO9M0BHnIbxPeyuCHsjMW+lJfyTc=
 github.com/hashicorp/golang-lru v0.5.4/go.mod h1:iADmTwqILo4mZ8BN3D2Q6+9jd8WM5uGBxy+E8yxSoD4=
+github.com/hashicorp/golang-lru/v2 v2.0.1 h1:5pv5N1lT1fjLg2VQ5KWc7kmucp2x/kvFOnxuVTqZ6x4=
+github.com/hashicorp/golang-lru/v2 v2.0.1/go.mod h1:QeFd9opnmA6QUJc5vARoKUSoFhyfM2/ZepoAG6RGpeM=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T20WEQ=
 github.com/hashicorp/hcl/v2 v2.14.1 h1:x0BpjfZ+CYdbiz+8yZTQ+gdLO7IXvOut7Da+XJayx34=
@@ -1235,6 +1235,8 @@ github.com/jcmturner/gokrb5/v8 v8.4.2/go.mod h1:sb+Xq/fTY5yktf/VxLsE3wlfPqQjp0aW
 github.com/jcmturner/rpc/v2 v2.0.3 h1:7FXXj8Ti1IaVFpSAziCZWNzbNuZmnvw/i6CqLNdWfZY=
 github.com/jcmturner/rpc/v2 v2.0.3/go.mod h1:VUJYCIDm3PVOEHw8sgt091/20OJjskO/YJki3ELg/Hc=
 github.com/jedib0t/go-pretty v4.3.0+incompatible/go.mod h1:XemHduiw8R651AF9Pt4FwCTKeG3oo7hrHJAoznj9nag=
+github.com/jeniawhite/trivy v0.0.0 h1:wmivOyOhUXtbPPBfXVCQ68iGzL+aEygyP0yrg48V53o=
+github.com/jeniawhite/trivy v0.0.0/go.mod h1:qEMOtJRgTNFPI2JrnqjVxAh4fEg1yea1NJ+Kh4qLGwk=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jessevdk/go-flags v1.5.0/go.mod h1:Fw0T6WPc1dYxT4mKEZRfG5kJhaTDP9pj1c2EWnYs/m4=
 github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
@@ -1384,8 +1386,8 @@ github.com/martini-contrib/render v0.0.0-20150707142108-ec18f8345a11 h1:YFh+sjyJ
 github.com/martini-contrib/render v0.0.0-20150707142108-ec18f8345a11/go.mod h1:Ah2dBMoxZEqk118as2T4u4fjfXarE0pPnMJaArZQZsI=
 github.com/masahiro331/go-disk v0.0.0-20220919035250-c8da316f91ac h1:QyRucnGOLHJag1eB9CtuZwZk+/LpvTSYr5mnFLLFlgA=
 github.com/masahiro331/go-disk v0.0.0-20220919035250-c8da316f91ac/go.mod h1:J7Vb0sf0JzOhT0uHTeCqO6dqP/ELVcQvQ6yQ/56ZRGw=
-github.com/masahiro331/go-ebs-file v0.0.0-20221125181850-09c63351e38c h1:sBVxQbdRxqMoczqQYPxUwe3V3msmAUj9KPuPZRpD13k=
-github.com/masahiro331/go-ebs-file v0.0.0-20221125181850-09c63351e38c/go.mod h1:5NOkqebMwu8UiOTSjwqam1Ykdr7fci52TVE2xDQnIiM=
+github.com/masahiro331/go-ebs-file v0.0.0-20230228042409-005c81d4ae43 h1:umYrurEClKuDjU29DKNNPmnWJNt4mnR0fWLOpWsDg0M=
+github.com/masahiro331/go-ebs-file v0.0.0-20230228042409-005c81d4ae43/go.mod h1:5NOkqebMwu8UiOTSjwqam1Ykdr7fci52TVE2xDQnIiM=
 github.com/masahiro331/go-ext4-filesystem v0.0.0-20221016160854-4b40d7ee6193 h1:1005OfmUUdBL4540DpkovaDrV+lkiEda7Nb/t792LEg=
 github.com/masahiro331/go-ext4-filesystem v0.0.0-20221016160854-4b40d7ee6193/go.mod h1:X08d9nmB+eg7Gj2XWAOkiG8lbMFbgGXPsDKEvkFwyF8=
 github.com/masahiro331/go-mvn-version v0.0.0-20210429150710-d3157d602a08 h1:AevUBW4cc99rAF8q8vmddIP8qd/0J5s/UyltGbp66dg=
