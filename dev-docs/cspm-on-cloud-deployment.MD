@@ -1,6 +1,6 @@
 # Install CSPM integration on a cloud deployment with standalone docker agent
 
-## Deploy Cloud Environment
+## 1. Deploy Cloud Environment
 - Go to https://cloud.elastic.co/home
 - Log into with your elastic account
 - Click on `Create Deployment`
@@ -11,7 +11,7 @@
 
 Launch your Cloud Deployment
 
-## Optional Step - Verify Cloud Deployment Commit
+## 2. Optional Step - Verify Cloud Deployment Commit
 - In your deployment, navigate to `/app/status`, the commit of your Kibana version will be displayed at the top
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222398648-348cae1d-2a5e-4039-aa3b-4ce9983d3b04.png">
@@ -21,7 +21,7 @@ Launch your Cloud Deployment
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222399185-110cc7fc-b8d5-4f4a-9a2f-e6998fc0fe28.png">
 
-## Create Agent Policy
+## 3. Create Agent Policy
 - Navigate to Fleet>Agent policies and click on `Create agent policy`
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222233724-fcdc7d5d-d35b-4fb8-aed9-c157471c789d.png">
@@ -41,7 +41,7 @@ Launch your Cloud Deployment
 
 Save the intergation
 
-## Add Standalone Docker Agent
+## 4. Add Standalone Docker Agent
 - Now that you have an agent policy with a configured CSPM intergation navigate to Fleet>Agents and select `Add Agent`
 - Select your CSPM intergation from the drop down list under `What type of host are you adding?`
 - On step 3 of the Flyout, you will be provided with the setup command for the agent, for example:
@@ -67,6 +67,6 @@ docker.elastic.co/beats/elastic-agent:8.7.0-SNAPSHOT
 
 At this point you should see your agent working in your docker and under `Confirm agent enrollment` section of the Flyout.
 
-## Discover
+## 5. Discover
 - Go to Discover and make sure you have docs in the `findings` and `findings-latest` indecies, `findings-latest` can take a few minutes to populate.
 - If you do, congrats you have a working CSPM cloud deployment.
