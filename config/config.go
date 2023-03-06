@@ -45,7 +45,7 @@ type Fetcher struct {
 
 type Config struct {
 	Benchmark   string                  `config:"config.v1.benchmark"`
-	Deployment  string                  `config:"config.v1.deployment"`
+	Type        string                  `config:"config.v1.type"`
 	CloudConfig CloudConfig             `config:"config.v1"`
 	Fetchers    []*config.C             `config:"fetchers"`
 	KubeConfig  string                  `config:"kube_config"`
