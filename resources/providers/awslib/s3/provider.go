@@ -32,6 +32,12 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
+const (
+	EncryptionNotFoundCode = "ServerSideEncryptionConfigurationNotFoundError"
+	PolicyNotFoundCode     = "NoSuchBucketPolicy"
+	NoEncryptionMessage    = "NoEncryption"
+)
+
 func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return s3Client.NewFromConfig(cfg)
@@ -63,7 +69,6 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 			}
 
 			bucketPolicy, policyErr := p.GetBucketPolicy(ctx, bucket.Name, region)
-
 			if policyErr != nil {
 				p.log.Errorf("Could not get bucket policy for bucket %s. Error: %v", *bucket.Name, policyErr)
 			}
@@ -105,9 +110,9 @@ func (p Provider) GetBucketPolicy(ctx context.Context, bucketName *string, regio
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
-			if apiErr.ErrorCode() == "NoSuchBucketPolicy" {
+			if apiErr.ErrorCode() == PolicyNotFoundCode {
 				p.log.Debugf("Bucket policy for bucket %s does not exist", *bucketName)
-				return nil, nil
+				return map[string]any{}, nil
 			}
 		}
 
@@ -117,7 +122,7 @@ func (p Provider) GetBucketPolicy(ctx context.Context, bucketName *string, regio
 	var bucketPolicy BucketPolicy
 	jsonErr := json.Unmarshal([]byte(*rawPolicy.Policy), &bucketPolicy)
 	if jsonErr != nil {
-		return nil, jsonErr
+		return map[string]any{}, jsonErr
 	}
 
 	return bucketPolicy, nil
@@ -161,30 +166,31 @@ func (p Provider) getBucketsRegionMapping(ctx context.Context, buckets []types.B
 	return bucketsRegionMap
 }
 
-func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string, region string) (string, error) {
+func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *string, region string) (*string, error) {
 	client, err := awslib.GetClient(&region, p.clients)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	encryption, err := client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
-			if apiErr.ErrorCode() == "ServerSideEncryptionConfigurationNotFoundError" {
+			if apiErr.ErrorCode() == EncryptionNotFoundCode {
 				p.log.Debugf("Bucket encryption for bucket %s does not exist", *bucketName)
-				return "", nil
+				return aws.String(NoEncryptionMessage), nil
 			}
 		}
 
-		return "", err
+		return nil, err
 	}
 
 	if len(encryption.ServerSideEncryptionConfiguration.Rules) <= 0 {
-		return "", nil
+		return aws.String(NoEncryptionMessage), nil
 	}
 
-	return string(encryption.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm), nil
+	sseAlgo := string(encryption.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm)
+	return &sseAlgo, nil
 }
 
 func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (string, error) {
@@ -202,17 +208,17 @@ func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (stri
 	return region, nil
 }
 
-func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, region string) (BucketVersioning, error) {
-	bucketVersioning := BucketVersioning{false, false}
+func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, region string) (*BucketVersioning, error) {
+	bucketVersioning := &BucketVersioning{false, false}
 
 	client, err := awslib.GetClient(&region, p.clients)
 	if err != nil {
-		return bucketVersioning, err
+		return nil, err
 	}
 
 	bucketVersioningResponse, err := client.GetBucketVersioning(ctx, &s3Client.GetBucketVersioningInput{Bucket: bucketName})
 	if err != nil {
-		return bucketVersioning, err
+		return nil, err
 	}
 
 	if bucketVersioningResponse.Status == types.BucketVersioningStatusEnabled {

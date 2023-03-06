@@ -164,17 +164,12 @@ cis_eks_4_2_9 = {
 
 k8s_object_config_1 = {
     **cis_eks_4_2_7,
-    **dict(
-        zip(
-            cis_eks_4_2_8.keys(),
-            skip_param_case(
-                skip_list=[*cis_eks_4_2_8.values()],
-                data_to_report=SkipReportData(
-                    skip_reason="Retest after testing configuration will be fixed.",
-                    url_title="cloudbeat: #500",
-                    url_link="https://github.com/elastic/cloudbeat/issues/500",
-                ),
-            ),
+    **skip_param_case(
+        cis_eks_4_2_8,
+        data_to_report=SkipReportData(
+            skip_reason="Retest after testing configuration will be fixed.",
+            url_title="cloudbeat: #500",
+            url_link="https://github.com/elastic/cloudbeat/issues/500",
         ),
     ),
     **cis_eks_4_2_9,
