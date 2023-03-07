@@ -424,7 +424,7 @@ class KubernetesHelper:
         )
         response = ""
         while resp.is_open():
-            resp.update(timeout=3)
+            resp.update(timeout=10)
             if resp.peek_stdout():
                 response = resp.read_stdout()
             if resp.peek_stderr():
