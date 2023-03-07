@@ -33,7 +33,7 @@ import (
 
 const (
 	DefaultNamespace             = "default"
-	VulnerabilityType            = "cloudbeat/vuln_mgmt_aws"
+	VulnerabilityType            = "vuln_mgmt"
 	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 )
 
@@ -45,6 +45,7 @@ type Fetcher struct {
 
 type Config struct {
 	Benchmark   string                  `config:"config.v1.benchmark"`
+	Type        string                  `config:"config.v1.type"`
 	Deployment  string                  `config:"config.v1.deployment"`
 	CloudConfig CloudConfig             `config:"config.v1"`
 	Fetchers    []*config.C             `config:"fetchers"`
