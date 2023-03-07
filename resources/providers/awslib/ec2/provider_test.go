@@ -293,7 +293,7 @@ func TestProvider_DescribeInstances(t *testing.T) {
 				clients:      tt.fields.clients,
 				awsAccountID: tt.fields.awsAccountID,
 			}
-			got, err := p.DescribeInstances(tt.args.ctx)
+			got, err := p.DescribeInstances(tt.args.ctx, "us-east-1")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Provider.DescribeInstances() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -331,7 +331,7 @@ func TestProvider_CreateSnapshots(t *testing.T) {
 				clients:      tt.fields.clients,
 				awsAccountID: tt.fields.awsAccountID,
 			}
-			got, err := p.CreateSnapshots(tt.args.ctx, tt.args.ins)
+			got, err := p.CreateSnapshots(tt.args.ctx, tt.args.ins, "us-east-1")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Provider.CreateSnapshots() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -369,7 +369,7 @@ func TestProvider_DescribeSnapshots(t *testing.T) {
 				clients:      tt.fields.clients,
 				awsAccountID: tt.fields.awsAccountID,
 			}
-			got, err := p.DescribeSnapshots(tt.args.ctx, tt.args.snap)
+			got, err := p.DescribeSnapshots(tt.args.ctx, tt.args.snap, "us-east-1")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Provider.DescribeSnapshots() error = %v, wantErr %v", err, tt.wantErr)
 				return
