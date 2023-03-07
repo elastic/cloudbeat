@@ -101,34 +101,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        test-target: [file_system_rules, k8s_object_rules, process_scheduler_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules]
+        values_file: [tests/deploy/values/ci.yml]
+        range: '0..4'
         include:
           - test-target: pre_merge_agent
             range: ''
             values_file: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
             range: ''
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: k8s_object_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_scheduler_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_controller_manager_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_etcd_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_kubelet_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
