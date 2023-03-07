@@ -282,3 +282,10 @@ def get_findings(elastic_client, config_timeout, match_type):
         time.sleep(1)
 
     return result
+
+
+def identifier_by_name(case_identifier, eval_resource) -> bool:
+    try:
+        return eval_resource.resource.name == case_identifier
+    except AttributeError:
+        return False
