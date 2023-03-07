@@ -103,7 +103,7 @@ jobs:
       matrix:
         test-target: [file_system_rules, k8s_object_rules, process_scheduler_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules]
         values_file: [tests/deploy/values/ci.yml]
-        range: '0..4'
+        range: ['0..4']
         include:
           - test-target: pre_merge_agent
             range: ''
@@ -165,6 +165,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        test-target: ['full']
+        range: ['functional']
         include:
           - test-target: pre_merge_agent
             range: ''
