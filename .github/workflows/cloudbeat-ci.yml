@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - '[0-9]+.[0-9]+'
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
 
 env:
   CONTAINER_SUFFIX: ${{ github.run_id }}
@@ -19,10 +19,15 @@ jobs:
     # for more information see .pre-commit-config.yaml
     name: Pre-commit Hooks
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
+
+      - name: Set up GO (with caching)
+        uses: magnetikonline/action-golang-cache@v3
+        with:
+          go-version-file: .go-version
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -32,6 +37,15 @@ jobs:
           pre-commit run --all-files
         shell: bash
 
+      - name: Mage Check
+        run: mage check
+
+      - name: Mage checkLicenseHeaders
+        run: mage checkLicenseHeaders
+
+      - name: Validate mocks
+        run: just validate-mocks
+
   Build:
     name: Build
     runs-on: ubuntu-20.04
@@ -40,18 +54,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
-
-      - name: cache go dependencies
-        uses: actions/cache@v3
+      - name: Setup GO (with caching)
+        uses: magnetikonline/action-golang-cache@v3
         with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ matrix.go-version }}-
+          go-version-file: .go-version
 
       - name: build cloudbeat binary
         uses: magefile/mage-action@v2
@@ -110,206 +116,3 @@ jobs:
         run: |
           ./.ci/scripts/gh-cache.sh
         shell: bash
-
-  Test_Matrix:
-    name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
-    needs: [Build]
-    runs-on: ubuntu-20.04
-    timeout-minutes: 55
-    strategy:
-      matrix:
-        include:
-          - test-target: pre_merge_agent
-            range: ''
-            values_file: tests/deploy/values/ci-sa-agent.yml
-          - test-target: pre_merge
-            range: ''
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '0..5'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '5..10'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '10..15'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '15..20'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '20..25'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '25..30'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '30..35'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '35..40'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '40..45'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '45..50'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '50..55'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '55..60'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '60..65'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '65..70'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: file_system_rules
-            range: '70..'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: k8s_object_rules
-            range: '0..6'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: k8s_object_rules
-            range: '6..12'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: k8s_object_rules
-            range: '12..18'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: k8s_object_rules
-            range: '18..'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_scheduler_rules
-            range: '0..3'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_scheduler_rules
-            range: '3..'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '0..5'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '5..10'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '10..15'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '15..20'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '20..24'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '24..28'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '28..32'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '32..36'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '36..40'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '40..44'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '44..48'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '48..52'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '52..56'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_api_server_rules
-            range: '56..'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_controller_manager_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_controller_manager_rules
-            range: '4..8'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_controller_manager_rules
-            range: '8..12'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_controller_manager_rules
-            range: '12..'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_etcd_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_etcd_rules
-            range: '4..8'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_etcd_rules
-            range: '8..'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_kubelet_rules
-            range: '0..4'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_kubelet_rules
-            range: '4..8'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_kubelet_rules
-            range: '8..12'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_kubelet_rules
-            range: '12..16'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_kubelet_rules
-            range: '16..20'
-            values_file: tests/deploy/values/ci.yml
-          - test-target: process_kubelet_rules
-            range: '20..'
-            values_file: tests/deploy/values/ci.yml
-      fail-fast: false
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
-
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
-
-      - name: Create k8s Kind Cluster
-        run: |
-          just create-kind-cluster
-
-      - name: Cache docker images
-        uses: actions/cache@v3
-        with:
-          path: /tmp/*.tar
-          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
-
-      - name: Load images to kind
-        run: |
-          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
-        shell: bash
-
-      - name: Deploy tests Helm chart
-        id: deploy_helm
-        run: |
-          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
-
-      - name: Run Tests
-        id: run_tests
-        run: |
-          just run-tests ${{ matrix.test-target }}
-
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: allure_results-${{ matrix.test-target}}
-          path: tests/allure/results/
-
-      - name: clear cache
-        id: clear_cache
-        if: always()
-        run: rm -rf /tmp/*-${{ env.CONTAINER_SUFFIX }}.tar
