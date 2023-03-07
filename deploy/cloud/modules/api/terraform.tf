@@ -1,11 +1,11 @@
 terraform {
   required_providers {
     restapi = {
-      source = "mastercard/restapi"
+      source  = "mastercard/restapi"
       version = "~> 1.18.0"
     }
     http = {
-      source = "hashicorp/http"
+      source  = "hashicorp/http"
       version = "~> 3.2.1"
     }
   }

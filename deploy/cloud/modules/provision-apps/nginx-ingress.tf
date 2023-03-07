@@ -1,10 +1,10 @@
 resource "helm_release" "nginx_ingress" {
-  chart      = "nginx-ingress-controller"
-  name       = "nginx-ingress-controller"
+  chart = "nginx-ingress-controller"
+  name  = "nginx-ingress-controller"
 
   repository = "https://charts.bitnami.com/bitnami"
-  timeout = 600
-  namespace = var.namespace
+  timeout    = 600
+  namespace  = var.namespace
 
   set {
     name  = "service.type"
@@ -12,7 +12,7 @@ resource "helm_release" "nginx_ingress" {
   }
 
   set {
-    name = "replicaCount"
+    name  = "replicaCount"
     value = var.replica_count
   }
 }
