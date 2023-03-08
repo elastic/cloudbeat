@@ -22,15 +22,18 @@ import (
 	"fmt"
 	"time"
 
-	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	filesystem_fetcher "github.com/elastic/cloudbeat/resources/fetchers/file_system"
 	iam_fetcher "github.com/elastic/cloudbeat/resources/fetchers/iam"
 	kube_fetcher "github.com/elastic/cloudbeat/resources/fetchers/kube"
+	logging_fetcher "github.com/elastic/cloudbeat/resources/fetchers/logging"
 	monitoring_fetcher "github.com/elastic/cloudbeat/resources/fetchers/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/resources/utils/user"
 	"github.com/elastic/cloudbeat/version"
 
@@ -64,7 +67,10 @@ import (
 	cloudtrail_sdk "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	cloudwatch_sdk "github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	cloudwatchlogs_sdk "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
+	configservice_sdk "github.com/aws/aws-sdk-go-v2/service/configservice"
 	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
+	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
+	s3_sdk "github.com/aws/aws-sdk-go-v2/service/s3"
 	securityhub_sdk "github.com/aws/aws-sdk-go-v2/service/securityhub"
 	sns_sdk "github.com/aws/aws-sdk-go-v2/service/sns"
 )
@@ -254,6 +260,8 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 	awsCloudwatchlogsCrossRegionFactory := &awslib.MultiRegionClientFactory[logs.Client]{}
 	awsSNSCrossRegionFactory := &awslib.MultiRegionClientFactory[sns.Client]{}
 	awsSecurityhubRegionFactory := &awslib.MultiRegionClientFactory[securityhub.Client]{}
+	awsS3CrossRegionFactory := &awslib.MultiRegionClientFactory[s3.Client]{}
+	awsConfigCrossRegionFactory := &awslib.MultiRegionClientFactory[configservice.Client]{}
 
 	if _, ok := list[iam_fetcher.Type]; ok {
 		reg[iam_fetcher.Type] = iam_fetcher.New(
@@ -298,6 +306,28 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 				Log:            log,
 			}),
 			monitoring_fetcher.WithSecurityhubService(securityhub.NewProvider(awsConfig, log, getSecurityhubClients(awsSecurityhubRegionFactory, log, awsConfig), *identity.Account)),
+		)
+	}
+
+	if _, ok := list[logging_fetcher.Type]; ok {
+		reg[logging_fetcher.Type] = logging_fetcher.New(
+			logging_fetcher.WithConfig(cfg),
+			logging_fetcher.WithLogger(log),
+			logging_fetcher.WithResourceChan(ch),
+			logging_fetcher.WithConfigserviceProvider(
+				configservice.NewProvider(
+					log,
+					awsConfig,
+					getConfigserviceClients(awsConfigCrossRegionFactory, log, awsConfig),
+					*identity.Account,
+				),
+			),
+			logging_fetcher.WithLoggingProvider(logging.NewProvider(
+				log,
+				awsConfig,
+				getCloudrailClients(awsTrailCrossRegionFactory, log, awsConfig),
+				getS3Clients(awsS3CrossRegionFactory, log, awsConfig),
+			)),
 		)
 	}
 	return reg, nil
@@ -443,6 +473,22 @@ func getSecurityhubClients(factory awslib.CrossRegionFactory[securityhub.Client]
 func getSNSClients(factory awslib.CrossRegionFactory[sns.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]sns.Client {
 	f := func(cfg aws_sdk.Config) sns.Client {
 		return sns_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getConfigserviceClients(factory awslib.CrossRegionFactory[configservice.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]configservice.Client {
+	f := func(cfg aws_sdk.Config) configservice.Client {
+		return configservice_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getS3Clients(factory awslib.CrossRegionFactory[s3.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]s3.Client {
+	f := func(cfg aws_sdk.Config) s3.Client {
+		return s3_sdk.NewFromConfig(cfg)
 	}
 	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
 	return m.GetMultiRegionsClientMap()

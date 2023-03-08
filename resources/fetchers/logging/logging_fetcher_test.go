@@ -15,13 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package logging
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 	"testing"
 	"time"
+
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
@@ -31,7 +33,9 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -113,13 +117,19 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
-			f := LoggingFetcher{
-				log:                   logp.NewLogger(tt.name),
-				loggingProvider:       tt.loggingProvider(),
-				configserviceProvider: tt.configServiceProvider(),
-				cfg:                   fetching.AwsBaseFetcherConfig{},
-				resourceCh:            ch,
-			}
+			f := New(
+				WithLogger(logp.NewLogger(tt.name)),
+				WithLoggingProvider(tt.loggingProvider()),
+				WithConfigserviceProvider(tt.configServiceProvider()),
+				WithResourceChan(ch),
+				WithConfig(&config.Config{
+					Fetchers: []*agentconfig.C{
+						agentconfig.MustNewConfigFrom(mapstr.M{
+							"name": "aws-trail",
+						}),
+					},
+				}),
+			)
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})
 			resources := testhelper.CollectResources(ch)

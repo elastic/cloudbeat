@@ -15,17 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package logging
 
 import (
 	"context"
+
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
+
+// Type fetcher
+const Type = "aws-trail"
 
 type LoggingFetcher struct {
 	log                   *logp.Logger
@@ -35,12 +38,12 @@ type LoggingFetcher struct {
 	resourceCh            chan fetching.ResourceInfo
 }
 
-type LoggingResource struct {
-	awslib.AwsResource
-}
-
-type ConfigResource struct {
-	awslib.AwsResource
+func New(options ...Option) *LoggingFetcher {
+	f := &LoggingFetcher{}
+	for _, opt := range options {
+		opt(f)
+	}
+	return f
 }
 
 func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -75,32 +78,3 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetad
 }
 
 func (f LoggingFetcher) Stop() {}
-
-func (r LoggingResource) GetData() any {
-	return r.AwsResource
-}
-
-func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	return fetching.ResourceMetadata{
-		ID:      r.GetResourceArn(),
-		Type:    fetching.CloudAudit,
-		SubType: r.GetResourceType(),
-		Name:    r.GetResourceName(),
-	}, nil
-}
-func (r LoggingResource) GetElasticCommonData() any { return nil }
-
-func (c ConfigResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	return fetching.ResourceMetadata{
-		ID:      c.GetResourceArn(),
-		Type:    fetching.CloudConfig,
-		SubType: c.GetResourceType(),
-		Name:    c.GetResourceName(),
-	}, nil
-}
-
-func (c ConfigResource) GetData() any {
-	return c.AwsResource
-}
-
-func (c ConfigResource) GetElasticCommonData() any { return nil }

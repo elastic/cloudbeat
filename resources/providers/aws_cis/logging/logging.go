@@ -24,9 +24,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 
-	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
-	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
-	s3_sdk "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -45,20 +42,11 @@ func NewProvider(
 	log *logp.Logger,
 	cfg aws.Config,
 	multiRegionTrailClients map[string]cloudtrail.Client,
-	multiRegionS3Factory awslib.CrossRegionFactory[s3.Client],
+	multiRegionS3Clients map[string]s3.Client,
 ) *Provider {
 	return &Provider{
 		log:           log,
-		s3Provider:    s3.NewProvider(cfg, log, getS3Clients(multiRegionS3Factory, log, cfg)),
+		s3Provider:    s3.NewProvider(cfg, log, multiRegionS3Clients),
 		trailProvider: cloudtrail.NewProvider(cfg, log, multiRegionTrailClients),
 	}
-}
-
-// TODO: this was copied from s3_factory.go, remove when possbile
-func getS3Clients(factory awslib.CrossRegionFactory[s3.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]s3.Client {
-	f := func(cfg aws_sdk.Config) s3.Client {
-		return s3_sdk.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
-	return m.GetMultiRegionsClientMap()
 }
