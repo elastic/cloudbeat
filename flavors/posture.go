@@ -23,10 +23,12 @@ import (
 	"time"
 
 	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
+	filesystem_fetcher "github.com/elastic/cloudbeat/resources/fetchers/file_system"
 	iam_fetcher "github.com/elastic/cloudbeat/resources/fetchers/iam"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
+	"github.com/elastic/cloudbeat/resources/utils/user"
 	"github.com/elastic/cloudbeat/version"
 
 	"github.com/elastic/cloudbeat/config"
@@ -238,6 +240,15 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 			iam_fetcher.WithResourceChan(ch),
 			iam_fetcher.WithLogger(log),
 			iam_fetcher.WithIAMProvider(iam.NewIAMProvider(log, awsIAMService)),
+		)
+	}
+
+	if _, ok := list[filesystem_fetcher.Type]; ok {
+		reg[filesystem_fetcher.Type] = filesystem_fetcher.New(
+			filesystem_fetcher.WithConfig(cfg),
+			filesystem_fetcher.WithLogger(log),
+			filesystem_fetcher.WithResourceChan(ch),
+			filesystem_fetcher.WithOSUser(user.NewOSUserUtil()),
 		)
 	}
 	return reg, nil

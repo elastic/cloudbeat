@@ -34,7 +34,7 @@ import (
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/fetchers/file_system"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/stretchr/testify/suite"
 )
@@ -56,8 +56,8 @@ var versionInfo = version.CloudbeatVersionInfo{
 	Version: version.Version{Version: "test_version"},
 }
 
-var fetcherResult = fetchers.FSResource{
-	EvalResource: fetchers.EvalFSResource{
+var fetcherResult = file_system.FSResource{
+	EvalResource: file_system.EvalFSResource{
 		Name:    "scheduler.conf",
 		Mode:    "700",
 		Gid:     "20",
@@ -68,7 +68,7 @@ var fetcherResult = fetchers.FSResource{
 		Inode:   "8901",
 		SubType: "file",
 	},
-	ElasticCommon: fetchers.FileCommonData{
+	ElasticCommon: file_system.FileCommonData{
 		Name: "scheduler.conf",
 	},
 }

@@ -15,13 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package file_system
 
 import (
-	"github.com/stretchr/testify/suite"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
 // Based on https://github.com/yargevad/filepathx/blob/master/filepathx.go
@@ -156,7 +157,7 @@ func (s *GlobMatcherTestSuite) TestGlobDirectoryRecursively() {
 	s.NoError(err, "Glob could not fetch results")
 	s.Equal(6, len(matchedFiles))
 
-	//When using glob matching recursively the first outer folder is being sent without a '/'
+	// When using glob matching recursively the first outer folder is being sent without a '/'
 	s.Equal(matchedFiles[0], outerDir+"/")
 	s.Equal(matchedFiles[1], filepath.Join(outerDir, outerFiles[0]))
 	s.Equal(matchedFiles[2], innerDir)

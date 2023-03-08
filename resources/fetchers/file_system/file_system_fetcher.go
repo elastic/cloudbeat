@@ -15,21 +15,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package file_system
 
 import (
 	"context"
 	"fmt"
-	"github.com/djherbis/times"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/user"
-	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/djherbis/times"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/user"
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -40,6 +41,9 @@ const (
 	DirSubType     = "directory"
 	UserFile       = "/hostfs/etc/passwd"
 	GroupFile      = "/hostfs/etc/group"
+
+	// Type fetcher
+	Type = "file-system"
 )
 
 type EvalFSResource struct {
@@ -73,11 +77,6 @@ type FileCommonData struct {
 	Ctime     time.Time `json:"ctime"`
 }
 
-type FSResource struct {
-	EvalResource  EvalFSResource
-	ElasticCommon FileCommonData
-}
-
 // FileSystemFetcher implement the Fetcher interface
 // The FileSystemFetcher meant to fetch file/directories from the file system and ship it
 // to the Cloudbeat
@@ -91,6 +90,14 @@ type FileSystemFetcher struct {
 type FileFetcherConfig struct {
 	fetching.BaseFetcherConfig
 	Patterns []string `config:"patterns"` // Files and directories paths for the fetcher to extract info from
+}
+
+func New(options ...Option) *FileSystemFetcher {
+	f := &FileSystemFetcher{}
+	for _, opt := range options {
+		opt(f)
+	}
+	return f
 }
 
 func (f *FileSystemFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -118,7 +125,6 @@ func (f *FileSystemFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleM
 }
 
 func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FSResource, error) {
-
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return FSResource{}, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
@@ -129,7 +135,6 @@ func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FSResource, er
 }
 
 func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FSResource, error) {
-
 	if info == nil {
 		return FSResource{}, nil
 	}
@@ -173,24 +178,6 @@ func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FSResou
 }
 
 func (f *FileSystemFetcher) Stop() {
-}
-
-func (r FSResource) GetData() any {
-	return r.EvalResource
-}
-
-func (r FSResource) GetElasticCommonData() any {
-	return r.ElasticCommon
-}
-
-func (r FSResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	return fetching.ResourceMetadata{
-		ID:        r.EvalResource.Path,
-		Type:      FSResourceType,
-		SubType:   r.EvalResource.SubType,
-		Name:      r.EvalResource.Path, // The Path from the container and not from the host
-		ECSFormat: FSResourceType,
-	}, nil
 }
 
 func getFSSubType(fileInfo os.FileInfo) string {

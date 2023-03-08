@@ -15,21 +15,25 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package file_system
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/resources/utils/user"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"os"
-	"path/filepath"
-	"testing"
 
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 )
 
 type FSFetcherTestSuite struct {
@@ -70,21 +74,27 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	}(dir)
 
 	filePaths := []string{filepath.Join(dir, files[0])}
-	cfg := FileFetcherConfig{
-		Patterns: filePaths,
-	}
 
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
-	fileFetcher := FileSystemFetcher{
-		log:        log,
-		cfg:        cfg,
-		osUser:     osUserMock,
-		resourceCh: s.resourceCh,
-	}
+	fileFetcher := New(
+		WithLogger(log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name": "file-system",
+					"patterns": []string{
+						filepath.Join(dir, files[0]),
+					},
+				}),
+			},
+		}),
+		WithOSUser(osUserMock),
+		WithResourceChan(s.resourceCh),
+	)
 
 	var results []fetching.ResourceInfo
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
@@ -121,23 +131,25 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 		}
 	}(outerDir)
 
-	paths := []string{filepath.Join(outerDir, outerFiles[0]), filepath.Join(outerDir, outerFiles[1])}
-	cfg := FileFetcherConfig{
-		Patterns: paths,
-	}
-
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil).Once()
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("etcd", nil).Once()
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil).Once()
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("etcd", nil).Once()
-
-	fileFetcher := FileSystemFetcher{
-		log:        s.log,
-		cfg:        cfg,
-		osUser:     osUserMock,
-		resourceCh: s.resourceCh,
-	}
+	paths := []string{filepath.Join(outerDir, outerFiles[0]), filepath.Join(outerDir, outerFiles[1])}
+	fileFetcher := New(
+		WithLogger(s.log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name":     "file-system",
+					"patterns": paths,
+				}),
+			},
+		}),
+		WithOSUser(osUserMock),
+		WithResourceChan(s.resourceCh),
+	)
 
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
@@ -186,20 +198,25 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	}(dir)
 
 	filePaths := []string{filepath.Join(dir)}
-	cfg := FileFetcherConfig{
-		Patterns: filePaths,
-	}
 
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
 
-	fileFetcher := FileSystemFetcher{
-		log:        s.log,
-		cfg:        cfg,
-		osUser:     osUserMock,
-		resourceCh: s.resourceCh,
-	}
+	fileFetcher := New(
+		WithLogger(s.log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name":     "file-system",
+					"patterns": filePaths,
+				}),
+			},
+		}),
+		WithOSUser(osUserMock),
+		WithResourceChan(s.resourceCh),
+	)
+
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
@@ -240,21 +257,25 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	innerDir := createDirectoriesWithFiles(&s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	path := []string{outerDir + "/*"}
-	cfg := FileFetcherConfig{
-		Patterns: path,
-	}
 
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
-	fileFetcher := FileSystemFetcher{
-		log:        log,
-		cfg:        cfg,
-		osUser:     osUserMock,
-		resourceCh: s.resourceCh,
-	}
+	fileFetcher := New(
+		WithLogger(log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name":     "file-system",
+					"patterns": path,
+				}),
+			},
+		}),
+		WithOSUser(osUserMock),
+		WithResourceChan(s.resourceCh),
+	)
 
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
@@ -262,7 +283,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	s.NoError(err, "Fetcher was not able to fetch files from FS")
 	s.Equal(2, len(results))
 
-	//All inner files should exist in the final result
+	// All inner files should exist in the final result
 	expectedResult := []string{"output.txt", filepath.Base(innerDir)}
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
@@ -302,19 +323,23 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	innerInnerDir := createDirectoriesWithFiles(&s.Suite, innerDir, innerInnerDirectoryName, innerInnerFiles)
 
 	path := []string{outerDir + "/**"}
-	cfg := FileFetcherConfig{
-		Patterns: path,
-	}
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
-	fileFetcher := FileSystemFetcher{
-		log:        s.log,
-		cfg:        cfg,
-		osUser:     osUserMock,
-		resourceCh: s.resourceCh,
-	}
+	fileFetcher := New(
+		WithLogger(s.log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name":     "file-system",
+					"patterns": path,
+				}),
+			},
+		}),
+		WithOSUser(osUserMock),
+		WithResourceChan(s.resourceCh),
+	)
 
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
@@ -325,7 +350,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	directories := []string{filepath.Base(outerDir), filepath.Base(innerDir), filepath.Base(innerInnerDir)}
 	allFilesName := append(append(append(innerFiles, directories...), outerFiles...), innerInnerFiles...)
 
-	//All inner files should exist in the final result
+	// All inner files should exist in the final result
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
 		rMetadata, err := fsResource.GetMetadata()
@@ -357,21 +382,25 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 	}(dir)
 
 	filePaths := []string{filepath.Join(dir, files[0])}
-	cfg := FileFetcherConfig{
-		Patterns: filePaths,
-	}
 
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
-	fileFetcher := FileSystemFetcher{
-		log:        log,
-		cfg:        cfg,
-		osUser:     osUserMock,
-		resourceCh: s.resourceCh,
-	}
+	fileFetcher := New(
+		WithLogger(log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name":     "file-system",
+					"patterns": filePaths,
+				}),
+			},
+		}),
+		WithOSUser(osUserMock),
+		WithResourceChan(s.resourceCh),
+	)
 
 	var results []fetching.ResourceInfo
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
@@ -405,7 +434,7 @@ func createDirectoriesWithFiles(s *suite.Suite, dirPath string, dirName string, 
 	}
 	for _, fileName := range filesToWriteInDirectory {
 		file := filepath.Join(dirPath, fileName)
-		s.Nil(os.WriteFile(file, []byte("test txt\n"), 0600), "Could not able to write a new file")
+		s.Nil(os.WriteFile(file, []byte("test txt\n"), 0o600), "Could not able to write a new file")
 	}
 	return dirPath
 }
