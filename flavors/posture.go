@@ -27,6 +27,7 @@ import (
 	kube_fetcher "github.com/elastic/cloudbeat/resources/fetchers/kube"
 	logging_fetcher "github.com/elastic/cloudbeat/resources/fetchers/logging"
 	monitoring_fetcher "github.com/elastic/cloudbeat/resources/fetchers/monitoring"
+	rds_fetcher "github.com/elastic/cloudbeat/resources/fetchers/rds"
 	s3_fetcher "github.com/elastic/cloudbeat/resources/fetchers/s3"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
@@ -62,6 +63,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch/logs"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
 
@@ -71,6 +73,7 @@ import (
 	configservice_sdk "github.com/aws/aws-sdk-go-v2/service/configservice"
 	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
 	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
+	rds_sdk "github.com/aws/aws-sdk-go-v2/service/rds"
 	s3_sdk "github.com/aws/aws-sdk-go-v2/service/s3"
 	securityhub_sdk "github.com/aws/aws-sdk-go-v2/service/securityhub"
 	sns_sdk "github.com/aws/aws-sdk-go-v2/service/sns"
@@ -263,6 +266,7 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 	awsSecurityhubRegionFactory := &awslib.MultiRegionClientFactory[securityhub.Client]{}
 	awsS3CrossRegionFactory := &awslib.MultiRegionClientFactory[s3.Client]{}
 	awsConfigCrossRegionFactory := &awslib.MultiRegionClientFactory[configservice.Client]{}
+	awsRDSCrossRegionFactory := &awslib.MultiRegionClientFactory[rds.Client]{}
 
 	if _, ok := list[iam_fetcher.Type]; ok {
 		reg[iam_fetcher.Type] = iam_fetcher.New(
@@ -341,6 +345,19 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 				awsConfig,
 				log,
 				getS3Clients(awsS3CrossRegionFactory, log, awsConfig),
+			)),
+		)
+	}
+
+	if _, ok := list[rds_fetcher.Type]; ok {
+		reg[rds_fetcher.Type] = rds_fetcher.New(
+			rds_fetcher.WithConfig(cfg),
+			rds_fetcher.WithLogger(log),
+			rds_fetcher.WithResourceChan(ch),
+			rds_fetcher.WithRDSProvider(rds.NewProvider(
+				log,
+				awsConfig,
+				getRDSClients(awsRDSCrossRegionFactory, log, awsConfig),
 			)),
 		)
 	}
@@ -503,6 +520,14 @@ func getConfigserviceClients(factory awslib.CrossRegionFactory[configservice.Cli
 func getS3Clients(factory awslib.CrossRegionFactory[s3.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]s3.Client {
 	f := func(cfg aws_sdk.Config) s3.Client {
 		return s3_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getRDSClients(factory awslib.CrossRegionFactory[rds.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]rds.Client {
+	f := func(cfg aws_sdk.Config) rds.Client {
+		return rds_sdk.NewFromConfig(cfg)
 	}
 	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
 	return m.GetMultiRegionsClientMap()

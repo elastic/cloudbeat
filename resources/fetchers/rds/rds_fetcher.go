@@ -15,16 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package rds
 
 import (
 	"context"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
+
+// Type fetcher
+const Type = "aws-rds"
 
 type RdsFetcher struct {
 	log        *logp.Logger
@@ -37,8 +39,12 @@ type RdsFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
 }
 
-type RdsResource struct {
-	dbInstance awslib.AwsResource
+func New(options ...Option) *RdsFetcher {
+	f := &RdsFetcher{}
+	for _, opt := range options {
+		opt(f)
+	}
+	return f
 }
 
 func (f *RdsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -61,18 +67,3 @@ func (f *RdsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 }
 
 func (f *RdsFetcher) Stop() {}
-
-func (r RdsResource) GetData() interface{} {
-	return r.dbInstance
-}
-
-func (r RdsResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	return fetching.ResourceMetadata{
-		ID:      r.dbInstance.GetResourceArn(),
-		Type:    fetching.CloudDatabase,
-		SubType: r.dbInstance.GetResourceType(),
-		Name:    r.dbInstance.GetResourceName(),
-	}, nil
-}
-
-func (r RdsResource) GetElasticCommonData() any { return nil }

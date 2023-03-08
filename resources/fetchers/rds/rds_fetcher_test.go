@@ -15,13 +15,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package rds
 
 import (
 	"context"
 	"errors"
 	"testing"
 
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/mapstr"
+
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
@@ -87,21 +91,23 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 	}
 
 	for _, test := range tests {
-		rdsFetcherCfg := RdsFetcherConfig{
-			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-		}
-
 		m := &rds.MockRds{}
 		for fn, rdsMocksReturnVals := range test.rdsMocksReturnVals {
 			m.On(fn, mock.Anything).Return(rdsMocksReturnVals...)
 		}
 
-		rdsFetcher := RdsFetcher{
-			log:        s.log,
-			cfg:        rdsFetcherCfg,
-			resourceCh: s.resourceCh,
-			provider:   m,
-		}
+		rdsFetcher := New(
+			WithLogger(s.log),
+			WithResourceChan(s.resourceCh),
+			WithRDSProvider(m),
+			WithConfig(&config.Config{
+				Fetchers: []*agentconfig.C{
+					agentconfig.MustNewConfigFrom(mapstr.M{
+						"name": "aws-rds",
+					}),
+				},
+			}),
+		)
 
 		ctx := context.Background()
 
