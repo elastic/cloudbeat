@@ -23,7 +23,8 @@ import (
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
+	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
@@ -42,7 +43,7 @@ func init() {
 
 type EC2NetworkFactory struct {
 	CrossRegionFactory awslib.CrossRegionFactory[ec2.Client]
-	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	IdentityProvider   func(cfg aws_sdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *EC2NetworkFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -73,8 +74,16 @@ func (f *EC2NetworkFactory) CreateFrom(log *logp.Logger, cfg ACLFetcherConfig, c
 	return &NetworkFetcher{
 		log:           log,
 		cfg:           cfg,
-		ec2Client:     ec2.NewEC2Provider(log, *identity.Account, awsConfig, f.CrossRegionFactory),
+		ec2Client:     ec2.NewEC2Provider(log, *identity.Account, awsConfig, getEC2Clients(f.CrossRegionFactory, log, awsConfig)),
 		cloudIdentity: identity,
 		resourceCh:    ch,
 	}, nil
+}
+
+func getEC2Clients(factory awslib.CrossRegionFactory[ec2.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]ec2.Client {
+	f := func(cfg aws_sdk.Config) ec2.Client {
+		return ec2_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
 }

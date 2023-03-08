@@ -21,7 +21,6 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -33,14 +32,10 @@ type ElasticCompute interface {
 	GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return ec2.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, clients map[string]Client) *Provider {
 	return &Provider{
 		log:          log,
-		clients:      m.GetMultiRegionsClientMap(),
+		clients:      clients,
 		awsAccountID: awsAccountID,
 	}
 }
