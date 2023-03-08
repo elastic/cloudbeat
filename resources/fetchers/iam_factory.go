@@ -20,9 +20,11 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+
+	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
+	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
@@ -39,7 +41,7 @@ func init() {
 }
 
 type IAMFactory struct {
-	IdentityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	IdentityProvider func(cfg aws_sdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -67,7 +69,7 @@ func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
-	provider := iam.NewIAMProvider(log, awsConfig)
+	provider := iam.NewIAMProvider(log, iam_sdk.NewFromConfig(awsConfig))
 
 	return &IAMFetcher{
 		log:           log,
@@ -76,5 +78,4 @@ func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan 
 		cloudIdentity: identity,
 		resourceCh:    ch,
 	}, nil
-
 }

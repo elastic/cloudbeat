@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"time"
 
+	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
@@ -287,7 +288,7 @@ func GetCommonDataProvider(ctx context.Context, log *logp.Logger, cfg config.Con
 		}
 
 		identityClient := awslib.GetIdentityClient(awsConfig)
-		iamProvider := iam.NewIAMProvider(log, awsConfig)
+		iamProvider := iam.NewIAMProvider(log, iam_sdk.NewFromConfig(awsConfig))
 
 		identity, err := identityClient.GetIdentity(ctx)
 		if err != nil {
