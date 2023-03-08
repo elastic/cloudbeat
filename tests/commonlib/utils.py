@@ -285,6 +285,13 @@ def get_findings(elastic_client, config_timeout, match_type):
 
 
 def identifier_by_name(case_identifier, eval_resource) -> bool:
+    """
+    This function compares unique field value retrieved from elastic to the value defined in the test case data.
+    Each test case has own unique field. This function uses resource.name as identifier.
+    @param case_identifier: Test case data identifier to be used for comparison
+    @param eval_resource: Resource event data retrieved from elastic
+    @return: True / False
+    """
     try:
         return eval_resource.resource.name == case_identifier
     except AttributeError:
