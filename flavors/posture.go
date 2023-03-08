@@ -27,6 +27,7 @@ import (
 	kube_fetcher "github.com/elastic/cloudbeat/resources/fetchers/kube"
 	logging_fetcher "github.com/elastic/cloudbeat/resources/fetchers/logging"
 	monitoring_fetcher "github.com/elastic/cloudbeat/resources/fetchers/monitoring"
+	s3_fetcher "github.com/elastic/cloudbeat/resources/fetchers/s3"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
@@ -326,6 +327,19 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 				log,
 				awsConfig,
 				getCloudrailClients(awsTrailCrossRegionFactory, log, awsConfig),
+				getS3Clients(awsS3CrossRegionFactory, log, awsConfig),
+			)),
+		)
+	}
+
+	if _, ok := list[s3_fetcher.Type]; ok {
+		reg[s3_fetcher.Type] = s3_fetcher.New(
+			s3_fetcher.WithConfig(cfg),
+			s3_fetcher.WithLogger(log),
+			s3_fetcher.WithResourceChan(ch),
+			s3_fetcher.WithS3Provider(s3.NewProvider(
+				awsConfig,
+				log,
 				getS3Clients(awsS3CrossRegionFactory, log, awsConfig),
 			)),
 		)

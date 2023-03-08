@@ -15,18 +15,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package s3
 
 import (
 	"context"
 	"errors"
+	"testing"
+
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type S3FetcherTestSuite struct {
@@ -58,7 +62,7 @@ func (s *S3FetcherTestSuite) TearDownTest() {
 }
 
 func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
-	var tests = []struct {
+	tests := []struct {
 		name               string
 		s3mocksReturnVals  s3mocksReturnVals
 		numExpectedResults int
@@ -80,21 +84,23 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 	}
 
 	for _, test := range tests {
-		s3FetcherCfg := S3FetcherConfig{
-			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-		}
 
 		s3ProviderMock := &s3.MockS3{}
 		for funcName, returnVals := range test.s3mocksReturnVals {
 			s3ProviderMock.On(funcName, context.TODO()).Return(returnVals...)
 		}
-
-		s3Fetcher := S3Fetcher{
-			log:        s.log,
-			cfg:        s3FetcherCfg,
-			s3:         s3ProviderMock,
-			resourceCh: s.resourceCh,
-		}
+		s3Fetcher := New(
+			WithLogger(s.log),
+			WithConfig(&config.Config{
+				Fetchers: []*agentconfig.C{
+					agentconfig.MustNewConfigFrom(mapstr.M{
+						"name": "aws-s3",
+					}),
+				},
+			}),
+			WithResourceChan(s.resourceCh),
+			WithS3Provider(s3ProviderMock),
+		)
 
 		ctx := context.Background()
 

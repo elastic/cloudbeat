@@ -15,15 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package s3
 
 import (
 	"context"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
+
+// Type fetcher
+const Type = "aws-s3"
 
 type S3Fetcher struct {
 	log        *logp.Logger
@@ -36,8 +39,12 @@ type S3FetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
 }
 
-type S3Resource struct {
-	bucket awslib.AwsResource
+func New(options ...Option) *S3Fetcher {
+	f := &S3Fetcher{}
+	for _, opt := range options {
+		opt(f)
+	}
+	return f
 }
 
 func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -61,18 +68,3 @@ func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 }
 
 func (f *S3Fetcher) Stop() {}
-
-func (r S3Resource) GetData() interface{} {
-	return r.bucket
-}
-
-func (r S3Resource) GetMetadata() (fetching.ResourceMetadata, error) {
-	return fetching.ResourceMetadata{
-		ID:      r.bucket.GetResourceArn(),
-		Type:    fetching.CloudStorage,
-		SubType: r.bucket.GetResourceType(),
-		Name:    r.bucket.GetResourceName(),
-	}, nil
-}
-
-func (r S3Resource) GetElasticCommonData() any { return nil }
