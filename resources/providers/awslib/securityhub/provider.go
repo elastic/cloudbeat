@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -41,16 +40,12 @@ type (
 	}
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
-	f := func(cfg aws.Config) Client {
-		return securityhub.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+func NewProvider(cfg aws.Config, log *logp.Logger, clients map[string]Client, accountId string) *Provider {
 	return &Provider{
 		log:       log,
 		region:    cfg.Region,
 		accountId: accountId,
-		clients:   m.GetMultiRegionsClientMap(),
+		clients:   clients,
 	}
 }
 
