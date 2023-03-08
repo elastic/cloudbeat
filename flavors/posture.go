@@ -24,6 +24,7 @@ import (
 	"os"
 	"time"
 
+	eks_fetcher "github.com/elastic/cloudbeat/resources/fetchers/eks"
 	elb_fetcher "github.com/elastic/cloudbeat/resources/fetchers/elb"
 	filesystem_fetcher "github.com/elastic/cloudbeat/resources/fetchers/file_system"
 	iam_fetcher "github.com/elastic/cloudbeat/resources/fetchers/iam"
@@ -78,6 +79,7 @@ import (
 	cloudwatchlogs_sdk "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
 	configservice_sdk "github.com/aws/aws-sdk-go-v2/service/configservice"
 	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
+	eks_sdk "github.com/aws/aws-sdk-go-v2/service/eks"
 	elb_sdk "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	rds_sdk "github.com/aws/aws-sdk-go-v2/service/rds"
@@ -274,6 +276,7 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 
 	awsIAMService := iam_sdk.NewFromConfig(awsConfig)
 	awsELBService := elb_sdk.NewFromConfig(awsConfig)
+	awsEKSService := eks_sdk.NewFromConfig(awsConfig)
 	awsTrailCrossRegionFactory := &awslib.MultiRegionClientFactory[cloudtrail.Client]{}
 	awsCloudwatchCrossRegionFactory := &awslib.MultiRegionClientFactory[cloudwatch.Client]{}
 	awsCloudwatchlogsCrossRegionFactory := &awslib.MultiRegionClientFactory[logs.Client]{}
@@ -412,6 +415,15 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 			elb_fetcher.WithElbProvider(awslib.NewElbProvider(awsELBService)),
 			elb_fetcher.WithKubeClient(k8sClient),
 			elb_fetcher.WithRegexMatcher(awsConfig.Region),
+		)
+	}
+
+	if _, ok := list[eks_fetcher.Type]; ok {
+		reg[eks_fetcher.Type] = eks_fetcher.New(
+			eks_fetcher.WithLogger(log),
+			eks_fetcher.WithConfig(cfg),
+			eks_fetcher.WithResourceChan(ch),
+			eks_fetcher.WithEKSProvider(awslib.NewEksProvider(awsEKSService)),
 		)
 	}
 	return reg, nil

@@ -15,19 +15,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package eks
 
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/service/eks/types"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 var (
@@ -61,7 +65,7 @@ func (s *EksFetcherTestSuite) TearDownTest() {
 }
 
 func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
-	var tests = []struct {
+	tests := []struct {
 		clusterName     string
 		clusterResponse awslib.EksClusterOutput
 	}{
@@ -77,20 +81,24 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 	}
 
 	for _, test := range tests {
-		eksConfig := EksFetcherConfig{
-			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-			ClusterName:          test.clusterName,
-		}
+
 		eksProvider := &awslib.MockEksClusterDescriber{}
 		expectedResource := EksResource{test.clusterResponse}
 
 		eksProvider.EXPECT().DescribeCluster(mock.Anything, test.clusterName).Return(test.clusterResponse, nil)
-		eksFetcher := EksFetcher{
-			log:         s.log,
-			cfg:         eksConfig,
-			eksProvider: eksProvider,
-			resourceCh:  s.resourceCh,
-		}
+		eksFetcher := New(
+			WithLogger(s.log),
+			WithConfig(&config.Config{
+				Fetchers: []*agentconfig.C{
+					agentconfig.MustNewConfigFrom(mapstr.M{
+						"name":        "aws-eks",
+						"clusterName": test.clusterName,
+					}),
+				},
+			}),
+			WithEKSProvider(eksProvider),
+			WithResourceChan(s.resourceCh),
+		)
 
 		ctx := context.Background()
 		err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})
@@ -110,20 +118,24 @@ func (s *EksFetcherTestSuite) TestEksFetcherFetch() {
 
 func (s *EksFetcherTestSuite) TestEksFetcherFetchWhenErrorOccurs() {
 	clusterName := "my-cluster"
-	eksConfig := EksFetcherConfig{
-		AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-		ClusterName:          clusterName,
-	}
 	eksProvider := &awslib.MockEksClusterDescriber{}
 
 	expectedErr := fmt.Errorf("my error")
 	eksProvider.EXPECT().DescribeCluster(mock.Anything, clusterName).Return(awslib.EksClusterOutput{}, expectedErr)
-	eksFetcher := EksFetcher{
-		log:         s.log,
-		cfg:         eksConfig,
-		eksProvider: eksProvider,
-		resourceCh:  s.resourceCh,
-	}
+
+	eksFetcher := New(
+		WithLogger(s.log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name":        "aws-eks",
+					"clusterName": clusterName,
+				}),
+			},
+		}),
+		WithEKSProvider(eksProvider),
+		WithResourceChan(s.resourceCh),
+	)
 
 	ctx := context.Background()
 	err := eksFetcher.Fetch(ctx, fetching.CycleMetadata{})

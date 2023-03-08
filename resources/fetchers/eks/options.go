@@ -15,40 +15,41 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package eks
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/aws/aws-sdk-go-v2/service/eks"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type EksClusterOutput eks.DescribeClusterOutput
+type Option func(*EksFetcher)
 
-type EksClusterDescriber interface {
-	DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error)
-}
-
-type EksProvider struct {
-	client *eks.Client
-}
-
-func NewEksProvider(client *eks.Client) *EksProvider {
-	return &EksProvider{
-		client: client,
+func WithLogger(log *logp.Logger) Option {
+	return func(ef *EksFetcher) {
+		ef.log = log
 	}
 }
 
-func (provider EksProvider) DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error) {
-	input := &eks.DescribeClusterInput{
-		Name: &clusterName,
+func WithConfig(c *config.Config) Option {
+	return func(ef *EksFetcher) {
+		cfg := EksFetcherConfig{}
+		if err := config.UnpackInto(c, Type, &cfg); err != nil {
+			panic(err)
+		}
+		ef.cfg = cfg
 	}
+}
 
-	response, err := provider.client.DescribeCluster(ctx, input)
-	if err != nil {
-		return EksClusterOutput{}, fmt.Errorf("failed to describe cluster %s from eks, error - %w", clusterName, err)
+func WithResourceChan(ch chan fetching.ResourceInfo) Option {
+	return func(ef *EksFetcher) {
+		ef.resourceCh = ch
 	}
+}
 
-	return EksClusterOutput(*response), err
+func WithEKSProvider(p awslib.EksClusterDescriber) Option {
+	return func(ef *EksFetcher) {
+		ef.eksProvider = p
+	}
 }

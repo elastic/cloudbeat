@@ -15,51 +15,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package eks
 
 import (
-	"context"
-	"github.com/pkg/errors"
-
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
-
-type EksFetcher struct {
-	log         *logp.Logger
-	cfg         EksFetcherConfig
-	eksProvider awslib.EksClusterDescriber
-	resourceCh  chan fetching.ResourceInfo
-}
-
-type EksFetcherConfig struct {
-	fetching.AwsBaseFetcherConfig `config:",inline"`
-	ClusterName                   string `config:"clusterName"`
-}
 
 type EksResource struct {
 	awslib.EksClusterOutput
-}
-
-func (f EksFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Debug("Starting EksFetcher.Fetch")
-
-	result, err := f.eksProvider.DescribeCluster(ctx, f.cfg.ClusterName)
-	if err != nil {
-		return err
-	}
-
-	f.resourceCh <- fetching.ResourceInfo{
-		Resource:      EksResource{result},
-		CycleMetadata: cMetadata,
-	}
-
-	return nil
-}
-
-func (f EksFetcher) Stop() {
 }
 
 func (r EksResource) GetData() interface{} {
