@@ -26,7 +26,9 @@ import (
 	filesystem_fetcher "github.com/elastic/cloudbeat/resources/fetchers/file_system"
 	iam_fetcher "github.com/elastic/cloudbeat/resources/fetchers/iam"
 	kube_fetcher "github.com/elastic/cloudbeat/resources/fetchers/kube"
+	monitoring_fetcher "github.com/elastic/cloudbeat/resources/fetchers/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/resources/utils/user"
@@ -51,6 +53,20 @@ import (
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch/logs"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
+
+	cloudtrail_sdk "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	cloudwatch_sdk "github.com/aws/aws-sdk-go-v2/service/cloudwatch"
+	cloudwatchlogs_sdk "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
+	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
+	securityhub_sdk "github.com/aws/aws-sdk-go-v2/service/securityhub"
+	sns_sdk "github.com/aws/aws-sdk-go-v2/service/sns"
 )
 
 // posture configuration.
@@ -233,6 +249,11 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 	}
 
 	awsIAMService := iam_sdk.NewFromConfig(awsConfig)
+	awsTrailCrossRegionFactory := &awslib.MultiRegionClientFactory[cloudtrail.Client]{}
+	awsCloudwatchCrossRegionFactory := &awslib.MultiRegionClientFactory[cloudwatch.Client]{}
+	awsCloudwatchlogsCrossRegionFactory := &awslib.MultiRegionClientFactory[logs.Client]{}
+	awsSNSCrossRegionFactory := &awslib.MultiRegionClientFactory[sns.Client]{}
+	awsSecurityhubRegionFactory := &awslib.MultiRegionClientFactory[securityhub.Client]{}
 
 	if _, ok := list[iam_fetcher.Type]; ok {
 		reg[iam_fetcher.Type] = iam_fetcher.New(
@@ -260,6 +281,23 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 			kube_fetcher.WithResourceChan(ch),
 			kube_fetcher.WithKubeClientProvider(kubernetes.GetKubernetesClient),
 			kube_fetcher.WithWatchers([]kubernetes.Watcher{}),
+		)
+	}
+
+	if _, ok := list[monitoring_fetcher.Type]; ok {
+		reg[monitoring_fetcher.Type] = monitoring_fetcher.New(
+			monitoring_fetcher.WithConfig(cfg),
+			monitoring_fetcher.WithLogger(log),
+			monitoring_fetcher.WithResourceChan(ch),
+			monitoring_fetcher.WithCloudIdentity(identity),
+			monitoring_fetcher.WithMonitoringProvider(&monitoring.Provider{
+				Cloudtrail:     cloudtrail.NewProvider(awsConfig, log, getCloudrailClients(awsTrailCrossRegionFactory, log, awsConfig)),
+				Cloudwatch:     cloudwatch.NewProvider(log, awsConfig, getCloudwatchClients(awsCloudwatchCrossRegionFactory, log, awsConfig)),
+				Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, awsConfig, getCloudwatchlogsClients(awsCloudwatchlogsCrossRegionFactory, log, awsConfig)),
+				Sns:            sns.NewSNSProvider(log, awsConfig, getSNSClients(awsSNSCrossRegionFactory, log, awsConfig)),
+				Log:            log,
+			}),
+			monitoring_fetcher.WithSecurityhubService(securityhub.NewProvider(awsConfig, log, getSecurityhubClients(awsSecurityhubRegionFactory, log, awsConfig), *identity.Account)),
 		)
 	}
 	return reg, nil
@@ -368,4 +406,44 @@ func GetCommonDataProvider(ctx context.Context, log *logp.Logger, cfg config.Con
 		), nil
 	}
 	return nil, fmt.Errorf("could not get common data provider for benchmark %s", cfg.Benchmark)
+}
+
+func getCloudrailClients(factory awslib.CrossRegionFactory[cloudtrail.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]cloudtrail.Client {
+	f := func(cfg aws_sdk.Config) cloudtrail.Client {
+		return cloudtrail_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getCloudwatchClients(factory awslib.CrossRegionFactory[cloudwatch.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]cloudwatch.Client {
+	f := func(cfg aws_sdk.Config) cloudwatch.Client {
+		return cloudwatch_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getCloudwatchlogsClients(factory awslib.CrossRegionFactory[logs.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]logs.Client {
+	f := func(cfg aws_sdk.Config) logs.Client {
+		return cloudwatchlogs_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getSecurityhubClients(factory awslib.CrossRegionFactory[securityhub.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]securityhub.Client {
+	f := func(cfg aws_sdk.Config) securityhub.Client {
+		return securityhub_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getSNSClients(factory awslib.CrossRegionFactory[sns.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]sns.Client {
+	f := func(cfg aws_sdk.Config) sns.Client {
+		return sns_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
 }

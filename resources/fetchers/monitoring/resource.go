@@ -15,73 +15,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package monitoring
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/resources/fetching"
 )
-
-type MonitoringFetcher struct {
-	log           *logp.Logger
-	provider      monitoring.Client
-	cfg           MonitoringFetcherConfig
-	resourceCh    chan fetching.ResourceInfo
-	cloudIdentity *awslib.Identity
-	securityhub   securityhub.Service
-}
-
-type MonitoringFetcherConfig struct {
-	fetching.AwsBaseFetcherConfig `config:",inline"`
-}
 
 type MonitoringResource struct {
 	monitoring.Resource
 	identity *awslib.Identity
 }
-
 type SecurityHubResource struct {
 	securityhub.SecurityHub
 }
-
-func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	m.log.Debug("Starting MonitoringFetcher.Fetch")
-	out, err := m.provider.AggregateResources(ctx)
-	if err != nil {
-		m.log.Errorf("failed to aggregate monitoring resources: %v", err)
-	}
-	if out != nil {
-		m.resourceCh <- fetching.ResourceInfo{
-			Resource:      MonitoringResource{*out, m.cloudIdentity},
-			CycleMetadata: cMetadata,
-		}
-	}
-	hubs, err := m.securityhub.Describe(ctx)
-	if err != nil {
-		m.log.Errorf("failed to describe security hub: %v", err)
-		return nil
-	}
-
-	for _, hub := range hubs {
-		m.resourceCh <- fetching.ResourceInfo{
-			Resource: SecurityHubResource{
-				SecurityHub: hub,
-			},
-			CycleMetadata: cMetadata,
-		}
-	}
-
-	return nil
-}
-
-func (f MonitoringFetcher) Stop() {}
 
 func (r MonitoringResource) GetData() any {
 	return r

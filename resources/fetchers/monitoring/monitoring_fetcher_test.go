@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package monitoring
 
 import (
 	"context"
@@ -25,12 +25,15 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	aws_securityhub "github.com/aws/aws-sdk-go-v2/service/securityhub"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -115,14 +118,20 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			for name, call := range tt.securityhub {
 				hub.On(name, call[0]...).Return(call[1]...)
 			}
-			m := MonitoringFetcher{
-				log:           logp.NewLogger("TestMonitoringFetcher_Fetch"),
-				provider:      mockClient,
-				securityhub:   hub,
-				cfg:           MonitoringFetcherConfig{},
-				resourceCh:    ch,
-				cloudIdentity: &awslib.Identity{Account: aws.String("account")},
-			}
+			m := New(
+				WithLogger(logp.NewLogger("TestMonitoringFetcher_Fetch")),
+				WithCloudIdentity(&awslib.Identity{Account: aws.String("account")}),
+				WithResourceChan(ch),
+				WithMonitoringProvider(mockClient),
+				WithSecurityhubService(hub),
+				WithConfig(&config.Config{
+					Fetchers: []*agentconfig.C{
+						agentconfig.MustNewConfigFrom(mapstr.M{
+							"name": "aws-monitoring",
+						}),
+					},
+				}),
+			)
 
 			err := m.Fetch(ctx, fetching.CycleMetadata{})
 			if tt.wantErr {
