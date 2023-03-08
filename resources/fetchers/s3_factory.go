@@ -19,6 +19,10 @@ package fetchers
 
 import (
 	"fmt"
+
+	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
+	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
+	s3_sdk "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
@@ -56,7 +60,7 @@ func (f *S3Factory) CreateFrom(log *logp.Logger, cfg S3FetcherConfig, ch chan fe
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	s3Provider := s3.NewProvider(awsConfig, log, f.CrossRegionFactory)
+	s3Provider := s3.NewProvider(awsConfig, log, getS3Clients(f.CrossRegionFactory, log, awsConfig))
 
 	return &S3Fetcher{
 		log:        log,
@@ -64,4 +68,12 @@ func (f *S3Factory) CreateFrom(log *logp.Logger, cfg S3FetcherConfig, ch chan fe
 		s3:         s3Provider,
 		resourceCh: ch,
 	}, nil
+}
+
+func getS3Clients(factory awslib.CrossRegionFactory[s3.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]s3.Client {
+	f := func(cfg aws_sdk.Config) s3.Client {
+		return s3_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
 }

@@ -22,9 +22,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
+	s3_sdk "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/smithy-go"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -38,20 +38,15 @@ const (
 	NoEncryptionMessage    = "NoEncryption"
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return s3Client.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
-
+func NewProvider(cfg aws.Config, log *logp.Logger, clients map[string]Client) *Provider {
 	return &Provider{
 		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
+		clients: clients,
 	}
 }
 
 func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, error) {
-	clientBuckets, err := p.clients[awslib.DefaultRegion].ListBuckets(ctx, &s3Client.ListBucketsInput{})
+	clientBuckets, err := p.clients[awslib.DefaultRegion].ListBuckets(ctx, &s3_sdk.ListBucketsInput{})
 	if err != nil {
 		p.log.Errorf("Could not list s3 buckets: %v", err)
 		return nil, err
@@ -85,13 +80,13 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 	return result, nil
 }
 
-func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region string) (*s3Client.GetBucketAclOutput, error) {
+func (p Provider) GetBucketACL(ctx context.Context, bucketName *string, region string) (*s3_sdk.GetBucketAclOutput, error) {
 	client, err := awslib.GetClient(&region, p.clients)
 	if err != nil {
 		return nil, err
 	}
 
-	acl, err := client.GetBucketAcl(ctx, &s3Client.GetBucketAclInput{Bucket: bucketName})
+	acl, err := client.GetBucketAcl(ctx, &s3_sdk.GetBucketAclInput{Bucket: bucketName})
 	if err != nil {
 		p.log.Debugf("Error getting bucket ACL: %s", err)
 		return nil, err
@@ -106,7 +101,7 @@ func (p Provider) GetBucketPolicy(ctx context.Context, bucketName *string, regio
 		return nil, err
 	}
 
-	rawPolicy, err := client.GetBucketPolicy(ctx, &s3Client.GetBucketPolicyInput{Bucket: bucketName})
+	rawPolicy, err := client.GetBucketPolicy(ctx, &s3_sdk.GetBucketPolicyInput{Bucket: bucketName})
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
@@ -134,7 +129,7 @@ func (p Provider) GetBucketLogging(ctx context.Context, bucketName *string, regi
 		return Logging{}, err
 	}
 
-	logging, err := client.GetBucketLogging(ctx, &s3Client.GetBucketLoggingInput{Bucket: bucketName})
+	logging, err := client.GetBucketLogging(ctx, &s3_sdk.GetBucketLoggingInput{Bucket: bucketName})
 	if err != nil {
 		p.log.Debugf("Error getting bucket logging: %s", err)
 		return Logging{}, err
@@ -172,7 +167,7 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 		return nil, err
 	}
 
-	encryption, err := client.GetBucketEncryption(ctx, &s3Client.GetBucketEncryptionInput{Bucket: bucketName})
+	encryption, err := client.GetBucketEncryption(ctx, &s3_sdk.GetBucketEncryptionInput{Bucket: bucketName})
 	if err != nil {
 		var apiErr smithy.APIError
 		if errors.As(err, &apiErr) {
@@ -194,7 +189,7 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 }
 
 func (p Provider) getBucketRegion(ctx context.Context, bucketName *string) (string, error) {
-	location, err := p.clients[awslib.DefaultRegion].GetBucketLocation(ctx, &s3Client.GetBucketLocationInput{Bucket: bucketName})
+	location, err := p.clients[awslib.DefaultRegion].GetBucketLocation(ctx, &s3_sdk.GetBucketLocationInput{Bucket: bucketName})
 	if err != nil {
 		return "", err
 	}
@@ -216,7 +211,7 @@ func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, r
 		return nil, err
 	}
 
-	bucketVersioningResponse, err := client.GetBucketVersioning(ctx, &s3Client.GetBucketVersioningInput{Bucket: bucketName})
+	bucketVersioningResponse, err := client.GetBucketVersioning(ctx, &s3_sdk.GetBucketVersioningInput{Bucket: bucketName})
 	if err != nil {
 		return nil, err
 	}
