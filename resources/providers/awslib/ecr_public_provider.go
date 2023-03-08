@@ -20,41 +20,47 @@ package awslib
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
+
 	"github.com/aws/aws-sdk-go-v2/service/ecrpublic"
 	"github.com/aws/aws-sdk-go-v2/service/ecrpublic/types"
 )
 
-type EcrPublicRepository types.Repository
-type EcrPublicRepositories []types.Repository
+type (
+	EcrPublicRepository   types.Repository
+	EcrPublicRepositories []types.Repository
+)
 
 type EcrPublicProvider struct {
+	clients map[string]*ecrpublic.Client
 }
 
-func NewEcrPublicProvider() *EcrPublicProvider {
-	return &EcrPublicProvider{}
+func NewEcrPublicProvider(clients map[string]*ecrpublic.Client) *EcrPublicProvider {
+	return &EcrPublicProvider{
+		clients: clients,
+	}
 }
 
 // DescribeAllEcrRepositories returns a list of all the existing public ecr repositories within this region
-func (provider *EcrPublicProvider) DescribeAllEcrRepositories(ctx context.Context, cfg aws.Config, region string) (EcrPublicRepositories, error) {
+func (provider *EcrPublicProvider) DescribeAllEcrRepositories(ctx context.Context, region string) (EcrPublicRepositories, error) {
 	// When repoNames is nil, it will describe all the existing repositories
-	return provider.DescribeRepositories(ctx, cfg, nil, region)
+	return provider.DescribeRepositories(ctx, nil, region)
 }
 
 // DescribeRepositories returns a list of public ecr repositories that match the given names.
 // When repoNames is empty, it will describe all the existing repositories
-func (provider *EcrPublicProvider) DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrPublicRepositories, error) {
+func (provider *EcrPublicProvider) DescribeRepositories(ctx context.Context, repoNames []string, region string) (EcrPublicRepositories, error) {
 	if len(repoNames) == 0 {
 		return EcrPublicRepositories{}, nil
 	}
-
-	cfg.Region = region
-	svc := ecrpublic.NewFromConfig(cfg)
+	client, ok := provider.clients[region]
+	if !ok {
+		return nil, ErrClientNotFound
+	}
 	input := &ecrpublic.DescribeRepositoriesInput{
 		RepositoryNames: repoNames,
 	}
 	var repos EcrPublicRepositories
-	paginator := ecrpublic.NewDescribeRepositoriesPaginator(svc, input)
+	paginator := ecrpublic.NewDescribeRepositoriesPaginator(client, input)
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(ctx)
 		if err != nil {
@@ -64,5 +70,4 @@ func (provider *EcrPublicProvider) DescribeRepositories(ctx context.Context, cfg
 	}
 
 	return repos, nil
-
 }

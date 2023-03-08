@@ -24,6 +24,7 @@ import (
 	"os"
 	"time"
 
+	ecr_fetcher "github.com/elastic/cloudbeat/resources/fetchers/ecr"
 	eks_fetcher "github.com/elastic/cloudbeat/resources/fetchers/eks"
 	elb_fetcher "github.com/elastic/cloudbeat/resources/fetchers/elb"
 	filesystem_fetcher "github.com/elastic/cloudbeat/resources/fetchers/file_system"
@@ -79,6 +80,7 @@ import (
 	cloudwatchlogs_sdk "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
 	configservice_sdk "github.com/aws/aws-sdk-go-v2/service/configservice"
 	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
+	ecr_sdk "github.com/aws/aws-sdk-go-v2/service/ecr"
 	eks_sdk "github.com/aws/aws-sdk-go-v2/service/eks"
 	elb_sdk "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
@@ -286,6 +288,7 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 	awsConfigCrossRegionFactory := &awslib.MultiRegionClientFactory[configservice.Client]{}
 	awsRDSCrossRegionFactory := &awslib.MultiRegionClientFactory[rds.Client]{}
 	awsEC2CrossRegionFactory := &awslib.MultiRegionClientFactory[ec2.Client]{}
+	awsECRCrossRegionFactory := &awslib.MultiRegionClientFactory[*ecr_sdk.Client]{}
 
 	if _, ok := list[iam_fetcher.Type]; ok {
 		reg[iam_fetcher.Type] = iam_fetcher.New(
@@ -424,6 +427,21 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 			eks_fetcher.WithConfig(cfg),
 			eks_fetcher.WithResourceChan(ch),
 			eks_fetcher.WithEKSProvider(awslib.NewEksProvider(awsEKSService)),
+		)
+	}
+
+	if _, ok := list[ecr_fetcher.Type]; ok {
+		reg[ecr_fetcher.Type] = ecr_fetcher.New(
+			ecr_fetcher.WithLogger(log),
+			ecr_fetcher.WithConfig(cfg),
+			ecr_fetcher.WithResourceChan(ch),
+			ecr_fetcher.WithKubeClient(k8sClient),
+			ecr_fetcher.WithECRProvider(
+				awslib.NewEcrProvider(
+					getEcrClients(awsECRCrossRegionFactory, log, awsConfig),
+				),
+				*identity.Account,
+			),
 		)
 	}
 	return reg, nil
@@ -601,6 +619,14 @@ func getRDSClients(factory awslib.CrossRegionFactory[rds.Client], log *logp.Logg
 func getEC2Clients(factory awslib.CrossRegionFactory[ec2.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]ec2.Client {
 	f := func(cfg aws_sdk.Config) ec2.Client {
 		return ec2_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getEcrClients(factory awslib.CrossRegionFactory[*ecr_sdk.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]*ecr_sdk.Client {
+	f := func(cfg aws_sdk.Config) *ecr_sdk.Client {
+		return ecr_sdk.NewFromConfig(cfg)
 	}
 	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
 	return m.GetMultiRegionsClientMap()

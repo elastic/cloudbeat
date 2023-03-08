@@ -22,8 +22,6 @@ package awslib
 import (
 	context "context"
 
-	aws "github.com/aws/aws-sdk-go-v2/aws"
-
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -40,13 +38,13 @@ func (_m *MockEcrRepositoryDescriber) EXPECT() *MockEcrRepositoryDescriber_Expec
 	return &MockEcrRepositoryDescriber_Expecter{mock: &_m.Mock}
 }
 
-// DescribeRepositories provides a mock function with given fields: ctx, cfg, repoNames, region
-func (_m *MockEcrRepositoryDescriber) DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error) {
-	ret := _m.Called(ctx, cfg, repoNames, region)
+// DescribeRepositories provides a mock function with given fields: ctx, repoNames, region
+func (_m *MockEcrRepositoryDescriber) DescribeRepositories(ctx context.Context, repoNames []string, region string) (EcrRepositories, error) {
+	ret := _m.Called(ctx, repoNames, region)
 
 	var r0 EcrRepositories
-	if rf, ok := ret.Get(0).(func(context.Context, aws.Config, []string, string) EcrRepositories); ok {
-		r0 = rf(ctx, cfg, repoNames, region)
+	if rf, ok := ret.Get(0).(func(context.Context, []string, string) EcrRepositories); ok {
+		r0 = rf(ctx, repoNames, region)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(EcrRepositories)
@@ -54,8 +52,8 @@ func (_m *MockEcrRepositoryDescriber) DescribeRepositories(ctx context.Context, 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, aws.Config, []string, string) error); ok {
-		r1 = rf(ctx, cfg, repoNames, region)
+	if rf, ok := ret.Get(1).(func(context.Context, []string, string) error); ok {
+		r1 = rf(ctx, repoNames, region)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -70,16 +68,15 @@ type MockEcrRepositoryDescriber_DescribeRepositories_Call struct {
 
 // DescribeRepositories is a helper method to define mock.On call
 //   - ctx context.Context
-//   - cfg aws.Config
 //   - repoNames []string
 //   - region string
-func (_e *MockEcrRepositoryDescriber_Expecter) DescribeRepositories(ctx interface{}, cfg interface{}, repoNames interface{}, region interface{}) *MockEcrRepositoryDescriber_DescribeRepositories_Call {
-	return &MockEcrRepositoryDescriber_DescribeRepositories_Call{Call: _e.mock.On("DescribeRepositories", ctx, cfg, repoNames, region)}
+func (_e *MockEcrRepositoryDescriber_Expecter) DescribeRepositories(ctx interface{}, repoNames interface{}, region interface{}) *MockEcrRepositoryDescriber_DescribeRepositories_Call {
+	return &MockEcrRepositoryDescriber_DescribeRepositories_Call{Call: _e.mock.On("DescribeRepositories", ctx, repoNames, region)}
 }
 
-func (_c *MockEcrRepositoryDescriber_DescribeRepositories_Call) Run(run func(ctx context.Context, cfg aws.Config, repoNames []string, region string)) *MockEcrRepositoryDescriber_DescribeRepositories_Call {
+func (_c *MockEcrRepositoryDescriber_DescribeRepositories_Call) Run(run func(ctx context.Context, repoNames []string, region string)) *MockEcrRepositoryDescriber_DescribeRepositories_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(aws.Config), args[2].([]string), args[3].(string))
+		run(args[0].(context.Context), args[1].([]string), args[2].(string))
 	})
 	return _c
 }

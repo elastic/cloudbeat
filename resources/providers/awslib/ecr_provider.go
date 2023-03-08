@@ -20,45 +20,52 @@ package awslib
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
+
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 )
 
-type EcrRepository types.Repository
-type EcrRepositories []types.Repository
+type (
+	EcrRepository   types.Repository
+	EcrRepositories []types.Repository
+)
 
 type EcrProvider struct {
+	clients map[string]*ecr.Client
 }
 
 type EcrRepositoryDescriber interface {
-	DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error)
+	DescribeRepositories(ctx context.Context, repoNames []string, region string) (EcrRepositories, error)
 }
 
-func NewEcrProvider() *EcrProvider {
-	return &EcrProvider{}
+func NewEcrProvider(clients map[string]*ecr.Client) *EcrProvider {
+	return &EcrProvider{
+		clients: clients,
+	}
 }
 
 // DescribeAllEcrRepositories returns a list of all the existing repositories
-func (provider *EcrProvider) DescribeAllEcrRepositories(ctx context.Context, cfg aws.Config, region string) (EcrRepositories, error) {
+func (provider *EcrProvider) DescribeAllEcrRepositories(ctx context.Context, region string) (EcrRepositories, error) {
 	/// When repoNames is nil, it will describe all the existing Repositories
-	return provider.DescribeRepositories(ctx, cfg, nil, region)
+	return provider.DescribeRepositories(ctx, nil, region)
 }
 
 // DescribeRepositories returns a list of repositories that match the given names.
 // When repoNames is empty, it will describe all the existing repositories
-func (provider *EcrProvider) DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error) {
+func (provider *EcrProvider) DescribeRepositories(ctx context.Context, repoNames []string, region string) (EcrRepositories, error) {
 	if len(repoNames) == 0 {
 		return EcrRepositories{}, nil
 	}
 
-	cfg.Region = region
-	svc := ecr.NewFromConfig(cfg)
+	client, ok := provider.clients[region]
+	if !ok {
+		return nil, ErrClientNotFound
+	}
 	input := &ecr.DescribeRepositoriesInput{
 		RepositoryNames: repoNames,
 	}
 	var repos EcrRepositories
-	paginator := ecr.NewDescribeRepositoriesPaginator(svc, input)
+	paginator := ecr.NewDescribeRepositoriesPaginator(client, input)
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(ctx)
 		if err != nil {

@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package ecr
 
 import (
 	"context"
@@ -27,7 +27,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	v1 "k8s.io/api/core/v1"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,6 +39,9 @@ const (
 	PrivateRepoRegexTemplate = "^%s\\.dkr\\.ecr\\.([-\\w]+)\\.amazonaws\\.com\\/([-\\w\\.\\/]+)[:,@]?"
 	EcrRegionRegexGroup      = 1
 	EcrImageRegexGroup       = 2
+
+	// Type fetcher
+	Type = "aws-ecr"
 )
 
 type EcrFetcher struct {
@@ -48,7 +50,6 @@ type EcrFetcher struct {
 	kubeClient   k8s.Interface
 	PodDescriber PodDescriber
 	resourceCh   chan fetching.ResourceInfo
-	awsConfig    aws.Config
 }
 
 type PodDescriber struct {
@@ -63,6 +64,14 @@ type EcrFetcherConfig struct {
 
 type EcrResource struct {
 	awslib.EcrRepository
+}
+
+func New(options ...Option) *EcrFetcher {
+	f := &EcrFetcher{}
+	for _, opt := range options {
+		opt(f)
+	}
+	return f
 }
 
 func (f *EcrFetcher) Stop() {
@@ -96,7 +105,7 @@ func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList
 	awsRepositories := make(awslib.EcrRepositories, 0)
 	for region, repositories := range regionToReposMap {
 		// Add configuration
-		describedRepo, err := describer.Provider.DescribeRepositories(ctx, f.awsConfig, repositories, region)
+		describedRepo, err := describer.Provider.DescribeRepositories(ctx, repositories, region)
 		if err != nil {
 			f.log.Errorf("could not retrieve pod's aws repositories for region %s: %v", region, err)
 		} else {

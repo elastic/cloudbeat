@@ -15,16 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package ecr
 
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"regexp"
 	"sort"
 	"testing"
+
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -73,7 +75,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 	privateRepoWithSlash := "build/cloudbeat"
 	repoArn := "arn:aws:ecr:us-west-2:012345678910:repository/ubuntu"
 
-	var tests = []struct {
+	tests := []struct {
 		identityAccount                     string
 		namespace                           string
 		containers                          []v1.Container
@@ -108,7 +110,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &secondRepositoryName,
 							RepositoryUri:              nil,
-						}},
+						},
+					},
 				},
 			},
 			[]string{firstRepositoryName, secondRepositoryName},
@@ -140,7 +143,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &secondRepositoryName,
 							RepositoryUri:              nil,
-						}},
+						},
+					},
 				},
 			},
 			[]string{privateRepoWithSlash, secondRepositoryName},
@@ -183,7 +187,8 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &firstRepositoryName,
 							RepositoryUri:              nil,
-						}},
+						},
+					},
 				},
 				"us-east-1": {
 					ExpectedRepositories: []string{"cloudbeat1"},
@@ -193,14 +198,15 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 							ImageScanningConfiguration: nil,
 							RepositoryName:             &secondRepositoryName,
 							RepositoryUri:              nil,
-						}},
+						},
+					},
 				},
 			},
 			[]string{firstRepositoryName, secondRepositoryName},
 		},
 	}
 	for _, test := range tests {
-		//Need to add services
+		// Need to add services
 		kubeclient := k8sfake.NewSimpleClientset()
 
 		pods := &v1.Pod{
@@ -226,32 +232,31 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		ecrProvider := &awslib.MockEcrRepositoryDescriber{}
 		// Init private repositories provider
 
-		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Call.
-			Return(func(ctx context.Context, cfg aws.Config, repoNames []string, region string) awslib.EcrRepositories {
+		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything).Call.
+			Return(func(ctx context.Context, repoNames []string, region string) awslib.EcrRepositories {
 				response, ok := test.privateRepositoriesResponseByRegion[region]
 				s.True(ok)
 				s.Equal(response.ExpectedRepositories, repoNames)
 
 				return response.EcrRepositories
 			},
-				func(ctx context.Context, cfg aws.Config, repoNames []string, region string) error {
+				func(ctx context.Context, repoNames []string, region string) error {
 					return nil
 				})
 
-		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount)
-
-		privateEcrExecutor := PodDescriber{
-			FilterRegex: regexp.MustCompile(privateRepoRegex),
-			Provider:    ecrProvider,
-		}
-
-		ecrFetcher := EcrFetcher{
-			log:          s.log,
-			cfg:          EcrFetcherConfig{},
-			kubeClient:   kubeclient,
-			PodDescriber: privateEcrExecutor,
-			resourceCh:   s.resourceCh,
-		}
+		ecrFetcher := New(
+			WithLogger(s.log),
+			WithConfig(&config.Config{
+				Fetchers: []*agentconfig.C{
+					agentconfig.MustNewConfigFrom(mapstr.M{
+						"name": "aws-ecr",
+					}),
+				},
+			}),
+			WithKubeClient(kubeclient),
+			WithECRProvider(ecrProvider, test.identityAccount),
+			WithResourceChan(s.resourceCh),
+		)
 
 		ctx := context.Background()
 		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
@@ -276,11 +281,10 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 			s.Equal(*ecrResource.RepositoryArn, metadata.ID)
 		}
 	}
-
 }
 
 func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
-	var tests = []struct {
+	tests := []struct {
 		identityAccount string
 		region          string
 		namespace       string
@@ -301,7 +305,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 		},
 	}
 	for _, test := range tests {
-		//Need to add services
+		// Need to add services
 		kubeclient := k8sfake.NewSimpleClientset()
 
 		pods := &v1.Pod{
@@ -325,21 +329,21 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		ecrProvider := &awslib.MockEcrRepositoryDescriber{}
-		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(awslib.EcrRepositories{}, test.error)
+		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything).Return(awslib.EcrRepositories{}, test.error)
 
-		privateRepoRegex := fmt.Sprintf(PrivateRepoRegexTemplate, test.identityAccount)
-
-		privateEcrExecutor := PodDescriber{
-			FilterRegex: regexp.MustCompile(privateRepoRegex),
-			Provider:    ecrProvider,
-		}
-		ecrFetcher := EcrFetcher{
-			log:          s.log,
-			cfg:          EcrFetcherConfig{},
-			kubeClient:   kubeclient,
-			PodDescriber: privateEcrExecutor,
-			resourceCh:   s.resourceCh,
-		}
+		ecrFetcher := New(
+			WithLogger(s.log),
+			WithConfig(&config.Config{
+				Fetchers: []*agentconfig.C{
+					agentconfig.MustNewConfigFrom(mapstr.M{
+						"name": "aws-ecr",
+					}),
+				},
+			}),
+			WithKubeClient(kubeclient),
+			WithECRProvider(ecrProvider, test.identityAccount),
+			WithResourceChan(s.resourceCh),
+		)
 
 		ctx := context.Background()
 		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
