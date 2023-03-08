@@ -21,7 +21,9 @@ import (
 	"context"
 	"fmt"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
+	cloudtrail_sdk "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
@@ -56,7 +58,7 @@ type MonitoringFactory struct {
 	CloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client]
 	SNSCrossRegionFactory            awslib.CrossRegionFactory[sns.Client]
 	SecurityhubRegionFactory         awslib.CrossRegionFactory[securityhub.Client]
-	IdentityProvider                 func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	IdentityProvider                 func(cfg aws_sdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *MonitoringFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -78,7 +80,7 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 	}
 
 	provider := monitoring.Provider{
-		Cloudtrail:     cloudtrail.NewProvider(awsConfig, log, f.TrailCrossRegionFactory),
+		Cloudtrail:     cloudtrail.NewProvider(awsConfig, log, getCloudrailClients(f.TrailCrossRegionFactory, log, awsConfig)),
 		Cloudwatch:     cloudwatch.NewProvider(log, awsConfig, f.CloudwatchCrossRegionFactory),
 		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, awsConfig, f.CloudwatchlogsCrossRegionFactory),
 		Sns:            sns.NewSNSProvider(log, awsConfig, f.SNSCrossRegionFactory),
@@ -99,4 +101,12 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 		cloudIdentity: identity,
 		securityhub:   securityhub.NewProvider(awsConfig, log, f.SecurityhubRegionFactory, *identity.Account),
 	}, nil
+}
+
+func getCloudrailClients(factory awslib.CrossRegionFactory[cloudtrail.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]cloudtrail.Client {
+	f := func(cfg aws_sdk.Config) cloudtrail.Client {
+		return cloudtrail_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
 }

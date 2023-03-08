@@ -20,7 +20,10 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+
+	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
+	cloudtrail_sdk "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -48,7 +51,7 @@ type LoggingFactory struct {
 	TrailCrossRegionFactory  awslib.CrossRegionFactory[cloudtrail.Client]
 	S3CrossRegionFactory     awslib.CrossRegionFactory[s3.Client]
 	ConfigCrossRegionFactory awslib.CrossRegionFactory[configservice.Client]
-	IdentityProvider         func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	IdentityProvider         func(cfg aws_sdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *LoggingFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -75,9 +78,15 @@ func (f *LoggingFactory) CreateFrom(log *logp.Logger, cfg fetching.AwsBaseFetche
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
+	fn := func(cfg aws_sdk.Config) cloudtrail.Client {
+		return cloudtrail_sdk.NewFromConfig(cfg)
+	}
+
+	m := f.TrailCrossRegionFactory.NewMultiRegionClients(ec2_sdk.NewFromConfig(awsConfig), awsConfig, fn, log)
+
 	return &LoggingFetcher{
 		log:                   log,
-		loggingProvider:       logging.NewProvider(log, awsConfig, f.TrailCrossRegionFactory, f.S3CrossRegionFactory),
+		loggingProvider:       logging.NewProvider(log, awsConfig, m.GetMultiRegionsClientMap(), f.S3CrossRegionFactory),
 		configserviceProvider: configservice.NewProvider(log, awsConfig, f.ConfigCrossRegionFactory, *identity.Account),
 		cfg:                   cfg,
 		resourceCh:            ch,
