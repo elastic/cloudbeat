@@ -20,6 +20,9 @@ package fetchers
 import (
 	"fmt"
 
+	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
+	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
+	rds_sdk "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
@@ -60,6 +63,14 @@ func (f *RdsFactory) CreateFrom(log *logp.Logger, cfg RdsFetcherConfig, ch chan 
 		log:        log,
 		cfg:        cfg,
 		resourceCh: ch,
-		provider:   rds.NewProvider(log, awsConfig, f.CrossRegionFactory),
+		provider:   rds.NewProvider(log, awsConfig, getRDSClients(f.CrossRegionFactory, log, awsConfig)),
 	}, nil
+}
+
+func getRDSClients(factory awslib.CrossRegionFactory[rds.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]rds.Client {
+	f := func(cfg aws_sdk.Config) rds.Client {
+		return rds_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
 }

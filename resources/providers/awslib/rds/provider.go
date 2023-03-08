@@ -21,30 +21,24 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/rds"
-	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
+	rds_sdk "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 )
 
-func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return rds.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+func NewProvider(log *logp.Logger, cfg aws.Config, clients map[string]Client) *Provider {
 	return &Provider{
 		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
+		clients: clients,
 	}
 }
 
 func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error) {
 	rdss, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
 		var result []awslib.AwsResource
-		dbInstances, err := c.DescribeDBInstances(ctx, &rdsClient.DescribeDBInstancesInput{})
+		dbInstances, err := c.DescribeDBInstances(ctx, &rds_sdk.DescribeDBInstancesInput{})
 		if err != nil {
 			p.log.Errorf("Could not describe DB instances. Error: %v", err)
 			return result, err
