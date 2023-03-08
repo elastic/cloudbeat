@@ -21,10 +21,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -32,13 +29,9 @@ type Cloudwatch interface {
 	DescribeAlarms(ctx context.Context, region *string, filters []string) ([]types.MetricAlarm, error)
 }
 
-func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return cloudwatch.NewFromConfig(cfg)
-	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+func NewProvider(log *logp.Logger, cfg aws.Config, clients map[string]Client) *Provider {
 	return &Provider{
 		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
+		clients: clients,
 	}
 }
