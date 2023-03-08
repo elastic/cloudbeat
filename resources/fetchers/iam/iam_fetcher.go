@@ -15,11 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package iam
 
 import (
 	"context"
-	"fmt"
+
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -27,21 +27,28 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type IAMFetcher struct {
-	log           *logp.Logger
-	iamProvider   iam.AccessManagement
-	cfg           IAMFetcherConfig
-	resourceCh    chan fetching.ResourceInfo
-	cloudIdentity *awslib.Identity
-}
+const Type = "aws-iam"
 
-type IAMFetcherConfig struct {
-	fetching.AwsBaseFetcherConfig `config:",inline"`
-}
+type (
+	IAMFetcher struct {
+		log           *logp.Logger
+		iamProvider   iam.AccessManagement
+		cfg           IAMFetcherConfig
+		resourceCh    chan fetching.ResourceInfo
+		cloudIdentity *awslib.Identity
+	}
 
-type IAMResource struct {
-	awslib.AwsResource
-	identity *awslib.Identity
+	IAMFetcherConfig struct {
+		fetching.AwsBaseFetcherConfig `config:",inline"`
+	}
+)
+
+func New(options ...Option) *IAMFetcher {
+	f := &IAMFetcher{}
+	for _, opt := range options {
+		opt(f)
+	}
+	return f
 }
 
 // Fetch collects IAM resources, such as password-policy and IAM users.
@@ -78,22 +85,3 @@ func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 }
 
 func (f IAMFetcher) Stop() {}
-
-func (r IAMResource) GetData() any {
-	return r.AwsResource
-}
-
-func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	identifier := r.GetResourceArn()
-	if identifier == "" {
-		identifier = fmt.Sprintf("%s-%s", *r.identity.Account, r.GetResourceName())
-	}
-
-	return fetching.ResourceMetadata{
-		ID:      identifier,
-		Type:    fetching.CloudIdentity,
-		SubType: r.GetResourceType(),
-		Name:    r.GetResourceName(),
-	}, nil
-}
-func (r IAMResource) GetElasticCommonData() any { return nil }

@@ -90,6 +90,39 @@ func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, c
 	return &ParsedFetcher{gen.Name, f}, nil
 }
 
+// TODO: copy of ParseConfigFetchers, remove the original when refactor is done
+func ParseConfigFetchers(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, fetchers map[string]fetching.Fetcher) ([]*ParsedFetcher, error) {
+	var arr []*ParsedFetcher
+
+	for _, fcfg := range cfg.Fetchers {
+		addCredentialsToFetcherConfiguration(log, cfg, fcfg)
+		p, err := parseConfigFetcher(log, fcfg, ch, fetchers)
+		if err != nil {
+			return nil, err
+		}
+
+		arr = append(arr, p)
+	}
+
+	return arr, nil
+}
+
+// TODO: copy of parseConfigFetcher, remove the original when refactor is done
+func parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, ch chan fetching.ResourceInfo, fetchers map[string]fetching.Fetcher) (*ParsedFetcher, error) {
+	gen := fetching.BaseFetcherConfig{}
+	err := fcfg.Unpack(&gen)
+	if err != nil {
+		return nil, err
+	}
+
+	f, ok := fetchers[gen.Name]
+	if !ok {
+		return nil, fmt.Errorf("fetcher %s could not be found", gen.Name)
+	}
+
+	return &ParsedFetcher{gen.Name, f}, nil
+}
+
 // addCredentialsToFetcherConfiguration adds the relevant credentials to the `fcfg`- the fetcher config
 // This function takes the configuration file provided by the integration the `cfg` file
 // and depending on the input type, extract the relevant credentials and add them to the fetcher config

@@ -15,18 +15,22 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package iam
 
 import (
 	"context"
+	"testing"
+
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type IamFetcherTestSuite struct {
@@ -70,12 +74,13 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 	}
 
 	iamUser := iam.User{
-		AccessKeys: []iam.AccessKey{{
-			Active:       false,
-			HasUsed:      false,
-			LastAccess:   "",
-			RotationDate: "",
-		},
+		AccessKeys: []iam.AccessKey{
+			{
+				Active:       false,
+				HasUsed:      false,
+				LastAccess:   "",
+				RotationDate: "",
+			},
 		},
 		MFADevices:          nil,
 		Name:                "test",
@@ -86,7 +91,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		MfaActive:           true,
 	}
 
-	var tests = []struct {
+	tests := []struct {
 		name               string
 		mocksReturnVals    mocksReturnVals
 		account            string
@@ -131,28 +136,30 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 	}
 
 	for _, test := range tests {
-		iamCfg := IAMFetcherConfig{
-			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-		}
 
 		iamProviderMock := &iam.MockAccessManagement{}
 		for funcName, returnVals := range test.mocksReturnVals {
 			iamProviderMock.On(funcName, context.TODO()).Return(returnVals...)
 		}
-
-		iamFetcher := IAMFetcher{
-			log:         s.log,
-			iamProvider: iamProviderMock,
-			cfg:         iamCfg,
-			resourceCh:  s.resourceCh,
-			cloudIdentity: &awslib.Identity{
+		iamCfg, err := agentconfig.NewConfigFrom(mapstr.M{"name": "aws-iam"})
+		s.NoError(err)
+		iamFetcher := New(
+			WithLogger(s.log),
+			WithCloudIdentity(&awslib.Identity{
 				Account: &test.account,
-			},
-		}
+			}),
+			WithConfig(&config.Config{
+				Fetchers: []*agentconfig.C{
+					iamCfg,
+				},
+			}),
+			WithResourceChan(s.resourceCh),
+			WithIAMProvider(iamProviderMock),
+		)
 
 		ctx := context.Background()
 
-		err := iamFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		err = iamFetcher.Fetch(ctx, fetching.CycleMetadata{})
 		s.NoError(err)
 
 		results := testhelper.CollectResources(s.resourceCh)

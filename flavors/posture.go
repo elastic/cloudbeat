@@ -23,6 +23,7 @@ import (
 	"time"
 
 	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
+	iam_fetcher "github.com/elastic/cloudbeat/resources/fetchers/iam"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
@@ -77,7 +78,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	le := uniqueness.NewLeaderElector(log, c, &providers.KubernetesProvider{})
 
-	fetchersRegistry, err := initRegistry(log, c, resourceCh, le)
+	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -187,7 +188,7 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (fetchersManager.FetchersRegistry, error) {
+func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (fetchersManager.FetchersRegistry, error) {
 	registry := fetchersManager.NewFetcherRegistry(log)
 
 	parsedList, err := fetchersManager.Factories.ParseConfigFetchers(log, cfg, ch)
@@ -195,11 +196,51 @@ func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.Resourc
 		return nil, err
 	}
 
+	r, err := initFetchers(ctx, log, cfg, ch)
+	if err != nil {
+		return nil, err
+	}
+	refactoredFetchers, err := fetchersManager.ParseConfigFetchers(log, cfg, ch, r)
+	if err != nil {
+		return nil, err
+	}
+	parsedList = append(parsedList, refactoredFetchers...)
+
 	if err := registry.RegisterFetchers(parsedList, le); err != nil {
 		return nil, err
 	}
-
 	return registry, nil
+}
+
+func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (map[string]fetching.Fetcher, error) {
+	reg := map[string]fetching.Fetcher{}
+	list, err := config.GetFetcherNames(cfg)
+	if err != nil {
+		return nil, err
+	}
+	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
+	if err != nil {
+		return nil, err
+	}
+
+	identityProvider := awslib.GetIdentityClient(awsConfig)
+	identity, err := identityProvider.GetIdentity(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	awsIAMService := iam_sdk.NewFromConfig(awsConfig)
+
+	if _, ok := list[iam_fetcher.Type]; ok {
+		reg[iam_fetcher.Type] = iam_fetcher.New(
+			iam_fetcher.WithCloudIdentity(identity),
+			iam_fetcher.WithConfig(cfg),
+			iam_fetcher.WithResourceChan(ch),
+			iam_fetcher.WithLogger(log),
+			iam_fetcher.WithIAMProvider(iam.NewIAMProvider(log, awsIAMService)),
+		)
+	}
+	return reg, nil
 }
 
 // Stop stops posture.

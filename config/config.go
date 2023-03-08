@@ -21,6 +21,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"time"
@@ -37,7 +38,10 @@ const (
 	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 )
 
-var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
+var (
+	ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
+	ErrConfigNotFound        = errors.New("config not found")
+)
 
 type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
@@ -116,4 +120,36 @@ func isSupportedBenchmark(benchmark string) bool {
 		}
 	}
 	return false
+}
+
+func GetFetcherNames(c *Config) (map[string]struct{}, error) {
+	res := map[string]struct{}{}
+	for _, fcfg := range c.Fetchers {
+		n, err := fcfg.String("name", -1)
+		if err != nil {
+			return nil, err
+		}
+		// TODO: what happen if the fetchers appears twice in cloudbeat.yml?
+		res[n] = struct{}{}
+
+	}
+	return res, nil
+}
+
+func UnpackInto(c *Config, name string, target interface{}) error {
+	for _, fcfg := range c.Fetchers {
+		n, err := fcfg.String("name", -1)
+		if err != nil {
+			return err
+		}
+		if n != name {
+			continue
+		}
+		err = fcfg.Unpack(target)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return ErrConfigNotFound
 }
