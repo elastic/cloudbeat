@@ -14,6 +14,10 @@ CIS_1_6 = "CIS 1.6"
 CIS_1_7 = "CIS 1.7"
 CIS_1_8 = "CIS 1.8"
 CIS_1_9 = "CIS 1.9"
+CIS_1_10 = "CIS 1.10"
+CIS_1_11 = "CIS 1.11"
+CIS_1_13 = "CIS 1.13"
+CIS_1_15 = "CIS 1.15"
 ROOT_ACCOUNT = "<root_account>"
 ROOT_ACCOUNT_2 = "<root_account_2>"
 
@@ -137,6 +141,95 @@ cis_aws_iam_1_9_skip = {
     "1.9 Account password policy reuse: reuse_count=24, expect: pass": cis_aws_iam_1_9_pass,
 }
 
+cis_aws_iam_1_10_pass_1 = EksAwsServiceCase(
+    rule_tag=CIS_1_10,
+    case_identifier="test-mfa-virtual-pass",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_aws_iam_1_10_pass_2 = EksAwsServiceCase(
+    rule_tag=CIS_1_10,
+    case_identifier="test-mfa-virtual-never-used",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_aws_iam_1_10_fail = EksAwsServiceCase(
+    rule_tag=CIS_1_10,
+    case_identifier="dev_test",  # test-no-mfa-fail
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_aws_iam_1_10 = {
+    "1.10 MFA enabled: MFA virtual=true, expect: passed": cis_aws_iam_1_10_pass_1,
+    "1.10 MFA enabled: MFA virtual=true but account never used, expect: passed": cis_aws_iam_1_10_pass_2,
+    "1.10 MFA enabled: MFA enabled=false, expect: failed": cis_aws_iam_1_10_fail,
+}
+
+cis_aws_iam_1_11_pass = EksAwsServiceCase(
+    rule_tag=CIS_1_11,
+    case_identifier="test-mfa-virtual-pass",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_aws_iam_1_11_fail = EksAwsServiceCase(
+    rule_tag=CIS_1_11,
+    case_identifier="test-setup-access-keys-during-init-fail",
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_aws_iam_1_11 = {
+    "1.11 Access key during user init: no access key, expect: passed": cis_aws_iam_1_11_pass,
+    "1.11 Access key during user init: access key is not not used, expect: failed": cis_aws_iam_1_11_fail,
+}
+
+cis_aws_iam_1_13_fail = EksAwsServiceCase(
+    rule_tag=CIS_1_13,
+    case_identifier="test-user-2-active-keys",
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_aws_iam_1_13_pass = EksAwsServiceCase(
+    rule_tag=CIS_1_13,
+    case_identifier="test-user-one-active-key",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_aws_iam_1_13_pass_2 = EksAwsServiceCase(
+    rule_tag=CIS_1_13,
+    case_identifier="test-user-1-active-1-not-active-keys-pass",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_aws_iam_1_13 = {
+    "1.13 Active key for user: 1 active key, expect: passed": cis_aws_iam_1_13_pass,
+    "1.13 Active key for user: 1 active key, 1 deactivated key, expect: passed": cis_aws_iam_1_13_pass_2,
+    "1.13 Active key for user: 2 active keys, expect: failed": cis_aws_iam_1_13_fail,
+}
+
+cis_aws_iam_1_15_fail = EksAwsServiceCase(
+    rule_tag=CIS_1_15,
+    case_identifier="test-user-with-inline-policy-fail",
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_aws_iam_1_15_pass = EksAwsServiceCase(
+    rule_tag=CIS_1_15,
+    case_identifier="test-mfa-virtual-pass",  # contains only group policy
+    expected=RULE_PASS_STATUS,
+)
+
+cis_aws_iam_1_15_pass_2 = EksAwsServiceCase(
+    rule_tag=CIS_1_15,
+    case_identifier="test-mfa-virtual-never-used",  # no groups, no inline policies
+    expected=RULE_PASS_STATUS,
+)
+
+cis_aws_iam_1_15 = {
+    "1.15 Permissions through groups: dev group only, expect: passed": cis_aws_iam_1_15_pass,
+    "1.15 Permissions through groups: no group permissions, expect: passed": cis_aws_iam_1_15_pass_2,
+    "1.15 Permissions through groups: inline policy, expect: failed": cis_aws_iam_1_15_fail,
+}
+
 cis_aws_iam_cases = {
     **cis_aws_iam_1_4,
     **skip_param_case(
@@ -192,4 +285,8 @@ cis_aws_iam_cases = {
             url_link="https://github.com/elastic/security-team/issues/6204",
         ),
     ),
+    **cis_aws_iam_1_10,
+    **cis_aws_iam_1_11,
+    **cis_aws_iam_1_13,
+    **cis_aws_iam_1_15,
 }
