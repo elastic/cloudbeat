@@ -82,7 +82,7 @@ conditions:
 
 targets:
   update-go-version:
-    name: "Update .go-version"
+    name: 'Update .go-version {{ source "latestGoVersion" }}'
     sourceid: latestGoVersion
     scmid: githubConfig
     kind: file
@@ -91,7 +91,7 @@ targets:
       file: .go-version
       matchpattern: '\d+.\d+.\d+'
   update-version.asciidoc:
-    name: "Update version.asciidoc"
+    name: 'Update version.asciidoc {{ source "latestGoVersion" }}'
     sourceid: latestGoVersion
     scmid: githubConfig
     kind: file
@@ -100,7 +100,7 @@ targets:
       file: docs/version.asciidoc
       matchpattern: ':go-version: \d+.\d+.\d+'
   update-gomod:
-    name: "Update go.mod"
+    name: 'Update go.mod {{ source "gomod" }}'
     sourceid: gomod
     scmid: githubConfig
     kind: file
