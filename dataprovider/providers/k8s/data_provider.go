@@ -21,8 +21,8 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/types"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetchers/file_system"
+	"github.com/elastic/cloudbeat/resources/fetchers/process"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -55,7 +55,7 @@ func New(options ...Option) DataProvider {
 
 func (k DataProvider) FetchData(resource string, id string) (types.Data, error) {
 	switch resource {
-	case fetchers.ProcessResourceType, file_system.FSResourceType:
+	case process.ProcessResourceType, file_system.FSResourceType:
 		id = uuid.NewV5(uuidNamespace, k.clusterID+k.nodeID+id).String()
 	case fetching.CloudContainerMgmt, fetching.CloudIdentity, fetching.CloudLoadBalancer, fetching.CloudContainerRegistry:
 		id = uuid.NewV5(uuidNamespace, k.clusterID).String()

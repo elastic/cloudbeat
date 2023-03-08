@@ -20,6 +20,8 @@ package flavors
 import (
 	"context"
 	"fmt"
+	"io/fs"
+	"os"
 	"time"
 
 	filesystem_fetcher "github.com/elastic/cloudbeat/resources/fetchers/file_system"
@@ -27,6 +29,7 @@ import (
 	kube_fetcher "github.com/elastic/cloudbeat/resources/fetchers/kube"
 	logging_fetcher "github.com/elastic/cloudbeat/resources/fetchers/logging"
 	monitoring_fetcher "github.com/elastic/cloudbeat/resources/fetchers/monitoring"
+	process_fetcher "github.com/elastic/cloudbeat/resources/fetchers/process"
 	rds_fetcher "github.com/elastic/cloudbeat/resources/fetchers/rds"
 	s3_fetcher "github.com/elastic/cloudbeat/resources/fetchers/s3"
 	"github.com/elastic/cloudbeat/resources/providers"
@@ -359,6 +362,15 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 				awsConfig,
 				getRDSClients(awsRDSCrossRegionFactory, log, awsConfig),
 			)),
+		)
+	}
+
+	if _, ok := list[process_fetcher.Type]; ok {
+		reg[process_fetcher.Type] = process_fetcher.New(
+			process_fetcher.WithConfig(cfg),
+			process_fetcher.WithLogger(log),
+			process_fetcher.WithResourceChan(ch),
+			process_fetcher.WithFSProvider(func(dir string) fs.FS { return os.DirFS(dir) }),
 		)
 	}
 	return reg, nil

@@ -23,7 +23,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/types"
-	"github.com/elastic/cloudbeat/resources/fetchers"
+	"github.com/elastic/cloudbeat/resources/fetchers/process"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/version"
 
@@ -104,7 +104,7 @@ func Test_k8sDataProvider_FetchData(t *testing.T) {
 					},
 				},
 			},
-			resource: fetchers.ProcessResourceType,
+			resource: process.ProcessResourceType,
 			options: []Option{
 				WithLogger(logger),
 				WithVersionInfo(versionInfo),

@@ -15,16 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package process
 
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"io/fs"
 	"strconv"
 	"testing"
 	"testing/fstest"
+
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -40,8 +44,10 @@ const (
 	EksCmdLineDelimiter     = " "
 )
 
-var Status = `Name:   %s`
-var CmdLine = `/usr/bin/%s --kubeconfig=/etc/kubernetes/kubelet.conf --%s%s%s`
+var (
+	Status  = `Name:   %s`
+	CmdLine = `/usr/bin/%s --kubeconfig=/etc/kubernetes/kubelet.conf --%s%s%s`
+)
 
 type TextProcessContext struct {
 	Pid               string
@@ -90,12 +96,21 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	}
 	sysfs := createProcess(testProcess, VanillaCmdLineDelimiter)
 
-	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		RequiredProcesses: map[string]ProcessInputConfiguration{
-			"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
-	}
-	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs, resourceCh: t.resourceCh}
+	processesFetcher := New(
+		WithLogger(t.log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name": "process",
+					"processes": map[string]ProcessInputConfiguration{
+						"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}},
+					},
+				}),
+			},
+		}),
+		WithFSProvider(func(dir string) fs.FS { return sysfs }),
+		WithResourceChan(t.resourceCh),
+	)
 
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(t.resourceCh)
@@ -120,12 +135,21 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 	}
 	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
 
-	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		RequiredProcesses: map[string]ProcessInputConfiguration{
-			"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}}},
-	}
-	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys, resourceCh: t.resourceCh}
+	processesFetcher := New(
+		WithLogger(t.log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name": "process",
+					"processes": map[string]ProcessInputConfiguration{
+						"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}},
+					},
+				}),
+			},
+		}),
+		WithFSProvider(func(dir string) fs.FS { return fsys }),
+		WithResourceChan(t.resourceCh),
+	)
 
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(t.resourceCh)
@@ -143,12 +167,21 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 	}
 	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
 
-	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		RequiredProcesses: map[string]ProcessInputConfiguration{
-			"kubelet": {ConfigFileArguments: []string{}}},
-	}
-	processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: fsys, resourceCh: t.resourceCh}
+	processesFetcher := New(
+		WithLogger(t.log),
+		WithConfig(&config.Config{
+			Fetchers: []*agentconfig.C{
+				agentconfig.MustNewConfigFrom(mapstr.M{
+					"name": "process",
+					"processes": map[string]ProcessInputConfiguration{
+						"kubelet": {ConfigFileArguments: []string{}},
+					},
+				}),
+			},
+		}),
+		WithFSProvider(func(dir string) fs.FS { return fsys }),
+		WithResourceChan(t.resourceCh),
+	)
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 
 	results := testhelper.CollectResources(t.resourceCh)
@@ -164,7 +197,6 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 }
 
 func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
-
 	testCases := []struct {
 		configFileName string
 		marshal        func(in interface{}) (out []byte, err error)
@@ -199,12 +231,21 @@ func (t *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 			Data: configData,
 		}
 
-		fetcherConfig := ProcessFetcherConfig{
-			BaseFetcherConfig: fetching.BaseFetcherConfig{},
-			RequiredProcesses: map[string]ProcessInputConfiguration{
-				"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
-		}
-		processesFetcher := &ProcessesFetcher{log: t.log, cfg: fetcherConfig, Fs: sysfs, resourceCh: t.resourceCh}
+		processesFetcher := New(
+			WithLogger(t.log),
+			WithConfig(&config.Config{
+				Fetchers: []*agentconfig.C{
+					agentconfig.MustNewConfigFrom(mapstr.M{
+						"name": "process",
+						"processes": map[string]ProcessInputConfiguration{
+							"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}},
+						},
+					}),
+				},
+			}),
+			WithFSProvider(func(dir string) fs.FS { return sysfs }),
+			WithResourceChan(t.resourceCh),
+		)
 
 		err = processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 		results := testhelper.CollectResources(t.resourceCh)

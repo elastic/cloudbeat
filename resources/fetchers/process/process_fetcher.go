@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package process
 
 import (
 	"context"
@@ -44,6 +44,9 @@ const (
 	ProcessResourceType = "process"
 	ProcessSubType      = "process"
 	userHz              = 100
+
+	// Type fetcher
+	Type = "process"
 )
 
 type EvalProcResource struct {
@@ -106,6 +109,7 @@ type ProcessesFetcher struct {
 	log        *logp.Logger
 	cfg        ProcessFetcherConfig
 	Fs         fs.FS
+	fsProvider func(dir string) fs.FS
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -119,6 +123,15 @@ type ProcessFetcherConfig struct {
 	fetching.BaseFetcherConfig
 	Directory         string             `config:"directory"` // parent directory of target procfs
 	RequiredProcesses ProcessesConfigMap `config:"processes"`
+}
+
+func New(options ...Option) *ProcessesFetcher {
+	f := &ProcessesFetcher{}
+	for _, opt := range options {
+		opt(f)
+	}
+	f.Fs = f.fsProvider(f.cfg.Directory)
+	return f
 }
 
 func (f *ProcessesFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
