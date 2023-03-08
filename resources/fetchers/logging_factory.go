@@ -23,6 +23,7 @@ import (
 
 	aws_sdk "github.com/aws/aws-sdk-go-v2/aws"
 	cloudtrail_sdk "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	configservice_sdk "github.com/aws/aws-sdk-go-v2/service/configservice"
 	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
@@ -87,8 +88,16 @@ func (f *LoggingFactory) CreateFrom(log *logp.Logger, cfg fetching.AwsBaseFetche
 	return &LoggingFetcher{
 		log:                   log,
 		loggingProvider:       logging.NewProvider(log, awsConfig, m.GetMultiRegionsClientMap(), f.S3CrossRegionFactory),
-		configserviceProvider: configservice.NewProvider(log, awsConfig, f.ConfigCrossRegionFactory, *identity.Account),
+		configserviceProvider: configservice.NewProvider(log, awsConfig, getConfigserviceClients(f.ConfigCrossRegionFactory, log, awsConfig), *identity.Account),
 		cfg:                   cfg,
 		resourceCh:            ch,
 	}, nil
+}
+
+func getConfigserviceClients(factory awslib.CrossRegionFactory[configservice.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]configservice.Client {
+	f := func(cfg aws_sdk.Config) configservice.Client {
+		return configservice_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
 }

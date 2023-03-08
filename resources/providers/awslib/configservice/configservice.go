@@ -20,10 +20,10 @@ package configservice
 import (
 	"context"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	configSDK "github.com/aws/aws-sdk-go-v2/service/configservice"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -56,15 +56,10 @@ type Recorder struct {
 	Status []types.ConfigurationRecorderStatus `json:"statuses"`
 }
 
-func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
-	f := func(cfg aws.Config) Client {
-		return configSDK.NewFromConfig(cfg)
-	}
-
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+func NewProvider(log *logp.Logger, cfg aws.Config, clients map[string]Client, accountId string) *Provider {
 	return &Provider{
 		log:          log,
-		clients:      m.GetMultiRegionsClientMap(),
+		clients:      clients,
 		awsAccountId: accountId,
 	}
 }
