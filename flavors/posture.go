@@ -25,6 +25,7 @@ import (
 	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	filesystem_fetcher "github.com/elastic/cloudbeat/resources/fetchers/file_system"
 	iam_fetcher "github.com/elastic/cloudbeat/resources/fetchers/iam"
+	kube_fetcher "github.com/elastic/cloudbeat/resources/fetchers/kube"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
@@ -249,6 +250,16 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 			filesystem_fetcher.WithLogger(log),
 			filesystem_fetcher.WithResourceChan(ch),
 			filesystem_fetcher.WithOSUser(user.NewOSUserUtil()),
+		)
+	}
+
+	if _, ok := list[kube_fetcher.Type]; ok {
+		reg[kube_fetcher.Type] = kube_fetcher.New(
+			kube_fetcher.WithLogger(log),
+			kube_fetcher.WithConfig(cfg),
+			kube_fetcher.WithResourceChan(ch),
+			kube_fetcher.WithKubeClientProvider(kubernetes.GetKubernetesClient),
+			kube_fetcher.WithWatchers([]kubernetes.Watcher{}),
 		)
 	}
 	return reg, nil

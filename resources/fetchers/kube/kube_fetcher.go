@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package kube
 
 import (
 	"context"
@@ -33,57 +33,60 @@ import (
 
 const (
 	allNamespaces = "" // The Kube API treats this as "all namespaces"
+
+	// Type fetcher
+	Type = "kube-api"
 )
 
-var (
-	// vanillaClusterResources represents those resources that are required for a vanilla
-	// Kubernetes cluster.
-	vanillaClusterResources = []requiredResource{
-		{
-			&kubernetes.Pod{},
-			allNamespaces,
-		},
-		{
-			&kubernetes.Role{},
-			allNamespaces,
-		},
-		{
-			&kubernetes.RoleBinding{},
-			allNamespaces,
-		},
-		{
-			&kubernetes.ClusterRole{},
-			allNamespaces,
-		},
-		{
-			&kubernetes.ClusterRoleBinding{},
-			allNamespaces,
-		},
-		{
-			&kubernetes.PodSecurityPolicy{},
-			allNamespaces,
-		},
-		{
-			&kubernetes.ServiceAccount{},
-			allNamespaces,
-		},
-		{
-			&kubernetes.Node{},
-			allNamespaces,
-		},
-		// TODO(yashtewari): Problem: github.com/elastic/beats/vendor/k8s.io/apimachinery/pkg/api/errors/errors.go#401
-		// > "the server could not find the requested resource"
-		// {
-		// 	&kubernetes.NetworkPolicy{},
-		// 	allNamespaces,
-		// },
-	}
-)
+// vanillaClusterResources represents those resources that are required for a vanilla
+// Kubernetes cluster.
+var vanillaClusterResources = []requiredResource{
+	{
+		&kubernetes.Pod{},
+		allNamespaces,
+	},
+	{
+		&kubernetes.Role{},
+		allNamespaces,
+	},
+	{
+		&kubernetes.RoleBinding{},
+		allNamespaces,
+	},
+	{
+		&kubernetes.ClusterRole{},
+		allNamespaces,
+	},
+	{
+		&kubernetes.ClusterRoleBinding{},
+		allNamespaces,
+	},
+	{
+		&kubernetes.PodSecurityPolicy{},
+		allNamespaces,
+	},
+	{
+		&kubernetes.ServiceAccount{},
+		allNamespaces,
+	},
+	{
+		&kubernetes.Node{},
+		allNamespaces,
+	},
+	// TODO(yashtewari): Problem: github.com/elastic/beats/vendor/k8s.io/apimachinery/pkg/api/errors/errors.go#401
+	// > "the server could not find the requested resource"
+	// {
+	// 	&kubernetes.NetworkPolicy{},
+	// 	allNamespaces,
+	// },
+}
 
 type requiredResource struct {
 	resource  kubernetes.Resource
 	namespace string
 }
+
+type KubeClientProvider func(kubeconfig string, opt kubernetes.KubeClientOptions) (k8s.Interface, error)
 
 type KubeFetcher struct {
 	log        *logp.Logger
@@ -91,7 +94,7 @@ type KubeFetcher struct {
 	resourceCh chan fetching.ResourceInfo
 
 	watchers       []kubernetes.Watcher
-	clientProvider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)
+	clientProvider KubeClientProvider
 	watcherLock    *sync.Once
 }
 
@@ -99,6 +102,17 @@ type KubeApiFetcherConfig struct {
 	fetching.BaseFetcherConfig
 	Interval   time.Duration `config:"interval"`
 	KubeConfig string        `config:"kubeconfig"`
+}
+
+func New(options ...Option) *KubeFetcher {
+	f := &KubeFetcher{
+		watcherLock: &sync.Once{},
+		watchers:    make([]kubernetes.Watcher, 0),
+	}
+	for _, opt := range options {
+		opt(f)
+	}
+	return f
 }
 
 func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) error {

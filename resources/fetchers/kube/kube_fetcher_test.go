@@ -15,15 +15,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package kube
 
 import (
 	"context"
 	"fmt"
+	"reflect"
+	"testing"
+
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
@@ -32,8 +38,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	k8s "k8s.io/client-go/kubernetes"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-	"reflect"
-	"testing"
 )
 
 type KubeFetcherTestSuite struct {
@@ -200,11 +204,20 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 			client := k8sfake.NewSimpleClientset(tt)
 			provider := MockProvider(client)
 
-			kubeFetcher, err := (&KubeFactory{}).CreateFrom(s.log, KubeApiFetcherConfig{}, s.resourceCh, provider)
+			kubeFetcher := New(
+				WithConfig(&config.Config{
+					Fetchers: []*agentconfig.C{
+						agentconfig.MustNewConfigFrom(mapstr.M{
+							"name": "kube-api",
+						}),
+					},
+				}),
+				WithLogger(s.log),
+				WithResourceChan(s.resourceCh),
+				WithKubeClientProvider(provider),
+			)
 
-			s.NoError(err)
-
-			err = kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+			err := kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 			results := testhelper.CollectResources(s.resourceCh)
 
 			s.NoError(err, "Fetcher was not able to fetch resources from kube api")
