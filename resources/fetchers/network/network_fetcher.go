@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package network
 
 import (
 	"context"
@@ -24,6 +24,11 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"github.com/elastic/elastic-agent-libs/logp"
+)
+
+const (
+	// Type fetcher
+	Type = "aws-ec2-network"
 )
 
 type NetworkFetcher struct {
@@ -38,9 +43,12 @@ type ACLFetcherConfig struct {
 	fetching.AwsBaseFetcherConfig `config:",inline"`
 }
 
-type NetworkResource struct {
-	awslib.AwsResource
-	identity *awslib.Identity
+func New(options ...Option) *NetworkFetcher {
+	f := &NetworkFetcher{}
+	for _, opt := range options {
+		opt(f)
+	}
+	return f
 }
 
 // Fetch collects network resource such as network acl and security groups
@@ -65,49 +73,3 @@ func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetad
 }
 
 func (f NetworkFetcher) Stop() {}
-
-func (r NetworkResource) GetData() any {
-	return r.AwsResource
-}
-
-func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	identifier := r.GetResourceArn()
-	return fetching.ResourceMetadata{
-		ID:      identifier,
-		Type:    fetching.EC2Identity,
-		SubType: r.GetResourceType(),
-		Name:    r.GetResourceName(),
-	}, nil
-}
-
-func (r NetworkResource) GetElasticCommonData() any { return nil }
-
-func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.ElasticCompute) ([]awslib.AwsResource, error) {
-	var resources []awslib.AwsResource
-	nacl, err := client.DescribeNetworkAcl(ctx)
-	if err != nil {
-		f.log.Errorf("failed to describe network acl: %v", err)
-	}
-	resources = append(resources, nacl...)
-
-	securityGroups, err := client.DescribeSecurityGroups(ctx)
-	if err != nil {
-		f.log.Errorf("failed to describe security groups: %v", err)
-	}
-	resources = append(resources, securityGroups...)
-	vpcs, err := client.DescribeVPCs(ctx)
-	if err != nil {
-		f.log.Errorf("failed to describe vpcs: %v", err)
-	}
-	resources = append(resources, vpcs...)
-	ebsEncryption, err := client.GetEbsEncryptionByDefault(ctx)
-	if err != nil {
-		f.log.Errorf("failed to get ebs encryption by default: %v", err)
-	}
-
-	if ebsEncryption != nil {
-		resources = append(resources, ebsEncryption...)
-	}
-
-	return resources, nil
-}

@@ -29,6 +29,7 @@ import (
 	kube_fetcher "github.com/elastic/cloudbeat/resources/fetchers/kube"
 	logging_fetcher "github.com/elastic/cloudbeat/resources/fetchers/logging"
 	monitoring_fetcher "github.com/elastic/cloudbeat/resources/fetchers/monitoring"
+	network_fetcher "github.com/elastic/cloudbeat/resources/fetchers/network"
 	process_fetcher "github.com/elastic/cloudbeat/resources/fetchers/process"
 	rds_fetcher "github.com/elastic/cloudbeat/resources/fetchers/rds"
 	s3_fetcher "github.com/elastic/cloudbeat/resources/fetchers/s3"
@@ -37,6 +38,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/resources/utils/user"
@@ -270,6 +272,7 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 	awsS3CrossRegionFactory := &awslib.MultiRegionClientFactory[s3.Client]{}
 	awsConfigCrossRegionFactory := &awslib.MultiRegionClientFactory[configservice.Client]{}
 	awsRDSCrossRegionFactory := &awslib.MultiRegionClientFactory[rds.Client]{}
+	awsEC2CrossRegionFactory := &awslib.MultiRegionClientFactory[ec2.Client]{}
 
 	if _, ok := list[iam_fetcher.Type]; ok {
 		reg[iam_fetcher.Type] = iam_fetcher.New(
@@ -371,6 +374,22 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 			process_fetcher.WithLogger(log),
 			process_fetcher.WithResourceChan(ch),
 			process_fetcher.WithFSProvider(func(dir string) fs.FS { return os.DirFS(dir) }),
+		)
+	}
+
+	if _, ok := list[network_fetcher.Type]; ok {
+		reg[network_fetcher.Type] = network_fetcher.New(
+			network_fetcher.WithLogger(log),
+			network_fetcher.WithConfig(cfg),
+			network_fetcher.WithCloudIdentity(identity),
+			network_fetcher.WithEC2Provider(
+				ec2.NewEC2Provider(
+					log,
+					*identity.Account,
+					awsConfig,
+					getEC2Clients(awsEC2CrossRegionFactory, log, awsConfig),
+				),
+			),
 		)
 	}
 	return reg, nil
@@ -540,6 +559,14 @@ func getS3Clients(factory awslib.CrossRegionFactory[s3.Client], log *logp.Logger
 func getRDSClients(factory awslib.CrossRegionFactory[rds.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]rds.Client {
 	f := func(cfg aws_sdk.Config) rds.Client {
 		return rds_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getEC2Clients(factory awslib.CrossRegionFactory[ec2.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]ec2.Client {
+	f := func(cfg aws_sdk.Config) ec2.Client {
+		return ec2_sdk.NewFromConfig(cfg)
 	}
 	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
 	return m.GetMultiRegionsClientMap()

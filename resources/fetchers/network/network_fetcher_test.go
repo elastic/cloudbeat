@@ -15,18 +15,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package network
 
 import (
 	"context"
 	"testing"
 	"time"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -129,13 +132,19 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
-			f := NetworkFetcher{
-				log:           logp.NewLogger(tt.name),
-				ec2Client:     tt.networkProvider(),
-				cfg:           ACLFetcherConfig{},
-				resourceCh:    ch,
-				cloudIdentity: &awslib.Identity{Account: &tt.name},
-			}
+			f := New(
+				WithLogger(logp.NewLogger(tt.name)),
+				WithEC2Provider(tt.networkProvider()),
+				WithConfig(&config.Config{
+					Fetchers: []*agentconfig.C{
+						agentconfig.MustNewConfigFrom(mapstr.M{
+							"name": "aws-ec2-network",
+						}),
+					},
+				}),
+				WithCloudIdentity(&awslib.Identity{Account: &tt.name}),
+				WithResourceChan(ch),
+			)
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})
 			if tt.wantErr {
