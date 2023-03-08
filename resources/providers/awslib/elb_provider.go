@@ -20,13 +20,15 @@ package awslib
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
+
 	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 )
 
-type ElbLoadBalancerDescriptions []types.LoadBalancerDescription
-type ElbLoadBalancersDescription types.LoadBalancerDescription
+type (
+	ElbLoadBalancerDescriptions []types.LoadBalancerDescription
+	ElbLoadBalancersDescription types.LoadBalancerDescription
+)
 
 type ElbLoadBalancerDescriber interface {
 	DescribeLoadBalancer(ctx context.Context, balancersNames []string) (ElbLoadBalancerDescriptions, error)
@@ -36,10 +38,9 @@ type ElbProvider struct {
 	client *elb.Client
 }
 
-func NewElbProvider(cfg aws.Config) *ElbProvider {
-	svc := elb.NewFromConfig(cfg)
+func NewElbProvider(client *elb.Client) *ElbProvider {
 	return &ElbProvider{
-		client: svc,
+		client: client,
 	}
 }
 

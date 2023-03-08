@@ -24,6 +24,7 @@ import (
 	"os"
 	"time"
 
+	elb_fetcher "github.com/elastic/cloudbeat/resources/fetchers/elb"
 	filesystem_fetcher "github.com/elastic/cloudbeat/resources/fetchers/file_system"
 	iam_fetcher "github.com/elastic/cloudbeat/resources/fetchers/iam"
 	kube_fetcher "github.com/elastic/cloudbeat/resources/fetchers/kube"
@@ -77,6 +78,7 @@ import (
 	cloudwatchlogs_sdk "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
 	configservice_sdk "github.com/aws/aws-sdk-go-v2/service/configservice"
 	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
+	elb_sdk "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	iam_sdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	rds_sdk "github.com/aws/aws-sdk-go-v2/service/rds"
 	s3_sdk "github.com/aws/aws-sdk-go-v2/service/s3"
@@ -252,6 +254,13 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 	if err != nil {
 		return nil, err
 	}
+
+	k8sProvider := providers.KubernetesProvider{}
+	k8sClient, err := k8sProvider.GetClient(log, "", kubernetes.KubeClientOptions{})
+	if err != nil {
+		return nil, err
+	}
+
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
 	if err != nil {
 		return nil, err
@@ -264,6 +273,7 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 	}
 
 	awsIAMService := iam_sdk.NewFromConfig(awsConfig)
+	awsELBService := elb_sdk.NewFromConfig(awsConfig)
 	awsTrailCrossRegionFactory := &awslib.MultiRegionClientFactory[cloudtrail.Client]{}
 	awsCloudwatchCrossRegionFactory := &awslib.MultiRegionClientFactory[cloudwatch.Client]{}
 	awsCloudwatchlogsCrossRegionFactory := &awslib.MultiRegionClientFactory[logs.Client]{}
@@ -390,6 +400,18 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 					getEC2Clients(awsEC2CrossRegionFactory, log, awsConfig),
 				),
 			),
+		)
+	}
+
+	if _, ok := list[elb_fetcher.Type]; ok {
+		reg[elb_fetcher.Type] = elb_fetcher.New(
+			elb_fetcher.WithLogger(log),
+			elb_fetcher.WithConfig(cfg),
+			elb_fetcher.WithResourceChan(ch),
+			elb_fetcher.WithCloudIdentity(identity),
+			elb_fetcher.WithElbProvider(awslib.NewElbProvider(awsELBService)),
+			elb_fetcher.WithKubeClient(k8sClient),
+			elb_fetcher.WithRegexMatcher(awsConfig.Region),
 		)
 	}
 	return reg, nil

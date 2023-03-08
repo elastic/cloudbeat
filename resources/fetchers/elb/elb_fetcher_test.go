@@ -15,16 +15,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package elb
 
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"regexp"
-	"testing"
+	agentconfig "github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/mapstr"
 
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -34,10 +37,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-)
-
-const (
-	elbRegex = "([\\w-]+)-\\d+\\.us-east-2.elb.amazonaws.com"
 )
 
 type ElbFetcherTestSuite struct {
@@ -74,7 +73,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		lbName      = "adda9cdc89b13452e92d48be46858d37"
 	)
 
-	var tests = []struct {
+	tests := []struct {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
 		lbResponse          awslib.ElbLoadBalancerDescriptions
@@ -138,17 +137,21 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			UserId:  &testID,
 		}
 
-		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
-
-		elbFetcher := ElbFetcher{
-			log:             s.log,
-			cfg:             ElbFetcherConfig{},
-			elbProvider:     elbProvider,
-			kubeClient:      kubeclient,
-			lbRegexMatchers: regexMatchers,
-			resourceCh:      s.resourceCh,
-			cloudIdentity:   &identity,
-		}
+		elbFetcher := New(
+			WithLogger(s.log),
+			WithConfig(&config.Config{
+				Fetchers: []*agentconfig.C{
+					agentconfig.MustNewConfigFrom(mapstr.M{
+						"name": "aws-elb",
+					}),
+				},
+			}),
+			WithElbProvider(elbProvider),
+			WithKubeClient(kubeclient),
+			WithRegexMatcher(""),
+			WithResourceChan(s.resourceCh),
+			WithCloudIdentity(&identity),
+		)
 
 		err = elbFetcher.Fetch(context.Background(), fetching.CycleMetadata{})
 		results := testhelper.CollectResources(s.resourceCh)
@@ -169,8 +172,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
-
-	var tests = []struct {
+	tests := []struct {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
 		error               error
@@ -182,7 +184,8 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.us-east-2.elb.amazonaws.com",
 				},
 			},
-			fmt.Errorf("elb error")},
+			fmt.Errorf("elb error"),
+		},
 	}
 	for _, test := range tests {
 		kubeclient := k8sfake.NewSimpleClientset()
@@ -212,16 +215,20 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		elbProvider := &awslib.MockElbLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(nil, test.error)
 
-		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
-
-		elbFetcher := ElbFetcher{
-			log:             s.log,
-			cfg:             ElbFetcherConfig{},
-			elbProvider:     elbProvider,
-			kubeClient:      kubeclient,
-			lbRegexMatchers: regexMatchers,
-			resourceCh:      s.resourceCh,
-		}
+		elbFetcher := New(
+			WithLogger(s.log),
+			WithConfig(&config.Config{
+				Fetchers: []*agentconfig.C{
+					agentconfig.MustNewConfigFrom(mapstr.M{
+						"name": "aws-elb",
+					}),
+				},
+			}),
+			WithElbProvider(elbProvider),
+			WithKubeClient(kubeclient),
+			WithRegexMatcher(""),
+			WithResourceChan(s.resourceCh),
+		)
 
 		ctx := context.Background()
 

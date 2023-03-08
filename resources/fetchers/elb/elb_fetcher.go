@@ -15,13 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchers
+package elb
 
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"regexp"
+
+	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -32,6 +33,9 @@ import (
 
 const (
 	elbRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
+
+	// Type fetcher
+	Type = "aws-elb"
 )
 
 type ElbFetcher struct {
@@ -52,6 +56,16 @@ type ElbFetcherConfig struct {
 type ElbResource struct {
 	lb       awslib.ElbLoadBalancersDescription
 	identity *awslib.Identity
+}
+
+func New(options ...Option) *ElbFetcher {
+	f := &ElbFetcher{
+		lbRegexMatchers: []*regexp.Regexp{},
+	}
+	for _, opt := range options {
+		opt(f)
+	}
+	return f
 }
 
 func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
