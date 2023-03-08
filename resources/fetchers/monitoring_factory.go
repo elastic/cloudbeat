@@ -27,6 +27,7 @@ import (
 	cloudwatchlogs_sdk "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
 	ec2_sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
 	securityhub_sdk "github.com/aws/aws-sdk-go-v2/service/securityhub"
+	sns_sdk "github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
@@ -86,7 +87,7 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 		Cloudtrail:     cloudtrail.NewProvider(awsConfig, log, getCloudrailClients(f.TrailCrossRegionFactory, log, awsConfig)),
 		Cloudwatch:     cloudwatch.NewProvider(log, awsConfig, getCloudwatchClients(f.CloudwatchCrossRegionFactory, log, awsConfig)),
 		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, awsConfig, getCloudwatchlogsClients(f.CloudwatchlogsCrossRegionFactory, log, awsConfig)),
-		Sns:            sns.NewSNSProvider(log, awsConfig, f.SNSCrossRegionFactory),
+		Sns:            sns.NewSNSProvider(log, awsConfig, getSNSClients(f.SNSCrossRegionFactory, log, awsConfig)),
 		Log:            log,
 	}
 
@@ -133,6 +134,14 @@ func getCloudwatchlogsClients(factory awslib.CrossRegionFactory[logs.Client], lo
 func getSecurityhubClients(factory awslib.CrossRegionFactory[securityhub.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]securityhub.Client {
 	f := func(cfg aws_sdk.Config) securityhub.Client {
 		return securityhub_sdk.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
+	return m.GetMultiRegionsClientMap()
+}
+
+func getSNSClients(factory awslib.CrossRegionFactory[sns.Client], log *logp.Logger, cfg aws_sdk.Config) map[string]sns.Client {
+	f := func(cfg aws_sdk.Config) sns.Client {
+		return sns_sdk.NewFromConfig(cfg)
 	}
 	m := factory.NewMultiRegionClients(ec2_sdk.NewFromConfig(cfg), cfg, f, log)
 	return m.GetMultiRegionsClientMap()
