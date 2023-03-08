@@ -15,32 +15,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package beater
+package aws
 
 import (
-	"testing"
-
-	_ "github.com/elastic/cloudbeat/processor"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/suite"
 )
 
-type BeaterTestSuite struct {
-	suite.Suite
+type Option func(*DataProvider)
 
-	log *logp.Logger
-}
-
-func TestBeaterTestSuite(t *testing.T) {
-	s := new(BeaterTestSuite)
-	s.log = logp.NewLogger("cloudbeat_beater_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
+func WithLogger(log *logp.Logger) Option {
+	return func(dp *DataProvider) {
+		dp.log = log
 	}
-
-	suite.Run(t, s)
 }
 
-func (s *BeaterTestSuite) SetupTest() {
+func WithAccount(name string, id string) Option {
+	return func(dp *DataProvider) {
+		dp.accountId = id
+		dp.accountName = name
+	}
 }
