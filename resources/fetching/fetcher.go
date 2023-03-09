@@ -60,6 +60,7 @@ const (
 	CloudAudit             = "cloud-audit"
 	CloudDatabase          = "cloud-database"
 	CloudConfig            = "cloud-config"
+	KeyManagement          = "key-management"
 )
 
 // Factory can create fetcher instances based on configuration

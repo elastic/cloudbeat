@@ -70,7 +70,7 @@ func (r KmsResource) GetData() interface{} {
 func (r KmsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      r.key.GetResourceArn(),
-		Type:    fetching.CloudStorage,
+		Type:    fetching.KeyManagement,
 		SubType: r.key.GetResourceType(),
 		Name:    r.key.GetResourceName(),
 	}, nil
