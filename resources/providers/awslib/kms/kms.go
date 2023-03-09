@@ -29,12 +29,8 @@ import (
 )
 
 type KmsInfo struct {
-	KeyMetadata        types.KeyMetadata
-	KeyRotationEnabled bool
-}
-
-type Logging struct {
-	Enabled bool `json:"Enabled"`
+	KeyMetadata        types.KeyMetadata `json:"key_metadata"`
+	KeyRotationEnabled bool              `json:"key_rotation_enabled"`
 }
 
 type KMS interface {
