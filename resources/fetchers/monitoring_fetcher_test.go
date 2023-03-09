@@ -150,7 +150,7 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 		{
 			name: "without trails",
 			fields: fields{
-				identity: &awslib.Identity{},
+				identity: &awslib.Identity{Account: aws.String("aws-account-id")},
 				Resource: monitoring.Resource{
 					Items: []monitoring.MonitoringItem{},
 				},
