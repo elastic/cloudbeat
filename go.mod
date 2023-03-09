@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20180905210152-236a6d29298a // indirect
 	github.com/akavel/rsrc v0.10.2 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.17.4
+	github.com/aws/aws-sdk-go-v2 v1.17.5
 	github.com/dlclark/regexp2 v1.8.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
@@ -32,7 +32,7 @@ require (
 )
 
 require (
-	github.com/aquasecurity/trivy v0.35.0
+	github.com/aquasecurity/trivy v0.0.0-00010101000000-000000000000
 	github.com/aquasecurity/trivy-db v0.0.0-20221227141502-af78ecb7db4c
 	github.com/aws/aws-sdk-go-v2/config v1.18.3
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.3
@@ -48,6 +48,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/eks v1.22.1
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.14.8
 	github.com/aws/aws-sdk-go-v2/service/iam v1.18.23
+	github.com/aws/aws-sdk-go-v2/service/kms v1.20.6
 	github.com/aws/aws-sdk-go-v2/service/rds v1.40.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.11
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.29.2
@@ -114,8 +115,8 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/aws/aws-sdk-go v1.44.136 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.8 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.28 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.22 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.29 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.23 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.26 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.0.14 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ebs v1.15.19 // indirect
