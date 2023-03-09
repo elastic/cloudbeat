@@ -89,21 +89,21 @@ func (p *Provider) DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResou
 	return lo.Flatten(symmetricKeys), err
 }
 
-func (v KmsInfo) GetResourceArn() string {
-	if v.KeyMetadata.Arn == nil {
+func (k KmsInfo) GetResourceArn() string {
+	if k.KeyMetadata.Arn == nil {
 		return ""
 	}
-	return *v.KeyMetadata.Arn
+	return *k.KeyMetadata.Arn
 
 }
 
-func (v KmsInfo) GetResourceName() string {
-	if v.KeyMetadata.KeyId == nil {
+func (k KmsInfo) GetResourceName() string {
+	if k.KeyMetadata.KeyId == nil {
 		return ""
 	}
-	return *v.KeyMetadata.KeyId
+	return *k.KeyMetadata.KeyId
 }
 
-func (v KmsInfo) GetResourceType() string {
+func (k KmsInfo) GetResourceType() string {
 	return fetching.KmsType
 }
