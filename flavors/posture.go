@@ -118,7 +118,12 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	le := uniqueness.NewLeaderElector(log, c, &providers.KubernetesProvider{})
 
-	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le)
+	fetchers, err := initFetchers(ctx, log, c, resourceCh)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, fetchers)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -228,14 +233,10 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (fetchersManager.FetchersRegistry, error) {
+func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, fetchers map[string]fetching.Fetcher) (fetchersManager.FetchersRegistry, error) {
 	registry := fetchersManager.NewFetcherRegistry(log)
 
-	r, err := initFetchers(ctx, log, cfg, ch)
-	if err != nil {
-		return nil, err
-	}
-	parsedList, err := fetchersManager.ParseConfigFetchers(log, cfg, ch, r)
+	parsedList, err := fetchersManager.ParseConfigFetchers(log, cfg, ch, fetchers)
 	if err != nil {
 		return nil, err
 	}
