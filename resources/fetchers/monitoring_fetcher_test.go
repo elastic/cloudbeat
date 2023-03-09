@@ -106,9 +106,9 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
-			monitoring := &monitoring.MockClient{}
+			mockClient := &monitoring.MockClient{}
 			for name, call := range tt.monitoring {
-				monitoring.On(name, call[0]...).Return(call[1]...)
+				mockClient.On(name, call[0]...).Return(call[1]...)
 			}
 
 			hub := &securityhub.MockService{}
@@ -117,7 +117,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 			}
 			m := MonitoringFetcher{
 				log:           logp.NewLogger("TestMonitoringFetcher_Fetch"),
-				provider:      monitoring,
+				provider:      mockClient,
 				securityhub:   hub,
 				cfg:           MonitoringFetcherConfig{},
 				resourceCh:    ch,
@@ -150,14 +150,14 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 		{
 			name: "without trails",
 			fields: fields{
-				identity: &awslib.Identity{},
+				identity: &awslib.Identity{Account: aws.String("aws-account-id")},
 				Resource: monitoring.Resource{
 					Items: []monitoring.MonitoringItem{},
 				},
 			},
 			want: fetching.ResourceMetadata{
-				ID:      "",
-				Name:    "",
+				ID:      "cloudtrail-aws-account-id",
+				Name:    "cloudtrail-aws-account-id",
 				Type:    fetching.MonitoringIdentity,
 				SubType: fetching.MultiTrailsType,
 			},
