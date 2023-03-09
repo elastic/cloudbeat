@@ -155,11 +155,13 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 	t := transformer.NewTransformer(log, cdp, resultsIndex)
 
 	base := flavorBase{
-		ctx:         ctx,
-		cancel:      cancel,
-		config:      c,
-		transformer: t,
-		log:         log,
+		ctx:                 ctx,
+		cancel:              cancel,
+		config:              c,
+		transformer:         t,
+		log:                 log,
+		flushInterval:       10 * time.Second,
+		shutdownGracePeriod: 30 * time.Second,
 	}
 
 	bt := &posture{
@@ -202,7 +204,7 @@ func (bt *posture) Run(b *beat.Beat) error {
 	eventsCh := pipeline.Step(bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event
-	ticker := time.NewTicker(flushInterval)
+	ticker := time.NewTicker(bt.flushInterval)
 	for {
 		select {
 		case <-bt.ctx.Done():
@@ -445,7 +447,7 @@ func initFetchers(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 // Stop stops posture.
 func (bt *posture) Stop() {
 	if bt.dataStop != nil {
-		bt.dataStop(bt.ctx, shutdownGracePeriod)
+		bt.dataStop(bt.ctx, bt.shutdownGracePeriod)
 	}
 	bt.evaluator.Stop(bt.ctx)
 	bt.leader.Stop()

@@ -30,18 +30,18 @@ import (
 )
 
 const (
-	flushInterval       = 10 * time.Second
-	eventsThreshold     = 75
-	resourceChBuffer    = 10000
-	shutdownGracePeriod = 30 * time.Second
+	eventsThreshold  = 75
+	resourceChBuffer = 10000
 )
 
 // flavorBase configuration.
 type flavorBase struct {
-	ctx         context.Context
-	cancel      context.CancelFunc
-	config      *config.Config
-	client      beat.Client
-	transformer transformer.Transformer
-	log         *logp.Logger
+	ctx                 context.Context
+	cancel              context.CancelFunc
+	config              *config.Config
+	client              beat.Client
+	transformer         transformer.Transformer
+	log                 *logp.Logger
+	flushInterval       time.Duration
+	shutdownGracePeriod time.Duration
 }
