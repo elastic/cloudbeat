@@ -1,0 +1,7 @@
+{
+    "url": "https://rds.us-west-2.amazonaws.com/",
+    "method": "POST",
+    "response": {
+        "DBInstances": []
+    }
+}

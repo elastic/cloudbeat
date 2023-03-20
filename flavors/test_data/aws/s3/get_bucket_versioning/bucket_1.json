@@ -1,0 +1,5 @@
+{
+    "url": "https://my-ecommerce-app-prod-us-west-2-terraform-state.s3.us-west-2.amazonaws.com/?versioning=",
+    "method": "GET",
+    "response": {}
+}

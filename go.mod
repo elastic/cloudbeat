@@ -35,7 +35,6 @@ require (
 	github.com/aquasecurity/trivy v0.35.0
 	github.com/aquasecurity/trivy-db v0.0.0-20221227141502-af78ecb7db4c
 	github.com/aws/aws-sdk-go-v2/config v1.18.3
-	github.com/aws/aws-sdk-go-v2/credentials v1.13.3
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.19
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.24.4
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.22.0
@@ -113,6 +112,7 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/aws/aws-sdk-go v1.44.136 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.8 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.13.3 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.28 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.22 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.26 // indirect
@@ -291,7 +291,7 @@ require (
 	github.com/containerd/containerd v1.6.12 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgraph-io/ristretto v0.1.0 // indirect
-	github.com/docker/distribution v2.8.1+incompatible
+	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20230309010449-b6aa37560e13

@@ -1,0 +1,7 @@
+{
+    "url": "https://rds.eu-central-1.amazonaws.com/",
+    "method": "POST",
+    "response": {
+        "DBInstances": []
+    }
+}

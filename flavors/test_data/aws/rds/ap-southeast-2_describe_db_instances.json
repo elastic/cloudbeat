@@ -1,0 +1,7 @@
+{
+    "url": "https://rds.ap-southeast-2.amazonaws.com/",
+    "method": "POST",
+    "response": {
+        "DBInstances": []
+    }
+}

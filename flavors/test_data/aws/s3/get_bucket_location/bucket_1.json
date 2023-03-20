@@ -1,0 +1,7 @@
+{
+    "url": "https://my-ecommerce-app-prod-us-west-2-terraform-state.s3.us-east-1.amazonaws.com/?location=",
+    "method": "GET",
+    "response": {
+        "LocationConstraint": "us-west-2"
+    }
+}

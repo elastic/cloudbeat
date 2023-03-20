@@ -1,0 +1,16 @@
+{
+    "url": "https://my-product-catalog-prod-ap-southeast-2-terraform-state.s3.ap-southeast-2.amazonaws.com/?encryption=",
+    "method": "GET",
+    "response": {
+        "ServerSideEncryptionConfiguration": {
+            "Rules": [
+                {
+                    "ApplyServerSideEncryptionByDefault": {
+                        "SSEAlgorithm": "AES256"
+                    },
+                    "BucketKeyEnabled": false
+                }
+            ]
+        }
+    }
+}

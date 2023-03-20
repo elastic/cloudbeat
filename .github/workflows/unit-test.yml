@@ -42,7 +42,10 @@ jobs:
 
       - name: Unit-Test
         run: |
-          GOOS=linux go test -v -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
+          go install github.com/shabbyrobe/gocovmerge/cmd/gocovmerge@latest
+          go test -v -race -coverpkg=./... -coverprofile=cover.unit.out.tmp ./...
+          go test -tags component -v -coverpkg=github.com/elastic/cloudbeat/flavors -coverprofile=cover.component.out.tmp github.com/elastic/cloudbeat/flavors
+          gocovmerge cover.component.out.tmp cover.unit.out.tmp > cover.out.tmp
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
 
       - name: Upload coverage artifact

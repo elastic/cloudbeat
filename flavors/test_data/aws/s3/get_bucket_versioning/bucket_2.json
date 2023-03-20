@@ -1,0 +1,5 @@
+{
+    "url": "https://my-customer-portal-staging-eu-central-1-terraform-state.s3.eu-central-1.amazonaws.com/?versioning=",
+    "method": "GET",
+    "response": {}
+}

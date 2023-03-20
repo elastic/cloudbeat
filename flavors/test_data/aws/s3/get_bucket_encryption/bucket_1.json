@@ -1,0 +1,16 @@
+{
+    "url": "https://my-ecommerce-app-prod-us-west-2-terraform-state.s3.us-west-2.amazonaws.com/?encryption=",
+    "method": "GET",
+    "response": {
+        "ServerSideEncryptionConfiguration": {
+            "Rules": [
+                {
+                    "ApplyServerSideEncryptionByDefault": {
+                        "SSEAlgorithm": "AES256"
+                    },
+                    "BucketKeyEnabled": false
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "url": "https://my-customer-portal-staging-eu-central-1-terraform-state.s3.eu-central-1.amazonaws.com/?policy=",
+    "method": "GET",
+    "error": {
+        "type": "APIError",
+        "code": "NoSuchBucketPolicy",
+        "message": "bucket not found"
+    }
+}

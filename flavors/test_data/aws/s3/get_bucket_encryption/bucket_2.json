@@ -1,0 +1,16 @@
+{
+    "url": "https://my-customer-portal-staging-eu-central-1-terraform-state.s3.eu-central-1.amazonaws.com/?encryption=",
+    "method": "GET",
+    "response": {
+        "ServerSideEncryptionConfiguration": {
+            "Rules": [
+                {
+                    "ApplyServerSideEncryptionByDefault": {
+                        "SSEAlgorithm": "AES256"
+                    },
+                    "BucketKeyEnabled": false
+                }
+            ]
+        }
+    }
+}

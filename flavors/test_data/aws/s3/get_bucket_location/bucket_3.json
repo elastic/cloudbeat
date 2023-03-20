@@ -1,0 +1,7 @@
+{
+    "url": "https://my-product-catalog-prod-ap-southeast-2-terraform-state.s3.us-east-1.amazonaws.com/?location=",
+    "method": "GET",
+    "response": {
+        "LocationConstraint": "ap-southeast-2"
+    }
+}

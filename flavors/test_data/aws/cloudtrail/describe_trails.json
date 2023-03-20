@@ -1,0 +1,16 @@
+{
+    "TrailList": [
+        {
+            "TrailARN": "arn:aws:cloudtrail:us-east-1:123456789012:trail/mytrail",
+            "Name": "trail",
+            "LogFileValidationEnabled": true,
+            "IsMultiRegionTrail": true,
+            "HasCustomEventSelectors": true,
+            "KmsKeyId": "kmsKey_123",
+            "CloudWatchLosLoroupArn": "arn:aws:los:us-east-1:123456789012:lo-roup:my-lo-roup",
+            "HomeReion": "us-east-1",
+            "S3BucketName": "trails_bucket",
+            "SnsTopicARN": "arn:aws:sns:us-east-1:123456789012:my-topic"
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+    "url": "https://s3.us-east-1.amazonaws.com/",
+    "method": "GET",
+    "response": {
+        "Buckets": [
+            {
+                "Name": "my-ecommerce-app-prod-us-west-2-terraform-state",
+                "CreationDate": "2022-04-29T20:39:27+00:00"
+            },
+            {
+                "Name": "my-customer-portal-staging-eu-central-1-terraform-state",
+                "CreationDate": "2022-04-29T20:39:27+00:00"
+            },
+            {
+                "Name": "my-product-catalog-prod-ap-southeast-2-terraform-state",
+                "CreationDate": "2022-04-29T20:39:27+00:00"
+            }
+        ],
+        "Owner": {
+            "DisplayName": "aws-test-account",
+            "ID": "49ad64d19e8cd26deaf82d3f09e696c9fe9d68633709a1360da13b2803402f6d"
+        }
+    }
+}

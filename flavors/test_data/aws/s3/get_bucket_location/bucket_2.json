@@ -1,0 +1,7 @@
+{
+    "url": "https://my-customer-portal-staging-eu-central-1-terraform-state.s3.us-east-1.amazonaws.com/?location=",
+    "method": "GET",
+    "response": {
+        "LocationConstraint": "eu-central-1"
+    }
+}

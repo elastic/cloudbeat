@@ -1,0 +1,20 @@
+{
+    "url": "https://rds.us-east-1.amazonaws.com/",
+    "method": "POST",
+    "response": {
+        "DBInstances": [
+            {
+                "DBInstanceIdentifier": "myblogdb",
+                "DBInstanceArn": "arn:aws:rds:us-east-1:123456789012:db:myblogdb",
+                "StorageEncrypted": false,
+                "AutoMinorVersionUpgrade": false
+            },
+            {
+                "DBInstanceIdentifier": "mycrmdb",
+                "DBInstanceArn": "arn:aws:rds:eu-west-1:123456789012:db:mycrmdb",
+                "StorageEncrypted": true,
+                "AutoMinorVersionUpgrade": true
+            }
+        ]
+    }
+}
