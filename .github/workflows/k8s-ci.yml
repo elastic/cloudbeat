@@ -165,8 +165,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-target: ['full']
-        range: ['functional']
         include:
           - test-target: pre_merge_agent
             range: ''
