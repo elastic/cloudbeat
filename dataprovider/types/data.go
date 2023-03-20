@@ -15,32 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package beater
+package types
 
-import (
-	"testing"
+import "github.com/elastic/cloudbeat/version"
 
-	_ "github.com/elastic/cloudbeat/processor"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/suite"
-)
-
-type BeaterTestSuite struct {
-	suite.Suite
-
-	log *logp.Logger
-}
-
-func TestBeaterTestSuite(t *testing.T) {
-	s := new(BeaterTestSuite)
-	s.log = logp.NewLogger("cloudbeat_beater_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
-
-	suite.Run(t, s)
-}
-
-func (s *BeaterTestSuite) SetupTest() {
+type Data struct {
+	ResourceID  string
+	VersionInfo version.CloudbeatVersionInfo
 }

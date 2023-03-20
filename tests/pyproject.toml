@@ -44,4 +44,5 @@ markers = [
     "eks_k8s_objects_rules",
     "eks_service_rules",
     "aws_s3_service_rules",
+    "aws_iam_rules"
 ]
