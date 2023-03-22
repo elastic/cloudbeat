@@ -20,14 +20,14 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
+	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
-	"sync"
 )
 
 type numberFetcher struct {
@@ -116,7 +116,7 @@ func (s *RegistryTestSuite) SetupTest() {
 }
 
 func (s *RegistryTestSuite) TestKeys() {
-	var tests = []struct {
+	tests := []struct {
 		key   string
 		value int
 	}{
@@ -170,44 +170,6 @@ func (s *RegistryTestSuite) TestRunNotRegistered() {
 	s.Error(err)
 }
 
-func (s *RegistryTestSuite) TestRunRegistered() {
-	f1 := newSyncNumberFetcher(1, s.resourceCh)
-	err := s.registry.Register("some-key-1", f1, nil)
-	s.NoError(err)
-
-	f2 := newSyncNumberFetcher(2, s.resourceCh)
-	err = s.registry.Register("some-key-2", f2, nil)
-	s.NoError(err)
-
-	f3 := newSyncNumberFetcher(3, s.resourceCh)
-	err = s.registry.Register("some-key-3", f3, nil)
-	s.NoError(err)
-
-	var tests = []struct {
-		key string
-		res NumberResource
-	}{
-		{
-			"some-key-1", NumberResource{1},
-		},
-		{
-			"some-key-2", NumberResource{2},
-		},
-		{
-			"some-key-3", NumberResource{3},
-		},
-	}
-
-	for _, test := range tests {
-		err = s.registry.Run(context.TODO(), test.key, fetching.CycleMetadata{})
-		results := testhelper.CollectResources(s.resourceCh)
-
-		s.NoError(err)
-		s.Equal(1, len(results))
-		s.Equal(test.res.Num, results[0].GetData())
-	}
-}
-
 func (s *RegistryTestSuite) TestShouldRunNotRegistered() {
 	f := newNumberFetcher(1, nil, s.wg)
 	err := s.registry.Register("some-key", f, nil)
@@ -221,7 +183,7 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	conditionTrue := newBoolFetcherCondition(true, "always-fetcher-condition")
 	conditionFalse := newBoolFetcherCondition(false, "never-fetcher-condition")
 
-	var tests = []struct {
+	tests := []struct {
 		conditions []fetching.Condition
 		expected   bool
 	}{

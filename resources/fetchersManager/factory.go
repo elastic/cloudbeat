@@ -26,71 +26,11 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-var Factories = newFactories()
-
-type factories struct {
-	m map[string]fetching.Factory
-}
-
 type ParsedFetcher struct {
 	name string
 	f    fetching.Fetcher
 }
 
-func newFactories() factories {
-	return factories{m: make(map[string]fetching.Factory)}
-}
-
-func (fa *factories) RegisterFactory(name string, f fetching.Factory) {
-	_, ok := fa.m[name]
-	if ok {
-		panic(fmt.Errorf("fetcher factory with name %q is already registered", name))
-	}
-
-	fa.m[name] = f
-}
-
-func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	factory, ok := fa.m[name]
-	if !ok {
-		return nil, fmt.Errorf("fetcher %s could not be found", name)
-	}
-
-	return factory.Create(log, c, ch)
-}
-
-func (fa *factories) ParseConfigFetchers(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) ([]*ParsedFetcher, error) {
-	var arr []*ParsedFetcher
-
-	for _, fcfg := range cfg.Fetchers {
-		addCredentialsToFetcherConfiguration(log, cfg, fcfg)
-		p, err := fa.parseConfigFetcher(log, fcfg, ch)
-		if err != nil {
-			return nil, err
-		}
-
-		arr = append(arr, p)
-	}
-
-	return arr, nil
-}
-
-func (fa *factories) parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, ch chan fetching.ResourceInfo) (*ParsedFetcher, error) {
-	gen := fetching.BaseFetcherConfig{}
-	err := fcfg.Unpack(&gen)
-	if err != nil {
-		return nil, err
-	}
-
-	f, err := fa.CreateFetcher(log, gen.Name, fcfg, ch)
-	if err != nil {
-		return nil, err
-	}
-
-	return &ParsedFetcher{gen.Name, f}, nil
-}
-
-// TODO: copy of ParseConfigFetchers, remove the original when refactor is done
 func ParseConfigFetchers(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, fetchers map[string]fetching.Fetcher) ([]*ParsedFetcher, error) {
 	var arr []*ParsedFetcher
 
@@ -107,7 +47,6 @@ func ParseConfigFetchers(log *logp.Logger, cfg *config.Config, ch chan fetching.
 	return arr, nil
 }
 
-// TODO: copy of parseConfigFetcher, remove the original when refactor is done
 func parseConfigFetcher(log *logp.Logger, fcfg *agentconfig.C, ch chan fetching.ResourceInfo, fetchers map[string]fetching.Fetcher) (*ParsedFetcher, error) {
 	gen := fetching.BaseFetcherConfig{}
 	err := fcfg.Unpack(&gen)

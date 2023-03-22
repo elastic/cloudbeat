@@ -57,15 +57,7 @@ type FactoriesTestSuite struct {
 	suite.Suite
 
 	log        *logp.Logger
-	F          factories
 	resourceCh chan fetching.ResourceInfo
-}
-
-type numberFetcherFactory struct{}
-
-func (n *numberFetcherFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	x, _ := c.Int("num", -1)
-	return &syncNumberFetcher{int(x), false, ch}, nil
 }
 
 func numberConfig(number int) *agentconfig.C {
@@ -90,67 +82,11 @@ func TestFactoriesTestSuite(t *testing.T) {
 }
 
 func (s *FactoriesTestSuite) SetupTest() {
-	s.F = newFactories()
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
 func (s *FactoriesTestSuite) TearDownTest() {
 	close(s.resourceCh)
-}
-
-func (s *FactoriesTestSuite) TestListFetcher() {
-	tests := []struct {
-		key string
-	}{
-		{"process"},
-		{"file-system"},
-	}
-
-	for _, test := range tests {
-		s.F.RegisterFactory(test.key, &numberFetcherFactory{})
-	}
-
-	s.Contains(s.F.m, "process")
-	s.Contains(s.F.m, "file-system")
-}
-
-func (s *FactoriesTestSuite) TestCreateFetcher() {
-	tests := []struct {
-		key   string
-		value int
-	}{
-		{"process", 1},
-		{"file-system", 4},
-	}
-
-	for _, test := range tests {
-		s.F.RegisterFactory(test.key, &numberFetcherFactory{})
-		c := numberConfig(test.value)
-
-		f, err := s.F.CreateFetcher(s.log, test.key, c, s.resourceCh)
-		s.NoError(err)
-		err = f.Fetch(context.TODO(), fetching.CycleMetadata{})
-		results := testhelper.CollectResources(s.resourceCh)
-
-		s.Equal(1, len(results))
-		s.NoError(err)
-		s.Equal(test.value, results[0].GetData())
-	}
-}
-
-func (s *FactoriesTestSuite) TestCreateFetcherCollision() {
-	tests := []struct {
-		key string
-	}{
-		{"process"},
-		{"process"},
-	}
-
-	s.Panics(func() {
-		for _, test := range tests {
-			s.F.RegisterFactory(test.key, &numberFetcherFactory{})
-		}
-	})
 }
 
 func (s *FactoriesTestSuite) TestRegisterFetchers() {
@@ -166,8 +102,6 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 	}
 
 	for _, test := range tests {
-		s.F = newFactories()
-		s.F.RegisterFactory(test.key, &numberFetcherFactory{})
 		numCfg := numberConfig(test.value)
 		err := numCfg.SetString("name", -1, test.key)
 		s.NoError(err, "Could not set name: %v", err)
@@ -177,7 +111,9 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		}
 		conf.Fetchers = []*agentconfig.C{numCfg}
 
-		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
+		parsedList, err := ParseConfigFetchers(s.log, conf, s.resourceCh, map[string]fetching.Fetcher{
+			test.key: newSyncNumberFetcher(test.value, s.resourceCh),
+		})
 		s.NoError(err)
 
 		reg := NewFetcherRegistry(s.log)
@@ -210,7 +146,7 @@ func (s *FactoriesTestSuite) TestRegisterNotFoundFetchers() {
 
 		conf.Fetchers = []*agentconfig.C{numCfg}
 
-		_, err = s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
+		_, err = ParseConfigFetchers(s.log, conf, s.resourceCh, map[string]fetching.Fetcher{})
 		s.Error(err)
 	}
 }
@@ -252,8 +188,9 @@ fetchers:
 		err = c.Fetchers[0].Unpack(&fetcher)
 		s.NoError(err)
 
-		s.F.RegisterFactory(fetcher.Name, &numberFetcherFactory{})
-		parsedList, err := s.F.ParseConfigFetchers(s.log, c, s.resourceCh)
+		parsedList, err := ParseConfigFetchers(s.log, c, s.resourceCh, map[string]fetching.Fetcher{
+			fetcher.Name: &syncNumberFetcher{-1, false, s.resourceCh},
+		})
 		s.Equal(fetcher.Name, parsedList[0].name)
 		s.NoError(err)
 
