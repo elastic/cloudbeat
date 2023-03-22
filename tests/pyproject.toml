@@ -47,4 +47,5 @@ markers = [
     "aws_iam_rules",
     "aws_logging_rules",
     "aws_ec2_rules",
+    "aws_rds_rules",
 ]
