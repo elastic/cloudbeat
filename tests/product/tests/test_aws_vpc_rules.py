@@ -36,7 +36,7 @@ def test_aws_vpc_service_rules(
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.aws_findings_timeout,
         rule_tag=rule_tag,
-        exec_timestamp=datetime.utcnow() - timedelta(hours=30),
+        exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
         resource_identifier=vpc_identifier,
     )
 

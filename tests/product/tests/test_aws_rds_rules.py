@@ -5,10 +5,11 @@ This module verifies correctness of retrieved findings by manipulating audit act
 from datetime import datetime, timedelta
 from functools import partial
 import pytest
-from commonlib.utils import get_ES_evaluation, identifier_by_name
+from commonlib.utils import get_ES_evaluation, res_identifier
 
 from product.tests.data.aws import aws_rds_test_cases as aws_rds_tc
 from product.tests.parameters import register_params, Parameters
+from .data.constants import RES_NAME
 
 
 @pytest.mark.aws_rds_rules
@@ -30,13 +31,13 @@ def test_aws_rds_service_rules(
     @return: None - Test Pass / Fail result is generated.
     """
     # pylint: disable=duplicate-code
-    rds_identifier = partial(identifier_by_name, case_identifier)
+    rds_identifier = partial(res_identifier, RES_NAME, case_identifier)
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.aws_findings_timeout,
         rule_tag=rule_tag,
-        exec_timestamp=datetime.utcnow() - timedelta(hours=30),
+        exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
         resource_identifier=rds_identifier,
     )
 
