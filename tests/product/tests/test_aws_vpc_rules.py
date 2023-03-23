@@ -5,10 +5,10 @@ This module verifies correctness of retrieved findings by manipulating audit act
 from datetime import datetime, timedelta
 from functools import partial
 import pytest
-from commonlib.utils import get_ES_evaluation, identifier_by_name
-
+from commonlib.utils import get_ES_evaluation, res_identifier
 from product.tests.data.aws import aws_vpc_test_cases as aws_vpc_tc
 from product.tests.parameters import register_params, Parameters
+from .data.constants import RES_ID
 
 
 @pytest.mark.aws_vpc_rules
@@ -30,7 +30,7 @@ def test_aws_vpc_service_rules(
     @return: None - Test Pass / Fail result is generated.
     """
     # pylint: disable=duplicate-code
-    vpc_identifier = partial(identifier_by_name, case_identifier)
+    vpc_identifier = partial(res_identifier, RES_ID, case_identifier)
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
