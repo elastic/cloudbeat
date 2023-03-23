@@ -48,4 +48,5 @@ markers = [
     "aws_logging_rules",
     "aws_ec2_rules",
     "aws_rds_rules",
+    "aws_vpc_rules",
 ]
