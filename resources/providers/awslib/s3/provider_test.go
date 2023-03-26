@@ -21,6 +21,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -30,7 +32,6 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type ProviderTestSuite struct {
@@ -58,7 +59,7 @@ func (s *ProviderTestSuite) TearDownTest() {}
 
 var bucketName = "MyBucket"
 var secondBucketName = "MyAnotherBucket"
-var region types.BucketLocationConstraint = "eu-west-1"
+var testRegion types.BucketLocationConstraint = "eu-west-1"
 var bucketPolicy BucketPolicy = map[string]any{"foo": "bar"}
 var bucketPolicyString = "{\"foo\": \"bar\"}"
 
@@ -118,7 +119,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			name: "Should return an S3 bucket without encryption, policy, and versioning due to regions mismatch",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets":       {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
-				"GetBucketLocation": {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketLocation": {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: testRegion}, nil}}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: nil, BucketPolicy: map[string]any(nil), BucketVersioning: nil}},
 			expectError: false,
@@ -135,39 +136,39 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 						},
 					},
 				}, nil}}},
-				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: testRegion}, nil}}},
 				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: aws.String("AES256"), BucketPolicy: map[string]any(nil), BucketVersioning: nil}},
 			expectError: false,
-			regions:     []string{awslib.DefaultRegion, string(region)},
+			regions:     []string{awslib.DefaultRegion, string(testRegion)},
 		},
 		{
 			name: "Should return an S3 bucket with bucket policy",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
 				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, &smithy.GenericAPIError{Code: EncryptionNotFoundCode}}}},
-				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: testRegion}, nil}}},
 				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil}}},
 				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: aws.String(NoEncryptionMessage), BucketPolicy: bucketPolicy, BucketVersioning: nil}},
 			expectError: false,
-			regions:     []string{awslib.DefaultRegion, string(region)},
+			regions:     []string{awslib.DefaultRegion, string(testRegion)},
 		},
 		{
 			name: "Should return an S3 bucket with bucket versioning",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
 				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
-				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: testRegion}, nil}}},
 				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}}},
 			},
 			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: nil, BucketPolicy: map[string]any(nil), BucketVersioning: &BucketVersioning{true, true}}},
 			expectError: false,
-			regions:     []string{awslib.DefaultRegion, string(region)},
+			regions:     []string{awslib.DefaultRegion, string(testRegion)},
 		},
 		{
 			name: "Should return two S3 buckets from different regions",
@@ -190,7 +191,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 					}, nil}},
 				},
 				"GetBucketLocation": {
-					{{mock.Anything, &s3Client.GetBucketLocationInput{Bucket: &bucketName}}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}},
+					{{mock.Anything, &s3Client.GetBucketLocationInput{Bucket: &bucketName}}, {&s3Client.GetBucketLocationOutput{LocationConstraint: testRegion}, nil}},
 					{{mock.Anything, &s3Client.GetBucketLocationInput{Bucket: &secondBucketName}}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}},
 				},
 				"GetBucketPolicy": {
@@ -207,7 +208,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 				BucketDescription{Name: secondBucketName, SSEAlgorithm: aws.String("aws:kms"), BucketPolicy: map[string]any(nil), BucketVersioning: &BucketVersioning{false, false}},
 			},
 			expectError: false,
-			regions:     []string{awslib.DefaultRegion, string(region)},
+			regions:     []string{awslib.DefaultRegion, string(testRegion)},
 		},
 		{
 			name: "Should return two S3 buckets from the same region",

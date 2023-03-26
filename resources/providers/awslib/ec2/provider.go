@@ -156,33 +156,41 @@ func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsR
 	})
 }
 
-func (p *Provider) DescribeInstances(ctx context.Context, region string) ([]types.Instance, error) {
-	client := p.clients[region]
-	if client == nil {
-		return nil, fmt.Errorf("error in DescribeInstances no client for region %s", region)
-	}
-	input := &ec2.DescribeInstancesInput{}
-	allInstances := []types.Instance{}
-	for {
-		output, err := client.DescribeInstances(ctx, input)
-		if err != nil {
-			return nil, err
+func (p *Provider) DescribeInstances(ctx context.Context) ([]Ec2Instance, error) {
+	insances, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]Ec2Instance, error) {
+		input := &ec2.DescribeInstancesInput{}
+		allInstances := []types.Instance{}
+		for {
+			output, err := c.DescribeInstances(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			for _, reservation := range output.Reservations {
+				allInstances = append(allInstances, reservation.Instances...)
+			}
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
 		}
-		for _, reservation := range output.Reservations {
-			allInstances = append(allInstances, reservation.Instances...)
+
+		var result []Ec2Instance
+		for _, instance := range allInstances {
+			result = append(result, Ec2Instance{
+				Instance:   instance,
+				awsAccount: p.awsAccountID,
+				Region:     region,
+			})
 		}
-		if output.NextToken == nil {
-			break
-		}
-		input.NextToken = output.NextToken
-	}
-	return allInstances, nil
+		return result, nil
+	})
+	return lo.Flatten(insances), err
 }
 
-func (p *Provider) CreateSnapshots(ctx context.Context, ins types.Instance, region string) ([]types.SnapshotInfo, error) {
-	client := p.clients[region]
+func (p *Provider) CreateSnapshots(ctx context.Context, ins Ec2Instance) ([]EBSSnapshot, error) {
+	client := p.clients[ins.Region]
 	if client == nil {
-		return nil, fmt.Errorf("error in CreateSnapshots no client for region %s", region)
+		return nil, fmt.Errorf("error in CreateSnapshots no client for region %s", ins.Region)
 	}
 	input := &ec2.CreateSnapshotsInput{
 		InstanceSpecification: &types.InstanceSpecification{
@@ -190,26 +198,36 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins types.Instance, regi
 		},
 		Description: aws.String("Cloudbeat Vulnerability Snapshot."),
 	}
-	result, err := client.CreateSnapshots(ctx, input)
+	res, err := client.CreateSnapshots(ctx, input)
 	if err != nil {
 		return nil, err
 	}
-	return result.Snapshots, nil
+
+	var result []EBSSnapshot
+	for _, snap := range res.Snapshots {
+		result = append(result, FromSnapshotInfo(snap, p.awsAccountID, ins.Region))
+	}
+	return result, nil
 }
 
 // TODO: Maybe we should bulk request snapshots?
 // This will limit us scaling the pipeline
-func (p *Provider) DescribeSnapshots(ctx context.Context, snap types.SnapshotInfo, region string) ([]types.Snapshot, error) {
-	client := p.clients[region]
+func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) ([]EBSSnapshot, error) {
+	client := p.clients[snapshot.Region]
 	if client == nil {
-		return nil, fmt.Errorf("error in DescribeSnapshots no client for region %s", region)
+		return nil, fmt.Errorf("error in DescribeSnapshots no client for region %s", snapshot.Region)
 	}
 	input := &ec2.DescribeSnapshotsInput{
-		SnapshotIds: []string{*snap.SnapshotId},
+		SnapshotIds: []string{snapshot.SnapshotId},
 	}
-	result, err := client.DescribeSnapshots(ctx, input)
+	res, err := client.DescribeSnapshots(ctx, input)
 	if err != nil {
 		return nil, err
 	}
-	return result.Snapshots, nil
+
+	var result []EBSSnapshot
+	for _, snap := range res.Snapshots {
+		result = append(result, FromSnapshot(snap, p.awsAccountID, snapshot.Region))
+	}
+	return result, nil
 }

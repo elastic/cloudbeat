@@ -15,29 +15,39 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cloudtrail
+package ec2
 
 import (
-	"context"
+	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	trailClient "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type TrailService interface {
-	DescribeTrails(ctx context.Context) ([]TrailInfo, error)
+type Ec2Instance struct {
+	types.Instance
+	Region     string
+	awsAccount string
 }
 
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
-	f := func(cfg aws.Config) Client {
-		return trailClient.NewFromConfig(cfg)
+func (i Ec2Instance) GetResourceArn() string {
+	if i.Instance.InstanceId == nil {
+		return ""
+	}
+	// TODO: check if this is the correct ARN
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:ec2/%s", i.Region, i.awsAccount, *i.Instance.InstanceId)
+}
+
+func (i Ec2Instance) GetResourceName() string {
+	for _, tag := range i.Instance.Tags {
+		if *tag.Key == "Name" {
+			return *tag.Value
+		}
 	}
 
-	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
-	return &Provider{
-		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
-	}
+	return ""
+}
+
+func (i Ec2Instance) GetResourceType() string {
+	return fetching.EC2Type
 }

@@ -37,7 +37,19 @@ func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, facto
 	f := func(cfg aws.Config) Client {
 		return ec2.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+	return &Provider{
+		log:          log,
+		clients:      m.GetMultiRegionsClientMap(),
+		awsAccountID: awsAccountID,
+	}
+}
+
+func NewCurrentRegionEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return ec2.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(awslib.CurrentRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:          log,
 		clients:      m.GetMultiRegionsClientMap(),

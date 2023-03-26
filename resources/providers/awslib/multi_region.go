@@ -24,18 +24,13 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-var (
-	awsRegions *cachedRegions
-	once       = &sync.Once{}
-)
-
-type cachedRegions struct {
-	enabledRegions []string
+type RegionsSelector interface {
+	Regions(ctx context.Context, cfg aws.Config) ([]string, error)
 }
 
 type CrossRegionFetcher[T any] interface {
@@ -43,11 +38,7 @@ type CrossRegionFetcher[T any] interface {
 }
 
 type CrossRegionFactory[T any] interface {
-	NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionFetcher[T]
-}
-
-type DescribeCloudRegions interface {
-	DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
+	NewMultiRegionClients(selector RegionsSelector, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionFetcher[T]
 }
 
 type (
@@ -58,9 +49,14 @@ type (
 )
 
 // NewMultiRegionClients is a utility function that is used to create a map of client instances of a given type T for multiple regions.
-func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
+func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(selector RegionsSelector, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
 	clientsMap := make(map[string]T, 0)
-	for _, region := range getRegions(client, log) {
+	regionList, err := selector.Regions(context.Background(), cfg)
+	if err != nil {
+		log.Errorf("Default region selected after failure to retrieve aws regions: %v", err)
+		regionList = []string{DefaultRegion}
+	}
+	for _, region := range regionList {
 		cfg.Region = region
 		clientsMap[region] = factory(cfg)
 	}
@@ -132,31 +128,4 @@ func shouldDrop(t interface{}) bool {
 
 func (w *multiRegionWrapper[T]) GetMultiRegionsClientMap() map[string]T {
 	return w.clients
-}
-
-// GetRegions will initialize the singleton instance and perform the API request to retrieve the regions list only once, even if the function is called multiple times.
-// Subsequent calls to the function will return the stored regions list without making another API request.
-// In case of a failure the function returns the default region.
-func getRegions(client DescribeCloudRegions, log *logp.Logger) []string {
-	log.Debug("GetRegions starting...")
-
-	once.Do(func() {
-		log.Debug("Get aws regions for the first time")
-		awsRegions = &cachedRegions{}
-
-		output, err := client.DescribeRegions(context.Background(), nil)
-		if err != nil {
-			log.Errorf("failed DescribeRegions: %v", err)
-			awsRegions.enabledRegions = []string{DefaultRegion}
-			once = &sync.Once{} // reset singleton upon error
-			return
-		}
-
-		for _, region := range output.Regions {
-			awsRegions.enabledRegions = append(awsRegions.enabledRegions, *region.RegionName)
-		}
-	})
-
-	log.Debugf("enabled regions for aws account, %v", awsRegions.enabledRegions)
-	return awsRegions.enabledRegions
 }
