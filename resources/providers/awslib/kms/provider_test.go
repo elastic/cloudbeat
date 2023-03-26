@@ -55,7 +55,8 @@ func (s *ProviderTestSuite) SetupTest() {}
 
 func (s *ProviderTestSuite) TearDownTest() {}
 
-var keyId = "21c0ba99-3a6c-4f72-8ef8-8118d4804710"
+var keyId1 = "21c0ba99-3a6c-4f72-8ef8-8118d4804710"
+var keyId2 = "21c0ba99-3a6c-4f72-8ef8-8118d4804711"
 
 func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 	var tests = []struct {
@@ -75,10 +76,19 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			regions:     []string{awslib.DefaultRegion},
 		},
 		{
+			name: "Should not return any resources keys can't be listed",
+			kmsClientMockReturnVals: kmsClientMockReturnVals{
+				"ListKeys": {{{mock.Anything, mock.Anything}, {nil, errors.New("some error")}}},
+			},
+			expected:    []awslib.AwsResource(nil),
+			expectError: true,
+			regions:     []string{awslib.DefaultRegion},
+		},
+		{
 			name: "Should not return a resource when key can't be described",
 			kmsClientMockReturnVals: kmsClientMockReturnVals{
 				"ListKeys": {{{mock.Anything, mock.Anything}, {&kmsClient.ListKeysOutput{Keys: []types.KeyListEntry{
-					{KeyId: &keyId},
+					{KeyId: &keyId1},
 				}}, nil}}},
 				"DescribeKey": {{{mock.Anything, mock.Anything}, {nil, errors.New("some error")}}},
 			},
@@ -90,10 +100,9 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			name: "Should not return a resource when key is not symmetric",
 			kmsClientMockReturnVals: kmsClientMockReturnVals{
 				"ListKeys": {{{mock.Anything, mock.Anything}, {&kmsClient.ListKeysOutput{Keys: []types.KeyListEntry{
-					{KeyId: &keyId},
+					{KeyId: &keyId1},
 				}}, nil}}},
-				// TODO: mock.matchBy({keyId}) ?
-				"DescribeKey": {{{mock.Anything, mock.Anything}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId, KeySpec: "some string"}}, nil}}},
+				"DescribeKey": {{{mock.Anything, mock.Anything}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId1, KeySpec: "some string"}}, nil}}},
 			},
 			expected:    []awslib.AwsResource(nil),
 			expectError: false,
@@ -103,9 +112,9 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			name: "Should not return a resource when key rotation status can't be described",
 			kmsClientMockReturnVals: kmsClientMockReturnVals{
 				"ListKeys": {{{mock.Anything, mock.Anything}, {&kmsClient.ListKeysOutput{Keys: []types.KeyListEntry{
-					{KeyId: &keyId},
+					{KeyId: &keyId1},
 				}}, nil}}},
-				"DescribeKey":          {{{mock.Anything, mock.Anything}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId, KeySpec: types.KeySpecSymmetricDefault}}, nil}}},
+				"DescribeKey":          {{{mock.Anything, mock.Anything}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault}}, nil}}},
 				"GetKeyRotationStatus": {{{mock.Anything, mock.Anything}, {nil, errors.New("some error")}}},
 			},
 			expected:    []awslib.AwsResource(nil),
@@ -113,19 +122,31 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			regions:     []string{awslib.DefaultRegion},
 		},
 		{
-			// TODO: add regions
-			// need to change Mock.On to take multiple ListKeys calls
 			name: "Should return a resource for a symmetric key",
 			kmsClientMockReturnVals: kmsClientMockReturnVals{
-				"ListKeys": {{{mock.Anything, mock.Anything}, {&kmsClient.ListKeysOutput{Keys: []types.KeyListEntry{
-					{KeyId: &keyId},
-				}}, nil}}},
-				"DescribeKey":          {{{mock.Anything, mock.Anything}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId, KeySpec: types.KeySpecSymmetricDefault}}, nil}}},
-				"GetKeyRotationStatus": {{{mock.Anything, mock.Anything}, {&kmsClient.GetKeyRotationStatusOutput{KeyRotationEnabled: true}, nil}}},
+				"ListKeys": {
+					{{mock.Anything, mock.Anything}, {&kmsClient.ListKeysOutput{Keys: []types.KeyListEntry{
+						{KeyId: &keyId1},
+					}}, nil}},
+					{{mock.Anything, mock.Anything}, {&kmsClient.ListKeysOutput{Keys: []types.KeyListEntry{
+						{KeyId: &keyId2},
+					}}, nil}},
+				},
+				"DescribeKey": {
+					{{mock.Anything, mock.MatchedBy(MatchDescribeKeyInput(keyId1))}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault}}, nil}},
+					{{mock.Anything, mock.MatchedBy(MatchDescribeKeyInput(keyId2))}, {&kmsClient.DescribeKeyOutput{KeyMetadata: &types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault}}, nil}},
+				},
+				"GetKeyRotationStatus": {
+					{{mock.Anything, mock.MatchedBy(MatchGetKeyRotationStatusInput(keyId1))}, {&kmsClient.GetKeyRotationStatusOutput{KeyRotationEnabled: true}, nil}},
+					{{mock.Anything, mock.MatchedBy(MatchGetKeyRotationStatusInput(keyId2))}, {&kmsClient.GetKeyRotationStatusOutput{KeyRotationEnabled: true}, nil}},
+				},
 			},
-			expected:    []awslib.AwsResource{KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true}},
+			expected: []awslib.AwsResource{
+				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true},
+				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true},
+			},
 			expectError: false,
-			regions:     []string{awslib.DefaultRegion},
+			regions:     []string{"us-east-1", "us-east-2"},
 		},
 	}
 
@@ -154,5 +175,17 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		// Using `ElementsMatch` instead of the usual `Equals` since iterating over the regions map does not produce a
 		//	guaranteed order
 		s.ElementsMatch(test.expected, results, fmt.Sprintf("Test '%s' failed, elements do not match", test.name))
+	}
+}
+
+func MatchDescribeKeyInput(keyId string) func(k *kmsClient.DescribeKeyInput) bool {
+	return func(k *kmsClient.DescribeKeyInput) bool {
+		return *k.KeyId == keyId
+	}
+}
+
+func MatchGetKeyRotationStatusInput(keyId string) func(k *kmsClient.GetKeyRotationStatusInput) bool {
+	return func(k *kmsClient.GetKeyRotationStatusInput) bool {
+		return *k.KeyId == keyId
 	}
 }
