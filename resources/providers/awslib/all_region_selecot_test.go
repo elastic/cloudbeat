@@ -20,7 +20,6 @@ package awslib
 import (
 	"context"
 	"errors"
-	"sync"
 	"testing"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -53,7 +52,7 @@ func TestAllRegionSelectorTestSuite(t *testing.T) {
 }
 
 func (s *AllRegionSelectorTestSuite) SetupTest() {
-	s.selector = newAllRegionSelector()
+	s.selector = &allRegionsSelector{}
 	s.mock = &mockDescribeCloudRegions{}
 	s.selector.client = s.mock
 }
@@ -63,19 +62,6 @@ func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_SingleCall() {
 	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
 	s.NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
-}
-
-func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_DoubleCallCached() {
-	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(successfulDescribeCloudRegionOutput, nil)
-	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
-	s.Equal([]string{usRegion, euRegion}, result)
-
-	result, err = s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
-	s.Equal([]string{usRegion, euRegion}, result)
-
-	s.mock.AssertNumberOfCalls(s.T(), "DescribeRegions", 1)
 }
 
 func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_FirstFail() {
@@ -89,39 +75,4 @@ func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_FirstFail() {
 	s.NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	s.mock.AssertNumberOfCalls(s.T(), "DescribeRegions", 2)
-}
-
-func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_ParallelCalls() {
-	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(successfulDescribeCloudRegionOutput, nil)
-	wg := sync.WaitGroup{}
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-			s.NoError(err)
-			s.Equal([]string{usRegion, euRegion}, result)
-		}()
-	}
-
-	wg.Wait()
-	s.mock.AssertNumberOfCalls(s.T(), "DescribeRegions", 1)
-}
-
-func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_ParallelCallsFail() {
-
-	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(nil, errors.New("mock"))
-	wg := sync.WaitGroup{}
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-			s.Error(err)
-			s.Len(result, 0)
-		}()
-	}
-
-	wg.Wait()
-	s.mock.AssertNumberOfCalls(s.T(), "DescribeRegions", 5)
 }

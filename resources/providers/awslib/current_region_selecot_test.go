@@ -20,7 +20,6 @@ package awslib
 import (
 	"context"
 	"errors"
-	"sync"
 	"testing"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -46,7 +45,7 @@ func TestCurrentRegionSelectorTestSuite(t *testing.T) {
 }
 
 func (s *CurrentRegionSelectorTestSuite) SetupTest() {
-	s.selector = newCurrentRegionSelector()
+	s.selector = &currentRegionSelector{}
 	s.mock = &mockCurrentCloudRegion{}
 	s.selector.client = s.mock
 }
@@ -56,19 +55,6 @@ func (s *CurrentRegionSelectorTestSuite) TestCurrentRegionSelector_SingleCall() 
 	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
 	s.NoError(err)
 	s.Equal([]string{euRegion}, result)
-}
-
-func (s *CurrentRegionSelectorTestSuite) TestCurrentRegionSelector_DoubleCallCached() {
-	s.mock.EXPECT().GetMetadata(mock.Anything, mock.Anything).Return(successfulCurrentCloudRegionOutput, nil)
-	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
-	s.Equal([]string{euRegion}, result)
-
-	result, err = s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
-	s.Equal([]string{euRegion}, result)
-
-	s.mock.AssertNumberOfCalls(s.T(), "GetMetadata", 1)
 }
 
 func (s *CurrentRegionSelectorTestSuite) TestCurrentRegionSelector_FirstFail() {
@@ -82,39 +68,4 @@ func (s *CurrentRegionSelectorTestSuite) TestCurrentRegionSelector_FirstFail() {
 	s.NoError(err)
 	s.Equal([]string{euRegion}, result)
 	s.mock.AssertNumberOfCalls(s.T(), "GetMetadata", 2)
-}
-
-func (s *CurrentRegionSelectorTestSuite) TestCurrentRegionSelector_ParallelCalls() {
-	s.mock.EXPECT().GetMetadata(mock.Anything, mock.Anything).Return(successfulCurrentCloudRegionOutput, nil)
-	wg := sync.WaitGroup{}
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-			s.NoError(err)
-			s.Equal([]string{euRegion}, result)
-		}()
-	}
-
-	wg.Wait()
-	s.mock.AssertNumberOfCalls(s.T(), "GetMetadata", 1)
-}
-
-func (s *CurrentRegionSelectorTestSuite) TestCurrentRegionSelector_ParallelCallsFail() {
-
-	s.mock.EXPECT().GetMetadata(mock.Anything, mock.Anything).Return(nil, errors.New("mock"))
-	wg := sync.WaitGroup{}
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-			s.Error(err)
-			s.Len(result, 0)
-		}()
-	}
-
-	wg.Wait()
-	s.mock.AssertNumberOfCalls(s.T(), "GetMetadata", 5)
 }

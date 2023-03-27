@@ -19,39 +19,17 @@ package awslib
 
 import (
 	"context"
-	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-var allSingleSelector = newAllRegionSelector()
-
-type cachedRegions struct {
-	regions []string
-}
-
 type describeCloudRegions interface {
 	DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 }
 
-func AllRegionSelector() *allRegionsSelector {
-	return allSingleSelector
-}
-
-func newAllRegionSelector() *allRegionsSelector {
-	return &allRegionsSelector{
-		once:  &sync.Once{},
-		lock:  &sync.Mutex{},
-		cache: &cachedRegions{},
-	}
-}
-
 type allRegionsSelector struct {
-	once   *sync.Once
-	lock   *sync.Mutex
-	cache  *cachedRegions
 	client describeCloudRegions
 }
 
@@ -61,31 +39,23 @@ type allRegionsSelector struct {
 func (s *allRegionsSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
 	log := logp.NewLogger("aws")
 	log.Debug("allRegionsSelector starting...")
-	var err error
 
-	// Make sure that consequent calls to the function will keep trying to retrieve the regions list until it succeeds.
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	s.once.Do(func() {
-		if s.client == nil {
-			s.client = ec2.NewFromConfig(cfg)
-		}
+	if s.client == nil {
+		s.client = ec2.NewFromConfig(cfg)
+	}
 
-		log.Debug("Get aws regions for the first time")
-		var output *ec2.DescribeRegionsOutput
-		output, err = s.client.DescribeRegions(ctx, nil)
-		if err != nil {
-			log.Errorf("failed DescribeRegions: %v", err)
-			s.once = &sync.Once{} // reset singleton upon error
-			return
-		}
+	log.Debug("Get aws regions for the first time")
+	var output *ec2.DescribeRegionsOutput
+	output, err := s.client.DescribeRegions(ctx, nil)
+	if err != nil {
+		log.Errorf("failed DescribeRegions: %v", err)
+		return nil, err
+	}
 
-		s.cache = &cachedRegions{}
-		for _, region := range output.Regions {
-			s.cache.regions = append(s.cache.regions, *region.RegionName)
-		}
-	})
+	result := []string{}
+	for _, region := range output.Regions {
+		result = append(result, *region.RegionName)
+	}
 
-	log.Debugf("enabled regions for aws account, %v", s.cache.regions)
-	return s.cache.regions, err
+	return result, nil
 }
