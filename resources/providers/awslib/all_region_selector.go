@@ -22,12 +22,11 @@ import (
 	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-var allSingleSelector = &allRegionsSelector{}
+var allSingleSelector = newAllRegionSelector()
 
 type cachedRegions struct {
 	regions []string
@@ -37,8 +36,16 @@ type describeCloudRegions interface {
 	DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 }
 
-func AllRegionSelector() RegionsSelector {
+func AllRegionSelector() *allRegionsSelector {
 	return allSingleSelector
+}
+
+func newAllRegionSelector() *allRegionsSelector {
+	return &allRegionsSelector{
+		once:  &sync.Once{},
+		lock:  &sync.Mutex{},
+		cache: &cachedRegions{},
+	}
 }
 
 type allRegionsSelector struct {
@@ -77,51 +84,6 @@ func (s *allRegionsSelector) Regions(ctx context.Context, cfg aws.Config) ([]str
 		for _, region := range output.Regions {
 			s.cache.regions = append(s.cache.regions, *region.RegionName)
 		}
-	})
-
-	log.Debugf("enabled regions for aws account, %v", s.cache.regions)
-	return s.cache.regions, err
-}
-
-var currentSingleSelector = &currentRegionSelector{}
-
-type currentRegionSelector struct {
-	once   *sync.Once
-	lock   *sync.Mutex
-	cache  *cachedRegions
-	client currentCloudRegion
-}
-
-type currentCloudRegion interface {
-	GetMetadata(ctx context.Context, cfg aws.Config) (ec2imds.InstanceIdentityDocument, error)
-}
-
-func CurrentRegionSelector() RegionsSelector {
-	return currentSingleSelector
-}
-
-func (s *currentRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
-	log := logp.NewLogger("aws")
-	log.Debug("currentRegionSelector starting...")
-	var err error
-
-	// Make sure that consequent calls to the function will keep trying to retrieve the region until it succeeds.
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	s.once.Do(func() {
-		if s.client == nil {
-			s.client = &Ec2MetadataProvider{}
-		}
-
-		var metadata Ec2Metadata
-		metadata, err = s.client.GetMetadata(ctx, cfg)
-		if err != nil {
-			log.Errorf("failed DescribeRegions: %v", err)
-			s.once = &sync.Once{} // reset singleton upon error
-			return
-		}
-
-		s.cache.regions = []string{metadata.Region}
 	})
 
 	log.Debugf("enabled regions for aws account, %v", s.cache.regions)
