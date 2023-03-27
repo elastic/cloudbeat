@@ -23,18 +23,18 @@ func init() {
 
 func newCachedRegions() (*ristretto.Cache, error) {
 	return ristretto.NewCache(&ristretto.Config{
-		NumCounters: 10,
+		NumCounters: 100,
 		MaxCost:     10000,
 		BufferItems: 64,
 	})
 }
 
 func CurrentRegionSelector() RegionsSelector {
-	return newCachedRegionSelector(&currentRegionSelector{}, "currentSelectorCache", 0)
+	return newCachedRegionSelector(&currentRegionSelector{}, "CurrentRegionSelectorCache", 0)
 }
 
 func AllRegionSelector() RegionsSelector {
-	return newCachedRegionSelector(&allRegionsSelector{}, "allSelectorCache", 720*time.Hour)
+	return newCachedRegionSelector(&allRegionSelector{}, "AllRegionSelectorCache", 720*time.Hour)
 }
 
 type cachedRegions struct {

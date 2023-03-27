@@ -29,14 +29,14 @@ type describeCloudRegions interface {
 	DescribeRegions(ctx context.Context, params *ec2.DescribeRegionsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRegionsOutput, error)
 }
 
-type allRegionsSelector struct {
+type allRegionSelector struct {
 	client describeCloudRegions
 }
 
 // Regions will initialize the singleton instance and perform the API request to retrieve the regions list only once, even if the function is called multiple times.
 // Subsequent calls to the function will return the stored regions list without making another API request.
 // In case of a failure the function returns an error and resets the singleton instance.
-func (s *allRegionsSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
+func (s *allRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
 	log := logp.NewLogger("aws")
 	log.Debug("Getting all available regions for the current account")
 

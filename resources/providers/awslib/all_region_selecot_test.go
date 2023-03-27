@@ -41,7 +41,7 @@ var successfulDescribeCloudRegionOutput = &ec2.DescribeRegionsOutput{
 
 type AllRegionSelectorTestSuite struct {
 	suite.Suite
-	selector *allRegionsSelector
+	selector *allRegionSelector
 	mock     *mockDescribeCloudRegions
 }
 
@@ -52,7 +52,7 @@ func TestAllRegionSelectorTestSuite(t *testing.T) {
 }
 
 func (s *AllRegionSelectorTestSuite) SetupTest() {
-	s.selector = &allRegionsSelector{}
+	s.selector = &allRegionSelector{}
 	s.mock = &mockDescribeCloudRegions{}
 	s.selector.client = s.mock
 }
