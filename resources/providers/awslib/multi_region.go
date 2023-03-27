@@ -51,7 +51,7 @@ type (
 // NewMultiRegionClients is a utility function that is used to create a map of client instances of a given type T for multiple regions.
 func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(selector RegionsSelector, cfg awssdk.Config, factory func(cfg awssdk.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
 	clientsMap := make(map[string]T, 0)
-	regionList, err := selector.Regions(context.Background(), cfg)
+	regionList, err := selector.Regions(context.TODO(), cfg)
 	if err != nil {
 		log.Errorf("Default region selected after failure to retrieve aws regions: %v", err)
 		regionList = []string{DefaultRegion}
