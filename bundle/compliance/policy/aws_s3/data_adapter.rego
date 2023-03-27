@@ -11,3 +11,5 @@ bucket_policy := input.resource.bucket_policy
 bucket_policy_statements := object.get(bucket_policy, "Statement", [])
 
 bucket_versioning := input.resource.bucket_versioning
+
+public_access_block_configuration := input.resource.public_access_block_configuration

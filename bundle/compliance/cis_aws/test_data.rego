@@ -111,12 +111,13 @@ not_evaluated_s3_bucket = {
 			"Statement": [generate_s3_bucket_policy_statement("Deny", "*", "s3:*", "true")],
 		},
 		"bucket_versioning": generate_s3_bucket_versioning(true, true),
+		"public_access_block_configuration": generate_s3_public_access_block_configuration(true, true, true, true),
 	},
 	"type": "wrong type",
 	"subType": "wrong sub type",
 }
 
-generate_s3_bucket(name, sse_algorithm, bucket_policy_statement, bucket_versioning) = {
+generate_s3_bucket(name, sse_algorithm, bucket_policy_statement, bucket_versioning, public_access_block_configuration) = {
 	"resource": {
 		"name": name,
 		"sse_algorithm": sse_algorithm,
@@ -125,6 +126,7 @@ generate_s3_bucket(name, sse_algorithm, bucket_policy_statement, bucket_versioni
 			"Statement": bucket_policy_statement,
 		},
 		"bucket_versioning": bucket_versioning,
+		"public_access_block_configuration": public_access_block_configuration,
 	},
 	"type": "cloud-storage",
 	"subType": "aws-s3",
@@ -262,4 +264,11 @@ generate_rds_db_instance(encryption_enabled, auto_minor_version_upgrade_enabled)
 	},
 	"type": "cloud-database",
 	"subType": "aws-rds",
+}
+
+generate_s3_public_access_block_configuration(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets) = {
+	"BlockPublicAcls": block_public_acls,
+	"BlockPublicPolicy": block_public_policy,
+	"IgnorePublicAcls": ignore_public_acls,
+	"RestrictPublicBuckets": restrict_public_buckets,
 }
