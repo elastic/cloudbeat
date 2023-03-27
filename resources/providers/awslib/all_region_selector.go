@@ -38,17 +38,16 @@ type allRegionsSelector struct {
 // In case of a failure the function returns an error and resets the singleton instance.
 func (s *allRegionsSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
 	log := logp.NewLogger("aws")
-	log.Debug("allRegionsSelector starting...")
+	log.Debug("Getting all available regions for the current account")
 
 	if s.client == nil {
 		s.client = ec2.NewFromConfig(cfg)
 	}
 
-	log.Debug("Get aws regions for the first time")
 	var output *ec2.DescribeRegionsOutput
 	output, err := s.client.DescribeRegions(ctx, nil)
 	if err != nil {
-		log.Errorf("failed DescribeRegions: %v", err)
+		log.Errorf("Failed getting available regions: %v", err)
 		return nil, err
 	}
 
@@ -57,5 +56,6 @@ func (s *allRegionsSelector) Regions(ctx context.Context, cfg aws.Config) ([]str
 		result = append(result, *region.RegionName)
 	}
 
+	log.Debugf("Available regions, %+q", result)
 	return result, nil
 }
