@@ -264,7 +264,7 @@ release-manager-release: release
 
 release: export PATH:=$(dir $(BIN_MAGE)):$(PATH)
 release: $(MAGE) $(PYTHON) build/dependencies.csv
-	$(MAGE) package
+	mage package
 
 build/dependencies.csv: $(PYTHON) go.mod
 ifdef SNAPSHOT
