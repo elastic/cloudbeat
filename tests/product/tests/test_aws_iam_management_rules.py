@@ -5,10 +5,11 @@ This module verifies correctness of retrieved findings by manipulating audit act
 from datetime import datetime, timedelta
 from functools import partial
 import pytest
-from commonlib.utils import get_ES_evaluation, identifier_by_name
+from commonlib.utils import get_ES_evaluation, res_identifier
 
 from product.tests.data.aws import aws_iam_test_cases as aws_iam_tc
 from product.tests.parameters import register_params, Parameters
+from .data.constants import RES_NAME
 
 
 @pytest.mark.aws_iam_rules
@@ -29,7 +30,8 @@ def test_aws_iam_management_rules(
     @param expected: Result to be found in finding evaluation field.
     @return: None - Test Pass / Fail result is generated.
     """
-    iam_identifier = partial(identifier_by_name, case_identifier)
+    # pylint: disable=duplicate-code
+    iam_identifier = partial(res_identifier, RES_NAME, case_identifier)
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,

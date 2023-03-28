@@ -45,5 +45,8 @@ markers = [
     "eks_service_rules",
     "aws_s3_service_rules",
     "aws_iam_rules",
-    "aws_logging_rules"
+    "aws_logging_rules",
+    "aws_ec2_rules",
+    "aws_rds_rules",
+    "aws_vpc_rules",
 ]

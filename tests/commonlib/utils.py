@@ -3,6 +3,7 @@ import datetime
 import json
 import time
 from typing import Union
+from functools import reduce
 
 import allure
 from commonlib.io_utils import get_logs_from_stream, get_events_from_index
@@ -284,15 +285,25 @@ def get_findings(elastic_client, config_timeout, match_type):
     return result
 
 
-def identifier_by_name(case_identifier, eval_resource) -> bool:
+def res_identifier(field_chain: str, case_identifier, eval_resource) -> bool:
     """
-    This function compares unique field value retrieved from elastic to the value defined in the test case data.
-    Each test case has own unique field. This function uses resource.name as identifier.
-    @param case_identifier: Test case data identifier to be used for comparison
-    @param eval_resource: Resource event data retrieved from elastic
+    This function compares current value retrieved from a resource (eval_resource) to unique field value.
+    Example:
+    Get value from the following chains:
+        eval_resource.resource.name
+        eval_resource.resource.id
+        eval_resource.host.name
+    @param field_chain: String representation of eval_resource object attributes, for example 'resource.name'
+    @param case_identifier: Case data identifier to be used for comparison
+    @param eval_resource: Resource data retrieved from elastic
     @return: True / False
     """
     try:
-        return eval_resource.resource.name == case_identifier
+        # 'reduce' function applies 'getattr' function on each element of field chain,
+        # starting from the base object 'eval_resource'
+        # the code is equivalent to:
+        # current_value = eval_resource.resource.name, where field_chain is 'resource.name'
+        current_value = reduce(getattr, field_chain.split("."), eval_resource)
+        return current_value == case_identifier
     except AttributeError:
         return False
