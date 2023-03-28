@@ -28,7 +28,11 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-var ristrettoCache *ristretto.Cache
+var (
+	ristrettoCache        *ristretto.Cache
+	allRegionCacheTTL     time.Duration = 720 * time.Hour
+	currentRegionCacheTTL time.Duration = 0
+)
 
 func init() {
 	var err error
@@ -47,11 +51,11 @@ func newCachedRegions() (*ristretto.Cache, error) {
 }
 
 func CurrentRegionSelector() RegionsSelector {
-	return newCachedRegionSelector(&currentRegionSelector{}, "CurrentRegionSelectorCache", 0)
+	return newCachedRegionSelector(&currentRegionSelector{}, "CurrentRegionSelectorCache", currentRegionCacheTTL)
 }
 
 func AllRegionSelector() RegionsSelector {
-	return newCachedRegionSelector(&allRegionSelector{}, "AllRegionSelectorCache", 720*time.Hour)
+	return newCachedRegionSelector(&allRegionSelector{}, "AllRegionSelectorCache", allRegionCacheTTL)
 }
 
 type cachedRegions struct {
