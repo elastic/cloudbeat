@@ -35,8 +35,7 @@ type currentCloudRegion interface {
 
 func (s *currentRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
 	log := logp.NewLogger("aws")
-	log.Debug("Getting current region of the instance")
-	var err error
+	log.Info("Getting current region of the instance")
 
 	if s.client == nil {
 		s.client = &Ec2MetadataProvider{}
@@ -48,6 +47,6 @@ func (s *currentRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]
 		return nil, err
 	}
 
-	log.Debugf("Current region of aws instance, %v", metadata.Region)
+	log.Infof("Current region of aws instance, %v", metadata.Region)
 	return []string{metadata.Region}, nil
 }
