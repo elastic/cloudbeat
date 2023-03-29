@@ -2,26 +2,30 @@
 
 ## Prerequiste
 1. Docker
-2. Connect to AWS account using the CLI
+2. [Connect to AWS account using the CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html)
 
 ## 1. Deploy Cloud Environment
 - Go to https://cloud.elastic.co/home
 - Log into with your elastic account
 - Select `Create Deployment`
 - Adjust the settings for your need, note that certain versions only exist on certain regions. 
-- At the time of writing this, `latest` and `snapshot` versions are avilable on `us-west2` 
+- At the time of writing this, `latest` and `snapshot` versions are avilable on `us-west2`
+> **Note**
+> `latest` is the build candidate for pre-released versions
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222231445-5033bd97-9f19-4241-9784-876e92417a23.png">
 
 Launch your Cloud Deployment
 
 ## 2. Optional Step - Verify Cloud Deployment Commit
-In order to confirm that the commit SHA of your deployment is matching the commit SHA of in the DRA
+
+To prevent cases of working with an incorrect commit, confirm that the commit SHA of your deployment is matching the desired commit SHA, wheter its the [DRA](https://artifacts-staging.elastic.co/dra-info/index.html), BC, or just a specific commit. for this guide, we will use the latest BC commit SHA
+
 - In your deployment, navigate to `/app/status`, the commit of your Kibana version will be displayed at the top
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222398648-348cae1d-2a5e-4039-aa3b-4ce9983d3b04.png">
 
-- Navigate to https://artifacts-staging.elastic.co/dra-info/index.html, here you can see all the latest commit for all snapshot and staging versions
+- Navigate to https://artifacts-staging.elastic.co/dra-info/index.html, here you can see all the latest commits for all snapshot and staging versions
 - Click on `JSON report` next to the version you are checking
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222493787-c2a3c2ae-72d4-44e6-9a40-ef7334090c44.png">
@@ -66,7 +70,7 @@ In order to confirm that the commit SHA of your deployment is matching the commi
 Save the intergation
 
 ## 4. Add Standalone Docker Agent
-- Now that you have an agent policy with a configured CSPM intergation navigate to Fleet>Agents and select `Add Agent`
+- Now that you have an agent policy with a configured CSPM intergation navigate to Fleet > Agents and select `Add Agent`
 - Select your CSPM intergation from the drop down list under `What type of host are you adding?`
 - On step 3 of the Flyout, you will be provided with the setup command for the agent, for example:
 
@@ -85,10 +89,10 @@ docker run -d --platform=linux/x86_64 \
 -e "FLEET_URL=<fleet-server-host-url>" \
 -e "FLEET_ENROLLMENT_TOKEN=<enrollment-token>" \
 -e "FLEET_ENROLL=1" \
-docker.elastic.co/beats/elastic-agent:8.7.0-SNAPSHOT
+docker.elastic.co/cloud-release/elastic-agent-cloud:8.7.0-046d305b
 ```
 > **Note**
-> make sure to also change the version according to what you are using)
+> make sure to change the agent docker image according to what you are using)
 
 At this point you should see your agent working in your docker and under `Confirm agent enrollment` section of the Flyout.
 
