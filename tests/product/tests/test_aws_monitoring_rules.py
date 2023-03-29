@@ -31,14 +31,14 @@ def test_aws_monitoring_service_rules(
     @return: None - Test Pass / Fail result is generated.
     """
     # pylint: disable=duplicate-code
-    rds_identifier = partial(res_identifier, RES_ID, case_identifier)
+    monitoring_identifier = partial(res_identifier, RES_ID, case_identifier)
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.aws_findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
-        resource_identifier=rds_identifier,
+        resource_identifier=monitoring_identifier,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
