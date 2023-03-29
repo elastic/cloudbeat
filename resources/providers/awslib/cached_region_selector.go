@@ -63,7 +63,7 @@ type cachedRegions struct {
 }
 
 type cachedRegionSelector struct {
-	lock   *sync.Mutex
+	lock   *sync.RWMutex
 	cache  *ristretto.Cache
 	keep   time.Duration
 	key    string
@@ -72,7 +72,7 @@ type cachedRegionSelector struct {
 
 func newCachedRegionSelector(selector RegionsSelector, cache string, keep time.Duration) *cachedRegionSelector {
 	return &cachedRegionSelector{
-		lock:   &sync.Mutex{},
+		lock:   &sync.RWMutex{},
 		cache:  ristrettoCache,
 		keep:   keep,
 		key:    cache,
@@ -83,19 +83,16 @@ func newCachedRegionSelector(selector RegionsSelector, cache string, keep time.D
 func (s *cachedRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
 	log := logp.NewLogger("aws")
 
+	// Make sure that consequent calls to the function will keep trying to retrieve the regions list until it succeeds.
+	s.lock.RLock()
 	cachedObject := s.getCache()
 	if cachedObject != nil {
 		return cachedObject, nil
 	}
+	s.lock.RUnlock()
 
-	// Make sure that consequent calls to the function will keep trying to retrieve the regions list until it succeeds.
 	s.lock.Lock()
 	defer s.lock.Unlock()
-	cachedObject = s.getCache()
-	if cachedObject != nil {
-		return cachedObject, nil
-	}
-
 	log.Debug("RegionsSelector starting to retrieve regions")
 	var output []string
 	output, err := s.client.Regions(ctx, cfg)
