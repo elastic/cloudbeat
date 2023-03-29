@@ -46,7 +46,7 @@ In order to confirm that the commit SHA of your deployment is matching the commi
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222495899-7164a25f-b8e6-4970-8b83-a39a3e1d094a.png">
 
 ## 3. Create Agent Policy
-- Navigate to Fleet>Agent policies and click on `Create agent policy`
+- Navigate to Fleet > Agent policies and select `Create agent policy`
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222233724-fcdc7d5d-d35b-4fb8-aed9-c157471c789d.png">
 
