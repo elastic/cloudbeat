@@ -5,17 +5,17 @@ Description: Creates an EC2 instance with permissions to run elastic-agent
 Parameters:
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-    Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/amd64/hvm/ebs-gp2/ami-id'
+    Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
   KeyName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: SSH Keypair to login to the instance
   InstanceType:
     Type: String
-    Default: t2.micro
+    Default: a1.xlarge
     AllowedValues:
-    - t2.micro
-    - t2.small
-    - t2.medium
+    - a1.xlarge
+    - a1.2xlarge
+    - a1.4xlarge
     Description: The type of EC2 instance to create
   EnrollmentToken:
     Type: String
@@ -55,48 +55,22 @@ Resources:
           - sts:AssumeRole
       Path: /
       Policies:
-      - PolicyName: snapshot-permissions
+      - PolicyName: vuln-mgmt-permissions
         PolicyDocument:
           Version: 2012-10-17
           Statement:
           - Effect: Allow
             Action:
-            - ec2:CreateSnapshot
-            Resource: "*"
-          - Effect: Allow
-            Action:
+            - ec2:DescribeImages
+            - ec2:DescribeTags
+            - ec2:DescribeSnapshots
+            - ec2:CreateSnapshots
             - ec2:CreateTags
             Resource: "*"
           - Effect: Allow
             Action:
-            - ec2:DescribeSnapshots
-            Resource: "*"
-          - Effect: Allow
-            Action:
-            - ec2:DescribeInstances
-            Resource: "*"
-          - Effect: Allow
-            Action:
-            - ec2:DescribeImages
-            Resource: "*"
-          - Effect: Allow
-            Action:
-            - ec2:DescribeTags
-            Resource: "*"
-          - Effect: Allow
-            Action:
-            - ec2:DescribeSnapshots
-            Resource: "*"
-          - Effect: Allow
-            Action:
             - ebs:ListSnapshotBlocks
-            Resource: "*"
-          - Effect: Allow
-            Action:
             - ebs:ListChangedBlocks
-            Resource: "*"
-          - Effect: Allow
-            Action:
             - ebs:GetSnapshotBlock
             Resource: "*"
 
