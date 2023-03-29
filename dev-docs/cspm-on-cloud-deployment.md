@@ -7,7 +7,7 @@
 ## 1. Deploy Cloud Environment
 - Go to https://cloud.elastic.co/home
 - Log into with your elastic account
-- Click on `Create Deployment`
+- Select `Create Deployment`
 - Adjust the settings for your need, note that certain versions only exist on certain regions. 
 - At the time of writing this, `latest` and `snapshot` versions are avilable on `us-west2` 
 
