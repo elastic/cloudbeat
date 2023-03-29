@@ -84,12 +84,10 @@ func (s *cachedRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]s
 	log := logp.NewLogger("aws")
 
 	// Make sure that consequent calls to the function will keep trying to retrieve the regions list until it succeeds.
-	s.lock.RLock()
 	cachedObject := s.getCache()
 	if cachedObject != nil {
 		return cachedObject, nil
 	}
-	s.lock.RUnlock()
 
 	s.lock.Lock()
 	defer s.lock.Unlock()
@@ -115,6 +113,8 @@ func (s *cachedRegionSelector) setCache(list []string) bool {
 	return ristrettoCache.SetWithTTL(s.key, cache, 1, s.keep)
 }
 func (s *cachedRegionSelector) getCache() []string {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
 	cachedObject, ok := ristrettoCache.Get(s.key)
 	if !ok {
 		return nil
