@@ -87,7 +87,8 @@ docker run -d --platform=linux/x86_64 \
 -e "FLEET_ENROLL=1" \
 docker.elastic.co/beats/elastic-agent:8.7.0-SNAPSHOT
 ```
-(Note: make sure to also change the version according to what you are using)
+> **Note**
+> make sure to also change the version according to what you are using)
 
 At this point you should see your agent working in your docker and under `Confirm agent enrollment` section of the Flyout.
 
