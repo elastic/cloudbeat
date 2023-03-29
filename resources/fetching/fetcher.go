@@ -30,6 +30,7 @@ const (
 
 	EcrType                   = "aws-ecr"
 	IAMType                   = "aws-iam"
+	EC2Type                   = "aws-ec2"
 	EC2NetworkingType         = "aws-ec2-network"
 	MonitoringType            = "aws-monitoring"
 	NetworkNACLType           = "aws-nacl"
@@ -37,6 +38,7 @@ const (
 	MultiTrailsType           = "aws-multi-trails"
 	SecurityGroupType         = "aws-security-group"
 	EBSType                   = "aws-ebs"
+	EBSSnapshotType           = "aws-ebs-snapshot"
 	ElbType                   = "aws-elb"
 	IAMUserType               = "aws-iam-user"
 	PwdPolicyType             = "aws-password-policy"

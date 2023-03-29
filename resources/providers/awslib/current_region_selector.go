@@ -22,25 +22,31 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
+	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type Ec2Metadata = ec2imds.InstanceIdentityDocument
-
-type Ec2MetadataProvider struct{}
-
-type MetadataProvider interface {
-	GetMetadata(ctx context.Context, cfg aws.Config) (*Ec2Metadata, error)
+type currentRegionSelector struct {
+	client currentCloudRegion
 }
 
-func (provider Ec2MetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (*Ec2Metadata, error) {
-	svc := ec2imds.NewFromConfig(cfg)
-	input := &ec2imds.GetInstanceIdentityDocumentInput{}
-	// this call will fail running from local machine
-	// TODO: mock local struct
-	identityDocument, err := svc.GetInstanceIdentityDocument(ctx, input)
+type currentCloudRegion interface {
+	GetMetadata(ctx context.Context, cfg aws.Config) (*ec2imds.InstanceIdentityDocument, error)
+}
+
+func (s *currentRegionSelector) Regions(ctx context.Context, cfg aws.Config) ([]string, error) {
+	log := logp.NewLogger("aws")
+	log.Info("Getting current region of the instance")
+
+	if s.client == nil {
+		s.client = &Ec2MetadataProvider{}
+	}
+
+	metadata, err := s.client.GetMetadata(ctx, cfg)
 	if err != nil {
+		log.Errorf("Failed getting current region: %v", err)
 		return nil, err
 	}
 
-	return &identityDocument.InstanceIdentityDocument, nil
+	log.Infof("Current region of aws instance, %v", metadata.Region)
+	return []string{metadata.Region}, nil
 }
