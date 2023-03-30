@@ -26,14 +26,14 @@ import (
 )
 
 const (
-	KubeAPIType = "kube-api"
-
+	KubeAPIType       = "kube-api"
 	EcrType           = "aws-ecr"
 	IAMType           = "aws-iam"
 	EC2NetworkingType = "aws-ec2-network"
 	MonitoringType    = "aws-monitoring"
 	NetworkNACLType   = "aws-nacl"
 	TrailType         = "aws-trail"
+	MultiTrailsType   = "aws-multi-trails"
 	SecurityGroupType = "aws-security-group"
 	EBSType           = "aws-ebs"
 	ElbType           = "aws-elb"

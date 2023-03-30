@@ -97,6 +97,6 @@ func (f *MonitoringFactory) CreateFrom(log *logp.Logger, cfg MonitoringFetcherCo
 		provider:      &provider,
 		resourceCh:    ch,
 		cloudIdentity: identity,
-		securityhub:   securityhub.NewProvider(awsConfig, log, f.SecurityhubRegionFactory),
+		securityhub:   securityhub.NewProvider(awsConfig, log, f.SecurityhubRegionFactory, *identity.Account),
 	}, nil
 }
