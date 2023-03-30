@@ -86,7 +86,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 	for _, test := range tests {
 		metaDataProvider := &awslib.MockMetadataProvider{}
 		metaDataProvider.EXPECT().GetMetadata(mock.Anything, mock.Anything).
-			Return(awslib.Ec2Metadata{}, nil)
+			Return(&awslib.Ec2Metadata{}, nil)
 
 		kubernetesClusterProvider := &MockKubernetesClusterNameProviderApi{}
 		kubernetesClusterProvider.EXPECT().GetClusterName(mock.Anything, mock.Anything).
