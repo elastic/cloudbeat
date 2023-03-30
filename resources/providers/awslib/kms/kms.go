@@ -21,7 +21,6 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -42,7 +41,7 @@ func NewKMSProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegion
 	f := func(cfg aws.Config) Client {
 		return kms.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+	m := factory.NewMultiRegionClients(awslib.CurrentRegionSelector(), cfg, f, log)
 
 	return &Provider{
 		log:     log,
