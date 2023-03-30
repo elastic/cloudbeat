@@ -19,8 +19,9 @@ package awslib
 
 import (
 	"context"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"testing"
+
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
@@ -71,7 +72,7 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 		metaDataGetter := &MockMetadataProvider{}
 		metaDataGetter.EXPECT().
 			GetMetadata(mock.Anything, mock.Anything).
-			Return(Ec2Metadata{
+			Return(&Ec2Metadata{
 				Region: test.region,
 			}, nil)
 

@@ -20,10 +20,10 @@ package configservice
 import (
 	"context"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	configSDK "github.com/aws/aws-sdk-go-v2/service/configservice"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -61,7 +61,7 @@ func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFac
 		return configSDK.NewFromConfig(cfg)
 	}
 
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:          log,
 		clients:      m.GetMultiRegionsClientMap(),

@@ -25,8 +25,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	ec2sdk "github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
@@ -39,22 +37,16 @@ const (
 	afRegion = "af-north-1"
 )
 
-var successfulOutput = &ec2sdk.DescribeRegionsOutput{
-	Regions: []types.Region{
-		{
-			RegionName: awssdk.String(usRegion),
-		},
-		{
-			RegionName: awssdk.String(euRegion),
-		},
-	},
+var successfulOutput = []string{
+	usRegion,
+	euRegion,
 }
 
 func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 	type args struct {
-		client func() DescribeCloudRegions
-		cfg    awssdk.Config
-		log    *logp.Logger
+		selector func() RegionsSelector
+		cfg      awssdk.Config
+		log      *logp.Logger
 	}
 	tests := []struct {
 		name string
@@ -64,9 +56,9 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 		{
 			name: "Error - return no regions",
 			args: args{
-				client: func() DescribeCloudRegions {
-					m := &MockDescribeCloudRegions{}
-					m.On("DescribeRegions", mock.Anything, mock.Anything).Return(nil, errors.New("fail to query endpoint"))
+				selector: func() RegionsSelector {
+					m := &MockRegionsSelector{}
+					m.On("Regions", mock.Anything, mock.Anything).Return(nil, errors.New("fail to query endpoint"))
 					return m
 				},
 				cfg: awssdk.Config{},
@@ -77,9 +69,9 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 		{
 			name: "Should return enabled regions",
 			args: args{
-				client: func() DescribeCloudRegions {
-					m := &MockDescribeCloudRegions{}
-					m.On("DescribeRegions", mock.Anything, mock.Anything).Return(successfulOutput, nil)
+				selector: func() RegionsSelector {
+					m := &MockRegionsSelector{}
+					m.On("Regions", mock.Anything, mock.Anything).Return(successfulOutput, nil)
 					return m
 				},
 				cfg: awssdk.Config{},
@@ -96,7 +88,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			multiRegionClients := wrapper.NewMultiRegionClients(tt.args.client(), tt.args.cfg, factory, tt.args.log)
+			multiRegionClients := wrapper.NewMultiRegionClients(tt.args.selector(), tt.args.cfg, factory, tt.args.log)
 			clients := multiRegionClients.GetMultiRegionsClientMap()
 			if !reflect.DeepEqual(clients, tt.want) {
 				t.Errorf("GetRegions() got = %v, want %v", clients, tt.want)
