@@ -338,10 +338,17 @@ func PythonEnv() error {
 	return err
 }
 
-func BuildOpaBundle() error {
+func BuildOpaBundle() (err error) {
 	owner := "elastic"
 	r := "csp-security-policies"
 	cspPoliciesPkgDir := "/tmp/" + r
+
+	defer func() {
+		rmErr := os.RemoveAll(cspPoliciesPkgDir)
+		if rmErr != nil && err == nil {
+			err = rmErr
+		}
+	}()
 
 	repo, err := git.PlainClone(cspPoliciesPkgDir, false, &git.CloneOptions{
 		URL: fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
@@ -373,5 +380,5 @@ func BuildOpaBundle() error {
 		return errors.Wrap(err, deleteDirErr.Error())
 	}
 
-	return sh.Run("rm", "-rf", cspPoliciesPkgDir)
+	return nil
 }
