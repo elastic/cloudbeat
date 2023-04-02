@@ -1,5 +1,5 @@
 """
-CIS AWS Elastic Compute Cloud rules verification.
+CIS AWS Monitoring rules verification.
 This module verifies correctness of retrieved findings by manipulating audit actions
 """
 from datetime import datetime, timedelta
@@ -7,13 +7,13 @@ from functools import partial
 import pytest
 from commonlib.utils import get_ES_evaluation, res_identifier
 
-from product.tests.data.aws import aws_ec2_test_cases as aws_ec2_tc
+from product.tests.data.aws import aws_monitoring_test_cases as aws_monitoring_tc
 from product.tests.parameters import register_params, Parameters
-from .data.constants import RES_NAME
+from .data.constants import RES_ID
 
 
-@pytest.mark.aws_ec2_rules
-def test_aws_ec2_service_rules(
+@pytest.mark.aws_monitoring_rules
+def test_aws_monitoring_service_rules(
     elastic_client,
     cloudbeat_agent,
     rule_tag,
@@ -30,14 +30,15 @@ def test_aws_ec2_service_rules(
     @param expected: Result to be found in finding evaluation field.
     @return: None - Test Pass / Fail result is generated.
     """
-    ec2_identifier = partial(res_identifier, RES_NAME, case_identifier)
+    # pylint: disable=duplicate-code
+    monitoring_identifier = partial(res_identifier, RES_ID, case_identifier)
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.aws_findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
-        resource_identifier=ec2_identifier,
+        resource_identifier=monitoring_identifier,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"
@@ -45,10 +46,10 @@ def test_aws_ec2_service_rules(
 
 
 register_params(
-    test_aws_ec2_service_rules,
+    test_aws_monitoring_service_rules,
     Parameters(
         ("rule_tag", "case_identifier", "expected"),
-        [*aws_ec2_tc.cis_aws_ec2_cases.values()],
-        ids=[*aws_ec2_tc.cis_aws_ec2_cases.keys()],
+        [*aws_monitoring_tc.cis_aws_monitoring_cases.values()],
+        ids=[*aws_monitoring_tc.cis_aws_monitoring_cases.keys()],
     ),
 )

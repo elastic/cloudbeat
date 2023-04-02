@@ -28,6 +28,7 @@ notice_overrides = [
     {"name": "github.com/build-security/beats/v7", "licenceType": "Elastic"},
     {"name": "github.com/elastic/csp-security-policies", "licenceType": "Elastic"},
     {"name": "github.com/golang/glog", "licenceType": "Apache-2.0"},
+    {"name": "github.com/spdx/tools-golang", "licenceFile": "LICENSE.code", "licenceType": "Apache-2.0"},
 ]
 
 # Additional third-party, non-source code dependencies, to add to the CSV output.

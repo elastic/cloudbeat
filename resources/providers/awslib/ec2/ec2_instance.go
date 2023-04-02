@@ -15,32 +15,39 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package ec2
 
 import (
-	"context"
+	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	ec2imds "github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-type Ec2Metadata = ec2imds.InstanceIdentityDocument
-
-type Ec2MetadataProvider struct{}
-
-type MetadataProvider interface {
-	GetMetadata(ctx context.Context, cfg aws.Config) (*Ec2Metadata, error)
+type Ec2Instance struct {
+	types.Instance
+	Region     string
+	awsAccount string
 }
 
-func (provider Ec2MetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (*Ec2Metadata, error) {
-	svc := ec2imds.NewFromConfig(cfg)
-	input := &ec2imds.GetInstanceIdentityDocumentInput{}
-	// this call will fail running from local machine
-	// TODO: mock local struct
-	identityDocument, err := svc.GetInstanceIdentityDocument(ctx, input)
-	if err != nil {
-		return nil, err
+func (i Ec2Instance) GetResourceArn() string {
+	if i.Instance.InstanceId == nil {
+		return ""
+	}
+	// TODO: check if this is the correct ARN
+	return fmt.Sprintf("arn:aws:ec2:%s:%s:ec2/%s", i.Region, i.awsAccount, *i.Instance.InstanceId)
+}
+
+func (i Ec2Instance) GetResourceName() string {
+	for _, tag := range i.Instance.Tags {
+		if *tag.Key == "Name" {
+			return *tag.Value
+		}
 	}
 
-	return &identityDocument.InstanceIdentityDocument, nil
+	return ""
+}
+
+func (i Ec2Instance) GetResourceType() string {
+	return fetching.EC2Type
 }

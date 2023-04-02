@@ -39,13 +39,13 @@ func (_m *MockCrossRegionFactory[T]) EXPECT() *MockCrossRegionFactory_Expecter[T
 	return &MockCrossRegionFactory_Expecter[T]{mock: &_m.Mock}
 }
 
-// NewMultiRegionClients provides a mock function with given fields: client, cfg, factory, log
-func (_m *MockCrossRegionFactory[T]) NewMultiRegionClients(client DescribeCloudRegions, cfg aws.Config, factory func(aws.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
-	ret := _m.Called(client, cfg, factory, log)
+// NewMultiRegionClients provides a mock function with given fields: selector, cfg, factory, log
+func (_m *MockCrossRegionFactory[T]) NewMultiRegionClients(selector RegionsSelector, cfg aws.Config, factory func(aws.Config) T, log *logp.Logger) CrossRegionFetcher[T] {
+	ret := _m.Called(selector, cfg, factory, log)
 
 	var r0 CrossRegionFetcher[T]
-	if rf, ok := ret.Get(0).(func(DescribeCloudRegions, aws.Config, func(aws.Config) T, *logp.Logger) CrossRegionFetcher[T]); ok {
-		r0 = rf(client, cfg, factory, log)
+	if rf, ok := ret.Get(0).(func(RegionsSelector, aws.Config, func(aws.Config) T, *logp.Logger) CrossRegionFetcher[T]); ok {
+		r0 = rf(selector, cfg, factory, log)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(CrossRegionFetcher[T])
@@ -61,17 +61,17 @@ type MockCrossRegionFactory_NewMultiRegionClients_Call[T interface{}] struct {
 }
 
 // NewMultiRegionClients is a helper method to define mock.On call
-//   - client DescribeCloudRegions
+//   - selector RegionsSelector
 //   - cfg aws.Config
 //   - factory func(aws.Config) T
 //   - log *logp.Logger
-func (_e *MockCrossRegionFactory_Expecter[T]) NewMultiRegionClients(client interface{}, cfg interface{}, factory interface{}, log interface{}) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
-	return &MockCrossRegionFactory_NewMultiRegionClients_Call[T]{Call: _e.mock.On("NewMultiRegionClients", client, cfg, factory, log)}
+func (_e *MockCrossRegionFactory_Expecter[T]) NewMultiRegionClients(selector interface{}, cfg interface{}, factory interface{}, log interface{}) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
+	return &MockCrossRegionFactory_NewMultiRegionClients_Call[T]{Call: _e.mock.On("NewMultiRegionClients", selector, cfg, factory, log)}
 }
 
-func (_c *MockCrossRegionFactory_NewMultiRegionClients_Call[T]) Run(run func(client DescribeCloudRegions, cfg aws.Config, factory func(aws.Config) T, log *logp.Logger)) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
+func (_c *MockCrossRegionFactory_NewMultiRegionClients_Call[T]) Run(run func(selector RegionsSelector, cfg aws.Config, factory func(aws.Config) T, log *logp.Logger)) *MockCrossRegionFactory_NewMultiRegionClients_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(DescribeCloudRegions), args[1].(aws.Config), args[2].(func(aws.Config) T), args[3].(*logp.Logger))
+		run(args[0].(RegionsSelector), args[1].(aws.Config), args[2].(func(aws.Config) T), args[3].(*logp.Logger))
 	})
 	return _c
 }

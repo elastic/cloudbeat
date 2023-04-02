@@ -21,7 +21,6 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -36,7 +35,7 @@ func NewSNSProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegion
 	f := func(cfg aws.Config) Client {
 		return sns.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:     log,
 		clients: m.GetMultiRegionsClientMap(),
