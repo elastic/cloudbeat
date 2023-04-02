@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -45,7 +44,7 @@ func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFac
 	f := func(cfg aws.Config) Client {
 		return securityhub.NewFromConfig(cfg)
 	}
-	m := factory.NewMultiRegionClients(ec2.NewFromConfig(cfg), cfg, f, log)
+	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:       log,
 		region:    cfg.Region,

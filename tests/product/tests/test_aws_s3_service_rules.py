@@ -3,11 +3,13 @@ CIS AWS S3 Service rules verification.
 This module verifies correctness of retrieved findings by manipulating audit actions
 """
 from datetime import datetime, timedelta
+from functools import partial
 import pytest
-from commonlib.utils import get_ES_evaluation
+from commonlib.utils import get_ES_evaluation, res_identifier
 
 from product.tests.data.aws import aws_s3_test_cases as aws_s3_tc
 from product.tests.parameters import register_params, Parameters
+from .data.constants import RES_NAME
 
 
 @pytest.mark.aws_s3_service_rules
@@ -29,20 +31,14 @@ def test_aws_s3_service_rules(
     @return: None - Test Pass / Fail result is generated.
     """
     # pylint: disable=duplicate-code
-
-    def identifier(eval_resource):
-        try:
-            eval_resource = eval_resource.resource
-            return eval_resource.name == case_identifier
-        except AttributeError:
-            return False
+    s3_identifier = partial(res_identifier, RES_NAME, case_identifier)
 
     evaluation = get_ES_evaluation(
         elastic_client=elastic_client,
         timeout=cloudbeat_agent.aws_findings_timeout,
         rule_tag=rule_tag,
-        exec_timestamp=datetime.utcnow() - timedelta(hours=2),
-        resource_identifier=identifier,
+        exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
+        resource_identifier=s3_identifier,
     )
 
     assert evaluation is not None, f"No evaluation for rule {rule_tag} could be found"

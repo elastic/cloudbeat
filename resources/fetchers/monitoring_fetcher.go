@@ -88,12 +88,6 @@ func (r MonitoringResource) GetData() any {
 }
 
 func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	if len(r.Items) == 0 {
-		return fetching.ResourceMetadata{
-			Type:    fetching.MonitoringIdentity,
-			SubType: fetching.MultiTrailsType,
-		}, nil
-	}
 	id := fmt.Sprintf("cloudtrail-%s", *r.identity.Account)
 	return fetching.ResourceMetadata{
 		ID:      id,

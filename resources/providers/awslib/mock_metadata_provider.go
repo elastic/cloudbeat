@@ -43,14 +43,16 @@ func (_m *MockMetadataProvider) EXPECT() *MockMetadataProvider_Expecter {
 }
 
 // GetMetadata provides a mock function with given fields: ctx, cfg
-func (_m *MockMetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (imds.InstanceIdentityDocument, error) {
+func (_m *MockMetadataProvider) GetMetadata(ctx context.Context, cfg aws.Config) (*imds.InstanceIdentityDocument, error) {
 	ret := _m.Called(ctx, cfg)
 
-	var r0 imds.InstanceIdentityDocument
-	if rf, ok := ret.Get(0).(func(context.Context, aws.Config) imds.InstanceIdentityDocument); ok {
+	var r0 *imds.InstanceIdentityDocument
+	if rf, ok := ret.Get(0).(func(context.Context, aws.Config) *imds.InstanceIdentityDocument); ok {
 		r0 = rf(ctx, cfg)
 	} else {
-		r0 = ret.Get(0).(imds.InstanceIdentityDocument)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*imds.InstanceIdentityDocument)
+		}
 	}
 
 	var r1 error
@@ -82,7 +84,7 @@ func (_c *MockMetadataProvider_GetMetadata_Call) Run(run func(ctx context.Contex
 	return _c
 }
 
-func (_c *MockMetadataProvider_GetMetadata_Call) Return(_a0 imds.InstanceIdentityDocument, _a1 error) *MockMetadataProvider_GetMetadata_Call {
+func (_c *MockMetadataProvider_GetMetadata_Call) Return(_a0 *imds.InstanceIdentityDocument, _a1 error) *MockMetadataProvider_GetMetadata_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }

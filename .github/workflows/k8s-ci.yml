@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup GO (with caching)
-        uses: magnetikonline/action-golang-cache@v3
+        uses: magnetikonline/action-golang-cache@v4
         with:
           go-version-file: .go-version
 
@@ -165,8 +165,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-target: ['full']
-        range: ['functional']
         include:
           - test-target: pre_merge_agent
             range: ''

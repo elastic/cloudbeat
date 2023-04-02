@@ -19,7 +19,6 @@ GENPACKAGE=$(GOOSBUILD)/genpackage
 GOIMPORTS=$(GOOSBUILD)/goimports
 GOLICENSER=$(GOOSBUILD)/go-licenser
 GOLINT=$(GOOSBUILD)/golint
-MAGE=$(GOOSBUILD)/mage
 REVIEWDOG=$(GOOSBUILD)/reviewdog
 STATICCHECK=$(GOOSBUILD)/staticcheck
 ELASTICPACKAGE=$(GOOSBUILD)/elastic-package
@@ -63,20 +62,20 @@ deactivate-hermit:
 .DEFAULT_GOAL := cloudbeat
 
 .PHONY: cloudbeat
-cloudbeat: $(MAGE)
-	@$(MAGE) build
+cloudbeat:
+	mage build
 
 .PHONY: test
 test:
 	$(GO) test $(GOTESTFLAGS) ./...
 
 .PHONY:
-clean: $(MAGE)
-	@$(MAGE) clean
+clean: 
+	mage clean
 
 .PHONY: PackageAgent
-PackageAgent: $(MAGE)
-	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
+PackageAgent:
+	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz mage -v $@
 
 # elastic_agent_docker_image builds the Cloud Elastic Agent image
 # with the local APM Server binary injected. The image will be based
@@ -104,8 +103,8 @@ check-approvals: $(APPROVALS)
 	@$(APPROVALS)
 
 .PHONY: check
-check: $(MAGE) check-fmt check-headers
-	@$(MAGE) check
+check: check-fmt check-headers
+	mage check
 
 .PHONY: bench
 bench:
@@ -115,12 +114,12 @@ bench:
 # Rules for updating config files, etc.
 ##############################################################################
 
-#update: go-generate add-headers build-package notice $(MAGE)
-update: go-generate add-headers $(MAGE)
+#update: go-generate add-headers build-package notice mage
+update: go-generate add-headers
 	@go mod download all # make sure go.sum is complete
 
 config:
-	@$(MAGE) config
+	mage config
 
 .PHONY: go-generate
 go-generate:
@@ -209,16 +208,6 @@ autopep8: $(PYTHON_BIN)
 # Rules for creating and installing build tools.
 ##############################################################################
 
-BIN_MAGE=$(GOOSBUILD)/bin/mage
-
-# BIN_MAGE is the standard "mage" binary.
-$(BIN_MAGE): go.mod
-	$(GO) build -o $@ github.com/magefile/mage
-
-# MAGE is the compiled magefile.
-$(MAGE): magefile.go $(BIN_MAGE)
-	$(BIN_MAGE) -compile=$@
-
 $(GOLINT): go.mod
 	$(GO) build -o $@ golang.org/x/lint/golint
 
@@ -239,8 +228,8 @@ $(ELASTICPACKAGE): utils/go.mod
 
 $(PYTHON): $(PYTHON_BIN)
 $(PYTHON_BIN): $(PYTHON_BIN)/activate
-$(PYTHON_BIN)/activate: $(MAGE)
-	@$(MAGE) pythonEnv
+$(PYTHON_BIN)/activate:
+	mage pythonEnv
 	@touch $@
 
 .PHONY: $(APPROVALS)
@@ -262,9 +251,8 @@ release-manager-release: release
 
 .PHONY: release
 
-release: export PATH:=$(dir $(BIN_MAGE)):$(PATH)
-release: $(MAGE) $(PYTHON) build/dependencies.csv
-	$(MAGE) package
+release: $(PYTHON) build/dependencies.csv
+	mage package
 
 build/dependencies.csv: $(PYTHON) go.mod
 ifdef SNAPSHOT

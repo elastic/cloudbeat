@@ -18,26 +18,11 @@
 package dataprovider
 
 import (
-	"context"
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/version"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/dataprovider/types"
 )
 
 type CommonDataProvider interface {
-	FetchCommonData(ctx context.Context) (CommonData, error)
+	FetchData(resource string, id string) (types.Data, error)
+	EnrichEvent(*beat.Event) error
 }
-
-type CommonData interface {
-	GetResourceId(fetching.ResourceMetadata) string
-	GetVersionInfo() version.CloudbeatVersionInfo
-	EnrichEvent(beat.Event) error
-}
-
-type EnvironmentCommonDataProvider interface {
-	FetchData(context.Context) (CommonData, error)
-}
-
-type EnvironmentDataProviderInit = func(*logp.Logger, *config.Config) (EnvironmentCommonDataProvider, error)

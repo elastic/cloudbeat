@@ -85,7 +85,7 @@ class ElasticWrapper:
             "bool": {
                 "filter": [
                     {"term": term},
-                    {"range": {"@timestamp": {"gte": "now-30s"}}},
+                    {"range": {"@timestamp": {"gte": "now-5m"}}},
                 ],
             },
         }
