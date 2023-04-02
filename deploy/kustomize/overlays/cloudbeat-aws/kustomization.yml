@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kube-system
+
+resources:
+  - ../../base
+
+configMapGenerator:
+  - name: cloudbeat-daemonset-config
+    behavior: create
+    files:
+      - cloudbeat.yml
+
+secretGenerator:
+  - name: aws-creds-secret
+    env: aws.creds
+
+patches:
+  - path: ./patches/patch-elastic-creds.yml
+    target:
+      kind: DaemonSet
+
+patchesStrategicMerge:
+  - daemonset.yml
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    k8s-app: cloudbeat

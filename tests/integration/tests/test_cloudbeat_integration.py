@@ -14,6 +14,7 @@ CONFIG_TIMEOUT = 45
 
 cluster_data_dict = {
     "vanilla": ["file", "process", "k8s_object"],
+    "vanilla_aws": ["aws-iam", "aws-s3", "aws-ec2-network", "aws-trail", "aws-monitoring", "aws-rds"],
     "eks": ["file", "process", "k8s_object", "load-balancer", "container-registry"],
 }
 

@@ -1,0 +1,18 @@
+# Deploy a cloudbeat instance per node for cis policy
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cloudbeat
+  namespace: kube-system
+  labels:
+    k8s-app: cloudbeat
+spec:
+  selector:
+      matchLabels:
+        k8s-app: cloudbeat
+  template:
+    spec:
+      containers:
+        - name: cloudbeat
+#          Please replace this image with your own cloudbeat public ecr image
+          image: cloudbeat:latest

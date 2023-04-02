@@ -14,7 +14,7 @@ agent.namespace = os.getenv("AGENT_NAMESPACE", "kube-system")
 agent.findings_timeout = 500
 agent.eks_findings_timeout = 120
 agent.aws_findings_timeout = 500
-agent.cluster_type = os.getenv("CLUSTER_TYPE", "eks")  # options: vanilla / eks
+agent.cluster_type = os.getenv("CLUSTER_TYPE", "eks")  # options: vanilla / eks / vanilla_aws
 
 # The K8S Node on which the test Pod is running.
 agent.node_name = os.getenv("NODE_NAME")

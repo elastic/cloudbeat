@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cloudbeat
+  namespace: kube-system
+  labels:
+    k8s-app: cloudbeat
+spec:
+  template:
+    spec:
+      containers:
+        - name: cloudbeat
+          env:
+          - name: ES_HOST
+            value: elasticsearch-master.kube-system:9200
+          - name: KIBANA_HOST
+            value: http://host.docker.internal:5601
+          - name: ES_USERNAME
+            value: kibana_system
+          - name: ES_PASSWORD
+            value: changeme
+          - name: CLOUDBEAT_TYPE
+            value: cloudbeat/cis_aws
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                key: AWS_ACCESS_KEY_ID
+                name: aws-creds-secret
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                key: AWS_SECRET_ACCESS_KEY
+                name: aws-creds-secret
