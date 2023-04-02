@@ -6,15 +6,15 @@ on:
     inputs:
       test-targets:
         required: true
-        description: 'Specify test markers to run'
+        description: "Specify test markers to run"
         default: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
 
   schedule:
     # Nightly job. Running every day at 2 am
-    - cron: '00 02 * * 0-4'
+    - cron: "00 02 * * 0-4"
 
     # Weekly job running every saturday at 2 am
-    - cron: '00 02 * * 6'
+    - cron: "00 02 * * 6"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -34,39 +34,39 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     timeout-minutes: 15
     steps:
-    - id: Default
-      env:
-        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
-      run: |
-        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+      - id: Default
+        env:
+          TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+        run: |
+          echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
 
-    - id: Nightly
-      if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 0-4'
-      env:
-        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
-      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+      - id: Nightly
+        if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 0-4'
+        env:
+          TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+        run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
-    - id: Weekly
-      if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 6'
-      env:
-        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
-      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+      - id: Weekly
+        if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 6'
+        env:
+          TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+        run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
-    - id: Push
-      if: github.event_name == 'push'
-      env:
-        TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
-      run: |
-        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+      - id: Push
+        if: github.event_name == 'push'
+        env:
+          TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
+        run: |
+          echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
 
-    - id: Dispatch
-      if: github.event_name == 'workflow_dispatch'
-      env:
-        TEST_TARGETS: ${{ github.event.inputs.test-targets }}
-      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+      - id: Dispatch
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TEST_TARGETS: ${{ github.event.inputs.test-targets }}
+        run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
-    - id: set-matrix
-      run: echo "{matrix}={${{ env.TEST_MATRIX}}}" >> $GITHUB_OUTPUT
+      - id: set-matrix
+        run: echo "{matrix}={${{ env.TEST_MATRIX}}}" >> $GITHUB_OUTPUT
 
   Build:
     name: Build
@@ -81,13 +81,10 @@ jobs:
         with:
           go-version-file: .go-version
 
-      - name: Fetch OPA version
-        run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
-
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: ${{ env.OPA_VERSION }}
+          version: 0.44 # this should be aligned with the version in go.mod
 
       - name: build cloudbeat
         run: make
@@ -143,7 +140,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   Test_Matrix:
-    needs: ['Build', 'Setup']
+    needs: ["Build", "Setup"]
     strategy:
       fail-fast: false
       matrix:
