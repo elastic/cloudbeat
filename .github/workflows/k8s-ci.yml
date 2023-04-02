@@ -140,7 +140,7 @@ jobs:
       - name: Run Tests
         id: run_tests
         run: |
-          just run-tests ${{ matrix.test-target }}     
+          just run-tests ${{ matrix.test-target }}
 
       - name: Upload Test Results
         if: always()
