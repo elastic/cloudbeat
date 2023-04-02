@@ -87,7 +87,7 @@ deploy-cloudbeat:
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
 deploy-cloudbeat-aws:
-  kubectl delete -k {{kustomizeAwsOverlay}} -n kube-system & kubectl apply -k {{kustomizeAwsOverlay}} -n kube-system
+  kubectl delete -k {{kustomizeAwsOverlay}} -n kube-system && kubectl apply -k {{kustomizeAwsOverlay}} -n kube-system
 
 deploy-cloudbeat-nocert:
   kubectl delete -k {{kustomizeVanillaNoCertOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaNoCertOverlay}} -n kube-system
