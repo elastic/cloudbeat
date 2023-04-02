@@ -5,7 +5,7 @@ from pathlib import Path
 import time
 import pytest
 from commonlib.io_utils import get_k8s_yaml_objects
-# from commonlib.kubernetes import ApiException
+from commonlib.kubernetes import ApiException
 from loguru import logger
 
 DEPLOY_YML_DICT = {
@@ -60,22 +60,22 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     time.sleep(10)
     logger.info(f"'{cloudbeat_agent.name}' pod started")
     yield k8s, api_client, cloudbeat_agent
-    # k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
-    # k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
-    #
-    # lease_resources = [
-    #     {"name": "cloudbeat-cluster-leader", "namespace": cloudbeat_agent.namespace},
-    #     {
-    #         "name": "elastic-agent-cluster-leader",
-    #         "namespace": cloudbeat_agent.namespace,
-    #     },
-    # ]
-    # # Delete lease resources
-    # for resource in lease_resources:
-    #     try:
-    #         k8s.delete_resources(resource_type="Lease", **resource)
-    #     except ApiException:
-    #         continue
+    k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
+    k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
+
+    lease_resources = [
+        {"name": "cloudbeat-cluster-leader", "namespace": cloudbeat_agent.namespace},
+        {
+            "name": "elastic-agent-cluster-leader",
+            "namespace": cloudbeat_agent.namespace,
+        },
+    ]
+    # Delete lease resources
+    for resource in lease_resources:
+        try:
+            k8s.delete_resources(resource_type="Lease", **resource)
+        except ApiException:
+            continue
 
 
 @pytest.fixture(name="fixture_data")
