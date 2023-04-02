@@ -56,7 +56,7 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     # some of them are runinng in multi cluster environment
     # the k8s.wait_for_resoruce waits for only the first pod it founds
     # see more details https://github.com/elastic/cloudbeat/pull/422
-    time.sleep(10)
+    time.sleep(20)
     logger.info(f"'{cloudbeat_agent.name}' pod started")
     yield k8s, api_client, cloudbeat_agent
     k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
