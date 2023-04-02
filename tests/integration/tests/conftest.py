@@ -10,7 +10,6 @@ from loguru import logger
 
 DEPLOY_YML_DICT = {
     "cloudbeat_vanilla": "../../deploy/cloudbeat-pytest.yml",
-    "cloudbeat_vanilla_aws": "../../deploy/cloudbeat-pytest.yml",
     "elastic-agent_vanilla": "../../deploy/sa-agent-pytest.yml",
     "cloudbeat_eks": "../../deploy/cloudbeat-eks-pytest.yaml",
 }
