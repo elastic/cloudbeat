@@ -77,7 +77,7 @@ func (f *LoggingFactory) CreateFrom(log *logp.Logger, cfg fetching.AwsBaseFetche
 
 	return &LoggingFetcher{
 		log:                   log,
-		loggingProvider:       logging.NewProvider(log, awsConfig, f.TrailCrossRegionFactory, f.S3CrossRegionFactory),
+		loggingProvider:       logging.NewProvider(log, awsConfig, f.TrailCrossRegionFactory, f.S3CrossRegionFactory, *identity.Account),
 		configserviceProvider: configservice.NewProvider(log, awsConfig, f.ConfigCrossRegionFactory, *identity.Account),
 		cfg:                   cfg,
 		resourceCh:            ch,

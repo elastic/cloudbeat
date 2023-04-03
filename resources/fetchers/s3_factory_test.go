@@ -18,6 +18,7 @@
 package fetchers
 
 import (
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/stretchr/testify/mock"
@@ -74,8 +75,17 @@ default_region: eu-west-2
 			mock.Anything,
 		).Return(mockCrossRegionFetcher)
 
+		identity := awslib.Identity{
+			Account: aws.String("123456789012"),
+		}
+		identityProvider := &awslib.MockIdentityProviderGetter{}
+		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
+
 		factory := &S3Factory{
 			CrossRegionFactory: mockCrossRegionFactory,
+			IdentityProvider: func(cfg aws.Config) awslib.IdentityProviderGetter {
+				return identityProvider
+			},
 		}
 
 		cfg, err := agentConfig.NewConfigFrom(test.config)
