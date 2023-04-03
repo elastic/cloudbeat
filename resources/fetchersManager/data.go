@@ -70,7 +70,7 @@ func (d *Data) Run(ctx context.Context) Stop {
 
 func (d *Data) fetchAndSleep(ctx context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
-	// set immidiate exec for first time run
+	// set immediate exec for first time run
 	timer := time.NewTimer(0)
 	defer func() {
 		cancel()
@@ -92,7 +92,7 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 			if !run.Load() {
 				return
 			}
-			// upadte the interval
+			// update the interval
 			timer.Reset(d.interval)
 			// this is blocking so the stop will not be called until all the fetchers are finished
 			// in case there is a blocking fetcher it will halt (til the d.timeout)
