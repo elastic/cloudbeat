@@ -244,7 +244,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 				SSEAlgorithm:     nil,
 				BucketPolicy:     map[string]any(nil),
 				BucketVersioning: nil,
-				PublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+				PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
 					BlockPublicAcls:       false,
 					BlockPublicPolicy:     false,
 					IgnorePublicAcls:      false,
@@ -279,7 +279,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 				BucketPolicy:                   map[string]any(nil),
 				BucketVersioning:               nil,
 				PublicAccessBlockConfiguration: nil,
-				AccountPublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+				AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
 					BlockPublicAcls:       false,
 					BlockPublicPolicy:     false,
 					IgnorePublicAcls:      false,
@@ -354,13 +354,13 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 					SSEAlgorithm:     aws.String("AES256"),
 					BucketPolicy:     bucketPolicy,
 					BucketVersioning: &BucketVersioning{true, true},
-					PublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+					PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
 						BlockPublicAcls:       false,
 						BlockPublicPolicy:     false,
 						IgnorePublicAcls:      false,
 						RestrictPublicBuckets: false,
 					},
-					AccountPublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+					AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
 						BlockPublicAcls:       false,
 						BlockPublicPolicy:     false,
 						IgnorePublicAcls:      false,
@@ -372,13 +372,13 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 					SSEAlgorithm:     aws.String("aws:kms"),
 					BucketPolicy:     map[string]any(nil),
 					BucketVersioning: &BucketVersioning{false, false},
-					PublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+					PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
 						BlockPublicAcls:       true,
 						BlockPublicPolicy:     true,
 						IgnorePublicAcls:      true,
 						RestrictPublicBuckets: true,
 					},
-					AccountPublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+					AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
 						BlockPublicAcls:       false,
 						BlockPublicPolicy:     false,
 						IgnorePublicAcls:      false,
@@ -454,13 +454,13 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 					SSEAlgorithm:     aws.String("AES256"),
 					BucketPolicy:     bucketPolicy,
 					BucketVersioning: &BucketVersioning{true, true},
-					PublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+					PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
 						BlockPublicAcls:       false,
 						BlockPublicPolicy:     false,
 						IgnorePublicAcls:      false,
 						RestrictPublicBuckets: false,
 					},
-					AccountPublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+					AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
 						BlockPublicAcls:       false,
 						BlockPublicPolicy:     false,
 						IgnorePublicAcls:      false,
@@ -472,13 +472,13 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 					SSEAlgorithm:     aws.String("aws:kms"),
 					BucketPolicy:     map[string]any(nil),
 					BucketVersioning: &BucketVersioning{false, false},
-					PublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+					PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
 						BlockPublicAcls:       true,
 						BlockPublicPolicy:     true,
 						IgnorePublicAcls:      true,
 						RestrictPublicBuckets: true,
 					},
-					AccountPublicAccessBlockConfiguration: &PublicAccessBlockConfiguration{
+					AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
 						BlockPublicAcls:       false,
 						BlockPublicPolicy:     false,
 						IgnorePublicAcls:      false,

@@ -20,18 +20,20 @@ package s3
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3control"
+	s3ContorlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type BucketDescription struct {
-	Name                                  string                          `json:"name"`
-	SSEAlgorithm                          *string                         `json:"sse_algorithm,omitempty"`
-	BucketPolicy                          BucketPolicy                    `json:"bucket_policy,omitempty"`
-	BucketVersioning                      *BucketVersioning               `json:"bucket_versioning,omitempty"`
-	PublicAccessBlockConfiguration        *PublicAccessBlockConfiguration `json:"public_access_block_configuration"`
-	AccountPublicAccessBlockConfiguration *PublicAccessBlockConfiguration `json:"account_public_access_block_configuration"`
+	Name                                  string                                         `json:"name"`
+	SSEAlgorithm                          *string                                        `json:"sse_algorithm,omitempty"`
+	BucketPolicy                          BucketPolicy                                   `json:"bucket_policy,omitempty"`
+	BucketVersioning                      *BucketVersioning                              `json:"bucket_versioning,omitempty"`
+	PublicAccessBlockConfiguration        *types.PublicAccessBlockConfiguration          `json:"public_access_block_configuration"`
+	AccountPublicAccessBlockConfiguration *s3ContorlTypes.PublicAccessBlockConfiguration `json:"account_public_access_block_configuration"`
 }
 
 // TODO: This can be better typed, but this is a complex object. See this library for example: https://github.com/liamg/iamgo/
@@ -40,13 +42,6 @@ type BucketPolicy map[string]any
 type BucketVersioning struct {
 	Enabled   bool
 	MfaDelete bool
-}
-
-type PublicAccessBlockConfiguration struct {
-	BlockPublicAcls       bool
-	BlockPublicPolicy     bool
-	IgnorePublicAcls      bool
-	RestrictPublicBuckets bool
 }
 
 type Logging struct {

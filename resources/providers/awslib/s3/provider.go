@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	s3ControlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
@@ -69,9 +70,9 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 		return result, nil
 	}
 
-	accountPublicAccessBlockConfig, getAccountPublicAccessBlockErr := p.getAccountPublicAccessBlock(ctx)
-	if getAccountPublicAccessBlockErr != nil {
-		p.log.Errorf("Could not get account public access block configuration. Err: %v", getAccountPublicAccessBlockErr)
+	accountPublicAccessBlockConfig, accountPublicAccessBlockErr := p.getAccountPublicAccessBlock(ctx)
+	if accountPublicAccessBlockErr != nil {
+		p.log.Errorf("Could not get account public access block configuration. Err: %v", accountPublicAccessBlockErr)
 	}
 
 	bucketsRegionsMapping := p.getBucketsRegionMapping(ctx, clientBuckets.Buckets)
@@ -260,7 +261,7 @@ func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, r
 	return bucketVersioning, nil
 }
 
-func (p Provider) getAccountPublicAccessBlock(ctx context.Context) (*PublicAccessBlockConfiguration, error) {
+func (p Provider) getAccountPublicAccessBlock(ctx context.Context) (*s3ControlTypes.PublicAccessBlockConfiguration, error) {
 	publicAccessBlock, err := p.controlClient.GetPublicAccessBlock(ctx, &s3control.GetPublicAccessBlockInput{AccountId: &p.accountId})
 	if err != nil {
 		return nil, err
@@ -270,15 +271,10 @@ func (p Provider) getAccountPublicAccessBlock(ctx context.Context) (*PublicAcces
 		return nil, errors.New("account public access block configuration is null")
 	}
 
-	return &PublicAccessBlockConfiguration{
-		BlockPublicAcls:       publicAccessBlock.PublicAccessBlockConfiguration.BlockPublicAcls,
-		BlockPublicPolicy:     publicAccessBlock.PublicAccessBlockConfiguration.BlockPublicPolicy,
-		IgnorePublicAcls:      publicAccessBlock.PublicAccessBlockConfiguration.IgnorePublicAcls,
-		RestrictPublicBuckets: publicAccessBlock.PublicAccessBlockConfiguration.RestrictPublicBuckets,
-	}, nil
+	return publicAccessBlock.PublicAccessBlockConfiguration, nil
 }
 
-func (p Provider) getPublicAccessBlock(ctx context.Context, bucketName *string, region string) (*PublicAccessBlockConfiguration, error) {
+func (p Provider) getPublicAccessBlock(ctx context.Context, bucketName *string, region string) (*types.PublicAccessBlockConfiguration, error) {
 	client, err := awslib.GetClient(&region, p.clients)
 	if err != nil {
 		return nil, err
@@ -293,13 +289,7 @@ func (p Provider) getPublicAccessBlock(ctx context.Context, bucketName *string, 
 		return nil, errors.New("public access block configuration is null")
 	}
 
-	return &PublicAccessBlockConfiguration{
-		BlockPublicAcls:       publicAccessBlock.PublicAccessBlockConfiguration.BlockPublicAcls,
-		BlockPublicPolicy:     publicAccessBlock.PublicAccessBlockConfiguration.BlockPublicPolicy,
-		IgnorePublicAcls:      publicAccessBlock.PublicAccessBlockConfiguration.IgnorePublicAcls,
-		RestrictPublicBuckets: publicAccessBlock.PublicAccessBlockConfiguration.RestrictPublicBuckets,
-	}, nil
-
+	return publicAccessBlock.PublicAccessBlockConfiguration, nil
 }
 
 func (b BucketDescription) GetResourceArn() string {
