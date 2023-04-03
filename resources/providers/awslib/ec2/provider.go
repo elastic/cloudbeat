@@ -45,6 +45,7 @@ type Client interface {
 	DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
 	CreateSnapshots(ctx context.Context, params *ec2.CreateSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.CreateSnapshotsOutput, error)
 	DescribeSnapshots(ctx context.Context, params *ec2.DescribeSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSnapshotsOutput, error)
+	DeleteSnapshot(ctx context.Context, params *ec2.DeleteSnapshotInput, optFns ...func(*ec2.Options)) (*ec2.DeleteSnapshotOutput, error)
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -230,4 +231,19 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID))
 	}
 	return result, nil
+}
+
+func (p *Provider) DeleteSnapshots(ctx context.Context, ids []string) error {
+	_, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]Ec2Instance, error) {
+		for _, id := range ids {
+			_, err := c.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(id)})
+			if err != nil {
+				p.log.Errorf("Error deleting snapshot %s: %v", id, err)
+			}
+		}
+
+		return nil, nil
+	})
+
+	return err
 }
