@@ -16,10 +16,10 @@ test_pass {
 
 test_not_evaluated {
 	not_eval with input as test_data.not_evaluated_s3_bucket
-	not_eval with input as test_data.generate_s3_bucket("Bucket", "", null, null, null)
+	not_eval with input as test_data.generate_s3_bucket("Bucket", "", null, null, null, null)
 }
 
-rule_input(enabled, mfa_delete) = test_data.generate_s3_bucket("Bucket", "", null, test_data.generate_s3_bucket_versioning(enabled, mfa_delete), null)
+rule_input(enabled, mfa_delete) = test_data.generate_s3_bucket("Bucket", "", null, test_data.generate_s3_bucket_versioning(enabled, mfa_delete), null, null)
 
 eval_fail {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

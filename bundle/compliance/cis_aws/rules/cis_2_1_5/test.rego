@@ -5,40 +5,36 @@ import data.compliance.cis_aws.data_adapter
 import data.lib.test
 
 test_violation {
-	# All properties false
-	eval_fail with input as rule_input(false, false, false, false)
+	eval_fail with input as rule_input(false, false, false, false, false, false, false, false)
 
-	# 3 properties false
-	eval_fail with input as rule_input(true, false, false, false)
-	eval_fail with input as rule_input(false, true, false, false)
-	eval_fail with input as rule_input(false, false, true, false)
-	eval_fail with input as rule_input(false, false, false, true)
-
-	# 2 properties false
-	eval_fail with input as rule_input(true, true, false, false)
-	eval_fail with input as rule_input(true, false, true, false)
-	eval_fail with input as rule_input(true, false, false, true)
-	eval_fail with input as rule_input(false, true, true, false)
-	eval_fail with input as rule_input(false, true, false, true)
-	eval_fail with input as rule_input(false, false, true, true)
-
-	# 1 property false
-	eval_fail with input as rule_input(false, true, true, true)
-	eval_fail with input as rule_input(true, false, true, true)
-	eval_fail with input as rule_input(true, true, false, true)
-	eval_fail with input as rule_input(true, true, true, false)
+	# A single property is `false` in both account-level and bucket-specific public access block config
+	eval_fail with input as rule_input(true, true, true, false, true, true, true, false)
+	eval_fail with input as rule_input(true, true, false, true, true, true, false, true)
+	eval_fail with input as rule_input(true, false, true, true, true, false, true, true)
+	eval_fail with input as rule_input(false, true, true, true, false, true, true, true)
 }
 
 test_pass {
-	eval_pass with input as rule_input(true, true, true, true)
+	eval_pass with input as rule_input(true, true, true, true, false, false, false, false)
+	eval_pass with input as rule_input(false, false, false, false, true, true, true, true)
+	eval_pass with input as rule_input(true, false, true, false, false, true, false, true)
+	eval_pass with input as rule_input(false, true, false, true, true, false, true, false)
 }
 
 test_not_evaluated {
 	not_eval with input as test_data.not_evaluated_s3_bucket
-	not_eval with input as test_data.generate_s3_bucket("Bucket", "", null, null, null)
+
+	# A bucket without any public access block config
+	not_eval with input as test_data.generate_s3_bucket("Bucket", "", null, null, null, null)
+
+	# A bucket without an account-level public access block config
+	not_eval with input as test_data.generate_s3_bucket("Bucket", "", null, null, test_data.generate_s3_public_access_block_configuration(true, true, true, true), null)
+
+	# A bucket without a bucket-level public access block config
+	not_eval with input as test_data.generate_s3_bucket("Bucket", "", null, null, null, test_data.generate_s3_public_access_block_configuration(true, true, true, true))
 }
 
-rule_input(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets) = test_data.generate_s3_bucket("Bucket", "", null, null, test_data.generate_s3_public_access_block_configuration(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets))
+rule_input(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets, account_block_public_acls, account_block_public_policy, account_ignore_public_acls, account_restrict_public_buckets) = test_data.generate_s3_bucket("Bucket", "", null, null, test_data.generate_s3_public_access_block_configuration(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets), test_data.generate_s3_public_access_block_configuration(account_block_public_acls, account_block_public_policy, account_ignore_public_acls, account_restrict_public_buckets))
 
 eval_fail {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

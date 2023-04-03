@@ -112,12 +112,13 @@ not_evaluated_s3_bucket = {
 		},
 		"bucket_versioning": generate_s3_bucket_versioning(true, true),
 		"public_access_block_configuration": generate_s3_public_access_block_configuration(true, true, true, true),
+		"account_public_access_block_configuration": generate_s3_public_access_block_configuration(true, true, true, true),
 	},
 	"type": "wrong type",
 	"subType": "wrong sub type",
 }
 
-generate_s3_bucket(name, sse_algorithm, bucket_policy_statement, bucket_versioning, public_access_block_configuration) = {
+generate_s3_bucket(name, sse_algorithm, bucket_policy_statement, bucket_versioning, public_access_block_configuration, account_public_access_block_configuration) = {
 	"resource": {
 		"name": name,
 		"sse_algorithm": sse_algorithm,
@@ -127,6 +128,7 @@ generate_s3_bucket(name, sse_algorithm, bucket_policy_statement, bucket_versioni
 		},
 		"bucket_versioning": bucket_versioning,
 		"public_access_block_configuration": public_access_block_configuration,
+		"account_public_access_block_configuration": account_public_access_block_configuration,
 	},
 	"type": "cloud-storage",
 	"subType": "aws-s3",
