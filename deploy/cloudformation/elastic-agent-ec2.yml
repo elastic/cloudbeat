@@ -3,6 +3,9 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates an EC2 instance with permissions to run elastic-agent
 
 Parameters:
+  UniqueId:
+    Type: String
+    Description: Unique ID to be used for naming the stack resources
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
@@ -32,7 +35,10 @@ Resources:
   ElasticAgentSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: elastic-agent-security-group
+      GroupName: !Join
+      - ''
+      - - elastic-agent-security-group-
+        - !Ref UniqueId
       GroupDescription: Allow incoming SSH traffic
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -79,7 +85,10 @@ Resources:
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: elastic-agent-instance-profile
+      InstanceProfileName: !Join
+      - ''
+      - - elastic-agent-instance-profile-
+        - !Ref UniqueId
       Path: /
       Roles:
        - !Ref ElasticAgentRole
@@ -88,6 +97,14 @@ Resources:
   ElasticAgentEc2Instance:
     Type: AWS::EC2::Instance
     Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+          - ''
+          - - elastic-agent-instance-
+            - !Ref UniqueId
+        - Key: Task
+          Value: Vulnerability Management Scanner
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ElasticAgentInstanceProfile
