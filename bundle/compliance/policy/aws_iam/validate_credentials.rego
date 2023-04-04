@@ -28,11 +28,11 @@ validate_credentials {
 	validate_access_keys
 }
 
-# checks if the user has a password enabled, if the user's last access date is "No_Information", the user's password last changed date should be within the specified duration.
+# checks if the user has a password enabled, if the user's last access date is "no_information", the user's password last changed date should be within the specified duration.
 # In addition checks that all of the user's active access keys are valid
 validate_credentials {
 	data_adapter.iam_user.password_enabled
-	data_adapter.iam_user.last_access == "No_Information"
+	data_adapter.iam_user.last_access == "no_information"
 	common.are_credentials_within_duration([data_adapter.iam_user], "password_last_changed", duration)
 	validate_access_keys
 }
