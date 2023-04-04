@@ -18,5 +18,5 @@ ensure_s3_object_logging(allowed_types) {
 	dataResource.Type == "AWS::S3::Object"
 
 	partialARN := dataResource.Values[k]
-	partialARN == "arn:aws:s3"
+	startswith(partialARN, "arn:aws:s3")
 } else = false

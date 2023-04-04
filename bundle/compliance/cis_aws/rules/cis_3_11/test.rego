@@ -21,6 +21,7 @@ test_violation {
 test_pass {
 	eval_pass with input as rule_input([{"ReadWriteType": "ReadOnly", "DataResources": [{"Type": s3_object_type, "Values": ["arn:aws:s3"]}]}], true)
 	eval_pass with input as rule_input([{"ReadWriteType": "All", "DataResources": [{"Type": s3_object_type, "Values": ["arn:aws:s3"]}]}], true)
+	eval_pass with input as rule_input([{"ReadWriteType": "All", "DataResources": [{"Type": s3_object_type, "Values": ["arn:aws:s3:::some-bucket"]}]}], true)
 	eval_pass with input as rule_input([{"ReadWriteType": "All", "DataResources": [{"Type": not_s3_object_type, "Values": ["arn:aws:s3"]}, {"Type": s3_object_type, "Values": ["arn:aws:s3"]}]}], true)
 }
 
