@@ -186,7 +186,7 @@ generate_enriched_trail(is_log_validation_enabled, cloudwatch_log_group_arn, log
 			"KmsKeyId": kms_key_id,
 		},
 		"Status": {"LatestcloudwatchLogdDeliveryTime": log_delivery_time},
-		"bucket_info": {"logging": {"enabled": is_bucket_logging_enabled}},
+		"bucket_info": {"logging": {"Enabled": is_bucket_logging_enabled}},
 	},
 }
 
