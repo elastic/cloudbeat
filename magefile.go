@@ -23,7 +23,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"log"
 	"os"
 	"os/exec"
@@ -376,8 +375,7 @@ func BuildOpaBundle() (err error) {
 	}
 
 	if err = sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance"); err != nil {
-		deleteDirErr := sh.Run("rm", "-rf", cspPoliciesPkgDir)
-		return errors.Wrap(err, deleteDirErr.Error())
+		return err
 	}
 
 	return nil
