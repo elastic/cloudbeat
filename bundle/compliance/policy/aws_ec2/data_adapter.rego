@@ -26,7 +26,7 @@ security_groups_ip_permissions = entries {
 
 is_default_security_group {
 	input.resource.GroupName == "default"
-} else = false
+}
 
 # Filter all the entries that 
 # 1. have ingres (egress == false)

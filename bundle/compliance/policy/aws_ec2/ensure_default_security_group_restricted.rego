@@ -9,6 +9,7 @@ default rule_evaluation = false
 finding = result {
 	# filter 
 	data_adapter.is_security_group_policy
+	data_adapter.is_default_security_group
 
 	# set result
 	result := common.generate_result_without_expected(
@@ -21,10 +22,7 @@ finding = result {
 # non default security group can have any rules
 rule_evaluation {
 	assert.all_true([
-		data_adapter.is_default_security_group,
 		count(data_adapter.security_group_inbound_rules) == 0,
 		count(data_adapter.security_group_outbound_rules) == 0,
 	])
-} else {
-	not data_adapter.is_default_security_group
 }

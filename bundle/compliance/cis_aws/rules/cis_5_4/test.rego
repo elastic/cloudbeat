@@ -15,9 +15,12 @@ test_violation {
 test_pass {
 	# default security group with restricted inbound/outbound rules
 	eval_pass with input as rule_input({"GroupName": "default", "IpPermissions": [], "IpPermissionsEgress": []})
+}
 
-	# non default security groups can have any rule
-	eval_pass with input as rule_input({"GroupName": "custom", "IpPermissions": [{}], "IpPermissionsEgress": [{}]})
+test_not_evaluated {
+	not_eval with input as rule_input({"GroupName": "custom", "IpPermissions": [{}], "IpPermissionsEgress": [{}]})
+	not_eval with input as rule_input({"GroupName": "custom", "IpPermissions": [{}]})
+	not_eval with input as rule_input({"GroupName": "custom", "IpPermissionsEgress": [{}]})
 }
 
 rule_input(entry) = test_data.generate_security_group(entry)
@@ -28,4 +31,8 @@ eval_fail {
 
 eval_pass {
 	test.assert_pass(finding) with data.benchmark_data_adapter as data_adapter
+}
+
+not_eval {
+	not finding with data.benchmark_data_adapter as data_adapter
 }
