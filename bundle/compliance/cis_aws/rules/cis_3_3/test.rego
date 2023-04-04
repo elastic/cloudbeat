@@ -9,19 +9,30 @@ forbidden_principal1 = "http://acs.amazonaws.com/groups/global/AllUsers"
 forbidden_principal2 = "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
 
 test_violation {
+	# Fail with forbidden principal
 	eval_fail with input as rule_input(forbidden_principal1, [test_data.generate_s3_bucket_policy_statement("Deny", "*", "s3:*", "true")])
 	eval_fail with input as rule_input(forbidden_principal2, [test_data.generate_s3_bucket_policy_statement("Deny", "*", "s3:*", "true")])
-	eval_fail with input as rule_input("", [test_data.generate_s3_bucket_policy_statement("Allow", "", "s3:*", "true")])
-	eval_fail with input as rule_input("", [test_data.generate_s3_bucket_policy_statement("Deny", "*", "s3:*", "true")])
-	eval_fail with input as rule_input("", [
-		test_data.generate_s3_bucket_policy_statement("Deny", {"AWS": "arn:aws:iam::111122223333:root"}, "s3:*", "true"),
-		test_data.generate_s3_bucket_policy_statement("Allow", {"AWS": "arn:aws:iam::111122223333:root"}, "s3:*", "true"),
-	])
+
+	# Fail with forbidden policy statement
+	eval_fail with input as rule_input("", [test_data.generate_s3_bucket_policy_statement("Allow", {"AWS": "*"}, "s3:*", "true")])
+	eval_fail with input as rule_input("", [test_data.generate_s3_bucket_policy_statement("Allow", "*", "s3:*", "true")])
+
+	# Fail with multiple policy statements, one of them forbidden
+	eval_fail with input as rule_input("", [test_data.generate_s3_bucket_policy_statement("Allow", "*", "s3:*", "true"), test_data.generate_s3_bucket_policy_statement("Deny", "blabla", "s3:*", "true")])
+
+	# Fail with both forbidden principal and forbidden policy statement
+	eval_fail with input as rule_input(forbidden_principal1, [test_data.generate_s3_bucket_policy_statement("Allow", "*", "s3:*", "true")])
 }
 
 test_pass {
 	eval_pass with input as rule_input("allowed-test-principal", [test_data.generate_s3_bucket_policy_statement("Deny", `{"AWS":"111122223333"}`, "s3:*", "true")])
 	eval_pass with input as rule_input(null, [test_data.generate_s3_bucket_policy_statement("Deny", `{"AWS":["arn:aws:iam::111122223333:role/JohnDoe"]}`, "s3:*", "true")])
+	eval_pass with input as rule_input("", [test_data.generate_s3_bucket_policy_statement("Deny", "*", "s3:*", "true")])
+	eval_pass with input as rule_input("", [
+		test_data.generate_s3_bucket_policy_statement("Allow", {"AWS": "arn:aws:iam::111122223333:root"}, "s3:*", "true"),
+		test_data.generate_s3_bucket_policy_statement("Deny", "*", "s3:*", "true"),
+		test_data.generate_s3_bucket_policy_statement("Deny", {"AWS": "*"}, "s3:*", "true"),
+	])
 }
 
 test_not_evaluated {

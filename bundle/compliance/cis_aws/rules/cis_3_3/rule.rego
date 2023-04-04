@@ -11,7 +11,7 @@ finding = result {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(audit.no_public_log_access),
+		common.calculate_result(audit.bucket_is_public == false),
 		input.resource,
 	)
 }
