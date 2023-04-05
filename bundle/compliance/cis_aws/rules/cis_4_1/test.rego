@@ -16,7 +16,7 @@ test_violation {
 			"EventSelectors": [{"IncludeManagementEvents": true}],
 		},
 		"Topics": ["arn:aws:...sns"],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 	}])
 
 	# No topics
@@ -27,7 +27,7 @@ test_violation {
 			"EventSelectors": [{"IncludeManagementEvents": true}],
 		},
 		"Topics": [],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 	}])
 
 	# No "AuthorizationFilterExists=true"
@@ -49,7 +49,7 @@ test_violation {
 			"EventSelectors": [{"IncludeManagementEvents": true}],
 		},
 		"Topics": ["arn:aws:...sns"],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 	}])
 
 	# The event selector does include management events 
@@ -60,7 +60,7 @@ test_violation {
 			"EventSelectors": [{"IncludeManagementEvents": false, "ReadWriteType": "All"}],
 		},
 		"Topics": ["arn:aws:...sns"],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 	}])
 
 	eval_fail with input as rule_input([{
@@ -70,7 +70,27 @@ test_violation {
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "WriteOnly"}],
 		},
 		"Topics": ["arn:aws:...sns"],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+	}])
+
+	# Missing * wildcards
+	eval_fail with input as rule_input([{
+		"TrailInfo": {
+			"Trail": {"IsMultiRegionTrail": true},
+			"Status": {"IsLogging": true},
+			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
+		},
+		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"Topics": ["arn:aws:...sns"],
+	}])
+	eval_fail with input as rule_input([{
+		"TrailInfo": {
+			"Trail": {"IsMultiRegionTrail": true},
+			"Status": {"IsLogging": true},
+			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
+		},
+		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"Topics": ["arn:aws:...sns"],
 	}])
 }
 
@@ -81,7 +101,7 @@ test_pass {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 		},
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 		"Topics": ["arn:aws:...sns"],
 	}])
 
@@ -94,7 +114,7 @@ test_pass {
 				"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 			},
 			"Topics": ["arn:aws:...sns"],
-			"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+			"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 		},
 		{
 			"TrailInfo": {

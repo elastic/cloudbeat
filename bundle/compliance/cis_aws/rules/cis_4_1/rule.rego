@@ -17,6 +17,6 @@ finding = result {
 	)
 }
 
-required_pattern = "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"
+required_pattern = "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"
 
 rule_evaluation = trail.at_least_one_trail_satisfied([required_pattern])
