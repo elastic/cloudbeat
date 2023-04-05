@@ -27,8 +27,9 @@ import (
 )
 
 const (
-	processorName = "add_cluster_id"
-	clusterIdKey  = "cluster_id"
+	processorName            = "add_cluster_id"
+	clusterIdKey             = "cluster_id"
+	orchestratorClusterIdKey = "orchestrator.cluster.id"
 )
 
 func init() {
@@ -70,6 +71,10 @@ func (p *addClusterID) Run(event *beat.Event) (*beat.Event, error) {
 	clusterId := p.helper.ClusterId()
 
 	if _, err := event.PutValue(clusterIdKey, clusterId); err != nil {
+		return nil, makeErrComputeID(err)
+	}
+
+	if _, err := event.PutValue(orchestratorClusterIdKey, clusterId); err != nil {
 		return nil, makeErrComputeID(err)
 	}
 
