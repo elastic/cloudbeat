@@ -6,9 +6,6 @@ Parameters:
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
-  KeyName:
-    Type: AWS::EC2::KeyPair::KeyName
-    Description: SSH Keypair to login to the instance
   InstanceType:
     Type: String
     Default: a1.xlarge
