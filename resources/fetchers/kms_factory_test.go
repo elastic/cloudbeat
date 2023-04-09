@@ -18,26 +18,26 @@
 package fetchers
 
 import (
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
-	"github.com/stretchr/testify/mock"
 	"testing"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/kms"
+	"github.com/stretchr/testify/mock"
 
 	agentConfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
 
-type S3FactoryTestSuite struct {
+type KmsFactoryTestSuite struct {
 	suite.Suite
 
 	log *logp.Logger
 }
 
-func TestS3FactoryTestSuite(t *testing.T) {
-	s := new(S3FactoryTestSuite)
-	s.log = logp.NewLogger("cloudbeat_s3_factory_test_suite")
+func TestKmsFactoryTestSuite(t *testing.T) {
+	s := new(KmsFactoryTestSuite)
+	s.log = logp.NewLogger("cloudbeat_kms_factory_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -46,15 +46,15 @@ func TestS3FactoryTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *S3FactoryTestSuite) SetupTest() {}
+func (s *KmsFactoryTestSuite) SetupTest() {}
 
-func (s *S3FactoryTestSuite) TestCreateFetcher() {
+func (s *KmsFactoryTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		config string
 	}{
 		{
 			`
-name: aws-s3
+name: aws-kms
 access_key_id: key
 secret_access_key: secret
 default_region: eu-west-2
@@ -63,10 +63,10 @@ default_region: eu-west-2
 	}
 
 	for _, test := range tests {
-		mockCrossRegionFetcher := &awslib.MockCrossRegionFetcher[s3.Client]{}
+		mockCrossRegionFetcher := &awslib.MockCrossRegionFetcher[kms.Client]{}
 		mockCrossRegionFetcher.On("GetMultiRegionsClientMap").Return(nil)
 
-		mockCrossRegionFactory := &awslib.MockCrossRegionFactory[s3.Client]{}
+		mockCrossRegionFactory := &awslib.MockCrossRegionFactory[kms.Client]{}
 		mockCrossRegionFactory.On(
 			"NewMultiRegionClients",
 			mock.Anything,
@@ -75,17 +75,8 @@ default_region: eu-west-2
 			mock.Anything,
 		).Return(mockCrossRegionFetcher)
 
-		identity := awslib.Identity{
-			Account: aws.String("123456789012"),
-		}
-		identityProvider := &awslib.MockIdentityProviderGetter{}
-		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
-
-		factory := &S3Factory{
+		factory := &KmsFactory{
 			CrossRegionFactory: mockCrossRegionFactory,
-			IdentityProvider: func(cfg aws.Config) awslib.IdentityProviderGetter {
-				return identityProvider
-			},
 		}
 
 		cfg, err := agentConfig.NewConfigFrom(test.config)
@@ -95,10 +86,10 @@ default_region: eu-west-2
 		s.NoError(err)
 		s.NotNil(fetcher)
 
-		s3Fetcher, ok := fetcher.(*S3Fetcher)
+		KmsFetcher, ok := fetcher.(*KmsFetcher)
 		s.True(ok)
-		s.Equal("key", s3Fetcher.cfg.AwsConfig.AccessKeyID)
-		s.Equal("secret", s3Fetcher.cfg.AwsConfig.SecretAccessKey)
-		s.Equal("eu-west-2", s3Fetcher.cfg.AwsConfig.DefaultRegion)
+		s.Equal("key", KmsFetcher.cfg.AwsConfig.AccessKeyID)
+		s.Equal("secret", KmsFetcher.cfg.AwsConfig.SecretAccessKey)
+		s.Equal("eu-west-2", KmsFetcher.cfg.AwsConfig.DefaultRegion)
 	}
 }

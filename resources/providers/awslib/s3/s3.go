@@ -20,15 +20,20 @@ package s3
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/aws-sdk-go-v2/service/s3control"
+	s3ContorlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type BucketDescription struct {
-	Name             string            `json:"name"`
-	SSEAlgorithm     *string           `json:"sse_algorithm,omitempty"`
-	BucketPolicy     BucketPolicy      `json:"bucket_policy,omitempty"`
-	BucketVersioning *BucketVersioning `json:"bucket_versioning,omitempty"`
+	Name                                  string                                         `json:"name"`
+	SSEAlgorithm                          *string                                        `json:"sse_algorithm,omitempty"`
+	BucketPolicy                          BucketPolicy                                   `json:"bucket_policy,omitempty"`
+	BucketVersioning                      *BucketVersioning                              `json:"bucket_versioning,omitempty"`
+	PublicAccessBlockConfiguration        *types.PublicAccessBlockConfiguration          `json:"public_access_block_configuration"`
+	AccountPublicAccessBlockConfiguration *s3ContorlTypes.PublicAccessBlockConfiguration `json:"account_public_access_block_configuration"`
 }
 
 // TODO: This can be better typed, but this is a complex object. See this library for example: https://github.com/liamg/iamgo/
@@ -52,8 +57,10 @@ type S3 interface {
 }
 
 type Provider struct {
-	log     *logp.Logger
-	clients map[string]Client
+	log           *logp.Logger
+	clients       map[string]Client
+	controlClient ControlClient
+	accountId     string
 }
 
 type Client interface {
@@ -64,4 +71,9 @@ type Client interface {
 	GetBucketVersioning(ctx context.Context, params *s3.GetBucketVersioningInput, optFns ...func(*s3.Options)) (*s3.GetBucketVersioningOutput, error)
 	GetBucketAcl(ctx context.Context, params *s3.GetBucketAclInput, optFns ...func(*s3.Options)) (*s3.GetBucketAclOutput, error)
 	GetBucketLogging(ctx context.Context, params *s3.GetBucketLoggingInput, optFns ...func(*s3.Options)) (*s3.GetBucketLoggingOutput, error)
+	GetPublicAccessBlock(ctx context.Context, params *s3.GetPublicAccessBlockInput, optFns ...func(*s3.Options)) (*s3.GetPublicAccessBlockOutput, error)
+}
+
+type ControlClient interface {
+	GetPublicAccessBlock(ctx context.Context, params *s3control.GetPublicAccessBlockInput, optFns ...func(*s3control.Options)) (*s3control.GetPublicAccessBlockOutput, error)
 }

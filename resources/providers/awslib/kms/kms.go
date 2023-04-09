@@ -15,39 +15,36 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package logging
+package kms
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/kms"
+	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type Client interface {
-	DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error)
+type KmsInfo struct {
+	KeyMetadata        types.KeyMetadata `json:"key_metadata"`
+	KeyRotationEnabled bool              `json:"key_rotation_enabled"`
 }
 
-type Provider struct {
-	log           *logp.Logger
-	s3Provider    s3.S3
-	trailProvider cloudtrail.TrailService
+type KMS interface {
+	// Returns keys with KeySpec set to KeySpecSymmetricDefault
+	DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewProvider(
-	log *logp.Logger,
-	cfg aws.Config,
-	multiRegionTrailFactory awslib.CrossRegionFactory[cloudtrail.Client],
-	multiRegionS3Factory awslib.CrossRegionFactory[s3.Client],
-	accountId string,
-) *Provider {
+func NewKMSProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return kms.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(awslib.CurrentRegionSelector(), cfg, f, log)
 
 	return &Provider{
-		log:           log,
-		s3Provider:    s3.NewProvider(cfg, log, multiRegionS3Factory, accountId),
-		trailProvider: cloudtrail.NewProvider(cfg, log, multiRegionTrailFactory),
+		log:     log,
+		clients: m.GetMultiRegionsClientMap(),
 	}
 }

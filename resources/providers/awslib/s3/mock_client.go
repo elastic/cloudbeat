@@ -411,6 +411,68 @@ func (_c *MockClient_GetBucketVersioning_Call) Return(_a0 *services3.GetBucketVe
 	return _c
 }
 
+// GetPublicAccessBlock provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) GetPublicAccessBlock(ctx context.Context, params *services3.GetPublicAccessBlockInput, optFns ...func(*services3.Options)) (*services3.GetPublicAccessBlockOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *services3.GetPublicAccessBlockOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *services3.GetPublicAccessBlockInput, ...func(*services3.Options)) *services3.GetPublicAccessBlockOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services3.GetPublicAccessBlockOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *services3.GetPublicAccessBlockInput, ...func(*services3.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_GetPublicAccessBlock_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPublicAccessBlock'
+type MockClient_GetPublicAccessBlock_Call struct {
+	*mock.Call
+}
+
+// GetPublicAccessBlock is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *services3.GetPublicAccessBlockInput
+//   - optFns ...func(*services3.Options)
+func (_e *MockClient_Expecter) GetPublicAccessBlock(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_GetPublicAccessBlock_Call {
+	return &MockClient_GetPublicAccessBlock_Call{Call: _e.mock.On("GetPublicAccessBlock",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_GetPublicAccessBlock_Call) Run(run func(ctx context.Context, params *services3.GetPublicAccessBlockInput, optFns ...func(*services3.Options))) *MockClient_GetPublicAccessBlock_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*services3.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*services3.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*services3.GetPublicAccessBlockInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_GetPublicAccessBlock_Call) Return(_a0 *services3.GetPublicAccessBlockOutput, _a1 error) *MockClient_GetPublicAccessBlock_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
 // ListBuckets provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) ListBuckets(ctx context.Context, params *services3.ListBucketsInput, optFns ...func(*services3.Options)) (*services3.ListBucketsOutput, error) {
 	_va := make([]interface{}, len(optFns))

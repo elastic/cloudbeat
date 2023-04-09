@@ -22,11 +22,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	s3ControlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/aws-sdk-go-v2/service/s3control"
 	"github.com/aws/smithy-go"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -38,15 +41,19 @@ const (
 	NoEncryptionMessage    = "NoEncryption"
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
 	f := func(cfg aws.Config) Client {
 		return s3Client.NewFromConfig(cfg)
 	}
 	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 
+	controlClient := s3control.NewFromConfig(cfg)
+
 	return &Provider{
-		log:     log,
-		clients: m.GetMultiRegionsClientMap(),
+		log:           log,
+		clients:       m.GetMultiRegionsClientMap(),
+		controlClient: controlClient,
+		accountId:     accountId,
 	}
 }
 
@@ -58,11 +65,21 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 	}
 
 	var result []awslib.AwsResource
+
+	if len(clientBuckets.Buckets) == 0 {
+		return result, nil
+	}
+
+	accountPublicAccessBlockConfig, accountPublicAccessBlockErr := p.getAccountPublicAccessBlock(ctx)
+	if accountPublicAccessBlockErr != nil {
+		p.log.Errorf("Could not get account public access block configuration. Err: %v", accountPublicAccessBlockErr)
+	}
+
 	bucketsRegionsMapping := p.getBucketsRegionMapping(ctx, clientBuckets.Buckets)
 	for region, buckets := range bucketsRegionsMapping {
 		for _, bucket := range buckets {
-			// Getting the bucket encryption, policy and versioning is not critical for the rest of the flow, so we
-			//	should keep describing the bucket even if getting these objects fails.
+			// Getting the bucket encryption, policy, versioning  and public access block is not critical for the rest
+			//  of the flow, so we should keep describing the bucket even if getting these objects fails.
 			sseAlgorithm, encryptionErr := p.getBucketEncryptionAlgorithm(ctx, bucket.Name, region)
 			if encryptionErr != nil {
 				p.log.Errorf("Could not get encryption for bucket %s. Error: %v", *bucket.Name, encryptionErr)
@@ -78,7 +95,19 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 				p.log.Errorf("Could not get bucket versioning for bucket %s. Err: %v", *bucket.Name, versioningErr)
 			}
 
-			result = append(result, BucketDescription{*bucket.Name, sseAlgorithm, bucketPolicy, bucketVersioning})
+			publicAccessBlockConfiguration, publicAccessBlockErr := p.getPublicAccessBlock(ctx, bucket.Name, region)
+			if publicAccessBlockErr != nil {
+				p.log.Errorf("Could not get public access block configuration for bucket %s. Err: %v", *bucket.Name, publicAccessBlockErr)
+			}
+
+			result = append(result, BucketDescription{
+				Name:                                  *bucket.Name,
+				SSEAlgorithm:                          sseAlgorithm,
+				BucketPolicy:                          bucketPolicy,
+				BucketVersioning:                      bucketVersioning,
+				PublicAccessBlockConfiguration:        publicAccessBlockConfiguration,
+				AccountPublicAccessBlockConfiguration: accountPublicAccessBlockConfig,
+			})
 		}
 	}
 
@@ -230,6 +259,37 @@ func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, r
 	}
 
 	return bucketVersioning, nil
+}
+
+func (p Provider) getAccountPublicAccessBlock(ctx context.Context) (*s3ControlTypes.PublicAccessBlockConfiguration, error) {
+	publicAccessBlock, err := p.controlClient.GetPublicAccessBlock(ctx, &s3control.GetPublicAccessBlockInput{AccountId: &p.accountId})
+	if err != nil {
+		return nil, err
+	}
+
+	if publicAccessBlock.PublicAccessBlockConfiguration == nil {
+		return nil, errors.New("account public access block configuration is null")
+	}
+
+	return publicAccessBlock.PublicAccessBlockConfiguration, nil
+}
+
+func (p Provider) getPublicAccessBlock(ctx context.Context, bucketName *string, region string) (*types.PublicAccessBlockConfiguration, error) {
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return nil, err
+	}
+
+	publicAccessBlock, err := client.GetPublicAccessBlock(ctx, &s3Client.GetPublicAccessBlockInput{Bucket: bucketName})
+	if err != nil {
+		return nil, err
+	}
+
+	if publicAccessBlock.PublicAccessBlockConfiguration == nil {
+		return nil, errors.New("public access block configuration is null")
+	}
+
+	return publicAccessBlock.PublicAccessBlockConfiguration, nil
 }
 
 func (b BucketDescription) GetResourceArn() string {

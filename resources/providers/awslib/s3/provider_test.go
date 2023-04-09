@@ -24,6 +24,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/aws-sdk-go-v2/service/s3control"
+	s3ControlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 	"github.com/aws/smithy-go"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -40,6 +42,7 @@ type ProviderTestSuite struct {
 }
 type mocks [2][]any
 type s3ClientMockReturnVals map[string][]mocks
+type s3ControlClientMockReturnVals map[string]mocks
 
 func TestProviderTestSuite(t *testing.T) {
 	s := new(ProviderTestSuite)
@@ -64,63 +67,85 @@ var bucketPolicyString = "{\"foo\": \"bar\"}"
 
 func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 	var tests = []struct {
-		name                   string
-		regions                []string
-		s3ClientMockReturnVals s3ClientMockReturnVals
-		expected               []awslib.AwsResource
-		expectError            bool
+		name                          string
+		regions                       []string
+		s3ClientMockReturnVals        s3ClientMockReturnVals
+		s3ControlClientMockReturnVals s3ControlClientMockReturnVals
+		expected                      []awslib.AwsResource
+		expectError                   bool
 	}{
 		{
 			name: "Should not return any S3 buckets when there aren't any",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets": {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{}}, nil}}},
 			},
-			expected:    []awslib.AwsResource(nil),
-			expectError: false,
-			regions:     []string{awslib.DefaultRegion},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{},
+			expected:                      []awslib.AwsResource(nil),
+			expectError:                   false,
+			regions:                       []string{awslib.DefaultRegion},
 		},
 		{
 			name: "Should not return any S3 buckets when there is an error",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets": {{{mock.Anything, mock.Anything}, {nil, errors.New("error")}}},
 			},
-			expected:    nil,
-			expectError: true,
-			regions:     []string{awslib.DefaultRegion},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{},
+			expected:                      nil,
+			expectError:                   true,
+			regions:                       []string{awslib.DefaultRegion},
 		},
 		{
 			name: "Should not return any S3 buckets when the region can not be fetched",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
-				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
-				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
-				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
-				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"ListBuckets":          {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption":  {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketLocation":    {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketPolicy":      {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketVersioning":  {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetPublicAccessBlock": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
-			expected:    nil,
-			expectError: false,
-			regions:     []string{awslib.DefaultRegion},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+			expected:                      nil,
+			expectError:                   false,
+			regions:                       []string{awslib.DefaultRegion},
 		},
 		{
-			name: "Should return an S3 bucket without encryption, versioning, and policy",
+			name: "Should return an S3 bucket without encryption, policy, versioning, and public access block config",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
-				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
-				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}}},
-				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
-				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"ListBuckets":          {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption":  {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketLocation":    {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: ""}, nil}}},
+				"GetBucketPolicy":      {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketVersioning":  {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetPublicAccessBlock": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: nil, BucketPolicy: map[string]any(nil), BucketVersioning: nil}},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+			expected: []awslib.AwsResource{BucketDescription{
+				Name:                                  bucketName,
+				SSEAlgorithm:                          nil,
+				BucketPolicy:                          map[string]any(nil),
+				BucketVersioning:                      nil,
+				PublicAccessBlockConfiguration:        nil,
+				AccountPublicAccessBlockConfiguration: nil,
+			}},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion},
 		},
 		{
-			name: "Should return an S3 bucket without encryption, policy, and versioning due to regions mismatch",
+			name: "Should return an S3 bucket without encryption, policy, versioning, and public access block config due to regions mismatch",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets":       {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
 				"GetBucketLocation": {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: nil, BucketPolicy: map[string]any(nil), BucketVersioning: nil}},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+			expected: []awslib.AwsResource{BucketDescription{
+				Name:                                  bucketName,
+				SSEAlgorithm:                          nil,
+				BucketPolicy:                          map[string]any(nil),
+				BucketVersioning:                      nil,
+				PublicAccessBlockConfiguration:        nil,
+				AccountPublicAccessBlockConfiguration: nil,
+			}},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion},
 		},
@@ -135,37 +160,132 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 						},
 					},
 				}, nil}}},
-				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
-				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
-				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketLocation":    {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketPolicy":      {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketVersioning":  {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetPublicAccessBlock": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: aws.String("AES256"), BucketPolicy: map[string]any(nil), BucketVersioning: nil}},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+			expected: []awslib.AwsResource{BucketDescription{
+				Name:                                  bucketName,
+				SSEAlgorithm:                          aws.String("AES256"),
+				BucketPolicy:                          map[string]any(nil),
+				BucketVersioning:                      nil,
+				PublicAccessBlockConfiguration:        nil,
+				AccountPublicAccessBlockConfiguration: nil,
+			}},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion, string(region)},
 		},
 		{
 			name: "Should return an S3 bucket with bucket policy",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
-				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
-				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, &smithy.GenericAPIError{Code: EncryptionNotFoundCode}}}},
-				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
-				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil}}},
-				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"ListBuckets":          {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption":  {{{mock.Anything, mock.Anything}, {nil, &smithy.GenericAPIError{Code: EncryptionNotFoundCode}}}},
+				"GetBucketLocation":    {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketPolicy":      {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketPolicyOutput{Policy: &bucketPolicyString}, nil}}},
+				"GetBucketVersioning":  {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetPublicAccessBlock": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: aws.String(NoEncryptionMessage), BucketPolicy: bucketPolicy, BucketVersioning: nil}},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+			expected: []awslib.AwsResource{BucketDescription{
+				Name:                                  bucketName,
+				SSEAlgorithm:                          aws.String(NoEncryptionMessage),
+				BucketPolicy:                          bucketPolicy,
+				BucketVersioning:                      nil,
+				PublicAccessBlockConfiguration:        nil,
+				AccountPublicAccessBlockConfiguration: nil,
+			}},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion, string(region)},
 		},
 		{
 			name: "Should return an S3 bucket with bucket versioning",
 			s3ClientMockReturnVals: s3ClientMockReturnVals{
+				"ListBuckets":          {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption":  {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketLocation":    {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketPolicy":      {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketVersioning":  {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}}},
+				"GetPublicAccessBlock": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+			},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+			expected: []awslib.AwsResource{BucketDescription{
+				Name:                                  bucketName,
+				SSEAlgorithm:                          nil,
+				BucketPolicy:                          map[string]any(nil),
+				BucketVersioning:                      &BucketVersioning{true, true},
+				PublicAccessBlockConfiguration:        nil,
+				AccountPublicAccessBlockConfiguration: nil,
+			}},
+			expectError: false,
+			regions:     []string{awslib.DefaultRegion, string(region)},
+		},
+		{
+			name: "Should return an S3 bucket with public access block config",
+			s3ClientMockReturnVals: s3ClientMockReturnVals{
 				"ListBuckets":         {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
 				"GetBucketEncryption": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
 				"GetBucketLocation":   {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
 				"GetBucketPolicy":     {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
-				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}}},
+				"GetBucketVersioning": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetPublicAccessBlock": {{{mock.Anything, mock.Anything}, {&s3Client.GetPublicAccessBlockOutput{
+					PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+						BlockPublicAcls:       false,
+						BlockPublicPolicy:     false,
+						IgnorePublicAcls:      false,
+						RestrictPublicBuckets: false,
+					},
+				}, nil}}},
 			},
-			expected:    []awslib.AwsResource{BucketDescription{Name: bucketName, SSEAlgorithm: nil, BucketPolicy: map[string]any(nil), BucketVersioning: &BucketVersioning{true, true}}},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+			expected: []awslib.AwsResource{BucketDescription{
+				Name:             bucketName,
+				SSEAlgorithm:     nil,
+				BucketPolicy:     map[string]any(nil),
+				BucketVersioning: nil,
+				PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+					BlockPublicAcls:       false,
+					BlockPublicPolicy:     false,
+					IgnorePublicAcls:      false,
+					RestrictPublicBuckets: false,
+				},
+				AccountPublicAccessBlockConfiguration: nil,
+			}},
+			expectError: false,
+			regions:     []string{awslib.DefaultRegion, string(region)},
+		},
+		{
+			name: "Should return an S3 bucket with account public access block config",
+			s3ClientMockReturnVals: s3ClientMockReturnVals{
+				"ListBuckets":          {{{mock.Anything, mock.Anything}, {&s3Client.ListBucketsOutput{Buckets: []types.Bucket{{Name: &bucketName}}}, nil}}},
+				"GetBucketEncryption":  {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketLocation":    {{{mock.Anything, mock.Anything}, {&s3Client.GetBucketLocationOutput{LocationConstraint: region}, nil}}},
+				"GetBucketPolicy":      {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetBucketVersioning":  {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+				"GetPublicAccessBlock": {{{mock.Anything, mock.Anything}, {nil, errors.New("bla")}}},
+			},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {&s3control.GetPublicAccessBlockOutput{
+				PublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
+					BlockPublicAcls:       false,
+					BlockPublicPolicy:     false,
+					IgnorePublicAcls:      false,
+					RestrictPublicBuckets: false,
+				},
+			}, nil}}},
+			expected: []awslib.AwsResource{BucketDescription{
+				Name:                           bucketName,
+				SSEAlgorithm:                   nil,
+				BucketPolicy:                   map[string]any(nil),
+				BucketVersioning:               nil,
+				PublicAccessBlockConfiguration: nil,
+				AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
+					BlockPublicAcls:       false,
+					BlockPublicPolicy:     false,
+					IgnorePublicAcls:      false,
+					RestrictPublicBuckets: false,
+				},
+			}},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion, string(region)},
 		},
@@ -201,10 +321,70 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 					{{mock.Anything, &s3Client.GetBucketVersioningInput{Bucket: &bucketName}}, {&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}},
 					{{mock.Anything, &s3Client.GetBucketVersioningInput{Bucket: &secondBucketName}}, {&s3Client.GetBucketVersioningOutput{Status: "Suspended", MFADelete: "Disabled"}, nil}},
 				},
+				"GetPublicAccessBlock": {
+					{{mock.Anything, &s3Client.GetPublicAccessBlockInput{Bucket: &bucketName}}, {&s3Client.GetPublicAccessBlockOutput{
+						PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+							BlockPublicAcls:       false,
+							BlockPublicPolicy:     false,
+							IgnorePublicAcls:      false,
+							RestrictPublicBuckets: false,
+						},
+					}, nil}},
+					{{mock.Anything, &s3Client.GetPublicAccessBlockInput{Bucket: &secondBucketName}}, {&s3Client.GetPublicAccessBlockOutput{
+						PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+							BlockPublicAcls:       true,
+							BlockPublicPolicy:     true,
+							IgnorePublicAcls:      true,
+							RestrictPublicBuckets: true,
+						},
+					}, nil}},
+				},
 			},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {&s3control.GetPublicAccessBlockOutput{
+				PublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
+					BlockPublicAcls:       false,
+					BlockPublicPolicy:     false,
+					IgnorePublicAcls:      false,
+					RestrictPublicBuckets: false,
+				},
+			}, nil}}},
 			expected: []awslib.AwsResource{
-				BucketDescription{Name: bucketName, SSEAlgorithm: aws.String("AES256"), BucketPolicy: bucketPolicy, BucketVersioning: &BucketVersioning{true, true}},
-				BucketDescription{Name: secondBucketName, SSEAlgorithm: aws.String("aws:kms"), BucketPolicy: map[string]any(nil), BucketVersioning: &BucketVersioning{false, false}},
+				BucketDescription{
+					Name:             bucketName,
+					SSEAlgorithm:     aws.String("AES256"),
+					BucketPolicy:     bucketPolicy,
+					BucketVersioning: &BucketVersioning{true, true},
+					PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+						BlockPublicAcls:       false,
+						BlockPublicPolicy:     false,
+						IgnorePublicAcls:      false,
+						RestrictPublicBuckets: false,
+					},
+					AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
+						BlockPublicAcls:       false,
+						BlockPublicPolicy:     false,
+						IgnorePublicAcls:      false,
+						RestrictPublicBuckets: false,
+					},
+				},
+				BucketDescription{
+					Name:             secondBucketName,
+					SSEAlgorithm:     aws.String("aws:kms"),
+					BucketPolicy:     map[string]any(nil),
+					BucketVersioning: &BucketVersioning{false, false},
+					PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+						BlockPublicAcls:       true,
+						BlockPublicPolicy:     true,
+						IgnorePublicAcls:      true,
+						RestrictPublicBuckets: true,
+					},
+					AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
+						BlockPublicAcls:       false,
+						BlockPublicPolicy:     false,
+						IgnorePublicAcls:      false,
+						RestrictPublicBuckets: false,
+					},
+				},
 			},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion, string(region)},
@@ -241,10 +421,70 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 					{{mock.Anything, &s3Client.GetBucketVersioningInput{Bucket: &bucketName}}, {&s3Client.GetBucketVersioningOutput{Status: "Enabled", MFADelete: "Enabled"}, nil}},
 					{{mock.Anything, &s3Client.GetBucketVersioningInput{Bucket: &secondBucketName}}, {&s3Client.GetBucketVersioningOutput{Status: "Suspended", MFADelete: "Disabled"}, nil}},
 				},
+				"GetPublicAccessBlock": {
+					{{mock.Anything, &s3Client.GetPublicAccessBlockInput{Bucket: &bucketName}}, {&s3Client.GetPublicAccessBlockOutput{
+						PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+							BlockPublicAcls:       false,
+							BlockPublicPolicy:     false,
+							IgnorePublicAcls:      false,
+							RestrictPublicBuckets: false,
+						},
+					}, nil}},
+					{{mock.Anything, &s3Client.GetPublicAccessBlockInput{Bucket: &secondBucketName}}, {&s3Client.GetPublicAccessBlockOutput{
+						PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+							BlockPublicAcls:       true,
+							BlockPublicPolicy:     true,
+							IgnorePublicAcls:      true,
+							RestrictPublicBuckets: true,
+						},
+					}, nil}},
+				},
 			},
+			s3ControlClientMockReturnVals: s3ControlClientMockReturnVals{"GetPublicAccessBlock": {{mock.Anything, mock.Anything}, {&s3control.GetPublicAccessBlockOutput{
+				PublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
+					BlockPublicAcls:       false,
+					BlockPublicPolicy:     false,
+					IgnorePublicAcls:      false,
+					RestrictPublicBuckets: false,
+				},
+			}, nil}}},
 			expected: []awslib.AwsResource{
-				BucketDescription{Name: bucketName, SSEAlgorithm: aws.String("AES256"), BucketPolicy: bucketPolicy, BucketVersioning: &BucketVersioning{true, true}},
-				BucketDescription{Name: secondBucketName, SSEAlgorithm: aws.String("aws:kms"), BucketPolicy: map[string]any(nil), BucketVersioning: &BucketVersioning{false, false}},
+				BucketDescription{
+					Name:             bucketName,
+					SSEAlgorithm:     aws.String("AES256"),
+					BucketPolicy:     bucketPolicy,
+					BucketVersioning: &BucketVersioning{true, true},
+					PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+						BlockPublicAcls:       false,
+						BlockPublicPolicy:     false,
+						IgnorePublicAcls:      false,
+						RestrictPublicBuckets: false,
+					},
+					AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
+						BlockPublicAcls:       false,
+						BlockPublicPolicy:     false,
+						IgnorePublicAcls:      false,
+						RestrictPublicBuckets: false,
+					},
+				},
+				BucketDescription{
+					Name:             secondBucketName,
+					SSEAlgorithm:     aws.String("aws:kms"),
+					BucketPolicy:     map[string]any(nil),
+					BucketVersioning: &BucketVersioning{false, false},
+					PublicAccessBlockConfiguration: &types.PublicAccessBlockConfiguration{
+						BlockPublicAcls:       true,
+						BlockPublicPolicy:     true,
+						IgnorePublicAcls:      true,
+						RestrictPublicBuckets: true,
+					},
+					AccountPublicAccessBlockConfiguration: &s3ControlTypes.PublicAccessBlockConfiguration{
+						BlockPublicAcls:       false,
+						BlockPublicPolicy:     false,
+						IgnorePublicAcls:      false,
+						RestrictPublicBuckets: false,
+					},
+				},
 			},
 			expectError: false,
 			regions:     []string{awslib.DefaultRegion},
@@ -259,9 +499,15 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 			}
 		}
 
+		controlClient := &MockControlClient{}
+		for funcName, vals := range test.s3ControlClientMockReturnVals {
+			controlClient.On(funcName, vals[0]...).Return(vals[1]...).Once()
+		}
+
 		s3Provider := Provider{
-			log:     s.log,
-			clients: testhelper.CreateMockClients[Client](s3ClientMock, test.regions),
+			log:           s.log,
+			clients:       testhelper.CreateMockClients[Client](s3ClientMock, test.regions),
+			controlClient: controlClient,
 		}
 
 		ctx := context.Background()

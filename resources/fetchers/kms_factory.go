@@ -18,12 +18,11 @@
 package fetchers
 
 import (
-	"context"
 	"fmt"
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/kms"
 	agentConfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -32,21 +31,19 @@ import (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.S3Type, &S3Factory{
-		CrossRegionFactory: &awslib.MultiRegionClientFactory[s3.Client]{},
-		IdentityProvider:   awslib.GetIdentityClient,
+	fetchersManager.Factories.RegisterFactory(fetching.KmsType, &KmsFactory{
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[kms.Client]{},
 	})
 }
 
-type S3Factory struct {
-	CrossRegionFactory awslib.CrossRegionFactory[s3.Client]
-	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
+type KmsFactory struct {
+	CrossRegionFactory awslib.CrossRegionFactory[kms.Client]
 }
 
-func (f *S3Factory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
-	log.Debug("Starting S3Factory.Create")
+func (f *KmsFactory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+	log.Debug("Starting KmsFactory.Create")
 
-	cfg := S3FetcherConfig{}
+	cfg := KmsFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
 		return nil, err
@@ -54,24 +51,18 @@ func (f *S3Factory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.
 	return f.CreateFrom(log, cfg, ch)
 }
 
-func (f *S3Factory) CreateFrom(log *logp.Logger, cfg S3FetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (f *KmsFactory) CreateFrom(log *logp.Logger, cfg KmsFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	identityProvider := f.IdentityProvider(awsConfig)
-	identity, err := identityProvider.GetIdentity(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
-	}
+	kmsProvider := kms.NewKMSProvider(awsConfig, log, f.CrossRegionFactory)
 
-	s3Provider := s3.NewProvider(awsConfig, log, f.CrossRegionFactory, *identity.Account)
-
-	return &S3Fetcher{
+	return &KmsFetcher{
 		log:        log,
 		cfg:        cfg,
-		s3:         s3Provider,
+		kms:        kmsProvider,
 		resourceCh: ch,
 	}, nil
 }
