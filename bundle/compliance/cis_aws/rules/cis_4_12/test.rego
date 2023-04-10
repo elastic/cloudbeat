@@ -11,8 +11,8 @@ test_pass {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 		},
-		"MetricFilters": [{"FilterPattern": "{ ($.eventName = CreateCustomerGateway) || ($.eventName = DeleteCustomerGateway) || ($.eventName = AttachInternetGateway) || ($.eventName = CreateInternetGateway) || ($.eventName = DeleteInternetGateway) || ($.eventName = DetachInternetGateway) }"}],
-		"Topics": ["arn:aws:...sns"],
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.eventName = CreateCustomerGateway) || ($.eventName = DeleteCustomerGateway) || ($.eventName = AttachInternetGateway) || ($.eventName = CreateInternetGateway) || ($.eventName = DeleteInternetGateway) || ($.eventName = DetachInternetGateway) }"}],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 }
 

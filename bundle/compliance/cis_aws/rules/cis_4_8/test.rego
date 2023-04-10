@@ -11,8 +11,8 @@ test_pass {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 		},
-		"MetricFilters": [{"FilterPattern": "{ ($.eventSource = s3.amazonaws.com) && (($.eventName = PutBucketAcl) || ($.eventName = PutBucketPolicy) || ($.eventName = PutBucketCors) || ($.eventName = PutBucketLifecycle) || ($.eventName = PutBucketReplication) || ($.eventName = DeleteBucketPolicy) || ($.eventName = DeleteBucketCors) || ($.eventName = DeleteBucketLifecycle) || ($.eventName = DeleteBucketReplication)) }"}],
-		"Topics": ["arn:aws:...sns"],
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.eventSource = s3.amazonaws.com) && (($.eventName = PutBucketAcl) || ($.eventName = PutBucketPolicy) || ($.eventName = PutBucketCors) || ($.eventName = PutBucketLifecycle) || ($.eventName = PutBucketReplication) || ($.eventName = DeleteBucketPolicy) || ($.eventName = DeleteBucketCors) || ($.eventName = DeleteBucketLifecycle) || ($.eventName = DeleteBucketReplication)) }"}],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 }
 

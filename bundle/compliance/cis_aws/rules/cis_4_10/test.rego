@@ -11,8 +11,8 @@ test_pass {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 		},
-		"MetricFilters": [{"FilterPattern": "{ ($.eventName = AuthorizeSecurityGroupIngress) || ($.eventName = AuthorizeSecurityGroupEgress) || ($.eventName = RevokeSecurityGroupIngress) || ($.eventName = RevokeSecurityGroupEgress) || ($.eventName = CreateSecurityGroup) || ($.eventName = DeleteSecurityGroup) }"}],
-		"Topics": ["arn:aws:...sns"],
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.eventName = AuthorizeSecurityGroupIngress) || ($.eventName = AuthorizeSecurityGroupEgress) || ($.eventName = RevokeSecurityGroupIngress) || ($.eventName = RevokeSecurityGroupEgress) || ($.eventName = CreateSecurityGroup) || ($.eventName = DeleteSecurityGroup) }"}],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 }
 

@@ -11,8 +11,8 @@ test_pass {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 		},
-		"MetricFilters": [{"FilterPattern": "{($.eventSource = kms.amazonaws.com) && (($.eventName=DisableKey)||($.eventName=ScheduleKeyDeletion)) }"}],
-		"Topics": ["arn:aws:...sns"],
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{($.eventSource = kms.amazonaws.com) && (($.eventName=DisableKey)||($.eventName=ScheduleKeyDeletion)) }"}],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 }
 

@@ -15,10 +15,10 @@ at_least_one_trail_satisfied(metric_filter_patterns) {
 	cloudtrail_enabled(trail)
 
 	# and the metric filter pattern is as expected
-	pattern.at_least_one_metric_exists(trail, metric_filter_patterns)
+	filter := pattern.get_filter_matched_to_pattern(trail, metric_filter_patterns)
 
 	# and it has at least one subscription
-	count(trail.Topics) > 0
+	count(trail.MetricTopicBinding[filter]) > 0
 }
 
 cloudtrail_enabled(trail) {

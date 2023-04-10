@@ -15,8 +15,8 @@ test_violation {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true}],
 		},
-		"Topics": ["arn:aws:...sns"],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 	}])
 
 	# No topics
@@ -26,8 +26,8 @@ test_violation {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true}],
 		},
-		"Topics": [],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricTopicBinding": {},
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 	}])
 
 	# No "AuthorizationFilterExists=true"
@@ -37,7 +37,7 @@ test_violation {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true}],
 		},
-		"Topics": ["arn:aws:...sns"],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 		"MetricFilters": [],
 	}])
 
@@ -48,8 +48,8 @@ test_violation {
 			"Status": {"IsLogging": false},
 			"EventSelectors": [{"IncludeManagementEvents": true}],
 		},
-		"Topics": ["arn:aws:...sns"],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 
 	# The event selector does include management events 
@@ -59,8 +59,8 @@ test_violation {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": false, "ReadWriteType": "All"}],
 		},
-		"Topics": ["arn:aws:...sns"],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 
 	eval_fail with input as rule_input([{
@@ -69,8 +69,8 @@ test_violation {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "WriteOnly"}],
 		},
-		"Topics": ["arn:aws:...sns"],
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 	}])
 
 	# Missing * wildcards
@@ -89,8 +89,8 @@ test_violation {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 		},
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
-		"Topics": ["arn:aws:...sns"],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 	}])
 }
 
@@ -101,8 +101,8 @@ test_pass {
 			"Status": {"IsLogging": true},
 			"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 		},
-		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
-		"Topics": ["arn:aws:...sns"],
+		"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 
 	# at least one is matching
@@ -113,8 +113,8 @@ test_pass {
 				"Status": {"IsLogging": true},
 				"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "All"}],
 			},
-			"Topics": ["arn:aws:...sns"],
-			"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+			"MetricFilters": [{"FilterName": "filter_1", "FilterPattern": "{ ($.errorCode = \"*UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
+			"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 		},
 		{
 			"TrailInfo": {
@@ -122,7 +122,7 @@ test_pass {
 				"Status": {"IsLogging": false},
 				"EventSelectors": [{"IncludeManagementEvents": true, "ReadWriteType": "WriteOnly"}],
 			},
-			"Topics": ["arn:aws:...sns"],
+			"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 			"MetricFilters": [],
 		},
 	])
