@@ -88,7 +88,7 @@ func (l *launcher) Run(b *beat.Beat) error {
 		l.log.Infof("Waiting for initial reconfiguration from Fleet server...")
 		update, err := l.reconfigureWait(reconfigureWaitTimeout)
 		if err != nil {
-			l.log.Errorf("Failed while waiting for initial reconfiguraiton from Fleet server: %v", err)
+			l.log.Errorf("Failed while waiting for the initial reconfiguration from Fleet server: %v", err)
 			return err
 		}
 
@@ -106,7 +106,7 @@ func (l *launcher) run() error {
 	if err != nil {
 		l.log.Errorf("Launcher has stopped: %v", err)
 	} else {
-		l.log.Info("Launcher was shutted down gracefully")
+		l.log.Info("Launcher was shut down gracefully")
 	}
 
 	l.reloader.Stop()
@@ -183,14 +183,14 @@ func (l *launcher) runBeater() error {
 	return nil
 }
 
-// stopBeater only returns after the beater truely stopped running
+// stopBeater only returns after the beater truly stopped running
 func (l *launcher) stopBeater() {
 	l.log.Infof("Launcher is shutting %s down gracefully", l.name)
 	l.beater.Stop()
 
-	// By waiting to the wait group, it make sure that the old beater has really stopped
+	// By waiting to the wait group, we make sure that the old beater has really stopped
 	l.wg.Wait()
-	l.log.Infof("Launcher shutted %s down gracefully", l.name)
+	l.log.Infof("Launcher shut %s down gracefully", l.name)
 }
 
 // waitForUpdates is the function that keeps Launcher runLoop busy
@@ -220,7 +220,7 @@ func (l *launcher) configUpdate(update *config.C) error {
 	return l.latest.MergeWithOpts(update, ucfg.ReplaceArrValues)
 }
 
-// reconfigureWait will wait for and consume incoming reconfuration from the Fleet server, and keep
+// reconfigureWait will wait for and consume incoming reconfiguration from the Fleet server, and keep
 // discarding them until the incoming config contains the necessary information to start beater
 // properly, thereafter returning the valid config.
 func (l *launcher) reconfigureWait(timeout time.Duration) (*config.C, error) {
