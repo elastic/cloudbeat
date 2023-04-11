@@ -197,7 +197,15 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins Ec2Instance) ([]EBSS
 		InstanceSpecification: &types.InstanceSpecification{
 			InstanceId: ins.InstanceId,
 		},
-		Description: aws.String("Cloudbeat Vulnerability Snapshot."),
+		Description: aws.String("Uri Vulnerability test."),
+		TagSpecifications: []types.TagSpecification{
+			{
+				ResourceType: "snapshot",
+				Tags: []types.Tag{
+					{Key: aws.String("Name"), Value: aws.String(fmt.Sprintf("elastic-vulnerability-%s", *ins.InstanceId))},
+				},
+			},
+		},
 	}
 	res, err := client.CreateSnapshots(ctx, input)
 	if err != nil {
@@ -233,17 +241,15 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 	return result, nil
 }
 
-func (p *Provider) DeleteSnapshots(ctx context.Context, ids []string) error {
-	_, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]Ec2Instance, error) {
-		for _, id := range ids {
-			_, err := c.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(id)})
-			if err != nil {
-				p.log.Errorf("Error deleting snapshot %s: %v", id, err)
-			}
-		}
+func (p *Provider) DeleteSnapshot(ctx context.Context, snapshot EBSSnapshot) error {
+	client, err := awslib.GetClient(aws.String(snapshot.Region), p.clients)
+	if err != nil {
+		return err
+	}
+	_, err = client.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)})
+	if err != nil {
+		return fmt.Errorf("error deleting snapshot %s: %v", snapshot.SnapshotId, err)
+	}
 
-		return nil, nil
-	})
-
-	return err
+	return nil
 }
