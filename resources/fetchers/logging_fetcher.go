@@ -19,6 +19,8 @@ package fetchers
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
@@ -33,6 +35,7 @@ type LoggingFetcher struct {
 	configserviceProvider configservice.ConfigService
 	cfg                   fetching.AwsBaseFetcherConfig
 	resourceCh            chan fetching.ResourceInfo
+	cloudIdentity         *awslib.Identity
 }
 
 type LoggingResource struct {
@@ -40,7 +43,8 @@ type LoggingResource struct {
 }
 
 type ConfigResource struct {
-	awslib.AwsResource
+	configs  []awslib.AwsResource
+	identity *awslib.Identity
 }
 
 func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -64,11 +68,9 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetad
 		f.log.Errorf("failed to describe config recorders: %v", err)
 	}
 
-	for _, resource := range configs {
-		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      ConfigResource{AwsResource: resource},
-			CycleMetadata: cMetadata,
-		}
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      ConfigResource{configs: configs, identity: f.cloudIdentity},
+		CycleMetadata: cMetadata,
 	}
 
 	return nil
@@ -91,16 +93,17 @@ func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 func (r LoggingResource) GetElasticCommonData() any { return nil }
 
 func (c ConfigResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	id := fmt.Sprintf("configservice-%s", *c.identity.Account)
 	return fetching.ResourceMetadata{
-		ID:      c.GetResourceArn(),
+		ID:      id,
 		Type:    fetching.CloudConfig,
-		SubType: c.GetResourceType(),
-		Name:    c.GetResourceName(),
+		SubType: fetching.ConfigServiceResourceType,
+		Name:    id,
 	}, nil
 }
 
 func (c ConfigResource) GetData() any {
-	return c.AwsResource
+	return c.configs
 }
 
 func (c ConfigResource) GetElasticCommonData() any { return nil }

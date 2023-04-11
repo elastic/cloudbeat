@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
@@ -81,5 +82,6 @@ func (f *LoggingFactory) CreateFrom(log *logp.Logger, cfg fetching.AwsBaseFetche
 		configserviceProvider: configservice.NewProvider(log, awsConfig, f.ConfigCrossRegionFactory, *identity.Account),
 		cfg:                   cfg,
 		resourceCh:            ch,
+		cloudIdentity:         identity,
 	}, nil
 }
