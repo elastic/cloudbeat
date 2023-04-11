@@ -52,6 +52,12 @@ repos:
           --diff,
         ]
 
+  - repo: https://github.com/awslabs/cfn-python-lint
+    rev: v0.77.0
+    hooks:
+    -   id: cfn-python-lint
+        files: deploy/cloudformation/elastic-agent-ec2.yml
+
   - repo: local
     hooks:
       - id: mage-config
