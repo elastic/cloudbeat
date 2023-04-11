@@ -6,9 +6,6 @@ Parameters:
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
-  KeyName:
-    Type: AWS::EC2::KeyPair::KeyName
-    Description: SSH Keypair to login to the instance
   InstanceType:
     Type: String
     Default: a1.xlarge
@@ -33,12 +30,8 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Join ['-', ['elastic-agent-security-group', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
-      GroupDescription: Allow incoming SSH traffic
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: 0.0.0.0/0
+      GroupDescription: Block incoming traffic
+      SecurityGroupIngress: []
 
   # IAM Role for EC2 instance
   ElasticAgentRole:
@@ -96,7 +89,6 @@ Resources:
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ElasticAgentInstanceProfile
-      KeyName: !Ref KeyName
       SecurityGroupIds:
         - !Ref ElasticAgentSecurityGroup
       UserData:
