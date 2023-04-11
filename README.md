@@ -152,7 +152,8 @@ opa test -b bundle.tar.gz -v
 ### Test specific rule
 
 ```bash
-opa test -v bundle/compliance/kubernetes_common bundle/compliance/lib bundle/compliance/cis_k8s/test_data.rego bundle/compliance/cis_k8s/rules/cis_1_1_2 --ignore="common_tests.rego"
+opa test -v bundle --run 'cis_4_1.test'  # Test the 4.1 rule
+opa test -v bundle --run 'cis_(4|5)'     # Test all rules of CIS section 4 and 5
 ```
 
 ### Pre-commit hooks
