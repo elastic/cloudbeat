@@ -32,7 +32,7 @@ Resources:
   ElasticAgentSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName: elastic-agent-security-group
+      GroupName: !Join ['-', ['elastic-agent-security-group', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
       GroupDescription: Allow incoming SSH traffic
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -79,7 +79,7 @@ Resources:
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: elastic-agent-instance-profile
+      InstanceProfileName: !Join ['-', ['elastic-agent-instance-profile', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
       Path: /
       Roles:
        - !Ref ElasticAgentRole
@@ -88,6 +88,11 @@ Resources:
   ElasticAgentEc2Instance:
     Type: AWS::EC2::Instance
     Properties:
+      Tags:
+        - Key: Name
+          Value: !Join ['-', ['elastic-agent-instance', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
+        - Key: Task
+          Value: Vulnerability Management Scanner
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ElasticAgentInstanceProfile
