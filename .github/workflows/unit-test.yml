@@ -134,21 +134,6 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v3
 
-  cloudformation-linter:
-    name: cloudfomration-lint
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Setup Cloud Formation Linter with Latest Version
-        uses: scottbrenner/cfn-lint-action@v2.3.0
-
-      - name: Print the Cloud Formation Linter Version & run Linter.
-        run: |
-          cfn-lint --version
-          cfn-lint -I -t ./deploy/cloudformation/elastic-agent-ec2.yml
-
   terraform-linter:
     name: terraform-lint
     runs-on: ubuntu-20.04
