@@ -5,6 +5,7 @@ ENROLLMENT_TOKEN="${3:-$ENROLLMENT_TOKEN}"
 ELASTIC_AGENT_VERSION="${4:-elastic-agent-8.8.0-SNAPSHOT-linux-arm64}"
 TEMPLATE="deploy/cloudformation/elastic-agent-ec2.yml"
 if [ -n "${DEV}" ]; then
+  python3 deploy/cloudformation/generate_dev.py || { echo 'Dev CloudFormation generation failed' ; exit 1; }
   TEMPLATE="deploy/cloudformation/elastic-agent-ec2-dev.yml"
 fi
 
