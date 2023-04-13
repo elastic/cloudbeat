@@ -19,9 +19,10 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 	"testing"
 	"time"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
@@ -108,6 +109,7 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 			expectedResources: 3,
 		},
 	}
+	testAccount := "test-account"
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
@@ -119,6 +121,9 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				configserviceProvider: tt.configServiceProvider(),
 				cfg:                   fetching.AwsBaseFetcherConfig{},
 				resourceCh:            ch,
+				cloudIdentity: &awslib.Identity{
+					Account: &testAccount,
+				},
 			}
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})

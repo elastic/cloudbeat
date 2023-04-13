@@ -68,9 +68,11 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetad
 		f.log.Errorf("failed to describe config recorders: %v", err)
 	}
 
-	f.resourceCh <- fetching.ResourceInfo{
-		Resource:      ConfigResource{configs: configs, identity: f.cloudIdentity},
-		CycleMetadata: cMetadata,
+	if len(configs) > 0 {
+		f.resourceCh <- fetching.ResourceInfo{
+			Resource:      ConfigResource{configs: configs, identity: f.cloudIdentity},
+			CycleMetadata: cMetadata,
+		}
 	}
 
 	return nil
