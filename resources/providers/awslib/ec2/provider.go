@@ -214,7 +214,7 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins Ec2Instance) ([]EBSS
 
 	var result []EBSSnapshot
 	for _, snap := range res.Snapshots {
-		result = append(result, FromSnapshotInfo(snap, ins.Region, p.awsAccountID))
+		result = append(result, FromSnapshotInfo(snap, ins.Region, p.awsAccountID, ins))
 	}
 	return result, nil
 }
@@ -236,7 +236,7 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 
 	var result []EBSSnapshot
 	for _, snap := range res.Snapshots {
-		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID))
+		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID, snapshot.Instance))
 	}
 	return result, nil
 }
