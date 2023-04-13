@@ -1,0 +1,114 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates an EC2 instance with permissions to run elastic-agent
+
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
+  InstanceType:
+    Type: String
+    Default: a1.xlarge
+    AllowedValues:
+    - a1.xlarge
+    - a1.2xlarge
+    - a1.4xlarge
+    Description: The type of EC2 instance to create
+  EnrollmentToken:
+    Type: String
+    Description: The enrollment token of elasitc-agent
+  FleetUrl:
+    Type: String
+    Description: The fleet URL of elastic-agent
+  ElasticAgentVersion:
+    Type: String
+    Description: The version of elastic-agent to install
+
+Resources:
+  # Security Group for EC2 instance
+  ElasticAgentSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join ['-', ['elastic-agent-security-group', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
+      GroupDescription: Block incoming traffic
+      SecurityGroupIngress: []
+
+  # IAM Role for EC2 instance
+  ElasticAgentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: vuln-mgmt-permissions
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - ec2:DescribeInstances
+            - ec2:DescribeImages
+            - ec2:DescribeTags
+            - ec2:DescribeSnapshots
+            - ec2:CreateSnapshots
+            - ec2:CreateTags
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - ebs:ListSnapshotBlocks
+            - ebs:ListChangedBlocks
+            - ebs:GetSnapshotBlock
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - kms:Decrypt
+            Resource:
+            - !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/ebs'
+
+  # Instance profile to attach to EC2 instance
+  ElasticAgentInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Join ['-', ['elastic-agent-instance-profile', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
+      Path: /
+      Roles:
+       - !Ref ElasticAgentRole
+
+  # EC2 Instance to run elastic-agent
+  ElasticAgentEc2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join ['-', ['elastic-agent-instance', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
+        - Key: Task
+          Value: Vulnerability Management Scanner
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref ElasticAgentInstanceProfile
+      SecurityGroupIds:
+        - !Ref ElasticAgentSecurityGroup
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            curl -L -O https://snapshots.elastic.co/8.8.0-4c45f51b/downloads/beats/elastic-agent/${ElasticAgentVersion}.tar.gz
+            tar xzvf ${ElasticAgentVersion}.tar.gz
+            cd ${ElasticAgentVersion}
+            sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken}
+
+Outputs:
+  Ec2InstanceId:
+    Value: !Ref ElasticAgentEc2Instance
+    Description: The EC2 instance ID
+  Ec2InstancePublicIp:
+    Value: !GetAtt ElasticAgentEc2Instance.PublicIp
+    Description: The EC2 instance public IP
