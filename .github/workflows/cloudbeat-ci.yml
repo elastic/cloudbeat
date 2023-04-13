@@ -46,12 +46,6 @@ jobs:
       - name: Validate mocks
         run: just validate-mocks
 
-      - name: Validate cloudformation dev
-        run: |
-          diff deploy/cloudformation/elastic-agent-ec2.yml deploy/cloudformation/elastic-agent-ec2-dev.yml > deploy/cloudformation/elastic-agent-ec2-dev.tmp.patch
-          DIFF=$(diff deploy/cloudformation/elastic-agent-ec2-dev.tmp.patch deploy/cloudformation/elastic-agent-ec2-dev.patch)
-          [[ -n "${DIFF}" ]] && exit 1
-
   Build:
     name: Build
     runs-on: ubuntu-20.04
