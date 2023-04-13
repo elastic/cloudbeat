@@ -31,8 +31,7 @@ import (
 func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error) {
 	var policies []awslib.AwsResource
 
-	input := &iamsdk.ListPoliciesInput{OnlyAttached: true}
-	listPolicies, err := p.client.ListPolicies(ctx, input)
+	listPolicies, err := p.client.ListPolicies(ctx, &iamsdk.ListPoliciesInput{OnlyAttached: true})
 	if err != nil {
 		return nil, err
 	}
