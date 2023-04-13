@@ -248,7 +248,7 @@ func (p *Provider) DeleteSnapshot(ctx context.Context, snapshot EBSSnapshot) err
 	}
 	_, err = client.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)})
 	if err != nil {
-		return fmt.Errorf("error deleting snapshot %s: %v", snapshot.SnapshotId, err)
+		return fmt.Errorf("error deleting snapshot %s: %w", snapshot.SnapshotId, err)
 	}
 
 	return nil
