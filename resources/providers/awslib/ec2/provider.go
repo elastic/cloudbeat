@@ -45,6 +45,7 @@ type Client interface {
 	DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
 	CreateSnapshots(ctx context.Context, params *ec2.CreateSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.CreateSnapshotsOutput, error)
 	DescribeSnapshots(ctx context.Context, params *ec2.DescribeSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSnapshotsOutput, error)
+	DeleteSnapshot(ctx context.Context, params *ec2.DeleteSnapshotInput, optFns ...func(*ec2.Options)) (*ec2.DeleteSnapshotOutput, error)
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -197,6 +198,14 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins Ec2Instance) ([]EBSS
 			InstanceId: ins.InstanceId,
 		},
 		Description: aws.String("Cloudbeat Vulnerability Snapshot."),
+		TagSpecifications: []types.TagSpecification{
+			{
+				ResourceType: "snapshot",
+				Tags: []types.Tag{
+					{Key: aws.String("Name"), Value: aws.String(fmt.Sprintf("elastic-vulnerability-%s", *ins.InstanceId))},
+				},
+			},
+		},
 	}
 	res, err := client.CreateSnapshots(ctx, input)
 	if err != nil {
@@ -230,4 +239,17 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID))
 	}
 	return result, nil
+}
+
+func (p *Provider) DeleteSnapshot(ctx context.Context, snapshot EBSSnapshot) error {
+	client, err := awslib.GetClient(aws.String(snapshot.Region), p.clients)
+	if err != nil {
+		return err
+	}
+	_, err = client.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)})
+	if err != nil {
+		return fmt.Errorf("error deleting snapshot %s: %w", snapshot.SnapshotId, err)
+	}
+
+	return nil
 }
