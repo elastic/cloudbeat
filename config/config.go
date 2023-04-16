@@ -79,8 +79,8 @@ func New(cfg *config.C) (*Config, error) {
 
 func defaultConfig() (*Config, error) {
 	ret := &Config{
-		Period:    4 * time.Hour,
-		Benchmark: CIS_K8S,
+		Period: 4 * time.Hour,
+		//Benchmark: CIS_K8S,
 	}
 
 	bundle, err := getBundlePath()

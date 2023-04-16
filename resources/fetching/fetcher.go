@@ -105,6 +105,7 @@ type ResourceMetadata struct {
 	SubType   string `json:"sub_type,omitempty"`
 	Name      string `json:"name,omitempty"`
 	ECSFormat string `json:"ecsFormat,omitempty"`
+	Region    string `json:"region,omitempty"`
 }
 
 type Result struct {

@@ -197,7 +197,7 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins Ec2Instance) ([]EBSS
 		InstanceSpecification: &types.InstanceSpecification{
 			InstanceId: ins.InstanceId,
 		},
-		Description: aws.String("Cloudbeat Vulnerability Snapshot."),
+		Description: aws.String("URI TEST Vulnerability."),
 		TagSpecifications: []types.TagSpecification{
 			{
 				ResourceType: "snapshot",

@@ -21,6 +21,8 @@ package dataprovider
 
 import (
 	beat "github.com/elastic/beats/v7/libbeat/beat"
+	fetching "github.com/elastic/cloudbeat/resources/fetching"
+
 	mock "github.com/stretchr/testify/mock"
 
 	types "github.com/elastic/cloudbeat/dataprovider/types"
@@ -39,13 +41,13 @@ func (_m *MockCommonDataProvider) EXPECT() *MockCommonDataProvider_Expecter {
 	return &MockCommonDataProvider_Expecter{mock: &_m.Mock}
 }
 
-// EnrichEvent provides a mock function with given fields: _a0
-func (_m *MockCommonDataProvider) EnrichEvent(_a0 *beat.Event) error {
-	ret := _m.Called(_a0)
+// EnrichEvent provides a mock function with given fields: event, resource
+func (_m *MockCommonDataProvider) EnrichEvent(event *beat.Event, resource fetching.ResourceMetadata) error {
+	ret := _m.Called(event, resource)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*beat.Event) error); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(*beat.Event, fetching.ResourceMetadata) error); ok {
+		r0 = rf(event, resource)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -59,14 +61,15 @@ type MockCommonDataProvider_EnrichEvent_Call struct {
 }
 
 // EnrichEvent is a helper method to define mock.On call
-//   - _a0 *beat.Event
-func (_e *MockCommonDataProvider_Expecter) EnrichEvent(_a0 interface{}) *MockCommonDataProvider_EnrichEvent_Call {
-	return &MockCommonDataProvider_EnrichEvent_Call{Call: _e.mock.On("EnrichEvent", _a0)}
+//   - event *beat.Event
+//   - resource fetching.ResourceMetadata
+func (_e *MockCommonDataProvider_Expecter) EnrichEvent(event interface{}, resource interface{}) *MockCommonDataProvider_EnrichEvent_Call {
+	return &MockCommonDataProvider_EnrichEvent_Call{Call: _e.mock.On("EnrichEvent", event, resource)}
 }
 
-func (_c *MockCommonDataProvider_EnrichEvent_Call) Run(run func(_a0 *beat.Event)) *MockCommonDataProvider_EnrichEvent_Call {
+func (_c *MockCommonDataProvider_EnrichEvent_Call) Run(run func(event *beat.Event, resource fetching.ResourceMetadata)) *MockCommonDataProvider_EnrichEvent_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*beat.Event))
+		run(args[0].(*beat.Event), args[1].(fetching.ResourceMetadata))
 	})
 	return _c
 }
@@ -76,7 +79,7 @@ func (_c *MockCommonDataProvider_EnrichEvent_Call) Return(_a0 error) *MockCommon
 	return _c
 }
 
-func (_c *MockCommonDataProvider_EnrichEvent_Call) RunAndReturn(run func(*beat.Event) error) *MockCommonDataProvider_EnrichEvent_Call {
+func (_c *MockCommonDataProvider_EnrichEvent_Call) RunAndReturn(run func(*beat.Event, fetching.ResourceMetadata) error) *MockCommonDataProvider_EnrichEvent_Call {
 	_c.Call.Return(run)
 	return _c
 }
