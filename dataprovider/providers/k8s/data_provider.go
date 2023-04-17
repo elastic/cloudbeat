@@ -65,7 +65,7 @@ func (k DataProvider) FetchData(resource string, id string) (types.Data, error) 
 	}, nil
 }
 
-func (k DataProvider) EnrichEvent(event *beat.Event) error {
+func (k DataProvider) EnrichEvent(event *beat.Event, _ fetching.ResourceMetadata) error {
 	name := k.cluster
 	if name == "" {
 		return nil

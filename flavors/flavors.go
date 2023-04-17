@@ -19,6 +19,7 @@ package flavors
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/dataprovider"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
@@ -44,4 +45,5 @@ type flavorBase struct {
 	client      beat.Client
 	transformer transformer.Transformer
 	log         *logp.Logger
+	cdp         dataprovider.CommonDataProvider
 }
