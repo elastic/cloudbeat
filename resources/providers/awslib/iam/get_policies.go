@@ -31,25 +31,33 @@ import (
 func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error) {
 	var policies []awslib.AwsResource
 
-	listPolicies, err := p.client.ListPolicies(ctx, &iamsdk.ListPoliciesInput{OnlyAttached: true})
-	if err != nil {
-		return nil, err
-	}
-
-	for _, policy := range listPolicies.Policies {
-		output, err := p.getPolicyVersion(ctx, policy)
+	input := &iamsdk.ListPoliciesInput{OnlyAttached: true}
+	for {
+		listPoliciesOutput, err := p.client.ListPolicies(ctx, input)
 		if err != nil {
 			return nil, err
 		}
 
-		doc, err := decodePolicyDocument(output.PolicyVersion)
-		if err != nil {
-			return nil, err
+		for _, policy := range listPoliciesOutput.Policies {
+			output, err := p.getPolicyVersion(ctx, policy)
+			if err != nil {
+				return nil, err
+			}
+
+			doc, err := decodePolicyDocument(output.PolicyVersion)
+			if err != nil {
+				return nil, err
+			}
+			policies = append(policies, Policy{
+				Policy:   policy,
+				Document: doc,
+			})
 		}
-		policies = append(policies, Policy{
-			Policy:   policy,
-			Document: doc,
-		})
+
+		if !listPoliciesOutput.IsTruncated {
+			break
+		}
+		input.Marker = listPoliciesOutput.Marker
 	}
 
 	return policies, nil
