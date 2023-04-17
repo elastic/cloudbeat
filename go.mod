@@ -64,6 +64,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
 	github.com/open-policy-agent/opa v0.44.1-0.20220927105354-00e835a7cc15
+	github.com/pandatix/go-cvss v0.5.2
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.37.0
 	go.elastic.co/go-licence-detector v0.6.0
