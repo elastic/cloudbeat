@@ -49,6 +49,7 @@ const (
 	VpcType                   = "aws-vpc"
 	RdsType                   = "aws-rds"
 	ConfigServiceResourceType = "aws-config"
+	PolicyType                = "aws-policy"
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"
