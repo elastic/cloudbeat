@@ -19,6 +19,8 @@ package fetchers
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
@@ -86,6 +88,23 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		MfaActive:           true,
 	}
 
+	iamPolicy := iam.Policy{
+		Policy: types.Policy{
+			Arn:             aws.String("testArn"),
+			AttachmentCount: aws.Int32(1),
+			IsAttachable:    true,
+		},
+		Document: map[string]interface{}{
+			"Statements": []map[string]interface{}{
+				{
+					"Resource": "*",
+					"Action":   "*",
+					"Effect":   "Allow",
+				},
+			},
+		},
+	}
+
 	var tests = []struct {
 		name               string
 		mocksReturnVals    mocksReturnVals
@@ -93,37 +112,51 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		numExpectedResults int
 	}{
 		{
-			name: "Should get password policy and an IAM user",
+			name: "Should get password policy, an IAM user and an IAM policy",
 			mocksReturnVals: mocksReturnVals{
 				"GetPasswordPolicy": {pwdPolicy, nil},
 				"GetUsers":          {[]awslib.AwsResource{iamUser}, nil},
+				"GetPolicies":       {[]awslib.AwsResource{iamPolicy}, nil},
 			},
 			account:            testAccount,
-			numExpectedResults: 2,
+			numExpectedResults: 3,
 		},
 		{
-			name: "Receives only an IAM user due to an error in GetPasswordPolicy",
+			name: "Receives only an IAM user due to errors in other fetchers",
 			mocksReturnVals: mocksReturnVals{
 				"GetPasswordPolicy": {nil, errors.New("Fail to fetch pwd policy")},
 				"GetUsers":          {[]awslib.AwsResource{iamUser}, nil},
+				"GetPolicies":       {nil, errors.New("Fail to fetch iam policies")},
 			},
 			account:            testAccount,
 			numExpectedResults: 1,
 		},
 		{
-			name: "Should get only a password policy resource due to an error in GetUsers",
+			name: "Should get only a password policy resource due errors in other fetchers",
 			mocksReturnVals: mocksReturnVals{
 				"GetPasswordPolicy": {pwdPolicy, nil},
 				"GetUsers":          {nil, errors.New("Fail to fetch iam users")},
+				"GetPolicies":       {nil, errors.New("Fail to fetch iam policies")},
 			},
 			account:            testAccount,
 			numExpectedResults: 1,
+		},
+		{
+			name: "Should get only IAM policies due to errors in other fetchers",
+			mocksReturnVals: mocksReturnVals{
+				"GetPasswordPolicy": {nil, errors.New("Fail to fetch pwd policy")},
+				"GetUsers":          {nil, errors.New("Fail to fetch iam users")},
+				"GetPolicies":       {[]awslib.AwsResource{iamPolicy, iamPolicy}, nil},
+			},
+			account:            testAccount,
+			numExpectedResults: 2, // note: intentionally including two policies
 		},
 		{
 			name: "Should not get any IAM resources",
 			mocksReturnVals: mocksReturnVals{
 				"GetPasswordPolicy": {nil, errors.New("Fail to fetch pwd policy")},
 				"GetUsers":          {nil, errors.New("Fail to fetch iam users")},
+				"GetPolicies":       {nil, errors.New("Fail to fetch iam policies")},
 			},
 			account:            testAccount,
 			numExpectedResults: 0,

@@ -101,7 +101,7 @@ func (t *Transformer) CreateBeatEvents(ctx context.Context, eventData evaluator.
 			},
 		}
 
-		err := t.commonDataProvider.EnrichEvent(&event)
+		err := t.commonDataProvider.EnrichEvent(&event, resMetadata)
 		if err != nil {
 			return nil, fmt.Errorf("failed to enrich event: %v", err)
 		}

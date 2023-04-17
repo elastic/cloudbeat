@@ -20,6 +20,7 @@ package aws
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/dataprovider/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -28,6 +29,7 @@ const (
 	cloudAccountIdField   = "cloud.account.id"
 	cloudAccountNameField = "cloud.account.name"
 	cloudProviderField    = "cloud.provider"
+	cloudRegionField      = "cloud.region"
 	cloudProviderValue    = "aws"
 )
 
@@ -55,7 +57,7 @@ func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 	}, nil
 }
 
-func (a DataProvider) EnrichEvent(event *beat.Event) error {
+func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
 	_, err := event.Fields.Put(cloudAccountIdField, a.accountId)
 	if err != nil {
 		return err
@@ -67,6 +69,11 @@ func (a DataProvider) EnrichEvent(event *beat.Event) error {
 	}
 
 	_, err = event.Fields.Put(cloudProviderField, cloudProviderValue)
+	if err != nil {
+		return err
+	}
+
+	_, err = event.Fields.Put(cloudRegionField, resMetadata.Region)
 	if err != nil {
 		return err
 	}
