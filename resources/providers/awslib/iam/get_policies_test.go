@@ -48,7 +48,6 @@ func TestProvider_GetPolicies(t *testing.T) {
 			mockReturnValues: mocksReturnVals{
 				"ListPolicies": {{nil, errors.New("some error")}},
 			},
-			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -68,8 +67,7 @@ func TestProvider_GetPolicies(t *testing.T) {
 					},
 				},
 			},
-			want:    nil,
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Error getting policy version",
@@ -89,7 +87,6 @@ func TestProvider_GetPolicies(t *testing.T) {
 				},
 				"GetPolicyVersion": {{nil, errors.New("some error")}},
 			},
-			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -98,7 +95,7 @@ func TestProvider_GetPolicies(t *testing.T) {
 				"ListPolicies": {
 					{
 						&iamsdk.ListPoliciesOutput{
-							Policies: []types.Policy{{Arn: nil},
+							Policies: []types.Policy{
 								{
 									Arn:              aws.String("some-arn"),
 									DefaultVersionId: aws.String("some-version"),
@@ -157,14 +154,14 @@ func Test_decodePolicyDocument(t *testing.T) {
 		{
 			name:          "Check for nil policy version",
 			policyVersion: nil,
-			want:          nil,
+			wantErr:       "invalid policy version",
 		},
 		{
 			name: "Check for nil document",
 			policyVersion: &types.PolicyVersion{
 				Document: nil,
 			},
-			want: nil,
+			wantErr: "invalid policy version",
 		},
 		{
 			name:          "Invalid JSON",

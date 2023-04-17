@@ -37,14 +37,7 @@ func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	}
 
 	for _, policy := range listPolicies.Policies {
-		if policy.Arn == nil || policy.DefaultVersionId == nil {
-			continue
-		}
-
-		output, err := p.client.GetPolicyVersion(ctx, &iamsdk.GetPolicyVersionInput{
-			PolicyArn: policy.Arn,
-			VersionId: policy.DefaultVersionId,
-		})
+		output, err := p.getPolicyVersion(ctx, policy)
 		if err != nil {
 			return nil, err
 		}
@@ -62,9 +55,16 @@ func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	return policies, nil
 }
 
+func (p Provider) getPolicyVersion(ctx context.Context, policy types.Policy) (*iamsdk.GetPolicyVersionOutput, error) {
+	if policy.Arn == nil || policy.DefaultVersionId == nil {
+		return nil, fmt.Errorf("invalid policy: %v", policy)
+	}
+	return p.client.GetPolicyVersion(ctx, &iamsdk.GetPolicyVersionInput{PolicyArn: policy.Arn, VersionId: policy.DefaultVersionId})
+}
+
 func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]interface{}, error) {
 	if policyVersion == nil || policyVersion.Document == nil {
-		return nil, nil
+		return nil, fmt.Errorf("invalid policy version: %v", policyVersion)
 	}
 
 	// The policy document is URL-encoded, compliant with RFC 3986
