@@ -42,11 +42,12 @@ func NewProvider(
 	cfg aws.Config,
 	multiRegionTrailFactory awslib.CrossRegionFactory[cloudtrail.Client],
 	multiRegionS3Factory awslib.CrossRegionFactory[s3.Client],
+	accountId string,
 ) *Provider {
 
 	return &Provider{
 		log:           log,
-		s3Provider:    s3.NewProvider(cfg, log, multiRegionS3Factory),
+		s3Provider:    s3.NewProvider(cfg, log, multiRegionS3Factory, accountId),
 		trailProvider: cloudtrail.NewProvider(cfg, log, multiRegionTrailFactory),
 	}
 }

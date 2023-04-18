@@ -7,7 +7,7 @@ repos:
       - id: check-added-large-files
       - id: check-yaml
         args: [--allow-multiple-documents, --unsafe]
-        exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*)$
+        exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*)$|(^deploy/cloudformation/elastic-agent-ec2.yml)$
       - id: check-json
 
       ## Security
@@ -51,6 +51,12 @@ repos:
           --check,
           --diff,
         ]
+
+  - repo: https://github.com/awslabs/cfn-python-lint
+    rev: v0.77.0
+    hooks:
+    -   id: cfn-python-lint
+        files: deploy/cloudformation/elastic-agent-ec2.yml
 
   - repo: local
     hooks:

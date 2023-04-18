@@ -56,6 +56,9 @@ func (s *ConfigTestSuite) TestNew() {
 	}{
 		{
 			`
+config:
+  v1:
+    benchmark: cis_k8s
 fetchers:
   - name: a
     directory: b

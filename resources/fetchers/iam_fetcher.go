@@ -64,6 +64,13 @@ func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 		iamResources = append(iamResources, users...)
 	}
 
+	policies, err := f.iamProvider.GetPolicies(ctx)
+	if err != nil {
+		f.log.Errorf("Unable to fetch IAM policies, error: %v", err)
+	} else {
+		iamResources = append(iamResources, policies...)
+	}
+
 	for _, iamResource := range iamResources {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource: IAMResource{

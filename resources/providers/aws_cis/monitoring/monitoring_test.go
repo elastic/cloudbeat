@@ -42,12 +42,13 @@ type (
 )
 
 var (
+	filter                         = "metric-filter-name"
 	metricFilterWithExpectedFilter = cloudwatchlogs_types.MetricFilter{
-		FilterName:    aws.String("metric-filter-name"),
+		FilterName:    aws.String(filter),
 		FilterPattern: aws.String("some-filter-pattern"),
 	}
 	metricFilterWithoutFilter = cloudwatchlogs_types.MetricFilter{
-		FilterName: aws.String("metric-filter-name"),
+		FilterName: aws.String(filter),
 	}
 	logGroupArn = "arn:aws:logs:us-east-1:account:log-group:cloudwatchlogs-log-group-arn"
 	snsTopicArn = "sns-topic-arn"
@@ -157,7 +158,10 @@ func TestProvider_AggregateResources(t *testing.T) {
 						MetricFilters: []cloudwatchlogs_types.MetricFilter{
 							metricFilterWithExpectedFilter,
 						},
-						Topics: []string{snsTopicArn},
+
+						MetricTopicBinding: map[string][]string{
+							filter: {snsTopicArn},
+						},
 					},
 				},
 			},
@@ -180,8 +184,8 @@ func TestProvider_AggregateResources(t *testing.T) {
 							Status:         expectedCommonTrailStatus,
 							EventSelectors: expectedCommonTrailEventSelector,
 						},
-						Topics:        []string{},
-						MetricFilters: []cloudwatchlogs_types.MetricFilter{metricFilterWithoutFilter},
+						MetricTopicBinding: map[string][]string{},
+						MetricFilters:      []cloudwatchlogs_types.MetricFilter{metricFilterWithoutFilter},
 					},
 				},
 			},

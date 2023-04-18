@@ -18,7 +18,9 @@
 package fetchers
 
 import (
+	"context"
 	"fmt"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
@@ -32,11 +34,13 @@ import (
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.S3Type, &S3Factory{
 		CrossRegionFactory: &awslib.MultiRegionClientFactory[s3.Client]{},
+		IdentityProvider:   awslib.GetIdentityClient,
 	})
 }
 
 type S3Factory struct {
 	CrossRegionFactory awslib.CrossRegionFactory[s3.Client]
+	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
 }
 
 func (f *S3Factory) Create(log *logp.Logger, c *agentConfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -56,7 +60,13 @@ func (f *S3Factory) CreateFrom(log *logp.Logger, cfg S3FetcherConfig, ch chan fe
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	s3Provider := s3.NewProvider(awsConfig, log, f.CrossRegionFactory)
+	identityProvider := f.IdentityProvider(awsConfig)
+	identity, err := identityProvider.GetIdentity(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
+	}
+
+	s3Provider := s3.NewProvider(awsConfig, log, f.CrossRegionFactory, *identity.Account)
 
 	return &S3Fetcher{
 		log:        log,
