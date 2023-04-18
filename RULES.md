@@ -201,9 +201,9 @@
 
 ## AWS CIS Benchmark
 
-### 49/63 implemented rules (78%)
+### 50/63 implemented rules (79%)
 
-#### Automated rules: 49/55 (89%)
+#### Automated rules: 50/55 (91%)
 
 #### Manual rules: 0/8 (0%)
 
@@ -249,7 +249,7 @@
 |   [3.5](bundle/compliance/cis_aws/rules/cis_3_5)   | Logging                           | Ensure AWS Config is enabled in all regions                                                                        | :white_check_mark: | Automated |
 |   [3.6](bundle/compliance/cis_aws/rules/cis_3_6)   | Logging                           | Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket                                             | :white_check_mark: | Automated |
 |   [3.7](bundle/compliance/cis_aws/rules/cis_3_7)   | Logging                           | Ensure CloudTrail logs are encrypted at rest using KMS CMKs                                                        | :white_check_mark: | Automated |
-|                        3.8                         | Logging                           | Ensure rotation for customer created symmetric CMKs is enabled                                                     |        :x:         | Automated |
+|   [3.8](bundle/compliance/cis_aws/rules/cis_3_8)   | Logging                           | Ensure rotation for customer created symmetric CMKs is enabled                                                     | :white_check_mark: | Automated |
 |   [3.9](bundle/compliance/cis_aws/rules/cis_3_9)   | Logging                           | Ensure VPC flow logging is enabled in all VPCs                                                                     | :white_check_mark: | Automated |
 |   [4.1](bundle/compliance/cis_aws/rules/cis_4_1)   | Monitoring                        | Ensure a log metric filter and alarm exist for unauthorized API calls                                              | :white_check_mark: | Automated |
 |  [4.10](bundle/compliance/cis_aws/rules/cis_4_10)  | Monitoring                        | Ensure a log metric filter and alarm exist for security group changes                                              | :white_check_mark: | Automated |

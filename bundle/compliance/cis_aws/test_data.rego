@@ -275,6 +275,19 @@ generate_s3_public_access_block_configuration(block_public_acls, block_public_po
 	"RestrictPublicBuckets": restrict_public_buckets,
 }
 
+generate_kms_resource(symmetric_default_enabled) = {
+	"resource": {
+		"key_metadata": {
+			# Only relevent keys are included
+			"KeyId": "21c0ba99-3a6c-4f72-8ef8-8118d4804710",
+			"KeySpec": "SYMMETRIC_DEFAULT",
+		},
+		"key_rotation_enabled": symmetric_default_enabled,
+	},
+	"type": "key-management",
+	"subType": "aws-kms",
+}
+
 generate_aws_configservice_with_resource(resource) = {
 	"resource": resource,
 	"type": "cloud-config",
