@@ -133,7 +133,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
 			dataProviderMock := dataprovider.MockCommonDataProvider{}
-			mockEnrichEvent := func(event *beat.Event) error {
+			mockEnrichEvent := func(event *beat.Event, meta fetching.ResourceMetadata) error {
 				_, err := event.Fields.Put(enrichedKey, enrichedValue)
 				return err
 			}
