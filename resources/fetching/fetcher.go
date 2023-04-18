@@ -44,10 +44,12 @@ const (
 	PwdPolicyType             = "aws-password-policy"
 	EksType                   = "aws-eks"
 	S3Type                    = "aws-s3"
+	KmsType                   = "aws-kms"
 	SecurityHubType           = "aws-securityhub"
 	VpcType                   = "aws-vpc"
 	RdsType                   = "aws-rds"
 	ConfigServiceResourceType = "aws-config"
+	PolicyType                = "aws-policy"
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"
@@ -59,6 +61,7 @@ const (
 	CloudAudit             = "cloud-audit"
 	CloudDatabase          = "cloud-database"
 	CloudConfig            = "cloud-config"
+	KeyManagement          = "key-management"
 )
 
 // Factory can create fetcher instances based on configuration
@@ -103,6 +106,7 @@ type ResourceMetadata struct {
 	SubType   string `json:"sub_type,omitempty"`
 	Name      string `json:"name,omitempty"`
 	ECSFormat string `json:"ecsFormat,omitempty"`
+	Region    string `json:"region,omitempty"`
 }
 
 type Result struct {

@@ -68,6 +68,10 @@ func (s *AddClusterIdTestSuite) TestClusterIdProcessor() {
 		res, err := event.GetValue("cluster_id")
 		s.NoError(err)
 		s.Equal(t, res)
+
+		res, err = event.GetValue("orchestrator.cluster.id")
+		s.NoError(err)
+		s.Equal(t, res)
 	}
 }
 

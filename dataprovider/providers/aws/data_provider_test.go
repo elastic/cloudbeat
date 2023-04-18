@@ -18,6 +18,7 @@
 package aws
 
 import (
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -32,6 +33,7 @@ import (
 var (
 	accountName = "accountName"
 	accountId   = "accountId"
+	someRegion  = "eu-west-1"
 )
 
 type AwsDataProviderTestSuite struct {
@@ -102,7 +104,7 @@ func TestAWSDataProvider_EnrichEvent(t *testing.T) {
 	e := &beat.Event{
 		Fields: mapstr.M{},
 	}
-	err := k.EnrichEvent(e)
+	err := k.EnrichEvent(e, fetching.ResourceMetadata{Region: someRegion})
 	assert.NoError(t, err)
 
 	accountID, err := e.Fields.GetValue(cloudAccountIdField)
@@ -116,4 +118,8 @@ func TestAWSDataProvider_EnrichEvent(t *testing.T) {
 	cloud, err := e.Fields.GetValue(cloudProviderField)
 	assert.NoError(t, err)
 	assert.Equal(t, "aws", cloud)
+
+	region, err := e.Fields.GetValue(cloudRegionField)
+	assert.NoError(t, err)
+	assert.Equal(t, someRegion, region)
 }
