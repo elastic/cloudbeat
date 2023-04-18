@@ -60,6 +60,7 @@ Resources:
             - ec2:DescribeSnapshots
             - ec2:CreateSnapshots
             - ec2:CreateTags
+            - ec2:DeleteSnapshot
             Resource: "*"
           - Effect: Allow
             Action:
