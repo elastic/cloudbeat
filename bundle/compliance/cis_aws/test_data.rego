@@ -274,3 +274,27 @@ generate_s3_public_access_block_configuration(block_public_acls, block_public_po
 	"IgnorePublicAcls": ignore_public_acls,
 	"RestrictPublicBuckets": restrict_public_buckets,
 }
+
+generate_aws_configservice_with_resource(resource) = {
+	"resource": resource,
+	"type": "cloud-config",
+	"subType": "aws-config",
+}
+
+generate_aws_configservice_recorder(all_supported_enabled, include_global_resource_types_enabled) = {"ConfigurationRecorder": {"RecordingGroup": {
+	"AllSupported": all_supported_enabled,
+	"IncludeGlobalResourceTypes": include_global_resource_types_enabled,
+}}}
+
+aws_configservice_disabled_region_recorder = generate_aws_configservice_with_resource([
+	{"recorders": [
+		generate_aws_configservice_recorder(true, true),
+		generate_aws_configservice_recorder(false, false),
+	]},
+	{"recorders": [
+		generate_aws_configservice_recorder(false, false),
+		generate_aws_configservice_recorder(false, false),
+	]},
+])
+
+aws_configservice_empty_recorders = generate_aws_configservice_with_resource([{"recorders": []}])
