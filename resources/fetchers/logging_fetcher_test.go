@@ -154,3 +154,18 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 	}}}, r.GetData())
 	assert.Equal(t, nil, r.GetElasticCommonData())
 }
+
+func TestConfigResource_GetMetadata(t *testing.T) {
+	r := ConfigResource{
+		identity: &awslib.Identity{
+			Account: aws.String("test-account"),
+			Arn:     aws.String("test-arn")},
+	}
+
+	meta, err := r.GetMetadata()
+
+	assert.NoError(t, err)
+	assert.Equal(t, fetching.ResourceMetadata(fetching.ResourceMetadata{ID: "configservice-test-account", Type: "cloud-config", SubType: "aws-config", Name: "configservice-test-account", ECSFormat: ""}), meta)
+	assert.Equal(t, ConfigResource{}.configs, r.GetData())
+	assert.Equal(t, nil, r.GetElasticCommonData())
+}
