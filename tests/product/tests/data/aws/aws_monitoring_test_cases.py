@@ -347,14 +347,15 @@ cis_aws_monitoring_4_16 = {
 }
 
 cis_aws_monitoring_cases = {
-    **skip_param_case(
-        cis_aws_monitoring_4_1,
-        data_to_report=SkipReportData(
-            skip_reason="Correctly defined metric and filter for unauthorized API calls is evaluated as failure.",
-            url_title="cloudbeat: #823",
-            url_link="https://github.com/elastic/cloudbeat/issues/823",
-        ),
-    ),
+    **cis_aws_monitoring_4_1,
+    # **skip_param_case(
+    #     cis_aws_monitoring_4_1,
+    #     data_to_report=SkipReportData(
+    #         skip_reason="Correctly defined metric and filter for unauthorized API calls is evaluated as failure.",
+    #         url_title="cloudbeat: #823",
+    #         url_link="https://github.com/elastic/cloudbeat/issues/823",
+    #     ),
+    # ),
     **skip_param_case(
         cis_aws_monitoring_4_1_skip,
         data_to_report=SkipReportData(
