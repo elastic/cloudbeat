@@ -125,11 +125,12 @@ cis_aws_log_3_4_fail = EksAwsServiceCase(
 
 cis_aws_log_3_4 = {
     "3.4 Ensure CloudTrail integration with CloudWatch, no integration expected failed": cis_aws_log_3_4_fail,
-}
-
-cis_aws_log_3_4_skip = {
     "3.4 Ensure CloudTrail integration with CloudWatch, integration exists expected passed": cis_aws_log_3_4_pass,
 }
+
+# cis_aws_log_3_4_skip = {
+#     "3.4 Ensure CloudTrail integration with CloudWatch, integration exists expected passed": cis_aws_log_3_4_pass,
+# }
 
 cis_aws_log_3_6_pass = EksAwsServiceCase(
     rule_tag=CIS_3_6,
@@ -145,11 +146,12 @@ cis_aws_log_3_6_fail = EksAwsServiceCase(
 
 cis_aws_log_3_6 = {
     "3.6 Ensure CloudTrail access logging, enabled=false expected failed": cis_aws_log_3_6_fail,
-}
-
-cis_aws_log_3_6_skip = {
     "3.6 Ensure CloudTrail access logging, enabled=true expected passed": cis_aws_log_3_6_pass,
 }
+
+# cis_aws_log_3_6_skip = {
+#     "3.6 Ensure CloudTrail access logging, enabled=true expected passed": cis_aws_log_3_6_pass,
+# }
 
 cis_aws_log_3_7_pass = EksAwsServiceCase(
     rule_tag=CIS_3_7,
@@ -230,11 +232,12 @@ cis_aws_log_3_11_fail = EksAwsServiceCase(
 
 cis_aws_log_3_11 = {
     "3.11 Ensure Object-level logging read events, enabled=false, expected failed ": cis_aws_log_3_11_fail,
-}
-
-cis_aws_log_3_11_skip = {
     "3.11 Ensure Object-level logging read events, enabled=true, expected passed": cis_aws_log_3_11_pass,
 }
+
+# cis_aws_log_3_11_skip = {
+#     "3.11 Ensure Object-level logging read events, enabled=true, expected passed": cis_aws_log_3_11_pass,
+# }
 
 cis_aws_log_cases = {
     **cis_aws_log_3_1,
@@ -249,27 +252,27 @@ cis_aws_log_cases = {
     **cis_aws_log_3_2,
     **cis_aws_log_3_3,
     **cis_aws_log_3_4,
-    **skip_param_case(
-        cis_aws_log_3_4_skip,
-        data_to_report=SkipReportData(
-            skip_reason=(
-                "When CloudTrail integration with CloudWatch is enabled, Cloudbeat returns evaluation result fail"
-            ),
-            url_title="cloudbeat: #809",
-            url_link="https://github.com/elastic/cloudbeat/issues/809",
-        ),
-    ),
+    # **skip_param_case(
+    #     cis_aws_log_3_4_skip,
+    #     data_to_report=SkipReportData(
+    #         skip_reason=(
+    #             "When CloudTrail integration with CloudWatch is enabled, Cloudbeat returns evaluation result fail"
+    #         ),
+    #         url_title="cloudbeat: #809",
+    #         url_link="https://github.com/elastic/cloudbeat/issues/809",
+    #     ),
+    # ),
     **cis_aws_log_3_6,
-    **skip_param_case(
-        cis_aws_log_3_6_skip,
-        data_to_report=SkipReportData(
-            skip_reason=(
-                "When S3 bucket access logging is enabled on the CloudTrail S3 bucket evaluation result is failed"
-            ),
-            url_title="cloudbeat: #810",
-            url_link="https://github.com/elastic/cloudbeat/issues/810",
-        ),
-    ),
+    # **skip_param_case(
+    #     cis_aws_log_3_6_skip,
+    #     data_to_report=SkipReportData(
+    #         skip_reason=(
+    #             "When S3 bucket access logging is enabled on the CloudTrail S3 bucket evaluation result is failed"
+    #         ),
+    #         url_title="cloudbeat: #810",
+    #         url_link="https://github.com/elastic/cloudbeat/issues/810",
+    #     ),
+    # ),
     **cis_aws_log_3_7,
     **cis_aws_log_3_9,
     **cis_aws_log_3_10,
@@ -282,12 +285,13 @@ cis_aws_log_cases = {
         ),
     ),
     **cis_aws_log_3_11,
-    **skip_param_case(
-        cis_aws_log_3_11_skip,
-        data_to_report=SkipReportData(
-            skip_reason="When object-level logging for write/read events is enabled for S3 bucket evaluation is failed",
-            url_title="cloudbeat: #811",
-            url_link="https://github.com/elastic/cloudbeat/issues/811",
-        ),
-    ),
+    # **skip_param_case(
+    #     cis_aws_log_3_11_skip,
+    #     data_to_report=SkipReportData(
+    #         skip_reason="When object-level logging for write/read events is enabled
+    #         for S3 bucket evaluation is failed",
+    #         url_title="cloudbeat: #811",
+    #         url_link="https://github.com/elastic/cloudbeat/issues/811",
+    #     ),
+    # ),
 }
