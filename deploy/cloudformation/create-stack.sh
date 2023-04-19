@@ -3,6 +3,7 @@ STACK_NAME="${1:-$STACK_NAME}"
 FLEET_URL="${2:-$FLEET_URL}"
 ENROLLMENT_TOKEN="${3:-$ENROLLMENT_TOKEN}"
 ELASTIC_AGENT_VERSION="${4:-elastic-agent-8.8.0-SNAPSHOT-linux-arm64}"
+KEY_NAME="${5:-$KEY_NAME}"
 TEMPLATE="deploy/cloudformation/elastic-agent-ec2.yml"
 if [ -n "${DEV}" ]; then
   python3 deploy/cloudformation/generate_dev.py || { echo 'Dev CloudFormation generation failed' ; exit 1; }
@@ -14,5 +15,6 @@ aws cloudformation create-stack                                                 
      --template-body file://${TEMPLATE}                                                             \
      --capabilities CAPABILITY_NAMED_IAM --parameters                                               \
      ParameterKey=ElasticAgentVersion,ParameterValue=${ELASTIC_AGENT_VERSION}                       \
+     ParameterKey=KeyName,ParameterValue=${KEY_NAME}                                                \
      ParameterKey=FleetUrl,ParameterValue=${FLEET_URL}                                              \
      ParameterKey=EnrollmentToken,ParameterValue=${ENROLLMENT_TOKEN}
