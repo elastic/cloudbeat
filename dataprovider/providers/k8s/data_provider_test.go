@@ -138,7 +138,7 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 	e := &beat.Event{
 		Fields: mapstr.M{},
 	}
-	err := k.EnrichEvent(e)
+	err := k.EnrichEvent(e, fetching.ResourceMetadata{})
 	assert.NoError(t, err)
 	v, err := e.Fields.GetValue(clusterNameField)
 	assert.NoError(t, err)

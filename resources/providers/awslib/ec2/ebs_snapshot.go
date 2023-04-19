@@ -25,6 +25,7 @@ import (
 )
 
 type EBSSnapshot struct {
+	Instance   Ec2Instance
 	SnapshotId string
 	State      types.SnapshotState
 	Region     string
@@ -46,22 +47,24 @@ func (e EBSSnapshot) GetResourceType() string {
 	return fetching.EBSSnapshotType
 }
 
-func FromSnapshotInfo(snapshot types.SnapshotInfo, region string, awsAccount string) EBSSnapshot {
+func FromSnapshotInfo(snapshot types.SnapshotInfo, region string, awsAccount string, ins Ec2Instance) EBSSnapshot {
 	return EBSSnapshot{
 		SnapshotId: *snapshot.SnapshotId,
 		State:      snapshot.State,
 		Region:     region,
 		awsAccount: awsAccount,
 		VolumeSize: int(*snapshot.VolumeSize),
+		Instance:   ins,
 	}
 }
 
-func FromSnapshot(snapshot types.Snapshot, region string, awsAccount string) EBSSnapshot {
+func FromSnapshot(snapshot types.Snapshot, region string, awsAccount string, ins Ec2Instance) EBSSnapshot {
 	return EBSSnapshot{
 		SnapshotId: *snapshot.SnapshotId,
 		State:      snapshot.State,
 		Region:     region,
 		awsAccount: awsAccount,
 		VolumeSize: int(*snapshot.VolumeSize),
+		Instance:   ins,
 	}
 }
