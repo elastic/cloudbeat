@@ -353,7 +353,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           just deploy-cloudbeat-aws
-          sleep 480 # Due to many s3 buckets on AWS account
+          sleep 180 # Due to many s3 buckets on AWS account
 
       - name: Run Tests
         id: run_tests
