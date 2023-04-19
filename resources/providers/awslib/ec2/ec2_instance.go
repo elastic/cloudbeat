@@ -19,6 +19,7 @@ package ec2
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -46,6 +47,14 @@ func (i Ec2Instance) GetResourceName() string {
 	}
 
 	return ""
+}
+
+func (i Ec2Instance) GetResourceId() string {
+	if i.Instance.InstanceId == nil {
+		return ""
+	}
+
+	return strings.Split(*i.Instance.InstanceId, "-")[1]
 }
 
 func (i Ec2Instance) GetResourceType() string {

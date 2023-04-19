@@ -49,9 +49,9 @@ type (
 	}
 
 	MonitoringItem struct {
-		TrailInfo     cloudtrail.TrailInfo
-		MetricFilters []cloudwatchlogs_types.MetricFilter
-		Topics        []string
+		TrailInfo          cloudtrail.TrailInfo
+		MetricFilters      []cloudwatchlogs_types.MetricFilter
+		MetricTopicBinding map[string][]string
 	}
 )
 
@@ -66,9 +66,9 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 	for _, info := range trails {
 		if info.Trail.CloudWatchLogsLogGroupArn == nil {
 			items = append(items, MonitoringItem{
-				TrailInfo:     info,
-				MetricFilters: []cloudwatchlogs_types.MetricFilter{},
-				Topics:        []string{},
+				TrailInfo:          info,
+				MetricFilters:      []cloudwatchlogs_types.MetricFilter{},
+				MetricTopicBinding: map[string][]string{},
 			})
 			continue
 		}
@@ -86,22 +86,27 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 		names := filterNamesFromMetrics(metrics)
 		if len(names) == 0 {
 			items = append(items, MonitoringItem{
-				TrailInfo:     info,
-				MetricFilters: metrics,
-				Topics:        []string{},
+				TrailInfo:          info,
+				MetricFilters:      metrics,
+				MetricTopicBinding: map[string][]string{},
 			})
 			continue
 		}
-		alarms, err := p.Cloudwatch.DescribeAlarms(ctx, info.Trail.HomeRegion, names)
-		if err != nil {
-			p.Log.Errorf("failed to describe alarms for cloudwatch filter %v: %v", names, err)
-			continue
+		bindings := map[string][]string{}
+		for _, name := range names {
+			alarms, err := p.Cloudwatch.DescribeAlarms(ctx, info.Trail.HomeRegion, []string{name})
+			if err != nil {
+				p.Log.Errorf("failed to describe alarms for cloudwatch filter %v: %v", names, err)
+				continue
+			}
+			topics := p.getSubscriptionForAlarms(ctx, info.Trail.HomeRegion, alarms)
+			bindings[name] = topics
+
 		}
-		topics := p.getSubscriptionForAlarms(ctx, info.Trail.HomeRegion, alarms)
 		items = append(items, MonitoringItem{
-			TrailInfo:     info,
-			MetricFilters: metrics,
-			Topics:        topics,
+			TrailInfo:          info,
+			MetricFilters:      metrics,
+			MetricTopicBinding: bindings,
 		})
 
 	}

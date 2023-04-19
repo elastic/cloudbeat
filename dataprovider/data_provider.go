@@ -20,9 +20,10 @@ package dataprovider
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/dataprovider/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type CommonDataProvider interface {
 	FetchData(resource string, id string) (types.Data, error)
-	EnrichEvent(*beat.Event) error
+	EnrichEvent(event *beat.Event, resource fetching.ResourceMetadata) error
 }
