@@ -12,6 +12,27 @@ test_calculate_result_rule_evaluation_true {
 	calculate_result(rule_evaluation) == "passed"
 }
 
+test_ensure_array_empty {
+	ensure_array([]) == []
+}
+
+test_ensure_array_from_array {
+	array := ["a", "b", "c"]
+	ensure_array(array) == array
+}
+
+test_ensure_array_from_int {
+	ensure_array(1) == [1]
+}
+
+test_ensure_array_from_null {
+	ensure_array(null) == [null]
+}
+
+test_ensure_array_from_string {
+	ensure_array("a") == ["a"]
+}
+
 test_array_contains {
 	array := ["a", "b", "c"]
 	key := "c"

@@ -13,6 +13,11 @@ calculate_result(evaluation) = "passed" {
 	evaluation
 } else = "failed"
 
+# If value is not an array, enclose it in one
+ensure_array(value) = [value] {
+	not is_array(value)
+} else = value
+
 array_contains(array, key) {
 	contains(array[_], key)
 } else = false

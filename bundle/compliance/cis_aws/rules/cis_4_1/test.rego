@@ -83,6 +83,7 @@ test_violation {
 		"MetricFilters": [{"FilterPattern": "{ ($.errorCode = \"UnauthorizedOperation\") || ($.errorCode = \"AccessDenied*\") || ($.sourceIPAddress!=\"delivery.logs.amazonaws.com\") || ($.eventName!=\"HeadBucket\") }"}],
 		"Topics": ["arn:aws:...sns"],
 	}])
+
 	eval_fail with input as rule_input([{
 		"TrailInfo": {
 			"Trail": {"IsMultiRegionTrail": true},
