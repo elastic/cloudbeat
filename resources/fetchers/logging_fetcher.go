@@ -66,13 +66,12 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetad
 	configs, err := f.configserviceProvider.DescribeConfigRecorders(ctx)
 	if err != nil {
 		f.log.Errorf("failed to describe config recorders: %v", err)
+		return nil
 	}
 
-	if len(configs) > 0 {
-		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      ConfigResource{configs: configs, identity: f.cloudIdentity},
-			CycleMetadata: cMetadata,
-		}
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      ConfigResource{configs: configs, identity: f.cloudIdentity},
+		CycleMetadata: cMetadata,
 	}
 
 	return nil

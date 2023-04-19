@@ -54,7 +54,7 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 			},
 			configServiceProvider: func() configservice.ConfigService {
 				m := configservice.MockConfigService{}
-				m.On("DescribeConfigRecorders", mock.Anything).Return([]awslib.AwsResource{}, nil)
+				m.On("DescribeConfigRecorders", mock.Anything).Return([]awslib.AwsResource{}, errors.New("can't fetch resources"))
 				return &m
 			},
 			expectedResources: 0,
