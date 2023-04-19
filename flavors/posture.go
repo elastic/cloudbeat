@@ -22,30 +22,19 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/elastic/cloudbeat/resources/providers"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
-	"github.com/elastic/cloudbeat/version"
-
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider"
-	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/aws"
-	k8s_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/pipeline"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/transformer"
 	"github.com/elastic/cloudbeat/uniqueness"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/processors"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // posture configuration.
@@ -135,7 +124,7 @@ func (bt *posture) Run(b *beat.Beat) error {
 
 	bt.dataStop = bt.data.Run(bt.ctx)
 
-	procs, err := bt.configureProcessors(bt.config.Processors)
+	procs, err := ConfigureProcessors(bt.config.Processors)
 	if err != nil {
 		return err
 	}
@@ -214,94 +203,4 @@ func (bt *posture) Stop() {
 	}
 
 	bt.cancel()
-}
-
-// configureProcessors configure processors to be used by the beat
-func (bt *posture) configureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
-	return processors.New(processorsList)
-}
-
-func GetCommonDataProvider(ctx context.Context, log *logp.Logger, cfg config.Config) (dataprovider.CommonDataProvider, error) {
-	if cfg.Benchmark == config.CIS_EKS || cfg.Benchmark == config.CIS_K8S {
-		kubeClient, err := providers.KubernetesProvider{}.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
-		if err != nil {
-			return nil, err
-		}
-
-		clusterNameProvider := providers.ClusterNameProvider{
-			KubernetesClusterNameProvider: providers.KubernetesClusterNameProvider{},
-			EKSMetadataProvider:           awslib.Ec2MetadataProvider{},
-			EKSClusterNameProvider:        awslib.EKSClusterNameProvider{},
-			KubeClient:                    kubeClient,
-			AwsConfigProvider: awslib.ConfigProvider{
-				MetadataProvider: awslib.Ec2MetadataProvider{},
-			},
-		}
-		name, err := clusterNameProvider.GetClusterName(ctx, &cfg, log)
-		if err != nil {
-			log.Errorf("failed to get cluster name: %v", err)
-		}
-		v, err := kubeClient.Discovery().ServerVersion()
-		if err != nil {
-			return nil, err
-		}
-		node, err := kubernetes.DiscoverKubernetesNode(log, &kubernetes.DiscoverKubernetesNodeParams{
-			ConfigHost:  "",
-			Client:      kubeClient,
-			IsInCluster: true,
-			HostUtils:   &kubernetes.DefaultDiscoveryUtils{},
-		})
-		if err != nil {
-			return nil, err
-		}
-		n, err := kubeClient.CoreV1().Nodes().Get(ctx, node, metav1.GetOptions{})
-		if err != nil {
-			return nil, err
-		}
-
-		ns, err := kubeClient.CoreV1().Namespaces().Get(ctx, "kube-system", metav1.GetOptions{})
-		if err != nil {
-			return nil, err
-		}
-		options := []k8s_dataprovider.Option{
-			k8s_dataprovider.WithConfig(&cfg),
-			k8s_dataprovider.WithLogger(log),
-			k8s_dataprovider.WithClusterName(name),
-			k8s_dataprovider.WithClusterID(string(ns.ObjectMeta.UID)),
-			k8s_dataprovider.WithNodeID(string(n.ObjectMeta.UID)),
-			k8s_dataprovider.WithVersionInfo(version.CloudbeatVersionInfo{
-				Version: version.CloudbeatVersion(),
-				Policy:  version.PolicyVersion(),
-				Kubernetes: version.Version{
-					Version: v.Major + "." + v.Minor,
-				},
-			}),
-		}
-		return k8s_dataprovider.New(options...), nil
-	}
-
-	if cfg.Benchmark == config.CIS_AWS {
-		awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
-		if err != nil {
-			return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
-		}
-
-		identityClient := awslib.GetIdentityClient(awsConfig)
-		iamProvider := iam.NewIAMProvider(log, awsConfig)
-
-		identity, err := identityClient.GetIdentity(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get AWS identity: %w", err)
-		}
-
-		alias, err := iamProvider.GetAccountAlias(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get AWS account alias: %w", err)
-		}
-		return aws_dataprovider.New(
-			aws_dataprovider.WithLogger(log),
-			aws_dataprovider.WithAccount(alias, *identity.Account),
-		), nil
-	}
-	return nil, fmt.Errorf("could not get common data provider for benchmark %s", cfg.Benchmark)
 }

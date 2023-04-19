@@ -60,12 +60,17 @@ Resources:
             - ec2:DescribeSnapshots
             - ec2:CreateSnapshots
             - ec2:CreateTags
+            - ec2:DeleteSnapshot
             Resource: "*"
           - Effect: Allow
             Action:
             - ebs:ListSnapshotBlocks
             - ebs:ListChangedBlocks
             - ebs:GetSnapshotBlock
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - iam:ListAccountAliases
             Resource: "*"
 
   # Instance profile to attach to EC2 instance

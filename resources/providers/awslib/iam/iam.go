@@ -31,6 +31,7 @@ type AccessManagement interface {
 	GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, error)
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 	GetAccountAlias(ctx context.Context) (string, error)
+	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
 type Client interface {
@@ -48,6 +49,8 @@ type Client interface {
 	GetUserPolicy(ctx context.Context, params *iamsdk.GetUserPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetUserPolicyOutput, error)
 	GenerateCredentialReport(ctx context.Context, params *iamsdk.GenerateCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GenerateCredentialReportOutput, error)
 	ListAccountAliases(ctx context.Context, params *iamsdk.ListAccountAliasesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAccountAliasesOutput, error)
+	ListPolicies(ctx context.Context, params *iamsdk.ListPoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListPoliciesOutput, error)
+	GetPolicyVersion(ctx context.Context, params *iamsdk.GetPolicyVersionInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyVersionOutput, error)
 }
 
 type Provider struct {
@@ -115,6 +118,11 @@ type CredentialReport struct {
 	AccessKey2LastUsed    string `csv:"access_key_2_last_used_date"`
 	Cert1Active           bool   `csv:"cert_1_active"`
 	Cert2Active           bool   `csv:"cert_2_active"`
+}
+
+type Policy struct {
+	types.Policy
+	Document map[string]interface{} `json:"document,omitempty"`
 }
 
 type PolicyDocument struct {
