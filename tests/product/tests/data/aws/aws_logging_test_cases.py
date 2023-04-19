@@ -108,6 +108,9 @@ cis_aws_log_3_3_fail = EksAwsServiceCase(
 
 cis_aws_log_3_3 = {
     "3.3 Ensure S3 bucket is not publicly accessible: Effect=Deny, expected passed": cis_aws_log_3_3_pass,
+}
+
+cis_aws_log_3_3_skip = {
     "3.3 Ensure S3 bucket is not publicly accessible: accessible=true, expected failed ": cis_aws_log_3_3_fail,
 }
 
@@ -251,6 +254,14 @@ cis_aws_log_cases = {
     ),
     **cis_aws_log_3_2,
     **cis_aws_log_3_3,
+    **skip_param_case(
+        cis_aws_log_3_3_skip,
+        data_to_report=SkipReportData(
+            skip_reason="Test case data generation issue",
+            url_title="security-team: #6204",
+            url_link="https://github.com/elastic/security-team/issues/6204",
+        ),
+    ),
     **cis_aws_log_3_4,
     # **skip_param_case(
     #     cis_aws_log_3_4_skip,
