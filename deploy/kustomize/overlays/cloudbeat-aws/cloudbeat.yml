@@ -8,7 +8,7 @@ cloudbeat:
           secret_access_key: ${AWS_SECRET_ACCESS_KEY:no_secret_was_set}
   type: cloudbeat/cis_aws
   # Defines how often an event is sent to the output
-  period: 30s
+  period: 180s
   fetchers:
     - name: aws-iam
     - name: aws-s3
