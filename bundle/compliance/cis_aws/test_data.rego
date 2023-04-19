@@ -252,20 +252,35 @@ not_evaluated_rds_db_instance = {
 		"arn": "arn:aws:rds:eu-west-1:704479110758:db:devops-postgres-rds",
 		"storage_encrypted": true,
 		"auto_minor_version_upgrade": true,
+		"publicly_accessible": true,
+		"subnets": [generate_rds_db_instance_subnet_with_route("0.0.0.0/0", "igw-a25733d9")],
 	},
 	"type": "wrong type",
 	"subType": "wrong sub type",
 }
 
-generate_rds_db_instance(encryption_enabled, auto_minor_version_upgrade_enabled) = {
+generate_rds_db_instance(encryption_enabled, auto_minor_version_upgrade_enabled, publicly_accessible, subnets) = {
 	"resource": {
 		"identifier": "test-db",
 		"arn": "arn:aws:rds:eu-west-1:704479110758:db:devops-postgres-rds",
 		"storage_encrypted": encryption_enabled,
 		"auto_minor_version_upgrade": auto_minor_version_upgrade_enabled,
+		"publicly_accessible": publicly_accessible,
+		"subnets": subnets,
 	},
 	"type": "cloud-database",
 	"subType": "aws-rds",
+}
+
+generate_rds_db_instance_subnet_with_route(destination_cidr_block, gateway_id) = {
+	"ID": "subnet-12345678",
+	"RouteTable": {
+		"ID": "rtb-12345678",
+		"Routes": [{
+			"DestinationCidrBlock": destination_cidr_block,
+			"GatewayId": gateway_id,
+		}],
+	},
 }
 
 generate_s3_public_access_block_configuration(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets) = {
