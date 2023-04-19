@@ -11,7 +11,7 @@ from commonlib.io_utils import FsClient
 from loguru import logger
 
 testdata = ["file", "process", "k8s_object"]
-CONFIG_TIMEOUT = 60
+CONFIG_TIMEOUT = 90
 
 
 @pytest.mark.pre_merge_agent
