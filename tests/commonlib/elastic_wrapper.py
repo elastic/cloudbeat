@@ -15,6 +15,7 @@ class ElasticWrapper:
         self.es_client = Elasticsearch(
             hosts=elastic_params.url,
             basic_auth=elastic_params.basic_auth,
+            request_timeout=30,
         )
 
     def get_index_data(
