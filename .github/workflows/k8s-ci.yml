@@ -355,12 +355,6 @@ jobs:
           just deploy-cloudbeat-aws
           sleep 300 # Due to many s3 buckets on AWS account
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: always()
-        with:
-          limit-access-to-actor: true
-
       - name: Run Tests
         id: run_tests
         run: |
