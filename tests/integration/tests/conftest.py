@@ -60,7 +60,7 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     logger.info(f"'{cloudbeat_agent.name}' pod started")
     yield k8s, api_client, cloudbeat_agent
     k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
-    k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
+    # k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
 
     lease_resources = [
         {"name": "cloudbeat-cluster-leader", "namespace": cloudbeat_agent.namespace},

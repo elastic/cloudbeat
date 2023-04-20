@@ -101,16 +101,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test-target: [file_system_rules, k8s_object_rules, process_scheduler_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules]
-        values_file: [tests/deploy/values/ci.yml]
-        range: ['0..4']
+        # test-target: [file_system_rules, k8s_object_rules, process_scheduler_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules]
+        # values_file: [tests/deploy/values/ci.yml]
+        # range: ['0..4']
         include:
           # Skip agent tests until resolved
-          # - test-target: pre_merge_agent
-          #   range: ''
-          #   values_file: tests/deploy/values/ci-sa-agent.yml
-          - test-target: pre_merge
+          - test-target: pre_merge_agent
             range: ''
+            values_file: tests/deploy/values/ci-sa-agent.yml
+          # - test-target: pre_merge
+          #   range: ''
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -142,6 +142,12 @@ jobs:
         id: run_tests
         run: |
           just run-tests ${{ matrix.test-target }}
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
 
       - name: Upload Test Results
         if: always()
