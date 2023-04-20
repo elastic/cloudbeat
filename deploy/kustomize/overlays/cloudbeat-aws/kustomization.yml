@@ -20,9 +20,6 @@ patches:
     target:
       kind: DaemonSet
 
-patchesStrategicMerge:
-  - daemonset.yml
-
 generatorOptions:
   disableNameSuffixHash: true
   labels:
