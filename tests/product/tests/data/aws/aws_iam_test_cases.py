@@ -224,7 +224,7 @@ cis_aws_iam_1_15_pass_2 = EksAwsServiceCase(
     expected=RULE_PASS_STATUS,
 )
 
-cis_aws_iam_1_15 = {
+cis_aws_iam_1_15_skip = {
     "1.15 Permissions through groups: dev group only, expect: passed": cis_aws_iam_1_15_pass,
     "1.15 Permissions through groups: no group permissions, expect: passed": cis_aws_iam_1_15_pass_2,
     "1.15 Permissions through groups: inline policy, expect: failed": cis_aws_iam_1_15_fail,
@@ -288,5 +288,12 @@ cis_aws_iam_cases = {
     **cis_aws_iam_1_10,
     **cis_aws_iam_1_11,
     **cis_aws_iam_1_13,
-    **cis_aws_iam_1_15,
+    **skip_param_case(
+        cis_aws_iam_1_15_skip,
+        data_to_report=SkipReportData(
+            skip_reason="Test case data generation issue",
+            url_title="security-team: #6204",
+            url_link="https://github.com/elastic/security-team/issues/6204",
+        ),
+    ),
 }
