@@ -102,6 +102,10 @@ func (p Policy) GetResourceType() string {
 	return fetching.PolicyType
 }
 
+func (p Policy) GetRegion() string {
+	return awslib.GlobalRegion
+}
+
 func stringOrEmpty(s *string) string {
 	if s == nil {
 		return ""

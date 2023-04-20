@@ -20,7 +20,6 @@ package securityhub
 import (
 	"context"
 	"fmt"
-
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
@@ -51,4 +50,8 @@ func (s SecurityHub) GetResourceName() string {
 
 func (s SecurityHub) GetResourceType() string {
 	return fetching.SecurityHubType
+}
+
+func (s SecurityHub) GetRegion() string {
+	return s.Region
 }

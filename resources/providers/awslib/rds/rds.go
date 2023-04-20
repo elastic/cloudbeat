@@ -30,6 +30,7 @@ type DBInstance struct {
 	Arn                     string `json:"arn"`
 	StorageEncrypted        bool   `json:"storage_encrypted"`
 	AutoMinorVersionUpgrade bool   `json:"auto_minor_version_upgrade"`
+	region                  string
 }
 
 type Rds interface {

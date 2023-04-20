@@ -101,6 +101,7 @@ func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Type:    fetching.CloudIdentity,
 		SubType: r.GetResourceType(),
 		Name:    r.GetResourceName(),
+		Region:  r.GetRegion(),
 	}, nil
 }
 func (r IAMResource) GetElasticCommonData() any { return nil }
