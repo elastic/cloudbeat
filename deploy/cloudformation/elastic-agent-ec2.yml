@@ -68,6 +68,10 @@ Resources:
             - ebs:ListChangedBlocks
             - ebs:GetSnapshotBlock
             Resource: "*"
+          - Effect: Allow
+            Action:
+              - iam:ListAccountAliases
+            Resource: "*"
 
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
