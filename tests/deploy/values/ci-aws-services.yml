@@ -1,0 +1,11 @@
+cloudbeat:
+  deploy: false
+
+standaloneAgent:
+  deploy: false
+
+testData:
+  marker: aws
+  agentName: cloudbeat
+  clusterType: vanilla_aws
+  markerCmd: -k

@@ -3,6 +3,7 @@ CLOUDBEAT_VERSION := ''
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeVanillaNoCertOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla-nocert"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
+kustomizeAwsOverlay := "deploy/kustomize/overlays/cloudbeat-aws"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
 
@@ -23,6 +24,9 @@ create-vanilla-deployment-file:
 
 create-vanilla-deployment-file-nocert:
   kustomize build {{kustomizeVanillaNoCertOverlay}} --output deploy/k8s/cloudbeat-ds-nocert.yaml
+
+create-aws-deployment-file:
+  kustomize build {{kustomizeAwsOverlay}} --output deploy/aws/cloudbeat-ds.yaml
 
 build-deploy-cloudbeat kind='kind-multi' $GOARCH=LOCAL_GOARCH:
   just build-cloudbeat-docker-image $GOARCH
@@ -81,6 +85,9 @@ deploy-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
+
+deploy-cloudbeat-aws:
+  kubectl delete -k {{kustomizeAwsOverlay}} -n kube-system || true && kubectl apply -k {{kustomizeAwsOverlay}} -n kube-system
 
 deploy-cloudbeat-nocert:
   kubectl delete -k {{kustomizeVanillaNoCertOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaNoCertOverlay}} -n kube-system
