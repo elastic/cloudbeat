@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -109,9 +110,15 @@ func createStack(stackName string, templatePath string, params map[string]string
 		cfParams = append(cfParams, p)
 	}
 
+	file, err := ioutil.ReadFile(templatePath)
+	if err != nil {
+		return fmt.Errorf("Failed to open template file: %v", err)
+	}
+	filestring := string(file)
+
 	createStackInput := &cloudformation.CreateStackInput{
 		StackName:    &stackName,
-		TemplateBody: &templatePath,
+		TemplateBody: &filestring,
 		Parameters:   cfParams,
 		Capabilities: []types.Capability{types.CapabilityCapabilityNamedIam},
 	}
