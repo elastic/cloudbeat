@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -67,7 +66,7 @@ func generateDevTemplate() error {
 	inputPath := filepath.Join(currentDir, prodTemplatePath)
 	outputPath := filepath.Join(currentDir, devTemplatePath)
 
-	fileContents, err := ioutil.ReadFile(inputPath)
+	fileContents, err := os.ReadFile(inputPath)
 	if err != nil {
 		return fmt.Errorf("Could not read input: %v", err)
 	}
@@ -77,7 +76,7 @@ func generateDevTemplate() error {
 	modifiedContents = acceptEC2Key(modifiedContents)
 	modifiedContents = assignEC2Key(modifiedContents)
 
-	if err := ioutil.WriteFile(outputPath, []byte(modifiedContents), 0644); err != nil {
+	if err := os.WriteFile(outputPath, []byte(modifiedContents), 0644); err != nil {
 		return fmt.Errorf("Could not write output: %v", err)
 	}
 
