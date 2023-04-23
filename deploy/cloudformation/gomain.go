@@ -22,12 +22,6 @@ type config struct {
 }
 
 func main() {
-	// stackName := flag.String("stack-name", "", "Name of the CloudFormation stack")
-	// fleetURL := flag.String("fleet-url", "", "URL of the Fleet server")
-	// enrollmentToken := flag.String("enrollment-token", "", "Enrollment token for the Elastic Agent")
-	// elasticAgentVersion := flag.String("elastic-agent-version", "elastic-agent-8.8.0-SNAPSHOT-linux-arm64", "Version of the Elastic Agent")
-	// dev := flag.Bool("dev", false, "Whether to use the development CloudFormation template")
-	// keyName := flag.String("key-name", "", "Name of the EC2 keypair for SSH access")
 	cfg, err := parseConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -62,7 +56,7 @@ func parseConfig() (*config, error) {
 	}
 
 	if cfg.Dev && cfg.KeyName == "" {
-		return nil, fmt.Errorf("Missing required flag: -key-name")
+		return nil, fmt.Errorf("Missing required flag for development mode: -key-name")
 	}
 
 	if cfg.ElasticAgentVersion == "" {
@@ -122,10 +116,11 @@ func createStack(stackName string, templatePath string, params map[string]string
 		Capabilities: []types.Capability{types.CapabilityCapabilityNamedIam},
 	}
 
-	_, err = svc.CreateStack(ctx, createStackInput)
+	stackOutput, err := svc.CreateStack(ctx, createStackInput)
 	if err != nil {
 		return fmt.Errorf("Failed to call AWS CloudFormation CreateStack: %v", err)
 	}
 
+	log.Printf("Created stack %s", *stackOutput.StackId)
 	return nil
 }

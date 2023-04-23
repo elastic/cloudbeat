@@ -81,6 +81,6 @@ func generateDevTemplate() error {
 		return fmt.Errorf("Could not write output: %v", err)
 	}
 
-	log.Printf("Created %s", outputPath)
+	log.Printf("Created dev template %s", outputPath)
 	return nil
 }
