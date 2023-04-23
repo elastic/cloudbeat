@@ -9,9 +9,17 @@ rule_evaluation = false {
 	audit.process_contains_key_with_value("--streaming-connection-idle-timeout", "0")
 }
 
+rule_evaluation = false {
+	audit.process_contains_key_with_value("--streaming-connection-idle-timeout", "0s")
+}
+
 # In case both flags and configuration file are specified, the executable argument takes precedence.
 rule_evaluation = false {
-	audit.not_process_arg_comparison("--streaming-connection-idle-timeout", ["streamingConnectionIdleTimeout"], 0)
+	audit.not_process_arg_comparison("--streaming-connection-idle-timeout", ["streamingConnectionIdleTimeout"], "0")
+}
+
+rule_evaluation = false {
+	audit.not_process_arg_comparison("--streaming-connection-idle-timeout", ["streamingConnectionIdleTimeout"], "0s")
 }
 
 finding = audit.finding(rule_evaluation)

@@ -6,10 +6,12 @@ import data.lib.test
 
 test_violation {
 	eval_fail with input as rule_input("--streaming-connection-idle-timeout 0")
+	eval_fail with input as rule_input("--streaming-connection-idle-timeout 0s")
 	eval_fail with input as rule_input_with_external("--streaming-connection-idle-timeout 0", create_process_config(0))
 	eval_fail with input as rule_input_with_external("--streaming-connection-idle-timeout 0", create_process_config(10))
 	eval_fail with input as rule_input_with_external("--streaming-connection-idle-timeout=0", create_process_config(10))
-	eval_fail with input as rule_input_with_external("", create_process_config(0))
+	eval_fail with input as rule_input_with_external("", create_process_config("0s"))
+	eval_fail with input as rule_input_with_external("", create_process_config("0"))
 }
 
 test_pass {
