@@ -328,16 +328,19 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Create k8s Kind Cluster
-        if: matrix.test-target != 'aws' # all k8s flows
-        run: |
-          just create-kind-cluster
-
-      # if - else statement is not supported in GitHub actions
-      - name: Create k8s Kind Cluster
+      - name: Set Kind Configuration
         if: matrix.test-target == 'aws'
         run: |
-          just create-kind-cluster "kind-mono"
+          echo "KIND_CONFIG=kind-mono" >> $GITHUB_ENV
+
+      - name: Set Kind Configuration
+        if: matrix.test-target != 'aws'
+        run: |
+          echo "KIND_CONFIG=kind-multi" >> $GITHUB_ENV
+
+      - name: Create k8s Kind Cluster
+        run: |
+          just create-kind-cluster ${{ env.KIND_CONFIG }}
 
       - name: Cache docker images
         uses: actions/cache@v3
@@ -347,7 +350,7 @@ jobs:
 
       - name: Load images to kind
         run: |
-          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} ${{ env.KIND_CONFIG }}
         shell: bash
 
       - name: Deploy tests Helm chart
