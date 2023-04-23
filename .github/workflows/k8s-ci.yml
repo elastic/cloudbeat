@@ -370,7 +370,7 @@ jobs:
       - name: Run Tests
         id: run_tests
         run: |
-          just run-tests ${{ matrix.test-target }}
+          just run-tests ${{ matrix.test-target }} ${{ env.KIND_CONFIG }}
 
       - name: Upload Test Results
         if: always()
