@@ -36,6 +36,7 @@ func main() {
 
 func parseConfig() (*config, error) {
 	viper.SetConfigFile(".env")
+	viper.AutomaticEnv()
 	viper.ReadInConfig()
 
 	var cfg config
