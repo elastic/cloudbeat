@@ -146,6 +146,92 @@ Additional functionality
 - **caplog fixture** - add a sink that propagates Loguru to the caplog handler.
 - **logger_wraps** - useful to log entry and exit values of a function
 
+#### CSPM Functional Tests
+
+CSPM functional tests are designed to check CSPM rules behaviour.
+
+Tests folder location: `<project_root>/tests/product/tests`
+
+Test file identification: `test_aws_`
+
+CSPM tests are grouped by groups:
+- Elastic Compute Cloud (EC2)
+- Identification And Management (IAM)
+- Logging
+- Monitoring
+- Relation Database Service (RDS)
+- Simple Storage Service (S3)
+- Networking (VPC)
+
+For example `EC2` rules will be located under `test_aws_ec2_rules.py`
+
+In order to separate and simply test development process, parametrization decorator is used.
+
+Test file defines the logic of the test, and the data defines test cases permutation.
+
+Tests data location: `<project_root>/tests/product/tests/data/aws`
+
+Data file identification: `aws_`
+
+For example `EC2` data cases will be located under `aws_ec2_test_cases.py`.
+
+##### Adding new CSPM test
+
+- Define data manually in AWS Cloud and define / get property for resource unique identification
+- Create test case data in `data` folder, for example in file `aws_logging_test_cases.py`
+```
+cis_aws_log_3_1_pass = EksAwsServiceCase(
+    rule_tag=CIS_3_1,
+    case_identifier="cloudtrail-704479110758", # resource unique identifier
+    expected=RULE_PASS_STATUS,
+)
+```
+- Update test cases dictionary or create new if not exist, for example
+```
+cis_aws_log_3_1 = {
+    "3.1 Ensure CloudTrail is enabled in all regions expect: passed": cis_aws_log_3_1_pass,
+}
+```
+- Finally, reference created dictionary in the group of all test cases, for example
+```
+cis_aws_log_cases = {
+    **cis_aws_log_3_1,
+    ...
+```
+- If just adding new test case to exist test suite no additional steps required, the case will be added automatically
+- For new test suite create a test file in `./product/tests` folder, like `test_aws_logging_rules.py`
+- Implement test method or just copy from any `test_aws_` and updated accordingly data section
+```
+register_params(
+    test_aws_logging_rules, # should be updated
+    Parameters(
+        ("rule_tag", "case_identifier", "expected"),
+        [*aws_logging_tc.cis_aws_log_cases.values()], # should be replaced by new data
+        ids=[*aws_logging_tc.cis_aws_log_cases.keys()], # should be replaced by new data
+    ),
+)
+```
+- Define new marker, for example
+```
+@pytest.mark.aws_logging_rules # <-- new marker should be created
+def test_aws_logging_rules(
+    elastic_client,
+    cloudbeat_agent,
+```
+
+- Update markers section in pyproject.toml with newly created marker
+```
+[tool.pytest.ini_options]
+markers = [
+    "pre_merge",
+    "pre_merge_agent",
+    ... # <-- add new marker
+```
+
+- Execute test suite by running the following command and replacing marker `aws_logging_rules` by newly defined marker
+```
+poetry run pytest -m "aws_logging_rules" --alluredir=./allure/results/ --clean-alluredir
+```
 
 ### Building
 
