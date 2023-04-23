@@ -37,10 +37,13 @@ func main() {
 func parseConfig() (*config, error) {
 	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
-	viper.ReadInConfig()
+	err := viper.ReadInConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to read configuration: %v", err)
+	}
 
 	var cfg config
-	err := viper.Unmarshal(&cfg)
+	err = viper.Unmarshal(&cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal configuration file: %v", err)
 	}
