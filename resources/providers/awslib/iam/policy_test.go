@@ -138,6 +138,138 @@ func TestProvider_GetPolicies(t *testing.T) {
 	}
 }
 
+func TestProvider_GetSupportPolicy(t *testing.T) {
+	policyOut := &iamsdk.GetPolicyOutput{
+		Policy: &types.Policy{
+			Arn: aws.String("some-arn"),
+		},
+	}
+	tests := []struct {
+		name             string
+		mockReturnValues mocksReturnVals
+		want             awslib.AwsResource
+		wantErr          bool
+	}{
+		{
+			name: "Error in GetPolicy",
+			mockReturnValues: mocksReturnVals{
+				"GetPolicy": {
+					{
+						nil,
+						errors.New("some error"),
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Error in ListEntitiesForPolicy",
+			mockReturnValues: mocksReturnVals{
+				"GetPolicy": {
+					{
+						policyOut,
+						nil,
+					},
+				},
+				"ListEntitiesForPolicy": {
+					{
+						nil,
+						errors.New("some error"),
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Empty",
+			mockReturnValues: mocksReturnVals{
+				"GetPolicy": {
+					{
+						policyOut,
+						nil,
+					},
+				},
+				"ListEntitiesForPolicy": {
+					{
+						&iamsdk.ListEntitiesForPolicyOutput{
+							IsTruncated: false,
+							PolicyRoles: []types.PolicyRole{},
+						},
+						nil,
+					},
+				},
+			},
+			want: Policy{
+				Policy: types.Policy{
+					Arn: aws.String("some-arn"),
+				},
+				Document: nil,
+				Roles:    []types.PolicyRole{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Success",
+			mockReturnValues: mocksReturnVals{
+				"GetPolicy": {
+					{
+						policyOut,
+						nil,
+					},
+				},
+				"ListEntitiesForPolicy": {
+					{
+						&iamsdk.ListEntitiesForPolicyOutput{
+							IsTruncated: false,
+							PolicyRoles: []types.PolicyRole{
+								{
+									RoleId:   aws.String("role-id"),
+									RoleName: aws.String("role-name"),
+								},
+								{
+									RoleId:   aws.String("role 2"),
+									RoleName: aws.String("name 2"),
+								},
+							},
+						},
+						nil,
+					},
+				},
+			},
+			want: Policy{
+				Policy: types.Policy{
+					Arn: aws.String("some-arn"),
+				},
+				Document: nil,
+				Roles: []types.PolicyRole{
+					{
+						RoleId:   aws.String("role-id"),
+						RoleName: aws.String("role-name"),
+					},
+					{
+						RoleId:   aws.String("role 2"),
+						RoleName: aws.String("name 2"),
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := createProviderFromMockValues(tt.mockReturnValues)
+
+			got, err := p.GetSupportPolicy(context.Background())
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func Test_decodePolicyDocument(t *testing.T) {
 	docToPolicy := func(document string) *types.PolicyVersion {
 		return &types.PolicyVersion{
