@@ -1,5 +1,9 @@
 package compliance.policy.aws_iam.data_adapter
 
+is_server_certificate {
+	input.subType == "aws-iam-server-certificate"
+}
+
 is_pwd_policy {
 	input.subType == "aws-password-policy"
 }
@@ -33,6 +37,8 @@ iam_user = input.resource
 policy_document = input.resource.document
 
 roles = input.resource.roles
+
+server_certificates = input.resource.certificates
 
 used_active_access_keys = {access_key |
 	access_key = iam_user.access_keys[_]

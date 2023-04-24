@@ -201,9 +201,9 @@
 
 ## AWS CIS Benchmark
 
-### 53/63 implemented rules (84%)
+### 54/63 implemented rules (86%)
 
-#### Automated rules: 53/55 (96%)
+#### Automated rules: 54/55 (98%)
 
 #### Manual rules: 0/8 (0%)
 
@@ -219,7 +219,7 @@
 |  [1.16](bundle/compliance/cis_aws/rules/cis_1_16)  | Identity and Access Management    | Ensure IAM policies that allow full "*:*" administrative privileges are not attached                               | :white_check_mark: | Automated |
 |  [1.17](bundle/compliance/cis_aws/rules/cis_1_17)  | Identity and Access Management    | Ensure a support role has been created to manage incidents with AWS Support                                        | :white_check_mark: | Automated |
 |                        1.18                        | Identity and Access Management    | Ensure IAM instance roles are used for AWS resource access from instances                                          |        :x:         |  Manual   |
-|                        1.19                        | Identity and Access Management    | Ensure that all the expired SSL/TLS certificates stored in AWS IAM are removed                                     |        :x:         | Automated |
+|  [1.19](bundle/compliance/cis_aws/rules/cis_1_19)  | Identity and Access Management    | Ensure that all the expired SSL/TLS certificates stored in AWS IAM are removed                                     | :white_check_mark: | Automated |
 |                        1.2                         | Identity and Access Management    | Ensure security contact information is registered                                                                  |        :x:         |  Manual   |
 |                        1.20                        | Identity and Access Management    | Ensure that IAM Access analyzer is enabled for all regions                                                         |        :x:         | Automated |
 |                        1.21                        | Identity and Access Management    | Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments |        :x:         |  Manual   |
