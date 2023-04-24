@@ -86,15 +86,11 @@ func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 		iamResources = append(iamResources, serverCertificates)
 	}
 
-	analyzers, err := f.iamProvider.GetAccessAnalyzers(ctx)
+	accessAnalyzers, err := f.iamProvider.GetAccessAnalyzers(ctx)
 	if err != nil {
-		f.log.Errorf("Unable to fetch access analyzers, error: %v", err)
-	}
-	for _, analyzer := range analyzers {
-		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      analyzer,
-			CycleMetadata: cMetadata,
-		}
+		f.log.Errorf("Unable to fetch access access analyzers, error: %v", err)
+	} else {
+		iamResources = append(iamResources, accessAnalyzers)
 	}
 
 	for _, iamResource := range iamResources {

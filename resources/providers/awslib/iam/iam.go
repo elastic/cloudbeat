@@ -36,7 +36,7 @@ type AccessManagement interface {
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	GetSupportPolicy(ctx context.Context) (awslib.AwsResource, error)
 	ListServerCertificates(ctx context.Context) (awslib.AwsResource, error)
-	GetAccessAnalyzers(ctx context.Context) ([]AnalyzersForRegion, error)
+	GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, error)
 }
 
 type Client interface {

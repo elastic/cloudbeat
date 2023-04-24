@@ -19,48 +19,61 @@ package iam
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
-type AnalyzersForRegion struct {
-	Analyzers []types.AnalyzerSummary
-	Region    string
+type AccessAnalyzers struct {
+	RegionToAccessAnalyzers map[string][]types.AnalyzerSummary
 }
 
-func (a AnalyzersForRegion) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := fmt.Sprintf("access-analyzers-for-%s", a.Region)
-	return fetching.ResourceMetadata{
-		ID:      id,
-		Type:    fetching.CloudIdentity,
-		SubType: fetching.RegionAccessAnalyzers,
-		Name:    id,
-	}, nil
+func (a AccessAnalyzers) GetResourceArn() string {
+	return ""
 }
 
-func (a AnalyzersForRegion) GetData() any { return a }
+func (a AccessAnalyzers) GetResourceName() string {
+	return "account-access-analyzers"
+}
 
-func (a AnalyzersForRegion) GetElasticCommonData() any { return nil }
+func (a AccessAnalyzers) GetResourceType() string {
+	return fetching.AccessAnalyzers
+}
 
-func (p Provider) GetAccessAnalyzers(ctx context.Context) ([]AnalyzersForRegion, error) {
-	out, err := awslib.MultiRegionFetch(ctx, p.accessAnalyzerClients, getAccessAnalyzersForRegion)
+func (a AccessAnalyzers) GetRegion() string {
+	return awslib.GlobalRegion
+}
+
+type analyzersForRegion struct {
+	analyzers  []types.AnalyzerSummary
+	regionName string
+}
+
+func (p Provider) GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, error) {
+	analyzers, err := awslib.MultiRegionFetch(ctx, p.accessAnalyzerClients, getAccessAnalyzersForRegion)
 	if err != nil {
 		return nil, err
 	}
-	return out, err
+
+	regionToAccessAnalyzers := make(map[string][]types.AnalyzerSummary)
+	for _, region := range analyzers {
+		regionToAccessAnalyzers[region.regionName] = region.analyzers
+	}
+
+	return AccessAnalyzers{
+		RegionToAccessAnalyzers: regionToAccessAnalyzers,
+	}, err
 }
 
-func getAccessAnalyzersForRegion(ctx context.Context, region string, c AccessAnalyzer) (AnalyzersForRegion, error) {
+func getAccessAnalyzersForRegion(ctx context.Context, region string, c AccessAnalyzer) (analyzersForRegion, error) {
 	analyzers := make([]types.AnalyzerSummary, 0)
 
 	input := &accessanalyzer.ListAnalyzersInput{}
 	for {
 		out, err := c.ListAnalyzers(ctx, input)
 		if err != nil {
-			return AnalyzersForRegion{}, err
+			return analyzersForRegion{}, err
 		}
 		analyzers = append(analyzers, out.Analyzers...)
 		if out.NextToken == nil {
@@ -69,8 +82,8 @@ func getAccessAnalyzersForRegion(ctx context.Context, region string, c AccessAna
 		input.NextToken = out.NextToken
 	}
 
-	return AnalyzersForRegion{
-		Analyzers: analyzers,
-		Region:    region,
+	return analyzersForRegion{
+		analyzers:  analyzers,
+		regionName: region,
 	}, nil
 }

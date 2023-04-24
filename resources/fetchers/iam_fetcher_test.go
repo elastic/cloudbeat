@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -115,6 +116,18 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		},
 	}
 
+	accessAnalyzers := iam.AccessAnalyzers{
+		RegionToAccessAnalyzers: map[string][]aatypes.AnalyzerSummary{
+			"region-1": {
+				{Arn: aws.String("some-arn")},
+			},
+			"region-2": {
+				{Arn: aws.String("some-other-arn")},
+				{Arn: aws.String("some-third-arn")},
+			},
+		},
+	}
+
 	var tests = []struct {
 		name               string
 		mocksReturnVals    mocksReturnVals
@@ -142,10 +155,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				"GetPolicies":            {[]awslib.AwsResource{iamPolicy}, nil},
 				"GetSupportPolicy":       {iamPolicy, nil},
 				"ListServerCertificates": {&certificates, nil},
-				"GetAccessAnalyzers": {[]iam.AnalyzersForRegion{{
-					Analyzers: nil,
-					Region:    "region-1",
-				}}, nil},
+				"GetAccessAnalyzers":     {accessAnalyzers, nil},
 			},
 			account:            testAccount,
 			numExpectedResults: 6,

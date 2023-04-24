@@ -41,19 +41,19 @@ func (_m *MockAccessManagement) EXPECT() *MockAccessManagement_Expecter {
 }
 
 // GetAccessAnalyzers provides a mock function with given fields: ctx
-func (_m *MockAccessManagement) GetAccessAnalyzers(ctx context.Context) ([]AnalyzersForRegion, error) {
+func (_m *MockAccessManagement) GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, error) {
 	ret := _m.Called(ctx)
 
-	var r0 []AnalyzersForRegion
+	var r0 awslib.AwsResource
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]AnalyzersForRegion, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) (awslib.AwsResource, error)); ok {
 		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []AnalyzersForRegion); ok {
+	if rf, ok := ret.Get(0).(func(context.Context) awslib.AwsResource); ok {
 		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]AnalyzersForRegion)
+			r0 = ret.Get(0).(awslib.AwsResource)
 		}
 	}
 
@@ -84,12 +84,12 @@ func (_c *MockAccessManagement_GetAccessAnalyzers_Call) Run(run func(ctx context
 	return _c
 }
 
-func (_c *MockAccessManagement_GetAccessAnalyzers_Call) Return(_a0 []AnalyzersForRegion, _a1 error) *MockAccessManagement_GetAccessAnalyzers_Call {
+func (_c *MockAccessManagement_GetAccessAnalyzers_Call) Return(_a0 awslib.AwsResource, _a1 error) *MockAccessManagement_GetAccessAnalyzers_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockAccessManagement_GetAccessAnalyzers_Call) RunAndReturn(run func(context.Context) ([]AnalyzersForRegion, error)) *MockAccessManagement_GetAccessAnalyzers_Call {
+func (_c *MockAccessManagement_GetAccessAnalyzers_Call) RunAndReturn(run func(context.Context) (awslib.AwsResource, error)) *MockAccessManagement_GetAccessAnalyzers_Call {
 	_c.Call.Return(run)
 	return _c
 }

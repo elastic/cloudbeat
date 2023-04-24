@@ -23,10 +23,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"sort"
 	"testing"
 )
 
@@ -34,13 +34,12 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 	tests := []struct {
 		name    string
 		clients map[string]AccessAnalyzer
-		want    []AnalyzersForRegion
+		want    awslib.AwsResource
 		wantErr string
 	}{
 		{
 			name:    "Clients not initialized",
 			clients: nil,
-			want:    nil,
 			wantErr: "multi region clients have not been initialized",
 		},
 		{
@@ -56,25 +55,15 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 				"region-1": mockAccessAnalyzerWithArns("some-arn", "zzz-last-arn"),
 				"region-2": mockAccessAnalyzerWithArns("some-other-arn"),
 			},
-			want: []AnalyzersForRegion{
-				{
-					Analyzers: []types.AnalyzerSummary{
-						{
-							Arn: aws.String("some-arn"),
-						},
-						{
-							Arn: aws.String("zzz-last-arn"),
-						},
+			want: AccessAnalyzers{
+				RegionToAccessAnalyzers: map[string][]types.AnalyzerSummary{
+					"region-1": {
+						{Arn: aws.String("some-arn")},
+						{Arn: aws.String("zzz-last-arn")},
 					},
-					Region: "region-1",
-				},
-				{
-					Analyzers: []types.AnalyzerSummary{
-						{
-							Arn: aws.String("some-other-arn"),
-						},
+					"region-2": {
+						{Arn: aws.String("some-other-arn")},
 					},
-					Region: "region-2",
 				},
 			},
 		},
@@ -84,7 +73,6 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 				"region-1": mockAccessAnalyzerWithArns("whatever"),
 				"region-2": mockAccessAnalyzerWithError(),
 			},
-			want:    nil,
 			wantErr: "some error",
 		},
 	}
@@ -101,16 +89,6 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 				assert.ErrorContains(t, err, tt.wantErr)
 			} else {
 				assert.NoError(t, err)
-			}
-
-			// Return order of AnalyzersForRegion is undefined, so sort results first
-			sort.Slice(allAnalyzers, func(i, j int) bool {
-				return allAnalyzers[i].Region < allAnalyzers[j].Region
-			})
-			for _, analyzersForRegion := range allAnalyzers {
-				sort.Slice(analyzersForRegion.Analyzers, func(i, j int) bool {
-					return *analyzersForRegion.Analyzers[i].Arn < *analyzersForRegion.Analyzers[j].Arn
-				})
 			}
 
 			assert.Equal(t, tt.want, allAnalyzers)
