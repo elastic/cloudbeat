@@ -94,3 +94,10 @@ func (e EnrichedTrail) GetResourceName() string {
 func (e EnrichedTrail) GetResourceType() string {
 	return fetching.TrailType
 }
+
+func (e EnrichedTrail) GetRegion() string {
+	if e.Trail.HomeRegion == nil {
+		return ""
+	}
+	return *e.Trail.HomeRegion
+}

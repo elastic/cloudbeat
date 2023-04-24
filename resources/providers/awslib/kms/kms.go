@@ -30,6 +30,7 @@ import (
 type KmsInfo struct {
 	KeyMetadata        types.KeyMetadata `json:"key_metadata"`
 	KeyRotationEnabled bool              `json:"key_rotation_enabled"`
+	region             string
 }
 
 type KMS interface {

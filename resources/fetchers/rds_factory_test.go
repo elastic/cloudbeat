@@ -18,6 +18,8 @@
 package fetchers
 
 import (
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"testing"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -74,8 +76,30 @@ secret_access_key: secret
 			mock.Anything,
 		).Return(mockCrossRegionFetcher)
 
+		mockEc2CrossRegionFetcher := &awslib.MockCrossRegionFetcher[ec2.Client]{}
+		mockEc2CrossRegionFetcher.On("GetMultiRegionsClientMap").Return(nil)
+
+		mockEc2CrossRegionFactory := &awslib.MockCrossRegionFactory[ec2.Client]{}
+		mockEc2CrossRegionFactory.On(
+			"NewMultiRegionClients",
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+			mock.Anything,
+		).Return(mockEc2CrossRegionFetcher)
+
+		identity := awslib.Identity{
+			Account: aws.String("123456789012"),
+		}
+		identityProvider := &awslib.MockIdentityProviderGetter{}
+		identityProvider.EXPECT().GetIdentity(mock.Anything).Return(&identity, nil)
+
 		factory := &RdsFactory{
-			CrossRegionFactory: mockCrossRegionFactory,
+			CrossRegionFactory:    mockCrossRegionFactory,
+			Ec2CrossRegionFactory: mockEc2CrossRegionFactory,
+			IdentityProvider: func(cfg aws.Config) awslib.IdentityProviderGetter {
+				return identityProvider
+			},
 		}
 
 		cfg, err := agentConfig.NewConfigFrom(test.config)

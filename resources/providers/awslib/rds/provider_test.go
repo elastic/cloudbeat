@@ -19,8 +19,11 @@ package rds
 
 import (
 	"context"
+	"errors"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"testing"
 
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -36,12 +39,15 @@ type ProviderTestSuite struct {
 }
 
 type rdsClientMockReturnVals map[string]map[string][]any
+type ec2GetRouteTableForSubnetVals [][]any
 
 var (
-	identifier  = "identifier"
-	identifier2 = "identifier2"
-	arn         = "arn"
-	arn2        = "arn2"
+	identifier           = "identifier"
+	identifier2          = "identifier2"
+	arn                  = "arn"
+	arn2                 = "arn2"
+	destinationCidrBlock = "0.0.0.0/0"
+	gatewayId            = "igw=12345678"
 )
 
 func TestProviderTestSuite(t *testing.T) {
@@ -61,9 +67,10 @@ func (s *ProviderTestSuite) TearDownTest() {}
 
 func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 	tests := []struct {
-		name                    string
-		rdsClientMockReturnVals rdsClientMockReturnVals
-		expected                []awslib.AwsResource
+		name                          string
+		rdsClientMockReturnVals       rdsClientMockReturnVals
+		ec2GetRouteTableForSubnetVals ec2GetRouteTableForSubnetVals
+		expected                      []awslib.AwsResource
 	}{
 		{
 			name: "Should not return any DB instances when there aren't any",
@@ -80,15 +87,38 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 				"DescribeDBInstances": {
 					awslib.DefaultRegion: {&rdsClient.DescribeDBInstancesOutput{
 						DBInstances: []types.DBInstance{
-							{DBInstanceIdentifier: &identifier, DBInstanceArn: &arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false},
-							{DBInstanceIdentifier: &identifier2, DBInstanceArn: &arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true},
+							{DBInstanceIdentifier: &identifier, DBInstanceArn: &arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false, PubliclyAccessible: false, DBSubnetGroup: &types.DBSubnetGroup{VpcId: &identifier, Subnets: []types.Subnet{}}},
+							{DBInstanceIdentifier: &identifier2, DBInstanceArn: &arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true, PubliclyAccessible: true, DBSubnetGroup: &types.DBSubnetGroup{VpcId: &identifier, Subnets: []types.Subnet{{SubnetIdentifier: &identifier}, {SubnetIdentifier: &identifier2}}}},
 						},
 					}, nil},
 				},
 			},
+			ec2GetRouteTableForSubnetVals: ec2GetRouteTableForSubnetVals{
+				{ec2types.RouteTable{}, errors.New("asd")},
+				{ec2types.RouteTable{RouteTableId: &identifier, Routes: []ec2types.Route{{DestinationCidrBlock: &destinationCidrBlock, GatewayId: &gatewayId}}}, nil},
+			},
 			expected: []awslib.AwsResource{
-				DBInstance{Identifier: identifier, Arn: arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false},
-				DBInstance{Identifier: identifier2, Arn: arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true},
+				DBInstance{
+					Identifier:              identifier,
+					Arn:                     arn,
+					StorageEncrypted:        false,
+					AutoMinorVersionUpgrade: false,
+					PubliclyAccessible:      false,
+					Subnets:                 []Subnet(nil),
+					region:                  awslib.DefaultRegion,
+				},
+				DBInstance{
+					Identifier:              identifier2,
+					Arn:                     arn2,
+					StorageEncrypted:        true,
+					AutoMinorVersionUpgrade: true,
+					PubliclyAccessible:      true, Subnets: []Subnet{
+						{ID: identifier, RouteTable: nil},
+						{ID: identifier2, RouteTable: &RouteTable{
+							ID:     identifier,
+							Routes: []Route{{DestinationCidrBlock: &destinationCidrBlock, GatewayId: &gatewayId}},
+						}}},
+					region: awslib.DefaultRegion},
 			},
 		},
 	}
@@ -102,9 +132,16 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 				clients[region] = m
 			}
 		}
+
+		mockEc2 := &ec2.MockElasticCompute{}
+		for _, calls := range test.ec2GetRouteTableForSubnetVals {
+			mockEc2.On("GetRouteTableForSubnet", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(calls...).Once()
+		}
+
 		rdsProvider := Provider{
 			log:     s.log,
 			clients: clients,
+			ec2:     mockEc2,
 		}
 
 		ctx := context.Background()

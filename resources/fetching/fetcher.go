@@ -41,6 +41,7 @@ const (
 	EBSSnapshotType           = "aws-ebs-snapshot"
 	ElbType                   = "aws-elb"
 	IAMUserType               = "aws-iam-user"
+	IAMServerCertificateType  = "aws-iam-server-certificate"
 	PwdPolicyType             = "aws-password-policy"
 	EksType                   = "aws-eks"
 	S3Type                    = "aws-s3"
