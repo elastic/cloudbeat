@@ -58,7 +58,7 @@ func (s *ProviderTestSuite) TearDownTest() {}
 var keyId1 = "21c0ba99-3a6c-4f72-8ef8-8118d4804710"
 var keyId2 = "21c0ba99-3a6c-4f72-8ef8-8118d4804711"
 
-func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
+func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
 	var tests = []struct {
 		name                    string
 		regions                 []string
@@ -142,11 +142,11 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 				},
 			},
 			expected: []awslib.AwsResource{
-				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true},
-				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true},
+				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true, region: "us-east-1"},
+				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true, region: "us-east-1"},
 			},
 			expectError: false,
-			regions:     []string{"us-east-1", "us-east-2"},
+			regions:     []string{"us-east-1"},
 		},
 	}
 
