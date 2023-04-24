@@ -26,7 +26,6 @@ import (
 	kmsClient "github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -143,24 +142,26 @@ func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
 			},
 			expected: []awslib.AwsResource{
 				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId1, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true, region: "us-east-1"},
-				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true, region: "us-east-1"},
+				KmsInfo{KeyMetadata: types.KeyMetadata{KeyId: &keyId2, KeySpec: types.KeySpecSymmetricDefault}, KeyRotationEnabled: true, region: "us-east-2"},
 			},
 			expectError: false,
-			regions:     []string{"us-east-1"},
+			regions:     []string{"us-east-1", "us-east-2"},
 		},
 	}
 
 	for _, test := range tests {
-		kmsClientMock := &MockClient{}
-		for funcName, returnVals := range test.kmsClientMockReturnVals {
-			for _, vals := range returnVals {
-				kmsClientMock.On(funcName, vals[0]...).Return(vals[1]...).Once()
+		mockClients := make(map[string]Client, len(test.regions))
+		for i, region := range test.regions {
+			kmsClientMock := &MockClient{}
+			for funcName, returnVals := range test.kmsClientMockReturnVals {
+				kmsClientMock.On(funcName, returnVals[i][0]...).Return(returnVals[i][1]...)
 			}
+			mockClients[region] = kmsClientMock
 		}
 
 		kmsProvider := Provider{
 			log:     s.log,
-			clients: testhelper.CreateMockClients[Client](kmsClientMock, test.regions),
+			clients: mockClients,
 		}
 
 		ctx := context.Background()
