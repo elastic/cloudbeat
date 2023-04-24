@@ -51,11 +51,19 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 		}
 
 		for _, dbInstance := range dbInstances.DBInstances {
+			subnets, subnetsErr := p.getDBInstanceSubnets(ctx, region, dbInstance)
+			if subnetsErr != nil {
+				p.log.Errorf("Could not get DB instance subnets. DB: %s. Error: %v", *dbInstance.DBInstanceIdentifier, err)
+			}
+
 			result = append(result, DBInstance{
 				Identifier:              *dbInstance.DBInstanceIdentifier,
 				Arn:                     *dbInstance.DBInstanceArn,
 				StorageEncrypted:        dbInstance.StorageEncrypted,
 				AutoMinorVersionUpgrade: dbInstance.AutoMinorVersionUpgrade,
+				PubliclyAccessible:      dbInstance.PubliclyAccessible,
+				Subnets:                 subnets,
+				region:                  region,
 			})
 		}
 
