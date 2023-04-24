@@ -87,8 +87,8 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 				},
 			},
 			expected: []awslib.AwsResource{
-				DBInstance{Identifier: identifier, Arn: arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false},
-				DBInstance{Identifier: identifier2, Arn: arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true},
+				DBInstance{Identifier: identifier, Arn: arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false, region: awslib.DefaultRegion},
+				DBInstance{Identifier: identifier2, Arn: arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true, region: awslib.DefaultRegion},
 			},
 		},
 	}
