@@ -35,22 +35,37 @@ Build and deploying cloudbeat into your local kind cluster:
    just build-deploy-cloudbeat-nocert
    ```
 
+#### Cross-platform Builds
 
-> **Note** By default, cloudbeat binary will be built based on `GOARCH` environment variable.
-> If you want to build cloudbeat for a different platform you can set it as following:
->
-> ```zsh
-> # just build-deploy-cloudbeat <Target Arch>
-> just build-deploy-cloudbeat amd64
-> ```
->
-> Or without certificate
->
-> ```zsh
-> # just build-deploy-cloudbeat-nocert <Target Arch>
-> just build-deploy-cloudbeat-nocert amd64
-> ```
+By default, cloudbeat binary will be built based on `GOARCH` environment variable.
+If you want to build cloudbeat for a different platform you can set it as following:
 
+```zsh
+# just build-deploy-cloudbeat <Target Arch>
+just build-deploy-cloudbeat amd64
+```
+
+Or without certificate
+
+```zsh
+# just build-deploy-cloudbeat-nocert <Target Arch>
+just build-deploy-cloudbeat-nocert amd64
+```
+
+#### Stopping / Restarting the local Elastic Stack
+
+If you are using `elastic-package` to run the Elastic Stack locally and need to take it down
+with `elastic-package stack down`, you might run into errors:
+```shell
+failed to remove network elastic-package-stack_default: Error response from daemon: error while removing network: network elastic-package-stack_default id <id> has active endpoints
+Error: tearing down the stack failed: stopping docker containers failed: running command failed: running Docker Compose down command failed: exit status 1
+```
+
+You can fix this by disconnecting the kind cluster from the stack with:
+
+```zsh
+just elastic-stack-disconnect-kind
+```
 
 ### Amazon Elastic Kubernetes Service (EKS)
 
