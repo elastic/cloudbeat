@@ -63,6 +63,7 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 				AutoMinorVersionUpgrade: dbInstance.AutoMinorVersionUpgrade,
 				PubliclyAccessible:      dbInstance.PubliclyAccessible,
 				Subnets:                 subnets,
+				region:                  region,
 			})
 		}
 
@@ -104,4 +105,8 @@ func (d DBInstance) GetResourceName() string {
 
 func (d DBInstance) GetResourceType() string {
 	return fetching.RdsType
+}
+
+func (d DBInstance) GetRegion() string {
+	return d.region
 }

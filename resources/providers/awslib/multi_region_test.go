@@ -168,6 +168,8 @@ func (t testAwsResource) GetResourceName() string { return "" }
 
 func (t testAwsResource) GetResourceType() string { return "" }
 
+func (t testAwsResource) GetRegion() string { return "" }
+
 func (d dummyTester) DummyFunc() ([]AwsResource, error) {
 	awsRes := []AwsResource{testAwsResource{resRegion: d.region}}
 	switch d.region {

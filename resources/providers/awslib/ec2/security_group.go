@@ -47,3 +47,7 @@ func (s SecurityGroup) GetResourceName() string {
 func (s SecurityGroup) GetResourceType() string {
 	return fetching.SecurityGroupType
 }
+
+func (s SecurityGroup) GetRegion() string {
+	return s.region
+}

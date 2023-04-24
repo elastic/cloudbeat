@@ -34,6 +34,47 @@ func (_m *MockAwsResource) EXPECT() *MockAwsResource_Expecter {
 	return &MockAwsResource_Expecter{mock: &_m.Mock}
 }
 
+// GetRegion provides a mock function with given fields:
+func (_m *MockAwsResource) GetRegion() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
+// MockAwsResource_GetRegion_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRegion'
+type MockAwsResource_GetRegion_Call struct {
+	*mock.Call
+}
+
+// GetRegion is a helper method to define mock.On call
+func (_e *MockAwsResource_Expecter) GetRegion() *MockAwsResource_GetRegion_Call {
+	return &MockAwsResource_GetRegion_Call{Call: _e.mock.On("GetRegion")}
+}
+
+func (_c *MockAwsResource_GetRegion_Call) Run(run func()) *MockAwsResource_GetRegion_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockAwsResource_GetRegion_Call) Return(_a0 string) *MockAwsResource_GetRegion_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockAwsResource_GetRegion_Call) RunAndReturn(run func() string) *MockAwsResource_GetRegion_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetResourceArn provides a mock function with given fields:
 func (_m *MockAwsResource) GetResourceArn() string {
 	ret := _m.Called()
