@@ -380,3 +380,94 @@ func TestProvider_DescribeSnapshots(t *testing.T) {
 		})
 	}
 }
+
+func TestProvider_GetRouteTableForSubnet(t *testing.T) {
+	routeTableId := "123456789"
+	anotherRouteTableId := "87654321"
+	routeTable := types.RouteTable{RouteTableId: &routeTableId}
+	anotherRouteTable := types.RouteTable{RouteTableId: &anotherRouteTableId}
+
+	tests := []struct {
+		name    string
+		client  func() Client
+		want    types.RouteTable
+		wantErr bool
+		regions []string
+	}{
+		{
+			name: "Gets attached route table for subnet",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeRouteTables", mock.Anything, mock.Anything).Return(&ec2.DescribeRouteTablesOutput{RouteTables: []types.RouteTable{routeTable}}, nil).Once()
+				return m
+			},
+			want:    routeTable,
+			wantErr: false,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "Gets implicitly attached route table for subnet",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeRouteTables", mock.Anything, mock.Anything).Return(&ec2.DescribeRouteTablesOutput{RouteTables: []types.RouteTable{}}, nil).Once()
+				m.On("DescribeRouteTables", mock.Anything, mock.Anything).Return(&ec2.DescribeRouteTablesOutput{RouteTables: []types.RouteTable{anotherRouteTable}}, nil).Once()
+				return m
+			},
+			want:    anotherRouteTable,
+			wantErr: false,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "Errors when fetching attached route table for subnet",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeRouteTables", mock.Anything, mock.Anything).Return(nil, errors.New("bla")).Once()
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "Errors when fetching implicitly attached route table for subnet",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeRouteTables", mock.Anything, mock.Anything).Return(&ec2.DescribeRouteTablesOutput{RouteTables: []types.RouteTable{}}, nil).Once()
+				m.On("DescribeRouteTables", mock.Anything, mock.Anything).Return(nil, errors.New("bla")).Once()
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "Errors when there is more than 1 attached route table for subnet",
+			client: func() Client {
+				m := &MockClient{}
+				m.On("DescribeRouteTables", mock.Anything, mock.Anything).Return(&ec2.DescribeRouteTablesOutput{RouteTables: []types.RouteTable{routeTable, anotherRouteTable}}, nil).Once()
+				return m
+			},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:          logp.NewLogger(tt.name),
+				clients:      clients,
+				awsAccountID: "aws-account",
+			}
+			got, err := p.GetRouteTableForSubnet(context.Background(), tt.regions[0], "", "")
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
