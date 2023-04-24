@@ -125,6 +125,10 @@ func (u User) GetResourceType() string {
 	return fetching.IAMUserType
 }
 
+func (u User) GetRegion() string {
+	return awslib.GlobalRegion
+}
+
 func (p Provider) listUsers(ctx context.Context) ([]types.User, error) {
 	p.log.Debug("IAMProvider.getUsers")
 	var nativeUsers []types.User

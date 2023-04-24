@@ -23,6 +23,7 @@ import (
 	"fmt"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"net/url"
@@ -63,6 +64,39 @@ func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	return policies, nil
 }
 
+func (p Provider) GetSupportPolicy(ctx context.Context) (awslib.AwsResource, error) {
+	const awsSupportAccessArn = "arn:aws:iam::aws:policy/AWSSupportAccess"
+
+	policy, err := p.client.GetPolicy(ctx, &iamsdk.GetPolicyInput{PolicyArn: aws.String(awsSupportAccessArn)})
+	if err != nil {
+		return nil, err
+	}
+
+	awsSupportAccessPolicy := Policy{
+		Policy: *policy.Policy,
+		Roles:  make([]types.PolicyRole, 0),
+	}
+	input := &iamsdk.ListEntitiesForPolicyInput{
+		PolicyArn:    aws.String(awsSupportAccessArn),
+		EntityFilter: types.EntityTypeRole,
+	}
+	for {
+		output, err := p.client.ListEntitiesForPolicy(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+
+		awsSupportAccessPolicy.Roles = append(awsSupportAccessPolicy.Roles, output.PolicyRoles...)
+
+		if !output.IsTruncated {
+			break
+		}
+		input.Marker = output.Marker
+	}
+
+	return awsSupportAccessPolicy, nil
+}
+
 func (p Provider) getPolicyVersion(ctx context.Context, policy types.Policy) (*iamsdk.GetPolicyVersionOutput, error) {
 	if policy.Arn == nil || policy.DefaultVersionId == nil {
 		return nil, fmt.Errorf("invalid policy: %v", policy)
@@ -100,6 +134,10 @@ func (p Policy) GetResourceName() string {
 
 func (p Policy) GetResourceType() string {
 	return fetching.PolicyType
+}
+
+func (p Policy) GetRegion() string {
+	return awslib.GlobalRegion
 }
 
 func stringOrEmpty(s *string) string {

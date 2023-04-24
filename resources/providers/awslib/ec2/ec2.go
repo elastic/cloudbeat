@@ -22,6 +22,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -31,6 +32,7 @@ type ElasticCompute interface {
 	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
 	DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error)
 	GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error)
+	GetRouteTableForSubnet(ctx context.Context, region string, subnetId string, vpcId string) (types.RouteTable, error)
 }
 
 func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
