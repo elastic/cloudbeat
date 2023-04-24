@@ -72,6 +72,7 @@ func (r S3Resource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Type:    fetching.CloudStorage,
 		SubType: r.bucket.GetResourceType(),
 		Name:    r.bucket.GetResourceName(),
+		Region:  r.bucket.GetRegion(),
 	}, nil
 }
 

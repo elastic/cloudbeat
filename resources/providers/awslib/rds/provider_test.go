@@ -98,8 +98,27 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 				{ec2types.RouteTable{RouteTableId: &identifier, Routes: []ec2types.Route{{DestinationCidrBlock: &destinationCidrBlock, GatewayId: &gatewayId}}}, nil},
 			},
 			expected: []awslib.AwsResource{
-				DBInstance{Identifier: identifier, Arn: arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false, PubliclyAccessible: false, Subnets: []Subnet(nil)},
-				DBInstance{Identifier: identifier2, Arn: arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true, PubliclyAccessible: true, Subnets: []Subnet{{ID: identifier, RouteTable: nil}, {ID: identifier2, RouteTable: &RouteTable{ID: identifier, Routes: []Route{{DestinationCidrBlock: &destinationCidrBlock, GatewayId: &gatewayId}}}}}},
+				DBInstance{
+					Identifier:              identifier,
+					Arn:                     arn,
+					StorageEncrypted:        false,
+					AutoMinorVersionUpgrade: false,
+					PubliclyAccessible:      false,
+					Subnets:                 []Subnet(nil),
+					region:                  awslib.DefaultRegion,
+				},
+				DBInstance{
+					Identifier:              identifier2,
+					Arn:                     arn2,
+					StorageEncrypted:        true,
+					AutoMinorVersionUpgrade: true,
+					PubliclyAccessible:      true, Subnets: []Subnet{
+						{ID: identifier, RouteTable: nil},
+						{ID: identifier2, RouteTable: &RouteTable{
+							ID:     identifier,
+							Routes: []Route{{DestinationCidrBlock: &destinationCidrBlock, GatewayId: &gatewayId}},
+						}}},
+					region: awslib.DefaultRegion},
 			},
 		},
 	}

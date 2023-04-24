@@ -77,6 +77,7 @@ func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Type:    fetching.EC2Identity,
 		SubType: r.GetResourceType(),
 		Name:    r.GetResourceName(),
+		Region:  r.GetRegion(),
 	}, nil
 }
 

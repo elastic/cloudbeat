@@ -19,10 +19,9 @@ package rds
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
-
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
@@ -33,6 +32,7 @@ type DBInstance struct {
 	AutoMinorVersionUpgrade bool     `json:"auto_minor_version_upgrade"`
 	PubliclyAccessible      bool     `json:"publicly_accessible"`
 	Subnets                 []Subnet `json:"subnets"`
+	region                  string
 }
 
 type Subnet struct {

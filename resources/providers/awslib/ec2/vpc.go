@@ -48,3 +48,7 @@ func (v VpcInfo) GetResourceName() string {
 func (v VpcInfo) GetResourceType() string {
 	return fetching.VpcType
 }
+
+func (v VpcInfo) GetRegion() string {
+	return v.region
+}
