@@ -1,11 +1,19 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
+
+	"github.com/awslabs/goformation/v7"
+	"github.com/awslabs/goformation/v7/cloudformation"
+	"github.com/awslabs/goformation/v7/cloudformation/ec2"
+	"github.com/awslabs/goformation/v7/intrinsics"
 )
 
 const (
@@ -13,48 +21,102 @@ const (
 	devTemplatePath  = "elastic-agent-ec2-dev.yml"
 )
 
-func editArtifactURL(content string) string {
-	prodURL := "https://artifacts.elastic.co/downloads/beats/elastic-agent/"
+type devModifier interface {
+	Modify(template *cloudformation.Template) error
+}
 
+type artifactUrlDevMod struct{}
+
+type securityGroupDevMod struct{}
+
+type ec2KeyDevMod struct{}
+
+var devModifiers = []devModifier{
+	&securityGroupDevMod{}, &ec2KeyDevMod{}, &artifactUrlDevMod{},
+}
+
+func (m *artifactUrlDevMod) Modify(template *cloudformation.Template) error {
+	ec2Instance, err := template.GetEC2InstanceWithName("ElasticAgentEc2Instance")
+	if err != nil {
+		return err
+	}
+
+	err = recursiveReplaceArtifactUrl(ec2Instance.UserData)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func recursiveReplaceArtifactUrl(encoded *string) error {
 	// TODO: Dynamically get the latest snapshot URL
 	devURL := "https://snapshots.elastic.co/8.8.0-3f572553/downloads/beats/elastic-agent/"
-	return strings.ReplaceAll(content, prodURL, devURL)
+	prodURL := "https://artifacts.elastic.co/downloads/beats/elastic-agent/"
+
+	if strings.Index(*encoded, prodURL) > -1 {
+		*encoded = strings.ReplaceAll(*encoded, prodURL, devURL)
+		return nil
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(*encoded)
+	if err != nil {
+		return fmt.Errorf("Could not decode user data: %v", err)
+	}
+
+	decodedObj := map[string]string{}
+	err = json.Unmarshal(decoded, &decodedObj)
+	if err != nil {
+		return fmt.Errorf("Could not unmarshal user data: %v", err)
+	}
+
+	for k, v := range decodedObj {
+		err = recursiveReplaceArtifactUrl(&v)
+		decodedObj[k] = v
+		if err != nil {
+			return err
+		}
+	}
+
+	decoded, err = json.Marshal(decodedObj)
+	if err != nil {
+		return err
+	}
+
+	*encoded = base64.StdEncoding.EncodeToString(decoded)
+	return nil
 }
 
-func allowSSHFromAnywhere(content string) string {
-	blockSecurityGroup := `
-      GroupDescription: Block incoming traffic
-      SecurityGroupIngress: []`
-
-	allowSSHSecurityGroup := `
-      GroupDescription: Allow SSH from anywhere
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: 0.0.0.0/0`
-	return strings.ReplaceAll(content, blockSecurityGroup, allowSSHSecurityGroup)
+func (m *securityGroupDevMod) Modify(template *cloudformation.Template) error {
+	securityGroups, err := template.GetEC2SecurityGroupWithName("ElasticAgentSecurityGroup")
+	if err != nil {
+		return err
+	}
+	securityGroups.GroupDescription = "Allow SSH from anywhere"
+	securityGroups.SecurityGroupIngress = []ec2.SecurityGroup_Ingress{
+		{
+			IpProtocol: "tcp",
+			FromPort:   cloudformation.Int(22),
+			ToPort:     cloudformation.Int(22),
+			CidrIp:     cloudformation.String("0.0.0.0/0"),
+		},
+	}
+	return nil
 }
 
-func acceptEC2Key(content string) string {
-	parametersSection := `
-Parameters:`
+func (m ec2KeyDevMod) Modify(template *cloudformation.Template) error {
+	template.Parameters["KeyName"] = cloudformation.Parameter{
+		Type:        "AWS::EC2::KeyPair::KeyName",
+		Description: cloudformation.String("SSH Keypair to login to the instance"),
+	}
 
-	keyParameter := `
-Parameters:
-  KeyName:
-    Type: AWS::EC2::KeyPair::KeyName
-    Description: SSH Keypair to login to the instance`
-	return strings.ReplaceAll(content, parametersSection, keyParameter)
-}
+	ec2Instance, err := template.GetEC2InstanceWithName("ElasticAgentEc2Instance")
+	if err != nil {
+		return err
+	}
 
-func assignEC2Key(content string) string {
-	ec2Props := `
-      ImageId: !Ref LatestAmiId`
-	keyAssignment := `
-      ImageId: !Ref LatestAmiId
-      KeyName: !Ref KeyName`
-	return strings.ReplaceAll(content, ec2Props, keyAssignment)
+	ec2Instance.KeyName = cloudformation.RefPtr("KeyName")
+	return nil
 }
 
 func generateDevTemplate() error {
@@ -66,17 +128,28 @@ func generateDevTemplate() error {
 	inputPath := filepath.Join(currentDir, prodTemplatePath)
 	outputPath := filepath.Join(currentDir, devTemplatePath)
 
-	fileContents, err := os.ReadFile(inputPath)
+	template, err := goformation.OpenWithOptions(inputPath, &intrinsics.ProcessorOptions{
+		IntrinsicHandlerOverrides: cloudformation.EncoderIntrinsics,
+	})
+
 	if err != nil {
-		return fmt.Errorf("Could not read input: %v", err)
+		return fmt.Errorf("Could not read CloudFormation input: %v", err)
 	}
 
-	modifiedContents := editArtifactURL(string(fileContents))
-	modifiedContents = allowSSHFromAnywhere(modifiedContents)
-	modifiedContents = acceptEC2Key(modifiedContents)
-	modifiedContents = assignEC2Key(modifiedContents)
+	for _, m := range devModifiers {
+		err := m.Modify(template)
+		if err != nil {
+			name := reflect.TypeOf(m)
+			return fmt.Errorf("Modifier %s could not modify template: %v", name, err)
+		}
+	}
 
-	if err := os.WriteFile(outputPath, []byte(modifiedContents), 0644); err != nil {
+	yaml, err := template.YAML()
+	if err != nil {
+		return fmt.Errorf("Could not generate output yaml: %v", err)
+	}
+
+	if err := os.WriteFile(outputPath, yaml, 0644); err != nil {
 		return fmt.Errorf("Could not write output: %v", err)
 	}
 
