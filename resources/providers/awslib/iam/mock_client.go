@@ -1089,6 +1089,76 @@ func (_c *MockClient_ListPolicies_Call) RunAndReturn(run func(context.Context, *
 	return _c
 }
 
+// ListServerCertificates provides a mock function with given fields: ctx, params, optFns
+func (_m *MockClient) ListServerCertificates(ctx context.Context, params *serviceiam.ListServerCertificatesInput, optFns ...func(*serviceiam.Options)) (*serviceiam.ListServerCertificatesOutput, error) {
+	_va := make([]interface{}, len(optFns))
+	for _i := range optFns {
+		_va[_i] = optFns[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *serviceiam.ListServerCertificatesOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceiam.ListServerCertificatesInput, ...func(*serviceiam.Options)) (*serviceiam.ListServerCertificatesOutput, error)); ok {
+		return rf(ctx, params, optFns...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *serviceiam.ListServerCertificatesInput, ...func(*serviceiam.Options)) *serviceiam.ListServerCertificatesOutput); ok {
+		r0 = rf(ctx, params, optFns...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*serviceiam.ListServerCertificatesOutput)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *serviceiam.ListServerCertificatesInput, ...func(*serviceiam.Options)) error); ok {
+		r1 = rf(ctx, params, optFns...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockClient_ListServerCertificates_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListServerCertificates'
+type MockClient_ListServerCertificates_Call struct {
+	*mock.Call
+}
+
+// ListServerCertificates is a helper method to define mock.On call
+//   - ctx context.Context
+//   - params *serviceiam.ListServerCertificatesInput
+//   - optFns ...func(*serviceiam.Options)
+func (_e *MockClient_Expecter) ListServerCertificates(ctx interface{}, params interface{}, optFns ...interface{}) *MockClient_ListServerCertificates_Call {
+	return &MockClient_ListServerCertificates_Call{Call: _e.mock.On("ListServerCertificates",
+		append([]interface{}{ctx, params}, optFns...)...)}
+}
+
+func (_c *MockClient_ListServerCertificates_Call) Run(run func(ctx context.Context, params *serviceiam.ListServerCertificatesInput, optFns ...func(*serviceiam.Options))) *MockClient_ListServerCertificates_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*serviceiam.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*serviceiam.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*serviceiam.ListServerCertificatesInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *MockClient_ListServerCertificates_Call) Return(_a0 *serviceiam.ListServerCertificatesOutput, _a1 error) *MockClient_ListServerCertificates_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockClient_ListServerCertificates_Call) RunAndReturn(run func(context.Context, *serviceiam.ListServerCertificatesInput, ...func(*serviceiam.Options)) (*serviceiam.ListServerCertificatesOutput, error)) *MockClient_ListServerCertificates_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListUserPolicies provides a mock function with given fields: ctx, params, optFns
 func (_m *MockClient) ListUserPolicies(ctx context.Context, params *serviceiam.ListUserPoliciesInput, optFns ...func(*serviceiam.Options)) (*serviceiam.ListUserPoliciesOutput, error) {
 	_va := make([]interface{}, len(optFns))
