@@ -81,6 +81,7 @@ func (p *Provider) DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResou
 			result = append(result, KmsInfo{
 				KeyMetadata:        *keyInfo.KeyMetadata,
 				KeyRotationEnabled: rotationStatus.KeyRotationEnabled,
+				region:             region,
 			})
 		}
 		return result, nil
@@ -106,4 +107,8 @@ func (k KmsInfo) GetResourceName() string {
 
 func (k KmsInfo) GetResourceType() string {
 	return fetching.KmsType
+}
+
+func (k KmsInfo) GetRegion() string {
+	return k.region
 }

@@ -23,7 +23,10 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
 
-const DefaultRegion = "us-east-1"
+const (
+	DefaultRegion = "us-east-1"
+	GlobalRegion  = "global"
+)
 
 var ErrClientNotFound = errors.New("aws client not found")
 
@@ -35,6 +38,7 @@ type AwsResource interface {
 	GetResourceArn() string
 	GetResourceName() string
 	GetResourceType() string
+	GetRegion() string
 }
 
 func GetClient[T any](region *string, list map[string]T) (T, error) {
