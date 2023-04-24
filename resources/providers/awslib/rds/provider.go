@@ -50,7 +50,12 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 		}
 
 		for _, dbInstance := range dbInstances.DBInstances {
-			result = append(result, DBInstance{Identifier: *dbInstance.DBInstanceIdentifier, Arn: *dbInstance.DBInstanceArn, StorageEncrypted: dbInstance.StorageEncrypted, AutoMinorVersionUpgrade: dbInstance.AutoMinorVersionUpgrade})
+			result = append(result, DBInstance{
+				Identifier:              *dbInstance.DBInstanceIdentifier,
+				Arn:                     *dbInstance.DBInstanceArn,
+				StorageEncrypted:        dbInstance.StorageEncrypted,
+				AutoMinorVersionUpgrade: dbInstance.AutoMinorVersionUpgrade,
+			})
 		}
 
 		return result, nil
