@@ -19,6 +19,7 @@ package iam
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
@@ -127,6 +128,7 @@ type Policy struct {
 	types.Policy
 	Document map[string]interface{} `json:"document,omitempty"`
 	Roles    []types.PolicyRole     `json:"roles"`
+
 }
 
 type PolicyDocument struct {

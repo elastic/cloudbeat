@@ -74,6 +74,7 @@ func (r KmsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Type:    fetching.KeyManagement,
 		SubType: r.key.GetResourceType(),
 		Name:    r.key.GetResourceName(),
+		Region:  r.key.GetRegion(),
 	}, nil
 }
 
