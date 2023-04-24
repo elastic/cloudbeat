@@ -34,7 +34,6 @@ type AccessManagement interface {
 	GetAccountAlias(ctx context.Context) (string, error)
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	GetSupportPolicy(ctx context.Context) (awslib.AwsResource, error)
-	ListServerCertificates(ctx context.Context) (awslib.AwsResource, error)
 }
 
 type Client interface {
@@ -56,7 +55,6 @@ type Client interface {
 	GetPolicy(ctx context.Context, params *iamsdk.GetPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyOutput, error)
 	GetPolicyVersion(ctx context.Context, params *iamsdk.GetPolicyVersionInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyVersionOutput, error)
 	ListEntitiesForPolicy(ctx context.Context, params *iamsdk.ListEntitiesForPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListEntitiesForPolicyOutput, error)
-	ListServerCertificates(ctx context.Context, params *iamsdk.ListServerCertificatesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListServerCertificatesOutput, error)
 }
 
 type Provider struct {
@@ -130,10 +128,7 @@ type Policy struct {
 	types.Policy
 	Document map[string]interface{} `json:"document,omitempty"`
 	Roles    []types.PolicyRole     `json:"roles"`
-}
 
-type ServerCertificatesInfo struct {
-	Certificates []types.ServerCertificateMetadata `json:"certificates"`
 }
 
 type PolicyDocument struct {
