@@ -363,6 +363,60 @@ func (_c *MockAccessManagement_GetUsers_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// ListServerCertificates provides a mock function with given fields: ctx
+func (_m *MockAccessManagement) ListServerCertificates(ctx context.Context) (awslib.AwsResource, error) {
+	ret := _m.Called(ctx)
+
+	var r0 awslib.AwsResource
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (awslib.AwsResource, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) awslib.AwsResource); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(awslib.AwsResource)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAccessManagement_ListServerCertificates_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListServerCertificates'
+type MockAccessManagement_ListServerCertificates_Call struct {
+	*mock.Call
+}
+
+// ListServerCertificates is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockAccessManagement_Expecter) ListServerCertificates(ctx interface{}) *MockAccessManagement_ListServerCertificates_Call {
+	return &MockAccessManagement_ListServerCertificates_Call{Call: _e.mock.On("ListServerCertificates", ctx)}
+}
+
+func (_c *MockAccessManagement_ListServerCertificates_Call) Run(run func(ctx context.Context)) *MockAccessManagement_ListServerCertificates_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockAccessManagement_ListServerCertificates_Call) Return(_a0 awslib.AwsResource, _a1 error) *MockAccessManagement_ListServerCertificates_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockAccessManagement_ListServerCertificates_Call) RunAndReturn(run func(context.Context) (awslib.AwsResource, error)) *MockAccessManagement_ListServerCertificates_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 type mockConstructorTestingTNewMockAccessManagement interface {
 	mock.TestingT
 	Cleanup(func())
