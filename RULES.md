@@ -201,9 +201,9 @@
 
 ## AWS CIS Benchmark
 
-### 52/63 implemented rules (83%)
+### 53/63 implemented rules (84%)
 
-#### Automated rules: 52/55 (95%)
+#### Automated rules: 53/55 (96%)
 
 #### Manual rules: 0/8 (0%)
 
@@ -217,7 +217,7 @@
 |  [1.14](bundle/compliance/cis_aws/rules/cis_1_14)  | Identity and Access Management    | Ensure access keys are rotated every 90 days or less                                                               | :white_check_mark: | Automated |
 |  [1.15](bundle/compliance/cis_aws/rules/cis_1_15)  | Identity and Access Management    | Ensure IAM Users Receive Permissions Only Through Groups                                                           | :white_check_mark: | Automated |
 |  [1.16](bundle/compliance/cis_aws/rules/cis_1_16)  | Identity and Access Management    | Ensure IAM policies that allow full "*:*" administrative privileges are not attached                               | :white_check_mark: | Automated |
-|                        1.17                        | Identity and Access Management    | Ensure a support role has been created to manage incidents with AWS Support                                        |        :x:         | Automated |
+|  [1.17](bundle/compliance/cis_aws/rules/cis_1_17)  | Identity and Access Management    | Ensure a support role has been created to manage incidents with AWS Support                                        | :white_check_mark: | Automated |
 |                        1.18                        | Identity and Access Management    | Ensure IAM instance roles are used for AWS resource access from instances                                          |        :x:         |  Manual   |
 |                        1.19                        | Identity and Access Management    | Ensure that all the expired SSL/TLS certificates stored in AWS IAM are removed                                     |        :x:         | Automated |
 |                        1.2                         | Identity and Access Management    | Ensure security contact information is registered                                                                  |        :x:         |  Manual   |

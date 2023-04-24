@@ -18,6 +18,11 @@ is_iam_policy {
 	input.subType == "aws-policy"
 }
 
+is_aws_support_access {
+	is_iam_policy
+	input.resource.Arn == "arn:aws:iam::aws:policy/AWSSupportAccess"
+}
+
 pwd_policy = policy {
 	is_pwd_policy
 	policy := input.resource
@@ -26,6 +31,8 @@ pwd_policy = policy {
 iam_user = input.resource
 
 policy_document = input.resource.document
+
+roles = input.resource.roles
 
 used_active_access_keys = {access_key |
 	access_key = iam_user.access_keys[_]
