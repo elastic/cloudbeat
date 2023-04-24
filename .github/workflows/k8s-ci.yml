@@ -329,14 +329,14 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Set Kind Configuration
+        if: matrix.test-target == 'aws'
+        run: |
+          echo "KIND_CONFIG=kind-mono" >> $GITHUB_ENV
+
+      - name: Set Kind Configuration
+        if: matrix.test-target != 'aws'
         run: |
           echo "KIND_CONFIG=kind-multi" >> $GITHUB_ENV
-          if [[ $VAR == "aws" ]]; then
-            echo "KIND_CONFIG=kind-mono" >> $GITHUB_ENV
-          fi
-        env:
-          VAR: ${{ matrix.test-target }}
-
 
       - name: Create k8s Kind Cluster
         run: |
