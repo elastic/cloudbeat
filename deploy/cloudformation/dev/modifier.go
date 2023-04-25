@@ -96,7 +96,7 @@ func getJson(url string, target interface{}) error {
 func (m *ArtifactUrlDevMod) recursiveReplaceArtifactUrl(encoded *string) error {
 	prodURL := "https://artifacts.elastic.co/downloads/beats/elastic-agent/"
 
-	if strings.Index(*encoded, prodURL) > -1 {
+	if strings.Contains(*encoded, prodURL) {
 		*encoded = strings.ReplaceAll(*encoded, prodURL, m.artifactUrl)
 		return nil
 	}
