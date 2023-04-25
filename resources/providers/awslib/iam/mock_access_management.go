@@ -40,6 +40,60 @@ func (_m *MockAccessManagement) EXPECT() *MockAccessManagement_Expecter {
 	return &MockAccessManagement_Expecter{mock: &_m.Mock}
 }
 
+// GetAccessAnalyzers provides a mock function with given fields: ctx
+func (_m *MockAccessManagement) GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, error) {
+	ret := _m.Called(ctx)
+
+	var r0 awslib.AwsResource
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (awslib.AwsResource, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) awslib.AwsResource); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(awslib.AwsResource)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockAccessManagement_GetAccessAnalyzers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAccessAnalyzers'
+type MockAccessManagement_GetAccessAnalyzers_Call struct {
+	*mock.Call
+}
+
+// GetAccessAnalyzers is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockAccessManagement_Expecter) GetAccessAnalyzers(ctx interface{}) *MockAccessManagement_GetAccessAnalyzers_Call {
+	return &MockAccessManagement_GetAccessAnalyzers_Call{Call: _e.mock.On("GetAccessAnalyzers", ctx)}
+}
+
+func (_c *MockAccessManagement_GetAccessAnalyzers_Call) Run(run func(ctx context.Context)) *MockAccessManagement_GetAccessAnalyzers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockAccessManagement_GetAccessAnalyzers_Call) Return(_a0 awslib.AwsResource, _a1 error) *MockAccessManagement_GetAccessAnalyzers_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockAccessManagement_GetAccessAnalyzers_Call) RunAndReturn(run func(context.Context) (awslib.AwsResource, error)) *MockAccessManagement_GetAccessAnalyzers_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAccountAlias provides a mock function with given fields: ctx
 func (_m *MockAccessManagement) GetAccountAlias(ctx context.Context) (string, error) {
 	ret := _m.Called(ctx)
