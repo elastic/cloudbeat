@@ -8,9 +8,8 @@ Parameters:
     Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
   InstanceType:
     Type: String
-    Default: a1.xlarge
+    Default: a1.2xlarge
     AllowedValues:
-    - a1.xlarge
     - a1.2xlarge
     - a1.4xlarge
     Description: The type of EC2 instance to create
