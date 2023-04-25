@@ -303,6 +303,8 @@ github.com/aws/aws-sdk-go-v2/internal/ini v1.3.26 h1:Mza+vlnZr+fPKFKRq/lKGVvM6B/
 github.com/aws/aws-sdk-go-v2/internal/ini v1.3.26/go.mod h1:Y2OJ+P+MC1u1VKnavT+PshiEuGPyh/7DqxoDNij4/bg=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.0.14 h1:ZSIPAkAsCCjYrhqfw2+lNzWDzxzHXEckFkTePL5RSWQ=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.0.14/go.mod h1:AyGgqiKv9ECM6IZeNQtdT8NnMvUb3/2wokeq2Fgryto=
+github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.16.0 h1:rPv8ZiaTIwLp4JOCQAQcgPx7i2a7FTRY7lnyrNS0HbU=
+github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.16.0/go.mod h1:l5+hat25VFsG9jpsXrtEYqw6Ih3pLaC5I4+8hrng7F4=
 github.com/aws/aws-sdk-go-v2/service/autoscaling v1.24.4 h1:UFY/jik4/RIejnc4Qfi+AxYAs/ZIoLlKVIt7s/iqQR4=
 github.com/aws/aws-sdk-go-v2/service/autoscaling v1.24.4/go.mod h1:uPC6MoUg0E5P19+yoXB//OnQGMUApXmu8Z2Gqo+h/bk=
 github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.22.0 h1:Hdql8h9SancrQPqJoDcaJQT01zwaSP4gYbe8rmrQRrw=

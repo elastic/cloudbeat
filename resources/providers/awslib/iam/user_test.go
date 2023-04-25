@@ -177,7 +177,7 @@ func createProviderFromMockValues(mockReturnValues mocksReturnVals) *Provider {
 		}
 	}
 	return &Provider{
-		client: &mockedClient,
 		log:    logp.NewLogger("iam-provider"),
+		client: &mockedClient,
 	}
 }
