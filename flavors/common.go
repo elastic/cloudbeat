@@ -57,7 +57,7 @@ func getAWSDataProvider(ctx context.Context, log *logp.Logger, cfg config.Config
 	}
 
 	identityClient := awslib.GetIdentityClient(awsConfig)
-	iamProvider := iam.NewIAMProvider(log, awsConfig)
+	iamProvider := iam.NewIAMProvider(log, awsConfig, nil)
 
 	identity, err := identityClient.GetIdentity(ctx)
 	if err != nil {

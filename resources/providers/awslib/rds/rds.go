@@ -19,17 +19,35 @@ package rds
 
 import (
 	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type DBInstance struct {
-	Identifier              string `json:"identifier"`
-	Arn                     string `json:"arn"`
-	StorageEncrypted        bool   `json:"storage_encrypted"`
-	AutoMinorVersionUpgrade bool   `json:"auto_minor_version_upgrade"`
+	Identifier              string   `json:"identifier"`
+	Arn                     string   `json:"arn"`
+	StorageEncrypted        bool     `json:"storage_encrypted"`
+	AutoMinorVersionUpgrade bool     `json:"auto_minor_version_upgrade"`
+	PubliclyAccessible      bool     `json:"publicly_accessible"`
+	Subnets                 []Subnet `json:"subnets"`
+	region                  string
+}
+
+type Subnet struct {
+	ID         string
+	RouteTable *RouteTable
+}
+
+type RouteTable struct {
+	ID     string
+	Routes []Route
+}
+
+type Route struct {
+	DestinationCidrBlock *string
+	GatewayId            *string
 }
 
 type Rds interface {
@@ -39,6 +57,7 @@ type Rds interface {
 type Provider struct {
 	log     *logp.Logger
 	clients map[string]Client
+	ec2     ec2.ElasticCompute
 }
 
 type Client interface {

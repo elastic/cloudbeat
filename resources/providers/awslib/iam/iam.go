@@ -19,7 +19,9 @@ package iam
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -32,6 +34,9 @@ type AccessManagement interface {
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 	GetAccountAlias(ctx context.Context) (string, error)
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
+	GetSupportPolicy(ctx context.Context) (awslib.AwsResource, error)
+	ListServerCertificates(ctx context.Context) (awslib.AwsResource, error)
+	GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, error)
 }
 
 type Client interface {
@@ -50,12 +55,20 @@ type Client interface {
 	GenerateCredentialReport(ctx context.Context, params *iamsdk.GenerateCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GenerateCredentialReportOutput, error)
 	ListAccountAliases(ctx context.Context, params *iamsdk.ListAccountAliasesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAccountAliasesOutput, error)
 	ListPolicies(ctx context.Context, params *iamsdk.ListPoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListPoliciesOutput, error)
+	GetPolicy(ctx context.Context, params *iamsdk.GetPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyOutput, error)
 	GetPolicyVersion(ctx context.Context, params *iamsdk.GetPolicyVersionInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyVersionOutput, error)
+	ListEntitiesForPolicy(ctx context.Context, params *iamsdk.ListEntitiesForPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListEntitiesForPolicyOutput, error)
+	ListServerCertificates(ctx context.Context, params *iamsdk.ListServerCertificatesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListServerCertificatesOutput, error)
+}
+
+type AccessAnalyzer interface {
+	ListAnalyzers(ctx context.Context, params *accessanalyzer.ListAnalyzersInput, optFns ...func(*accessanalyzer.Options)) (*accessanalyzer.ListAnalyzersOutput, error)
 }
 
 type Provider struct {
-	log    *logp.Logger
-	client Client
+	log                   *logp.Logger
+	client                Client
+	accessAnalyzerClients map[string]AccessAnalyzer
 }
 
 type RolePolicyInfo struct {
@@ -123,6 +136,11 @@ type CredentialReport struct {
 type Policy struct {
 	types.Policy
 	Document map[string]interface{} `json:"document,omitempty"`
+	Roles    []types.PolicyRole     `json:"roles"`
+}
+
+type ServerCertificatesInfo struct {
+	Certificates []types.ServerCertificateMetadata `json:"certificates"`
 }
 
 type PolicyDocument struct {
@@ -130,10 +148,16 @@ type PolicyDocument struct {
 	Policy     string `json:"policy,omitempty"`
 }
 
-func NewIAMProvider(log *logp.Logger, cfg aws.Config) *Provider {
-	svc := iamsdk.NewFromConfig(cfg)
-	return &Provider{
+func NewIAMProvider(log *logp.Logger, cfg aws.Config, crossRegionFactory awslib.CrossRegionFactory[AccessAnalyzer]) *Provider {
+	provider := Provider{
 		log:    log,
-		client: svc,
+		client: iamsdk.NewFromConfig(cfg),
 	}
+	if crossRegionFactory != nil {
+		m := crossRegionFactory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, func(cfg aws.Config) AccessAnalyzer {
+			return accessanalyzer.NewFromConfig(cfg)
+		}, log)
+		provider.accessAnalyzerClients = m.GetMultiRegionsClientMap()
+	}
+	return &provider
 }

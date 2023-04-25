@@ -48,3 +48,7 @@ func (r NACLInfo) GetResourceName() string {
 func (r NACLInfo) GetResourceType() string {
 	return fetching.NetworkNACLType
 }
+
+func (r NACLInfo) GetRegion() string {
+	return r.region
+}

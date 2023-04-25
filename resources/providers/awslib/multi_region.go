@@ -76,7 +76,7 @@ func MultiRegionFetch[T any, K any](ctx context.Context, set map[string]T, fetch
 	errChan := make(chan error, len(set))
 
 	if set == nil {
-		return nil, errors.New("multi region clients have not been initialize")
+		return nil, errors.New("multi region clients have not been initialized")
 	}
 
 	for region, client := range set {

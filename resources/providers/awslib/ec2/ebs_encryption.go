@@ -40,3 +40,7 @@ func (e EBSEncryption) GetResourceName() string {
 func (e EBSEncryption) GetResourceType() string {
 	return fetching.EBSType
 }
+
+func (e EBSEncryption) GetRegion() string {
+	return e.region
+}
