@@ -26,6 +26,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"time"
@@ -331,7 +332,7 @@ func Fields() { mg.Deps(cloudbeat.Update.Fields) }
 // Config generates both the short/reference/docker configs.
 func Config() { mg.Deps(cloudbeat.Update.Config) }
 
-// PythonEnv ensures the Python venv is up-to-date with the beats requrements.txt.
+// PythonEnv ensures the Python venv is up-to-date with the beats requirements.txt.
 func PythonEnv() error {
 	_, err := mage.PythonVirtualenv(true)
 	return err
@@ -339,18 +340,27 @@ func PythonEnv() error {
 
 func BuildOpaBundle() (err error) {
 	owner := "elastic"
-	r := "csp-security-policies"
-	cspPoliciesPkgDir := "/tmp/" + r
+	repoName := "csp-security-policies"
+
+	// Override default SIGINT behaviour which does not allow deferred functions to be called
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	cspPoliciesPkgDir, err := os.MkdirTemp("", repoName)
+	if err != nil {
+		return err
+	}
 
 	defer func() {
 		rmErr := os.RemoveAll(cspPoliciesPkgDir)
 		if rmErr != nil && err == nil {
 			err = rmErr
 		}
+		signal.Stop(c)
 	}()
 
 	repo, err := git.PlainClone(cspPoliciesPkgDir, false, &git.CloneOptions{
-		URL: fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
+		URL: fmt.Sprintf("https://github.com/%s/%s.git", owner, repoName),
 	})
 	if err != nil {
 		return err
