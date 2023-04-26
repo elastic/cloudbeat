@@ -105,11 +105,7 @@ func TestProvider_GetPolicies(t *testing.T) {
 						nil,
 					},
 				},
-				"GetPolicyVersion": {{&iamsdk.GetPolicyVersionOutput{
-					PolicyVersion: &types.PolicyVersion{
-						Document: aws.String("%7B%22hello%22%3A%20%22world%22%7D"),
-					},
-				}, nil}},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
 			},
 			want: []awslib.AwsResource{
 				Policy{
@@ -117,7 +113,7 @@ func TestProvider_GetPolicies(t *testing.T) {
 						Arn:              aws.String("some-arn"),
 						DefaultVersionId: aws.String("some-version"),
 					},
-					Document: map[string]interface{}{"hello": "world"},
+					Document: validGetPolicyVersionOutputDecoded(),
 				},
 			},
 			wantErr: false,
@@ -141,7 +137,8 @@ func TestProvider_GetPolicies(t *testing.T) {
 func TestProvider_GetSupportPolicy(t *testing.T) {
 	policyOut := &iamsdk.GetPolicyOutput{
 		Policy: &types.Policy{
-			Arn: aws.String("some-arn"),
+			Arn:              aws.String("some-arn"),
+			DefaultVersionId: aws.String("some-version"),
 		},
 	}
 	tests := []struct {
@@ -177,6 +174,7 @@ func TestProvider_GetSupportPolicy(t *testing.T) {
 						errors.New("some error"),
 					},
 				},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
 			},
 			wantErr: true,
 		},
@@ -198,12 +196,14 @@ func TestProvider_GetSupportPolicy(t *testing.T) {
 						nil,
 					},
 				},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
 			},
 			want: Policy{
 				Policy: types.Policy{
-					Arn: aws.String("some-arn"),
+					Arn:              aws.String("some-arn"),
+					DefaultVersionId: aws.String("some-version"),
 				},
-				Document: nil,
+				Document: validGetPolicyVersionOutputDecoded(),
 				Roles:    []types.PolicyRole{},
 			},
 			wantErr: false,
@@ -235,12 +235,14 @@ func TestProvider_GetSupportPolicy(t *testing.T) {
 						nil,
 					},
 				},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
 			},
 			want: Policy{
 				Policy: types.Policy{
-					Arn: aws.String("some-arn"),
+					Arn:              aws.String("some-arn"),
+					DefaultVersionId: aws.String("some-version"),
 				},
-				Document: nil,
+				Document: validGetPolicyVersionOutputDecoded(),
 				Roles: []types.PolicyRole{
 					{
 						RoleId:   aws.String("role-id"),
@@ -309,8 +311,8 @@ func Test_decodePolicyDocument(t *testing.T) {
 		},
 		{
 			name:          "Success",
-			policyVersion: docToPolicy("%7B%22hello%22%3A%20%22world%22%7D"), // {"hello": "world"}
-			want:          map[string]interface{}{"hello": "world"},
+			policyVersion: validGetPolicyVersionOutput().PolicyVersion,
+			want:          validGetPolicyVersionOutputDecoded(),
 		},
 	}
 	for _, tt := range tests {
@@ -324,4 +326,16 @@ func Test_decodePolicyDocument(t *testing.T) {
 			assert.Equalf(t, tt.want, got, "decodePolicyDocument(%v)", tt.policyVersion)
 		})
 	}
+}
+
+func validGetPolicyVersionOutput() *iamsdk.GetPolicyVersionOutput {
+	return &iamsdk.GetPolicyVersionOutput{
+		PolicyVersion: &types.PolicyVersion{
+			Document: aws.String("%7B%22hello%22%3A%20%22world%22%7D"),
+		},
+	}
+}
+
+func validGetPolicyVersionOutputDecoded() map[string]interface{} {
+	return map[string]interface{}{"hello": "world"}
 }
