@@ -32,6 +32,18 @@ import (
 const awsSupportAccessArn = "arn:aws:iam::aws:policy/AWSSupportAccess"
 
 func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error) {
+	policies, err := p.getPolicies(ctx)
+	if err != nil {
+		return nil, err
+	}
+	supportPolicy, err := p.getSupportPolicy(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return append(policies, supportPolicy), nil
+}
+
+func (p Provider) getPolicies(ctx context.Context) ([]awslib.AwsResource, error) {
 	var policies []awslib.AwsResource
 
 	input := &iamsdk.ListPoliciesInput{OnlyAttached: true}
@@ -43,7 +55,7 @@ func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 
 		for _, policy := range listPoliciesOutput.Policies {
 			if stringOrEmpty(policy.Arn) == awsSupportAccessArn {
-				// Fetch this one explicitly with GetSupportPolicy()
+				// Fetch this one explicitly with getSupportPolicy()
 				continue
 			}
 
@@ -67,7 +79,7 @@ func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	return policies, nil
 }
 
-func (p Provider) GetSupportPolicy(ctx context.Context) (awslib.AwsResource, error) {
+func (p Provider) getSupportPolicy(ctx context.Context) (awslib.AwsResource, error) {
 	policy, err := p.client.GetPolicy(ctx, &iamsdk.GetPolicyInput{PolicyArn: aws.String(awsSupportAccessArn)})
 	if err != nil {
 		return nil, err

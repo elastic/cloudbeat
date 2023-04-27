@@ -34,7 +34,6 @@ type AccessManagement interface {
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 	GetAccountAlias(ctx context.Context) (string, error)
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
-	GetSupportPolicy(ctx context.Context) (awslib.AwsResource, error)
 	ListServerCertificates(ctx context.Context) (awslib.AwsResource, error)
 	GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, error)
 }
