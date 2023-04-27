@@ -55,7 +55,12 @@ func (p Provider) getPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 
 		for _, policy := range listPoliciesOutput.Policies {
 			if stringOrEmpty(policy.Arn) == awsSupportAccessArn {
-				// Fetch this one explicitly with getSupportPolicy()
+				// Fetch this one explicitly with getSupportPolicy().
+				// The reasoning is that we want to attach roles to the AWS support access policy. If we don't skip it
+				// here, we will produce it another time in getSupportPolicy(), leading to duplicated resources. We
+				// cannot just fetch the roles here either because if the AWS support access policy is not attached,
+				// we will never see it.
+				// See: https://github.com/elastic/cloudbeat/pull/900
 				continue
 			}
 
