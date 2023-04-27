@@ -29,20 +29,15 @@ import (
 )
 
 func TestProvider_GetPolicies(t *testing.T) {
+	supportPolicy := validSupportAccessPolicy()
+	supportPolicyOut := &iamsdk.GetPolicyOutput{Policy: &supportPolicy}
+
 	tests := []struct {
 		name             string
 		mockReturnValues mocksReturnVals
 		want             []awslib.AwsResource
 		wantErr          bool
 	}{
-		{
-			name: "No policies",
-			mockReturnValues: mocksReturnVals{
-				"ListPolicies": {{&iamsdk.ListPoliciesOutput{}, nil}},
-			},
-			want:    nil,
-			wantErr: false,
-		},
 		{
 			name: "Error listing policies",
 			mockReturnValues: mocksReturnVals{
@@ -51,73 +46,55 @@ func TestProvider_GetPolicies(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Policies with missing fields",
+			name: "Error in GetPolicy",
 			mockReturnValues: mocksReturnVals{
 				"ListPolicies": {
 					{
-						&iamsdk.ListPoliciesOutput{
-							Policies: []types.Policy{{Arn: nil},
-								{
-									Arn:              aws.String("some-arn"),
-									DefaultVersionId: nil,
-								},
-							},
-						},
+						&iamsdk.ListPoliciesOutput{Policies: []types.Policy{validPolicy()}},
 						nil,
+					},
+				},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
+				"GetPolicy": {
+					{
+						nil,
+						errors.New("some error"),
 					},
 				},
 			},
 			wantErr: true,
 		},
 		{
-			name: "Error getting policy version",
+			name: "Return just the support policy policy",
 			mockReturnValues: mocksReturnVals{
 				"ListPolicies": {
 					{
-						&iamsdk.ListPoliciesOutput{
-							Policies: []types.Policy{{Arn: nil},
-								{
-									Arn:              aws.String("some-arn"),
-									DefaultVersionId: aws.String("some-version"),
-								},
-							},
+						&iamsdk.ListPoliciesOutput{},
+						nil,
+					},
+				},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
+				"GetPolicy": {
+					{
+						supportPolicyOut,
+						nil,
+					},
+				},
+				"ListEntitiesForPolicy": {
+					{
+						&iamsdk.ListEntitiesForPolicyOutput{
+							IsTruncated: false,
+							PolicyRoles: validPolicyRoles(),
 						},
 						nil,
 					},
 				},
-				"GetPolicyVersion": {{nil, errors.New("some error")}},
-			},
-			wantErr: true,
-		},
-		{
-			name: "Return 1 policy",
-			mockReturnValues: mocksReturnVals{
-				"ListPolicies": {
-					{
-						&iamsdk.ListPoliciesOutput{
-							Policies: []types.Policy{
-								{
-									Arn:              aws.String("some-arn"),
-									DefaultVersionId: aws.String("some-version"),
-								},
-							},
-						},
-						nil,
-					},
-				},
-				"GetPolicyVersion": {{&iamsdk.GetPolicyVersionOutput{
-					PolicyVersion: &types.PolicyVersion{
-						Document: aws.String("%7B%22hello%22%3A%20%22world%22%7D"),
-					},
-				}, nil}},
 			},
 			want: []awslib.AwsResource{
 				Policy{
-					Policy: types.Policy{
-						Arn:              aws.String("some-arn"),
-						DefaultVersionId: aws.String("some-version"),
-					},
-					Document: map[string]interface{}{"hello": "world"},
+					Policy:   validSupportAccessPolicy(),
+					Document: validGetPolicyVersionOutputDecoded(),
+					Roles:    validPolicyRoles(),
 				},
 			},
 			wantErr: false,
@@ -138,12 +115,116 @@ func TestProvider_GetPolicies(t *testing.T) {
 	}
 }
 
-func TestProvider_GetSupportPolicy(t *testing.T) {
-	policyOut := &iamsdk.GetPolicyOutput{
-		Policy: &types.Policy{
-			Arn: aws.String("some-arn"),
+func TestProvider_getPolicies(t *testing.T) {
+	tests := []struct {
+		name             string
+		mockReturnValues mocksReturnVals
+		want             []awslib.AwsResource
+		wantErr          bool
+	}{
+		{
+			name: "No policies",
+			mockReturnValues: mocksReturnVals{
+				"ListPolicies": {{&iamsdk.ListPoliciesOutput{}, nil}},
+			},
+			want:    nil,
+			wantErr: false,
+		},
+		{
+			name: "Ignore AWSSupportPolicy",
+			mockReturnValues: mocksReturnVals{
+				"ListPolicies": {
+					{
+						&iamsdk.ListPoliciesOutput{
+							Policies: []types.Policy{validSupportAccessPolicy()},
+						},
+						nil,
+					},
+				},
+			},
+			want:    nil,
+			wantErr: false,
+		},
+		{
+			name: "Error listing policies",
+			mockReturnValues: mocksReturnVals{
+				"ListPolicies": {{nil, errors.New("some error")}},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Policies with missing fields",
+			mockReturnValues: mocksReturnVals{
+				"ListPolicies": {
+					{
+						&iamsdk.ListPoliciesOutput{
+							Policies: []types.Policy{
+								{},
+								invalidPolicyWithoutVersion(),
+							},
+						},
+						nil,
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Error getting policy version",
+			mockReturnValues: mocksReturnVals{
+				"ListPolicies": {
+					{
+						&iamsdk.ListPoliciesOutput{
+							Policies: []types.Policy{validPolicy()},
+						},
+						nil,
+					},
+				},
+				"GetPolicyVersion": {{nil, errors.New("some error")}},
+			},
+			wantErr: true,
+		},
+		{
+			name: "Return 1 policy",
+			mockReturnValues: mocksReturnVals{
+				"ListPolicies": {
+					{
+						&iamsdk.ListPoliciesOutput{
+							Policies: []types.Policy{validPolicy()},
+						},
+						nil,
+					},
+				},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
+			},
+			want: []awslib.AwsResource{
+				Policy{
+					Policy:   validPolicy(),
+					Document: validGetPolicyVersionOutputDecoded(),
+				},
+			},
+			wantErr: false,
 		},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := createProviderFromMockValues(tt.mockReturnValues)
+
+			got, err := p.getPolicies(context.Background())
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestProvider_getSupportPolicy(t *testing.T) {
+	policy := validSupportAccessPolicy()
+	policyOut := &iamsdk.GetPolicyOutput{Policy: &policy}
+
 	tests := []struct {
 		name             string
 		mockReturnValues mocksReturnVals
@@ -177,6 +258,7 @@ func TestProvider_GetSupportPolicy(t *testing.T) {
 						errors.New("some error"),
 					},
 				},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
 			},
 			wantErr: true,
 		},
@@ -198,12 +280,11 @@ func TestProvider_GetSupportPolicy(t *testing.T) {
 						nil,
 					},
 				},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
 			},
 			want: Policy{
-				Policy: types.Policy{
-					Arn: aws.String("some-arn"),
-				},
-				Document: nil,
+				Policy:   validSupportAccessPolicy(),
+				Document: validGetPolicyVersionOutputDecoded(),
 				Roles:    []types.PolicyRole{},
 			},
 			wantErr: false,
@@ -221,36 +302,17 @@ func TestProvider_GetSupportPolicy(t *testing.T) {
 					{
 						&iamsdk.ListEntitiesForPolicyOutput{
 							IsTruncated: false,
-							PolicyRoles: []types.PolicyRole{
-								{
-									RoleId:   aws.String("role-id"),
-									RoleName: aws.String("role-name"),
-								},
-								{
-									RoleId:   aws.String("role 2"),
-									RoleName: aws.String("name 2"),
-								},
-							},
+							PolicyRoles: validPolicyRoles(),
 						},
 						nil,
 					},
 				},
+				"GetPolicyVersion": {{validGetPolicyVersionOutput(), nil}},
 			},
 			want: Policy{
-				Policy: types.Policy{
-					Arn: aws.String("some-arn"),
-				},
-				Document: nil,
-				Roles: []types.PolicyRole{
-					{
-						RoleId:   aws.String("role-id"),
-						RoleName: aws.String("role-name"),
-					},
-					{
-						RoleId:   aws.String("role 2"),
-						RoleName: aws.String("name 2"),
-					},
-				},
+				Policy:   validSupportAccessPolicy(),
+				Document: validGetPolicyVersionOutputDecoded(),
+				Roles:    validPolicyRoles(),
 			},
 			wantErr: false,
 		},
@@ -259,7 +321,7 @@ func TestProvider_GetSupportPolicy(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := createProviderFromMockValues(tt.mockReturnValues)
 
-			got, err := p.GetSupportPolicy(context.Background())
+			got, err := p.getSupportPolicy(context.Background())
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -309,8 +371,8 @@ func Test_decodePolicyDocument(t *testing.T) {
 		},
 		{
 			name:          "Success",
-			policyVersion: docToPolicy("%7B%22hello%22%3A%20%22world%22%7D"), // {"hello": "world"}
-			want:          map[string]interface{}{"hello": "world"},
+			policyVersion: validGetPolicyVersionOutput().PolicyVersion,
+			want:          validGetPolicyVersionOutputDecoded(),
 		},
 	}
 	for _, tt := range tests {
@@ -323,5 +385,42 @@ func Test_decodePolicyDocument(t *testing.T) {
 			}
 			assert.Equalf(t, tt.want, got, "decodePolicyDocument(%v)", tt.policyVersion)
 		})
+	}
+}
+
+func validSupportAccessPolicy() types.Policy {
+	return types.Policy{Arn: aws.String(awsSupportAccessArn), DefaultVersionId: aws.String("some-version")}
+}
+
+func validPolicy() types.Policy {
+	return types.Policy{Arn: aws.String("some-arn"), DefaultVersionId: aws.String("some-version")}
+}
+
+func invalidPolicyWithoutVersion() types.Policy {
+	return types.Policy{Arn: aws.String("some-arn")}
+}
+
+func validGetPolicyVersionOutput() *iamsdk.GetPolicyVersionOutput {
+	return &iamsdk.GetPolicyVersionOutput{
+		PolicyVersion: &types.PolicyVersion{
+			Document: aws.String("%7B%22hello%22%3A%20%22world%22%7D"),
+		},
+	}
+}
+
+func validGetPolicyVersionOutputDecoded() map[string]interface{} {
+	return map[string]interface{}{"hello": "world"}
+}
+
+func validPolicyRoles() []types.PolicyRole {
+	return []types.PolicyRole{
+		{
+			RoleId:   aws.String("role-id"),
+			RoleName: aws.String("role-name"),
+		},
+		{
+			RoleId:   aws.String("role 2"),
+			RoleName: aws.String("name 2"),
+		},
 	}
 }
