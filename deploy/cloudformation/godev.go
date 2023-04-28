@@ -30,7 +30,6 @@ import (
 	"github.com/awslabs/goformation/v7"
 	"github.com/awslabs/goformation/v7/cloudformation"
 	"github.com/awslabs/goformation/v7/intrinsics"
-	"github.com/elastic/cloudbeat/deploy/cloudformation/dev"
 )
 
 const (
@@ -42,11 +41,7 @@ type devModifier interface {
 	Modify(template *cloudformation.Template) error
 }
 
-var devModifiers = []devModifier{
-	&dev.SecurityGroupDevMod{}, &dev.Ec2KeyDevMod{}, &dev.ArtifactUrlDevMod{},
-}
-
-func generateDevTemplate() error {
+func generateDevTemplate(devModifiers []devModifier) error {
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("Could not get exexutable: %v", err)

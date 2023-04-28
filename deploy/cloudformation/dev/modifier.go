@@ -32,8 +32,24 @@ import (
 	"github.com/awslabs/goformation/v7/cloudformation/ec2"
 )
 
+type ArtifactURLType string
+
+const (
+	SnapshotArtifact ArtifactURLType = "snapshot"
+	StagingArtifact  ArtifactURLType = "staging"
+
+	prodUrlBase     string = "https://artifacts.elastic.co/downloads/beats/elastic-agent/"
+	stagingUrlBase  string = "https://staging.elastic.co/8.8.0-<sha>/downloads/beats/elastic-agent/"
+	snapshotUrlBase string = "https://snapshots.elastic.co/8.8.0-<sha>/downloads/beats/elastic-agent/"
+
+	latestSnapshotApi string = "https://artifacts-api.elastic.co/v1/search/8.8-SNAPSHOT/elastic-agent/"
+	latestSnapshotKey string = "elastic-agent-8.8.0-SNAPSHOT-linux-arm64.tar.gz"
+)
+
 type ArtifactUrlDevMod struct {
-	artifactUrl string
+	UrlType ArtifactURLType
+	Latest  bool
+	Sha     string
 }
 
 func (m *ArtifactUrlDevMod) Modify(template *cloudformation.Template) error {
@@ -42,12 +58,12 @@ func (m *ArtifactUrlDevMod) Modify(template *cloudformation.Template) error {
 		return err
 	}
 
-	m.artifactUrl, err = elasticAgentSnapshotArtifact()
+	replaceUrl, err := m.resolveArtifactUrl()
 	if err != nil {
 		return err
 	}
 
-	err = m.recursiveReplaceArtifactUrl(ec2Instance.UserData)
+	err = m.recursiveReplaceArtifactUrl(ec2Instance.UserData, replaceUrl)
 	if err != nil {
 		return err
 	}
@@ -55,12 +71,27 @@ func (m *ArtifactUrlDevMod) Modify(template *cloudformation.Template) error {
 	return nil
 }
 
-func elasticAgentSnapshotArtifact() (string, error) {
-	url := "https://artifacts-api.elastic.co/v1/search/8.8-SNAPSHOT/elastic-agent/"
-	key := "elastic-agent-8.8.0-SNAPSHOT-linux-arm64.tar.gz"
+func (m *ArtifactUrlDevMod) resolveArtifactUrl() (string, error) {
+	if !m.Latest && m.Sha != "" {
+		var baseUrl string
+		switch m.UrlType {
+		case SnapshotArtifact:
+			baseUrl = snapshotUrlBase
+		case StagingArtifact:
+			baseUrl = stagingUrlBase
+		default:
+			return "", fmt.Errorf("Could not recognize base Url for artifact: %s", m.UrlType)
+		}
 
+		return strings.ReplaceAll(baseUrl, "<sha>", m.Sha), nil
+	}
+
+	return getLatestSnapshotArtifact()
+}
+
+func getLatestSnapshotArtifact() (string, error) {
 	artifacts := map[string]interface{}{}
-	err := getJson(url, &artifacts)
+	err := getJson(latestSnapshotApi, &artifacts)
 	if err != nil {
 		return "", err
 	}
@@ -70,16 +101,16 @@ func elasticAgentSnapshotArtifact() (string, error) {
 		return "", fmt.Errorf("Could not find packages field")
 	}
 
-	arm64Section, ok := packages[key].(map[string]interface{})
+	arm64Section, ok := packages[latestSnapshotKey].(map[string]interface{})
 	if !ok {
 		return "", fmt.Errorf("Could not find arm64 section")
 	}
 
 	arm64Url, ok := arm64Section["url"].(string)
 	if !ok {
-		return "", fmt.Errorf("Could not find arm64 link")
+		return "", fmt.Errorf("Could not find arm64 URL")
 	}
-	return arm64Url, nil
+	return strings.TrimSuffix(arm64Url, latestSnapshotKey), nil
 }
 
 func getJson(url string, target interface{}) error {
@@ -93,11 +124,9 @@ func getJson(url string, target interface{}) error {
 	return json.NewDecoder(r.Body).Decode(target)
 }
 
-func (m *ArtifactUrlDevMod) recursiveReplaceArtifactUrl(encoded *string) error {
-	prodURL := "https://artifacts.elastic.co/downloads/beats/elastic-agent/"
-
-	if strings.Contains(*encoded, prodURL) {
-		*encoded = strings.ReplaceAll(*encoded, prodURL, m.artifactUrl)
+func (m *ArtifactUrlDevMod) recursiveReplaceArtifactUrl(encoded *string, replaceUrl string) error {
+	if strings.Contains(*encoded, prodUrlBase) {
+		*encoded = strings.ReplaceAll(*encoded, prodUrlBase, replaceUrl)
 		return nil
 	}
 
@@ -113,7 +142,7 @@ func (m *ArtifactUrlDevMod) recursiveReplaceArtifactUrl(encoded *string) error {
 	}
 
 	for k, v := range decodedObj {
-		err = m.recursiveReplaceArtifactUrl(&v)
+		err = m.recursiveReplaceArtifactUrl(&v, replaceUrl)
 		decodedObj[k] = v
 		if err != nil {
 			return err
