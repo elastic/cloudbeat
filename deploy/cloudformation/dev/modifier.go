@@ -34,21 +34,25 @@ import (
 
 type ArtifactURLType string
 
+var artifactUrlBase = map[ArtifactURLType]string{
+	SnapshotArtifact: "https://snapshots.elastic.co/%s-%s/downloads/beats/elastic-agent/",
+	StagingArtifact:  "https://staging.elastic.co/%s-%s/downloads/beats/elastic-agent/",
+}
+
 const (
 	SnapshotArtifact ArtifactURLType = "snapshot"
 	StagingArtifact  ArtifactURLType = "staging"
 
-	prodUrlBase     string = "https://artifacts.elastic.co/downloads/beats/elastic-agent/"
-	stagingUrlBase  string = "https://staging.elastic.co/8.8.0-<sha>/downloads/beats/elastic-agent/"
-	snapshotUrlBase string = "https://snapshots.elastic.co/8.8.0-<sha>/downloads/beats/elastic-agent/"
+	prodUrlBase string = "https://artifacts.elastic.co/downloads/beats/elastic-agent/"
 
-	latestSnapshotApi string = "https://artifacts-api.elastic.co/v1/search/8.8-SNAPSHOT/elastic-agent/"
-	latestSnapshotKey string = "elastic-agent-8.8.0-SNAPSHOT-linux-arm64.tar.gz"
+	latestSnapshotApi string = "https://artifacts-api.elastic.co/v1/search/%s-SNAPSHOT/elastic-agent/"
+	latestSnapshotKey string = "elastic-agent-%s-SNAPSHOT-linux-arm64.tar.gz"
 )
 
 type ArtifactUrlDevMod struct {
 	UrlType ArtifactURLType
 	Latest  bool
+	Version string
 	Sha     string
 }
 
@@ -73,25 +77,22 @@ func (m *ArtifactUrlDevMod) Modify(template *cloudformation.Template) error {
 
 func (m *ArtifactUrlDevMod) resolveArtifactUrl() (string, error) {
 	if !m.Latest && m.Sha != "" {
-		var baseUrl string
-		switch m.UrlType {
-		case SnapshotArtifact:
-			baseUrl = snapshotUrlBase
-		case StagingArtifact:
-			baseUrl = stagingUrlBase
-		default:
+		baseUrl, ok := artifactUrlBase[m.UrlType]
+		if !ok {
 			return "", fmt.Errorf("Could not recognize base Url for artifact: %s", m.UrlType)
 		}
 
-		return strings.ReplaceAll(baseUrl, "<sha>", m.Sha), nil
+		return fmt.Sprintf(baseUrl, m.Version, m.Sha), nil
 	}
 
-	return getLatestSnapshotArtifact()
+	return m.getLatestSnapshotArtifact()
 }
 
-func getLatestSnapshotArtifact() (string, error) {
+func (m *ArtifactUrlDevMod) getLatestSnapshotArtifact() (string, error) {
+	url := fmt.Sprintf(latestSnapshotApi, m.Version)
+	key := fmt.Sprintf(latestSnapshotKey, m.Version)
 	artifacts := map[string]interface{}{}
-	err := getJson(latestSnapshotApi, &artifacts)
+	err := getJson(url, &artifacts)
 	if err != nil {
 		return "", err
 	}
@@ -101,7 +102,7 @@ func getLatestSnapshotArtifact() (string, error) {
 		return "", fmt.Errorf("Could not find packages field")
 	}
 
-	arm64Section, ok := packages[latestSnapshotKey].(map[string]interface{})
+	arm64Section, ok := packages[key].(map[string]interface{})
 	if !ok {
 		return "", fmt.Errorf("Could not find arm64 section")
 	}
@@ -110,7 +111,7 @@ func getLatestSnapshotArtifact() (string, error) {
 	if !ok {
 		return "", fmt.Errorf("Could not find arm64 URL")
 	}
-	return strings.TrimSuffix(arm64Url, latestSnapshotKey), nil
+	return strings.TrimSuffix(arm64Url, key), nil
 }
 
 func getJson(url string, target interface{}) error {
