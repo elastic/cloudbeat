@@ -57,6 +57,11 @@ type ArtifactUrlDevMod struct {
 }
 
 func (m *ArtifactUrlDevMod) Modify(template *cloudformation.Template) error {
+	err := m.validate()
+	if err != nil {
+		return err
+	}
+
 	ec2Instance, err := template.GetEC2InstanceWithName("ElasticAgentEc2Instance")
 	if err != nil {
 		return err
@@ -75,8 +80,23 @@ func (m *ArtifactUrlDevMod) Modify(template *cloudformation.Template) error {
 	return nil
 }
 
+func (m *ArtifactUrlDevMod) validate() error {
+	if m.Latest && m.Sha != "" {
+		return fmt.Errorf("Cannot specify both latest and sha")
+	}
+
+	if !m.Latest && m.Sha == "" {
+		return fmt.Errorf("Must specify either latest or sha")
+	}
+
+	if m.Sha == "" && m.UrlType == StagingArtifact {
+		return fmt.Errorf("Must specify sha when using staging artifact")
+	}
+
+	return nil
+}
 func (m *ArtifactUrlDevMod) resolveArtifactUrl() (string, error) {
-	if !m.Latest && m.Sha != "" {
+	if m.Sha != "" {
 		baseUrl, ok := artifactUrlBase[m.UrlType]
 		if !ok {
 			return "", fmt.Errorf("Could not recognize base Url for artifact: %s", m.UrlType)

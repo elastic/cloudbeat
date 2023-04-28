@@ -65,19 +65,15 @@ func createFromConfig(cfg *config) error {
 			rawVersion := strings.TrimSuffix(cfg.ElasticAgentVersion, "-SNAPSHOT")
 			artifactModifier := &dev.ArtifactUrlDevMod{
 				Version: rawVersion,
+				Sha:     cfg.Dev.Sha,
+				UrlType: dev.StagingArtifact,
 			}
 
-			if cfg.Dev.Sha != "" {
-				artifactModifier.Sha = cfg.Dev.Sha
-
-				snapshot := strings.HasSuffix(cfg.ElasticAgentVersion, "-SNAPSHOT")
-				if snapshot {
-					artifactModifier.UrlType = dev.SnapshotArtifact
-				} else {
-					artifactModifier.UrlType = dev.StagingArtifact
-				}
-			} else {
+			if strings.HasSuffix(cfg.ElasticAgentVersion, "-SNAPSHOT") {
 				artifactModifier.UrlType = dev.SnapshotArtifact
+			}
+
+			if cfg.Dev.Sha == "" {
 				artifactModifier.Latest = true
 			}
 			modifiers = append(modifiers, artifactModifier)
