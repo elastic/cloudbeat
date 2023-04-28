@@ -67,17 +67,17 @@ func elasticAgentSnapshotArtifact() (string, error) {
 
 	packages, ok := artifacts["packages"].(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("Could not find packages field")
+		return "", fmt.Errorf("could not find packages field")
 	}
 
 	arm64Section, ok := packages[key].(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("Could not find arm64 section")
+		return "", fmt.Errorf("could not find arm64 section")
 	}
 
 	arm64Url, ok := arm64Section["url"].(string)
 	if !ok {
-		return "", fmt.Errorf("Could not find arm64 link")
+		return "", fmt.Errorf("could not find arm64 link")
 	}
 	return arm64Url, nil
 }
@@ -103,13 +103,13 @@ func (m *ArtifactUrlDevMod) recursiveReplaceArtifactUrl(encoded *string) error {
 
 	decoded, err := base64.StdEncoding.DecodeString(*encoded)
 	if err != nil {
-		return fmt.Errorf("Could not decode user data: %v", err)
+		return fmt.Errorf("could not decode user data: %v", err)
 	}
 
 	decodedObj := map[string]string{}
 	err = json.Unmarshal(decoded, &decodedObj)
 	if err != nil {
-		return fmt.Errorf("Could not unmarshal user data: %v", err)
+		return fmt.Errorf("could not unmarshal user data: %v", err)
 	}
 
 	for k, v := range decodedObj {

@@ -38,7 +38,7 @@ type awsTestFetcher struct {
 	cfg        awsTestFetcherConfig
 }
 
-func (f *awsTestFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *awsTestFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      awsTestResource{AwsConfig: f.cfg.AwsConfig},
 		CycleMetadata: cMetadata,
@@ -47,7 +47,7 @@ func (f *awsTestFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMeta
 	return nil
 }
 
-func (f awsTestFetcher) Stop() {
+func (f *awsTestFetcher) Stop() {
 }
 
 type awsTestResource struct {
@@ -68,7 +68,7 @@ func (a awsTestResource) GetElasticCommonData() any {
 
 type awsTestFactory struct{}
 
-func (n *awsTestFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (n *awsTestFactory) Create(_ *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	cfg := awsTestFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
