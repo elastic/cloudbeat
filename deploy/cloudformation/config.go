@@ -23,7 +23,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/elastic/cloudbeat/deploy/cloudformation/dev"
 	"github.com/spf13/viper"
 )
 
@@ -36,11 +35,10 @@ type config struct {
 }
 
 type devConfig struct {
-	KeyName      string              `mapstructure:"KEY_NAME"`
-	AllowSSH     bool                `mapstructure:"ALLOW_SSH"`
-	Sha          string              `mapstructure:"SHA"`
-	Latest       bool                `mapstructure:"LATEST"`
-	ArtifactType dev.ArtifactURLType `mapstructure:"ARTIFACT_TYPE"`
+	AllowSSH   bool   `mapstructure:"ALLOW_SSH"`
+	KeyName    string `mapstructure:"KEY_NAME"`
+	PreRelease bool   `mapstructure:"PRE_RELEASE"`
+	Sha        string `mapstructure:"SHA"`
 }
 
 func parseConfig() (*config, error) {
@@ -92,16 +90,6 @@ func validateConfig(cfg *config) error {
 func validateDevConfig(cfg *devConfig) error {
 	if cfg.AllowSSH && cfg.KeyName == "" {
 		return fmt.Errorf("Missing required flag for SSH enablement mode: DEV.KEY_NAME")
-	}
-
-	if cfg.ArtifactType != "" {
-		if cfg.Sha != "" && cfg.Latest {
-			return fmt.Errorf("Cannot specify both DEV.SHA and DEV.LATEST")
-		}
-
-		if cfg.Sha == "" && !cfg.Latest {
-			return fmt.Errorf("Missing required flag: DEV.SHA or DEV.LATEST")
-		}
 	}
 
 	return nil

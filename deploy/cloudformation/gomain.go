@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
@@ -60,12 +61,26 @@ func createFromConfig(cfg *config) error {
 			params["KeyName"] = cfg.Dev.KeyName
 		}
 
-		if cfg.Dev.ArtifactType != "" {
-			modifiers = append(modifiers, &dev.ArtifactUrlDevMod{
-				Sha:     cfg.Dev.Sha,
-				Latest:  cfg.Dev.Latest,
-				UrlType: dev.ArtifactURLType(cfg.Dev.ArtifactType),
-			})
+		if cfg.Dev.PreRelease {
+			rawVersion := strings.TrimSuffix(cfg.ElasticAgentVersion, "-SNAPSHOT")
+			artifactModifier := &dev.ArtifactUrlDevMod{
+				Version: rawVersion,
+			}
+
+			if cfg.Dev.Sha != "" {
+				artifactModifier.Sha = cfg.Dev.Sha
+
+				snapshot := strings.HasSuffix(cfg.ElasticAgentVersion, "-SNAPSHOT")
+				if snapshot {
+					artifactModifier.UrlType = dev.SnapshotArtifact
+				} else {
+					artifactModifier.UrlType = dev.StagingArtifact
+				}
+			} else {
+				artifactModifier.UrlType = dev.SnapshotArtifact
+				artifactModifier.Latest = true
+			}
+			modifiers = append(modifiers, artifactModifier)
 		}
 
 		err := generateDevTemplate(modifiers)
