@@ -150,7 +150,7 @@ Additional functionality
 
 CSPM functional tests are designed to check CSPM rules behaviour.
 
-Tests folder location: `<project_root>/tests/product/tests`
+The tests are located under [product folder](./product/tests).
 
 Test file identification prefix: `test_aws_`
 
@@ -165,11 +165,11 @@ CSPM tests are grouped by:
 
 For example `EC2` rules will be located under `test_aws_ec2_rules.py`
 
-In order to separate and simply test development process, parametrization decorator is used.
+Parametrization is used to separate and simplify the test development process.
 
-Test file defines the logic of the test, and the data defines test cases permutation.
+The test file defines logic of the test, and the data file defines test cases.
 
-Tests data location: `<project_root>/tests/product/tests/data/aws`
+AWS tests data is located in [aws folder](./product/tests/data/aws).
 
 Data file identification: `aws_`
 
@@ -199,7 +199,7 @@ cis_aws_log_cases = {
     ...
 ```
 - If just adding new test case to exist test suite no additional steps required, the case will be added automatically
-- For new test suite create a test file in `./product/tests` folder, like `test_aws_logging_rules.py`
+- For new test suite create a test file in [product folder](./product/tests), like `test_aws_logging_rules.py`
 - Implement test method or just copy from any `test_aws_` and updated accordingly data section
 ```
 register_params(
