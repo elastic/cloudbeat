@@ -89,6 +89,7 @@ func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Type:    fetching.CloudAudit,
 		SubType: r.GetResourceType(),
 		Name:    r.GetResourceName(),
+		Region:  r.GetRegion(),
 	}, nil
 }
 func (r LoggingResource) GetElasticCommonData() any { return nil }

@@ -165,7 +165,7 @@ func TestConfigResource_GetMetadata(t *testing.T) {
 	meta, err := r.GetMetadata()
 
 	assert.NoError(t, err)
-	assert.Equal(t, fetching.ResourceMetadata(fetching.ResourceMetadata{ID: "configservice-test-account", Type: "cloud-config", SubType: "aws-config", Name: "configservice-test-account", ECSFormat: ""}), meta)
+	assert.Equal(t, fetching.ResourceMetadata{ID: "configservice-test-account", Type: "cloud-config", SubType: "aws-config", Name: "configservice-test-account", ECSFormat: ""}, meta)
 	assert.Equal(t, ConfigResource{}.configs, r.GetData())
 	assert.Equal(t, nil, r.GetElasticCommonData())
 }

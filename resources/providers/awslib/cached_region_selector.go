@@ -30,7 +30,7 @@ import (
 
 var (
 	ristrettoCache        *ristretto.Cache
-	allRegionCacheTTL     time.Duration = 720 * time.Hour
+	allRegionCacheTTL                   = 720 * time.Hour
 	currentRegionCacheTTL time.Duration = 0
 )
 
@@ -38,7 +38,7 @@ func init() {
 	var err error
 	ristrettoCache, err = newCachedRegions()
 	if err != nil {
-		panic(fmt.Errorf("Unable to init region-selector cache: %w", err))
+		panic(fmt.Errorf("unable to init region-selector cache: %w", err))
 	}
 }
 

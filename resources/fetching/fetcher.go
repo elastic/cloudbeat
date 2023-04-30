@@ -41,6 +41,7 @@ const (
 	EBSSnapshotType           = "aws-ebs-snapshot"
 	ElbType                   = "aws-elb"
 	IAMUserType               = "aws-iam-user"
+	IAMServerCertificateType  = "aws-iam-server-certificate"
 	PwdPolicyType             = "aws-password-policy"
 	EksType                   = "aws-eks"
 	S3Type                    = "aws-s3"
@@ -50,6 +51,7 @@ const (
 	RdsType                   = "aws-rds"
 	ConfigServiceResourceType = "aws-config"
 	PolicyType                = "aws-policy"
+	AccessAnalyzers           = "aws-access-analyzers"
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"

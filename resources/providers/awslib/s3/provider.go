@@ -107,6 +107,7 @@ func (p Provider) DescribeBuckets(ctx context.Context) ([]awslib.AwsResource, er
 				BucketVersioning:                      bucketVersioning,
 				PublicAccessBlockConfiguration:        publicAccessBlockConfiguration,
 				AccountPublicAccessBlockConfiguration: accountPublicAccessBlockConfig,
+				region:                                region,
 			})
 		}
 	}
@@ -302,4 +303,8 @@ func (b BucketDescription) GetResourceName() string {
 
 func (b BucketDescription) GetResourceType() string {
 	return fetching.S3Type
+}
+
+func (b BucketDescription) GetRegion() string {
+	return b.region
 }

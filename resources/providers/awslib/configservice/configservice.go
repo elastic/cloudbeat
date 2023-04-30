@@ -80,3 +80,7 @@ func (c Config) GetResourceName() string {
 func (c Config) GetResourceType() string {
 	return fetching.ConfigServiceResourceType
 }
+
+func (c Config) GetRegion() string {
+	return c.region
+}
