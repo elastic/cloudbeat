@@ -196,8 +196,8 @@ purge-tests:
 gen-report:
   allure generate tests/allure/results --clean -o tests/allure/reports && cp tests/allure/reports/history/* tests/allure/results/history/. && allure open tests/allure/reports
 
-run-tests target='default' context='kind-multi':
-  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context kind-{{context}} --timeout {{TESTS_TIMEOUT}} --logs
+run-tests target='default' context='kind-kind-multi':
+  helm test {{TESTS_RELEASE}} -n {{NAMESPACE}} --kube-context {{context}} --timeout {{TESTS_TIMEOUT}} --logs
 
 build-load-run-tests: build-pytest-docker load-pytest-kind run-tests
 
