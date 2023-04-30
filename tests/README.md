@@ -175,7 +175,7 @@ Data file identification: `aws_`
 
 For example `EC2` data cases will be located under `aws_ec2_test_cases.py`.
 
-##### Adding new CSPM test
+#### Adding new CSPM test
 
 - Define data manually in AWS Cloud and define / get property for resource unique identification
 - Create test case data in `data` folder, for example in file `aws_logging_test_cases.py`
