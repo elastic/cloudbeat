@@ -328,9 +328,18 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Set Kind Configuration
+        run: |
+          echo "KIND_CONFIG=kind-multi" >> $GITHUB_ENV
+          if [[ $VAR == "aws" ]]; then
+            echo "KIND_CONFIG=kind-mono" >> $GITHUB_ENV
+          fi
+        env:
+          VAR: ${{ matrix.test-target }}
+
       - name: Create k8s Kind Cluster
         run: |
-          just create-kind-cluster
+          just create-kind-cluster ${{ env.KIND_CONFIG }}
 
       - name: Cache docker images
         uses: actions/cache@v3
@@ -340,7 +349,7 @@ jobs:
 
       - name: Load images to kind
         run: |
-          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} ${{ env.KIND_CONFIG }}
         shell: bash
 
       - name: Deploy tests Helm chart
@@ -355,12 +364,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           just deploy-cloudbeat-aws
-          sleep 240 # Due to many s3 buckets on AWS account
+          sleep 600 # Due to many s3 buckets on AWS account
 
       - name: Run Tests
         id: run_tests
         run: |
-          just run-tests ${{ matrix.test-target }}
+          just run-tests ${{ matrix.test-target }} ${{ env.KIND_CONFIG }}
 
       - name: Upload Test Results
         if: always()

@@ -5,13 +5,18 @@ This CloudFormation template creates a role for elastic-agent and attaches it to
 The EC2 instance has elastic-agent preinstalled in it using the fleet URL and enrollment token.
 
 ### How to test it
-The template can be tested with AWS CLI as follows:
+The template can be tested with AWS SDK as follows:
+Create a `.env` file of the form:
 ```
-aws cloudformation create-stack --stack-name elastic-agent-ec2          \
-    --template-body file://deploy/cloudformation/elastic-agent-ec2.yml  \
-    --capabilities CAPABILITY_IAM   \
-    --parameters                    \
-    ParameterKey=ElasticAgentVersion,ParameterValue=elastic-agent-8.6.0-linux-x86_64  \
-    ParameterKey=FleetUrl,ParameterValue=<Elastic Agent Fleet URL>                    \
-    ParameterKey=EnrollmentToken,ParameterValue=<Elastic Agent Enrollment Token>
+STACK_NAME="your unique stack name"
+FLEET_URL="<Elastic Agent Fleet URL>"
+ENROLLMENT_TOKEN="<Elastic Agent Enrollment Token>"
+ELASTIC_AGENT_VERSION="<Elastic Agent Version>" # e.g: 8.8.0 | 8.8.0-SNAPSHOT
+
+DEV.ALLOW_SSH=bool # Set to true in order to modify the template to allow SSH connections
+DEV.KEY_NAME="" # When SSH is allowed, your EC2 SSH key is required
+DEV.PRE_RELEASE=bool # Set to true in order to replace the artifact URL with a pre-release version (BC or snapshot)
+DEV.SHA="" # When running a pre-release version, you have to specify the SHA of the pre-release artifact (on SNAPSHOT versions you can leave empty to take the latest)
 ```
+
+Run `just deploy-cloudformation`
