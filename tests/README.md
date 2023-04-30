@@ -152,7 +152,7 @@ CSPM functional tests are designed to check CSPM rules behaviour.
 
 Tests folder location: `<project_root>/tests/product/tests`
 
-Test file identification: `test_aws_`
+Test file identification prefix: `test_aws_`
 
 CSPM tests are grouped by groups:
 - Elastic Compute Cloud (EC2)
