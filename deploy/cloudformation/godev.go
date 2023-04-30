@@ -44,7 +44,7 @@ type devModifier interface {
 func generateDevTemplate(devModifiers []devModifier) error {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		return fmt.Errorf("Could not get exexutable: %v", err)
+		return fmt.Errorf("could not get executable: %v", err)
 	}
 
 	inputPath := filepath.Join(currentDir, prodTemplatePath)
@@ -55,24 +55,24 @@ func generateDevTemplate(devModifiers []devModifier) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Could not read CloudFormation input: %v", err)
+		return fmt.Errorf("could not read CloudFormation input: %v", err)
 	}
 
 	for _, m := range devModifiers {
 		err := m.Modify(template)
 		if err != nil {
 			name := reflect.TypeOf(m)
-			return fmt.Errorf("Modifier %s could not modify template: %v", name, err)
+			return fmt.Errorf("modifier %s could not modify template: %v", name, err)
 		}
 	}
 
 	yaml, err := template.YAML()
 	if err != nil {
-		return fmt.Errorf("Could not generate output yaml: %v", err)
+		return fmt.Errorf("could not generate output yaml: %v", err)
 	}
 
 	if err := os.WriteFile(outputPath, yaml, 0644); err != nil {
-		return fmt.Errorf("Could not write output: %v", err)
+		return fmt.Errorf("could not write output: %v", err)
 	}
 
 	log.Printf("Created dev template %s", outputPath)

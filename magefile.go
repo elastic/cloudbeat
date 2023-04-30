@@ -16,7 +16,6 @@
 // under the License.
 
 //go:build mage
-// +build mage
 
 package main
 
@@ -228,9 +227,9 @@ func bundleAgent() {
 }
 
 func PackageAgent() {
-	version, found := os.LookupEnv("BEAT_VERSION")
+	beatVersion, found := os.LookupEnv("BEAT_VERSION")
 	if !found {
-		version, _ = devtools.BeatQualifiedVersion()
+		beatVersion, _ = devtools.BeatQualifiedVersion()
 	}
 	// prepare new drop
 	dropPath := filepath.Join("build", "elastic-agent-drop")
@@ -271,7 +270,7 @@ func PackageAgent() {
 	ctx := context.Background()
 	for _, beat := range packedBeats {
 		for _, reqPackage := range requiredPackages {
-			newVersion, packageName := getPackageName(beat, version, reqPackage)
+			newVersion, packageName := getPackageName(beat, beatVersion, reqPackage)
 			err := fetchBinaryFromArtifactsApi(ctx, packageName, beat, newVersion, dropPath)
 			if err != nil {
 				panic(fmt.Sprintf("fetchBinaryFromArtifactsApi failed: %v", err))
