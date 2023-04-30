@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -115,6 +116,18 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		},
 	}
 
+	accessAnalyzers := iam.AccessAnalyzers{
+		RegionToAccessAnalyzers: map[string][]aatypes.AnalyzerSummary{
+			"region-1": {
+				{Arn: aws.String("some-arn")},
+			},
+			"region-2": {
+				{Arn: aws.String("some-other-arn")},
+				{Arn: aws.String("some-third-arn")},
+			},
+		},
+	}
+
 	var tests = []struct {
 		name               string
 		mocksReturnVals    mocksReturnVals
@@ -127,8 +140,8 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				"GetPasswordPolicy":      {nil, errors.New("Fail to fetch iam pwd policy")},
 				"GetUsers":               {nil, errors.New("Fail to fetch iam users")},
 				"GetPolicies":            {nil, errors.New("Fail to fetch iam policies")},
-				"GetSupportPolicy":       {nil, errors.New("Fail to fetch iam support policy")},
 				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
 			},
 			account:            testAccount,
 			numExpectedResults: 0,
@@ -139,8 +152,8 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				"GetPasswordPolicy":      {pwdPolicy, nil},
 				"GetUsers":               {[]awslib.AwsResource{iamUser}, nil},
 				"GetPolicies":            {[]awslib.AwsResource{iamPolicy}, nil},
-				"GetSupportPolicy":       {iamPolicy, nil},
 				"ListServerCertificates": {&certificates, nil},
+				"GetAccessAnalyzers":     {accessAnalyzers, nil},
 			},
 			account:            testAccount,
 			numExpectedResults: 5,
@@ -151,8 +164,8 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				"GetPasswordPolicy":      {pwdPolicy, nil},
 				"GetUsers":               {nil, errors.New("Fail to fetch iam users")},
 				"GetPolicies":            {nil, errors.New("Fail to fetch iam policies")},
-				"GetSupportPolicy":       {nil, errors.New("Fail to fetch iam support policy")},
 				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
 			},
 			account:            testAccount,
 			numExpectedResults: 1,
@@ -163,8 +176,8 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				"GetPasswordPolicy":      {nil, errors.New("Fail to fetch iam pwd policy")},
 				"GetUsers":               {[]awslib.AwsResource{iamUser}, nil},
 				"GetPolicies":            {nil, errors.New("Fail to fetch iam policies")},
-				"GetSupportPolicy":       {nil, errors.New("Fail to fetch iam support policy")},
 				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
 			},
 			account:            testAccount,
 			numExpectedResults: 1,
@@ -175,20 +188,8 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				"GetPasswordPolicy":      {nil, errors.New("Fail to fetch iam pwd policy")},
 				"GetUsers":               {nil, errors.New("Fail to fetch iam users")},
 				"GetPolicies":            {[]awslib.AwsResource{iamPolicy}, nil},
-				"GetSupportPolicy":       {nil, errors.New("Fail to fetch iam support policies")},
 				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
-			},
-			account:            testAccount,
-			numExpectedResults: 1,
-		},
-		{
-			name: "Should only get a support policy",
-			mocksReturnVals: mocksReturnVals{
-				"GetPasswordPolicy":      {nil, errors.New("Fail to fetch iam pwd policy")},
-				"GetUsers":               {nil, errors.New("Fail to fetch iam users")},
-				"GetPolicies":            {nil, errors.New("Fail to fetch iam policies")},
-				"GetSupportPolicy":       {iamPolicy, nil},
-				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
 			},
 			account:            testAccount,
 			numExpectedResults: 1,
@@ -199,8 +200,8 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				"GetPasswordPolicy":      {nil, errors.New("Fail to fetch iam pwd policy")},
 				"GetUsers":               {nil, errors.New("Fail to fetch iam users")},
 				"GetPolicies":            {nil, errors.New("Fail to fetch iam policies")},
-				"GetSupportPolicy":       {nil, errors.New("Fail to fetch iam support policy")},
 				"ListServerCertificates": {&certificates, nil},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
 			},
 			account:            testAccount,
 			numExpectedResults: 1,

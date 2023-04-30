@@ -35,12 +35,14 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.IAMType, &IAMFactory{
-		IdentityProvider: awslib.GetIdentityClient,
+		IdentityProvider:   awslib.GetIdentityClient,
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[iam.AccessAnalyzer]{},
 	})
 }
 
 type IAMFactory struct {
-	IdentityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	CrossRegionFactory awslib.CrossRegionFactory[iam.AccessAnalyzer]
 }
 
 func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -68,7 +70,7 @@ func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
-	provider := iam.NewIAMProvider(log, awsConfig)
+	provider := iam.NewIAMProvider(log, awsConfig, f.CrossRegionFactory)
 
 	return &IAMFetcher{
 		log:           log,
