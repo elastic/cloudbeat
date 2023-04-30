@@ -154,7 +154,7 @@ Tests folder location: `<project_root>/tests/product/tests`
 
 Test file identification prefix: `test_aws_`
 
-CSPM tests are grouped by groups:
+CSPM tests are grouped by:
 - Elastic Compute Cloud (EC2)
 - Identification And Management (IAM)
 - Logging
