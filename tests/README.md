@@ -229,7 +229,7 @@ markers = [
 ```
 
 - Execute the test suite by running the following command and replacing marker `aws_logging_rules` with newly defined marker
-```
+```shell
 poetry run pytest -m "aws_logging_rules" --alluredir=./allure/results/ --clean-alluredir
 ```
 
