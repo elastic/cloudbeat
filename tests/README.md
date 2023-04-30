@@ -228,7 +228,7 @@ markers = [
     ... # <-- add new marker
 ```
 
-- Execute test suite by running the following command and replacing marker `aws_logging_rules` by newly defined marker
+- Execute the test suite by running the following command and replacing marker `aws_logging_rules` with newly defined marker
 ```
 poetry run pytest -m "aws_logging_rules" --alluredir=./allure/results/ --clean-alluredir
 ```
