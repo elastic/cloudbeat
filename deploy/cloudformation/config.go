@@ -65,19 +65,19 @@ func parseConfig() (*config, error) {
 
 func validateConfig(cfg *config) error {
 	if cfg.StackName == "" {
-		return fmt.Errorf("Missing required flag: STACK_NAME")
+		return fmt.Errorf("missing required flag: STACK_NAME")
 	}
 
 	if cfg.FleetURL == "" {
-		return fmt.Errorf("Missing required flag: FLEET_URL")
+		return fmt.Errorf("missing required flag: FLEET_URL")
 	}
 
 	if cfg.EnrollmentToken == "" {
-		return fmt.Errorf("Missing required flag: ENROLLMENT_TOKEN")
+		return fmt.Errorf("missing required flag: ENROLLMENT_TOKEN")
 	}
 
 	if cfg.ElasticAgentVersion == "" {
-		return fmt.Errorf("Missing required flag: ELASTIC_AGENT_VERSION")
+		return fmt.Errorf("missing required flag: ELASTIC_AGENT_VERSION")
 	}
 
 	if cfg.Dev != nil {
@@ -89,7 +89,7 @@ func validateConfig(cfg *config) error {
 
 func validateDevConfig(cfg *devConfig) error {
 	if cfg.AllowSSH && cfg.KeyName == "" {
-		return fmt.Errorf("Missing required flag for SSH enablement mode: DEV.KEY_NAME")
+		return fmt.Errorf("missing required flag for SSH enablement mode: DEV.KEY_NAME")
 	}
 
 	return nil

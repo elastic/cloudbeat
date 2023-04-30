@@ -82,15 +82,15 @@ func (m *ArtifactUrlDevMod) Modify(template *cloudformation.Template) error {
 
 func (m *ArtifactUrlDevMod) validate() error {
 	if m.Latest && m.Sha != "" {
-		return fmt.Errorf("Cannot specify both latest and sha")
+		return fmt.Errorf("cannot specify both latest and sha")
 	}
 
 	if !m.Latest && m.Sha == "" {
-		return fmt.Errorf("Must specify either latest or sha")
+		return fmt.Errorf("must specify either latest or sha")
 	}
 
 	if m.Sha == "" && m.UrlType == StagingArtifact {
-		return fmt.Errorf("Must specify sha when using staging artifact")
+		return fmt.Errorf("must specify sha when using staging artifact")
 	}
 
 	return nil
@@ -99,7 +99,7 @@ func (m *ArtifactUrlDevMod) resolveArtifactUrl() (string, error) {
 	if m.Sha != "" {
 		baseUrl, ok := artifactUrlBase[m.UrlType]
 		if !ok {
-			return "", fmt.Errorf("Could not recognize base Url for artifact: %s", m.UrlType)
+			return "", fmt.Errorf("could not recognize base Url for artifact: %s", m.UrlType)
 		}
 
 		return fmt.Sprintf(baseUrl, m.Version, m.Sha), nil
