@@ -93,7 +93,7 @@ type FileFetcherConfig struct {
 	Patterns []string `config:"patterns"` // Files and directories paths for the fetcher to extract info from
 }
 
-func (f *FileSystemFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *FileSystemFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting FileSystemFetcher.Fetch")
 
 	// Input files might contain glob pattern

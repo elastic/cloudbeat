@@ -30,7 +30,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	mock "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestProvider_DescribeTrails(t *testing.T) {

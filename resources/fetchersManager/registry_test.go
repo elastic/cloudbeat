@@ -45,7 +45,7 @@ func newNumberFetcher(num int, ch chan fetching.ResourceInfo, wg *sync.WaitGroup
 	return &numberFetcher{num, false, ch, wg}
 }
 
-func (f *numberFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *numberFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	defer f.wg.Done()
 
 	f.resourceCh <- fetching.ResourceInfo{
