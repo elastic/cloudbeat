@@ -212,7 +212,7 @@ register_params(
 )
 ```
 - Define new marker, for example
-```
+```python
 @pytest.mark.aws_logging_rules # <-- new marker should be created
 def test_aws_logging_rules(
     elastic_client,
