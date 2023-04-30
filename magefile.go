@@ -16,17 +16,16 @@
 // under the License.
 
 //go:build mage
-// +build mage
 
 package main
 
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"time"
@@ -228,9 +227,9 @@ func bundleAgent() {
 }
 
 func PackageAgent() {
-	version, found := os.LookupEnv("BEAT_VERSION")
+	beatVersion, found := os.LookupEnv("BEAT_VERSION")
 	if !found {
-		version, _ = devtools.BeatQualifiedVersion()
+		beatVersion, _ = devtools.BeatQualifiedVersion()
 	}
 	// prepare new drop
 	dropPath := filepath.Join("build", "elastic-agent-drop")
@@ -271,7 +270,7 @@ func PackageAgent() {
 	ctx := context.Background()
 	for _, beat := range packedBeats {
 		for _, reqPackage := range requiredPackages {
-			newVersion, packageName := getPackageName(beat, version, reqPackage)
+			newVersion, packageName := getPackageName(beat, beatVersion, reqPackage)
 			err := fetchBinaryFromArtifactsApi(ctx, packageName, beat, newVersion, dropPath)
 			if err != nil {
 				panic(fmt.Sprintf("fetchBinaryFromArtifactsApi failed: %v", err))
@@ -332,19 +331,35 @@ func Fields() { mg.Deps(cloudbeat.Update.Fields) }
 // Config generates both the short/reference/docker configs.
 func Config() { mg.Deps(cloudbeat.Update.Config) }
 
-// PythonEnv ensures the Python venv is up-to-date with the beats requrements.txt.
+// PythonEnv ensures the Python venv is up-to-date with the beats requirements.txt.
 func PythonEnv() error {
 	_, err := mage.PythonVirtualenv(true)
 	return err
 }
 
-func BuildOpaBundle() error {
+func BuildOpaBundle() (err error) {
 	owner := "elastic"
-	r := "csp-security-policies"
-	cspPoliciesPkgDir := "/tmp/" + r
+	repoName := "csp-security-policies"
+
+	// Override default SIGINT behaviour which does not allow deferred functions to be called
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+
+	cspPoliciesPkgDir, err := os.MkdirTemp("", repoName)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		rmErr := os.RemoveAll(cspPoliciesPkgDir)
+		if rmErr != nil && err == nil {
+			err = rmErr
+		}
+		signal.Stop(c)
+	}()
 
 	repo, err := git.PlainClone(cspPoliciesPkgDir, false, &git.CloneOptions{
-		URL: fmt.Sprintf("https://github.com/%s/%s.git", owner, r),
+		URL: fmt.Sprintf("https://github.com/%s/%s.git", owner, repoName),
 	})
 	if err != nil {
 		return err
@@ -369,9 +384,8 @@ func BuildOpaBundle() error {
 	}
 
 	if err = sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance"); err != nil {
-		deleteDirErr := sh.Run("rm", "-rf", cspPoliciesPkgDir)
-		return errors.Wrap(err, deleteDirErr.Error())
+		return err
 	}
 
-	return sh.Run("rm", "-rf", cspPoliciesPkgDir)
+	return nil
 }

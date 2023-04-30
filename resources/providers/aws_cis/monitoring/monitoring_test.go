@@ -205,15 +205,15 @@ func TestProvider_AggregateResources(t *testing.T) {
 			for name, call := range tt.fields.cloudwatchlogsMocks {
 				cwl.On(name, call[0]...).Return(call[1]...)
 			}
-			sns := &sns.MockSNS{}
+			mockSNS := &sns.MockSNS{}
 			for name, call := range tt.fields.snsMocks {
-				sns.On(name, call[0]...).Return(call[1]...)
+				mockSNS.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
 				Cloudtrail:     ct,
 				Cloudwatch:     cw,
 				Cloudwatchlogs: cwl,
-				Sns:            sns,
+				Sns:            mockSNS,
 				Log:            logp.NewLogger("TestProvider_AggregateResources"),
 			}
 			got, err := p.AggregateResources(context.Background())

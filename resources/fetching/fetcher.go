@@ -51,6 +51,7 @@ const (
 	RdsType                   = "aws-rds"
 	ConfigServiceResourceType = "aws-config"
 	PolicyType                = "aws-policy"
+	AccessAnalyzers           = "aws-access-analyzers"
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"

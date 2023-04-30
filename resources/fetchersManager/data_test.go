@@ -79,7 +79,7 @@ func newPanicFetcher(message string, ch chan fetching.ResourceInfo, wg *sync.Wai
 	return &PanicFetcher{message, false, ch, wg}
 }
 
-func (f *PanicFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *PanicFetcher) Fetch(context.Context, fetching.CycleMetadata) error {
 	defer f.wg.Done()
 	panic(f.message)
 }

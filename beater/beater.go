@@ -30,7 +30,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-func New(b *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
+func New(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("launcher")
 	reloader := launcher.NewListener(log)
 	validator := &validator{}
