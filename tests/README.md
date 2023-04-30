@@ -146,7 +146,7 @@ Additional functionality
 - **caplog fixture** - add a sink that propagates Loguru to the caplog handler.
 - **logger_wraps** - useful to log entry and exit values of a function
 
-#### CSPM Functional Tests
+### CSPM Functional Tests
 
 CSPM functional tests are designed to check CSPM rules behaviour.
 
