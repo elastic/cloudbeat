@@ -69,19 +69,19 @@ func parseConfig() (*config, error) {
 	}
 
 	if cfg.StackName == "" {
-		return nil, fmt.Errorf("Missing required flag: -stack-name")
+		return nil, fmt.Errorf("missing required flag: -stack-name")
 	}
 
 	if cfg.FleetURL == "" {
-		return nil, fmt.Errorf("Missing required flag: -fleet-url")
+		return nil, fmt.Errorf("missing required flag: -fleet-url")
 	}
 
 	if cfg.EnrollmentToken == "" {
-		return nil, fmt.Errorf("Missing required flag: -enrollment-token")
+		return nil, fmt.Errorf("missing required flag: -enrollment-token")
 	}
 
 	if cfg.Dev && cfg.KeyName == "" {
-		return nil, fmt.Errorf("Missing required flag for development mode: -key-name")
+		return nil, fmt.Errorf("missing required flag for development mode: -key-name")
 	}
 
 	if cfg.ElasticAgentVersion == "" {
@@ -102,7 +102,7 @@ func createFromConfig(cfg *config) error {
 	if cfg.Dev {
 		err := generateDevTemplate()
 		if err != nil {
-			return fmt.Errorf("Could not generate dev template: %v", err)
+			return fmt.Errorf("could not generate dev template: %v", err)
 		}
 		templatePath = devTemplatePath
 		params["KeyName"] = cfg.KeyName
@@ -110,7 +110,7 @@ func createFromConfig(cfg *config) error {
 
 	err := createStack(cfg.StackName, templatePath, params)
 	if err != nil {
-		return fmt.Errorf("Failed to create CloudFormation stack: %v", err)
+		return fmt.Errorf("failed to create CloudFormation stack: %v", err)
 	}
 
 	return nil
@@ -121,7 +121,7 @@ func createStack(stackName string, templatePath string, params map[string]string
 
 	cfg, err := awsConfig.LoadDefaultConfig(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to load AWS SDK config: %v", err)
+		return fmt.Errorf("failed to load AWS SDK config: %v", err)
 	}
 
 	svc := cloudformation.NewFromConfig(cfg)
@@ -136,7 +136,7 @@ func createStack(stackName string, templatePath string, params map[string]string
 
 	file, err := os.ReadFile(templatePath)
 	if err != nil {
-		return fmt.Errorf("Failed to open template file: %v", err)
+		return fmt.Errorf("failed to open template file: %v", err)
 	}
 	filestring := string(file)
 
@@ -149,7 +149,7 @@ func createStack(stackName string, templatePath string, params map[string]string
 
 	stackOutput, err := svc.CreateStack(ctx, createStackInput)
 	if err != nil {
-		return fmt.Errorf("Failed to call AWS CloudFormation CreateStack: %v", err)
+		return fmt.Errorf("failed to call AWS CloudFormation CreateStack: %v", err)
 	}
 
 	log.Printf("Created stack %s", *stackOutput.StackId)

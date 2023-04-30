@@ -64,6 +64,6 @@ func (c ServerCertificatesInfo) GetResourceType() string {
 	return fetching.IAMServerCertificateType
 }
 
-func (p ServerCertificatesInfo) GetRegion() string {
+func (c ServerCertificatesInfo) GetRegion() string {
 	return awslib.GlobalRegion
 }

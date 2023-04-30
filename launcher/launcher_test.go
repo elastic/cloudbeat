@@ -45,14 +45,14 @@ type beaterMock struct {
 	done chan struct{}
 }
 
-func beaterMockCreator(b *beat.Beat, cfg *config.C) (beat.Beater, error) {
+func beaterMockCreator(_ *beat.Beat, cfg *config.C) (beat.Beater, error) {
 	return &beaterMock{
 		cfg:  cfg,
 		done: make(chan struct{}),
 	}, nil
 }
 
-func (m *beaterMock) Run(b *beat.Beat) error {
+func (m *beaterMock) Run(_ *beat.Beat) error {
 	<-m.done
 	return nil
 }
@@ -63,11 +63,11 @@ func (m *beaterMock) Stop() {
 
 type errorBeaterMock struct{}
 
-func errorBeaterMockCreator(b *beat.Beat, cfg *config.C) (beat.Beater, error) {
+func errorBeaterMockCreator(_ *beat.Beat, _ *config.C) (beat.Beater, error) {
 	return &errorBeaterMock{}, nil
 }
 
-func errorBeaterCreator(b *beat.Beat, cfg *config.C) (beat.Beater, error) {
+func errorBeaterCreator(_ *beat.Beat, _ *config.C) (beat.Beater, error) {
 	return nil, errors.New("beater creation error")
 }
 
@@ -82,7 +82,7 @@ func errorReloadBeaterCreator() func(b *beat.Beat, cfg *config.C) (beat.Beater, 
 	}
 }
 
-func (m *errorBeaterMock) Run(b *beat.Beat) error {
+func (m *errorBeaterMock) Run(_ *beat.Beat) error {
 	time.Sleep(10 * time.Millisecond)
 	return errors.New("some error")
 }
@@ -93,11 +93,11 @@ func (m *errorBeaterMock) Stop() {
 
 type panicBeaterMock struct{}
 
-func panicBeaterMockCreator(b *beat.Beat, cfg *config.C) (beat.Beater, error) {
+func panicBeaterMockCreator(_ *beat.Beat, _ *config.C) (beat.Beater, error) {
 	return &panicBeaterMock{}, nil
 }
 
-func (m *panicBeaterMock) Run(b *beat.Beat) error {
+func (m *panicBeaterMock) Run(_ *beat.Beat) error {
 	panic("panicBeaterMock panics")
 }
 

@@ -81,7 +81,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 	return nil
 }
 
-func (f MonitoringFetcher) Stop() {}
+func (m MonitoringFetcher) Stop() {}
 
 func (r MonitoringResource) GetData() any {
 	return r

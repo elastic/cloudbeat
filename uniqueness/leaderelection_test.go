@@ -136,7 +136,7 @@ func (s *LeaderElectionTestSuite) TestManager_RunWaitForLeader() {
 // lease is not being renewed.
 func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 	podId := "this_pod"
-	os.Setenv(PodNameEnvar, podId)
+	s.NoError(os.Setenv(PodNameEnvar, podId))
 
 	holderIdentity := LeaderLeaseName + "_another_pod"
 	lease := generateLease(&holderIdentity)
@@ -158,7 +158,7 @@ func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 // After waiting for a FirstLeaderDeadline seconds we should be holding the lease again as it has not been renewed.
 func (s *LeaderElectionTestSuite) TestManager_ReRun() {
 	podId := "this_pod"
-	os.Setenv(PodNameEnvar, podId)
+	s.NoError(os.Setenv(PodNameEnvar, podId))
 
 	s.manager.kubeClient = k8sFake.NewSimpleClientset()
 	err := s.manager.Run(context.Background())
@@ -209,7 +209,7 @@ func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
 
 	for _, tt := range tests {
 		if tt.shouldSetEnvar {
-			os.Setenv(PodNameEnvar, podId)
+			s.NoError(os.Setenv(PodNameEnvar, podId))
 		}
 
 		got, err := s.manager.buildConfig(context.TODO())
@@ -225,7 +225,7 @@ func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
 			s.Equal(got.Lock.Identity(), tt.want.Lock.Identity(), "buildConfig() got = %v, want %v", got, tt.want)
 		}
 
-		os.Unsetenv(PodNameEnvar)
+		s.NoError(os.Unsetenv(PodNameEnvar))
 	}
 }
 

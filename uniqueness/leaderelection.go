@@ -188,7 +188,7 @@ func (m *LeaderelectionManager) lastPart(s string) (string, error) {
 }
 
 func (m *LeaderelectionManager) generateUUID() (string, error) {
-	uuid, err := uuid.NewV4()
-	m.log.Warnf("Generating uuid as an identifier, UUID: %s", uuid.String())
-	return uuid.String(), err
+	result, err := uuid.NewV4()
+	m.log.Warnf("Generating uuid as an identifier, UUID: %s", result.String())
+	return result.String(), err
 }
