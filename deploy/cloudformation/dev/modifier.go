@@ -32,22 +32,47 @@ import (
 	"github.com/awslabs/goformation/v7/cloudformation/ec2"
 )
 
+type ArtifactURLType string
+
+var artifactUrlBase = map[ArtifactURLType]string{
+	SnapshotArtifact: "https://snapshots.elastic.co/%s-%s/downloads/beats/elastic-agent/",
+	StagingArtifact:  "https://staging.elastic.co/%s-%s/downloads/beats/elastic-agent/",
+}
+
+const (
+	SnapshotArtifact ArtifactURLType = "snapshot"
+	StagingArtifact  ArtifactURLType = "staging"
+
+	prodUrlBase string = "https://artifacts.elastic.co/downloads/beats/elastic-agent/"
+
+	latestSnapshotApi string = "https://artifacts-api.elastic.co/v1/search/%s-SNAPSHOT/elastic-agent/"
+	latestSnapshotKey string = "elastic-agent-%s-SNAPSHOT-linux-arm64.tar.gz"
+)
+
 type ArtifactUrlDevMod struct {
-	artifactUrl string
+	UrlType ArtifactURLType
+	Latest  bool
+	Version string
+	Sha     string
 }
 
 func (m *ArtifactUrlDevMod) Modify(template *cloudformation.Template) error {
+	err := m.validate()
+	if err != nil {
+		return err
+	}
+
 	ec2Instance, err := template.GetEC2InstanceWithName("ElasticAgentEc2Instance")
 	if err != nil {
 		return err
 	}
 
-	m.artifactUrl, err = elasticAgentSnapshotArtifact()
+	replaceUrl, err := m.resolveArtifactUrl()
 	if err != nil {
 		return err
 	}
 
-	err = m.recursiveReplaceArtifactUrl(ec2Instance.UserData)
+	err = m.recursiveReplaceArtifactUrl(ec2Instance.UserData, replaceUrl)
 	if err != nil {
 		return err
 	}
@@ -55,10 +80,37 @@ func (m *ArtifactUrlDevMod) Modify(template *cloudformation.Template) error {
 	return nil
 }
 
-func elasticAgentSnapshotArtifact() (string, error) {
-	url := "https://artifacts-api.elastic.co/v1/search/8.8-SNAPSHOT/elastic-agent/"
-	key := "elastic-agent-8.8.0-SNAPSHOT-linux-arm64.tar.gz"
+func (m *ArtifactUrlDevMod) validate() error {
+	if m.Latest && m.Sha != "" {
+		return fmt.Errorf("cannot specify both latest and sha")
+	}
 
+	if !m.Latest && m.Sha == "" {
+		return fmt.Errorf("must specify either latest or sha")
+	}
+
+	if m.Sha == "" && m.UrlType == StagingArtifact {
+		return fmt.Errorf("must specify sha when using staging artifact")
+	}
+
+	return nil
+}
+func (m *ArtifactUrlDevMod) resolveArtifactUrl() (string, error) {
+	if m.Sha != "" {
+		baseUrl, ok := artifactUrlBase[m.UrlType]
+		if !ok {
+			return "", fmt.Errorf("could not recognize base Url for artifact: %s", m.UrlType)
+		}
+
+		return fmt.Sprintf(baseUrl, m.Version, m.Sha), nil
+	}
+
+	return m.getLatestSnapshotArtifact()
+}
+
+func (m *ArtifactUrlDevMod) getLatestSnapshotArtifact() (string, error) {
+	url := fmt.Sprintf(latestSnapshotApi, m.Version)
+	key := fmt.Sprintf(latestSnapshotKey, m.Version)
 	artifacts := map[string]interface{}{}
 	err := getJson(url, &artifacts)
 	if err != nil {
@@ -77,9 +129,9 @@ func elasticAgentSnapshotArtifact() (string, error) {
 
 	arm64Url, ok := arm64Section["url"].(string)
 	if !ok {
-		return "", fmt.Errorf("could not find arm64 link")
+		return "", fmt.Errorf("could not find arm64 URL")
 	}
-	return arm64Url, nil
+	return strings.TrimSuffix(arm64Url, key), nil
 }
 
 func getJson(url string, target interface{}) error {
@@ -93,11 +145,9 @@ func getJson(url string, target interface{}) error {
 	return json.NewDecoder(r.Body).Decode(target)
 }
 
-func (m *ArtifactUrlDevMod) recursiveReplaceArtifactUrl(encoded *string) error {
-	prodURL := "https://artifacts.elastic.co/downloads/beats/elastic-agent/"
-
-	if strings.Contains(*encoded, prodURL) {
-		*encoded = strings.ReplaceAll(*encoded, prodURL, m.artifactUrl)
+func (m *ArtifactUrlDevMod) recursiveReplaceArtifactUrl(encoded *string, replaceUrl string) error {
+	if strings.Contains(*encoded, prodUrlBase) {
+		*encoded = strings.ReplaceAll(*encoded, prodUrlBase, replaceUrl)
 		return nil
 	}
 
@@ -113,7 +163,7 @@ func (m *ArtifactUrlDevMod) recursiveReplaceArtifactUrl(encoded *string) error {
 	}
 
 	for k, v := range decodedObj {
-		err = m.recursiveReplaceArtifactUrl(&v)
+		err = m.recursiveReplaceArtifactUrl(&v, replaceUrl)
 		decodedObj[k] = v
 		if err != nil {
 			return err
