@@ -17,13 +17,30 @@
 
 package testhelper
 
+// CollectResources fetches items from a channel and returns them in a slice.
+//
+// Warning: this function does not wait for the channel to close, using it can cause race conditions.
+// See CollectResourcesBlocking for a blocking version of the function.
 func CollectResources[T any](ch chan T) []T {
-	var numResources = len(ch)
 	var results []T
-	for i := 0; i < numResources; i++ {
-		results = append(results, <-ch)
+	for {
+		select {
+		case value := <-ch:
+			results = append(results, value)
+		default:
+			return results
+		}
 	}
+}
 
+// CollectResourcesBlocking fetches items from a channel and returns them in a slice.
+// This function waits for the channel to close before returning.
+// See CollectResources for a non-blocking version of the function.
+func CollectResourcesBlocking[T any](ch chan T) []T {
+	var results []T
+	for v := range ch {
+		results = append(results, v)
+	}
 	return results
 }
 
