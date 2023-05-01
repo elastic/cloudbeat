@@ -19,6 +19,7 @@ package rds
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
@@ -44,16 +45,28 @@ func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFac
 func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error) {
 	rdss, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
 		var result []awslib.AwsResource
-		dbInstances, err := c.DescribeDBInstances(ctx, &rds.DescribeDBInstancesInput{})
-		if err != nil {
-			p.log.Errorf("Could not describe DB instances. Error: %v", err)
-			return result, err
+		var dbInstancesInput rds.DescribeDBInstancesInput
+		var dbInstances []types.DBInstance
+
+		for {
+			output, err := c.DescribeDBInstances(ctx, &dbInstancesInput)
+			if err != nil {
+				p.log.Errorf("Could not describe DB instances. Error: %v", err)
+				return result, err
+			}
+
+			dbInstances = append(dbInstances, output.DBInstances...)
+			if output.Marker == nil {
+				break
+			}
+
+			dbInstancesInput.Marker = output.Marker
 		}
 
-		for _, dbInstance := range dbInstances.DBInstances {
+		for _, dbInstance := range dbInstances {
 			subnets, subnetsErr := p.getDBInstanceSubnets(ctx, region, dbInstance)
 			if subnetsErr != nil {
-				p.log.Errorf("Could not get DB instance subnets. DB: %s. Error: %v", *dbInstance.DBInstanceIdentifier, err)
+				p.log.Errorf("Could not get DB instance subnets. DB: %s. Error: %v", *dbInstance.DBInstanceIdentifier, subnetsErr)
 			}
 
 			result = append(result, DBInstance{
