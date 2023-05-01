@@ -6,8 +6,8 @@ The EC2 instance has elastic-agent preinstalled in it using the fleet URL and en
 
 ### How to test it
 *Prerequisites:*
-1. You have an elastic stack deployed in the cloud that includes Kibana, elasticsearch and fleet-server
-2. You have AWS CLI installed on your laptop and configured to work with our dev account `elastic-security-cloud-security-dev` (in particular, `~/.aws/config` and `~/.aws/credentials` should be set)
+1. You have an elastic stack deployed in the cloud that includes Kibana, elasticsearch and fleet-server (check https://cloud.elastic.co/ to deploy your own stack)
+2. You have AWS CLI installed on your laptop and configured to work with our dev account `elastic-security-cloud-security-dev` (in particular, `~/.aws/config` and `~/.aws/credentials` should be set, check https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html for more information)
 
 *Steps:*
 1. Install Vulnerability Management integration on a new agent policy, you might have to check the "Display beta integrations" checkbox.
