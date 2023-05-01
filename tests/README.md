@@ -171,7 +171,7 @@ The test file defines logic of the test, and the data file defines test cases.
 
 AWS tests data is located in [aws folder](./product/tests/data/aws).
 
-Data file identification: `aws_`
+Data file identification prefix: `aws_`
 
 For example `EC2` data cases will be located under `aws_ec2_test_cases.py`.
 
@@ -179,29 +179,29 @@ For example `EC2` data cases will be located under `aws_ec2_test_cases.py`.
 
 - Define data manually in AWS Cloud and define / get property for resource unique identification
 - Create test case data in `data` folder, for example in file `aws_logging_test_cases.py`
-```
+```python
 cis_aws_log_3_1_pass = EksAwsServiceCase(
     rule_tag=CIS_3_1,
     case_identifier="cloudtrail-704479110758", # resource unique identifier
     expected=RULE_PASS_STATUS,
 )
 ```
-- Update test cases dictionary or create new if not exist, for example
-```
+- Update the test cases dictionary or create a new one if it didn't exist, for example:
+```python
 cis_aws_log_3_1 = {
     "3.1 Ensure CloudTrail is enabled in all regions expect: passed": cis_aws_log_3_1_pass,
 }
 ```
 - Finally, reference created dictionary in the group of all test cases, for example
-```
+```python
 cis_aws_log_cases = {
     **cis_aws_log_3_1,
     ...
 ```
-- If just adding new test case to exist test suite no additional steps required, the case will be added automatically
+- If just adding a new test case to existing test suite, no additional steps are required, the case will be added automatically
 - For new test suite create a test file in [product folder](./product/tests), like `test_aws_logging_rules.py`
 - Implement test method or just copy from any `test_aws_` and updated accordingly data section
-```
+```python
 register_params(
     test_aws_logging_rules, # should be updated
     Parameters(
