@@ -45,11 +45,11 @@ func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFac
 func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource, error) {
 	rdss, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]awslib.AwsResource, error) {
 		var result []awslib.AwsResource
-		var dbInstancesInput rds.DescribeDBInstancesInput
 		var dbInstances []types.DBInstance
+		dbInstancesInput := &rds.DescribeDBInstancesInput{}
 
 		for {
-			output, err := c.DescribeDBInstances(ctx, &dbInstancesInput)
+			output, err := c.DescribeDBInstances(ctx, dbInstancesInput)
 			if err != nil {
 				p.log.Errorf("Could not describe DB instances. Error: %v", err)
 				return result, err
@@ -64,9 +64,9 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 		}
 
 		for _, dbInstance := range dbInstances {
-			subnets, subnetsErr := p.getDBInstanceSubnets(ctx, region, dbInstance)
-			if subnetsErr != nil {
-				p.log.Errorf("Could not get DB instance subnets. DB: %s. Error: %v", *dbInstance.DBInstanceIdentifier, subnetsErr)
+			subnets, err := p.getDBInstanceSubnets(ctx, region, dbInstance)
+			if err != nil {
+				p.log.Errorf("Could not get DB instance subnets. DB: %s. Error: %v", *dbInstance.DBInstanceIdentifier, err)
 			}
 
 			result = append(result, DBInstance{
