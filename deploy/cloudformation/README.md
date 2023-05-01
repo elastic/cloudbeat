@@ -24,9 +24,7 @@ DEV.KEY_NAME="" # When SSH is allowed, your EC2 SSH key name is required
 DEV.PRE_RELEASE=bool # Set to true to replace the artifact URL with a pre-release version (BC or snapshot)
 DEV.SHA="" # When running a pre-release version, you have to specify the SHA of the pre-release artifact (on SNAPSHOT versions you can leave it empty to take the latest)
 ```
-
 4. Run `just deploy-cloudformation` to create a CloudFormation stack with an elastic-agent that will automatically enroll to your fleet.
-
 
 *Debugging:*
 1. To track the progress of the CloudFormation stack creation go to https://console.aws.amazon.com/cloudformation/
