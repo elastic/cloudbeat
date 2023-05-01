@@ -6,7 +6,7 @@ The EC2 instance has elastic-agent preinstalled in it using the fleet URL and en
 
 ### How to test it
 *Prerequisites:*
-1. You have an elastic stack deployed in the cloud that includes Kibana, elasticsearch and fleet-server (check https://cloud.elastic.co/ to deploy your own stack)
+1. You have an elastic stack deployed in the cloud that includes Kibana, elasticsearch and fleet-server (check https://github.com/elastic/cloudbeat/blob/main/dev-docs/ELK-Deployment.md to deploy your own stack)
 2. You have AWS CLI installed on your laptop and configured to work with our dev account `elastic-security-cloud-security-dev` (in particular, `~/.aws/config` and `~/.aws/credentials` should be set, check https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html for more information)
 
 *Steps:*
@@ -14,7 +14,7 @@ The EC2 instance has elastic-agent preinstalled in it using the fleet URL and en
 2. After you installed the integration you can install a new elastic-agent, you should keep the fleet URL and the enrollment token.
 3. On cloudbeat repo, create a `deploy/cloudformation/.env` file of the form:
 ```
-STACK_NAME="your unique stack name"
+STACK_NAME="<Unique stack name>" # john-qa-bc2-8-9-0-May28
 FLEET_URL="<Elastic Agent Fleet URL>"
 ENROLLMENT_TOKEN="<Elastic Agent Enrollment Token>"
 ELASTIC_AGENT_VERSION="<Elastic Agent Version>" # e.g: 8.8.0 | 8.8.0-SNAPSHOT
