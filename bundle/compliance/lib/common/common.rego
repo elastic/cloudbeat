@@ -19,7 +19,7 @@ ensure_array(value) = [value] {
 } else = value
 
 array_contains(array, key) {
-	contains(array[_], key)
+	array[_] == key
 } else = false
 
 contains_key(object, key) {

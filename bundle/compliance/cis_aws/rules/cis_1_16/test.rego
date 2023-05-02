@@ -97,6 +97,20 @@ test_pass {
 			"Resource": "some-resource",
 		},
 	])
+
+	# Action contains wildchar but it doesn't match all resources
+	eval_pass with input as generate_input([
+		{
+			"Action": "ec2:*",
+			"Effect": "Allow",
+			"Resource": "*",
+		},
+		{
+			"Action": "*",
+			"Effect": "Allow",
+			"Resource": ["resource*", "*resource", "*resource*"],
+		},
+	])
 }
 
 test_not_evaluated {

@@ -45,6 +45,12 @@ test_array_contains_not_contains {
 	assert.is_false(array_contains(array, key))
 }
 
+test_array_contains_not_contains_substring {
+	array := ["a", "b", "ccc"]
+	key := "c"
+	assert.is_false(array_contains(array, key))
+}
+
 test_contains_key {
 	array := {"a": "aa", "b": "bb"}
 	key := "a"
