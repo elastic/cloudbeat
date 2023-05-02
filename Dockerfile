@@ -1,13 +1,13 @@
-FROM debian
-RUN set -x && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-      ca-certificates curl iputils-ping jq && \
-      apt-get clean
+FROM node:12.16.1
 
-COPY ./cloudbeat /cloudbeat
-COPY ./cloudbeat.yml /cloudbeat.yml
-COPY ./bundle.tar.gz /bundle.tar.gz
+WORKDIR /app
 
-ENTRYPOINT ["/cloudbeat"]
-CMD ["-e", "-d", "'*'"]
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
