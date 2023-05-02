@@ -117,15 +117,21 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 	}
 
 	accessAnalyzers := iam.AccessAnalyzers{
-		RegionToAccessAnalyzers: map[string][]aatypes.AnalyzerSummary{
-			"region-1": {
-				{Arn: aws.String("some-arn")},
+		Analyzers: []iam.AccessAnalyzer{
+			{
+				AnalyzerSummary: aatypes.AnalyzerSummary{Arn: aws.String("some-arn")},
+				Region:          "region-1",
 			},
-			"region-2": {
-				{Arn: aws.String("some-other-arn")},
-				{Arn: aws.String("some-third-arn")},
+			{
+				AnalyzerSummary: aatypes.AnalyzerSummary{Arn: aws.String("some-other-arn")},
+				Region:          "region-2",
+			},
+			{
+				AnalyzerSummary: aatypes.AnalyzerSummary{Arn: aws.String("some-third-arn")},
+				Region:          "region-2",
 			},
 		},
+		Regions: []string{"region-1", "region-2"},
 	}
 
 	var tests = []struct {
