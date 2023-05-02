@@ -3,48 +3,53 @@ package compliance.cis_aws.rules.cis_1_20
 import data.compliance.cis_aws.data_adapter
 import data.lib.test
 
-generate_input(analyzers) = {
+generate_input(analyzers, regions) = {
 	"type": "identity-management",
 	"subType": "aws-access-analyzers",
-	"resource": {"RegionToAccessAnalyzers": analyzers},
+	"resource": {
+		"Analyzers": analyzers,
+		"Regions": regions,
+	},
 }
 
-analyzer(arn, status) = {
+analyzer(arn, status, region) = {
 	"Arn": arn,
 	"CreatedAt": "2023-01-09T15:06:39Z",
 	"Name": "Analyzer",
 	"Status": status,
 	"Type": "ACCOUNT",
 	"Tags": {},
+	"Region": region,
 }
 
 test_violation {
-	eval_fail with input as generate_input({"region-1": [analyzer("some-arn", null)]})
-	eval_fail with input as generate_input({"region-1": [analyzer("some-arn", "FOO")]})
-	eval_fail with input as generate_input({
-		"region-1": [analyzer("some-arn", "ACTIVE")],
-		"region-2": [], # no analyzer in some region
-	})
-	eval_fail with input as generate_input({
-		"region-1": [analyzer("some-arn", "ACTIVE")],
-		"region-2": [analyzer("invalid-status", "FOO")],
-	})
+	eval_fail with input as generate_input([], ["region-1"])
+	eval_fail with input as generate_input([analyzer("some-arn", null, "region-1")], ["region-1"])
+	eval_fail with input as generate_input([analyzer("some-arn", "FOO", "region-1")], ["region-1"])
+	eval_fail with input as generate_input(
+		[analyzer("some-arn", "ACTIVE", "region-1")],
+		["region-1", "region-2"], # no analyzer in region-2
+	)
+	eval_fail with input as generate_input(
+		[analyzer("some-arn", "ACTIVE", "region-1"), analyzer("invalid-status", "FOO", "region-2")],
+		["region-1", "region-2"],
+	)
 }
 
 test_pass {
 	# no regions, no problems
-	eval_pass with input as generate_input(null)
-	eval_pass with input as generate_input([])
-	eval_pass with input as generate_input({"region-1": [analyzer("some-arn", "ACTIVE")]})
-	eval_pass with input as generate_input({
-		"region-1": [analyzer("some-arn", "ACTIVE")],
-		"region-2": [analyzer("invalid-status", "FOO"), analyzer("some-other-arn", "ACTIVE")],
-	})
+	eval_pass with input as generate_input(null, [])
+	eval_pass with input as generate_input([], [])
+	eval_pass with input as generate_input([analyzer("some-arn", "ACTIVE", "region-1")], ["region-1"])
+	eval_pass with input as generate_input(
+		[analyzer("some-arn", "ACTIVE", "region-1"), analyzer("invalid-status", "FOO", "region-1"), analyzer("some-other-arn", "ACTIVE", "region-2")],
+		["region-1", "region-2"],
+	)
 }
 
 test_not_evaluated {
 	not_eval with input as {}
-	not_eval with input as {"resource": {"RegionToAccessAnalyzers": []}} # No subType
+	not_eval with input as {"resource": {"Analyzers": []}} # No subType
 }
 
 eval_fail {

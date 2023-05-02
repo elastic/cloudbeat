@@ -44,7 +44,9 @@ roles = input.resource.roles
 
 server_certificates = input.resource.certificates
 
-analyzers = input.resource.RegionToAccessAnalyzers
+analyzers = input.resource.Analyzers
+
+analyzer_regions = input.resource.Regions
 
 used_active_access_keys = {access_key |
 	access_key = iam_user.access_keys[_]

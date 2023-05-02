@@ -19,8 +19,9 @@ finding = result if {
 }
 
 analyzer_exists if {
-	every region in data_adapter.analyzers {
-		some analyzer in region
+	every region in data_adapter.analyzer_regions {
+		some analyzer in data_adapter.analyzers
+		analyzer.Region == region
 		analyzer.Status == "ACTIVE"
 	}
 } else = false
