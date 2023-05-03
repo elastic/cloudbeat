@@ -1,0 +1,62 @@
+name: Test environment deployment for sanity checks
+
+on:
+  # Ability to execute on demand
+  workflow_dispatch:
+    inputs:
+      elk-stack-version:
+        required: true
+        description: "Specify version ELK stack version to deploy"
+        default: "8.8.0-SNAPSHOT"
+      ess-region:
+        required: false
+        description: "Specify deployment region"
+        default: "gcp-us-west2"
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  TF_VAR_ec_api_key: ${{ secrets.CI_EC_API_KEY }}
+  EC_DEPLOYMENT: "module.ec_deployment"
+  WORKING_DIR: deploy/cloud
+
+jobs:
+  Setup:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+    outputs:
+      stack-version: ${{ steps.set-elk-vars.outputs.stack-version }}
+      ess-region: ${{ steps.set-elk-vars.outputs.ess-region }}
+    steps:
+      - id: set-elk-vars
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          ELK_VERSION: ${{ github.event.inputs.elk-stack-version }}
+          ESS_REGION: ${{ github.event.inputs.ess-region }}
+        run: |
+          echo "{stack-version}={${{ env.ELK_VERSION}}}" >> $GITHUB_OUTPUT
+          echo "{ess-region}=${ESS_REGION}" >> $GITHUB_OUTPUT
+  
+  Deploy:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+        working-directory: ./
+
+      - name: Terraform Init
+        run: terraform init -no-color
+
+      - name: Terraform Validate
+        run: terraform validate -no-color
+
+      - name: Deploy Elastic Cloud
+        run: terraform apply --auto-approve -target ${{env.EC_DEPLOYMENT}}
+
