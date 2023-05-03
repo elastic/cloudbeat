@@ -25,8 +25,14 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
+type AccessAnalyzer struct {
+	types.AnalyzerSummary
+	Region string
+}
+
 type AccessAnalyzers struct {
-	RegionToAccessAnalyzers map[string][]types.AnalyzerSummary
+	Analyzers []AccessAnalyzer
+	Regions   []string
 }
 
 func (a AccessAnalyzers) GetResourceArn() string {
@@ -56,17 +62,25 @@ func (p Provider) GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, e
 		return nil, err
 	}
 
-	regionToAccessAnalyzers := make(map[string][]types.AnalyzerSummary)
+	accessAnalyzers := make([]AccessAnalyzer, 0)
+	regions := make([]string, 0)
 	for _, region := range analyzers {
-		regionToAccessAnalyzers[region.regionName] = region.analyzers
+		regions = append(regions, region.regionName)
+		for _, analyzer := range region.analyzers {
+			accessAnalyzers = append(accessAnalyzers, AccessAnalyzer{
+				AnalyzerSummary: analyzer,
+				Region:          region.regionName,
+			})
+		}
 	}
 
 	return AccessAnalyzers{
-		RegionToAccessAnalyzers: regionToAccessAnalyzers,
+		Analyzers: accessAnalyzers,
+		Regions:   regions,
 	}, err
 }
 
-func getAccessAnalyzersForRegion(ctx context.Context, region string, c AccessAnalyzer) (analyzersForRegion, error) {
+func getAccessAnalyzersForRegion(ctx context.Context, region string, c AccessAnalyzerClient) (analyzersForRegion, error) {
 	analyzers := make([]types.AnalyzerSummary, 0)
 
 	input := &accessanalyzer.ListAnalyzersInput{}
