@@ -8,15 +8,15 @@ Parameters:
     Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
   InstanceType:
     Type: String
-    Default: a1.xlarge
+    Default: c6g.xlarge
     AllowedValues:
-    - a1.xlarge
-    - a1.2xlarge
-    - a1.4xlarge
+    - c6g.xlarge
+    - c6g.2xlarge
+    - c6g.4xlarge
     Description: The type of EC2 instance to create
   EnrollmentToken:
     Type: String
-    Description: The enrollment token of elasitc-agent
+    Description: The enrollment token of elastic-agent
   FleetUrl:
     Type: String
     Description: The fleet URL of elastic-agent
@@ -27,18 +27,26 @@ Parameters:
 Resources:
   # Security Group for EC2 instance
   ElasticAgentSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+    Type: 'AWS::EC2::SecurityGroup'
     Properties:
-      GroupName: !Join ['-', ['elastic-agent-security-group', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
+      GroupName:
+        Fn::Join:
+        - '-'
+        - - 'elastic-agent-security-group'
+          - Fn::Select:
+            - 2
+            - Fn::Split:
+              - '/'
+              - Ref: 'AWS::StackId'
       GroupDescription: Block incoming traffic
       SecurityGroupIngress: []
 
   # IAM Role for EC2 instance
   ElasticAgentRole:
-    Type: AWS::IAM::Role
+    Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
-        Version: 2012-10-17
+        Version: '2012-10-17'
         Statement:
         - Effect: Allow
           Principal:
@@ -50,7 +58,7 @@ Resources:
       Policies:
       - PolicyName: vuln-mgmt-permissions
         PolicyDocument:
-          Version: 2012-10-17
+          Version: '2012-10-17'
           Statement:
           - Effect: Allow
             Action:
@@ -60,6 +68,7 @@ Resources:
             - ec2:DescribeSnapshots
             - ec2:CreateSnapshots
             - ec2:CreateTags
+            - ec2:DeleteSnapshot
             Resource: "*"
           - Effect: Allow
             Action:
@@ -72,23 +81,43 @@ Resources:
             - kms:Decrypt
             Resource:
             - !Sub 'arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/ebs'
+          - Effect: Allow
+            Action:
+              - iam:ListAccountAliases
+            Resource: "*"
 
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: !Join ['-', ['elastic-agent-instance-profile', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
+      InstanceProfileName:
+        Fn::Join:
+        - '-'
+        - - 'elastic-agent-instance-profile'
+          - Fn::Select:
+            - 2
+            - Fn::Split:
+              - '/'
+              - Ref: 'AWS::StackId'
       Path: /
       Roles:
-       - !Ref ElasticAgentRole
+       - Ref: 'ElasticAgentRole'
 
   # EC2 Instance to run elastic-agent
   ElasticAgentEc2Instance:
-    Type: AWS::EC2::Instance
+    Type: 'AWS::EC2::Instance'
     Properties:
       Tags:
         - Key: Name
-          Value: !Join ['-', ['elastic-agent-instance', !Select [2, !Split ['/', !Ref AWS::StackId]]]]
+          Value:
+            Fn::Join:
+            - '-'
+            - - 'elastic-agent-instance'
+              - Fn::Select:
+                - 2
+                - Fn::Split:
+                  - '/'
+                  - Ref: 'AWS::StackId'
         - Key: Task
           Value: Vulnerability Management Scanner
       ImageId: !Ref LatestAmiId
@@ -100,9 +129,10 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash
-            curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/${ElasticAgentVersion}.tar.gz
-            tar xzvf ${ElasticAgentVersion}.tar.gz
-            cd ${ElasticAgentVersion}
+            ElasticAgentArtifact=elastic-agent-${ElasticAgentVersion}-linux-arm64
+            curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/$ElasticAgentArtifact.tar.gz
+            tar xzvf $ElasticAgentArtifact.tar.gz
+            cd $ElasticAgentArtifact
             sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken}
 
 Outputs:

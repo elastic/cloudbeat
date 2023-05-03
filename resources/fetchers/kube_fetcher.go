@@ -150,7 +150,7 @@ func (f *KubeFetcher) initWatchers() error {
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *KubeFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting KubeFetcher.Fetch")
 
 	var err error

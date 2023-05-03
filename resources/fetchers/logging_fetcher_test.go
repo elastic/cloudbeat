@@ -19,9 +19,10 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 	"testing"
 	"time"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
@@ -53,7 +54,7 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 			},
 			configServiceProvider: func() configservice.ConfigService {
 				m := configservice.MockConfigService{}
-				m.On("DescribeConfigRecorders", mock.Anything).Return([]awslib.AwsResource{}, nil)
+				m.On("DescribeConfigRecorders", mock.Anything).Return([]awslib.AwsResource{}, errors.New("can't fetch resources"))
 				return &m
 			},
 			expectedResources: 0,
@@ -108,6 +109,7 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 			expectedResources: 3,
 		},
 	}
+	testAccount := "test-account"
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ch := make(chan fetching.ResourceInfo, 100)
@@ -119,6 +121,9 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				configserviceProvider: tt.configServiceProvider(),
 				cfg:                   fetching.AwsBaseFetcherConfig{},
 				resourceCh:            ch,
+				cloudIdentity: &awslib.Identity{
+					Account: &testAccount,
+				},
 			}
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})
@@ -147,5 +152,20 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 	assert.Equal(t, logging.EnrichedTrail{TrailInfo: cloudtrail.TrailInfo{Trail: types.Trail{
 		TrailARN: aws.String("test-arn"),
 	}}}, r.GetData())
+	assert.Equal(t, nil, r.GetElasticCommonData())
+}
+
+func TestConfigResource_GetMetadata(t *testing.T) {
+	r := ConfigResource{
+		identity: &awslib.Identity{
+			Account: aws.String("test-account"),
+			Arn:     aws.String("test-arn")},
+	}
+
+	meta, err := r.GetMetadata()
+
+	assert.NoError(t, err)
+	assert.Equal(t, fetching.ResourceMetadata{ID: "configservice-test-account", Type: "cloud-config", SubType: "aws-config", Name: "configservice-test-account", ECSFormat: ""}, meta)
+	assert.Equal(t, ConfigResource{}.configs, r.GetData())
 	assert.Equal(t, nil, r.GetElasticCommonData())
 }

@@ -20,6 +20,7 @@ package ec2
 import (
 	"context"
 	"fmt"
+	"github.com/go-errors/errors"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/samber/lo"
@@ -29,6 +30,10 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
+
+var subnetAssociationIdFilterName = "association.subnet-id"
+var subnetVpcIdFilterName = "vpc-id"
+var subnetMainAssociationFilterName = "association.main"
 
 type Provider struct {
 	log          *logp.Logger
@@ -45,6 +50,8 @@ type Client interface {
 	DescribeInstances(ctx context.Context, params *ec2.DescribeInstancesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error)
 	CreateSnapshots(ctx context.Context, params *ec2.CreateSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.CreateSnapshotsOutput, error)
 	DescribeSnapshots(ctx context.Context, params *ec2.DescribeSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSnapshotsOutput, error)
+	DeleteSnapshot(ctx context.Context, params *ec2.DeleteSnapshotInput, optFns ...func(*ec2.Options)) (*ec2.DeleteSnapshotOutput, error)
+	DescribeRouteTables(ctx context.Context, params *ec2.DescribeRouteTablesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRouteTablesOutput, error)
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -197,6 +204,14 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins Ec2Instance) ([]EBSS
 			InstanceId: ins.InstanceId,
 		},
 		Description: aws.String("Cloudbeat Vulnerability Snapshot."),
+		TagSpecifications: []types.TagSpecification{
+			{
+				ResourceType: "snapshot",
+				Tags: []types.Tag{
+					{Key: aws.String("Name"), Value: aws.String(fmt.Sprintf("elastic-vulnerability-%s", *ins.InstanceId))},
+				},
+			},
+		},
 	}
 	res, err := client.CreateSnapshots(ctx, input)
 	if err != nil {
@@ -205,7 +220,7 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins Ec2Instance) ([]EBSS
 
 	var result []EBSSnapshot
 	for _, snap := range res.Snapshots {
-		result = append(result, FromSnapshotInfo(snap, ins.Region, p.awsAccountID))
+		result = append(result, FromSnapshotInfo(snap, ins.Region, p.awsAccountID, ins))
 	}
 	return result, nil
 }
@@ -227,7 +242,55 @@ func (p *Provider) DescribeSnapshots(ctx context.Context, snapshot EBSSnapshot) 
 
 	var result []EBSSnapshot
 	for _, snap := range res.Snapshots {
-		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID))
+		result = append(result, FromSnapshot(snap, snapshot.Region, p.awsAccountID, snapshot.Instance))
 	}
 	return result, nil
+}
+
+func (p *Provider) DeleteSnapshot(ctx context.Context, snapshot EBSSnapshot) error {
+	client, err := awslib.GetClient(aws.String(snapshot.Region), p.clients)
+	if err != nil {
+		return err
+	}
+	_, err = client.DeleteSnapshot(ctx, &ec2.DeleteSnapshotInput{SnapshotId: aws.String(snapshot.SnapshotId)})
+	if err != nil {
+		return fmt.Errorf("error deleting snapshot %s: %w", snapshot.SnapshotId, err)
+	}
+
+	return nil
+}
+
+func (p *Provider) GetRouteTableForSubnet(ctx context.Context, region string, subnetId string, vpcId string) (types.RouteTable, error) {
+	client, err := awslib.GetClient(&region, p.clients)
+	if err != nil {
+		return types.RouteTable{}, err
+	}
+
+	// Fetching route tables explicitly attached to the subnet
+	routeTables, err := client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{Filters: []types.Filter{
+		{Name: &subnetAssociationIdFilterName, Values: []string{subnetId}}},
+	})
+
+	if err != nil {
+		return types.RouteTable{}, err
+	}
+
+	// If there are no route tables explicitly attached to the subnet, it means the VPC main subnet is implicitly attached
+	if len(routeTables.RouteTables) == 0 {
+		routeTables, err = client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{Filters: []types.Filter{
+			{Name: &subnetMainAssociationFilterName, Values: []string{"true"}},
+			{Name: &subnetVpcIdFilterName, Values: []string{vpcId}},
+		}})
+
+		if err != nil {
+			return types.RouteTable{}, err
+		}
+	}
+
+	// A subnet should not have more than 1 attached route table
+	if len(routeTables.RouteTables) != 1 {
+		return types.RouteTable{}, errors.Errorf("subnet %s has %d route tables", subnetId, len(routeTables.RouteTables))
+	}
+
+	return routeTables.RouteTables[0], nil
 }

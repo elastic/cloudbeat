@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -64,6 +65,27 @@ func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 		iamResources = append(iamResources, users...)
 	}
 
+	policies, err := f.iamProvider.GetPolicies(ctx)
+	if err != nil {
+		f.log.Errorf("Unable to fetch IAM policies, error: %v", err)
+	} else {
+		iamResources = append(iamResources, policies...)
+	}
+
+	serverCertificates, err := f.iamProvider.ListServerCertificates(ctx)
+	if err != nil {
+		f.log.Errorf("Unable to fetch IAM server certificates, error: %v", err)
+	} else {
+		iamResources = append(iamResources, serverCertificates)
+	}
+
+	accessAnalyzers, err := f.iamProvider.GetAccessAnalyzers(ctx)
+	if err != nil {
+		f.log.Errorf("Unable to fetch access access analyzers, error: %v", err)
+	} else {
+		iamResources = append(iamResources, accessAnalyzers)
+	}
+
 	for _, iamResource := range iamResources {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource: IAMResource{
@@ -94,6 +116,7 @@ func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Type:    fetching.CloudIdentity,
 		SubType: r.GetResourceType(),
 		Name:    r.GetResourceName(),
+		Region:  r.GetRegion(),
 	}, nil
 }
 func (r IAMResource) GetElasticCommonData() any { return nil }

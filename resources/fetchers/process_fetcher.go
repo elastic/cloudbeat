@@ -121,7 +121,7 @@ type ProcessFetcherConfig struct {
 	RequiredProcesses ProcessesConfigMap `config:"processes"`
 }
 
-func (f *ProcessesFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *ProcessesFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ProcessesFetcher.Fetch")
 
 	pids, err := proc.ListFS(f.Fs)

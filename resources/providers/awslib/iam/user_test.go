@@ -145,17 +145,7 @@ func Test_GetUsers(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		mockedClient := &MockClient{}
-		for funcName, returnVals := range test.mocksReturnVals {
-			for _, vals := range returnVals {
-				mockedClient.On(funcName, mock.Anything, mock.Anything).Return(vals...).Once()
-			}
-		}
-
-		p := Provider{
-			client: mockedClient,
-			log:    logp.NewLogger("iam-provider"),
-		}
+		p := createProviderFromMockValues(test.mocksReturnVals)
 
 		users, err := p.GetUsers(context.TODO())
 
@@ -176,5 +166,18 @@ func Test_GetUsers(t *testing.T) {
 				assert.Equal(t, test.expected[i].IsVirtualMFA, user.(User).MFADevices[0].IsVirtual)
 			}
 		}
+	}
+}
+
+func createProviderFromMockValues(mockReturnValues mocksReturnVals) *Provider {
+	mockedClient := MockClient{}
+	for funcName, returnValues := range mockReturnValues {
+		for _, values := range returnValues {
+			mockedClient.On(funcName, mock.Anything, mock.Anything).Return(values...).Once()
+		}
+	}
+	return &Provider{
+		log:    logp.NewLogger("iam-provider"),
+		client: &mockedClient,
 	}
 }

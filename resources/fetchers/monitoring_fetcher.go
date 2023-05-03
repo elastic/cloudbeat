@@ -81,7 +81,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 	return nil
 }
 
-func (f MonitoringFetcher) Stop() {}
+func (m MonitoringFetcher) Stop() {}
 
 func (r MonitoringResource) GetData() any {
 	return r
@@ -94,6 +94,7 @@ func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Type:    fetching.MonitoringIdentity,
 		SubType: fetching.MultiTrailsType,
 		Name:    id,
+		Region:  awslib.GlobalRegion,
 	}, nil
 }
 func (r MonitoringResource) GetElasticCommonData() any { return nil }
@@ -108,6 +109,7 @@ func (s SecurityHubResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Name:    s.GetResourceName(),
 		Type:    fetching.MonitoringIdentity,
 		SubType: fetching.SecurityHubType,
+		Region:  s.GetRegion(),
 	}, nil
 }
 

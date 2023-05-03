@@ -72,6 +72,7 @@ func (r RdsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Type:    fetching.CloudDatabase,
 		SubType: r.dbInstance.GetResourceType(),
 		Name:    r.dbInstance.GetResourceName(),
+		Region:  r.dbInstance.GetRegion(),
 	}, nil
 }
 

@@ -3,6 +3,7 @@ CLOUDBEAT_VERSION := ''
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeVanillaNoCertOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla-nocert"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
+kustomizeAwsOverlay := "deploy/kustomize/overlays/cloudbeat-aws"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
 
@@ -23,6 +24,9 @@ create-vanilla-deployment-file:
 
 create-vanilla-deployment-file-nocert:
   kustomize build {{kustomizeVanillaNoCertOverlay}} --output deploy/k8s/cloudbeat-ds-nocert.yaml
+
+create-aws-deployment-file:
+  kustomize build {{kustomizeAwsOverlay}} --output deploy/aws/cloudbeat-ds.yaml
 
 build-deploy-cloudbeat kind='kind-multi' $GOARCH=LOCAL_GOARCH:
   just build-cloudbeat-docker-image $GOARCH
@@ -82,6 +86,9 @@ deploy-cloudbeat:
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
+deploy-cloudbeat-aws:
+  kubectl delete -k {{kustomizeAwsOverlay}} -n kube-system || true && kubectl apply -k {{kustomizeAwsOverlay}} -n kube-system
+
 deploy-cloudbeat-nocert:
   kubectl delete -k {{kustomizeVanillaNoCertOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaNoCertOverlay}} -n kube-system
 
@@ -112,6 +119,9 @@ logs-cloudbeat:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl logs -f "${CLOUDBEAT_POD}" -n kube-system
 
+deploy-cloudformation:
+  cd deploy/cloudformation && go run .
+
 build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v
 
@@ -123,6 +133,9 @@ elastic-stack-down:
 
 elastic-stack-connect-kind kind='kind-multi':
   ./.ci/scripts/connect_kind.sh {{kind}}
+
+elastic-stack-disconnect-kind kind='kind-multi':
+  ./.ci/scripts/connect_kind.sh {{kind}} disconnect
 
 ssh-cloudbeat:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
@@ -137,7 +150,7 @@ expose-ports:
 # generate new and update existing mocks from golang interfaces
 # and update the license header
 generate-mocks:
-  mockery --dir . --inpackage --all --with-expecter --case underscore --recursive
+  mockery --dir . --inpackage --all --with-expecter --case underscore --recursive --exclude vendor
   mage AddLicenseHeaders
 
 # run to validate no mocks are missing
