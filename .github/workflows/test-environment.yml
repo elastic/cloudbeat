@@ -70,7 +70,7 @@ jobs:
       - name: Terraform Validate
         run: terraform validate -no-color
 
-      - name: Apply Elastic Cloud
+      - name: Provision Elastic Cloud
         id: apply
         env:
           TF_VAR_stack_version: ${{ needs.Setup.outputs.stack-version }}
@@ -80,7 +80,8 @@ jobs:
             -target ${{ env.EC_DEPLOYMENT }} \
             -state=${{ needs.Setup.outputs.tf-state}}
 
-      - name: Upload Terraform state to S3
+      - name: Upload tf state
+        if: success()
         uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl private --follow-symlinks --delete --exclude '*.tf' --exclude 'terraform.tfstate*' --exclude '.git/*' --exclude '.github/*' --exclude '.vscode/*'
