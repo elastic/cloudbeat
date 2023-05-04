@@ -20,6 +20,9 @@ Parameters:
   FleetUrl:
     Type: String
     Description: The fleet URL of elastic-agent
+  ElasticArtifactServer:
+    Type: String
+    Description: The URL of the artifact server
   ElasticAgentVersion:
     Type: String
     Description: The version of elastic-agent to install
@@ -125,7 +128,7 @@ Resources:
           !Sub |
             #!/bin/bash
             ElasticAgentArtifact=elastic-agent-${ElasticAgentVersion}-linux-arm64
-            curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/$ElasticAgentArtifact.tar.gz
+            curl -L -O ${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz
             tar xzvf $ElasticAgentArtifact.tar.gz
             cd $ElasticAgentArtifact
             sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken}
