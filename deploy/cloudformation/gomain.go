@@ -51,6 +51,7 @@ func createFromConfig(cfg *config) error {
 	params["FleetUrl"] = cfg.FleetURL
 	params["EnrollmentToken"] = cfg.EnrollmentToken
 	params["ElasticAgentVersion"] = cfg.ElasticAgentVersion
+	params["ElasticArtifactServer"] = cfg.ElasticArtifactServer
 
 	templatePath := prodTemplatePath
 	if cfg.Dev != nil {
