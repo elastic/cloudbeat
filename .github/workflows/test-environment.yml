@@ -9,7 +9,7 @@ on:
         description: "Specify version ELK stack version to deploy"
         default: "8.8.0-SNAPSHOT"
       ess-region:
-        required: false
+        required: true
         description: "Specify deployment region"
         default: "gcp-us-west2"
 
@@ -90,7 +90,7 @@ jobs:
         uses: jakejarvis/s3-sync-action@master
         env:
           AWS_S3_BUCKET: "tf-state-bucket-test-infra"
-          SOURCE_DIR: "${{env.WORKING_DIR}}/${{ env.TF_STATE_FILE }}"
+          SOURCE_DIR: "${{env.WORKING_DIR}}"
         with:
           args: --acl private --follow-symlinks --delete --exclude '*' --include '*.tfstate'
 
