@@ -126,16 +126,9 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash
-<<<<<<< HEAD
-            curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/${ElasticAgentVersion}.tar.gz
+            curl -L -O ${ElasticArtifactServer}/${ElasticAgentVersion}.tar.gz
             tar xzvf ${ElasticAgentVersion}.tar.gz
             cd ${ElasticAgentVersion}
-=======
-            ElasticAgentArtifact=elastic-agent-${ElasticAgentVersion}-linux-arm64
-            curl -L -O ${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz
-            tar xzvf $ElasticAgentArtifact.tar.gz
-            cd $ElasticAgentArtifact
->>>>>>> d9dac83 (Accept ElasticArtifactServer as a CloudFormation parameter (#939))
             sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken}
 
 Outputs:
