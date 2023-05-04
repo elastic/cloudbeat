@@ -76,10 +76,6 @@ jobs:
 
       - name: Provision Elastic Cloud
         id: apply
-        # env:
-        #   TF_VAR_stack_version: ${{ needs.Setup.outputs.stack-version }}
-        #   TF_VAR_ess_region: ${{ needs.Setup.outputs.ess-region }}
-        #   TF_STATE_FILE: ${{ needs.Setup.outputs.tf-state }}
         run: |
           terraform apply --auto-approve \
             -target ${{ env.EC_DEPLOYMENT }} \
@@ -87,12 +83,15 @@ jobs:
 
       - name: Upload tf state
         if: success()
-        uses: jakejarvis/s3-sync-action@master
-        env:
-          AWS_S3_BUCKET: "tf-state-bucket-test-infra"
-          SOURCE_DIR: "${{env.WORKING_DIR}}"
-        with:
-          args: --acl private --exclude '*' --include '*.tfstate'
+        run: |
+          aws s3 cp "${{env.WORKING_DIR}}/${{ env.TF_STATE_FILE }}" "s3://tf-state-bucket-test-infra/${{ env.TF_STATE_FILE }}"
+        # if: success()
+        # uses: jakejarvis/s3-sync-action@master
+        # env:
+        #   AWS_S3_BUCKET: "tf-state-bucket-test-infra"
+        #   SOURCE_DIR: "${{env.WORKING_DIR}}"
+        # with:
+        #   args: --acl private --exclude '*' --include '*.tfstate'
 
       - name: Sleep action
         if: success()
@@ -101,10 +100,6 @@ jobs:
 
       - name: Cleanup Environment
         if: always()
-        # env:
-        #   TF_VAR_stack_version: ${{ needs.Setup.outputs.stack-version }}
-        #   TF_VAR_ess_region: ${{ needs.Setup.outputs.ess-region }}
-        #   TF_STATE_FILE: ${{ needs.Setup.outputs.tf-state }}
         run: |
           terraform destroy --auto-approve \
             -target ${{ env.EC_DEPLOYMENT }} \
