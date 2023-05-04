@@ -84,9 +84,10 @@ jobs:
       - name: Upload tf state
         if: success()
         uses: jakejarvis/s3-sync-action@master
+        env:
+          AWS_S3_BUCKET: "tf-state-bucket-test-infra"
         with:
           args: --acl private --follow-symlinks --delete --exclude '*.tf' --exclude 'terraform.tfstate*' --exclude '.git/*' --exclude '.github/*' --exclude '.vscode/*'
-          AWS_S3_BUCKET: "s3://tf-state-bucket-test-infra/"
 
       - name: Sleep action
         if: success()
