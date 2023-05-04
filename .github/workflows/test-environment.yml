@@ -86,6 +86,7 @@ jobs:
         uses: jakejarvis/s3-sync-action@master
         env:
           AWS_S3_BUCKET: "tf-state-bucket-test-infra"
+          SOURCE_DIR: "${{env.WORKING_DIR}}/${{env.TF_STATE_FILE}}"
         with:
           args: --acl private --follow-symlinks --delete --exclude '*.tf' --exclude 'terraform.tfstate*' --exclude '.git/*' --exclude '.github/*' --exclude '.vscode/*'
 
