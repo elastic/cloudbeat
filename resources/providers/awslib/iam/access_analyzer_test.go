@@ -27,13 +27,15 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"sort"
 	"testing"
 )
 
 func TestProvider_GetAccessAnalyzers(t *testing.T) {
 	tests := []struct {
 		name    string
-		clients map[string]AccessAnalyzer
+		clients map[string]AccessAnalyzerClient
 		want    awslib.AwsResource
 		wantErr string
 	}{
@@ -44,32 +46,55 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 		},
 		{
 			name: "Error in client",
-			clients: map[string]AccessAnalyzer{
+			clients: map[string]AccessAnalyzerClient{
 				"region-1": mockAccessAnalyzerWithError(),
 			},
 			wantErr: "some error",
 		},
 		{
 			name: "Ok",
-			clients: map[string]AccessAnalyzer{
-				"region-1": mockAccessAnalyzerWithArns("some-arn", "zzz-last-arn"),
-				"region-2": mockAccessAnalyzerWithArns("some-other-arn"),
+			clients: map[string]AccessAnalyzerClient{
+				"region-1": mockAccessAnalyzerWithArns("some-arn", "some-other-arn"),
+				"region-2": mockAccessAnalyzerWithArns("some-third-arn"),
 			},
 			want: AccessAnalyzers{
-				RegionToAccessAnalyzers: map[string][]types.AnalyzerSummary{
-					"region-1": {
-						{Arn: aws.String("some-arn")},
-						{Arn: aws.String("zzz-last-arn")},
+				Analyzers: []AccessAnalyzer{
+					{
+						AnalyzerSummary: types.AnalyzerSummary{Arn: aws.String("some-arn")},
+						Region:          "region-1",
 					},
-					"region-2": {
-						{Arn: aws.String("some-other-arn")},
+					{
+						AnalyzerSummary: types.AnalyzerSummary{Arn: aws.String("some-other-arn")},
+						Region:          "region-1",
+					},
+					{
+						AnalyzerSummary: types.AnalyzerSummary{Arn: aws.String("some-third-arn")},
+						Region:          "region-2",
 					},
 				},
+				Regions: []string{"region-1", "region-2"},
+			},
+		},
+		{
+			name: "With empty regions",
+			clients: map[string]AccessAnalyzerClient{
+				"region-1": mockAccessAnalyzerWithArns(),
+				"region-2": mockAccessAnalyzerWithArns("some-arn"),
+				"region-3": mockAccessAnalyzerWithArns(),
+			},
+			want: AccessAnalyzers{
+				Analyzers: []AccessAnalyzer{
+					{
+						AnalyzerSummary: types.AnalyzerSummary{Arn: aws.String("some-arn")},
+						Region:          "region-2",
+					},
+				},
+				Regions: []string{"region-1", "region-2", "region-3"},
 			},
 		},
 		{
 			name: "Ok and error => error",
-			clients: map[string]AccessAnalyzer{
+			clients: map[string]AccessAnalyzerClient{
 				"region-1": mockAccessAnalyzerWithArns("whatever"),
 				"region-2": mockAccessAnalyzerWithError(),
 			},
@@ -87,28 +112,43 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 			allAnalyzers, err := p.GetAccessAnalyzers(context.Background())
 			if tt.wantErr != "" {
 				assert.ErrorContains(t, err, tt.wantErr)
+				return
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
+
+			allAnalyzersTyped, ok := allAnalyzers.(AccessAnalyzers)
+			require.True(t, ok)
+			sort.Slice(allAnalyzersTyped.Analyzers, func(i, j int) bool {
+				a := allAnalyzersTyped.Analyzers[i]
+				b := allAnalyzersTyped.Analyzers[j]
+				if a.Region != b.Region {
+					return a.Region < b.Region
+				}
+				return *a.Arn < *b.Arn
+			})
+			sort.Slice(allAnalyzersTyped.Regions, func(i, j int) bool {
+				return allAnalyzersTyped.Regions[i] < allAnalyzersTyped.Regions[j]
+			})
 
 			assert.Equal(t, tt.want, allAnalyzers)
 		})
 	}
 }
 
-func mockAccessAnalyzerWithError() *MockAccessAnalyzer {
-	client := &MockAccessAnalyzer{}
+func mockAccessAnalyzerWithError() *MockAccessAnalyzerClient {
+	client := &MockAccessAnalyzerClient{}
 	client.On("ListAnalyzers", mock.Anything, mock.Anything).Return(nil, errors.New("some error")).Once()
 	return client
 }
 
-func mockAccessAnalyzerWithArns(arns ...string) *MockAccessAnalyzer {
+func mockAccessAnalyzerWithArns(arns ...string) *MockAccessAnalyzerClient {
 	var output []types.AnalyzerSummary
 	for _, arn := range arns {
 		output = append(output, types.AnalyzerSummary{Arn: aws.String(arn)})
 	}
 
-	client := &MockAccessAnalyzer{}
+	client := &MockAccessAnalyzerClient{}
 	client.On("ListAnalyzers", mock.Anything, mock.Anything).Return(&accessanalyzer.ListAnalyzersOutput{
 		Analyzers: output,
 	}, nil).Once()
