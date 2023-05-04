@@ -77,31 +77,29 @@ jobs:
           TF_VAR_ess_region: ${{ needs.Setup.outputs.ess-region }}
           TF_STATE_FILE: ${{ needs.Setup.outputs.tf-state }}
         run: |
-          echo "$TF_STATE_FILE $TF_VAR_stack_version"
-          echo "${{ env.TF_STATE_FILE }} ${{ env.TF_VAR_ess_region }}"  
-      #     terraform apply --auto-approve \
-      #       -target ${{ env.EC_DEPLOYMENT }} \
-      #       -state=${{ env.TF_STATE_FILE}}
+          terraform apply --auto-approve \
+            -target ${{ env.EC_DEPLOYMENT }} \
+            -state=${{ env.TF_STATE_FILE}}
 
-      # - name: Upload tf state
-      #   if: success()
-      #   uses: jakejarvis/s3-sync-action@master
-      #   with:
-      #     args: --acl private --follow-symlinks --delete --exclude '*.tf' --exclude 'terraform.tfstate*' --exclude '.git/*' --exclude '.github/*' --exclude '.vscode/*'
-      #     AWS_S3_BUCKET: "s3://tf-state-bucket-test-infra/"
+      - name: Upload tf state
+        if: success()
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl private --follow-symlinks --delete --exclude '*.tf' --exclude 'terraform.tfstate*' --exclude '.git/*' --exclude '.github/*' --exclude '.vscode/*'
+          AWS_S3_BUCKET: "s3://tf-state-bucket-test-infra/"
 
-      # - name: Sleep action
-      #   if: success()
-      #   run: |
-      #     sleep 300
+      - name: Sleep action
+        if: success()
+        run: |
+          sleep 300
 
-      # - name: Cleanup Environment
-      #   if: always()
-      #   env:
-      #     TF_VAR_stack_version: ${{ needs.Setup.outputs.stack-version }}
-      #     TF_VAR_ess_region: ${{ needs.Setup.outputs.ess-region }}
-      #     TF_STATE_FILE: ${{ needs.Setup.outputs.tf-state }}
-      #   run: |
-      #     terraform destroy --auto-approve \
-      #       -target ${{env.EC_DEPLOYMENT }} \
-      #       -state=${{ env.TF_STATE_FILE }}
+      - name: Cleanup Environment
+        if: always()
+        env:
+          TF_VAR_stack_version: ${{ needs.Setup.outputs.stack-version }}
+          TF_VAR_ess_region: ${{ needs.Setup.outputs.ess-region }}
+          TF_STATE_FILE: ${{ needs.Setup.outputs.tf-state }}
+        run: |
+          terraform destroy --auto-approve \
+            -target ${{env.EC_DEPLOYMENT }} \
+            -state=${{ env.TF_STATE_FILE }}
