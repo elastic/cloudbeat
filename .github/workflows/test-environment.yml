@@ -16,6 +16,7 @@ on:
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: "eu-west-3"
   TF_VAR_ec_api_key: ${{ secrets.CI_EC_API_KEY }}
   EC_DEPLOYMENT: "module.ec_deployment"
   WORKING_DIR: deploy/cloud
@@ -27,6 +28,7 @@ jobs:
     outputs:
       stack-version: ${{ steps.set-elk-vars.outputs.stack-version }}
       ess-region: ${{ steps.set-elk-vars.outputs.ess-region }}
+      tf-state: ${{ steps.gen-tf-name.ouputs.tf-file}}
     steps:
       - id: set-elk-vars
         if: github.event_name == 'workflow_dispatch'
@@ -36,8 +38,12 @@ jobs:
         run: |
           echo "{stack-version}={${{ env.ELK_VERSION}}}" >> $GITHUB_OUTPUT
           echo "{ess-region}=${ESS_REGION}" >> $GITHUB_OUTPUT
+      - id: gen-tf-name
+        run: |
+          echo "{tf-file}=terraform_$(date +'%Y-%m-%d_%H-%M-%S').tfstate" >> $GITHUB_OUTPUT
   
   Deploy:
+    needs: ["Setup"]
     runs-on: ubuntu-20.04
     timeout-minutes: 15
     defaults:
@@ -51,12 +57,46 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Terraform Init
         run: terraform init -no-color
 
       - name: Terraform Validate
         run: terraform validate -no-color
 
-      - name: Deploy Elastic Cloud
-        run: terraform apply --auto-approve -target ${{env.EC_DEPLOYMENT}}
+      - name: Apply Elastic Cloud
+        id: apply
+        env:
+          TF_VAR_stack_version: needs.Setup.outputs.stack-version
+          TF_VAR_ess_region: nees.Setup.outputs.ess-region
+        run: |
+          terraform apply -auto-approve \
+            -target ${{env.EC_DEPLOYMENT}} \
+            -state=${{ needs.Setup.outputs.tf-state}}
 
+      - name: Upload Terraform state to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl private --follow-symlinks --delete --exclude '*.tf' --exclude 'terraform.tfstate*' --exclude '.git/*' --exclude '.github/*' --exclude '.vscode/*'
+          AWS_S3_BUCKET: "s3://tf-state-bucket-test-infra/"
+
+      - name: Sleep action
+        if: success()
+        run: |
+          sleep 300
+
+      - name: Cleanup Environment
+        if: always()
+        env:
+          TF_VAR_stack_version: needs.Setup.outputs.stack-version
+          TF_VAR_ess_region: nees.Setup.outputs.ess-region
+        run: |
+          terraform destroy -auto-approve \
+            -target ${{env.EC_DEPLOYMENT}} \
+            -state=${{ needs.Setup.outputs.tf-state}}
