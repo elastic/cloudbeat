@@ -6,11 +6,11 @@ on:
     inputs:
       elk-stack-version:
         required: true
-        description: "Specify version ELK stack version to deploy"
+        description: "Elastic Cloud stack version"
         default: "8.8.0-SNAPSHOT"
       ess-region:
         required: true
-        description: "Specify deployment region"
+        description: "Elastic Cloud deployment region"
         default: "gcp-us-west2"
 
 env:
@@ -84,7 +84,8 @@ jobs:
       - name: Upload tf state
         if: success()
         run: |
-          aws s3 cp "${{env.WORKING_DIR}}/${{ env.TF_STATE_FILE }}" "s3://tf-state-bucket-test-infra/${{ env.TF_STATE_FILE }}"
+          ls
+          aws s3 cp "${{ env.TF_STATE_FILE }}" "s3://tf-state-bucket-test-infra/${{ env.TF_STATE_FILE }}"
         # if: success()
         # uses: jakejarvis/s3-sync-action@master
         # env:
