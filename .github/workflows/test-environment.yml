@@ -92,7 +92,7 @@ jobs:
           AWS_S3_BUCKET: "tf-state-bucket-test-infra"
           SOURCE_DIR: "${{env.WORKING_DIR}}"
         with:
-          args: --acl private --follow-symlinks --delete --exclude '*' --include '*.tfstate'
+          args: --acl private --exclude '*' --include '*.tfstate'
 
       - name: Sleep action
         if: success()
