@@ -36,11 +36,11 @@ jobs:
           ELK_VERSION: ${{ github.event.inputs.elk-stack-version }}
           ESS_REGION: ${{ github.event.inputs.ess-region }}
         run: |
-          echo "{stack-version}={${{ env.ELK_VERSION }}}" >> $GITHUB_OUTPUT
-          echo "{ess-region}={${{ env.ESS_REGION }}}" >> $GITHUB_OUTPUT
+          echo "stack-version=${{ env.ELK_VERSION }}" >> $GITHUB_OUTPUT
+          echo "ess-region=${{ env.ESS_REGION }}" >> $GITHUB_OUTPUT
       - id: gen-tf-name
         run: |
-          echo "{tf-file}=terraform_$(date +'%Y-%m-%d_%H-%M-%S').tfstate" >> $GITHUB_OUTPUT
+          echo "tf-file=terraform_$(date +'%Y-%m-%d_%H-%M-%S').tfstate" >> $GITHUB_OUTPUT
   
   Deploy:
     needs: ["Setup"]
