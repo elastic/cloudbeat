@@ -97,22 +97,10 @@ func createFromConfig(cfg *config) error {
 	params["FleetUrl"] = cfg.FleetURL
 	params["EnrollmentToken"] = cfg.EnrollmentToken
 	params["ElasticAgentVersion"] = cfg.ElasticAgentVersion
-	params["ElasticArtifactServer"] = cfg.ElasticArtifactServer
 
 	templatePath := prodTemplatePath
-<<<<<<< HEAD
 	if cfg.Dev {
 		err := generateDevTemplate()
-=======
-	if cfg.Dev != nil {
-		modifiers := []devModifier{}
-		if cfg.Dev.AllowSSH {
-			modifiers = append(modifiers, &dev.SecurityGroupDevMod{}, &dev.Ec2KeyDevMod{})
-			params["KeyName"] = cfg.Dev.KeyName
-		}
-
-		err := generateDevTemplate(modifiers)
->>>>>>> d9dac83 (Accept ElasticArtifactServer as a CloudFormation parameter (#939))
 		if err != nil {
 			return fmt.Errorf("Could not generate dev template: %v", err)
 		}

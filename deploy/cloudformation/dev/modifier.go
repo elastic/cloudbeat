@@ -21,11 +21,17 @@
 package dev
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/awslabs/goformation/v7/cloudformation"
 	"github.com/awslabs/goformation/v7/cloudformation/ec2"
 )
 
-<<<<<<< HEAD
 type ArtifactUrlDevMod struct {
 	artifactUrl string
 }
@@ -123,8 +129,6 @@ func (m *ArtifactUrlDevMod) recursiveReplaceArtifactUrl(encoded *string) error {
 	return nil
 }
 
-=======
->>>>>>> d9dac83 (Accept ElasticArtifactServer as a CloudFormation parameter (#939))
 type SecurityGroupDevMod struct{}
 
 func (m *SecurityGroupDevMod) Modify(template *cloudformation.Template) error {
