@@ -28,7 +28,7 @@ jobs:
     outputs:
       stack-version: ${{ steps.set-elk-vars.outputs.stack-version }}
       ess-region: ${{ steps.set-elk-vars.outputs.ess-region }}
-      tf-state: ${{ steps.gen-tf-name.ouputs.tf-file}}
+      tf-state: ${{ steps.gen-tf-name.outputs.tf-file}}
     steps:
       - id: set-elk-vars
         if: github.event_name == 'workflow_dispatch'
@@ -40,9 +40,7 @@ jobs:
           echo "ess-region=${{ env.ESS_REGION }}" >> $GITHUB_OUTPUT
       - id: gen-tf-name
         run: |
-          output_file="terraform_ $(date +'%Y-%m-%d_%H-%M-%S').tfstate"
-          echo $output_file
-          echo "tf-file=$output_file" >> $GITHUB_OUTPUT
+          echo "tf-file=terraform_$(date +'%Y-%m-%d_%H-%M-%S').tfstate" >> $GITHUB_OUTPUT
   
   Deploy:
     needs: ["Setup"]
