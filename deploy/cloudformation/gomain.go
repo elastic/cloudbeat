@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
@@ -59,24 +58,6 @@ func createFromConfig(cfg *config) error {
 		if cfg.Dev.AllowSSH {
 			modifiers = append(modifiers, &dev.SecurityGroupDevMod{}, &dev.Ec2KeyDevMod{})
 			params["KeyName"] = cfg.Dev.KeyName
-		}
-
-		if cfg.Dev.PreRelease {
-			rawVersion := strings.TrimSuffix(cfg.ElasticAgentVersion, "-SNAPSHOT")
-			artifactModifier := &dev.ArtifactUrlDevMod{
-				Version: rawVersion,
-				Sha:     cfg.Dev.Sha,
-				UrlType: dev.StagingArtifact,
-			}
-
-			if strings.HasSuffix(cfg.ElasticAgentVersion, "-SNAPSHOT") {
-				artifactModifier.UrlType = dev.SnapshotArtifact
-			}
-
-			if cfg.Dev.Sha == "" {
-				artifactModifier.Latest = true
-			}
-			modifiers = append(modifiers, artifactModifier)
 		}
 
 		err := generateDevTemplate(modifiers)
