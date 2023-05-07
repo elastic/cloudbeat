@@ -58,9 +58,8 @@ variable "security_team_repository" {
   default = "github.com/elastic/security-team"
 }
 
-variable "deployment_name_prefix" {
-  default     = "cloudbeat-tf"
-  description = "Optional set a prefix of the deployment. Defaults to cloudbeat-tf"
+variable "deployment_name" {
+  description = "Name of the deployment. Example: `john-8-8-0bc1-7May`"
 }
 
 variable "eks_region" {
