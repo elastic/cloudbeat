@@ -84,16 +84,11 @@ jobs:
       - name: Upload tf state
         if: success()
         run: |
-          ls
           aws s3 cp "${{ env.TF_STATE_FILE }}" "s3://tf-state-bucket-test-infra/${{ env.TF_STATE_FILE }}"
-        # if: success()
-        # uses: jakejarvis/s3-sync-action@master
-        # env:
-        #   AWS_S3_BUCKET: "tf-state-bucket-test-infra"
-        #   SOURCE_DIR: "${{env.WORKING_DIR}}"
-        # with:
-        #   args: --acl private --exclude '*' --include '*.tfstate'
 
+      # Placeholder action that need to be replaced by the following:
+      # Additional deployment EC2 / K8s
+      # Tests execution
       - name: Sleep action
         if: success()
         run: |
