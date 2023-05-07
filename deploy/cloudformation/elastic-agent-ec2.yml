@@ -23,6 +23,7 @@ Parameters:
   ElasticArtifactServer:
     Type: String
     Description: The URL of the artifact server
+    Default: https://artifacts.elastic.co/downloads/beats/elastic-agent
   ElasticAgentVersion:
     Type: String
     Description: The version of elastic-agent to install
