@@ -180,7 +180,7 @@ pipeline {
 
                   dir("${BASE_DIR}"){
                     withMageEnv(){
-                      sh(label: 'Build packages', script: './.ci/scripts/package.sh')
+                        sh(label: 'Build packages', script: './.ci/scripts/package.sh')
                     }
                   }
                 }
