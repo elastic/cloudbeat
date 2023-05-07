@@ -25,12 +25,13 @@ import (
 )
 
 type EBSSnapshot struct {
-	Instance   Ec2Instance
-	SnapshotId string
-	State      types.SnapshotState
-	Region     string
-	awsAccount string
-	VolumeSize int
+	Instance    Ec2Instance
+	SnapshotId  string
+	State       types.SnapshotState
+	Region      string
+	awsAccount  string
+	VolumeSize  int
+	IsEncrypted bool
 }
 
 func (e EBSSnapshot) GetResourceArn() string {
@@ -49,22 +50,24 @@ func (e EBSSnapshot) GetResourceType() string {
 
 func FromSnapshotInfo(snapshot types.SnapshotInfo, region string, awsAccount string, ins Ec2Instance) EBSSnapshot {
 	return EBSSnapshot{
-		SnapshotId: *snapshot.SnapshotId,
-		State:      snapshot.State,
-		Region:     region,
-		awsAccount: awsAccount,
-		VolumeSize: int(*snapshot.VolumeSize),
-		Instance:   ins,
+		Instance:    ins,
+		SnapshotId:  *snapshot.SnapshotId,
+		State:       snapshot.State,
+		Region:      region,
+		awsAccount:  awsAccount,
+		VolumeSize:  int(*snapshot.VolumeSize),
+		IsEncrypted: *snapshot.Encrypted,
 	}
 }
 
 func FromSnapshot(snapshot types.Snapshot, region string, awsAccount string, ins Ec2Instance) EBSSnapshot {
 	return EBSSnapshot{
-		SnapshotId: *snapshot.SnapshotId,
-		State:      snapshot.State,
-		Region:     region,
-		awsAccount: awsAccount,
-		VolumeSize: int(*snapshot.VolumeSize),
-		Instance:   ins,
+		SnapshotId:  *snapshot.SnapshotId,
+		State:       snapshot.State,
+		Region:      region,
+		awsAccount:  awsAccount,
+		VolumeSize:  int(*snapshot.VolumeSize),
+		Instance:    ins,
+		IsEncrypted: *snapshot.Encrypted,
 	}
 }
