@@ -5,6 +5,11 @@ variable "ec_api_key" {
   type        = string
 }
 
+variable "endpoint" {
+  description = "ESS endpoint"
+  type        = string
+}
+
 variable "ess_region" {
   default     = "gcp-us-central1"
   description = "Optional ESS region where the deployment will be created. Defaults to gcp-us-west2"

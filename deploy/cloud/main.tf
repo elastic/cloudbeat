@@ -1,5 +1,6 @@
 provider "ec" {
   apikey = var.ec_api_key
+  endpoint = var.endpoint
 }
 
 module "ec_deployment" {
@@ -28,7 +29,7 @@ module "eks" {
   source = "./modules/provision-eks-cluster"
 
   region              = var.eks_region
-  cluster_name_prefix = "${var.deployment_name_prefix}-${random_string.suffix.result}"
+  cluster_name_prefix = "${var.deployment_name_prefix}"
 }
 
 # Retrieve EKS cluster information
