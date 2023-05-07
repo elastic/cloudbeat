@@ -30,7 +30,12 @@ import (
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation/types"
-	"github.com/elastic/cloudbeat/deploy/cloudformation/dev"
+	"github.com/mikefarah/yq/v4/pkg/yqlib"
+)
+
+const (
+	prodTemplatePath = "elastic-agent-ec2.yml"
+	devTemplatePath  = "elastic-agent-ec2-dev.yml"
 )
 
 func main() {
@@ -51,17 +56,20 @@ func createFromConfig(cfg *config) error {
 	params["FleetUrl"] = cfg.FleetURL
 	params["EnrollmentToken"] = cfg.EnrollmentToken
 	params["ElasticAgentVersion"] = cfg.ElasticAgentVersion
-	params["ElasticArtifactServer"] = cfg.ElasticArtifactServer
+
+	if cfg.ElasticArtifactServer != nil {
+		params["ElasticArtifactServer"] = *cfg.ElasticArtifactServer
+	}
+
+	if cfg.IntegrationType != nil {
+		params["Integration"] = *cfg.IntegrationType
+	}
 
 	templatePath := prodTemplatePath
-	if cfg.Dev != nil {
-		modifiers := []devModifier{}
-		if cfg.Dev.AllowSSH {
-			modifiers = append(modifiers, &dev.SecurityGroupDevMod{}, &dev.Ec2KeyDevMod{})
-			params["KeyName"] = cfg.Dev.KeyName
-		}
+	if cfg.Dev != nil && cfg.Dev.AllowSSH {
+		params["KeyName"] = cfg.Dev.KeyName
 
-		err := generateDevTemplate(modifiers)
+		err := generateDevTemplate()
 		if err != nil {
 			return fmt.Errorf("could not generate dev template: %v", err)
 		}
@@ -74,6 +82,55 @@ func createFromConfig(cfg *config) error {
 	}
 
 	return nil
+}
+
+func generateDevTemplate() (err error) {
+	const yqExpression = `
+.Parameters.KeyName = {
+	"Description": "SSH Keypair to login to the instance",
+	"Type": "AWS::EC2::KeyPair::KeyName"
+} |
+.Resources.ElasticAgentEc2Instance.Properties.KeyName = { "Ref": "KeyName" } |
+.Resources.ElasticAgentSecurityGroup.Properties.GroupDescription = "Allow SSH from anywhere" |
+.Resources.ElasticAgentSecurityGroup.Properties.SecurityGroupIngress += {
+	"CidrIp": "0.0.0.0/0",
+	"FromPort": 22,
+	"IpProtocol": "tcp",
+	"ToPort": 22
+}
+`
+	inputBytes, err := os.ReadFile(prodTemplatePath)
+	if err != nil {
+		return err
+	}
+
+	generatedTemplateString, err := yqlib.NewStringEvaluator().Evaluate(
+		yqExpression,
+		string(inputBytes),
+		yqlib.NewYamlEncoder(2, false, yqlib.NewDefaultYamlPreferences()),
+		yqlib.NewYamlDecoder(yqlib.NewDefaultYamlPreferences()),
+	)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(devTemplatePath)
+	if err != nil {
+		return err
+	}
+	defer func(f *os.File) {
+		closeErr := f.Close()
+		if closeErr != nil && err == nil {
+			err = fmt.Errorf("failed to close file: %w", closeErr)
+		}
+	}(f)
+
+	_, err = f.Write([]byte(generatedTemplateString))
+	if err != nil {
+		return fmt.Errorf("failed to write to dev template: %w", err)
+	}
+
+	return
 }
 
 func createStack(stackName string, templatePath string, params map[string]string) error {
@@ -94,15 +151,14 @@ func createStack(stackName string, templatePath string, params map[string]string
 		cfParams = append(cfParams, p)
 	}
 
-	file, err := os.ReadFile(templatePath)
+	bodyBytes, err := os.ReadFile(templatePath)
 	if err != nil {
 		return fmt.Errorf("failed to open template file: %v", err)
 	}
-	filestring := string(file)
 
 	createStackInput := &cloudformation.CreateStackInput{
 		StackName:    &stackName,
-		TemplateBody: &filestring,
+		TemplateBody: aws.String(string(bodyBytes)),
 		Parameters:   cfParams,
 		Capabilities: []types.Capability{types.CapabilityCapabilityNamedIam},
 	}

@@ -31,11 +31,11 @@ eks.current_config = os.getenv("EKS_CONFIG", "test-eks-config-1")
 eks.config_1 = os.getenv("EKS_CONFIG_1", "test-eks-config-1")
 eks.config_1_node_1 = os.getenv(
     "EKS_CONFIG_1_NODE_1",
-    "ip-192-168-57-173.eu-west-2.compute.internal",
+    "ip-192-168-15-75.eu-west-2.compute.internal",
 )
 eks.config_1_node_2 = os.getenv(
     "EKS_CONFIG_1_NODE_2",
-    "ip-192-168-83-229.eu-west-2.compute.internal",
+    "ip-192-168-38-87.eu-west-2.compute.internal",
 )
 eks.config_2 = os.getenv("EKS_CONFIG_2", "test-eks-config-2")
 eks.config_2_node_1 = os.getenv(

@@ -22,6 +22,7 @@ spec:
       repository: elastic/cloudbeat
       pipeline_file: ".buildkite/pipeline.yml"
       teams:
-        cloud-security-posture: {}
+        cloud-security-posture:
+          access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY

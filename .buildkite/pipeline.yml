@@ -1,45 +1,35 @@
+env:
+  BRANCH: "${BUILDKITE_BRANCH}"
 agents:
-  image: "golang:1.20"
-  cpu: "4"
-  ephemeralStorage: "20G"
-  memory: "2G"
+  provider: "gcp" # needed for running docker commands
 
 steps:
-  - label: ":rocket: Checkout"
-    command:
-      - rm -rf $BUILDKITE_BUILD_CHECKOUT_PATH
-      - git clone git@github.com:elastic/cloudbeat.git $BUILDKITE_BUILD_CHECKOUT_PATH
-      - cd $BUILDKITE_BUILD_CHECKOUT_PATH
-      - git checkout $BUILDKITE_COMMIT
-  - label: ":whale: Docker login"
-    depends_on: ":rocket: Checkout"
-    command: .buildkite/docker-login.sh
+  - label: ":package: Package Cloudbeat - Snapshot"
+    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
     env:
-      DOCKER_REGISTRY_VAULT_PATH: "secret/ci/cloudbeat/docker-registry"
-  - label: ":package: Package & Publish"
-    depends_on: ":whale: Docker login"
+      WORKFLOW: "snapshot"
+    key: "package-snapshot"
+    command: "./.buildkite/scripts/package.sh"
+    artifact_paths: "build/distributions/*"
+
+  - label: ":rocket: Publishing Snapshot DRA artifacts"
+    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+    depends_on: "package-snapshot"
+    command: "./.buildkite/scripts/publish.sh"
     env:
-      REPO: "cloudbeat"
-      BASE_DIR: "$BUILDKITE_BUILD_CHECKOUT_PATH/src/github.com/elastic/${env.REPO}"
-      WORKFLOW: "${BUILDKITE_PIPELINE_SLUG}-${BUILDKITE_BRANCH}"
-    branches: "*"
-    steps:
-      - label: ":package: Package Snapshot"
-        command:
-          - cd $BUILDKITE_BUILD_CHECKOUT_PATH
-          - ../ci/scripts/package.sh
-      - label: ":gcloud: Upload DRA artifacts to GCS"
-        depends_on: ":package: Package Snapshot"
-        plugins:
-          - google-cloud-sdk#v0.1.5:
-              credentials: ${JOB_GCS_CREDENTIALS}
-        env:
-          BUCKET_URI: ${if isPR then "gs://${JOB_GCS_BUCKET}/cloudbeat/pull-requests/pr-${CHANGE_ID}" else "gs://${JOB_GCS_BUCKET}/cloudbeat/snapshots"}
-        steps:
-          command:
-            - cd $BUILDKITE_BUILD_CHECKOUT_PATH
-#            - 'buildkite-agent artifact download "build/distributions/*" .'
-            # Upload files to Google Cloud Storage
-            - gsutil cp -r ${BASE_DIR}/build/distributions/* gs://${BUCKET_URI}/${BASE_DIR}/build/distributions/
-        agents:
-          provider: gcp
+      WORKFLOW: "snapshot"
+
+  - label: ":package: Package Cloudbeat - Staging"
+    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+    env:
+      WORKFLOW: "staging"
+    key: "package-staging"
+    command: "./.buildkite/scripts/package.sh"
+    artifact_paths: "build/distributions/*"
+
+  - label: ":rocket: Publishing Staging DRA artifacts"
+    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+    depends_on: "package-staging"
+    command: "./.buildkite/scripts/publish.sh"
+    env:
+      WORKFLOW: "staging"
