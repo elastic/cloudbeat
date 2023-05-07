@@ -29,7 +29,7 @@ module "eks" {
   source = "./modules/provision-eks-cluster"
 
   region              = var.eks_region
-  cluster_name_prefix = "${var.deployment_name_prefix}"
+  cluster_name_prefix = "${var.deployment_name_prefix}-${random_string.suffix.result}"
 }
 
 # Retrieve EKS cluster information
