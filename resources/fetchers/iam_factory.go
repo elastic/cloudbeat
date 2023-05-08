@@ -36,13 +36,13 @@ import (
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.IAMType, &IAMFactory{
 		IdentityProvider:   awslib.GetIdentityClient,
-		CrossRegionFactory: &awslib.MultiRegionClientFactory[iam.AccessAnalyzer]{},
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{},
 	})
 }
 
 type IAMFactory struct {
 	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
-	CrossRegionFactory awslib.CrossRegionFactory[iam.AccessAnalyzer]
+	CrossRegionFactory awslib.CrossRegionFactory[iam.AccessAnalyzerClient]
 }
 
 func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
