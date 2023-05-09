@@ -87,28 +87,30 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 	}
 
 	for _, test := range tests {
-		rdsFetcherCfg := RdsFetcherConfig{
-			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-		}
+		s.Run(test.name, func() {
+			rdsFetcherCfg := RdsFetcherConfig{
+				AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
+			}
 
-		m := &rds.MockRds{}
-		for fn, rdsMocksReturnVals := range test.rdsMocksReturnVals {
-			m.On(fn, mock.Anything).Return(rdsMocksReturnVals...)
-		}
+			m := &rds.MockRds{}
+			for fn, rdsMocksReturnVals := range test.rdsMocksReturnVals {
+				m.On(fn, mock.Anything).Return(rdsMocksReturnVals...)
+			}
 
-		rdsFetcher := RdsFetcher{
-			log:        s.log,
-			cfg:        rdsFetcherCfg,
-			resourceCh: s.resourceCh,
-			provider:   m,
-		}
+			rdsFetcher := RdsFetcher{
+				log:        s.log,
+				cfg:        rdsFetcherCfg,
+				resourceCh: s.resourceCh,
+				provider:   m,
+			}
 
-		ctx := context.Background()
+			ctx := context.Background()
 
-		err := rdsFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		s.NoError(err)
+			err := rdsFetcher.Fetch(ctx, fetching.CycleMetadata{})
+			s.NoError(err)
 
-		results := testhelper.CollectResources(s.resourceCh)
-		s.ElementsMatch(test.expected, results)
+			results := testhelper.CollectResources(s.resourceCh)
+			s.ElementsMatch(test.expected, results)
+		})
 	}
 }
