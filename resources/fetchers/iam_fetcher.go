@@ -72,13 +72,6 @@ func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata)
 		iamResources = append(iamResources, policies...)
 	}
 
-	supportPolicy, err := f.iamProvider.GetSupportPolicy(ctx)
-	if err != nil {
-		f.log.Errorf("Unable to fetch AWS Support Policy, error: %v", err)
-	} else {
-		iamResources = append(iamResources, supportPolicy)
-	}
-
 	serverCertificates, err := f.iamProvider.ListServerCertificates(ctx)
 	if err != nil {
 		f.log.Errorf("Unable to fetch IAM server certificates, error: %v", err)

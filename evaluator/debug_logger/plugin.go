@@ -38,16 +38,16 @@ type plugin struct {
 	config  config
 }
 
-func (p *plugin) Start(ctx context.Context) error {
+func (p *plugin) Start(_ context.Context) error {
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateOK})
 	return nil
 }
 
-func (p *plugin) Stop(ctx context.Context) {
+func (p *plugin) Stop(_ context.Context) {
 	p.manager.UpdatePluginStatus(PluginName, &plugins.Status{State: plugins.StateNotReady})
 }
 
-func (p *plugin) Reconfigure(ctx context.Context, conf interface{}) {
+func (p *plugin) Reconfigure(_ context.Context, conf interface{}) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 	p.config = conf.(config)
@@ -55,7 +55,7 @@ func (p *plugin) Reconfigure(ctx context.Context, conf interface{}) {
 
 // Log is called by the decision logger when a record (event) should be emitted. The logs.EventV1 fields
 // map 1:1 to those described in https://www.openpolicyagent.org/docs/latest/management-decision-logs
-func (p *plugin) Log(ctx context.Context, event logs.EventV1) error {
+func (p *plugin) Log(_ context.Context, event logs.EventV1) error {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 

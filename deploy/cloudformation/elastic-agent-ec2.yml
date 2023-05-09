@@ -8,17 +8,22 @@ Parameters:
     Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
   InstanceType:
     Type: String
-    Default: a1.2xlarge
+    Default: c6g.xlarge
     AllowedValues:
-    - a1.2xlarge
-    - a1.4xlarge
+    - c6g.xlarge
+    - c6g.2xlarge
+    - c6g.4xlarge
     Description: The type of EC2 instance to create
   EnrollmentToken:
     Type: String
-    Description: The enrollment token of elasitc-agent
+    Description: The enrollment token of elastic-agent
   FleetUrl:
     Type: String
     Description: The fleet URL of elastic-agent
+  ElasticArtifactServer:
+    Type: String
+    Description: The URL of the artifact server
+    Default: https://artifacts.elastic.co/downloads/beats/elastic-agent
   ElasticAgentVersion:
     Type: String
     Description: The version of elastic-agent to install
@@ -123,9 +128,10 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash
-            curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/${ElasticAgentVersion}.tar.gz
-            tar xzvf ${ElasticAgentVersion}.tar.gz
-            cd ${ElasticAgentVersion}
+            ElasticAgentArtifact=elastic-agent-${ElasticAgentVersion}-linux-arm64
+            curl -L -O ${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz
+            tar xzvf $ElasticAgentArtifact.tar.gz
+            cd $ElasticAgentArtifact
             sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken}
 
 Outputs:

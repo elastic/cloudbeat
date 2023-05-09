@@ -30,17 +30,8 @@ import (
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation/types"
-	"github.com/spf13/viper"
+	"github.com/elastic/cloudbeat/deploy/cloudformation/dev"
 )
-
-type config struct {
-	StackName           string `mapstructure:"STACK_NAME"`
-	FleetURL            string `mapstructure:"FLEET_URL"`
-	EnrollmentToken     string `mapstructure:"ENROLLMENT_TOKEN"`
-	ElasticAgentVersion string `mapstructure:"ELASTIC_AGENT_VERSION"`
-	Dev                 bool   `mapstructure:"DEV"`
-	KeyName             string `mapstructure:"KEY_NAME"`
-}
 
 func main() {
 	cfg, err := parseConfig()
@@ -54,63 +45,32 @@ func main() {
 	}
 }
 
-func parseConfig() (*config, error) {
-	viper.SetConfigFile(".env")
-	viper.AutomaticEnv()
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, fmt.Errorf("failed to read configuration: %v", err)
-	}
-
-	var cfg config
-	err = viper.Unmarshal(&cfg)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal configuration file: %v", err)
-	}
-
-	if cfg.StackName == "" {
-		return nil, fmt.Errorf("Missing required flag: -stack-name")
-	}
-
-	if cfg.FleetURL == "" {
-		return nil, fmt.Errorf("Missing required flag: -fleet-url")
-	}
-
-	if cfg.EnrollmentToken == "" {
-		return nil, fmt.Errorf("Missing required flag: -enrollment-token")
-	}
-
-	if cfg.Dev && cfg.KeyName == "" {
-		return nil, fmt.Errorf("Missing required flag for development mode: -key-name")
-	}
-
-	if cfg.ElasticAgentVersion == "" {
-		cfg.ElasticAgentVersion = "elastic-agent-8.8.0-SNAPSHOT-linux-arm64"
-	}
-
-	return &cfg, nil
-}
-
 func createFromConfig(cfg *config) error {
 	params := map[string]string{}
 
 	params["FleetUrl"] = cfg.FleetURL
 	params["EnrollmentToken"] = cfg.EnrollmentToken
 	params["ElasticAgentVersion"] = cfg.ElasticAgentVersion
+	params["ElasticArtifactServer"] = cfg.ElasticArtifactServer
 
 	templatePath := prodTemplatePath
-	if cfg.Dev {
-		err := generateDevTemplate()
+	if cfg.Dev != nil {
+		modifiers := []devModifier{}
+		if cfg.Dev.AllowSSH {
+			modifiers = append(modifiers, &dev.SecurityGroupDevMod{}, &dev.Ec2KeyDevMod{})
+			params["KeyName"] = cfg.Dev.KeyName
+		}
+
+		err := generateDevTemplate(modifiers)
 		if err != nil {
-			return fmt.Errorf("Could not generate dev template: %v", err)
+			return fmt.Errorf("could not generate dev template: %v", err)
 		}
 		templatePath = devTemplatePath
-		params["KeyName"] = cfg.KeyName
 	}
 
 	err := createStack(cfg.StackName, templatePath, params)
 	if err != nil {
-		return fmt.Errorf("Failed to create CloudFormation stack: %v", err)
+		return fmt.Errorf("failed to create CloudFormation stack: %v", err)
 	}
 
 	return nil
@@ -121,7 +81,7 @@ func createStack(stackName string, templatePath string, params map[string]string
 
 	cfg, err := awsConfig.LoadDefaultConfig(ctx)
 	if err != nil {
-		return fmt.Errorf("Failed to load AWS SDK config: %v", err)
+		return fmt.Errorf("failed to load AWS SDK config: %v", err)
 	}
 
 	svc := cloudformation.NewFromConfig(cfg)
@@ -136,7 +96,7 @@ func createStack(stackName string, templatePath string, params map[string]string
 
 	file, err := os.ReadFile(templatePath)
 	if err != nil {
-		return fmt.Errorf("Failed to open template file: %v", err)
+		return fmt.Errorf("failed to open template file: %v", err)
 	}
 	filestring := string(file)
 
@@ -149,7 +109,7 @@ func createStack(stackName string, templatePath string, params map[string]string
 
 	stackOutput, err := svc.CreateStack(ctx, createStackInput)
 	if err != nil {
-		return fmt.Errorf("Failed to call AWS CloudFormation CreateStack: %v", err)
+		return fmt.Errorf("failed to call AWS CloudFormation CreateStack: %v", err)
 	}
 
 	log.Printf("Created stack %s", *stackOutput.StackId)

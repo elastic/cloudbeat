@@ -19,9 +19,9 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -31,42 +31,34 @@ var (
 )
 
 func TestStep(t *testing.T) {
-	type args struct {
-		inputChannel chan int
-		fn           func(context.Context, int) (float64, error)
-		val          int
-	}
 	tests := []struct {
-		name string
-		args args
-		want int
+		name    string
+		fn      func(context.Context, int) (float64, error)
+		input   int
+		wantLen int
 	}{
 		{
-			name: "Should receive value from output channel",
-			args: args{
-				inputChannel: make(chan int),
-				fn:           func(context context.Context, i int) (float64, error) { return float64(i), nil },
-				val:          1,
-			},
-			want: 1,
+			name:    "Should receive value from output channel",
+			fn:      func(context context.Context, i int) (float64, error) { return float64(i), nil },
+			input:   1,
+			wantLen: 1,
 		},
 		{
-			name: "Pipeline function returns error - no value received",
-			args: args{
-				inputChannel: make(chan int),
-				fn:           func(context context.Context, i int) (float64, error) { return 0, errors.New("") },
-				val:          1,
-			},
-			want: 0,
+			name:    "Pipeline function returns error - no value received",
+			fn:      func(context context.Context, i int) (float64, error) { return 0, errors.New("some error") },
+			input:   2,
+			wantLen: 0,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			outCh := Step(log, tt.args.inputChannel, tt.args.fn)
-			tt.args.inputChannel <- tt.args.val
-			results := testhelper.CollectResources(outCh)
+			inputChannel := make(chan int)
+			outCh := Step(log, inputChannel, tt.fn)
+			inputChannel <- tt.input
+			close(inputChannel)
 
-			assert.Equal(t, tt.want, len(results))
+			results := testhelper.CollectResourcesBlocking(outCh)
+			assert.Equal(t, tt.wantLen, len(results))
 		})
 	}
 }
