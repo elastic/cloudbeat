@@ -100,9 +100,9 @@ For example, to deploy `8.6.0-SNAPSHOT` use
 
 ## Named environment
 
-To give your environment a different prefix in the name use
+To give your environment a name in advance use:
 
-`terraform apply --auto-approve -var="deployment_name_prefix=elastic-deployment"`
+`terraform apply --auto-approve -var="deployment_name=john-8-8-0bc1-30Apr"`
 
 ## Deploy specific resources
 
