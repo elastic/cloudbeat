@@ -472,8 +472,6 @@ github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.16.0 h1:rPv8ZiaTIwLp4JOCQ
 github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.16.0/go.mod h1:l5+hat25VFsG9jpsXrtEYqw6Ih3pLaC5I4+8hrng7F4=
 github.com/aws/aws-sdk-go-v2/service/autoscaling v1.24.4 h1:UFY/jik4/RIejnc4Qfi+AxYAs/ZIoLlKVIt7s/iqQR4=
 github.com/aws/aws-sdk-go-v2/service/autoscaling v1.24.4/go.mod h1:uPC6MoUg0E5P19+yoXB//OnQGMUApXmu8Z2Gqo+h/bk=
-github.com/aws/aws-sdk-go-v2/service/cloudformation v1.27.2 h1:Mlq4Uch64Z7TdoXpc1KCCl4YG/wL8lRYoBRLJ0jm1RU=
-github.com/aws/aws-sdk-go-v2/service/cloudformation v1.27.2/go.mod h1:5bNbzhJ4AzkiqlN6xlNaiLYuPMQGXzAfbK1iOVzo7iY=
 github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.24.4 h1:4n6EhYGGPyNHffNcz1glTQWa7jU5yLfCgDCb2fmXPno=
 github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.24.4/go.mod h1:qv5TNLKArfckMdJqnZ2Wy6DiZBoYbn8OXhf6Si1IUGg=
 github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.24.0 h1:U7hDPPdDP7bptV6wJ5OJkshEw8P/K2k5WCjEYlVajLw=
@@ -536,8 +534,6 @@ github.com/aws/smithy-go v1.13.3/go.mod h1:Tg+OJXh4MB2R/uN61Ko2f6hTZwB/ZYGOtib8J
 github.com/aws/smithy-go v1.13.4/go.mod h1:Tg+OJXh4MB2R/uN61Ko2f6hTZwB/ZYGOtib8J3gBHzA=
 github.com/aws/smithy-go v1.13.5 h1:hgz0X/DX0dGqTYpGALqXJoRKRj5oQ7150i5FdTePzO8=
 github.com/aws/smithy-go v1.13.5/go.mod h1:Tg+OJXh4MB2R/uN61Ko2f6hTZwB/ZYGOtib8J3gBHzA=
-github.com/awslabs/goformation/v7 v7.7.4 h1:LyxRJZaDSDLco8m5ozwEBx8xaRkpbPUzN4Bzbzehvf0=
-github.com/awslabs/goformation/v7 v7.7.4/go.mod h1:322OHH7B/bgp1KVFPDIQCTHhbrl31JHoxPEmpjLUv2Q=
 github.com/aymerick/raymond v2.0.2+incompatible/go.mod h1:osfaiScAUVup+UC9Nfq76eWqDhXlp+4UYaA8uhTBO6g=
 github.com/benbjohnson/clock v1.0.3/go.mod h1:bGMdMPoPVvcYyt1gHDf4J2KE153Yf9BuiUKYMaxlTDM=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
@@ -1775,6 +1771,7 @@ github.com/onsi/ginkgo v1.14.0/go.mod h1:iSB4RoI2tjJc9BBv4NKIKWKya62Rps+oPG/Lv9k
 github.com/onsi/ginkgo v1.16.4/go.mod h1:dX+/inL/fNMqNlz0e9LfyB9TswhZpCVdJM/Z6Vvnwo0=
 github.com/onsi/ginkgo v1.16.5 h1:8xi0RTUf59SOSfEtZMvwTvXYMzG4gV23XVHOZiXNtnE=
 github.com/onsi/ginkgo/v2 v2.9.2 h1:BA2GMJOtfGAfagzYtrAlufIP0lq6QERkFmHLMLPwFSU=
+github.com/onsi/ginkgo/v2 v2.9.2/go.mod h1:WHcJJG2dIlcCqVfBAwUCrJxSPFb6v4azBwgxeMeDuts=
 github.com/onsi/gomega v0.0.0-20151007035656-2152b45fa28a/go.mod h1:C1qb7wdrVGGVU+Z6iS04AVkA3Q65CEZX59MT0QO5uiA=
 github.com/onsi/gomega v0.0.0-20170829124025-dcabb60a477c/go.mod h1:C1qb7wdrVGGVU+Z6iS04AVkA3Q65CEZX59MT0QO5uiA=
 github.com/onsi/gomega v1.4.3/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1CpauHY=
@@ -1786,6 +1783,7 @@ github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1y
 github.com/onsi/gomega v1.10.3/go.mod h1:V9xEwhxec5O8UDM77eCW8vLymOMltsqPVYWrpDsH8xc=
 github.com/onsi/gomega v1.15.0/go.mod h1:cIuvLEne0aoVhAgh/O6ac0Op8WWw9H6eYCriF+tEHG0=
 github.com/onsi/gomega v1.27.6 h1:ENqfyGeS5AX/rlXDd/ETokDz93u0YufY1Pgxuy/PvWE=
+github.com/onsi/gomega v1.27.6/go.mod h1:PIQNjfQwkP3aQAH7lf7j87O/5FiNr+ZR8+ipb+qQlhg=
 github.com/open-policy-agent/opa v0.45.0 h1:P5nuhVRtR+e58fk3CMMbiqr6ZFyWQPNOC3otsorGsFs=
 github.com/open-policy-agent/opa v0.45.0/go.mod h1:/OnsYljNEWJ6DXeFOOnoGn8CvwZGMUS4iRqzYdJvmBI=
 github.com/opencontainers/go-digest v0.0.0-20170106003457-a6d0ee40d420/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=

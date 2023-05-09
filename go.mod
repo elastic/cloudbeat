@@ -35,12 +35,10 @@ require (
 	github.com/aquasecurity/trivy v0.41.0
 	github.com/aquasecurity/trivy-db v0.0.0-20230411140759-3c2ee2168575
 	github.com/aws/aws-sdk-go v1.44.234
-	github.com/aws/aws-sdk-go-v2/config v1.18.15
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.15
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.23
 	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.16.0
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.24.4
-	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.27.2
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.24.4
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.24.0
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.19.0
@@ -59,7 +57,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.19.0
 	github.com/aws/aws-sdk-go-v2/service/sts v1.18.7
 	github.com/aws/smithy-go v1.13.5
-	github.com/awslabs/goformation/v7 v7.7.4
 	github.com/djherbis/times v1.5.0
 	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
 	github.com/elastic/elastic-agent-autodiscover v0.5.0
@@ -71,7 +68,6 @@ require (
 	github.com/open-policy-agent/opa v0.45.0
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.37.0
-	github.com/spf13/viper v1.15.0
 	go.elastic.co/go-licence-detector v0.6.0
 	go.uber.org/goleak v1.2.1
 	golang.org/x/exp v0.0.0-20230124195608-d38c7dcee874
@@ -124,6 +120,7 @@ require (
 	github.com/aquasecurity/trivy-java-db v0.0.0-20230209231723-7cddb1406728 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.8 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.18.15 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.32 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.26 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.30 // indirect
@@ -226,6 +223,8 @@ require (
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
+	github.com/onsi/ginkgo/v2 v2.9.2 // indirect
+	github.com/onsi/gomega v1.27.6 // indirect
 	github.com/opencontainers/runc v1.1.5 // indirect
 	github.com/opencontainers/runtime-spec v1.1.0-rc.1 // indirect
 	github.com/opencontainers/selinux v1.11.0 // indirect
@@ -253,6 +252,7 @@ require (
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
+	github.com/spf13/viper v1.15.0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/tchap/go-patricia/v2 v2.3.1 // indirect
 	github.com/tetratelabs/wazero v1.0.0 // indirect

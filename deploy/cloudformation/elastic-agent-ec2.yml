@@ -28,6 +28,16 @@ Parameters:
     Type: String
     Description: The version of elastic-agent to install
 
+Conditions:
+  DevAccess:
+    Fn::Equals:
+      - Fn::Select:
+        - 0
+        - Fn::Split:
+          - "-"
+          - !Ref AWS::StackName
+      - "developeraccess"
+
 Resources:
   # Security Group for EC2 instance
   ElasticAgentSecurityGroup:
@@ -43,7 +53,14 @@ Resources:
               - '/'
               - Ref: 'AWS::StackId'
       GroupDescription: Block incoming traffic
-      SecurityGroupIngress: []
+      SecurityGroupIngress:
+        - Fn::If:
+          - DevAccess
+          - CidrIp: 0.0.0.0/0
+            FromPort: 22
+            IpProtocol: tcp
+            ToPort: 22
+          - []
 
   # IAM Role for EC2 instance
   ElasticAgentRole:
@@ -121,6 +138,11 @@ Resources:
           Value: Vulnerability Management Scanner
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
+      KeyName:
+        Fn::If:
+          - DevAccess
+          - !Ref AWS::StackName
+          - !Ref AWS::NoValue
       IamInstanceProfile: !Ref ElasticAgentInstanceProfile
       SecurityGroupIds:
         - !Ref ElasticAgentSecurityGroup

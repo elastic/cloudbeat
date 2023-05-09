@@ -120,7 +120,10 @@ logs-cloudbeat:
   kubectl logs -f "${CLOUDBEAT_POD}" -n kube-system
 
 deploy-cloudformation:
-  cd deploy/cloudformation && go run .
+  cd deploy/cloudformation && ./create-stack.sh
+
+delete-cloudformation:
+  cd deploy/cloudformation && ./create-stack.sh delete
 
 build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v
