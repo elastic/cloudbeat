@@ -9,7 +9,7 @@ module "ec_deployment" {
   stack_version = var.stack_version
 
   deployment_template    = var.deployment_template
-  deployment_name_prefix = "${var.deployment_name_prefix}-${random_string.suffix.result}"
+  deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
 
   integrations_server = true
 
@@ -27,8 +27,8 @@ module "ec_deployment" {
 module "eks" {
   source = "./modules/provision-eks-cluster"
 
-  region              = var.eks_region
-  cluster_name_prefix = "${var.deployment_name_prefix}-${random_string.suffix.result}"
+  region       = var.eks_region
+  cluster_name = var.deployment_name
 }
 
 # Retrieve EKS cluster information
@@ -45,7 +45,7 @@ module "iam_eks_role" {
   depends_on             = [module.eks]
   allow_self_assume_role = true
 
-  role_name = "cloudbeat-tf-${random_string.suffix.result}"
+  role_name = "Role-${var.deployment_name}-${random_string.suffix.result}"
 
   role_policy_arns = {
     Developers_eks = "arn:aws:iam::704479110758:policy/Developers_eks"
