@@ -54,6 +54,15 @@ repos:
           --diff,
         ]
 
+  - repo: local
+    hooks:
+      - id: yq
+        name: format with yq
+        entry: yq
+        language: system
+        args: [ -i ]
+        files: deploy/cloudformation/elastic-agent-ec2.yml
+
   - repo: https://github.com/awslabs/cfn-python-lint
     rev: v0.77.5
     hooks:

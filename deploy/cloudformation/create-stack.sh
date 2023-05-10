@@ -8,30 +8,28 @@ function die() {
     exit "$code"
 }
 
-function setup_key() {
-    key_name="$STACK_NAME"
-
-    if ! key_output=$(aws ec2 describe-key-pairs --key-name "$key_name" 2>&1); then
-        echo "$key_output" | grep InvalidKeyPair.NotFound &>/dev/null || {
-            die "Unexpected aws error: $key_output" 1;
-        } || exit 1
-
-        output="$HOME/.ssh/$key_name"
-        [[ -f "$output" ]] && die "local file $output already exists, refusing to overwrite, run: rm -f $output"
-        echo "Creating key $output"
-
-        mkdir -p ~/.ssh
-        aws ec2 create-key-pair --key-name "$key_name" --query 'KeyMaterial' --output text > "$output"
-        chmod 0400 "$output"
-    else
-        echo "Re-using existing key $key_name"
-        return 0
-    fi
+function generate_dev_yml() {
+    yq '
+        .Parameters.KeyName = {
+            "Description": "SSH Keypair to login to the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        } |
+        .Resources.ElasticAgentEc2Instance.Properties.KeyName = { "Ref": "KeyName" } |
+        .Resources.ElasticAgentSecurityGroup.Properties.GroupDescription = "Allow SSH from anywhere" |
+        .Resources.ElasticAgentSecurityGroup.Properties.SecurityGroupIngress += {
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": 22,
+            "IpProtocol": "tcp",
+            "ToPort": 22
+        }
+    ' "$yml_file" > elastic-agent-ec2-dev.yml
 }
 
 if [[ ! -f .env ]]; then
     die 'Missing .env file, see README.md'
 fi
+
+yml_file='elastic-agent-ec2.yml'
 
 # shellcheck disable=SC2046 # Intended splitting of .env arguments
 export $(sed 's/#.*//g' .env| xargs)
@@ -43,10 +41,14 @@ declare -a parameters
 [[ -z "${ELASTIC_AGENT_VERSION-}" ]] && die 'Missing ELASTIC_AGENT_VERSION variable' || parameters+=("ParameterKey=ElasticAgentVersion,ParameterValue=$ELASTIC_AGENT_VERSION")
 # optional parameter
 [[ -z "${ELASTIC_ARTIFACT_SERVER-}" ]] || parameters+=("ParameterKey=ElasticArtifactServer,ParameterValue=$ELASTIC_ARTIFACT_SERVER")
+if [[ -n "${KEY_NAME-}" ]]; then
+    generate_dev_yml
+    parameters+=("ParameterKey=KeyName,ParameterValue=$KEY_NAME")
+    yml_file='elastic-agent-ec2-dev.yml'
+fi
 
 function create_stack() {
-    [[ "$STACK_NAME" == developeraccess-* ]] && setup_key
-    aws cloudformation create-stack --parameters "${parameters[@]}" --stack-name "$STACK_NAME" --template-body file://elastic-agent-ec2.yml --capabilities CAPABILITY_NAMED_IAM
+    aws cloudformation create-stack --parameters "${parameters[@]}" --stack-name "$STACK_NAME" --template-body file://"$yml_file" --capabilities CAPABILITY_NAMED_IAM
 }
 
 function delete_stack() {
