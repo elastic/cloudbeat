@@ -77,9 +77,3 @@ repos:
         language: system
         files: (^_meta\/.*|^cloudbeat.*yml)$
         pass_filenames: false
-
-# shell
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.2
-    hooks:
-      -   id: shellcheck
