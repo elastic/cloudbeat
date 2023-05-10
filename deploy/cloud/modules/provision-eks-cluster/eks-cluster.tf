@@ -21,7 +21,7 @@ module "eks" {
 
   eks_managed_node_groups = {
     one = {
-      name = "${var.cluster_name_prefix}-1"
+      name = "${local.cluster_name}-1"
 
       instance_types = ["t3.small"]
 
@@ -35,7 +35,7 @@ module "eks" {
     }
 
     two = {
-      name = "${var.cluster_name_prefix}-2"
+      name = "${local.cluster_name}-2"
 
       instance_types = ["t3.medium"]
 
