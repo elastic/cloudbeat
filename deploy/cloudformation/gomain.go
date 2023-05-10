@@ -22,7 +22,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -61,9 +60,6 @@ func createFromConfig(cfg *config) error {
 
 	templatePath := prodTemplatePath
 	if cfg.Dev != nil && cfg.Dev.AllowSSH {
-		if cfg.Dev.KeyName == "" {
-			return errors.New("config: ALLOW_SSH is set, KEY_NAME must also be set")
-		}
 		params["KeyName"] = cfg.Dev.KeyName
 
 		err := generateDevTemplate()
