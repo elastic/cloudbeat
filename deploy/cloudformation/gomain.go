@@ -144,15 +144,14 @@ func createStack(stackName string, templatePath string, params map[string]string
 		cfParams = append(cfParams, p)
 	}
 
-	file, err := os.ReadFile(templatePath)
+	bodyBytes, err := os.ReadFile(templatePath)
 	if err != nil {
 		return fmt.Errorf("failed to open template file: %v", err)
 	}
-	fileName := string(file)
 
 	createStackInput := &cloudformation.CreateStackInput{
 		StackName:    &stackName,
-		TemplateBody: &fileName,
+		TemplateBody: aws.String(string(bodyBytes)),
 		Parameters:   cfParams,
 		Capabilities: []types.Capability{types.CapabilityCapabilityNamedIam},
 	}
