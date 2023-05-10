@@ -11,6 +11,7 @@ repos:
       - id: check-json
       - id: check-executables-have-shebangs
       - id: trailing-whitespace
+        exclude: cloudbeat.reference.yml
 
       ## Security
       - id: detect-private-key
