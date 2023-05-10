@@ -9,6 +9,9 @@ repos:
         args: [--allow-multiple-documents, --unsafe]
         exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*)$|(^deploy/cloudformation/elastic-agent-ec2.yml)$
       - id: check-json
+      - id: check-executables-have-shebangs
+      - id: trailing-whitespace
+        exclude: cloudbeat.reference.yml
 
       ## Security
       - id: detect-private-key
@@ -52,8 +55,17 @@ repos:
           --diff,
         ]
 
+  - repo: local
+    hooks:
+      - id: yq
+        name: format with yq
+        entry: yq
+        language: system
+        args: [ -i ]
+        files: deploy/cloudformation/elastic-agent-ec2.yml
+
   - repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.77.0
+    rev: v0.77.5
     hooks:
     -   id: cfn-python-lint
         files: deploy/cloudformation/elastic-agent-ec2.yml
