@@ -18,6 +18,9 @@ CIS_1_10 = "CIS 1.10"
 CIS_1_11 = "CIS 1.11"
 CIS_1_13 = "CIS 1.13"
 CIS_1_15 = "CIS 1.15"
+CIS_1_16 = "CIS 1.16"
+CIS_1_17 = "CIS 1.17"
+CIS_1_20 = "CIS 1.20"
 ROOT_ACCOUNT = "<root_account>"
 ROOT_ACCOUNT_2 = "<root_account_2>"
 
@@ -230,6 +233,35 @@ cis_aws_iam_1_15_skip = {
     "1.15 Permissions through groups: inline policy, expect: failed": cis_aws_iam_1_15_fail,
 }
 
+cis_aws_iam_1_16 = {
+    "1.16 Built-in EC2 policy, expect: passed": EksAwsServiceCase(
+        rule_tag=CIS_1_16,
+        case_identifier="AmazonEC2FullAccess",
+        expected=RULE_PASS_STATUS,
+    ),
+    "1.16 Attached AdministratorAccess Policy, expect: failed": EksAwsServiceCase(
+        rule_tag=CIS_1_16,
+        case_identifier="AdministratorAccess",
+        expected=RULE_FAIL_STATUS,
+    ),
+}
+
+cis_aws_iam_1_17 = {
+    "1.17 Attached support access policy, expect: passed": EksAwsServiceCase(
+        rule_tag=CIS_1_17,
+        case_identifier="AWSSupportAccess",
+        expected=RULE_PASS_STATUS,
+    ),
+}
+
+cis_aws_iam_1_20 = {
+    "1.20 Valid access analyzers in all regions, expect: passed": EksAwsServiceCase(
+        rule_tag=CIS_1_20,
+        case_identifier="account-access-analyzers",
+        expected=RULE_PASS_STATUS,
+    ),
+}
+
 cis_aws_iam_cases = {
     **cis_aws_iam_1_4,
     **skip_param_case(
@@ -296,4 +328,7 @@ cis_aws_iam_cases = {
             url_link="https://github.com/elastic/security-team/issues/6204",
         ),
     ),
+    **cis_aws_iam_1_16,
+    **cis_aws_iam_1_17,
+    **cis_aws_iam_1_20,
 }
