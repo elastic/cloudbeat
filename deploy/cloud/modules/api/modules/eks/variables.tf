@@ -1,5 +1,10 @@
 ## Deployment configuration
 
+variable "fleet_url" {
+  description = "Fleet URL"
+  type        = string
+}
+
 variable "username" {
   description = "Elastic username"
   type        = string
