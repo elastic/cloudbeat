@@ -215,31 +215,33 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 	}
 
 	for _, test := range tests {
-		iamCfg := IAMFetcherConfig{
-			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-		}
+		s.Run(test.name, func() {
+			iamCfg := IAMFetcherConfig{
+				AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
+			}
 
-		iamProviderMock := &iam.MockAccessManagement{}
-		for funcName, returnVals := range test.mocksReturnVals {
-			iamProviderMock.On(funcName, context.TODO()).Return(returnVals...)
-		}
+			iamProviderMock := &iam.MockAccessManagement{}
+			for funcName, returnVals := range test.mocksReturnVals {
+				iamProviderMock.On(funcName, context.TODO()).Return(returnVals...)
+			}
 
-		iamFetcher := IAMFetcher{
-			log:         s.log,
-			iamProvider: iamProviderMock,
-			cfg:         iamCfg,
-			resourceCh:  s.resourceCh,
-			cloudIdentity: &awslib.Identity{
-				Account: &test.account,
-			},
-		}
+			iamFetcher := IAMFetcher{
+				log:         s.log,
+				iamProvider: iamProviderMock,
+				cfg:         iamCfg,
+				resourceCh:  s.resourceCh,
+				cloudIdentity: &awslib.Identity{
+					Account: &test.account,
+				},
+			}
 
-		ctx := context.Background()
+			ctx := context.Background()
 
-		err := iamFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		s.NoError(err)
+			err := iamFetcher.Fetch(ctx, fetching.CycleMetadata{})
+			s.NoError(err)
 
-		results := testhelper.CollectResources(s.resourceCh)
-		s.Equal(test.numExpectedResults, len(results))
+			results := testhelper.CollectResources(s.resourceCh)
+			s.Equal(test.numExpectedResults, len(results))
+		})
 	}
 }

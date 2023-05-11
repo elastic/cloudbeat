@@ -70,7 +70,7 @@ test:
 	$(GO) test $(GOTESTFLAGS) ./...
 
 .PHONY:
-clean: 
+clean:
 	mage clean
 
 .PHONY: PackageAgent
