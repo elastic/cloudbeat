@@ -198,9 +198,9 @@ module "apps" {
   replica_count = "5"
 }
 module "aws_ec2_with_agent" {
-  source    = "./modules/ec2"
-  providers = { aws : aws }
-  yml       = module.api.vanilla.yaml
+  source          = "./modules/ec2"
+  providers       = { aws : aws }
+  yml             = module.api.vanilla.yaml
   deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
   depends_on = [
     module.ec_deployment,

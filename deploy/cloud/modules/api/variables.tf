@@ -22,6 +22,6 @@ variable "role_arn" {
 
 variable "agent_docker_img" {
   description = "Customize agent's docker image (Optional)"
-  default = ""
-  type = string
+  default     = ""
+  type        = string
 }

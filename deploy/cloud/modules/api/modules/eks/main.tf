@@ -36,8 +36,8 @@ data "restapi_object" "enrollment_token" {
 }
 
 locals {
-  agent_policy_id          = restapi_object.agent_policy.id
-  enrollment_token         = regex("api_key:(.*\\=\\=)", data.restapi_object.enrollment_token.api_data.item)[0]
+  agent_policy_id  = restapi_object.agent_policy.id
+  enrollment_token = regex("api_key:(.*\\=\\=)", data.restapi_object.enrollment_token.api_data.item)[0]
 }
 
 data "http" "yaml" {
