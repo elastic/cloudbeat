@@ -50,7 +50,7 @@ locals {
   yaml_src                = jsondecode(data.http.yaml.response_body).item
   origin_docker_agent_img = regex("image: ([\\w\\.\\-\\/:]+)", local.yaml_src)[0]
   enrollment_token        = regex("api_key:(.*\\=\\=)", data.restapi_object.enrollment_token.api_data.item)[0]
-  docker_cmd = <<-EOT
+  docker_cmd              = <<-EOT
 sudo docker run -d --platform linux/x86_64 \
   --name cspm_aws_agent
   -e "FLEET_URL=${var.fleet_url}" \
