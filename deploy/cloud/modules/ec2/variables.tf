@@ -19,3 +19,9 @@ variable "deployment_name" {
   description = "EC2 instance name"
   type        = string
 }
+
+variable "cspm_aws_docker_cmd" {
+  default     = ""
+  description = "Optional. Docker command to enroll CSPM AWS agent"
+  type        = string
+}

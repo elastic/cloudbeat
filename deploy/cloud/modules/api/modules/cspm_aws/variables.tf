@@ -1,5 +1,10 @@
 ## Deployment configuration
 
+variable "fleet_url" {
+  description = "Fleet URL"
+  type        = string
+}
+
 variable "username" {
   description = "Elastic username"
   type        = string
@@ -24,9 +29,4 @@ variable "agent_docker_img" {
   description = "Customize agent's docker image (Optional)"
   default = ""
   type = string
-}
-
-variable "stack_version" {
-  description = "Stack version ('latest' is not supported)"
-  type        = string
 }
