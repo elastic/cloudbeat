@@ -80,5 +80,5 @@ output "cloudbeat_ssh_cmd" {
 
 output "cspm_aws_docker_cmd" {
   description = "Docker command to deploy and enroll CSPM AWS agent"
-  value       = module.api.installedCspm ? module.api.cspm_aws[0].docker_cmd : ""
+  value       = module.api.installedCspm ? module.api.cspm_aws.docker_cmd : ""
 }

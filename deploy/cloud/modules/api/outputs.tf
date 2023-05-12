@@ -7,7 +7,7 @@ output "eks" {
 }
 
 output "cspm_aws" {
-  value = module.cspm_aws
+  value = module.cspm_aws[0]
 }
 
 output "installedCspm" {
