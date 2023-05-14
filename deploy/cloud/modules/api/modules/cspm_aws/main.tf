@@ -52,7 +52,7 @@ locals {
   enrollment_token        = regex("api_key:(.*\\=\\=)", data.restapi_object.enrollment_token.api_data.item)[0]
   docker_cmd              = <<-EOT
 sudo docker run -d --platform linux/x86_64 \
-  --name cspm_aws_agent
+  --name cspm_aws_agent \
   -e "FLEET_URL=${var.fleet_url}" \
   -e "FLEET_ENROLLMENT_TOKEN=${local.enrollment_token}" \
   -e "FLEET_ENROLL=1" \
