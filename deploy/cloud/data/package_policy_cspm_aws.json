@@ -62,7 +62,6 @@
                             "type": "text"
                         },
                         "role_arn": {
-                            "value": "${role_arn}",
                             "type": "text"
                         },
                         "aws.credentials.type": {

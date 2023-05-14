@@ -54,6 +54,5 @@ module "cspm_aws" {
   username         = var.username
   password         = var.password
   uri              = var.uri
-  role_arn         = var.role_arn
   agent_docker_img = var.agent_docker_img
 }

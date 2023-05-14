@@ -21,7 +21,6 @@ resource "restapi_object" "package_policy" {
   id_attribute = "item/id"
   data = templatefile("data/package_policy_cspm_aws.json", {
     agent_policy_id = restapi_object.agent_policy.id
-    role_arn        = var.role_arn
   })
 }
 

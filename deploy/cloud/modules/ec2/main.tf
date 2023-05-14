@@ -70,6 +70,7 @@ resource "aws_instance" "cloudbeat" {
   key_name                    = aws_key_pair.generated_key.key_name
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.main.id]
+  iam_instance_profile        = "ec2-role-with-security-audit" # This is a prerequisite, role that contains the policy arn:aws:iam::aws:policy/SecurityAudit
   tags                        = local.common_tags
   connection {
     host        = self.public_ip
