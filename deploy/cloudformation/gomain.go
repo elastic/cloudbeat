@@ -61,6 +61,10 @@ func createFromConfig(cfg *config) error {
 		params["ElasticArtifactServer"] = *cfg.ElasticArtifactServer
 	}
 
+	if cfg.IntegrationType != nil {
+		params["Integration"] = *cfg.IntegrationType
+	}
+
 	templatePath := prodTemplatePath
 	if cfg.Dev != nil && cfg.Dev.AllowSSH {
 		params["KeyName"] = cfg.Dev.KeyName
