@@ -26,3 +26,42 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
+
+---
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/e57ee3bed7a6f73077a3f55a38e76e40ec87a7cf/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: deploy-test-env
+  description: Buildkite Pipeline for deploying testing environment for Cloud Security Posture products
+  links:
+    - title: Pipeline
+      url: https://buildkite.com/elastic/cloud-security-posture-deploy-test-env
+spec:
+  type: buildkite-pipeline
+  owner: group:cloud-security-posture
+  system: buildkite
+
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: cloud-security-posture-deploy-test-env
+    spec:
+      repository: elastic/cloudbeat
+      pipeline_file: ".buildkite/deploy-test-env/pipeline.yml"
+
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+
+      skip_intermediate_builds: false
+      default_branch: main
+
+      teams:
+        cloud-security-posture:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY
