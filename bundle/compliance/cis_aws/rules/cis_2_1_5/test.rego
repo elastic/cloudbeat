@@ -12,6 +12,15 @@ test_violation {
 	eval_fail with input as rule_input(true, true, false, true, true, true, false, true)
 	eval_fail with input as rule_input(true, false, true, true, true, false, true, true)
 	eval_fail with input as rule_input(false, true, true, true, false, true, true, true)
+
+	# No public access block config
+	eval_fail with input as test_data.generate_s3_bucket("Bucket", "", null, null, null, null)
+
+	# Only bucket-level public access block config
+	eval_fail with input as test_data.generate_s3_bucket("Bucket", "", null, null, test_data.generate_s3_public_access_block_configuration(true, false, true, true), null)
+
+	# Only account-level public access block config
+	eval_fail with input as test_data.generate_s3_bucket("Bucket", "", null, null, null, test_data.generate_s3_public_access_block_configuration(true, true, false, true))
 }
 
 test_pass {
@@ -19,19 +28,16 @@ test_pass {
 	eval_pass with input as rule_input(false, false, false, false, true, true, true, true)
 	eval_pass with input as rule_input(true, false, true, false, false, true, false, true)
 	eval_pass with input as rule_input(false, true, false, true, true, false, true, false)
+
+	# Only bucket-level public access block config
+	eval_pass with input as test_data.generate_s3_bucket("Bucket", "", null, null, test_data.generate_s3_public_access_block_configuration(true, true, true, true), null)
+
+	# Only account-level public access block config
+	eval_pass with input as test_data.generate_s3_bucket("Bucket", "", null, null, null, test_data.generate_s3_public_access_block_configuration(true, true, true, true))
 }
 
 test_not_evaluated {
 	not_eval with input as test_data.not_evaluated_s3_bucket
-
-	# A bucket without any public access block config
-	not_eval with input as test_data.generate_s3_bucket("Bucket", "", null, null, null, null)
-
-	# A bucket without an account-level public access block config
-	not_eval with input as test_data.generate_s3_bucket("Bucket", "", null, null, test_data.generate_s3_public_access_block_configuration(true, true, true, true), null)
-
-	# A bucket without a bucket-level public access block config
-	not_eval with input as test_data.generate_s3_bucket("Bucket", "", null, null, null, test_data.generate_s3_public_access_block_configuration(true, true, true, true))
 }
 
 rule_input(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets, account_block_public_acls, account_block_public_policy, account_ignore_public_acls, account_restrict_public_buckets) = test_data.generate_s3_bucket("Bucket", "", null, null, test_data.generate_s3_public_access_block_configuration(block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets), test_data.generate_s3_public_access_block_configuration(account_block_public_acls, account_block_public_policy, account_ignore_public_acls, account_restrict_public_buckets))
