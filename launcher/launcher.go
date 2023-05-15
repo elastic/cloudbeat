@@ -28,6 +28,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/management"
+	"github.com/elastic/cloudbeat/health"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/go-ucfg"
@@ -199,17 +200,21 @@ func (l *launcher) stopBeater() {
 // 2. The beater run has returned
 // 3. A config update received
 func (l *launcher) waitForUpdates() (*config.C, error) {
-	select {
-	case err := <-l.beaterErr:
-		return nil, err
+	for {
+		select {
+		case err := <-l.beaterErr:
+			return nil, err
 
-	case update, ok := <-l.reloader.Channel():
-		if !ok {
-			return nil, fmt.Errorf("reloader channel unexpectedly closed")
+		case update, ok := <-l.reloader.Channel():
+			if !ok {
+				return nil, fmt.Errorf("reloader channel unexpectedly closed")
+			}
+
+			l.log.Infof("Launcher will restart %s to apply the configuration update", l.name)
+			return update, nil
+		case err := <-health.Reporter.Channel():
+			l.beat.Manager.UpdateStatus(management.Degraded, err.Error())
 		}
-
-		l.log.Infof("Launcher will restart %s to apply the configuration update", l.name)
-		return update, nil
 	}
 }
 
