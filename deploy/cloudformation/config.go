@@ -30,7 +30,7 @@ type config struct {
 	StackName             string     `mapstructure:"STACK_NAME"`
 	FleetURL              string     `mapstructure:"FLEET_URL"`
 	EnrollmentToken       string     `mapstructure:"ENROLLMENT_TOKEN"`
-	ElasticArtifactServer string     `mapstructure:"ELASTIC_ARTIFACT_SERVER"`
+	ElasticArtifactServer *string    `mapstructure:"ELASTIC_ARTIFACT_SERVER"`
 	ElasticAgentVersion   string     `mapstructure:"ELASTIC_AGENT_VERSION"`
 	IntegrationType       *string    `mapstructure:"INTEGRATION"`
 	Dev                   *devConfig `mapstructure:"DEV"`
