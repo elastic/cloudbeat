@@ -216,7 +216,7 @@ jobs:
 
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@v2.2.3
+        uses: andrcuns/allure-publish-action@v2.3.0
         with:
           storageType: s3
           resultsGlob: "tests/allure/results/*"
