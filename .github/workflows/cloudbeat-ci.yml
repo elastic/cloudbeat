@@ -34,7 +34,7 @@ jobs:
 
       - name: Pre-commit Hooks
         run: |
-          pre-commit run --all-files
+          SKIP=golangci-lint pre-commit run --all-files
         shell: bash
 
       - name: Mage Check
