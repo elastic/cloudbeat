@@ -29,6 +29,8 @@ type StatusReporter interface {
 	UpdateStatus(status management.Status, msg string)
 }
 
+// Every package can report its health status by calling NewHealth.
+// Launcher will listen to the channel and report the status to the fleet server.
 var Reporter = &reporter{
 	ch:     make(chan error, 1),
 	errors: map[string]error{},

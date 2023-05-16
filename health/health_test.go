@@ -22,10 +22,30 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"go.uber.org/goleak"
 )
 
-func TestNewHealth(t *testing.T) {
+type HealthTestSuite struct {
+	suite.Suite
+
+	opts goleak.Option
+}
+
+func TestHealthTestSuite(t *testing.T) {
+	s := new(HealthTestSuite)
+
+	s.opts = goleak.IgnoreCurrent()
+	suite.Run(t, s)
+}
+
+func (s *HealthTestSuite) TearDownTest() {
+	// Verify no goroutines are leaking. Safest to keep this on top of the function.
+	// Go defers are implemented as a LIFO stack. This should be the last one to run.
+	goleak.VerifyNone(s.T(), s.opts)
+}
+
+func (s *HealthTestSuite) TestNewHealth() {
 	r := &reporter{
 		ch:     make(chan error, 1),
 		errors: make(map[string]error),
@@ -65,12 +85,54 @@ func TestNewHealth(t *testing.T) {
 
 	for _, e := range events {
 		r.NewHealth(e.component, e.err)
-		err := <-r.ch
+		<-r.ch
+		err := r.getHealth()
 		if e.wantErr {
-			assert.Error(t, err)
+			s.Error(err)
 			fmt.Println(err)
 		} else {
-			assert.NoError(t, err)
+			s.NoError(err)
 		}
+	}
+}
+
+func (s *HealthTestSuite) TestParallelNewHealth() {
+	r := &reporter{
+		ch:     make(chan error),
+		errors: make(map[string]error),
+	}
+
+	events := []struct {
+		component string
+		err       error
+	}{
+		{
+			component: "component1",
+			err:       nil,
+		},
+		{
+			component: "component1",
+			err:       errors.New("went wrong"),
+		},
+		{
+			component: "component1",
+			err:       errors.New("component went wrong"),
+		},
+		{
+			component: "component1",
+			err:       nil,
+		},
+		{
+			component: "component1",
+			err:       errors.New("some error"),
+		},
+	}
+
+	for _, e := range events {
+		go r.NewHealth(e.component, e.err)
+	}
+
+	for i := 0; i < len(events); i++ {
+		<-r.ch
 	}
 }
