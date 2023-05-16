@@ -98,32 +98,6 @@ jobs:
           command: |
             kubeval --strict -d ${{ env.K8S_MANIFEST_DIR }} --ignore-missing-schemas --ignored-filename-patterns kustomization,kind,patch,cloudbeat,cloudformation --skip-kinds ClusterConfig
 
-  golangci:
-    name: golangci-lint
-    runs-on: ubuntu-20.04
-    timeout-minutes: 15
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
-
-      - name: Set up GO (with caching)
-        uses: magnetikonline/action-golang-cache@v4
-        with:
-          go-version-file: .go-version
-
-      - name: Check out the repo
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
-          ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
-
-      - name: Go linter
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-          args: --timeout=10m --whole-files
-
   dependency-review:
     runs-on: ubuntu-20.04
     if: ${{ github.event_name == 'pull_request' }}
