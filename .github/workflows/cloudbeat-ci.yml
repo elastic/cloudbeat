@@ -33,8 +33,10 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Pre-commit Hooks
+        env:
+          SKIP: golangci-lint
         run: |
-          SKIP=golangci-lint pre-commit run --all-files
+          pre-commit run --all-files
         shell: bash
 
       - name: Mage Check
