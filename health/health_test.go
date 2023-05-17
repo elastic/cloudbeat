@@ -85,8 +85,7 @@ func (s *HealthTestSuite) TestNewHealth() {
 
 	for _, e := range events {
 		r.NewHealth(e.component, e.err)
-		<-r.ch
-		err := r.getHealth()
+		err := <-r.ch
 		if e.wantErr {
 			s.Error(err)
 			fmt.Println(err)
