@@ -68,7 +68,7 @@ brew install weaveworks/tap/eksctl
 1. `aws eks update-kubeconfig --region <region> --name <name_of_cluster>`
 2. verify current k8s is `eksctl` (`kubectl config current-context` should include `eksctl` )
 3. install KSPM EKS in kibana. provide your own credentials (`cat ~/.aws/credentials`)
-4. `kubectl apply -f <K8S_YAML_FROM_FLYOUT>
+4. `kubectl apply -f <K8S_YAML_FROM_FLYOUT>`
 
 ## Useful references
 
