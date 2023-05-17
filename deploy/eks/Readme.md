@@ -50,7 +50,7 @@ brew install weaveworks/tap/eksctl
 
 2. Run The following command to deploy cluster:
    ```bash
-   eksctl create cluster --config-file deploy/eks/simple-cluster.yml
+   eksctl create cluster --config-file deploy/eks/simple-cluster.yml --version 1.23.12
    ```
    Creation should take around 20 minutes for a simple config.
    eksctl will create your cluster and automatically add the context to your `~/.kube/config`
