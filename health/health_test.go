@@ -45,39 +45,44 @@ func (s *HealthTestSuite) TearDownTest() {
 	goleak.VerifyNone(s.T(), s.opts)
 }
 
+var (
+	testComponent1 component = "test-component1"
+	testComponent2 component = "test-component2"
+)
+
 func (s *HealthTestSuite) TestNewHealth() {
 	r := &reporter{
 		ch:     make(chan error, 1),
-		errors: make(map[string]error),
+		errors: make(map[component]error),
 	}
 
 	events := []struct {
-		component string
+		component component
 		err       error
 		wantErr   bool
 	}{
 		{
-			component: "component1",
+			component: testComponent1,
 			err:       nil,
 			wantErr:   false,
 		},
 		{
-			component: "component1",
+			component: testComponent1,
 			err:       errors.New("component1 went wrong"),
 			wantErr:   true,
 		},
 		{
-			component: "component2",
+			component: testComponent2,
 			err:       errors.New("component2 went wrong"),
 			wantErr:   true,
 		},
 		{
-			component: "component2",
+			component: testComponent2,
 			err:       nil,
 			wantErr:   true,
 		},
 		{
-			component: "component1",
+			component: testComponent1,
 			err:       nil,
 			wantErr:   false,
 		},
@@ -98,31 +103,31 @@ func (s *HealthTestSuite) TestNewHealth() {
 func (s *HealthTestSuite) TestParallelNewHealth() {
 	r := &reporter{
 		ch:     make(chan error),
-		errors: make(map[string]error),
+		errors: make(map[component]error),
 	}
 
 	events := []struct {
-		component string
+		component component
 		err       error
 	}{
 		{
-			component: "component1",
+			component: testComponent1,
 			err:       nil,
 		},
 		{
-			component: "component1",
+			component: testComponent1,
 			err:       errors.New("went wrong"),
 		},
 		{
-			component: "component1",
+			component: testComponent1,
 			err:       errors.New("component went wrong"),
 		},
 		{
-			component: "component1",
+			component: testComponent1,
 			err:       nil,
 		},
 		{
-			component: "component1",
+			component: testComponent1,
 			err:       errors.New("some error"),
 		},
 	}

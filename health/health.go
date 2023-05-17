@@ -23,24 +23,30 @@ import (
 	"sync"
 )
 
+type component string
+
+var (
+	VulnDb component = "vuln-db"
+)
+
 // Every package can report its health status by calling NewHealth.
 // Launcher will listen to the channel and report the status to the fleet server.
 var Reporter = &reporter{
 	ch:     make(chan error, 1),
-	errors: map[string]error{},
+	errors: map[component]error{},
 	mut:    sync.Mutex{},
 }
 
 type reporter struct {
 	ch     chan error
-	errors map[string]error
+	errors map[component]error
 	mut    sync.Mutex
 }
 
-func (r *reporter) NewHealth(component string, err error) {
+func (r *reporter) NewHealth(com component, err error) {
 	r.mut.Lock()
 	defer r.mut.Unlock()
-	r.errors[component] = err
+	r.errors[com] = err
 	r.ch <- r.getHealth()
 }
 
