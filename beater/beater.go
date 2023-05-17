@@ -22,6 +22,7 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/flavors"
+	"github.com/elastic/cloudbeat/health"
 	"github.com/elastic/cloudbeat/launcher"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -35,7 +36,7 @@ func New(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	reloader := launcher.NewListener(log)
 	validator := &validator{}
 
-	s, err := launcher.New(log, "Cloudbeat", reloader, validator, NewBeater, cfg)
+	s, err := launcher.New(log, "Cloudbeat", reloader, health.Reporter, validator, NewBeater, cfg)
 	if err != nil {
 		return nil, err
 	}

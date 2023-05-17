@@ -28,7 +28,6 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/management"
-	"github.com/elastic/cloudbeat/health"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/go-ucfg"
@@ -43,6 +42,7 @@ type launcher struct {
 	beater    beat.Beater
 	beaterErr chan error
 	reloader  Reloader
+	health    Health
 	log       *logp.Logger
 	latest    *config.C
 	beat      *beat.Beat
@@ -56,17 +56,27 @@ type Reloader interface {
 	Stop()
 }
 
+type Health interface {
+	Channel() <-chan error
+	Stop()
+}
+
+type Manager interface {
+	management.Manager
+}
+
 type Validator interface {
 	Validate(*config.C) error
 }
 
-func New(log *logp.Logger, name string, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
+func New(log *logp.Logger, name string, reloader Reloader, health Health, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
 	s := &launcher{
 		beaterErr: make(chan error, 1),
 		wg:        sync.WaitGroup{},
 		log:       log,
 		name:      name,
 		reloader:  reloader,
+		health:    health,
 		validator: validator,
 		creator:   creator,
 		latest:    cfg,
@@ -111,7 +121,7 @@ func (l *launcher) run() error {
 	}
 
 	l.reloader.Stop()
-	health.Reporter.Stop()
+	l.health.Stop()
 	return err
 }
 
@@ -213,12 +223,13 @@ func (l *launcher) waitForUpdates() (*config.C, error) {
 
 			l.log.Infof("Launcher will restart %s to apply the configuration update", l.name)
 			return update, nil
-		case err, ok := <-health.Reporter.Channel():
-			// TODO: Check if manager enabled
-			if err != nil {
-				l.beat.Manager.UpdateStatus(management.Degraded, err.Error())
-			} else if ok {
-				l.beat.Manager.UpdateStatus(management.Running, "")
+		case err, ok := <-l.health.Channel():
+			if l.beat.Manager.Enabled() {
+				if err != nil {
+					l.beat.Manager.UpdateStatus(management.Degraded, err.Error())
+				} else if ok {
+					l.beat.Manager.UpdateStatus(management.Running, "")
+				}
 			}
 		}
 	}

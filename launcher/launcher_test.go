@@ -28,8 +28,6 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/cmd/instance"
-	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/beats/v7/libbeat/management"
 	"github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -138,7 +136,9 @@ type LauncherTestSuite struct {
 
 type launcherMocks struct {
 	reloader  *reloaderMock
+	health    *MockHealth
 	beat      *beat.Beat
+	manager   *MockManager
 	validator Validator
 }
 
@@ -161,21 +161,13 @@ func (s *LauncherTestSuite) InitMocks() *launcherMocks {
 	mocks.validator = &validatorMock{
 		expected: config.MustNewConfigFrom(mapstr.M{"a": 1}),
 	}
-	mocks.beat = &beat.Beat{}
-	return &mocks
-}
+	mocks.health = NewMockHealth(s.T())
 
-func (s *LauncherTestSuite) MockBeatManager(mocks *launcherMocks) {
-	settings := instance.Settings{
-		Name:                  "some-beater",
-		Version:               "version",
-		DisableConfigResolver: true,
+	mocks.manager = NewMockManager(s.T())
+	mocks.beat = &beat.Beat{
+		Manager: mocks.manager,
 	}
-	b, err := instance.NewInitializedBeat(settings)
-	s.NoError(err)
-	b.Manager, err = management.Factory(b.Config.Management)(b.Config.Management, reload.RegisterV2, b.Beat.Info.ID)
-	s.NoError(err)
-	mocks.beat = &b.Beat
+	return &mocks
 }
 
 func (s *LauncherTestSuite) TearDownTest() {
@@ -321,7 +313,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 	for _, tcase := range testcases {
 		s.Run(tcase.name, func() {
 			mocks := s.InitMocks()
-			sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+			sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
 
 			go func(ic incomingConfigs) {
@@ -350,7 +342,7 @@ func (s *LauncherTestSuite) TestErrorWaitForUpdates() {
 	})
 
 	mocks := s.InitMocks()
-	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, errorReloadBeaterCreator(), config.NewConfig())
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, errorReloadBeaterCreator(), config.NewConfig())
 	s.NoError(err)
 
 	go func() {
@@ -443,7 +435,7 @@ func (s *LauncherTestSuite) TestLauncherValidator() {
 	for _, tcase := range testcases {
 		s.Run(tcase.name, func() {
 			mocks := s.InitMocks()
-			sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.validator, beaterMockCreator, config.NewConfig())
+			sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, mocks.validator, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
 
 			mocks.reloader.ch = make(chan *config.C, len(tcase.configs))
@@ -465,10 +457,33 @@ func (s *LauncherTestSuite) TestLauncherValidator() {
 	}
 }
 
+func (s *LauncherTestSuite) TestHealthReporter() {
+	errorStr := "some error"
+	healthCh := make(chan error)
+	mocks := s.InitMocks()
+	mocks.health.EXPECT().Channel().Return(healthCh)
+	mocks.health.EXPECT().Stop()
+	mocks.manager.EXPECT().Enabled().Return(true)
+	mocks.manager.EXPECT().UpdateStatus(management.Degraded, errorStr)
+	mocks.manager.EXPECT().UpdateStatus(management.Running, "")
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, beaterMockCreator, config.NewConfig())
+	sut.beat = mocks.beat
+	s.NoError(err)
+	go func() {
+		healthCh <- errors.New(errorStr)
+		healthCh <- nil
+		time.Sleep(time.Millisecond)
+
+		sut.Stop()
+	}()
+	err = sut.run()
+	s.NoError(err)
+}
+
 // TestLauncherErrorBeater should not call sut.Stop as the launcher should stop without callling it
 func (s *LauncherTestSuite) TestLauncherErrorBeater() {
 	mocks := s.InitMocks()
-	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, errorBeaterMockCreator, config.NewConfig())
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, errorBeaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
@@ -477,7 +492,7 @@ func (s *LauncherTestSuite) TestLauncherErrorBeater() {
 // TestLauncherPanicBeater should not call sut.Stop as the launcher should stop without callling it
 func (s *LauncherTestSuite) TestLauncherPanicBeater() {
 	mocks := s.InitMocks()
-	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, panicBeaterMockCreator, config.NewConfig())
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, panicBeaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
@@ -486,7 +501,7 @@ func (s *LauncherTestSuite) TestLauncherPanicBeater() {
 
 func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 	mocks := s.InitMocks()
-	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	go func() {
 		mocks.reloader.ch <- config.NewConfig()
@@ -498,7 +513,7 @@ func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 
 func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
 	mocks := s.InitMocks()
-	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	go func() {
 		mocks.reloader.ch <- config.NewConfig()
@@ -515,7 +530,7 @@ func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
 // TestLauncherErrorBeaterCreation should not call sut.Stop as the launcher should stop without callling it
 func (s *LauncherTestSuite) TestLauncherErrorBeaterCreation() {
 	mocks := s.InitMocks()
-	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, errorBeaterCreator, config.NewConfig())
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, errorBeaterCreator, config.NewConfig())
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
