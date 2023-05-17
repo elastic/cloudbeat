@@ -27,6 +27,4 @@ jobs:
           VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           FILENAME=$(date +"cloudformation-$VERSION-%Y-%m-%d-%H-%M-%S.yml")
           echo "Uploading $FILENAME to S3"
-          # TODO: Remove upload to vuln-mgmt/ after integration starts using new link
-          aws s3 cp deploy/cloudformation/elastic-agent-ec2.yml s3://elastic-cspm-cft/vuln-mgmt/$FILENAME
           aws s3 cp deploy/cloudformation/elastic-agent-ec2.yml s3://elastic-cspm-cft/$FILENAME
