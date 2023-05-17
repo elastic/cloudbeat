@@ -2,6 +2,7 @@
 This module provides fixtures and configurations for
 product tests.
 """
+import os.path
 from pathlib import Path
 import time
 import json
@@ -59,6 +60,7 @@ def config_node_pre_test(cloudbeat_start_stop):
     temp_file_list = [
         "/var/lib/etcd/some_file.txt",
         "/etc/kubernetes/pki/some_file.txt",
+        "/etc/kubernetes/pki/some_dir/some_file.txt",
     ]
 
     config_files = {
@@ -84,6 +86,12 @@ limits:
         if node.metadata.name != cloudbeat_agent.node_name:
             continue
         for temp_file in temp_file_list:
+            api_client.exec_command(
+                container_name=node.metadata.name,
+                command="mkdir",
+                param_value=os.path.dirname(temp_file),
+                resource="",
+            )
             api_client.exec_command(
                 container_name=node.metadata.name,
                 command="touch",
