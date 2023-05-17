@@ -72,7 +72,7 @@ brew install weaveworks/tap/eksctl
 
 ## Useful references
 
-- [ekcstl config file examples](https://github.com/weaveworks/eksctl/tree/main/examples) for different deployment scenerios
+- [ekcstl config file examples](https://github.com/weaveworks/eksctl/tree/main/examples) for different deployment scenarios
 - [eksctl-docs](https://eksctl.io/introduction/)
 - [Aws cli installation](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html)
 - [kubectl installation](https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/)
