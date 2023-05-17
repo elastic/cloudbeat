@@ -137,6 +137,7 @@ type LauncherTestSuite struct {
 type launcherMocks struct {
 	reloader  *reloaderMock
 	health    *MockHealth
+	healthCh  chan error
 	beat      *beat.Beat
 	manager   *MockManager
 	validator Validator
@@ -154,19 +155,24 @@ func TestLauncherTestSuite(t *testing.T) {
 }
 
 func (s *LauncherTestSuite) InitMocks() *launcherMocks {
-	mocks := launcherMocks{}
+	mocks := launcherMocks{
+		healthCh: make(chan error),
+	}
 	mocks.reloader = &reloaderMock{
 		ch: make(chan *config.C),
 	}
 	mocks.validator = &validatorMock{
 		expected: config.MustNewConfigFrom(mapstr.M{"a": 1}),
 	}
-	mocks.health = NewMockHealth(s.T())
+	mocks.health = &MockHealth{}
 
 	mocks.manager = NewMockManager(s.T())
 	mocks.beat = &beat.Beat{
 		Manager: mocks.manager,
 	}
+
+	mocks.health.EXPECT().Channel().Return(mocks.healthCh)
+	mocks.health.EXPECT().Stop()
 	return &mocks
 }
 
@@ -459,10 +465,8 @@ func (s *LauncherTestSuite) TestLauncherValidator() {
 
 func (s *LauncherTestSuite) TestHealthReporter() {
 	errorStr := "some error"
-	healthCh := make(chan error)
 	mocks := s.InitMocks()
-	mocks.health.EXPECT().Channel().Return(healthCh)
-	mocks.health.EXPECT().Stop()
+
 	mocks.manager.EXPECT().Enabled().Return(true)
 	mocks.manager.EXPECT().UpdateStatus(management.Degraded, errorStr)
 	mocks.manager.EXPECT().UpdateStatus(management.Running, "")
@@ -470,8 +474,8 @@ func (s *LauncherTestSuite) TestHealthReporter() {
 	sut.beat = mocks.beat
 	s.NoError(err)
 	go func() {
-		healthCh <- errors.New(errorStr)
-		healthCh <- nil
+		mocks.healthCh <- errors.New(errorStr)
+		mocks.healthCh <- nil
 		time.Sleep(time.Millisecond)
 
 		sut.Stop()
