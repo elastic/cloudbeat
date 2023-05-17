@@ -111,6 +111,7 @@ func (l *launcher) run() error {
 	}
 
 	l.reloader.Stop()
+	health.Reporter.Stop()
 	return err
 }
 

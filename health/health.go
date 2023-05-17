@@ -79,6 +79,6 @@ func (r *reporter) Channel() <-chan error {
 	return r.ch
 }
 
-func (r *reporter) Close() {
+func (r *reporter) Stop() {
 	close(r.ch)
 }
