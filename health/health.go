@@ -21,50 +21,30 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-
-	"github.com/elastic/beats/v7/libbeat/management"
 )
-
-type StatusReporter interface {
-	UpdateStatus(status management.Status, msg string)
-}
 
 // Every package can report its health status by calling NewHealth.
 // Launcher will listen to the channel and report the status to the fleet server.
 var Reporter = &reporter{
 	ch:     make(chan error, 1),
 	errors: map[string]error{},
-	mut:    sync.RWMutex{},
+	mut:    sync.Mutex{},
 }
 
 type reporter struct {
 	ch     chan error
 	errors map[string]error
-	mut    sync.RWMutex
+	mut    sync.Mutex
 }
 
 func (r *reporter) NewHealth(component string, err error) {
 	r.mut.Lock()
 	defer r.mut.Unlock()
 	r.errors[component] = err
-	r.ch <- nil
-}
-
-func (r *reporter) Report(statusReporter StatusReporter) {
-	var status management.Status
-	err := r.getHealth()
-	if err != nil {
-		status = management.Degraded
-	} else {
-		status = management.Running
-	}
-
-	statusReporter.UpdateStatus(status, err.Error())
+	r.ch <- r.getHealth()
 }
 
 func (r *reporter) getHealth() error {
-	r.mut.RLock()
-	defer r.mut.RUnlock()
 	list := make([]error, 0, len(r.errors))
 	for c, err := range r.errors {
 		if err != nil {

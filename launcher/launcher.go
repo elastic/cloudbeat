@@ -213,9 +213,12 @@ func (l *launcher) waitForUpdates() (*config.C, error) {
 
 			l.log.Infof("Launcher will restart %s to apply the configuration update", l.name)
 			return update, nil
-		case _, ok := <-health.Reporter.Channel():
-			if ok {
-				health.Reporter.Report(l.beat.Manager)
+		case err, ok := <-health.Reporter.Channel():
+			// TODO: Check if manager enabled
+			if err != nil {
+				l.beat.Manager.UpdateStatus(management.Degraded, err.Error())
+			} else if ok {
+				l.beat.Manager.UpdateStatus(management.Running, "")
 			}
 		}
 	}
