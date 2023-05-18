@@ -226,8 +226,10 @@ func (l *launcher) waitForUpdates() (*config.C, error) {
 		case err, ok := <-l.health.Channel():
 			if l.beat.Manager.Enabled() {
 				if err != nil {
+					l.log.Infof("Launcher is sending status update: Degraded: ", err.Error())
 					l.beat.Manager.UpdateStatus(management.Degraded, err.Error())
 				} else if ok {
+					l.log.Infof("Launcher is sending status update: Running")
 					l.beat.Manager.UpdateStatus(management.Running, "")
 				}
 			}
