@@ -31,10 +31,14 @@ var (
 
 // Every package can report its health status by calling NewHealth.
 // Launcher will listen to the channel and report the status to the fleet server.
-var Reporter = &reporter{
-	ch:     make(chan error, 1),
-	errors: map[component]error{},
-	mut:    sync.Mutex{},
+var Reporter = newReporter()
+
+func newReporter() *reporter {
+	return &reporter{
+		ch:     make(chan error, 1),
+		errors: map[component]error{},
+		mut:    sync.Mutex{},
+	}
 }
 
 type reporter struct {

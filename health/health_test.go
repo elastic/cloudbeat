@@ -51,10 +51,7 @@ var (
 )
 
 func (s *HealthTestSuite) TestNewHealth() {
-	r := &reporter{
-		ch:     make(chan error, 1),
-		errors: make(map[component]error),
-	}
+	r := newReporter()
 
 	events := []struct {
 		component component
@@ -100,11 +97,8 @@ func (s *HealthTestSuite) TestNewHealth() {
 	}
 }
 
-func (s *HealthTestSuite) TestParallelNewHealth() {
-	r := &reporter{
-		ch:     make(chan error),
-		errors: make(map[component]error),
-	}
+func (s *HealthTestSuite) TestConcurrentNewHealth() {
+	r := newReporter()
 
 	events := []struct {
 		component component
