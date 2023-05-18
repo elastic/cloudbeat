@@ -72,4 +72,4 @@ jobs:
 
       - name: Save tfstate
         run: |
-          aws s3 cp ./terraform.tfstate "s3://private-deployment-states/${{ github.event.inputs.deployment_name }}/terraform.tfstate"
+          aws s3 cp ./terraform.tfstate "s3://private-deployments-tfstate/${{ github.event.inputs.deployment_name }}/terraform.tfstate"
