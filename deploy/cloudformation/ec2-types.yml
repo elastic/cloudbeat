@@ -1,0 +1,195 @@
+AWSTemplateFormatVersion: 2010-09-09
+# Parameters:
+# ARMImages:
+#   Type: CommaDelimitedList
+#   Default: >-
+#     ami-0a0ae3c8519bff7f0, ami-062e673cc4273dad8, ami-0b2dd5cb6105dcd18,
+#     ami-0e6902f007857ad9c, ami-0083086bc808b1d71
+# Transform: Count
+Resources:
+  armAWSLinuxGP2ext4:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            "Fn::Join":
+              - "-"
+              - - vuln-mgmt-types-armAWSLinuxGP2ext4
+                - "Fn::Select":
+                    - 2
+                    - "Fn::Split":
+                        - /
+                        - Ref: "AWS::StackId"
+      InstanceType: t4g.nano
+      ImageId:
+        ami-0a0ae3c8519bff7f0
+        # Fn::GetAtt: [ARMImages, %d]
+      # !Select
+      #         - !Ref %d
+      #         - !Ref ARMImages
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: "8"
+            VolumeType: gp2
+            DeleteOnTermination: "true"
+            Encrypted: "false"
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t ext4 /dev/sda1
+    # Count: !Length
+    #   - !Ref ARMImages
+  armRHLinuxIO1xfs:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            "Fn::Join":
+              - "-"
+              - - vuln-mgmt-types-armRHLinuxIO1xfs
+                - "Fn::Select":
+                    - 2
+                    - "Fn::Split":
+                        - /
+                        - Ref: "AWS::StackId"
+      InstanceType: t4g.small
+      ImageId:
+        ami-062e673cc4273dad8
+        # Fn::GetAtt: [ARMImages, %d]
+      # !Select
+      #         - !Ref %d
+      #         - !Ref ARMImages
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: "10"
+            VolumeType: io1
+            Iops: "100"
+            DeleteOnTermination: "true"
+            Encrypted: "false"
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t xfs /dev/sda1
+    # Count: !Length
+    #   - !Ref ARMImages
+  x86SuseLinuxStandardext4:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            "Fn::Join":
+              - "-"
+              - - vuln-mgmt-types-x86SuseLinuxStandardext4
+                - "Fn::Select":
+                    - 2
+                    - "Fn::Split":
+                        - /
+                        - Ref: "AWS::StackId"
+      InstanceType: t2.nano
+      ImageId:
+        ami-09ee771fad415a6d7
+        # Fn::GetAtt: [ARMImages, %d]
+      # !Select
+      #         - !Ref %d
+      #         - !Ref ARMImages
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: "10"
+            VolumeType: standard
+            DeleteOnTermination: "true"
+            Encrypted: "false"
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t ext4 /dev/sda1
+    # Count: !Length
+    #   - !Ref ARMImages
+  x86UbuntuLinuxGP3xfs:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            "Fn::Join":
+              - "-"
+              - - vuln-mgmt-types-x86UbuntuLinuxGP3xfs
+                - "Fn::Select":
+                    - 2
+                    - "Fn::Split":
+                        - /
+                        - Ref: "AWS::StackId"
+      InstanceType: t2.nano
+      ImageId:
+        ami-00aa9d3df94c6c354
+        # Fn::GetAtt: [ARMImages, %d]
+      # !Select
+      #         - !Ref %d
+      #         - !Ref ARMImages
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: "10"
+            VolumeType: gp3
+            DeleteOnTermination: "true"
+            Encrypted: "false"
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t xfs /dev/sda1
+    # Count: !Length
+    #   - !Ref ARMImages
+  x86DebianLinuxIO2ext4:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            "Fn::Join":
+              - "-"
+              - - vuln-mgmt-types-x86DebianLinuxIO2ext4
+                - "Fn::Select":
+                    - 2
+                    - "Fn::Split":
+                        - /
+                        - Ref: "AWS::StackId"
+      InstanceType: t2.nano
+      ImageId:
+        ami-089f338f3a2e69431
+        # Fn::GetAtt: [ARMImages, %d]
+      # !Select
+      #         - !Ref %d
+      #         - !Ref ARMImages
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: "10"
+            VolumeType: io2
+            Iops: "100"
+            DeleteOnTermination: "true"
+            Encrypted: "false"
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t ext4 /dev/sda1
+    # Count: !Length
+    #   - !Ref ARMImages
+  SecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupName:
+        "Fn::Join":
+          - "-"
+          - - vuln-mgmt-types
+            - "Fn::Select":
+                - 2
+                - "Fn::Split":
+                    - /
+                    - Ref: "AWS::StackId"
+      GroupDescription: Block incoming traffic
+      SecurityGroupIngress: []
