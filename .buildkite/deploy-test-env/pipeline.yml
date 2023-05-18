@@ -1,0 +1,52 @@
+
+
+steps:
+  - block: "Trigger deployment"
+    prompt: "Fill out the details for this deployment"
+    fields:
+      - key: deployment_name
+        text: 'Name your environment. For example: john-8-8-0-bc3-May11'
+        required: true
+      - key: stack_version
+        text: |
+          Optional, Elastic's stack version. (e.g., 8.8.0, 8.8.0-SNAPSHOT, latest).
+          Defaults is latest.
+          For BC, enter only version without additions/commit sha
+        required: false
+        default: latest
+      - key: environment
+        select: Environment to deploy
+        required: true
+        options:
+          - label: staging.found.no
+            value: staging.found.no
+          - label: cloud.elastic.co
+            value: cloud.elastic.co
+      - key: EC_API_KEY
+        text: Elastic's cloud API key
+        required: true
+      - key: agent_docker_image_override
+        text: Optional, agent's image. Defaults to stack release.
+        required: false
+
+  - label: "Init Hermit"
+    command: "./bin/hermit env -r >> $GITHUB_ENV"
+
+  - label: Deploy Elastic Cloud
+    commands:
+      - cd deploy/cloud
+      - terraform init
+      - terraform apply -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
+      - terraform apply --auto-approve -target "module.aws_ec2_with_agent"
+      - terraform apply --auto-approve -target "module.apps"
+      - terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
+      - terraform apply --auto-approve
+    artifact_paths: "deploy/cloud/terraform.tfstate"
+    env:
+      TF_VAR_ec_api_key: ${{ github.event.inputs.EC_API_KEY }}
+      TF_VAR_ess_region: ${{ github.event.inputs.environment == 'staging.found.no' && 'gcp-us-central1' || 'gcp-us-west2'}}
+      TF_VAR_deployment_name: ${{ github.event.inputs.deployment_name }}
+      TF_VAR_stack_version: ${{ github.event.inputs.stack_version == '' && 'latest' || github.event.inputs.stack_version}}
+      TF_VAR_agent_docker_image_override: ${{ github.event.inputs.agent_docker_image_override }}
+
+      # Destroy on failures
