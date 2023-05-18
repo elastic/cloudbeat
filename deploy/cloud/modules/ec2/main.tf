@@ -4,6 +4,7 @@ locals {
   common_tags = {
     id          = "${random_id.id.hex}"
     provisioner = "terraform"
+    Name        = var.deployment_name
   }
 }
 resource "tls_private_key" "cloudbeat_key" {
