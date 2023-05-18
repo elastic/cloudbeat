@@ -81,28 +81,30 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 	}
 
 	for _, test := range tests {
-		kmsFetcherCfg := KmsFetcherConfig{
-			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-		}
+		s.Run(test.name, func() {
+			kmsFetcherCfg := KmsFetcherConfig{
+				AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
+			}
 
-		kmsProviderMock := &kms.MockKMS{}
-		for funcName, returnVals := range test.kmsMocksReturnVals {
-			kmsProviderMock.On(funcName, context.TODO()).Return(returnVals...)
-		}
+			kmsProviderMock := &kms.MockKMS{}
+			for funcName, returnVals := range test.kmsMocksReturnVals {
+				kmsProviderMock.On(funcName, context.TODO()).Return(returnVals...)
+			}
 
-		kmsFetcher := KmsFetcher{
-			log:        s.log,
-			cfg:        kmsFetcherCfg,
-			kms:        kmsProviderMock,
-			resourceCh: s.resourceCh,
-		}
+			kmsFetcher := KmsFetcher{
+				log:        s.log,
+				cfg:        kmsFetcherCfg,
+				kms:        kmsProviderMock,
+				resourceCh: s.resourceCh,
+			}
 
-		ctx := context.Background()
+			ctx := context.Background()
 
-		err := kmsFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		s.NoError(err)
+			err := kmsFetcher.Fetch(ctx, fetching.CycleMetadata{})
+			s.NoError(err)
 
-		results := testhelper.CollectResources(s.resourceCh)
-		s.Equal(test.numExpectedResults, len(results))
+			results := testhelper.CollectResources(s.resourceCh)
+			s.Equal(test.numExpectedResults, len(results))
+		})
 	}
 }
