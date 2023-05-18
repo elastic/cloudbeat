@@ -1,9 +1,5 @@
 {
-<<<<<<<< HEAD:deploy/cloud/data/agent_policy_cspm_aws.json
     "name": "tf-ap-cspm-aws",
-========
-    "name": "tf-ap-kspm-eks",
->>>>>>>> origin:deploy/cloud/data/agent_policy_eks.json
     "namespace": "default",
     "monitoring_enabled":["logs","metrics"]
 }
