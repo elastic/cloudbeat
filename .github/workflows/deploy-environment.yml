@@ -3,16 +3,6 @@ name: Deploy environment
 on:
   workflow_dispatch:
     inputs:
-      deployment_name:
-        type: string
-        description: 'Name your environment. For example: john-8-8-0-bc3-May11'
-        required: true
-      stack_version:
-        type: string
-        description: |
-          Optional, Elastic's stack version. (e.g., 8.8.0, 8.8.0-SNAPSHOT, latest).
-          Defaults is latest.
-          For BC, enter only version without additions/commit sha
       environment:
         description: Environment to deploy
         type: choice
@@ -23,8 +13,18 @@ on:
         type: string
         description: Elastic's cloud API key
         required: true
+      deployment_name:
+        type: string
+        description: 'Name your environment. For example: john-8-8-0-bc3-May11'
+        required: true
+      stack_version:
+        type: string
+        description: |
+          Elastic's stack version. (e.g., 8.8.0, 8.8.0-SNAPSHOT, latest).
+          Optional, defaults is latest.
+          For BC, enter only version without additions/commit sha
       agent_docker_image_override:
-        description: Optional, agent's image. Defaults to stack release.
+        description: Agent's image. Optional, defaults to stack release.
         type: string
 
 env:
