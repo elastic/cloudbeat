@@ -56,14 +56,15 @@ jobs:
         with:
           storageType: s3
           resultsGlob: "tests/allure/results"
-          updatePr: actions
-          collapseSummary: false
-          summary: suites
-          summaryTableType: markdown
-          copyLatest: true
           bucket: csp-allure-reports
           prefix: allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}
-          ignoreMissingResults: true
+          updatePr: description
+          summary: behaviors
+          copyLatest: true
+          ignoreMissingResults: false
+          summaryTableType: ascii
+          collapseSummary: false
+
 
       - name: Output to Job Summary
         if: ${{ github.event.workflow_run.event == 'pull_request' }}
