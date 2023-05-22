@@ -102,18 +102,6 @@ func (m *panicBeaterMock) Run(_ *beat.Beat) error {
 func (m *panicBeaterMock) Stop() {
 }
 
-type reloaderMock struct {
-	ch chan *config.C
-}
-
-func (m *reloaderMock) Channel() <-chan *config.C {
-	return m.ch
-}
-
-func (m *reloaderMock) Stop() {
-	close(m.ch)
-}
-
 type validatorMock struct {
 	expected *config.C
 }
@@ -135,12 +123,13 @@ type LauncherTestSuite struct {
 }
 
 type launcherMocks struct {
-	reloader  *reloaderMock
-	health    *MockHealth
-	healthCh  chan error
-	beat      *beat.Beat
-	manager   *MockManager
-	validator Validator
+	reloader   *MockReloader
+	reloaderCh chan *config.C
+	health     *MockHealth
+	healthCh   chan error
+	beat       *beat.Beat
+	manager    *MockManager
+	validator  Validator
 }
 
 func TestLauncherTestSuite(t *testing.T) {
@@ -156,11 +145,10 @@ func TestLauncherTestSuite(t *testing.T) {
 
 func (s *LauncherTestSuite) InitMocks() *launcherMocks {
 	mocks := launcherMocks{
-		healthCh: make(chan error),
+		healthCh:   make(chan error),
+		reloaderCh: make(chan *config.C, 10),
 	}
-	mocks.reloader = &reloaderMock{
-		ch: make(chan *config.C),
-	}
+	mocks.reloader = &MockReloader{}
 	mocks.validator = &validatorMock{
 		expected: config.MustNewConfigFrom(mapstr.M{"a": 1}),
 	}
@@ -171,6 +159,8 @@ func (s *LauncherTestSuite) InitMocks() *launcherMocks {
 		Manager: mocks.manager,
 	}
 
+	mocks.reloader.EXPECT().Channel().Return(mocks.reloaderCh)
+	mocks.reloader.EXPECT().Stop()
 	mocks.health.EXPECT().Channel().Return(mocks.healthCh)
 	mocks.health.EXPECT().Stop()
 	return &mocks
@@ -325,7 +315,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			go func(ic incomingConfigs) {
 				for _, c := range ic {
 					time.Sleep(c.after)
-					mocks.reloader.ch <- c.config
+					mocks.reloaderCh <- c.config
 				}
 
 				time.Sleep(tcase.delay)
@@ -353,7 +343,7 @@ func (s *LauncherTestSuite) TestErrorWaitForUpdates() {
 
 	go func() {
 		time.Sleep(40 * time.Millisecond)
-		mocks.reloader.ch <- configErr
+		mocks.reloaderCh <- configErr
 	}()
 
 	err = sut.run()
@@ -444,11 +434,10 @@ func (s *LauncherTestSuite) TestLauncherValidator() {
 			sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, mocks.validator, beaterMockCreator, config.NewConfig())
 			s.NoError(err)
 
-			mocks.reloader.ch = make(chan *config.C, len(tcase.configs))
 			go func(ic incomingConfigs) {
 				for _, c := range ic {
 					time.Sleep(c.after)
-					mocks.reloader.ch <- c.config
+					mocks.reloaderCh <- c.config
 				}
 			}(tcase.configs)
 
@@ -508,7 +497,7 @@ func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	go func() {
-		mocks.reloader.ch <- config.NewConfig()
+		mocks.reloaderCh <- config.NewConfig()
 		sut.Stop()
 	}()
 	err = sut.run()
@@ -520,7 +509,7 @@ func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
 	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
 	go func() {
-		mocks.reloader.ch <- config.NewConfig()
+		mocks.reloaderCh <- config.NewConfig()
 		sut.Stop()
 	}()
 	err = sut.run()
