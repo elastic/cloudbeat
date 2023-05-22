@@ -50,14 +50,14 @@ output "eks_cluster_name" {
   value       = module.eks.cluster_name
 }
 
-output "agent_policy_id" {
-  description = "Agent policy ID"
-  value       = module.api.agent_policy_id
+output "eks_agent_policy_id" {
+  description = "EKS Agent policy ID"
+  value       = module.api.eks.agent_policy_id
 }
 
-output "enrollment_token" {
-  description = "Agent enrollment token"
-  value       = module.api.enrollment_token
+output "eks_enrollment_token" {
+  description = "EKS Agent enrollment token"
+  value       = module.api.eks.enrollment_token
 }
 
 output "fleet_url" {
@@ -65,9 +65,9 @@ output "fleet_url" {
   value       = module.api.fleet_url
 }
 
-output "yaml" {
-  description = "Kubernetes deployment YAML"
-  value       = module.api.yaml
+output "eks_yaml" {
+  description = "Kubernetes EKS deployment YAML"
+  value       = module.api.eks.yaml
 }
 output "role_arn" {
   description = "AWS role arn"
