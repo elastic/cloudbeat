@@ -1,5 +1,5 @@
 {
-    "name": "tf-agent-policy-vanilla",
+    "name": "tf-ap-kspm-vanilla",
     "namespace": "default",
     "monitoring_enabled": [
         "logs",

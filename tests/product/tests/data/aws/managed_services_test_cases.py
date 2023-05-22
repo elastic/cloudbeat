@@ -78,7 +78,14 @@ aws_test_config_1 = {
             url_link="https://github.com/elastic/cloudbeat/issues/500",
         ),
     ),
-    **cis_eks_5_4_5_config_1,
+    **skip_param_case(
+        cis_eks_5_4_5_config_1,
+        data_to_report=SkipReportData(
+            skip_reason="Retest after testing configuration will be fixed.",
+            url_title="cloudbeat: #500",
+            url_link="https://github.com/elastic/cloudbeat/issues/500",
+        ),
+    ),
     **skip_param_case(
         cis_eks_2_1_1_config_1,
         data_to_report=SkipReportData(

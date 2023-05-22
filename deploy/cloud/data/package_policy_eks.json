@@ -1,5 +1,5 @@
 {
-    "name": "cloud_security_posture-tf",
+    "name": "pkg-plcy-kspm-eks-tf",
     "description": "",
     "namespace": "default",
     "policy_id": "${agent_policy_id}",
