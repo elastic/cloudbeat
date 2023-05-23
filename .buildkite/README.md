@@ -6,7 +6,7 @@ This README provides an overview of the Buildkite pipeline used to automate the 
 
 The pipeline generates the following artifacts:
 
-- **dependencies-CLOUDBEAT_VERSION-WORKFLOW.csv**: This CSV file contains a list of dependencies for the specific version of Cloudbeat being built. It helps track the dependencies used in the build process.
+- **dependencies-CLOUDBEAT_VERSION-WORKFLOW.csv**: This CSV file contains a list of dependencies for the specific Cloudbeat version being built. It helps track build dependencies.
 
 - **cloudbeat-CLOUDBEAT_VERSION-WORKFLOW-linux-ARCH.tar.gz**: This tarball includes the Cloudbeat binary and its corresponding csp-policies archive. The supported architectures for the artifacts are amd64 and arm64.
 
