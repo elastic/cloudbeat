@@ -4,7 +4,7 @@
 # Infra & ops related
 /deploy/ @elastic/csp-ops
 .ci/  @elastic/csp-ops
-Jenkinsfile  @elastic/csp-ops
+.buildkite/  @elastic/csp-ops
 
 # Automation tests
 /tests/ @elastic/csp-automation
