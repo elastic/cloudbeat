@@ -22,6 +22,8 @@ jobs:
       # required by download step to access artifacts API
       actions: read
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
 
       - name: Download and Extract Artifacts
         env:
