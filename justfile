@@ -122,8 +122,14 @@ elastic-stack-down:
   elastic-package stack down
 
 elastic-stack-connect-kind kind='kind-multi':
-  ./.ci/scripts/connect_kind.sh {{kind}}
+  ./scripts/connect_kind.sh {{kind}}
 
+<<<<<<< HEAD
+=======
+elastic-stack-disconnect-kind kind='kind-multi':
+  ./scripts/connect_kind.sh {{kind}} disconnect
+
+>>>>>>> 45badd9 (Buildkite migration (#944))
 ssh-cloudbeat:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl exec --stdin --tty "${CLOUDBEAT_POD}" -n kube-system -- /bin/bash
@@ -142,7 +148,7 @@ generate-mocks:
 
 # run to validate no mocks are missing
 validate-mocks:
-  ./.ci/scripts/validate-mocks.sh
+  ./scripts/validate-mocks.sh
 
 
 #### TESTS ####

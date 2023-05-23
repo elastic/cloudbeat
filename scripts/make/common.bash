@@ -80,32 +80,6 @@ setup_go_path() {
   debug "GOPATH=${GOPATH}"
 }
 
-jenkins_setup() {
-  : "${HOME:?Need to set HOME to a non-empty value.}"
-  : "${WORKSPACE:?Need to set WORKSPACE to a non-empty value.}"
-
-  if [ -z ${GO_VERSION:-} ]; then
-    get_go_version
-  fi
-
-  # Setup Go.
-  export GOPATH=${WORKSPACE}
-  export PATH=${GOPATH}/bin:${PATH}
-  eval "$(gvm ${GO_VERSION})"
-
-  # Workaround for Python virtualenv path being too long.
-  export TEMP_PYTHON_ENV=$(mktemp -d)
-  export PYTHON_ENV="${TEMP_PYTHON_ENV}/python-env"
-
-  # Write cached magefile binaries to workspace to ensure
-  # each run starts from a clean slate.
-  export MAGEFILE_CACHE="${WORKSPACE}/.magefile"
-
-  # Enable verbose output for Mage,
-  # to help diagnose build failures.
-  export MAGEFILE_VERBOSE=1
-}
-
 docker_setup() {
   OS="$(uname)"
   case $OS in
