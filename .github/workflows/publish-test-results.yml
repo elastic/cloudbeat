@@ -69,7 +69,6 @@ jobs:
 
 
       - name: Output to Job Summary
-        if: ${{ github.event.workflow_run.event == 'pull_request' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
