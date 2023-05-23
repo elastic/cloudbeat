@@ -72,20 +72,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "### Run Summary :rocket:" >> $GITHUB_STEP_SUMMARY
-          echo "Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html" >> $GITHUB_STEP_SUMMARY
-          echo "[Report](http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html)" >> $GITHUB_STEP_SUMMARY
-          jq '.[0].data' tests/allure/results/allure-report/history/history-trend.json -c
-          OUTPUT=$(jq '.[0].data' tests/allure/results/allure-report/history/history-trend.json -c | npx tablemark-cli -)
-          OUTPUT="${OUTPUT//'Failed'/'\![](https://placehold.co/7x7/fc593e/fc593e.png) Failed'}"
-          OUTPUT="${OUTPUT//'Broken'/'\![](https://placehold.co/7x7/ffd050/ffd050.png) Broken'}"
-          OUTPUT="${OUTPUT//'Skipped'/'\![](https://placehold.co/7x7/aaaaaa/aaaaaa.png) Skipped'}"
-          OUTPUT="${OUTPUT//'Passed'/'\![](https://placehold.co/7x7/97cc64/97cc64.png) Passed'}"
-          OUTPUT="${OUTPUT//'Unknown'/'\![](https://placehold.co/7x7/d35ebd/d35ebd.png) Unknown'}"
-          OUTPUT="${OUTPUT//'%'/'%25'}​【7,6 m】"
-          OUTPUT="${OUTPUT//$'\n'/'%0A'}"
-          OUTPUT="${OUTPUT//$'\r'/'%0D'}"
-          echo "result=$OUTPUT" >> $GITHUB_OUTPUT
+          allure_result=tests/allure/results/allure-report/history/history-trend.json
+          allure_url=http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html
+
+          allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
+          echo "$allure_summary" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
@@ -95,5 +86,4 @@ jobs:
           number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ## Cloudbeat CI :robot:
-            Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html
+            $GITHUB_STEP_SUMMARY
