@@ -2,13 +2,21 @@ cloudbeat:
   config:
     v1:
       benchmark: cis_aws
+      aws:
+        credentials:
+          access_key_id: ${AWS_ACCESS_KEY_ID:""}
+          secret_access_key: ${AWS_SECRET_ACCESS_KEY:""}
   type: cloudbeat/cis_aws
-  access_key_id: ${AWS_ACCESS_KEY_ID:""}
-  secret_access_key: ${AWS_SECRET_ACCESS_KEY:""}
   # Defines how often an event is sent to the output
   period: 30s
   fetchers:
     - name: aws-iam
+    - name: aws-s3
+    - name: aws-ec2-network
+    - name: aws-trail
+    - name: aws-monitoring
+    - name: aws-rds
+    - name: aws-kms
   evaluator:
     decision_logs: false
 # =================================== Kibana ===================================

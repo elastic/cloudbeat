@@ -3,6 +3,7 @@ import datetime
 import json
 import time
 from typing import Union
+from functools import reduce
 
 import allure
 from commonlib.io_utils import get_logs_from_stream, get_events_from_index
@@ -30,6 +31,8 @@ def get_ES_evaluation(
 
     while time.time() - start_time < timeout:
         try:
+            # timeout used for reducing requests frequency to ElasticSearch
+            time.sleep(2)
             events = get_events_from_index(
                 elastic_client,
                 elastic_client.index,
@@ -37,7 +40,7 @@ def get_ES_evaluation(
                 latest_timestamp,
             )
         except Exception as e:
-            logger.warning(e)
+            logger.debug(e)
             continue
 
         for event in events:
@@ -55,6 +58,15 @@ def get_ES_evaluation(
                 continue
 
             if resource_identifier(event):
+                allure.attach(
+                    json.dumps(
+                        event,
+                        indent=4,
+                        sort_keys=True,
+                    ),
+                    rule_tag,
+                    attachment_type=allure.attachment_type.JSON,
+                )
                 return evaluation
 
     return None
@@ -271,3 +283,27 @@ def get_findings(elastic_client, config_timeout, match_type):
         time.sleep(1)
 
     return result
+
+
+def res_identifier(field_chain: str, case_identifier, eval_resource) -> bool:
+    """
+    This function compares current value retrieved from a resource (eval_resource) to unique field value.
+    Example:
+    Get value from the following chains:
+        eval_resource.resource.name
+        eval_resource.resource.id
+        eval_resource.host.name
+    @param field_chain: String representation of eval_resource object attributes, for example 'resource.name'
+    @param case_identifier: Case data identifier to be used for comparison
+    @param eval_resource: Resource data retrieved from elastic
+    @return: True / False
+    """
+    try:
+        # 'reduce' function applies 'getattr' function on each element of field chain,
+        # starting from the base object 'eval_resource'
+        # the code is equivalent to:
+        # current_value = eval_resource.resource.name, where field_chain is 'resource.name'
+        current_value = reduce(getattr, field_chain.split("."), eval_resource)
+        return current_value == case_identifier
+    except AttributeError:
+        return False

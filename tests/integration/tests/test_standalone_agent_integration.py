@@ -8,6 +8,7 @@ import pytest
 
 from commonlib.utils import get_findings
 from commonlib.io_utils import FsClient
+from loguru import logger
 
 testdata = ["file", "process", "k8s_object"]
 CONFIG_TIMEOUT = 60
@@ -90,6 +91,7 @@ def test_cloudbeat_status(k8s, cloudbeat_agent):
             namespace=cloudbeat_agent.namespace,
             command=exec_command,
         )
+        logger.debug(response)
         status = FsClient.get_beat_status_from_json(
             response=response,
             beat_name="cloudbeat",

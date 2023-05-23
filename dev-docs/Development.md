@@ -1,6 +1,7 @@
 # Development
 
 ### Code guidelines
+
 For Golang, we try to follow [Google's code style](https://google.github.io/styleguide/go/)
 For Python we try to follow [PEP8](https://peps.python.org/pep-0008/) style guid
 
@@ -15,15 +16,21 @@ pre-commit install # install the pre commits hooks
 pre-commit run --all-files --verbose # run it!
 ```
 
-
 ### Update default configurations
 
 If you need to change the default values in the configuration(`ES_HOST`, `ES_PORT`, `ES_USERNAME`, `ES_PASSWORD`), you
 can also create the deployment file yourself:
 
 Self-Managed Kubernetes
+
 ```zsh
 just create-vanilla-deployment-file
+```
+
+Self-Managed Kubernetes wthout certificate
+
+```zsh
+just create-vanilla-deployment-file-nocert
 ```
 
 EKS
@@ -40,12 +47,24 @@ To stop this example and clean up the pod, run:
 just delete-cloudbeat
 ```
 
+Or when running without certificate
+
+```zsh
+just delete-cloudbeat-nocert
+```
+
 ### Remote Debugging
 
 Build & Deploy remote debug docker:
 
 ```zsh
 just build-deploy-cloudbeat-debug
+```
+
+Or without certificate
+
+```zsh
+just build-deploy-cloudbeat-debug-nocert
 ```
 
 After running the pod, expose the relevant ports:
@@ -61,12 +80,15 @@ The app will wait for the debugger to connect before starting
 > example [Goland](https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html#step-3-create-the-remote-run-debug-configuration-on-the-client-computer))
 
 ### Update Cloudbeat configuration on a running Elastic-Agent
+
 Update cloudbeat configuration on a running elastic-agent can be done by running the [script](/scripts/remote_edit_config.sh).
 The script still requires a second step of triggering the agent to re-run cloudbeat.
 This can be done on Fleet UI by changing the agent log level.
 
 ### Local configuration changes
+
 To update your local configuration of cloudbeat, use `mage config`, for example to control the policy type you can pass the following environment variable
+
 ```zsh
 POLICY_TYPE=cloudbeat/cis_eks mage config
 ```
@@ -93,7 +115,7 @@ For more information, see our [testing docs](/tests/README.md)
 Cloudbeat uses [`mockery`](https://github.com/vektra/mockery) as its mocking test framework.
 `Mockery` provides an easy way to generate mocks for golang interfaces.
 
-Some tests use the new [expecter]((https://github.com/vektra/mockery#expecter-interfaces)) interface the library provides.
+Some tests use the new [expecter](https://github.com/vektra/mockery#expecter-interfaces) interface the library provides.
 For example, given an interface such as
 
 ```go
@@ -101,7 +123,9 @@ type Requester interface {
 	Get(path string) (string, error)
 }
 ```
+
 You can use the type-safe expecter interface as such:
+
 ```go
 requesterMock := Requester{}
 requesterMock.EXPECT().Get("some path").Return("result", nil)
@@ -112,19 +136,11 @@ requesterMock.EXPECT().
 	Call.Return(func(path string) string { return "result for " + path }, nil)
 ```
 
-Notes
-- Place the test in the same package as the code it meant to test.
-- File name should be aligned with the convention `original_file_mock`. For example: ecr_provider -> ecr_provider_mock.
-
-Command example:
-```
-mockery --name=<interface_name> --with-expecter  --case underscore  --inpackage --recursive
-```
+To easily generate mocks run `just generate-mocks`
 
 ### Running CI Locally - GitHub Act
 
 #### Overview
-
 
 [GitHub act tool](https://github.com/nektos/act) allows execution of GitHub actions locally.
 
@@ -194,12 +210,12 @@ The solution is described in [this](https://github.com/nektos/act/issues/329) is
 In project's root folder need to create `docker-compose.yml`:
 
 ```yaml
-  artifact-server:
-    image: ghcr.io/jefuller/artifact-server:latest
-    environment:
-      AUTH_KEY: foo
-    ports:
-      - "8080:8080"
+artifact-server:
+  image: ghcr.io/jefuller/artifact-server:latest
+  environment:
+    AUTH_KEY: foo
+  ports:
+    - "8080:8080"
 ```
 
 Then update `.actrc`:

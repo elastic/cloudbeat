@@ -70,3 +70,7 @@ func (p PasswordPolicy) GetResourceName() string {
 func (p PasswordPolicy) GetResourceType() string {
 	return fetching.PwdPolicyType
 }
+
+func (p PasswordPolicy) GetRegion() string {
+	return awslib.GlobalRegion
+}

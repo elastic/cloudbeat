@@ -10,6 +10,7 @@ data:
   ES_PASSWORD: "changeme"
   ES_HOST: "elasticsearch-master.kube-system"
   USE_DOCKER: "false"
+  MARKER_CMD: {{ .Values.testData.markerCmd}}
   TEST_MARKER: {{ .Values.testData.marker }}
   {{- if .Values.testData.range }}
   RANGE_FLAG: "--range"
@@ -20,3 +21,4 @@ data:
   {{- end }}
   AGENT_NAME: {{ .Values.testData.agentName }}
   CLUSTER_TYPE: {{ .Values.testData.clusterType }}
+  EKS_CONFIG: {{ .Values.testData.clusterConfig }}

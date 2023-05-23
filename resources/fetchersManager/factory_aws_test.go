@@ -38,7 +38,7 @@ type awsTestFetcher struct {
 	cfg        awsTestFetcherConfig
 }
 
-func (f *awsTestFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *awsTestFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      awsTestResource{AwsConfig: f.cfg.AwsConfig},
 		CycleMetadata: cMetadata,
@@ -47,7 +47,7 @@ func (f *awsTestFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMeta
 	return nil
 }
 
-func (f awsTestFetcher) Stop() {
+func (f *awsTestFetcher) Stop() {
 }
 
 type awsTestResource struct {
@@ -68,7 +68,7 @@ func (a awsTestResource) GetElasticCommonData() any {
 
 type awsTestFactory struct{}
 
-func (n *awsTestFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (n *awsTestFactory) Create(_ *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	cfg := awsTestFetcherConfig{}
 	err := c.Unpack(&cfg)
 	if err != nil {
@@ -147,7 +147,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 		s.F = newFactories()
 		s.F.RegisterFactory(test.fetcherName, &awsTestFactory{})
 		reg := NewFetcherRegistry(s.log)
-		conf := createEksAgentConfig(s, test.awsConfig, test.fetcherName)
+		conf := createEksAgentConfig(test.awsConfig, test.fetcherName)
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)
 		s.Equal(test.fetcherName, parsedList[0].name)
 		s.NoError(err)
@@ -167,11 +167,13 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 	}
 }
 
-func createEksAgentConfig(s *FactoriesTestSuite, awsConfig aws.ConfigAWS, fetcherName string) *config.Config {
+func createEksAgentConfig(awsConfig aws.ConfigAWS, fetcherName string) *config.Config {
 	conf := &config.Config{
 		Benchmark: config.CIS_EKS,
-		AWSConfig: awsConfig,
-		Fetchers:  []*agentconfig.C{agentconfig.MustNewConfigFrom(fmt.Sprint("name: ", fetcherName))},
+		CloudConfig: config.CloudConfig{
+			AwsCred: awsConfig,
+		},
+		Fetchers: []*agentconfig.C{agentconfig.MustNewConfigFrom(fmt.Sprint("name: ", fetcherName))},
 	}
 
 	return conf

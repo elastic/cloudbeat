@@ -88,10 +88,10 @@ func (m *LeaderelectionManager) Run(ctx context.Context) error {
 
 	go m.leader.Run(newCtx)
 	m.wg.Add(1)
-	m.log.Infof("started leader election")
+	m.log.Infof("Started leader election")
 
 	time.Sleep(FirstLeaderDeadline)
-	m.log.Infof("stop waiting after %s for a leader to be elected", FirstLeaderDeadline)
+	m.log.Debugf("Stop waiting after %s for a leader to be elected", FirstLeaderDeadline)
 
 	return nil
 }
@@ -104,7 +104,7 @@ func (m *LeaderelectionManager) Stop() {
 		return
 	}
 
-	m.log.Warnf("cancelFunc is not set")
+	m.log.Warn("Leader election manager is not initialized")
 }
 
 func (m *LeaderelectionManager) buildConfig(ctx context.Context) (le.LeaderElectionConfig, error) {
@@ -138,29 +138,29 @@ func (m *LeaderelectionManager) buildConfig(ctx context.Context) (le.LeaderElect
 		RetryPeriod:     RetryPeriod,
 		Callbacks: le.LeaderCallbacks{
 			OnStartedLeading: func(ctx context.Context) {
-				m.log.Infof("leader election lock GAINED, id: %v", id)
+				m.log.Infof("Leader election lock GAINED, id: %v", id)
 			},
 			OnStoppedLeading: func() {
-				// OnStoppedLeading gets called even if cloudbeat wasn't the leader, for example, if the context is cancelled due to reconfiguration from fleet.
+				// OnStoppedLeading gets called even if cloudbeat wasn't the leader, for example, if the context is canceled due to reconfiguration from fleet.
 				// We re-run the manager to keep following leader status except for context cancellation events.
-				m.log.Infof("leader election lock LOST, id: %v", id)
+				m.log.Infof("Leader election lock LOST, id: %v", id)
 				defer m.wg.Done()
 
 				select {
 				case <-ctx.Done():
-					m.log.Info("Context is cancelled - should not re-run leader election")
+					m.log.Info("Leader election is canceled")
 					return
 				default:
 					go m.leader.Run(ctx)
 					m.wg.Add(1)
-					m.log.Infof("re-running leader elector")
+					m.log.Infof("Re-running leader elector")
 				}
 			},
 			OnNewLeader: func(identity string) {
 				if identity == id {
-					m.log.Infof("leader election lock has been acquired by this pod, id: %v", identity)
+					m.log.Infof("Leader election lock has been acquired by this pod, id: %v", identity)
 				} else {
-					m.log.Infof("leader election lock has been acquired by another pod, id: %v", identity)
+					m.log.Infof("Leader election lock has been acquired by another pod, id: %v", identity)
 				}
 			},
 		},
@@ -180,7 +180,7 @@ func (m *LeaderelectionManager) currentPodID() (string, error) {
 func (m *LeaderelectionManager) lastPart(s string) (string, error) {
 	parts := strings.Split(s, "-")
 	if len(parts) == 0 {
-		m.log.Warnf("failed to find id for pod_name: %s", s)
+		m.log.Warnf("Failed to find id for pod_name: %s", s)
 		return m.generateUUID()
 	}
 
@@ -188,7 +188,7 @@ func (m *LeaderelectionManager) lastPart(s string) (string, error) {
 }
 
 func (m *LeaderelectionManager) generateUUID() (string, error) {
-	uuid, err := uuid.NewV4()
-	m.log.Warnf("Generating uuid as an identifier, UUID: %s", uuid.String())
-	return uuid.String(), err
+	result, err := uuid.NewV4()
+	m.log.Warnf("Generating uuid as an identifier, UUID: %s", result.String())
+	return result.String(), err
 }

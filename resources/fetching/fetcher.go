@@ -28,21 +28,42 @@ import (
 const (
 	KubeAPIType = "kube-api"
 
-	EcrType           = "aws-ecr"
-	IAMType           = "aws-iam"
-	EC2NetworkingType = "aws-ec2-network"
-	NetworkNACLType   = "aws-nacl"
-	SecurityGroupType = "aws-security-group"
-	ElbType           = "aws-elb"
-	IAMUserType       = "aws-iam-user"
-	PwdPolicyType     = "aws-password-policy"
-	EksType           = "aws-eks"
+	EcrType                   = "aws-ecr"
+	IAMType                   = "aws-iam"
+	EC2Type                   = "aws-ec2"
+	EC2NetworkingType         = "aws-ec2-network"
+	MonitoringType            = "aws-monitoring"
+	NetworkNACLType           = "aws-nacl"
+	TrailType                 = "aws-trail"
+	MultiTrailsType           = "aws-multi-trails"
+	SecurityGroupType         = "aws-security-group"
+	EBSType                   = "aws-ebs"
+	EBSSnapshotType           = "aws-ebs-snapshot"
+	ElbType                   = "aws-elb"
+	IAMUserType               = "aws-iam-user"
+	IAMServerCertificateType  = "aws-iam-server-certificate"
+	PwdPolicyType             = "aws-password-policy"
+	EksType                   = "aws-eks"
+	S3Type                    = "aws-s3"
+	KmsType                   = "aws-kms"
+	SecurityHubType           = "aws-securityhub"
+	VpcType                   = "aws-vpc"
+	RdsType                   = "aws-rds"
+	ConfigServiceResourceType = "aws-config"
+	PolicyType                = "aws-policy"
+	AccessAnalyzers           = "aws-access-analyzers"
 
 	CloudIdentity          = "identity-management"
 	EC2Identity            = "cloud-compute"
+	MonitoringIdentity     = "monitoring"
 	CloudContainerMgmt     = "caas" // containers as a service
 	CloudLoadBalancer      = "load-balancer"
 	CloudContainerRegistry = "container-registry"
+	CloudStorage           = "cloud-storage"
+	CloudAudit             = "cloud-audit"
+	CloudDatabase          = "cloud-database"
+	CloudConfig            = "cloud-config"
+	KeyManagement          = "key-management"
 )
 
 // Factory can create fetcher instances based on configuration
@@ -87,6 +108,7 @@ type ResourceMetadata struct {
 	SubType   string `json:"sub_type,omitempty"`
 	Name      string `json:"name,omitempty"`
 	ECSFormat string `json:"ecsFormat,omitempty"`
+	Region    string `json:"region,omitempty"`
 }
 
 type Result struct {

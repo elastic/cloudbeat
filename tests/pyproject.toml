@@ -42,5 +42,12 @@ markers = [
     "eks_file_system_rules",
     "eks_process_rules",
     "eks_k8s_objects_rules",
-    "eks_aws_service_rules",
+    "eks_service_rules",
+    "aws_s3_service_rules",
+    "aws_iam_rules",
+    "aws_logging_rules",
+    "aws_ec2_rules",
+    "aws_rds_rules",
+    "aws_vpc_rules",
+    "aws_monitoring_rules",
 ]

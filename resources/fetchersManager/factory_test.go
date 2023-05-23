@@ -40,7 +40,7 @@ func newSyncNumberFetcher(num int, ch chan fetching.ResourceInfo) fetching.Fetch
 	return &syncNumberFetcher{num, false, ch}
 }
 
-func (f *syncNumberFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *syncNumberFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      fetchValue(f.num),
 		CycleMetadata: cMetadata,
@@ -63,7 +63,7 @@ type FactoriesTestSuite struct {
 
 type numberFetcherFactory struct{}
 
-func (n *numberFetcherFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
+func (n *numberFetcherFactory) Create(_ *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	x, _ := c.Int("num", -1)
 	return &syncNumberFetcher{int(x), false, ch}, nil
 }
@@ -172,7 +172,9 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 		err := numCfg.SetString("name", -1, test.key)
 		s.NoError(err, "Could not set name: %v", err)
 
-		conf := &config.Config{Benchmark: test.integrationType}
+		conf := &config.Config{
+			Benchmark: test.integrationType,
+		}
 		conf.Fetchers = []*agentconfig.C{numCfg}
 
 		parsedList, err := s.F.ParseConfigFetchers(s.log, conf, s.resourceCh)

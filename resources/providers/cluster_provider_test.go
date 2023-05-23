@@ -68,18 +68,25 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		{
 			config.Config{
 				Benchmark: config.CIS_EKS,
-				AWSConfig: aws.ConfigAWS{},
 			},
 			"vanilla-cluster",
 			"eks-cluster",
 			"eks-cluster",
+		},
+		{
+			config.Config{
+				Benchmark: config.CIS_AWS,
+			},
+			"",
+			"",
+			"",
 		},
 	}
 
 	for _, test := range tests {
 		metaDataProvider := &awslib.MockMetadataProvider{}
 		metaDataProvider.EXPECT().GetMetadata(mock.Anything, mock.Anything).
-			Return(awslib.Ec2Metadata{}, nil)
+			Return(&awslib.Ec2Metadata{}, nil)
 
 		kubernetesClusterProvider := &MockKubernetesClusterNameProviderApi{}
 		kubernetesClusterProvider.EXPECT().GetClusterName(mock.Anything, mock.Anything).
@@ -90,8 +97,8 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 			Return(test.eksClusterName, nil)
 
 		configProviderMock := &awslib.MockConfigProviderAPI{}
-		configProviderMock.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything, mock.Anything).
-			Return(awssdk.Config{}, nil)
+		configProviderMock.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
+			Return(&awssdk.Config{}, nil)
 
 		kubeClient := k8sfake.NewSimpleClientset()
 		clusterProvider := ClusterNameProvider{
@@ -115,7 +122,10 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	ctx := context.Background()
 	cfg := config.Config{
 		Benchmark: "invalid-type",
-		AWSConfig: aws.ConfigAWS{},
+		CloudConfig: config.CloudConfig{
+			AwsCred: aws.ConfigAWS{},
+		},
 	}
+
 	s.Panics(func() { _, _ = clusterProvider.GetClusterName(ctx, &cfg, nil) })
 }

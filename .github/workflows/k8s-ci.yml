@@ -1,32 +1,182 @@
-name: K8s Functional Tests
+name: K8s-CI
 
 on:
-  workflow_run:
-    workflows: ["Build"]
-    types:
-      - completed
+  pull_request:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+    types: [opened, synchronize, reopened]
+
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+
+env:
+  CONTAINER_SUFFIX: ${{ github.run_id }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-env:
-  CONTAINER_SUFFIX: ${{ github.event.workflow_run.workflow_id }}
-
 jobs:
-  Test_Matrix:
-    name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
+  Build:
+    name: Build
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Setup GO (with caching)
+        uses: magnetikonline/action-golang-cache@v4
+        with:
+          go-version-file: .go-version
+
+      - name: build cloudbeat binary
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: build
+
+      - name: build opa bundle
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: BuildOpaBundle
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Cache Build dependencies
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.workflow }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build cloudbeat-docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: cloudbeat:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
+
+      - name: Build elastic-agent
+        run: |
+          make build_elastic_agent_docker_image
+
+      - name: Build pytest-docker
+        uses: docker/build-push-action@v4
+        with:
+          context: ./tests/.
+          push: false
+          tags: cloudbeat-test:latest
+          cache-from: type=local,mode=max,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
+
+      - name: Cache docker images
+        uses: actions/cache@v3
+        with:
+          path: /tmp/*.tar
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
+
+      - name: Move cache
+        run: |
+          ./.ci/scripts/gh-cache.sh
+        shell: bash
+
+  k8s_functional_tests:
+    # Run only selected tests on PRs
+    if: github.event_name == 'pull_request'
+    name: ${{ matrix.test-target }}-tests
+    needs: [Build]
     runs-on: ubuntu-20.04
     timeout-minutes: 55
     strategy:
+      fail-fast: false
+      matrix:
+        test-target: [file_system_rules, k8s_object_rules, process_scheduler_rules, process_api_server_rules, process_controller_manager_rules, process_etcd_rules, process_kubelet_rules]
+        values_file: [tests/deploy/values/ci.yml]
+        range: ['0..4']
+        include:
+          # Skip agent tests until resolved
+          # - test-target: pre_merge_agent
+          #   range: ''
+          #   values_file: tests/deploy/values/ci-sa-agent.yml
+          - test-target: pre_merge
+            range: ''
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Create k8s Kind Cluster
+        run: |
+          just create-kind-cluster
+
+      - name: Cache docker images
+        uses: actions/cache@v3
+        with:
+          path: /tmp/*.tar
+          key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
+
+      - name: Load images to kind
+        run: |
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
+        shell: bash
+
+      - name: Deploy tests Helm chart
+        id: deploy_helm
+        run: |
+          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
+
+      - name: Run Tests
+        id: run_tests
+        run: |
+          just run-tests ${{ matrix.test-target }}
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure_results-${{ matrix.test-target}}
+          path: tests/allure/results/
+
+      - name: clear cache
+        id: clear_cache
+        if: always()
+        run: rm -rf /tmp/*-${{ env.CONTAINER_SUFFIX }}.tar
+
+
+  k8s_functional_tests_full:
+    # Run full test suit on post-merge
+    name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
+    if: github.event_name == 'push'
+    needs: [Build]
+    runs-on: ubuntu-20.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
       matrix:
         include:
-          - test-target: pre_merge_agent
-            range: ''
-            values_file: tests/deploy/values/ci-sa-agent.yml
+          # Skip agent tests until resolved
+          # - test-target: pre_merge_agent
+          #   range: ''
+          #   values_file: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
             range: ''
             values_file: tests/deploy/values/ci.yml
+          - test-target: aws
+            range: ''
+            values_file: tests/deploy/values/ci-aws-services.yml
           - test-target: file_system_rules
             range: '0..5'
             values_file: tests/deploy/values/ci.yml
@@ -171,7 +321,6 @@ jobs:
           - test-target: process_kubelet_rules
             range: '20..'
             values_file: tests/deploy/values/ci.yml
-      fail-fast: false
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -179,12 +328,20 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Set Kind Configuration
+        run: |
+          echo "KIND_CONFIG=kind-multi" >> $GITHUB_ENV
+          if [[ $VAR == "aws" ]]; then
+            echo "KIND_CONFIG=kind-mono" >> $GITHUB_ENV
+          fi
+        env:
+          VAR: ${{ matrix.test-target }}
+
       - name: Create k8s Kind Cluster
         run: |
-          just create-kind-cluster
+          just create-kind-cluster ${{ env.KIND_CONFIG }}
 
       - name: Cache docker images
-        if: ${{ !env.ACT }} # skip caching if running on ACT
         uses: actions/cache@v3
         with:
           path: /tmp/*.tar
@@ -192,7 +349,7 @@ jobs:
 
       - name: Load images to kind
         run: |
-          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} kind-multi
+          ./.ci/scripts/kind-images.sh ${{ env.CONTAINER_SUFFIX }} ${{ env.KIND_CONFIG }}
         shell: bash
 
       - name: Deploy tests Helm chart
@@ -200,10 +357,19 @@ jobs:
         run: |
           just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
 
+      - name: Deploy cloudbeat aws
+        if: matrix.test-target == 'aws'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          just deploy-cloudbeat-aws
+          sleep 600 # Due to many s3 buckets on AWS account
+
       - name: Run Tests
         id: run_tests
         run: |
-          just run-tests ${{ matrix.test-target }}
+          just run-tests ${{ matrix.test-target }} kind-${{ env.KIND_CONFIG }}
 
       - name: Upload Test Results
         if: always()
@@ -211,3 +377,8 @@ jobs:
         with:
           name: allure_results-${{ matrix.test-target}}
           path: tests/allure/results/
+
+      - name: clear cache
+        id: clear_cache
+        if: always()
+        run: rm -rf /tmp/*-${{ env.CONTAINER_SUFFIX }}.tar

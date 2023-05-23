@@ -151,5 +151,5 @@ func (s *OpaTestSuite) getTestConfig() *config.Config {
 }
 
 func findDecisionLogs() []observer.LoggedEntry {
-	return logp.ObserverLogs().FilterMessage("Decision Log").TakeAll()
+	return logp.ObserverLogs().FilterMessageSnippet("Decision Log").TakeAll()
 }

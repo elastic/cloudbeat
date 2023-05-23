@@ -19,6 +19,12 @@ package fetchers
 
 import (
 	"context"
+	"testing"
+	"time"
+
+	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
@@ -26,7 +32,6 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
-	"testing"
 )
 
 type IamFetcherTestSuite struct {
@@ -86,6 +91,49 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		MfaActive:           true,
 	}
 
+	iamPolicy := iam.Policy{
+		Policy: types.Policy{
+			Arn:             aws.String("testArn"),
+			AttachmentCount: aws.Int32(1),
+			IsAttachable:    true,
+		},
+		Document: map[string]interface{}{
+			"Statements": []map[string]interface{}{
+				{
+					"Resource": "*",
+					"Action":   "*",
+					"Effect":   "Allow",
+				},
+			},
+		},
+	}
+
+	certificates := iam.ServerCertificatesInfo{
+		Certificates: []types.ServerCertificateMetadata{
+			{
+				Expiration: &time.Time{},
+			},
+		},
+	}
+
+	accessAnalyzers := iam.AccessAnalyzers{
+		Analyzers: []iam.AccessAnalyzer{
+			{
+				AnalyzerSummary: aatypes.AnalyzerSummary{Arn: aws.String("some-arn")},
+				Region:          "region-1",
+			},
+			{
+				AnalyzerSummary: aatypes.AnalyzerSummary{Arn: aws.String("some-other-arn")},
+				Region:          "region-2",
+			},
+			{
+				AnalyzerSummary: aatypes.AnalyzerSummary{Arn: aws.String("some-third-arn")},
+				Region:          "region-2",
+			},
+		},
+		Regions: []string{"region-1", "region-2"},
+	}
+
 	var tests = []struct {
 		name               string
 		mocksReturnVals    mocksReturnVals
@@ -93,69 +141,107 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		numExpectedResults int
 	}{
 		{
-			name: "Should get password policy and an IAM user",
-			mocksReturnVals: mocksReturnVals{
-				"GetPasswordPolicy": {pwdPolicy, nil},
-				"GetUsers":          {[]awslib.AwsResource{iamUser}, nil},
-			},
-			account:            testAccount,
-			numExpectedResults: 2,
-		},
-		{
-			name: "Receives only an IAM user due to an error in GetPasswordPolicy",
-			mocksReturnVals: mocksReturnVals{
-				"GetPasswordPolicy": {nil, errors.New("Fail to fetch pwd policy")},
-				"GetUsers":          {[]awslib.AwsResource{iamUser}, nil},
-			},
-			account:            testAccount,
-			numExpectedResults: 1,
-		},
-		{
-			name: "Should get only a password policy resource due to an error in GetUsers",
-			mocksReturnVals: mocksReturnVals{
-				"GetPasswordPolicy": {pwdPolicy, nil},
-				"GetUsers":          {nil, errors.New("Fail to fetch iam users")},
-			},
-			account:            testAccount,
-			numExpectedResults: 1,
-		},
-		{
 			name: "Should not get any IAM resources",
 			mocksReturnVals: mocksReturnVals{
-				"GetPasswordPolicy": {nil, errors.New("Fail to fetch pwd policy")},
-				"GetUsers":          {nil, errors.New("Fail to fetch iam users")},
+				"GetPasswordPolicy":      {nil, errors.New("Fail to fetch iam pwd policy")},
+				"GetUsers":               {nil, errors.New("Fail to fetch iam users")},
+				"GetPolicies":            {nil, errors.New("Fail to fetch iam policies")},
+				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
 			},
 			account:            testAccount,
 			numExpectedResults: 0,
 		},
+		{
+			name: "Should get all AWS resources",
+			mocksReturnVals: mocksReturnVals{
+				"GetPasswordPolicy":      {pwdPolicy, nil},
+				"GetUsers":               {[]awslib.AwsResource{iamUser}, nil},
+				"GetPolicies":            {[]awslib.AwsResource{iamPolicy}, nil},
+				"ListServerCertificates": {&certificates, nil},
+				"GetAccessAnalyzers":     {accessAnalyzers, nil},
+			},
+			account:            testAccount,
+			numExpectedResults: 5,
+		},
+		{
+			name: "Should only get iam pwd policy",
+			mocksReturnVals: mocksReturnVals{
+				"GetPasswordPolicy":      {pwdPolicy, nil},
+				"GetUsers":               {nil, errors.New("Fail to fetch iam users")},
+				"GetPolicies":            {nil, errors.New("Fail to fetch iam policies")},
+				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
+			},
+			account:            testAccount,
+			numExpectedResults: 1,
+		},
+		{
+			name: "Should only get iam users",
+			mocksReturnVals: mocksReturnVals{
+				"GetPasswordPolicy":      {nil, errors.New("Fail to fetch iam pwd policy")},
+				"GetUsers":               {[]awslib.AwsResource{iamUser}, nil},
+				"GetPolicies":            {nil, errors.New("Fail to fetch iam policies")},
+				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
+			},
+			account:            testAccount,
+			numExpectedResults: 1,
+		},
+		{
+			name: "Should only get iam policies",
+			mocksReturnVals: mocksReturnVals{
+				"GetPasswordPolicy":      {nil, errors.New("Fail to fetch iam pwd policy")},
+				"GetUsers":               {nil, errors.New("Fail to fetch iam users")},
+				"GetPolicies":            {[]awslib.AwsResource{iamPolicy}, nil},
+				"ListServerCertificates": {nil, errors.New("Fail to fetch iam certificates")},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
+			},
+			account:            testAccount,
+			numExpectedResults: 1,
+		},
+		{
+			name: "Should only get iam certificates",
+			mocksReturnVals: mocksReturnVals{
+				"GetPasswordPolicy":      {nil, errors.New("Fail to fetch iam pwd policy")},
+				"GetUsers":               {nil, errors.New("Fail to fetch iam users")},
+				"GetPolicies":            {nil, errors.New("Fail to fetch iam policies")},
+				"ListServerCertificates": {&certificates, nil},
+				"GetAccessAnalyzers":     {nil, errors.New("Fail to fetch access analyzers")},
+			},
+			account:            testAccount,
+			numExpectedResults: 1,
+		},
 	}
 
 	for _, test := range tests {
-		iamCfg := IAMFetcherConfig{
-			AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-		}
+		s.Run(test.name, func() {
+			iamCfg := IAMFetcherConfig{
+				AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
+			}
 
-		iamProviderMock := &iam.MockAccessManagement{}
-		for funcName, returnVals := range test.mocksReturnVals {
-			iamProviderMock.On(funcName, context.TODO()).Return(returnVals...)
-		}
+			iamProviderMock := &iam.MockAccessManagement{}
+			for funcName, returnVals := range test.mocksReturnVals {
+				iamProviderMock.On(funcName, context.TODO()).Return(returnVals...)
+			}
 
-		iamFetcher := IAMFetcher{
-			log:         s.log,
-			iamProvider: iamProviderMock,
-			cfg:         iamCfg,
-			resourceCh:  s.resourceCh,
-			cloudIdentity: &awslib.Identity{
-				Account: &test.account,
-			},
-		}
+			iamFetcher := IAMFetcher{
+				log:         s.log,
+				iamProvider: iamProviderMock,
+				cfg:         iamCfg,
+				resourceCh:  s.resourceCh,
+				cloudIdentity: &awslib.Identity{
+					Account: &test.account,
+				},
+			}
 
-		ctx := context.Background()
+			ctx := context.Background()
 
-		err := iamFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		s.NoError(err)
+			err := iamFetcher.Fetch(ctx, fetching.CycleMetadata{})
+			s.NoError(err)
 
-		results := testhelper.CollectResources(s.resourceCh)
-		s.Equal(test.numExpectedResults, len(results))
+			results := testhelper.CollectResources(s.resourceCh)
+			s.Equal(test.numExpectedResults, len(results))
+		})
 	}
 }

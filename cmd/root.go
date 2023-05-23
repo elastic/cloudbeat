@@ -25,7 +25,7 @@ import (
 	"github.com/elastic/elastic-agent-client/v7/pkg/client"
 	"github.com/elastic/elastic-agent-client/v7/pkg/proto"
 
-	cmd "github.com/elastic/beats/v7/libbeat/cmd"
+	"github.com/elastic/beats/v7/libbeat/cmd"
 	"github.com/elastic/beats/v7/libbeat/cmd/instance"
 	"github.com/elastic/beats/v7/libbeat/common/reload"
 
@@ -45,7 +45,7 @@ func cloudbeatCfg(rawIn *proto.UnitExpectedConfig, agentInfo *client.AgentInfo) 
 		return nil, fmt.Errorf("error creating input list from raw expected config: %w", err)
 	}
 
-	// format for the reloadable list needed bythe cm.Reload() method
+	// format for the reloadable list needed by the cm.Reload() method
 	configList, err := management.CreateReloadConfigFromInputs(modules)
 	if err != nil {
 		return nil, fmt.Errorf("error creating reloader config: %w", err)

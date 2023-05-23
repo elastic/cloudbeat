@@ -22,21 +22,39 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type ElasticCompute interface {
-	DescribeNeworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
+	DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error)
 	DescribeSecurityGroups(ctx context.Context) ([]awslib.AwsResource, error)
+	DescribeVPCs(ctx context.Context) ([]awslib.AwsResource, error)
+	GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsResource, error)
+	GetRouteTableForSubnet(ctx context.Context, region string, subnetId string, vpcId string) (types.RouteTable, error)
 }
 
-func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config) *Provider {
-	svc := ec2.NewFromConfig(cfg)
+func NewEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return ec2.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
 	return &Provider{
 		log:          log,
-		client:       svc,
+		clients:      m.GetMultiRegionsClientMap(),
 		awsAccountID: awsAccountID,
-		awsRegion:    cfg.Region,
+	}
+}
+
+func NewCurrentRegionEC2Provider(log *logp.Logger, awsAccountID string, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return ec2.NewFromConfig(cfg)
+	}
+	m := factory.NewMultiRegionClients(awslib.CurrentRegionSelector(), cfg, f, log)
+	return &Provider{
+		log:          log,
+		clients:      m.GetMultiRegionsClientMap(),
+		awsAccountID: awsAccountID,
 	}
 }

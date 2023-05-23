@@ -23,7 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	smithy "github.com/aws/smithy-go"
+	"github.com/aws/smithy-go"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/gocarina/gocsv"
@@ -77,23 +77,35 @@ func (p Provider) GetUsers(ctx context.Context) ([]awslib.AwsResource, error) {
 
 		mfaDevices, err := p.getMFADevices(ctx, apiUser, userAccount)
 		if err != nil {
-			p.log.Errorf("fail to list mfa device for user: %v, error: %v", apiUser, err)
+			p.log.Errorf("fail to list mfa device for user: %s, error: %v", username, err)
 		}
 
 		pwdEnabled, err := isPasswordEnabled(userAccount)
 		if err != nil {
-			p.log.Errorf("fail to parse PasswordEnabled for user: %v, error: %v", apiUser, err)
+			p.log.Errorf("fail to parse PasswordEnabled for user: %s, error: %v", username, err)
 			pwdEnabled = false
+		}
+
+		inlinePolicies, err := p.listInlinePolicies(ctx, apiUser.UserName)
+		if err != nil && !isRootUser(username) {
+			p.log.Errorf("fail to list inline policies for user: %s, error: %v", username, err)
+		}
+
+		attachedPolicies, err := p.listAttachedPolicies(ctx, apiUser.UserName)
+		if err != nil && !isRootUser(username) {
+			p.log.Errorf("fail to list attached policies for user: %s, error: %v", username, err)
 		}
 
 		users = append(users, User{
 			AccessKeys:          keys,
 			MFADevices:          mfaDevices,
+			InlinePolicies:      inlinePolicies,
+			AttachedPolicies:    attachedPolicies,
 			Name:                username,
 			LastAccess:          userAccount.PasswordLastUsed,
 			Arn:                 arn,
-			PasswordEnabled:     pwdEnabled,
 			PasswordLastChanged: userAccount.PasswordLastChanged,
+			PasswordEnabled:     pwdEnabled,
 			MfaActive:           userAccount.MfaActive,
 		})
 	}
@@ -111,6 +123,10 @@ func (u User) GetResourceName() string {
 
 func (u User) GetResourceType() string {
 	return fetching.IAMUserType
+}
+
+func (u User) GetRegion() string {
+	return awslib.GlobalRegion
 }
 
 func (p Provider) listUsers(ctx context.Context) ([]types.User, error) {

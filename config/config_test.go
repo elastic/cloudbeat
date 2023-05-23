@@ -56,6 +56,9 @@ func (s *ConfigTestSuite) TestNew() {
 	}{
 		{
 			`
+config:
+  v1:
+    benchmark: cis_k8s
 fetchers:
   - name: a
     directory: b
@@ -71,12 +74,14 @@ fetchers:
 config:
   v1:
     benchmark: cis_eks
-access_key_id: key
-secret_access_key: secret
-session_token: session
-shared_credential_file: shared_credential_file
-credential_profile_name: credential_profile_name
-role_arn: role_arn
+    aws:
+      credentials:
+        access_key_id: key
+        secret_access_key: secret
+        session_token: session
+        shared_credential_file: shared_credential_file
+        credential_profile_name: credential_profile_name
+        role_arn: role_arn
 fetchers:
   - name: a
     directory: b
@@ -107,7 +112,7 @@ fetchers:
 			s.NoError(err)
 
 			s.Equal(test.expectedType, c.Benchmark)
-			s.Equal(test.expectedAWSConfig, c.AWSConfig)
+			s.Equal(test.expectedAWSConfig, c.CloudConfig.AwsCred)
 			s.Equal(test.expectedFetchers, len(c.Fetchers))
 		})
 	}

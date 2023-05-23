@@ -19,7 +19,9 @@ package iam
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -30,24 +32,42 @@ type AccessManagement interface {
 	GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error)
 	GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, error)
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
+	GetAccountAlias(ctx context.Context) (string, error)
+	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
+	ListServerCertificates(ctx context.Context) (awslib.AwsResource, error)
+	GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, error)
 }
 
 type Client interface {
 	ListUsers(ctx context.Context, params *iamsdk.ListUsersInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListUsersOutput, error)
 	ListMFADevices(ctx context.Context, params *iamsdk.ListMFADevicesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListMFADevicesOutput, error)
 	ListAccessKeys(ctx context.Context, params *iamsdk.ListAccessKeysInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAccessKeysOutput, error)
+	ListAttachedRolePolicies(ctx context.Context, params *iamsdk.ListAttachedRolePoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAttachedRolePoliciesOutput, error)
+	ListVirtualMFADevices(ctx context.Context, params *iamsdk.ListVirtualMFADevicesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListVirtualMFADevicesOutput, error)
+	ListAttachedUserPolicies(ctx context.Context, params *iamsdk.ListAttachedUserPoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAttachedUserPoliciesOutput, error)
+	ListUserPolicies(ctx context.Context, params *iamsdk.ListUserPoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListUserPoliciesOutput, error)
 	GetAccessKeyLastUsed(ctx context.Context, params *iamsdk.GetAccessKeyLastUsedInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetAccessKeyLastUsedOutput, error)
 	GetAccountPasswordPolicy(ctx context.Context, params *iamsdk.GetAccountPasswordPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetAccountPasswordPolicyOutput, error)
 	GetRolePolicy(ctx context.Context, params *iamsdk.GetRolePolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetRolePolicyOutput, error)
-	ListAttachedRolePolicies(ctx context.Context, params *iamsdk.ListAttachedRolePoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAttachedRolePoliciesOutput, error)
-	GenerateCredentialReport(ctx context.Context, params *iamsdk.GenerateCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GenerateCredentialReportOutput, error)
 	GetCredentialReport(ctx context.Context, params *iamsdk.GetCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetCredentialReportOutput, error)
-	ListVirtualMFADevices(ctx context.Context, params *iamsdk.ListVirtualMFADevicesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListVirtualMFADevicesOutput, error)
+	GetUserPolicy(ctx context.Context, params *iamsdk.GetUserPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetUserPolicyOutput, error)
+	GenerateCredentialReport(ctx context.Context, params *iamsdk.GenerateCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GenerateCredentialReportOutput, error)
+	ListAccountAliases(ctx context.Context, params *iamsdk.ListAccountAliasesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAccountAliasesOutput, error)
+	ListPolicies(ctx context.Context, params *iamsdk.ListPoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListPoliciesOutput, error)
+	GetPolicy(ctx context.Context, params *iamsdk.GetPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyOutput, error)
+	GetPolicyVersion(ctx context.Context, params *iamsdk.GetPolicyVersionInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyVersionOutput, error)
+	ListEntitiesForPolicy(ctx context.Context, params *iamsdk.ListEntitiesForPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListEntitiesForPolicyOutput, error)
+	ListServerCertificates(ctx context.Context, params *iamsdk.ListServerCertificatesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListServerCertificatesOutput, error)
+}
+
+type AccessAnalyzerClient interface {
+	ListAnalyzers(ctx context.Context, params *accessanalyzer.ListAnalyzersInput, optFns ...func(*accessanalyzer.Options)) (*accessanalyzer.ListAnalyzersOutput, error)
 }
 
 type Provider struct {
-	log    *logp.Logger
-	client Client
+	log                   *logp.Logger
+	client                Client
+	accessAnalyzerClients map[string]AccessAnalyzerClient
 }
 
 type RolePolicyInfo struct {
@@ -57,14 +77,16 @@ type RolePolicyInfo struct {
 
 // User Override SDK User type
 type User struct {
-	AccessKeys          []AccessKey  `json:"access_keys,omitempty"`
-	MFADevices          []AuthDevice `json:"mfa_devices,omitempty"`
-	Name                string       `json:"name,omitempty"`
-	LastAccess          string       `json:"last_access,omitempty"`
-	Arn                 string       `json:"arn,omitempty"`
-	PasswordLastChanged string       `json:"password_last_changed,omitempty"`
-	PasswordEnabled     bool         `json:"password_enabled"`
-	MfaActive           bool         `json:"mfa_active"`
+	AccessKeys          []AccessKey            `json:"access_keys,omitempty"`
+	MFADevices          []AuthDevice           `json:"mfa_devices,omitempty"`
+	InlinePolicies      []PolicyDocument       `json:"inline_policies"`
+	AttachedPolicies    []types.AttachedPolicy `json:"attached_policies"`
+	Name                string                 `json:"name,omitempty"`
+	LastAccess          string                 `json:"last_access,omitempty"`
+	Arn                 string                 `json:"arn,omitempty"`
+	PasswordLastChanged string                 `json:"password_last_changed,omitempty"`
+	PasswordEnabled     bool                   `json:"password_enabled"`
+	MfaActive           bool                   `json:"mfa_active"`
 }
 
 type AuthDevice struct {
@@ -110,10 +132,31 @@ type CredentialReport struct {
 	Cert2Active           bool   `csv:"cert_2_active"`
 }
 
-func NewIAMProvider(log *logp.Logger, cfg aws.Config) *Provider {
-	svc := iamsdk.NewFromConfig(cfg)
-	return &Provider{
+type Policy struct {
+	types.Policy
+	Document map[string]interface{} `json:"document,omitempty"`
+	Roles    []types.PolicyRole     `json:"roles"`
+}
+
+type ServerCertificatesInfo struct {
+	Certificates []types.ServerCertificateMetadata `json:"certificates"`
+}
+
+type PolicyDocument struct {
+	PolicyName string `json:"PolicyName,omitempty"`
+	Policy     string `json:"policy,omitempty"`
+}
+
+func NewIAMProvider(log *logp.Logger, cfg aws.Config, crossRegionFactory awslib.CrossRegionFactory[AccessAnalyzerClient]) *Provider {
+	provider := Provider{
 		log:    log,
-		client: svc,
+		client: iamsdk.NewFromConfig(cfg),
 	}
+	if crossRegionFactory != nil {
+		m := crossRegionFactory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, func(cfg aws.Config) AccessAnalyzerClient {
+			return accessanalyzer.NewFromConfig(cfg)
+		}, log)
+		provider.accessAnalyzerClients = m.GetMultiRegionsClientMap()
+	}
+	return &provider
 }

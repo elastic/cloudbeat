@@ -1,4 +1,4 @@
-name: Periodic CI
+name: Periodic-CI
 
 on:
   # On demand execution of workflow will run all suites.
@@ -6,15 +6,15 @@ on:
     inputs:
       test-targets:
         required: true
-        description: 'Specify test markers to run'
+        description: "Specify test markers to run"
         default: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
 
   schedule:
     # Nightly job. Running every day at 2 am
-    - cron: '00 02 * * 0-4'
+    - cron: "00 02 * * 0-4"
 
     # Weekly job running every saturday at 2 am
-    - cron: '00 02 * * 6'
+    - cron: "00 02 * * 6"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -27,7 +27,6 @@ permissions:
   actions: read
   checks: write
   statuses: read
-
 jobs:
   Setup:
     runs-on: ubuntu-20.04
@@ -35,39 +34,39 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     timeout-minutes: 15
     steps:
-    - id: Default
-      env:
-        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
-      run: |
-        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+      - id: Default
+        env:
+          TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+        run: |
+          echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
 
-    - id: Nightly
-      if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 0-4'
-      env:
-        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
-      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+      - id: Nightly
+        if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 0-4'
+        env:
+          TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+        run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
-    - id: Weekly
-      if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 6'
-      env:
-        TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
-      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+      - id: Weekly
+        if: github.event_name == 'schedule' && github.event.schedule == '00 02 * * 6'
+        env:
+          TEST_TARGETS: ${{ env.TEST_TARGETS_DEFAULT }}
+        run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
-    - id: Push
-      if: github.event_name == 'push'
-      env:
-        TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
-      run: |
-        echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
+      - id: Push
+        if: github.event_name == 'push'
+        env:
+          TEST_TARGETS: '[\"pre_merge\", \"file_system_rules\"]'
+        run: |
+          echo "TEST_MATRIX=$TEST_TARGETS" >> $GITHUB_ENV
 
-    - id: Dispatch
-      if: github.event_name == 'workflow_dispatch'
-      env:
-        TEST_TARGETS: ${{ github.event.inputs.test-targets }}
-      run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
+      - id: Dispatch
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TEST_TARGETS: ${{ github.event.inputs.test-targets }}
+        run: echo "TEST_MATRIX=${TEST_TARGETS}" >> $GITHUB_ENV
 
-    - id: set-matrix
-      run: echo "{matrix}={${{ env.TEST_MATRIX}}}" >> $GITHUB_OUTPUT
+      - id: set-matrix
+        run: echo "{matrix}={${{ env.TEST_MATRIX}}}" >> $GITHUB_OUTPUT
 
   Build:
     name: Build
@@ -77,28 +76,15 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v3
+      - name: Set up GO (with caching)
+        uses: magnetikonline/action-golang-cache@v4
         with:
           go-version-file: .go-version
 
-      - name: Fetch OPA version
-        run: echo "OPA_VERSION=$(go list -m -f {{.Version}} github.com/open-policy-agent/opa | sed 's/v//')" >> $GITHUB_ENV
-
       - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v1
+        uses: open-policy-agent/setup-opa@v2
         with:
-          version: ${{ env.OPA_VERSION }}
-
-      - name: cache go dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ matrix.go-version }}-
+          version: 0.44 # this should be aligned with the version in go.mod
 
       - name: build cloudbeat
         run: make
@@ -121,7 +107,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: false
@@ -131,7 +117,7 @@ jobs:
           outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: ./tests/.
           push: false
@@ -154,7 +140,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   Test_Matrix:
-    needs: ['Build', 'Setup']
+    needs: ["Build", "Setup"]
     strategy:
       fail-fast: false
       matrix:
@@ -166,7 +152,7 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - uses: azure/setup-helm@v1
+      - uses: azure/setup-helm@v3
         id: install
 
       - uses: extractions/setup-just@v1
@@ -174,7 +160,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.2.0
+        uses: helm/kind-action@v1.7.0
         with:
           config: deploy/k8s/kind/kind-mono.yml
 
@@ -230,7 +216,7 @@ jobs:
 
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@v2.1.0
+        uses: andrcuns/allure-publish-action@v2.3.0
         with:
           storageType: s3
           resultsGlob: "tests/allure/results/*"

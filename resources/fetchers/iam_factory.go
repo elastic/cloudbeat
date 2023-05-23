@@ -20,8 +20,10 @@ package fetchers
 import (
 	"context"
 	"fmt"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
@@ -33,14 +35,14 @@ import (
 
 func init() {
 	fetchersManager.Factories.RegisterFactory(fetching.IAMType, &IAMFactory{
-		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
-		IdentityProvider:  awslib.GetIdentityClient,
+		IdentityProvider:   awslib.GetIdentityClient,
+		CrossRegionFactory: &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{},
 	})
 }
 
 type IAMFactory struct {
-	AwsConfigProvider config.AwsConfigProvider
-	IdentityProvider  func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	IdentityProvider   func(cfg awssdk.Config) awslib.IdentityProviderGetter
+	CrossRegionFactory awslib.CrossRegionFactory[iam.AccessAnalyzerClient]
 }
 
 func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
@@ -57,7 +59,7 @@ func (f *IAMFactory) Create(log *logp.Logger, c *agentconfig.C, ch chan fetching
 
 func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 	ctx := context.Background()
-	awsConfig, err := f.AwsConfigProvider.InitializeAWSConfig(ctx, cfg.AwsConfig, log)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.AwsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
@@ -68,7 +70,7 @@ func (f *IAMFactory) CreateFrom(log *logp.Logger, cfg IAMFetcherConfig, ch chan 
 		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
 	}
 
-	provider := iam.NewIAMProvider(log, awsConfig)
+	provider := iam.NewIAMProvider(log, awsConfig, f.CrossRegionFactory)
 
 	return &IAMFetcher{
 		log:           log,

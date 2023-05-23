@@ -33,16 +33,16 @@ pull_request_rules:
       - -closed
       - conflict
     actions:
-        comment:
-          message: |
-            This pull request is now in conflicts. Could you fix it? 🙏
-            To fixup this pull request, you can check out it locally. See documentation: https://help.github.com/articles/checking-out-pull-requests-locally/
-            ```
-            git fetch upstream
-            git checkout -b {{head}} upstream/{{head}}
-            git merge upstream/{{base}}
-            git push upstream {{head}}
-            ```
+      comment:
+        message: |
+          This pull request is now in conflicts. Could you fix it? 🙏
+          To fixup this pull request, you can check out it locally. See documentation: https://help.github.com/articles/checking-out-pull-requests-locally/
+          ```
+          git fetch upstream
+          git checkout -b {{head}} upstream/{{head}}
+          git merge upstream/{{base}}
+          git push upstream {{head}}
+          ```
   - name: close automated pull requests with bump updates if any conflict
     conditions:
       - -merged
@@ -58,12 +58,12 @@ pull_request_rules:
   - name: delete upstream branch after merging changes on .go-version or it's closed
     conditions:
       - or:
-        - merged
-        - closed
+          - merged
+          - closed
       - and:
-        - label=automation
-        - head~=^update-go-version
-        - files~=^\.go-version$
+          - label=automation
+          - head~=^update-go-version
+          - files~=^\.go-version$
     actions:
       delete_head_branch:
   - name: automatic approval for mergify pull requests with changes in bump-rules
@@ -95,12 +95,12 @@ pull_request_rules:
   - name: delete upstream branch with changes on ^.mergify.yml that has been merged or closed
     conditions:
       - or:
-        - merged
-        - closed
+          - merged
+          - closed
       - and:
-        - label=automation
-        - head~=^add-backport-next.*
-        - files~=^\.mergify\.yml$
+          - label=automation
+          - head~=^add-backport-next.*
+          - files~=^\.mergify\.yml$
     actions:
       delete_head_branch:
   - name: notify the backport has not been merged yet
@@ -190,6 +190,32 @@ pull_request_rules:
           - "{{ author }}"
         branches:
           - "8.6"
+        labels:
+          - "backport"
+        title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
+  - name: backport patches to 8.7 branch
+    conditions:
+      - merged
+      - label=backport-v8.7.0
+    actions:
+      backport:
+        assignees:
+          - "{{ author }}"
+        branches:
+          - "8.7"
+        labels:
+          - "backport"
+        title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"
+  - name: backport patches to 8.8 branch
+    conditions:
+      - merged
+      - label=backport-v8.8.0
+    actions:
+      backport:
+        assignees:
+          - "{{ author }}"
+        branches:
+          - "8.8"
         labels:
           - "backport"
         title: "[{{ destination_branch }}](backport #{{ number }}) {{ title }}"

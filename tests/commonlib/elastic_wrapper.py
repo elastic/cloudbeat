@@ -3,7 +3,6 @@ This module is a wrapper of ElasticSearch low-level client
 """
 
 from elasticsearch import Elasticsearch
-from loguru import logger
 
 
 class ElasticWrapper:
@@ -61,8 +60,7 @@ class ElasticWrapper:
         """
         try:
             ret_value = data["hits"]["hits"][index]["_source"]
-        except IndexError as ex:
-            logger.warning(ex)
+        except IndexError:
             return {}
         return ret_value
 
@@ -87,7 +85,7 @@ class ElasticWrapper:
             "bool": {
                 "filter": [
                     {"term": term},
-                    {"range": {"@timestamp": {"gte": "now-30s"}}},
+                    {"range": {"@timestamp": {"gte": "now-5m"}}},
                 ],
             },
         }

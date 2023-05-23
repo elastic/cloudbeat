@@ -1,0 +1,30 @@
+name: Publish-Artifacts
+
+on:
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+'
+    paths:
+      - deploy/cloudformation/*.yml
+      - .github/workflows/publish-artifacts.yml
+
+jobs:
+  Cloudformation:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.CSPM_CFT_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CSPM_CFT_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      - name: Upload to S3 if elastic-agent CloudFormation template has changed
+        run: |
+          VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
+          FILENAME=$(date +"cloudformation-$VERSION-%Y-%m-%d-%H-%M-%S.yml")
+          echo "Uploading $FILENAME to S3"
+          aws s3 cp deploy/cloudformation/elastic-agent-ec2.yml s3://elastic-cspm-cft/$FILENAME

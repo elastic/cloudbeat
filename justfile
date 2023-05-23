@@ -1,7 +1,9 @@
 # Variables
 CLOUDBEAT_VERSION := ''
 kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
+kustomizeVanillaNoCertOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla-nocert"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
+kustomizeAwsOverlay := "deploy/kustomize/overlays/cloudbeat-aws"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
 
@@ -20,15 +22,31 @@ create-vanilla-deployment-file:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kustomize build {{kustomizeVanillaOverlay}} --output deploy/k8s/cloudbeat-ds.yaml
 
-build-deploy-cloudbeat $GOARCH=LOCAL_GOARCH:
+create-vanilla-deployment-file-nocert:
+  kustomize build {{kustomizeVanillaNoCertOverlay}} --output deploy/k8s/cloudbeat-ds-nocert.yaml
+
+create-aws-deployment-file:
+  kustomize build {{kustomizeAwsOverlay}} --output deploy/aws/cloudbeat-ds.yaml
+
+build-deploy-cloudbeat kind='kind-multi' $GOARCH=LOCAL_GOARCH:
+  just build-cloudbeat-docker-image $GOARCH
+  just load-cloudbeat-image {{kind}}
+  just deploy-cloudbeat
+
+build-deploy-cloudbeat-nocert $GOARCH=LOCAL_GOARCH:
   just build-cloudbeat-docker-image $GOARCH
   just load-cloudbeat-image
-  just deploy-cloudbeat
+  just deploy-cloudbeat-nocert
 
 build-deploy-cloudbeat-debug $GOARCH=LOCAL_GOARCH:
   just build-cloudbeat-debug $GOARCH
   just load-cloudbeat-image
   just deploy-cloudbeat
+
+build-deploy-cloudbeat-debug-nocert $GOARCH=LOCAL_GOARCH:
+  just build-cloudbeat-debug $GOARCH
+  just load-cloudbeat-image
+  just deploy-cloudbeat-nocert
 
 # Builds cloudbeat binary and replace it in the agents (in the current context - i.e. `kubectl config current-context`)
 # Set GOARCH to the desired values amd64|arm64
@@ -68,6 +86,12 @@ deploy-cloudbeat:
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaOverlay}} -n kube-system
   rm {{kustomizeVanillaOverlay}}/ca-cert.pem
 
+deploy-cloudbeat-aws:
+  kubectl delete -k {{kustomizeAwsOverlay}} -n kube-system || true && kubectl apply -k {{kustomizeAwsOverlay}} -n kube-system
+
+deploy-cloudbeat-nocert:
+  kubectl delete -k {{kustomizeVanillaNoCertOverlay}} -n kube-system & kubectl apply -k {{kustomizeVanillaNoCertOverlay}} -n kube-system
+
 # Builds cloudbeat docker image with the OPA bundle included and the debug flag
 build-cloudbeat-debug $GOARCH=LOCAL_GOARCH: build-opa-bundle
   GOOS=linux go mod vendor
@@ -76,6 +100,9 @@ build-cloudbeat-debug $GOARCH=LOCAL_GOARCH: build-opa-bundle
 delete-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
   kubectl delete -k {{kustomizeVanillaOverlay}} -n kube-system
+
+delete-cloudbeat-nocert:
+  kubectl delete -k {{kustomizeVanillaNoCertOverlay}} -n kube-system
 
 # EKS
 create-eks-deployment-file:
@@ -92,6 +119,9 @@ logs-cloudbeat:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl logs -f "${CLOUDBEAT_POD}" -n kube-system
 
+deploy-cloudformation:
+  cd deploy/cloudformation && go run .
+
 build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v
 
@@ -102,7 +132,10 @@ elastic-stack-down:
   elastic-package stack down
 
 elastic-stack-connect-kind kind='kind-multi':
-  ./.ci/scripts/connect_kind.sh {{kind}}
+  ./scripts/connect_kind.sh {{kind}}
+
+elastic-stack-disconnect-kind kind='kind-multi':
+  ./scripts/connect_kind.sh {{kind}} disconnect
 
 ssh-cloudbeat:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
@@ -111,6 +144,18 @@ ssh-cloudbeat:
 expose-ports:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
+
+#### MOCKS #####
+
+# generate new and update existing mocks from golang interfaces
+# and update the license header
+generate-mocks:
+  mockery --dir . --inpackage --all --with-expecter --case underscore --recursive --exclude vendor
+  mage AddLicenseHeaders
+
+# run to validate no mocks are missing
+validate-mocks:
+  ./scripts/validate-mocks.sh
 
 
 #### TESTS ####

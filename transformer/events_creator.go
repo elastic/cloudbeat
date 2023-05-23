@@ -40,9 +40,9 @@ const (
 )
 
 type Transformer struct {
-	log        *logp.Logger
-	index      string
-	commonData dataprovider.CommonDataInterface
+	log                *logp.Logger
+	index              string
+	commonDataProvider dataprovider.CommonDataProvider
 }
 
 type ECSEvent struct {
@@ -55,11 +55,11 @@ type ECSEvent struct {
 	Type     []string  `json:"type"`
 }
 
-func NewTransformer(log *logp.Logger, cd dataprovider.CommonDataInterface, index string) Transformer {
+func NewTransformer(log *logp.Logger, cdp dataprovider.CommonDataProvider, index string) Transformer {
 	return Transformer{
-		log:        log,
-		index:      index,
-		commonData: cd,
+		log:                log,
+		index:              index,
+		commonDataProvider: cdp,
 	}
 }
 
@@ -73,8 +73,13 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 	if err != nil {
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
 	}
-	resMetadata.ID = t.commonData.GetResourceId(resMetadata)
-	clusterName := t.commonData.GetClusterName()
+	t.log.Infof("fetching data for %s and id %s", resMetadata.Type, resMetadata.ID)
+	cd, err := t.commonDataProvider.FetchData(resMetadata.Type, resMetadata.ID)
+	if err != nil {
+		return []beat.Event{}, err
+	}
+	t.log.Infof("got data for %s and id %s", resMetadata.Type, cd.ResourceID)
+	resMetadata.ID = cd.ResourceID
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
@@ -87,19 +92,18 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 			Timestamp: timestamp,
 			Fields: mapstr.M{
 				resMetadata.ECSFormat: eventData.GetElasticCommonData(),
-				"event":               buildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt),
+				"event":               BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
 				"resource":            resource,
 				"result":              finding.Result,
 				"rule":                finding.Rule,
 				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
-				"cloudbeat":           t.commonData.GetVersionInfo(),
+				"cloudbeat":           cd.VersionInfo,
 			},
 		}
-		if clusterName != "" {
-			_, err := event.Fields.Put("orchestrator.cluster.name", clusterName)
-			if err != nil {
-				return nil, fmt.Errorf("failed to add cluster name to object: %v", err)
-			}
+
+		err := t.commonDataProvider.EnrichEvent(&event, resMetadata)
+		if err != nil {
+			return nil, fmt.Errorf("failed to enrich event: %v", err)
 		}
 
 		events = append(events, event)
@@ -108,10 +112,10 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 	return events, nil
 }
 
-func buildECSEvent(seq int64, created time.Time) ECSEvent {
+func BuildECSEvent(seq int64, created time.Time, categories []string) ECSEvent {
 	id, _ := uuid.NewV4() // zero value in case of an error is uuid.Nil
 	return ECSEvent{
-		Category: []string{ecsCategoryConfiguration},
+		Category: categories,
 		Created:  created,
 		ID:       id.String(),
 		Kind:     ecsKindState,

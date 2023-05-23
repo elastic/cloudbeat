@@ -33,10 +33,11 @@ import (
 type mocksReturnVals map[string][][]any
 
 type expectedResult struct {
-	Arn          string
-	HasUsed      bool
-	IsVirtualMFA bool
-	MfaActive    bool
+	Arn               string
+	HasUsed           bool
+	IsVirtualMFA      bool
+	MfaActive         bool
+	hasAttachedPolicy bool
 }
 
 func Test_GetUsers(t *testing.T) {
@@ -50,24 +51,23 @@ func Test_GetUsers(t *testing.T) {
 		{
 			name: "Test 1: Should not return users",
 			mocksReturnVals: mocksReturnVals{
-				"ListUsers":                {{&iamsdk.ListUsersOutput{}, nil}},
-				"ListMFADevices":           {{nil, nil}},
-				"GenerateCredentialReport": {{nil, nil}},
-				"GetCredentialReport":      {{nil, nil}},
+				"ListUsers":           {{&iamsdk.ListUsersOutput{}, nil}},
+				"GetCredentialReport": {{nil, nil}},
 			},
 			expected: []expectedResult{
 				{
-					HasUsed:      false,
-					IsVirtualMFA: false,
-					Arn:          "",
-					MfaActive:    true,
+					Arn:               "",
+					HasUsed:           false,
+					IsVirtualMFA:      false,
+					MfaActive:         true,
+					hasAttachedPolicy: false,
 				},
 			},
 			wantErr:       false,
 			expectedUsers: 0,
 		},
 		{
-			name: "Test 2: Should return two users",
+			name: "Test 2: Should return 3 users",
 			mocksReturnVals: mocksReturnVals{
 				"ListUsers": {{&iamsdk.ListUsersOutput{Users: apiUsers}, nil}},
 				"ListMFADevices": {
@@ -79,25 +79,43 @@ func Test_GetUsers(t *testing.T) {
 				"GetCredentialReport": {
 					{nil, &smithy.GenericAPIError{Code: "ReportNotPresent"}},
 					{CredentialsReportOutput, nil}},
+				"ListUserPolicies": {
+					{&iamsdk.ListUserPoliciesOutput{PolicyNames: []string{"inline-test-policy"}}, nil},
+					{&iamsdk.ListUserPoliciesOutput{PolicyNames: []string{"inline-test-policy"}}, nil},
+					{nil, errors.New("no such user - root account")},
+				},
+				"ListAttachedUserPolicies": {
+					{&iamsdk.ListAttachedUserPoliciesOutput{AttachedPolicies: []types.AttachedPolicy{{PolicyName: aws.String("policy-name-1")}}}, nil},
+					{&iamsdk.ListAttachedUserPoliciesOutput{AttachedPolicies: []types.AttachedPolicy{{PolicyName: aws.String("policy-name-2")}}}, nil},
+					{nil, errors.New("no such user - root account")},
+				},
+				"GetUserPolicy": {
+					{&iamsdk.GetUserPolicyOutput{PolicyDocument: aws.String("aws-test-policy"), PolicyName: aws.String("policy-name-1")}, nil},
+					{&iamsdk.GetUserPolicyOutput{PolicyDocument: aws.String("aws-test-policy"), PolicyName: aws.String("policy-name-2")}, nil},
+					{nil, errors.New("no such user - root account")},
+				},
 			},
 			expected: []expectedResult{
 				{
-					HasUsed:      true,
-					MfaActive:    true,
-					IsVirtualMFA: true,
-					Arn:          "arn:aws:iam::123456789012:user/user1",
+					Arn:               "arn:aws:iam::123456789012:user/user1",
+					HasUsed:           true,
+					IsVirtualMFA:      true,
+					MfaActive:         true,
+					hasAttachedPolicy: true,
 				},
 				{
-					HasUsed:      true,
-					MfaActive:    true,
-					IsVirtualMFA: false,
-					Arn:          "arn:aws:iam::123456789012:user/user2",
+					HasUsed:           true,
+					MfaActive:         true,
+					IsVirtualMFA:      false,
+					Arn:               "arn:aws:iam::123456789012:user/user2",
+					hasAttachedPolicy: true,
 				},
 				{
-					HasUsed:      true,
-					MfaActive:    false,
-					IsVirtualMFA: false,
-					Arn:          "arn:aws:iam::1234567890:root",
+					HasUsed:           true,
+					MfaActive:         false,
+					IsVirtualMFA:      false,
+					Arn:               "arn:aws:iam::1234567890:root",
+					hasAttachedPolicy: false,
 				},
 			},
 			wantErr:       false,
@@ -127,17 +145,7 @@ func Test_GetUsers(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		mockedClient := &MockClient{}
-		for funcName, returnVals := range test.mocksReturnVals {
-			for _, vals := range returnVals {
-				mockedClient.On(funcName, mock.Anything, mock.Anything).Return(vals...).Once()
-			}
-		}
-
-		p := Provider{
-			client: mockedClient,
-			log:    logp.NewLogger("iam-provider"),
-		}
+		p := createProviderFromMockValues(test.mocksReturnVals)
 
 		users, err := p.GetUsers(context.TODO())
 
@@ -152,10 +160,24 @@ func Test_GetUsers(t *testing.T) {
 			assert.Equal(t, test.expected[i].Arn, user.(User).Arn)
 			assert.Equal(t, test.expected[i].HasUsed, user.(User).AccessKeys[0].HasUsed)
 			assert.Equal(t, test.expected[i].MfaActive, user.(User).MfaActive)
+			assert.Equal(t, test.expected[i].hasAttachedPolicy, len(user.(User).AttachedPolicies)+len(user.(User).InlinePolicies) > 0)
 
 			if test.expected[i].MfaActive {
 				assert.Equal(t, test.expected[i].IsVirtualMFA, user.(User).MFADevices[0].IsVirtual)
 			}
 		}
+	}
+}
+
+func createProviderFromMockValues(mockReturnValues mocksReturnVals) *Provider {
+	mockedClient := MockClient{}
+	for funcName, returnValues := range mockReturnValues {
+		for _, values := range returnValues {
+			mockedClient.On(funcName, mock.Anything, mock.Anything).Return(values...).Once()
+		}
+	}
+	return &Provider{
+		log:    logp.NewLogger("iam-provider"),
+		client: &mockedClient,
 	}
 }

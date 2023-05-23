@@ -1,0 +1,387 @@
+{{- if .Values.cloudbeatEks.deploy -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: cloudbeat
+  name: cloudbeat
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    k8s-app: cloudbeat
+  name: cloudbeat-kubeadm-config
+  namespace: kube-system
+rules:
+  - apiGroups:
+      - ""
+    resourceNames:
+      - kubeadm-config
+    resources:
+      - configmaps
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    k8s-app: cloudbeat
+  name: cloudbeat-role
+  namespace: kube-system
+rules:
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - create
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    k8s-app: cloudbeat
+  name: cloudbeat
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - namespaces
+      - events
+      - pods
+      - services
+      - configmaps
+      - serviceaccounts
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - replicasets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+      - deployments
+      - replicasets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/stats
+    verbs:
+      - get
+  - nonResourceURLs:
+      - /metrics
+    verbs:
+      - get
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingressclasses
+      - ingresses
+      - networkpolicies
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - policy
+    resources:
+      - podsecuritypolicies
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cloudbeat-kubeadm-config
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cloudbeat-kubeadm-config
+subjects:
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cloudbeat-role-binding
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cloudbeat-role
+subjects:
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cloudbeat
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: cloudbeat
+    namespace: kube-system
+---
+apiVersion: v1
+data:
+  cloudbeat.yml: |
+    cloudbeat:
+      config:
+        v1:
+          benchmark: cis_eks
+          aws:
+            credentials:
+              access_key_id: ${AWS_ACCESS_KEY_ID:no_access_key_was_set}
+              secret_access_key: ${AWS_SECRET_ACCESS_KEY:no_secret_was_set}
+      # Defines how often an event is sent to the output
+      period: 30s
+      fetchers:
+        - name: kube-api
+        - name: process
+          directory: "/hostfs"
+          processes:
+            kubelet:
+              config-file-arguments:
+                - config
+        - name: aws-ecr
+        - name: aws-elb
+        - name: file-system
+          patterns: [
+            "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
+            "/hostfs/var/lib/kubelet/kubeconfig",
+          ]
+    # =================================== Kibana ===================================
+    setup.kibana:
+
+      # Kibana Host
+      host: "http://host.docker.internal:5601"
+    # =============================== Elastic Cloud ================================
+
+    # These settings simplify using Cloudbeat with the Elastic Cloud (https://cloud.elastic.co/).
+
+    # The cloud.id setting overwrites the `output.elasticsearch.hosts` and
+    # `setup.kibana.host` options.
+    # You can find the `cloud.id` in the Elastic Cloud web UI.
+    #cloud.id:
+
+    # The cloud.auth setting overwrites the `output.elasticsearch.username` and
+    # `output.elasticsearch.password` settings. The format is `<user>:<pass>`.
+    #cloud.auth:
+
+    # ---------------------------- Elasticsearch Output ----------------------------
+    output.elasticsearch:
+      # Array of hosts to connect to.
+      hosts: ${ES_HOST}
+
+      # Protocol - either `http` (default) or `https`.
+      #protocol: "https"
+
+      # Authentication credentials - either API key or username/password.
+      #api_key: "id:api_key"
+      username: ${ES_USERNAME}
+      password: ${ES_PASSWORD}
+
+      # Enable to allow sending output to older ES versions
+      allow_older_versions: true
+
+    # ================================= Processors =================================
+    processors:
+      - add_host_metadata: ~
+      - add_cloud_metadata: ~
+      - add_docker_metadata: ~
+      - add_cluster_id: ~
+
+    # Sets log level. The default log level is info.
+    # Available log levels are: error, warning, info, debug
+    logging.level: debug
+
+    # Enable debug output for selected components. To enable all selectors use ["*"]
+    # Other available selectors are "beat", "publisher", "service"
+    # Multiple selectors can be chained.
+    #logging.selectors: ["publisher"]
+
+    # Send all logging output to stderr. The default is false.
+    #logging.to_stderr: false
+kind: ConfigMap
+metadata:
+  labels:
+    k8s-app: cloudbeat
+  name: cloudbeat-daemonset-config
+  namespace: kube-system
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: cloudbeat
+  name: cloudbeat
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k8s-app: cloudbeat
+  template:
+    metadata:
+      labels:
+        k8s-app: cloudbeat
+    spec:
+      containers:
+        - env:
+            - name: CLOUDBEAT_TYPE
+              value: cloudbeat/eks
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_ACCESS_KEY_ID
+                  name: aws-creds-secret
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_SECRET_ACCESS_KEY
+                  name: aws-creds-secret
+            - name: ES_HOST
+              value: elasticsearch-master.kube-system:9200
+            - name: ES_USERNAME
+              value: kibana_system
+            - name: ES_PASSWORD
+              value: changeme
+            - name: KIBANA_HOST
+              value: http://host.docker.internal:5601
+            - name: ELASTIC_CLOUD_ID
+              value: none
+            - name: ELASTIC_CLOUD_AUTH
+              value: none
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          image: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat:latest
+          name: cloudbeat
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /cloudbeat.yml
+              name: config
+              readOnly: true
+              subPath: cloudbeat.yml
+            - mountPath: /hostfs/proc
+              name: proc
+              readOnly: true
+            - mountPath: /hostfs/etc/kubernetes
+              name: etc-kubernetes
+            - mountPath: /hostfs/var/lib
+              name: var-lib
+              readOnly: true
+            - mountPath: /hostfs/sys/fs/cgroup
+              name: cgroup
+              readOnly: true
+            - mountPath: /var/lib/docker/containers
+              name: varlibdockercontainers
+              readOnly: true
+            - mountPath: /var/log
+              name: varlog
+              readOnly: true
+            - mountPath: /hostfs/etc/passwd
+              name: passwd
+              readOnly: true
+            - mountPath: /hostfs/etc/group
+              name: group
+              readOnly: true
+            - mountPath: /hostfs/etc/systemd
+              name: etcsysmd
+              readOnly: true
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      serviceAccountName: cloudbeat
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+      volumes:
+        - hostPath:
+            path: /proc
+          name: proc
+        - hostPath:
+            path: /etc/kubernetes
+          name: etc-kubernetes
+        - hostPath:
+            path: /var/lib
+          name: var-lib
+        - hostPath:
+            path: /etc/passwd
+          name: passwd
+        - hostPath:
+            path: /etc/group
+          name: group
+        - hostPath:
+            path: /sys/fs/cgroup
+          name: cgroup
+        - hostPath:
+            path: /var/lib/docker/containers
+          name: varlibdockercontainers
+        - hostPath:
+            path: /var/log
+          name: varlog
+        - hostPath:
+            path: /etc/systemd
+          name: etcsysmd
+        - configMap:
+            defaultMode: 416
+            name: cloudbeat-daemonset-config
+          name: config
+{{- end }}

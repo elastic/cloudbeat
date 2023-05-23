@@ -20,14 +20,16 @@ package transformer
 import (
 	"context"
 	"encoding/json"
-	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/cloudbeat/dataprovider"
-	"github.com/elastic/cloudbeat/version"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"os"
 	"regexp"
 	"testing"
+
+	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/dataprovider/types"
+	"github.com/elastic/cloudbeat/version"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -38,15 +40,21 @@ import (
 )
 
 type testAttr struct {
-	name        string
-	input       evaluator.EventData
-	clusterName string
+	name  string
+	input evaluator.EventData
 }
 
 const (
 	opaResultsFileName = "opa_results.json"
 	testIndex          = "test_index"
+	resourceId         = "test_resource_id"
+	enrichedKey        = "enriched_key"
+	enrichedValue      = "enrichedValue"
 )
+
+var versionInfo = version.CloudbeatVersionInfo{
+	Version: version.Version{Version: "test_version"},
+}
 
 var fetcherResult = fetchers.FSResource{
 	EvalResource: fetchers.EvalFSResource{
@@ -105,7 +113,6 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 					CycleMetadata: fetching.CycleMetadata{},
 				},
 			},
-			clusterName: "test_cluster_name",
 		},
 		{
 			name: "Events should not be created due zero findings",
@@ -120,36 +127,26 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 					CycleMetadata: fetching.CycleMetadata{},
 				},
 			},
-			clusterName: "test_cluster_name",
-		},
-		{
-			name: "Event with no cluster name",
-			input: evaluator.EventData{
-				RuleResult: opaResults,
-				ResourceInfo: fetching.ResourceInfo{
-					Resource:      fetcherResult,
-					CycleMetadata: fetching.CycleMetadata{},
-				},
-			},
-			clusterName: "",
 		},
 	}
 
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
-			dataProviderMock := dataprovider.MockCommonDataInterface{}
-			dataProviderMock.EXPECT().GetResourceId(mock.Anything).Return("test_resource_id")
-			dataProviderMock.EXPECT().GetVersionInfo().Return(version.CloudbeatVersionInfo{
-				Version: version.Version{Version: "test_version"},
-			})
-			dataProviderMock.EXPECT().GetClusterName().Return(tt.clusterName)
+			dataProviderMock := dataprovider.MockCommonDataProvider{}
+			mockEnrichEvent := func(event *beat.Event, meta fetching.ResourceMetadata) error {
+				_, err := event.Fields.Put(enrichedKey, enrichedValue)
+				return err
+			}
+			dataProviderMock.EXPECT().FetchData(mock.Anything, mock.Anything).Return(types.Data{
+				ResourceID:  resourceId,
+				VersionInfo: versionInfo,
+			}, nil)
+			dataProviderMock.On("EnrichEvent", mock.Anything, mock.Anything).Return(mockEnrichEvent)
 
 			transformer := NewTransformer(s.log, &dataProviderMock, testIndex)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
-				ValidateClusterName(event, s, tt)
-
 				resource := event.Fields["resource"].(fetching.ResourceFields)
 				s.NotEmpty(event.Timestamp, `event timestamp is missing`)
 				s.NotEmpty(event.Fields["result"], "event result is missing")
@@ -157,22 +154,14 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(event.Fields["file"], "elastic common data is missing")
 				s.NotEmpty(resource.Raw, "raw resource is missing")
 				s.NotEmpty(resource.SubType, "resource sub type is missing")
-				s.NotEmpty(resource.ID, "resource ID is missing")
+				s.Equal(resource.ID, "test_resource_id")
 				s.NotEmpty(resource.Type, "resource  type is missing")
 				s.NotEmpty(event.Fields["event"], "resource event is missing")
-				s.NotEmpty(event.Fields["cloudbeat"], "cloudbeat's version info is missing")
+				s.Equal(event.Fields["cloudbeat"], versionInfo)
+				s.Equal(event.Fields[enrichedKey], enrichedValue)
 				s.Regexp(regexp.MustCompile("^Rule \".*\": (passed|failed)$"), event.Fields["message"], "event message is not correct")
 			}
 		})
-	}
-}
-
-func ValidateClusterName(event beat.Event, s *EventsCreatorTestSuite, tt testAttr) {
-	eventClusterName, err := event.GetValue("orchestrator.cluster.name")
-	if err != nil {
-		s.Equal(tt.clusterName, "", "Cluster name should not be present in event")
-	} else {
-		s.Equal(tt.clusterName, eventClusterName, "Cluster name should be present in event")
 	}
 }
 

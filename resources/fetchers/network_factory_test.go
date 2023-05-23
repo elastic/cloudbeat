@@ -18,12 +18,11 @@
 package fetchers
 
 import (
-	"context"
 	"testing"
 
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -44,25 +43,31 @@ func TestNetworkFactory_Create(t *testing.T) {
 	identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
 		Account: awssdk.String("test-account"),
 	}, nil)
-	awsconfig := &config.MockAwsConfigProvider{}
-	awsconfig.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
-		Call.
-		Return(func(ctx context.Context, config aws.ConfigAWS) awssdk.Config {
-			return CreateSdkConfig(config, "us1-east")
-		},
-			func(ctx context.Context, config aws.ConfigAWS) error {
-				return nil
-			},
-		)
+
+	mockEc2Compute := &ec2.MockElasticCompute{}
+	mockEc2Compute.On("DescribeNetworkAcl", mock.Anything).Return(nil, nil)
+	mockEc2Compute.On("DescribeSecurityGroups", mock.Anything).Return(nil, nil)
+	ec2Mock := &awslib.MockCrossRegionFetcher[ec2.Client]{}
+	ec2Mock.On("GetMultiRegionsClientMap").Return(nil)
+
+	mockCrossRegion := &awslib.MockCrossRegionFactory[ec2.Client]{}
+	mockCrossRegion.On(
+		"NewMultiRegionClients",
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+		mock.Anything,
+	).Return(ec2Mock)
+
 	f := &EC2NetworkFactory{
-		AwsConfigProvider: awsconfig,
+		CrossRegionFactory: mockCrossRegion,
 		IdentityProvider: func(cfg awssdk.Config) awslib.IdentityProviderGetter {
 			return identity
 		},
 	}
 	cfg, err := agentconfig.NewConfigFrom(awsConfig)
 	assert.NoError(t, err)
-	fetcher, err := f.Create(logp.NewLogger("test"), cfg, nil)
+	fetcher, err := f.Create(logp.NewLogger("network-factory-test"), cfg, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, fetcher)
 	nacl, ok := fetcher.(*NetworkFetcher)

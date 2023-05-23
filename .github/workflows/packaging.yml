@@ -30,18 +30,13 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Setup GO (with caching)
+        uses: magnetikonline/action-golang-cache@v4
+        with:
+          go-version-file: .go-version
+
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
-
-      - name: cache go dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: Packaging
         run: |

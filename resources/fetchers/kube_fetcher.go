@@ -134,7 +134,7 @@ func (f *KubeFetcher) initWatchers() error {
 		return fmt.Errorf("could not get k8s client: %w", err)
 	}
 
-	f.log.Info("Kubernetes client initiated.")
+	f.log.Info("Kubernetes client initiated")
 
 	f.watchers = make([]kubernetes.Watcher, 0)
 
@@ -145,12 +145,12 @@ func (f *KubeFetcher) initWatchers() error {
 		}
 	}
 
-	f.log.Info("Kubernetes Watchers initiated.")
+	f.log.Info("Kubernetes Watchers initiated")
 
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *KubeFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting KubeFetcher.Fetch")
 
 	var err error

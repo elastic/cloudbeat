@@ -21,24 +21,21 @@
 package config
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/elastic/cloudbeat/launcher"
-	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/cloudbeat/launcher"
 	"github.com/elastic/elastic-agent-libs/config"
-
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
 
-const DefaultNamespace = "default"
-
-const ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
+const (
+	DefaultNamespace             = "default"
+	VulnerabilityType            = "vuln_mgmt"
+	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
+)
 
 var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
 
@@ -47,13 +44,19 @@ type Fetcher struct {
 }
 
 type Config struct {
-	AWSConfig  aws.ConfigAWS           `config:",inline"`
-	Fetchers   []*config.C             `config:"fetchers"`
-	KubeConfig string                  `config:"kube_config"`
-	Period     time.Duration           `config:"period"`
-	Processors processors.PluginConfig `config:"processors"`
-	BundlePath string                  `config:"bundle_path"`
-	Benchmark  string                  `config:"config.v1.benchmark"`
+	Benchmark   string                  `config:"config.v1.benchmark"`
+	Type        string                  `config:"config.v1.type"`
+	Deployment  string                  `config:"config.v1.deployment"`
+	CloudConfig CloudConfig             `config:"config.v1"`
+	Fetchers    []*config.C             `config:"fetchers"`
+	KubeConfig  string                  `config:"kube_config"`
+	Period      time.Duration           `config:"period"`
+	Processors  processors.PluginConfig `config:"processors"`
+	BundlePath  string                  `config:"bundle_path"`
+}
+
+type CloudConfig struct {
+	AwsCred aws.ConfigAWS `config:"aws.credentials"`
 }
 
 func New(cfg *config.C) (*Config, error) {
@@ -76,8 +79,7 @@ func New(cfg *config.C) (*Config, error) {
 
 func defaultConfig() (*Config, error) {
 	ret := &Config{
-		Period:    4 * time.Hour,
-		Benchmark: CIS_K8S,
+		Period: 4 * time.Hour,
 	}
 
 	bundle, err := getBundlePath()
@@ -104,10 +106,6 @@ func Datastream(namespace string, indexPrefix string) string {
 		namespace = DefaultNamespace
 	}
 	return indexPrefix + "-" + namespace
-}
-
-type AwsConfigProvider interface {
-	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS, log *logp.Logger) (awssdk.Config, error)
 }
 
 func isSupportedBenchmark(benchmark string) bool {
