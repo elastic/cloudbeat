@@ -13,5 +13,11 @@ variable "aws_ec2_instance_type" {
 variable "yml" {
   description = "Kubernetes yaml to be applied"
   type        = string
+  default     = ""
+}
 
+variable "deploy_agent" {
+  description = "Deploy agent flag"
+  type = bool
+  default = true # Supporting original behaviour when agent is deployed by default
 }

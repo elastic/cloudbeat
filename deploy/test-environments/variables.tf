@@ -1,13 +1,37 @@
-## Deployment configuration
+# AWS provider variable
+variable "region" {
+  description = "AWS region"
+  type        = string
+  default     = "eu-west-3"
+}
 
+# EC2 variable
+variable "ami_map" {
+  description = "Mapping of regions to AMI IDs"
+  type        = map
+  default     = {
+    "eu-west-1" = "ami-0a5b3305c37e58e04"
+    "eu-west-3" = "ami-0532b3f7436b93d52"
+    # Add more regions and respective AMI IDs here
+  }
+}
+
+# Elactic Cloud variables
+# ===========================================
 variable "ec_api_key" {
-  description = "Elastic cloud API key"
+  description = "Provide Elastic Cloud API key or use export TF_VAR_ec_api_key={TOKEN}"
   type        = string
 }
 
 variable "ess_region" {
-  default     = "gcp-us-central1"
+  default     = "gcp-us-west2"
   description = "Optional ESS region where the deployment will be created. Defaults to gcp-us-west2"
+  type        = string
+}
+
+variable "stack_version" {
+  default     = "latest"
+  description = "Optional stack version"
   type        = string
 }
 
@@ -17,10 +41,9 @@ variable "deployment_template" {
   type        = string
 }
 
-variable "stack_version" {
-  default     = "latest"
-  description = "Optional stack version"
-  type        = string
+variable "deployment_name_prefix" {
+  default     = "test-env-ci-tf"
+  description = "Optional set a prefix of the deployment. Defaults to test-env-ci-tf"
 }
 
 variable "elasticsearch_size" {
@@ -53,30 +76,4 @@ variable "docker_image_override" {
   }
   type = map(string)
 }
-
-variable "security_team_repository" {
-  default = "github.com/elastic/security-team"
-}
-
-variable "deployment_name_prefix" {
-  default     = "cloudbeat-tf"
-  description = "Optional set a prefix of the deployment. Defaults to cloudbeat-tf"
-}
-
-variable "eks_region" {
-  default     = "eu-west-1"
-  description = "Optional AWS region where the EKS cluster will be created. Defaults to eu-west-1"
-  type        = string
-}
-
-variable "node_group_one_desired_size" {
-  default = 3
-  type = number
-  description = "Node group one default size"
-}
-
-variable "node_group_two_desired_size" {
-  default = 3
-  type = number
-  description = "Node group two default size"
-}
+# ============================================

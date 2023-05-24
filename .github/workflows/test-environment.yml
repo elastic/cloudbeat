@@ -18,8 +18,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: "eu-west-3"
   TF_VAR_ec_api_key: ${{ secrets.CI_EC_API_KEY }}
-  EC_DEPLOYMENT: "module.ec_deployment"
-  WORKING_DIR: deploy/cloud
+  WORKING_DIR: deploy/test-environments
 
 jobs:
   Setup:
@@ -73,12 +72,10 @@ jobs:
       - name: Terraform Validate
         run: terraform validate -no-color
 
-      - name: Provision Elastic Cloud
+      - name: Provision Test Environment (EC + EC2 with kubernetes kind)
         id: apply
         run: |
-          terraform apply --auto-approve \
-            -target ${{ env.EC_DEPLOYMENT }} \
-            -state=${{ env.TF_STATE_FILE}}
+          terraform apply --auto-approve -state=${{ env.TF_STATE_FILE }}
 
       - name: Upload tf state
         if: success()
@@ -96,6 +93,4 @@ jobs:
       - name: Cleanup Environment
         if: always()
         run: |
-          terraform destroy --auto-approve \
-            -target ${{ env.EC_DEPLOYMENT }} \
-            -state=${{ env.TF_STATE_FILE }}
+          terraform destroy --auto-approve -state=${{ env.TF_STATE_FILE }}

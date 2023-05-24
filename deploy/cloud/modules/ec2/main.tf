@@ -90,7 +90,13 @@ resource "aws_instance" "cloudbeat" {
       "cd cloudbeat",
       "sudo kind create cluster --config deploy/k8s/kind/kind-multi.yml --wait 30s",
       "sudo kind export kubeconfig --name kind-multi --kubeconfig /home/ubuntu/.kube/config",
-      "kubectl apply -f /tmp/manifests.yml",
+      "enable_agent=${var.deploy_agent}",
+      "if [ \"$enable_agent\" = true ]; then",
+      "  echo 'Deploy KSPM agent'",
+      "  kubectl apply -f /tmp/manifests.yml",
+      "else",
+      "  echo 'KSPM Agent will not be installed!'",
+      "fi"
     ]
   }
 }
