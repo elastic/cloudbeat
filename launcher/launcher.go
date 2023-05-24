@@ -35,7 +35,16 @@ import (
 
 const (
 	reconfigureWaitTimeout = 10 * time.Minute
+
+	// Time to wait for the beater to stop before ignoring it
+	shutdownGracePeriod = 5 * time.Second
 )
+
+// stopped before shutdownGracePeriod, after completed waiting for the beater to stop
+var ErrorStopBeater = errors.New("stop beater")
+
+// stopped after shutdownGracePeriod, without waiting for the beater to stop
+var ErrorStopBeaterTimeout = errors.New("stop beater timeout")
 
 type launcher struct {
 	wg        sync.WaitGroup // WaitGroup used to wait for active beaters
@@ -84,9 +93,7 @@ func (l *launcher) Run(b *beat.Beat) error {
 
 	// Wait for Fleet-side reconfiguration only if beater is running in Agent-managed mode.
 	if b.Manager.Enabled() {
-
 		defer b.Manager.Stop()
-
 		l.log.Infof("Waiting for initial reconfiguration from Fleet server...")
 		update, err := l.reconfigureWait(reconfigureWaitTimeout)
 		if err != nil {
@@ -105,10 +112,16 @@ func (l *launcher) Run(b *beat.Beat) error {
 
 func (l *launcher) run() error {
 	err := l.runLoop()
+
 	if err != nil {
-		l.log.Errorf("Launcher has stopped: %v", err)
-	} else {
-		l.log.Info("Launcher was shut down gracefully")
+		switch err {
+		case ErrorStopBeater:
+			l.log.Info("Launcher stopped successfully")
+		case ErrorStopBeaterTimeout:
+			l.log.Info("Launcher stopped after timeout")
+		default:
+			l.log.Errorf("Launcher stopped by error: %v", err)
+		}
 	}
 
 	l.reloader.Stop()
@@ -126,18 +139,14 @@ func (l *launcher) runLoop() error {
 		}
 
 		// Wait for something to happen:
-		// config update produces val, nil
-		// signal produces nil, nil
-		// beater error produces nil, err
+		// config update		(val, nil)
+		// stop signal			(nil, nil)
+		// beater error			(nil, err)
 		cfg, err := l.waitForUpdates()
 
-		// If it's not a beater error, should stop the beater
-		if err == nil {
+		if isConfigUpdate(cfg, err) {
 			l.stopBeater()
-		}
 
-		// If it's a config update let's merge the new config and continue with the next iteration
-		if cfg != nil {
 			err = l.configUpdate(cfg)
 			if err != nil {
 				return fmt.Errorf("failed to update Beater config: %w", err)
@@ -146,8 +155,13 @@ func (l *launcher) runLoop() error {
 			continue
 		}
 
-		// If the beater produced an error, should bubble the error up
-		return err
+		if isStopSignal(cfg, err) {
+			return l.stopBeaterWithTimeout(shutdownGracePeriod)
+		}
+
+		if isBeaterError(cfg, err) {
+			return err
+		}
 	}
 }
 
@@ -185,7 +199,6 @@ func (l *launcher) runBeater() error {
 	return nil
 }
 
-// stopBeater only returns after the beater truly stopped running
 func (l *launcher) stopBeater() {
 	l.log.Infof("Launcher is shutting %s down gracefully", l.name)
 	l.beater.Stop()
@@ -195,11 +208,34 @@ func (l *launcher) stopBeater() {
 	l.log.Infof("Launcher shut %s down gracefully", l.name)
 }
 
-// waitForUpdates is the function that keeps Launcher runLoop busy
+// Returns an error indicating if the beater was stopped gracefully or not
+func (l *launcher) stopBeaterWithTimeout(duration time.Duration) error {
+	l.log.Infof("Launcher is shutting %s down gracefully", l.name)
+	l.beater.Stop()
+
+	wgCh := make(chan struct{})
+
+	go func() {
+		// By waiting to the wait group, we make sure that the old beater has really stopped
+		l.wg.Wait()
+		close(wgCh)
+	}()
+
+	select {
+	case <-time.After(duration):
+		l.log.Infof("Grace period for %s ended", l.name)
+		return ErrorStopBeaterTimeout
+	case <-wgCh:
+		l.log.Infof("Launcher shut %s down gracefully", l.name)
+		return ErrorStopBeater
+	}
+}
+
+// waitForUpdates is the function that keeps Launcher runLoop busy.
 // It will finish for one of following reasons:
-// 1. The Stop function got called
-// 2. The beater run has returned
-// 3. A config update received
+//  1. The Stop function got called 	(nil, nil)
+//  2. The beater run has returned 		(nil, err)
+//  3. A config update received 		(val, nil)
 func (l *launcher) waitForUpdates() (*config.C, error) {
 	select {
 	case err := <-l.beaterErr:
@@ -213,6 +249,18 @@ func (l *launcher) waitForUpdates() (*config.C, error) {
 		l.log.Infof("Launcher will restart %s to apply the configuration update", l.name)
 		return update, nil
 	}
+}
+
+func isConfigUpdate(cfg *config.C, err error) bool {
+	return cfg != nil && err == nil
+}
+
+func isStopSignal(cfg *config.C, err error) bool {
+	return cfg == nil && err == nil
+}
+
+func isBeaterError(cfg *config.C, err error) bool {
+	return cfg == nil && err != nil
 }
 
 // configUpdate applies incoming reconfiguration from the Fleet server to the beater config
