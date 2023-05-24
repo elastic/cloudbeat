@@ -22,6 +22,8 @@ jobs:
       # required by download step to access artifacts API
       actions: read
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
 
       - name: Download and Extract Artifacts
         env:
@@ -66,13 +68,15 @@ jobs:
           ignoreMissingResults: true
 
       - name: Output to Job Summary
-        if: ${{ github.event.workflow_run.event == 'pull_request' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "### Run Summary :rocket:" >> $GITHUB_STEP_SUMMARY
-          echo "Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html" >> $GITHUB_STEP_SUMMARY
+          allure_result=tests/allure/results/allure-report/history/history-trend.json
+          allure_url=http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html
+
+          allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
+          echo "$allure_summary" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
@@ -82,5 +86,4 @@ jobs:
           number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ## Cloudbeat CI :robot:
-            Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html
+            $GITHUB_STEP_SUMMARY
