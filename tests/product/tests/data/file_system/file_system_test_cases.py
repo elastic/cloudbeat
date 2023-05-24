@@ -260,6 +260,12 @@ cis_1_1_19 = [
         "/etc/kubernetes/pki/some_file.txt",
         "failed",
     ),
+    # Directory under pki/
+    ("CIS 1.1.19", "chown", "root:root", "/etc/kubernetes/pki/some_dir", "passed"),
+    ("CIS 1.1.19", "chown", "daemon:daemon", "/etc/kubernetes/pki/some_dir", "failed"),
+    # Check recursion
+    ("CIS 1.1.19", "chown", "root:root", "/etc/kubernetes/pki/some_dir/some_file.txt", "passed"),
+    ("CIS 1.1.19", "chown", "daemon:daemon", "/etc/kubernetes/pki/some_dir/some_file.txt", "failed"),
 ]
 
 cis_1_1_20 = [
