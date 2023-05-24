@@ -176,7 +176,7 @@ jobs:
             values_file: tests/deploy/values/ci.yml
           - test-target: aws
             range: ''
-            values_file: tests/deploy/values/ci-aws-services.yml          
+            values_file: tests/deploy/values/ci-aws-services.yml
           - test-target: file_system_rules
             range: '0..5'
             values_file: tests/deploy/values/ci.yml

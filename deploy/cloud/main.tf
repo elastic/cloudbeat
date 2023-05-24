@@ -9,7 +9,7 @@ module "ec_deployment" {
   stack_version = var.stack_version
 
   deployment_template    = var.deployment_template
-  deployment_name_prefix = "${var.deployment_name_prefix}-${random_string.suffix.result}"
+  deployment_name_prefix = "${var.deployment_name}-${random_string.suffix.result}"
 
   integrations_server = true
 
@@ -27,8 +27,8 @@ module "ec_deployment" {
 module "eks" {
   source = "./modules/provision-eks-cluster"
 
-  region              = var.eks_region
-  cluster_name_prefix = "${var.deployment_name_prefix}-${random_string.suffix.result}"
+  region       = var.eks_region
+  cluster_name = var.deployment_name
 }
 
 # Retrieve EKS cluster information
@@ -45,7 +45,7 @@ module "iam_eks_role" {
   depends_on             = [module.eks]
   allow_self_assume_role = true
 
-  role_name = "cloudbeat-tf-${random_string.suffix.result}"
+  role_name = "Role-${var.deployment_name}-${random_string.suffix.result}"
 
   role_policy_arns = {
     Developers_eks = "arn:aws:iam::704479110758:policy/Developers_eks"
@@ -111,10 +111,11 @@ module "api" {
   providers  = { restapi : restapi }
   depends_on = [module.ec_deployment, module.iam_eks_role]
 
-  username = module.ec_deployment.elasticsearch_username
-  password = module.ec_deployment.elasticsearch_password
-  uri      = module.ec_deployment.kibana_url
-  role_arn = module.iam_eks_role.iam_role_arn
+  username         = module.ec_deployment.elasticsearch_username
+  password         = module.ec_deployment.elasticsearch_password
+  uri              = module.ec_deployment.kibana_url
+  role_arn         = module.iam_eks_role.iam_role_arn
+  agent_docker_img = var.agent_docker_image_override
 }
 
 provider "kubernetes" {
@@ -134,13 +135,13 @@ provider "kubernetes" {
 
 # In order for Elastic agent to successfully assume the role,
 # it needs to be deployed (or restarted) after service account is created and annotated.
-resource "kubernetes_manifest" "agent_service_account" {
-  depends_on = [module.eks, module.iam_eks_role, module.api]
-  for_each   = module.api.service_account_manifests
+resource "kubernetes_manifest" "eks_agent_service_account" {
+  depends_on = [module.eks, module.iam_eks_role, module.api.eks]
+  for_each   = module.api.eks.service_account_manifests
   manifest   = each.value
 }
 
-resource "kubernetes_annotations" "service_account" {
+resource "kubernetes_annotations" "eks_service_account" {
   api_version = "v1"
   kind        = "ServiceAccount"
   metadata {
@@ -150,12 +151,12 @@ resource "kubernetes_annotations" "service_account" {
   annotations = {
     "eks.amazonaws.com/role-arn" = module.iam_eks_role.iam_role_arn
   }
-  depends_on = [kubernetes_manifest.agent_service_account]
+  depends_on = [kubernetes_manifest.eks_agent_service_account]
 }
 
-resource "kubernetes_manifest" "agent_yaml" {
-  depends_on = [kubernetes_annotations.service_account]
-  for_each   = module.api.other_manifests
+resource "kubernetes_manifest" "eks_agent_yaml" {
+  depends_on = [kubernetes_annotations.eks_service_account]
+  for_each   = module.api.eks.other_manifests
   manifest   = each.value
 }
 
@@ -197,9 +198,10 @@ module "apps" {
   replica_count = "5"
 }
 module "aws_ec2_with_agent" {
-  source    = "./modules/ec2"
-  providers = { aws : aws }
-  yml       = module.api.yaml_vanilla
+  source          = "./modules/ec2"
+  providers       = { aws : aws }
+  yml             = module.api.vanilla.yaml
+  deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
   depends_on = [
     module.ec_deployment,
     module.api,

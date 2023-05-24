@@ -58,9 +58,8 @@ variable "security_team_repository" {
   default = "github.com/elastic/security-team"
 }
 
-variable "deployment_name_prefix" {
-  default     = "cloudbeat-tf"
-  description = "Optional set a prefix of the deployment. Defaults to cloudbeat-tf"
+variable "deployment_name" {
+  description = "Name of the deployment. Example: `john-8-8-0bc1-7May`"
 }
 
 variable "eks_region" {
@@ -79,4 +78,10 @@ variable "node_group_two_desired_size" {
   default = 3
   type = number
   description = "Node group two default size"
+}
+
+variable "agent_docker_image_override" {
+  default     = "" # When empty, uses the default provided by kibana
+  description = "(Optional) Override agent image when deploying KSPM/CSPM. Defaults to stack version."
+  type        = string
 }
