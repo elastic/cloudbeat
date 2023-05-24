@@ -2,7 +2,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
 [![Build status](https://badge.buildkite.com/82f39bb3a95eeb7f46e28891fb48a623cf184fbfca2eff545a.svg)](https://buildkite.com/elastic/cloudbeat)
 
-# Cloudbeat
+# Cloudbeat - test
 
 Cloudbeat analyzes cloud assets for security compliance and sends findings to Elasticsearch as part of
 the [Cloud Security Posture](https://www.elastic.co/blog/secure-your-cloud-with-elastic-security) plugin in Kibana.
