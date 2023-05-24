@@ -2,7 +2,6 @@
 This module provides fixtures and configurations for
 product tests.
 """
-import os.path
 from pathlib import Path
 import time
 import json
@@ -89,7 +88,7 @@ limits:
             api_client.exec_command(
                 container_name=node.metadata.name,
                 command="mkdir",
-                param_value=os.path.dirname(temp_file),
+                param_value=str(Path(temp_file).parent),
                 resource="",
             )
             api_client.exec_command(
