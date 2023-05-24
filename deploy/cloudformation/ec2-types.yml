@@ -1,3 +1,7 @@
+# The purpose of this template is to create a set of EC2 instances with different instance types and AMIs.
+# Then scan these instances with vulnerability scanner in order to verify that the scanner works well.
+# Currently this process is being done manually, but eventually we would like to automate it.
+# This template is separate to the elastic-agent-ec2.yml template and is not used in the production deployment process.
 AWSTemplateFormatVersion: 2010-09-09
 # Parameters:
 # ARMImages:
