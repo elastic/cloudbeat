@@ -34,7 +34,6 @@ type AccessManagement interface {
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
 	GetAccountAlias(ctx context.Context) (string, error)
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
-	GetSupportPolicy(ctx context.Context) (awslib.AwsResource, error)
 	ListServerCertificates(ctx context.Context) (awslib.AwsResource, error)
 	GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, error)
 }
@@ -61,14 +60,14 @@ type Client interface {
 	ListServerCertificates(ctx context.Context, params *iamsdk.ListServerCertificatesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListServerCertificatesOutput, error)
 }
 
-type AccessAnalyzer interface {
+type AccessAnalyzerClient interface {
 	ListAnalyzers(ctx context.Context, params *accessanalyzer.ListAnalyzersInput, optFns ...func(*accessanalyzer.Options)) (*accessanalyzer.ListAnalyzersOutput, error)
 }
 
 type Provider struct {
 	log                   *logp.Logger
 	client                Client
-	accessAnalyzerClients map[string]AccessAnalyzer
+	accessAnalyzerClients map[string]AccessAnalyzerClient
 }
 
 type RolePolicyInfo struct {
@@ -148,13 +147,13 @@ type PolicyDocument struct {
 	Policy     string `json:"policy,omitempty"`
 }
 
-func NewIAMProvider(log *logp.Logger, cfg aws.Config, crossRegionFactory awslib.CrossRegionFactory[AccessAnalyzer]) *Provider {
+func NewIAMProvider(log *logp.Logger, cfg aws.Config, crossRegionFactory awslib.CrossRegionFactory[AccessAnalyzerClient]) *Provider {
 	provider := Provider{
 		log:    log,
 		client: iamsdk.NewFromConfig(cfg),
 	}
 	if crossRegionFactory != nil {
-		m := crossRegionFactory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, func(cfg aws.Config) AccessAnalyzer {
+		m := crossRegionFactory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, func(cfg aws.Config) AccessAnalyzerClient {
 			return accessanalyzer.NewFromConfig(cfg)
 		}, log)
 		provider.accessAnalyzerClients = m.GetMultiRegionsClientMap()

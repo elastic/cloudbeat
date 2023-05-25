@@ -29,7 +29,21 @@ import (
 	"net/url"
 )
 
+const awsSupportAccessArn = "arn:aws:iam::aws:policy/AWSSupportAccess"
+
 func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error) {
+	policies, err := p.getPolicies(ctx)
+	if err != nil {
+		return nil, err
+	}
+	supportPolicy, err := p.getSupportPolicy(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return append(policies, supportPolicy), nil
+}
+
+func (p Provider) getPolicies(ctx context.Context) ([]awslib.AwsResource, error) {
 	var policies []awslib.AwsResource
 
 	input := &iamsdk.ListPoliciesInput{OnlyAttached: true}
@@ -40,15 +54,21 @@ func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 		}
 
 		for _, policy := range listPoliciesOutput.Policies {
-			output, err := p.getPolicyVersion(ctx, policy)
+			if stringOrEmpty(policy.Arn) == awsSupportAccessArn {
+				// Fetch this one explicitly with getSupportPolicy().
+				// The reasoning is that we want to attach roles to the AWS support access policy. If we don't skip it
+				// here, we will produce it another time in getSupportPolicy(), leading to duplicated resources. We
+				// cannot just fetch the roles here either because if the AWS support access policy is not attached,
+				// we will never see it.
+				// See: https://github.com/elastic/cloudbeat/pull/900
+				continue
+			}
+
+			doc, err := p.getPolicyDocument(ctx, policy)
 			if err != nil {
 				return nil, err
 			}
 
-			doc, err := decodePolicyDocument(output.PolicyVersion)
-			if err != nil {
-				return nil, err
-			}
 			policies = append(policies, Policy{
 				Policy:   policy,
 				Document: doc,
@@ -64,18 +84,22 @@ func (p Provider) GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	return policies, nil
 }
 
-func (p Provider) GetSupportPolicy(ctx context.Context) (awslib.AwsResource, error) {
-	const awsSupportAccessArn = "arn:aws:iam::aws:policy/AWSSupportAccess"
-
+func (p Provider) getSupportPolicy(ctx context.Context) (awslib.AwsResource, error) {
 	policy, err := p.client.GetPolicy(ctx, &iamsdk.GetPolicyInput{PolicyArn: aws.String(awsSupportAccessArn)})
 	if err != nil {
 		return nil, err
 	}
 
-	awsSupportAccessPolicy := Policy{
-		Policy: *policy.Policy,
-		Roles:  make([]types.PolicyRole, 0),
+	doc, err := p.getPolicyDocument(ctx, *policy.Policy)
+	if err != nil {
+		return nil, err
 	}
+	awsSupportAccessPolicy := Policy{
+		Policy:   *policy.Policy,
+		Document: doc,
+		Roles:    make([]types.PolicyRole, 0),
+	}
+
 	input := &iamsdk.ListEntitiesForPolicyInput{
 		PolicyArn:    aws.String(awsSupportAccessArn),
 		EntityFilter: types.EntityTypeRole,
@@ -97,11 +121,21 @@ func (p Provider) GetSupportPolicy(ctx context.Context) (awslib.AwsResource, err
 	return awsSupportAccessPolicy, nil
 }
 
-func (p Provider) getPolicyVersion(ctx context.Context, policy types.Policy) (*iamsdk.GetPolicyVersionOutput, error) {
+func (p Provider) getPolicyDocument(ctx context.Context, policy types.Policy) (map[string]interface{}, error) {
 	if policy.Arn == nil || policy.DefaultVersionId == nil {
 		return nil, fmt.Errorf("invalid policy: %v", policy)
 	}
-	return p.client.GetPolicyVersion(ctx, &iamsdk.GetPolicyVersionInput{PolicyArn: policy.Arn, VersionId: policy.DefaultVersionId})
+	out, err := p.client.GetPolicyVersion(ctx, &iamsdk.GetPolicyVersionInput{PolicyArn: policy.Arn, VersionId: policy.DefaultVersionId})
+	if err != nil {
+		return nil, err
+	}
+
+	doc, err := decodePolicyDocument(out.PolicyVersion)
+	if err != nil {
+		return nil, err
+	}
+
+	return doc, nil
 }
 
 func decodePolicyDocument(policyVersion *types.PolicyVersion) (map[string]interface{}, error) {
