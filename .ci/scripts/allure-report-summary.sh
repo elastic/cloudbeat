@@ -12,6 +12,34 @@ results="$1"
 # Allure report URL
 allure_report_url="$2"
 
+echo "Current path: $(pwd)"
+echo "Files in $(pwd)"
+for file in "$(pwd)"/*; do
+    if [[ -f "$file" ]]; then
+        echo "$file"
+    fi
+done
+
+echo "Files in $(pwd)/tests"
+for file in "$(pwd)/tests"/*; do
+    if [[ -f "$file" ]]; then
+        echo "$file"
+    fi
+done
+
+echo "Files in $(pwd)/tests/allure-report"
+for file in "$(pwd)/tests/allure-report"/*; do
+    if [[ -f "$file" ]]; then
+        echo "$file"
+    fi
+done
+
+echo "Files in $(pwd)/tests/allure-report/history"
+for file in "$(pwd)/tests/allure-report/history"/*; do
+    if [[ -f "$file" ]]; then
+        echo "$file"
+    fi
+done
 # Check if the JSON file exists
 if [ ! -f "$results" ]; then
   echo "Error: JSON file '$results' not found."
