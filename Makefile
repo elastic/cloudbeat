@@ -70,13 +70,8 @@ clean: $(MAGE)
 	@$(MAGE) clean
 
 .PHONY: PackageAgent
-<<<<<<< HEAD
 PackageAgent: $(MAGE)
-	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
-=======
-PackageAgent:
-	SNAPSHOT=TRUE PLATFORMS=linux/$(shell go env GOARCH) TYPES=tar.gz mage -v $@
->>>>>>> 45badd9 (Buildkite migration (#944))
+	SNAPSHOT=TRUE PLATFORMS=linux/$(shell go env GOARCH) TYPES=tar.gz $(MAGE) -v $@
 
 # elastic_agent_docker_image builds the Cloud Elastic Agent image
 # with the local APM Server binary injected. The image will be based
