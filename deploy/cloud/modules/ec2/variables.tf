@@ -11,9 +11,14 @@ variable "aws_ec2_instance_type" {
 }
 
 variable "yml" {
-  description = "Kubernetes yaml to be applied"
+  description = "Kubernetes vanilla yaml to be applied"
   type        = string
   default     = ""
+}
+
+variable "deployment_name" {
+  description = "EC2 instance name"
+  type        = string
 }
 
 variable "deploy_agent" {

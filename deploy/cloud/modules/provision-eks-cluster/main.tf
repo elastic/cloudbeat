@@ -15,5 +15,5 @@ provider "aws" {
 data "aws_availability_zones" "available" {}
 
 locals {
-  cluster_name = var.cluster_name_prefix
+  cluster_name = var.cluster_name
 }

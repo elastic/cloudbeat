@@ -70,13 +70,20 @@ variable "eks_region" {
 }
 
 variable "node_group_one_desired_size" {
-  default     = 3
-  type        = number
+  default = 3
+  type = number
   description = "Node group one default size"
 }
 
 variable "node_group_two_desired_size" {
-  default     = 3
-  type        = number
+  default = 3
+  type = number
   description = "Node group two default size"
+}
+
+
+variable "agent_docker_image_override" {
+  default     = "" # When empty, uses the default provided by kibana
+  description = "(Optional) Override agent image when deploying KSPM/CSPM. Defaults to stack version."
+  type        = string
 }

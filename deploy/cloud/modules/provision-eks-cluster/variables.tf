@@ -4,10 +4,9 @@ variable "region" {
   default     = "eu-west-1"
 }
 
-variable "cluster_name_prefix" {
-  description = "EKS cluster name prefix"
+variable "cluster_name" {
+  description = "EKS cluster name"
   type        = string
-  default     = "cloudbeat-tf"
 }
 
 variable "node_group_one_desired_size" {
