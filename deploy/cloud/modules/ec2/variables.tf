@@ -18,6 +18,6 @@ variable "yml" {
 
 variable "deploy_agent" {
   description = "Deploy agent flag"
-  type = bool
-  default = true # Supporting original behaviour when agent is deployed by default
+  type        = bool
+  default     = true # Supporting original behaviour when agent is deployed by default
 }

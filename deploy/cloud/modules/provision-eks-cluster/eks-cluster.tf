@@ -46,7 +46,7 @@ module "eks" {
         aws_security_group.node_group_two.id
       ]
     }
-  } : {
+    } : {
     one = {
       name = "${var.cluster_name_prefix}-1"
 

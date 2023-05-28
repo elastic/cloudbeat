@@ -4,9 +4,9 @@ provider "aws" {
 
 # EC2 + kind deployment
 module "aws_ec2_kind" {
-  source = "../cloud/modules/ec2"
-  providers = { aws : aws }
-  aws_ami = var.ami_map[var.region]
+  source       = "../cloud/modules/ec2"
+  providers    = { aws : aws }
+  aws_ami      = var.ami_map[var.region]
   deploy_agent = false # Agent will not be deployed
 }
 
@@ -43,9 +43,9 @@ module "ec_deployment" {
 }
 
 module "eks" {
-  source = "../cloud/modules/provision-eks-cluster"
-  region              = var.region
-  cluster_name_prefix = "${var.deployment_name_prefix}-${random_string.suffix.result}"
+  source                      = "../cloud/modules/provision-eks-cluster"
+  region                      = var.region
+  cluster_name_prefix         = "${var.deployment_name_prefix}-${random_string.suffix.result}"
   node_group_one_desired_size = 1
   # node_group_two_desired_size = 1
   enable_node_group_two = false

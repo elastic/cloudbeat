@@ -8,8 +8,8 @@ variable "region" {
 # EC2 variable
 variable "ami_map" {
   description = "Mapping of regions to AMI IDs"
-  type        = map
-  default     = {
+  type        = map(any)
+  default = {
     "eu-west-1" = "ami-0a5b3305c37e58e04"
     "eu-west-3" = "ami-0532b3f7436b93d52"
     # Add more regions and respective AMI IDs here
