@@ -6,7 +6,7 @@ To provide an easy and deterministic way to set up the latest cloud environment,
 
 **Prerequisite**
 
-This project utilizes AWS and Elastic Cloud accounts. To ensure proper deployment and usage, it is essential to obtain appropriate licenses in compliance with the licensing terms and conditions provided by the respective service providers. 
+This project utilizes AWS and Elastic Cloud accounts. To ensure proper deployment and usage, it is essential to obtain appropriate licenses in compliance with the licensing terms and conditions provided by the respective service providers.
 
 Follow the [prerequisites](/README.md#prerequisites) chapter of our main README.
 

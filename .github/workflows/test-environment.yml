@@ -39,7 +39,7 @@ jobs:
       - id: gen-tf-name
         run: |
           echo "tf-file=terraform_$(date +'%Y-%m-%d_%H-%M-%S').tfstate" >> $GITHUB_OUTPUT
-  
+
   Deploy:
     needs: ["Setup"]
     runs-on: ubuntu-20.04
@@ -50,7 +50,7 @@ jobs:
     env:
       TF_VAR_stack_version: ${{ needs.Setup.outputs.stack-version }}
       TF_VAR_ess_region: ${{ needs.Setup.outputs.ess-region }}
-      TF_STATE_FILE: ${{ needs.Setup.outputs.tf-state }}      
+      TF_STATE_FILE: ${{ needs.Setup.outputs.tf-state }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
