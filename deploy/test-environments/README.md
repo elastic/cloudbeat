@@ -48,7 +48,7 @@ Please note that the customized image is currently available in the following re
 |:-------------:|:-------------:|:------------|
 | ec_api_key    |   None   | The API key for Elastic Cloud can also be defined using the `TF_VAR_ec_api_key` environment variable |
 | ess_region    | gcp-us-west2 | The ESS deployment region can also be defined using the `TF_VAR_stack_version` environment variable|
-| stack_version | latest | The ELK stack version can alsob be defined using the `TF_VAR_stack_version` environment variable | 
+| stack_version | latest | The ELK stack version can alsob be defined using the `TF_VAR_stack_version` environment variable |
 
 ## Execution
 
