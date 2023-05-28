@@ -48,7 +48,7 @@ module "eks" {
     }
     } : {
     one = {
-      name = "${var.cluster_name_prefix}-1"
+      name = "${var.cluster_name}-1"
 
       instance_types = ["t3.small"]
 

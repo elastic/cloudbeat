@@ -41,7 +41,7 @@ variable "deployment_template" {
   type        = string
 }
 
-variable "deployment_name_prefix" {
+variable "deployment_name" {
   default     = "test-env-ci-tf"
   description = "Optional set a prefix of the deployment. Defaults to test-env-ci-tf"
 }

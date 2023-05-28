@@ -26,3 +26,15 @@ variable "deploy_agent" {
   type        = bool
   default     = true # Supporting original behaviour when agent is deployed by default
 }
+
+variable "deploy_k8s" {
+  description = "Deploy kubernetes flag"
+  type        = bool
+  default     = true
+}
+
+variable "specific_tags" {
+  description = "Specific tags for this deployment"
+  type        = map(string)
+  default     = {}
+}
