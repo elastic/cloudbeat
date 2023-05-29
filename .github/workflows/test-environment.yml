@@ -33,6 +33,7 @@ jobs:
       tf-state: ${{ steps.gen-tf-name.outputs.tf-file}}
     steps:
       - id: set-elk-vars
+        if: github.event_name == 'workflow_dispatch'
         env:
           ELK_VERSION: ${{ github.event.inputs.elk-stack-version }}
           ESS_REGION: ${{ github.event.inputs.ess-region }}
