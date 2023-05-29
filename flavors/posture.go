@@ -72,7 +72,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	// TODO: timeout should be configurable and not hard-coded. Setting to 10 minutes for now to account for CSPM fetchers
 	// 	https://github.com/elastic/cloudbeat/issues/653
-	data, err := fetchersManager.NewData(log, c.Period, time.Minute*10, fetchersRegistry)
+	data, err := fetchersManager.NewData(ctx, log, c.Period, time.Minute*10, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -121,7 +121,7 @@ func (bt *posture) Run(b *beat.Beat) error {
 		return err
 	}
 
-	bt.data.Run(bt.ctx)
+	bt.data.Run()
 
 	procs, err := ConfigureProcessors(bt.config.Processors)
 	if err != nil {

@@ -32,41 +32,46 @@ import (
 type Data struct {
 	log *logp.Logger
 
-	// Maximum duration of a single fetcher
+	// Duration of a single fetcher
 	timeout time.Duration
 
-	// Time between two consecutive cycles
+	// Duration between two consecutive cycles
 	interval time.Duration
 
 	fetchers FetchersRegistry
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
-func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
+func NewData(ctx context.Context, log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
+	ctx, cancel := context.WithCancel(ctx)
+
 	return &Data{
 		log:      log,
 		timeout:  timeout,
 		interval: interval,
 		fetchers: fetchers,
+		ctx:      ctx,
+		cancel:   cancel,
 	}, nil
 }
 
 // Run starts all configured fetchers to collect resources.
-func (d *Data) Run(ctx context.Context) {
-	go d.fetchAndSleep(ctx)
+func (d *Data) Run() {
+	go d.fetchAndSleep(d.ctx)
 }
 
 func (d *Data) Stop() {
+	d.cancel()
 	d.fetchers.Stop()
 }
 
 func (d *Data) fetchAndSleep(ctx context.Context) {
-	ctx, cancel := context.WithCancel(ctx)
+
 	// set immediate exec for first time run
 	timer := time.NewTimer(0)
-	defer func() {
-		cancel()
-		timer.Stop()
-	}()
+	defer timer.Stop()
 
 	for {
 		select {
