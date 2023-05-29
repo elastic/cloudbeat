@@ -10,5 +10,5 @@ output "cloudbeat_ssh_cmd" {
 
 output "ec2_ssh_key" {
   description = "EC2 ssh key path"
-  value = local.cloudbeat_private_key_file
+  value       = local.cloudbeat_private_key_file
 }
