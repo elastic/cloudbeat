@@ -122,7 +122,10 @@ elastic-stack-down:
   elastic-package stack down
 
 elastic-stack-connect-kind kind='kind-multi':
-  ./.ci/scripts/connect_kind.sh {{kind}}
+  ./scripts/connect_kind.sh {{kind}}
+
+elastic-stack-disconnect-kind kind='kind-multi':
+  ./scripts/connect_kind.sh {{kind}} disconnect
 
 ssh-cloudbeat:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
@@ -142,7 +145,7 @@ generate-mocks:
 
 # run to validate no mocks are missing
 validate-mocks:
-  ./.ci/scripts/validate-mocks.sh
+  ./scripts/validate-mocks.sh
 
 
 #### TESTS ####

@@ -4,16 +4,11 @@
 CI_ELASTIC_AGENT_DOCKER_TAG?=8.7.0-SNAPSHOT
 CI_ELASTIC_AGENT_DOCKER_IMAGE?=704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent
 
-# Ensure the Go version in .go_version is installed and used.
-GOROOT?=$(shell ./scripts/make/run_with_go_ver go env GOROOT)
-GO:=$(GOROOT)/bin/go
-export PATH:=$(GOROOT)/bin:$(PATH)
-
 # By default we run tests with verbose output. This may be overridden, e.g.
 # scripts may set GOTESTFLAGS=-json to format test output for processing.
 GOTESTFLAGS?=-v
 
-GOOSBUILD:=./build/$(shell $(GO) env GOOS)
+GOOSBUILD:=./build/$(shell go env GOOS)
 APPROVALS=$(GOOSBUILD)/approvals
 GENPACKAGE=$(GOOSBUILD)/genpackage
 GOIMPORTS=$(GOOSBUILD)/goimports
@@ -25,7 +20,7 @@ STATICCHECK=$(GOOSBUILD)/staticcheck
 ELASTICPACKAGE=$(GOOSBUILD)/elastic-package
 
 PYTHON_ENV?=.
-PYTHON_BIN:=$(PYTHON_ENV)/build/ve/$(shell $(GO) env GOOS)/bin
+PYTHON_BIN:=$(PYTHON_ENV)/build/ve/$(shell go env GOOS)/bin
 PYTHON=$(PYTHON_BIN)/python
 
 CLOUDBEAT_VERSION=$(shell grep defaultBeatVersion version/version.go | cut -d'=' -f2 | tr -d '" ')
@@ -68,7 +63,7 @@ cloudbeat: $(MAGE)
 
 .PHONY: test
 test:
-	$(GO) test $(GOTESTFLAGS) ./...
+	go test $(GOTESTFLAGS) ./...
 
 .PHONY:
 clean: $(MAGE)
@@ -76,7 +71,7 @@ clean: $(MAGE)
 
 .PHONY: PackageAgent
 PackageAgent: $(MAGE)
-	SNAPSHOT=TRUE PLATFORMS=linux/$(shell $(GO) env GOARCH) TYPES=tar.gz $(MAGE) -v $@
+	SNAPSHOT=TRUE PLATFORMS=linux/$(shell go env GOARCH) TYPES=tar.gz $(MAGE) -v $@
 
 # elastic_agent_docker_image builds the Cloud Elastic Agent image
 # with the local APM Server binary injected. The image will be based
@@ -109,7 +104,7 @@ check: $(MAGE) check-fmt check-headers
 
 .PHONY: bench
 bench:
-	@$(GO) test -benchmem -run=XXX -benchtime=100ms -bench='.*' ./...
+	@go test -benchmem -run=XXX -benchtime=100ms -bench='.*' ./...
 
 ##############################################################################
 # Rules for updating config files, etc.
@@ -124,7 +119,7 @@ config:
 
 .PHONY: go-generate
 go-generate:
-	@$(GO) generate .
+	@go generate .
 
 notice: NOTICE.txt
 NOTICE.txt: $(PYTHON) go.mod utils/go.mod
@@ -163,7 +158,7 @@ update-beats-docs: $(PYTHON)
 # Linting, style-checking, license header checks, etc.
 ##############################################################################
 
-GOLINT_TARGETS?=$(shell $(GO) list ./...)
+GOLINT_TARGETS?=$(shell go list ./...)
 GOLINT_UPSTREAM?=origin/main
 REVIEWDOG_FLAGS?=-conf=reviewdog.yml -f=golint -diff="git diff $(GOLINT_UPSTREAM)"
 GOLINT_COMMAND=$(GOLINT) ${GOLINT_TARGETS} | grep -v "should have comment" | $(REVIEWDOG) $(REVIEWDOG_FLAGS)
@@ -220,22 +215,22 @@ $(MAGE): magefile.go $(BIN_MAGE)
 	$(BIN_MAGE) -compile=$@
 
 $(GOLINT): go.mod
-	$(GO) build -o $@ golang.org/x/lint/golint
+	go build -o $@ golang.org/x/lint/golint
 
 $(GOIMPORTS): go.mod
-	$(GO) build -o $@ golang.org/x/utils/cmd/goimports
+	go build -o $@ golang.org/x/utils/cmd/goimports
 
 $(STATICCHECK): utils/go.mod
-	$(GO) build -o $@ -modfile=$< honnef.co/go/utils/cmd/staticcheck
+	go build -o $@ -modfile=$< honnef.co/go/utils/cmd/staticcheck
 
 $(GOLICENSER): go.mod
-	$(GO) build -o $@ -modfile=$< github.com/elastic/go-licenser
+	go build -o $@ -modfile=$< github.com/elastic/go-licenser
 
 $(REVIEWDOG): utils/go.mod
-	$(GO) build -o $@ -modfile=$< github.com/reviewdog/reviewdog/cmd/reviewdog
+	go build -o $@ -modfile=$< github.com/reviewdog/reviewdog/cmd/reviewdog
 
 $(ELASTICPACKAGE): utils/go.mod
-	$(GO) build -o $@ -modfile=$< -ldflags '-X github.com/elastic/elastic-package/internal/version.CommitHash=anything' github.com/elastic/elastic-package
+	go build -o $@ -modfile=$< -ldflags '-X github.com/elastic/elastic-package/internal/version.CommitHash=anything' github.com/elastic/elastic-package
 
 $(PYTHON): $(PYTHON_BIN)
 $(PYTHON_BIN): $(PYTHON_BIN)/activate
@@ -245,7 +240,7 @@ $(PYTHON_BIN)/activate: $(MAGE)
 
 .PHONY: $(APPROVALS)
 $(APPROVALS):
-	@$(GO) build -o $@ github.com/elastic/cloudbeat/approvaltest/cmd/check-approvals
+	@go build -o $@ github.com/elastic/cloudbeat/approvaltest/cmd/check-approvals
 
 ##############################################################################
 # Release manager.
