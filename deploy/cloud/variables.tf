@@ -67,3 +67,9 @@ variable "eks_region" {
   description = "Optional AWS region where the EKS cluster will be created. Defaults to eu-west-1"
   type        = string
 }
+
+variable "agent_docker_image_override" {
+  default     = "" # When empty, uses the default provided by kibana
+  description = "(Optional) Override agent image when deploying KSPM/CSPM. Defaults to stack version."
+  type        = string
+}
