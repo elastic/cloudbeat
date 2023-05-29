@@ -46,7 +46,7 @@ jobs:
   Deploy:
     needs: ["Setup"]
     runs-on: ubuntu-20.04
-    timeout-minutes: 15
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: ${{ env.WORKING_DIR }}
@@ -81,7 +81,7 @@ jobs:
           terraform apply --auto-approve -state=${{ env.TF_STATE_FILE }}
 
       - name: Upload tf state
-        if: success()
+        if: always()
         run: |
           aws s3 cp "${{ env.TF_STATE_FILE }}" "s3://tf-state-bucket-test-infra/${{ env.TF_STATE_FILE }}"
 
