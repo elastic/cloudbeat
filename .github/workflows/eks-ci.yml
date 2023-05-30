@@ -24,6 +24,8 @@ env:
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
+  CI_ELASTIC_AGENT_DOCKER_TAG: "8.7.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_IMAGE: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 # run only a single job at a time
 concurrency: EKS-Functional-Tests
@@ -97,8 +99,13 @@ jobs:
           outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Build elastic-agent
+        env:
+          BASE_IMAGE: docker.elastic.co/beats/elastic-agent:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
+          GOOS: linux
+          GOARCH: amd64
         run: |
-          make build_elastic_agent_docker_image
+          dev-tools/packaging/docker/elastic-agent/build.sh -t ${{ env.CI_ELASTIC_AGENT_DOCKER_IMAGE }:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
+        shell: bash
 
       - name: Build pytest-docker
         uses: docker/build-push-action@v4
