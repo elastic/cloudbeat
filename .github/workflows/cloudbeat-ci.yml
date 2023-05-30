@@ -103,7 +103,7 @@ jobs:
           GOOS: linux
           GOARCH: amd64
         run: |
-          dev-tools/packaging/docker/elastic-agent/build.sh -t ${{ env.CI_ELASTIC_AGENT_DOCKER_IMAGE }:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
+          dev-tools/packaging/docker/elastic-agent/build.sh -t ${{ env.CI_ELASTIC_AGENT_DOCKER_IMAGE }}:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
         shell: bash
 
       - name: Build pytest-docker
