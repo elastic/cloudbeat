@@ -38,6 +38,10 @@ Resources:
             VolumeType: gp2
             DeleteOnTermination: "true"
             Encrypted: !Ref Encrypted
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t ext4 /dev/sda1
   armRHLinuxIO1xfs:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -63,6 +67,10 @@ Resources:
             Iops: "100"
             DeleteOnTermination: "true"
             Encrypted: !Ref Encrypted
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t xfs /dev/sda1
   x86SuseLinuxStandardext4:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -87,6 +95,10 @@ Resources:
             VolumeType: standard
             DeleteOnTermination: "true"
             Encrypted: !Ref Encrypted
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t ext4 /dev/sda1
   x86UbuntuLinuxGP3xfs:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -111,6 +123,10 @@ Resources:
             VolumeType: gp3
             DeleteOnTermination: "true"
             Encrypted: !Ref Encrypted
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t xfs /dev/sda1
   x86DebianLinuxIO2ext4:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -136,6 +152,10 @@ Resources:
             Iops: "100"
             DeleteOnTermination: "true"
             Encrypted: !Ref Encrypted
+      UserData:
+        "Fn::Base64": !Sub |
+          #!/bin/bash
+          mkfs -t ext4 /dev/sda1
   SecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
