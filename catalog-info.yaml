@@ -20,12 +20,13 @@ spec:
       name: cloudbeat
     spec:
       repository: elastic/cloudbeat
+      branch_configuration: "main 10.* 9.* 8.*"
       pipeline_file: ".buildkite/pipeline.yml"
       teams:
         cloud-security-posture:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
-      provider_settings:
-        filter_condition: 'build.branch == main || build.branch =~ /^[0-9]+\.[0-9]+\$/'
-        filter_enabled: true
+#      provider_settings:
+#        filter_condition: 'build.branch == main || build.branch =~ /^[0-9]+\.[0-9]+\$/'
+#        filter_enabled: true
