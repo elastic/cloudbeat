@@ -1,4 +1,4 @@
-name: Build
+name: Cloudbeat-CI
 
 on:
   pull_request:
@@ -15,6 +15,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  Lint:
+    # for more information see .pre-commit-config.yaml
+    name: Pre-commit Hooks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up GO (with caching)
+        uses: magnetikonline/action-golang-cache@v4
+        with:
+          go-version-file: .go-version
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Pre-commit Hooks
+        env:
+         # Skipping golangci-lint as it's tested by golangci/golangci-lint-action
+          SKIP: golangci-lint
+        run: |
+          pre-commit run --all-files
+        shell: bash
+
+      - name: Mage Check
+        run: mage check
+
+      - name: Mage checkLicenseHeaders
+        run: mage checkLicenseHeaders
+
+      - name: Validate mocks
+        run: just validate-mocks
+
   Build:
     name: Build
     runs-on: ubuntu-20.04
@@ -23,15 +57,10 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      # This actions also handles the caching of go dependencies
-      - name: Setup Go & Hermit
-        uses: actions/setup-go@v3
+      - name: Setup GO (with caching)
+        uses: magnetikonline/action-golang-cache@v4
         with:
           go-version-file: .go-version
-          cache: true
-      - run: |
-          go version
-          ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: build cloudbeat binary
         uses: magefile/mage-action@v2
@@ -49,7 +78,6 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Cache Build dependencies
-        #        if: ${{ !env.ACT }} # skip caching if running on ACT
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
@@ -58,7 +86,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: false
@@ -72,7 +100,7 @@ jobs:
           make build_elastic_agent_docker_image
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: ./tests/.
           push: false
@@ -82,14 +110,12 @@ jobs:
           outputs: type=docker,dest=/tmp/pytest-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Cache docker images
-        #        if: ${{ !env.ACT }} # skip caching if running on ACT
         uses: actions/cache@v3
         with:
           path: /tmp/*.tar
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Move cache
-        #        if: ${{ !env.ACT }} # skip caching if running on ACT
         run: |
           ./.ci/scripts/gh-cache.sh
         shell: bash

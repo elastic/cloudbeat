@@ -1,4 +1,4 @@
-name: EKS Functional tests
+name: EKS-CI
 
 on:
   # On demand execution of workflow will run all suites.
