@@ -9,8 +9,7 @@ This guide deploys both an Elastic cloud environment, an AWS EKS cluster, and an
 
 Follow the [prerequisites](/README.md#prerequisites) chapter of our main README.
 
-**How To**
-Create environment
+**How To Create an Environment**
 
 1. Create an [API token](https://cloud.elastic.co/deployment-features/keys) from your cloud console account.
 
@@ -21,7 +20,8 @@ Create environment
    for `SNAPSHOT` version make sure to also set the region properly.
 
    ```bash
-   export TF_VAR_stack_version=8.6.0-SNAPSHOT
+   export TF_VAR_stack_version=8.7.2-SNAPSHOT
+   export TF_VAR_agent_docker_image_override=docker.elastic.co/beats/elastic-agent:8.7.2-SNAPSHOT
    export TF_VAR_ess_region=gcp-us-west2
    ```
 
@@ -92,11 +92,19 @@ terraform destroy --auto-approve
 
 To create an environment with specific version use
 
-`terraform apply --auto-approve -var="stack_version=8.5.1"`
-When working with non production versions it is required to also update the deployment regions.
-For example, to deploy `8.6.0-SNAPSHOT` use
+```bash
+terraform apply --auto-approve -var="stack_version=8.7.2"
+```
 
-`terraform apply --auto-approve -var="stack_version=8.6.0-SNAPSHOT" -var="ess_region=gcp-us-west2"`
+When working with non-production versions it is required to also update the deployment regions.
+For example, to deploy `8.7.2-SNAPSHOT` use
+
+```bash
+terraform apply --auto-approve \
+   -var="stack_version=8.7.2-SNAPSHOT" \
+   -var="agent_docker_image_override=docker.elastic.co/beats/elastic-agent:8.7.2-SNAPSHOT" \
+   -var="ess_region=gcp-us-west2"
+```
 
 ## Named environment
 

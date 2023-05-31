@@ -1,5 +1,0 @@
----
-- job:
-    name: cloudbeat
-    description: cloudbeat
-    project-type: folder
