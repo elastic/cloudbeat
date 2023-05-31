@@ -78,3 +78,11 @@ repos:
         language: system
         files: (^_meta\/.*|^cloudbeat.*yml)$
         pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: actionlint
+        name: github actions lint
+        entry: actionlint
+        language: system
+        pass_filenames: false
