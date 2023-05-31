@@ -82,7 +82,7 @@ repos:
   - repo: local
     hooks:
       - id: actionlint
-        name: github actions lint
+        name: github actions linter
         entry: actionlint
         language: system
         pass_filenames: false
