@@ -17,7 +17,7 @@ repos:
       - id: detect-private-key
 
   - repo: https://github.com/asottile/add-trailing-comma
-    rev: v2.3.0
+    rev: v2.4.0
     hooks:
       - id: add-trailing-comma
 
@@ -37,7 +37,7 @@ repos:
         files: ^tests/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v2.15.7
+    rev: v3.0.0a6
     hooks:
       - id: pylint
         args: [
@@ -46,7 +46,7 @@ repos:
         ]
 
   - repo: https://github.com/psf/black
-    rev: 22.10.0
+    rev: 23.3.0
     hooks:
       - id: black
         args: [
@@ -77,12 +77,4 @@ repos:
         entry: bash -c 'mage config'
         language: system
         files: (^_meta\/.*|^cloudbeat.*yml)$
-        pass_filenames: false
-
-  - repo: local
-    hooks:
-      - id: actionlint
-        name: github actions linter
-        entry: actionlint
-        language: system
         pass_filenames: false
