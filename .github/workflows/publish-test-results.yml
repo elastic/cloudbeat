@@ -70,9 +70,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sudo apt-get install tree
-          tree .
-
+          sudo apt-get -y install allure
           allure generate --clean tests/allure/results -o tests/allure/reports
           allure_result=tests/allure/reports/allure-report/history/history-trend.json
           allure_url=http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html
