@@ -37,7 +37,7 @@ repos:
         files: ^tests/
 
   - repo: https://github.com/pycqa/pylint
-    rev: v3.0.0a6
+    rev: v2.17.4
     hooks:
       - id: pylint
         args: [
