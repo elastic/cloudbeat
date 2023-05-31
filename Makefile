@@ -208,7 +208,7 @@ BIN_MAGE=$(GOOSBUILD)/bin/mage
 
 # BIN_MAGE is the standard "mage" binary.
 $(BIN_MAGE): go.mod
-	$(GO) build -o $@ github.com/magefile/mage
+	go build -o $@ github.com/magefile/mage
 
 # MAGE is the compiled magefile.
 $(MAGE): magefile.go $(BIN_MAGE)
