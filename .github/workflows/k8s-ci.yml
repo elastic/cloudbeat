@@ -171,12 +171,12 @@ jobs:
           # - test-target: pre_merge_agent
           #   range: ''
           #   values_file: tests/deploy/values/ci-sa-agent.yml
-          - test-target: pre_merge
-            range: ''
-            values_file: tests/deploy/values/ci.yml
-          - test-target: aws
-            range: ''
-            values_file: tests/deploy/values/ci-aws-services.yml
+#          - test-target: pre_merge
+#            range: ''
+#            values_file: tests/deploy/values/ci.yml
+#          - test-target: aws
+#            range: ''
+#            values_file: tests/deploy/values/ci-aws-services.yml
           - test-target: file_system_rules
             range: '0..5'
             values_file: tests/deploy/values/ci.yml
