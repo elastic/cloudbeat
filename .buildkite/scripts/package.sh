@@ -4,6 +4,9 @@ set -uox pipefail
 export PLATFORMS="linux/amd64,linux/arm64"
 export TYPES="tar.gz"
 CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -d'=' -f2 | tr -d '" ')
+PYTHON_BIN=./build/ve/$(go env GOOS)/bin
+PYTHON=$PYTHON_BIN/python
+
 
 if [ "$WORKFLOW" = "snapshot" ] ; then
     export SNAPSHOT="true"
@@ -11,10 +14,12 @@ fi
 
 source ./bin/activate-hermit
 
-mage pythonEnv
+#mage pythonEnv
+#mage package
 
-./bin/python3 ./.buildkite/scripts/generate_notice.py --csv build/dependencies-"${CLOUDBEAT_VERSION}"-"${WORKFLOW}".csv
+CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
+[ -n "$SNAPSHOT" ] && CSV_FILE+="-SNAPSHOT"
 
-mage package
-
+echo "Generating $CSV_FILE.csv"
+$PYTHON ./.buildkite/scripts/generate_notice.py --csv "$CSV_FILE.csv"
 cp build/dependencies-*.csv build/distributions/.
