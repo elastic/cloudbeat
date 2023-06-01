@@ -64,13 +64,24 @@ jobs:
           summaryTableType: ascii
           collapseSummary: false
 
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+
+      - name: Install Allure
+        run: |
+          sudo apt-add-repository ppa:qameta/allure
+          sudo apt-get update
+          sudo apt-get install allure -y
+          allure --version
 
       - name: Output to Job Summary
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          sudo apt-get -y install allure
           allure generate --clean tests/allure/results -o tests/allure/reports
           allure_result=tests/allure/reports/allure-report/history/history-trend.json
           allure_url=http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html

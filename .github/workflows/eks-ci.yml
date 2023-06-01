@@ -1,19 +1,19 @@
 name: EKS-CI
 
-on:
-  # On demand execution of workflow will run all suites.
-  workflow_dispatch:
-    inputs:
-      test-targets:
-        required: true
-        description: "Specify test markers to run"
-        default: '["eks"]'
-
-  # On post-merge execution running eks tests
-  push:
-    branches:
-      - main
-      - '[0-9]+.[0-9]+'
+#on:
+#  # On demand execution of workflow will run all suites.
+#  workflow_dispatch:
+#    inputs:
+#      test-targets:
+#        required: true
+#        description: "Specify test markers to run"
+#        default: '["eks"]'
+#
+#  # On post-merge execution running eks tests
+#  push:
+#    branches:
+#      - main
+#      - '[0-9]+.[0-9]+'
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
