@@ -14,8 +14,8 @@ fi
 
 source ./bin/activate-hermit
 
-#mage pythonEnv
-#mage package
+mage pythonEnv
+mage package
 
 CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
 [ -n "$SNAPSHOT" ] && CSV_FILE+="-SNAPSHOT"
