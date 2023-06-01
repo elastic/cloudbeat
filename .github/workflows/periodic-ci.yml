@@ -87,13 +87,7 @@ jobs:
           version: 0.44 # this should be aligned with the version in go.mod
 
       - name: build cloudbeat
-        run: make
-
-      - name: build opa bundle
-        uses: magefile/mage-action@v2
-        with:
-          version: latest
-          args: BuildOpaBundle
+        run: mage Build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
