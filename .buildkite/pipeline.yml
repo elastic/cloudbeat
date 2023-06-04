@@ -2,22 +2,28 @@ env:
   BRANCH: "${BUILDKITE_BRANCH}"
 agents:
   provider: "gcp" # needed for running docker commands
+common:
+  - hermit_plugin: &hermit
+      elastic/hermit#v1.0.0
+
 
 steps:
   - label: ":package: Package Cloudbeat - Snapshot"
-    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+#    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
     env:
       WORKFLOW: "snapshot"
     key: "package-snapshot"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
+    plugins:
+      - *hermit
 
-  - label: ":rocket: Publishing Snapshot DRA artifacts"
-    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
-    depends_on: "package-snapshot"
-    command: "./.buildkite/scripts/publish.sh"
-    env:
-      WORKFLOW: "snapshot"
+#  - label: ":rocket: Publishing Snapshot DRA artifacts"
+#    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+#    depends_on: "package-snapshot"
+#    command: "./.buildkite/scripts/publish.sh"
+#    env:
+#      WORKFLOW: "snapshot"
 
   - label: ":package: Package Cloudbeat - Staging"
     if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
@@ -26,10 +32,12 @@ steps:
     key: "package-staging"
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
+    plugins:
+      - *hermit
 
-  - label: ":rocket: Publishing Staging DRA artifacts"
-    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
-    depends_on: "package-staging"
-    command: "./.buildkite/scripts/publish.sh"
-    env:
-      WORKFLOW: "staging"
+#  - label: ":rocket: Publishing Staging DRA artifacts"
+#    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
+#    depends_on: "package-staging"
+#    command: "./.buildkite/scripts/publish.sh"
+#    env:
+#      WORKFLOW: "staging"
