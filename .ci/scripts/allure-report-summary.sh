@@ -28,7 +28,7 @@ skipped=$(echo "$data" | jq -r '.[0].data.skipped')
 
 # Check if all tests either passed or were skipped
 if [ "$failed" -eq 0 ]; then
-  summary=":green_heart: All tests either passed or were skipped."
+  summary=":green_heart: No failures were reported."
 else
   summary=":broken_heart: Some tests failed or were broken."
 fi
