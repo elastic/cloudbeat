@@ -2,9 +2,7 @@
 set -euxo pipefail
 IMAGE_SUFFIX=$1
 CONTAINER_REGISTRY=$2
-ELASTIC_AGENT_DOCKER_TAG=$(make get-ci-agent-version)
-
-
+ELASTIC_AGENT_DOCKER_TAG=$3
 
 load_and_push_image () {
     docker load -i /tmp/"$1"-"${IMAGE_SUFFIX}".tar

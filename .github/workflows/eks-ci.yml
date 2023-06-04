@@ -138,7 +138,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          ./.ci/scripts/ecr-images.sh ${{ env.CONTAINER_SUFFIX }}  ${{ env.ECR_REGISTRY}}
+          ./.ci/scripts/ecr-images.sh ${{ env.CONTAINER_SUFFIX }}  ${{ env.ECR_REGISTRY }} ${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
         shell: bash
 
 
