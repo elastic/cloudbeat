@@ -3,6 +3,8 @@ set -uox pipefail
 
 export PLATFORMS="linux/amd64,linux/arm64"
 export TYPES="tar.gz"
+source ./bin/activate-hermit
+
 CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -d'=' -f2 | tr -d '" ')
 PYTHON_BIN=./build/ve/$(go env GOOS)/bin
 PYTHON=$PYTHON_BIN/python
@@ -10,8 +12,6 @@ PYTHON=$PYTHON_BIN/python
 if [ "$WORKFLOW" = "snapshot" ] ; then
     export SNAPSHOT="true"
 fi
-
-source ./bin/activate-hermit
 
 mage pythonEnv
 mage package
