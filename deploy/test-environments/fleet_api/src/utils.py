@@ -39,7 +39,8 @@ def read_json(json_path: Path) -> dict:
             return json.load(json_file)
     except FileNotFoundError:
         logger.error(f"{json_path.name} file not found.")
-        return
+        return {}
+
 
 def save_state(file_path: Path, data: list) -> None:
     """
@@ -72,6 +73,7 @@ def save_state(file_path: Path, data: list) -> None:
         logger.error(f"Error occurred while saving JSON data: {ex}")
         raise ex
 
+
 def delete_file(file_path: Path):
     """
     Delete a file.
@@ -91,6 +93,7 @@ def delete_file(file_path: Path):
     except OSError as ex:
         logger.error(f"Error occurred while deleting file '{file_path}': {ex}")
         raise ex
+
 
 def update_key(data: Union[dict, list], search_key: str, value_to_apply: str):
     """Update the value of a specific key in the given data.
@@ -116,12 +119,13 @@ def update_key(data: Union[dict, list], search_key: str, value_to_apply: str):
             elif isinstance(value, (dict, list)):
                 update_key(value, search_key, value_to_apply)
 
+
 def delete_key(data: Union[dict, list], search_key: str, key_to_delete: str):
     """Delete a specific key from the data if it matches the search key.
 
-    If the data is a dictionary, 
+    If the data is a dictionary,
     it searches for the specified key and deletes the corresponding key_to_delete.
-    
+
     If the data is a list, it recursively calls the function for each item in the list.
 
     Args:

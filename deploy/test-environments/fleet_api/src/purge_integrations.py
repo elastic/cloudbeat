@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 """
 Purge Integrations and Policies
 
-This script is used to purge integrations and policies 
+This script is used to purge integrations and policies
 based on the stored IDs in the state_data.json file.
 
 The following steps are performed:
@@ -16,12 +17,17 @@ Usage:
 import json
 from munch import munchify
 from loguru import logger
-from api.agent_policy_api import delete_agent_policy
+from api.agent_policy_api import (
+    delete_agent_policy,
+    get_agents,
+    unenroll_agents_from_policy,
+)
 from api.package_policy_api import delete_package_policy
-import configuration as cnfg
+import configuration_fleet as cnfg
 from utils import delete_file
 
 state_data_file = cnfg.state_data_file
+
 
 def purge_integrations():
     """
@@ -40,12 +46,19 @@ def purge_integrations():
         logger.error("state_data.json file not found.")
         return
 
+    agents = get_agents(cfg=cnfg.elk_config)
     # Delete policies based on the stored IDs
     for policy in policy_data.policies:
         delete_package_policy(cfg=cnfg.elk_config, policy_ids=[policy.pkg_policy_id])
+
+        agents_list = [item.agent.id for item in agents if item.policy_id == policy.agnt_policy_id]
+        if agents_list:
+            unenroll_agents_from_policy(cfg=cnfg.elk_config, agents=agents_list)
+
         delete_agent_policy(cfg=cnfg.elk_config, agent_policy_id=policy.agnt_policy_id)
 
     delete_file(state_data_file)
+
 
 if __name__ == "__main__":
     logger.info("Start purging integrations and policies process...")

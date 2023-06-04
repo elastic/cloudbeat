@@ -14,6 +14,7 @@ You can install it by running 'pip install requests' in your Python environment.
 """
 import requests
 
+
 class APICallException(Exception):
     """
     Exception raised for API call failures.

@@ -1,4 +1,4 @@
-""" 
+"""
 This module contains API calls related to Fleet settings
 """
 import codecs
@@ -9,7 +9,7 @@ from api.base_call_api import perform_api_call, APICallException
 
 
 def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
-    """ Retrieves the enrollment token for a specified policy ID.
+    """Retrieves the enrollment token for a specified policy ID.
 
     Args:
         cfg (Munch): Config object containing authentication data.
@@ -22,11 +22,13 @@ def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
     url = f"{cfg.kibana_url}/api/fleet/enrollment_api_keys"
 
     try:
-        response = perform_api_call(method="GET",
-                                    url=url,
-                                    headers=headers,
-                                    auth=cfg.auth,
-                                    params={})
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            headers=headers,
+            auth=cfg.auth,
+            params={},
+        )
         response_obj = munchify(response)
 
         api_key = ""
@@ -36,15 +38,15 @@ def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
                 break
     except APICallException as api_ex:
         logger.error(
-            f"API call failed with status code {api_ex.status_code}. "
-            f"Response: {api_ex.response_text}"
-            )
-        return
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return ""
 
     return api_key
 
+
 def get_fleet_server_host(cfg: Munch) -> str:
-    """ Retrieves the Fleet server host URL.
+    """Retrieves the Fleet server host URL.
 
     Args:
         cfg (Munch): Config object containing authentication data.
@@ -56,49 +58,51 @@ def get_fleet_server_host(cfg: Munch) -> str:
     url = f"{cfg.kibana_url}/api/fleet/settings"
 
     try:
-        response = perform_api_call(method="GET",
-                                    url=url,
-                                    headers=headers,
-                                    auth=cfg.auth,
-                                    params={})
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            headers=headers,
+            auth=cfg.auth,
+            params={},
+        )
         response_obj = munchify(response)
         return response_obj.item.fleet_server_hosts[0]
     except APICallException as api_ex:
         logger.error(
-            f"API call failed with status code {api_ex.status_code}. "
-            f"Response: {api_ex.response_text}"
-            )
-        return
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return ""
 
 
 def create_kubernetes_manifest(cfg: Munch, params: Munch):
-    """ Create a Kubernetes manifest based on the provided configuration and parameters.
+    """Create a Kubernetes manifest based on the provided configuration and parameters.
 
     Args:
         cfg (Munch): Config object containing authentication data.
         params (Munch): The parameters object containing additional information.
     """
-
+    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/kubernetes"
 
     request_params = {
         "fleetServer": params.fleet_url,
-        "enrolToken": params.enrollment_token
+        "enrolToken": params.enrollment_token,
     }
 
     try:
-        response = perform_api_call(method="GET",
-                                    url=url,
-                                    headers=headers,
-                                    auth=cfg.auth,
-                                    params={"params": request_params})
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            headers=headers,
+            auth=cfg.auth,
+            params={"params": request_params},
+        )
         response_obj = munchify(response)
-        with codecs.open(params.yaml_path, 'w', encoding='utf-8-sig') as k8s_yaml:
+        with codecs.open(params.yaml_path, "w", encoding="utf-8-sig") as k8s_yaml:
             k8s_yaml.write(response_obj.item)
         logger.info(f"KSPM manifest is available at: '{params.yaml_path}'")
     except APICallException as api_ex:
         logger.error(
-            f"API call failed with status code {api_ex.status_code}. "
-            f"Response: {api_ex.response_text}"
-            )
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
         return
