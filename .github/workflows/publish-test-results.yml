@@ -91,6 +91,7 @@ jobs:
 
 
       - name: Output to Job Summary
+        id: output-summary
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -100,6 +101,7 @@ jobs:
 
           ./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url"
           allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
+          echo "allure_summary=$allure_summary" >> $GITHUB_OUTPUT
           echo "$allure_summary" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment test success result
@@ -110,4 +112,4 @@ jobs:
           number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ${{ GITHUB_STEP_SUMMARY }}
+            ${{ steps.output-summary.outputs.allure_summary }}
