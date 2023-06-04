@@ -81,7 +81,7 @@ jobs:
 
       - name: Copy allure report json from S3
         run: |
-          aws s3 cp ${{ env.ALLURE_S3_BUCKET }}/${{ env.PR_NUMBER }}/history/history-trend.json ./ --recursive
+          aws s3 cp ${{ env.ALLURE_S3_BUCKET }}/${{ env.PR_NUMBER }}/history/history-trend.json .
 
 
       - name: Output to Job Summary
