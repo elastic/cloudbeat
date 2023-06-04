@@ -2,10 +2,6 @@ env:
   BRANCH: "${BUILDKITE_BRANCH}"
 agents:
   provider: "gcp" # needed for running docker commands
-common:
-  - hermit_plugin: &hermit
-      elastic/hermit#v1.0.0
-
 
 steps:
   - label: ":package: Package Cloudbeat - Snapshot"
@@ -16,7 +12,7 @@ steps:
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
     plugins:
-      - *hermit
+      - elastic/hermit#v1.0.0
 
 #  - label: ":rocket: Publishing Snapshot DRA artifacts"
 #    if: build.branch == 'main' || build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
@@ -33,7 +29,7 @@ steps:
     command: "./.buildkite/scripts/package.sh"
     artifact_paths: "build/distributions/*"
     plugins:
-      - *hermit
+      - elastic/hermit#v1.0.0
 
 #  - label: ":rocket: Publishing Staging DRA artifacts"
 #    if: build.branch =~ /^[0-9]+\.[0-9]+\$/ || build.env("RUN_RELEASE") == "true"
