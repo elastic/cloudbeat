@@ -79,12 +79,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install AWS CLI
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-
       - name: Copy allure report json from S3
         run: |
           aws s3 cp ${{ env.ALLURE_S3_BUCKET }}/${{ env.PR_NUMBER }}/history/history-trend.json ./ --recursive
