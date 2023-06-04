@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "fleet-api"
+version = "0.1.0"
+description = ""
+authors = ["Dmitry Gurevich <99176494+gurevichdmitry@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "fleet_api", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.31.0"
+munch = "^3.0.0"
+loguru = "^0.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
