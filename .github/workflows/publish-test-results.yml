@@ -47,7 +47,6 @@ jobs:
           done
 
       - name: Get pr info
-        id: pr_info
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -95,7 +94,7 @@ jobs:
 
           ./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url"
           allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
-          echo "allure_summary=$allure_summary" >> $GITHUB_OUTPUT
+          echo "allure_summary=$allure_summary" >> $GITHUB_ENV
           echo "$allure_summary" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment test success result
@@ -106,4 +105,4 @@ jobs:
           number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ${{ steps.output-summary.outputs.allure_summary }}
+            ${{ env.allure_summary }}
