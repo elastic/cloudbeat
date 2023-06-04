@@ -51,6 +51,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUM=$(gh api -X GET search/issues -f q='elastic/cloudbeat is:open is:pr is:unmerged ${{ github.event.workflow_run.head_sha }}' | jq  '.items[0].number' )
+          echo "PR_NUMBER=$PR_NUM"
           echo "PR_NUMBER=$PR_NUM" >> $GITHUB_ENV
 
       - name: Publish allure report
