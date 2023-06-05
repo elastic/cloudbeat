@@ -8,12 +8,12 @@ on:
         type: string
         description: |
           Name your environment (Only a-zA-Z0-9 and `-`).
-          For example: john-8-8-0-June01'
+          For example: john-8-7-2-June01'
         required: true
       elk-stack-version:
         required: true
         description: "Elastic Cloud stack version"
-        default: "8.8.0-SNAPSHOT"
+        default: "8.7.2-SNAPSHOT"
       ess-region:
         required: true
         description: "Elastic Cloud deployment region"
