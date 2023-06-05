@@ -9,6 +9,7 @@ from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 
 CIS_2_3_1 = "CIS 2.3.1"
 CIS_2_3_2 = "CIS 2.3.2"
+CIS_2_3_3 = "CIS 2.3.3"
 
 cis_aws_rds_2_3_1_pass = EksAwsServiceCase(
     rule_tag=CIS_2_3_1,
@@ -44,7 +45,25 @@ cis_aws_rds_2_3_2 = {
     "2.3.2 Ensure Auto Minor Version Enabled, AutoMinorVersionUpgrade=false expect: failed": cis_aws_rds_2_3_2_fail,
 }
 
+cis_aws_rds_2_3_3_pass = EksAwsServiceCase(
+    rule_tag=CIS_2_3_3,
+    case_identifier="test-aws-db-no-public-access-allowed-pass",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_aws_rds_2_3_3_fail = EksAwsServiceCase(
+    rule_tag=CIS_2_3_3,
+    case_identifier="test-aws-db-public-access-on-fail",
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_aws_rds_2_3_3 = {
+    "2.3.3 Ensure no public access, no public access, expect: passed": cis_aws_rds_2_3_3_pass,
+    "2.3.3 Ensure no public access, public access allowed, expect: failed": cis_aws_rds_2_3_3_fail,
+}
+
 cis_aws_rds_cases = {
     **cis_aws_rds_2_3_1,
     **cis_aws_rds_2_3_2,
+    **cis_aws_rds_2_3_3,
 }

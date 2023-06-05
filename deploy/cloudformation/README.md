@@ -10,7 +10,7 @@ The EC2 instance has elastic-agent preinstalled in it using the fleet URL and en
 2. You have AWS CLI installed on your laptop and configured to work with our dev account `elastic-security-cloud-security-dev` (in particular, `~/.aws/config` and `~/.aws/credentials` should be set, check https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html for more information)
 
 *Steps:*
-1. Install Vulnerability Management integration on a new agent policy, you might have to check the "Display beta integrations" checkbox.
+1. Install the Vulnerability Management integration on a new agent policy, you might have to check the "Display beta integrations" checkbox.
 2. After you installed the integration you can install a new elastic-agent, you should keep the fleet URL and the enrollment token.
 3. On cloudbeat repo, create a `deploy/cloudformation/.env` file of the form:
 ```
@@ -19,6 +19,7 @@ FLEET_URL="<Elastic Agent Fleet URL>"
 ENROLLMENT_TOKEN="<Elastic Agent Enrollment Token>"
 ELASTIC_ARTIFACT_SERVER="https://artifacts.elastic.co/downloads/beats/elastic-agent" # Replace artifact URL with a pre-release version (BC or snapshot)
 ELASTIC_AGENT_VERSION="<Elastic Agent Version>" # e.g: 8.8.0 | 8.8.0-SNAPSHOT
+# INTEGRATION=CloudSecurityPostureManagement # Defaults to VulnerabilityManagement if not specified
 
 DEV.ALLOW_SSH=false # Set to true to allow SSH connections to the deployed instance
 DEV.KEY_NAME="" # When SSH is allowed, you must provide the key name that will be used to ssh into the EC2

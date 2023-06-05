@@ -102,7 +102,7 @@ class FsClient:
     """
 
     @staticmethod
-    def exec_command(
+    def exec_command(  # noqa: C901
         container_name: str,
         command: str,
         param_value: str,
@@ -122,6 +122,10 @@ class FsClient:
                 return
             with open(param_value, "a+", encoding="utf-8"):
                 pass
+            return
+
+        if command == "mkdir":
+            os.makedirs(param_value, exist_ok=True)
             return
 
         if command == "cat":

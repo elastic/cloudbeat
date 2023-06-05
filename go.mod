@@ -1,6 +1,6 @@
 module github.com/elastic/cloudbeat
 
-go 1.19
+go 1.20
 
 require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20190809170250-f77fb823c7ee // indirect
@@ -62,7 +62,7 @@ require (
 	github.com/djherbis/times v1.5.0
 	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
 	github.com/elastic/elastic-agent-autodiscover v0.5.0
-	github.com/elastic/elastic-agent-libs v0.3.3
+	github.com/elastic/elastic-agent-libs v0.3.8
 	github.com/elastic/go-licenser v0.4.1
 	github.com/go-errors/errors v1.0.1
 	github.com/go-git/go-git/v5 v5.6.1

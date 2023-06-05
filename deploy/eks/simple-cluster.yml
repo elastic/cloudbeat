@@ -5,10 +5,11 @@ kind: ClusterConfig
 metadata:
   name:
   region: eu-west-1
+  version: "1.23"
 
 vpc:
-    # Don't change vpc settings
-  id: 	"vpc-6cb55a15"  # (optional, must match VPC ID used for each subnet below)
+  # Don't change vpc settings
+  id: "vpc-6cb55a15" # (optional, must match VPC ID used for each subnet below)
   subnets:
     # must provide 'private' and/or 'public' subnets by availibility zone as shown
     public:
@@ -27,8 +28,8 @@ nodeGroups:
     desiredCapacity: 2
 
 cloudWatch:
-    clusterLogging:
-        # enable specific types of cluster control plane logs
-        enableTypes: ["audit", "authenticator", "controllerManager"]
-        # all supported types: "api", "audit", "authenticator", "controllerManager", "scheduler"
-        # supported special values: "*" and "all"
+  clusterLogging:
+    # enable specific types of cluster control plane logs
+    enableTypes: ["audit", "authenticator", "controllerManager"]
+    # all supported types: "api", "audit", "authenticator", "controllerManager", "scheduler"
+    # supported special values: "*" and "all"

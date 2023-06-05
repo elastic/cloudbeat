@@ -7,8 +7,8 @@
 set -eu
 
 REPO_ROOT=$(realpath "$(dirname "$(realpath dev-tools/packaging/docker/elastic-agent/build.sh)")"/../../../..)
-
-DEFAULT_IMAGE_TAG="${DEFAULT_IMAGE_TAG:-$(make get-version)-SNAPSHOT}"
+VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
+DEFAULT_IMAGE_TAG="${DEFAULT_IMAGE_TAG:-${VERSION}-SNAPSHOT}"
 BASE_IMAGE="${BASE_IMAGE:-docker.elastic.co/beats/elastic-agent:$DEFAULT_IMAGE_TAG}"
 GOARCH="${GOARCH:-$(go env GOARCH)}"
 
