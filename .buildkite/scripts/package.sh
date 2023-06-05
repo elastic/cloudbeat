@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
-set -euox pipefail
+set -uox pipefail
 
 export PLATFORMS="linux/amd64,linux/arm64"
 export TYPES="tar.gz"
-
 source ./bin/activate-hermit
-if [ $WORKFLOW = "staging" ] ; then
-    make release-manager-release
-else
+
+CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -d'=' -f2 | tr -d '" ')
+PYTHON_BIN=./build/ve/$(go env GOOS)/bin
+PYTHON=$PYTHON_BIN/python
+
+if [ "$WORKFLOW" = "snapshot" ] ; then
     export SNAPSHOT="true"
-    make release-manager-snapshot
 fi
 
+mage pythonEnv
+mage package
+
+CSV_FILE="build/dependencies-${CLOUDBEAT_VERSION}"
+[ -n "${SNAPSHOT+x}" ] && CSV_FILE+="-SNAPSHOT"
+
+echo "Generating $CSV_FILE.csv"
+$PYTHON ./.buildkite/scripts/generate_notice.py --csv "$CSV_FILE.csv"
 cp build/dependencies-*.csv build/distributions/.
