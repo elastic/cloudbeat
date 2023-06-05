@@ -16,7 +16,7 @@ To successfully deploy the environment, ensure that the following variables are 
 
 ```bash
 export TF_VAR_ec_api_key={TOKEN} # <-- should be replaced by Elastic Cloud TOKEN
-export TF_VAR_stack_version=8.6.0-SNAPSHOT
+export TF_VAR_stack_version=8.7.2-SNAPSHOT
 export TF_VAR_ess_region=gcp-us-west2
 ```
 

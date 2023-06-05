@@ -29,6 +29,8 @@ module "eks" {
 
   region       = var.eks_region
   cluster_name = var.deployment_name
+  node_group_one_desired_size = var.node_group_one_desired_size
+  node_group_two_desired_size = var.node_group_two_desired_size
 }
 
 # Retrieve EKS cluster information
