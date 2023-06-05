@@ -89,6 +89,31 @@ def create_kspm_eks_integration(
         return ""
 
 
+def create_cspm_integration(
+    cfg: Munch,
+    pkg_policy: dict,
+    agent_policy_id: str,
+    cspm_data: dict,
+) -> str:
+    """Creates an CSPM AWS integration
+
+    Args:
+        cfg (Munch): Config object containing authentication data.
+        pkg_policy (dict): The package policy to be associated with the integration.
+        agent_policy_id (str): The ID of the agent policy to be used.
+        eks_data (dict): The CSPM data to be modified in the package policy.
+
+    Returns:
+        str: The ID of the created unmanaged integration.
+    """
+    return create_kspm_eks_integration(
+        cfg=cfg,
+        pkg_policy=pkg_policy,
+        agent_policy_id=agent_policy_id,
+        eks_data=cspm_data,
+    )
+
+
 def delete_package_policy(cfg: Munch, policy_ids: list):
     """Delete package policy
 

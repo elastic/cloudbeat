@@ -29,4 +29,9 @@ aws_config = Munch()
 aws_config.access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "NA")
 aws_config.secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "NA")
 
+artifactory_url = {
+    "staging": "https://staging.elastic.co/",
+    "snapshot": "https://snapshots.elastic.co/",
+}
+
 state_data_file = Path(__file__).parent / "state_data.json"

@@ -17,6 +17,7 @@ Import this module to utilize the provided functions for JSON file operations an
 import json
 from typing import Union
 from pathlib import Path
+from jinja2 import Template
 from loguru import logger
 
 
@@ -146,3 +147,28 @@ def delete_key(data: Union[dict, list], search_key: str, key_to_delete: str):
                 del value[key_to_delete]
             elif isinstance(value, (dict, list)):
                 delete_key(value, search_key, key_to_delete)
+
+
+def render_template(template_path, replacements):
+    """
+    Render a template file with the provided replacements.
+
+    Args:
+        template_path (str): The path to the template file.
+        replacements (dict): A dictionary containing the replacements to be applied to the template.
+
+    Returns:
+        str: The rendered content of the template file with replacements applied.
+
+    Raises:
+        FileNotFoundError: If the template file specified by `template_path` does not exist.
+        IOError: If there is an error reading the template file.
+
+    """
+    with open(template_path, "r", encoding="utf-8") as t_file:
+        template_content = t_file.read()
+
+    template = Template(template_content)
+    rendered_content = template.render(replacements)
+
+    return rendered_content

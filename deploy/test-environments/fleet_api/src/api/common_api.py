@@ -106,3 +106,41 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         return
+
+
+def get_build_info(version: str, is_snapshot: bool) -> str:
+    """
+    Retrieve the build ID for a specific version of Elastic.
+
+    Args:
+        version (str): The version of Elastic.
+        is_snapshot (bool): Flag indicating whether it is a snapshot build.
+
+    Returns:
+        str: The build ID of the specified version.
+
+    Raises:
+        APICallException: If the API call to retrieve the build ID fails.
+    """
+    # pylint: disable=duplicate-code
+    if is_snapshot:
+        url = "https://snapshots.elastic.co/latest/master.json"
+    else:
+        url = f"https://staging.elastic.co/latest/{version}.json"
+
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            headers=headers,
+            auth={},
+            params={"params": {}},
+        )
+        response_obj = munchify(response)
+        return response_obj.build_id
+
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return ""
