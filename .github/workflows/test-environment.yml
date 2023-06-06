@@ -114,7 +114,6 @@ jobs:
           aws s3 cp "${{ env.EC2_KSPM_KEY }}" "${{ env.S3_BUCKET }}/kspm.pem"
 
       # Placeholder action that need to be replaced by the following:
-      # Additional deployment EC2 / K8s
       # # Tests execution
       # - name: Sleep action
       #   if: success()
