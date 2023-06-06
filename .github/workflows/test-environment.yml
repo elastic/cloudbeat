@@ -1,4 +1,4 @@
-name: sanity workflow
+name: Sanity tests
 
 on:
   # Ability to execute on demand
