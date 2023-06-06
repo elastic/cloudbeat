@@ -2,7 +2,7 @@
 name = "fleet-api"
 version = "0.1.0"
 description = ""
-authors = ["Dmitry Gurevich <99176494+gurevichdmitry@users.noreply.github.com>"]
+authors = ["Dmitry Gurevich <dmitry.gurevich@elastic.co>"]
 readme = "README.md"
 packages = [{include = "fleet_api", from = "src"}]
 
