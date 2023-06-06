@@ -30,41 +30,41 @@ env:
   WORKING_DIR: deploy/test-environments
 
 jobs:
-  Setup:
-    runs-on: ubuntu-20.04
-    timeout-minutes: 15
-    outputs:
-      stack-version: ${{ steps.set-input-vars.outputs.stack-version }}
-      ess-region: ${{ steps.set-input-vars.outputs.ess-region }}
-      deployment-name: ${{ steps.set-input-vars.outputs.deployment-name }}
-      tf-folder-date: ${{ steps.gen-tf-name.outputs.tf-folder-date}}
-    steps:
-      - id: set-input-vars
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          ELK_VERSION: ${{ github.event.inputs.elk-stack-version }}
-          ESS_REGION: ${{ github.event.inputs.ess-region }}
-          DEPLOYMENT_NAME: ${{ github.event.inputs.deployment_name }}
-        run: |
-          echo "stack-version=${{ env.ELK_VERSION }}" >> $GITHUB_OUTPUT
-          echo "ess-region=${{ env.ESS_REGION }}" >> $GITHUB_OUTPUT
-          echo "deployment-name=${{ env.DEPLOYMENT_NAME }}" >> $GITHUB_OUTPUT
-      - id: gen-tf-name
-        run: |
-          echo "tf-folder-date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
+  # Setup:
+  #   runs-on: ubuntu-20.04
+  #   timeout-minutes: 15
+  #   outputs:
+  #     stack-version: ${{ steps.set-input-vars.outputs.stack-version }}
+  #     ess-region: ${{ steps.set-input-vars.outputs.ess-region }}
+  #     deployment-name: ${{ steps.set-input-vars.outputs.deployment-name }}
+  #     # tf-folder-date: ${{ steps.gen-tf-name.outputs.tf-folder-date}}
+  #   steps:
+  #     - id: set-input-vars
+  #       if: github.event_name == 'workflow_dispatch'
+  #       env:
+  #         ELK_VERSION: ${{ github.event.inputs.elk-stack-version }}
+  #         ESS_REGION: ${{ github.event.inputs.ess-region }}
+  #         DEPLOYMENT_NAME: ${{ github.event.inputs.deployment_name }}
+  #       run: |
+  #         echo "stack-version=${{ env.ELK_VERSION }}" >> $GITHUB_OUTPUT
+  #         echo "ess-region=${{ env.ESS_REGION }}" >> $GITHUB_OUTPUT
+  #         echo "deployment-name=${{ env.DEPLOYMENT_NAME }}" >> $GITHUB_OUTPUT
+      # - id: gen-tf-name
+      #   run: |
+      #     echo "tf-folder-date=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
 
   Deploy:
-    needs: ["Setup"]
+    # needs: ["Setup"]
     runs-on: ubuntu-20.04
     timeout-minutes: 120
     defaults:
       run:
         working-directory: ${{ env.WORKING_DIR }}
     env:
-      TF_VAR_stack_version: ${{ needs.Setup.outputs.stack-version }}
-      TF_VAR_ess_region: ${{ needs.Setup.outputs.ess-region }}
-      TF_STATE_FOLDER: ${{ needs.Setup.outputs.tf-folder-date }}
-      DEPLOYMENT_NAME: ${{ needs.Setup.outputs.deployment-name }}
+      TF_VAR_stack_version: ${{ github.event.inputs.elk-stack-version }}
+      TF_VAR_ess_region: ${{ github.event.inputs.ess-region }}
+      # TF_STATE_FOLDER: ${{ needs.Setup.outputs.tf-folder-date }}
+      DEPLOYMENT_NAME: ${{ github.event.inputs.deployment_name }}
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
     steps:
       - name: Check out the repo
@@ -80,6 +80,10 @@ jobs:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set TF_STATE_FOLDER
+        run: |
+          echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_OUTPUT
 
       - name: Terraform Init
         run: terraform init -no-color
