@@ -4,8 +4,7 @@ This module contains API calls related to Fleet settings
 import codecs
 from munch import Munch, munchify
 from loguru import logger
-from api.headers import base_headers as headers
-from api.base_call_api import perform_api_call, APICallException
+from api.base_call_api import APICallException, perform_api_call
 
 
 def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
@@ -25,9 +24,7 @@ def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
         response = perform_api_call(
             method="GET",
             url=url,
-            headers=headers,
             auth=cfg.auth,
-            params={},
         )
         response_obj = munchify(response)
 
@@ -61,9 +58,7 @@ def get_fleet_server_host(cfg: Munch) -> str:
         response = perform_api_call(
             method="GET",
             url=url,
-            headers=headers,
             auth=cfg.auth,
-            params={},
         )
         response_obj = munchify(response)
         return response_obj.item.fleet_server_hosts[0]
@@ -93,7 +88,6 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
         response = perform_api_call(
             method="GET",
             url=url,
-            headers=headers,
             auth=cfg.auth,
             params={"params": request_params},
         )
@@ -132,9 +126,6 @@ def get_build_info(version: str, is_snapshot: bool) -> str:
         response = perform_api_call(
             method="GET",
             url=url,
-            headers=headers,
-            auth={},
-            params={"params": {}},
         )
         response_obj = munchify(response)
         return response_obj.build_id

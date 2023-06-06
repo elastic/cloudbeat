@@ -33,17 +33,20 @@ class APICallException(Exception):
         self.response_text = response_text
 
 
-def perform_api_call(method, url, headers, auth, params):
+def perform_api_call(method, url, headers=None, auth=None, params=None):
     """
     Perform an API call using the provided parameters.
 
     Args:
         method (str): The HTTP method for the API call (e.g., 'GET', 'POST', 'PUT', 'DELETE').
         url (str): The URL of the API endpoint.
-        headers (dict): The headers to be included in the API request.
-        auth (tuple or None): The authentication tuple (username, password)
-                        for basic authentication. Set to None for no authentication.
-        params (dict): The parameters to be included in the API request.
+        headers (dict, optional): The headers to be included in the API request.
+                                  If not provided, default headers will be used.
+        auth (tuple or None, optional): The authentication tuple (username, password)
+                                        for basic authentication. Set to None for no authentication.
+                                        Defaults to None.
+        params (dict, optional): The parameters to be included in the API request.
+                                 Defaults to None.
 
     Returns:
         dict: The JSON response from the API call.
@@ -51,6 +54,16 @@ def perform_api_call(method, url, headers, auth, params):
     Raises:
         APICallException: If the API call returns a non-200 status code.
     """
+    if headers is None:
+        headers = {
+            "Content-Type": "application/json",
+            "kbn-xsrf": "true",
+        }
+    if auth is None:
+        auth = ()
+    if params is None:
+        params = {}
+
     response = requests.request(method=method, url=url, headers=headers, auth=auth, **params)
     if response.status_code != 200:
         raise APICallException(response.status_code, response.text)

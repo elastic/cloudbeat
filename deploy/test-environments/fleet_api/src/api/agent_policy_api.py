@@ -4,7 +4,6 @@ This module contains API calls related to the agent policy API.
 
 from munch import Munch, munchify
 from loguru import logger
-from api.headers import base_headers as headers
 from api.base_call_api import APICallException, perform_api_call
 
 
@@ -28,7 +27,6 @@ def create_agent_policy(cfg: Munch, json_policy: dict) -> str:
         response = perform_api_call(
             method="POST",
             url=url,
-            headers=headers,
             auth=cfg.auth,
             params={"json": json_policy},
         )
@@ -61,7 +59,6 @@ def delete_agent_policy(cfg: Munch, agent_policy_id: str):
         perform_api_call(
             method="POST",
             url=url,
-            headers=headers,
             auth=cfg.auth,
             params={"json": json_data},
         )
@@ -93,9 +90,7 @@ def get_agents(cfg: Munch) -> list:
         response = perform_api_call(
             method="GET",
             url=url,
-            headers=headers,
             auth=cfg.auth,
-            params={},
         )
         response_obj = munchify(response)
         return response_obj.list
@@ -127,7 +122,6 @@ def unenroll_agents_from_policy(cfg: Munch, agents: list):
         perform_api_call(
             method="POST",
             url=url,
-            headers=headers,
             auth=cfg.auth,
             params={"json": json_data},
         )

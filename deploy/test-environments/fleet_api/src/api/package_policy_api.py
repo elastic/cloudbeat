@@ -4,7 +4,6 @@ This module contains API calls related to the package policy API.
 
 from munch import Munch, munchify
 from loguru import logger
-from api.headers import base_headers as headers
 from api.base_call_api import APICallException, perform_api_call
 from utils import update_key, delete_key
 
@@ -29,7 +28,6 @@ def create_kspm_unmanaged_integration(cfg: Munch, pkg_policy: dict, agent_policy
         response = perform_api_call(
             method="POST",
             url=url,
-            headers=headers,
             auth=cfg.auth,
             params={"json": package_policy},
         )
@@ -75,7 +73,6 @@ def create_kspm_eks_integration(
         response = perform_api_call(
             method="POST",
             url=url,
-            headers=headers,
             auth=cfg.auth,
             params={"json": package_policy},
         )
@@ -133,7 +130,6 @@ def delete_package_policy(cfg: Munch, policy_ids: list):
         perform_api_call(
             method="POST",
             url=url,
-            headers=headers,
             auth=cfg.auth,
             params={"json": data_json},
         )
