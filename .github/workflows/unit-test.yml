@@ -119,7 +119,7 @@ jobs:
           ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
       - name: Go linter
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v3.5.0
         with:
           version: latest
           args: --timeout=10m --whole-files

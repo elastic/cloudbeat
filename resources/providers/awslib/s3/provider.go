@@ -36,9 +36,10 @@ import (
 )
 
 const (
-	EncryptionNotFoundCode = "ServerSideEncryptionConfigurationNotFoundError"
-	PolicyNotFoundCode     = "NoSuchBucketPolicy"
-	NoEncryptionMessage    = "NoEncryption"
+	EncryptionNotFoundCode               = "ServerSideEncryptionConfigurationNotFoundError"
+	PolicyNotFoundCode                   = "NoSuchBucketPolicy"
+	NoEncryptionMessage                  = "NoEncryption"
+	NoPublicAccessBlockConfigurationCode = "NoSuchPublicAccessBlockConfiguration"
 )
 
 func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
@@ -265,6 +266,14 @@ func (p Provider) getBucketVersioning(ctx context.Context, bucketName *string, r
 func (p Provider) getAccountPublicAccessBlock(ctx context.Context) (*s3ControlTypes.PublicAccessBlockConfiguration, error) {
 	publicAccessBlock, err := p.controlClient.GetPublicAccessBlock(ctx, &s3control.GetPublicAccessBlockInput{AccountId: &p.accountId})
 	if err != nil {
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == NoPublicAccessBlockConfigurationCode {
+				p.log.Debugf("Account public access block for account %s does not exist", p.accountId)
+				return nil, nil
+			}
+		}
+
 		return nil, err
 	}
 
@@ -283,6 +292,14 @@ func (p Provider) getPublicAccessBlock(ctx context.Context, bucketName *string, 
 
 	publicAccessBlock, err := client.GetPublicAccessBlock(ctx, &s3Client.GetPublicAccessBlockInput{Bucket: bucketName})
 	if err != nil {
+		var apiErr smithy.APIError
+		if errors.As(err, &apiErr) {
+			if apiErr.ErrorCode() == NoPublicAccessBlockConfigurationCode {
+				p.log.Debugf("Bucket public access block for bucket %s does not exist", *bucketName)
+				return nil, nil
+			}
+		}
+
 		return nil, err
 	}
 
