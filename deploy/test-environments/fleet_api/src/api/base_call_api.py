@@ -7,10 +7,7 @@ Module contents:
     - perform_api_call: Function for making API calls and handling the response.
 
 Dependencies:
-    - requests: Library for making HTTP requests.
-
-Note: Make sure to install the 'requests' library before using this module.
-You can install it by running 'pip install requests' in your Python environment.
+    - requests: Library for making HTTP requests
 """
 import requests
 
