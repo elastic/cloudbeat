@@ -12,7 +12,7 @@ on:
         required: true
       elk-stack-version:
         required: true
-        description: "Elastic Cloud stack version"
+        description: "Elastic Cloud stack SNAPSHOT or BC version"
         default: "8.7.2-SNAPSHOT"
       ess-region:
         required: true
