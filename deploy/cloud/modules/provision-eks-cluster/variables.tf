@@ -10,13 +10,13 @@ variable "cluster_name" {
 }
 
 variable "node_group_one_desired_size" {
-  default     = 1
+  default     = 2
   type        = number
   description = "Node group one desired size, ensure that the desired size does not exceed the max size"
 }
 
 variable "node_group_two_desired_size" {
-  default     = 1
+  default     = 2
   type        = number
   description = "Node group two desired size, ensure that the desired size does not exceed the max size"
 }
