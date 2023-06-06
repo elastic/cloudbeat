@@ -25,8 +25,8 @@ from utils import (
     save_state,
 )
 
-KSPM_EKS_AGENT_POLICY = "../../../cloud/data/agent_policy.json"
-KSPM_EKS_PACKAGE_POLICY = "../../../cloud/data/package_policy.json"
+KSPM_EKS_AGENT_POLICY = "../../../cloud/data/agent_policy_eks.json"
+KSPM_EKS_PACKAGE_POLICY = "../../../cloud/data/package_policy_eks.json"
 
 
 kspm_agent_policy_data = Path(__file__).parent / KSPM_EKS_AGENT_POLICY
