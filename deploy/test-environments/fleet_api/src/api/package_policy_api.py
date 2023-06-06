@@ -101,7 +101,7 @@ def create_cspm_integration(
         cfg (Munch): Config object containing authentication data.
         pkg_policy (dict): The package policy to be associated with the integration.
         agent_policy_id (str): The ID of the agent policy to be used.
-        eks_data (dict): The CSPM data to be modified in the package policy.
+        cspm_data (dict): The CSPM data to be modified in the package policy.
 
     Returns:
         str: The ID of the created unmanaged integration.
