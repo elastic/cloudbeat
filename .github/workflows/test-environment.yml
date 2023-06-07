@@ -75,17 +75,31 @@ jobs:
       - name: Set Environment Output
         id: env-output
         run: |
-          declare -A outputs=(
-            ["KIBANA_URL"]="kibana_url"
-            ["ES_USER"]="elasticsearch_username"
-            ["ES_PASSWORD"]="elasticsearch_password"
-            ["EC2_CSPM"]="ec2_cspm_ssh_cmd"
-            ["EC2_KSPM"]="ec2_kspm_ssh_cmd"
-            ["EC2_CSPM_KEY"]="ec2_cspm_key"
-            ["EC2_KSPM_KEY"]="ec2_kspm_key"
-          )
+          echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
 
-          ./scripts/setup-terraform-output.sh "${outputs[@]}"
+          export ES_USER=$(terraform output elasticsearch_username)
+          echo "::add-mask::$ES_USER"
+          echo "ES_USER=$ES_USER" >> $GITHUB_ENV
+
+          export ES_PASSWORD=$(terraform output elasticsearch_password)
+          echo "::add-mask::$ES_PASSWORD"
+          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+
+          export EC2_CSPM=$(terraform output ec2_cspm_ssh_cmd)
+          echo "::add-mask::$EC2_CSPM"
+          echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
+
+          export EC2_KSPM=$(terraform output ec2_kspm_ssh_cmd)
+          echo "::add-mask::$EC2_KSPM"
+          echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
+
+          export EC2_CSPM_KEY=$(terraform output ec2_cspm_key)
+          echo "::add-mask::$EC2_CSPM_KEY"
+          echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
+
+          export EC2_KSPM_KEY=$(terraform output ec2_kspm_key)
+          echo "::add-mask::$EC2_KSPM_KEY"
+          echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
 
       - name: Upload tf state
         if: always()
