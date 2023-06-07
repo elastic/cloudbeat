@@ -61,10 +61,10 @@ jobs:
           echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
       - name: Terraform Init
-        run: terraform init -no-color
+        run: terraform init
 
       - name: Terraform Validate
-        run: terraform validate -no-color
+        run: terraform validate
 
       - name: Provision Test Environment (EC + EC2 K8s + EC2 CSPM)
         id: apply
@@ -75,33 +75,17 @@ jobs:
       - name: Set Environment Output
         id: env-output
         run: |
-          export KIBANA_URL=$(terraform output kibana_url)
-          echo "::add-mask::$KIBANA_URL"
-          echo "KIBANA_URL=$KIBANA_URL" >> $GITHUB_ENV
+          declare -A outputs=(
+            ["KIBANA_URL"]="kibana_url"
+            ["ES_USER"]="elasticsearch_username"
+            ["ES_PASSWORD"]="elasticsearch_password"
+            ["EC2_CSPM"]="ec2_cspm_ssh_cmd"
+            ["EC2_KSPM"]="ec2_kspm_ssh_cmd"
+            ["EC2_CSPM_KEY"]="ec2_cspm_key"
+            ["EC2_KSPM_KEY"]="ec2_kspm_key"
+          )
 
-          export ES_USER=$(terraform output elasticsearch_username)
-          echo "::add-mask::$ES_USER"
-          echo "ES_USER=$ES_USER" >> $GITHUB_ENV
-
-          export ES_PASSWORD=$(terraform output elasticsearch_password)
-          echo "::add-mask::$ES_PASSWORD"
-          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
-
-          export EC2_CSPM=$(terraform output ec2_cspm_ssh_cmd)
-          echo "::add-mask::$EC2_CSPM"
-          echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
-
-          export EC2_KSPM=$(terraform output ec2_kspm_ssh_cmd)
-          echo "::add-mask::$EC2_KSPM"
-          echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
-
-          export EC2_CSPM_KEY=$(terraform output ec2_cspm_key)
-          echo "::add-mask::$EC2_CSPM_KEY"
-          echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
-
-          export EC2_KSPM_KEY=$(terraform output ec2_kspm_key)
-          echo "::add-mask::$EC2_KSPM_KEY"
-          echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
+          ./scripts/setup-terraform-outputs.sh "${outputs[@]}"
 
       - name: Upload tf state
         if: always()
