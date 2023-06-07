@@ -70,7 +70,7 @@ jobs:
         id: apply
         if: success()
         run: |
-          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}"
+          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -var="region=${{ env.AWS_REGION }}"
 
       - name: Set Environment Output
         id: env-output
