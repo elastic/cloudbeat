@@ -75,6 +75,8 @@ jobs:
       - name: Set Environment Output
         id: env-output
         run: |
+          ls
+          tree
           declare -A outputs=(
             ["KIBANA_URL"]="kibana_url"
             ["ES_USER"]="elasticsearch_username"
@@ -86,6 +88,12 @@ jobs:
           )
 
           ./scripts/setup-terraform-outputs.sh "${outputs[@]}"
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
 
       - name: Upload tf state
         if: always()
