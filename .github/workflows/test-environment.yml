@@ -120,4 +120,4 @@ jobs:
       - name: Cleanup Environment
         if: github.event.inputs.cleanup-env == 'true'
         run: |
-          terraform destroy --auto-approve
+          terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
