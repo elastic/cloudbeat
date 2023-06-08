@@ -51,7 +51,7 @@ jobs:
         working-directory: ./
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
@@ -91,37 +91,37 @@ jobs:
       - name: Set Environment Output
         id: env-output
         run: |
-          echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
+          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
 
-          export ES_USER=$(terraform output elasticsearch_username)
+          export ES_USER=$(terraform output -raw elasticsearch_username)
           echo "::add-mask::$ES_USER"
           echo "ES_USER=$ES_USER" >> $GITHUB_ENV
 
-          export ES_PASSWORD=$(terraform output elasticsearch_password)
+          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
           echo "::add-mask::$ES_PASSWORD"
           echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
 
-          export EC2_CSPM=$(terraform output ec2_cspm_ssh_cmd)
+          export EC2_CSPM=$(terraform output -raw ec2_cspm_ssh_cmd)
           echo "::add-mask::$EC2_CSPM"
           echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
 
-          export EC2_KSPM=$(terraform output ec2_kspm_ssh_cmd)
+          export EC2_KSPM=$(terraform output -raw ec2_kspm_ssh_cmd)
           echo "::add-mask::$EC2_KSPM"
           echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
 
-          export EC2_CSPM_KEY=$(terraform output ec2_cspm_key)
+          export EC2_CSPM_KEY=$(terraform output -raw ec2_cspm_key)
           echo "::add-mask::$EC2_CSPM_KEY"
           echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
 
-          export EC2_KSPM_KEY=$(terraform output ec2_kspm_key)
+          export EC2_KSPM_KEY=$(terraform output -raw ec2_kspm_key)
           echo "::add-mask::$EC2_KSPM_KEY"
           echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
 
-          export KSPM_PUBLIC_IP=$(terraform output ec2_kspm_public_ip)
+          export KSPM_PUBLIC_IP=$(terraform output -raw ec2_kspm_public_ip)
           echo "::add-mask::$KSPM_PUBLIC_IP"
           export "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
 
-          export CSPM_PUBLIC_IP=$(terraform output ec2_cspm_public_ip)
+          export CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
           echo "::add-mask::$CSPM_PUBLIC_IP"
           export "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
 
@@ -137,7 +137,6 @@ jobs:
       - name: Install KSPM EKS integration
         id: kspm-eks
         run: |
-          tree
           cd fleet_api
           poetry run python src/install_kspm_eks_integration.py
 
@@ -150,6 +149,12 @@ jobs:
           echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
           kubectl config use-context eks-config
           kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_eks.yaml
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
 
       # - name: Install KSPM Unmanaged integration
       #   id: kspm-unmanaged
