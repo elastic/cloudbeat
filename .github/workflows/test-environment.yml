@@ -28,6 +28,7 @@ env:
   AWS_REGION: "eu-west-1"
   TF_VAR_ec_api_key: ${{ secrets.CI_EC_API_KEY }}
   WORKING_DIR: deploy/test-environments
+  FLEET_API_DIR: fleet_api/src
 
 jobs:
   Deploy:
@@ -49,75 +50,135 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Set TF_STATE_FOLDER
+      - name: Install Poetry
+        # working-directory: "${{ env.WORKING_DIR }}/fleet_api"
         run: |
-          echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry --version
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Install Fleet API dependencies
+        working-directory: "${{ env.WORKING_DIR }}/fleet_api"
+        run: poetry install
 
-      - name: Terraform Validate
-        run: terraform validate
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v1-node16
+      #   with:
+      #     aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ env.AWS_REGION }}
 
-      - name: Provision Test Environment (EC + EC2 K8s + EC2 CSPM)
-        id: apply
-        if: success()
-        run: |
-          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -var="region=${{ env.AWS_REGION }}"
+      # - name: Set TF_STATE_FOLDER
+      #   run: |
+      #     echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
-      - name: Set Environment Output
-        id: env-output
-        run: |
-          echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
+      # - name: Terraform Init
+      #   run: terraform init
 
-          export ES_USER=$(terraform output elasticsearch_username)
-          echo "::add-mask::$ES_USER"
-          echo "ES_USER=$ES_USER" >> $GITHUB_ENV
+      # - name: Terraform Validate
+      #   run: terraform validate
 
-          export ES_PASSWORD=$(terraform output elasticsearch_password)
-          echo "::add-mask::$ES_PASSWORD"
-          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
-
-          export EC2_CSPM=$(terraform output ec2_cspm_ssh_cmd)
-          echo "::add-mask::$EC2_CSPM"
-          echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
-
-          export EC2_KSPM=$(terraform output ec2_kspm_ssh_cmd)
-          echo "::add-mask::$EC2_KSPM"
-          echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
-
-          export EC2_CSPM_KEY=$(terraform output ec2_cspm_key)
-          echo "::add-mask::$EC2_CSPM_KEY"
-          echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
-
-          export EC2_KSPM_KEY=$(terraform output ec2_kspm_key)
-          echo "::add-mask::$EC2_KSPM_KEY"
-          echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
-
-      - name: Upload tf state
-        if: always()
-        env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-        run: |
-          aws s3 cp "./terraform.tfstate" "${{ env.S3_BUCKET }}/terraform.tfstate"
-          aws s3 cp "${{ env.EC2_CSPM_KEY }}" "${{ env.S3_BUCKET }}/cspm.pem"
-          aws s3 cp "${{ env.EC2_KSPM_KEY }}" "${{ env.S3_BUCKET }}/kspm.pem"
-
-      # Placeholder action that need to be replaced by the following:
-      # # Tests execution
-      # - name: Sleep action
+      # - name: Provision Test Environment (EC + EC2 K8s + EC2 CSPM)
+      #   id: apply
       #   if: success()
       #   run: |
-      #     sleep 300
+      #     terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -var="region=${{ env.AWS_REGION }}"
 
-      - name: Cleanup Environment
-        if: github.event.inputs.cleanup-env == 'true'
-        run: |
-          terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
+      # - name: Set Environment Output
+      #   id: env-output
+      #   run: |
+      #     echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
+
+      #     export ES_USER=$(terraform output elasticsearch_username)
+      #     echo "::add-mask::$ES_USER"
+      #     echo "ES_USER=$ES_USER" >> $GITHUB_ENV
+
+      #     export ES_PASSWORD=$(terraform output elasticsearch_password)
+      #     echo "::add-mask::$ES_PASSWORD"
+      #     echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+
+      #     export EC2_CSPM=$(terraform output ec2_cspm_ssh_cmd)
+      #     echo "::add-mask::$EC2_CSPM"
+      #     echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
+
+      #     export EC2_KSPM=$(terraform output ec2_kspm_ssh_cmd)
+      #     echo "::add-mask::$EC2_KSPM"
+      #     echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
+
+      #     export EC2_CSPM_KEY=$(terraform output ec2_cspm_key)
+      #     echo "::add-mask::$EC2_CSPM_KEY"
+      #     echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
+
+      #     export EC2_KSPM_KEY=$(terraform output ec2_kspm_key)
+      #     echo "::add-mask::$EC2_KSPM_KEY"
+      #     echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
+
+      #     export KSPM_PUBLIC_IP=$(terraform output ec2_kspm_public_ip)
+      #     echo "::add-mask::$KSPM_PUBLIC_IP"
+      #     export "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
+
+      #     export CSPM_PUBLIC_IP=$(terraform output ec2_cspm_public_ip)
+      #     echo "::add-mask::$CSPM_PUBLIC_IP"
+      #     export "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
+
+      # - name: Upload tf state
+      #   if: always()
+      #   env:
+      #     S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+      #   run: |
+      #     aws s3 cp "./terraform.tfstate" "${{ env.S3_BUCKET }}/terraform.tfstate"
+      #     aws s3 cp "${{ env.EC2_CSPM_KEY }}" "${{ env.S3_BUCKET }}/cspm.pem"
+      #     aws s3 cp "${{ env.EC2_KSPM_KEY }}" "${{ env.S3_BUCKET }}/kspm.pem"
+
+      # - name: Install KSPM EKS integration
+      #   id: kspm-eks
+      #   run: |
+      #     poetry run python ${{ env.FLEET_API_DIR}}/install_kspm_eks_integration.py
+
+      # - name: Deploy KSPM EKS agent
+      #   if: success() and needs.kspm-eks.result == "success"
+      #   run: |
+      #     aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
+      #         --name $(terraform output -raw deployment_name) --alias eks-config
+      #     echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
+      #     kubectl config use-context eks-config
+      #     kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_eks.yaml
+
+      # - name: Install KSPM Unmanaged integration
+      #   id: kspm-unmanaged
+      #   run: |
+      #     poetry run python ${{ env.FLEET_API_DIR}}/install_kspm_unmanaged_integration.py
+
+      # - name: Deploy KSPM Unmanaged agent
+      #   if: success() and needs.kspm-unmanaged.result == "success"
+      #   run: |
+      #     chmod 600 ${{ env.EC2_KSPM_KEY }}
+      #     # Copy the manifest file to the EC2 instance
+      #     scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} ${{ env.FLEET_API_DIR}}/kspm_eks.yaml "ubuntu@${{ env.KSPM_PUBLIC_IP }}:~/."
+      #     # Apply the manifest file
+      #     ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl apply -f kspm_eks.yaml"
+
+      # - name: Install CSPM integration
+      #   id: cspm
+      #   run: |
+      #     poetry run python ${{ env.FLEET_API_DIR}}/install_cspm_integration.py
+
+      # - name: Deploy CSPM agent
+      #   if: success() and needs.cspm.result == "success"
+      #   run: |
+      #     chmod 600 ${{ env.EC2_CSPM_KEY }}
+      #     # Copy the manifest file to the EC2 instance
+      #     scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ${{ env.FLEET_API_DIR}}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
+      #     # Apply the manifest file
+      #     ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "~/cspm-linux.sh"
+
+      # # Placeholder action that need to be replaced by the following:
+      # # # Tests execution
+      # # - name: Sleep action
+      # #   if: success()
+      # #   run: |
+      # #     sleep 300
+
+      # - name: Cleanup Environment
+      #   if: github.event.inputs.cleanup-env == 'true'
+      #   run: |
+      #     terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
