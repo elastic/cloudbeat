@@ -141,7 +141,7 @@ jobs:
           poetry run python ${{ env.FLEET_API_DIR}}/install_kspm_eks_integration.py
 
       - name: Deploy KSPM EKS agent
-        if: success() && needs.kspm-eks.result == "success"
+        if: success() && needs.kspm-eks.result == success()
         run: |
           tree
           aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
@@ -156,7 +156,7 @@ jobs:
       #     poetry run python ${{ env.FLEET_API_DIR}}/install_kspm_unmanaged_integration.py
 
       # - name: Deploy KSPM Unmanaged agent
-      #   if: success() && needs.kspm-unmanaged.result == "success"
+      #   if: success() && needs.kspm-unmanaged.result == success()
       #   run: |
       #     chmod 600 ${{ env.EC2_KSPM_KEY }}
       #     # Copy the manifest file to the EC2 instance
@@ -170,7 +170,7 @@ jobs:
       #     poetry run python ${{ env.FLEET_API_DIR}}/install_cspm_integration.py
 
       # - name: Deploy CSPM agent
-      #   if: success() && needs.cspm.result == "success"
+      #   if: success() && needs.cspm.result == success()
       #   run: |
       #     chmod 600 ${{ env.EC2_CSPM_KEY }}
       #     # Copy the manifest file to the EC2 instance
