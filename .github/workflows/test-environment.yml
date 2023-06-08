@@ -50,6 +50,11 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
       - name: Install Poetry
         # working-directory: "${{ env.WORKING_DIR }}/fleet_api"
         run: |
