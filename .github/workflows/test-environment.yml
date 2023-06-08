@@ -82,71 +82,73 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      # - name: Provision Test Environment (EC + EC2 K8s + EC2 CSPM)
-      #   id: apply
-      #   if: success()
-      #   run: |
-      #     terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -var="region=${{ env.AWS_REGION }}"
+      - name: Provision Test Environment (EC + EC2 K8s + EC2 CSPM)
+        id: apply
+        if: success()
+        run: |
+          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -var="region=${{ env.AWS_REGION }}"
 
-      # - name: Set Environment Output
-      #   id: env-output
-      #   run: |
-      #     echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
+      - name: Set Environment Output
+        id: env-output
+        run: |
+          echo "KIBANA_URL=$(terraform output kibana_url)" >> $GITHUB_ENV
 
-      #     export ES_USER=$(terraform output elasticsearch_username)
-      #     echo "::add-mask::$ES_USER"
-      #     echo "ES_USER=$ES_USER" >> $GITHUB_ENV
+          export ES_USER=$(terraform output elasticsearch_username)
+          echo "::add-mask::$ES_USER"
+          echo "ES_USER=$ES_USER" >> $GITHUB_ENV
 
-      #     export ES_PASSWORD=$(terraform output elasticsearch_password)
-      #     echo "::add-mask::$ES_PASSWORD"
-      #     echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+          export ES_PASSWORD=$(terraform output elasticsearch_password)
+          echo "::add-mask::$ES_PASSWORD"
+          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
 
-      #     export EC2_CSPM=$(terraform output ec2_cspm_ssh_cmd)
-      #     echo "::add-mask::$EC2_CSPM"
-      #     echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
+          export EC2_CSPM=$(terraform output ec2_cspm_ssh_cmd)
+          echo "::add-mask::$EC2_CSPM"
+          echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
 
-      #     export EC2_KSPM=$(terraform output ec2_kspm_ssh_cmd)
-      #     echo "::add-mask::$EC2_KSPM"
-      #     echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
+          export EC2_KSPM=$(terraform output ec2_kspm_ssh_cmd)
+          echo "::add-mask::$EC2_KSPM"
+          echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
 
-      #     export EC2_CSPM_KEY=$(terraform output ec2_cspm_key)
-      #     echo "::add-mask::$EC2_CSPM_KEY"
-      #     echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
+          export EC2_CSPM_KEY=$(terraform output ec2_cspm_key)
+          echo "::add-mask::$EC2_CSPM_KEY"
+          echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
 
-      #     export EC2_KSPM_KEY=$(terraform output ec2_kspm_key)
-      #     echo "::add-mask::$EC2_KSPM_KEY"
-      #     echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
+          export EC2_KSPM_KEY=$(terraform output ec2_kspm_key)
+          echo "::add-mask::$EC2_KSPM_KEY"
+          echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
 
-      #     export KSPM_PUBLIC_IP=$(terraform output ec2_kspm_public_ip)
-      #     echo "::add-mask::$KSPM_PUBLIC_IP"
-      #     export "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
+          export KSPM_PUBLIC_IP=$(terraform output ec2_kspm_public_ip)
+          echo "::add-mask::$KSPM_PUBLIC_IP"
+          export "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
 
-      #     export CSPM_PUBLIC_IP=$(terraform output ec2_cspm_public_ip)
-      #     echo "::add-mask::$CSPM_PUBLIC_IP"
-      #     export "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
+          export CSPM_PUBLIC_IP=$(terraform output ec2_cspm_public_ip)
+          echo "::add-mask::$CSPM_PUBLIC_IP"
+          export "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
 
-      # - name: Upload tf state
-      #   if: always()
-      #   env:
-      #     S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-      #   run: |
-      #     aws s3 cp "./terraform.tfstate" "${{ env.S3_BUCKET }}/terraform.tfstate"
-      #     aws s3 cp "${{ env.EC2_CSPM_KEY }}" "${{ env.S3_BUCKET }}/cspm.pem"
-      #     aws s3 cp "${{ env.EC2_KSPM_KEY }}" "${{ env.S3_BUCKET }}/kspm.pem"
+      - name: Upload tf state
+        if: always()
+        env:
+          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+        run: |
+          aws s3 cp "./terraform.tfstate" "${{ env.S3_BUCKET }}/terraform.tfstate"
+          aws s3 cp "${{ env.EC2_CSPM_KEY }}" "${{ env.S3_BUCKET }}/cspm.pem"
+          aws s3 cp "${{ env.EC2_KSPM_KEY }}" "${{ env.S3_BUCKET }}/kspm.pem"
 
-      # - name: Install KSPM EKS integration
-      #   id: kspm-eks
-      #   run: |
-      #     poetry run python ${{ env.FLEET_API_DIR}}/install_kspm_eks_integration.py
+      - name: Install KSPM EKS integration
+        id: kspm-eks
+        run: |
+          tree
+          poetry run python ${{ env.FLEET_API_DIR}}/install_kspm_eks_integration.py
 
-      # - name: Deploy KSPM EKS agent
-      #   if: success() and needs.kspm-eks.result == "success"
-      #   run: |
-      #     aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
-      #         --name $(terraform output -raw deployment_name) --alias eks-config
-      #     echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
-      #     kubectl config use-context eks-config
-      #     kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_eks.yaml
+      - name: Deploy KSPM EKS agent
+        if: success() and needs.kspm-eks.result == "success"
+        run: |
+          tree
+          aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
+              --name $(terraform output -raw deployment_name) --alias eks-config
+          echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
+          kubectl config use-context eks-config
+          kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_eks.yaml
 
       # - name: Install KSPM Unmanaged integration
       #   id: kspm-unmanaged
@@ -176,14 +178,14 @@ jobs:
       #     # Apply the manifest file
       #     ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "~/cspm-linux.sh"
 
-      # # Placeholder action that need to be replaced by the following:
-      # # # Tests execution
-      # # - name: Sleep action
-      # #   if: success()
-      # #   run: |
-      # #     sleep 300
-
-      # - name: Cleanup Environment
-      #   if: github.event.inputs.cleanup-env == 'true'
+      # Placeholder action that need to be replaced by the following:
+      # # Tests execution
+      # - name: Sleep action
+      #   if: success()
       #   run: |
-      #     terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
+      #     sleep 300
+
+      - name: Cleanup Environment
+        if: github.event.inputs.cleanup-env == 'true'
+        run: |
+          terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
