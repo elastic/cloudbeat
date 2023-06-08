@@ -33,8 +33,8 @@ repos:
     rev: 6.0.0
     hooks:
       - id: flake8
-        name: flake8 ./tests/
-        files: ^tests/
+        name: flake8 ./tests/ ./fleet_api/
+        files: ^(tests|deploy/test-environments/fleet_api)/
 
   - repo: https://github.com/pycqa/pylint
     rev: v2.15.7
