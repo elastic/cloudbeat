@@ -61,7 +61,6 @@ jobs:
           poetry --version
 
       - name: Install Fleet API dependencies
-        working-directory: ${{ env.WORKING_DIR}}
         run: |
           cd fleet_api
           tree
