@@ -141,7 +141,6 @@ jobs:
           poetry run python src/install_kspm_eks_integration.py
 
       - name: Deploy KSPM EKS agent
-        if: success() && needs.kspm-eks.result == success()
         run: |
           tree
           aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
@@ -150,26 +149,25 @@ jobs:
           kubectl config use-context eks-config
           kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_eks.yaml
 
+      - name: Install KSPM Unmanaged integration
+        id: kspm-unmanaged
+        run: |
+          cd fleet_api
+          poetry run python ${{ env.FLEET_API_DIR}}/install_kspm_unmanaged_integration.py
+
+      - name: Deploy KSPM Unmanaged agent
+        run: |
+          chmod 600 ${{ env.EC2_KSPM_KEY }}
+          # Copy the manifest file to the EC2 instance
+          scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} ${{ env.FLEET_API_DIR}}/kspm_eks.yaml "ubuntu@${{ env.KSPM_PUBLIC_IP }}:~/."
+          # Apply the manifest file
+          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl apply -f kspm_eks.yaml"
+
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: failure()
         with:
           limit-access-to-actor: true
-
-      # - name: Install KSPM Unmanaged integration
-      #   id: kspm-unmanaged
-      #   run: |
-      #     poetry run python ${{ env.FLEET_API_DIR}}/install_kspm_unmanaged_integration.py
-
-      # - name: Deploy KSPM Unmanaged agent
-      #   if: success() && needs.kspm-unmanaged.result == success()
-      #   run: |
-      #     chmod 600 ${{ env.EC2_KSPM_KEY }}
-      #     # Copy the manifest file to the EC2 instance
-      #     scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} ${{ env.FLEET_API_DIR}}/kspm_eks.yaml "ubuntu@${{ env.KSPM_PUBLIC_IP }}:~/."
-      #     # Apply the manifest file
-      #     ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl apply -f kspm_eks.yaml"
-
       # - name: Install CSPM integration
       #   id: cspm
       #   run: |
