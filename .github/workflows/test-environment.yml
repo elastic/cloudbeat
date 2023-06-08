@@ -138,7 +138,8 @@ jobs:
         id: kspm-eks
         run: |
           tree
-          poetry run python ${{ env.FLEET_API_DIR}}/install_kspm_eks_integration.py
+          cd fleet_api
+          poetry run python src/install_kspm_eks_integration.py
 
       - name: Deploy KSPM EKS agent
         if: success() && needs.kspm-eks.result == success()
