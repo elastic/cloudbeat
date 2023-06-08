@@ -61,10 +61,12 @@ jobs:
           poetry --version
 
       - name: Install Fleet API dependencies
-        working-directory: ${{ env.WORKING_DIR}}/fleet_api
+        working-directory: ${{ env.WORKING_DIR}}
         run: |
+          cd fleet_api
           tree
           poetry install
+          echo "Installation finished"
           poetry run python src/purge_integrations.py
 
       # - name: Configure AWS credentials
