@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["Dmitry Gurevich <dmitry.gurevich@elastic.co>"]
 readme = "README.md"
-packages = [{include = "fleet_api", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
