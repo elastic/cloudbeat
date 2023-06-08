@@ -56,14 +56,15 @@ jobs:
           python-version: '3.9'
 
       - name: Install Poetry
-        # working-directory: "${{ env.WORKING_DIR }}/fleet_api"
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
           poetry --version
 
       - name: Install Fleet API dependencies
-        working-directory: "${{ env.WORKING_DIR }}/fleet_api"
-        run: poetry install
+        working-directory: fleet_api
+        run: |
+          poetry install
+          poetry run python src/purge_integrations.py
 
       # - name: Configure AWS credentials
       #   uses: aws-actions/configure-aws-credentials@v1-node16
