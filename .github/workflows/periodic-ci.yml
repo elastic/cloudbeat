@@ -87,13 +87,7 @@ jobs:
           version: 0.44 # this should be aligned with the version in go.mod
 
       - name: build cloudbeat
-        run: make
-
-      - name: build opa bundle
-        uses: magefile/mage-action@v2
-        with:
-          version: latest
-          args: BuildOpaBundle
+        run: mage Build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -160,7 +154,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1.5.0
+        uses: helm/kind-action@v1.7.0
         with:
           config: deploy/k8s/kind/kind-mono.yml
 
