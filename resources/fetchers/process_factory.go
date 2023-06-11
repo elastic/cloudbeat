@@ -18,7 +18,7 @@
 package fetchers
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"os"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -34,7 +34,7 @@ type ProcessFactory struct {
 }
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(ProcessType, &ProcessFactory{})
+	factory.Factories.RegisterFactory(ProcessType, &ProcessFactory{})
 }
 
 func (f *ProcessFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {

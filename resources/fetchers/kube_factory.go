@@ -18,7 +18,7 @@
 package fetchers
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/config"
@@ -33,7 +33,7 @@ type KubeFactory struct {
 type KubeClientProvider func(kubeconfig string, opt kubernetes.KubeClientOptions) (k8s.Interface, error)
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.KubeAPIType, &KubeFactory{})
+	factory.Factories.RegisterFactory(fetching.KubeAPIType, &KubeFactory{})
 }
 
 func (f *KubeFactory) Create(log *logp.Logger, c *config.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {

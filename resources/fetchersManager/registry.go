@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/conditions"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -32,7 +33,7 @@ type FetchersRegistry interface {
 	ShouldRun(key string) bool
 	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
 	Stop()
-	RegisterFetchers(fetchers []*ParsedFetcher, le uniqueness.Manager) error
+	RegisterFetchers(fetchers factory.FetchersMap, le uniqueness.Manager) error
 }
 
 type fetchersRegistry struct {
@@ -54,16 +55,16 @@ func NewFetcherRegistry(log *logp.Logger) FetchersRegistry {
 }
 
 // RegisterFetchers registers entire list of parsed fetchers
-func (r *fetchersRegistry) RegisterFetchers(fetchers []*ParsedFetcher, le uniqueness.Manager) error {
-	for _, p := range fetchers {
-		c, err := r.getConditions(p.name, le)
+func (r *fetchersRegistry) RegisterFetchers(fetchers factory.FetchersMap, le uniqueness.Manager) error {
+	for name, fetcher := range fetchers {
+		c, err := r.getConditions(name, le)
 		if err != nil {
-			return fmt.Errorf("RegisterFetchers error in getConditions for factory %s skipping Register due to: %v", p.name, err)
+			return fmt.Errorf("RegisterFetchers error in getConditions for fetcher %s, skipping Registeration due to: %v", name, err)
 		}
 
-		err = r.Register(p.name, p.f, c...)
+		err = r.Register(name, fetcher, c...)
 		if err != nil {
-			return fmt.Errorf("RegisterFetchers error in Register for factory %s skipping Register due to: %v", p.name, err)
+			return fmt.Errorf("RegisterFetchers error in Register for fetcher %s, skipping Registeration due to: %v", name, err)
 		}
 	}
 

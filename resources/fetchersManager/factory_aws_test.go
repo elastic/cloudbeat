@@ -20,6 +20,7 @@ package fetchersManager
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
@@ -144,7 +145,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchersWithAwsCredentials() {
 	}
 
 	for _, test := range tests {
-		s.F = newFactories()
+		s.F = factory.newFactories()
 		s.F.RegisterFactory(test.fetcherName, &awsTestFactory{})
 		reg := NewFetcherRegistry(s.log)
 		conf := createEksAgentConfig(test.awsConfig, test.fetcherName)

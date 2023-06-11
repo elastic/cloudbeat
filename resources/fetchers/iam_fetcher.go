@@ -31,7 +31,6 @@ import (
 type IAMFetcher struct {
 	log           *logp.Logger
 	iamProvider   iam.AccessManagement
-	cfg           IAMFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
 }
@@ -43,6 +42,15 @@ type IAMFetcherConfig struct {
 type IAMResource struct {
 	awslib.AwsResource
 	identity *awslib.Identity
+}
+
+func NewIAMFetcher(log *logp.Logger, provider iam.AccessManagement, ch chan fetching.ResourceInfo, identity *awslib.Identity) *IAMFetcher {
+	return &IAMFetcher{
+		log:           log,
+		iamProvider:   provider,
+		resourceCh:    ch,
+		cloudIdentity: identity,
+	}
 }
 
 // Fetch collects IAM resources, such as password-policy and IAM users.

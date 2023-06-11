@@ -19,6 +19,7 @@ package fetchersManager
 
 import (
 	"context"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"testing"
 
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -57,7 +58,7 @@ type FactoriesTestSuite struct {
 	suite.Suite
 
 	log        *logp.Logger
-	F          factories
+	F          factory.factories
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -90,7 +91,7 @@ func TestFactoriesTestSuite(t *testing.T) {
 }
 
 func (s *FactoriesTestSuite) SetupTest() {
-	s.F = newFactories()
+	s.F = factory.newFactories()
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
@@ -166,7 +167,7 @@ func (s *FactoriesTestSuite) TestRegisterFetchers() {
 	}
 
 	for _, test := range tests {
-		s.F = newFactories()
+		s.F = factory.newFactories()
 		s.F.RegisterFactory(test.key, &numberFetcherFactory{})
 		numCfg := numberConfig(test.value)
 		err := numCfg.SetString("name", -1, test.key)

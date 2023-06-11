@@ -18,7 +18,7 @@
 package fetchers
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/user"
 	"github.com/elastic/elastic-agent-libs/config"
@@ -30,7 +30,7 @@ const (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(FileSystemType, &FileSystemFactory{})
+	factory.Factories.RegisterFactory(FileSystemType, &FileSystemFactory{})
 }
 
 type FileSystemFactory struct {

@@ -21,8 +21,6 @@ import (
 	"context"
 
 	awssdk "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
@@ -68,7 +66,7 @@ const (
 
 // Factory can create fetcher instances based on configuration
 type Factory interface {
-	Create(*logp.Logger, *config.C, chan ResourceInfo) (Fetcher, error)
+	//Create(*logp.Logger, *config.C, chan ResourceInfo) (Fetcher, error)
 }
 
 // Fetcher represents a data fetcher.

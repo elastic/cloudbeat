@@ -20,16 +20,16 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.EksType, &EksFactory{
+	factory.Factories.RegisterFactory(fetching.EksType, &EksFactory{
 		AwsConfigProvider: awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 	})
 }

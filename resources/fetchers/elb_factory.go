@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"time"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -31,12 +32,11 @@ import (
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.ElbType, &ElbFactory{
+	factory.Factories.RegisterFactory(fetching.ElbType, &ElbFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
 		IdentityProvider:   awslib.GetIdentityClient,
 		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},

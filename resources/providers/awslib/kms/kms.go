@@ -38,7 +38,7 @@ type KMS interface {
 	DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResource, error)
 }
 
-func NewKMSProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client]) *Provider {
+func NewKMSProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
 	f := func(cfg aws.Config) Client {
 		return kms.NewFromConfig(cfg)
 	}

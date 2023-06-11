@@ -21,6 +21,7 @@ package fetchersManager
 
 import (
 	context "context"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 
 	fetching "github.com/elastic/cloudbeat/resources/fetching"
 	mock "github.com/stretchr/testify/mock"
@@ -143,11 +144,11 @@ func (_c *MockFetchersRegistry_Register_Call) RunAndReturn(run func(string, fetc
 }
 
 // RegisterFetchers provides a mock function with given fields: fetchers, le
-func (_m *MockFetchersRegistry) RegisterFetchers(fetchers []*ParsedFetcher, le uniqueness.Manager) error {
+func (_m *MockFetchersRegistry) RegisterFetchers(fetchers []*factory.ParsedFetcher, le uniqueness.Manager) error {
 	ret := _m.Called(fetchers, le)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func([]*ParsedFetcher, uniqueness.Manager) error); ok {
+	if rf, ok := ret.Get(0).(func([]*factory.ParsedFetcher, uniqueness.Manager) error); ok {
 		r0 = rf(fetchers, le)
 	} else {
 		r0 = ret.Error(0)
@@ -168,9 +169,9 @@ func (_e *MockFetchersRegistry_Expecter) RegisterFetchers(fetchers interface{}, 
 	return &MockFetchersRegistry_RegisterFetchers_Call{Call: _e.mock.On("RegisterFetchers", fetchers, le)}
 }
 
-func (_c *MockFetchersRegistry_RegisterFetchers_Call) Run(run func(fetchers []*ParsedFetcher, le uniqueness.Manager)) *MockFetchersRegistry_RegisterFetchers_Call {
+func (_c *MockFetchersRegistry_RegisterFetchers_Call) Run(run func(fetchers []*factory.ParsedFetcher, le uniqueness.Manager)) *MockFetchersRegistry_RegisterFetchers_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]*ParsedFetcher), args[1].(uniqueness.Manager))
+		run(args[0].([]*factory.ParsedFetcher), args[1].(uniqueness.Manager))
 	})
 	return _c
 }
@@ -180,7 +181,7 @@ func (_c *MockFetchersRegistry_RegisterFetchers_Call) Return(_a0 error) *MockFet
 	return _c
 }
 
-func (_c *MockFetchersRegistry_RegisterFetchers_Call) RunAndReturn(run func([]*ParsedFetcher, uniqueness.Manager) error) *MockFetchersRegistry_RegisterFetchers_Call {
+func (_c *MockFetchersRegistry_RegisterFetchers_Call) RunAndReturn(run func([]*factory.ParsedFetcher, uniqueness.Manager) error) *MockFetchersRegistry_RegisterFetchers_Call {
 	_c.Call.Return(run)
 	return _c
 }

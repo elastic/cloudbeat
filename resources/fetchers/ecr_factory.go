@@ -19,7 +19,7 @@ package fetchers
 
 import (
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"regexp"
 
@@ -34,7 +34,7 @@ import (
 )
 
 func init() {
-	fetchersManager.Factories.RegisterFactory(fetching.EcrType, &EcrFactory{
+	factory.Factories.RegisterFactory(fetching.EcrType, &EcrFactory{
 		KubernetesProvider: providers.KubernetesProvider{},
 		IdentityProvider:   awslib.GetIdentityClient,
 		AwsConfigProvider:  awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
