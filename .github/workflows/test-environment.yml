@@ -119,11 +119,11 @@ jobs:
 
           export KSPM_PUBLIC_IP=$(terraform output -raw ec2_kspm_public_ip)
           echo "::add-mask::$KSPM_PUBLIC_IP"
-          export "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
+          echo "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
 
           export CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
           echo "::add-mask::$CSPM_PUBLIC_IP"
-          export "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
+          echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
 
       - name: Upload tf state
         if: always()
