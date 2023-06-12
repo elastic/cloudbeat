@@ -79,7 +79,7 @@ jobs:
       # - KSPM EKS Agent
       # - KSPM Vanilla Agent
       # - CSPM Agent (when ELK version >=8.7.0)
-      # Command documentation can be found here: https://github.com/elastic/cloudbeat/tree/main/deploy/cloud 
+      # Command documentation can be found here: https://github.com/elastic/cloudbeat/tree/main/deploy/cloud
       - name: Run terraform (deploy environment)
         run: |
           terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
@@ -93,7 +93,7 @@ jobs:
         env:
           SUB_BUCKET_NAME: ${{ github.event.inputs.deployment_name }}-${{ steps.date.outputs.date }}
         run: |
-          if test -f ./terraform.tfstate; then 
+          if test -f ./terraform.tfstate; then
             echo "Uploading terraform.tfstate"
             aws s3 cp ./terraform.tfstate "s3://private-deployments-tfstate/$SUB_BUCKET_NAME/terraform.tfstate"
           else
