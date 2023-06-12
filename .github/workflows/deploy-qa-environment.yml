@@ -71,6 +71,15 @@ jobs:
       - name: Terraform Init
         run: terraform init -no-color
 
+      # Deploys:
+      # - ELK
+      # - Installs KSPM & CSPM agent policies
+      # - EKS cluster
+      # - EC2 with kubernetes cluster (using kind)
+      # - KSPM EKS Agent
+      # - KSPM Vanilla Agent
+      # - CSPM Agent (when ELK version >=8.7.0)
+      # Command documentation can be found here: https://github.com/elastic/cloudbeat/tree/main/deploy/cloud 
       - name: Run terraform (deploy environment)
         run: |
           terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
