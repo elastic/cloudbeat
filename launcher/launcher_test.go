@@ -335,7 +335,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			}(tcase.configs)
 
 			err = sut.run()
-			s.ErrorIs(err, ErrorStopBeater)
+			s.ErrorIs(err, ErrorGracefulExit)
 			beater, ok := sut.beater.(*beaterMock)
 			s.True(ok)
 			s.Equal(tcase.expected, beater.cfg)
@@ -493,7 +493,7 @@ func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 		sut.Stop()
 	}()
 	err = sut.run()
-	s.ErrorIs(err, ErrorStopBeater)
+	s.ErrorIs(err, ErrorGracefulExit)
 }
 
 func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
@@ -505,7 +505,7 @@ func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
 		sut.Stop()
 	}()
 	err = sut.run()
-	s.ErrorIs(err, ErrorStopBeater)
+	s.ErrorIs(err, ErrorGracefulExit)
 
 	s.Panics(func() {
 		sut.Stop()
@@ -531,7 +531,7 @@ func (s *LauncherTestSuite) TestLauncherStop() {
 	}()
 
 	err = sut.run()
-	s.ErrorIs(err, ErrorStopBeater)
+	s.ErrorIs(err, ErrorGracefulExit)
 }
 
 func (s *LauncherTestSuite) TestLauncherStopTimeout() {
@@ -547,5 +547,5 @@ func (s *LauncherTestSuite) TestLauncherStopTimeout() {
 	}()
 
 	err = sut.run()
-	s.ErrorIs(err, ErrorStopBeaterTimeout)
+	s.ErrorIs(err, ErrorTimeoutExit)
 }

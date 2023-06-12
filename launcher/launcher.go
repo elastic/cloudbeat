@@ -37,14 +37,14 @@ const (
 	reconfigureWaitTimeout = 10 * time.Minute
 
 	// Time to wait for the beater to stop before ignoring it
-	shutdownGracePeriod = 5 * time.Second
+	shutdownGracePeriod = 20 * time.Second
 )
 
 // stopped before shutdownGracePeriod, after completed waiting for the beater to stop
-var ErrorStopBeater = errors.New("stop beater")
+var ErrorGracefulExit = beat.GracefulExit
 
 // stopped after shutdownGracePeriod, without waiting for the beater to stop
-var ErrorStopBeaterTimeout = errors.New("stop beater timeout")
+var ErrorTimeoutExit = errors.New("exit after timeout")
 
 type launcher struct {
 	wg        sync.WaitGroup // WaitGroup used to wait for active beaters
@@ -115,9 +115,9 @@ func (l *launcher) run() error {
 
 	if err != nil {
 		switch err {
-		case ErrorStopBeater:
+		case ErrorGracefulExit:
 			l.log.Info("Launcher stopped successfully")
-		case ErrorStopBeaterTimeout:
+		case ErrorTimeoutExit:
 			l.log.Info("Launcher stopped after timeout")
 		default:
 			l.log.Errorf("Launcher stopped by error: %v", err)
@@ -224,10 +224,10 @@ func (l *launcher) stopBeaterWithTimeout(duration time.Duration) error {
 	select {
 	case <-time.After(duration):
 		l.log.Infof("Grace period for %s ended", l.name)
-		return ErrorStopBeaterTimeout
+		return ErrorTimeoutExit
 	case <-wgCh:
 		l.log.Infof("Launcher shut %s down gracefully", l.name)
-		return ErrorStopBeater
+		return ErrorGracefulExit
 	}
 }
 
