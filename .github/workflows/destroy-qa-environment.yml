@@ -34,9 +34,7 @@ on:
 
 env:
   WORKING_DIR: deploy/cloud
-  EC_API_KEY: ${{ github.event.inputs.EC_API_KEY }}
   EC_ENDPOINT: ${{ github.event.inputs.environment == 'staging.found.no' && 'https://staging.found.no' || ''}}
-  TF_VAR_ec_api_key: ${{ github.event.inputs.EC_API_KEY }}
   TF_VAR_ess_region: ${{ github.event.inputs.environment == 'staging.found.no' && 'gcp-us-central1' || 'gcp-us-west2'}}
   TF_VAR_deployment_name: ${{ github.event.inputs.deployment_name }}
   TF_VAR_stack_version: ${{ github.event.inputs.stack_version == '' && 'latest' || github.event.inputs.stack_version}}
@@ -79,6 +77,9 @@ jobs:
           aws s3 cp "s3://private-deployments-tfstate/$SUB_BUCKET_NAME/terraform.tfstate" ./terraform.tfstate
 
       - name: Run terraform (destroy environment)
+        env:
+          EC_API_KEY: ${{ github.event.inputs.EC_API_KEY }}
+          TF_VAR_ec_api_key: ${{ github.event.inputs.EC_API_KEY }}
         run: |
           terraform destroy --auto-approve
 
