@@ -139,8 +139,8 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 
 	// Creating the data pipeline
-	findingsCh := pipeline.Step(bt.log, bt.resourceCh, bt.evaluator.Eval)
-	eventsCh := pipeline.Step(bt.log, findingsCh, bt.transformer.CreateBeatEvents)
+	findingsCh := pipeline.Step(bt.ctx, bt.log, bt.resourceCh, bt.evaluator.Eval)
+	eventsCh := pipeline.Step(bt.ctx, bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event
 	ticker := time.NewTicker(flushInterval)
