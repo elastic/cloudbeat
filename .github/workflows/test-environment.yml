@@ -175,7 +175,7 @@ jobs:
           # Copy the manifest file to the EC2 instance
           scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ${{ env.FLEET_API_DIR}}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
           # Apply the manifest file
-          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "~/cspm-linux.sh"
+          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "chmod +x cspm-linux.sh && ./cspm-linux.sh"
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
