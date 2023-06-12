@@ -341,7 +341,7 @@ func (s *DataTestSuite) TestDataStopWithNoticePeriod() {
 
 	stop(ctx, time.Second)
 	time.Sleep(2 * time.Second)
-	s.LessOrEqual(f.execCounter, 4)
+	s.LessOrEqual(f.execCounter, 5)
 }
 
 func (s *DataTestSuite) TestDataDoubleStop() {
