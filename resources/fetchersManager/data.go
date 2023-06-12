@@ -132,7 +132,15 @@ func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
+		switch ctx.Err() {
+		case context.DeadlineExceeded:
+			return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
+		case context.Canceled:
+			return fmt.Errorf("fetcher %s was canceled", k)
+		default:
+			return fmt.Errorf("fetcher %s failed with an unknown error: %v", k, ctx.Err())
+		}
+
 	case err := <-errCh:
 		return err
 	}
