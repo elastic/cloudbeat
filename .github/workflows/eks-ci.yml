@@ -24,6 +24,8 @@ env:
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
+  CI_ELASTIC_AGENT_DOCKER_TAG: "8.7.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_IMAGE: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 # run only a single job at a time
 concurrency: EKS-Functional-Tests
@@ -97,8 +99,12 @@ jobs:
           outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Build elastic-agent
-        run: |
-          make build_elastic_agent_docker_image
+        env:
+          BASE_IMAGE: docker.elastic.co/beats/elastic-agent:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
+          GOOS: linux
+          GOARCH: amd64
+        run: ./dev-tools/packaging/docker/elastic-agent/build.sh -t ${{ env.CI_ELASTIC_AGENT_DOCKER_IMAGE }}:${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
+        shell: bash
 
       - name: Build pytest-docker
         uses: docker/build-push-action@v4
@@ -132,7 +138,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          ./.ci/scripts/ecr-images.sh ${{ env.CONTAINER_SUFFIX }}  ${{ env.ECR_REGISTRY}}
+          ./.ci/scripts/ecr-images.sh ${{ env.CONTAINER_SUFFIX }}  ${{ env.ECR_REGISTRY }} ${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
         shell: bash
 
 
@@ -228,7 +234,7 @@ jobs:
 
       - name: Publish allure report
         if: always()
-        uses: andrcuns/allure-publish-action@v2.2.3
+        uses: andrcuns/allure-publish-action@v2.3.0
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: eu-west-1

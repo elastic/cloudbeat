@@ -11,7 +11,17 @@ variable "aws_ec2_instance_type" {
 }
 
 variable "yml" {
-  description = "Kubernetes yaml to be applied"
+  description = "Kubernetes vanilla yaml to be applied"
   type        = string
+}
 
+variable "deployment_name" {
+  description = "EC2 instance name"
+  type        = string
+}
+
+variable "cspm_aws_docker_cmd" {
+  default     = ""
+  description = "Optional. Docker command to enroll CSPM AWS agent"
+  type        = string
 }

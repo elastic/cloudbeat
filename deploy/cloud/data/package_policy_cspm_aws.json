@@ -1,5 +1,5 @@
 {
-    "name": "cloud_security_posture-tf",
+    "name": "pkg-plcy-cspm-aws-tf",
     "description": "",
     "namespace": "default",
     "policy_id": "${agent_policy_id}",
@@ -15,14 +15,27 @@
                     "data_stream": {
                         "type": "logs",
                         "dataset": "cloud_security_posture.findings"
-                    },
-                    "release": "ga"
+                    }
                 }
             ]
         },
         {
             "type": "cloudbeat/cis_eks",
             "policy_template": "kspm",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.findings"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "cloudbeat/cis_aws",
+            "policy_template": "cspm",
             "enabled": true,
             "streams": [
                 {
@@ -49,17 +62,52 @@
                             "type": "text"
                         },
                         "role_arn": {
-                            "value": "${role_arn}",
+                            "type": "text"
+                        },
+                        "aws.credentials.type": {
+                            "value": "assume_role",
                             "type": "text"
                         }
                     }
                 }
             ]
+        },
+        {
+            "type": "cspm-cloudbeat/cis_gcp",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.findings"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "cspm-cloudbeat/cis_azure",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.findings"
+                    }
+                }
+            ]
         }
     ],
+    "vars": {
+        "posture": { "value": "cspm", "type": "text" },
+        "deployment": { "value": "aws", "type": "text" }
+    },
     "package": {
         "name": "cloud_security_posture",
-        "title": "Kubernetes Security Posture Management (KSPM)",
-        "version": "1.1.1"
+        "title": "Cloud Security Posture Management (CSPM)",
+        "version": "1.2.13"
     }
 }

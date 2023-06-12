@@ -4,6 +4,7 @@ locals {
   common_tags = {
     id          = "${random_id.id.hex}"
     provisioner = "terraform"
+    Name        = var.deployment_name
   }
 }
 resource "tls_private_key" "cloudbeat_key" {
@@ -69,6 +70,7 @@ resource "aws_instance" "cloudbeat" {
   key_name                    = aws_key_pair.generated_key.key_name
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.main.id]
+  iam_instance_profile        = "ec2-role-with-security-audit" # This is a prerequisite, role that contains the policy arn:aws:iam::aws:policy/SecurityAudit
   tags                        = local.common_tags
   connection {
     host        = self.public_ip
@@ -91,6 +93,7 @@ resource "aws_instance" "cloudbeat" {
       "sudo kind create cluster --config deploy/k8s/kind/kind-multi.yml --wait 30s",
       "sudo kind export kubeconfig --name kind-multi --kubeconfig /home/ubuntu/.kube/config",
       "kubectl apply -f /tmp/manifests.yml",
+      var.cspm_aws_docker_cmd,
     ]
   }
 }
