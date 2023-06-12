@@ -42,9 +42,10 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
-  terraform:
-    name: Run terraform
+  deploy-qa-env:
+    name: Deploy new QA Environment
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: ${{ env.WORKING_DIR }}
@@ -70,7 +71,7 @@ jobs:
       - name: Terraform Init
         run: terraform init -no-color
 
-      - name: Deploy Elastic Cloud
+      - name: Run terraform (deploy environment)
         run: |
           terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
           terraform apply --auto-approve -target "module.aws_ec2_with_agent"
