@@ -1,0 +1,81 @@
+name: Destroy QA environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Elastic cloud environment
+        type: choice
+        options:
+          - staging.found.no
+          - cloud.elastic.co
+      EC_API_KEY:
+        type: string
+        description: Elastic's cloud API key
+        required: true
+      deployment_name:
+        type: string
+        description: |
+          Enter the name of your environment (Only a-zA-Z0-9 and `-`).
+          For example: john-8-8-0-bc3-May11'
+        required: true
+      tfstate_s3_bucket:
+        type: string
+        description: |
+          Enter the s3 bucket that contains your environment terraform state (Only a-zA-Z0-9 and `-`).
+          For example: john-8-8-0-bc3-May11-1686583340'
+        required: true
+      stack_version:
+        type: string
+        description: |
+          Elastic's stack version. (e.g., 8.8.0, 8.8.0-SNAPSHOT, latest).
+          Optional, defaults is latest.
+          For BC, enter only version without additions/commit sha
+
+env:
+  WORKING_DIR: deploy/cloud
+  EC_API_KEY: ${{ github.event.inputs.EC_API_KEY }}
+  EC_ENDPOINT: ${{ github.event.inputs.environment == 'staging.found.no' && 'https://staging.found.no' || ''}}
+  TF_VAR_ec_api_key: ${{ github.event.inputs.EC_API_KEY }}
+  TF_VAR_ess_region: ${{ github.event.inputs.environment == 'staging.found.no' && 'gcp-us-central1' || 'gcp-us-west2'}}
+  TF_VAR_deployment_name: ${{ github.event.inputs.deployment_name }}
+  TF_VAR_stack_version: ${{ github.event.inputs.stack_version == '' && 'latest' || github.event.inputs.stack_version}}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  destroy-qa-env:
+    name: Destroy QA Environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+        working-directory: ./
+
+      - name: Terraform Init
+        run: terraform init -no-color
+
+      - name: Download tfstate
+        env:
+          SUB_BUCKET_NAME: ${{ github.event.inputs.tfstate_s3_bucket }}
+        run: |
+          aws s3 cp "s3://private-deployments-tfstate/$SUB_BUCKET_NAME/terraform.tfstate" ./terraform.tfstate
+
+      - name: Run terraform (destroy environment)
+        run: |
+          terraform destroy --auto-approve
+
