@@ -78,7 +78,13 @@ jobs:
           terraform apply --auto-approve
 
       - name: Save tfstate
+        if: always()
         env:
           SUB_BUCKET_NAME: ${{ github.event.inputs.deployment_name }}-${{ steps.date.outputs.date }}
         run: |
-          aws s3 cp ./terraform.tfstate "s3://private-deployments-tfstate/$SUB_BUCKET_NAME/terraform.tfstate"
+          if test -f ./terraform.tfstate; then 
+            echo "Uploading terraform.tfstate"
+            aws s3 cp ./terraform.tfstate "s3://private-deployments-tfstate/$SUB_BUCKET_NAME/terraform.tfstate"
+          else
+            echo "terraform.tfstate does not exists"
+          fi
