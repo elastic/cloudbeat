@@ -45,7 +45,7 @@ jobs:
   deploy-qa-env:
     name: Deploy new QA Environment
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: ${{ env.WORKING_DIR }}
