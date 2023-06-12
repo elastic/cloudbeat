@@ -2,6 +2,7 @@
 # Then scan these instances with vulnerability scanner in order to verify that the scanner works well.
 # Currently this process is being done manually, but eventually we would like to automate it.
 # This template is separate to the elastic-agent-ec2.yml template and is not used in the production deployment process.
+# All AMIs in this template are only available in eu-west-1 region.
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   Encrypted:
