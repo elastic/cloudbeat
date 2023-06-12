@@ -72,7 +72,7 @@ jobs:
 
       - name: Deploy Elastic Cloud
         run: |
-          terraform apply -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
+          terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
           terraform apply --auto-approve -target "module.aws_ec2_with_agent"
           terraform apply --auto-approve -target "module.apps"
           terraform apply --auto-approve -target "module.api" -target "module.iam_eks_role"
