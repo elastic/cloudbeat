@@ -1,4 +1,4 @@
-name: Deploy environment
+name: Deploy QA environment
 
 on:
   workflow_dispatch:
