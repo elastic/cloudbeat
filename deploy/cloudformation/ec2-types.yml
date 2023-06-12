@@ -2,6 +2,7 @@
 # Then scan these instances with vulnerability scanner in order to verify that the scanner works well.
 # Currently this process is being done manually, but eventually we would like to automate it.
 # This template is separate to the elastic-agent-ec2.yml template and is not used in the production deployment process.
+# All AMIs in this template are only available in eu-west-1 region.
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   Encrypted:
@@ -14,7 +15,7 @@ Parameters:
 Conditions:
   Encrypted: !Equals ["true", !Ref Encrypted]
 Resources:
-  armAWSLinuxGP2ext4:
+  arm64AmazonLinux2:
     Type: "AWS::EC2::Instance"
     Properties:
       Tags:
@@ -22,27 +23,21 @@ Resources:
           Value:
             "Fn::Join":
               - "-"
-              - - vuln-mgmt-types-armAWSLinuxGP2ext4
+              - - vuln-mgmt-types-arm64AmazonLinux2
                 - "Fn::Select":
                     - 2
                     - "Fn::Split":
                         - /
                         - Ref: "AWS::StackId"
       InstanceType: t4g.nano
-      ImageId:
-        ami-0a0ae3c8519bff7f0
+      ImageId: ami-0a0ae3c8519bff7f0
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: "8"
-            VolumeType: gp2
-            DeleteOnTermination: "true"
+            VolumeSize: "10"
             Encrypted: !Ref Encrypted
-      UserData:
-        "Fn::Base64": !Sub |
-          #!/bin/bash
-          mkfs -t ext4 /dev/xvda
-  armRHLinuxIO1xfs:
+
+  arm64RHLinux9:
     Type: "AWS::EC2::Instance"
     Properties:
       Tags:
@@ -50,28 +45,21 @@ Resources:
           Value:
             "Fn::Join":
               - "-"
-              - - vuln-mgmt-types-armRHLinuxIO1xfs
+              - - vuln-mgmt-types-arm64RHLinux9
                 - "Fn::Select":
                     - 2
                     - "Fn::Split":
                         - /
                         - Ref: "AWS::StackId"
       InstanceType: t4g.small
-      ImageId:
-        ami-062e673cc4273dad8
+      ImageId: ami-062e673cc4273dad8
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
             VolumeSize: "10"
-            VolumeType: io1
-            Iops: "100"
-            DeleteOnTermination: "true"
             Encrypted: !Ref Encrypted
-      UserData:
-        "Fn::Base64": !Sub |
-          #!/bin/bash
-          mkfs -t xfs /dev/sda1
-  x86SuseLinuxStandardext4:
+
+  x86SuseLinux15:
     Type: "AWS::EC2::Instance"
     Properties:
       Tags:
@@ -79,27 +67,21 @@ Resources:
           Value:
             "Fn::Join":
               - "-"
-              - - vuln-mgmt-types-x86SuseLinuxStandardext4
+              - - vuln-mgmt-types-x86SuseLinux15
                 - "Fn::Select":
                     - 2
                     - "Fn::Split":
                         - /
                         - Ref: "AWS::StackId"
       InstanceType: t2.nano
-      ImageId:
-        ami-09ee771fad415a6d7
+      ImageId: ami-09ee771fad415a6d7
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
             VolumeSize: "10"
-            VolumeType: standard
-            DeleteOnTermination: "true"
             Encrypted: !Ref Encrypted
-      UserData:
-        "Fn::Base64": !Sub |
-          #!/bin/bash
-          mkfs -t ext4 /dev/sda1
-  x86UbuntuLinuxGP3xfs:
+
+  x86UbuntuLinux2204:
     Type: "AWS::EC2::Instance"
     Properties:
       Tags:
@@ -107,27 +89,21 @@ Resources:
           Value:
             "Fn::Join":
               - "-"
-              - - vuln-mgmt-types-x86UbuntuLinuxGP3xfs
+              - - vuln-mgmt-types-x86UbuntuLinux2204
                 - "Fn::Select":
                     - 2
                     - "Fn::Split":
                         - /
                         - Ref: "AWS::StackId"
       InstanceType: t2.nano
-      ImageId:
-        ami-00aa9d3df94c6c354
+      ImageId: ami-00aa9d3df94c6c354
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
             VolumeSize: "10"
-            VolumeType: gp3
-            DeleteOnTermination: "true"
             Encrypted: !Ref Encrypted
-      UserData:
-        "Fn::Base64": !Sub |
-          #!/bin/bash
-          mkfs -t xfs /dev/sda1
-  x86DebianLinuxIO2ext4:
+
+  x86DebianLinux11:
     Type: "AWS::EC2::Instance"
     Properties:
       Tags:
@@ -135,27 +111,42 @@ Resources:
           Value:
             "Fn::Join":
               - "-"
-              - - vuln-mgmt-types-x86DebianLinuxIO2ext4
+              - - vuln-mgmt-types-x86DebianLinux11
                 - "Fn::Select":
                     - 2
                     - "Fn::Split":
                         - /
                         - Ref: "AWS::StackId"
       InstanceType: t2.nano
-      ImageId:
-        ami-089f338f3a2e69431
+      ImageId: ami-089f338f3a2e69431
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
             VolumeSize: "10"
-            VolumeType: io2
-            Iops: "100"
-            DeleteOnTermination: "true"
             Encrypted: !Ref Encrypted
-      UserData:
-        "Fn::Base64": !Sub |
-          #!/bin/bash
-          mkfs -t ext4 /dev/xvda
+
+  x86AmazonLinux2023:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            "Fn::Join":
+              - "-"
+              - - vuln-mgmt-types-x86AmazonLinux2023
+                - "Fn::Select":
+                    - 2
+                    - "Fn::Split":
+                        - /
+                        - Ref: "AWS::StackId"
+      InstanceType: t2.nano
+      ImageId: ami-04b1c88a6bbd48f8e
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: "10"
+            Encrypted: !Ref Encrypted
+
   SecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
