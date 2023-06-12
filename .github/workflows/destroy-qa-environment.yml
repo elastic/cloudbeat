@@ -55,6 +55,9 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Hide the inputs
+        uses: levibostian/action-hide-sensitive-inputs@v1
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
