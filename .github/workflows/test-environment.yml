@@ -195,7 +195,12 @@ jobs:
         run: |
           kibana_url=$(terraform output -raw kibana_url)
           summary="Kibana URL: $kibana_url"
+          bucket_name="${{ env.S3_BASE_BUCKET }}"
+          bucket_name="${bucket_name#s3://}"
+          s3_bucket_link="https://s3.console.aws.amazon.com/s3/buckets/$bucket_name"
+          summary="Kibana URL: $kibana_url\nEnvironment Details: $s3_bucket_link"
           echo "$summary" >> $GITHUB_STEP_SUMMARY
+          echo "$summary" # Print the summary to the workflow log
 
       - name: Cleanup Environment
         if: github.event.inputs.cleanup-env == 'true'
