@@ -323,7 +323,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			}(tcase.configs)
 
 			err = sut.run()
-			s.NoError(err)
+			s.ErrorIs(err, ErrorGracefulExit)
 			beater, ok := sut.beater.(*beaterMock)
 			s.True(ok)
 			s.Equal(tcase.expected, beater.cfg)
@@ -501,7 +501,7 @@ func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 		sut.Stop()
 	}()
 	err = sut.run()
-	s.NoError(err)
+	s.ErrorIs(err, ErrorGracefulExit)
 }
 
 func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
@@ -513,7 +513,7 @@ func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
 		sut.Stop()
 	}()
 	err = sut.run()
-	s.NoError(err)
+	s.ErrorIs(err, ErrorGracefulExit)
 
 	s.Panics(func() {
 		sut.Stop()
@@ -527,4 +527,33 @@ func (s *LauncherTestSuite) TestLauncherErrorBeaterCreation() {
 	s.NoError(err)
 	err = sut.run()
 	s.Error(err)
+}
+
+func (s *LauncherTestSuite) TestLauncherStop() {
+	mocks := s.InitMocks()
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+	s.NoError(err)
+
+	go func() {
+		sut.Stop()
+	}()
+
+	err = sut.run()
+	s.ErrorIs(err, ErrorGracefulExit)
+}
+
+func (s *LauncherTestSuite) TestLauncherStopTimeout() {
+	mocks := s.InitMocks()
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+	s.NoError(err)
+
+	sut.wg.Add(1) // keep waiting for graceful period
+	go func() {
+		sut.Stop()
+		time.Sleep(shutdownGracePeriod + 10*time.Millisecond)
+		sut.wg.Done()
+	}()
+
+	err = sut.run()
+	s.ErrorIs(err, ErrorTimeoutExit)
 }

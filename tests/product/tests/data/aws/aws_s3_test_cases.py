@@ -11,6 +11,7 @@ from ..constants import RULE_PASS_STATUS, RULE_FAIL_STATUS
 CIS_2_1_1 = "CIS 2.1.1"
 CIS_2_1_2 = "CIS 2.1.2"
 CIS_2_1_3 = "CIS 2.1.3"
+CIS_2_1_5 = "CIS 2.1.5"
 
 cis_aws_s3_2_1_1_pass = EksAwsServiceCase(
     rule_tag=CIS_2_1_1,
@@ -84,6 +85,23 @@ cis_aws_s3_2_1_3_skip = {
     "2.1.2 Ensure MFA Delete is enabled, expect: failed": cis_aws_s3_2_1_3_pass,
 }
 
+cis_aws_s3_2_1_5_pass = EksAwsServiceCase(
+    rule_tag=CIS_2_1_5,
+    case_identifier="test-aws-no-public-access-pass",
+    expected=RULE_PASS_STATUS,
+)
+
+cis_aws_s3_2_1_5_fail = EksAwsServiceCase(
+    rule_tag=CIS_2_1_5,
+    case_identifier="test-aws-public-access-allowed-fail",
+    expected=RULE_FAIL_STATUS,
+)
+
+cis_aws_s3_2_1_5 = {
+    "2.1.5 Ensure S3 block public access: No public access -> expect: passed": cis_aws_s3_2_1_5_pass,
+    "2.1.5 Ensure S3 block public access: Public access allowed -> expect: failed": cis_aws_s3_2_1_5_fail,
+}
+
 cis_aws_s3_cases = {
     **cis_aws_s3_2_1_1,
     **skip_param_case(
@@ -105,4 +123,5 @@ cis_aws_s3_cases = {
             url_link="https://github.com/elastic/security-team/issues/6204",
         ),
     ),
+    **cis_aws_s3_2_1_5,
 }
