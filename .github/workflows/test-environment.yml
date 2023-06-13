@@ -18,6 +18,9 @@ on:
         required: true
         description: "Elastic Cloud deployment region"
         default: "gcp-us-west2"
+      docker-image-override:
+        required: false
+        description: "Provide the full Docker image path to override the default image (BC versions only)"
       cleanup-env:
         description: "Boolean: Cleanup resources after provision"
         default: false
@@ -42,6 +45,7 @@ jobs:
       TF_VAR_ess_region: ${{ github.event.inputs.ess-region }}
       DEPLOYMENT_NAME: ${{ github.event.inputs.deployment_name }}
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
+      DOCKER_IMAGE_OVERRIDE: ${{ github.event.inputs.docker-image-override }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3

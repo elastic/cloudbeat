@@ -15,8 +15,10 @@ Usage:
 Import this module to utilize the provided functions for JSON file operations and file deletion.
 """
 import json
+from io import StringIO
 from typing import Union
 from pathlib import Path
+import ruamel.yaml
 from jinja2 import Template
 from loguru import logger
 
@@ -172,3 +174,57 @@ def render_template(template_path, replacements):
     rendered_content = template.render(replacements)
 
     return rendered_content
+
+
+def replace_image_recursive(data, new_image: str):
+    """
+    Recursively searches for the 'image' field in the YAML data and replaces its value.
+
+    Args:
+        data (Union[CommentedMap, list]): The YAML data to be processed.
+        new_image (str): The new image value to replace the existing one.
+
+    Returns:
+        None
+    """
+    if isinstance(data, ruamel.yaml.comments.CommentedMap):
+        for key in data:
+            if key == "image":
+                data[key] = new_image
+            else:
+                replace_image_recursive(data[key], new_image)
+    elif isinstance(data, list):
+        for item in data:
+            replace_image_recursive(item, new_image)
+
+
+def replace_image_field(yaml_string: str, new_image: str) -> str:
+    """
+    Replaces the value of the 'image' field in the provided YAML string with a new image value.
+
+    Args:
+        yaml_string (str): The YAML string to be processed.
+        new_image (str): The new image value to replace the existing one.
+
+    Returns:
+        str: The modified YAML string with the updated 'image' field.
+    """
+    yaml = ruamel.yaml.YAML()
+    yaml.preserve_quotes = True
+    yaml.indent(mapping=2, sequence=4, offset=2)
+
+    output = []
+    for doc in yaml.load_all(yaml_string):
+        replace_image_recursive(doc, new_image)
+        output.append(doc)
+
+    # Create an output stream
+    output_stream = StringIO()
+
+    # Dump the modified YAML data to the output stream
+    yaml.dump_all(output, output_stream)
+
+    # Get the YAML string from the output stream
+    yaml_string = output_stream.getvalue()
+
+    return yaml_string
