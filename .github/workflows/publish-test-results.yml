@@ -93,11 +93,14 @@ jobs:
 
           ./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url"
           allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
-          echo "allure_summary<<EOF" >> $GITHUB_ENV
+          # posting result into job summary
+          echo "$allure_summary" >> $GITHUB_STEP_SUMMARY
+
+          # saving result into env variable (with multiline handling)
+          echo "ALLURE_SUMMARY<<EOF" >> $GITHUB_ENV
           echo "$allure_summary" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-          echo ${{ allure_summary }} >> $GITHUB_STEP_SUMMARY
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
@@ -107,4 +110,4 @@ jobs:
           number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ${{ env.allure_summary }}
+            ${{ env.ALLURE_SUMMARY }}
