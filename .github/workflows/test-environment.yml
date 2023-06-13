@@ -194,12 +194,12 @@ jobs:
       #   run: |
       #     sleep 300
 
-      - name: Cleanup Environment
-        if: github.event.inputs.cleanup-env == 'true'
-        run: |
-          terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
-
       - name: Summary
         if: always()
         run: |
           echo $(terraform output -raw kibana_url) >> $GITHUB_STEP_SUMMARY
+
+      - name: Cleanup Environment
+        if: github.event.inputs.cleanup-env == 'true'
+        run: |
+          terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
