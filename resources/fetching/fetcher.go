@@ -24,7 +24,9 @@ import (
 )
 
 const (
-	KubeAPIType = "kube-api"
+	KubeAPIType    = "kube-api"
+	FileSystemType = "file-system"
+	ProcessType    = "process"
 
 	EcrType                   = "aws-ecr"
 	IAMType                   = "aws-iam"
@@ -63,11 +65,6 @@ const (
 	CloudConfig            = "cloud-config"
 	KeyManagement          = "key-management"
 )
-
-// Factory can create fetcher instances based on configuration
-type Factory interface {
-	//Create(*logp.Logger, *config.C, chan ResourceInfo) (Fetcher, error)
-}
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {

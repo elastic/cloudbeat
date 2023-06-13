@@ -73,7 +73,6 @@ func NewProvider(
 		Cloudwatch:     cloudwatch.NewProvider(log, awsConfig, cloudwatchCrossResignFactory),
 		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, awsConfig, cloudwatchlogsCrossRegionFactory),
 		Sns:            sns.NewSNSProvider(log, awsConfig, snsCrossRegionFactory),
-		SecurityHub:    securityhub.NewProvider(awsConfig, log, SecurityHubCrossRegionFactory, *identity.Account),
 		Log:            log,
 	}
 }

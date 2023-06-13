@@ -58,7 +58,6 @@ type FactoriesTestSuite struct {
 	suite.Suite
 
 	log        *logp.Logger
-	F          factory.factories
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -91,7 +90,6 @@ func TestFactoriesTestSuite(t *testing.T) {
 }
 
 func (s *FactoriesTestSuite) SetupTest() {
-	s.F = factory.newFactories()
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 

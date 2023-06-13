@@ -15,42 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package elb
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/eks"
+	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
+	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 )
 
-type EksClusterOutput eks.DescribeClusterOutput
-
-type EksClusterDescriber interface {
-	DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error)
+type LoadBalancerDescriber interface {
+	DescribeLoadBalancer(ctx context.Context, balancersNames []string) ([]types.LoadBalancerDescription, error)
 }
 
-type EksProvider struct {
-	client *eks.Client
+type Provider struct {
+	client *elb.Client
 }
 
-func NewEksProvider(cfg aws.Config) *EksProvider {
-	svc := eks.NewFromConfig(cfg)
-	return &EksProvider{
+func NewElbProvider(cfg aws.Config) *Provider {
+	svc := elb.NewFromConfig(cfg)
+	return &Provider{
 		client: svc,
 	}
-}
-
-func (provider EksProvider) DescribeCluster(ctx context.Context, clusterName string) (EksClusterOutput, error) {
-	input := &eks.DescribeClusterInput{
-		Name: &clusterName,
-	}
-
-	response, err := provider.client.DescribeCluster(ctx, input)
-	if err != nil {
-		return EksClusterOutput{}, fmt.Errorf("failed to describe cluster %s from eks, error - %w", clusterName, err)
-	}
-
-	return EksClusterOutput(*response), err
 }

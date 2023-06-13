@@ -15,56 +15,54 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package ecr
 
 import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ecr"
+	ecrClient "github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
-type EcrRepository types.Repository
-type EcrRepositories []types.Repository
-
-type EcrProvider struct {
-}
-
-type EcrRepositoryDescriber interface {
-	DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error)
-}
-
-func NewEcrProvider() *EcrProvider {
-	return &EcrProvider{}
-}
-
 // DescribeAllEcrRepositories returns a list of all the existing repositories
-func (provider *EcrProvider) DescribeAllEcrRepositories(ctx context.Context, cfg aws.Config, region string) (EcrRepositories, error) {
+func (provider *Provider) DescribeAllEcrRepositories(ctx context.Context, cfg aws.Config, region string) ([]types.Repository, error) {
 	/// When repoNames is nil, it will describe all the existing Repositories
-	return provider.DescribeRepositories(ctx, cfg, nil, region)
+	return provider.DescribeRepositories(ctx, nil, region)
 }
 
 // DescribeRepositories returns a list of repositories that match the given names.
 // When repoNames is empty, it will describe all the existing repositories
-func (provider *EcrProvider) DescribeRepositories(ctx context.Context, cfg aws.Config, repoNames []string, region string) (EcrRepositories, error) {
+func (provider *Provider) DescribeRepositories(ctx context.Context, repoNames []string, region string) ([]types.Repository, error) {
 	if len(repoNames) == 0 {
-		return EcrRepositories{}, nil
+		return nil, nil
 	}
 
-	cfg.Region = region
-	svc := ecr.NewFromConfig(cfg)
-	input := &ecr.DescribeRepositoriesInput{
+	client, err := awslib.GetClient(&region, provider.clients)
+	if err != nil {
+		return nil, fmt.Errorf("error getting client: %w", err)
+	}
+
+	input := &ecrClient.DescribeRepositoriesInput{
 		RepositoryNames: repoNames,
 	}
-	var repos EcrRepositories
-	paginator := ecr.NewDescribeRepositoriesPaginator(svc, input)
-	for paginator.HasMorePages() {
-		page, err := paginator.NextPage(ctx)
+
+	var repos []types.Repository
+	for {
+		output, err := client.DescribeRepositories(ctx, input)
 		if err != nil {
-			return nil, fmt.Errorf("error DescribeRepositories with Paginator: %w", err)
+			return nil, fmt.Errorf("error describing repositories: %w", err)
 		}
-		repos = append(repos, page.Repositories...)
+
+		repos = append(repos, output.Repositories...)
+
+		// Check if there are more repositories to retrieve
+		if output.NextToken == nil {
+			break
+		}
+
+		input.NextToken = output.NextToken
 	}
 
 	return repos, nil

@@ -15,39 +15,35 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package logging
+package ecr
 
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
-
+	ecrClient "github.com/aws/aws-sdk-go-v2/service/ecr"
+	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type Client interface {
-	DescribeTrails(ctx context.Context) ([]awslib.AwsResource, error)
-}
-
+type Repository types.Repository
 type Provider struct {
-	log           *logp.Logger
-	s3Provider    s3.S3
-	trailProvider cloudtrail.TrailService
+	clients map[string]Client
 }
 
-func NewProvider(
-	log *logp.Logger,
-	cfg aws.Config,
-	multiRegionTrailFactory awslib.CrossRegionFactory[cloudtrail.Client],
-	multiRegionS3Factory awslib.CrossRegionFactory[s3.Client],
-	accountId string,
-) *Provider {
+type RepositoryDescriber interface {
+	DescribeRepositories(ctx context.Context, repoNames []string, region string) ([]types.Repository, error)
+}
 
-	return &Provider{
-		log:           log,
-		s3Provider:    s3.NewProvider(log, cfg, multiRegionS3Factory, accountId),
-		trailProvider: cloudtrail.NewProvider(log, cfg, multiRegionTrailFactory),
+type Client interface {
+	DescribeRepositories(ctx context.Context, params *ecrClient.DescribeRepositoriesInput, optFns ...func(*ecrClient.Options)) (*ecrClient.DescribeRepositoriesOutput, error)
+}
+
+func NewEcrProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client]) *Provider {
+	f := func(cfg aws.Config) Client {
+		return ecrClient.NewFromConfig(cfg)
 	}
+	m := factory.NewMultiRegionClients(awslib.AllRegionSelector(), cfg, f, log)
+
+	return &Provider{clients: m.GetMultiRegionsClientMap()}
 }

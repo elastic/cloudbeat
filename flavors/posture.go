@@ -21,6 +21,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
+	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
@@ -29,7 +31,6 @@ import (
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/transformer"
 	"github.com/elastic/cloudbeat/uniqueness"
 
@@ -64,9 +65,13 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
-	le := uniqueness.NewLeaderElector(log, c, &providers.KubernetesProvider{})
+	kubeClient, err := providers.GetK8sClient(log, c.KubeConfig, kubernetes.KubeClientOptions{})
+	if err != nil {
+		log.Errorf("failed to create kubernetes client: %v", err)
+	}
+	le := uniqueness.NewLeaderElector(log, kubeClient)
 
-	fetchersRegistry, err := initRegistry(log, c, resourceCh, le)
+	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -176,9 +181,9 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (fetchersManager.FetchersRegistry, error) {
+func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (fetchersManager.FetchersRegistry, error) {
 	registry := fetchersManager.NewFetcherRegistry(log)
-	f, err := factory.NewFactory(log, cfg, ch)
+	f, err := factory.NewFactory(ctx, log, cfg, ch)
 	if err != nil {
 		return nil, err
 	}

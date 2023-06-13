@@ -18,6 +18,7 @@
 package factory
 
 import (
+	"context"
 	"fmt"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -25,34 +26,30 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-var Factories = newFactories()
-
-type factories struct {
-	m map[string]fetching.Factory
-}
-
 type FetchersMap map[string]fetching.Fetcher
 
-func newFactories() factories {
-	return factories{m: make(map[string]fetching.Factory)}
-}
-
 // NewFactory Creates a new factory based on the benchmark name
-func NewFactory(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (FetchersMap, error) {
+func NewFactory(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (FetchersMap, error) {
 	switch cfg.Benchmark {
 	case config.CIS_AWS:
-		return NewCisAwsFactory(log, cfg, ch)
-	}
-}
-
-func (fa *factories) RegisterFactory(name string, f fetching.Factory) {
-	_, ok := fa.m[name]
-	if ok {
-		panic(fmt.Errorf("fetcher factory with name %q is already registered", name))
+		return NewCisAwsFactory(ctx, log, cfg, ch)
+	case config.CIS_K8S:
+		return NewCisK8sFactory(ctx, log, cfg, ch)
+	case config.CIS_EKS:
+		return NewCisEksFactory(ctx, log, cfg, ch)
 	}
 
-	fa.m[name] = f
+	return nil, fmt.Errorf("benchmark %s is not supported, no fetchers to return", cfg.Benchmark)
 }
+
+//func (fa *factories) RegisterFactory(name string, f fetching.Factory) {
+//	_, ok := fa.m[name]
+//	if ok {
+//		panic(fmt.Errorf("fetcher factory with name %q is already registered", name))
+//	}
+//
+//	fa.m[name] = f
+//}
 
 //func (fa *factories) CreateFetcher(log *logp.Logger, name string, c *agentconfig.C, ch chan fetching.ResourceInfo) (fetching.Fetcher, error) {
 //	factory, ok := fa.m[name]

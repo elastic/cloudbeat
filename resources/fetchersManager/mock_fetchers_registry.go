@@ -21,9 +21,10 @@ package fetchersManager
 
 import (
 	context "context"
-	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 
+	factory "github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	fetching "github.com/elastic/cloudbeat/resources/fetching"
+
 	mock "github.com/stretchr/testify/mock"
 
 	uniqueness "github.com/elastic/cloudbeat/uniqueness"
@@ -144,11 +145,11 @@ func (_c *MockFetchersRegistry_Register_Call) RunAndReturn(run func(string, fetc
 }
 
 // RegisterFetchers provides a mock function with given fields: fetchers, le
-func (_m *MockFetchersRegistry) RegisterFetchers(fetchers []*factory.ParsedFetcher, le uniqueness.Manager) error {
+func (_m *MockFetchersRegistry) RegisterFetchers(fetchers factory.FetchersMap, le uniqueness.Manager) error {
 	ret := _m.Called(fetchers, le)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func([]*factory.ParsedFetcher, uniqueness.Manager) error); ok {
+	if rf, ok := ret.Get(0).(func(factory.FetchersMap, uniqueness.Manager) error); ok {
 		r0 = rf(fetchers, le)
 	} else {
 		r0 = ret.Error(0)
@@ -163,15 +164,15 @@ type MockFetchersRegistry_RegisterFetchers_Call struct {
 }
 
 // RegisterFetchers is a helper method to define mock.On call
-//   - fetchers []*ParsedFetcher
+//   - fetchers factory.FetchersMap
 //   - le uniqueness.Manager
 func (_e *MockFetchersRegistry_Expecter) RegisterFetchers(fetchers interface{}, le interface{}) *MockFetchersRegistry_RegisterFetchers_Call {
 	return &MockFetchersRegistry_RegisterFetchers_Call{Call: _e.mock.On("RegisterFetchers", fetchers, le)}
 }
 
-func (_c *MockFetchersRegistry_RegisterFetchers_Call) Run(run func(fetchers []*factory.ParsedFetcher, le uniqueness.Manager)) *MockFetchersRegistry_RegisterFetchers_Call {
+func (_c *MockFetchersRegistry_RegisterFetchers_Call) Run(run func(fetchers factory.FetchersMap, le uniqueness.Manager)) *MockFetchersRegistry_RegisterFetchers_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]*factory.ParsedFetcher), args[1].(uniqueness.Manager))
+		run(args[0].(factory.FetchersMap), args[1].(uniqueness.Manager))
 	})
 	return _c
 }
@@ -181,7 +182,7 @@ func (_c *MockFetchersRegistry_RegisterFetchers_Call) Return(_a0 error) *MockFet
 	return _c
 }
 
-func (_c *MockFetchersRegistry_RegisterFetchers_Call) RunAndReturn(run func([]*factory.ParsedFetcher, uniqueness.Manager) error) *MockFetchersRegistry_RegisterFetchers_Call {
+func (_c *MockFetchersRegistry_RegisterFetchers_Call) RunAndReturn(run func(factory.FetchersMap, uniqueness.Manager) error) *MockFetchersRegistry_RegisterFetchers_Call {
 	_c.Call.Return(run)
 	return _c
 }

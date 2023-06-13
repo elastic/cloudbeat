@@ -15,42 +15,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package awslib
+package elb
 
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 )
 
-type ElbLoadBalancerDescriptions []types.LoadBalancerDescription
-type ElbLoadBalancersDescription types.LoadBalancerDescription
-
-type ElbLoadBalancerDescriber interface {
-	DescribeLoadBalancer(ctx context.Context, balancersNames []string) (ElbLoadBalancerDescriptions, error)
-}
-
-type ElbProvider struct {
-	client *elb.Client
-}
-
-func NewElbProvider(cfg aws.Config) *ElbProvider {
-	svc := elb.NewFromConfig(cfg)
-	return &ElbProvider{
-		client: svc,
-	}
-}
-
 // DescribeLoadBalancer returns LoadBalancerDescriptions which contain information about the load balancers.
 // When balancersNames is empty, it will describe all the existing load balancers
-func (provider ElbProvider) DescribeLoadBalancer(ctx context.Context, balancersNames []string) (ElbLoadBalancerDescriptions, error) {
+func (provider Provider) DescribeLoadBalancer(ctx context.Context, balancersNames []string) ([]types.LoadBalancerDescription, error) {
 	input := &elb.DescribeLoadBalancersInput{
 		LoadBalancerNames: balancersNames,
 	}
 
-	var loadBalancerDescriptions ElbLoadBalancerDescriptions
+	var loadBalancerDescriptions []types.LoadBalancerDescription
 	paginator := elb.NewDescribeLoadBalancersPaginator(provider.client, input)
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(ctx)

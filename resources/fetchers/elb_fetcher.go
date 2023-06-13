@@ -20,6 +20,8 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
 	"github.com/pkg/errors"
 	"regexp"
 
@@ -30,14 +32,9 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-const (
-	elbRegexTemplate = "([\\w-]+)-\\d+\\.%s.elb.amazonaws.com"
-)
-
 type ElbFetcher struct {
 	log             *logp.Logger
-	cfg             ElbFetcherConfig
-	elbProvider     awslib.ElbLoadBalancerDescriber
+	elbProvider     elb.LoadBalancerDescriber
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
 	resourceCh      chan fetching.ResourceInfo
@@ -50,8 +47,19 @@ type ElbFetcherConfig struct {
 }
 
 type ElbResource struct {
-	lb       awslib.ElbLoadBalancersDescription
+	lb       types.LoadBalancerDescription
 	identity *awslib.Identity
+}
+
+func NewElbFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider k8s.Interface, provider elb.LoadBalancerDescriber, identity *awslib.Identity, matchers string) *ElbFetcher {
+	return &ElbFetcher{
+		log:             log,
+		elbProvider:     provider,
+		cloudIdentity:   identity,
+		kubeClient:      kubeProvider,
+		lbRegexMatchers: []*regexp.Regexp{regexp.MustCompile(matchers)},
+		resourceCh:      ch,
+	}
 }
 
 func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
@@ -68,7 +76,7 @@ func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 
 	for _, loadBalancer := range result {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      ElbResource{awslib.ElbLoadBalancersDescription(loadBalancer), f.cloudIdentity},
+			Resource:      ElbResource{lb: loadBalancer, identity: f.cloudIdentity},
 			CycleMetadata: cMetadata,
 		}
 	}
