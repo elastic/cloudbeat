@@ -67,7 +67,7 @@ module "eks" {
   source                      = "../cloud/modules/provision-eks-cluster"
   region                      = var.region
   cluster_name                = var.deployment_name
-  node_group_one_desired_size = 1
+  node_group_one_desired_size = 2
   # node_group_two_desired_size = 1
   enable_node_group_two = false
 }
