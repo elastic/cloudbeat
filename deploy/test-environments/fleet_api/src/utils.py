@@ -15,7 +15,6 @@ Usage:
 Import this module to utilize the provided functions for JSON file operations and file deletion.
 """
 import json
-from io import StringIO
 from typing import Union
 from pathlib import Path
 import ruamel.yaml
@@ -212,14 +211,16 @@ def replace_image_field(yaml_string: str, new_image: str) -> str:
     yaml = ruamel.yaml.YAML()
     yaml.preserve_quotes = True
     yaml.indent(mapping=2, sequence=4, offset=2)
+    yaml.explicit_start = True
 
     output = []
     for doc in yaml.load_all(yaml_string):
         replace_image_recursive(doc, new_image)
-        output.append(doc)
+        if doc:
+            output.append(doc)
 
     # Create an output stream
-    output_stream = StringIO()
+    output_stream = ruamel.yaml.compat.StringIO()
 
     # Dump the modified YAML data to the output stream
     yaml.dump_all(output, output_stream)
