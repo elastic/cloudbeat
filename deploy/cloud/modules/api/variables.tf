@@ -25,3 +25,8 @@ variable "agent_docker_img" {
   default     = ""
   type        = string
 }
+
+variable "stack_version" {
+  description = "Stack version ('latest' is not supported)"
+  type        = string
+}

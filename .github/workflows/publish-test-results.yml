@@ -6,11 +6,6 @@ on:
     types:
       - completed
 
-env:
-  AWS_REGION: 'eu-west-1'
-  ALLURE_S3_BUCKET: 's3://csp-allure-reports/allure_reports/cloudbeat/prs'
-  S3_BUCKET_ALLURE_REPORT_AP: 'http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs'
-
 jobs:
   publish_results:
     timeout-minutes: 15
@@ -27,8 +22,6 @@ jobs:
       # required by download step to access artifacts API
       actions: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
 
       - name: Download and Extract Artifacts
         env:
@@ -63,14 +56,14 @@ jobs:
         with:
           storageType: s3
           resultsGlob: "tests/allure/results"
+          updatePr: actions
+          collapseSummary: false
+          summary: suites
+          summaryTableType: markdown
+          copyLatest: true
           bucket: csp-allure-reports
           prefix: allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}
-          updatePr: description
-          summary: behaviors
-          copyLatest: true
-          ignoreMissingResults: false
-          summaryTableType: ascii
-          collapseSummary: false
+          ignoreMissingResults: true
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -83,9 +76,7 @@ jobs:
         run: |
           aws s3 cp ${{ env.ALLURE_S3_BUCKET }}/${{ env.PR_NUMBER }}/history/history-trend.json .
 
-
       - name: Output to Job Summary
-        id: output-summary
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -99,7 +90,7 @@ jobs:
           echo "$allure_summary" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-          echo ${{ env.allure_summary }} >> $GITHUB_STEP_SUMMARY
+          echo ${{ allure_summary }} >> $GITHUB_STEP_SUMMARY
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
@@ -109,4 +100,5 @@ jobs:
           number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ${{ env.allure_summary }}
+            ## Cloudbeat CI :robot:
+            Allure Report: http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs/${{ env.PR_NUMBER }}/index.html
