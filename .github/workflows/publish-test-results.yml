@@ -97,7 +97,7 @@ jobs:
           echo "$allure_summary" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-          echo ${{ env.allure_summary }} >> $GITHUB_STEP_SUMMARY
+          echo ${{ allure_summary }} >> $GITHUB_STEP_SUMMARY
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
