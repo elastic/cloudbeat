@@ -84,7 +84,6 @@ jobs:
           aws s3 cp ${{ env.ALLURE_S3_BUCKET }}/${{ env.PR_NUMBER }}/history/history-trend.json .
 
       - name: Output to Job Summary
-        if: ${{ github.event.workflow_run.event == 'pull_request' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
