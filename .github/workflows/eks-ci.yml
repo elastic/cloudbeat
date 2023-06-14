@@ -92,10 +92,11 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
+          file: ./deploy/Dockerfile
           push: false
           tags: cloudbeat:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          # cache-from: type=local,src=/tmp/.buildx-cache
+          # cache-to: type=local,dest=/tmp/.buildx-cache-new
           outputs: type=docker,dest=/tmp/cloudbeat-${{ env.CONTAINER_SUFFIX }}.tar
 
       - name: Build elastic-agent
