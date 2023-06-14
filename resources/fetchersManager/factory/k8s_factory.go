@@ -20,9 +20,11 @@ package factory
 import (
 	"context"
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -51,14 +53,14 @@ var vanillaRequiredProcesses = fetchers.ProcessesConfigMap{
 	"kubelet":         {ConfigFileArguments: []string{"config"}},
 }
 
-func NewCisK8sFactory(_ context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (FetchersMap, error) {
+func NewCisK8sFactory(_ context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (FetchersMap, error) {
 	log.Infof("Initializing K8s fetchers")
 	m := make(FetchersMap)
 	fsFetcher := fetchers.NewFsFetcher(log, ch, vanillaFsPatterns)
-	m[fetching.FileSystemType] = fsFetcher
+	m[fetching.FileSystemType] = RegisteredFetcher{Fetcher: fsFetcher}
 
 	procFetcher := fetchers.NewProcessFetcher(log, ch, vanillaRequiredProcesses)
-	m[fetching.ProcessType] = procFetcher
+	m[fetching.ProcessType] = RegisteredFetcher{Fetcher: procFetcher}
 
 	k8sProvider, err := providers.GetK8sClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
@@ -66,7 +68,7 @@ func NewCisK8sFactory(_ context.Context, log *logp.Logger, cfg *config.Config, c
 	}
 
 	kubeFetcher := fetchers.NewKubeFetcher(log, ch, k8sProvider)
-	m[fetching.KubeAPIType] = kubeFetcher
+	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{conditions.NewLeaseFetcherCondition(log, le)}}
 
 	return m, nil
 }

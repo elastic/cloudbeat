@@ -20,6 +20,7 @@ package uniqueness
 import (
 	"context"
 	"fmt"
+	k8s "k8s.io/client-go/kubernetes"
 	"os"
 	"reflect"
 	"strings"
@@ -85,7 +86,7 @@ func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
 	type args struct {
 		log       *logp.Logger
 		cfg       *config.Config
-		k8sClient *k8sFake.Clientset
+		k8sClient k8s.Interface
 	}
 	tests := []struct {
 		name string
@@ -112,7 +113,7 @@ func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
 		},
 	}
 	for _, tt := range tests {
-		got := NewLeaderElector(tt.args.log, s.kubeClient)
+		got := NewLeaderElector(tt.args.log, tt.args.k8sClient)
 		s.Truef(reflect.TypeOf(got) == reflect.TypeOf(tt.want), "NewLeaderElector() = %v, want %v", got, tt.want)
 	}
 }

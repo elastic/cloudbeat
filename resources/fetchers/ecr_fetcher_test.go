@@ -20,7 +20,6 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
@@ -46,7 +45,7 @@ type EcrFetcherTestSuite struct {
 }
 
 type describeRepoMockParameters struct {
-	EcrRepositories      []ecr.Repository
+	EcrRepositories      []types.Repository
 	ExpectedRepositories []string
 }
 
@@ -97,7 +96,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 			map[string]describeRepoMockParameters{
 				"us-east-2": {
 					ExpectedRepositories: []string{"cloudbeat", "cloudbeat1"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: []types.Repository{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -130,7 +129,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 			map[string]describeRepoMockParameters{
 				"us-east-2": {
 					ExpectedRepositories: []string{"build/cloudbeat", "cloudbeat1"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: []types.Repository{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -178,7 +177,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 			map[string]describeRepoMockParameters{
 				"us-east-2": {
 					ExpectedRepositories: []string{"cloudbeat"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: []types.Repository{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -188,7 +187,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 				},
 				"us-east-1": {
 					ExpectedRepositories: []string{"cloudbeat1"},
-					EcrRepositories: []ecr.Repository{
+					EcrRepositories: []types.Repository{
 						{
 							RepositoryArn:              &repoArn,
 							ImageScanningConfiguration: nil,
@@ -228,14 +227,14 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		// Init private repositories provider
 
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything).Call.
-			Return(func(ctx context.Context, cfg aws.Config, repoNames []string, region string) []ecr.Repository {
+			Return(func(ctx context.Context, repoNames []string, region string) []types.Repository {
 				response, ok := test.privateRepositoriesResponseByRegion[region]
 				s.True(ok)
 				s.Equal(response.ExpectedRepositories, repoNames)
 
 				return response.EcrRepositories
 			},
-				func(ctx context.Context, cfg aws.Config, repoNames []string, region string) error {
+				func(ctx context.Context, repoNames []string, region string) error {
 					return nil
 				})
 

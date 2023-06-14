@@ -15,11 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package fetchersManager
+package data
 
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/registry"
 	"sync"
 	"time"
 
@@ -34,7 +35,7 @@ type Data struct {
 	log        *logp.Logger
 	timeout    time.Duration
 	interval   time.Duration
-	fetchers   FetchersRegistry
+	fetchers   registry.FetchersRegistry
 	stop       chan struct{}
 	stopNotice chan time.Duration
 }
@@ -44,7 +45,7 @@ type Stop func(context.Context, time.Duration)
 // NewData returns a new Data instance.
 // interval is the duration the manager wait between two consecutive cycles.
 // timeout is the maximum duration the manager wait for a single fetcher to return results.
-func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
+func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers registry.FetchersRegistry) (*Data, error) {
 	return &Data{
 		log:        log,
 		timeout:    timeout,

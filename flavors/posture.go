@@ -20,7 +20,9 @@ package flavors
 import (
 	"context"
 	"fmt"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/data"
 	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/registry"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"time"
@@ -29,7 +31,6 @@ import (
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/pipeline"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/transformer"
 	"github.com/elastic/cloudbeat/uniqueness"
@@ -42,11 +43,11 @@ import (
 // posture configuration.
 type posture struct {
 	flavorBase
-	data       *fetchersManager.Data
+	data       *data.Data
 	evaluator  evaluator.Evaluator
 	resourceCh chan fetching.ResourceInfo
 	leader     uniqueness.Manager
-	dataStop   fetchersManager.Stop
+	dataStop   data.Stop
 }
 
 // NewPosture creates an instance of posture.
@@ -79,7 +80,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	// TODO: timeout should be configurable and not hard-coded. Setting to 10 minutes for now to account for CSPM fetchers
 	// 	https://github.com/elastic/cloudbeat/issues/653
-	data, err := fetchersManager.NewData(log, c.Period, time.Minute*10, fetchersRegistry)
+	data, err := data.NewData(log, c.Period, time.Minute*10, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -181,17 +182,13 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (fetchersManager.FetchersRegistry, error) {
-	registry := fetchersManager.NewFetcherRegistry(log)
-	f, err := factory.NewFactory(ctx, log, cfg, ch)
+func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (registry.FetchersRegistry, error) {
+	f, err := factory.NewFactory(ctx, log, cfg, ch, le)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := registry.RegisterFetchers(f, le); err != nil {
-		return nil, err
-	}
-
+	registry := registry.NewFetcherRegistry(log, f)
 	return registry, nil
 }
 

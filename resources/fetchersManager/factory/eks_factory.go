@@ -22,12 +22,14 @@ import (
 	"fmt"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/conditions"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
+	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"regexp"
@@ -44,7 +46,7 @@ var (
 		"/hostfs/var/lib/kubelet/kubeconfig"}
 )
 
-func NewCisEksFactory(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (FetchersMap, error) {
+func NewCisEksFactory(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (FetchersMap, error) {
 	log.Infof("Initializing EKS fetchers")
 
 	m := make(FetchersMap)
@@ -64,13 +66,13 @@ func NewCisEksFactory(ctx context.Context, log *logp.Logger, cfg *config.Config,
 	}
 
 	fsFetcher := fetchers.NewFsFetcher(log, ch, eksFsPatterns)
-	m[fetching.FileSystemType] = fsFetcher
+	m[fetching.FileSystemType] = RegisteredFetcher{Fetcher: fsFetcher}
 
 	procFetcher := fetchers.NewProcessFetcher(log, ch, eksRequiredProcesses)
-	m[fetching.ProcessType] = procFetcher
+	m[fetching.ProcessType] = RegisteredFetcher{Fetcher: procFetcher}
 
 	kubeFetcher := fetchers.NewKubeFetcher(log, ch, kubeClient)
-	m[fetching.KubeAPIType] = kubeFetcher
+	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{conditions.NewLeaseFetcherCondition(log, le)}}
 
 	ecrPrivateProvider := ecr.NewEcrProvider(log, awsConfig, &awslib.MultiRegionClientFactory[ecr.Client]{})
 	privateRepoRegex := fmt.Sprintf(fetchers.PrivateRepoRegexTemplate, *identity.Account)
@@ -81,12 +83,12 @@ func NewCisEksFactory(ctx context.Context, log *logp.Logger, cfg *config.Config,
 	}
 
 	ecrFetcher := fetchers.NewEcrFetcher(log, ch, kubeClient, ecrPodDescriber)
-	m[fetching.EcrType] = ecrFetcher
+	m[fetching.EcrType] = RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{conditions.NewLeaseFetcherCondition(log, le)}}
 
 	elbProvider := elb.NewElbProvider(awsConfig)
 	loadBalancerRegex := fmt.Sprintf(elbRegexTemplate, awsConfig.Region)
 	elbFetcher := fetchers.NewElbFetcher(log, ch, kubeClient, elbProvider, identity, loadBalancerRegex)
-	m[fetching.ElbType] = elbFetcher
+	m[fetching.ElbType] = RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{conditions.NewLeaseFetcherCondition(log, le)}}
 
 	return m, nil
 }
