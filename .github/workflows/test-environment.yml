@@ -142,10 +142,13 @@ jobs:
           poetry run python src/install_kspm_eks_integration.py
 
       - name: Deploy KSPM EKS agent
+        env:
+          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
         run: |
           aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
               --name $(terraform output -raw deployment_name) --alias eks-config
           echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
+          aws s3 cp ~/.kube/config "${{ env.S3_BUCKET }}/kubeconfig"
           kubectl config use-context eks-config
           kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_eks.yaml
 
@@ -176,6 +179,15 @@ jobs:
           scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ${{ env.FLEET_API_DIR}}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
           # Apply the manifest file
           ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "chmod +x cspm-linux.sh && ./cspm-linux.sh"
+
+      - name: Upload Integrations data
+        if: always()
+        env:
+          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
+        run: |
+          aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
+          aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
+          aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
