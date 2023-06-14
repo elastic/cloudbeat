@@ -70,7 +70,8 @@ resource "aws_instance" "cloudbeat" {
   key_name                    = aws_key_pair.generated_key.key_name
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.main.id]
-  tags                        = local.tags
+  iam_instance_profile        = "ec2-role-with-security-audit" # This is a prerequisite, role that contains the policy arn:aws:iam::aws:policy/SecurityAudit
+  tags                        = local.common_tags
   connection {
     host        = self.public_ip
     user        = local.ec2_username
@@ -96,6 +97,7 @@ resource "aws_instance" "cloudbeat" {
       "  if [ \"$enable_agent\" = true ]; then",
       "    echo 'Deploy KSPM agent'",
       "    kubectl apply -f /tmp/manifests.yml",
+      "    ${var.cspm_aws_docker_cmd}",
       "  else",
       "    echo 'KSPM Agent will not be installed!'",
       "  fi",

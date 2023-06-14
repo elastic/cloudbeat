@@ -37,4 +37,9 @@ variable "specific_tags" {
   description = "Specific tags for this deployment"
   type        = map(string)
   default     = {}
+  
+variable "cspm_aws_docker_cmd" {
+  default     = ""
+  description = "Optional. Docker command to enroll CSPM AWS agent"
+  type        = string
 }

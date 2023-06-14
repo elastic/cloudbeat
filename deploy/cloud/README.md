@@ -33,7 +33,7 @@ Follow the [prerequisites](/README.md#prerequisites) chapter of our main README.
    terraform init
    terraform apply --auto-approve -target "module.ec_deployment" -target "null_resource.rules" -target "null_resource.store_local_dashboard" -target "module.eks"
    ```
-4. Create EC2 instance to run Cloudbeat on vanilla cluster
+4. Create EC2 instance to run Cloudbeat on vanilla cluster (KSPM) and to run CSPM's Cloudbeat agent (from version >=8.7.0)
    ```bash
    terraform apply --auto-approve -target "module.aws_ec2_with_agent"
    ```

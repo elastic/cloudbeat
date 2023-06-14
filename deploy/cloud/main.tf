@@ -118,6 +118,7 @@ module "api" {
   uri              = module.ec_deployment.kibana_url
   role_arn         = module.iam_eks_role.iam_role_arn
   agent_docker_img = var.agent_docker_image_override
+  stack_version    = var.stack_version
 }
 
 provider "kubernetes" {
@@ -200,10 +201,11 @@ module "apps" {
   replica_count = "5"
 }
 module "aws_ec2_with_agent" {
-  source          = "./modules/ec2"
-  providers       = { aws : aws }
-  yml             = module.api.vanilla.yaml
-  deployment_name = "${var.deployment_name}-${random_string.suffix.result}"
+  source              = "./modules/ec2"
+  providers           = { aws : aws }
+  yml                 = module.api.vanilla.yaml
+  cspm_aws_docker_cmd = module.api.installedCspm ? module.api.cspm_aws.docker_cmd : ""
+  deployment_name     = "${var.deployment_name}-${random_string.suffix.result}"
   depends_on = [
     module.ec_deployment,
     module.api,
