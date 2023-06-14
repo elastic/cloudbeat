@@ -51,6 +51,7 @@ jobs:
       DEPLOYMENT_NAME: ${{ github.event.inputs.deployment_name }}
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ github.event.inputs.docker-image-override }}
+      STACK_VERSION: ${{ github.event.inputs.elk-stack-version }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
