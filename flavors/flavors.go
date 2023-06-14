@@ -19,8 +19,9 @@ package flavors
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/dataprovider"
 	"time"
+
+	"github.com/elastic/cloudbeat/dataprovider"
 
 	"github.com/elastic/cloudbeat/config"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
@@ -31,10 +32,9 @@ import (
 )
 
 const (
-	flushInterval       = 10 * time.Second
-	eventsThreshold     = 75
-	resourceChBuffer    = 10000
-	shutdownGracePeriod = 30 * time.Second
+	flushInterval    = 10 * time.Second
+	eventsThreshold  = 75
+	resourceChBuffer = 10000
 )
 
 // flavorBase configuration.
