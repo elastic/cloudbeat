@@ -10,6 +10,10 @@ on:
           Name your environment (Only a-zA-Z0-9 and `-`).
           For example: john-8-7-2-June01'
         required: true
+      ec-api-key:
+        type: string
+        description: "Elastic Cloud API KEY"
+        required: true
       elk-stack-version:
         required: true
         description: "Elastic Cloud stack SNAPSHOT or BC version"
@@ -29,7 +33,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: "eu-west-1"
-  TF_VAR_ec_api_key: ${{ secrets.CI_EC_API_KEY }}
+  # TF_VAR_ec_api_key: ${{ secrets.CI_EC_API_KEY }}
   WORKING_DIR: deploy/test-environments
   FLEET_API_DIR: fleet_api/src
 
@@ -43,10 +47,15 @@ jobs:
     env:
       TF_VAR_stack_version: ${{ github.event.inputs.elk-stack-version }}
       TF_VAR_ess_region: ${{ github.event.inputs.ess-region }}
+      TF_VAR_ec_api_key: ${{ github.event.inputs.ec-api-key }}
       DEPLOYMENT_NAME: ${{ github.event.inputs.deployment_name }}
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ github.event.inputs.docker-image-override }}
     steps:
+      - name: Update env key
+        run: |
+          echo "::add-mask::${{ env.TF_VAR_ec_api_key }}"
+
       - name: Check out the repo
         uses: actions/checkout@v3
 
