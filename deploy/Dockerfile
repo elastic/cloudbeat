@@ -5,9 +5,9 @@ RUN set -x && \
       ca-certificates curl iputils-ping jq && \
       apt-get clean
 
-COPY ./cloudbeat /cloudbeat
-COPY ./cloudbeat.yml /cloudbeat.yml
-COPY ./bundle.tar.gz /bundle.tar.gz
+COPY ../cloudbeat /cloudbeat
+COPY ../cloudbeat.yml /cloudbeat.yml
+COPY ../bundle.tar.gz /bundle.tar.gz
 
 ENTRYPOINT ["/cloudbeat"]
 CMD ["-e", "-d", "'*'"]
