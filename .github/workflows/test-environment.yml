@@ -194,15 +194,8 @@ jobs:
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
-
-      # Placeholder action that need to be replaced by the following:
-      # # Tests execution
-      # - name: Sleep action
+      # Placeholder for sanity tests
+      # - name: Run Sanity tests
       #   if: success()
       #   run: |
       #     sleep 300
