@@ -61,7 +61,8 @@ jobs:
       - name: Build cloudbeat-docker
         uses: docker/build-push-action@v4
         with:
-          context: deploy
+          context: .
+          file: deploy/Dockerfile
           push: false
           tags: cloudbeat:latest
           cache-from: type=local,src=/tmp/.buildx-cache
