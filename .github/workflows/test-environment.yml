@@ -33,7 +33,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: "eu-west-1"
-  # TF_VAR_ec_api_key: ${{ secrets.CI_EC_API_KEY }}
+  TF_VAR_ec_api_key: ${{ secrets.CI_EC_API_KEY }}
   WORKING_DIR: deploy/test-environments
   FLEET_API_DIR: fleet_api/src
 
@@ -52,10 +52,6 @@ jobs:
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ github.event.inputs.docker-image-override }}
     steps:
-      - name: Update env key
-        run: |
-          echo "::add-mask::${{ env.TF_VAR_ec_api_key }}"
-
       - name: Check out the repo
         uses: actions/checkout@v3
 
