@@ -7,7 +7,9 @@ on:
       - completed
 
 env:
-  AWS_REGION: eu-west-1
+  AWS_REGION: 'eu-west-1'
+  ALLURE_S3_BUCKET: 's3://csp-allure-reports/allure_reports/cloudbeat/prs'
+  S3_BUCKET_ALLURE_REPORT_AP: 'http://csp-allure-reports.s3.amazonaws.com/allure_reports/cloudbeat/prs'
 
 jobs:
   publish_results:
@@ -25,6 +27,8 @@ jobs:
       # required by download step to access artifacts API
       actions: read
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Download and Extract Artifacts
         env:
