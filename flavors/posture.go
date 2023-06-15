@@ -129,7 +129,7 @@ func (bt *posture) Run(b *beat.Beat) error {
 		return err
 	}
 
-	bt.dataStop = bt.data.Run(bt.ctx)
+	bt.data.Run()
 
 	procs, err := ConfigureProcessors(bt.config.Processors)
 	if err != nil {
@@ -147,8 +147,8 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 
 	// Creating the data pipeline
-	findingsCh := pipeline.Step(bt.log, bt.resourceCh, bt.evaluator.Eval)
-	eventsCh := pipeline.Step(bt.log, findingsCh, bt.transformer.CreateBeatEvents)
+	findingsCh := pipeline.Step(bt.ctx, bt.log, bt.resourceCh, bt.evaluator.Eval)
+	eventsCh := pipeline.Step(bt.ctx, bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event
 	ticker := time.NewTicker(flushInterval)
@@ -194,9 +194,7 @@ func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 
 // Stop stops posture.
 func (bt *posture) Stop() {
-	if bt.dataStop != nil {
-		bt.dataStop(bt.ctx, shutdownGracePeriod)
-	}
+	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
 	bt.leader.Stop()
 	close(bt.resourceCh)

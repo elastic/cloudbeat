@@ -94,7 +94,6 @@ type DataTestSuite struct {
 	ctx        context.Context
 	log        *logp.Logger
 	registry   registry.MockFetchersRegistry
-	dataLayer  *Data
 	opts       goleak.Option
 	resourceCh chan fetching.ResourceInfo
 	wg         *sync.WaitGroup
@@ -119,15 +118,6 @@ func (s *DataTestSuite) SetupTest() {
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.registry = registry.MockFetchersRegistry{}
 	s.wg = &sync.WaitGroup{}
-
-	s.dataLayer = &Data{
-		log:        s.log,
-		timeout:    2 * time.Second,
-		interval:   5 * time.Second,
-		fetchers:   &s.registry,
-		stop:       make(chan struct{}),
-		stopNotice: make(chan time.Duration),
-	}
 }
 
 func (s *DataTestSuite) TearDownTest() {
@@ -164,16 +154,10 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	mock1.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Panic(fetcherMessage)
 	mock1.EXPECT().Stop().Return()
 
-	d := &Data{
-		log:        s.log,
-		timeout:    timeout,
-		interval:   interval,
-		fetchers:   &mock1,
-		stop:       make(chan struct{}),
-		stopNotice: make(chan time.Duration),
-	}
+	data, err := NewData(s.ctx, s.log, interval, timeout, &mock1)
+	s.NoError(err)
 
-	stop := d.Run(s.ctx)
+	stop := data.Run()
 	defer stop(context.Background(), time.Second)
 	mock1.AssertNumberOfCalls(s.T(), "Keys", 1)
 }
