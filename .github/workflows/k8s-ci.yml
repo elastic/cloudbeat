@@ -103,7 +103,7 @@ jobs:
     name: ${{ matrix.test-target }}-tests
     needs: [Build]
     runs-on: ubuntu-20.04
-    timeout-minutes: 55
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
