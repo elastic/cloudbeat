@@ -10,7 +10,15 @@ This project utilizes AWS and Elastic Cloud accounts. To ensure proper deploymen
 
 Follow the [prerequisites](/README.md#prerequisites) chapter of our main README.
 
-## Environment Variables
+## Environment Variables & EC API Key
+
+To generate an Elastic Cloud token, you have two options:
+
+1. Follow the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for step-by-step instructions on generating the token.
+
+2. If you are already familiar with the token generation process, you can directly access the [Elastic Cloud Keys](https://cloud.elastic.co/deployment-features/keys) page to generate the token.
+
+Choose the method that is most convenient for you to obtain the Elastic Cloud token required for deployment.
 
 To successfully deploy the environment, ensure that the following variables are provided as deployment parameters or exported as environment variables:
 
