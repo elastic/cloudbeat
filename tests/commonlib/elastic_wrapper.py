@@ -95,16 +95,22 @@ class ElasticWrapper:
         return query, sort
 
     @staticmethod
-    def build_es_must_match_query(must_query_list: list[dict]):
+    def build_es_must_match_query(must_query_list: list[dict], time_range: str):
         """
-        This method builds an ES 'must' query with the given query list.
-        @param must_query_list: list of queries
-        @return: ES query and sorting order
+        Build an Elasticsearch 'must' query with the given query list.
+
+        Args:
+            must_query_list (list[dict]): List of queries.
+            time_range (str): Time range for filtering the query.
+
+        Returns:
+            tuple: Tuple containing the Elasticsearch query and sorting order.
+
         """
         query = {
             "bool": {
                 "must": must_query_list,
-                "filter": [{"range": {"@timestamp": {"gte": "now-30m"}}}],
+                "filter": [{"range": {"@timestamp": {"gte": time_range}}}],
             },
         }
 
