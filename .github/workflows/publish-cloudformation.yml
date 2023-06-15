@@ -1,4 +1,4 @@
-name: Publish-Artifacts
+name: Publish-CloudFormation
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - .github/workflows/publish-artifacts.yml
 
 jobs:
-  Cloudformation:
+  publish_cloudformation:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3

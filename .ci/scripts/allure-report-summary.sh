@@ -26,6 +26,12 @@ failed=$(echo "$data" | jq -r '.[0].data.failed')
 passed=$(echo "$data" | jq -r '.[0].data.passed')
 skipped=$(echo "$data" | jq -r '.[0].data.skipped')
 
+# Check if no tests were run
+if [ "$failed" -eq 0 ] && [ "$passed" -eq 0 ] && [ "$skipped" -eq 0 ]; then
+  echo ":x: No tests were run. :x:"
+  exit 0
+fi
+
 # Check if all tests either passed or were skipped
 if [ "$failed" -eq 0 ]; then
   summary=":green_heart: No failures were reported."
