@@ -26,8 +26,9 @@ on:
         required: false
         description: "Provide the full Docker image path to override the default image (BC versions only)"
       cleanup-env:
-        description: "Boolean: Cleanup resources after provision"
+        description: "Cleanup resources after provision"
         default: false
+        type: boolean
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
