@@ -1,17 +1,17 @@
 ---
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Description: Creates an EC2 instance with permissions to run elastic-agent
 Parameters:
   LatestAmiId:
-    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-    Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
+    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+    Default: "/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id"
   InstanceType:
     Type: String
-    Default: c6g.xlarge
+    Default: m6g.xlarge
     AllowedValues:
-      - c6g.xlarge
-      - c6g.2xlarge
-      - c6g.4xlarge
+      - m6g.xlarge
+      - m6g.2xlarge
+      - m6g.4xlarge
     Description: The type of EC2 instance to create
   EnrollmentToken:
     Type: String
@@ -39,7 +39,7 @@ Mappings:
       Policies:
         - PolicyName: vuln-mgmt-permissions
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -69,25 +69,25 @@ Mappings:
 Resources:
   # Security Group for EC2 instance
   ElasticAgentSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupName:
         Fn::Join:
-          - '-'
-          - - 'elastic-agent-security-group'
+          - "-"
+          - - "elastic-agent-security-group"
             - Fn::Select:
                 - 2
                 - Fn::Split:
-                    - '/'
-                    - Ref: 'AWS::StackId'
+                    - "/"
+                    - Ref: "AWS::StackId"
       GroupDescription: Block incoming traffic
       SecurityGroupIngress: []
   # IAM Role for EC2 instance
   ElasticAgentRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -112,31 +112,31 @@ Resources:
     Properties:
       InstanceProfileName:
         Fn::Join:
-          - '-'
-          - - 'elastic-agent-instance-profile'
+          - "-"
+          - - "elastic-agent-instance-profile"
             - Fn::Select:
                 - 2
                 - Fn::Split:
-                    - '/'
-                    - Ref: 'AWS::StackId'
+                    - "/"
+                    - Ref: "AWS::StackId"
       Path: /
       Roles:
-        - Ref: 'ElasticAgentRole'
+        - Ref: "ElasticAgentRole"
   # EC2 Instance to run elastic-agent
   ElasticAgentEc2Instance:
-    Type: 'AWS::EC2::Instance'
+    Type: "AWS::EC2::Instance"
     Properties:
       Tags:
         - Key: Name
           Value:
             Fn::Join:
-              - '-'
-              - - 'elastic-agent-instance'
+              - "-"
+              - - "elastic-agent-instance"
                 - Fn::Select:
                     - 2
                     - Fn::Split:
-                        - '/'
-                        - Ref: 'AWS::StackId'
+                        - "/"
+                        - Ref: "AWS::StackId"
         - Key: Task
           Value:
             Fn::FindInMap:
