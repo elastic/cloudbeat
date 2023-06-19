@@ -24,7 +24,7 @@ concurrency:
 jobs:
   Build:
     name: Build
-    runs-on: ubuntu-20.04
+    runs-on: macos-latest
     timeout-minutes: 15
     steps:
       - name: Check out the repo
