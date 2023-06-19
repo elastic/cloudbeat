@@ -102,7 +102,7 @@ jobs:
     if: github.event_name == 'pull_request'
     name: ${{ matrix.test-target }}-tests
     needs: [Build]
-    runs-on: ubuntu-20.04
+    runs-on: macos-latest
     timeout-minutes: 180
     strategy:
       fail-fast: false
