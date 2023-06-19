@@ -131,13 +131,12 @@ func (s *DataTestSuite) TestDataRun() {
 	interval := 10 * time.Second
 
 	s.wg.Add(fetcherCount)
-
 	registerNFetchers(s.T(), s.registry, fetcherCount, s.resourceCh, s.wg)
-	d, err := NewData(s.log, interval, timeout, s.registry)
+	d, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
+	d.Run()
+	defer d.Stop()
 
-	stop := d.Run(s.ctx)
-	defer stop(context.Background(), time.Second)
 	s.wg.Wait() // waiting for all fetchers to complete
 
 	results := testhelper.CollectResources(s.resourceCh)
@@ -154,12 +153,10 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
-	d, err := NewData(s.log, interval, timeout, s.registry)
+	d, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
-
-	stop := d.Run(s.ctx)
-	s.NoError(err)
-	defer stop(context.Background(), time.Second)
+	d.Run()
+	defer d.Stop()
 
 	s.wg.Wait()
 	results := testhelper.CollectResources(s.resourceCh)
@@ -176,7 +173,7 @@ func (s *DataTestSuite) TestDataFetchSinglePanic() {
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
-	d, err := NewData(s.log, interval, timeout, s.registry)
+	d, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = d.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
@@ -193,12 +190,10 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
-	d, err := NewData(s.log, interval, timeout, s.registry)
+	d, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
-
-	stop := d.Run(s.ctx)
-	s.NoError(err)
-	defer stop(s.ctx, time.Second)
+	d.Run()
+	defer d.Stop()
 
 	s.wg.Wait()
 	results := testhelper.CollectResources(s.resourceCh)
@@ -216,7 +211,7 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 	err := s.registry.Register(fetcherName, f)
 	s.NoError(err)
 
-	d, err := NewData(s.log, interval, timeout, s.registry)
+	d, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = d.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
@@ -234,12 +229,10 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	err := s.registry.Register(fetcherName, f, c)
 	s.NoError(err)
 
-	d, err := NewData(s.log, interval, timeout, s.registry)
+	d, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
-
-	stop := d.Run(s.ctx)
-	s.NoError(err)
-	defer stop(context.Background(), time.Second)
+	d.Run()
+	defer d.Stop()
 
 	// Fetcher did not run, we can not wait for sync.done() to be called.
 	var results []fetching.ResourceInfo
@@ -264,12 +257,12 @@ func (s *DataTestSuite) TestDataStop() {
 	err := s.registry.Register(fetcherName, f, c)
 	s.NoError(err)
 
-	d, err := NewData(s.log, interval, time.Second*5, s.registry)
+	d, err := NewData(s.ctx, s.log, interval, time.Second*5, s.registry)
 	s.NoError(err)
 
-	stop := d.Run(context.Background())
+	d.Run()
 	time.Sleep(1 * time.Second)
-	stop(context.Background(), time.Second)
+	d.Stop()
 	time.Sleep(3 * time.Second)
 	s.True(f.stopCalled)
 	s.False(<-isRunningChan, "fetcher should not be running")
@@ -286,81 +279,13 @@ func (s *DataTestSuite) TestDataStopWithTimeout() {
 	c := newBoolFetcherCondition(true, fetcherConditionName)
 	err := s.registry.Register(fetcherName, f, c)
 	s.NoError(err)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	ctx, cancel := context.WithTimeout(s.ctx, time.Second*2)
 	defer cancel()
-	d, err := NewData(s.log, interval, time.Second*5, s.registry)
+	d, err := NewData(ctx, s.log, interval, time.Second*5, s.registry)
 	s.NoError(err)
-
-	d.Run(ctx)
+	d.Run()
+	defer d.Stop()
 	time.Sleep(2 * time.Second)
 	s.False(<-isRunningChan, "fetcher should not be running")
 	s.Equal(context.DeadlineExceeded, f.err)
-}
-
-func (s *DataTestSuite) TestDataStopWithGracefulShutdown() {
-	interval := 30 * time.Second
-	fetcherName := "run_fetcher"
-	fetcherConditionName := "true_condition"
-
-	isRunningChan := make(chan bool, 1)
-	f := newDelayFetcher(time.Minute, s.resourceCh, s.wg, isRunningChan)
-	c := newBoolFetcherCondition(true, fetcherConditionName)
-	err := s.registry.Register(fetcherName, f, c)
-	s.NoError(err)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	d, err := NewData(s.log, interval, time.Second*5, s.registry)
-	s.NoError(err)
-
-	stop := d.Run(ctx)
-	time.Sleep(2 * time.Second)
-
-	stop(ctx, time.Second)
-	time.Sleep(2 * time.Second)
-
-	s.False(<-isRunningChan, "fetcher should not be running")
-	s.Equal(context.Canceled, f.err)
-}
-
-func (s *DataTestSuite) TestDataStopWithNoticePeriod() {
-	fetcherName := "run_fetcher"
-	fetcherConditionName := "true_condition"
-
-	isRunningChan := make(chan bool, 1)
-	f := newDelayFetcher(time.Millisecond, s.resourceCh, s.wg, isRunningChan)
-	c := newBoolFetcherCondition(true, fetcherConditionName)
-	err := s.registry.Register(fetcherName, f, c)
-	s.NoError(err)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	d, err := NewData(s.log, 500*time.Millisecond, time.Second*5, s.registry)
-	s.NoError(err)
-
-	stop := d.Run(ctx)
-	time.Sleep(2 * time.Second)
-
-	stop(ctx, time.Second)
-	time.Sleep(2 * time.Second)
-	s.LessOrEqual(f.execCounter, 5)
-}
-
-func (s *DataTestSuite) TestDataDoubleStop() {
-	fetcherName := "run_fetcher"
-	fetcherConditionName := "true_condition"
-
-	isRunningChan := make(chan bool, 1)
-	f := newDelayFetcher(time.Millisecond, s.resourceCh, s.wg, isRunningChan)
-	c := newBoolFetcherCondition(false, fetcherConditionName)
-	err := s.registry.Register(fetcherName, f, c)
-	s.NoError(err)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	d, err := NewData(s.log, 500*time.Millisecond, time.Second*5, s.registry)
-	s.NoError(err)
-
-	stop := d.Run(ctx)
-	time.Sleep(2 * time.Second)
-
-	stop(ctx, time.Second)
-	stop(ctx, time.Second)
 }
