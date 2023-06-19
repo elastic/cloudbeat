@@ -77,3 +77,8 @@ output "role_arn" {
 output "cloudbeat_ssh_cmd" {
   value = module.aws_ec2_with_agent.cloudbeat_ssh_cmd
 }
+
+output "cspm_aws_docker_cmd" {
+  description = "Docker command to deploy and enroll CSPM AWS agent"
+  value       = module.api.installedCspm ? module.api.cspm_aws.docker_cmd : ""
+}
