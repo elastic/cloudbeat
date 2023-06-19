@@ -25,6 +25,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetchersManager/registry"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	k8s "k8s.io/client-go/kubernetes"
 	"time"
 
 	"github.com/elastic/cloudbeat/config"
@@ -71,7 +72,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 	}
 	le := uniqueness.NewLeaderElector(log, kubeClient)
 
-	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le)
+	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, kubeClient)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -181,8 +182,8 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (registry.FetchersRegistry, error) {
-	f, err := factory.NewFactory(ctx, log, cfg, ch, le)
+func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) (registry.FetchersRegistry, error) {
+	f, err := factory.NewFactory(ctx, log, cfg, ch, le, k8sClient)
 	if err != nil {
 		return nil, err
 	}

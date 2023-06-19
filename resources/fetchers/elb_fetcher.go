@@ -41,11 +41,6 @@ type ElbFetcher struct {
 	cloudIdentity   *awslib.Identity
 }
 
-type ElbFetcherConfig struct {
-	fetching.AwsBaseFetcherConfig `config:",inline"`
-	KubeConfig                    string `config:"Kubeconfig"`
-}
-
 type ElbResource struct {
 	lb       types.LoadBalancerDescription
 	identity *awslib.Identity
