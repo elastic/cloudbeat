@@ -47,7 +47,6 @@ type posture struct {
 	evaluator  evaluator.Evaluator
 	resourceCh chan fetching.ResourceInfo
 	leader     uniqueness.Manager
-	dataStop   data.Stop
 }
 
 // NewPosture creates an instance of posture.
@@ -80,7 +79,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	// TODO: timeout should be configurable and not hard-coded. Setting to 10 minutes for now to account for CSPM fetchers
 	// 	https://github.com/elastic/cloudbeat/issues/653
-	data, err := data.NewData(log, c.Period, time.Minute*10, fetchersRegistry)
+	data, err := data.NewData(ctx, log, c.Period, time.Minute*10, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
