@@ -44,7 +44,6 @@ type posture struct {
 	evaluator  evaluator.Evaluator
 	resourceCh chan fetching.ResourceInfo
 	leader     uniqueness.Manager
-	dataStop   fetchersManager.Stop
 }
 
 // NewPosture creates an instance of posture.
@@ -73,7 +72,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	// TODO: timeout should be configurable and not hard-coded. Setting to 10 minutes for now to account for CSPM fetchers
 	// 	https://github.com/elastic/cloudbeat/issues/653
-	data, err := fetchersManager.NewData(log, c.Period, time.Minute*10, fetchersRegistry)
+	data, err := fetchersManager.NewData(ctx, log, c.Period, time.Minute*10, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -122,7 +121,7 @@ func (bt *posture) Run(b *beat.Beat) error {
 		return err
 	}
 
-	bt.dataStop = bt.data.Run(bt.ctx)
+	bt.data.Run()
 
 	procs, err := ConfigureProcessors(bt.config.Processors)
 	if err != nil {
@@ -140,8 +139,8 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 
 	// Creating the data pipeline
-	findingsCh := pipeline.Step(bt.log, bt.resourceCh, bt.evaluator.Eval)
-	eventsCh := pipeline.Step(bt.log, findingsCh, bt.transformer.CreateBeatEvents)
+	findingsCh := pipeline.Step(bt.ctx, bt.log, bt.resourceCh, bt.evaluator.Eval)
+	eventsCh := pipeline.Step(bt.ctx, bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
 	var eventsToSend []beat.Event
 	ticker := time.NewTicker(flushInterval)
@@ -192,9 +191,7 @@ func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.Resourc
 
 // Stop stops posture.
 func (bt *posture) Stop() {
-	if bt.dataStop != nil {
-		bt.dataStop(bt.ctx, shutdownGracePeriod)
-	}
+	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
 	bt.leader.Stop()
 	close(bt.resourceCh)

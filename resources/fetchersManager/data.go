@@ -23,7 +23,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/common/atomic"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
@@ -31,67 +30,55 @@ import (
 // Data maintains a cache that is updated by Fetcher implementations registered
 // against it. It sends the cache to an output channel at the defined interval.
 type Data struct {
-	log        *logp.Logger
-	timeout    time.Duration
-	interval   time.Duration
-	fetchers   FetchersRegistry
-	stop       chan struct{}
-	stopNotice chan time.Duration
+	log *logp.Logger
+
+	// Duration of a single fetcher
+	timeout time.Duration
+
+	// Duration between two consecutive cycles
+	interval time.Duration
+
+	fetchers FetchersRegistry
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
-type Stop func(context.Context, time.Duration)
+func NewData(ctx context.Context, log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
+	ctx, cancel := context.WithCancel(ctx)
 
-// NewData returns a new Data instance.
-// interval is the duration the manager wait between two consecutive cycles.
-// timeout is the maximum duration the manager wait for a single fetcher to return results.
-func NewData(log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers FetchersRegistry) (*Data, error) {
 	return &Data{
-		log:        log,
-		timeout:    timeout,
-		interval:   interval,
-		fetchers:   fetchers,
-		stop:       make(chan struct{}),
-		stopNotice: make(chan time.Duration),
+		log:      log,
+		timeout:  timeout,
+		interval: interval,
+		fetchers: fetchers,
+		ctx:      ctx,
+		cancel:   cancel,
 	}, nil
 }
 
 // Run starts all configured fetchers to collect resources.
-func (d *Data) Run(ctx context.Context) Stop {
-	go d.fetchAndSleep(ctx)
-	called := atomic.NewBool(false)
-	return func(ctx context.Context, grace time.Duration) {
-		defer called.Store(true)
-		if called.Load() {
-			return
-		}
-		d.stopData(ctx, grace)
-	}
+func (d *Data) Run() {
+	go d.fetchAndSleep(d.ctx)
+}
+
+func (d *Data) Stop() {
+	d.cancel()
+	d.fetchers.Stop()
 }
 
 func (d *Data) fetchAndSleep(ctx context.Context) {
-	ctx, cancel := context.WithCancel(ctx)
+
 	// set immediate exec for first time run
 	timer := time.NewTimer(0)
-	defer func() {
-		cancel()
-		timer.Stop()
-	}()
-	run := atomic.NewBool(true)
+	defer timer.Stop()
+
 	for {
 		select {
-		case grace := <-d.stopNotice:
-			d.log.Infof("Received stop notice with grace period of %s, fetchers will not be executing from now on", grace.String())
-			run.Store(false)
-		case <-d.stop:
-			d.log.Info("Fetchers manager stopped")
-			return
 		case <-ctx.Done():
 			d.log.Info("Fetchers manager canceled")
 			return
 		case <-timer.C:
-			if !run.Load() {
-				return
-			}
 			// update the interval
 			timer.Reset(d.interval)
 			// this is blocking so the stop will not be called until all the fetchers are finished
@@ -145,7 +132,15 @@ func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching
 
 	select {
 	case <-ctx.Done():
-		return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
+		switch ctx.Err() {
+		case context.DeadlineExceeded:
+			return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
+		case context.Canceled:
+			return fmt.Errorf("fetcher %s was canceled", k)
+		default:
+			return fmt.Errorf("fetcher %s failed with an unknown error: %v", k, ctx.Err())
+		}
+
 	case err := <-errCh:
 		return err
 	}
@@ -160,14 +155,4 @@ func (d *Data) fetchProtected(ctx context.Context, k string, metadata fetching.C
 	}()
 
 	return d.fetchers.Run(ctx, k, metadata)
-}
-
-// Stop cleans up Data resources gracefully.
-func (d *Data) stopData(ctx context.Context, grace time.Duration) {
-	d.stopNotice <- grace
-	ctx, cancel := context.WithTimeout(ctx, grace)
-	defer cancel()
-	<-ctx.Done()
-	d.fetchers.Stop()
-	close(d.stop)
 }
