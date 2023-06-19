@@ -117,7 +117,7 @@ func TestNewFactory(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient)
-			assert.Equal(t, len(fetchersMap), tt.want.count)
+			assert.Equal(t, tt.want.count, len(fetchersMap))
 			for fetcher := range fetchersMap {
 				if _, ok := fetchersMap[fetcher]; !ok {
 					t.Errorf("NewFactory() fetchersMap = %v, want %v", fetchersMap, tt.want.names)
