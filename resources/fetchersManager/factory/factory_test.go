@@ -20,6 +20,7 @@ package factory
 import (
 	"context"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -156,6 +157,16 @@ func TestNewFactory(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		awsconfig := &awslib.MockConfigProviderAPI{}
+		awsconfig.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
+			Call.
+			Return(func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
+				return CreateSdkConfig(config, "us1-east")
+			},
+				func(ctx context.Context, config aws.ConfigAWS) error {
+					return nil
+				},
+			)
 		identity := &awslib.MockIdentityProviderGetter{}
 		identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
 			Account: awssdk.String("test-account"),
@@ -167,7 +178,7 @@ func TestNewFactory(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 
-			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient, identityProvider)
+			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient, identityProvider, awsconfig)
 			assert.Equal(t, tt.want.count, len(fetchersMap))
 			for fetcher := range fetchersMap {
 				if _, ok := fetchersMap[fetcher]; !ok {
@@ -180,4 +191,19 @@ func TestNewFactory(t *testing.T) {
 			}
 		})
 	}
+}
+
+func CreateSdkConfig(config aws.ConfigAWS, region string) *awssdk.Config {
+	awsConfig := awssdk.NewConfig()
+	awsCredentials := awssdk.Credentials{
+		AccessKeyID:     config.AccessKeyID,
+		SecretAccessKey: config.SecretAccessKey,
+		SessionToken:    config.SessionToken,
+	}
+
+	awsConfig.Credentials = credentials.StaticCredentialsProvider{
+		Value: awsCredentials,
+	}
+	awsConfig.Region = region
+	return awsConfig
 }

@@ -74,7 +74,9 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 	}
 	le := uniqueness.NewLeaderElector(log, kubeClient)
 
-	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, kubeClient, awslib.GetIdentityClient)
+	awsConfigProvider := awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}}
+
+	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, kubeClient, awslib.GetIdentityClient, awsConfigProvider)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -184,8 +186,8 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter) (registry.FetchersRegistry, error) {
-	f, err := factory.NewFactory(ctx, log, cfg, ch, le, k8sClient, identityProvider)
+func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter, awsConfigProvider awslib.ConfigProviderAPI) (registry.FetchersRegistry, error) {
+	f, err := factory.NewFactory(ctx, log, cfg, ch, le, k8sClient, identityProvider, awsConfigProvider)
 	if err != nil {
 		return nil, err
 	}

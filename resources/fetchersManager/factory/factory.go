@@ -20,16 +20,15 @@ package factory
 import (
 	"context"
 	"fmt"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
-
-	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type RegisteredFetcher struct {
@@ -39,7 +38,7 @@ type RegisteredFetcher struct {
 
 type FetchersMap map[string]RegisteredFetcher
 
-// NewFactory Creates a new factory based on the benchmark name
+// NewFactory creates a new factory based on the benchmark name
 func NewFactory(
 	ctx context.Context,
 	log *logp.Logger,
@@ -48,20 +47,15 @@ func NewFactory(
 	le uniqueness.Manager,
 	k8sClient k8s.Interface,
 	identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter,
+	awsConfigProvider awslib.ConfigProviderAPI,
 ) (FetchersMap, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("config is nil")
 	}
 
-	var awsIdentity *awslib.Identity
-	var awsConfig awssdk.Config
-	var err error
-	if cfg.CloudConfig != (config.CloudConfig{}) && cfg.CloudConfig.AwsCred != (aws.ConfigAWS{}) {
-		log.Infof("NewFactory Using AWS credentials from config")
-		awsConfig, awsIdentity, err = AdaptAwsConfig(ctx, cfg, identityProvider)
-		if err != nil {
-			return nil, err
-		}
+	awsConfig, awsIdentity, err := getAwsConfig(ctx, cfg, identityProvider, awsConfigProvider)
+	if err != nil {
+		return nil, err
 	}
 
 	switch cfg.Benchmark {
@@ -76,15 +70,25 @@ func NewFactory(
 	return nil, fmt.Errorf("benchmark %s is not supported, no fetchers to return", cfg.Benchmark)
 }
 
-func AdaptAwsConfig(ctx context.Context, cfg *config.Config, identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter) (awssdk.Config, *awslib.Identity, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
+func getAwsConfig(
+	ctx context.Context,
+	cfg *config.Config,
+	identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter,
+	awsCfgProvider awslib.ConfigProviderAPI,
+) (awssdk.Config, *awslib.Identity, error) {
+	if cfg.CloudConfig == (config.CloudConfig{}) || cfg.CloudConfig.AwsCred == (aws.ConfigAWS{}) {
+		return awssdk.Config{}, nil, nil
+	}
+
+	awsConfig, err := awsCfgProvider.InitializeAWSConfig(ctx, cfg.CloudConfig.AwsCred)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	IdentityProviderGetter, err := identityProvider(awsConfig).GetIdentity(ctx)
+	identityProviderGetter, err := identityProvider(*awsConfig).GetIdentity(ctx)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
-	return awsConfig, IdentityProviderGetter, nil
+
+	return *awsConfig, identityProviderGetter, nil
 }
