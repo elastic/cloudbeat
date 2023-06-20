@@ -32,6 +32,7 @@ require (
 )
 
 require (
+	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6
 	github.com/aquasecurity/trivy v0.42.1
 	github.com/aquasecurity/trivy-db v0.0.0-20230515061101-378ab9ed302c
 	github.com/aws/aws-sdk-go v1.44.245
@@ -60,11 +61,12 @@ require (
 	github.com/djherbis/times v1.5.0
 	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
 	github.com/elastic/elastic-agent-autodiscover v0.5.0
-	github.com/elastic/elastic-agent-libs v0.3.8
+	github.com/elastic/elastic-agent-libs v0.3.9
 	github.com/elastic/go-licenser v0.4.1
 	github.com/go-errors/errors v1.0.1
 	github.com/go-git/go-git/v5 v5.7.0
 	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
+	github.com/masahiro331/go-xfs-filesystem v0.0.0-20230608043311-a335f4599b70
 	github.com/mikefarah/yq/v4 v4.33.3
 	github.com/open-policy-agent/opa v0.45.0
 	github.com/pkg/errors v0.9.1
@@ -116,7 +118,6 @@ require (
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/aquasecurity/defsec v0.89.0 // indirect
-	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6 // indirect
 	github.com/aquasecurity/go-gem-version v0.0.0-20201115065557-8eed6fe000ce // indirect
 	github.com/aquasecurity/go-npm-version v0.0.0-20201110091526-0b796d180798 // indirect
 	github.com/aquasecurity/go-pep440-version v0.0.0-20210121094942-22b2f8951d46 // indirect
@@ -219,7 +220,6 @@ require (
 	github.com/masahiro331/go-ext4-filesystem v0.0.0-20221225060520-c150f5eacfe1 // indirect
 	github.com/masahiro331/go-mvn-version v0.0.0-20210429150710-d3157d602a08 // indirect
 	github.com/masahiro331/go-vmdk-parser v0.0.0-20221225061455-612096e4bbbd // indirect
-	github.com/masahiro331/go-xfs-filesystem v0.0.0-20230608043311-a335f4599b70 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-sqlite3 v1.14.15 // indirect
 	github.com/microsoft/go-rustaudit v0.0.0-20220808201409-204dfee52032 // indirect
