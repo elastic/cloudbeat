@@ -33,9 +33,6 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Pre-commit Hooks
-        env:
-          # Skipping golangci-lint as it's tested by golangci/golangci-lint-action
-          SKIP: golangci-lint
         run: |
           pre-commit run --all-files
         shell: bash
