@@ -19,7 +19,6 @@ package registry
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"testing"
@@ -75,8 +74,8 @@ func (s *RegistryTestSuite) TestKeys() {
 	}
 
 	for i, test := range tests {
-		f := fetchersManager.NewNumberFetcher(test.value, nil, s.wg)
-		fetchersManager.RegisterFetcher(s.fetchers, f, test.key, nil)
+		f := NewNumberFetcher(test.value, nil, s.wg)
+		RegisterFetcher(s.fetchers, f, test.key, nil)
 
 		s.Equal(i+1, len(s.registry.Keys()))
 	}
@@ -89,35 +88,35 @@ func (s *RegistryTestSuite) TestKeys() {
 }
 
 func (s *RegistryTestSuite) TestRunNotRegistered() {
-	f := fetchersManager.NewNumberFetcher(1, nil, s.wg)
-	fetchersManager.RegisterFetcher(s.fetchers, f, "some-key", nil)
+	f := NewNumberFetcher(1, nil, s.wg)
+	RegisterFetcher(s.fetchers, f, "some-key", nil)
 
 	err := s.registry.Run(context.TODO(), "unknown", fetching.CycleMetadata{})
 	s.Error(err)
 }
 
 func (s *RegistryTestSuite) TestRunRegistered() {
-	f1 := fetchersManager.NewSyncNumberFetcher(1, s.resourceCh)
-	fetchersManager.RegisterFetcher(s.fetchers, f1, "some-key-1", nil)
+	f1 := NewSyncNumberFetcher(1, s.resourceCh)
+	RegisterFetcher(s.fetchers, f1, "some-key-1", nil)
 
-	f2 := fetchersManager.NewSyncNumberFetcher(2, s.resourceCh)
-	fetchersManager.RegisterFetcher(s.fetchers, f2, "some-key-2", nil)
+	f2 := NewSyncNumberFetcher(2, s.resourceCh)
+	RegisterFetcher(s.fetchers, f2, "some-key-2", nil)
 
-	f3 := fetchersManager.NewSyncNumberFetcher(3, s.resourceCh)
-	fetchersManager.RegisterFetcher(s.fetchers, f3, "some-key-3", nil)
+	f3 := NewSyncNumberFetcher(3, s.resourceCh)
+	RegisterFetcher(s.fetchers, f3, "some-key-3", nil)
 
 	var tests = []struct {
 		key string
-		res fetchersManager.NumberResource
+		res NumberResource
 	}{
 		{
-			"some-key-1", fetchersManager.NumberResource{Num: 1},
+			"some-key-1", NumberResource{Num: 1},
 		},
 		{
-			"some-key-2", fetchersManager.NumberResource{Num: 2},
+			"some-key-2", NumberResource{Num: 2},
 		},
 		{
-			"some-key-3", fetchersManager.NumberResource{Num: 3},
+			"some-key-3", NumberResource{Num: 3},
 		},
 	}
 
@@ -132,16 +131,16 @@ func (s *RegistryTestSuite) TestRunRegistered() {
 }
 
 func (s *RegistryTestSuite) TestShouldRunNotRegistered() {
-	f := fetchersManager.NewNumberFetcher(1, nil, s.wg)
-	fetchersManager.RegisterFetcher(s.fetchers, f, "some-key", nil)
+	f := NewNumberFetcher(1, nil, s.wg)
+	RegisterFetcher(s.fetchers, f, "some-key", nil)
 
 	res := s.registry.ShouldRun("unknown")
 	s.False(res)
 }
 
 func (s *RegistryTestSuite) TestShouldRun() {
-	conditionTrue := fetchersManager.NewBoolFetcherCondition(true, "always-fetcher-condition")
-	conditionFalse := fetchersManager.NewBoolFetcherCondition(false, "never-fetcher-condition")
+	conditionTrue := NewBoolFetcherCondition(true, "always-fetcher-condition")
+	conditionFalse := NewBoolFetcherCondition(false, "never-fetcher-condition")
 
 	var tests = []struct {
 		conditions []fetching.Condition
@@ -165,11 +164,101 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	}
 
 	for _, test := range tests {
-		f := fetchersManager.NewNumberFetcher(1, nil, s.wg)
-		fetchersManager.RegisterFetcher(s.fetchers, f, "some-key", test.conditions)
+		f := NewNumberFetcher(1, nil, s.wg)
+		RegisterFetcher(s.fetchers, f, "some-key", test.conditions)
 		s.registry = NewFetcherRegistry(s.log, s.fetchers)
 
 		should := s.registry.ShouldRun("some-key")
 		s.Equal(test.expected, should)
 	}
+}
+
+func RegisterFetcher(fMap factory.FetchersMap, f fetching.Fetcher, key string, condition []fetching.Condition) {
+	fMap[key] = factory.RegisteredFetcher{Fetcher: f, Condition: condition}
+}
+
+type NumberFetcher struct {
+	num        int
+	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+	wg         *sync.WaitGroup
+}
+type syncNumberFetcher struct {
+	num        int
+	stopCalled bool
+	resourceCh chan fetching.ResourceInfo
+}
+
+func (f *syncNumberFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      NumberResource{f.num},
+		CycleMetadata: cMetadata,
+	}
+
+	return nil
+}
+
+func (f *syncNumberFetcher) Stop() {
+	f.stopCalled = true
+}
+
+func NewSyncNumberFetcher(num int, ch chan fetching.ResourceInfo) fetching.Fetcher {
+	return &syncNumberFetcher{num, false, ch}
+}
+
+type NumberResource struct {
+	Num int
+}
+
+func (res NumberResource) GetData() interface{} {
+	return res.Num
+}
+
+func (res NumberResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	return fetching.ResourceMetadata{
+		ID:      "",
+		Type:    "number",
+		SubType: "number",
+		Name:    "number",
+	}, nil
+}
+
+func (res NumberResource) GetElasticCommonData() interface{} {
+	return nil
+}
+
+func NewNumberFetcher(num int, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
+	return &NumberFetcher{num, false, ch, wg}
+}
+
+func (f *NumberFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
+	defer f.wg.Done()
+
+	f.resourceCh <- fetching.ResourceInfo{
+		Resource:      NumberResource{f.num},
+		CycleMetadata: cMetadata,
+	}
+
+	return nil
+}
+
+func (f *NumberFetcher) Stop() {
+	f.stopCalled = true
+}
+
+type boolFetcherCondition struct {
+	val  bool
+	name string
+}
+
+func NewBoolFetcherCondition(val bool, name string) fetching.Condition {
+	return &boolFetcherCondition{val, name}
+}
+
+func (c *boolFetcherCondition) Condition() bool {
+	return c.val
+}
+
+func (c *boolFetcherCondition) Name() string {
+	return c.name
 }

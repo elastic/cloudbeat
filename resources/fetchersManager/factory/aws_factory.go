@@ -66,7 +66,6 @@ func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.Resourc
 		&awslib.MultiRegionClientFactory[cloudwatch.Client]{},
 		&awslib.MultiRegionClientFactory[logs.Client]{},
 		&awslib.MultiRegionClientFactory[sns.Client]{},
-		identity,
 	)
 
 	securityHubProvider := securityhub.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[securityhub.Client]{}, *identity.Account)

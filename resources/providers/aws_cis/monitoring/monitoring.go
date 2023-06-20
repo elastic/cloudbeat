@@ -59,15 +59,7 @@ type (
 	}
 )
 
-func NewProvider(
-	log *logp.Logger,
-	awsConfig aws.Config,
-	trailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client],
-	cloudwatchCrossResignFactory awslib.CrossRegionFactory[cloudwatch.Client],
-	cloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client],
-	snsCrossRegionFactory awslib.CrossRegionFactory[sns.Client],
-	identity *awslib.Identity,
-) *Provider {
+func NewProvider(log *logp.Logger, awsConfig aws.Config, trailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client], cloudwatchCrossResignFactory awslib.CrossRegionFactory[cloudwatch.Client], cloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client], snsCrossRegionFactory awslib.CrossRegionFactory[sns.Client]) *Provider {
 	return &Provider{
 		Cloudtrail:     cloudtrail.NewProvider(log, awsConfig, trailCrossRegionFactory),
 		Cloudwatch:     cloudwatch.NewProvider(log, awsConfig, cloudwatchCrossResignFactory),
