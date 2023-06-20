@@ -28,7 +28,7 @@ skipped=$(echo "$data" | jq -r '.[0].data.skipped')
 
 # Check if no tests were run
 if [ "$failed" -eq 0 ] && [ "$passed" -eq 0 ] && [ "$skipped" -eq 0 ]; then
-  echo ":x: No tests were run. :x:"
+  echo "## :x: No tests were run  :x:"
   exit 0
 fi
 
