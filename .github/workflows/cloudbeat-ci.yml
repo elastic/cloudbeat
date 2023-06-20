@@ -4,8 +4,8 @@ on:
   pull_request:
     branches:
       - main
-      - '[0-9]+.[0-9]+'
-    types: [ opened, synchronize, reopened ]
+      - "[0-9]+.[0-9]+"
+    types: [opened, synchronize, reopened]
 
 env:
   CONTAINER_SUFFIX: ${{ github.run_id }}
@@ -19,7 +19,7 @@ jobs:
     # for more information see .pre-commit-config.yaml
     name: Pre-commit Hooks
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
