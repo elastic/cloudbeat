@@ -84,6 +84,7 @@ if __name__ == "__main__":
 
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
     manifest_params.yaml_path = Path(__file__).parent / "kspm_eks.yaml"
+    manifest_params.docker_image_override = cnfg.kspm_config.docker_image_override
     logger.info("Creating KSPM EKS manifest")
     create_kubernetes_manifest(cfg=cnfg.elk_config, params=manifest_params)
     logger.info("Installation of KSPM EKS integration is done")
