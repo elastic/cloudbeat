@@ -79,7 +79,7 @@ alias build-cloudbeat := build-cloudbeat-docker-image
 build-cloudbeat-docker-image $GOARCH=LOCAL_GOARCH: build-opa-bundle
   just build-binary $GOARCH
   @echo "Building cloudbeat docker image for linux/$GOARCH"
-  docker build -t cloudbeat . --platform=linux/$GOARCH
+  docker build -f deploy/Dockerfile -t cloudbeat . --platform=linux/$GOARCH
 
 deploy-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
