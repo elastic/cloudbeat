@@ -9,7 +9,7 @@ verifying that there are findings of 'resource.type' for each feature.
 import pytest
 from commonlib.utils import get_findings
 
-CONFIG_TIMEOUT = 60
+CONFIG_TIMEOUT = 300
 
 tests_data = {
     "cis_aws": [
