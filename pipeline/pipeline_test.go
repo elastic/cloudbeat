@@ -20,10 +20,11 @@ package pipeline
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var (
@@ -53,7 +54,7 @@ func TestStep(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			inputChannel := make(chan int)
-			outCh := Step(log, inputChannel, tt.fn)
+			outCh := Step(context.Background(), log, inputChannel, tt.fn)
 			inputChannel <- tt.input
 			close(inputChannel)
 

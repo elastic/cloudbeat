@@ -57,7 +57,8 @@ def test_elastic_index_exists(elastic_client, match_type):
     :param match_type: Findings type for matching
     :return:
     """
-    result = get_findings(elastic_client, CONFIG_TIMEOUT, match_type)
+    query, sort = elastic_client.build_es_query(term={"resource.type": match_type})
+    result = get_findings(elastic_client, CONFIG_TIMEOUT, query, sort, match_type)
 
     assert len(result) > 0, f"The findings of type {match_type} not found"
 

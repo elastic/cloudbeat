@@ -1,0 +1,7 @@
+#!/bin/bash
+
+curl -L -O {{ artifacts_url }}/downloads/beats/elastic-agent/elastic-agent-{{ agent_version }}-linux-x86_64.tar.gz
+tar xzvf elastic-agent-{{ agent_version }}-linux-x86_64.tar.gz
+cd elastic-agent-{{ agent_version }}-linux-x86_64
+sudo ./elastic-agent install -f --url={{ fleet_url }} --enrollment-token={{ enrollment_token }}
+
