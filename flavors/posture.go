@@ -20,10 +20,12 @@ package flavors
 import (
 	"context"
 	"fmt"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/fetchersManager/data"
 	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"github.com/elastic/cloudbeat/resources/fetchersManager/registry"
 	"github.com/elastic/cloudbeat/resources/providers"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	k8s "k8s.io/client-go/kubernetes"
 	"time"
@@ -72,7 +74,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 	}
 	le := uniqueness.NewLeaderElector(log, kubeClient)
 
-	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, kubeClient)
+	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, kubeClient, awslib.GetIdentityClient)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -182,8 +184,8 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) (registry.FetchersRegistry, error) {
-	f, err := factory.NewFactory(ctx, log, cfg, ch, le, k8sClient)
+func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter) (registry.FetchersRegistry, error) {
+	f, err := factory.NewFactory(ctx, log, cfg, ch, le, k8sClient, identityProvider)
 	if err != nil {
 		return nil, err
 	}

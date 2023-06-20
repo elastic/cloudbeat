@@ -18,10 +18,8 @@
 package factory
 
 import (
-	"context"
 	"fmt"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/config"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
@@ -41,36 +39,29 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-func NewCisAwsFactory(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (FetchersMap, error) {
+func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *awslib.Identity) (FetchersMap, error) {
 	log.Infof("Initializing AWS fetchers")
+	if identity == nil {
+		return nil, fmt.Errorf("NewCisAwsFactory was not provided with an aws identity")
+	}
 
 	m := make(FetchersMap)
-	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
-	}
-
-	identity, err := awslib.GetIdentityClient(awsConfig).GetIdentity(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("could not get cloud indentity: %w", err)
-	}
-
-	iamProvider := iam.NewIAMProvider(log, awsConfig, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
+	iamProvider := iam.NewIAMProvider(log, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
 	iamFetcher := fetchers.NewIAMFetcher(log, iamProvider, ch, identity)
 	m[fetching.IAMType] = RegisteredFetcher{Fetcher: iamFetcher}
 
-	kmsProvider := kms.NewKMSProvider(log, awsConfig, &awslib.MultiRegionClientFactory[kms.Client]{})
+	kmsProvider := kms.NewKMSProvider(log, cfg, &awslib.MultiRegionClientFactory[kms.Client]{})
 	kmsFetcher := fetchers.NewKMSFetcher(log, kmsProvider, ch)
 	m[fetching.KmsType] = RegisteredFetcher{Fetcher: kmsFetcher}
 
-	loggingProvider := logging.NewProvider(log, awsConfig, &awslib.MultiRegionClientFactory[cloudtrail.Client]{}, &awslib.MultiRegionClientFactory[s3.Client]{}, *identity.Account)
-	configserviceProvider := configservice.NewProvider(log, awsConfig, &awslib.MultiRegionClientFactory[configservice.Client]{}, *identity.Account)
+	loggingProvider := logging.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[cloudtrail.Client]{}, &awslib.MultiRegionClientFactory[s3.Client]{}, *identity.Account)
+	configserviceProvider := configservice.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[configservice.Client]{}, *identity.Account)
 	loggingFetcher := fetchers.NewLoggingFetcher(log, loggingProvider, configserviceProvider, ch, identity)
 	m[fetching.TrailType] = RegisteredFetcher{Fetcher: loggingFetcher}
 
 	monitoringProvider := monitoring.NewProvider(
 		log,
-		awsConfig,
+		cfg,
 		&awslib.MultiRegionClientFactory[cloudtrail.Client]{},
 		&awslib.MultiRegionClientFactory[cloudwatch.Client]{},
 		&awslib.MultiRegionClientFactory[logs.Client]{},
@@ -78,19 +69,19 @@ func NewCisAwsFactory(ctx context.Context, log *logp.Logger, cfg *config.Config,
 		identity,
 	)
 
-	securityHubProvider := securityhub.NewProvider(log, awsConfig, &awslib.MultiRegionClientFactory[securityhub.Client]{}, *identity.Account)
+	securityHubProvider := securityhub.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[securityhub.Client]{}, *identity.Account)
 	monitoringFetcher := fetchers.NewMonitoringFetcher(log, monitoringProvider, securityHubProvider, ch, identity)
 	m[fetching.MonitoringType] = RegisteredFetcher{Fetcher: monitoringFetcher}
 
-	ec2Provider := ec2.NewEC2Provider(log, *identity.Account, awsConfig, &awslib.MultiRegionClientFactory[ec2.Client]{})
+	ec2Provider := ec2.NewEC2Provider(log, *identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
 	networkFetcher := fetchers.NewNetworkFetcher(log, ec2Provider, ch, identity)
 	m[fetching.EC2NetworkingType] = RegisteredFetcher{Fetcher: networkFetcher}
 
-	rdsProvider := rds.NewProvider(log, awsConfig, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
+	rdsProvider := rds.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
 	rdsFetcher := fetchers.NewRdsFetcher(log, rdsProvider, ch)
 	m[fetching.RdsType] = RegisteredFetcher{Fetcher: rdsFetcher}
 
-	s3Provider := s3.NewProvider(log, awsConfig, &awslib.MultiRegionClientFactory[s3.Client]{}, *identity.Account)
+	s3Provider := s3.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, *identity.Account)
 	s3Fetcher := fetchers.NewS3Fetcher(log, s3Provider, ch)
 	m[fetching.S3Type] = RegisteredFetcher{Fetcher: s3Fetcher}
 

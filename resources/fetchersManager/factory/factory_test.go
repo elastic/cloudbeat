@@ -19,11 +19,15 @@ package factory
 
 import (
 	"context"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"testing"
 )
@@ -63,6 +67,11 @@ func TestNewFactory(t *testing.T) {
 			name: "Get CIS AWS factory",
 			cfg: &config.Config{
 				Benchmark: config.CIS_AWS,
+				CloudConfig: config.CloudConfig{
+					AwsCred: aws.ConfigAWS{
+						AccessKeyID: "test",
+					},
+				},
 			},
 			want: expectedFetchers{
 				names: []string{
@@ -78,9 +87,41 @@ func TestNewFactory(t *testing.T) {
 			},
 		},
 		{
-			name: "Get CIS EKS factory",
+			name: "No AWS credentials - unable to get CIS AWS factory",
+			cfg: &config.Config{
+				Benchmark: config.CIS_AWS,
+			},
+			want: expectedFetchers{
+				names: []string{},
+				count: 0,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Get CIS EKS factory without the aws related fetchers",
 			cfg: &config.Config{
 				Benchmark: config.CIS_EKS,
+			},
+			want: expectedFetchers{
+				names: []string{
+					fetching.FileSystemType,
+					fetching.KubeAPIType,
+					fetching.ProcessType,
+					fetching.EcrType,
+					fetching.ElbType,
+				},
+				count: 3,
+			},
+		},
+		{
+			name: "Get CIS EKS factory with aws related fetchers",
+			cfg: &config.Config{
+				Benchmark: config.CIS_EKS,
+				CloudConfig: config.CloudConfig{
+					AwsCred: aws.ConfigAWS{
+						AccessKeyID: "test",
+					},
+				},
 			},
 			want: expectedFetchers{
 				names: []string{
@@ -116,7 +157,16 @@ func TestNewFactory(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient)
+			identity := &awslib.MockIdentityProviderGetter{}
+			identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
+				Account: awssdk.String("test-account"),
+			}, nil)
+
+			identityProvider := func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+				return identity
+			}
+
+			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient, identityProvider)
 			assert.Equal(t, tt.want.count, len(fetchersMap))
 			for fetcher := range fetchersMap {
 				if _, ok := fetchersMap[fetcher]; !ok {
