@@ -121,9 +121,13 @@ def k8s():
     @return: Kubernetes Helper instance.
     """
     logger.debug(f"Kubernetes 'in_cluster_config': {configuration.kubernetes.is_in_cluster_config}")
-    return KubernetesHelper(
-        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
-    )
+    logger.debug(f"Kubernetes 'use_k8s': {configuration.kubernetes.use_kubernetes}")
+    if configuration.kubernetes.use_kubernetes:
+        return KubernetesHelper(
+            is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
+        )
+
+    return None
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -217,29 +221,31 @@ def pytest_sessionfinish(session):
     """
     report_dir = session.config.option.allure_report_dir
     cloudbeat = configuration.agent
-    kube_client = KubernetesHelper(
-        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
-    )
-    app_list = [cloudbeat.name, "kibana", "elasticsearch"]
-    apps_dict = {}
-    for app in app_list:
-        apps_dict.update(
-            kube_client.get_pod_image_version(
-                pod_name=app,
-                namespace=cloudbeat.namespace,
-            ),
+    use_kubernetes = configuration.kubernetes.use_kubernetes
+    if use_kubernetes:
+        kube_client = KubernetesHelper(
+            is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
         )
-    kubernetes_data = kube_client.get_nodes_versions()
-    report_data = {**apps_dict, **kubernetes_data}
-    try:
-        if report_dir:
-            with open(
-                f"{report_dir}/{'environment.properties'}",
-                "w",
-                encoding="utf8",
-            ) as allure_env:
-                allure_env.writelines(
-                    [f"{key}:{value}\n" for key, value in report_data.items()],
-                )
-    except ValueError:
-        logger.warning("Warning fail to create allure environment report")
+        app_list = [cloudbeat.name, "kibana", "elasticsearch"]
+        apps_dict = {}
+        for app in app_list:
+            apps_dict.update(
+                kube_client.get_pod_image_version(
+                    pod_name=app,
+                    namespace=cloudbeat.namespace,
+                ),
+            )
+        kubernetes_data = kube_client.get_nodes_versions()
+        report_data = {**apps_dict, **kubernetes_data}
+        try:
+            if report_dir:
+                with open(
+                    f"{report_dir}/{'environment.properties'}",
+                    "w",
+                    encoding="utf8",
+                ) as allure_env:
+                    allure_env.writelines(
+                        [f"{key}:{value}\n" for key, value in report_data.items()],
+                    )
+        except ValueError:
+            logger.warning("Warning fail to create allure environment report")
