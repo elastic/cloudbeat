@@ -156,15 +156,16 @@ func TestNewFactory(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			identity := &awslib.MockIdentityProviderGetter{}
-			identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
-				Account: awssdk.String("test-account"),
-			}, nil)
+		identity := &awslib.MockIdentityProviderGetter{}
+		identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
+			Account: awssdk.String("test-account"),
+		}, nil)
 
-			identityProvider := func(cfg awssdk.Config) awslib.IdentityProviderGetter {
-				return identity
-			}
+		identityProvider := func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+			return identity
+		}
+
+		t.Run(tt.name, func(t *testing.T) {
 
 			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient, identityProvider)
 			assert.Equal(t, tt.want.count, len(fetchersMap))
