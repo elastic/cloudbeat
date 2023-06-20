@@ -161,19 +161,12 @@ jobs:
         if: always()
         run: rm -rf /tmp/*-${{ env.CONTAINER_SUFFIX }}.tar
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
-
-
   k8s_functional_tests_full:
     # Run full test suit on post-merge
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
     if: github.event_name == 'push'
     needs: [Build]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
       fail-fast: false
