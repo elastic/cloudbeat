@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package data
+package manager
 
 import (
 	"context"
@@ -31,7 +31,7 @@ import (
 	"go.uber.org/goleak"
 )
 
-type DataTestSuite struct {
+type ManagerTestSuite struct {
 	suite.Suite
 	ctx        context.Context
 	log        *logp.Logger
@@ -43,9 +43,9 @@ type DataTestSuite struct {
 
 const timeout = 2 * time.Second
 
-func TestDataTestSuite(t *testing.T) {
-	s := new(DataTestSuite)
-	s.log = logp.NewLogger("cloudbeat_data_test_suite")
+func TestManagerTestSuite(t *testing.T) {
+	s := new(ManagerTestSuite)
+	s.log = logp.NewLogger("cloudbeat_manager_test_suite")
 
 	if err := logp.TestingSetup(); err != nil {
 		t.Error(err)
@@ -54,7 +54,7 @@ func TestDataTestSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func (s *DataTestSuite) SetupTest() {
+func (s *ManagerTestSuite) SetupTest() {
 	s.ctx = context.Background()
 	s.opts = goleak.IgnoreCurrent()
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
@@ -62,13 +62,13 @@ func (s *DataTestSuite) SetupTest() {
 	s.wg = &sync.WaitGroup{}
 }
 
-func (s *DataTestSuite) TearDownTest() {
+func (s *ManagerTestSuite) TearDownTest() {
 	// Verify no goroutines are leaking. Safest to keep this on top of the function.
 	// Go defers are implemented as a LIFO stack. This should be the last one to run.
 	goleak.VerifyNone(s.T(), s.opts)
 }
 
-func (s *DataTestSuite) TestDataRun() {
+func (s *ManagerTestSuite) TestManagerRun() {
 	interval := 5 * time.Second
 	fetcherName := "test_fetcher"
 
@@ -77,17 +77,17 @@ func (s *DataTestSuite) TestDataRun() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(5)
 	s.registry.EXPECT().Stop().Return().Once()
 
-	data, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
+	m, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
-	data.Run()
+	m.Run()
 	waitForACycleToEnd(interval)
-	data.Stop()
+	m.Stop()
 
 	s.registry.AssertExpectations(s.T())
 }
 
-func (s *DataTestSuite) TestDataRunPanic() {
+func (s *ManagerTestSuite) TestManagerRunPanic() {
 	interval := 3 * time.Second
 	fetcherMessage := "fetcher got panic"
 	fetcherName := "panic_fetcher"
@@ -97,17 +97,17 @@ func (s *DataTestSuite) TestDataRunPanic() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Panic(fetcherMessage).Once()
 	s.registry.EXPECT().Stop().Return().Once()
 
-	data, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
+	m, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
-	data.Run()
+	m.Run()
 	waitForACycleToEnd(interval)
-	data.Stop()
+	m.Stop()
 
 	s.registry.AssertExpectations(s.T())
 }
 
-func (s *DataTestSuite) TestDataRunTimeout() {
+func (s *ManagerTestSuite) TestManagerRunTimeout() {
 	fetcherDelay := 4 * time.Second
 	interval := 5 * time.Second
 	fetcherName := "delay_fetcher"
@@ -117,18 +117,18 @@ func (s *DataTestSuite) TestDataRunTimeout() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).WaitUntil(time.After(fetcherDelay)).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	d, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
+	m, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
-	d.Run()
+	m.Run()
 	waitForACycleToEnd(interval)
 
-	d.Stop()
+	m.Stop()
 
 	s.registry.AssertExpectations(s.T())
 }
 
-func (s *DataTestSuite) TestDataFetchSingleTimeout() {
+func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 	fetcherDelay := 4 * time.Second
 	interval := 3 * time.Second
 	fetcherName := "timeout_fetcher"
@@ -143,15 +143,15 @@ func (s *DataTestSuite) TestDataFetchSingleTimeout() {
 		}
 	}).Once()
 
-	d, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
+	m, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
-	err = d.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
+	err = m.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
 	s.Error(err)
 	s.registry.AssertExpectations(s.T())
 }
 
-func (s *DataTestSuite) TestDataRunShouldNotRun() {
+func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
 	interval := 5 * time.Second
 	fetcherName := "not_run_fetcher"
 
@@ -159,7 +159,7 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	s.registry.EXPECT().ShouldRun(mock.Anything).Return(false).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	d, err := NewData(s.ctx, s.log, interval, timeout, s.registry)
+	d, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
 	s.NoError(err)
 
 	d.Run()
@@ -168,7 +168,7 @@ func (s *DataTestSuite) TestDataRunShouldNotRun() {
 	s.registry.AssertExpectations(s.T())
 }
 
-func (s *DataTestSuite) TestDataStop() {
+func (s *ManagerTestSuite) TestManagerStop() {
 	interval := 30 * time.Second
 	fetcherName := "run_fetcher"
 
@@ -177,19 +177,19 @@ func (s *DataTestSuite) TestDataStop() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	d, err := NewData(s.ctx, s.log, interval, time.Second*5, s.registry)
+	m, err := NewManager(s.ctx, s.log, interval, time.Second*5, s.registry)
 	s.NoError(err)
 
-	d.Run()
+	m.Run()
 	waitForACycleToEnd(2 * time.Second)
-	d.Stop()
+	m.Stop()
 	time.Sleep(2 * time.Second)
 
 	s.registry.AssertExpectations(s.T())
-	s.EqualError(context.Canceled, d.ctx.Err().Error())
+	s.EqualError(context.Canceled, m.ctx.Err().Error())
 }
 
-func (s *DataTestSuite) TestDataStopWithTimeout() {
+func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
 	interval := 30 * time.Second
 	fetcherName := "run_fetcher"
 
@@ -200,10 +200,10 @@ func (s *DataTestSuite) TestDataStopWithTimeout() {
 	s.registry.EXPECT().ShouldRun(mock.Anything).Return(true).Once()
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 
-	d, err := NewData(ctx, s.log, interval, time.Second*5, s.registry)
+	m, err := NewManager(ctx, s.log, interval, time.Second*5, s.registry)
 	s.NoError(err)
 
-	d.Run()
+	m.Run()
 	time.Sleep(3 * time.Second)
 	s.EqualError(context.DeadlineExceeded, ctx.Err().Error())
 	s.registry.AssertExpectations(s.T())

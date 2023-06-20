@@ -11,11 +11,11 @@
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
+// KIND, either express or impliem.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
 
-package data
+package manager
 
 import (
 	"context"
@@ -28,9 +28,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-// Data maintains a cache that is updated by Fetcher implementations registered
-// against it. It sends the cache to an output channel at the defined interval.
-type Data struct {
+type Manager struct {
 	log *logp.Logger
 
 	// Duration of a single fetcher
@@ -45,10 +43,10 @@ type Data struct {
 	cancel context.CancelFunc
 }
 
-func NewData(ctx context.Context, log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers registry.FetchersRegistry) (*Data, error) {
+func NewManager(ctx context.Context, log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers registry.FetchersRegistry) (*Manager, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
-	return &Data{
+	return &Manager{
 		log:      log,
 		timeout:  timeout,
 		interval: interval,
@@ -59,16 +57,16 @@ func NewData(ctx context.Context, log *logp.Logger, interval time.Duration, time
 }
 
 // Run starts all configured fetchers to collect resources.
-func (d *Data) Run() {
-	go d.fetchAndSleep(d.ctx)
+func (m *Manager) Run() {
+	go m.fetchAndSleep(m.ctx)
 }
 
-func (d *Data) Stop() {
-	d.cancel()
-	d.fetchers.Stop()
+func (m *Manager) Stop() {
+	m.cancel()
+	m.fetchers.Stop()
 }
 
-func (d *Data) fetchAndSleep(ctx context.Context) {
+func (m *Manager) fetchAndSleep(ctx context.Context) {
 
 	// set immediate exec for first time run
 	timer := time.NewTimer(0)
@@ -77,50 +75,50 @@ func (d *Data) fetchAndSleep(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			d.log.Info("Fetchers manager canceled")
+			m.log.Info("Fetchers manager canceled")
 			return
 		case <-timer.C:
 			// update the interval
-			timer.Reset(d.interval)
+			timer.Reset(m.interval)
 			// this is blocking so the stop will not be called until all the fetchers are finished
-			// in case there is a blocking fetcher it will halt (til the d.timeout)
-			go d.fetchIteration(ctx)
+			// in case there is a blocking fetcher it will halt (til the m.timeout)
+			go m.fetchIteration(ctx)
 		}
 	}
 }
 
 // fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
-func (d *Data) fetchIteration(ctx context.Context) {
-	d.log.Infof("Manager triggered fetching for %d fetchers", len(d.fetchers.Keys()))
+func (m *Manager) fetchIteration(ctx context.Context) {
+	m.log.Infof("Manager triggered fetching for %d fetchers", len(m.fetchers.Keys()))
 
 	start := time.Now()
 
 	seq := time.Now().Unix()
-	d.log.Infof("Cycle %d has started", seq)
+	m.log.Infof("Cycle %d has started", seq)
 	wg := &sync.WaitGroup{}
-	for _, key := range d.fetchers.Keys() {
+	for _, key := range m.fetchers.Keys() {
 		wg.Add(1)
 		go func(k string) {
 			defer wg.Done()
-			err := d.fetchSingle(ctx, k, fetching.CycleMetadata{Sequence: seq})
+			err := m.fetchSingle(ctx, k, fetching.CycleMetadata{Sequence: seq})
 			if err != nil {
-				d.log.Errorf("Error running fetcher for key %s: %v", k, err)
+				m.log.Errorf("Error running fetcher for key %s: %v", k, err)
 			}
 		}(key)
 	}
 
 	wg.Wait()
-	d.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
-	d.log.Infof("Cycle %d resource fetching has ended", seq)
+	m.log.Infof("Manager finished waiting and sending data after %d milliseconds", time.Since(start).Milliseconds())
+	m.log.Infof("Cycle %d resource fetching has ended", seq)
 }
 
-func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching.CycleMetadata) error {
-	if !d.fetchers.ShouldRun(k) {
+func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata fetching.CycleMetadata) error {
+	if !m.fetchers.ShouldRun(k) {
 		return nil
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, d.timeout)
+	ctx, cancel := context.WithTimeout(ctx, m.timeout)
 	defer cancel()
 
 	// The buffer is required to avoid go-routine leaks in a case a fetcher timed out
@@ -128,14 +126,14 @@ func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching
 
 	go func() {
 		defer close(errCh)
-		errCh <- d.fetchProtected(ctx, k, cycleMetadata)
+		errCh <- m.fetchProtected(ctx, k, cycleMetadata)
 	}()
 
 	select {
 	case <-ctx.Done():
 		switch ctx.Err() {
 		case context.DeadlineExceeded:
-			return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, d.timeout.Seconds())
+			return fmt.Errorf("fetcher %s reached a timeout after %v seconds", k, m.timeout.Seconds())
 		case context.Canceled:
 			return fmt.Errorf("fetcher %s was canceled", k)
 		default:
@@ -148,12 +146,12 @@ func (d *Data) fetchSingle(ctx context.Context, k string, cycleMetadata fetching
 }
 
 // fetchProtected protect the fetching goroutine from getting panic
-func (d *Data) fetchProtected(ctx context.Context, k string, metadata fetching.CycleMetadata) (err error) {
+func (m *Manager) fetchProtected(ctx context.Context, k string, metadata fetching.CycleMetadata) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("fetcher %s recovered from panic: %v", k, r)
 		}
 	}()
 
-	return d.fetchers.Run(ctx, k, metadata)
+	return m.fetchers.Run(ctx, k, metadata)
 }

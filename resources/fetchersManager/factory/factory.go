@@ -49,10 +49,6 @@ func NewFactory(
 	identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter,
 	awsConfigProvider awslib.ConfigProviderAPI,
 ) (FetchersMap, error) {
-	if cfg == nil {
-		return nil, fmt.Errorf("config is nil")
-	}
-
 	awsConfig, awsIdentity, err := getAwsConfig(ctx, cfg, identityProvider, awsConfigProvider)
 	if err != nil {
 		return nil, err

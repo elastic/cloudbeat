@@ -146,15 +146,6 @@ func TestNewFactory(t *testing.T) {
 			},
 			wantErr: true,
 		},
-		{
-			name: "No config fail to get factory",
-			cfg:  nil,
-			want: expectedFetchers{
-				names: []string{},
-				count: 0,
-			},
-			wantErr: true,
-		},
 	}
 	for _, tt := range tests {
 		awsconfig := &awslib.MockConfigProviderAPI{}

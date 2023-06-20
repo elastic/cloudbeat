@@ -21,8 +21,8 @@ import (
 	"context"
 	"fmt"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources/fetchersManager/data"
 	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
+	"github.com/elastic/cloudbeat/resources/fetchersManager/manager"
 	"github.com/elastic/cloudbeat/resources/fetchersManager/registry"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -46,7 +46,7 @@ import (
 // posture configuration.
 type posture struct {
 	flavorBase
-	data       *data.Data
+	data       *manager.Manager
 	evaluator  evaluator.Evaluator
 	resourceCh chan fetching.ResourceInfo
 	leader     uniqueness.Manager
@@ -84,7 +84,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	// TODO: timeout should be configurable and not hard-coded. Setting to 10 minutes for now to account for CSPM fetchers
 	// 	https://github.com/elastic/cloudbeat/issues/653
-	data, err := data.NewData(ctx, log, c.Period, time.Minute*10, fetchersRegistry)
+	newData, err := manager.NewManager(ctx, log, c.Period, time.Minute*10, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -118,7 +118,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 	bt := &posture{
 		flavorBase: base,
 		evaluator:  eval,
-		data:       data,
+		data:       newData,
 		resourceCh: resourceCh,
 		leader:     le,
 	}
@@ -192,8 +192,7 @@ func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch 
 		return nil, err
 	}
 
-	registry := registry.NewFetcherRegistry(log, f)
-	return registry, nil
+	return registry.NewFetcherRegistry(log, f), nil
 }
 
 // Stop stops posture.

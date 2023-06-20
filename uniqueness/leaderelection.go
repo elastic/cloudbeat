@@ -48,7 +48,7 @@ type LeaderelectionManager struct {
 
 func NewLeaderElector(log *logp.Logger, client k8s.Interface) Manager {
 	if client == nil {
-		log.Errorf("NewLeaderElector no k8s client received")
+		log.Errorf("NewLeaderElector returned default client")
 		return &DefaultUniqueManager{}
 	}
 
