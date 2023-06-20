@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-    timeout-minutes: 15
+    timeout-minutes: 40
     steps:
       - id: Default
         env:
