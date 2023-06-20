@@ -5,6 +5,7 @@ import codecs
 from munch import Munch, munchify
 from loguru import logger
 from api.base_call_api import APICallException, perform_api_call
+from utils import replace_image_field
 
 
 def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
@@ -92,8 +93,14 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
             params={"params": request_params},
         )
         response_obj = munchify(response)
+        manifest_yaml = response_obj.item
+        if params.docker_image_override:
+            manifest_yaml = replace_image_field(
+                response_obj.item,
+                new_image=params.docker_image_override,
+            )
         with codecs.open(params.yaml_path, "w", encoding="utf-8-sig") as k8s_yaml:
-            k8s_yaml.write(response_obj.item)
+            k8s_yaml.write(manifest_yaml)
         logger.info(f"KSPM manifest is available at: '{params.yaml_path}'")
     except APICallException as api_ex:
         logger.error(
