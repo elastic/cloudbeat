@@ -21,7 +21,7 @@ jobs:
   unit_tests:
     name: Unit Tests
     runs-on: ubuntu-20.04
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
