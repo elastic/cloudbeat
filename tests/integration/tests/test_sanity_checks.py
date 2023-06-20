@@ -51,7 +51,7 @@ def test_kspm_unmanaged_findings(elastic_client, match_type):
 
 @pytest.mark.sanity
 @pytest.mark.parametrize("match_type", tests_data["cis_eks"])
-def test_kspm_eks_findings(elastic_client, match_type):
+def test_kspm_e_k_s_findings(elastic_client, match_type):
     """
     Test case to check for EKS findings in KSPM.
 
