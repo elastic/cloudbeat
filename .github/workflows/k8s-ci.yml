@@ -24,7 +24,7 @@ concurrency:
 jobs:
   Build:
     name: Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
       - name: Check out the repo
@@ -103,7 +103,7 @@ jobs:
     if: github.event_name == 'pull_request'
     name: ${{ matrix.test-target }}-tests
     needs: [Build]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
       fail-fast: false
@@ -162,13 +162,12 @@ jobs:
         if: always()
         run: rm -rf /tmp/*-${{ env.CONTAINER_SUFFIX }}.tar
 
-
   k8s_functional_tests_full:
     # Run full test suit on post-merge
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
     if: github.event_name == 'push'
     needs: [Build]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
       fail-fast: false
