@@ -59,7 +59,6 @@ jobs:
         uses: andrcuns/allure-publish-action@v2.3.0
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AWS_REGION: eu-west-1
         with:
           storageType: s3
           resultsGlob: "tests/allure/results"
@@ -73,7 +72,7 @@ jobs:
           ignoreMissingResults: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2.1.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -84,7 +83,6 @@ jobs:
           aws s3 cp ${{ env.ALLURE_S3_BUCKET }}/${{ env.PR_NUMBER }}/history/history-trend.json .
 
       - name: Output to Job Summary
-        if: ${{ github.event.workflow_run.event == 'pull_request' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,11 +92,14 @@ jobs:
 
           ./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url"
           allure_summary=$(./.ci/scripts/allure-report-summary.sh "$allure_result" "$allure_url")
-          echo "allure_summary<<EOF" >> $GITHUB_ENV
+          # posting result into job summary
+          echo "$allure_summary" >> $GITHUB_STEP_SUMMARY
+
+          # saving result into env variable (with multiline handling)
+          echo "ALLURE_SUMMARY<<EOF" >> $GITHUB_ENV
           echo "$allure_summary" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-          echo ${{ env.allure_summary }} >> $GITHUB_STEP_SUMMARY
 
       - name: Comment test success result
         uses: marocchino/sticky-pull-request-comment@v2
@@ -108,4 +109,4 @@ jobs:
           number: ${{ env.PR_NUMBER }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: |
-            ${{ env.allure_summary }}
+            ${{ env.ALLURE_SUMMARY }}
