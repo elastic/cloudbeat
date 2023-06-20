@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 from munch import Munch
 import configuration_fleet as cnfg
-from api.agent_policy_api import create_agent_policy, get_agents
+from api.agent_policy_api import create_agent_policy
 from api.package_policy_api import create_cspm_integration
 from api.common_api import (
     get_enrollment_token,
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
     manifest_params.file_path = Path(__file__).parent / "cspm.sh"
-    manifest_params.agent_version = get_agents(cfg=cnfg.elk_config)[0].agent.version
+    manifest_params.agent_version = cnfg.elk_config.stack_version
     if "SNAPSHOT" in manifest_params.agent_version:
         manifest_params.artifacts_url = cnfg.artifactory_url["snapshot"] + get_build_info(
             version=manifest_params.agent_version,

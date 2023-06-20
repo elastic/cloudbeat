@@ -19,7 +19,7 @@ module "eks" {
     create_security_group = false
   }
 
-  eks_managed_node_groups = {
+  eks_managed_node_groups = var.enable_node_group_two ? {
     one = {
       name = "${local.cluster_name}-1"
 
@@ -27,13 +27,12 @@ module "eks" {
 
       min_size     = 1
       max_size     = 4
-      desired_size = 3
+      desired_size = var.node_group_one_desired_size
 
       vpc_security_group_ids = [
         aws_security_group.node_group_one.id
       ]
-    }
-
+    },
     two = {
       name = "${local.cluster_name}-2"
 
@@ -41,10 +40,24 @@ module "eks" {
 
       min_size     = 1
       max_size     = 4
-      desired_size = 3
+      desired_size = var.node_group_two_desired_size
 
       vpc_security_group_ids = [
         aws_security_group.node_group_two.id
+      ]
+    }
+    } : {
+    one = {
+      name = "${var.cluster_name}-1"
+
+      instance_types = ["t3.small"]
+
+      min_size     = 1
+      max_size     = 4
+      desired_size = var.node_group_one_desired_size
+
+      vpc_security_group_ids = [
+        aws_security_group.node_group_one.id
       ]
     }
   }
