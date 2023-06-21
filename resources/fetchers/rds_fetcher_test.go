@@ -88,10 +88,6 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
-			rdsFetcherCfg := RdsFetcherConfig{
-				AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-			}
-
 			m := &rds.MockRds{}
 			for fn, rdsMocksReturnVals := range test.rdsMocksReturnVals {
 				m.On(fn, mock.Anything).Return(rdsMocksReturnVals...)
@@ -99,7 +95,6 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 
 			rdsFetcher := RdsFetcher{
 				log:        s.log,
-				cfg:        rdsFetcherCfg,
 				resourceCh: s.resourceCh,
 				provider:   m,
 			}

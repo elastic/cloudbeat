@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -30,7 +29,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	k8s "k8s.io/client-go/kubernetes"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"reflect"
 	"testing"
@@ -60,12 +58,6 @@ func (s *KubeFetcherTestSuite) SetupTest() {
 
 func (s *KubeFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
-}
-
-func MockProvider(client *k8sfake.Clientset) KubeClientProvider {
-	return func(s string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
-		return client, nil
-	}
 }
 
 func clean(fetcher fetching.Fetcher) func() {
@@ -198,13 +190,9 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 	for i, tt := range tests {
 		s.Run(fmt.Sprintf("Kube api test %v", i), func() {
 			client := k8sfake.NewSimpleClientset(tt)
-			provider := MockProvider(client)
+			kubeFetcher := NewKubeFetcher(s.log, s.resourceCh, client)
 
-			kubeFetcher, err := (&KubeFactory{}).CreateFrom(s.log, KubeApiFetcherConfig{}, s.resourceCh, provider)
-
-			s.NoError(err)
-
-			err = kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+			err := kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 			results := testhelper.CollectResources(s.resourceCh)
 
 			s.NoError(err, "Fetcher was not able to fetch resources from kube api")

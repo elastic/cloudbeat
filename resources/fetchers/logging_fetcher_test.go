@@ -119,7 +119,6 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				log:                   logp.NewLogger(tt.name),
 				loggingProvider:       tt.loggingProvider(),
 				configserviceProvider: tt.configServiceProvider(),
-				cfg:                   fetching.AwsBaseFetcherConfig{},
 				resourceCh:            ch,
 				cloudIdentity: &awslib.Identity{
 					Account: &testAccount,

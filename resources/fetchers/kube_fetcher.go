@@ -86,13 +86,11 @@ type requiredResource struct {
 }
 
 type KubeFetcher struct {
-	log        *logp.Logger
-	cfg        KubeApiFetcherConfig
-	resourceCh chan fetching.ResourceInfo
-
-	watchers       []kubernetes.Watcher
-	clientProvider func(string, kubernetes.KubeClientOptions) (k8s.Interface, error)
-	watcherLock    *sync.Once
+	log         *logp.Logger
+	resourceCh  chan fetching.ResourceInfo
+	watchers    []kubernetes.Watcher
+	k8sProvider k8s.Interface
+	watcherLock *sync.Once
 }
 
 type KubeApiFetcherConfig struct {
@@ -101,11 +99,21 @@ type KubeApiFetcherConfig struct {
 	KubeConfig string        `config:"kubeconfig"`
 }
 
+func NewKubeFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider k8s.Interface) *KubeFetcher {
+	return &KubeFetcher{
+		log:         log,
+		resourceCh:  ch,
+		watcherLock: &sync.Once{},
+		watchers:    make([]kubernetes.Watcher, 0),
+		k8sProvider: provider,
+	}
+}
+
 func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) error {
-	f.cfg.Interval = time.Duration(time.Duration.Seconds(30)) // todo: hard coded - need to get from config
+	interval := time.Duration(time.Duration.Seconds(30)) // todo: hard coded - need to get from config
 
 	watcher, err := kubernetes.NewWatcher(client, r.resource, kubernetes.WatchOptions{
-		SyncTimeout: f.cfg.Interval,
+		SyncTimeout: interval,
 		Namespace:   r.namespace,
 	}, nil)
 	if err != nil {
@@ -129,17 +137,11 @@ func (f *KubeFetcher) initWatcher(client k8s.Interface, r requiredResource) erro
 }
 
 func (f *KubeFetcher) initWatchers() error {
-	client, err := f.clientProvider(f.cfg.KubeConfig, kubernetes.KubeClientOptions{})
-	if err != nil {
-		return fmt.Errorf("could not get k8s client: %w", err)
-	}
-
-	f.log.Info("Kubernetes client initiated")
-
+	f.log.Info("init k8s watchers")
 	f.watchers = make([]kubernetes.Watcher, 0)
 
 	for _, r := range vanillaClusterResources {
-		err := f.initWatcher(client, r)
+		err := f.initWatcher(f.k8sProvider, r)
 		if err != nil {
 			return err
 		}

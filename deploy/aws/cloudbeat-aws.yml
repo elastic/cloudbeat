@@ -9,14 +9,6 @@ cloudbeat:
   type: cloudbeat/cis_aws
   # Defines how often an event is sent to the output
   period: 30s
-  fetchers:
-    - name: aws-iam
-    - name: aws-s3
-    - name: aws-ec2-network
-    - name: aws-trail
-    - name: aws-monitoring
-    - name: aws-rds
-    - name: aws-kms
   evaluator:
     decision_logs: false
 # =================================== Kibana ===================================
