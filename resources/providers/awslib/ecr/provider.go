@@ -20,14 +20,13 @@ package ecr
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	ecrClient "github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 // DescribeAllEcrRepositories returns a list of all the existing repositories
-func (provider *Provider) DescribeAllEcrRepositories(ctx context.Context, cfg aws.Config, region string) ([]types.Repository, error) {
+func (provider *Provider) DescribeAllEcrRepositories(ctx context.Context, region string) ([]types.Repository, error) {
 	/// When repoNames is nil, it will describe all the existing Repositories
 	return provider.DescribeRepositories(ctx, nil, region)
 }

@@ -76,15 +76,26 @@ func getAwsConfig(
 		return awssdk.Config{}, nil, nil
 	}
 
-	awsConfig, err := awsCfgProvider.InitializeAWSConfig(ctx, cfg.CloudConfig.AwsCred)
-	if err != nil {
-		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+	var awsConfig awssdk.Config
+	var err error
+	if cfg.Benchmark == config.CIS_AWS {
+		// initialize AWS config without setting the region to be the ec2 metadata region
+		awsConfig, err = aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
+		if err != nil {
+			return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		}
+	} else {
+		initializedCfg, err := awsCfgProvider.InitializeAWSConfig(ctx, cfg.CloudConfig.AwsCred)
+		if err != nil {
+			return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		}
+		awsConfig = *initializedCfg
 	}
 
-	identityProviderGetter, err := identityProvider(*awsConfig).GetIdentity(ctx)
+	identityProviderGetter, err := identityProvider(awsConfig).GetIdentity(ctx)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	return *awsConfig, identityProviderGetter, nil
+	return awsConfig, identityProviderGetter, nil
 }

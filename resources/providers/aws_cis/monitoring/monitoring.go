@@ -21,7 +21,6 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"strings"
 
 	cloudwatch_types "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
@@ -39,7 +38,6 @@ type Provider struct {
 	Cloudwatchlogs logs.CloudwatchLogs
 	Sns            sns.SNS
 	Log            *logp.Logger
-	SecurityHub    *securityhub.Provider
 }
 
 type Client interface {
