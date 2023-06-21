@@ -94,5 +94,3 @@ The following environment variables are required:
 ## Cleanup
 
 If you want to destroy the provisioned infrastructure, set the `cleanup-env` input to `true` when running the workflow. The cleanup step will be executed at the end.
-
-Note: Destroying the environment is irreversible, so use it with caution.

@@ -148,7 +148,7 @@ jobs:
           aws s3 cp "${{ env.EC2_KSPM_KEY }}" "${{ env.S3_BUCKET }}/kspm.pem"
 
       - name: Summary
-        if: always()
+        if: success()
         run: |
           kibana_url=$(terraform output -raw kibana_url)
           summary="Kibana URL: $kibana_url"
