@@ -77,6 +77,7 @@ require (
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.26.3
+	modernc.org/sqlite v1.23.1
 )
 
 require (
@@ -181,7 +182,6 @@ require (
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/go-containerregistry v0.14.0 // indirect
 	github.com/google/licenseclassifier/v2 v2.0.0 // indirect
-	github.com/google/pprof v0.0.0-20221118152302-e6195bd50e26 // indirect
 	github.com/google/s2a-go v0.1.3 // indirect
 	github.com/google/wire v0.5.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
@@ -222,7 +222,6 @@ require (
 	github.com/masahiro331/go-mvn-version v0.0.0-20210429150710-d3157d602a08 // indirect
 	github.com/masahiro331/go-vmdk-parser v0.0.0-20221225061455-612096e4bbbd // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/mattn/go-sqlite3 v1.14.16 // indirect
 	github.com/microsoft/go-rustaudit v0.0.0-20220808201409-204dfee52032 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
@@ -302,7 +301,6 @@ require (
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.5.0 // indirect
 	modernc.org/opt v0.1.3 // indirect
-	modernc.org/sqlite v1.23.1 // indirect
 	modernc.org/strutil v1.1.3 // indirect
 	modernc.org/token v1.0.1 // indirect
 	sigs.k8s.io/kustomize/api v0.12.1 // indirect
