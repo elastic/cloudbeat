@@ -27,17 +27,20 @@ import (
 
 type S3Fetcher struct {
 	log        *logp.Logger
-	cfg        S3FetcherConfig
 	s3         s3.S3
 	resourceCh chan fetching.ResourceInfo
 }
 
-type S3FetcherConfig struct {
-	fetching.AwsBaseFetcherConfig `config:",inline"`
-}
-
 type S3Resource struct {
 	bucket awslib.AwsResource
+}
+
+func NewS3Fetcher(log *logp.Logger, s3 s3.S3, ch chan fetching.ResourceInfo) *S3Fetcher {
+	return &S3Fetcher{
+		log:        log,
+		s3:         s3,
+		resourceCh: ch,
+	}
 }
 
 func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {

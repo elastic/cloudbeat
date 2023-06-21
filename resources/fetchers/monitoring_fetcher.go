@@ -32,14 +32,9 @@ import (
 type MonitoringFetcher struct {
 	log           *logp.Logger
 	provider      monitoring.Client
-	cfg           MonitoringFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
 	securityhub   securityhub.Service
-}
-
-type MonitoringFetcherConfig struct {
-	fetching.AwsBaseFetcherConfig `config:",inline"`
 }
 
 type MonitoringResource struct {
@@ -49,6 +44,16 @@ type MonitoringResource struct {
 
 type SecurityHubResource struct {
 	securityhub.SecurityHub
+}
+
+func NewMonitoringFetcher(log *logp.Logger, provider monitoring.Client, securityHubProvider securityhub.Service, ch chan fetching.ResourceInfo, identity *awslib.Identity) *MonitoringFetcher {
+	return &MonitoringFetcher{
+		log:           log,
+		provider:      provider,
+		securityhub:   securityHubProvider,
+		resourceCh:    ch,
+		cloudIdentity: identity,
+	}
 }
 
 func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {

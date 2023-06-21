@@ -19,7 +19,6 @@ package fetchers
 
 import (
 	"context"
-
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
@@ -29,7 +28,6 @@ import (
 type NetworkFetcher struct {
 	log           *logp.Logger
 	ec2Client     ec2.ElasticCompute
-	cfg           ACLFetcherConfig
 	resourceCh    chan fetching.ResourceInfo
 	cloudIdentity *awslib.Identity
 }
@@ -41,6 +39,15 @@ type ACLFetcherConfig struct {
 type NetworkResource struct {
 	awslib.AwsResource
 	identity *awslib.Identity
+}
+
+func NewNetworkFetcher(log *logp.Logger, ec2Client ec2.ElasticCompute, ch chan fetching.ResourceInfo, identity *awslib.Identity) *NetworkFetcher {
+	return &NetworkFetcher{
+		log:           log,
+		ec2Client:     ec2Client,
+		resourceCh:    ch,
+		cloudIdentity: identity,
+	}
 }
 
 // Fetch collects network resource such as network acl and security groups

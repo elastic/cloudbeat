@@ -20,14 +20,14 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 	"regexp"
 
 	"github.com/pkg/errors"
 
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	v1 "k8s.io/api/core/v1"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,29 +44,30 @@ const (
 
 type EcrFetcher struct {
 	log          *logp.Logger
-	cfg          EcrFetcherConfig
 	kubeClient   k8s.Interface
 	PodDescriber PodDescriber
 	resourceCh   chan fetching.ResourceInfo
-	awsConfig    aws.Config
 }
 
 type PodDescriber struct {
 	FilterRegex *regexp.Regexp
-	Provider    awslib.EcrRepositoryDescriber
-}
-
-type EcrFetcherConfig struct {
-	fetching.AwsBaseFetcherConfig `config:",inline"`
-	KubeConfig                    string `config:"Kubeconfig"`
+	Provider    ecr.RepositoryDescriber
 }
 
 type EcrResource struct {
-	awslib.EcrRepository
+	ecr.Repository
 }
 
-func (f *EcrFetcher) Stop() {
+func NewEcrFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider k8s.Interface, podDescriber PodDescriber) *EcrFetcher {
+	return &EcrFetcher{
+		log:          log,
+		kubeClient:   kubeProvider,
+		resourceCh:   ch,
+		PodDescriber: podDescriber,
+	}
 }
+
+func (f *EcrFetcher) Stop() {}
 
 func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting EcrFetcher.Fetch")
@@ -83,20 +84,20 @@ func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 	}
 	for _, repository := range ecrDescribedRepositories {
 		f.resourceCh <- fetching.ResourceInfo{
-			Resource:      EcrResource{awslib.EcrRepository(repository)},
+			Resource:      EcrResource{ecr.Repository(repository)},
 			CycleMetadata: cMetadata,
 		}
 	}
 	return nil
 }
 
-func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) (awslib.EcrRepositories, error) {
+func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) ([]types.Repository, error) {
 	regionToReposMap := getAwsRepositories(podsList, describer)
 	f.log.Debugf("sending pods to ecrProviders: %v", regionToReposMap)
-	awsRepositories := make(awslib.EcrRepositories, 0)
+	awsRepositories := make([]types.Repository, 0)
 	for region, repositories := range regionToReposMap {
 		// Add configuration
-		describedRepo, err := describer.Provider.DescribeRepositories(ctx, f.awsConfig, repositories, region)
+		describedRepo, err := describer.Provider.DescribeRepositories(ctx, repositories, region)
 		if err != nil {
 			f.log.Errorf("could not retrieve pod's aws repositories for region %s: %v", region, err)
 		} else {
