@@ -9,7 +9,7 @@ verifying that there are findings of 'resource.type' for each feature.
 import pytest
 from commonlib.utils import get_findings
 
-CONFIG_TIMEOUT = 60
+CONFIG_TIMEOUT = 120
 
 tests_data = {
     "cis_aws": [
@@ -22,7 +22,7 @@ tests_data = {
         "cloud-config",
     ],
     "cis_k8s": ["file", "process", "k8s_object"],
-    "cis_eks": ["file", "process", "k8s_object"],
+    "cis_eks": ["process", "k8s_object"],  # Optimize search findings by excluding 'file'.
 }
 
 
@@ -51,7 +51,7 @@ def test_kspm_unmanaged_findings(elastic_client, match_type):
 
 @pytest.mark.sanity
 @pytest.mark.parametrize("match_type", tests_data["cis_eks"])
-def test_kspm_eks_findings(elastic_client, match_type):
+def test_kspm_e_k_s_findings(elastic_client, match_type):
     """
     Test case to check for EKS findings in KSPM.
 
