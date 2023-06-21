@@ -79,7 +79,8 @@ func getAwsConfig(
 	var awsConfig awssdk.Config
 	var err error
 	if cfg.Benchmark == config.CIS_AWS {
-		// initialize AWS config without setting the region to be the ec2 metadata region
+		// Initialize AWS config with the default region rather than the ec2 region.
+		// This is because in CSPM we create a client per region.
 		awsConfig, err = aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
 		if err != nil {
 			return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
