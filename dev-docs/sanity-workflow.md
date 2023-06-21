@@ -31,7 +31,7 @@ To run the workflow, perform the following steps:
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/5e5131ba-264e-4444-8879-aa612d5de778)
 
 
-To track the execution of the Sanity flow, follow these steps:
+### To track the execution of the Sanity flow, follow these steps:
 
 1. Click on the "Sanity tests" to access its details.
 
@@ -49,6 +49,26 @@ To track the execution of the Sanity flow, follow these steps:
 4. Review Summary details
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/1b41fba0-0ee5-4d37-b2f8-cdd6f632eadc)
+
+### Environment Login Instructions
+
+To log in to the created environment, please follow these steps:
+
+1. Click on the kibana link.
+
+![image](https://github.com/elastic/cloudbeat/assets/99176494/500351cf-6029-4bd5-bc6f-e6e046fbb73d)
+
+2. Select the "Login with Elastic Cloud" option.
+
+![image](https://github.com/elastic/cloudbeat/assets/99176494/c3c1521e-e997-43ce-af76-b00aa0fa353a)
+
+3. Choose the "Google" authentication method.
+
+![image](https://github.com/elastic/cloudbeat/assets/99176494/f5209ed8-3bd7-420e-a3d1-cffb4c3711c9)
+
+4. On the Elastic Cloud dashboard, click on "Open" next to the provisioned environment.
+
+![image](https://github.com/elastic/cloudbeat/assets/99176494/b2bcf5f3-d463-4d2c-8073-8ef9183c9ada)
 
 
 ## Inputs
