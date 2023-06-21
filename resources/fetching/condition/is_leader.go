@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package conditions
+package condition
 
 import (
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -23,22 +23,22 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type LeaseFetcherCondition struct {
+type IsLeader struct {
 	log      *logp.Logger
 	provider uniqueness.Manager
 }
 
-func NewLeaseFetcherCondition(log *logp.Logger, le uniqueness.Manager) fetching.Condition {
-	return &LeaseFetcherCondition{
+func NewIsLeader(log *logp.Logger, le uniqueness.Manager) fetching.Condition {
+	return &IsLeader{
 		log:      log,
 		provider: le,
 	}
 }
 
-func (c *LeaseFetcherCondition) Condition() bool {
+func (c *IsLeader) Condition() bool {
 	return c.provider.IsLeader()
 }
 
-func (c *LeaseFetcherCondition) Name() string {
-	return "leader_election_conditional_fetcher"
+func (c *IsLeader) Name() string {
+	return "is_leader_conditional_fetcher"
 }

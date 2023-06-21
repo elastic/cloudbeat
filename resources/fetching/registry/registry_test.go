@@ -19,7 +19,7 @@ package registry
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
+	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"testing"
 
@@ -34,7 +34,7 @@ type RegistryTestSuite struct {
 
 	log        *logp.Logger
 	fetchers   factory.FetchersMap
-	registry   FetchersRegistry
+	registry   Registry
 	resourceCh chan fetching.ResourceInfo
 	wg         *sync.WaitGroup
 }
@@ -52,7 +52,7 @@ func TestRegistryTestSuite(t *testing.T) {
 
 func (s *RegistryTestSuite) SetupTest() {
 	s.fetchers = make(factory.FetchersMap, 0)
-	s.registry = NewFetcherRegistry(s.log, s.fetchers)
+	s.registry = NewRegistry(s.log, s.fetchers)
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
@@ -166,7 +166,7 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	for _, test := range tests {
 		f := NewNumberFetcher(1, nil, s.wg)
 		RegisterFetcher(s.fetchers, f, "some-key", test.conditions)
-		s.registry = NewFetcherRegistry(s.log, s.fetchers)
+		s.registry = NewRegistry(s.log, s.fetchers)
 
 		should := s.registry.ShouldRun("some-key")
 		s.Equal(test.expected, should)
