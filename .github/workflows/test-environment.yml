@@ -147,6 +147,22 @@ jobs:
           aws s3 cp "${{ env.EC2_CSPM_KEY }}" "${{ env.S3_BUCKET }}/cspm.pem"
           aws s3 cp "${{ env.EC2_KSPM_KEY }}" "${{ env.S3_BUCKET }}/kspm.pem"
 
+      - name: Summary
+        if: always()
+        run: |
+          kibana_url=$(terraform output -raw kibana_url)
+          summary="Kibana URL: $kibana_url"
+          bucket_name="${{ env.S3_BASE_BUCKET }}"
+          bucket_name="${bucket_name#s3://}"
+          s3_bucket_link="[creds and keys](https://s3.console.aws.amazon.com/s3/buckets/$bucket_name)"
+          summary=$(cat <<-EOF
+          Kibana URL: [kibana]($kibana_url)
+          Environment Details: $s3_bucket_link
+          EOF
+          )
+          echo "$summary" >> $GITHUB_STEP_SUMMARY
+          echo "$summary" # Print the summary to the workflow log
+
       - name: Install KSPM EKS integration
         id: kspm-eks
         run: |
@@ -207,22 +223,6 @@ jobs:
           cd ../../tests
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir
-
-      - name: Summary
-        if: always()
-        run: |
-          kibana_url=$(terraform output -raw kibana_url)
-          summary="Kibana URL: $kibana_url"
-          bucket_name="${{ env.S3_BASE_BUCKET }}"
-          bucket_name="${bucket_name#s3://}"
-          s3_bucket_link="[creds and keys](https://s3.console.aws.amazon.com/s3/buckets/$bucket_name)"
-          summary=$(cat <<-EOF
-          Kibana URL: [kibana]($kibana_url)
-          Environment Details: $s3_bucket_link
-          EOF
-          )
-          echo "$summary" >> $GITHUB_STEP_SUMMARY
-          echo "$summary" # Print the summary to the workflow log
 
       - name: Cleanup Environment
         if: github.event.inputs.cleanup-env == 'true'

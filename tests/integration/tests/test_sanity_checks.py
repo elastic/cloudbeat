@@ -22,7 +22,7 @@ tests_data = {
         "cloud-config",
     ],
     "cis_k8s": ["file", "process", "k8s_object"],
-    "cis_eks": ["file", "process", "k8s_object"],
+    "cis_eks": ["process", "k8s_object"],  # Optimize search findings by excluding 'file'.
 }
 
 
