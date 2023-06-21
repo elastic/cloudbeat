@@ -42,7 +42,7 @@ const (
 	NoPublicAccessBlockConfigurationCode = "NoSuchPublicAccessBlockConfiguration"
 )
 
-func NewProvider(cfg aws.Config, log *logp.Logger, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
+func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], accountId string) *Provider {
 	f := func(cfg aws.Config) Client {
 		return s3Client.NewFromConfig(cfg)
 	}

@@ -119,7 +119,6 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 				log:           logp.NewLogger("TestMonitoringFetcher_Fetch"),
 				provider:      mockClient,
 				securityhub:   hub,
-				cfg:           MonitoringFetcherConfig{},
 				resourceCh:    ch,
 				cloudIdentity: &awslib.Identity{Account: aws.String("account")},
 			}

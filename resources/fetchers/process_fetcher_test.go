@@ -89,13 +89,10 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 		ConfigFilePath:    "test/path",
 	}
 	sysfs := createProcess(testProcess, VanillaCmdLineDelimiter)
-
-	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		RequiredProcesses: map[string]ProcessInputConfiguration{
-			"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
+	var procCfg = ProcessesConfigMap{
+		testProcess.Name: {ConfigFileArguments: []string{"fetcherConfig"}},
 	}
-	processesFetcher := &ProcessesFetcher{log: s.log, cfg: fetcherConfig, Fs: sysfs, resourceCh: s.resourceCh}
+	processesFetcher := &ProcessesFetcher{log: s.log, Fs: sysfs, resourceCh: s.resourceCh, processes: procCfg}
 
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
@@ -118,14 +115,17 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 		ConfigFileFlagKey: "fetcherConfig",
 		ConfigFilePath:    "test/path",
 	}
-	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
 
-	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		RequiredProcesses: map[string]ProcessInputConfiguration{
-			"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}}},
+	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
+	var procCfg = ProcessesConfigMap{
+		"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}},
 	}
-	processesFetcher := &ProcessesFetcher{log: s.log, cfg: fetcherConfig, Fs: fsys, resourceCh: s.resourceCh}
+	processesFetcher := &ProcessesFetcher{
+		log:        s.log,
+		Fs:         fsys,
+		resourceCh: s.resourceCh,
+		processes:  procCfg,
+	}
 
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
@@ -142,13 +142,9 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 		ConfigFilePath:    "test/path",
 	}
 	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
-
-	fetcherConfig := ProcessFetcherConfig{
-		BaseFetcherConfig: fetching.BaseFetcherConfig{},
-		RequiredProcesses: map[string]ProcessInputConfiguration{
-			"kubelet": {ConfigFileArguments: []string{}}},
-	}
-	processesFetcher := &ProcessesFetcher{log: s.log, cfg: fetcherConfig, Fs: fsys, resourceCh: s.resourceCh}
+	var procCfg = ProcessesConfigMap{
+		"kubelet": {ConfigFileArguments: []string{}}}
+	processesFetcher := &ProcessesFetcher{log: s.log, Fs: fsys, resourceCh: s.resourceCh, processes: procCfg}
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 
 	results := testhelper.CollectResources(s.resourceCh)
@@ -198,14 +194,10 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 		sysfs[test.configFileName] = &fstest.MapFile{
 			Data: configData,
 		}
-
-		fetcherConfig := ProcessFetcherConfig{
-			BaseFetcherConfig: fetching.BaseFetcherConfig{},
-			RequiredProcesses: map[string]ProcessInputConfiguration{
-				"kubelet": {ConfigFileArguments: []string{"fetcherConfig"}}},
+		procCfg := ProcessesConfigMap{
+			testProcess.Name: {ConfigFileArguments: []string{"fetcherConfig"}},
 		}
-		processesFetcher := &ProcessesFetcher{log: s.log, cfg: fetcherConfig, Fs: sysfs, resourceCh: s.resourceCh}
-
+		processesFetcher := &ProcessesFetcher{log: s.log, Fs: sysfs, resourceCh: s.resourceCh, processes: procCfg}
 		err = processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 

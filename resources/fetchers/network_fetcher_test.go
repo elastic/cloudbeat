@@ -132,7 +132,6 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			f := NetworkFetcher{
 				log:           logp.NewLogger(tt.name),
 				ec2Client:     tt.networkProvider(),
-				cfg:           ACLFetcherConfig{},
 				resourceCh:    ch,
 				cloudIdentity: &awslib.Identity{Account: &tt.name},
 			}

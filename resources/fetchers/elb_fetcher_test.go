@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"regexp"
 	"testing"
@@ -77,7 +78,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 	var tests = []struct {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
-		lbResponse          awslib.ElbLoadBalancerDescriptions
+		lbResponse          []types.LoadBalancerDescription
 		expectedlbNames     []string
 	}{
 		{
@@ -87,7 +88,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.us-east-2.elb.amazonaws.com",
 				},
 			},
-			awslib.ElbLoadBalancerDescriptions{{
+			[]types.LoadBalancerDescription{{
 				Instances:        []types.Instance{},
 				LoadBalancerName: &lbName,
 			}},
@@ -100,7 +101,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 					Hostname: "adda9cdc89b13452e92d48be46858d37-1423035038.wrong-region.elb.amazonaws.com",
 				},
 			},
-			awslib.ElbLoadBalancerDescriptions{},
+			[]types.LoadBalancerDescription{},
 			[]string{},
 		},
 	}
@@ -129,7 +130,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		elbProvider := &awslib.MockElbLoadBalancerDescriber{}
+		elbProvider := &elb.MockLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
 
 		identity := awslib.Identity{
@@ -142,7 +143,6 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
 		elbFetcher := ElbFetcher{
 			log:             s.log,
-			cfg:             ElbFetcherConfig{},
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
@@ -209,14 +209,13 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
-		elbProvider := &awslib.MockElbLoadBalancerDescriber{}
+		elbProvider := &elb.MockLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(nil, test.error)
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
 		elbFetcher := ElbFetcher{
 			log:             s.log,
-			cfg:             ElbFetcherConfig{},
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
