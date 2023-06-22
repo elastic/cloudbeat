@@ -20,6 +20,13 @@ To generate an Elastic Cloud token, you have two options:
 
 Choose the method that is most convenient for you to obtain the Elastic Cloud token required for deployment.
 
+
+Ensure that the following AWS credentials are defined:
+
+- `AWS_ACCESS_KEY_ID`: Your AWS access key ID.
+- `AWS_SECRET_ACCESS_KEY`: Your AWS secret access key.
+
+
 To successfully deploy the environment, ensure that the following variables are provided as deployment parameters or exported as environment variables:
 
 ```bash
@@ -44,7 +51,7 @@ Please note that the customized image is currently available in the following re
 
 | Variable  | Default Value | Comment |
 |:-------------:|:-------------:|:------------|
-| region      |   eu-west-3   | AWS EC2 deployment region |
+| region      |   eu-west-1   | AWS EC2 deployment region |
 
 
 
@@ -72,7 +79,7 @@ terraform init
 - Deploy test environment
 
 ```bash
-terraform apply --auto-approve
+terraform apply --auto-approve -var="deployment_name=dev-env"
 ```
 
 For development purposes, it is possible to deploy each module separately, allowing for focused and independent development and testing. Each module within the project represents a specific component or functionality and can be deployed individually to streamline the development process.
@@ -101,4 +108,23 @@ terraform apply --auto-approve -target "module.ec_deployment"
 
 ```bash
 terraform apply --auto-approve -target "module.eks"
+```
+
+## Environment Cleanup
+
+To destroy local environment use
+
+``` bash
+terraform destroy -var="region=eu-west-1"
+```
+
+
+To destroy the environment provisioned using the Sanity job, follow these steps:
+
+1. [Download](https://s3.console.aws.amazon.com/s3/buckets/tf-state-bucket-test-infra?region=eu-west-3&tab=objects) the Terraform state file to the [test-environments](../test-environments/) folder.
+2. Rename the state file, for example, `terraform-sanity.tfstate`.
+3. Run the following command:
+
+``` bash
+terraform destroy -var="region=eu-west-1" -state terraform-sanity.tfstate
 ```
