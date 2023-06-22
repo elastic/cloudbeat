@@ -43,7 +43,6 @@ const (
 	IAMUserType               = "aws-iam-user"
 	IAMServerCertificateType  = "aws-iam-server-certificate"
 	PwdPolicyType             = "aws-password-policy"
-	EksType                   = "aws-eks"
 	S3Type                    = "aws-s3"
 	KmsType                   = "aws-kms"
 	SecurityHubType           = "aws-securityhub"

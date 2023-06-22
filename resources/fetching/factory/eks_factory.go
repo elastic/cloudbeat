@@ -19,17 +19,18 @@ package factory
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources/conditions"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/condition"
+	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
 	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
-	"regexp"
 )
 
 const (
@@ -58,12 +59,12 @@ func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.R
 		}
 
 		ecrFetcher := fetchers.NewEcrFetcher(log, ch, k8sClient, ecrPodDescriber)
-		m[fetching.EcrType] = RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{conditions.NewLeaseFetcherCondition(log, le)}}
+		m[fetching.EcrType] = RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 
 		elbProvider := elb.NewElbProvider(awsConfig)
 		loadBalancerRegex := fmt.Sprintf(elbRegexTemplate, awsConfig.Region)
 		elbFetcher := fetchers.NewElbFetcher(log, ch, k8sClient, elbProvider, identity, loadBalancerRegex)
-		m[fetching.ElbType] = RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{conditions.NewLeaseFetcherCondition(log, le)}}
+		m[fetching.ElbType] = RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 	}
 
 	fsFetcher := fetchers.NewFsFetcher(log, ch, eksFsPatterns)
@@ -73,6 +74,6 @@ func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.R
 	m[fetching.ProcessType] = RegisteredFetcher{Fetcher: procFetcher}
 
 	kubeFetcher := fetchers.NewKubeFetcher(log, ch, k8sClient)
-	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{conditions.NewLeaseFetcherCondition(log, le)}}
+	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 	return m, nil
 }
