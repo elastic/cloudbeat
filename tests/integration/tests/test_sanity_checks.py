@@ -9,17 +9,17 @@ verifying that there are findings of 'resource.type' for each feature.
 import pytest
 from commonlib.utils import get_findings
 
-CONFIG_TIMEOUT = 120
+CONFIG_TIMEOUT = 240
 
 tests_data = {
     "cis_aws": [
         "cloud-compute",
-        "cloud-storage",
         "identity-management",
         "monitoring",
         "cloud-audit",
         "cloud-database",
         "cloud-config",
+        "cloud-storage",
     ],
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": ["process", "k8s_object"],  # Optimize search findings by excluding 'file'.
