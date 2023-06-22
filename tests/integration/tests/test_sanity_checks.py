@@ -14,13 +14,12 @@ CONFIG_TIMEOUT = 120
 tests_data = {
     "cis_aws": [
         "cloud-compute",
-        "cloud-storage",
         "identity-management",
         "monitoring",
         "cloud-audit",
         "cloud-database",
         "cloud-config",
-    ],
+    ],  # Exclude "cloud-storage" due to lack of fetcher control and potential delays.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": ["process", "k8s_object"],  # Optimize search findings by excluding 'file'.
 }
