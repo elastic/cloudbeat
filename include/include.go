@@ -18,6 +18,5 @@
 package include
 
 import (
-	_ "github.com/elastic/cloudbeat/resources/fetchers"
 	_ "modernc.org/sqlite"
 )
