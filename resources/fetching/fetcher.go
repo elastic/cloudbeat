@@ -21,12 +21,12 @@ import (
 	"context"
 
 	awssdk "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
-	KubeAPIType = "kube-api"
+	KubeAPIType    = "kube-api"
+	FileSystemType = "file-system"
+	ProcessType    = "process"
 
 	EcrType                   = "aws-ecr"
 	IAMType                   = "aws-iam"
@@ -43,7 +43,6 @@ const (
 	IAMUserType               = "aws-iam-user"
 	IAMServerCertificateType  = "aws-iam-server-certificate"
 	PwdPolicyType             = "aws-password-policy"
-	EksType                   = "aws-eks"
 	S3Type                    = "aws-s3"
 	KmsType                   = "aws-kms"
 	SecurityHubType           = "aws-securityhub"
@@ -65,11 +64,6 @@ const (
 	CloudConfig            = "cloud-config"
 	KeyManagement          = "key-management"
 )
-
-// Factory can create fetcher instances based on configuration
-type Factory interface {
-	Create(*logp.Logger, *config.C, chan ResourceInfo) (Fetcher, error)
-}
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {

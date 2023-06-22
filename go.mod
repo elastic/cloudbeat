@@ -32,6 +32,7 @@ require (
 )
 
 require (
+	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6
 	github.com/aquasecurity/trivy v0.42.1
 	github.com/aquasecurity/trivy-db v0.0.0-20230515061101-378ab9ed302c
 	github.com/aws/aws-sdk-go v1.44.245
@@ -47,8 +48,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.29.2
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.98.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.17.18
-	github.com/aws/aws-sdk-go-v2/service/ecrpublic v1.13.8
-	github.com/aws/aws-sdk-go-v2/service/eks v1.22.1
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.14.8
 	github.com/aws/aws-sdk-go-v2/service/iam v1.19.12
 	github.com/aws/aws-sdk-go-v2/service/kms v1.21.1
@@ -67,6 +66,7 @@ require (
 	github.com/go-errors/errors v1.0.1
 	github.com/go-git/go-git/v5 v5.7.0
 	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
+	github.com/masahiro331/go-xfs-filesystem v0.0.0-20230608043311-a335f4599b70
 	github.com/mikefarah/yq/v4 v4.33.3
 	github.com/open-policy-agent/opa v0.45.0
 	github.com/pkg/errors v0.9.1
@@ -77,6 +77,7 @@ require (
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.26.3
+	modernc.org/sqlite v1.23.1
 )
 
 require (
@@ -118,7 +119,6 @@ require (
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/aquasecurity/defsec v0.89.0 // indirect
-	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6 // indirect
 	github.com/aquasecurity/go-gem-version v0.0.0-20201115065557-8eed6fe000ce // indirect
 	github.com/aquasecurity/go-npm-version v0.0.0-20201110091526-0b796d180798 // indirect
 	github.com/aquasecurity/go-pep440-version v0.0.0-20210121094942-22b2f8951d46 // indirect
@@ -182,7 +182,6 @@ require (
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/go-containerregistry v0.14.0 // indirect
 	github.com/google/licenseclassifier/v2 v2.0.0 // indirect
-	github.com/google/pprof v0.0.0-20221118152302-e6195bd50e26 // indirect
 	github.com/google/s2a-go v0.1.3 // indirect
 	github.com/google/wire v0.5.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
@@ -222,9 +221,7 @@ require (
 	github.com/masahiro331/go-ext4-filesystem v0.0.0-20221225060520-c150f5eacfe1 // indirect
 	github.com/masahiro331/go-mvn-version v0.0.0-20210429150710-d3157d602a08 // indirect
 	github.com/masahiro331/go-vmdk-parser v0.0.0-20221225061455-612096e4bbbd // indirect
-	github.com/masahiro331/go-xfs-filesystem v0.0.0-20230608043311-a335f4599b70 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/mattn/go-sqlite3 v1.14.16 // indirect
 	github.com/microsoft/go-rustaudit v0.0.0-20220808201409-204dfee52032 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
@@ -304,7 +301,6 @@ require (
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.5.0 // indirect
 	modernc.org/opt v0.1.3 // indirect
-	modernc.org/sqlite v1.23.1 // indirect
 	modernc.org/strutil v1.1.3 // indirect
 	modernc.org/token v1.0.1 // indirect
 	sigs.k8s.io/kustomize/api v0.12.1 // indirect
@@ -320,7 +316,7 @@ require (
 	github.com/containerd/containerd v1.7.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgraph-io/ristretto v0.1.0
-	github.com/docker/distribution v2.8.2+incompatible
+	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20230309010449-b6aa37560e13

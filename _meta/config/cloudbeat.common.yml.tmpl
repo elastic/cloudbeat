@@ -9,34 +9,6 @@ cloudbeat:
   type: {{$type}}
   # Defines how often an event is sent to the output
   period: 4h
-  fetchers:
-    - name: kube-api
-    - name: process
-      directory: "/hostfs"
-      processes:
-        etcd:
-        kube-apiserver:
-        kube-controller:
-        kube-scheduler:
-        kubelet:
-          config-file-arguments:
-            - config
-    - name: file-system
-      patterns: [
-        "/hostfs/etc/kubernetes/scheduler.conf",
-        "/hostfs/etc/kubernetes/controller-manager.conf",
-        "/hostfs/etc/kubernetes/admin.conf",
-        "/hostfs/etc/kubernetes/kubelet.conf",
-        "/hostfs/etc/kubernetes/manifests/etcd.yaml",
-        "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-        "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
-        "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
-        "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
-        "/hostfs/etc/kubernetes/pki/**",
-        "/hostfs/var/lib/kubelet/config.yaml",
-        "/hostfs/var/lib/etcd",
-        "/hostfs/etc/kubernetes/pki"
-      ]
   config:
     v1:
 {{- if eq $type $SELF_MANAGED_TYPE }}
@@ -44,18 +16,3 @@ cloudbeat:
 {{- else if eq $type $EKS_TYPE }}
       benchmark: cis_eks
 {{end}}
-#    # EKS Fetchers configuration
-#      - name: kube-api
-#      - name: process
-#        directory: "/hostfs"
-#        processes:
-#          kubelet:
-#            config-file-arguments:
-#              - config
-#      - name: aws-ecr
-#      - name: aws-elb
-#      - name: file-system
-#        patterns: [
-#          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
-#          "/hostfs/var/lib/kubelet/kubeconfig",
-#        ]
