@@ -19,26 +19,12 @@ def create_kspm_unmanaged_integration(cfg: Munch, pkg_policy: dict, agent_policy
     Returns:
         str: The ID of the created unmanaged integration.
     """
-    package_policy = munchify(pkg_policy)
-    package_policy.policy_id = agent_policy_id
-
-    url = f"{cfg.kibana_url}/api/fleet/package_policies"
-
-    try:
-        response = perform_api_call(
-            method="POST",
-            url=url,
-            auth=cfg.auth,
-            params={"json": package_policy},
-        )
-        package_policy_id = munchify(response).item.id
-        logger.info(f"Package policy '{package_policy_id}' created successfully")
-        return package_policy_id
-    except APICallException as api_ex:
-        logger.error(
-            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
-        )
-        return ""
+    return create_integration(
+        cfg=cfg,
+        pkg_policy=pkg_policy,
+        agent_policy_id=agent_policy_id,
+        data={},
+    )
 
 
 def create_kspm_eks_integration(
@@ -58,32 +44,15 @@ def create_kspm_eks_integration(
     Returns:
         str: The ID of the created unmanaged integration.
     """
-    # pylint: disable=duplicate-code
-    url = f"{cfg.kibana_url}/api/fleet/package_policies"
+    package_policy = munchify(pkg_policy)
+    delete_key(package_policy, search_key="role_arn", key_to_delete="value")
 
-    try:
-        package_policy = munchify(pkg_policy)
-        package_policy.policy_id = agent_policy_id
-
-        delete_key(package_policy, search_key="role_arn", key_to_delete="value")
-
-        for key, value in eks_data.items():
-            update_key(package_policy, key, value)
-
-        response = perform_api_call(
-            method="POST",
-            url=url,
-            auth=cfg.auth,
-            params={"json": package_policy},
-        )
-        package_policy_id = munchify(response).item.id
-        logger.info(f"Package policy '{package_policy_id}' created successfully")
-        return package_policy_id
-    except APICallException as api_ex:
-        logger.error(
-            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
-        )
-        return ""
+    return create_integration(
+        cfg=cfg,
+        pkg_policy=package_policy,
+        agent_policy_id=agent_policy_id,
+        data=eks_data,
+    )
 
 
 def create_cspm_integration(
@@ -103,13 +72,66 @@ def create_cspm_integration(
     Returns:
         str: The ID of the created unmanaged integration.
     """
-    return create_kspm_eks_integration(
+    return create_integration(
         cfg=cfg,
         pkg_policy=pkg_policy,
         agent_policy_id=agent_policy_id,
-        eks_data=cspm_data,
+        data=cspm_data,
     )
 
+def create_cnvm_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str) -> str:
+    """Creates an integration for CNVM
+
+    Args:
+        cfg (Munch): Config object containing authentication data.
+        pkg_policy (dict): The package policy to be associated with the integration.
+        agent_policy_id (str): The ID of the agent policy to be used.
+
+    Returns:
+        str: The ID of the created unmanaged integration.
+    """
+    return create_integration(
+        cfg=cfg,
+        pkg_policy=pkg_policy,
+        agent_policy_id=agent_policy_id,
+        data={},
+    )
+
+def create_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str, data: dict) -> str:
+    """Creates an elastic integration
+
+    Args:
+        cfg (Munch): Config object containing authentication data.
+        pkg_policy (dict): The package policy to be associated with the integration.
+        agent_policy_id (str): The ID of the agent policy to be used.
+        data (dict): The integration data to be modified in the package policy.
+
+    Returns:
+        str: The ID of the created unmanaged integration.
+    """
+    url = f"{cfg.kibana_url}/api/fleet/package_policies"
+
+    package_policy = munchify(pkg_policy)
+    package_policy.policy_id = agent_policy_id
+
+    for key, value in data.items():
+        update_key(package_policy, key, value)
+
+    try:
+        response = perform_api_call(
+            method="POST",
+            url=url,
+            auth=cfg.auth,
+            params={"json": package_policy},
+        )
+        package_policy_id = munchify(response).item.id
+        logger.info(f"Package policy '{package_policy_id}' created successfully")
+        return package_policy_id
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return ""
 
 def delete_package_policy(cfg: Munch, policy_ids: list):
     """Delete package policy
