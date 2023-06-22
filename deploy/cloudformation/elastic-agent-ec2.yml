@@ -4,7 +4,7 @@ Description: Creates an EC2 instance with permissions to run elastic-agent
 Parameters:
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-    Default: '/aws/service/canonical/ubuntu/server/jammy/stable/current/arm64/hvm/ebs-gp2/ami-id'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-minimal-hvm-arm64-ebs'
   InstanceType:
     Type: String
     Default: c6g.xlarge
@@ -156,6 +156,10 @@ Resources:
           tar xzvf $ElasticAgentArtifact.tar.gz
           cd $ElasticAgentArtifact
           sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken}
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 10
 Outputs:
   Ec2InstanceId:
     Value: !Ref ElasticAgentEc2Instance
