@@ -25,6 +25,11 @@ jobs:
       - name: Upload to S3 if elastic-agent CloudFormation template has changed
         run: |
           VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
-          FILENAME=$(date +"cloudformation-$VERSION-%Y-%m-%d-%H-%M-%S.yml")
+          DATE=$(date +"%Y-%m-%d-%H-%M-%S")
+          FILENAME="cloudformation-$VERSION-$DATE.yml"
           echo "Uploading $FILENAME to S3"
           aws s3 cp deploy/cloudformation/elastic-agent-ec2.yml s3://elastic-cspm-cft/$FILENAME
+
+          FILENAME="cloudformation-organization-$VERSION-$DATE.yml"
+          echo "Uploading $FILENAME to S3"
+          aws s3 cp deploy/cloudformation/organization.yml s3://elastic-cspm-cft/$FILENAME
