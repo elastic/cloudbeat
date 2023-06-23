@@ -21,6 +21,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -36,8 +37,6 @@ const (
 	VulnerabilityType            = "vuln_mgmt"
 	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 )
-
-var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
 
 type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
@@ -55,8 +54,14 @@ type Config struct {
 }
 
 type CloudConfig struct {
-	AwsCred aws.ConfigAWS `config:"aws.credentials"`
+	AwsCred        aws.ConfigAWS `config:"aws.credentials"`
+	AwsAccountType string        `config:"aws.account_type"`
 }
+
+const (
+	SingleAccount       = "single_account"
+	OrganizationAccount = "organization_account"
+)
 
 func New(cfg *config.C) (*Config, error) {
 	c, err := defaultConfig()
@@ -70,9 +75,22 @@ func New(cfg *config.C) (*Config, error) {
 
 	if c.Benchmark != "" {
 		if !isSupportedBenchmark(c.Benchmark) {
-			return c, ErrBenchmarkNotSupported
+			return c, launcher.NewUnhealthyError(fmt.Sprintf("benchmark '%s' is not supported", c.Benchmark))
 		}
 	}
+
+	switch c.CloudConfig.AwsAccountType {
+	case "":
+	case SingleAccount:
+	case OrganizationAccount:
+		fallthrough // TODO: remove when implemented
+	default:
+		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
+			"aws.account_type '%s' is not supported",
+			c.CloudConfig.AwsAccountType,
+		))
+	}
+
 	return c, nil
 }
 
