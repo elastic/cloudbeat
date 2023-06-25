@@ -28,6 +28,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/gofrs/uuid"
@@ -46,9 +48,10 @@ type LeaderelectionManager struct {
 	kubeClient k8s.Interface
 }
 
-func NewLeaderElector(log *logp.Logger, client k8s.Interface) Manager {
-	if client == nil {
-		log.Errorf("NewLeaderElector returned default client")
+func NewLeaderElector(log *logp.Logger, cfg *config.Config, k8sProvider providers.KubernetesClientGetter) Manager {
+	kubeClient, err := k8sProvider.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
+	if err != nil {
+		log.Errorf("NewLeaderElector error in GetClient: %v", err)
 		return &DefaultUniqueManager{}
 	}
 
@@ -58,7 +61,7 @@ func NewLeaderElector(log *logp.Logger, client k8s.Interface) Manager {
 		leader:     nil,
 		wg:         wg,
 		cancelFunc: nil,
-		kubeClient: client,
+		kubeClient: kubeClient,
 	}
 }
 

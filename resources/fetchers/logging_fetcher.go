@@ -33,6 +33,7 @@ type LoggingFetcher struct {
 	log                   *logp.Logger
 	loggingProvider       logging.Client
 	configserviceProvider configservice.ConfigService
+	cfg                   fetching.AwsBaseFetcherConfig
 	resourceCh            chan fetching.ResourceInfo
 	cloudIdentity         *awslib.Identity
 }
@@ -44,22 +45,6 @@ type LoggingResource struct {
 type ConfigResource struct {
 	configs  []awslib.AwsResource
 	identity *awslib.Identity
-}
-
-func NewLoggingFetcher(
-	log *logp.Logger,
-	loggingProvider logging.Client,
-	configserviceProvider configservice.ConfigService,
-	ch chan fetching.ResourceInfo,
-	identity *awslib.Identity,
-) *LoggingFetcher {
-	return &LoggingFetcher{
-		log:                   log,
-		loggingProvider:       loggingProvider,
-		configserviceProvider: configserviceProvider,
-		resourceCh:            ch,
-		cloudIdentity:         identity,
-	}
 }
 
 func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {

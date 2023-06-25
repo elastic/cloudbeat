@@ -70,6 +70,9 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	}(dir)
 
 	filePaths := []string{filepath.Join(dir, files[0])}
+	cfg := FileFetcherConfig{
+		Patterns: filePaths,
+	}
 
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
@@ -78,9 +81,9 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher := FileSystemFetcher{
 		log:        log,
+		cfg:        cfg,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
-		patterns:   filePaths,
 	}
 
 	var results []fetching.ResourceInfo
@@ -119,6 +122,9 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	}(outerDir)
 
 	paths := []string{filepath.Join(outerDir, outerFiles[0]), filepath.Join(outerDir, outerFiles[1])}
+	cfg := FileFetcherConfig{
+		Patterns: paths,
+	}
 
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil).Once()
@@ -128,9 +134,9 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 
 	fileFetcher := FileSystemFetcher{
 		log:        s.log,
+		cfg:        cfg,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
-		patterns:   paths,
 	}
 
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
@@ -180,13 +186,17 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	}(dir)
 
 	filePaths := []string{filepath.Join(dir)}
+	cfg := FileFetcherConfig{
+		Patterns: filePaths,
+	}
+
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
 
 	fileFetcher := FileSystemFetcher{
 		log:        s.log,
-		patterns:   filePaths,
+		cfg:        cfg,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
 	}
@@ -230,6 +240,10 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	innerDir := createDirectoriesWithFiles(&s.Suite, outerDir, innerDirectoryName, innerFiles)
 
 	path := []string{outerDir + "/*"}
+	cfg := FileFetcherConfig{
+		Patterns: path,
+	}
+
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
@@ -237,7 +251,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher := FileSystemFetcher{
 		log:        log,
-		patterns:   path,
+		cfg:        cfg,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
 	}
@@ -288,13 +302,16 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	innerInnerDir := createDirectoriesWithFiles(&s.Suite, innerDir, innerInnerDirectoryName, innerInnerFiles)
 
 	path := []string{outerDir + "/**"}
+	cfg := FileFetcherConfig{
+		Patterns: path,
+	}
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
 	fileFetcher := FileSystemFetcher{
 		log:        s.log,
-		patterns:   path,
+		cfg:        cfg,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
 	}
@@ -340,6 +357,10 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 	}(dir)
 
 	filePaths := []string{filepath.Join(dir, files[0])}
+	cfg := FileFetcherConfig{
+		Patterns: filePaths,
+	}
+
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
@@ -347,7 +368,7 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher := FileSystemFetcher{
 		log:        log,
-		patterns:   filePaths,
+		cfg:        cfg,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
 	}
