@@ -17,7 +17,7 @@ on:
       elk-stack-version:
         required: true
         description: "Elastic Cloud stack SNAPSHOT or BC version"
-        default: "8.7.2-SNAPSHOT"
+        default: "8.8.0"
       ess-region:
         required: true
         description: "Elastic Cloud deployment region"
