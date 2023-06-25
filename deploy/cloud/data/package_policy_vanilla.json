@@ -56,6 +56,16 @@
             ]
         }
     ],
+    "vars": {
+        "posture": {
+            "value": "kspm",
+            "type": "text"
+        },
+        "deployment": {
+            "value": "k8s",
+            "type": "text"
+        }
+    },
     "package": {
         "name": "cloud_security_posture",
         "title": "Kubernetes Security Posture Management (KSPM)",
