@@ -15,8 +15,7 @@
                     "data_stream": {
                         "type": "logs",
                         "dataset": "cloud_security_posture.findings"
-                    },
-                    "release": "ga"
+                    }
                 }
             ]
         },
@@ -31,7 +30,6 @@
                         "type": "logs",
                         "dataset": "cloud_security_posture.findings"
                     },
-                    "release": "ga",
                     "vars": {
                         "access_key_id": {
                             "type": "text"
@@ -51,12 +49,104 @@
                         "role_arn": {
                             "value": "${role_arn}",
                             "type": "text"
+                        },
+                        "aws.credentials.type": {
+                            "type": "text"
                         }
                     }
                 }
             ]
+        },
+        {
+            "type": "cloudbeat/cis_aws",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.findings"
+                    },
+                    "vars": {
+                        "access_key_id": {
+                            "type": "text"
+                        },
+                        "secret_access_key": {
+                            "type": "text"
+                        },
+                        "session_token": {
+                            "type": "text"
+                        },
+                        "shared_credential_file": {
+                            "type": "text"
+                        },
+                        "credential_profile_name": {
+                            "type": "text"
+                        },
+                        "role_arn": {
+                            "type": "text"
+                        },
+                        "aws.credentials.type": {
+                            "type": "text"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "type": "cloudbeat/cis_gcp",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.findings"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "cloudbeat/cis_azure",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.findings"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "cloudbeat/vuln_mgmt_aws",
+            "policy_template": "vuln_mgmt",
+            "enabled": false,
+            "streams": [
+                {
+                    "enabled": false,
+                    "data_stream": {
+                        "type": "logs",
+                        "dataset": "cloud_security_posture.vulnerabilities"
+                    }
+                }
+            ],
+            "config": {
+                "cloud_formation_template_url": {
+                    "value": "https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-8.9.0-2023-05-31-05-56-21.yml&stackName=Elastic-Vulnerability-Management&param_EnrollmentToken=FLEET_ENROLLMENT_TOKEN&param_FleetUrl=FLEET_URL&param_ElasticAgentVersion=KIBANA_VERSION&param_ElasticArtifactServer=https://artifacts.elastic.co/downloads/beats/elastic-agent"
+                }
+            }
         }
     ],
+    "package": {
+        "name": "cloud_security_posture",
+        "title": "Security Posture Management",
+        "version": "1.1.1"
+    },
     "vars": {
         "posture": {
             "value": "kspm",
@@ -66,10 +156,5 @@
             "value": "eks",
             "type": "text"
         }
-    },
-    "package": {
-        "name": "cloud_security_posture",
-        "title": "Kubernetes Security Posture Management (KSPM)",
-        "version": "1.1.1"
     }
 }
