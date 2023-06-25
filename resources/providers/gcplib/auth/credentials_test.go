@@ -18,7 +18,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 			name: "Should return a GcpClientConfig using SA credentials file path",
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
-					GcpCred: config.GcpClientOpt{
+					GcpCfg: config.GcpClientOpt{
 						CredentialsFilePath: "sa-credentials.json",
 					},
 				},
@@ -30,7 +30,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 			name: "Should return a GcpClientConfig using SA credentials json",
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
-					GcpCred: config.GcpClientOpt{
+					GcpCfg: config.GcpClientOpt{
 						CredentialsJSON: "test-json-content",
 					},
 				},
@@ -42,7 +42,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 			name: "Should return error when both credentials_file_path and credentials_json specified",
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
-					GcpCred: config.GcpClientOpt{
+					GcpCfg: config.GcpClientOpt{
 						CredentialsFilePath: "sa-credentials.json",
 						CredentialsJSON:     "test-json-content",
 					},

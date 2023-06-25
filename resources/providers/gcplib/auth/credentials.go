@@ -8,7 +8,7 @@ import (
 
 func GetGcpClientConfig(cfg *config.Config) ([]option.ClientOption, error) {
 	// Create credentials options
-	gcpCred := cfg.CloudConfig.GcpCred
+	gcpCred := cfg.CloudConfig.GcpCfg
 	var opt []option.ClientOption
 	if gcpCred.CredentialsFilePath != "" && gcpCred.CredentialsJSON != "" {
 		return nil, errors.New("both credentials_file_path and credentials_json specified, you must use only one of them")
