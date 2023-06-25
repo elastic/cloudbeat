@@ -72,24 +72,59 @@ Resources:
               - Effect: Allow
                 Action:
                   - ec2:DescribeInstances
-                  - ec2:DescribeImages
-                  - ec2:DescribeTags
-                  - ec2:DescribeSnapshots
                   - ec2:CreateSnapshots
                   - ec2:CreateTags
-                  - ec2:DeleteSnapshot
-                  - ec2:DescribeVolumes
-                Resource: '*'
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:ec2:"
+                    - !Ref AWS::Region
+                    - "::instance/*"
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeImages
+                  - ec2:CreateTags
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:ec2:"
+                    - !Ref AWS::Region
+                    - "::image/*"
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeSnapshots
+                  - ec2:CreateSnapshots
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:ec2:"
+                    - !Ref AWS::Region
+                    - "::snapshot/*"
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeTags
+                  - ec2:CreateTags
+                Resource: "*"
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:ec2:"
+                    - !Ref AWS::Region
+                    - "::snapshot/*"
               - Effect: Allow
                 Action:
                   - ebs:ListSnapshotBlocks
                   - ebs:ListChangedBlocks
                   - ebs:GetSnapshotBlock
-                Resource: '*'
+                  - ec2:DeleteSnapshot
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:ec2:"
+                    - !Ref AWS::Region
+                    - "::snapshot/*"
+                Condition:
+                  StringEqualsIgnoreCase:
+                    aws:ResourceTag/Workload: "Cloudbeat Vulnerability Snapshot"
               - Effect: Allow
                 Action:
                   - iam:ListAccountAliases
-                Resource: '*'
+                Resource: "arn:aws:iam::*:*"
 
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
