@@ -25,6 +25,7 @@ const (
 	CIS_K8S = "cis_k8s"
 	CIS_EKS = "cis_eks"
 	CIS_AWS = "cis_aws"
+	CIS_GCP = "cis_gcp"
 )
 
-var SupportedCIS = []string{CIS_AWS, CIS_K8S, CIS_EKS}
+var SupportedCIS = []string{CIS_AWS, CIS_K8S, CIS_EKS, CIS_GCP}

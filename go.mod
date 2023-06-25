@@ -75,6 +75,7 @@ require (
 	go.elastic.co/go-licence-detector v0.6.0
 	go.uber.org/goleak v1.2.1
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
+	google.golang.org/api v0.121.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.26.3
 	modernc.org/sqlite v1.23.1
@@ -283,7 +284,6 @@ require (
 	go.opentelemetry.io/otel/metric v0.38.0 // indirect
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
-	google.golang.org/api v0.121.0 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473 // indirect
@@ -423,7 +423,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gomodule/redigo v1.8.3 // indirect
-	github.com/google/flatbuffers v1.12.1 // indirect
+	github.com/google/flatbuffers v2.0.8+incompatible // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/licenseclassifier v0.0.0-20221004142553-c1ed8fcf4bab // indirect

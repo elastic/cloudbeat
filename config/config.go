@@ -56,6 +56,12 @@ type Config struct {
 
 type CloudConfig struct {
 	AwsCred aws.ConfigAWS `config:"aws.credentials"`
+	GcpCred GcpClientOpt  `config:"gcp.credentials"`
+}
+
+type GcpClientOpt struct {
+	CredentialsJSON     string `config:"credentials_json"`
+	CredentialsFilePath string `config:"credentials_file_path"`
 }
 
 func New(cfg *config.C) (*Config, error) {
