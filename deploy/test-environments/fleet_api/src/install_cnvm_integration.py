@@ -7,7 +7,7 @@ The following steps are performed:
 2. Create a CNVM AWS integration.
 3. Create a CNVM bash script to be deployed on a host.
 """
-
+import json
 from pathlib import Path
 from typing import Dict, Tuple
 from munch import Munch
@@ -27,9 +27,11 @@ from utils import (
 
 CNVM_AGENT_POLICY = "../../../cloud/data/agent_policy_cnvm_aws.json"
 CNVM_PACKAGE_POLICY = "../../../cloud/data/package_policy_cnvm_aws.json"
+CNVM_CLOUDFORMATION_CONFIG = "../../../cloudformation/config.json"
 
 cnvm_agent_policy_data = Path(__file__).parent / CNVM_AGENT_POLICY
 cnvm_pkg_policy_data = Path(__file__).parent / CNVM_PACKAGE_POLICY
+cnvm_cloudformation_config = Path(__file__).parent / CNVM_CLOUDFORMATION_CONFIG
 
 
 def load_data() -> Tuple[Dict, Dict]:
@@ -69,23 +71,27 @@ if __name__ == "__main__":
         ],
     )
     cloudformation_params = Munch()
-    cloudformation_params.enrollment_token = get_enrollment_token(
+    cloudformation_params.ENROLLMENT_TOKEN = get_enrollment_token(
         cfg=cnfg.elk_config,
         policy_id=agent_policy_id,
     )
 
-    cloudformation_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
-    cloudformation_params.agent_version = get_agents(cfg=cnfg.elk_config)[0].agent.version
-    if "SNAPSHOT" in cloudformation_params.agent_version:
-        cloudformation_params.artifacts_url = cnfg.artifactory_url["snapshot"] + get_build_info(
-            version=cloudformation_params.agent_version,
+    cloudformation_params.STACK_NAME = "cnvm-sanity-test-stack"
+    cloudformation_params.FLEET_URL = get_fleet_server_host(cfg=cnfg.elk_config)
+    cloudformation_params.ELASTIC_AGENT_VERSION = get_agents(cfg=cnfg.elk_config)[0].agent.version
+    if "SNAPSHOT" in cloudformation_params.ELASTIC_AGENT_VERSION:
+        cloudformation_params.ELASTIC_ARTIFACTS_SERVER = cnfg.artifactory_url["snapshot"] + get_build_info(
+            version=cloudformation_params.ELASTIC_AGENT_VERSION,
             is_snapshot=True,
         ) + "downloads/beats/elastic-agent"
     else:
-        cloudformation_params.artifacts_url = cnfg.artifactory_url["staging"] + get_build_info(
-            version=cloudformation_params.agent_version,
+        cloudformation_params.ELASTIC_ARTIFACTS_SERVER = cnfg.artifactory_url["staging"] + get_build_info(
+            version=cloudformation_params.ELASTIC_AGENT_VERSION,
             is_snapshot=False,
         ) + "downloads/beats/elastic-agent"
 
     logger.info("Cloudformation parameters: ", cloudformation_params)
+    with open(cnvm_cloudformation_config, "w") as file:
+        json.dump(cloudformation_params, file)
+
     logger.info("Installation of CNVM integration is done")
