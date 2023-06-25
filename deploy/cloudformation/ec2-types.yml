@@ -36,7 +36,6 @@ Resources:
           Ebs:
             VolumeSize: "10"
             Encrypted: !Ref Encrypted
-
   arm64RHLinux9:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -58,7 +57,6 @@ Resources:
           Ebs:
             VolumeSize: "10"
             Encrypted: !Ref Encrypted
-
   x86SuseLinux15:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -80,7 +78,6 @@ Resources:
           Ebs:
             VolumeSize: "10"
             Encrypted: !Ref Encrypted
-
   x86UbuntuLinux2204:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -102,7 +99,6 @@ Resources:
           Ebs:
             VolumeSize: "10"
             Encrypted: !Ref Encrypted
-
   x86DebianLinux11:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -124,7 +120,6 @@ Resources:
           Ebs:
             VolumeSize: "10"
             Encrypted: !Ref Encrypted
-
   x86AmazonLinux2023:
     Type: "AWS::EC2::Instance"
     Properties:
@@ -146,7 +141,6 @@ Resources:
           Ebs:
             VolumeSize: "10"
             Encrypted: !Ref Encrypted
-
   SecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:

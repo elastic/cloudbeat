@@ -20,7 +20,7 @@ package manager
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/fetchersManager/registry"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"sync"
 	"time"
 
@@ -37,22 +37,22 @@ type Manager struct {
 	// Duration between two consecutive cycles
 	interval time.Duration
 
-	fetchers registry.FetchersRegistry
+	fetcherRegistry registry.Registry
 
 	ctx    context.Context
 	cancel context.CancelFunc
 }
 
-func NewManager(ctx context.Context, log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers registry.FetchersRegistry) (*Manager, error) {
+func NewManager(ctx context.Context, log *logp.Logger, interval time.Duration, timeout time.Duration, fetchers registry.Registry) (*Manager, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	return &Manager{
-		log:      log,
-		timeout:  timeout,
-		interval: interval,
-		fetchers: fetchers,
-		ctx:      ctx,
-		cancel:   cancel,
+		log:             log,
+		timeout:         timeout,
+		interval:        interval,
+		fetcherRegistry: fetchers,
+		ctx:             ctx,
+		cancel:          cancel,
 	}, nil
 }
 
@@ -63,7 +63,7 @@ func (m *Manager) Run() {
 
 func (m *Manager) Stop() {
 	m.cancel()
-	m.fetchers.Stop()
+	m.fetcherRegistry.Stop()
 }
 
 func (m *Manager) fetchAndSleep(ctx context.Context) {
@@ -90,14 +90,14 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 // fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
 func (m *Manager) fetchIteration(ctx context.Context) {
-	m.log.Infof("Manager triggered fetching for %d fetchers", len(m.fetchers.Keys()))
+	m.log.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))
 
 	start := time.Now()
 
 	seq := time.Now().Unix()
 	m.log.Infof("Cycle %d has started", seq)
 	wg := &sync.WaitGroup{}
-	for _, key := range m.fetchers.Keys() {
+	for _, key := range m.fetcherRegistry.Keys() {
 		wg.Add(1)
 		go func(k string) {
 			defer wg.Done()
@@ -114,7 +114,7 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 }
 
 func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata fetching.CycleMetadata) error {
-	if !m.fetchers.ShouldRun(k) {
+	if !m.fetcherRegistry.ShouldRun(k) {
 		return nil
 	}
 
@@ -153,5 +153,5 @@ func (m *Manager) fetchProtected(ctx context.Context, k string, metadata fetchin
 		}
 	}()
 
-	return m.fetchers.Run(ctx, k, metadata)
+	return m.fetcherRegistry.Run(ctx, k, metadata)
 }
