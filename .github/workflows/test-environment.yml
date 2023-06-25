@@ -222,7 +222,7 @@ jobs:
         run: |
           cd ../../tests
           poetry install
-          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir
+          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Cleanup Environment
         if: github.event.inputs.cleanup-env == 'true'

@@ -19,9 +19,9 @@ package factory
 
 import (
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/conditions"
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/condition"
+	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
 	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
@@ -61,7 +61,7 @@ func NewCisK8sFactory(log *logp.Logger, _ *config.Config, ch chan fetching.Resou
 	m[fetching.ProcessType] = RegisteredFetcher{Fetcher: procFetcher}
 
 	kubeFetcher := fetchers.NewKubeFetcher(log, ch, k8sClient)
-	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{conditions.NewLeaseFetcherCondition(log, le)}}
+	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 
 	return m, nil
 }

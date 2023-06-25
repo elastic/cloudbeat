@@ -20,32 +20,32 @@ package registry
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/elastic-agent-libs/logp"
 )
 
-type FetchersRegistry interface {
+type Registry interface {
 	Keys() []string
 	ShouldRun(key string) bool
 	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
 	Stop()
 }
 
-type fetchersRegistry struct {
+type registry struct {
 	log *logp.Logger
 	reg factory.FetchersMap
 }
 
-func NewFetcherRegistry(log *logp.Logger, f factory.FetchersMap) FetchersRegistry {
-	r := &fetchersRegistry{
+func NewRegistry(log *logp.Logger, f factory.FetchersMap) Registry {
+	r := &registry{
 		log: log,
 		reg: f,
 	}
 	return r
 }
 
-func (r *fetchersRegistry) Keys() []string {
+func (r *registry) Keys() []string {
 	var keys []string
 	for k := range r.reg {
 		keys = append(keys, k)
@@ -54,7 +54,7 @@ func (r *fetchersRegistry) Keys() []string {
 	return keys
 }
 
-func (r *fetchersRegistry) ShouldRun(key string) bool {
+func (r *registry) ShouldRun(key string) bool {
 	registered, ok := r.reg[key]
 	if !ok {
 		return false
@@ -70,7 +70,7 @@ func (r *fetchersRegistry) ShouldRun(key string) bool {
 	return true
 }
 
-func (r *fetchersRegistry) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
+func (r *registry) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
 	registered, ok := r.reg[key]
 	if !ok {
 		return fmt.Errorf("fetcher %v not found", key)
@@ -79,9 +79,9 @@ func (r *fetchersRegistry) Run(ctx context.Context, key string, metadata fetchin
 	return registered.Fetcher.Fetch(ctx, metadata)
 }
 
-func (r *fetchersRegistry) Stop() {
-	for key, rfetcher := range r.reg {
-		rfetcher.Fetcher.Stop()
+func (r *registry) Stop() {
+	for key, registered := range r.reg {
+		registered.Fetcher.Stop()
 		r.log.Infof("Fetcher for key %q stopped", key)
 	}
 }

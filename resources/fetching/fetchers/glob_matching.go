@@ -23,8 +23,8 @@ import (
 	"strings"
 )
 
-// Based on https://github.com/yargevad/filepathx/blob/master/filepathx.go
 // Globs represents one filepath glob, with its elements joined by "**".
+// Based on https://github.com/yargevad/filepathx/blob/master/filepathx.go
 type Globs []string
 
 // Glob adds double-star support to the core path/filepath Glob function.

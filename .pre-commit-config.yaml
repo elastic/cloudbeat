@@ -59,16 +59,16 @@ repos:
     hooks:
       - id: yq
         name: format with yq
-        entry: yq
+        entry: sh -c 'for file in "$@"; do yq -i "$file"; done'
         language: system
         args: [ -i ]
-        files: deploy/cloudformation/elastic-agent-ec2.yml
+        files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
     rev: v0.77.5
     hooks:
     -   id: cfn-python-lint
-        files: deploy/cloudformation/elastic-agent-ec2.yml
+        files: deploy/cloudformation/(organization|elastic-agent-ec2).yml
 
   - repo: local
     hooks:
