@@ -79,6 +79,7 @@ def create_cspm_integration(
         data=cspm_data,
     )
 
+
 def create_cnvm_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str) -> str:
     """Creates an integration for CNVM
 
@@ -96,6 +97,7 @@ def create_cnvm_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str) 
         agent_policy_id=agent_policy_id,
         data={},
     )
+
 
 def create_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str, data: dict) -> str:
     """Creates an elastic integration
@@ -132,6 +134,7 @@ def create_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str, data:
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         return ""
+
 
 def delete_package_policy(cfg: Munch, policy_ids: list):
     """Delete package policy
