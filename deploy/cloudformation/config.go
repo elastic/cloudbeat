@@ -22,6 +22,8 @@ package main
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -42,14 +44,14 @@ type devConfig struct {
 }
 
 func parseConfig() (*config, error) {
-	viper.SetConfigFile(".env")
-	viper.AutomaticEnv()
+	viper.AddConfigPath("./")
 	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read configuration: %v", err)
 	}
 
 	var cfg config
+	bindEnvs(cfg)
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal configuration file: %v", err)
@@ -61,6 +63,25 @@ func parseConfig() (*config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func bindEnvs(iface interface{}, parts ...string) {
+	ifv := reflect.ValueOf(iface)
+	ift := reflect.TypeOf(iface)
+	for i := 0; i < ift.NumField(); i++ {
+		v := ifv.Field(i)
+		t := ift.Field(i)
+		tv, ok := t.Tag.Lookup("mapstructure")
+		if !ok {
+			continue
+		}
+		switch v.Kind() {
+		case reflect.Struct:
+			bindEnvs(v.Interface(), append(parts, tv)...)
+		default:
+			viper.BindEnv(strings.Join(append(parts, tv), "."))
+		}
+	}
 }
 
 func validateConfig(cfg *config) error {
