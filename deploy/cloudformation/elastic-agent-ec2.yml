@@ -1,10 +1,10 @@
 ---
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Description: Creates an EC2 instance with permissions to run elastic-agent
 Parameters:
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-minimal-hvm-arm64-ebs'
+    Default: '/aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-arm64'
   InstanceType:
     Type: String
     Default: c6g.xlarge
