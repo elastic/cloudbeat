@@ -51,6 +51,7 @@ jobs:
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ github.event.inputs.docker-image-override }}
       STACK_VERSION: ${{ github.event.inputs.elk-stack-version }}
+      CNVM_STACK_NAME: "cnvm-sanity-test-stack"
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -208,6 +209,17 @@ jobs:
           # Apply the manifest file
           ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "chmod +x cspm-linux.sh && ./cspm-linux.sh"
 
+      - name: Install CNVM integration
+        id: cnvm
+        run: |
+          cd fleet_api
+          poetry run python src/install_cnvm_integration.py
+
+      - name: Deploy CNVM agent
+        env:
+          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+        run: just deploy-cloudformation
+
       - name: Upload Integrations data
         if: always()
         env:
@@ -228,3 +240,4 @@ jobs:
         if: github.event.inputs.cleanup-env == 'true'
         run: |
           terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
+          aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
