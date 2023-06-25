@@ -101,7 +101,6 @@ Resources:
                 Action:
                   - ec2:DescribeTags
                   - ec2:CreateTags
-                Resource: "*"
                 Resource: !Join
                   - ""
                   - - "arn:aws:ec2:"
