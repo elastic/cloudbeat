@@ -5,7 +5,7 @@ import codecs
 from munch import Munch, munchify
 from loguru import logger
 from api.base_call_api import APICallException, perform_api_call
-from utils import replace_image_field
+from utils import replace_image_field, check_pre_release
 
 
 def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
@@ -142,3 +142,95 @@ def get_build_info(version: str, is_snapshot: bool) -> str:
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         return ""
+
+
+def get_stack_latest_version():
+    """
+    Retrieve the latest version of the stack from the Elastic snapshots API.
+
+    Returns:
+        str: The latest version of the stack.
+
+    Raises:
+        APICallException: If the API call to retrieve the version fails.
+
+    """
+    url = "https://snapshots.elastic.co/latest/master.json"
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+        )
+        response_obj = munchify(response)
+        return response_obj.version
+
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return ""
+
+
+def get_cloud_security_posture_version(cfg: Munch, params: Munch) -> str:
+    """
+    Retrieves the version of the 'cloud_security_posture' package using Fleet api.
+
+    Args:
+        cfg (Munch): Configuration object containing the Kibana URL and authentication details.
+        params (Munch): Additional parameters for the API request.
+
+    Returns:
+        str: The version of the 'cloud_security_posture' package, or None if the API call fails.
+    """
+    url = f"{cfg.kibana_url}/api/fleet/epm/packages"
+
+    request_params = {
+        "prerelease": params.prerelease,
+    }
+
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            auth=cfg.auth,
+            params={"params": request_params},
+        )
+        response_obj = munchify(response)
+        cloud_security_posture_version = None
+        for package in response_obj.response:
+            if package["name"] == "cloud_security_posture":
+                cloud_security_posture_version = package["version"]
+                # break
+
+        return cloud_security_posture_version
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return None
+
+
+def update_package_policy_version(cfg: Munch, package_data: dict):
+    """
+    Update the package version in the package policy data.
+
+    Args:
+        cfg (Munch): Configuration object containing stack version.
+        package_data (dict): Package policy data.
+
+    Returns:
+        None
+    """
+    elk_version = cfg.stack_version
+    latest_version = get_stack_latest_version()
+    csp_package_params = Munch()
+    csp_package_params.prerelease = check_pre_release(
+        elk_version=elk_version,
+        latest_version=latest_version,
+    )
+    package_version = get_cloud_security_posture_version(
+        cfg=cfg,
+        params=csp_package_params,
+    )
+
+    package_data["package"]["version"] = package_version
