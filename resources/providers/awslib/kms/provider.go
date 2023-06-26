@@ -22,10 +22,11 @@ import (
 
 	kmsClient "github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type Provider struct {

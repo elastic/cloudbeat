@@ -29,11 +29,12 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 const (

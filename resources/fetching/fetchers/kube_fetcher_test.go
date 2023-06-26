@@ -20,8 +20,9 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"reflect"
+	"testing"
+
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -30,8 +31,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
-	"reflect"
-	"testing"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type KubeFetcherTestSuite struct {

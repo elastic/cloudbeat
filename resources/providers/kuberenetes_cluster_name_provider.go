@@ -19,10 +19,12 @@ package providers
 
 import (
 	"fmt"
-	"github.com/elastic/cloudbeat/config"
+
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes/metadata"
 	agentcfg "github.com/elastic/elastic-agent-libs/config"
 	k8s "k8s.io/client-go/kubernetes"
+
+	"github.com/elastic/cloudbeat/config"
 )
 
 type KubernetesClusterNameProviderApi interface {
