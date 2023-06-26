@@ -18,9 +18,10 @@
 package condition
 
 import (
+	"github.com/elastic/elastic-agent-libs/logp"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/uniqueness"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type IsLeader struct {

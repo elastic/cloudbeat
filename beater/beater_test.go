@@ -20,9 +20,10 @@ package beater
 import (
 	"testing"
 
-	_ "github.com/elastic/cloudbeat/processor"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
+
+	_ "github.com/elastic/cloudbeat/processor"
 )
 
 type BeaterTestSuite struct {

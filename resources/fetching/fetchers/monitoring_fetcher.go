@@ -21,12 +21,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 )
 
 type MonitoringFetcher struct {

@@ -20,18 +20,19 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"io/fs"
 	"strconv"
 	"testing"
 	"testing/fstest"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/json"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 const (

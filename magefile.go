@@ -30,25 +30,25 @@ import (
 	"strings"
 	"time"
 
+	"github.com/elastic/beats/v7/dev-tools/mage"
+	devtools "github.com/elastic/beats/v7/dev-tools/mage"
+	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
+	"github.com/elastic/e2e-testing/pkg/downloads"
+	"github.com/go-git/go-git/v5"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 
-	"github.com/elastic/beats/v7/dev-tools/mage"
-	devtools "github.com/elastic/beats/v7/dev-tools/mage"
-	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
-	"github.com/elastic/cloudbeat/version"
-	"github.com/elastic/e2e-testing/pkg/downloads"
-	"github.com/go-git/go-git/v5"
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
-	// mage:import
-	_ "github.com/elastic/beats/v7/dev-tools/mage/target/unittest"
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/integtest/notests"
 	// mage:import
+	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
+	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/test"
+	// mage:import
+	_ "github.com/elastic/beats/v7/dev-tools/mage/target/unittest"
 
-	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
+	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
+	"github.com/elastic/cloudbeat/version"
 )
 
 const (
