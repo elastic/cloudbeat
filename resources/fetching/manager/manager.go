@@ -20,12 +20,13 @@ package manager
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"sync"
 	"time"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 )
 
 type Manager struct {

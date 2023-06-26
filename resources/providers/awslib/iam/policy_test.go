@@ -20,12 +20,14 @@ package iam
 import (
 	"context"
 	"errors"
+	"testing"
+
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/stretchr/testify/assert"
-	"testing"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 func TestProvider_GetPolicies(t *testing.T) {

@@ -18,10 +18,11 @@
 package providers
 
 import (
+	"os"
+
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
-	"os"
 )
 
 type KubernetesClientGetter interface {

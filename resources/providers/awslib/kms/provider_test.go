@@ -25,10 +25,11 @@ import (
 
 	kmsClient "github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type ProviderTestSuite struct {
