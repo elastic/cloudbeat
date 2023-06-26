@@ -18,6 +18,8 @@ from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     create_kubernetes_manifest,
+    get_cloud_security_posture_version,
+    update_package_version,
     # update_package_policy_version,
 )
 from loguru import logger
@@ -47,6 +49,10 @@ def load_data() -> Tuple[Dict, Dict]:
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
+    package_version = get_cloud_security_posture_version(cfg=cnfg.elk_config)
+    logger.info(f"Package version: {package_version}")
+    update_package_version(cfg=cnfg.elk_config, package_version=package_version)
+
     logger.info("Starting installation of KSPM integration.")
     agent_data, package_data = load_data()
 

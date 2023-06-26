@@ -20,7 +20,6 @@ from pathlib import Path
 import ruamel.yaml
 from jinja2 import Template
 from loguru import logger
-from packaging.version import parse as parse_version
 
 
 def read_json(json_path: Path) -> dict:
@@ -230,28 +229,3 @@ def replace_image_field(yaml_string: str, new_image: str) -> str:
     yaml_string = output_stream.getvalue()
 
     return yaml_string
-
-
-def check_pre_release(elk_version: str, latest_version: str) -> bool:
-    """
-    Checks if the given Elasticsearch version is a pre-release version.
-
-    Args:
-        elk_version (str): The Elasticsearch version to check.
-        latest_version (str): The latest Elasticsearch version.
-
-    Returns:
-        bool: True if the elk_version is a pre-release version, False otherwise.
-    """
-    elk_version = elk_version.split("-")[0]
-    latest_version = latest_version.split("-")[0]
-    elk_version_parsed = parse_version(elk_version)
-    latest_version_parsed = parse_version(latest_version)
-
-    # Extract major and minor versions
-    elk_major, elk_minor, _ = elk_version_parsed.release
-    latest_major, latest_minor, _ = latest_version_parsed.release
-
-    pre_release = elk_major == latest_major and elk_minor <= latest_minor - 1
-
-    return pre_release

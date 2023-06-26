@@ -5,7 +5,7 @@ import codecs
 from munch import Munch, munchify
 from loguru import logger
 from api.base_call_api import APICallException, perform_api_call
-from utils import replace_image_field, check_pre_release
+from utils import replace_image_field
 
 
 def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
@@ -171,21 +171,23 @@ def get_stack_latest_version():
         return ""
 
 
-def get_cloud_security_posture_version(cfg: Munch, params: Munch) -> str:
+def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> str:
     """
-    Retrieves the version of the 'cloud_security_posture' package using Fleet api.
+    Retrieve the version of the cloud_security_posture package.
 
     Args:
-        cfg (Munch): Configuration object containing the Kibana URL and authentication details.
-        params (Munch): Additional parameters for the API request.
+        cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
+        prerelease (bool, optional): Flag indicating whether to include
+                                        prerelease versions.Defaults to True.
 
     Returns:
-        str: The version of the 'cloud_security_posture' package, or None if the API call fails.
+        str: The version of the cloud_security_posture package, or None if the API call fails.
+
     """
     url = f"{cfg.kibana_url}/api/fleet/epm/packages"
 
     request_params = {
-        "prerelease": params.prerelease,
+        "prerelease": prerelease,
     }
 
     try:
@@ -210,27 +212,41 @@ def get_cloud_security_posture_version(cfg: Munch, params: Munch) -> str:
         return None
 
 
-def update_package_policy_version(cfg: Munch, package_data: dict):
+def update_package_version(cfg: Munch, package_version: str):
     """
-    Update the package version in the package policy data.
+    Updates the version of the 'cloud_security_posture' package.
 
     Args:
-        cfg (Munch): Configuration object containing stack version.
-        package_data (dict): Package policy data.
+        cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
+        package_version (str): The version to update the 'cloud_security_posture' package to.
 
     Returns:
-        None
-    """
-    elk_version = cfg.stack_version
-    latest_version = get_stack_latest_version()
-    csp_package_params = Munch()
-    csp_package_params.prerelease = check_pre_release(
-        elk_version=elk_version,
-        latest_version=latest_version,
-    )
-    package_version = get_cloud_security_posture_version(
-        cfg=cfg,
-        params=csp_package_params,
-    )
+        Union[Munch, str]: The response object if the API call is successful,
+        or an empty string on failure.
 
-    package_data["package"]["version"] = package_version
+    Raises:
+        APICallException: If the API call fails with an error.
+
+    """
+    # pylint: disable=duplicate-code
+    url = f"{cfg.kibana_url}/api/fleet/epm/packages/cloud_security_posture/{package_version}"
+    try:
+        response = perform_api_call(
+            method="POST",
+            url=url,
+            auth=cfg.auth,
+            params={
+                "json": {
+                    "force": True,
+                    "ignore_constraints": True,
+                },
+            },
+        )
+        response_obj = munchify(response)
+        return response_obj
+
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return ""
