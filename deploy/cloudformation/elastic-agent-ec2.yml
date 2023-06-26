@@ -159,7 +159,7 @@ Resources:
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
-            VolumeSize: 10
+            VolumeSize: 32
 Outputs:
   Ec2InstanceId:
     Value: !Ref ElasticAgentEc2Instance
