@@ -20,15 +20,15 @@ package ec2
 import (
 	"context"
 	"fmt"
-	"github.com/go-errors/errors"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/samber/lo"
-
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/go-errors/errors"
+	"github.com/samber/lo"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 var subnetAssociationIdFilterName = "association.subnet-id"

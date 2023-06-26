@@ -23,12 +23,13 @@ import (
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
+	k8s "k8s.io/client-go/kubernetes"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/uniqueness"
-	"github.com/elastic/elastic-agent-libs/logp"
-	k8s "k8s.io/client-go/kubernetes"
 )
 
 type RegisteredFetcher struct {

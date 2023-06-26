@@ -19,7 +19,9 @@ package configservice
 
 import (
 	"context"
+
 	configSDK "github.com/aws/aws-sdk-go-v2/service/configservice"
+
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 

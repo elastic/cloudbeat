@@ -20,14 +20,14 @@ package beater
 import (
 	"fmt"
 
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/flavors"
-	"github.com/elastic/cloudbeat/launcher"
-
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/beats/v7/libbeat/common/reload"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/flavors"
+	"github.com/elastic/cloudbeat/launcher"
 )
 
 func New(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
