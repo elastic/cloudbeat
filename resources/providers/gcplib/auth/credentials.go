@@ -18,24 +18,59 @@
 package gcplib
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"google.golang.org/api/option"
+	"io/fs"
+	"os"
 )
 
-func GetGcpClientConfig(cfg *config.Config) ([]option.ClientOption, error) {
-	// Create credentials options
+func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOption, error) {
+	log.Info("GetGCPClientConfig create credentials options")
 	gcpCred := cfg.CloudConfig.GcpCfg
-	var opt []option.ClientOption
-	if gcpCred.CredentialsFilePath != "" && gcpCred.CredentialsJSON != "" {
-		return nil, errors.New("both credentials_file_path and credentials_json specified, you must use only one of them")
-	} else if gcpCred.CredentialsFilePath != "" {
-		opt = []option.ClientOption{option.WithCredentialsFile(gcpCred.CredentialsFilePath)}
-	} else if gcpCred.CredentialsJSON != "" {
-		opt = []option.ClientOption{option.WithCredentialsJSON([]byte(gcpCred.CredentialsJSON))}
-	} else {
+	if gcpCred.CredentialsJSON == "" && gcpCred.CredentialsFilePath == "" {
 		return nil, errors.New("no credentials_file_path or credentials_json specified")
 	}
 
-	return opt, nil
+	var opts []option.ClientOption
+	if gcpCred.CredentialsFilePath != "" {
+		if err := validateJSONFromFile(log, gcpCred.CredentialsFilePath); err == nil {
+			log.Infof("Appending credentials file path to gcp client options: %s", gcpCred.CredentialsFilePath)
+			opts = append(opts, option.WithCredentialsFile(gcpCred.CredentialsFilePath))
+		} else {
+			return nil, err
+		}
+	}
+
+	if gcpCred.CredentialsJSON != "" {
+		if json.Valid([]byte(gcpCred.CredentialsJSON)) {
+			log.Info("Appending credentials JSON to client options")
+			opts = append(opts, option.WithCredentialsJSON([]byte(gcpCred.CredentialsJSON)))
+		} else {
+			return nil, errors.New("invalid credentials JSON")
+		}
+	}
+
+	return opts, nil
+}
+
+func validateJSONFromFile(log *logp.Logger, filePath string) error {
+	if _, err := os.Stat(filePath); errors.Is(err, fs.ErrNotExist) {
+		return fmt.Errorf("the file %q cannot be found", filePath)
+
+	}
+
+	b, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("the file %q cannot be read", filePath)
+	}
+
+	if !json.Valid(b) {
+		return fmt.Errorf("the file %q does not contain valid JSON", filePath)
+	}
+
+	return nil
 }

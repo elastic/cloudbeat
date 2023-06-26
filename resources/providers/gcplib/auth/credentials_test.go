@@ -19,12 +19,22 @@ package gcplib
 
 import (
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"google.golang.org/api/option"
+	"os"
 	"reflect"
 	"testing"
 )
 
+const (
+	saCredentialsJSON = `{ "client_id": "test" }`
+	saFilePath        = "sa-credentials.json"
+)
+
 func TestGetGcpClientConfig(t *testing.T) {
+	f := createServiceAccountFile(t)
+	defer os.Remove(f.Name())
+
 	tests := []struct {
 		name    string
 		cfg     *config.Config
@@ -36,42 +46,69 @@ func TestGetGcpClientConfig(t *testing.T) {
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
 					GcpCfg: config.GcpClientOpt{
-						CredentialsFilePath: "sa-credentials.json",
+						CredentialsFilePath: saFilePath,
 					},
 				},
 			},
-			want:    []option.ClientOption{option.WithCredentialsFile("sa-credentials.json")},
+			want:    []option.ClientOption{option.WithCredentialsFile(saFilePath)},
 			wantErr: false,
 		},
 		{
-			name: "Should return a GcpClientConfig using SA credentials json",
+			name: "Should return an error due to invalid SA credentials file path",
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
 					GcpCfg: config.GcpClientOpt{
-						CredentialsJSON: "test-json-content",
-					},
-				},
-			},
-			want:    []option.ClientOption{option.WithCredentialsJSON([]byte("test-json-content"))},
-			wantErr: false,
-		},
-		{
-			name: "Should return error when both credentials_file_path and credentials_json specified",
-			cfg: &config.Config{
-				CloudConfig: config.CloudConfig{
-					GcpCfg: config.GcpClientOpt{
-						CredentialsFilePath: "sa-credentials.json",
-						CredentialsJSON:     "test-json-content",
+						CredentialsFilePath: "invalid path",
 					},
 				},
 			},
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			name: "Should return a GcpClientConfig using SA credentials json",
+			cfg: &config.Config{
+				CloudConfig: config.CloudConfig{
+					GcpCfg: config.GcpClientOpt{
+						CredentialsJSON: saCredentialsJSON,
+					},
+				},
+			},
+			want:    []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+			wantErr: false,
+		},
+		{
+			name: "Should return an error due to invalid SA json",
+			cfg: &config.Config{
+				CloudConfig: config.CloudConfig{
+					GcpCfg: config.GcpClientOpt{
+						CredentialsJSON: "invalid json",
+					},
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Should return client options with both credentials_file_path and credentials_json",
+			cfg: &config.Config{
+				CloudConfig: config.CloudConfig{
+					GcpCfg: config.GcpClientOpt{
+						CredentialsFilePath: saFilePath,
+						CredentialsJSON:     saCredentialsJSON,
+					},
+				},
+			},
+			want: []option.ClientOption{
+				option.WithCredentialsFile(saFilePath),
+				option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetGcpClientConfig(tt.cfg)
+			got, err := GetGcpClientConfig(tt.cfg, logp.NewLogger("gcp credentials test"))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetGcpClientConfig() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -82,4 +119,21 @@ func TestGetGcpClientConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Creates a test sa account file to be used in the tests
+func createServiceAccountFile(t *testing.T) *os.File {
+	f, err := os.Create(saFilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.WriteString(saCredentialsJSON); err != nil {
+		t.Fatal(err)
+	}
+	return f
 }
