@@ -25,13 +25,14 @@ import (
 	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/suite"
 )
 
 type IamFetcherTestSuite struct {

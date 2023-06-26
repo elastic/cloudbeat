@@ -20,11 +20,12 @@ package iam
 import (
 	"context"
 	"errors"
+	"testing"
+
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
 )
 
 type accountAliasMocks map[string][][]any

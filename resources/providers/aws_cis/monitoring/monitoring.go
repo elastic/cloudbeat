@@ -19,17 +19,18 @@ package monitoring
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	cloudwatch_types "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
 	cloudwatchlogs_types "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
+	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch/logs"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Provider struct {

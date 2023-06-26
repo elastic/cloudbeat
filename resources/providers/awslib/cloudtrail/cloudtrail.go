@@ -22,8 +22,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	trailClient "github.com/aws/aws-sdk-go-v2/service/cloudtrail"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type TrailService interface {

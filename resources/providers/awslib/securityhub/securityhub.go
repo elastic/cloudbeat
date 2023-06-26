@@ -20,7 +20,9 @@ package securityhub
 import (
 	"context"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
