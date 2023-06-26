@@ -19,14 +19,15 @@ package registry
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"sync"
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
-	"sync"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type RegistryTestSuite struct {

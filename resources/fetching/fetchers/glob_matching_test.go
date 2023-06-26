@@ -18,10 +18,11 @@
 package fetchers
 
 import (
-	"github.com/stretchr/testify/suite"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/suite"
 )
 
 // Based on https://github.com/yargevad/filepathx/blob/master/filepathx.go

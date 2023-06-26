@@ -20,14 +20,16 @@ package configservice
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	configSDK "github.com/aws/aws-sdk-go-v2/service/configservice"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 const awsAccountId = "dummy-account-id"

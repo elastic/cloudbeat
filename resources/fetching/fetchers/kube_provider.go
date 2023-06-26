@@ -20,10 +20,11 @@ package fetchers
 import (
 	"reflect"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 type K8sResource struct {
