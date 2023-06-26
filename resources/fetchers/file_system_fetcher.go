@@ -83,25 +83,21 @@ type FSResource struct {
 // to the Cloudbeat
 type FileSystemFetcher struct {
 	log        *logp.Logger
+	cfg        FileFetcherConfig
 	osUser     user.OSUser
 	resourceCh chan fetching.ResourceInfo
-	patterns   []string
 }
 
-func NewFsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, patterns []string) *FileSystemFetcher {
-	return &FileSystemFetcher{
-		log:        log,
-		resourceCh: ch,
-		osUser:     user.NewOSUserUtil(),
-		patterns:   patterns,
-	}
+type FileFetcherConfig struct {
+	fetching.BaseFetcherConfig
+	Patterns []string `config:"patterns"` // Files and directories paths for the fetcher to extract info from
 }
 
 func (f *FileSystemFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting FileSystemFetcher.Fetch")
 
 	// Input files might contain glob pattern
-	for _, filePattern := range f.patterns {
+	for _, filePattern := range f.cfg.Patterns {
 		matchedFiles, err := Glob(filePattern)
 		if err != nil {
 			f.log.Errorf("Failed to find matched glob for %s, error: %+v", filePattern, err)
