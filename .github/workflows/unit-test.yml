@@ -123,7 +123,6 @@ jobs:
         with:
           version: latest
           args: --timeout=10m --whole-files -v
-          skip-cache: false
 
   dependency-review:
     runs-on: ubuntu-20.04
