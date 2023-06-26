@@ -20,8 +20,13 @@ package flavors
 import (
 	"context"
 	"fmt"
+
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+	"github.com/elastic/elastic-agent-libs/logp"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/aws"
@@ -30,9 +35,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/version"
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/logp"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ConfigureProcessors configure processors to be used by the beat

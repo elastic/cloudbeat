@@ -18,9 +18,8 @@
 package mage
 
 import (
-	"github.com/magefile/mage/mg"
-
 	devtools "github.com/elastic/beats/v7/dev-tools/mage"
+	"github.com/magefile/mage/mg"
 )
 
 // Update target namespace.

@@ -20,18 +20,17 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 	"regexp"
 
-	"github.com/pkg/errors"
-
-	v1 "k8s.io/api/core/v1"
-
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 )
 
 const (

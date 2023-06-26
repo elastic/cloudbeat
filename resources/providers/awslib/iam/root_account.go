@@ -19,11 +19,12 @@ package iam
 
 import (
 	"context"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"strings"
-	"time"
 )
 
 func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User {

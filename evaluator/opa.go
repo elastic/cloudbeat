@@ -23,14 +23,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/elastic/cloudbeat/config"
-	dlogger "github.com/elastic/cloudbeat/evaluator/debug_logger"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
-
 	"github.com/mitchellh/mapstructure"
 	"github.com/open-policy-agent/opa/plugins"
 	"github.com/open-policy-agent/opa/sdk"
+
+	"github.com/elastic/cloudbeat/config"
+	dlogger "github.com/elastic/cloudbeat/evaluator/debug_logger"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 var now = func() time.Time { return time.Now().UTC() }

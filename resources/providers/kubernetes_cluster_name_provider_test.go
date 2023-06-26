@@ -19,7 +19,6 @@ package providers
 
 import (
 	"fmt"
-	"github.com/elastic/cloudbeat/config"
 	"testing"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -28,6 +27,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/fake"
+
+	"github.com/elastic/cloudbeat/config"
 )
 
 type KubernetesClusterNameProviderTestSuite struct {

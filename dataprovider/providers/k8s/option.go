@@ -18,9 +18,10 @@
 package k8s
 
 import (
+	"github.com/elastic/elastic-agent-libs/logp"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/version"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Option func(*DataProvider)

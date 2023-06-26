@@ -20,6 +20,7 @@ package cloudtrail
 import (
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
