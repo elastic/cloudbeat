@@ -51,7 +51,7 @@ jobs:
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ github.event.inputs.docker-image-override }}
       STACK_VERSION: ${{ github.event.inputs.elk-stack-version }}
-      CNVM_STACK_NAME: "cnvm-sanity-test-stack"
+      CNVM_STACK_NAME: "${{ github.event.inputs.deployment_name }}-cnvm-sanity-test-stack"
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
