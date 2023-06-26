@@ -18,7 +18,7 @@ from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     get_build_info,
-    update_package_policy_version,
+    # update_package_policy_version,
 )
 from loguru import logger
 from utils import (
@@ -44,7 +44,7 @@ def load_data() -> Tuple[Dict, Dict]:
     logger.info("Loading agent and package policies")
     agent_policy = read_json(json_path=cspm_agent_policy_data)
     package_policy = read_json(json_path=cspm_pkg_policy_data)
-    update_package_policy_version(cfg=cnfg.elk_config, package_data=package_policy)
+    # update_package_policy_version(cfg=cnfg.elk_config, package_data=package_policy)
     return agent_policy, package_policy
 
 
