@@ -19,17 +19,18 @@ package fetchers
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"github.com/elastic/cloudbeat/resources/utils/user"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/suite"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/resources/utils/user"
 )
 
 type FSFetcherTestSuite struct {

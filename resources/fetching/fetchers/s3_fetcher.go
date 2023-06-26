@@ -19,10 +19,12 @@ package fetchers
 
 import (
 	"context"
+
+	"github.com/elastic/elastic-agent-libs/logp"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type S3Fetcher struct {

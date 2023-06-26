@@ -27,8 +27,9 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/launcher"
 	"github.com/elastic/elastic-agent-libs/config"
+
+	"github.com/elastic/cloudbeat/launcher"
 )
 
 const (

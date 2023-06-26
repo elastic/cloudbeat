@@ -19,6 +19,7 @@ package dataprovider
 
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
+
 	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )

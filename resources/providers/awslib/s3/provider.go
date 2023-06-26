@@ -22,17 +22,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	s3ControlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3control"
+	s3ControlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 	"github.com/aws/smithy-go"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (

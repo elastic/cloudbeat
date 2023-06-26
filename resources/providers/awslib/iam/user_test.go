@@ -19,6 +19,8 @@ package iam
 
 import (
 	"context"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
@@ -27,7 +29,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
 )
 
 type mocksReturnVals map[string][][]any
