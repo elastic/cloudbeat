@@ -164,6 +164,17 @@ jobs:
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
 
+      - name: Install CNVM integration
+        id: cnvm
+        run: |
+          cd fleet_api
+          poetry run python src/install_cnvm_integration.py
+
+      - name: Deploy CNVM agent
+        env:
+          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+        run: just deploy-cloudformation
+
       - name: Install KSPM EKS integration
         id: kspm-eks
         run: |
@@ -208,17 +219,6 @@ jobs:
           scp -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} ${{ env.FLEET_API_DIR}}/cspm-linux.sh "ubuntu@${{ env.CSPM_PUBLIC_IP }}:~/."
           # Apply the manifest file
           ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_CSPM_KEY }} "ubuntu@${{ env.CSPM_PUBLIC_IP }}" "chmod +x cspm-linux.sh && ./cspm-linux.sh"
-
-      - name: Install CNVM integration
-        id: cnvm
-        run: |
-          cd fleet_api
-          poetry run python src/install_cnvm_integration.py
-
-      - name: Deploy CNVM agent
-        env:
-          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: just deploy-cloudformation
 
       - name: Upload Integrations data
         if: always()
