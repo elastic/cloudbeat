@@ -10,13 +10,6 @@ cloudbeat:
   # Defines how often an event is sent to the output
   # Due to many s3 buckets, CSPM period recommendation is 600s
   period: 600s
-  fetchers:
-    - name: aws-iam
-    - name: aws-s3
-    - name: aws-ec2-network
-    - name: aws-trail
-    - name: aws-monitoring
-    - name: aws-rds
   evaluator:
     decision_logs: false
 # =================================== Kibana ===================================

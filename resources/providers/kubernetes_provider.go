@@ -28,9 +28,7 @@ type KubernetesClientGetter interface {
 	GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error)
 }
 
-type KubernetesProvider struct{}
-
-func (p KubernetesProvider) GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
+func GetK8sClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
 	client, err := kubernetes.GetKubernetesClient(kubeConfig, options)
 	if err != nil {
 		if kubernetes.IsInCluster(kubeConfig) {

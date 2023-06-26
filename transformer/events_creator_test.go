@@ -28,14 +28,12 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/types"
-	"github.com/elastic/cloudbeat/version"
-	"github.com/stretchr/testify/mock"
-
 	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
+	"github.com/elastic/cloudbeat/version"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 

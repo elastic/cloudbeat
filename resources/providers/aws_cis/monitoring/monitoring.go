@@ -19,6 +19,8 @@ package monitoring
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"strings"
 
 	cloudwatch_types "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
@@ -54,6 +56,16 @@ type (
 		MetricTopicBinding map[string][]string
 	}
 )
+
+func NewProvider(log *logp.Logger, awsConfig aws.Config, trailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client], cloudwatchCrossResignFactory awslib.CrossRegionFactory[cloudwatch.Client], cloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client], snsCrossRegionFactory awslib.CrossRegionFactory[sns.Client]) *Provider {
+	return &Provider{
+		Cloudtrail:     cloudtrail.NewProvider(log, awsConfig, trailCrossRegionFactory),
+		Cloudwatch:     cloudwatch.NewProvider(log, awsConfig, cloudwatchCrossResignFactory),
+		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, awsConfig, cloudwatchlogsCrossRegionFactory),
+		Sns:            sns.NewSNSProvider(log, awsConfig, snsCrossRegionFactory),
+		Log:            log,
+	}
+}
 
 // AggregateResources will gather all the resource to be used for aws cis 4.1 ... 4.15 rules
 func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {

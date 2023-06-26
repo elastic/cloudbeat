@@ -48,7 +48,6 @@ type Config struct {
 	Type        string                  `config:"config.v1.type"`
 	Deployment  string                  `config:"config.v1.deployment"`
 	CloudConfig CloudConfig             `config:"config.v1"`
-	Fetchers    []*config.C             `config:"fetchers"`
 	KubeConfig  string                  `config:"kube_config"`
 	Period      time.Duration           `config:"period"`
 	Processors  processors.PluginConfig `config:"processors"`
