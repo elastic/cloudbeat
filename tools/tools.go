@@ -23,16 +23,13 @@
 package tools
 
 import (
+	_ "github.com/elastic/go-licenser"
 	_ "github.com/magefile/mage"
+	_ "github.com/mitchellh/gox"
 	_ "github.com/pierrre/gotestcover"
 	_ "github.com/tsg/go-daemon"
+	_ "go.elastic.co/go-licence-detector"
+	_ "golang.org/x/lint/golint"
 	_ "golang.org/x/tools/cmd/goimports"
 	_ "gotest.tools/gotestsum/cmd"
-
-	_ "github.com/mitchellh/gox"
-	_ "golang.org/x/lint/golint"
-
-	_ "go.elastic.co/go-licence-detector"
-
-	_ "github.com/elastic/go-licenser"
 )

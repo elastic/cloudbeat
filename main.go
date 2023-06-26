@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/elastic/cloudbeat/cmd"
-
 	_ "github.com/elastic/cloudbeat/include"
 )
 

@@ -22,6 +22,9 @@ import (
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
+	k8s "k8s.io/client-go/kubernetes"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/condition"
 	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
@@ -29,8 +32,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
 	"github.com/elastic/cloudbeat/uniqueness"
-	"github.com/elastic/elastic-agent-libs/logp"
-	k8s "k8s.io/client-go/kubernetes"
 )
 
 const (

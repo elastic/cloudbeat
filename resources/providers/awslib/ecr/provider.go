@@ -20,8 +20,10 @@ package ecr
 import (
 	"context"
 	"fmt"
+
 	ecrClient "github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
+
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 

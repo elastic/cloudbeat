@@ -19,11 +19,13 @@ package ecr
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	ecrClient "github.com/aws/aws-sdk-go-v2/service/ecr"
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type Repository types.Repository

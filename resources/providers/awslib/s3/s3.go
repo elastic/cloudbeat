@@ -19,12 +19,14 @@ package s3
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3control"
 	s3ContorlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type BucketDescription struct {

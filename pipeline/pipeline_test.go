@@ -22,9 +22,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 var (

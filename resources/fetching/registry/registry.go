@@ -20,9 +20,11 @@ package registry
 import (
 	"context"
 	"fmt"
+
+	"github.com/elastic/elastic-agent-libs/logp"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Registry interface {
