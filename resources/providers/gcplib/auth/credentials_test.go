@@ -18,12 +18,14 @@
 package gcplib
 
 import (
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"google.golang.org/api/option"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/elastic/elastic-agent-libs/logp"
+	"google.golang.org/api/option"
+
+	"github.com/elastic/cloudbeat/config"
 )
 
 const (

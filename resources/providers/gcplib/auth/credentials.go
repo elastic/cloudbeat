@@ -21,11 +21,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"google.golang.org/api/option"
 	"io/fs"
 	"os"
+
+	"github.com/elastic/elastic-agent-libs/logp"
+	"google.golang.org/api/option"
+
+	"github.com/elastic/cloudbeat/config"
 )
 
 func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOption, error) {
