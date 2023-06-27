@@ -10,6 +10,7 @@ linters:
     - nolintlint
     - unconvert
     - unparam
+    - whitespace
 # TODO: These are good but need some work to fix everything
 #    - gocritic
 #    - revive

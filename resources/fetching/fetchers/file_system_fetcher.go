@@ -123,7 +123,6 @@ func (f *FileSystemFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMet
 }
 
 func (f *FileSystemFetcher) fetchSystemResource(filePath string) (*FSResource, error) {
-
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)

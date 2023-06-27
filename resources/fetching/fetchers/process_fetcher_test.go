@@ -161,7 +161,6 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 }
 
 func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
-
 	testCases := []struct {
 		configFileName string
 		marshal        func(in interface{}) (out []byte, err error)

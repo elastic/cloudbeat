@@ -170,7 +170,6 @@ func TestNewFactory(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-
 			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient, identityProvider, awsconfig)
 			assert.Equal(t, tt.want.count, len(fetchersMap))
 			for fetcher := range fetchersMap {
