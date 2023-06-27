@@ -164,6 +164,7 @@ def get_stack_latest_version() -> str:
 
         return response.get("version", "")
 
+
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
@@ -197,6 +198,7 @@ def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> s
             auth=cfg.auth,
             params={"params": request_params},
         )
+        
         cloud_security_posture_version = None
         for package in response["response"]:
             if package.get("name", "") == "cloud_security_posture":
