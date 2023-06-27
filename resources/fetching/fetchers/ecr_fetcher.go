@@ -19,7 +19,6 @@ package fetchers
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
@@ -77,10 +76,7 @@ func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 		return err
 	}
 
-	ecrDescribedRepositories, err := f.describePodImagesRepositories(ctx, podsList, f.PodDescriber)
-	if err != nil {
-		return fmt.Errorf("could not retrieve pod's aws repositories: %w", err)
-	}
+	ecrDescribedRepositories := f.describePodImagesRepositories(ctx, podsList, f.PodDescriber)
 	for _, repository := range ecrDescribedRepositories {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      EcrResource{ecr.Repository(repository)},
@@ -90,7 +86,7 @@ func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 	return nil
 }
 
-func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) ([]types.Repository, error) {
+func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList *v1.PodList, describer PodDescriber) []types.Repository {
 	regionToReposMap := getAwsRepositories(podsList, describer)
 	f.log.Debugf("sending pods to ecrProviders: %v", regionToReposMap)
 	awsRepositories := make([]types.Repository, 0)
@@ -103,7 +99,7 @@ func (f *EcrFetcher) describePodImagesRepositories(ctx context.Context, podsList
 			awsRepositories = append(awsRepositories, describedRepo...)
 		}
 	}
-	return awsRepositories, nil
+	return awsRepositories
 }
 
 func getAwsRepositories(podsList *v1.PodList, describer PodDescriber) map[string][]string {
