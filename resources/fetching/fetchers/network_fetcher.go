@@ -55,10 +55,7 @@ func NewNetworkFetcher(log *logp.Logger, ec2Client ec2.ElasticCompute, ch chan f
 // Fetch collects network resource such as network acl and security groups
 func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting NetworkFetcher.Fetch")
-	resources, err := f.aggregateResources(ctx, f.ec2Client)
-	if err != nil {
-		return err
-	}
+	resources := f.aggregateResources(ctx, f.ec2Client)
 
 	for _, resource := range resources {
 		f.resourceCh <- fetching.ResourceInfo{
@@ -92,7 +89,7 @@ func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
 
 func (r NetworkResource) GetElasticCommonData() any { return nil }
 
-func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.ElasticCompute) ([]awslib.AwsResource, error) {
+func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.ElasticCompute) []awslib.AwsResource {
 	var resources []awslib.AwsResource
 	nacl, err := client.DescribeNetworkAcl(ctx)
 	if err != nil {
@@ -119,5 +116,5 @@ func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.Elast
 		resources = append(resources, ebsEncryption...)
 	}
 
-	return resources, nil
+	return resources
 }

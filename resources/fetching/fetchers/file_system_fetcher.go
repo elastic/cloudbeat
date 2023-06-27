@@ -122,26 +122,25 @@ func (f *FileSystemFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMet
 	return nil
 }
 
-func (f *FileSystemFetcher) fetchSystemResource(filePath string) (FSResource, error) {
+func (f *FileSystemFetcher) fetchSystemResource(filePath string) (*FSResource, error) {
 
 	info, err := os.Stat(filePath)
 	if err != nil {
-		return FSResource{}, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
+		return nil, fmt.Errorf("failed to fetch %s, error: %w", filePath, err)
 	}
 	resourceInfo, _ := f.fromFileInfo(info, filePath)
 
 	return resourceInfo, nil
 }
 
-func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FSResource, error) {
-
+func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (*FSResource, error) {
 	if info == nil {
-		return FSResource{}, nil
+		return nil, nil
 	}
 
 	stat, ok := info.Sys().(*syscall.Stat_t)
 	if !ok {
-		return FSResource{}, errors.New("Not a syscall.Stat_t")
+		return nil, errors.New("Not a syscall.Stat_t")
 	}
 
 	mod := strconv.FormatUint(uint64(info.Mode().Perm()), 8)
@@ -171,7 +170,7 @@ func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (FSResou
 		SubType: getFSSubType(info),
 	}
 
-	return FSResource{
+	return &FSResource{
 		EvalResource:  data,
 		ElasticCommon: enrichFileCommonData(stat, data, path),
 	}, nil

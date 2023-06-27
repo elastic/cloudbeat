@@ -165,7 +165,7 @@ func TestNewFactory(t *testing.T) {
 			Account: awssdk.String("test-account"),
 		}, nil)
 
-		identityProvider := func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+		identityProvider := func(_ awssdk.Config) awslib.IdentityProviderGetter {
 			return identity
 		}
 

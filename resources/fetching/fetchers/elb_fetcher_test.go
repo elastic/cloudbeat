@@ -221,6 +221,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
 			resourceCh:      s.resourceCh,
+			cloudIdentity:   nil,
 		}
 
 		ctx := context.Background()
