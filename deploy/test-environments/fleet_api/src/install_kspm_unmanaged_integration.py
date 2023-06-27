@@ -20,7 +20,6 @@ from api.common_api import (
     create_kubernetes_manifest,
     get_cloud_security_posture_version,
     update_package_version,
-    # update_package_policy_version,
 )
 from loguru import logger
 from utils import read_json, save_state
