@@ -21,10 +21,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
+
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type ClusterNameProviderAPI interface {

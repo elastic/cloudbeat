@@ -23,13 +23,13 @@ import (
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
-	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/suite"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type ClusterProviderTestSuite struct {

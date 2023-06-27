@@ -20,18 +20,19 @@ package fetchers
 import (
 	"context"
 	"fmt"
-	"github.com/djherbis/times"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/user"
-	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
 	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/djherbis/times"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/user"
 )
 
 const (

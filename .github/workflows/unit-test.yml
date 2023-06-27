@@ -105,24 +105,23 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-
-      - name: Set up GO (with caching)
-        uses: magnetikonline/action-golang-cache@v4
-        with:
-          go-version-file: .go-version
-
-      - name: Check out the repo
-        uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
           ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: .go-version
+          cache: false
+
       - name: Go linter
         uses: golangci/golangci-lint-action@v3.6.0
         with:
           version: latest
-          args: --timeout=10m --whole-files
+          args: --timeout=10m --whole-files -v
+
 
   dependency-review:
     runs-on: ubuntu-20.04

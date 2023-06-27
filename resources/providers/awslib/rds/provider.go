@@ -23,11 +23,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/samber/lo"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	ec2Provider "github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/samber/lo"
 )
 
 func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], ec2Provider ec2Provider.ElasticCompute) *Provider {

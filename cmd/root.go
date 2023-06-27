@@ -19,18 +19,17 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/elastic/cloudbeat/version"
-
-	"github.com/elastic/cloudbeat/beater"
-	"github.com/elastic/elastic-agent-client/v7/pkg/client"
-	"github.com/elastic/elastic-agent-client/v7/pkg/proto"
 
 	"github.com/elastic/beats/v7/libbeat/cmd"
 	"github.com/elastic/beats/v7/libbeat/cmd/instance"
 	"github.com/elastic/beats/v7/libbeat/common/reload"
-
 	_ "github.com/elastic/beats/v7/x-pack/libbeat/include"
 	"github.com/elastic/beats/v7/x-pack/libbeat/management"
+	"github.com/elastic/elastic-agent-client/v7/pkg/client"
+	"github.com/elastic/elastic-agent-client/v7/pkg/proto"
+
+	"github.com/elastic/cloudbeat/beater"
+	"github.com/elastic/cloudbeat/version"
 )
 
 // Name of this beat
