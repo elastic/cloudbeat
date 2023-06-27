@@ -114,14 +114,12 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 			}
 			topics := p.getSubscriptionForAlarms(ctx, info.Trail.HomeRegion, alarms)
 			bindings[name] = topics
-
 		}
 		items = append(items, MonitoringItem{
 			TrailInfo:          info,
 			MetricFilters:      metrics,
 			MetricTopicBinding: bindings,
 		})
-
 	}
 
 	return &Resource{Items: items}, nil

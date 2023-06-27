@@ -31,7 +31,6 @@ import (
 )
 
 func TestProvider_ListServerCertificates(t *testing.T) {
-
 	certificates := []types.ServerCertificateMetadata{
 		{
 			Expiration: &time.Time{},
