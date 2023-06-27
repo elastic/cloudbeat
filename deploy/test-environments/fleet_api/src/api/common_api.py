@@ -125,7 +125,7 @@ def get_build_info(version: str, is_snapshot: bool) -> str:
     """
     # pylint: disable=duplicate-code
     if is_snapshot:
-        url = "https://snapshots.elastic.co/latest/master.json"
+        url = f"https://snapshots.elastic.co/latest/{version}.json"
     else:
         url = f"https://staging.elastic.co/latest/{version}.json"
 
