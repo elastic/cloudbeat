@@ -91,7 +91,6 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 		}
 		s.NoError(err)
 		s.Equal(result, test.expected)
-
 	}
 }
 
