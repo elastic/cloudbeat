@@ -57,7 +57,7 @@ type Config struct {
 
 type CloudConfig struct {
 	AwsCred aws.ConfigAWS `config:"aws.credentials"`
-	GcpCfg  GcpClientOpt  `config:"gcp"`
+	GcpCfg  GcpConfig     `config:"gcp"`
 }
 
 type GcpConfig struct {

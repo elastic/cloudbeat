@@ -39,7 +39,7 @@ func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOp
 
 	var opts []option.ClientOption
 	if gcpCred.CredentialsFilePath != "" {
-		if err := validateJSONFromFile(log, gcpCred.CredentialsFilePath); err == nil {
+		if err := validateJSONFromFile(gcpCred.CredentialsFilePath); err == nil {
 			log.Infof("Appending credentials file path to gcp client options: %s", gcpCred.CredentialsFilePath)
 			opts = append(opts, option.WithCredentialsFile(gcpCred.CredentialsFilePath))
 		} else {
@@ -59,7 +59,7 @@ func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOp
 	return opts, nil
 }
 
-func validateJSONFromFile(log *logp.Logger, filePath string) error {
+func validateJSONFromFile(filePath string) error {
 	if _, err := os.Stat(filePath); errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("the file %q cannot be found", filePath)
 
