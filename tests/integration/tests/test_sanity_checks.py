@@ -92,3 +92,26 @@ def test_cspm_findings(elastic_client, match_type):
 
     results = get_findings(elastic_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
+
+
+@pytest.mark.sanity
+def test_cnvm_findings(elastic_client):
+    """
+    Test case to check for vulnerabilities found by CNVM.
+
+    Args:
+        elastic_client: The elastic client object.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the resource type is missing.
+    """
+    match_type = "vulnerability"
+    query_list = []
+    query, sort = elastic_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
+    elastic_client.index = "*cloud_security_posture.vulnerabilities*"
+
+    results = get_findings(elastic_client, CONFIG_TIMEOUT, query, sort, match_type)
+    assert len(results) > 0, f"The resource type '{match_type}' is missing"
