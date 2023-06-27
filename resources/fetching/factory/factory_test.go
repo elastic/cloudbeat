@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/config"
@@ -150,8 +151,8 @@ func TestNewFactory(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		awsconfig := &awslib.MockConfigProviderAPI{}
-		awsconfig.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
+		awsCfg := &awslib.MockConfigProviderAPI{}
+		awsCfg.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
 			Call.
 			Return(func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
 				return CreateSdkConfig(config, "us1-east")
@@ -160,27 +161,23 @@ func TestNewFactory(t *testing.T) {
 					return nil
 				},
 			)
-		identity := &awslib.MockIdentityProviderGetter{}
-		identity.EXPECT().GetIdentity(mock.Anything).Return(&awslib.Identity{
+		identityProvider := &awslib.MockIdentityProviderGetter{}
+		identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything).Return(&awslib.Identity{
 			Account: awssdk.String("test-account"),
 		}, nil)
 
-		identityProvider := func(cfg awssdk.Config) awslib.IdentityProviderGetter {
-			return identity
-		}
-
 		t.Run(tt.name, func(t *testing.T) {
-
-			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient, identityProvider, awsconfig)
+			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient, identityProvider, awsCfg)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
 			assert.Equal(t, tt.want.count, len(fetchersMap))
 			for fetcher := range fetchersMap {
 				if _, ok := fetchersMap[fetcher]; !ok {
 					t.Errorf("NewFactory() fetchersMap = %v, want %v", fetchersMap, tt.want.names)
 				}
-			}
-
-			if tt.wantErr {
-				assert.Error(t, err)
 			}
 		})
 	}

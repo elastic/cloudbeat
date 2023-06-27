@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"time"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
@@ -74,9 +73,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 	}
 	le := uniqueness.NewLeaderElector(log, kubeClient)
 
-	awsConfigProvider := awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}}
-
-	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, kubeClient, awslib.GetIdentityClient, awsConfigProvider)
+	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, kubeClient)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -186,8 +183,24 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter, awsConfigProvider awslib.ConfigProviderAPI) (registry.Registry, error) {
-	f, err := factory.NewFactory(ctx, log, cfg, ch, le, k8sClient, identityProvider, awsConfigProvider)
+func initRegistry(
+	ctx context.Context,
+	log *logp.Logger,
+	cfg *config.Config,
+	ch chan fetching.ResourceInfo,
+	le uniqueness.Manager,
+	k8sClient k8s.Interface,
+) (registry.Registry, error) {
+	f, err := factory.NewFactory(
+		ctx,
+		log,
+		cfg,
+		ch,
+		le,
+		k8sClient,
+		&awslib.IdentityProvider{},
+		awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+	)
 	if err != nil {
 		return nil, err
 	}
