@@ -61,7 +61,7 @@ func NewElbFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider
 func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Debug("Starting ElbFetcher.Fetch")
 
-	balancers, err := f.GetLoadBalancers()
+	balancers, err := f.GetLoadBalancers(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to load balancers from Kubernetes %w", err)
 	}
@@ -79,8 +79,7 @@ func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 	return nil
 }
 
-func (f *ElbFetcher) GetLoadBalancers() ([]string, error) {
-	ctx := context.Background()
+func (f *ElbFetcher) GetLoadBalancers(ctx context.Context) ([]string, error) {
 	services, err := f.kubeClient.CoreV1().Services("").List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Kuberenetes services:  %w", err)
