@@ -20,16 +20,18 @@ package iam
 import (
 	"context"
 	"errors"
+	"sort"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"sort"
-	"testing"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 func TestProvider_GetAccessAnalyzers(t *testing.T) {

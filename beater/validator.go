@@ -23,8 +23,9 @@ package beater
 import (
 	"fmt"
 
-	"github.com/elastic/cloudbeat/config"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
+
+	"github.com/elastic/cloudbeat/config"
 )
 
 type validator struct{}

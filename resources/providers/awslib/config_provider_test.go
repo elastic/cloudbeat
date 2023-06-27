@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
