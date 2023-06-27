@@ -144,7 +144,7 @@ def get_build_info(version: str, is_snapshot: bool) -> str:
         return ""
 
 
-def get_stack_latest_version():
+def get_stack_latest_version() -> str:
     """
     Retrieve the latest version of the stack from the Elastic snapshots API.
 
@@ -161,8 +161,8 @@ def get_stack_latest_version():
             method="GET",
             url=url,
         )
-        response_obj = munchify(response)
-        return response_obj.version
+
+        return response.get("version", "")
 
     except APICallException as api_ex:
         logger.error(
@@ -197,12 +197,11 @@ def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> s
             auth=cfg.auth,
             params={"params": request_params},
         )
-        response_obj = munchify(response)
         cloud_security_posture_version = None
-        for package in response_obj.response:
-            if package.get("name", "")== "cloud_security_posture":
-                cloud_security_posture_version = package["version"]
-                # break
+        for package in response["response"]:
+            if package.get("name", "") == "cloud_security_posture":
+                cloud_security_posture_version = package.get("version", "")
+                break
 
         return cloud_security_posture_version
     except APICallException as api_ex:
@@ -220,10 +219,6 @@ def update_package_version(cfg: Munch, package_version: str):
         cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
         package_version (str): The version to update the 'cloud_security_posture' package to.
 
-    Returns:
-        Union[Munch, str]: The response object if the API call is successful,
-        or an empty string on failure.
-
     Raises:
         APICallException: If the API call fails with an error.
 
@@ -231,7 +226,7 @@ def update_package_version(cfg: Munch, package_version: str):
     # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/epm/packages/cloud_security_posture/{package_version}"
     try:
-        response = perform_api_call(
+        perform_api_call(
             method="POST",
             url=url,
             auth=cfg.auth,
@@ -242,11 +237,8 @@ def update_package_version(cfg: Munch, package_version: str):
                 },
             },
         )
-        response_obj = munchify(response)
-        return response_obj
 
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return ""

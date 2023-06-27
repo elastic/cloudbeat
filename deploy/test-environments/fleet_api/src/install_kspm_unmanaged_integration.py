@@ -42,7 +42,6 @@ def load_data() -> Tuple[Dict, Dict]:
     logger.info("Loading agent and package policies")
     agent_policy = read_json(json_path=kspm_agent_policy_data)
     package_policy = read_json(json_path=kspm_unmanached_pkg_policy_data)
-    # update_package_policy_version(cfg=cnfg.elk_config, package_data=package_policy)
 
     return agent_policy, package_policy
 
