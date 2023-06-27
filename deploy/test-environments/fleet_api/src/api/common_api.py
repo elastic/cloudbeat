@@ -200,7 +200,7 @@ def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> s
         response_obj = munchify(response)
         cloud_security_posture_version = None
         for package in response_obj.response:
-            if package["name"] == "cloud_security_posture":
+            if package.get("name", "")== "cloud_security_posture":
                 cloud_security_posture_version = package["version"]
                 # break
 
