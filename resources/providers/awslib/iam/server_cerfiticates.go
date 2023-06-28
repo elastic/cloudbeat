@@ -28,7 +28,6 @@ import (
 )
 
 func (p Provider) ListServerCertificates(ctx context.Context) (awslib.AwsResource, error) {
-
 	p.log.Debug("IAMProvider.ListServerCertificates")
 
 	var certificates []types.ServerCertificateMetadata

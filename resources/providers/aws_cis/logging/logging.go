@@ -45,7 +45,6 @@ func NewProvider(
 	multiRegionS3Factory awslib.CrossRegionFactory[s3.Client],
 	accountId string,
 ) *Provider {
-
 	return &Provider{
 		log:           log,
 		s3Provider:    s3.NewProvider(log, cfg, multiRegionS3Factory, accountId),

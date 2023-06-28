@@ -170,7 +170,6 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
-
 	var tests = []struct {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
@@ -221,6 +220,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
 			resourceCh:      s.resourceCh,
+			cloudIdentity:   nil,
 		}
 
 		ctx := context.Background()

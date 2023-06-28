@@ -83,10 +83,6 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
-			kmsFetcherCfg := KmsFetcherConfig{
-				AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
-			}
-
 			kmsProviderMock := &kms.MockKMS{}
 			for funcName, returnVals := range test.kmsMocksReturnVals {
 				kmsProviderMock.On(funcName, context.TODO()).Return(returnVals...)
@@ -94,7 +90,6 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 
 			kmsFetcher := KmsFetcher{
 				log:        s.log,
-				cfg:        kmsFetcherCfg,
 				kms:        kmsProviderMock,
 				resourceCh: s.resourceCh,
 			}

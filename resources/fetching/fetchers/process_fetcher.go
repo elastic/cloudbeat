@@ -170,7 +170,6 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 }
 
 func (f *ProcessesFetcher) enrichProcCommonData(stat proc.ProcStat, cmd string, pid string) ProcCommonData {
-	procCd := &ProcCommonData{}
 	processID, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
 		f.log.Errorf("Couldn't parse PID, pid: %s", pid)
@@ -197,18 +196,20 @@ func (f *ProcessesFetcher) enrichProcCommonData(stat proc.ProcStat, cmd string, 
 	}
 	uptimeDate := time.Now().Add(-time.Duration(sysUptime) * time.Second)
 
-	procCd.PID = processID
-	procCd.CommandLine = cmd
-	procCd.Args = strings.Split(cmd, " ")
-	procCd.ArgsCount = int64(len(procCd.Args))
-	procCd.Name = stat.Name
-	procCd.Title = stat.Name
-	procCd.PGID = pgid
-	procCd.Parent = &ProcCommonData{PID: ppid}
-	procCd.Start = uptimeDate.Add(ticksToDuration(startTime))
-	procCd.Uptime = int64(time.Since(procCd.Start).Seconds())
-
-	return *procCd
+	args := strings.Split(cmd, " ")
+	start := uptimeDate.Add(ticksToDuration(startTime))
+	return ProcCommonData{
+		Parent:      &ProcCommonData{PID: ppid},
+		PID:         processID,
+		Name:        stat.Name,
+		PGID:        pgid,
+		CommandLine: cmd,
+		Args:        args,
+		ArgsCount:   int64(len(args)),
+		Title:       stat.Name,
+		Start:       start,
+		Uptime:      int64(time.Since(start).Seconds()),
+	}
 }
 
 // getProcessConfigurationFile - reads the configuration file associated with a process.

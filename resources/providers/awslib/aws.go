@@ -19,8 +19,6 @@ package awslib
 
 import (
 	"errors"
-
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 )
 
 const (
@@ -29,10 +27,6 @@ const (
 )
 
 var ErrClientNotFound = errors.New("aws client not found")
-
-type Config struct {
-	Config awssdk.Config
-}
 
 type AwsResource interface {
 	GetResourceArn() string

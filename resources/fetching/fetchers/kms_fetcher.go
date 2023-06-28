@@ -29,13 +29,8 @@ import (
 
 type KmsFetcher struct {
 	log        *logp.Logger
-	cfg        KmsFetcherConfig
 	kms        kms.KMS
 	resourceCh chan fetching.ResourceInfo
-}
-
-type KmsFetcherConfig struct {
-	fetching.AwsBaseFetcherConfig `config:",inline"`
 }
 
 type KmsResource struct {
