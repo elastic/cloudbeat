@@ -58,7 +58,6 @@ func (p *Provider) DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResou
 
 		var result []awslib.AwsResource
 		for _, keyEntry := range kmsKeys {
-
 			keyInfo, err := c.DescribeKey(ctx, &kmsClient.DescribeKeyInput{
 				KeyId: keyEntry.KeyId,
 			})
@@ -96,7 +95,6 @@ func (k KmsInfo) GetResourceArn() string {
 		return ""
 	}
 	return *k.KeyMetadata.Arn
-
 }
 
 func (k KmsInfo) GetResourceName() string {
