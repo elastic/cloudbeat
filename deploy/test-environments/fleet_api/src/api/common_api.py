@@ -170,15 +170,6 @@ def get_artifact_server(version: str) -> str:
 
 
 def is_snapshot(version: str) -> bool:
-    """
-    Determine if the specified version is a snapshot version.
-
-    Args:
-        version (str): The version of Elastic.
-
-    Returns:
-        bool: True if the version is a snapshot version, False otherwise.
-    """
     return "SNAPSHOT" in version
 
 
