@@ -17,7 +17,7 @@ from api.package_policy_api import create_cspm_integration
 from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
-    get_build_info,
+    get_artifact_server,
 )
 from loguru import logger
 from utils import (
@@ -87,16 +87,7 @@ if __name__ == "__main__":
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
     manifest_params.file_path = Path(__file__).parent / "cspm.sh"
     manifest_params.agent_version = cnfg.elk_config.stack_version
-    if "SNAPSHOT" in manifest_params.agent_version:
-        manifest_params.artifacts_url = cnfg.artifactory_url["snapshot"] + get_build_info(
-            version=manifest_params.agent_version,
-            is_snapshot=True,
-        )
-    else:
-        manifest_params.artifacts_url = cnfg.artifactory_url["staging"] + get_build_info(
-            version=manifest_params.agent_version,
-            is_snapshot=False,
-        )
+    manifest_params.artifacts_url = get_artifact_server(cnfg.elk_config.stack_version)
 
     # Render the template and get the replaced content
     rendered_content = render_template(cspm_template, manifest_params.toDict())

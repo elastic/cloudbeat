@@ -7,6 +7,11 @@ from loguru import logger
 from api.base_call_api import APICallException, perform_api_call
 from utils import replace_image_field
 
+AGENT_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
+
+STAGING_ARTIFACTORY_URL = "https://staging.elastic.co/"
+SNAPSHOT_ARTIFACTORY_URL = "https://snapshots.elastic.co/"
+
 
 def get_enrollment_token(cfg: Munch, policy_id: str) -> str:
     """Retrieves the enrollment token for a specified policy ID.
@@ -109,13 +114,12 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
         return
 
 
-def get_build_info(version: str, is_snapshot: bool) -> str:
+def get_build_info(version: str) -> str:
     """
     Retrieve the build ID for a specific version of Elastic.
 
     Args:
         version (str): The version of Elastic.
-        is_snapshot (bool): Flag indicating whether it is a snapshot build.
 
     Returns:
         str: The build ID of the specified version.
@@ -123,8 +127,7 @@ def get_build_info(version: str, is_snapshot: bool) -> str:
     Raises:
         APICallException: If the API call to retrieve the build ID fails.
     """
-    # pylint: disable=duplicate-code
-    if is_snapshot:
+    if is_snapshot(version):
         url = f"https://snapshots.elastic.co/latest/{version}.json"
     else:
         url = f"https://staging.elastic.co/latest/{version}.json"
@@ -142,3 +145,29 @@ def get_build_info(version: str, is_snapshot: bool) -> str:
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         return ""
+
+
+def get_artifact_server(version: str) -> str:
+    """
+    Retrieve the artifact server for a specific version of Elastic.
+
+    Args:
+        version (str): The version of Elastic.
+
+    Returns:
+        str: The artifact server of the specified version.
+
+    Raises:
+        APICallException: If the API call to retrieve the artifact server fails.
+    """
+
+    if is_snapshot(version):
+        url = SNAPSHOT_ARTIFACTORY_URL
+    else:
+        url = STAGING_ARTIFACTORY_URL
+
+    return url + get_build_info(version) + AGENT_ARTIFACT_SUFFIX
+
+
+def is_snapshot(version: str) -> bool:
+    return "SNAPSHOT" in version
