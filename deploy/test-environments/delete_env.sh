@@ -23,7 +23,7 @@ do
         SKIPPED+=($ENV)
         continue
     fi
-    # Download the state file, destroy the environment, and delete the state file
+    # Download the state file, destroy the environment, and delete the environment data from S3
     local="./$ENV-terraform.tfstate"
     aws s3 cp $BUCKET/$ENV/terraform.tfstate $local && \
     terraform destroy -var="region=eu-west-1" -state $local --auto-approve && \
