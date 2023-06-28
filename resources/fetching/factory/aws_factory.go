@@ -18,8 +18,6 @@
 package factory
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -42,10 +40,7 @@ import (
 )
 
 func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *awslib.Identity) (FetchersMap, error) {
-	log.Infof("Initializing AWS fetchers")
-	if identity == nil {
-		return nil, fmt.Errorf("NewCisAwsFactory was not provided with an aws identity")
-	}
+	log.Infof("Initializing AWS fetchers for account: '%s'", *identity.Account)
 
 	m := make(FetchersMap)
 	iamProvider := iam.NewIAMProvider(log, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
