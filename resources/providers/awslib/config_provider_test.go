@@ -93,6 +93,5 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 		s.Equal(test.secret, cred.SecretAccessKey)
 		s.Equal(test.session, cred.SessionToken)
 		s.Equal(test.region, awsConfig.Region)
-
 	}
 }

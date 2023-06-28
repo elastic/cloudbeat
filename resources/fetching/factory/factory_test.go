@@ -165,12 +165,11 @@ func TestNewFactory(t *testing.T) {
 			Account: awssdk.String("test-account"),
 		}, nil)
 
-		identityProvider := func(cfg awssdk.Config) awslib.IdentityProviderGetter {
+		identityProvider := func(_ awssdk.Config) awslib.IdentityProviderGetter {
 			return identity
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-
 			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient, identityProvider, awsconfig)
 			assert.Equal(t, tt.want.count, len(fetchersMap))
 			for fetcher := range fetchersMap {

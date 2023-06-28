@@ -82,6 +82,5 @@ func Test_GetAccountAlias(t *testing.T) {
 			assert.Equal(t, test.expected, result)
 			assert.Error(t, err)
 		}
-
 	}
 }

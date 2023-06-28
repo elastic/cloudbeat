@@ -47,7 +47,6 @@ func (p *Provider) DescribeConfigRecorders(ctx context.Context) ([]awslib.AwsRes
 				ConfigurationRecorder: recorder,
 				Status:                recorderStatus.ConfigurationRecordersStatus,
 			})
-
 		}
 
 		return Config{Recorders: result, region: region, accountId: p.awsAccountId}, nil
