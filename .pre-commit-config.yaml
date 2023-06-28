@@ -27,7 +27,6 @@ repos:
     hooks:
       - id: go-imports
         args: [-local, "github.com/elastic/cloudbeat"]
-        verbose: true
         exclude: 'mock_.*\.go'
       - id: golangci-lint
 

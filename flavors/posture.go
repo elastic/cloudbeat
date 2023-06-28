@@ -52,7 +52,7 @@ type posture struct {
 }
 
 // NewPosture creates an instance of posture.
-func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
+func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	log := logp.NewLogger("posture")
 
 	ctx, cancel := context.WithCancel(context.Background())

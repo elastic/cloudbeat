@@ -217,7 +217,6 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
-
 			iamProviderMock := &iam.MockAccessManagement{}
 			for funcName, returnVals := range test.mocksReturnVals {
 				iamProviderMock.On(funcName, context.TODO()).Return(returnVals...)

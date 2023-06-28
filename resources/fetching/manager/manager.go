@@ -68,7 +68,6 @@ func (m *Manager) Stop() {
 }
 
 func (m *Manager) fetchAndSleep(ctx context.Context) {
-
 	// set immediate exec for first time run
 	timer := time.NewTimer(0)
 	defer timer.Stop()
