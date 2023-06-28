@@ -28,7 +28,7 @@ from utils import (
 CNVM_AGENT_POLICY = "../../../cloud/data/agent_policy_cnvm_aws.json"
 CNVM_PACKAGE_POLICY = "../../../cloud/data/package_policy_cnvm_aws.json"
 CNVM_CLOUDFORMATION_CONFIG = "../../../cloudformation/config.json"
-CNVM_ARTIFACT_SUFFIX = "downloads/beats/elastic-agent"
+CNVM_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
 
 cnvm_agent_policy_data = Path(__file__).parent / CNVM_AGENT_POLICY
 cnvm_pkg_policy_data = Path(__file__).parent / CNVM_PACKAGE_POLICY
