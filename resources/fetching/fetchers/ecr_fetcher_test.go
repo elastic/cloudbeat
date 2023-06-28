@@ -276,7 +276,6 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 			s.Equal(*ecrResource.RepositoryArn, metadata.ID)
 		}
 	}
-
 }
 
 func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {

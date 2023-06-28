@@ -58,10 +58,9 @@ func getAWSDataProvider(ctx context.Context, log *logp.Logger, cfg config.Config
 		return nil, fmt.Errorf("Common.getAWSDataProvider failed to initialize AWS credentials: %w", err)
 	}
 
-	identityClient := awslib.GetIdentityClient(awsConfig)
 	iamProvider := iam.NewIAMProvider(log, awsConfig, nil)
 
-	identity, err := identityClient.GetIdentity(ctx)
+	identity, err := awslib.IdentityProvider{}.GetIdentity(ctx, awsConfig)
 	if err != nil {
 		return nil, fmt.Errorf("Common.getAWSDataProvider failed to get AWS identity: %w", err)
 	}

@@ -171,3 +171,103 @@ def get_artifact_server(version: str) -> str:
 
 def is_snapshot(version: str) -> bool:
     return "SNAPSHOT" in version
+
+
+def get_stack_latest_version() -> str:
+    """
+    Retrieve the latest version of the stack from the Elastic snapshots API.
+
+    Returns:
+        str: The latest version of the stack.
+
+    Raises:
+        APICallException: If the API call to retrieve the version fails.
+
+    """
+    url = "https://snapshots.elastic.co/latest/master.json"
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+        )
+        return response.get("version", "")
+
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return ""
+
+
+def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> str:
+    """
+    Retrieve the version of the cloud_security_posture package.
+
+    Args:
+        cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
+        prerelease (bool, optional): Flag indicating whether to include
+                                        prerelease versions.Defaults to True.
+
+    Returns:
+        str: The version of the cloud_security_posture package, or None if the API call fails.
+
+    """
+    url = f"{cfg.kibana_url}/api/fleet/epm/packages"
+
+    request_params = {
+        "prerelease": prerelease,
+    }
+
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            auth=cfg.auth,
+            params={"params": request_params},
+        )
+
+        cloud_security_posture_version = None
+        for package in response["response"]:
+            if package.get("name", "") == "cloud_security_posture":
+                cloud_security_posture_version = package.get("version", "")
+                break
+
+        return cloud_security_posture_version
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return None
+
+
+def update_package_version(cfg: Munch, package_version: str):
+    """
+    Updates the version of the 'cloud_security_posture' package.
+
+    Args:
+        cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
+        package_version (str): The version to update the 'cloud_security_posture' package to.
+
+    Raises:
+        APICallException: If the API call fails with an error.
+
+    """
+    # pylint: disable=duplicate-code
+    url = f"{cfg.kibana_url}/api/fleet/epm/packages/cloud_security_posture/{package_version}"
+    try:
+        perform_api_call(
+            method="POST",
+            url=url,
+            auth=cfg.auth,
+            params={
+                "json": {
+                    "force": True,
+                    "ignore_constraints": True,
+                },
+            },
+        )
+
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )

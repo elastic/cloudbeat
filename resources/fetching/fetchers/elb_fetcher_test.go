@@ -71,8 +71,6 @@ func (s *ElbFetcherTestSuite) TearDownTest() {
 func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 	var (
 		testAccount = "test-account"
-		testID      = "test-id"
-		testARN     = "test-arn"
 		lbName      = "adda9cdc89b13452e92d48be46858d37"
 	)
 
@@ -136,8 +134,6 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 
 		identity := awslib.Identity{
 			Account: &testAccount,
-			Arn:     &testARN,
-			UserId:  &testID,
 		}
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
@@ -170,7 +166,6 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 }
 
 func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
-
 	var tests = []struct {
 		ns                  string
 		loadBalancerIngress []v1.LoadBalancerIngress
@@ -221,6 +216,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
 			resourceCh:      s.resourceCh,
+			cloudIdentity:   nil,
 		}
 
 		ctx := context.Background()
