@@ -62,7 +62,6 @@ func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOp
 func validateJSONFromFile(filePath string) error {
 	if _, err := os.Stat(filePath); errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("the file %q cannot be found", filePath)
-
 	}
 
 	b, err := os.ReadFile(filePath)
