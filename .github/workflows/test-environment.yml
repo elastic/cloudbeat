@@ -17,7 +17,7 @@ on:
       elk-stack-version:
         required: true
         description: "Elastic Cloud stack SNAPSHOT or BC version"
-        default: "8.7.2-SNAPSHOT"
+        default: "8.8.0"
       ess-region:
         required: true
         description: "Elastic Cloud deployment region"
@@ -51,6 +51,7 @@ jobs:
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ github.event.inputs.docker-image-override }}
       STACK_VERSION: ${{ github.event.inputs.elk-stack-version }}
+      CNVM_STACK_NAME: "${{ github.event.inputs.deployment_name }}-cnvm-sanity-test-stack"
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -163,6 +164,17 @@ jobs:
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
 
+      - name: Install CNVM integration
+        id: cnvm
+        run: |
+          cd fleet_api
+          poetry run python src/install_cnvm_integration.py
+
+      - name: Deploy CNVM agent
+        env:
+          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+        run: just deploy-cloudformation
+
       - name: Install KSPM EKS integration
         id: kspm-eks
         run: |
@@ -228,3 +240,4 @@ jobs:
         if: github.event.inputs.cleanup-env == 'true'
         run: |
           terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
+          aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
