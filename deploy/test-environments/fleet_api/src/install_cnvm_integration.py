@@ -80,7 +80,6 @@ if __name__ == "__main__":
     cloudformation_params.ELASTIC_AGENT_VERSION = cnfg.elk_config.stack_version
     cloudformation_params.ELASTIC_ARTIFACT_SERVER = get_artifact_server(cnfg.elk_config.stack_version)
 
-    logger.info("Cloudformation parameters: ", cloudformation_params)
     with open(cnvm_cloudformation_config, "w") as file:
         json.dump(cloudformation_params, file)
 
