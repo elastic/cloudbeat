@@ -77,9 +77,8 @@ if __name__ == "__main__":
         policy_id=agent_policy_id,
     )
 
-    cloudformation_params.STACK_NAME = "cnvm-sanity-test-stack"
     cloudformation_params.FLEET_URL = get_fleet_server_host(cfg=cnfg.elk_config)
-    cloudformation_params.ELASTIC_AGENT_VERSION = get_agents(cfg=cnfg.elk_config)[0].agent.version
+    cloudformation_params.ELASTIC_AGENT_VERSION = cnfg.elk_config.stack_version
     if "SNAPSHOT" in cloudformation_params.ELASTIC_AGENT_VERSION:
         cloudformation_params.ELASTIC_ARTIFACTS_SERVER = (
             cnfg.artifactory_url["snapshot"]
