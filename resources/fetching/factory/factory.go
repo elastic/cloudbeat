@@ -47,7 +47,7 @@ func NewFactory(
 	ch chan fetching.ResourceInfo,
 	le uniqueness.Manager,
 	k8sClient k8s.Interface,
-	identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter,
+	identityProvider awslib.IdentityProviderGetter,
 	awsConfigProvider awslib.ConfigProviderAPI,
 ) (FetchersMap, error) {
 	awsConfig, awsIdentity, err := getAwsConfig(ctx, cfg, identityProvider, awsConfigProvider)
@@ -70,7 +70,7 @@ func NewFactory(
 func getAwsConfig(
 	ctx context.Context,
 	cfg *config.Config,
-	identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter,
+	identityProvider awslib.IdentityProviderGetter,
 	awsCfgProvider awslib.ConfigProviderAPI,
 ) (awssdk.Config, *awslib.Identity, error) {
 	if cfg.CloudConfig == (config.CloudConfig{}) || cfg.CloudConfig.AwsCred == (aws.ConfigAWS{}) {
@@ -94,10 +94,10 @@ func getAwsConfig(
 		awsConfig = *initializedCfg
 	}
 
-	identityProviderGetter, err := identityProvider(awsConfig).GetIdentity(ctx)
+	identity, err := identityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	return awsConfig, identityProviderGetter, nil
+	return awsConfig, identity, nil
 }
