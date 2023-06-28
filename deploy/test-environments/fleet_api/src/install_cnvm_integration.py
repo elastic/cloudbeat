@@ -5,7 +5,7 @@ This script installs CNVM AWS integration
 The following steps are performed:
 1. Create an agent policy.
 2. Create a CNVM AWS integration.
-3. Create a CNVM bash script to be deployed on a host.
+3. Create a deploy/cloudformation/config.json file to be used by the just deploy-cloudformation command.
 """
 import json
 from pathlib import Path
