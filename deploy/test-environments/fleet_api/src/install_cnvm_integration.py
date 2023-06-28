@@ -12,12 +12,12 @@ from pathlib import Path
 from typing import Dict, Tuple
 from munch import Munch
 import configuration_fleet as cnfg
-from api.agent_policy_api import create_agent_policy, get_agents
+from api.agent_policy_api import create_agent_policy
 from api.package_policy_api import create_cnvm_integration
 from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
-    get_build_info,
+    get_artifact_server,
 )
 from loguru import logger
 from utils import (
@@ -28,7 +28,6 @@ from utils import (
 CNVM_AGENT_POLICY = "../../../cloud/data/agent_policy_cnvm_aws.json"
 CNVM_PACKAGE_POLICY = "../../../cloud/data/package_policy_cnvm_aws.json"
 CNVM_CLOUDFORMATION_CONFIG = "../../../cloudformation/config.json"
-CNVM_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
 
 cnvm_agent_policy_data = Path(__file__).parent / CNVM_AGENT_POLICY
 cnvm_pkg_policy_data = Path(__file__).parent / CNVM_PACKAGE_POLICY
@@ -79,24 +78,7 @@ if __name__ == "__main__":
 
     cloudformation_params.FLEET_URL = get_fleet_server_host(cfg=cnfg.elk_config)
     cloudformation_params.ELASTIC_AGENT_VERSION = cnfg.elk_config.stack_version
-    if "SNAPSHOT" in cloudformation_params.ELASTIC_AGENT_VERSION:
-        cloudformation_params.ELASTIC_ARTIFACTS_SERVER = (
-            cnfg.artifactory_url["snapshot"]
-            + get_build_info(
-                version=cloudformation_params.ELASTIC_AGENT_VERSION,
-                is_snapshot=True,
-            )
-            + CNVM_ARTIFACT_SUFFIX
-        )
-    else:
-        cloudformation_params.ELASTIC_ARTIFACTS_SERVER = (
-            cnfg.artifactory_url["staging"]
-            + get_build_info(
-                version=cloudformation_params.ELASTIC_AGENT_VERSION,
-                is_snapshot=False,
-            )
-            + CNVM_ARTIFACT_SUFFIX
-        )
+    cloudformation_params.ELASTIC_ARTIFACTS_SERVER = get_artifact_server(cnfg.elk_config.stack_version)
 
     logger.info("Cloudformation parameters: ", cloudformation_params)
     with open(cnvm_cloudformation_config, "w") as file:
