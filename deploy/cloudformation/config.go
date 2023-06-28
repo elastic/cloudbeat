@@ -51,7 +51,11 @@ func parseConfig() (*config, error) {
 	}
 
 	var cfg config
-	bindEnvs(cfg)
+	err = bindEnvs(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to bind environment variables: %v", err)
+	}
+
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal configuration file: %v", err)
@@ -65,7 +69,7 @@ func parseConfig() (*config, error) {
 	return &cfg, nil
 }
 
-func bindEnvs(iface interface{}, parts ...string) {
+func bindEnvs(iface interface{}, parts ...string) error {
 	ifv := reflect.ValueOf(iface)
 	ift := reflect.TypeOf(iface)
 	for i := 0; i < ift.NumField(); i++ {
@@ -75,13 +79,18 @@ func bindEnvs(iface interface{}, parts ...string) {
 		if !ok {
 			continue
 		}
+		var err error
 		switch v.Kind() {
 		case reflect.Struct:
-			bindEnvs(v.Interface(), append(parts, tv)...)
+			err = bindEnvs(v.Interface(), append(parts, tv)...)
 		default:
-			viper.BindEnv(strings.Join(append(parts, tv), "."))
+			err = viper.BindEnv(strings.Join(append(parts, tv), "."))
+		}
+		if err != nil {
+			return err
 		}
 	}
+	return nil
 }
 
 func validateConfig(cfg *config) error {
