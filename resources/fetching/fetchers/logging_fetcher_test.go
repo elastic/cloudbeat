@@ -158,7 +158,7 @@ func TestConfigResource_GetMetadata(t *testing.T) {
 		configs: nil,
 		identity: &awslib.Identity{
 			Account: aws.String("test-account"),
-			Arn:     aws.String("test-arn")},
+		},
 	}
 
 	meta, err := r.GetMetadata()
