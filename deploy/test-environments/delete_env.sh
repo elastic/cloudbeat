@@ -5,8 +5,8 @@
 # This will delete all the environments that start with "test"
 # It will ask for confirmation before deleting each environment
 # TF_VAR_ec_api_key environment variable should be set
-# AWS CLI is installed and configured
-# Terraform CLI is not installed and configured
+# AWS CLI should be installed and configured
+# Terraform CLI should be installed and configured
 
 ENV_PREFIX=$1
 [ -z "$ENV_PREFIX" ] && echo "Please provide an environment prefix to delete" && exit -1
