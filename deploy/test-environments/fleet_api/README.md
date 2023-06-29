@@ -53,7 +53,13 @@ Follow these steps to install the dependencies and execute the different scripts
     poetry run python src/install_cspm_integration.py
     ```
 
-6. To purge integrations, use the following command:
+6. To execute the CNVM integration, use the following command:
+
+    ``` bash
+    poetry run python src/install_cnvm_integration.py
+    ```
+
+7. To purge integrations, use the following command:
 
     ``` bash
     poetry run python src/purge_integrations.py
