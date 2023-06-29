@@ -44,7 +44,7 @@ func (A *AWS) InitRegistry(ctx context.Context, log *logp.Logger, cfg *config.Co
 
 	fm, err := factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create EKS: %w", err)
+		return nil, fmt.Errorf("failed to create AWS: %w", err)
 	}
 	return registry.NewRegistry(log, fm), nil
 }
@@ -54,6 +54,7 @@ func (A *AWS) Stop() {}
 func getCisAwsConfig(ctx context.Context, cfg *config.Config, dependencies *Dependencies) (awssdk.Config, *awslib.Identity, error) {
 	// Initialize AWS config with the default region rather than the ec2 region.
 	// This is because in CSPM we create a client per region.
+	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)

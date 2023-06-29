@@ -51,7 +51,7 @@ func (k *EKS) InitRegistry(
 ) (registry.Registry, error) {
 	kubeClient, err := dependencies.KubernetesClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create kubernetes client :%w", err)
+		return nil, fmt.Errorf("failed to create kubernetes client: %w", err)
 	}
 	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 

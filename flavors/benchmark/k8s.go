@@ -31,15 +31,15 @@ import (
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 
-type K8s struct {
+type K8S struct {
 	leaderElector uniqueness.Manager
 }
 
-func (k *K8s) Run(ctx context.Context) error {
+func (k *K8S) Run(ctx context.Context) error {
 	return k.leaderElector.Run(ctx)
 }
 
-func (k *K8s) InitRegistry(
+func (k *K8S) InitRegistry(
 	_ context.Context,
 	log *logp.Logger,
 	cfg *config.Config,
@@ -54,11 +54,11 @@ func (k *K8s) InitRegistry(
 
 	fm, err := factory.NewCisK8sFactory(log, cfg, ch, k.leaderElector, kubeClient)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create K8s: %w", err)
+		return nil, fmt.Errorf("failed to create K8S: %w", err)
 	}
 	return registry.NewRegistry(log, fm), nil
 }
 
-func (k *K8s) Stop() {
+func (k *K8S) Stop() {
 	k.leaderElector.Stop()
 }

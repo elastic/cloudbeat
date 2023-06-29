@@ -19,6 +19,8 @@ package benchmark
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"testing"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -42,7 +44,7 @@ type expectedFetchers struct {
 }
 
 func TestNewBenchmark(t *testing.T) {
-	logger := logp.NewLogger("test new factory")
+	logger := logp.NewLogger("test new benchmark")
 
 	tests := []struct {
 		name    string
@@ -51,7 +53,7 @@ func TestNewBenchmark(t *testing.T) {
 		want    expectedFetchers
 	}{
 		{
-			name: "Get k8s factory",
+			name: "Get k8s benchmark",
 			cfg: &config.Config{
 				Benchmark: config.CIS_K8S,
 			},
@@ -65,7 +67,7 @@ func TestNewBenchmark(t *testing.T) {
 			},
 		},
 		{
-			name: "Get CIS AWS factory",
+			name: "Get CIS AWS benchmark",
 			cfg: &config.Config{
 				Benchmark: config.CIS_AWS,
 				CloudConfig: config.CloudConfig{
@@ -88,7 +90,7 @@ func TestNewBenchmark(t *testing.T) {
 			},
 		},
 		{
-			name: "Get CIS EKS factory without the aws related fetchers",
+			name: "Get CIS EKS benchmark without the aws related fetchers",
 			cfg: &config.Config{
 				Benchmark: config.CIS_EKS,
 			},
@@ -102,7 +104,7 @@ func TestNewBenchmark(t *testing.T) {
 			},
 		},
 		{
-			name: "Get CIS EKS factory with aws related fetchers",
+			name: "Get CIS EKS benchmark with aws related fetchers",
 			cfg: &config.Config{
 				Benchmark: config.CIS_EKS,
 				CloudConfig: config.CloudConfig{
@@ -123,7 +125,7 @@ func TestNewBenchmark(t *testing.T) {
 			},
 		},
 		{
-			name: "Non supported benchmark fail to get factory",
+			name: "Non supported benchmark fail",
 			cfg: &config.Config{
 				Benchmark: "Non existing benchmark",
 			},
@@ -139,25 +141,6 @@ func TestNewBenchmark(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			kubeClient := providers.MockKubernetesClientGetterAPI{}
-			kubeClient.On("GetClient", mock.Anything, mock.Anything, mock.Anything).Return(k8sfake.NewSimpleClientset(), nil)
-
-			awsCfg := &awslib.MockConfigProviderAPI{}
-			awsCfg.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
-				Call.
-				Return(func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
-					return CreateSdkConfig(config, "us1-east")
-				},
-					func(ctx context.Context, config aws.ConfigAWS) error {
-						return nil
-					},
-				)
-
-			identityProvider := &awslib.MockIdentityProviderGetter{}
-			identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything).Return(&awslib.Identity{
-				Account: awssdk.String("test-account"),
-			}, nil)
-
 			b, err := NewBenchmark(tt.cfg)
 			if tt.wantErr {
 				if b == nil {
@@ -172,7 +155,7 @@ func TestNewBenchmark(t *testing.T) {
 				logger,
 				tt.cfg,
 				make(chan fetching.ResourceInfo),
-				NewDependencies(&kubeClient, identityProvider, awsCfg),
+				NewDependencies(mockKubeClient(nil), mockIdentityProvider(nil), mockAwsCfg(nil)),
 			)
 			if tt.wantErr {
 				require.Error(t, err)
@@ -191,17 +174,190 @@ func TestNewBenchmark(t *testing.T) {
 	}
 }
 
-func CreateSdkConfig(config aws.ConfigAWS, region string) *awssdk.Config {
-	awsConfig := awssdk.NewConfig()
-	awsCredentials := awssdk.Credentials{
-		AccessKeyID:     config.AccessKeyID,
-		SecretAccessKey: config.SecretAccessKey,
-		SessionToken:    config.SessionToken,
+func Test_InitRegistry(t *testing.T) {
+	logger := logp.NewLogger("test benchmark")
+
+	awsCfg := config.Config{
+		CloudConfig: config.CloudConfig{
+			AwsCred: aws.ConfigAWS{
+				AccessKeyID: "some-key",
+			},
+		},
 	}
 
-	awsConfig.Credentials = credentials.StaticCredentialsProvider{
-		Value: awsCredentials,
+	tests := []struct {
+		name         string
+		benchmark    Benchmark
+		dependencies Dependencies
+		cfg          config.Config
+		wantErr      string
+	}{
+		{
+			name:      "nothing initialized",
+			benchmark: &AWS{},
+			wantErr:   "aws identity provider is uninitialized",
+		},
+		{
+			name:      "identity provider error",
+			benchmark: &AWS{},
+			dependencies: Dependencies{
+				identityProvider: mockIdentityProvider(errors.New("some error")),
+			},
+			wantErr: "some error",
+		},
+		{
+			// TODO: this doesn't finish instantly because there is code in MultiRegionClientFactory that is not initialized lazily
+			name:      "no error",
+			benchmark: &AWS{},
+			dependencies: Dependencies{
+				identityProvider:   mockIdentityProvider(nil),
+				kubernetesProvider: mockKubeClient(errors.New("some error")), // ineffectual
+			},
+		},
+		// K8S tests
+		{
+			name:      "nothing initialized",
+			benchmark: &K8S{},
+			wantErr:   "k8s provider is uninitialized",
+		},
+		{
+			name:      "kubernetes provider error",
+			benchmark: &K8S{},
+			dependencies: Dependencies{
+				kubernetesProvider: mockKubeClient(errors.New("some error")),
+			},
+			wantErr: "some error",
+		},
+		{
+			name:      "ignored uninitialized aws provider",
+			benchmark: &K8S{},
+			dependencies: Dependencies{
+				kubernetesProvider: mockKubeClient(nil),
+			},
+			cfg: awsCfg,
+		},
+		{
+			name:      "no error",
+			benchmark: &K8S{},
+			dependencies: Dependencies{
+				identityProvider:   mockIdentityProvider(errors.New("some error")), // ineffectual
+				kubernetesProvider: mockKubeClient(nil),
+			},
+		},
+		// EKS tests
+		{
+			name:      "nothing initialized",
+			benchmark: &EKS{},
+			wantErr:   "k8s provider is uninitialized",
+		},
+		{
+			name:      "kubernetes provider error",
+			benchmark: &EKS{},
+			dependencies: Dependencies{
+				kubernetesProvider: mockKubeClient(errors.New("some error")),
+			},
+			wantErr: "some error",
+		},
+		{
+			name:      "uninitialized aws provider",
+			benchmark: &EKS{},
+			dependencies: Dependencies{
+				kubernetesProvider: mockKubeClient(nil),
+			},
+			cfg:     awsCfg,
+			wantErr: "aws config provider is uninitialized",
+		},
+		{
+			name:      "aws error",
+			benchmark: &EKS{},
+			dependencies: Dependencies{
+				awsCfgProvider:     mockAwsCfg(errors.New("some error")),
+				kubernetesProvider: mockKubeClient(nil),
+			},
+			cfg:     awsCfg,
+			wantErr: "some error",
+		},
+		{
+			name:      "no error",
+			benchmark: &EKS{},
+			dependencies: Dependencies{
+				identityProvider:   mockIdentityProvider(errors.New("some error")), // ineffectual
+				kubernetesProvider: mockKubeClient(nil),
+			},
+		},
 	}
-	awsConfig.Region = region
-	return awsConfig
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%T: %s", tt.benchmark, tt.name), func(t *testing.T) {
+			got, err := tt.benchmark.InitRegistry(
+				context.Background(),
+				logger,
+				&tt.cfg,
+				make(chan fetching.ResourceInfo),
+				&tt.dependencies,
+			)
+			if tt.wantErr != "" {
+				assert.ErrorContains(t, err, tt.wantErr)
+				return
+			}
+			assert.NoError(t, err)
+			assert.NotNil(t, got)
+		})
+	}
+}
+
+func mockAwsCfg(err error) *awslib.MockConfigProviderAPI {
+	awsCfg := awslib.MockConfigProviderAPI{}
+	awsCfg.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
+		Call.
+		Return(
+			func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
+				if err != nil {
+					return nil
+				}
+
+				awsConfig := awssdk.NewConfig()
+				awsCredentials := awssdk.Credentials{
+					AccessKeyID:     config.AccessKeyID,
+					SecretAccessKey: config.SecretAccessKey,
+					SessionToken:    config.SessionToken,
+				}
+
+				awsConfig.Credentials = credentials.StaticCredentialsProvider{
+					Value: awsCredentials,
+				}
+				awsConfig.Region = "us1-east"
+				return awsConfig
+			},
+			func(ctx context.Context, config aws.ConfigAWS) error {
+				return err
+			},
+		)
+	return &awsCfg
+}
+
+func mockKubeClient(err error) *providers.MockKubernetesClientGetterAPI {
+	kube := providers.MockKubernetesClientGetterAPI{}
+	on := kube.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return(k8sfake.NewSimpleClientset(), nil)
+	} else {
+		on.Return(nil, err)
+	}
+	return &kube
+}
+
+func mockIdentityProvider(err error) *awslib.MockIdentityProviderGetter {
+	identityProvider := &awslib.MockIdentityProviderGetter{}
+	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return(
+			&awslib.Identity{
+				Account: awssdk.String("test-account"),
+			},
+			nil,
+		)
+	} else {
+		on.Return(nil, err)
+	}
+	return identityProvider
 }
