@@ -1,1 +1,3 @@
 elastic-agent-ec2-dev.yml
+config.env
+config.json
