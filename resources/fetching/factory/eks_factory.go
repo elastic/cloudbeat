@@ -45,7 +45,7 @@ var (
 		"/hostfs/var/lib/kubelet/kubeconfig"}
 )
 
-func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *awslib.Identity) (FetchersMap, error) {
+func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *awslib.Identity) FetchersMap {
 	log.Infof("Initializing EKS fetchers")
 	m := make(FetchersMap)
 
@@ -76,5 +76,5 @@ func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.R
 
 	kubeFetcher := fetchers.NewKubeFetcher(log, ch, k8sClient)
 	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
-	return m, nil
+	return m
 }

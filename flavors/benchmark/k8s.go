@@ -52,11 +52,7 @@ func (k *K8S) InitRegistry(
 	}
 	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 
-	fm, err := factory.NewCisK8sFactory(log, cfg, ch, k.leaderElector, kubeClient)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create K8S: %w", err)
-	}
-	return registry.NewRegistry(log, fm), nil
+	return registry.NewRegistry(log, factory.NewCisK8sFactory(log, ch, k.leaderElector, kubeClient)), nil
 }
 
 func (k *K8S) Stop() {

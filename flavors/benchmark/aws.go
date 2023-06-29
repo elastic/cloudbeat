@@ -42,11 +42,7 @@ func (A *AWS) InitRegistry(ctx context.Context, log *logp.Logger, cfg *config.Co
 		return nil, fmt.Errorf("failed to initialize AWS config: %w", err)
 	}
 
-	fm, err := factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create AWS: %w", err)
-	}
-	return registry.NewRegistry(log, fm), nil
+	return registry.NewRegistry(log, factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity)), nil
 }
 
 func (A *AWS) Stop() {}

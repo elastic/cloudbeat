@@ -60,11 +60,7 @@ func (k *EKS) InitRegistry(
 		return nil, fmt.Errorf("failed to initialize AWS config: %w", err)
 	}
 
-	fm, err := factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create EKS: %w", err)
-	}
-	return registry.NewRegistry(log, fm), nil
+	return registry.NewRegistry(log, factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)), nil
 }
 
 func (k *EKS) Stop() {
