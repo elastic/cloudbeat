@@ -29,11 +29,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	core_v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -44,6 +46,7 @@ type expectedFetchers struct {
 }
 
 func TestNewBenchmark(t *testing.T) {
+	t.Setenv("NODE_NAME", "node-name")
 	tests := []struct {
 		name    string
 		cfg     *config.Config
@@ -152,12 +155,18 @@ func TestNewBenchmark(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-			fetchersMap, err := b.InitRegistry(
+			fetchersMap, _, err := b.Initialize(
 				context.Background(),
 				testhelper.NewLogger(t),
 				tt.cfg,
 				make(chan fetching.ResourceInfo),
-				NewDependencies(mockKubeClient(nil), mockIdentityProvider(nil), mockAwsCfg(nil)),
+				NewDependencies(
+					mockAwsCfg(nil),
+					mockIdentityProvider(nil),
+					mockKubeClient(nil),
+					mockMetadataProvider(nil),
+					mockAwsClusterName(nil),
+				),
 			)
 			if tt.wantErr {
 				require.Error(t, err)
@@ -176,7 +185,7 @@ func TestNewBenchmark(t *testing.T) {
 	}
 }
 
-func Test_InitRegistry(t *testing.T) {
+func Test_Initialize(t *testing.T) {
 	awsCfg := config.Config{
 		CloudConfig: config.CloudConfig{
 			Aws: config.AwsConfig{
@@ -291,17 +300,30 @@ func Test_InitRegistry(t *testing.T) {
 			wantErr: "some error",
 		},
 		{
+			name:      "dependencies uninitialized",
+			benchmark: &EKS{},
+			dependencies: Dependencies{
+				kubernetesProvider: mockKubeClient(nil),
+			},
+			wantErr: "EKS dependencies uninitialized",
+		},
+		{
 			name:      "no error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				identityProvider:   mockIdentityProvider(errors.New("some error")), // ineffectual
-				kubernetesProvider: mockKubeClient(nil),
+				awsCfgProvider:         mockAwsCfg(nil),
+				identityProvider:       mockIdentityProvider(errors.New("some error")), // ineffectual
+				kubernetesProvider:     mockKubeClient(nil),
+				metadataProvider:       mockMetadataProvider(errors.New("some error")), // ignored
+				awsClusterNameProvider: mockAwsClusterName(errors.New("some error")),   // ignored
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%T: %s", tt.benchmark, tt.name), func(t *testing.T) {
-			got, err := tt.benchmark.InitRegistry(
+			t.Setenv("NODE_NAME", "node-name")
+
+			reg, dp, err := tt.benchmark.Initialize(
 				context.Background(),
 				testhelper.NewLogger(t),
 				&tt.cfg,
@@ -313,7 +335,8 @@ func Test_InitRegistry(t *testing.T) {
 				return
 			}
 			assert.NoError(t, err)
-			assert.NotNil(t, got)
+			assert.NotNil(t, reg)
+			assert.NotNil(t, dp)
 		})
 	}
 }
@@ -348,11 +371,23 @@ func mockAwsCfg(err error) *awslib.MockConfigProviderAPI {
 	return &awsCfg
 }
 
-func mockKubeClient(err error) *providers.MockKubernetesClientGetterAPI {
-	kube := providers.MockKubernetesClientGetterAPI{}
+func mockKubeClient(err error) k8s.ClientGetterAPI {
+	kube := k8s.MockClientGetterAPI{}
 	on := kube.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything)
 	if err == nil {
-		on.Return(k8sfake.NewSimpleClientset(), nil)
+		on.Return(
+			k8sfake.NewSimpleClientset(
+				&core_v1.Node{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "node-name",
+					},
+				},
+				&core_v1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "kube-system",
+					},
+				},
+			), nil)
 	} else {
 		on.Return(nil, err)
 	}
@@ -365,7 +400,7 @@ func mockIdentityProvider(err error) *awslib.MockIdentityProviderGetter {
 	if err == nil {
 		on.Return(
 			&awslib.Identity{
-				Account: awssdk.String("test-account"),
+				Account: "test-account",
 			},
 			nil,
 		)
@@ -373,4 +408,30 @@ func mockIdentityProvider(err error) *awslib.MockIdentityProviderGetter {
 		on.Return(nil, err)
 	}
 	return identityProvider
+}
+
+func mockMetadataProvider(err error) *awslib.MockMetadataProvider {
+	provider := awslib.MockMetadataProvider{}
+	on := provider.EXPECT().GetMetadata(mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return(&awslib.Ec2Metadata{
+			InstanceID: "instance-id",
+		}, nil)
+	} else {
+		on.Return(nil, err)
+	}
+
+	return &provider
+}
+
+func mockAwsClusterName(err error) *awslib.MockClusterNameProvider {
+	provider := awslib.MockClusterNameProvider{}
+	on := provider.EXPECT().GetClusterName(mock.Anything, mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return("cluster-name", nil)
+	} else {
+		on.Return("", err)
+	}
+
+	return &provider
 }

@@ -19,13 +19,16 @@ package awslib
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 )
 
 type Identity struct {
-	Account *string
+	Account string
+	Alias   string
 }
 
 type IdentityProviderGetter interface {
@@ -35,17 +38,32 @@ type IdentityProviderGetter interface {
 type IdentityProvider struct{}
 
 // GetIdentity returns AWS identity information
-func (provider IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*Identity, error) {
-	client := sts.NewFromConfig(cfg)
-
-	input := &sts.GetCallerIdentityInput{}
-	response, err := client.GetCallerIdentity(ctx, input)
+func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*Identity, error) {
+	response, err := sts.NewFromConfig(cfg).GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get caller identity: %w", err)
 	}
 
-	identity := &Identity{
-		Account: response.Account,
+	alias, err := p.getAccountAlias(ctx, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get aliases: %w", err)
 	}
-	return identity, nil
+
+	return &Identity{
+		Account: *response.Account,
+		Alias:   alias,
+	}, nil
+}
+
+func (IdentityProvider) getAccountAlias(ctx context.Context, cfg aws.Config) (string, error) {
+	aliases, err := iam.NewFromConfig(cfg).ListAccountAliases(ctx, &iam.ListAccountAliasesInput{})
+	if err != nil {
+		return "", err
+	}
+
+	if len(aliases.AccountAliases) > 0 {
+		return aliases.AccountAliases[0], nil
+	}
+
+	return "", nil
 }

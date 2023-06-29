@@ -120,7 +120,7 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				configserviceProvider: tt.configServiceProvider(),
 				resourceCh:            ch,
 				cloudIdentity: &awslib.Identity{
-					Account: &testAccount,
+					Account: testAccount,
 				},
 			}
 
@@ -157,7 +157,7 @@ func TestConfigResource_GetMetadata(t *testing.T) {
 	r := ConfigResource{
 		configs: nil,
 		identity: &awslib.Identity{
-			Account: aws.String("test-account"),
+			Account: "test-account",
 		},
 	}
 

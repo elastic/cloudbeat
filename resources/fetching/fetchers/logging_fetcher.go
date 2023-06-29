@@ -110,7 +110,7 @@ func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 func (r LoggingResource) GetElasticCommonData() any { return nil }
 
 func (c ConfigResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := fmt.Sprintf("configservice-%s", *c.identity.Account)
+	id := fmt.Sprintf("configservice-%s", c.identity.Account)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    fetching.CloudConfig,

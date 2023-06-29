@@ -134,7 +134,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 				log:           logp.NewLogger(tt.name),
 				ec2Client:     tt.networkProvider(),
 				resourceCh:    ch,
-				cloudIdentity: &awslib.Identity{Account: &tt.name},
+				cloudIdentity: &awslib.Identity{Account: tt.name},
 			}
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})

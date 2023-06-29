@@ -19,6 +19,7 @@ package benchmark
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -27,6 +28,8 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -38,34 +41,38 @@ type EKS struct {
 	leaderElector uniqueness.Manager
 }
 
-func (k *EKS) Run(ctx context.Context) error {
-	return k.leaderElector.Run(ctx)
-}
-
-func (k *EKS) InitRegistry(
-	ctx context.Context,
-	log *logp.Logger,
-	cfg *config.Config,
-	ch chan fetching.ResourceInfo,
-	dependencies *Dependencies,
-) (registry.Registry, error) {
+func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error) {
 	kubeClient, err := dependencies.KubernetesClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create kubernetes client: %w", err)
+		return nil, nil, fmt.Errorf("failed to create kubernetes client: %w", err)
 	}
 	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 
 	awsConfig, awsIdentity, err := getEksAwsConfig(ctx, cfg, dependencies)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize AWS config: %w", err)
+		return nil, nil, fmt.Errorf("failed to initialize AWS config: %w", err)
 	}
 
-	return registry.NewRegistry(log, factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)), nil
+	if dependencies.awsClusterNameProvider == nil || dependencies.metadataProvider == nil {
+		return nil, nil, errors.New("EKS dependencies uninitialized")
+	}
+
+	clusterNameProvider := k8s.EKSClusterNameProvider{
+		AwsCfg:                 awsConfig,
+		EKSMetadataProvider:    dependencies.metadataProvider,
+		EKSClusterNameProvider: dependencies.awsClusterNameProvider,
+		KubeClient:             kubeClient,
+	}
+	dp, err := getK8sDataProvider(ctx, log, *cfg, kubeClient, clusterNameProvider)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create k8s data provider: %w", err)
+	}
+
+	return registry.NewRegistry(log, factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)), dp, nil
 }
 
-func (k *EKS) Stop() {
-	k.leaderElector.Stop()
-}
+func (k *EKS) Run(ctx context.Context) error { return k.leaderElector.Run(ctx) }
+func (k *EKS) Stop()                         { k.leaderElector.Stop() }
 
 func getEksAwsConfig(
 	ctx context.Context,

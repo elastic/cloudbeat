@@ -29,21 +29,16 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider"
+	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type Benchmark interface {
 	Run(ctx context.Context) error
-	InitRegistry(
-		ctx context.Context,
-		log *logp.Logger,
-		cfg *config.Config,
-		ch chan fetching.ResourceInfo,
-		dependencies *Dependencies,
-	) (registry.Registry, error)
+	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error)
 	Stop()
 }
 
@@ -60,18 +55,29 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 }
 
 type Dependencies struct {
-	awsCfgProvider     awslib.ConfigProviderAPI
-	identityProvider   awslib.IdentityProviderGetter
-	kubernetesProvider providers.KubernetesClientGetterAPI
+	awsCfgProvider         awslib.ConfigProviderAPI
+	identityProvider       awslib.IdentityProviderGetter
+	kubernetesProvider     k8sprovider.ClientGetterAPI
+	metadataProvider       awslib.MetadataProvider
+	awsClusterNameProvider awslib.ClusterNameProvider
 }
 
-func NewDependencies(k8s providers.KubernetesClientGetterAPI, getter awslib.IdentityProviderGetter, api awslib.ConfigProviderAPI) *Dependencies {
+func NewDependencies(
+	awsCfgProvider awslib.ConfigProviderAPI,
+	identityProvider awslib.IdentityProviderGetter,
+	kubernetesProvider k8sprovider.ClientGetterAPI,
+	metadataProvider awslib.MetadataProvider,
+	awsClusterNameProvider awslib.ClusterNameProvider,
+) *Dependencies {
 	return &Dependencies{
-		awsCfgProvider:     api,
-		identityProvider:   getter,
-		kubernetesProvider: k8s,
+		awsCfgProvider:         awsCfgProvider,
+		identityProvider:       identityProvider,
+		kubernetesProvider:     kubernetesProvider,
+		metadataProvider:       metadataProvider,
+		awsClusterNameProvider: awsClusterNameProvider,
 	}
 }
+
 func (d *Dependencies) KubernetesClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
 	if d.kubernetesProvider == nil {
 		return nil, fmt.Errorf("k8s provider is uninitialized")

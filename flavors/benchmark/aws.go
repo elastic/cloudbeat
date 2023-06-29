@@ -21,45 +21,45 @@ import (
 	"context"
 	"fmt"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider"
+	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/aws"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type AWS struct{}
 
-func (A *AWS) Run(context.Context) error { return nil }
-
-func (A *AWS) InitRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, error) {
-	awsConfig, awsIdentity, err := getCisAwsConfig(ctx, cfg, dependencies)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize AWS config: %w", err)
-	}
-
-	return registry.NewRegistry(log, factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity)), nil
-}
-
-func (A *AWS) Stop() {}
-
-func getCisAwsConfig(ctx context.Context, cfg *config.Config, dependencies *Dependencies) (awssdk.Config, *awslib.Identity, error) {
-	// Initialize AWS config with the default region rather than the ec2 region.
-	// This is because in CSPM we create a client per region.
+func (A *AWS) Initialize(
+	ctx context.Context,
+	log *logp.Logger,
+	cfg *config.Config,
+	ch chan fetching.ResourceInfo,
+	dependencies *Dependencies,
+) (registry.Registry, dataprovider.CommonDataProvider, error) {
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
-		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	identity, err := dependencies.AWSIdentity(ctx, awsConfig)
+	awsIdentity, err := dependencies.AWSIdentity(ctx, awsConfig)
 	if err != nil {
-		return awssdk.Config{}, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	return awsConfig, identity, err
+	return registry.NewRegistry(
+			log,
+			factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity),
+		), aws_dataprovider.New(
+			aws_dataprovider.WithLogger(log),
+			aws_dataprovider.WithAccount(awsIdentity),
+		), nil
 }
+
+func (A *AWS) Run(context.Context) error { return nil }
+func (A *AWS) Stop()                     {}

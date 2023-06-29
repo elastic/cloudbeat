@@ -27,6 +27,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
 )
@@ -64,7 +65,10 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 			name: "get data",
 			options: []Option{
 				WithLogger(testhelper.NewLogger(s.T())),
-				WithAccount(accountName, accountId),
+				WithAccount(&awslib.Identity{
+					Account: accountId,
+					Alias:   accountName,
+				}),
 			},
 			expected: types.Data{
 				ResourceID: "",
@@ -91,7 +95,10 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 func TestAWSDataProvider_EnrichEvent(t *testing.T) {
 	options := []Option{
 		WithLogger(testhelper.NewLogger(t)),
-		WithAccount(accountName, accountId),
+		WithAccount(&awslib.Identity{
+			Account: accountId,
+			Alias:   accountName,
+		}),
 	}
 
 	k := New(options...)

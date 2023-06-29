@@ -19,6 +19,8 @@ package aws
 
 import (
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type Option func(*DataProvider)
@@ -29,9 +31,9 @@ func WithLogger(log *logp.Logger) Option {
 	}
 }
 
-func WithAccount(name string, id string) Option {
+func WithAccount(identity *awslib.Identity) Option {
 	return func(dp *DataProvider) {
-		dp.accountId = id
-		dp.accountName = name
+		dp.accountId = identity.Account
+		dp.accountName = identity.Alias
 	}
 }

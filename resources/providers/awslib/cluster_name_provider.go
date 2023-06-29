@@ -28,8 +28,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type EKSClusterNameProvider struct {
-}
+type EKSClusterNameProvider struct{}
 
 const (
 	asgPattern                               = "^kubernetes.io/cluster/(.*)$"
