@@ -70,4 +70,5 @@ module "eks" {
   node_group_one_desired_size = 2
   # node_group_two_desired_size = 1
   enable_node_group_two = false
+  tags                  = merge(local.common_tags, { "ec2_type" : "kspm_eks" })
 }
