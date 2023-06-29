@@ -25,11 +25,13 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-type KubernetesClientGetter interface {
+type KubernetesClientGetterAPI interface {
 	GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error)
 }
 
-func GetK8sClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
+type KubernetesClientGetter struct{}
+
+func (KubernetesClientGetter) GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
 	client, err := kubernetes.GetKubernetesClient(kubeConfig, options)
 	if err != nil {
 		if kubernetes.IsInCluster(kubeConfig) {
