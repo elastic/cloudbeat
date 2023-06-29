@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package benchmark
 
 import (
 	"context"
@@ -32,8 +32,8 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/uniqueness"
 )
 
 type expectedFetchers struct {
@@ -41,11 +41,8 @@ type expectedFetchers struct {
 	count int
 }
 
-func TestNewFactory(t *testing.T) {
+func TestNewBenchmark(t *testing.T) {
 	logger := logp.NewLogger("test new factory")
-	ch := make(chan fetching.ResourceInfo)
-	le := &uniqueness.DefaultUniqueManager{}
-	kubeClient := k8sfake.NewSimpleClientset()
 
 	tests := []struct {
 		name    string
@@ -91,17 +88,6 @@ func TestNewFactory(t *testing.T) {
 			},
 		},
 		{
-			name: "No AWS credentials - unable to get CIS AWS factory",
-			cfg: &config.Config{
-				Benchmark: config.CIS_AWS,
-			},
-			want: expectedFetchers{
-				names: []string{},
-				count: 0,
-			},
-			wantErr: true,
-		},
-		{
 			name: "Get CIS EKS factory without the aws related fetchers",
 			cfg: &config.Config{
 				Benchmark: config.CIS_EKS,
@@ -111,8 +97,6 @@ func TestNewFactory(t *testing.T) {
 					fetching.FileSystemType,
 					fetching.KubeAPIType,
 					fetching.ProcessType,
-					fetching.EcrType,
-					fetching.ElbType,
 				},
 				count: 3,
 			},
@@ -151,33 +135,57 @@ func TestNewFactory(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		awsCfg := &awslib.MockConfigProviderAPI{}
-		awsCfg.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
-			Call.
-			Return(func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
-				return CreateSdkConfig(config, "us1-east")
-			},
-				func(ctx context.Context, config aws.ConfigAWS) error {
-					return nil
-				},
-			)
-		identityProvider := &awslib.MockIdentityProviderGetter{}
-		identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything).Return(&awslib.Identity{
-			Account: awssdk.String("test-account"),
-		}, nil)
-
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			fetchersMap, err := NewFactory(context.TODO(), logger, tt.cfg, ch, le, kubeClient, identityProvider, awsCfg)
+			t.Parallel()
+
+			kubeClient := providers.MockKubernetesClientGetterAPI{}
+			kubeClient.On("GetClient", mock.Anything, mock.Anything, mock.Anything).Return(k8sfake.NewSimpleClientset(), nil)
+
+			awsCfg := &awslib.MockConfigProviderAPI{}
+			awsCfg.EXPECT().InitializeAWSConfig(mock.Anything, mock.Anything).
+				Call.
+				Return(func(ctx context.Context, config aws.ConfigAWS) *awssdk.Config {
+					return CreateSdkConfig(config, "us1-east")
+				},
+					func(ctx context.Context, config aws.ConfigAWS) error {
+						return nil
+					},
+				)
+
+			identityProvider := &awslib.MockIdentityProviderGetter{}
+			identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything).Return(&awslib.Identity{
+				Account: awssdk.String("test-account"),
+			}, nil)
+
+			b, err := NewBenchmark(tt.cfg)
 			if tt.wantErr {
-				assert.Error(t, err)
+				if b == nil {
+					require.Error(t, err)
+					return
+				}
 			} else {
 				require.NoError(t, err)
 			}
-			assert.Equal(t, tt.want.count, len(fetchersMap))
-			for fetcher := range fetchersMap {
-				if _, ok := fetchersMap[fetcher]; !ok {
-					t.Errorf("NewFactory() fetchersMap = %v, want %v", fetchersMap, tt.want.names)
-				}
+			fetchersMap, err := b.InitRegistry(
+				context.Background(),
+				logger,
+				tt.cfg,
+				make(chan fetching.ResourceInfo),
+				NewDependencies(&kubeClient, identityProvider, awsCfg),
+			)
+			if tt.wantErr {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want.count, len(fetchersMap.Keys()))
+
+			require.NoError(t, b.Run(context.Background()))
+			defer b.Stop()
+			for _, fetcher := range tt.want.names {
+				ok := fetchersMap.ShouldRun(fetcher)
+				assert.Truef(t, ok, "fetcher %s enabled", fetcher)
 			}
 		})
 	}

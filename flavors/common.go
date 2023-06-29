@@ -77,7 +77,7 @@ func getAWSDataProvider(ctx context.Context, log *logp.Logger, cfg config.Config
 }
 
 func getK8sDataProvider(ctx context.Context, log *logp.Logger, cfg config.Config) (dataprovider.CommonDataProvider, error) {
-	kubeClient, err := providers.GetK8sClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
+	kubeClient, err := providers.KubernetesClientGetter{}.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, err
 	}
