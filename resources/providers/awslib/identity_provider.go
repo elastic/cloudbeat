@@ -28,11 +28,11 @@ type Identity struct {
 	Account *string
 }
 
-type IdentityProvider struct{}
-
 type IdentityProviderGetter interface {
 	GetIdentity(ctx context.Context, cfg aws.Config) (*Identity, error)
 }
+
+type IdentityProvider struct{}
 
 // GetIdentity returns AWS identity information
 func (provider IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*Identity, error) {
