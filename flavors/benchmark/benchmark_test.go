@@ -278,6 +278,17 @@ func Test_InitRegistry(t *testing.T) {
 			wantErr: "some error",
 		},
 		{
+			name:      "aws identity provider error",
+			benchmark: &EKS{},
+			dependencies: Dependencies{
+				awsCfgProvider:     mockAwsCfg(nil),
+				identityProvider:   mockIdentityProvider(errors.New("some error")),
+				kubernetesProvider: mockKubeClient(nil),
+			},
+			cfg:     awsCfg,
+			wantErr: "some error",
+		},
+		{
 			name:      "no error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
