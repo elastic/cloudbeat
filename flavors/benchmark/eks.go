@@ -86,7 +86,7 @@ func getEksAwsConfig(
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	identity, err := dependencies.Identity(ctx, *awsCfg)
+	identity, err := dependencies.AWSIdentity(ctx, *awsCfg)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}

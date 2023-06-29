@@ -59,7 +59,7 @@ func getCisAwsConfig(ctx context.Context, cfg *config.Config, dependencies *Depe
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	identity, err := dependencies.Identity(ctx, awsConfig)
+	identity, err := dependencies.AWSIdentity(ctx, awsConfig)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}

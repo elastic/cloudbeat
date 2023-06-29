@@ -86,7 +86,7 @@ func (d *Dependencies) AWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssd
 	return d.awsCfgProvider.InitializeAWSConfig(ctx, cfg)
 }
 
-func (d *Dependencies) Identity(ctx context.Context, cfg awssdk.Config) (*awslib.Identity, error) {
+func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*awslib.Identity, error) {
 	if d.identityProvider == nil {
 		return nil, errors.New("aws identity provider is uninitialized")
 	}
