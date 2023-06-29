@@ -50,7 +50,7 @@ func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.R
 	m := make(FetchersMap)
 
 	if identity != nil {
-		log.Info("NewCisAwsFactory init aws related fetchers")
+		log.Info("Initialize aws-related fetchers")
 		ecrPrivateProvider := ecr.NewEcrProvider(log, awsConfig, &awslib.MultiRegionClientFactory[ecr.Client]{})
 		privateRepoRegex := fmt.Sprintf(fetchers.PrivateRepoRegexTemplate, *identity.Account)
 
