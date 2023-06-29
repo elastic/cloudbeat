@@ -156,6 +156,10 @@ Resources:
           tar xzvf $ElasticAgentArtifact.tar.gz
           cd $ElasticAgentArtifact
           sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken}
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 32
 Outputs:
   Ec2InstanceId:
     Value: !Ref ElasticAgentEc2Instance
