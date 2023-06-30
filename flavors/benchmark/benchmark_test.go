@@ -26,7 +26,6 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -36,6 +35,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type expectedFetchers struct {
@@ -44,8 +44,6 @@ type expectedFetchers struct {
 }
 
 func TestNewBenchmark(t *testing.T) {
-	logger := logp.NewLogger("test new benchmark")
-
 	tests := []struct {
 		name    string
 		cfg     *config.Config
@@ -152,7 +150,7 @@ func TestNewBenchmark(t *testing.T) {
 			}
 			fetchersMap, err := b.InitRegistry(
 				context.Background(),
-				logger,
+				testhelper.NewLogger(t),
 				tt.cfg,
 				make(chan fetching.ResourceInfo),
 				NewDependencies(mockKubeClient(nil), mockIdentityProvider(nil), mockAwsCfg(nil)),

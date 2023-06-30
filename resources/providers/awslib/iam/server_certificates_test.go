@@ -80,7 +80,7 @@ func TestProvider_ListServerCertificates(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := createProviderFromMockValues(tt.mockReturnValues)
+			p := createProviderFromMockValues(t, tt.mockReturnValues)
 
 			got, err := p.ListServerCertificates(context.Background())
 			if tt.wantErr {
