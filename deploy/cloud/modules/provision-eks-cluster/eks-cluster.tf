@@ -11,6 +11,8 @@ module "eks" {
   enable_irsa                 = true
   create_cloudwatch_log_group = false
 
+  tags = var.tags
+
   eks_managed_node_group_defaults = {
     ami_type = "AL2_x86_64"
 
