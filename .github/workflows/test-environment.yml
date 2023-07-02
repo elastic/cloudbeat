@@ -36,6 +36,7 @@ env:
   AWS_REGION: "eu-west-1"
   WORKING_DIR: deploy/test-environments
   FLEET_API_DIR: fleet_api/src
+  COMMON_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture"
 
 jobs:
   Deploy:
@@ -228,6 +229,11 @@ jobs:
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
+
+      - name: Tag CNVM Instance
+        env:
+          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} "${{ env.COMMON_TAGS }} Key=owner,Value=${{ github.actor }}"
 
       - name: Run Sanity checks
         if: success()
