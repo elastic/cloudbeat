@@ -122,6 +122,9 @@ logs-cloudbeat:
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
+create-cnvm-stack-tags region stack_name tags='Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture':
+  ./scripts/add_cnvm_tags.sh {{region}} {{stack_name}} {{tags}}
+
 build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v
 
