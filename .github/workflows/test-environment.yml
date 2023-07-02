@@ -233,7 +233,7 @@ jobs:
       - name: Tag CNVM Instance
         env:
           STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} "${{ env.COMMON_TAGS }} Key=owner,Value=${{ github.actor }}"
+        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} '${{ env.COMMON_TAGS }} Key=owner,Value=${{ github.actor }}'
 
       - name: Run Sanity checks
         if: success()
