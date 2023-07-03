@@ -22,25 +22,20 @@ import (
 	"fmt"
 	"time"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
-	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/flavors/benchmark"
 	"github.com/elastic/cloudbeat/pipeline"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/manager"
-	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/transformer"
-	"github.com/elastic/cloudbeat/uniqueness"
 )
 
 // posture configuration.
@@ -49,34 +44,36 @@ type posture struct {
 	fetcherManager *manager.Manager
 	evaluator      evaluator.Evaluator
 	resourceCh     chan fetching.ResourceInfo
-	leader         uniqueness.Manager
+	benchmark      benchmark.Benchmark
 }
 
 // NewPosture creates an instance of posture.
-func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
-	log := logp.NewLogger("posture")
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	c, err := config.New(cfg)
+func NewPosture(_ *beat.Beat, agentConfig *agentconfig.C) (beat.Beater, error) {
+	cfg, err := config.New(agentConfig)
 	if err != nil {
-		cancel()
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
+	return newPostureFromCfg(cfg)
+}
 
-	log.Info("Config initiated with cycle period of ", c.Period)
+// NewPosture creates an instance of posture.
+func newPostureFromCfg(cfg *config.Config) (*posture, error) {
+	log := logp.NewLogger("posture")
+	log.Info("Config initiated with cycle period of ", cfg.Period)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	b, err := benchmark.NewBenchmark(cfg)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
-
-	kubeClient, err := providers.GetK8sClient(log, c.KubeConfig, kubernetes.KubeClientOptions{})
-	if err != nil {
-		log.Errorf("failed to create kubernetes client: %v", err)
-	}
-	le := uniqueness.NewLeaderElector(log, kubeClient)
-
-	awsConfigProvider := awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}}
-
-	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, kubeClient, awslib.GetIdentityClient, awsConfigProvider)
+	fetchersRegistry, err := b.InitRegistry(ctx, log, cfg, resourceCh, benchmark.NewDependencies(
+		providers.KubernetesClientGetter{},
+		awslib.IdentityProvider{},
+		awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+	))
 	if err != nil {
 		cancel()
 		return nil, err
@@ -84,13 +81,13 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	// TODO: timeout should be configurable and not hard-coded. Setting to 10 minutes for now to account for CSPM fetchers
 	// 	https://github.com/elastic/cloudbeat/issues/653
-	fetcherManager, err := manager.NewManager(ctx, log, c.Period, time.Minute*10, fetchersRegistry)
+	fetcherManager, err := manager.NewManager(ctx, log, cfg.Period, time.Minute*10, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	eval, err := evaluator.NewOpaEvaluator(ctx, log, c)
+	eval, err := evaluator.NewOpaEvaluator(ctx, log, cfg)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -99,7 +96,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
-	cdp, err := GetCommonDataProvider(ctx, log, *c)
+	cdp, err := GetCommonDataProvider(ctx, log, *cfg)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -107,29 +104,26 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	t := transformer.NewTransformer(log, cdp, resultsIndex)
 
-	base := flavorBase{
-		ctx:         ctx,
-		cancel:      cancel,
-		config:      c,
-		transformer: t,
-		log:         log,
-	}
-
-	bt := &posture{
-		flavorBase:     base,
-		evaluator:      eval,
+	return &posture{
+		flavorBase: flavorBase{
+			ctx:         ctx,
+			cancel:      cancel,
+			config:      cfg,
+			transformer: t,
+			log:         log,
+		},
 		fetcherManager: fetcherManager,
+		evaluator:      eval,
 		resourceCh:     resourceCh,
-		leader:         le,
-	}
-	return bt, nil
+		benchmark:      b,
+	}, nil
 }
 
 // Run starts posture.
 func (bt *posture) Run(b *beat.Beat) error {
 	bt.log.Info("posture is running! Hit CTRL-C to stop it")
 
-	if err := bt.leader.Run(bt.ctx); err != nil {
+	if err := bt.benchmark.Run(bt.ctx); err != nil {
 		return err
 	}
 
@@ -186,20 +180,10 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter, awsConfigProvider awslib.ConfigProviderAPI) (registry.Registry, error) {
-	f, err := factory.NewFactory(ctx, log, cfg, ch, le, k8sClient, identityProvider, awsConfigProvider)
-	if err != nil {
-		return nil, err
-	}
-
-	return registry.NewRegistry(log, f), nil
-}
-
 // Stop stops posture.
 func (bt *posture) Stop() {
 	bt.fetcherManager.Stop()
 	bt.evaluator.Stop(bt.ctx)
-	bt.leader.Stop()
 	close(bt.resourceCh)
 	if err := bt.client.Close(); err != nil {
 		bt.log.Fatal("Cannot close client", err)

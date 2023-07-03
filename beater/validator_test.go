@@ -45,10 +45,15 @@ func TestValidatorTestSuite(t *testing.T) {
 }
 
 func (s *ValidatorTestSuite) TestConfig() {
-	configWithBenchmark := config.MustNewConfigFrom(`
+	configWithK8sBenchmark := config.MustNewConfigFrom(`
 config:
   v1:
     benchmark: cis_k8s
+`)
+	configWithGcpBenchmark := config.MustNewConfigFrom(`
+config:
+  v1:
+    benchmark: cis_gcp
 `)
 
 	testcases := []struct {
@@ -61,7 +66,11 @@ config:
 		},
 		{
 			false,
-			configWithBenchmark,
+			configWithK8sBenchmark,
+		},
+		{
+			false,
+			configWithGcpBenchmark,
 		},
 	}
 

@@ -125,7 +125,7 @@ func generateDevTemplate() (err error) {
 		}
 	}(f)
 
-	_, err = f.Write([]byte(generatedTemplateString))
+	_, err = f.WriteString(generatedTemplateString)
 	if err != nil {
 		return fmt.Errorf("failed to write to dev template: %w", err)
 	}

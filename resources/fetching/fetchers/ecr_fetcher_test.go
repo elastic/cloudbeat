@@ -201,7 +201,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		},
 	}
 	for _, test := range tests {
-		//Need to add services
+		// Need to add services
 		kubeclient := k8sfake.NewSimpleClientset()
 
 		pods := &v1.Pod{
@@ -221,7 +221,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetterAPI{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		ecrProvider := &ecr.MockRepositoryDescriber{}
@@ -276,7 +276,6 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 			s.Equal(*ecrResource.RepositoryArn, metadata.ID)
 		}
 	}
-
 }
 
 func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
@@ -301,7 +300,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 		},
 	}
 	for _, test := range tests {
-		//Need to add services
+		// Need to add services
 		kubeclient := k8sfake.NewSimpleClientset()
 
 		pods := &v1.Pod{
@@ -321,7 +320,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetterAPI{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		ecrProvider := &ecr.MockRepositoryDescriber{}

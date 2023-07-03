@@ -26,38 +26,26 @@ import (
 
 type Identity struct {
 	Account *string
-	Arn     *string
-	UserId  *string
-}
-
-type IdentityProvider struct {
-	client *sts.Client
 }
 
 type IdentityProviderGetter interface {
-	GetIdentity(ctx context.Context) (*Identity, error)
+	GetIdentity(ctx context.Context, cfg aws.Config) (*Identity, error)
 }
 
-func GetIdentityClient(cfg aws.Config) IdentityProviderGetter {
-	svc := sts.NewFromConfig(cfg)
+type IdentityProvider struct{}
 
-	return &IdentityProvider{
-		client: svc,
-	}
-}
+// GetIdentity returns AWS identity information
+func (provider IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*Identity, error) {
+	client := sts.NewFromConfig(cfg)
 
-// GetIdentity This method will return your identity (Arn, user-id...)
-func (provider *IdentityProvider) GetIdentity(ctx context.Context) (*Identity, error) {
 	input := &sts.GetCallerIdentityInput{}
-	response, err := provider.client.GetCallerIdentity(ctx, input)
+	response, err := client.GetCallerIdentity(ctx, input)
 	if err != nil {
 		return nil, err
 	}
 
 	identity := &Identity{
 		Account: response.Account,
-		UserId:  response.UserId,
-		Arn:     response.Arn,
 	}
 	return identity, nil
 }
