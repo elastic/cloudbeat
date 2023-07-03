@@ -22,7 +22,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
@@ -35,7 +34,6 @@ import (
 type RdsFetcherTestSuite struct {
 	suite.Suite
 
-	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -48,12 +46,6 @@ var (
 
 func TestRdsFetcherTestSuite(t *testing.T) {
 	s := new(RdsFetcherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_rds_fetcher_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
-
 	suite.Run(t, s)
 }
 
@@ -95,7 +87,7 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 			}
 
 			rdsFetcher := RdsFetcher{
-				log:        s.log,
+				log:        testhelper.NewLogger(s.T()),
 				resourceCh: s.resourceCh,
 				provider:   m,
 			}

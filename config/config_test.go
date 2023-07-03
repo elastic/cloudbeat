@@ -24,22 +24,15 @@ import (
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
 
 type ConfigTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
 }
 
 func TestConfigTestSuite(t *testing.T) {
 	s := new(ConfigTestSuite)
-	s.log = logp.NewLogger("cloudbeat_config_test_suite")
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }

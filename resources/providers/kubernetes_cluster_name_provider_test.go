@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,17 +32,10 @@ import (
 
 type KubernetesClusterNameProviderTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
 }
 
 func TestKubernetesClusterNameProviderTestSuite(t *testing.T) {
 	s := new(KubernetesClusterNameProviderTestSuite)
-	s.log = logp.NewLogger("cloudbeat_cluster_name_provider_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }

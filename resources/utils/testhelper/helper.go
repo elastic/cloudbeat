@@ -17,6 +17,14 @@
 
 package testhelper
 
+import (
+	"sync"
+	"testing"
+
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/require"
+)
+
 // CollectResources fetches items from a channel and returns them in a slice.
 //
 // Warning: this function does not wait for the channel to close, using it can cause race conditions.
@@ -51,4 +59,16 @@ func CreateMockClients[T any](client T, regions []string) map[string]T {
 	}
 
 	return m
+}
+
+var once sync.Once
+
+func NewLogger(t *testing.T) *logp.Logger {
+	t.Helper()
+
+	once.Do(func() {
+		require.NoError(t, logp.TestingSetup())
+	})
+
+	return logp.NewLogger(t.Name())
 }

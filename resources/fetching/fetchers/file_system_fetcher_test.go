@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -36,17 +35,11 @@ import (
 type FSFetcherTestSuite struct {
 	suite.Suite
 
-	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
 func TestFSFetcherTestSuite(t *testing.T) {
 	s := new(FSFetcherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_fs_fetcher_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -76,9 +69,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
-	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher := FileSystemFetcher{
-		log:        log,
+		log:        testhelper.NewLogger(s.T()),
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
 		patterns:   filePaths,
@@ -128,7 +120,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("etcd", nil).Once()
 
 	fileFetcher := FileSystemFetcher{
-		log:        s.log,
+		log:        testhelper.NewLogger(s.T()),
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
 		patterns:   paths,
@@ -186,7 +178,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
 
 	fileFetcher := FileSystemFetcher{
-		log:        s.log,
+		log:        testhelper.NewLogger(s.T()),
 		patterns:   filePaths,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
@@ -235,9 +227,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
-	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher := FileSystemFetcher{
-		log:        log,
+		log:        testhelper.NewLogger(s.T()),
 		patterns:   path,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
@@ -249,7 +240,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	s.NoError(err, "Fetcher was not able to fetch files from FS")
 	s.Equal(2, len(results))
 
-	//All inner files should exist in the final result
+	// All inner files should exist in the final result
 	expectedResult := []string{"output.txt", filepath.Base(innerDir)}
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
@@ -294,7 +285,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
 	fileFetcher := FileSystemFetcher{
-		log:        s.log,
+		log:        testhelper.NewLogger(s.T()),
 		patterns:   path,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
@@ -309,7 +300,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	directories := []string{filepath.Base(outerDir), filepath.Base(innerDir), filepath.Base(innerInnerDir)}
 	allFilesName := append(append(append(innerFiles, directories...), outerFiles...), innerInnerFiles...)
 
-	//All inner files should exist in the final result
+	// All inner files should exist in the final result
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
 		rMetadata, err := fsResource.GetMetadata()
@@ -345,9 +336,8 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("root", nil)
 
-	log := logp.NewLogger("cloudbeat_file_system_fetcher_test")
 	fileFetcher := FileSystemFetcher{
-		log:        log,
+		log:        testhelper.NewLogger(s.T()),
 		patterns:   filePaths,
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,

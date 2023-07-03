@@ -23,7 +23,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
@@ -39,17 +38,11 @@ import (
 type KubeFetcherTestSuite struct {
 	suite.Suite
 
-	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
 func TestKubeFetcherTestSuite(t *testing.T) {
 	s := new(KubeFetcherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_kube_fetcher_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -192,7 +185,7 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 	for i, tt := range tests {
 		s.Run(fmt.Sprintf("Kube api test %v", i), func() {
 			client := k8sfake.NewSimpleClientset(tt)
-			kubeFetcher := NewKubeFetcher(s.log, s.resourceCh, client)
+			kubeFetcher := NewKubeFetcher(testhelper.NewLogger(s.T()), s.resourceCh, client)
 
 			err := kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 			results := testhelper.CollectResources(s.resourceCh)

@@ -25,7 +25,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	configSDK "github.com/aws/aws-sdk-go-v2/service/configservice"
 	"github.com/aws/aws-sdk-go-v2/service/configservice/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -107,7 +106,7 @@ func TestProvider_DescribeConfigRecorders(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Provider{
-				log:          logp.NewLogger("configservice_provider_test"),
+				log:          testhelper.NewLogger(t),
 				awsAccountId: awsAccountId,
 				clients:      testhelper.CreateMockClients[Client](tt.mockClient(), tt.regions),
 			}

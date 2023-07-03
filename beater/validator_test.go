@@ -21,25 +21,18 @@ import (
 	"testing"
 
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
 
 type ValidatorTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
 	sut *validator
 }
 
 func TestValidatorTestSuite(t *testing.T) {
 	s := new(ValidatorTestSuite)
-	s.log = logp.NewLogger("cloudbeat_validator_test_suite")
 	s.sut = &validator{}
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
