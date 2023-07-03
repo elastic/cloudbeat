@@ -26,3 +26,9 @@ variable "enable_node_group_two" {
   type        = bool
   description = "Flag to enable/disable deployment of node_group_two"
 }
+
+variable "tags" {
+  type        = map(string)
+  description = "Tags to be applied to the EKS cluster and its resources."
+  default     = {}
+}
