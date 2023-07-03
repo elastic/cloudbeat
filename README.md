@@ -16,34 +16,26 @@ Cloudbeat uses security policies from the [CSP Security Policies](https://github
 
 To get started with Cloud Security Posture on your cluster, please refer to our documentation:
 
-- [Get started with KSPM (Kubernetes Security Posture Management)](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#get-started-with-kspm)
+- [Get started with Kubernetes Security Posture Management (KSPM)](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#get-started-with-kspm)
 
-- [Get started with CSPM (Cloud Security Posture Management)](https://www.elastic.co/guide/en/security/master/cspm-get-started.html#cspm-get-started)
+- [Get started with Cloud Security Posture Management (CSPM)](https://www.elastic.co/guide/en/security/master/cspm-get-started.html#cspm-get-started)
 
-- [Get started with CNVM (Cloud Native Vulnerability Management)](https://www.elastic.co/guide/en/security/master/vuln-management-overview.html)
+- [Get started with Cloud Native Vulnerability Management (CNVM)](https://www.elastic.co/guide/en/security/master/vuln-management-overview.html)
 
 ---
 
 ## Deployment
 
-To run Cloudbeat, you need to have Elastic Stack (Elasticsearch, Kibana, etc) running (locally/cloud). See **[Elastic Stack Deployment options](dev-docs/ELK-Deployment.md)**
+To run Cloudbeat, you need to have Elastic Stack (Elasticsearch, Kibana, etc) running (locally/cloud). See our [Elastic Stack Deployment options](dev-docs/ELK-Deployment.md) documentation.
 
-After deploying your Elastic Stack, you can deploy Cloudbeat. See **[Cloudbeat Deployment options](dev-docs/Cloudbeat-Deployment.md)**
+Once your Elastic Stack is deployed, you can proceed with the deployment of Cloudbeat. For deployment instructions, see [Cloudbeat Deployment options](dev-docs/Cloudbeat-Deployment.md).
 
 ## Development
 
 ### Prerequisites
 
-We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to keep all our tooling in check. See our [README](/bin/README.hermit.md) for more details.
+We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to manage our development tooling. Please refer to our [README](/bin/README.hermit.md) for detailed instructions on setting it up.
 
-Install it with the following commands:
-```zsh
-curl -fsSL https://github.com/cashapp/hermit/releases/download/stable/install.sh | /bin/bash
-. ./bin/activate-hermit
-```
-> **Note**
-> This will download and install hermit into `~/bin`. You should add this to your `$PATH` if it isn't already.
-It is also recommended to add hermit's [shell integration](https://cashapp.github.io/hermit/usage/shell/)
+___
 
-
-If you are a developer or contributor, or if you are looking for additional information, please visit our [development documentation](dev-docs/Development.md)
+> **Note*** If you are a developer or contributor, or if you are looking for additional information, please visit our [development documentation](dev-docs/Development.md)
