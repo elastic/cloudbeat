@@ -82,15 +82,17 @@ config:
 `,
 			"cis_eks",
 			CloudConfig{
-				AwsCred: aws.ConfigAWS{
-					AccessKeyID:          "key",
-					SecretAccessKey:      "secret",
-					SessionToken:         "session",
-					SharedCredentialFile: "shared_credential_file",
-					ProfileName:          "credential_profile_name",
-					RoleArn:              "role_arn",
+				Aws: AwsConfig{
+					Cred: aws.ConfigAWS{
+						AccessKeyID:          "key",
+						SecretAccessKey:      "secret",
+						SessionToken:         "session",
+						SharedCredentialFile: "shared_credential_file",
+						ProfileName:          "credential_profile_name",
+						RoleArn:              "role_arn",
+					},
+					AccountType: "single_account",
 				},
-				AwsAccountType: "single_account",
 			},
 			3,
 		},

@@ -56,9 +56,13 @@ type Config struct {
 }
 
 type CloudConfig struct {
-	AwsCred        aws.ConfigAWS `config:"aws.credentials"`
-	AwsAccountType string        `config:"aws.account_type"`
-	GcpCfg         GcpConfig     `config:"gcp"`
+	Aws AwsConfig `config:"aws"`
+	Gcp GcpConfig `config:"gcp"`
+}
+
+type AwsConfig struct {
+	Cred        aws.ConfigAWS `config:"credentials"`
+	AccountType string        `config:"account_type"`
 }
 
 type GcpConfig struct {
@@ -92,19 +96,19 @@ func New(cfg *config.C) (*Config, error) {
 		}
 	}
 
-	switch c.CloudConfig.AwsAccountType {
+	switch c.CloudConfig.Aws.AccountType {
 	case "":
 	case SingleAccount:
 	case OrganizationAccount:
 		logp.NewLogger("config").Errorf(
 			"aws.account_type '%s' not implemented yet",
-			c.CloudConfig.AwsAccountType,
+			c.CloudConfig.Aws.AccountType,
 		)
-		c.CloudConfig.AwsAccountType = SingleAccount
+		c.CloudConfig.Aws.AccountType = SingleAccount
 	default:
 		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
 			"aws.account_type '%s' is not supported",
-			c.CloudConfig.AwsAccountType,
+			c.CloudConfig.Aws.AccountType,
 		))
 	}
 

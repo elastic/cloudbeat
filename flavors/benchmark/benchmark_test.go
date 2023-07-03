@@ -71,8 +71,10 @@ func TestNewBenchmark(t *testing.T) {
 			cfg: &config.Config{
 				Benchmark: config.CIS_AWS,
 				CloudConfig: config.CloudConfig{
-					AwsCred: aws.ConfigAWS{
-						AccessKeyID: "test",
+					Aws: config.AwsConfig{
+						Cred: aws.ConfigAWS{
+							AccessKeyID: "test",
+						},
 					},
 				},
 			},
@@ -108,8 +110,10 @@ func TestNewBenchmark(t *testing.T) {
 			cfg: &config.Config{
 				Benchmark: config.CIS_EKS,
 				CloudConfig: config.CloudConfig{
-					AwsCred: aws.ConfigAWS{
-						AccessKeyID: "test",
+					Aws: config.AwsConfig{
+						Cred: aws.ConfigAWS{
+							AccessKeyID: "test",
+						},
 					},
 				},
 			},
@@ -179,8 +183,10 @@ func Test_InitRegistry(t *testing.T) {
 
 	awsCfg := config.Config{
 		CloudConfig: config.CloudConfig{
-			AwsCred: aws.ConfigAWS{
-				AccessKeyID: "some-key",
+			Aws: config.AwsConfig{
+				Cred: aws.ConfigAWS{
+					AccessKeyID: "some-key",
+				},
 			},
 		},
 	}
