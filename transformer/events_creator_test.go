@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/dataprovider"
@@ -94,11 +95,17 @@ func TestSuite(t *testing.T) {
 }
 
 func (s *EventsCreatorTestSuite) SetupSuite() {
-	err := parseJsonfile(opaResultsFileName, &opaResults)
-	if err != nil {
-		s.log.Errorf("Could not parse JSON file: %v", err)
-		return
-	}
+	fetcherDataFile, err := os.Open(opaResultsFileName)
+	require.NoError(s.T(), err)
+	defer func() {
+		require.NoError(s.T(), fetcherDataFile.Close())
+	}()
+
+	byteValue, err := io.ReadAll(fetcherDataFile)
+	require.NoError(s.T(), err)
+
+	err = json.Unmarshal(byteValue, &opaResults)
+	require.NoError(s.T(), err)
 }
 
 func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
@@ -162,23 +169,4 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			}
 		})
 	}
-}
-
-func parseJsonfile(filename string, data interface{}) error {
-	fetcherDataFile, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer fetcherDataFile.Close()
-
-	byteValue, err := io.ReadAll(fetcherDataFile)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(byteValue, data)
-	if err != nil {
-		return err
-	}
-	return nil
 }
