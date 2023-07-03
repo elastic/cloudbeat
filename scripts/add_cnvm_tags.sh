@@ -19,6 +19,7 @@ stack_name=${2:?Stack name not provided}
 # Tags provided as the third argument
 tags=${3:?Tags not provided}
 
+# Initialize instance_id variable
 instance_id=""
 
 # Loop until instance ID is retrieved or timeout is reached
@@ -46,5 +47,5 @@ echo "$instance_id"
 
 # If instance ID is retrieved, create tags for the instance
 if [ -n "$instance_id" ]; then
-    aws ec2 create-tags --region "$aws_region" --resources "$instance_id" --tags "$tags"
+    aws ec2 create-tags --region "$aws_region" --resources "$instance_id" --tags $tags
 fi
