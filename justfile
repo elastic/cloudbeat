@@ -6,6 +6,7 @@ kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 kustomizeAwsOverlay := "deploy/kustomize/overlays/cloudbeat-aws"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
+AWS_DEFAULT_TAGS := 'Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments'
 
 # use env var if available
 export LOCAL_GOARCH := `go env GOARCH`
@@ -122,7 +123,7 @@ logs-cloudbeat:
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
-create-cnvm-stack-tags region stack_name tags='Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture':
+create-cnvm-stack-tags region stack_name tags=(AWS_DEFAULT_TAGS):
   ./scripts/add_cnvm_tags.sh {{region}} {{stack_name}} '{{tags}}'
 
 build-kibana-docker:

@@ -36,7 +36,7 @@ env:
   AWS_REGION: "eu-west-1"
   WORKING_DIR: deploy/test-environments
   FLEET_API_DIR: fleet_api/src
-  COMMON_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture"
+  AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
 
 jobs:
   Deploy:
@@ -233,7 +233,7 @@ jobs:
       - name: Tag CNVM Instance
         env:
           STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} '${{ env.COMMON_TAGS }} Key=owner,Value=${{ github.actor }}'
+        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} '${{ env.AWS_DEFAULT_TAGS }} Key=owner,Value=${{ github.actor }}'
 
       - name: Run Sanity checks
         if: success()
