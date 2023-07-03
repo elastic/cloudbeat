@@ -173,8 +173,6 @@ func TestNewBenchmark(t *testing.T) {
 }
 
 func Test_InitRegistry(t *testing.T) {
-	logger := logp.NewLogger("test benchmark")
-
 	awsCfg := config.Config{
 		CloudConfig: config.CloudConfig{
 			AwsCred: aws.ConfigAWS{
@@ -299,7 +297,7 @@ func Test_InitRegistry(t *testing.T) {
 		t.Run(fmt.Sprintf("%T: %s", tt.benchmark, tt.name), func(t *testing.T) {
 			got, err := tt.benchmark.InitRegistry(
 				context.Background(),
-				logger,
+				testhelper.NewLogger(t),
 				&tt.cfg,
 				make(chan fetching.ResourceInfo),
 				&tt.dependencies,
