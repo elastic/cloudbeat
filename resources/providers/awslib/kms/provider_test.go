@@ -25,29 +25,21 @@ import (
 
 	kmsClient "github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type ProviderTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
 }
 type mocks [2][]any
 type kmsClientMockReturnVals map[string][]mocks
 
 func TestProviderTestSuite(t *testing.T) {
 	s := new(ProviderTestSuite)
-	s.log = logp.NewLogger("cloudbeat_kms_provider_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
-
 	suite.Run(t, s)
 }
 
@@ -161,7 +153,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeSymmetricKeys() {
 		}
 
 		kmsProvider := Provider{
-			log:     s.log,
+			log:     testhelper.NewLogger(s.T()),
 			clients: mockClients,
 		}
 

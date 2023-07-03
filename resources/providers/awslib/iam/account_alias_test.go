@@ -23,9 +23,10 @@ import (
 	"testing"
 
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type accountAliasMocks map[string][][]any
@@ -71,7 +72,7 @@ func Test_GetAccountAlias(t *testing.T) {
 
 		p := Provider{
 			client: mockedClient,
-			log:    logp.NewLogger("iam-provider"),
+			log:    testhelper.NewLogger(t),
 		}
 
 		result, err := p.GetAccountAlias(context.TODO())

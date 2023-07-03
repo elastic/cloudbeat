@@ -26,7 +26,6 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -36,6 +35,7 @@ import (
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
 )
 
@@ -80,17 +80,10 @@ var (
 
 type EventsCreatorTestSuite struct {
 	suite.Suite
-	log *logp.Logger
 }
 
 func TestSuite(t *testing.T) {
 	s := new(EventsCreatorTestSuite)
-	s.log = logp.NewLogger("cloudbeat_events_creator_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
-
 	suite.Run(t, s)
 }
 
@@ -149,7 +142,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			}, nil)
 			dataProviderMock.On("EnrichEvent", mock.Anything, mock.Anything).Return(mockEnrichEvent)
 
-			transformer := NewTransformer(s.log, &dataProviderMock, testIndex)
+			transformer := NewTransformer(testhelper.NewLogger(s.T()), &dataProviderMock, testIndex)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {

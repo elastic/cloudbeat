@@ -25,18 +25,16 @@ import (
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type ProviderTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
 }
 
 type rdsClientMockReturnVals map[string]map[string][]any
@@ -53,12 +51,6 @@ var (
 
 func TestProviderTestSuite(t *testing.T) {
 	s := new(ProviderTestSuite)
-	s.log = logp.NewLogger("cloudbeat_rds_provider_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
-
 	suite.Run(t, s)
 }
 
@@ -140,7 +132,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 		}
 
 		rdsProvider := Provider{
-			log:     s.log,
+			log:     testhelper.NewLogger(s.T()),
 			clients: clients,
 			ec2:     mockEc2,
 		}
