@@ -34,7 +34,7 @@ func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOp
 	log.Info("GetGCPClientConfig create credentials options")
 	gcpCred := cfg.CloudConfig.GcpCfg
 	if gcpCred.CredentialsJSON == "" && gcpCred.CredentialsFilePath == "" {
-		return nil, errors.New("no credentials_file_path or credentials_json specified")
+		return nil, errors.New("The credentials file path or credentials JSON have not been specified")
 	}
 
 	var opts []option.ClientOption
@@ -61,16 +61,16 @@ func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOp
 
 func validateJSONFromFile(filePath string) error {
 	if _, err := os.Stat(filePath); errors.Is(err, fs.ErrNotExist) {
-		return fmt.Errorf("the file %q cannot be found", filePath)
+		return fmt.Errorf("The file %q cannot be found", filePath)
 	}
 
 	b, err := os.ReadFile(filePath)
 	if err != nil {
-		return fmt.Errorf("the file %q cannot be read", filePath)
+		return fmt.Errorf("The file %q cannot be read", filePath)
 	}
 
 	if !json.Valid(b) {
-		return fmt.Errorf("the file %q does not contain valid JSON", filePath)
+		return fmt.Errorf("The file %q does not contain valid JSON", filePath)
 	}
 
 	return nil
