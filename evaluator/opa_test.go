@@ -33,6 +33,7 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type DummyResource struct {
@@ -55,7 +56,7 @@ type OpaTestSuite struct {
 
 func TestOpaTestSuite(t *testing.T) {
 	s := new(OpaTestSuite)
-	s.log = logp.NewLogger("opa_evaluator_test")
+	s.log = testhelper.NewLogger(t)
 
 	suite.Run(t, s)
 }

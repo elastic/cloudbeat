@@ -26,16 +26,16 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/common/reload"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type ListenerTestSuite struct {
 	suite.Suite
 
-	log  *logp.Logger
 	opts goleak.Option
 }
 
@@ -45,10 +45,6 @@ func TestListenerTestSuite(t *testing.T) {
 }
 
 func (s *ListenerTestSuite) SetupTest() {
-	if err := logp.TestingSetup(); err != nil {
-		s.Error(err)
-	}
-	s.log = logp.NewLogger("cloudbeat_listener_test_suite")
 	s.opts = goleak.IgnoreCurrent()
 }
 
@@ -83,7 +79,7 @@ func (s *ListenerTestSuite) TestReloadAndStop() {
 			},
 		},
 		{
-			name: "multiuple empty configs",
+			name: "multiple empty configs",
 			values: []configUpdate{
 				{},
 				{},
@@ -165,7 +161,7 @@ func (s *ListenerTestSuite) TestReloadAndStop() {
 
 	for _, tcase := range tests {
 		s.Run(tcase.name, func() {
-			sut := NewListener(s.log)
+			sut := NewListener(testhelper.NewLogger(s.T()))
 			wg := sync.WaitGroup{}
 
 			for _, val := range tcase.values {

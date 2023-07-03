@@ -25,7 +25,6 @@ import (
 	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 
@@ -38,7 +37,6 @@ import (
 type IamFetcherTestSuite struct {
 	suite.Suite
 
-	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -46,11 +44,6 @@ type mocksReturnVals map[string][]any
 
 func TestIamFetcherTestSuite(t *testing.T) {
 	s := new(IamFetcherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_iam_fetcher_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -223,7 +216,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 			}
 
 			iamFetcher := IAMFetcher{
-				log:         s.log,
+				log:         testhelper.NewLogger(s.T()),
 				iamProvider: iamProviderMock,
 				resourceCh:  s.resourceCh,
 				cloudIdentity: &awslib.Identity{

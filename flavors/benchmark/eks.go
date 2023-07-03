@@ -72,12 +72,12 @@ func getEksAwsConfig(
 	cfg *config.Config,
 	dependencies *Dependencies,
 ) (awssdk.Config, *awslib.Identity, error) {
-	if cfg.CloudConfig == (config.CloudConfig{}) || cfg.CloudConfig.AwsCred == (aws.ConfigAWS{}) {
+	if cfg.CloudConfig == (config.CloudConfig{}) || cfg.CloudConfig.Aws.Cred == (aws.ConfigAWS{}) {
 		// Optional for EKS
 		return awssdk.Config{}, nil, nil
 	}
 
-	awsCfg, err := dependencies.AWSConfig(ctx, cfg.CloudConfig.AwsCred)
+	awsCfg, err := dependencies.AWSConfig(ctx, cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}

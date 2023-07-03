@@ -26,7 +26,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
@@ -41,7 +40,6 @@ import (
 
 type EcrFetcherTestSuite struct {
 	suite.Suite
-	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -52,10 +50,6 @@ type describeRepoMockParameters struct {
 
 func TestEcrFetcherTestSuite(t *testing.T) {
 	s := new(EcrFetcherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_ecr_fetcher_test_suite")
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -247,7 +241,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		}
 
 		ecrFetcher := EcrFetcher{
-			log:          s.log,
+			log:          testhelper.NewLogger(s.T()),
 			kubeClient:   kubeclient,
 			PodDescriber: privateEcrExecutor,
 			resourceCh:   s.resourceCh,
@@ -333,7 +327,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 			Provider:    ecrProvider,
 		}
 		ecrFetcher := EcrFetcher{
-			log:          s.log,
+			log:          testhelper.NewLogger(s.T()),
 			kubeClient:   kubeclient,
 			PodDescriber: privateEcrExecutor,
 			resourceCh:   s.resourceCh,

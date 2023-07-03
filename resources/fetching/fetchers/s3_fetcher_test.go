@@ -22,7 +22,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -34,7 +33,6 @@ import (
 type S3FetcherTestSuite struct {
 	suite.Suite
 
-	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -42,11 +40,6 @@ type s3mocksReturnVals map[string][]any
 
 func TestS3FetcherTestSuite(t *testing.T) {
 	s := new(S3FetcherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_s3_fetcher_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -89,7 +82,7 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 			}
 
 			s3Fetcher := S3Fetcher{
-				log:        s.log,
+				log:        testhelper.NewLogger(s.T()),
 				s3:         s3ProviderMock,
 				resourceCh: s.resourceCh,
 			}
