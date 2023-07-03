@@ -14,7 +14,7 @@ Cloudbeat uses security policies from the [CSP Security Policies](https://github
 
 ## Getting Started
 
-To get started with Cloud Security Posture on your cluster, please refer to our documentation:
+To get started with Cloud Security on your cluster, please refer to our documentation:
 
 - [Get started with Kubernetes Security Posture Management (KSPM)](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#get-started-with-kspm)
 
