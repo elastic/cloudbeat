@@ -120,15 +120,6 @@ config:
 			"cis_eks",
 			false,
 		},
-		{
-			`
-config:
-  v1:
-    benchmark: cis_gcp
-`,
-			"",
-			true,
-		},
 	}
 
 	for i, test := range tests {
