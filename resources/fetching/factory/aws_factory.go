@@ -39,7 +39,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
 )
 
-func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *awslib.Identity) (FetchersMap, error) {
+func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *awslib.Identity) FetchersMap {
 	log.Infof("Initializing AWS fetchers for account: '%s'", *identity.Account)
 
 	m := make(FetchersMap)
@@ -81,5 +81,5 @@ func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.Resourc
 	s3Fetcher := fetchers.NewS3Fetcher(log, s3Provider, ch)
 	m[fetching.S3Type] = RegisteredFetcher{Fetcher: s3Fetcher}
 
-	return m, nil
+	return m
 }

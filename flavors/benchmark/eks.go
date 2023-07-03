@@ -51,7 +51,7 @@ func (k *EKS) InitRegistry(
 ) (registry.Registry, error) {
 	kubeClient, err := dependencies.KubernetesClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create kubernetes client :%w", err)
+		return nil, fmt.Errorf("failed to create kubernetes client: %w", err)
 	}
 	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 
@@ -60,11 +60,7 @@ func (k *EKS) InitRegistry(
 		return nil, fmt.Errorf("failed to initialize AWS config: %w", err)
 	}
 
-	fm, err := factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create EKS: %w", err)
-	}
-	return registry.NewRegistry(log, fm), nil
+	return registry.NewRegistry(log, factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)), nil
 }
 
 func (k *EKS) Stop() {
