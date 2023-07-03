@@ -104,7 +104,7 @@ func TestProvider_GetPolicies(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := createProviderFromMockValues(tt.mockReturnValues)
+			p := createProviderFromMockValues(t, tt.mockReturnValues)
 
 			got, err := p.GetPolicies(context.Background())
 			if tt.wantErr {
@@ -210,7 +210,7 @@ func TestProvider_getPolicies(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := createProviderFromMockValues(tt.mockReturnValues)
+			p := createProviderFromMockValues(t, tt.mockReturnValues)
 
 			got, err := p.getPolicies(context.Background())
 			if tt.wantErr {
@@ -321,7 +321,7 @@ func TestProvider_getSupportPolicy(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := createProviderFromMockValues(tt.mockReturnValues)
+			p := createProviderFromMockValues(t, tt.mockReturnValues)
 
 			got, err := p.getSupportPolicy(context.Background())
 			if tt.wantErr {

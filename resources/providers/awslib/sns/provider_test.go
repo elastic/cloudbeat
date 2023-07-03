@@ -24,9 +24,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type (
@@ -73,7 +74,7 @@ func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 				c.On(name, call[0]...).Return(call[1]...)
 			}
 			p := &Provider{
-				log:     logp.NewLogger("TestProvider_ListSubscriptionsByTopic"),
+				log:     testhelper.NewLogger(t),
 				clients: createMockClients(c, regions),
 			}
 			got, err := p.ListSubscriptionsByTopic(context.Background(), &regions[0], tt.topic)

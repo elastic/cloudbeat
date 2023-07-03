@@ -22,7 +22,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -34,7 +33,6 @@ import (
 type KmsFetcherTestSuite struct {
 	suite.Suite
 
-	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
@@ -42,11 +40,6 @@ type KmsMocksReturnVals map[string][]any
 
 func TestKmsFetcherTestSuite(t *testing.T) {
 	s := new(KmsFetcherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_kms_fetcher_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -89,7 +82,7 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 			}
 
 			kmsFetcher := KmsFetcher{
-				log:        s.log,
+				log:        testhelper.NewLogger(s.T()),
 				kms:        kmsProviderMock,
 				resourceCh: s.resourceCh,
 			}

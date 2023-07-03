@@ -26,7 +26,6 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -36,6 +35,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type expectedFetchers struct {
@@ -44,8 +44,6 @@ type expectedFetchers struct {
 }
 
 func TestNewBenchmark(t *testing.T) {
-	logger := logp.NewLogger("test new benchmark")
-
 	tests := []struct {
 		name    string
 		cfg     *config.Config
@@ -156,7 +154,7 @@ func TestNewBenchmark(t *testing.T) {
 			}
 			fetchersMap, err := b.InitRegistry(
 				context.Background(),
-				logger,
+				testhelper.NewLogger(t),
 				tt.cfg,
 				make(chan fetching.ResourceInfo),
 				NewDependencies(mockKubeClient(nil), mockIdentityProvider(nil), mockAwsCfg(nil)),
@@ -179,8 +177,6 @@ func TestNewBenchmark(t *testing.T) {
 }
 
 func Test_InitRegistry(t *testing.T) {
-	logger := logp.NewLogger("test benchmark")
-
 	awsCfg := config.Config{
 		CloudConfig: config.CloudConfig{
 			Aws: config.AwsConfig{
@@ -307,7 +303,7 @@ func Test_InitRegistry(t *testing.T) {
 		t.Run(fmt.Sprintf("%T: %s", tt.benchmark, tt.name), func(t *testing.T) {
 			got, err := tt.benchmark.InitRegistry(
 				context.Background(),
-				logger,
+				testhelper.NewLogger(t),
 				&tt.cfg,
 				make(chan fetching.ResourceInfo),
 				&tt.dependencies,

@@ -23,19 +23,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type ManagerTestSuite struct {
 	suite.Suite
 	ctx        context.Context
-	log        *logp.Logger
 	registry   *registry.MockRegistry
 	opts       goleak.Option
 	resourceCh chan fetching.ResourceInfo
@@ -46,11 +45,6 @@ const timeout = 2 * time.Second
 
 func TestManagerTestSuite(t *testing.T) {
 	s := new(ManagerTestSuite)
-	s.log = logp.NewLogger("cloudbeat_manager_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -78,7 +72,7 @@ func (s *ManagerTestSuite) TestManagerRun() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(5)
 	s.registry.EXPECT().Stop().Return().Once()
 
-	m, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
+	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.NoError(err)
 
 	m.Run()
@@ -98,7 +92,7 @@ func (s *ManagerTestSuite) TestManagerRunPanic() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Panic(fetcherMessage).Once()
 	s.registry.EXPECT().Stop().Return().Once()
 
-	m, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
+	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.NoError(err)
 
 	m.Run()
@@ -118,7 +112,7 @@ func (s *ManagerTestSuite) TestManagerRunTimeout() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).WaitUntil(time.After(fetcherDelay)).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
+	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.NoError(err)
 
 	m.Run()
@@ -144,7 +138,7 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 		}
 	}).Once()
 
-	m, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
+	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.NoError(err)
 
 	err = m.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
@@ -160,7 +154,7 @@ func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
 	s.registry.EXPECT().ShouldRun(mock.Anything).Return(false).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	d, err := NewManager(s.ctx, s.log, interval, timeout, s.registry)
+	d, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.NoError(err)
 
 	d.Run()
@@ -178,7 +172,7 @@ func (s *ManagerTestSuite) TestManagerStop() {
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(s.ctx, s.log, interval, time.Second*5, s.registry)
+	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
 	s.NoError(err)
 
 	m.Run()
@@ -201,7 +195,7 @@ func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
 	s.registry.EXPECT().ShouldRun(mock.Anything).Return(true).Once()
 	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Return(nil).Once()
 
-	m, err := NewManager(ctx, s.log, interval, time.Second*5, s.registry)
+	m, err := NewManager(ctx, testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
 	s.NoError(err)
 
 	m.Run()
