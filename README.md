@@ -5,7 +5,7 @@
 # Cloudbeat
 
 Cloudbeat is a tool that analyzes cloud assets for security compliance and sends findings to Elasticsearch.
-It is designed to be used as part of the [Cloud Security Posture](https://www.elastic.co/blog/secure-your-cloud-with-elastic-security) plugin in Kibana.
+It is designed to be used as part of the [Cloud Security](https://www.elastic.co/blog/secure-your-cloud-with-elastic-security) plugin in Kibana.
 
 
 ### CSP Security Policies
