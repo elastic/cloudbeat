@@ -25,7 +25,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	aws_securityhub "github.com/aws/aws-sdk-go-v2/service/securityhub"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -117,7 +116,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 				hub.On(name, call[0]...).Return(call[1]...)
 			}
 			m := MonitoringFetcher{
-				log:           logp.NewLogger("TestMonitoringFetcher_Fetch"),
+				log:           testhelper.NewLogger(t),
 				provider:      mockClient,
 				securityhub:   hub,
 				resourceCh:    ch,

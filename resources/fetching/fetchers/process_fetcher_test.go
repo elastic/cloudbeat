@@ -25,7 +25,6 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v2"
@@ -59,17 +58,11 @@ type ProcessConfigTestStruct struct {
 type ProcessFetcherTestSuite struct {
 	suite.Suite
 
-	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
 func TestProcessFetcherTestSuite(t *testing.T) {
 	s := new(ProcessFetcherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_process_fetcher_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -93,7 +86,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	var procCfg = ProcessesConfigMap{
 		testProcess.Name: {ConfigFileArguments: []string{"fetcherConfig"}},
 	}
-	processesFetcher := &ProcessesFetcher{log: s.log, Fs: sysfs, resourceCh: s.resourceCh, processes: procCfg}
+	processesFetcher := &ProcessesFetcher{log: testhelper.NewLogger(s.T()), Fs: sysfs, resourceCh: s.resourceCh, processes: procCfg}
 
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
@@ -122,7 +115,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 		"someProcess": {ConfigFileArguments: []string{"fetcherConfig"}},
 	}
 	processesFetcher := &ProcessesFetcher{
-		log:        s.log,
+		log:        testhelper.NewLogger(s.T()),
 		Fs:         fsys,
 		resourceCh: s.resourceCh,
 		processes:  procCfg,
@@ -145,7 +138,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 	fsys := createProcess(testProcess, VanillaCmdLineDelimiter)
 	var procCfg = ProcessesConfigMap{
 		"kubelet": {ConfigFileArguments: []string{}}}
-	processesFetcher := &ProcessesFetcher{log: s.log, Fs: fsys, resourceCh: s.resourceCh, processes: procCfg}
+	processesFetcher := &ProcessesFetcher{log: testhelper.NewLogger(s.T()), Fs: fsys, resourceCh: s.resourceCh, processes: procCfg}
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 
 	results := testhelper.CollectResources(s.resourceCh)
@@ -197,7 +190,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 		procCfg := ProcessesConfigMap{
 			testProcess.Name: {ConfigFileArguments: []string{"fetcherConfig"}},
 		}
-		processesFetcher := &ProcessesFetcher{log: s.log, Fs: sysfs, resourceCh: s.resourceCh, processes: procCfg}
+		processesFetcher := &ProcessesFetcher{log: testhelper.NewLogger(s.T()), Fs: sysfs, resourceCh: s.resourceCh, processes: procCfg}
 		err = processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 

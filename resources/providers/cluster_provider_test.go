@@ -23,28 +23,21 @@ import (
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type ClusterProviderTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
 }
 
 func TestClusterProviderTestSuite(t *testing.T) {
 	s := new(ClusterProviderTestSuite)
-	s.log = logp.NewLogger("cloudbeat_cluster_provider_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -110,7 +103,7 @@ func (s *ClusterProviderTestSuite) TestGetClusterName() {
 		}
 
 		ctx := context.Background()
-		clusterName, err := clusterProvider.GetClusterName(ctx, &test.config, s.log)
+		clusterName, err := clusterProvider.GetClusterName(ctx, &test.config, testhelper.NewLogger(s.T()))
 
 		s.NoError(err)
 		s.Equal(test.expectedClusterName, clusterName)
@@ -123,7 +116,9 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	cfg := config.Config{
 		Benchmark: "invalid-type",
 		CloudConfig: config.CloudConfig{
-			AwsCred: aws.ConfigAWS{},
+			Aws: config.AwsConfig{
+				Cred: aws.ConfigAWS{},
+			},
 		},
 	}
 

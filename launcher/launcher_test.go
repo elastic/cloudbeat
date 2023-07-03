@@ -36,6 +36,8 @@ import (
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 var dummyBeaterName = "Dummybeat"
@@ -144,10 +146,7 @@ type launcherMocks struct {
 
 func TestLauncherTestSuite(t *testing.T) {
 	s := new(LauncherTestSuite)
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
-	s.log = logp.NewLogger("cloudbeat_launcher_test_suite")
+	s.log = testhelper.NewLogger(t)
 
 	s.opts = goleak.IgnoreCurrent()
 	suite.Run(t, s)

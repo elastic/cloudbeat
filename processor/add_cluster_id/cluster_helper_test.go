@@ -20,7 +20,6 @@ package add_cluster_id
 import (
 	"testing"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,17 +29,10 @@ import (
 
 type ClusterHelperTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
 }
 
 func TestClusterHelperTestSuite(t *testing.T) {
 	s := new(ClusterHelperTestSuite)
-	s.log = logp.NewLogger("cloudbeat_cluster_helper_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }

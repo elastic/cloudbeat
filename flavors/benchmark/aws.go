@@ -51,7 +51,7 @@ func getCisAwsConfig(ctx context.Context, cfg *config.Config, dependencies *Depe
 	// Initialize AWS config with the default region rather than the ec2 region.
 	// This is because in CSPM we create a client per region.
 	// TODO: make this mock-able
-	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return awssdk.Config{}, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}

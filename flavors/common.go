@@ -53,7 +53,7 @@ func GetCommonDataProvider(ctx context.Context, log *logp.Logger, cfg config.Con
 }
 
 func getAWSDataProvider(ctx context.Context, log *logp.Logger, cfg config.Config) (dataprovider.CommonDataProvider, error) {
-	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.AwsCred)
+	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return nil, fmt.Errorf("Common.getAWSDataProvider failed to initialize AWS credentials: %w", err)
 	}
