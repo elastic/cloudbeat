@@ -1,4 +1,18 @@
 #!/usr/bin/env bash
+# Script: add_cnvm_tags.sh
+# Description: This script retrieves the instance ID of an EC2 instance
+#              associated with a CloudFormation stack and applies tags to it.
+# Usage: ./scripts/add_cnvm_tags.sh <aws_region> <stack_name> <tags>
+#
+# Arguments:
+#   <aws_region>: The AWS region where the CloudFormation stack is deployed.
+#   <stack_name>: The name of the CloudFormation stack.
+#   <tags>: Tags to be applied to the EC2 instance, provided as a single string
+#           with each key-value pair separated by spaces.
+#
+# Example:
+#   ./scripts/add_cnvm_tags.sh eu-west-1 cnvm-sanity-test-stack "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture"
+
 set -euo pipefail
 
 # Maximum timeout in seconds
