@@ -230,11 +230,6 @@ jobs:
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
 
-      - name: Tag CNVM Instance
-        env:
-          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} '${{ env.AWS_DEFAULT_TAGS }} Key=owner,Value=${{ github.actor }}'
-
       - name: Run Sanity checks
         if: success()
         run: |
@@ -247,3 +242,9 @@ jobs:
         run: |
           terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
           aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
+
+      - name: Tag CNVM Instance
+        if: github.event.inputs.cleanup-env == 'false'
+        env:
+          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} '${{ env.AWS_DEFAULT_TAGS }} Key=owner,Value=${{ github.actor }}'
