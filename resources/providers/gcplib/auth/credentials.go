@@ -32,7 +32,7 @@ import (
 
 func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOption, error) {
 	log.Info("GetGCPClientConfig create credentials options")
-	gcpCred := cfg.CloudConfig.GcpCfg
+	gcpCred := cfg.CloudConfig.Gcp
 	if gcpCred.CredentialsJSON == "" && gcpCred.CredentialsFilePath == "" {
 		return nil, errors.New("The credentials file path or credentials JSON have not been specified")
 	}

@@ -47,7 +47,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 			name: "Should return a GcpClientConfig using SA credentials file path",
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
-					GcpCfg: config.GcpConfig{
+					Gcp: config.GcpConfig{
 						GcpClientOpt: config.GcpClientOpt{
 							CredentialsFilePath: saFilePath,
 						},
@@ -61,7 +61,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 			name: "Should return an error due to invalid SA credentials file path",
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
-					GcpCfg: config.GcpConfig{
+					Gcp: config.GcpConfig{
 						GcpClientOpt: config.GcpClientOpt{
 							CredentialsFilePath: "invalid path",
 						},
@@ -75,7 +75,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 			name: "Should return a GcpClientConfig using SA credentials json",
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
-					GcpCfg: config.GcpConfig{
+					Gcp: config.GcpConfig{
 						GcpClientOpt: config.GcpClientOpt{
 							CredentialsJSON: saCredentialsJSON,
 						},
@@ -89,7 +89,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 			name: "Should return an error due to invalid SA json",
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
-					GcpCfg: config.GcpConfig{
+					Gcp: config.GcpConfig{
 						GcpClientOpt: config.GcpClientOpt{
 							CredentialsJSON: "invalid json",
 						},
@@ -103,7 +103,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 			name: "Should return client options with both credentials_file_path and credentials_json",
 			cfg: &config.Config{
 				CloudConfig: config.CloudConfig{
-					GcpCfg: config.GcpConfig{
+					Gcp: config.GcpConfig{
 						GcpClientOpt: config.GcpClientOpt{
 							CredentialsFilePath: saFilePath,
 							CredentialsJSON:     saCredentialsJSON,

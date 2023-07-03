@@ -116,7 +116,9 @@ func (s *ClusterProviderTestSuite) TestGetClusterNameNoValidIntegrationType() {
 	cfg := config.Config{
 		Benchmark: "invalid-type",
 		CloudConfig: config.CloudConfig{
-			AwsCred: aws.ConfigAWS{},
+			Aws: config.AwsConfig{
+				Cred: aws.ConfigAWS{},
+			},
 		},
 	}
 

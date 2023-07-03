@@ -21,6 +21,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -28,6 +29,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/launcher"
 )
@@ -37,8 +39,6 @@ const (
 	VulnerabilityType            = "vuln_mgmt"
 	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 )
-
-var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
 
 type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
@@ -56,8 +56,13 @@ type Config struct {
 }
 
 type CloudConfig struct {
-	AwsCred aws.ConfigAWS `config:"aws.credentials"`
-	GcpCfg  GcpConfig     `config:"gcp"`
+	Aws AwsConfig `config:"aws"`
+	Gcp GcpConfig `config:"gcp"`
+}
+
+type AwsConfig struct {
+	Cred        aws.ConfigAWS `config:"credentials"`
+	AccountType string        `config:"account_type"`
 }
 
 type GcpConfig struct {
@@ -69,6 +74,11 @@ type GcpClientOpt struct {
 	CredentialsJSON     string `config:"credentials_json"`
 	CredentialsFilePath string `config:"credentials_file_path"`
 }
+
+const (
+	SingleAccount       = "single_account"
+	OrganizationAccount = "organization_account"
+)
 
 func New(cfg *config.C) (*Config, error) {
 	c, err := defaultConfig()
@@ -82,9 +92,26 @@ func New(cfg *config.C) (*Config, error) {
 
 	if c.Benchmark != "" {
 		if !isSupportedBenchmark(c.Benchmark) {
-			return c, ErrBenchmarkNotSupported
+			return c, launcher.NewUnhealthyError(fmt.Sprintf("benchmark '%s' is not supported", c.Benchmark))
 		}
 	}
+
+	switch c.CloudConfig.Aws.AccountType {
+	case "":
+	case SingleAccount:
+	case OrganizationAccount:
+		logp.NewLogger("config").Errorf(
+			"aws.account_type '%s' not implemented yet",
+			c.CloudConfig.Aws.AccountType,
+		)
+		c.CloudConfig.Aws.AccountType = SingleAccount
+	default:
+		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
+			"aws.account_type '%s' is not supported",
+			c.CloudConfig.Aws.AccountType,
+		))
+	}
+
 	return c, nil
 }
 
