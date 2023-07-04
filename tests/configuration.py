@@ -59,7 +59,9 @@ elasticsearch.basic_auth = (elasticsearch.user, elasticsearch.password)
 elasticsearch.port = os.getenv("ES_PORT", "9200")
 elasticsearch.protocol = os.getenv("ES_PROTOCOL", "http")
 elasticsearch.url = os.getenv("ES_URL", f"{elasticsearch.protocol}://{elasticsearch.hosts}:{elasticsearch.port}")
-elasticsearch.cis_index = os.getenv("CIS_INDEX", "*cloud_security_posture.findings*")
+elasticsearch.kspm_index = os.getenv("KSPM_INDEX", "*cloud_security_posture.findings*")
+elasticsearch.cspm_index = os.getenv("CSPM_INDEX", "*cloud_security_posture.findings*")
+elasticsearch.cnvm_index = os.getenv("CNVM_INDEX", "*cloud_security_posture.vulnerabilities*")
 
 # --- Docker environment definition
 docker = Munch()

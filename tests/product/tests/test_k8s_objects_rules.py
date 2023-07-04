@@ -17,7 +17,7 @@ from commonlib.framework.reporting import skip_param_case, SkipReportData
 
 @pytest.mark.k8s_object_rules
 def test_kube_resource_patch(
-    elastic_client,
+    kspm_client,
     test_env,
     rule_tag,
     resource_type,
@@ -75,7 +75,7 @@ def test_kube_resource_patch(
             return False
 
     evaluation = get_ES_evaluation(
-        elastic_client=elastic_client,
+        elastic_client=kspm_client,
         timeout=agent_config.findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),

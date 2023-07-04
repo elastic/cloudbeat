@@ -19,7 +19,6 @@ from loguru import logger
 
 def get_events_from_index(
     elastic_client,
-    index_name: str,
     rule_tag: str,
     time_after: datetime,
 ) -> list[Munch]:
@@ -48,7 +47,6 @@ def get_events_from_index(
     }
     sort = [{"@timestamp": {"order": "desc"}}]
     result = elastic_client.get_index_data(
-        index_name=index_name,
         query=query,
         sort=sort,
         size=1000,

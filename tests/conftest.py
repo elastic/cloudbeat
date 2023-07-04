@@ -9,7 +9,7 @@ import time
 import pytest
 import configuration
 from commonlib.kubernetes import KubernetesHelper
-from commonlib.elastic_wrapper import ElasticWrapper
+from tests.elasticsearch.elastic_wrapper import ElasticWrapper
 from commonlib.docker_wrapper import DockerWrapper
 from commonlib.io_utils import FsClient
 from _pytest.logging import LogCaptureFixture
@@ -146,18 +146,6 @@ def eks_cluster():
     @return: EKS config
     """
     return configuration.eks
-
-
-@pytest.fixture(scope="session", autouse=True)
-def elastic_client():
-    """
-    This function (fixture) instantiate ElasticWrapper.
-    @return: ElasticWrapper client
-    """
-    elastic_config = configuration.elasticsearch
-    es_client = ElasticWrapper(elastic_params=elastic_config)
-    logger.info(f"ElasticSearch url: {elastic_config.url}")
-    return es_client
 
 
 @pytest.fixture(scope="session", autouse=True)

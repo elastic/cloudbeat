@@ -35,7 +35,6 @@ def get_ES_evaluation(
             time.sleep(2)
             events = get_events_from_index(
                 elastic_client,
-                elastic_client.index,
                 rule_tag,
                 latest_timestamp,
             )
@@ -186,7 +185,6 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
             while not is_timeout(start_time_per_agent, node_cycle_timeout):
                 # keep query ES until the sequence has changed
                 result = elastic_client.get_index_data(
-                    index_name=elastic_client.index,
                     query=query,
                     sort=sort,
                 )
@@ -277,7 +275,6 @@ def get_findings(elastic_client, config_timeout, query, sort, match_type):
     result = {}
     while time.time() - start_time < config_timeout:
         current_result = elastic_client.get_index_data(
-            index_name=elastic_client.index,
             query=query,
             sort=sort,
         )
@@ -293,7 +290,7 @@ def get_findings(elastic_client, config_timeout, query, sort, match_type):
             )
             result = current_result
             break
-        time.sleep(1)
+        time.sleep(5)
 
     return result
 
