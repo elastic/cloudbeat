@@ -29,7 +29,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3control"
 	s3ControlTypes "github.com/aws/aws-sdk-go-v2/service/s3control/types"
 	"github.com/aws/smithy-go"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
@@ -39,8 +38,6 @@ import (
 
 type ProviderTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
 }
 type mocks [2][]any
 type s3ClientMockReturnVals map[string][]mocks
@@ -48,12 +45,6 @@ type s3ControlClientMockReturnVals map[string]mocks
 
 func TestProviderTestSuite(t *testing.T) {
 	s := new(ProviderTestSuite)
-	s.log = logp.NewLogger("cloudbeat_s3_provider_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
-
 	suite.Run(t, s)
 }
 
@@ -518,7 +509,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 		}
 
 		s3Provider := Provider{
-			log:           s.log,
+			log:           testhelper.NewLogger(s.T()),
 			clients:       testhelper.CreateMockClients[Client](s3ClientMock, test.regions),
 			controlClient: controlClient,
 			accountId:     "asd",

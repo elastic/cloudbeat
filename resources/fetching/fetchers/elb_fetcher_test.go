@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
@@ -45,17 +44,11 @@ const (
 type ElbFetcherTestSuite struct {
 	suite.Suite
 
-	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 }
 
 func TestElbFetcherTestSuite(t *testing.T) {
 	s := new(ElbFetcherTestSuite)
-	s.log = logp.NewLogger("cloudbeat_elb_fetcher_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -126,7 +119,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetterAPI{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
@@ -139,7 +132,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
 		elbFetcher := ElbFetcher{
-			log:             s.log,
+			log:             testhelper.NewLogger(s.T()),
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,
@@ -202,7 +195,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetter{}
+		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetterAPI{}
 		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
@@ -211,7 +204,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
 
 		elbFetcher := ElbFetcher{
-			log:             s.log,
+			log:             testhelper.NewLogger(s.T()),
 			elbProvider:     elbProvider,
 			kubeClient:      kubeclient,
 			lbRegexMatchers: regexMatchers,

@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
 
@@ -29,11 +28,11 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
 )
 
 var (
-	logger      = logp.NewLogger("cloudbeat_k8s_common_data_provider_test")
 	versionInfo = version.CloudbeatVersionInfo{
 		Version: version.CloudbeatVersion(),
 		Policy:  version.PolicyVersion(),
@@ -68,7 +67,7 @@ func Test_k8sDataProvider_FetchData(t *testing.T) {
 				},
 			},
 			options: []Option{
-				WithLogger(logger),
+				WithLogger(testhelper.NewLogger(t)),
 				WithVersionInfo(versionInfo),
 			},
 		},
@@ -86,7 +85,7 @@ func Test_k8sDataProvider_FetchData(t *testing.T) {
 			},
 			resource: fetching.CloudContainerMgmt,
 			options: []Option{
-				WithLogger(logger),
+				WithLogger(testhelper.NewLogger(t)),
 				WithVersionInfo(versionInfo),
 				WithClusterID(clusterID),
 			},
@@ -105,7 +104,7 @@ func Test_k8sDataProvider_FetchData(t *testing.T) {
 			},
 			resource: fetchers.ProcessResourceType,
 			options: []Option{
-				WithLogger(logger),
+				WithLogger(testhelper.NewLogger(t)),
 				WithVersionInfo(versionInfo),
 				WithClusterID(clusterID),
 				WithNodeID(nodeID),
@@ -127,7 +126,7 @@ func Test_k8sDataProvider_FetchData(t *testing.T) {
 func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 	options := []Option{
 		WithClusterName("test_cluster"),
-		WithLogger(logger),
+		WithLogger(testhelper.NewLogger(t)),
 		WithConfig(&config.Config{
 			Benchmark: config.CIS_K8S,
 		}),

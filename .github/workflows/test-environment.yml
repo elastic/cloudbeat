@@ -36,6 +36,7 @@ env:
   AWS_REGION: "eu-west-1"
   WORKING_DIR: deploy/test-environments
   FLEET_API_DIR: fleet_api/src
+  AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
 
 jobs:
   Deploy:
@@ -241,3 +242,9 @@ jobs:
         run: |
           terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
           aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
+
+      - name: Tag CNVM Instance
+        if: github.event.inputs.cleanup-env == 'false'
+        env:
+          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} '${{ env.AWS_DEFAULT_TAGS }} Key=owner,Value=${{ github.actor }}'

@@ -11,6 +11,7 @@ Before running the scripts, ensure that you have set the following environment v
 - `ES_USER`: The username for the Elasticsearch instance.
 - `ES_PASSWORD`: The password for the Elasticsearch instance.
 - `KIBANA_URL`: The URL of the Kibana instance.
+- `STACK_VERSION`: The version of the Elastic Stack being used.
 
 ### AWS Configuration
 
