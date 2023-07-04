@@ -1,7 +1,10 @@
-from tests.elasticsearch.elastic_wrapper import ElasticWrapper
+"""
+Define the cspm_client fixture.
+"""
 import configuration
 import pytest
 from loguru import logger
+from tests.elasticsearch.elastic_wrapper import ElasticWrapper
 
 
 @pytest.fixture(scope="session", autouse=True)

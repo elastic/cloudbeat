@@ -9,7 +9,6 @@ import time
 import pytest
 import configuration
 from commonlib.kubernetes import KubernetesHelper
-from tests.elasticsearch.elastic_wrapper import ElasticWrapper
 from commonlib.docker_wrapper import DockerWrapper
 from commonlib.io_utils import FsClient
 from _pytest.logging import LogCaptureFixture
