@@ -271,8 +271,10 @@ def create_es_client(index: str) -> ElasticWrapper:
     This function (fixture) instantiate ElasticWrapper.
     @return: ElasticWrapper client with cspm index.
     """
-    es_client = ElasticWrapper(configuration.elasticsearch.url,
-                               configuration.elasticsearch.basic_auth,
-                               index)
+    es_client = ElasticWrapper(
+        configuration.elasticsearch.url,
+        configuration.elasticsearch.basic_auth,
+        index,
+    )
     logger.info(f"client with ElasticSearch url: {configuration.elasticsearch.url}")
     return es_client
