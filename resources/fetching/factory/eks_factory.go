@@ -27,8 +27,8 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/condition"
-	awsFetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/aws"
-	k8sFetcher "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
+	awsf "github.com/elastic/cloudbeat/resources/fetching/fetchers/aws"
+	k8sf "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
@@ -40,7 +40,7 @@ const (
 )
 
 var (
-	eksRequiredProcesses = k8sFetcher.ProcessesConfigMap{"kubelet": {ConfigFileArguments: []string{"config"}}}
+	eksRequiredProcesses = k8sf.ProcessesConfigMap{"kubelet": {ConfigFileArguments: []string{"config"}}}
 	eksFsPatterns        = []string{
 		"/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
 		"/hostfs/var/lib/kubelet/kubeconfig"}
@@ -53,29 +53,29 @@ func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.R
 	if identity != nil {
 		log.Info("Initialize aws-related fetchers")
 		ecrPrivateProvider := ecr.NewEcrProvider(log, awsConfig, &awslib.MultiRegionClientFactory[ecr.Client]{})
-		privateRepoRegex := fmt.Sprintf(awsFetchers.PrivateRepoRegexTemplate, identity.Account)
+		privateRepoRegex := fmt.Sprintf(awsf.PrivateRepoRegexTemplate, identity.Account)
 
-		ecrPodDescriber := awsFetchers.PodDescriber{
+		ecrPodDescriber := awsf.PodDescriber{
 			FilterRegex: regexp.MustCompile(privateRepoRegex),
 			Provider:    ecrPrivateProvider,
 		}
 
-		ecrFetcher := awsFetchers.NewEcrFetcher(log, ch, k8sClient, ecrPodDescriber)
+		ecrFetcher := awsf.NewEcrFetcher(log, ch, k8sClient, ecrPodDescriber)
 		m[fetching.EcrType] = RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 
 		elbProvider := elb.NewElbProvider(awsConfig)
 		loadBalancerRegex := fmt.Sprintf(elbRegexTemplate, awsConfig.Region)
-		elbFetcher := awsFetchers.NewElbFetcher(log, ch, k8sClient, elbProvider, identity, loadBalancerRegex)
+		elbFetcher := awsf.NewElbFetcher(log, ch, k8sClient, elbProvider, identity, loadBalancerRegex)
 		m[fetching.ElbType] = RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 	}
 
-	fsFetcher := k8sFetcher.NewFsFetcher(log, ch, eksFsPatterns)
+	fsFetcher := k8sf.NewFsFetcher(log, ch, eksFsPatterns)
 	m[fetching.FileSystemType] = RegisteredFetcher{Fetcher: fsFetcher}
 
-	procFetcher := k8sFetcher.NewProcessFetcher(log, ch, eksRequiredProcesses)
+	procFetcher := k8sf.NewProcessFetcher(log, ch, eksRequiredProcesses)
 	m[fetching.ProcessType] = RegisteredFetcher{Fetcher: procFetcher}
 
-	kubeFetcher := k8sFetcher.NewKubeFetcher(log, ch, k8sClient)
+	kubeFetcher := k8sf.NewKubeFetcher(log, ch, k8sClient)
 	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 	return m
 }
