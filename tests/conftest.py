@@ -175,7 +175,7 @@ def kspm_client():
     return create_es_client(configuration.elasticsearch.kspm_index)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 def api_client():
     """
     This function (fixture) instantiates client depends on configuration.
