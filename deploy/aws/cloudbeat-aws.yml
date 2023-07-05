@@ -43,6 +43,9 @@ output.elasticsearch:
 
   # Enable to allow sending output to older ES versions
   allow_older_versions: true
+  ssl:
+    certificate_authorities:
+      - ${ES_CERT}
 
 # ================================= Processors =================================
 processors:
