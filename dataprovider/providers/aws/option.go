@@ -31,7 +31,7 @@ func WithLogger(log *logp.Logger) Option {
 	}
 }
 
-func WithAccount(identity *awslib.Identity) Option {
+func WithAccount(identity awslib.Identity) Option {
 	return func(dp *DataProvider) {
 		dp.accountId = identity.Account
 		dp.accountName = identity.Alias

@@ -65,7 +65,7 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 			name: "get data",
 			options: []Option{
 				WithLogger(testhelper.NewLogger(s.T())),
-				WithAccount(&awslib.Identity{
+				WithAccount(awslib.Identity{
 					Account: accountId,
 					Alias:   accountName,
 				}),
@@ -95,7 +95,7 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 func TestAWSDataProvider_EnrichEvent(t *testing.T) {
 	options := []Option{
 		WithLogger(testhelper.NewLogger(t)),
-		WithAccount(&awslib.Identity{
+		WithAccount(awslib.Identity{
 			Account: accountId,
 			Alias:   accountName,
 		}),

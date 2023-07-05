@@ -57,7 +57,7 @@ func (A *AWS) Initialize(
 			factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity),
 		), aws_dataprovider.New(
 			aws_dataprovider.WithLogger(log),
-			aws_dataprovider.WithAccount(awsIdentity),
+			aws_dataprovider.WithAccount(*awsIdentity),
 		), nil
 }
 
