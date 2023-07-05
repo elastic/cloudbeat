@@ -64,7 +64,7 @@ config:
   v1:
     benchmark: cis_eks
     aws:
-      account_type: single_account
+      account_type: organization_account
       credentials:
         access_key_id: key
         secret_access_key: secret
@@ -84,7 +84,7 @@ config:
 						ProfileName:          "credential_profile_name",
 						RoleArn:              "role_arn",
 					},
-					AccountType: "single_account",
+					AccountType: "organization_account",
 				},
 			},
 			3,

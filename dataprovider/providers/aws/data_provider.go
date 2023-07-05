@@ -59,12 +59,21 @@ func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 }
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
-	_, err := event.Fields.Put(cloudAccountIdField, a.accountId)
+	accountId := a.accountId
+	if resMetadata.AwsAccountId != "" {
+		accountId = resMetadata.AwsAccountId
+	}
+	accountName := a.accountName
+	if resMetadata.AwsAccountAlias != "" {
+		accountName = resMetadata.AwsAccountAlias
+	}
+
+	_, err := event.Fields.Put(cloudAccountIdField, accountId)
 	if err != nil {
 		return err
 	}
 
-	_, err = event.Fields.Put(cloudAccountNameField, a.accountName)
+	_, err = event.Fields.Put(cloudAccountNameField, accountName)
 	if err != nil {
 		return err
 	}

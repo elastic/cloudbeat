@@ -36,6 +36,7 @@ linters-settings:
     include:
       - '.*cloudbeat.*fetching.ResourceInfo'
       - '.*cloudbeat.*fetching.fetchers.*'
+      - '.*cloudbeat.*benchmark.Dependencies'
     exclude:
       - '.*cloudbeat.*fetching.fetchers.FileCommonData'
       - '.*cloudbeat.*fetching.fetchers.ProcCommonData'

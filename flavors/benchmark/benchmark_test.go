@@ -160,13 +160,14 @@ func TestNewBenchmark(t *testing.T) {
 				testhelper.NewLogger(t),
 				tt.cfg,
 				make(chan fetching.ResourceInfo),
-				NewDependencies(
-					mockAwsCfg(nil),
-					mockIdentityProvider(nil),
-					mockKubeClient(nil),
-					mockMetadataProvider(nil),
-					mockEksClusterNameProvider(nil),
-				),
+				&Dependencies{
+					AwsCfgProvider:           mockAwsCfg(nil),
+					AwsIdentityProvider:      mockIdentityProvider(nil),
+					AwsAccountProvider:       nil,
+					KubernetesClientProvider: mockKubeClient(nil),
+					AwsMetadataProvider:      mockMetadataProvider(nil),
+					EksClusterNameProvider:   mockEksClusterNameProvider(nil),
+				},
 			)
 			if tt.wantErr {
 				require.Error(t, err)
@@ -212,7 +213,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "identity provider error",
 			benchmark: &AWS{},
 			dependencies: Dependencies{
-				identityProvider: mockIdentityProvider(errors.New("some error")),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: nil,
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			wantErr: "some error",
 		},
@@ -221,8 +227,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "no error",
 			benchmark: &AWS{},
 			dependencies: Dependencies{
-				identityProvider:   mockIdentityProvider(nil),
-				kubernetesProvider: mockKubeClient(errors.New("some error")), // ineffectual
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(errors.New("some error")), // ineffectual
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 		},
 		// K8S tests
@@ -235,7 +245,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "kubernetes provider error",
 			benchmark: &K8S{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(errors.New("some error")),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(errors.New("some error")),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			wantErr: "some error",
 		},
@@ -243,7 +258,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "ignored uninitialized aws provider",
 			benchmark: &K8S{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			cfg: awsCfg,
 		},
@@ -251,8 +271,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "no error",
 			benchmark: &K8S{},
 			dependencies: Dependencies{
-				identityProvider:   mockIdentityProvider(errors.New("some error")), // ineffectual
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")), // ineffectual
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 		},
 		// EKS tests
@@ -265,7 +289,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "kubernetes provider error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(errors.New("some error")),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(errors.New("some error")),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			wantErr: "some error",
 		},
@@ -273,7 +302,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "uninitialized aws provider",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			cfg:     awsCfg,
 			wantErr: "aws config provider is uninitialized",
@@ -282,8 +316,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "aws error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				awsCfgProvider:     mockAwsCfg(errors.New("some error")),
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           mockAwsCfg(errors.New("some error")),
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			cfg:     awsCfg,
 			wantErr: "some error",
@@ -292,9 +330,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "aws identity provider error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				awsCfgProvider:     mockAwsCfg(nil),
-				identityProvider:   mockIdentityProvider(errors.New("some error")),
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           mockAwsCfg(nil),
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			cfg:     awsCfg,
 			wantErr: "some error",
@@ -303,7 +344,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "dependencies uninitialized",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			wantErr: "EKS dependencies uninitialized",
 		},
@@ -311,11 +357,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "no error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				awsCfgProvider:         mockAwsCfg(nil),
-				identityProvider:       mockIdentityProvider(errors.New("some error")), // ineffectual
-				kubernetesProvider:     mockKubeClient(nil),
-				metadataProvider:       mockMetadataProvider(errors.New("some error")),       // ignored
-				eksClusterNameProvider: mockEksClusterNameProvider(errors.New("some error")), // ignored
+				AwsCfgProvider:           mockAwsCfg(nil),
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")), // ineffectual
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      mockMetadataProvider(errors.New("some error")),       // ignored
+				EksClusterNameProvider:   mockEksClusterNameProvider(errors.New("some error")), // ignored
 			},
 		},
 	}

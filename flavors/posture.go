@@ -69,13 +69,15 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 	}
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
-	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh, benchmark.NewDependencies(
-		awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
-		awslib.IdentityProvider{},
-		k8s.ClientGetter{},
-		awslib.Ec2MetadataProvider{},
-		awslib.EKSClusterNameProvider{},
-	))
+
+	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh, &benchmark.Dependencies{
+		AwsCfgProvider:           awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+		AwsIdentityProvider:      awslib.IdentityProvider{},
+		AwsAccountProvider:       awslib.AccountProvider{},
+		KubernetesClientProvider: k8s.ClientGetter{},
+		AwsMetadataProvider:      awslib.Ec2MetadataProvider{},
+		EksClusterNameProvider:   awslib.EKSClusterNameProvider{},
+	})
 	if err != nil {
 		cancel()
 		return nil, err

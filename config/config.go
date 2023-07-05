@@ -29,7 +29,6 @@ import (
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/launcher"
 )
@@ -100,11 +99,6 @@ func New(cfg *config.C) (*Config, error) {
 	case "":
 	case SingleAccount:
 	case OrganizationAccount:
-		logp.NewLogger("config").Errorf(
-			"aws.account_type '%s' not implemented yet",
-			c.CloudConfig.Aws.AccountType,
-		)
-		c.CloudConfig.Aws.AccountType = SingleAccount
 	default:
 		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
 			"aws.account_type '%s' is not supported",

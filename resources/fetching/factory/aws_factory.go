@@ -18,8 +18,11 @@
 package factory
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"go.uber.org/zap"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
@@ -38,6 +41,59 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
 )
+
+type AwsAccount struct {
+	*awslib.Identity
+	aws.Config
+}
+
+type wrapResource struct {
+	wrapped  fetching.Resource
+	identity *awslib.Identity
+}
+
+func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	mdata, err := w.wrapped.GetMetadata()
+	if err != nil {
+		return mdata, err
+	}
+	mdata.AwsAccountAlias = w.identity.Alias
+	mdata.AwsAccountId = w.identity.Account
+	return mdata, nil
+}
+
+func (w *wrapResource) GetData() any              { return w.wrapped.GetData() }
+func (w *wrapResource) GetElasticCommonData() any { return w.wrapped.GetElasticCommonData() }
+
+func NewCisAwsOrganizationFactory(log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount) FetchersMap {
+	m := make(FetchersMap)
+	for _, account := range accounts {
+		ch := make(chan fetching.ResourceInfo)
+		go func(identity *awslib.Identity) {
+			for resourceInfo := range ch {
+				rootCh <- fetching.ResourceInfo{
+					Resource: &wrapResource{
+						wrapped:  resourceInfo.Resource,
+						identity: identity,
+					},
+					CycleMetadata: resourceInfo.CycleMetadata,
+				}
+			}
+		}(account.Identity)
+
+		fm := NewCisAwsFactory(
+			log.Named("aws").WithOptions(zap.Fields(zap.String("cloud.account.id", account.Identity.Account))),
+			account.Config,
+			ch,
+			account.Identity,
+		)
+
+		for k, v := range fm {
+			m[fmt.Sprintf("%s-%s", account.Identity.Account, k)] = v
+		}
+	}
+	return m
+}
 
 func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *awslib.Identity) FetchersMap {
 	log.Infof("Initializing AWS fetchers for account: '%s'", identity.Account)
