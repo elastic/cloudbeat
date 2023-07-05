@@ -22,7 +22,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
+	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/aws"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
