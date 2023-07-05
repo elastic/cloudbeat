@@ -15,9 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package providers
+package k8s
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -65,9 +66,9 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterName() {
 	}
 	cfg := &config.Config{}
 	client := fake.NewSimpleClientset(ns, cfgMap)
-	provider := KubernetesClusterNameProvider{}
+	provider := KubernetesClusterNameProvider{KubeClient: client}
 
-	res, err := provider.GetClusterName(cfg, client)
+	res, err := provider.GetClusterName(context.Background(), cfg)
 	s.NoError(err)
 	s.Equal(clusterName, res)
 }
@@ -82,9 +83,9 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterMetadataNoCluster
 	}
 	cfg := &config.Config{}
 	client := fake.NewSimpleClientset(ns)
-	provider := KubernetesClusterNameProvider{}
+	provider := KubernetesClusterNameProvider{KubeClient: client}
 
-	res, err := provider.GetClusterName(cfg, client)
+	res, err := provider.GetClusterName(context.Background(), cfg)
 	s.Empty(res)
 	s.Error(err)
 	s.ErrorContains(err, "fail to resolve the name of the cluster")

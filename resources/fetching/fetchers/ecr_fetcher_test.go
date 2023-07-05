@@ -33,7 +33,6 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -215,9 +214,6 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetterAPI{}
-		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
-
 		ecrProvider := &ecr.MockRepositoryDescriber{}
 		// Init private repositories provider
 
@@ -313,9 +309,6 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 		}
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
 		s.NoError(err)
-
-		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetterAPI{}
-		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		ecrProvider := &ecr.MockRepositoryDescriber{}
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything).Return([]types.Repository{}, test.error)

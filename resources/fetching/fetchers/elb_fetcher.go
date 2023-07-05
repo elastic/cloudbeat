@@ -107,13 +107,13 @@ func (r ElbResource) GetData() interface{} {
 }
 
 func (r ElbResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	if r.identity.Account == nil || r.lb.LoadBalancerName == nil {
+	if r.lb.LoadBalancerName == nil {
 		return fetching.ResourceMetadata{}, errors.New("received nil pointer")
 	}
 
 	return fetching.ResourceMetadata{
 		// A compromise because aws-sdk do not return an arn for an Elb
-		ID:      fmt.Sprintf("%s-%s", *r.identity.Account, *r.lb.LoadBalancerName),
+		ID:      fmt.Sprintf("%s-%s", r.identity.Account, *r.lb.LoadBalancerName),
 		Type:    fetching.CloudLoadBalancer,
 		SubType: fetching.ElbType,
 		Name:    *r.lb.LoadBalancerName,

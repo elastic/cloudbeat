@@ -28,8 +28,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type EKSClusterNameProvider struct {
-}
+type EKSClusterNameProvider struct{}
 
 const (
 	asgPattern                               = "^kubernetes.io/cluster/(.*)$"
@@ -42,7 +41,7 @@ var (
 	asgCompiledRegex = regexp.MustCompile(asgPattern)
 )
 
-type ClusterNameProvider interface {
+type EKSClusterNameProviderAPI interface {
 	GetClusterName(ctx context.Context, cfg aws.Config, instanceId string) (string, error)
 }
 

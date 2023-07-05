@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package providers
+package k8s
 
 import (
 	"os"
@@ -25,13 +25,13 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 )
 
-type KubernetesClientGetterAPI interface {
+type ClientGetterAPI interface {
 	GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error)
 }
 
-type KubernetesClientGetter struct{}
+type ClientGetter struct{}
 
-func (KubernetesClientGetter) GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
+func (ClientGetter) GetClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
 	client, err := kubernetes.GetKubernetesClient(kubeConfig, options)
 	if err != nil {
 		if kubernetes.IsInCluster(kubeConfig) {
