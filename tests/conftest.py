@@ -112,7 +112,7 @@ def pytest_configure():
     logger.configure(**config)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 def k8s():
     """
     This function (fixture) instantiates KubernetesHelper depends on configuration.
@@ -130,7 +130,7 @@ def k8s():
     return None
 
 
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 def cloudbeat_agent():
     """
     This function (fixture) retrieves agent configuration, defined in configuration.py file.
@@ -139,7 +139,7 @@ def cloudbeat_agent():
     return configuration.agent
 
 
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 def eks_cluster():
     """
     This function (fixture) retrieves eks_cluster configuration, defined in configuration.py file.
