@@ -165,7 +165,7 @@ func TestNewBenchmark(t *testing.T) {
 					mockIdentityProvider(nil),
 					mockKubeClient(nil),
 					mockMetadataProvider(nil),
-					mockAwsClusterName(nil),
+					mockEksClusterNameProvider(nil),
 				),
 			)
 			if tt.wantErr {
@@ -314,8 +314,8 @@ func Test_Initialize(t *testing.T) {
 				awsCfgProvider:         mockAwsCfg(nil),
 				identityProvider:       mockIdentityProvider(errors.New("some error")), // ineffectual
 				kubernetesProvider:     mockKubeClient(nil),
-				metadataProvider:       mockMetadataProvider(errors.New("some error")), // ignored
-				awsClusterNameProvider: mockAwsClusterName(errors.New("some error")),   // ignored
+				metadataProvider:       mockMetadataProvider(errors.New("some error")),       // ignored
+				eksClusterNameProvider: mockEksClusterNameProvider(errors.New("some error")), // ignored
 			},
 		},
 	}
@@ -424,8 +424,8 @@ func mockMetadataProvider(err error) *awslib.MockMetadataProvider {
 	return &provider
 }
 
-func mockAwsClusterName(err error) *awslib.MockClusterNameProvider {
-	provider := awslib.MockClusterNameProvider{}
+func mockEksClusterNameProvider(err error) *awslib.MockEKSClusterNameProviderAPI {
+	provider := awslib.MockEKSClusterNameProviderAPI{}
 	on := provider.EXPECT().GetClusterName(mock.Anything, mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return("cluster-name", nil)

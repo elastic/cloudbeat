@@ -59,7 +59,7 @@ type Dependencies struct {
 	identityProvider       awslib.IdentityProviderGetter
 	kubernetesProvider     k8sprovider.ClientGetterAPI
 	metadataProvider       awslib.MetadataProvider
-	awsClusterNameProvider awslib.EKSClusterNameProviderAPI
+	eksClusterNameProvider awslib.EKSClusterNameProviderAPI
 }
 
 func NewDependencies(
@@ -67,14 +67,14 @@ func NewDependencies(
 	identityProvider awslib.IdentityProviderGetter,
 	kubernetesProvider k8sprovider.ClientGetterAPI,
 	metadataProvider awslib.MetadataProvider,
-	awsClusterNameProvider awslib.EKSClusterNameProviderAPI,
+	eksClusterNameProvider awslib.EKSClusterNameProviderAPI,
 ) *Dependencies {
 	return &Dependencies{
 		awsCfgProvider:         awsCfgProvider,
 		identityProvider:       identityProvider,
 		kubernetesProvider:     kubernetesProvider,
 		metadataProvider:       metadataProvider,
-		awsClusterNameProvider: awsClusterNameProvider,
+		eksClusterNameProvider: eksClusterNameProvider,
 	}
 }
 
