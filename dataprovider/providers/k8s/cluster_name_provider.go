@@ -35,10 +35,10 @@ type ClusterNameProviderAPI interface {
 }
 
 type EKSClusterNameProvider struct {
-	AwsCfg                 aws.Config
-	EKSMetadataProvider    awslib.MetadataProvider
-	EKSClusterNameProvider awslib.ClusterNameProvider
-	KubeClient             kubernetes.Interface
+	AwsCfg              aws.Config
+	EKSMetadataProvider awslib.MetadataProvider
+	ClusterNameProvider awslib.EKSClusterNameProviderAPI
+	KubeClient          kubernetes.Interface
 }
 
 func (provider EKSClusterNameProvider) GetClusterName(ctx context.Context, _ *config.Config) (string, error) {
@@ -46,7 +46,7 @@ func (provider EKSClusterNameProvider) GetClusterName(ctx context.Context, _ *co
 	if err != nil {
 		return "", fmt.Errorf("failed to get the ec2 metadata required for identifying the cluster name: %v", err)
 	}
-	return provider.EKSClusterNameProvider.GetClusterName(ctx, provider.AwsCfg, mdata.InstanceID)
+	return provider.ClusterNameProvider.GetClusterName(ctx, provider.AwsCfg, mdata.InstanceID)
 }
 
 type KubernetesClusterNameProvider struct {

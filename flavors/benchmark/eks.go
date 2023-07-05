@@ -58,10 +58,10 @@ func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	}
 
 	clusterNameProvider := k8s.EKSClusterNameProvider{
-		AwsCfg:                 awsConfig,
-		EKSMetadataProvider:    dependencies.metadataProvider,
-		EKSClusterNameProvider: dependencies.awsClusterNameProvider,
-		KubeClient:             kubeClient,
+		AwsCfg:              awsConfig,
+		EKSMetadataProvider: dependencies.metadataProvider,
+		ClusterNameProvider: dependencies.awsClusterNameProvider,
+		KubeClient:          kubeClient,
 	}
 	dp, err := getK8sDataProvider(ctx, log, *cfg, kubeClient, clusterNameProvider)
 	if err != nil {

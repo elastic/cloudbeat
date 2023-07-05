@@ -41,7 +41,7 @@ var (
 	asgCompiledRegex = regexp.MustCompile(asgPattern)
 )
 
-type ClusterNameProvider interface {
+type EKSClusterNameProviderAPI interface {
 	GetClusterName(ctx context.Context, cfg aws.Config, instanceId string) (string, error)
 }
 
