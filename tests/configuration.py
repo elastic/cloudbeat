@@ -25,30 +25,30 @@ kubernetes.is_in_cluster_config = bool(
     os.getenv("KUBERNETES_IN_CLUSTER", "false") == "true",
 )
 kubernetes.use_kubernetes = bool(
-    os.getenv("USE_K8S", "false") == "true",
+    os.getenv("USE_K8S", "true") == "true",
 )
 
 # --- AWS EKS ---------------------------------------------
 eks = Munch()
-# eks.current_config = os.getenv("EKS_CONFIG", "test-eks-config-1")
-# eks.config_1 = os.getenv("EKS_CONFIG_1", "test-eks-config-1")
-# eks.config_1_node_1 = os.getenv(
-#     "EKS_CONFIG_1_NODE_1",
-#     "ip-192-168-15-75.eu-west-2.compute.internal",
-# )
-# eks.config_1_node_2 = os.getenv(
-#     "EKS_CONFIG_1_NODE_2",
-#     "ip-192-168-38-87.eu-west-2.compute.internal",
-# )
-# eks.config_2 = os.getenv("EKS_CONFIG_2", "test-eks-config-2")
-# eks.config_2_node_1 = os.getenv(
-#     "EKS_CONFIG_2_NODE_1",
-#     "ip-192-168-14-74.eu-west-2.compute.internal",
-# )
-# eks.config_2_node_2 = os.getenv(
-#     "EKS_CONFIG_2_NODE_2",
-#     "ip-192-168-89-216.eu-west-2.compute.internal",
-# )
+eks.current_config = os.getenv("EKS_CONFIG", "test-eks-config-1")
+eks.config_1 = os.getenv("EKS_CONFIG_1", "test-eks-config-1")
+eks.config_1_node_1 = os.getenv(
+    "EKS_CONFIG_1_NODE_1",
+    "ip-192-168-15-75.eu-west-2.compute.internal",
+)
+eks.config_1_node_2 = os.getenv(
+    "EKS_CONFIG_1_NODE_2",
+    "ip-192-168-38-87.eu-west-2.compute.internal",
+)
+eks.config_2 = os.getenv("EKS_CONFIG_2", "test-eks-config-2")
+eks.config_2_node_1 = os.getenv(
+    "EKS_CONFIG_2_NODE_1",
+    "ip-192-168-14-74.eu-west-2.compute.internal",
+)
+eks.config_2_node_2 = os.getenv(
+    "EKS_CONFIG_2_NODE_2",
+    "ip-192-168-89-216.eu-west-2.compute.internal",
+)
 
 # --- Elasticsearch environment definition --------------------------------
 elasticsearch = Munch()
