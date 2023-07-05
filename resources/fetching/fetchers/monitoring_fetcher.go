@@ -93,7 +93,7 @@ func (r MonitoringResource) GetData() any {
 }
 
 func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := fmt.Sprintf("cloudtrail-%s", *r.identity.Account)
+	id := fmt.Sprintf("cloudtrail-%s", r.identity.Account)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    fetching.MonitoringIdentity,

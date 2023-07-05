@@ -31,7 +31,6 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -119,14 +118,11 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
 		s.NoError(err)
 
-		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetterAPI{}
-		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
-
 		elbProvider := &elb.MockLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
 
 		identity := awslib.Identity{
-			Account: &testAccount,
+			Account: testAccount,
 		}
 
 		regexMatchers := []*regexp.Regexp{regexp.MustCompile(elbRegex)}
@@ -194,9 +190,6 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		}
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
 		s.NoError(err)
-
-		mockedKubernetesClientGetter := &providers.MockKubernetesClientGetterAPI{}
-		mockedKubernetesClientGetter.EXPECT().GetClient(mock.Anything, mock.Anything, mock.Anything).Return(kubeclient, nil)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(nil, test.error)

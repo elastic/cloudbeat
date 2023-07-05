@@ -116,7 +116,7 @@ func (r IAMResource) GetData() any {
 func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	identifier := r.GetResourceArn()
 	if identifier == "" {
-		identifier = fmt.Sprintf("%s-%s", *r.identity.Account, r.GetResourceName())
+		identifier = fmt.Sprintf("%s-%s", r.identity.Account, r.GetResourceName())
 	}
 
 	return fetching.ResourceMetadata{

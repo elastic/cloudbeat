@@ -27,13 +27,13 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/flavors/benchmark"
 	"github.com/elastic/cloudbeat/pipeline"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/manager"
-	"github.com/elastic/cloudbeat/resources/providers"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/transformer"
 )
@@ -69,10 +69,12 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 	}
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
-	fetchersRegistry, err := b.InitRegistry(ctx, log, cfg, resourceCh, benchmark.NewDependencies(
-		providers.KubernetesClientGetter{},
-		awslib.IdentityProvider{},
+	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh, benchmark.NewDependencies(
 		awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+		awslib.IdentityProvider{},
+		k8s.ClientGetter{},
+		awslib.Ec2MetadataProvider{},
+		awslib.EKSClusterNameProvider{},
 	))
 	if err != nil {
 		cancel()
@@ -95,12 +97,6 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
-
-	cdp, err := GetCommonDataProvider(ctx, log, *cfg)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
 
 	t := transformer.NewTransformer(log, cdp, resultsIndex)
 

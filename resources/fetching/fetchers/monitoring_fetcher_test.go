@@ -120,7 +120,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 				provider:      mockClient,
 				securityhub:   hub,
 				resourceCh:    ch,
-				cloudIdentity: &awslib.Identity{Account: aws.String("account")},
+				cloudIdentity: &awslib.Identity{Account: "account"},
 			}
 
 			err := m.Fetch(ctx, fetching.CycleMetadata{})
@@ -149,7 +149,7 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 		{
 			name: "without trails",
 			fields: fields{
-				identity: &awslib.Identity{Account: aws.String("aws-account-id")},
+				identity: &awslib.Identity{Account: "aws-account-id"},
 				Resource: monitoring.Resource{
 					Items: []monitoring.MonitoringItem{},
 				},
@@ -165,7 +165,7 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 		{
 			name: "with trails",
 			fields: fields{
-				identity: &awslib.Identity{Account: aws.String("aws-account-id")},
+				identity: &awslib.Identity{Account: "aws-account-id"},
 				Resource: monitoring.Resource{
 					Items: []monitoring.MonitoringItem{
 						{},

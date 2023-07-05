@@ -24,6 +24,8 @@ import (
 
 	config "github.com/elastic/cloudbeat/config"
 
+	dataprovider "github.com/elastic/cloudbeat/dataprovider"
+
 	fetching "github.com/elastic/cloudbeat/resources/fetching"
 
 	logp "github.com/elastic/elastic-agent-libs/logp"
@@ -46,13 +48,14 @@ func (_m *MockBenchmark) EXPECT() *MockBenchmark_Expecter {
 	return &MockBenchmark_Expecter{mock: &_m.Mock}
 }
 
-// InitRegistry provides a mock function with given fields: ctx, log, cfg, ch, dependencies
-func (_m *MockBenchmark) InitRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, error) {
+// Initialize provides a mock function with given fields: ctx, log, cfg, ch, dependencies
+func (_m *MockBenchmark) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error) {
 	ret := _m.Called(ctx, log, cfg, ch, dependencies)
 
 	var r0 registry.Registry
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) (registry.Registry, error)); ok {
+	var r1 dataprovider.CommonDataProvider
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error)); ok {
 		return rf(ctx, log, cfg, ch, dependencies)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) registry.Registry); ok {
@@ -63,43 +66,51 @@ func (_m *MockBenchmark) InitRegistry(ctx context.Context, log *logp.Logger, cfg
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) dataprovider.CommonDataProvider); ok {
 		r1 = rf(ctx, log, cfg, ch, dependencies)
 	} else {
-		r1 = ret.Error(1)
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(dataprovider.CommonDataProvider)
+		}
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) error); ok {
+		r2 = rf(ctx, log, cfg, ch, dependencies)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
-// MockBenchmark_InitRegistry_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'InitRegistry'
-type MockBenchmark_InitRegistry_Call struct {
+// MockBenchmark_Initialize_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Initialize'
+type MockBenchmark_Initialize_Call struct {
 	*mock.Call
 }
 
-// InitRegistry is a helper method to define mock.On call
+// Initialize is a helper method to define mock.On call
 //   - ctx context.Context
 //   - log *logp.Logger
 //   - cfg *config.Config
 //   - ch chan fetching.ResourceInfo
 //   - dependencies *Dependencies
-func (_e *MockBenchmark_Expecter) InitRegistry(ctx interface{}, log interface{}, cfg interface{}, ch interface{}, dependencies interface{}) *MockBenchmark_InitRegistry_Call {
-	return &MockBenchmark_InitRegistry_Call{Call: _e.mock.On("InitRegistry", ctx, log, cfg, ch, dependencies)}
+func (_e *MockBenchmark_Expecter) Initialize(ctx interface{}, log interface{}, cfg interface{}, ch interface{}, dependencies interface{}) *MockBenchmark_Initialize_Call {
+	return &MockBenchmark_Initialize_Call{Call: _e.mock.On("Initialize", ctx, log, cfg, ch, dependencies)}
 }
 
-func (_c *MockBenchmark_InitRegistry_Call) Run(run func(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies)) *MockBenchmark_InitRegistry_Call {
+func (_c *MockBenchmark_Initialize_Call) Run(run func(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies)) *MockBenchmark_Initialize_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(*logp.Logger), args[2].(*config.Config), args[3].(chan fetching.ResourceInfo), args[4].(*Dependencies))
 	})
 	return _c
 }
 
-func (_c *MockBenchmark_InitRegistry_Call) Return(_a0 registry.Registry, _a1 error) *MockBenchmark_InitRegistry_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockBenchmark_Initialize_Call) Return(_a0 registry.Registry, _a1 dataprovider.CommonDataProvider, _a2 error) *MockBenchmark_Initialize_Call {
+	_c.Call.Return(_a0, _a1, _a2)
 	return _c
 }
 
-func (_c *MockBenchmark_InitRegistry_Call) RunAndReturn(run func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) (registry.Registry, error)) *MockBenchmark_InitRegistry_Call {
+func (_c *MockBenchmark_Initialize_Call) RunAndReturn(run func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error)) *MockBenchmark_Initialize_Call {
 	_c.Call.Return(run)
 	return _c
 }

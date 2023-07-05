@@ -220,7 +220,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				iamProvider: iamProviderMock,
 				resourceCh:  s.resourceCh,
 				cloudIdentity: &awslib.Identity{
-					Account: &test.account,
+					Account: test.account,
 				},
 			}
 
