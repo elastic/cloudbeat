@@ -44,38 +44,6 @@ def read_json(json_path: Path) -> dict:
         return {}
 
 
-def save_state(file_path: Path, data: list) -> None:
-    """
-    Save data to a JSON file.
-
-    If the file already exists, the new data is appended to the existing data.
-    If the file does not exist, a new file is created with the provided data.
-
-    Args:
-        file_path (Path): Path to the JSON file.
-        data (list): List of data to be saved.
-
-    Raises:
-        Exception: If an error occurs while saving the JSON data.
-    """
-    try:
-        if file_path.exists():
-            with file_path.open("r") as exist_file:
-                policies_data = json.load(exist_file)
-            policies_data["policies"].extend(data)
-        else:
-            policies_data = {"policies": data}
-        with file_path.open("w") as policies_file:
-            json.dump(policies_data, policies_file)
-        logger.info(f"JSON data saved to {file_path}")
-    except FileNotFoundError as ex:
-        logger.error(f"Error occurred while saving JSON data: File '{file_path}' not found.")
-        raise ex
-    except IOError as ex:
-        logger.error(f"Error occurred while saving JSON data: {ex}")
-        raise ex
-
-
 def delete_file(file_path: Path):
     """
     Delete a file.
