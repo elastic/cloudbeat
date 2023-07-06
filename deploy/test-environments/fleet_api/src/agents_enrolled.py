@@ -2,6 +2,7 @@
 Wait for agents to be enrolled for a given policies
 If the expected number of agents is not enrolled within the timeout, the test will fail
 """
+import sys
 import time
 from api.agent_policy_api import get_agents
 import configuration_fleet as cnfg
@@ -75,4 +76,4 @@ if __name__ == "__main__":
         logger.info("All agents enrolled successfully")
     else:
         logger.error("Not all agents were enrolled")
-        exit(1)
+        sys.exit(1)

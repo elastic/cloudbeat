@@ -1,8 +1,10 @@
 """
+Define a class to manage the policies state using a file.
+Exports state_manager object as a singleton.
 """
 import json
-from munch import munchify
 from pathlib import Path
+from munch import munchify
 from utils import delete_file
 from loguru import logger
 
@@ -10,11 +12,17 @@ __state_file = Path(__file__).parent / "state_data.json"
 
 
 class PolicyStateEncoder(json.JSONEncoder):
-        def default(self, o):
-            return o.__dict__
+    """
+    Custom JSON encoder for PolicyState objects.
+    """
+    def default(self, o):
+        return o.__dict__
 
 
 class PolicyState:
+    """
+    Class to represent a policy state.
+    """
     def __init__(self, agnt_policy_id, pkg_policy_id, expected_agents):
         self.agnt_policy_id = agnt_policy_id
         self.pkg_policy_id = pkg_policy_id
@@ -22,6 +30,9 @@ class PolicyState:
 
 
 class StateFileManager:
+    """
+    Class to manage the policies state using a file.
+    """
     def __init__(self, state_file: str):
         self.state_file = state_file
         self.policies = []
