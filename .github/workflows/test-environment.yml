@@ -230,6 +230,12 @@ jobs:
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
 
+      - name: Wait for agents to enroll
+        if: success()
+        run: |
+          cd fleet_api
+          poetry run python src/agents_enrolled.py
+
       - name: Run Sanity checks
         if: success()
         run: |
