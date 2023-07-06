@@ -17,6 +17,7 @@ def get_expected_agents_mapping() -> dict:
     Returns:
         map: The name of the policy and the number of agents expected to be enrolled
     """
+
     logger.info("Loading agent policies state file")
     policies_map = {}
     for policy in state_manager.policies:
@@ -25,11 +26,11 @@ def get_expected_agents_mapping() -> dict:
 
 
 def get_actual_agents_mapping() -> dict:
-
     """
     Returns:
         map: The name of the policy and the number of agents enrolled
     """
+
     agents = get_agents(cfg=cnfg.elk_config)
     policies_map = {}
     for agent in agents:
