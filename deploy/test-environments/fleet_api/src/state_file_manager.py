@@ -25,7 +25,7 @@ class PolicyState:
     Class to represent a policy state.
     """
 
-    def __init__(self, agnt_policy_id, pkg_policy_id, expected_agents):
+    def __init__(self, agnt_policy_id: str, pkg_policy_id: str, expected_agents: int):
         self.agnt_policy_id = agnt_policy_id
         self.pkg_policy_id = pkg_policy_id
         self.expected_agents = expected_agents
@@ -38,7 +38,7 @@ class StateFileManager:
 
     def __init__(self, state_file: str):
         self.__state_file = state_file
-        self.__policies = list[PolicyState]
+        self.__policies = []
         self.__load()
 
     def __load(self) -> None:
@@ -64,7 +64,7 @@ class StateFileManager:
             json.dump(policies_data, policies_file, cls=PolicyStateEncoder)
         logger.info(f" {len(self.__policies)} policies saved to state in {self.__state_file}")
 
-    def add_policy(self, data: PolicyState):
+    def add_policy(self, data: PolicyState) -> None:
         """
         Add a policy to the current state.
 
@@ -84,7 +84,7 @@ class StateFileManager:
         """
         return self.__policies
 
-    def delete_all(self):
+    def delete_all(self) -> None:
         """
         Delete the current state.
         """
