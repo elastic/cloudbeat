@@ -2,18 +2,19 @@ package compliance.cis_aws.rules.cis_3_4
 
 import data.cis_aws.test_data
 import data.compliance.cis_aws.data_adapter
+import data.compliance.lib.common
 import data.lib.test
 
 test_violation {
 	eval_fail with input as rule_input(false, null, null, false, null)
-	eval_fail with input as rule_input(false, null, test_data.past_date, false, null)
+	eval_fail with input as rule_input(false, null, common.past_date, false, null)
 	eval_fail with input as rule_input(false, "test-arn", null, false, null)
-	eval_fail with input as rule_input(false, "", test_data.current_date, false, null)
-	eval_fail with input as rule_input(false, "test-arn", test_data.past_date, false, null)
+	eval_fail with input as rule_input(false, "", common.current_date, false, null)
+	eval_fail with input as rule_input(false, "test-arn", common.past_date, false, null)
 }
 
 test_pass {
-	eval_pass with input as rule_input(false, "test-arn", test_data.current_date, false, null)
+	eval_pass with input as rule_input(false, "test-arn", common.current_date, false, null)
 }
 
 test_not_evaluated {

@@ -81,6 +81,19 @@ selected_columns_map = {
         # "": "default_value", # todo: talk with CIS team to add this column to the excel
         "References": "references",
         "Assessment Status": "type",
+    },
+    "cis_gcp": {
+        "Section #": "Section",
+        "Recommendation #": "Rule Number",
+        "Title": "Title",
+        "Description": "description",
+        "Rationale Statement": "rationale",
+        "Audit Procedure": "audit",
+        "Remediation Procedure": "remediation",
+        "Impact Statement": "impact",
+        # "": "default_value", # todo: talk with CIS team to add this column to the excel
+        "References": "references",
+        "Assessment Status": "type",
     }
 }
 
@@ -88,6 +101,7 @@ benchmark_to_posture_type = {
     "cis_k8s": KSPM_POSTURE_TYPE,
     "cis_eks": KSPM_POSTURE_TYPE,
     "cis_aws": CSPM_POSTURE_TYPE,
+    "cis_gcp": CSPM_POSTURE_TYPE,
 }
 
 

@@ -9,7 +9,7 @@ is_only_private(cluster, cidr_allowed) {
 	public_access_is_restricted(cluster, cidr_allowed)
 } else = false
 
-public_access_is_restricted(cluster, cidr_allowed) {
+public_access_is_restricted(cluster, _) {
 	not cluster.ResourcesVpcConfig.EndpointPublicAccess
 }
 

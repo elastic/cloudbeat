@@ -8,6 +8,24 @@ metadata = {
 	"policy_version": "1.0.0",
 }
 
+current_date := create_date_from_ns(time.now_ns())
+
+past_date = "2021-12-25T12:43:00+00:00"
+
+create_date_from_ns(x) = time_str {
+	date := time.date(x)
+	t := time.clock(x)
+
+	time_str := sprintf("%d-%02d-%02dT%02d:%02d:%02d+00:00", array.concat(date, t))
+}
+
+ConvertDaysToHours(duration) = result {
+	suffix := "d"
+	contains(duration, suffix)
+	days := trim_suffix(duration, suffix)
+	result = sprintf("%dh", [to_number(days) * 24])
+} else = duration
+
 # set the rule result
 calculate_result(evaluation) = "passed" {
 	evaluation

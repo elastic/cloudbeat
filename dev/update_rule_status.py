@@ -160,8 +160,11 @@ def update_main_readme_status_badge(percentage, service):
             badge = f"[![CIS {service.upper()}]({badge_api}/CIS-Amazon%20EKS%20({percentage:.0f}%25)-FF9900?" \
                     f"logo=Amazon+EKS)](RULES.md#eks-cis-benchmark)\n"
         elif service == "aws":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-AWS%20({percentage:.0f}%25)-232F3E?l" \
-                    f"ogo=Amazon+AWS)](RULES.md#aws-cis-benchmark)\n"
+            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-AWS%20({percentage:.0f}%25)-232F3E?" \
+                    f"logo=Amazon+AWS)](RULES.md#aws-cis-benchmark)\n"
+        elif service == "gcp":
+            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-GCP%20({percentage:.0f}%25)-4285F4?" \
+                    f"logo=Google+Cloud)](RULES.md#gcp-cis-benchmark)\n"
 
         badge_line = get_badge_line_number(readme, service)
         readme[badge_line] = badge
