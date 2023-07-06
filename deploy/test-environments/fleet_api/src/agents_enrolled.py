@@ -11,6 +11,7 @@ from loguru import logger
 
 TIMEOUT = 600
 
+
 def get_expected_agents_mapping() -> dict:
     """
     Returns:

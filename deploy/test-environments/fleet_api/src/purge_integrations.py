@@ -24,6 +24,7 @@ from api.package_policy_api import delete_package_policy
 import configuration_fleet as cnfg
 from state_file_manager import state_manager
 
+
 def purge_integrations():
     """
     Purge integrations and policies based on stored IDs in the state_data.json file.

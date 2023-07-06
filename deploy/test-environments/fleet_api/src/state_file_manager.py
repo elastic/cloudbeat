@@ -38,7 +38,6 @@ class StateFileManager:
         self.policies = []
         self.__load()
 
-
     def __load(self) -> None:
         """
         Load the policies data from a file.
@@ -51,7 +50,6 @@ class StateFileManager:
                 self.policies.append(PolicyState(**policy))
         logger.info(f" {len(self.policies)} policies loaded to state from {self.state_file}")
 
-
     def __save(self) -> None:
         """
         Save the policies data to a file.
@@ -60,7 +58,6 @@ class StateFileManager:
         with self.state_file.open("w") as policies_file:
             json.dump(policies_data, policies_file, cls=PolicyStateEncoder)
         logger.info(f" {len(self.policies)} policies saved to state in {self.state_file}")
-
 
     def add_policy(self, data: PolicyState):
         """
@@ -72,12 +69,12 @@ class StateFileManager:
         self.policies.append(data)
         self.__save()
 
-
     def delete_all(self):
         """
         Delete the current state.
         """
         self.policies = []
         delete_file(self.state_file)
+
 
 state_manager = StateFileManager(__state_file)
