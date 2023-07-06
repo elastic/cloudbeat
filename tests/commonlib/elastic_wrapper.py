@@ -38,20 +38,6 @@ class ElasticWrapper:
         )
         return result
 
-    def count_index(
-        self,
-        query: dict,
-    ) -> int:
-        """
-        This method retrieves data from specified index
-        @param query: Query to be applied on index
-        @return: Result dictionary
-        """
-        result = self.es_client.count(
-            index=self.index,
-            query=query,
-        )
-        return result["count"]
 
     @staticmethod
     def get_total_value(data: dict) -> int:
