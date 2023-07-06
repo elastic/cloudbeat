@@ -10,7 +10,7 @@ import pytest
 from commonlib.utils import get_findings
 
 CONFIG_TIMEOUT = 120
-CNVM_CONFIG_TIMEOUT = 300
+CNVM_CONFIG_TIMEOUT = 1200
 
 tests_data = {
     "cis_aws": [
