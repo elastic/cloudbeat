@@ -38,7 +38,7 @@ class StateFileManager:
 
     def __init__(self, state_file: str):
         self.state_file = state_file
-        self.policies = []
+        self.__policies = list[PolicyState]
         self.__load()
 
     def __load(self) -> None:
@@ -51,18 +51,18 @@ class StateFileManager:
         with self.state_file.open("r") as policies_file:
             policies_data = json.load(policies_file)
             for policy in policies_data["policies"]:
-                self.policies.append(PolicyState(**policy))
-        logger.info(f" {len(self.policies)} policies loaded to state from {self.state_file}")
+                self.__policies.append(PolicyState(**policy))
+        logger.info(f" {len(self.__policies)} policies loaded to state from {self.state_file}")
 
     def __save(self) -> None:
         """
         Save the policies data to a file.
         """
 
-        policies_data = munchify({"policies": self.policies})
+        policies_data = munchify({"policies": self.__policies})
         with self.state_file.open("w") as policies_file:
             json.dump(policies_data, policies_file, cls=PolicyStateEncoder)
-        logger.info(f" {len(self.policies)} policies saved to state in {self.state_file}")
+        logger.info(f" {len(self.__policies)} policies saved to state in {self.state_file}")
 
     def add_policy(self, data: PolicyState):
         """
@@ -72,15 +72,24 @@ class StateFileManager:
             data (PolicyState): Policy data to be added.
         """
 
-        self.policies.append(data)
+        self.__policies.append(data)
         self.__save()
+
+    def get_policies(self) -> list[PolicyState]:
+        """
+        Get the current state.
+
+        Returns:
+            list: List of policies.
+        """
+        return self.__policies
 
     def delete_all(self):
         """
         Delete the current state.
         """
 
-        self.policies = []
+        self.__policies = []
         delete_file(self.state_file)
 
 

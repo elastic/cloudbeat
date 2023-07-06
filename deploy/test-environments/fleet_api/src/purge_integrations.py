@@ -33,7 +33,7 @@ def purge_integrations():
 
     agents = get_agents(cfg=cnfg.elk_config)
     # Delete policies based on the stored IDs
-    for policy in state_manager.policies:
+    for policy in state_manager.get_policies():
         logger.info("Deleting policy", policy.pkg_policy_id, policy.agnt_policy_id)
         delete_package_policy(cfg=cnfg.elk_config, policy_ids=[policy.pkg_policy_id])
 

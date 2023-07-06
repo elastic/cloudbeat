@@ -20,7 +20,7 @@ def get_expected_agents_mapping() -> dict:
 
     logger.info("Loading agent policies state file")
     policies_map = {}
-    for policy in state_manager.policies:
+    for policy in state_manager.get_policies():
         policies_map[policy.agnt_policy_id] = policy.expected_agents
     return policies_map
 
