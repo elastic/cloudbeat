@@ -67,7 +67,7 @@ class StateFileManager:
         """
         Save the policies data to a file.
         """
-        policies_data = munchify({"policies": self.__policies})
+        policies_data = {"policies": self.__policies}
         with self.__state_file.open("w") as policies_file:
             json.dump(policies_data, policies_file, cls=PolicyStateEncoder)
         logger.info(f" {len(self.__policies)} policies saved to state in {self.__state_file}")
