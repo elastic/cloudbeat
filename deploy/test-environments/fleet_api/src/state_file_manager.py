@@ -27,6 +27,12 @@ class PolicyState:
     Class to represent a policy state.
     """
     def __init__(self, agnt_policy_id: str, pkg_policy_id: str, expected_agents: int):
+        """
+        Args:
+            agnt_policy_id (str): ID of the agent policy.
+            pkg_policy_id (str): ID of the package policy.
+            expected_agents (int): Expected number of deployed agents.
+        """
         self.agnt_policy_id = agnt_policy_id
         self.pkg_policy_id = pkg_policy_id
         self.expected_agents = expected_agents
