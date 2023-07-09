@@ -15,8 +15,10 @@ class PolicyStateEncoder(json.JSONEncoder):
     """
     Custom JSON encoder for PolicyState objects.
     """
-
     def default(self, o):
+        """
+        Encode a PolicyState object.
+        """
         return o.__dict__
 
 
@@ -24,7 +26,6 @@ class PolicyState:
     """
     Class to represent a policy state.
     """
-
     def __init__(self, agnt_policy_id: str, pkg_policy_id: str, expected_agents: int):
         self.agnt_policy_id = agnt_policy_id
         self.pkg_policy_id = pkg_policy_id
@@ -35,7 +36,6 @@ class StateFileManager:
     """
     Class to manage the policies state using a file.
     """
-
     def __init__(self, state_file: str):
         self.__state_file = state_file
         self.__policies = []
@@ -45,7 +45,6 @@ class StateFileManager:
         """
         Load the policies data from a file.
         """
-
         if not self.__state_file.exists():
             return
         with self.__state_file.open("r") as policies_file:
@@ -58,7 +57,6 @@ class StateFileManager:
         """
         Save the policies data to a file.
         """
-
         policies_data = munchify({"policies": self.__policies})
         with self.__state_file.open("w") as policies_file:
             json.dump(policies_data, policies_file, cls=PolicyStateEncoder)
@@ -71,7 +69,6 @@ class StateFileManager:
         Args:
             data (PolicyState): Policy data to be added.
         """
-
         self.__policies.append(data)
         self.__save()
 
@@ -88,7 +85,6 @@ class StateFileManager:
         """
         Delete the current state.
         """
-
         self.__policies = []
         delete_file(self.__state_file)
 

@@ -15,29 +15,27 @@ TIMEOUT = 600
 def get_expected_agents_mapping() -> dict:
     """
     Returns:
-        map: The name of the policy and the number of agents expected to be enrolled
+        dict: The name of the policy and the number of agents expected to be enrolled
     """
-
     logger.info("Loading agent policies state file")
-    policies_map = {}
+    policies_dict = {}
     for policy in state_manager.get_policies():
-        policies_map[policy.agnt_policy_id] = policy.expected_agents
-    return policies_map
+        policies_dict[policy.agnt_policy_id] = policy.expected_agents
+    return policies_dict
 
 
 def get_actual_agents_mapping() -> dict:
     """
     Returns:
-        map: The name of the policy and the number of agents enrolled
+        dict: The name of the policy and the number of agents enrolled
     """
-
     agents = get_agents(cfg=cnfg.elk_config)
-    policies_map = {}
+    policies_dict = {}
     for agent in agents:
-        if agent.policy_id not in policies_map:
-            policies_map[agent.policy_id] = 0
-        policies_map[agent.policy_id] += 1
-    return policies_map
+        if agent.policy_id not in policies_dict:
+            policies_dict[agent.policy_id] = 0
+        policies_dict[agent.policy_id] += 1
+    return policies_dict
 
 
 def verify_agents_enrolled() -> bool:
