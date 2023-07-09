@@ -36,7 +36,11 @@ class StateFileManager:
     """
     Class to manage the policies state using a file.
     """
-    def __init__(self, state_file: str):
+    def __init__(self, state_file: Path):
+        """
+        Args:
+            state_file (Path): Path of a file to cache the state.
+        """
         self.__state_file = state_file
         self.__policies = []
         self.__load()
