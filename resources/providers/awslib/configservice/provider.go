@@ -19,7 +19,9 @@ package configservice
 
 import (
 	"context"
+
 	configSDK "github.com/aws/aws-sdk-go-v2/service/configservice"
+
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
@@ -45,7 +47,6 @@ func (p *Provider) DescribeConfigRecorders(ctx context.Context) ([]awslib.AwsRes
 				ConfigurationRecorder: recorder,
 				Status:                recorderStatus.ConfigurationRecordersStatus,
 			})
-
 		}
 
 		return Config{Recorders: result, region: region, accountId: p.awsAccountId}, nil

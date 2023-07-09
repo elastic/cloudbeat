@@ -24,6 +24,9 @@ kubernetes = Munch()
 kubernetes.is_in_cluster_config = bool(
     os.getenv("KUBERNETES_IN_CLUSTER", "false") == "true",
 )
+kubernetes.use_kubernetes = bool(
+    os.getenv("USE_K8S", "true") == "true",
+)
 
 # --- AWS EKS ---------------------------------------------
 eks = Munch()
@@ -55,7 +58,7 @@ elasticsearch.password = os.getenv("ES_PASSWORD", "changeme")
 elasticsearch.basic_auth = (elasticsearch.user, elasticsearch.password)
 elasticsearch.port = os.getenv("ES_PORT", "9200")
 elasticsearch.protocol = os.getenv("ES_PROTOCOL", "http")
-elasticsearch.url = f"{elasticsearch.protocol}://{elasticsearch.hosts}:{elasticsearch.port}"
+elasticsearch.url = os.getenv("ES_URL", f"{elasticsearch.protocol}://{elasticsearch.hosts}:{elasticsearch.port}")
 elasticsearch.cis_index = os.getenv("CIS_INDEX", "*cloud_security_posture.findings*")
 
 # --- Docker environment definition

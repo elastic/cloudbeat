@@ -19,9 +19,10 @@ package iam
 
 import (
 	"context"
-	"github.com/aws/aws-sdk-go-v2/service/iam"
-	"github.com/elastic/cloudbeat/resources/fetching"
 
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 

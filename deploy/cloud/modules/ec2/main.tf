@@ -1,12 +1,13 @@
 locals {
   cloudbeat_private_key_file = "${path.module}/cloudbeat-${random_id.id.hex}.pem"
   ec2_username               = "ubuntu"
-  common_tags = {
+  tags = merge({
     id          = "${random_id.id.hex}"
     provisioner = "terraform"
     Name        = var.deployment_name
-  }
+  }, var.specific_tags)
 }
+
 resource "tls_private_key" "cloudbeat_key" {
   algorithm = "RSA"
   rsa_bits  = 4096
@@ -20,7 +21,7 @@ resource "aws_key_pair" "generated_key" {
   provider   = aws
   key_name   = "cloudbeat-generated-${random_id.id.hex}"
   public_key = tls_private_key.cloudbeat_key.public_key_openssh
-  tags       = local.common_tags
+  tags       = local.tags
 }
 
 resource "aws_security_group" "main" {
@@ -51,7 +52,7 @@ resource "aws_security_group" "main" {
       to_port          = 22
     }
   ]
-  tags = local.common_tags
+  tags = local.tags
 
 }
 
@@ -71,7 +72,7 @@ resource "aws_instance" "cloudbeat" {
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.main.id]
   iam_instance_profile        = "ec2-role-with-security-audit" # This is a prerequisite, role that contains the policy arn:aws:iam::aws:policy/SecurityAudit
-  tags                        = local.common_tags
+  tags                        = local.tags
   connection {
     host        = self.public_ip
     user        = local.ec2_username
@@ -83,17 +84,27 @@ resource "aws_instance" "cloudbeat" {
     content     = var.yml
     destination = "/tmp/manifests.yml"
   }
-
-
   provisioner "remote-exec" {
     inline = [
-      "cloud-init status --wait",
-      "git clone https://github.com/elastic/cloudbeat",
-      "cd cloudbeat",
-      "sudo kind create cluster --config deploy/k8s/kind/kind-multi.yml --wait 30s",
-      "sudo kind export kubeconfig --name kind-multi --kubeconfig /home/ubuntu/.kube/config",
-      "kubectl apply -f /tmp/manifests.yml",
-      var.cspm_aws_docker_cmd,
+      "deploy_k8s=${var.deploy_k8s}",
+      "if [ \"$deploy_k8s\" = true ]; then",
+      "  echo 'Installing Kubernetes cluster using Kind tool'",
+      "  cloud-init status --wait",
+      "  git clone https://github.com/elastic/cloudbeat",
+      "  cd cloudbeat",
+      "  sudo kind create cluster --config deploy/k8s/kind/kind-multi.yml --wait 30s",
+      "  sudo kind export kubeconfig --name kind-multi --kubeconfig /home/ubuntu/.kube/config",
+      "  enable_agent=${var.deploy_agent}",
+      "  if [ \"$enable_agent\" = true ]; then",
+      "    echo 'Deploy KSPM agent'",
+      "    kubectl apply -f /tmp/manifests.yml",
+      "    ${var.cspm_aws_docker_cmd}",
+      "  else",
+      "    echo 'KSPM Agent will not be installed!'",
+      "  fi",
+      "else",
+      "  echo 'No Kubernetes cluster will be installed'",
+      "fi"
     ]
   }
 }

@@ -20,15 +20,15 @@ package awslib
 import (
 	"context"
 	"fmt"
+	"regexp"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"k8s.io/klog/v2"
-	"regexp"
 )
 
-type EKSClusterNameProvider struct {
-}
+type EKSClusterNameProvider struct{}
 
 const (
 	asgPattern                               = "^kubernetes.io/cluster/(.*)$"
@@ -41,7 +41,7 @@ var (
 	asgCompiledRegex = regexp.MustCompile(asgPattern)
 )
 
-type ClusterNameProvider interface {
+type EKSClusterNameProviderAPI interface {
 	GetClusterName(ctx context.Context, cfg aws.Config, instanceId string) (string, error)
 }
 

@@ -26,17 +26,17 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/types"
-	"github.com/elastic/cloudbeat/version"
-	"github.com/stretchr/testify/mock"
-
 	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/resources/fetchers"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/stretchr/testify/suite"
+	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/version"
 )
 
 type testAttr struct {
@@ -80,26 +80,25 @@ var (
 
 type EventsCreatorTestSuite struct {
 	suite.Suite
-	log *logp.Logger
 }
 
 func TestSuite(t *testing.T) {
 	s := new(EventsCreatorTestSuite)
-	s.log = logp.NewLogger("cloudbeat_events_creator_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
-
 	suite.Run(t, s)
 }
 
 func (s *EventsCreatorTestSuite) SetupSuite() {
-	err := parseJsonfile(opaResultsFileName, &opaResults)
-	if err != nil {
-		s.log.Errorf("Could not parse JSON file: %v", err)
-		return
-	}
+	fetcherDataFile, err := os.Open(opaResultsFileName)
+	require.NoError(s.T(), err)
+	defer func() {
+		require.NoError(s.T(), fetcherDataFile.Close())
+	}()
+
+	byteValue, err := io.ReadAll(fetcherDataFile)
+	require.NoError(s.T(), err)
+
+	err = json.Unmarshal(byteValue, &opaResults)
+	require.NoError(s.T(), err)
 }
 
 func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
@@ -143,7 +142,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			}, nil)
 			dataProviderMock.On("EnrichEvent", mock.Anything, mock.Anything).Return(mockEnrichEvent)
 
-			transformer := NewTransformer(s.log, &dataProviderMock, testIndex)
+			transformer := NewTransformer(testhelper.NewLogger(s.T()), &dataProviderMock, testIndex)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {
@@ -163,23 +162,4 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			}
 		})
 	}
-}
-
-func parseJsonfile(filename string, data interface{}) error {
-	fetcherDataFile, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer fetcherDataFile.Close()
-
-	byteValue, err := io.ReadAll(fetcherDataFile)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(byteValue, data)
-	if err != nil {
-		return err
-	}
-	return nil
 }

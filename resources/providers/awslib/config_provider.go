@@ -19,16 +19,17 @@ package awslib
 
 import (
 	"context"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 )
 
-type ConfigProvider struct {
-	MetadataProvider MetadataProvider
-}
-
 type ConfigProviderAPI interface {
 	InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error)
+}
+
+type ConfigProvider struct {
+	MetadataProvider MetadataProvider
 }
 
 func (p ConfigProvider) InitializeAWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error) {

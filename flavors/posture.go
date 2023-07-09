@@ -22,49 +22,60 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/cloudbeat/pipeline"
-	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources/fetchersManager"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers"
-	"github.com/elastic/cloudbeat/transformer"
-	"github.com/elastic/cloudbeat/uniqueness"
-
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
+	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/flavors/benchmark"
+	"github.com/elastic/cloudbeat/pipeline"
+	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/manager"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/transformer"
 )
 
 // posture configuration.
 type posture struct {
 	flavorBase
-	data       *fetchersManager.Data
-	evaluator  evaluator.Evaluator
-	resourceCh chan fetching.ResourceInfo
-	leader     uniqueness.Manager
+	fetcherManager *manager.Manager
+	evaluator      evaluator.Evaluator
+	resourceCh     chan fetching.ResourceInfo
+	benchmark      benchmark.Benchmark
 }
 
 // NewPosture creates an instance of posture.
-func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
-	log := logp.NewLogger("posture")
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	c, err := config.New(cfg)
+func NewPosture(_ *beat.Beat, agentConfig *agentconfig.C) (beat.Beater, error) {
+	cfg, err := config.New(agentConfig)
 	if err != nil {
-		cancel()
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
+	return newPostureFromCfg(cfg)
+}
 
-	log.Info("Config initiated with cycle period of ", c.Period)
+// NewPosture creates an instance of posture.
+func newPostureFromCfg(cfg *config.Config) (*posture, error) {
+	log := logp.NewLogger("posture")
+	log.Info("Config initiated with cycle period of ", cfg.Period)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	b, err := benchmark.NewBenchmark(cfg)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
-
-	le := uniqueness.NewLeaderElector(log, c, &providers.KubernetesProvider{})
-
-	fetchersRegistry, err := initRegistry(log, c, resourceCh, le)
+	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh, benchmark.NewDependencies(
+		awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+		awslib.IdentityProvider{},
+		k8s.ClientGetter{},
+		awslib.Ec2MetadataProvider{},
+		awslib.EKSClusterNameProvider{},
+	))
 	if err != nil {
 		cancel()
 		return nil, err
@@ -72,13 +83,13 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	// TODO: timeout should be configurable and not hard-coded. Setting to 10 minutes for now to account for CSPM fetchers
 	// 	https://github.com/elastic/cloudbeat/issues/653
-	data, err := fetchersManager.NewData(ctx, log, c.Period, time.Minute*10, fetchersRegistry)
+	fetcherManager, err := manager.NewManager(ctx, log, cfg.Period, time.Minute*10, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	eval, err := evaluator.NewOpaEvaluator(ctx, log, c)
+	eval, err := evaluator.NewOpaEvaluator(ctx, log, cfg)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -87,41 +98,32 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
-	cdp, err := GetCommonDataProvider(ctx, log, *c)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-
 	t := transformer.NewTransformer(log, cdp, resultsIndex)
 
-	base := flavorBase{
-		ctx:         ctx,
-		cancel:      cancel,
-		config:      c,
-		transformer: t,
-		log:         log,
-	}
-
-	bt := &posture{
-		flavorBase: base,
-		evaluator:  eval,
-		data:       data,
-		resourceCh: resourceCh,
-		leader:     le,
-	}
-	return bt, nil
+	return &posture{
+		flavorBase: flavorBase{
+			ctx:         ctx,
+			cancel:      cancel,
+			config:      cfg,
+			transformer: t,
+			log:         log,
+		},
+		fetcherManager: fetcherManager,
+		evaluator:      eval,
+		resourceCh:     resourceCh,
+		benchmark:      b,
+	}, nil
 }
 
 // Run starts posture.
 func (bt *posture) Run(b *beat.Beat) error {
 	bt.log.Info("posture is running! Hit CTRL-C to stop it")
 
-	if err := bt.leader.Run(bt.ctx); err != nil {
+	if err := bt.benchmark.Run(bt.ctx); err != nil {
 		return err
 	}
 
-	bt.data.Run()
+	bt.fetcherManager.Run()
 
 	procs, err := ConfigureProcessors(bt.config.Processors)
 	if err != nil {
@@ -174,26 +176,10 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (fetchersManager.FetchersRegistry, error) {
-	registry := fetchersManager.NewFetcherRegistry(log)
-
-	parsedList, err := fetchersManager.Factories.ParseConfigFetchers(log, cfg, ch)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := registry.RegisterFetchers(parsedList, le); err != nil {
-		return nil, err
-	}
-
-	return registry, nil
-}
-
 // Stop stops posture.
 func (bt *posture) Stop() {
-	bt.data.Stop()
+	bt.fetcherManager.Stop()
 	bt.evaluator.Stop(bt.ctx)
-	bt.leader.Stop()
 	close(bt.resourceCh)
 	if err := bt.client.Close(); err != nil {
 		bt.log.Fatal("Cannot close client", err)

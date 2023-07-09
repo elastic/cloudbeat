@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-    timeout-minutes: 15
+    timeout-minutes: 40
     steps:
       - id: Default
         env:
@@ -104,6 +104,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
+          file: ./deploy/Dockerfile
           push: false
           tags: cloudbeat:latest
           cache-from: type=local,src=/tmp/.buildx-cache

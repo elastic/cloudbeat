@@ -20,7 +20,7 @@
 
 package launcher
 
-// BeaterUnhealthyError error is an error that is desgined to have an information that
+// BeaterUnhealthyError error is an error that is designed to have an information that
 // can help to end user to operate cloudbeat health issues.
 // For example, when a cloudbeat configuration is invalid, the error will include
 // more information about what is missing/expected and might have links to external sources as well

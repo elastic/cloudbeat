@@ -23,11 +23,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/samber/lo"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	ec2Provider "github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/samber/lo"
 )
 
 func NewProvider(log *logp.Logger, cfg aws.Config, factory awslib.CrossRegionFactory[Client], ec2Provider ec2Provider.ElasticCompute) *Provider {
@@ -64,11 +65,7 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 		}
 
 		for _, dbInstance := range dbInstances {
-			subnets, err := p.getDBInstanceSubnets(ctx, region, dbInstance)
-			if err != nil {
-				p.log.Errorf("Could not get DB instance subnets. DB: %s. Error: %v", *dbInstance.DBInstanceIdentifier, err)
-			}
-
+			subnets := p.getDBInstanceSubnets(ctx, region, dbInstance)
 			result = append(result, DBInstance{
 				Identifier:              *dbInstance.DBInstanceIdentifier,
 				Arn:                     *dbInstance.DBInstanceArn,
@@ -86,7 +83,7 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 	return lo.Flatten(rdss), err
 }
 
-func (p Provider) getDBInstanceSubnets(ctx context.Context, region string, dbInstance types.DBInstance) ([]Subnet, error) {
+func (p Provider) getDBInstanceSubnets(ctx context.Context, region string, dbInstance types.DBInstance) []Subnet {
 	var results []Subnet
 	for _, subnet := range dbInstance.DBSubnetGroup.Subnets {
 		resultSubnet := Subnet{ID: *subnet.SubnetIdentifier, RouteTable: nil}
@@ -105,7 +102,7 @@ func (p Provider) getDBInstanceSubnets(ctx context.Context, region string, dbIns
 		results = append(results, resultSubnet)
 	}
 
-	return results, nil
+	return results
 }
 
 func (d DBInstance) GetResourceArn() string {

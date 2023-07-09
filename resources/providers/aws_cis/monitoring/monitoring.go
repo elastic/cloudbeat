@@ -21,13 +21,16 @@ import (
 	"context"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	cloudwatch_types "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
 	cloudwatchlogs_types "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
+	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch/logs"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Provider struct {
@@ -54,6 +57,16 @@ type (
 		MetricTopicBinding map[string][]string
 	}
 )
+
+func NewProvider(log *logp.Logger, awsConfig aws.Config, trailCrossRegionFactory awslib.CrossRegionFactory[cloudtrail.Client], cloudwatchCrossResignFactory awslib.CrossRegionFactory[cloudwatch.Client], cloudwatchlogsCrossRegionFactory awslib.CrossRegionFactory[logs.Client], snsCrossRegionFactory awslib.CrossRegionFactory[sns.Client]) *Provider {
+	return &Provider{
+		Cloudtrail:     cloudtrail.NewProvider(log, awsConfig, trailCrossRegionFactory),
+		Cloudwatch:     cloudwatch.NewProvider(log, awsConfig, cloudwatchCrossResignFactory),
+		Cloudwatchlogs: logs.NewCloudwatchLogsProvider(log, awsConfig, cloudwatchlogsCrossRegionFactory),
+		Sns:            sns.NewSNSProvider(log, awsConfig, snsCrossRegionFactory),
+		Log:            log,
+	}
+}
 
 // AggregateResources will gather all the resource to be used for aws cis 4.1 ... 4.15 rules
 func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
@@ -101,14 +114,12 @@ func (p *Provider) AggregateResources(ctx context.Context) (*Resource, error) {
 			}
 			topics := p.getSubscriptionForAlarms(ctx, info.Trail.HomeRegion, alarms)
 			bindings[name] = topics
-
 		}
 		items = append(items, MonitoringItem{
 			TrailInfo:          info,
 			MetricFilters:      metrics,
 			MetricTopicBinding: bindings,
 		})
-
 	}
 
 	return &Resource{Items: items}, nil

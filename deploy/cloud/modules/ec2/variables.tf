@@ -13,11 +13,30 @@ variable "aws_ec2_instance_type" {
 variable "yml" {
   description = "Kubernetes vanilla yaml to be applied"
   type        = string
+  default     = ""
 }
 
 variable "deployment_name" {
   description = "EC2 instance name"
   type        = string
+}
+
+variable "deploy_agent" {
+  description = "Deploy agent flag"
+  type        = bool
+  default     = true # Supporting original behaviour when agent is deployed by default
+}
+
+variable "deploy_k8s" {
+  description = "Deploy kubernetes flag"
+  type        = bool
+  default     = true
+}
+
+variable "specific_tags" {
+  description = "Specific tags for this deployment"
+  type        = map(string)
+  default     = {}
 }
 
 variable "cspm_aws_docker_cmd" {

@@ -23,15 +23,14 @@ elk_config = Munch()
 elk_config.user = os.getenv("ES_USER", "NA")
 elk_config.password = os.getenv("ES_PASSWORD", "NA")
 elk_config.kibana_url = os.getenv("KIBANA_URL", "NA")
+elk_config.stack_version = os.getenv("STACK_VERSION", "NA")
 elk_config.auth = (elk_config.user, elk_config.password)
+
+kspm_config = Munch()
+kspm_config.docker_image_override = os.getenv("DOCKER_IMAGE_OVERRIDE", "")
 
 aws_config = Munch()
 aws_config.access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "NA")
 aws_config.secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "NA")
-
-artifactory_url = {
-    "staging": "https://staging.elastic.co/",
-    "snapshot": "https://snapshots.elastic.co/",
-}
 
 state_data_file = Path(__file__).parent / "state_data.json"

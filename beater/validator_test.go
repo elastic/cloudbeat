@@ -21,34 +21,32 @@ import (
 	"testing"
 
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
 )
 
 type ValidatorTestSuite struct {
 	suite.Suite
 
-	log *logp.Logger
 	sut *validator
 }
 
 func TestValidatorTestSuite(t *testing.T) {
 	s := new(ValidatorTestSuite)
-	s.log = logp.NewLogger("cloudbeat_validator_test_suite")
 	s.sut = &validator{}
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
 
 func (s *ValidatorTestSuite) TestConfig() {
-	configWithBenchmark := config.MustNewConfigFrom(`
+	configWithK8sBenchmark := config.MustNewConfigFrom(`
 config:
   v1:
     benchmark: cis_k8s
+`)
+	configWithGcpBenchmark := config.MustNewConfigFrom(`
+config:
+  v1:
+    benchmark: cis_gcp
 `)
 
 	testcases := []struct {
@@ -61,7 +59,11 @@ config:
 		},
 		{
 			false,
-			configWithBenchmark,
+			configWithK8sBenchmark,
+		},
+		{
+			false,
+			configWithGcpBenchmark,
 		},
 	}
 

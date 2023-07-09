@@ -18,16 +18,18 @@
 package aws
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/cloudbeat/dataprovider/types"
-	"github.com/elastic/cloudbeat/version"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/elastic/cloudbeat/dataprovider/types"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/version"
 )
 
 var (
@@ -38,16 +40,10 @@ var (
 
 type AwsDataProviderTestSuite struct {
 	suite.Suite
-	log *logp.Logger
 }
 
 func TestAwsDataProviderTestSuite(t *testing.T) {
 	s := new(AwsDataProviderTestSuite)
-	s.log = logp.NewLogger("cloudbeat_aws_data_provider_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -68,8 +64,11 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 		{
 			name: "get data",
 			options: []Option{
-				WithLogger(s.log),
-				WithAccount(accountName, accountId),
+				WithLogger(testhelper.NewLogger(s.T())),
+				WithAccount(awslib.Identity{
+					Account: accountId,
+					Alias:   accountName,
+				}),
 			},
 			expected: types.Data{
 				ResourceID: "",
@@ -90,14 +89,16 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 		}
 		s.NoError(err)
 		s.Equal(result, test.expected)
-
 	}
 }
 
 func TestAWSDataProvider_EnrichEvent(t *testing.T) {
 	options := []Option{
-		WithLogger(logp.NewLogger("")),
-		WithAccount(accountName, accountId),
+		WithLogger(testhelper.NewLogger(t)),
+		WithAccount(awslib.Identity{
+			Account: accountId,
+			Alias:   accountName,
+		}),
 	}
 
 	k := New(options...)

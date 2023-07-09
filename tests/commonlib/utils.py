@@ -258,8 +258,21 @@ def config_contains_arguments(config, arguments_dict):
     return True
 
 
-def get_findings(elastic_client, config_timeout, match_type):
-    query, sort = elastic_client.build_es_query(term={"resource.type": match_type})
+def get_findings(elastic_client, config_timeout, query, sort, match_type):
+    """
+    Retrieves data from an Elasticsearch index using the specified query and sort parameters.
+
+    Args:
+        elastic_client: An instance of the Elasticsearch client.
+        config_timeout (int): The maximum time (in seconds) to wait for the desired findings.
+        query (dict): The Elasticsearch query to be used for retrieving the data.
+        sort (list[dict]): The sort order to be applied to the retrieved data.
+        match_type (str): The match type for the findings.
+
+    Returns:
+        dict: The retrieved Elasticsearch data,
+        or an empty dictionary if no findings are found within the timeout period.
+    """
     start_time = time.time()
     result = {}
     while time.time() - start_time < config_timeout:

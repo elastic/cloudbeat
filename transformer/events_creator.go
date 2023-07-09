@@ -24,12 +24,13 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	libevents "github.com/elastic/beats/v7/libbeat/beat/events"
-	"github.com/elastic/cloudbeat/dataprovider"
-	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/gofrs/uuid"
+
+	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 const (

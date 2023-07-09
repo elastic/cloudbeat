@@ -19,6 +19,7 @@ package logging
 
 import (
 	"context"
+
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
 
 	"github.com/elastic/cloudbeat/resources/fetching"

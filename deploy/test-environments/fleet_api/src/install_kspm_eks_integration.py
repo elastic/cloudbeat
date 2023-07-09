@@ -18,6 +18,8 @@ from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     create_kubernetes_manifest,
+    get_cloud_security_posture_version,
+    update_package_version,
 )
 from loguru import logger
 from utils import (
@@ -47,6 +49,10 @@ def load_data() -> Tuple[Dict, Dict]:
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
+    package_version = get_cloud_security_posture_version(cfg=cnfg.elk_config)
+    logger.info(f"Package version: {package_version}")
+    update_package_version(cfg=cnfg.elk_config, package_version=package_version)
+
     logger.info("Starting installation of KSPM EKS integration.")
     agent_data, package_data = load_data()
 
@@ -84,6 +90,7 @@ if __name__ == "__main__":
 
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
     manifest_params.yaml_path = Path(__file__).parent / "kspm_eks.yaml"
+    manifest_params.docker_image_override = cnfg.kspm_config.docker_image_override
     logger.info("Creating KSPM EKS manifest")
     create_kubernetes_manifest(cfg=cnfg.elk_config, params=manifest_params)
     logger.info("Installation of KSPM EKS integration is done")

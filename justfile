@@ -6,6 +6,7 @@ kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 kustomizeAwsOverlay := "deploy/kustomize/overlays/cloudbeat-aws"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
+AWS_DEFAULT_TAGS := 'Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments'
 
 # use env var if available
 export LOCAL_GOARCH := `go env GOARCH`
@@ -79,7 +80,7 @@ alias build-cloudbeat := build-cloudbeat-docker-image
 build-cloudbeat-docker-image $GOARCH=LOCAL_GOARCH: build-opa-bundle
   just build-binary $GOARCH
   @echo "Building cloudbeat docker image for linux/$GOARCH"
-  docker build -t cloudbeat . --platform=linux/$GOARCH
+  docker build -f deploy/Dockerfile -t cloudbeat . --platform=linux/$GOARCH
 
 deploy-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
@@ -95,7 +96,7 @@ deploy-cloudbeat-nocert:
 # Builds cloudbeat docker image with the OPA bundle included and the debug flag
 build-cloudbeat-debug $GOARCH=LOCAL_GOARCH: build-opa-bundle
   GOOS=linux go mod vendor
-  GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f Dockerfile.debug -t cloudbeat . --platform=linux/$GOARCH
+  GOOS=linux CGO_ENABLED=0 go build -gcflags "all=-N -l" && docker build -f deploy/Dockerfile.debug -t cloudbeat . --platform=linux/$GOARCH
 
 delete-cloudbeat:
   cp {{env_var('ELASTIC_PACKAGE_CA_CERT')}} {{kustomizeVanillaOverlay}}
@@ -121,6 +122,9 @@ logs-cloudbeat:
 
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
+
+create-cnvm-stack-tags region stack_name tags=(AWS_DEFAULT_TAGS):
+  ./scripts/add_cnvm_tags.sh {{region}} {{stack_name}} '{{tags}}'
 
 build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v

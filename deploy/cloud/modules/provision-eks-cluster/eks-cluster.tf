@@ -8,7 +8,10 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  enable_irsa = true
+  enable_irsa                 = true
+  create_cloudwatch_log_group = false
+
+  tags = var.tags
 
   eks_managed_node_group_defaults = {
     ami_type = "AL2_x86_64"
@@ -19,7 +22,7 @@ module "eks" {
     create_security_group = false
   }
 
-  eks_managed_node_groups = {
+  eks_managed_node_groups = var.enable_node_group_two ? {
     one = {
       name = "${local.cluster_name}-1"
 
@@ -27,13 +30,12 @@ module "eks" {
 
       min_size     = 1
       max_size     = 4
-      desired_size = 3
+      desired_size = var.node_group_one_desired_size
 
       vpc_security_group_ids = [
         aws_security_group.node_group_one.id
       ]
-    }
-
+    },
     two = {
       name = "${local.cluster_name}-2"
 
@@ -41,10 +43,24 @@ module "eks" {
 
       min_size     = 1
       max_size     = 4
-      desired_size = 3
+      desired_size = var.node_group_two_desired_size
 
       vpc_security_group_ids = [
         aws_security_group.node_group_two.id
+      ]
+    }
+    } : {
+    one = {
+      name = "${var.cluster_name}-1"
+
+      instance_types = ["t3.small"]
+
+      min_size     = 1
+      max_size     = 4
+      desired_size = var.node_group_one_desired_size
+
+      vpc_security_group_ids = [
+        aws_security_group.node_group_one.id
       ]
     }
   }

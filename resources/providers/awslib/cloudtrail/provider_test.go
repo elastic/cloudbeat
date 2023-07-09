@@ -24,9 +24,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type (
@@ -149,7 +150,7 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 			}
 
 			p := &Provider{
-				log:     logp.NewLogger("TestProvider_DescribeCloudTrails"),
+				log:     testhelper.NewLogger(t),
 				clients: createMockClients(clientMock, tt.regions),
 			}
 
