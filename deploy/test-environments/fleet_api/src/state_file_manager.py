@@ -15,6 +15,7 @@ class PolicyStateEncoder(json.JSONEncoder):
     """
     Custom JSON encoder for PolicyState objects.
     """
+
     def default(self, o):
         """
         Encode a PolicyState object.
@@ -26,6 +27,7 @@ class PolicyState:
     """
     Class to represent a policy state.
     """
+
     def __init__(self, agnt_policy_id: str, pkg_policy_id: str, expected_agents: int):
         """
         Args:
@@ -42,6 +44,7 @@ class StateFileManager:
     """
     Class to manage the policies state using a file.
     """
+
     def __init__(self, state_file: Path):
         """
         Args:
