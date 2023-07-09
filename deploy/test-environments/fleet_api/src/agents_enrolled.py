@@ -12,7 +12,7 @@ from loguru import logger
 TIMEOUT = 600
 
 
-def get_expected_agents_mapping() -> dict:
+def get_expected_agents() -> dict:
     """
     Returns:
         dict: The name of the policy and the number of agents expected to be enrolled
@@ -24,7 +24,7 @@ def get_expected_agents_mapping() -> dict:
     return policies_dict
 
 
-def get_actual_agents_mapping() -> dict:
+def get_actual_agents() -> dict:
     """
     Returns:
         dict: The name of the policy and the number of agents enrolled
@@ -42,8 +42,8 @@ def verify_agents_enrolled() -> bool:
     """
     Verify that the expected number of agents are enrolled
     """
-    expected = get_expected_agents_mapping()
-    actual = get_actual_agents_mapping()
+    expected = get_expected_agents()
+    actual = get_actual_agents()
     result = True
     for policy_id, expected_count in expected.items():
         if policy_id not in actual:
