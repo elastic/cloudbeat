@@ -4,7 +4,6 @@ Exports state_manager object as a singleton.
 """
 import json
 from pathlib import Path
-from munch import munchify
 from utils import delete_file
 from loguru import logger
 
