@@ -32,9 +32,7 @@ def get_actual_agents() -> dict:
     agents = get_agents(cfg=cnfg.elk_config)
     policies_dict = {}
     for agent in agents:
-        if agent.policy_id not in policies_dict:
-            policies_dict[agent.policy_id] = 0
-        policies_dict[agent.policy_id] += 1
+        policies_dict[agent.policy_id] = policies_dict.get(agent.policy_id, 0) + 1
     return policies_dict
 
 
@@ -49,11 +47,9 @@ def verify_agents_enrolled() -> bool:
         if policy_id not in actual:
             result = False
             logger.info(f"Policy {policy_id} not found in the actual agents mapping")
-            continue
-        if actual[policy_id] != expected_count:
+        elif actual[policy_id] != expected_count:
             result = False
             logger.info(f"Policy {policy_id} expected {expected_count} agents, but got {actual[policy_id]}")
-            continue
     return result
 
 
