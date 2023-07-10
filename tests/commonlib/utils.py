@@ -13,6 +13,7 @@ FINDINGS_BACKOFF_SECONDS = 5
 EVALUATION_BACKOFF_SECONDS = 2
 CYCLE_BACKOFF_SECONDS = 1
 
+
 def get_ES_evaluation(
     elastic_client,
     timeout,
