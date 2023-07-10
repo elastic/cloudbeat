@@ -37,7 +37,7 @@ def create_agent_policy(cfg: Munch, json_policy: dict) -> str:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return ""
+        raise api_ex
 
 
 def delete_agent_policy(cfg: Munch, agent_policy_id: str):

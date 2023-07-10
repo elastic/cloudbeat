@@ -78,8 +78,9 @@ jobs:
           poetry --version
 
       - name: Install Fleet API dependencies
+        id: fleet-api-deps
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd fleet_api
           poetry install
 
       - name: Configure AWS credentials
@@ -167,8 +168,8 @@ jobs:
 
       - name: Install CNVM integration
         id: cnvm
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd fleet_api
           poetry run python src/install_cnvm_integration.py
 
       - name: Deploy CNVM agent
@@ -178,8 +179,8 @@ jobs:
 
       - name: Install KSPM EKS integration
         id: kspm-eks
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd fleet_api
           poetry run python src/install_kspm_eks_integration.py
 
       - name: Deploy KSPM EKS agent
@@ -195,8 +196,8 @@ jobs:
 
       - name: Install KSPM Unmanaged integration
         id: kspm-unmanaged
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd fleet_api
           poetry run python src/install_kspm_unmanaged_integration.py
 
       - name: Deploy KSPM Unmanaged agent
@@ -209,8 +210,8 @@ jobs:
 
       - name: Install CSPM integration
         id: cspm
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd fleet_api
           poetry run python src/install_cspm_integration.py
 
       - name: Deploy CSPM agent
@@ -230,10 +231,16 @@ jobs:
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
 
+      - name: Wait for agents to enroll
+        id: wait-for-agents
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/agents_enrolled.py
+
       - name: Run Sanity checks
         if: success()
+        working-directory: ./tests
         run: |
-          cd ../../tests
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
