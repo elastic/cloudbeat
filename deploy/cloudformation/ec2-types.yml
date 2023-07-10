@@ -12,8 +12,6 @@ Parameters:
     AllowedValues:
       - "true"
       - "false"
-Conditions:
-  Encrypted: !Equals ["true", !Ref Encrypted]
 Resources:
   arm64AmazonLinux2:
     Type: "AWS::EC2::Instance"
