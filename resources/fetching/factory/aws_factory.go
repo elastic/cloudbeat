@@ -18,6 +18,7 @@
 package factory
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -65,18 +66,22 @@ func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
 func (w *wrapResource) GetData() any              { return w.wrapped.GetData() }
 func (w *wrapResource) GetElasticCommonData() any { return w.wrapped.GetElasticCommonData() }
 
-func NewCisAwsOrganizationFactory(log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount) FetchersMap {
+func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount) FetchersMap {
 	m := make(FetchersMap)
 	for _, account := range accounts {
 		ch := make(chan fetching.ResourceInfo)
 		go func(identity *awslib.Identity) {
 			for resourceInfo := range ch {
-				rootCh <- fetching.ResourceInfo{
+				select {
+				case <-ctx.Done():
+					return
+				case rootCh <- fetching.ResourceInfo{
 					Resource: &wrapResource{
 						wrapped:  resourceInfo.Resource,
 						identity: identity,
 					},
 					CycleMetadata: resourceInfo.CycleMetadata,
+				}:
 				}
 			}
 		}(account.Identity)
