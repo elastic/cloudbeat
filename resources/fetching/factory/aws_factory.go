@@ -71,17 +71,22 @@ func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh 
 	for _, account := range accounts {
 		ch := make(chan fetching.ResourceInfo)
 		go func(identity *awslib.Identity) {
-			for resourceInfo := range ch {
+			for {
 				select {
 				case <-ctx.Done():
 					return
-				case rootCh <- fetching.ResourceInfo{
-					Resource: &wrapResource{
-						wrapped:  resourceInfo.Resource,
-						identity: identity,
-					},
-					CycleMetadata: resourceInfo.CycleMetadata,
-				}:
+				case resourceInfo := <-ch:
+					select {
+					case <-ctx.Done():
+						return
+					case rootCh <- fetching.ResourceInfo{
+						Resource: &wrapResource{
+							wrapped:  resourceInfo.Resource,
+							identity: identity,
+						},
+						CycleMetadata: resourceInfo.CycleMetadata,
+					}:
+					}
 				}
 			}
 		}(account.Identity)
