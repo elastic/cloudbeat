@@ -23,6 +23,7 @@ tests_data = {
     ],  # Exclude "cloud-storage" due to lack of fetcher control and potential delays.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": ["process", "k8s_object"],  # Optimize search findings by excluding 'file'.
+    "cnvm": ["vulnerability"],
 }
 
 
@@ -96,12 +97,14 @@ def test_cspm_findings(cspm_client, match_type):
 
 
 @pytest.mark.sanity
-def test_cnvm_findings(cnvm_client):
+@pytest.mark.parametrize("match_type", tests_data["cnvm"])
+def test_cnvm_findings(cnvm_client, match_type):
     """
     Test case to check for vulnerabilities found by CNVM.
 
     Args:
         cnvm_client: The elastic client object.
+        match_type (str): The resource type to match.
 
     Returns:
         None
@@ -109,7 +112,6 @@ def test_cnvm_findings(cnvm_client):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    match_type = "vulnerability"
     query_list = []
     query, sort = cnvm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
     results = get_findings(cnvm_client, CNVM_CONFIG_TIMEOUT, query, sort, match_type)
