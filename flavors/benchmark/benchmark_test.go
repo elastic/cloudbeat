@@ -40,31 +40,23 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-type expectedFetchers struct {
-	names []string
-	count int
-}
-
 func TestNewBenchmark(t *testing.T) {
 	t.Setenv("NODE_NAME", "node-name")
 	tests := []struct {
 		name    string
 		cfg     *config.Config
 		wantErr bool
-		want    expectedFetchers
+		want    []string
 	}{
 		{
 			name: "Get k8s benchmark",
 			cfg: &config.Config{
 				Benchmark: config.CIS_K8S,
 			},
-			want: expectedFetchers{
-				names: []string{
-					fetching.FileSystemType,
-					fetching.KubeAPIType,
-					fetching.ProcessType,
-				},
-				count: 3,
+			want: []string{
+				fetching.FileSystemType,
+				fetching.KubeAPIType,
+				fetching.ProcessType,
 			},
 		},
 		{
@@ -79,17 +71,44 @@ func TestNewBenchmark(t *testing.T) {
 					},
 				},
 			},
-			want: expectedFetchers{
-				names: []string{
-					fetching.IAMType,
-					fetching.KmsType,
-					fetching.TrailType,
-					fetching.MonitoringType,
-					fetching.EC2NetworkingType,
-					fetching.RdsType,
-					fetching.S3Type,
+			want: []string{
+				fetching.IAMType,
+				fetching.KmsType,
+				fetching.TrailType,
+				fetching.MonitoringType,
+				fetching.EC2NetworkingType,
+				fetching.RdsType,
+				fetching.S3Type,
+			},
+		},
+		{
+			name: "Get CIS AWS org benchmark",
+			cfg: &config.Config{
+				Benchmark: config.CIS_AWS,
+				CloudConfig: config.CloudConfig{
+					Aws: config.AwsConfig{
+						Cred: aws.ConfigAWS{
+							AccessKeyID: "test",
+						},
+						AccountType: "organization_account",
+					},
 				},
-				count: 7,
+			},
+			want: []string{
+				"123-" + fetching.IAMType,
+				"123-" + fetching.KmsType,
+				"123-" + fetching.TrailType,
+				"123-" + fetching.MonitoringType,
+				"123-" + fetching.EC2NetworkingType,
+				"123-" + fetching.RdsType,
+				"123-" + fetching.S3Type,
+				"test-account-" + fetching.IAMType,
+				"test-account-" + fetching.KmsType,
+				"test-account-" + fetching.TrailType,
+				"test-account-" + fetching.MonitoringType,
+				"test-account-" + fetching.EC2NetworkingType,
+				"test-account-" + fetching.RdsType,
+				"test-account-" + fetching.S3Type,
 			},
 		},
 		{
@@ -97,13 +116,10 @@ func TestNewBenchmark(t *testing.T) {
 			cfg: &config.Config{
 				Benchmark: config.CIS_EKS,
 			},
-			want: expectedFetchers{
-				names: []string{
-					fetching.FileSystemType,
-					fetching.KubeAPIType,
-					fetching.ProcessType,
-				},
-				count: 3,
+			want: []string{
+				fetching.FileSystemType,
+				fetching.KubeAPIType,
+				fetching.ProcessType,
 			},
 		},
 		{
@@ -118,15 +134,12 @@ func TestNewBenchmark(t *testing.T) {
 					},
 				},
 			},
-			want: expectedFetchers{
-				names: []string{
-					fetching.FileSystemType,
-					fetching.KubeAPIType,
-					fetching.ProcessType,
-					fetching.EcrType,
-					fetching.ElbType,
-				},
-				count: 5,
+			want: []string{
+				fetching.FileSystemType,
+				fetching.KubeAPIType,
+				fetching.ProcessType,
+				fetching.EcrType,
+				fetching.ElbType,
 			},
 		},
 		{
@@ -134,10 +147,7 @@ func TestNewBenchmark(t *testing.T) {
 			cfg: &config.Config{
 				Benchmark: "Non existing benchmark",
 			},
-			want: expectedFetchers{
-				names: []string{},
-				count: 0,
-			},
+			want:    []string{},
 			wantErr: true,
 		},
 	}
@@ -163,7 +173,7 @@ func TestNewBenchmark(t *testing.T) {
 				&Dependencies{
 					AwsCfgProvider:           mockAwsCfg(nil),
 					AwsIdentityProvider:      mockIdentityProvider(nil),
-					AwsAccountProvider:       nil,
+					AwsAccountProvider:       mockAccountProvider(nil),
 					KubernetesClientProvider: mockKubeClient(nil),
 					AwsMetadataProvider:      mockMetadataProvider(nil),
 					EksClusterNameProvider:   mockEksClusterNameProvider(nil),
@@ -174,11 +184,11 @@ func TestNewBenchmark(t *testing.T) {
 				return
 			}
 			require.NoError(t, err)
-			assert.Equal(t, tt.want.count, len(fetchersMap.Keys()))
+			assert.Len(t, fetchersMap.Keys(), len(tt.want))
 
 			require.NoError(t, b.Run(context.Background()))
 			defer b.Stop()
-			for _, fetcher := range tt.want.names {
+			for _, fetcher := range tt.want {
 				ok := fetchersMap.ShouldRun(fetcher)
 				assert.Truef(t, ok, "fetcher %s enabled", fetcher)
 			}
