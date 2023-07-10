@@ -38,7 +38,6 @@ class ElasticWrapper:
         )
         return result
 
-
     @staticmethod
     def get_total_value(data: dict) -> int:
         """
