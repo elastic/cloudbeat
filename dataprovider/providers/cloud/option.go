@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package cloud
 
 import (
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -35,5 +35,6 @@ func WithAccount(identity awslib.Identity) Option {
 	return func(dp *DataProvider) {
 		dp.accountId = identity.Account
 		dp.accountName = identity.Alias
+		dp.providerName = identity.Provider
 	}
 }

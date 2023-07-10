@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package cloud
 
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -31,13 +31,13 @@ const (
 	cloudAccountNameField = "cloud.account.name"
 	cloudProviderField    = "cloud.provider"
 	cloudRegionField      = "cloud.region"
-	cloudProviderValue    = "aws"
 )
 
 type DataProvider struct {
-	log         *logp.Logger
-	accountId   string
-	accountName string
+	log          *logp.Logger
+	accountId    string
+	accountName  string
+	providerName string
 }
 
 func New(options ...Option) DataProvider {
@@ -69,7 +69,7 @@ func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.Resour
 		return err
 	}
 
-	_, err = event.Fields.Put(cloudProviderField, cloudProviderValue)
+	_, err = event.Fields.Put(cloudProviderField, a.providerName)
 	if err != nil {
 		return err
 	}

@@ -26,7 +26,7 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
-	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/aws"
+	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"

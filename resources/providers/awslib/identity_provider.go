@@ -27,8 +27,9 @@ import (
 )
 
 type Identity struct {
-	Account string
-	Alias   string
+	Account  string
+	Alias    string
+	Provider string
 }
 
 type IdentityProviderGetter interface {
@@ -50,8 +51,9 @@ func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*Ide
 	}
 
 	return &Identity{
-		Account: *response.Account,
-		Alias:   alias,
+		Account:  *response.Account,
+		Alias:    alias,
+		Provider: "aws",
 	}, nil
 }
 
