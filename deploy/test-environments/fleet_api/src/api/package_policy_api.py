@@ -133,7 +133,7 @@ def create_integration(cfg: Munch, pkg_policy: dict, agent_policy_id: str, data:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return ""
+        raise api_ex
 
 
 def delete_package_policy(cfg: Munch, policy_ids: list):

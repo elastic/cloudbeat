@@ -16,7 +16,6 @@ the ELK configuration (ES_USER, ES_PASSWORD, KIBANA_URL)
 have been set in the system environment.
 """
 import os
-from pathlib import Path
 from munch import Munch
 
 elk_config = Munch()
@@ -32,5 +31,3 @@ kspm_config.docker_image_override = os.getenv("DOCKER_IMAGE_OVERRIDE", "")
 aws_config = Munch()
 aws_config.access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "NA")
 aws_config.secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "NA")
-
-state_data_file = Path(__file__).parent / "state_data.json"

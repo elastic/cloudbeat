@@ -22,10 +22,12 @@ from api.common_api import (
     update_package_version,
 )
 from loguru import logger
-from utils import read_json, save_state
+from utils import read_json
+from state_file_manager import state_manager, PolicyState
 
 KSPM_UNMANAGED_AGENT_POLICY = "../../../cloud/data/agent_policy_vanilla.json"
 KSPM_UNMANAGED_PACKAGE_POLICY = "../../../cloud/data/package_policy_vanilla.json"
+KSPM_UNMANAGED_EXPECTED_AGENTS = 2
 
 
 kspm_agent_policy_data = Path(__file__).parent / KSPM_UNMANAGED_AGENT_POLICY
@@ -64,15 +66,8 @@ if __name__ == "__main__":
         agent_policy_id=agent_policy_id,
     )
 
-    save_state(
-        cnfg.state_data_file,
-        [
-            {
-                "pkg_policy_id": package_policy_id,
-                "agnt_policy_id": agent_policy_id,
-            },
-        ],
-    )
+    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, KSPM_UNMANAGED_EXPECTED_AGENTS))
+
     manifest_params = Munch()
     manifest_params.enrollment_token = get_enrollment_token(
         cfg=cnfg.elk_config,
