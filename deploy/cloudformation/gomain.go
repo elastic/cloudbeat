@@ -34,9 +34,20 @@ import (
 )
 
 const (
-	prodTemplatePath = "elastic-agent-ec2.yml"
-	devTemplatePath  = "elastic-agent-ec2-dev.yml"
+	DEV  = "DEV"
+	PROD = "PROD"
 )
+
+var templatePaths = map[string]map[string]string{
+	DeploymentTypeCSPM: map[string]string{
+		DEV:  "elastic-agent-ec2-dev-cspm.yml",
+		PROD: "elastic-agent-ec2-cspm.yml",
+	},
+	DeploymentTypeCNVM: map[string]string{
+		DEV:  "elastic-agent-ec2-dev-cnvm.yml",
+		PROD: "elastic-agent-ec2-cnvm.yml",
+	},
+}
 
 func main() {
 	cfg, err := parseConfig()
@@ -61,22 +72,28 @@ func createFromConfig(cfg *config) error {
 		params["ElasticArtifactServer"] = *cfg.ElasticArtifactServer
 	}
 
-	if cfg.IntegrationType != nil {
-		params["Integration"] = *cfg.IntegrationType
+	templatePath, err := getTemplatePath(cfg.DeploymentType, PROD)
+	if err != nil {
+		return fmt.Errorf("could not get template path: %v", err)
 	}
 
-	templatePath := prodTemplatePath
 	if cfg.Dev != nil && cfg.Dev.AllowSSH {
 		params["KeyName"] = cfg.Dev.KeyName
 
-		err := generateDevTemplate()
+		devTemplatePath, err := getTemplatePath(cfg.DeploymentType, DEV)
+		if err != nil {
+			return fmt.Errorf("could not get dev template path: %v", err)
+		}
+
+		err = generateDevTemplate(templatePath, devTemplatePath)
 		if err != nil {
 			return fmt.Errorf("could not generate dev template: %v", err)
 		}
+
 		templatePath = devTemplatePath
 	}
 
-	err := createStack(cfg.StackName, templatePath, params)
+	err = createStack(cfg.StackName, templatePath, params)
 	if err != nil {
 		return fmt.Errorf("failed to create CloudFormation stack: %v", err)
 	}
@@ -84,7 +101,7 @@ func createFromConfig(cfg *config) error {
 	return nil
 }
 
-func generateDevTemplate() (err error) {
+func generateDevTemplate(prodTemplatePath string, devTemplatePath string) (err error) {
 	const yqExpression = `
 .Parameters.KeyName = {
 	"Description": "SSH Keypair to login to the instance",
@@ -170,4 +187,14 @@ func createStack(stackName string, templatePath string, params map[string]string
 
 	log.Printf("Created stack %s", *stackOutput.StackId)
 	return nil
+}
+
+func getTemplatePath(deploymentType string, env string) (string, error) {
+	if deploymentType == "" {
+		// Default is CNVM
+		deploymentType = DeploymentTypeCNVM
+	} else if deploymentType != DeploymentTypeCNVM && deploymentType != DeploymentTypeCSPM {
+		return "", fmt.Errorf("deploymentType %s must be either %s or %s", deploymentType, DeploymentTypeCSPM, DeploymentTypeCNVM)
+	}
+	return templatePaths[deploymentType][env], nil
 }

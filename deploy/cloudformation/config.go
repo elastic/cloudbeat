@@ -34,9 +34,14 @@ type config struct {
 	EnrollmentToken       string     `mapstructure:"ENROLLMENT_TOKEN"`
 	ElasticArtifactServer *string    `mapstructure:"ELASTIC_ARTIFACT_SERVER"`
 	ElasticAgentVersion   string     `mapstructure:"ELASTIC_AGENT_VERSION"`
-	IntegrationType       *string    `mapstructure:"INTEGRATION"`
 	Dev                   *devConfig `mapstructure:"DEV"`
+	DeploymentType        string     `mapstructure:"DEPLOYMENT_TYPE"`
 }
+
+const (
+	DeploymentTypeCSPM = "cspm"
+	DeploymentTypeCNVM = "cnvm"
+)
 
 type devConfig struct {
 	AllowSSH bool   `mapstructure:"ALLOW_SSH"`
