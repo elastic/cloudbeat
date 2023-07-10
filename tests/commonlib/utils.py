@@ -9,6 +9,9 @@ import allure
 from commonlib.io_utils import get_logs_from_stream, get_events_from_index
 from loguru import logger
 
+FINDINGS_BACKOFF_SECONDS = 5
+EVALUATION_BACKOFF_SECONDS = 2
+CYCLE_BACKOFF_SECONDS = 1
 
 def get_ES_evaluation(
     elastic_client,
@@ -32,7 +35,7 @@ def get_ES_evaluation(
     while time.time() - start_time < timeout:
         try:
             # timeout used for reducing requests frequency to ElasticSearch
-            time.sleep(2)
+            time.sleep(EVALUATION_BACKOFF_SECONDS)
             events = get_events_from_index(
                 elastic_client,
                 rule_tag,
@@ -197,7 +200,7 @@ def wait_for_cycle_completion(elastic_client, nodes: list) -> bool:
                     # New cycle findings for this node
                     agents_cycles_count += 1
                     break
-                time.sleep(1)
+                time.sleep(CYCLE_BACKOFF_SECONDS)
 
         if prev_sequence != curr_sequence:
             prev_sequence = curr_sequence
@@ -290,7 +293,7 @@ def get_findings(elastic_client, config_timeout, query, sort, match_type):
             )
             result = current_result
             break
-        time.sleep(5)
+        time.sleep(FINDINGS_BACKOFF_SECONDS)
 
     return result
 
