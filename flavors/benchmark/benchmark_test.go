@@ -204,6 +204,7 @@ func Test_Initialize(t *testing.T) {
 		cfg          config.Config
 		wantErr      string
 	}{
+		// AWS test
 		{
 			name:      "nothing initialized",
 			benchmark: &AWS{},
@@ -230,6 +231,37 @@ func Test_Initialize(t *testing.T) {
 				AwsCfgProvider:           nil,
 				AwsIdentityProvider:      mockIdentityProvider(nil),
 				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(errors.New("some error")), // ineffectual
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
+			},
+		},
+		// AWS org tests
+		{
+			name:      "nothing initialized",
+			benchmark: &AWSOrg{},
+			wantErr:   "aws identity provider is uninitialized",
+		},
+		{
+			name:      "identity provider error",
+			benchmark: &AWSOrg{},
+			dependencies: Dependencies{
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: nil,
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
+			},
+			wantErr: "some error",
+		},
+		{
+			name:      "no error",
+			benchmark: &AWSOrg{},
+			dependencies: Dependencies{
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsAccountProvider:       mockAccountProvider(nil),
 				KubernetesClientProvider: mockKubeClient(errors.New("some error")), // ineffectual
 				AwsMetadataProvider:      nil,
 				EksClusterNameProvider:   nil,
@@ -480,5 +512,19 @@ func mockEksClusterNameProvider(err error) *awslib.MockEKSClusterNameProviderAPI
 		on.Return("", err)
 	}
 
+	return &provider
+}
+
+func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
+	provider := awslib.MockAccountProviderAPI{}
+	on := provider.EXPECT().ListAccounts(mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return([]awslib.Identity{
+			{
+				Account: "123",
+				Alias:   "some-name",
+			},
+		}, nil)
+	}
 	return &provider
 }
