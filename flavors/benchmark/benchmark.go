@@ -59,12 +59,14 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 }
 
 type Dependencies struct {
-	AwsCfgProvider           awslib.ConfigProviderAPI
-	AwsIdentityProvider      awslib.IdentityProviderGetter
-	AwsAccountProvider       awslib.AccountProviderAPI
+	AwsCfgProvider      awslib.ConfigProviderAPI
+	AwsIdentityProvider awslib.IdentityProviderGetter
+	AwsAccountProvider  awslib.AccountProviderAPI
+
 	KubernetesClientProvider k8sprovider.ClientGetterAPI
-	AwsMetadataProvider      awslib.MetadataProvider
-	EksClusterNameProvider   awslib.EKSClusterNameProviderAPI
+
+	AwsMetadataProvider    awslib.MetadataProvider
+	EksClusterNameProvider awslib.EKSClusterNameProviderAPI
 }
 
 func (d *Dependencies) KubernetesClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {

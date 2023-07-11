@@ -23,6 +23,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
+
+	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type AccountProviderAPI interface {
@@ -46,14 +48,9 @@ func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]Id
 				continue
 			}
 
-			alias := ""
-			if account.Name != nil {
-				alias = *account.Name
-			}
-
 			accounts = append(accounts, Identity{
 				Account: *account.Id,
-				Alias:   alias,
+				Alias:   strings.Dereference(account.Name),
 			})
 		}
 
