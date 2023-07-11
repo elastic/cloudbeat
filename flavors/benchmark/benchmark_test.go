@@ -253,6 +253,19 @@ func Test_Initialize(t *testing.T) {
 			wantErr:   "aws identity provider is uninitialized",
 		},
 		{
+			name:      "account provider uninitialized",
+			benchmark: &AWSOrg{},
+			dependencies: Dependencies{
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: nil,
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
+			},
+			wantErr: "account provider is uninitialized",
+		},
+		{
 			name:      "identity provider error",
 			benchmark: &AWSOrg{},
 			dependencies: Dependencies{
