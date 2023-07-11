@@ -44,13 +44,13 @@ import (
 )
 
 type AwsAccount struct {
-	*awslib.Identity
+	awslib.Identity
 	aws.Config
 }
 
 type wrapResource struct {
 	wrapped  fetching.Resource
-	identity *awslib.Identity
+	identity awslib.Identity
 }
 
 func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
@@ -70,7 +70,7 @@ func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh 
 	m := make(FetchersMap)
 	for _, account := range accounts {
 		ch := make(chan fetching.ResourceInfo)
-		go func(identity *awslib.Identity) {
+		go func(identity awslib.Identity) {
 			for {
 				select {
 				case <-ctx.Done():
@@ -95,7 +95,7 @@ func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh 
 			log.Named("aws").WithOptions(zap.Fields(zap.String("cloud.account.id", account.Identity.Account))),
 			account.Config,
 			ch,
-			account.Identity,
+			&account.Identity,
 		)
 
 		for k, v := range fm {

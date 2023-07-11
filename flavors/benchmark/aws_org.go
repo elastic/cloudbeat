@@ -95,11 +95,15 @@ func getAwsAccounts(
 
 	accounts := []factory.AwsAccount{
 		{
-			Identity: rootIdentity,
+			Identity: *rootIdentity,
 			Config:   rootCfg,
 		},
 	}
 	for _, identity := range accountIdentities {
+		if identity.Account == rootIdentity.Account {
+			continue
+		}
+
 		memberCfg := assumeRole(
 			stsClient,
 			rootCfg,
@@ -107,7 +111,7 @@ func getAwsAccounts(
 		)
 
 		accounts = append(accounts, factory.AwsAccount{
-			Identity: &identity,
+			Identity: identity,
 			Config:   memberCfg,
 		})
 	}

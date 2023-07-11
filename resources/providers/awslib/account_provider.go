@@ -60,6 +60,7 @@ func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]Id
 		if o.NextToken == nil {
 			break
 		}
+		input.NextToken = o.NextToken
 	}
 	return accounts, nil
 }

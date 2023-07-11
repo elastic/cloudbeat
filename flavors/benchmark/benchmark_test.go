@@ -535,6 +535,14 @@ func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
 				Alias:   "some-name",
 			},
 		}, nil)
+	} else {
+		on.Return(nil, err)
 	}
+	return &provider
+}
+
+func mockAccountProviderWithIdentities(identities []awslib.Identity) *awslib.MockAccountProviderAPI {
+	provider := awslib.MockAccountProviderAPI{}
+	provider.EXPECT().ListAccounts(mock.Anything, mock.Anything).Return(identities, nil)
 	return &provider
 }

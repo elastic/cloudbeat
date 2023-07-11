@@ -44,7 +44,7 @@ func TestNewCisAwsOrganizationFactory_Leak(t *testing.T) {
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
 		[]AwsAccount{{
-			Identity: &awslib.Identity{Account: "account"},
+			Identity: awslib.Identity{Account: "account"},
 		}},
 	)
 	assert.NotNil(t, result)
