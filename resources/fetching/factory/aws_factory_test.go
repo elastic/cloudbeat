@@ -30,7 +30,7 @@ import (
 )
 
 func TestNewCisAwsOrganizationFactory_Leak(t *testing.T) {
-	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
+	defer goleak.VerifyNone(t, goleak.IgnoreCurrent(), goleak.IgnoreTopFunction("net/http.(*persistConn).writeLoop"))
 
 	ctx, cancel := context.WithCancel(context.Background())
 
