@@ -42,6 +42,7 @@ import (
 
 func TestNewBenchmark(t *testing.T) {
 	t.Setenv("NODE_NAME", "node-name")
+
 	tests := []struct {
 		name    string
 		cfg     *config.Config
@@ -197,6 +198,8 @@ func TestNewBenchmark(t *testing.T) {
 }
 
 func Test_Initialize(t *testing.T) {
+	t.Setenv("NODE_NAME", "node-name")
+
 	awsCfg := config.Config{
 		CloudConfig: config.CloudConfig{
 			Aws: config.AwsConfig{
@@ -272,6 +275,19 @@ func Test_Initialize(t *testing.T) {
 				AwsCfgProvider:           nil,
 				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
 				AwsAccountProvider:       nil,
+				KubernetesClientProvider: nil,
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
+			},
+			wantErr: "some error",
+		},
+		{
+			name:      "account provider error",
+			benchmark: &AWSOrg{},
+			dependencies: Dependencies{
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsAccountProvider:       mockAccountProvider(errors.New("some error")),
 				KubernetesClientProvider: nil,
 				AwsMetadataProvider:      nil,
 				EksClusterNameProvider:   nil,
@@ -422,8 +438,9 @@ func Test_Initialize(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(fmt.Sprintf("%T: %s", tt.benchmark, tt.name), func(t *testing.T) {
-			t.Setenv("NODE_NAME", "node-name")
+			t.Parallel()
 
 			reg, dp, err := tt.benchmark.Initialize(
 				context.Background(),
