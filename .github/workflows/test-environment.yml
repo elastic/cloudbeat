@@ -1,4 +1,4 @@
-name: Sanity tests
+name: Create environment
 
 on:
   # Ability to execute on demand
