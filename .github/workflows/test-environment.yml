@@ -1,4 +1,4 @@
-name: Create environment
+name: Create Environment
 
 on:
   # Ability to execute on demand

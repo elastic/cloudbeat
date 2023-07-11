@@ -10,7 +10,7 @@ To run the workflow, perform the following steps:
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/2686668f-7be6-4b55-a37b-e37426c1a0e1)
 
-1. Select the `Sanity Tests` workflow. If the workflow is not visible, click on `Show more workflows...` link
+1. Select the `Create Environment` workflow. If the workflow is not visible, click on `Show more workflows...` link
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/f2e8ce8f-11f5-483d-b067-b24db3f58114)
 
@@ -37,6 +37,8 @@ To run the workflow, perform the following steps:
 
 - `cleanup-env` (optional): Boolean value to indicate if resources should be cleaned up after provision. Default: `false`.
 
+- `run-sanity-tests` (optional): Boolean value to run the sanity tests after the environment is already up and running. Default: `false`.
+
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/bac5004d-7cbc-4a34-8127-3acd11acc90e)
 
 6. Click on the `Run workflow`
@@ -46,7 +48,7 @@ To run the workflow, perform the following steps:
 
 ### To track the execution of the Sanity flow, follow these steps:
 
-1. Click on the `Sanity tests` to access its details.
+1. Click on the `Create Environment` to access its details.
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/abe8182d-4229-41bd-8604-ed5202d23574)
 
