@@ -14,7 +14,7 @@ from product.tests.parameters import register_params, Parameters
 
 @pytest.mark.process_etcd_rules
 def test_process_etcd(
-    elastic_client,
+    kspm_client,
     config_node_pre_test,
     rule_tag,
     dictionary,
@@ -57,7 +57,7 @@ def test_process_etcd(
         return command_contains_arguments(eval_resource.command, dictionary)
 
     evaluation = get_ES_evaluation(
-        elastic_client=elastic_client,
+        elastic_client=kspm_client,
         timeout=cloudbeat_agent.findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),

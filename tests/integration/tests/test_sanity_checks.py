@@ -10,6 +10,7 @@ import pytest
 from commonlib.utils import get_findings
 
 CONFIG_TIMEOUT = 120
+CNVM_CONFIG_TIMEOUT = 3600
 
 tests_data = {
     "cis_aws": [
@@ -22,17 +23,18 @@ tests_data = {
     ],  # Exclude "cloud-storage" due to lack of fetcher control and potential delays.
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": ["process", "k8s_object"],  # Optimize search findings by excluding 'file'.
+    "cnvm": ["vulnerability"],
 }
 
 
 @pytest.mark.sanity
 @pytest.mark.parametrize("match_type", tests_data["cis_k8s"])
-def test_kspm_unmanaged_findings(elastic_client, match_type):
+def test_kspm_unmanaged_findings(kspm_client, match_type):
     """
     Test case to check for unmanaged findings in KSPM.
 
     Args:
-        elastic_client: The elastic client object.
+        kspm_client: The kspm client object.
         match_type (str): The resource type to match.
 
     Returns:
@@ -42,20 +44,20 @@ def test_kspm_unmanaged_findings(elastic_client, match_type):
         AssertionError: If the resource type is missing.
     """
     query_list = [{"term": {"rule.benchmark.id": "cis_k8s"}}, {"term": {"resource.type": match_type}}]
-    query, sort = elastic_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
+    query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
 
-    result = get_findings(elastic_client, CONFIG_TIMEOUT, query, sort, match_type)
+    result = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(result) > 0, f"The resource type '{match_type}' is missing"
 
 
 @pytest.mark.sanity
 @pytest.mark.parametrize("match_type", tests_data["cis_eks"])
-def test_kspm_e_k_s_findings(elastic_client, match_type):
+def test_kspm_e_k_s_findings(kspm_client, match_type):
     """
     Test case to check for EKS findings in KSPM.
 
     Args:
-        elastic_client: The elastic client object.
+        kspm_client: The elastic client object.
         match_type (str): The resource type to match.
 
     Returns:
@@ -65,20 +67,20 @@ def test_kspm_e_k_s_findings(elastic_client, match_type):
         AssertionError: If the resource type is missing.
     """
     query_list = [{"term": {"rule.benchmark.id": "cis_eks"}}, {"term": {"resource.type": match_type}}]
-    query, sort = elastic_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
+    query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
 
-    results = get_findings(elastic_client, CONFIG_TIMEOUT, query, sort, match_type)
+    results = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
 
 
 @pytest.mark.sanity
 @pytest.mark.parametrize("match_type", tests_data["cis_aws"])
-def test_cspm_findings(elastic_client, match_type):
+def test_cspm_findings(cspm_client, match_type):
     """
     Test case to check for AWS findings in CSPM.
 
     Args:
-        elastic_client: The elastic client object.
+        cspm_client: The elastic client object.
         match_type (str): The resource type to match.
 
     Returns:
@@ -88,7 +90,29 @@ def test_cspm_findings(elastic_client, match_type):
         AssertionError: If the resource type is missing.
     """
     query_list = [{"term": {"rule.benchmark.id": "cis_aws"}}, {"term": {"resource.type": match_type}}]
-    query, sort = elastic_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
+    query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
-    results = get_findings(elastic_client, CONFIG_TIMEOUT, query, sort, match_type)
+    results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
+    assert len(results) > 0, f"The resource type '{match_type}' is missing"
+
+
+@pytest.mark.sanity
+@pytest.mark.parametrize("match_type", tests_data["cnvm"])
+def test_cnvm_findings(cnvm_client, match_type):
+    """
+    Test case to check for vulnerabilities found by CNVM.
+
+    Args:
+        cnvm_client: The elastic client object.
+        match_type (str): The resource type to match.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the resource type is missing.
+    """
+    query_list = []
+    query, sort = cnvm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
+    results = get_findings(cnvm_client, CNVM_CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
