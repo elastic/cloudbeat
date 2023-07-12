@@ -26,6 +26,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/elastic/cloudbeat/deploy/util"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
@@ -50,7 +52,12 @@ var templatePaths = map[string]map[string]string{
 }
 
 func main() {
-	cfg, err := parseConfig()
+	cfg, err := util.ParseConfig[config]()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = validateConfig(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
