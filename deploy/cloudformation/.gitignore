@@ -1,4 +1,3 @@
-elastic-agent-ec2-dev-cspm.yml
-elastic-agent-ec2-dev-cnvm.yml
+elastic-agent-ec2-dev-*.yml
 config.env
 config.json
