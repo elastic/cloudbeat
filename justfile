@@ -123,6 +123,9 @@ logs-cloudbeat:
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
+deploy-deployment-manager:
+  cd deploy/deployment-manager && go run .
+
 create-cnvm-stack-tags region stack_name tags=(AWS_DEFAULT_TAGS):
   ./scripts/add_cnvm_tags.sh {{region}} {{stack_name}} '{{tags}}'
 
