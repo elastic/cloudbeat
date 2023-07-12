@@ -50,15 +50,15 @@ def test_agent_pods_running(fixture_data):
 @pytest.mark.order(3)
 @pytest.mark.dependency(depends=["test_agent_pod_exist"])
 @pytest.mark.parametrize("match_type", testdata)
-def test_elastic_index_exists(elastic_client, match_type):
+def test_elastic_index_exists(kspm_client, match_type):
     """
     This test verifies that findings of all types are sending to elasticsearch
-    :param elastic_client: Elastic API client
+    :param kspm_client: Elastic API client
     :param match_type: Findings type for matching
     :return:
     """
-    query, sort = elastic_client.build_es_query(term={"resource.type": match_type})
-    result = get_findings(elastic_client, CONFIG_TIMEOUT, query, sort, match_type)
+    query, sort = kspm_client.build_es_query(term={"resource.type": match_type})
+    result = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
 
     assert len(result) > 0, f"The findings of type {match_type} not found"
 

@@ -14,7 +14,7 @@ from product.tests.parameters import register_params, Parameters
 
 @pytest.mark.eks_k8s_objects_rules
 def test_eks_kube_objects(
-    elastic_client,
+    kspm_client,
     cloudbeat_agent,
     rule_tag,
     test_resource_id,
@@ -41,7 +41,7 @@ def test_eks_kube_objects(
             return False
 
     evaluation = get_ES_evaluation(
-        elastic_client=elastic_client,
+        elastic_client=kspm_client,
         timeout=cloudbeat_agent.eks_findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow() - timedelta(hours=1),

@@ -76,3 +76,9 @@ repos:
         language: system
         files: (^_meta\/.*|^cloudbeat.*yml)$
         pass_filenames: false
+      - id: mage-license-headers
+        name: mage AddLicenseHeaders
+        entry: bash -c 'mage AddLicenseHeaders'
+        language: system
+        files: .*.go
+        pass_filenames: false
