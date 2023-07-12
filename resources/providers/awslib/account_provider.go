@@ -34,7 +34,10 @@ type AccountProviderAPI interface {
 type AccountProvider struct{}
 
 func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]Identity, error) {
-	client := organizations.NewFromConfig(cfg)
+	return listAccounts(ctx, organizations.NewFromConfig(cfg))
+}
+
+func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClient) ([]Identity, error) {
 	input := organizations.ListAccountsInput{}
 	var accounts []Identity
 	for {
