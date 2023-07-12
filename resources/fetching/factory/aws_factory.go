@@ -67,6 +67,19 @@ func (w *wrapResource) GetData() any              { return w.wrapped.GetData() }
 func (w *wrapResource) GetElasticCommonData() any { return w.wrapped.GetElasticCommonData() }
 
 func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount) FetchersMap {
+	return newCisAwsOrganizationFactory(ctx, log, rootCh, accounts, NewCisAwsFactory)
+}
+
+// awsFactory is the same function type as NewCisAwsFactory and it's used to mock the function in tests
+type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *awslib.Identity) FetchersMap
+
+func newCisAwsOrganizationFactory(
+	ctx context.Context,
+	log *logp.Logger,
+	rootCh chan fetching.ResourceInfo,
+	accounts []AwsAccount,
+	factory awsFactory,
+) FetchersMap {
 	m := make(FetchersMap)
 	for _, account := range accounts {
 		ch := make(chan fetching.ResourceInfo)
@@ -75,7 +88,11 @@ func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh 
 				select {
 				case <-ctx.Done():
 					return
-				case resourceInfo := <-ch:
+				case resourceInfo, ok := <-ch:
+					if !ok {
+						return
+					}
+
 					select {
 					case <-ctx.Done():
 						return
@@ -91,7 +108,7 @@ func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh 
 			}
 		}(account.Identity)
 
-		fm := NewCisAwsFactory(
+		fm := factory(
 			log.Named("aws").WithOptions(zap.Fields(zap.String("cloud.account.id", account.Identity.Account))),
 			account.Config,
 			ch,

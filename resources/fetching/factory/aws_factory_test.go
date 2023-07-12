@@ -19,8 +19,12 @@ package factory
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/goleak"
 
@@ -30,23 +34,68 @@ import (
 )
 
 func TestNewCisAwsOrganizationFactory_Leak(t *testing.T) {
-	defer goleak.VerifyNone(
-		t,
-		goleak.IgnoreCurrent(),
-		goleak.IgnoreTopFunction("net/http.(*persistConn).writeLoop"),
-		goleak.IgnoreTopFunction("internal/poll.runtime_pollWait"),
+	t.Run("drain", func(t *testing.T) {
+		subtest(t, true)
+	})
+	t.Run("no drain", func(t *testing.T) {
+		subtest(t, false)
+	})
+}
+
+func subtest(t *testing.T, drain bool) {
+	const (
+		nAccounts           = 5
+		nFetchers           = 33
+		resourcesPerAccount = 111
 	)
+
+	var accounts []AwsAccount
+	for i := 0; i < nAccounts; i++ {
+		accounts = append(accounts, AwsAccount{
+			Identity: awslib.Identity{Account: fmt.Sprintf("account-%d", i)},
+		})
+	}
+
+	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	result := NewCisAwsOrganizationFactory(
+	rootCh := make(chan fetching.ResourceInfo)
+	result := newCisAwsOrganizationFactory(
 		ctx,
 		testhelper.NewLogger(t),
-		make(chan fetching.ResourceInfo),
-		[]AwsAccount{{
-			Identity: awslib.Identity{Account: "account"},
-		}},
+		rootCh,
+		accounts,
+		func(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *awslib.Identity) FetchersMap {
+			if drain {
+				// create some resources if we are testing for that
+				go func() {
+					for i := 0; i < resourcesPerAccount; i++ {
+						ch <- fetching.ResourceInfo{
+							Resource:      nil,
+							CycleMetadata: fetching.CycleMetadata{Sequence: int64(i)},
+						}
+					}
+				}()
+			}
+
+			fm := FetchersMap{}
+			for i := 0; i < nFetchers; i++ {
+				fm[fmt.Sprintf("fetcher-%d", i)] = RegisteredFetcher{}
+			}
+			return fm
+		},
 	)
-	assert.NotNil(t, result)
+	assert.Lenf(t, result, nFetchers*nAccounts, "Correct amount of fetchers")
+
+	if drain {
+		assert.Lenf(
+			t,
+			testhelper.CollectResourcesWithTimeout(rootCh, 10*time.Millisecond),
+			nAccounts*resourcesPerAccount,
+			"Correct amount of resources fetched",
+		)
+	}
+
 	cancel()
 }
