@@ -17,48 +17,12 @@
 
 package ec2
 
-import (
-	"fmt"
-	"strings"
-
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
-
-	"github.com/elastic/cloudbeat/resources/fetching"
-)
-
-type Ec2Instance struct {
-	types.Instance
+type EC2Volume struct {
+	VolumeId   string
+	InstanceId string
 	Region     string
 	awsAccount string
-	RootVolume *EC2Volume
-}
-
-func (i Ec2Instance) GetResourceArn() string {
-	if i.Instance.InstanceId == nil {
-		return ""
-	}
-	// TODO: check if this is the correct ARN
-	return fmt.Sprintf("arn:aws:ec2:%s:%s:ec2/%s", i.Region, i.awsAccount, *i.Instance.InstanceId)
-}
-
-func (i Ec2Instance) GetResourceName() string {
-	for _, tag := range i.Instance.Tags {
-		if *tag.Key == "Name" {
-			return *tag.Value
-		}
-	}
-
-	return ""
-}
-
-func (i Ec2Instance) GetResourceId() string {
-	if i.Instance.InstanceId == nil {
-		return ""
-	}
-
-	return strings.Split(*i.Instance.InstanceId, "-")[1]
-}
-
-func (i Ec2Instance) GetResourceType() string {
-	return fetching.EC2Type
+	Size       int
+	Encrypted  bool
+	Device     string
 }
