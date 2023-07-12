@@ -26,6 +26,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"go.uber.org/goleak"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -60,33 +61,30 @@ func subtest(t *testing.T, drain bool) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	rootCh := make(chan fetching.ResourceInfo)
-	result := newCisAwsOrganizationFactory(
-		ctx,
-		testhelper.NewLogger(t),
-		rootCh,
-		accounts,
-		func(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *awslib.Identity) FetchersMap {
-			if drain {
-				// create some resources if we are testing for that
-				go func() {
-					for i := 0; i < resourcesPerAccount; i++ {
-						ch <- fetching.ResourceInfo{
-							Resource:      nil,
-							CycleMetadata: fetching.CycleMetadata{Sequence: int64(i)},
-						}
+	factory := mockAwsFactory{}
+	factory.EXPECT().Execute(mock.Anything, mock.Anything, mock.Anything, mock.Anything).RunAndReturn(func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *awslib.Identity) FetchersMap {
+		if drain {
+			// create some resources if we are testing for that
+			go func() {
+				for i := 0; i < resourcesPerAccount; i++ {
+					ch <- fetching.ResourceInfo{
+						Resource:      nil,
+						CycleMetadata: fetching.CycleMetadata{Sequence: int64(i)},
 					}
-				}()
-			}
+				}
+			}()
+		}
 
-			fm := FetchersMap{}
-			for i := 0; i < nFetchers; i++ {
-				fm[fmt.Sprintf("fetcher-%d", i)] = RegisteredFetcher{}
-			}
-			return fm
-		},
-	)
-	assert.Lenf(t, result, nFetchers*nAccounts, "Correct amount of fetchers")
+		fm := FetchersMap{}
+		for i := 0; i < nFetchers; i++ {
+			fm[fmt.Sprintf("fetcher-%d", i)] = RegisteredFetcher{}
+		}
+		return fm
+	}).Times(nAccounts)
+
+	rootCh := make(chan fetching.ResourceInfo)
+	fetcherMap := newCisAwsOrganizationFactory(ctx, testhelper.NewLogger(t), rootCh, accounts, factory.Execute)
+	assert.Lenf(t, fetcherMap, nFetchers*nAccounts, "Correct amount of fetchers")
 
 	if drain {
 		assert.Lenf(
