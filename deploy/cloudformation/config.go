@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slices"
 )
 
 type config struct {
@@ -39,9 +40,11 @@ type config struct {
 }
 
 const (
-	DeploymentTypeCSPM = "cspm"
-	DeploymentTypeCNVM = "cnvm"
+	DeploymentTypeCSPM = "CSPM"
+	DeploymentTypeCNVM = "CNVM"
 )
+
+var ValidDeploymentTypes = []string{DeploymentTypeCSPM, DeploymentTypeCNVM}
 
 type devConfig struct {
 	AllowSSH bool   `mapstructure:"ALLOW_SSH"`
@@ -117,6 +120,11 @@ func validateConfig(cfg *config) error {
 
 	if cfg.Dev != nil {
 		return validateDevConfig(cfg.Dev)
+	}
+
+	if cfg.DeploymentType != "" &&
+		!slices.Contains(ValidDeploymentTypes, cfg.DeploymentType) {
+		return fmt.Errorf("DeploymentType %s invalid", cfg.DeploymentType)
 	}
 
 	return nil

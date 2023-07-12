@@ -26,13 +26,13 @@ jobs:
         run: |
           VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           DATE=$(date +"%Y-%m-%d-%H-%M-%S")
-          CNVMFILENAME="cloudformation-cnvm-$VERSION-$DATE.yml"
-          echo "Uploading $CNVMFILENAME to S3"
-          aws s3 cp deploy/cloudformation/elastic-agent-ec2-cnvm.yml s3://elastic-cnvm-cft/$CNVMFILENAME
+          CNVM_FILENAME="cloudformation-cnvm-$VERSION-$DATE.yml"
+          echo "Uploading $CNVM_FILENAME to S3"
+          aws s3 cp deploy/cloudformation/elastic-agent-ec2-cnvm.yml s3://elastic-cspm-cft/$CNVM_FILENAME
 
-          CSPMFILENAME="cloudformation-cspm-$VERSION-$DATE.yml"
-          echo "Uploading $CSPMFILENAME to S3"
-          aws s3 cp deploy/cloudformation/elastic-agent-ec2-cspm.yml s3://elastic-cspm-cft/$CSPMFILENAME
+          CSPM_FILENAME="cloudformation-cspm-$VERSION-$DATE.yml"
+          echo "Uploading $CSPM_FILENAME to S3"
+          aws s3 cp deploy/cloudformation/elastic-agent-ec2-cspm.yml s3://elastic-cspm-cft/$CSPM_FILENAME
 
           FILENAME="cloudformation-organization-$VERSION-$DATE.yml"
           echo "Uploading $FILENAME to S3"

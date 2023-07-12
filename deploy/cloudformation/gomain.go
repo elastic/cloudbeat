@@ -34,16 +34,16 @@ import (
 )
 
 const (
-	DEV  = "DEV"
-	PROD = "PROD"
+	DEV  = "DEV_TEMPLATE"
+	PROD = "PROD_TEMPLATE"
 )
 
 var templatePaths = map[string]map[string]string{
-	DeploymentTypeCSPM: map[string]string{
+	DeploymentTypeCSPM: {
 		DEV:  "elastic-agent-ec2-dev-cspm.yml",
 		PROD: "elastic-agent-ec2-cspm.yml",
 	},
-	DeploymentTypeCNVM: map[string]string{
+	DeploymentTypeCNVM: {
 		DEV:  "elastic-agent-ec2-dev-cnvm.yml",
 		PROD: "elastic-agent-ec2-cnvm.yml",
 	},
@@ -72,20 +72,14 @@ func createFromConfig(cfg *config) error {
 		params["ElasticArtifactServer"] = *cfg.ElasticArtifactServer
 	}
 
-	templatePath, err := getTemplatePath(cfg.DeploymentType, PROD)
-	if err != nil {
-		return fmt.Errorf("could not get template path: %v", err)
-	}
+	templatePath := getTemplatePath(cfg.DeploymentType, PROD)
 
 	if cfg.Dev != nil && cfg.Dev.AllowSSH {
 		params["KeyName"] = cfg.Dev.KeyName
 
-		devTemplatePath, err := getTemplatePath(cfg.DeploymentType, DEV)
-		if err != nil {
-			return fmt.Errorf("could not get dev template path: %v", err)
-		}
+		devTemplatePath := getTemplatePath(cfg.DeploymentType, DEV)
 
-		err = generateDevTemplate(templatePath, devTemplatePath)
+		err := generateDevTemplate(templatePath, devTemplatePath)
 		if err != nil {
 			return fmt.Errorf("could not generate dev template: %v", err)
 		}
@@ -93,7 +87,7 @@ func createFromConfig(cfg *config) error {
 		templatePath = devTemplatePath
 	}
 
-	err = createStack(cfg.StackName, templatePath, params)
+	err := createStack(cfg.StackName, templatePath, params)
 	if err != nil {
 		return fmt.Errorf("failed to create CloudFormation stack: %v", err)
 	}
@@ -189,12 +183,10 @@ func createStack(stackName string, templatePath string, params map[string]string
 	return nil
 }
 
-func getTemplatePath(deploymentType string, env string) (string, error) {
+func getTemplatePath(deploymentType string, env string) string {
 	if deploymentType == "" {
 		// Default is CNVM
 		deploymentType = DeploymentTypeCNVM
-	} else if deploymentType != DeploymentTypeCNVM && deploymentType != DeploymentTypeCSPM {
-		return "", fmt.Errorf("deploymentType %s must be either %s or %s", deploymentType, DeploymentTypeCSPM, DeploymentTypeCNVM)
 	}
-	return templatePaths[deploymentType][env], nil
+	return templatePaths[deploymentType][env]
 }
