@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -53,7 +54,10 @@ func subtest(t *testing.T, drain bool) {
 	var accounts []AwsAccount
 	for i := 0; i < nAccounts; i++ {
 		accounts = append(accounts, AwsAccount{
-			Identity: awslib.Identity{Account: fmt.Sprintf("account-%d", i)},
+			Identity: awslib.Identity{
+				Account: fmt.Sprintf("account-%d", i),
+				Alias:   fmt.Sprintf("alias-%d", i),
+			},
 		})
 	}
 
@@ -68,7 +72,7 @@ func subtest(t *testing.T, drain bool) {
 			go func() {
 				for i := 0; i < resourcesPerAccount; i++ {
 					ch <- fetching.ResourceInfo{
-						Resource:      nil,
+						Resource:      mockResource(),
 						CycleMetadata: fetching.CycleMetadata{Sequence: int64(i)},
 					}
 				}
@@ -87,13 +91,42 @@ func subtest(t *testing.T, drain bool) {
 	assert.Lenf(t, fetcherMap, nFetchers*nAccounts, "Correct amount of fetchers")
 
 	if drain {
+		resources := testhelper.CollectResourcesWithTimeout(rootCh, 10*time.Millisecond)
 		assert.Lenf(
 			t,
-			testhelper.CollectResourcesWithTimeout(rootCh, 10*time.Millisecond),
+			resources,
 			nAccounts*resourcesPerAccount,
 			"Correct amount of resources fetched",
 		)
+
+		nameCounts := make(map[string]int)
+		for _, resource := range resources {
+			assert.NotNil(t, resource.GetData())
+			assert.NotNil(t, resource.GetElasticCommonData())
+			mdata, err := resource.GetMetadata()
+			require.NotNil(t, mdata)
+			require.NoError(t, err)
+			assert.Equal(t, "some-region", mdata.Region)
+			nameCounts[mdata.AwsAccountId]++
+			nameCounts[mdata.AwsAccountAlias]++
+		}
+		assert.Len(t, nameCounts, 2*nAccounts)
+		for _, v := range nameCounts {
+			assert.Equal(t, resourcesPerAccount, v)
+		}
 	}
 
 	cancel()
+}
+
+func mockResource() *fetching.MockResource {
+	m := fetching.MockResource{}
+	m.EXPECT().GetData().Return(struct{}{}).Once()
+	m.EXPECT().GetMetadata().Return(fetching.ResourceMetadata{
+		Region:          "some-region",
+		AwsAccountId:    "some-id",
+		AwsAccountAlias: "some-alias",
+	}, nil).Once()
+	m.EXPECT().GetElasticCommonData().Return(struct{}{}).Once()
+	return &m
 }
