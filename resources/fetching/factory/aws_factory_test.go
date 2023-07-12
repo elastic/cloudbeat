@@ -107,6 +107,8 @@ func subtest(t *testing.T, drain bool) {
 			require.NotNil(t, mdata)
 			require.NoError(t, err)
 			assert.Equal(t, "some-region", mdata.Region)
+			assert.NotEqual(t, "some-id", mdata.AwsAccountId)
+			assert.NotEqual(t, "some-alias", mdata.AwsAccountAlias)
 			nameCounts[mdata.AwsAccountId]++
 			nameCounts[mdata.AwsAccountAlias]++
 		}
