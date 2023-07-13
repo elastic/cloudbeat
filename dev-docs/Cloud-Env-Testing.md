@@ -83,3 +83,23 @@ Follow these steps to log in to the created environment:
 ## Cleanup Procedure
 
 If you wish to remove the provisioned infrastructure, set the `cleanup-env` input to `true` when initiating the workflow. The cleanup procedure will be executed at the end.
+
+In addition to the automatic cleanup, you can manually delete environments using the provided script [`delete_env.sh`](deploy/test-environments/delete_env.sh). This script deletes all environments that match a given prefix. 
+
+Before running the script, ensure that:
+
+- The AWS CLI is installed and configured.
+- The Terraform CLI is installed and configured.
+- The `TF_VAR_ec_api_key` environment variable is set.
+
+The script usage is as follows:
+
+```bash
+./deploy/test-environments/delete_env.sh <prefix>
+```
+
+The above command will delete all environments that start with the prefix `<prefix>`.
+
+**Note**: The script will ask for confirmation before deleting each environment.
+
+The script fetches all environments starting with the provided prefix from the defined S3 bucket. After seeking your confirmation, it proceeds to destroy each Terraform environment and remove the related data from the S3 bucket. If the deletion is successful, the script lists the environment in the "Successfully deleted" section. In case of any issues, the environment's name is listed under "Failed to delete". Environments that you chose to skip will be listed under "Skipped deletion".
