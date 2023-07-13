@@ -28,7 +28,7 @@
 
 
 ```
-gcloud deployment-manager deployments create --automatic-rollback-on-error uri-test --template compute-engine.py --properties zone:europe-west2-a,elasticAgentVersion:8.8.0,fleetUrl:https://0bcfe3aec94240f0ab3731e4f007daf0.fleet.us-central1.gcp.foundit.no:443,enrollmentToken:OVRpbFNZa0JOekpSZTBsRDhXYWw6MjdsYzdRRXVRNmFxUzFhUkl5X1Mtdw==
+gcloud deployment-manager deployments create --automatic-rollback-on-error uri-test --template compute-engine.py --properties zone:europe-west2-a,elasticAgentVersion:8.8.0,fleetUrl:<URL>,enrollmentToken:<TOKEN>
 ```
 
 
