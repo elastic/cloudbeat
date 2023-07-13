@@ -1,37 +1,33 @@
-# Sanity Tests
+# Cloud Enviorment Testing
 
-This GitHub workflow deploys the environment, saves state and data, performs sanity checks, and provides an option to destroy the infrastructure.
+[Create Environment](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml) GitHub action deploys a complete cloud environment, preinstalled with all of our integrations, and also supports running sainty testing and auto-deletion.
 
 ## Running the Workflow
 
 To run the workflow, perform the following steps:
 
-1. Click on the `Actions` tab in [Cloudbeat](https://github.com/elastic/cloudbeat) repository.
+1. Navigate to [`Actions > Create Environment`](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml)
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/2686668f-7be6-4b55-a37b-e37426c1a0e1)
 
-1. Select the `Create Environment` workflow. If the workflow is not visible, click on `Show more workflows...` link
-
-![image](https://github.com/elastic/cloudbeat/assets/99176494/f2e8ce8f-11f5-483d-b067-b24db3f58114)
-
-3. Click on the `Run workflow` button.
+2. Click on the `Run workflow` button.
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/115fdd53-cff7-406a-bc3d-d65d5199389f)
 
-4. Fill in the required inputs: `deployment_name`, `ec-api-key`, `elk-stack-version`, `ess-region`.
+3. Fill in the required inputs:
 
-- `deployment_name` (required): Name your environment (Only a-zA-Z0-9 and `-`). For example: `john-8-7-2-June01`.
+- **`deployment_name`**: Name your environment (Only a-zA-Z0-9 and `-`). For example: `john-8-7-2-June01`.
 
-- `ec-api-key` (required): Elastic Cloud API KEY. Follow the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for step-by-step instructions on generating the token.
+- **`ec-api-key`**: Elastic Cloud API KEY. Follow the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for step-by-step instructions on generating the token.
 
-- `elk-stack-version` (required): The version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC) version. The default value is `8.7.2-SNAPSHOT`. You can find the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
+- **`elk-stack-version`**: The version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC) version. The default value is `8.7.2-SNAPSHOT`. You can find the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
 
-- `ess-region` (required): Elastic Cloud deployment region. By default, use the value `gcp-us-west2`, which includes snapshot versions and build candidate (BC) versions. Only specify a different region if there are specific requirements.
+- **`ess-region`**: Elastic Cloud deployment region. By default, use the value `gcp-us-west2`, which includes snapshot versions and build candidate (BC) versions. Only specify a different region if there are specific requirements.
 
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/06d8144d-13cc-4e13-92fc-19f52ce8206b)
 
-5. Optionally, adjust the other input values as needed.
+4. Optionally, adjust the other input values as needed.
 
 - `docker-image-override` (optional): To override the default Docker image for build candidate (BC) versions, provide the full image path. For snapshot versions, leave this field empty. The image path should follow this format: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`, where `8.8.1-9ac7eb02` should be replaced with the latest build candidate version.
 
@@ -41,12 +37,12 @@ To run the workflow, perform the following steps:
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/bac5004d-7cbc-4a34-8127-3acd11acc90e)
 
-6. Click on the `Run workflow`
+5. Click on the `Run workflow`
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/5e5131ba-264e-4444-8879-aa612d5de778)
 
 
-### To track the execution of the Sanity flow, follow these steps:
+### To track the execution of the workflow progress, follow these steps:
 
 1. Click on the `Create Environment` to access its details.
 
@@ -57,7 +53,7 @@ To run the workflow, perform the following steps:
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/230743cf-02ff-40cb-9069-d747b460824c)
 
-3. Once the flow execution is complete, click on the `Summary` button to get the summary report.
+3. Once the flow execution is complete, click the `Summary` button to get the summary report.
 
 ![image](https://github.com/elastic/cloudbeat/assets/99176494/7751d919-1605-4d07-9cfd-c98336051e3d)
 
