@@ -1,88 +1,85 @@
-# Cloud Enviorment Testing
+# Cloud Environment Testing
 
-[Create Environment](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml) GitHub action deploys a complete cloud environment, preinstalled with all of our integrations, and also supports running sainty testing and auto-deletion.
+The [Create Environment](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml) GitHub action deploys a full-featured cloud environment, pre-configured with all our integrations. It also includes features for running sanity testing and automated deletion.
 
-## Running the Workflow
+## How to Run the Workflow
 
-To run the workflow, perform the following steps:
+Follow these steps to run the workflow:
 
-1. Navigate to [`Actions > Create Environment`](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml)
+1. Go to [`Actions > Create Environment`](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml).
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/2686668f-7be6-4b55-a37b-e37426c1a0e1)
+![Navigate to Actions](https://github.com/elastic/cloudbeat/assets/99176494/2686668f-7be6-4b55-a37b-e37426c1a0e1)
 
-2. Click on the `Run workflow` button.
+2. Click the `Run workflow` button.
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/115fdd53-cff7-406a-bc3d-d65d5199389f)
+![Run Workflow](https://github.com/elastic/cloudbeat/assets/99176494/115fdd53-cff7-406a-bc3d-d65d5199389f)
 
-3. Fill in the required inputs:
+3. Complete the required input fields:
 
-- **`deployment_name`**: Name your environment (Only a-zA-Z0-9 and `-`). For example: `john-8-7-2-June01`.
+- **`deployment_name`**: Name your environment (Allowed characters: a-zA-Z0-9 and `-`). For instance: `john-8-7-2-June01`.
 
-- **`ec-api-key`**: Elastic Cloud API KEY. Follow the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for step-by-step instructions on generating the token.
+- **`ec-api-key`**: Elastic Cloud API Key. Refer to the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation to generate your token.
 
-- **`elk-stack-version`**: The version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC) version. The default value is `8.7.2-SNAPSHOT`. You can find the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
+- **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC) version. The default value is `8.8.0`. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
 
-- **`ess-region`**: Elastic Cloud deployment region. By default, use the value `gcp-us-west2`, which includes snapshot versions and build candidate (BC) versions. Only specify a different region if there are specific requirements.
+- **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which supports snapshot and build candidate (BC) versions. Specify a different region only if necessary.
 
+![Enter Inputs](https://github.com/elastic/cloudbeat/assets/99176494/06d8144d-13cc-4e13-92fc-19f52ce8206b)
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/06d8144d-13cc-4e13-92fc-19f52ce8206b)
+4. Optionally, modify other input values if required:
 
-4. Optionally, adjust the other input values as needed.
+- `docker-image-override` (optional): Use this to replace the default Docker image for build candidate (BC) versions. Provide the full image path. Leave this field blank for snapshot versions. Follow this format for the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`.
 
-- `docker-image-override` (optional): To override the default Docker image for build candidate (BC) versions, provide the full image path. For snapshot versions, leave this field empty. The image path should follow this format: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`, where `8.8.1-9ac7eb02` should be replaced with the latest build candidate version.
+- `cleanup-env` (optional): Set to `true` if you want the resources to be cleaned up after provisioning. Default: `false`.
 
-- `cleanup-env` (optional): Boolean value to indicate if resources should be cleaned up after provision. Default: `false`.
+- `run-sanity-tests` (optional): Set to `true` to run sanity tests after the environment is set up. Default: `false`.
 
-- `run-sanity-tests` (optional): Boolean value to run the sanity tests after the environment is already up and running. Default: `false`.
+![Adjust Inputs](https://github.com/elastic/cloudbeat/assets/99176494/bac5004d-7cbc-4a34-8127-3acd11acc90e)
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/bac5004d-7cbc-4a34-8127-3acd11acc90e)
+5. Click the `Run workflow` button to start.
 
-5. Click on the `Run workflow`
+![Run Workflow](https://github.com/elastic/cloudbeat/assets/99176494/5e5131ba-264e-4444-8879-aa612d5de778)
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/5e5131ba-264e-4444-8879-aa612d5de778)
+## Tracking Workflow Execution
 
+Monitor the progress of the workflow execution as follows:
 
-### To track the execution of the workflow progress, follow these steps:
+1. Click `Create Environment` for details.
 
-1. Click on the `Create Environment` to access its details.
+![Create Environment](https://github.com/elastic/cloudbeat/assets/99176494/abe8182d-4229-41bd-8604-ed5202d23574)
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/abe8182d-4229-41bd-8604-ed5202d23574)
+2. Click `Deploy`.
 
+![Deploy](https://github.com/elastic/cloudbeat/assets/99176494/230743cf-02ff-40cb-9069-d747b460824c)
 
-2. Click on `Deploy`
+3. Once the workflow execution finishes, click the `Summary` button to view the summary report.
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/230743cf-02ff-40cb-9069-d747b460824c)
+![Summary Report](https://github.com/elastic/cloudbeat/assets/99176494/7751d919-1605-4d07-9cfd-c98336051e3d)
 
-3. Once the flow execution is complete, click the `Summary` button to get the summary report.
+4. Review the details in the Summary.
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/7751d919-1605-4d07-9cfd-c98336051e3d)
+![Summary Details](https://github.com/elastic/cloudbeat/assets/99176494/1b41fba0-0ee5-4d37-b2f8-cdd6f632eadc)
 
-4. Review Summary details
+## Logging into the Environment
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/1b41fba0-0ee5-4d37-b2f8-cdd6f632eadc)
+Follow these steps to log in to the created environment:
 
+1. Click the `kibana` link.
 
-### Environment Login Instructions
+![Kibana Link](https://github.com/elastic/cloudbeat/assets/99176494/500351cf-6029-4bd5-bc6f-e6e046fbb73d)
 
-To log in to the created environment, please follow these steps:
+2. Select `Login with Elastic Cloud`.
 
-1. Click on the `kibana` link.
-
-![image](https://github.com/elastic/cloudbeat/assets/99176494/500351cf-6029-4bd5-bc6f-e6e046fbb73d)
-
-2. Select the `Login with Elastic Cloud` option.
-
-![image](https://github.com/elastic/cloudbeat/assets/99176494/c3c1521e-e997-43ce-af76-b00aa0fa353a)
+![Login](https://github.com/elastic/cloudbeat/assets/99176494/c3c1521e-e997-43ce-af76-b00aa0fa353a)
 
 3. Choose the `Google` authentication method.
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/f5209ed8-3bd7-420e-a3d1-cffb4c3711c9)
+![Google Authentication](https://github.com/elastic/cloudbeat/assets/99176494/f5209ed8-3bd7-420e-a3d1-cffb4c3711c9)
 
-4. On the Elastic Cloud dashboard, click on `Open` next to the provisioned environment.
+4. In the Elastic Cloud dashboard, click `Open` next to the created environment.
 
-![image](https://github.com/elastic/cloudbeat/assets/99176494/b2bcf5f3-d463-4d2c-8073-8ef9183c9ada)
+![Open Environment](https://github.com/elastic/cloudbeat/assets/99176494/b2bcf5f3-d463-4d2c-8073-8ef9183c9ada)
 
+## Cleanup Procedure
 
-## Cleanup
-
-If you want to destroy the provisioned infrastructure, set the `cleanup-env` input to `true` when running the workflow. The cleanup step will be executed at the end.
+If you wish to remove the provisioned infrastructure, set the `cleanup-env` input to `true` when initiating the workflow. The cleanup procedure will be executed at the end.
