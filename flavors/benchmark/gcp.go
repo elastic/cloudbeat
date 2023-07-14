@@ -19,6 +19,7 @@ package benchmark
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -30,13 +31,20 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 )
 
-type GCP struct{}
+type GCP struct {
+	IdentityProvider identity.ProviderGetter
+}
 
 func (G *GCP) Run(context.Context) error { return nil }
 
-func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+	if err := G.checkDependencies(); err != nil {
+		return nil, nil, err
+	}
+
 	gcpClientConfig, err := auth.GetGcpClientConfig(cfg.CloudConfig.Gcp, log)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
@@ -47,9 +55,9 @@ func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		ClientOpts: gcpClientConfig,
 	}
 
-	gcpIdentity, identityErr := dependencies.GCPIdentity(ctx, cfg.CloudConfig.Gcp)
-	if identityErr != nil {
-		return nil, nil, fmt.Errorf("failed to get GCP identity: %v", identityErr)
+	gcpIdentity, err := G.IdentityProvider.GetIdentity(ctx, cfg.CloudConfig.Gcp, log)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get GCP identity: %v", err)
 	}
 
 	fetchers, err := factory.NewCisGcpFactory(ctx, log, ch, *gcpFactoryConfig)
@@ -64,3 +72,10 @@ func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 }
 
 func (G *GCP) Stop() {}
+
+func (G *GCP) checkDependencies() error {
+	if G.IdentityProvider == nil {
+		return errors.New("gcp identity provider is uninitialized")
+	}
+	return nil
+}

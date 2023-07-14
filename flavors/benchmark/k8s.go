@@ -19,6 +19,7 @@ package benchmark
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
@@ -29,6 +30,7 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
+	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -37,17 +39,17 @@ import (
 )
 
 type K8S struct {
+	ClientProvider k8sprovider.ClientGetterAPI
+
 	leaderElector uniqueness.Manager
 }
 
-func (k *K8S) Initialize(
-	ctx context.Context,
-	log *logp.Logger,
-	cfg *config.Config,
-	ch chan fetching.ResourceInfo,
-	dependencies *Dependencies,
-) (registry.Registry, dataprovider.CommonDataProvider, error) {
-	kubeClient, err := dependencies.KubernetesClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
+func (k *K8S) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+	if err := k.checkDependencies(); err != nil {
+		return nil, nil, err
+	}
+
+	kubeClient, err := k.ClientProvider.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create kubernetes client :%w", err)
 	}
@@ -116,4 +118,11 @@ func getK8sDataProvider(
 		}),
 	}
 	return k8s.New(options...), nil
+}
+
+func (k *K8S) checkDependencies() error {
+	if k.ClientProvider == nil {
+		return errors.New("kubernetes client provider is uninitialized")
+	}
+	return nil
 }
