@@ -65,29 +65,30 @@ func subtest(t *testing.T, drain bool) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	factory := mockAwsFactory{}
-	factory.EXPECT().Execute(mock.Anything, mock.Anything, mock.Anything, mock.Anything).RunAndReturn(func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *awslib.Identity) FetchersMap {
-		if drain {
-			// create some resources if we are testing for that
-			go func() {
-				for i := 0; i < resourcesPerAccount; i++ {
-					ch <- fetching.ResourceInfo{
-						Resource:      mockResource(),
-						CycleMetadata: fetching.CycleMetadata{Sequence: int64(i)},
+	factory := mockFactory(nAccounts,
+		func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *awslib.Identity) FetchersMap {
+			if drain {
+				// create some resources if we are testing for that
+				go func() {
+					for i := 0; i < resourcesPerAccount; i++ {
+						ch <- fetching.ResourceInfo{
+							Resource:      mockResource(),
+							CycleMetadata: fetching.CycleMetadata{Sequence: int64(i)},
+						}
 					}
-				}
-			}()
-		}
+				}()
+			}
 
-		fm := FetchersMap{}
-		for i := 0; i < nFetchers; i++ {
-			fm[fmt.Sprintf("fetcher-%d", i)] = RegisteredFetcher{}
-		}
-		return fm
-	}).Times(nAccounts)
+			fm := FetchersMap{}
+			for i := 0; i < nFetchers; i++ {
+				fm[fmt.Sprintf("fetcher-%d", i)] = RegisteredFetcher{}
+			}
+			return fm
+		},
+	)
 
 	rootCh := make(chan fetching.ResourceInfo)
-	fetcherMap := newCisAwsOrganizationFactory(ctx, testhelper.NewLogger(t), rootCh, accounts, factory.Execute)
+	fetcherMap := newCisAwsOrganizationFactory(ctx, testhelper.NewLogger(t), rootCh, accounts, factory)
 	assert.Lenf(t, fetcherMap, nFetchers*nAccounts, "Correct amount of fetchers")
 
 	if drain {
@@ -121,6 +122,57 @@ func subtest(t *testing.T, drain bool) {
 	cancel()
 }
 
+func TestNewCisAwsOrganizationFactory_LeakContextDone(t *testing.T) {
+	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
+	ctx, cancel := context.WithCancel(context.Background())
+
+	newCisAwsOrganizationFactory(
+		ctx,
+		testhelper.NewLogger(t),
+		make(chan fetching.ResourceInfo),
+		[]AwsAccount{{
+			Identity: awslib.Identity{
+				Account: "1",
+				Alias:   "account",
+			},
+		}},
+		mockFactory(1,
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *awslib.Identity) FetchersMap {
+				ch <- fetching.ResourceInfo{
+					Resource:      mockResource(),
+					CycleMetadata: fetching.CycleMetadata{Sequence: 1},
+				}
+
+				return FetchersMap{"fetcher": RegisteredFetcher{}}
+			},
+		),
+	)
+
+	cancel()
+}
+
+func TestNewCisAwsOrganizationFactory_CloseChannel(t *testing.T) {
+	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
+
+	newCisAwsOrganizationFactory(
+		context.Background(),
+		testhelper.NewLogger(t),
+		make(chan fetching.ResourceInfo),
+		[]AwsAccount{{
+			Identity: awslib.Identity{
+				Account: "1",
+				Alias:   "account",
+			},
+		}},
+		mockFactory(1,
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *awslib.Identity) FetchersMap {
+				defer close(ch)
+				return FetchersMap{"fetcher": RegisteredFetcher{}}
+			},
+		),
+	)
+}
+
 func mockResource() *fetching.MockResource {
 	m := fetching.MockResource{}
 	m.EXPECT().GetData().Return(struct{}{}).Once()
@@ -131,4 +183,10 @@ func mockResource() *fetching.MockResource {
 	}, nil).Once()
 	m.EXPECT().GetElasticCommonData().Return(struct{}{}).Once()
 	return &m
+}
+
+func mockFactory(times int, f awsFactory) awsFactory {
+	factory := mockAwsFactory{}
+	factory.EXPECT().Execute(mock.Anything, mock.Anything, mock.Anything, mock.Anything).RunAndReturn(f).Times(times)
+	return factory.Execute
 }
