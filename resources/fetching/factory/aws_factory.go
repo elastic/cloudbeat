@@ -70,7 +70,7 @@ func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh 
 	return newCisAwsOrganizationFactory(ctx, log, rootCh, accounts, NewCisAwsFactory)
 }
 
-// awsFactory is the same function type as NewCisAwsFactory and it's used to mock the function in tests
+// awsFactory is the same function type as NewCisAwsFactory, and it's used to mock the function in tests
 type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *awslib.Identity) FetchersMap
 
 func newCisAwsOrganizationFactory(
