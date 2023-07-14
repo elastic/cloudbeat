@@ -93,16 +93,18 @@ func newCisAwsOrganizationFactory(
 						return
 					}
 
-					select {
-					case <-ctx.Done():
-						return
-					case rootCh <- fetching.ResourceInfo{
+					wrappedResourceInfo := fetching.ResourceInfo{
 						Resource: &wrapResource{
 							wrapped:  resourceInfo.Resource,
 							identity: identity,
 						},
 						CycleMetadata: resourceInfo.CycleMetadata,
-					}:
+					}
+
+					select {
+					case <-ctx.Done():
+						return
+					case rootCh <- wrappedResourceInfo:
 					}
 				}
 			}
