@@ -336,7 +336,6 @@ func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance
 				InstanceId: *vol.Attachments[0].InstanceId,
 				Device:     *vol.Attachments[0].Device,
 			})
-
 		}
 		return result, nil
 	})
