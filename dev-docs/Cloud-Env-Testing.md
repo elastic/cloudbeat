@@ -34,7 +34,7 @@ Follow these steps to run the workflow:
       supports
       snapshot and build candidate (BC) versions. Specify a different region only if necessary.
 
-![Enter Inputs](https://github.com/elastic/cloudbeat/assets/99176494/06d8144d-13cc-4e13-92fc-19f52ce8206b)
+   ![Enter Inputs](https://github.com/elastic/cloudbeat/assets/99176494/06d8144d-13cc-4e13-92fc-19f52ce8206b)
 
 4. Optionally, modify other input values if required:
 
