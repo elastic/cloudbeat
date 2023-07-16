@@ -12,7 +12,7 @@ from product.tests.parameters import register_params, Parameters
 
 @pytest.mark.file_system_rules
 def test_file_system_configuration(
-    elastic_client,
+    kspm_client,
     config_node_pre_test,
     rule_tag,
     command,
@@ -67,7 +67,7 @@ def test_file_system_configuration(
         return False
 
     evaluation = get_ES_evaluation(
-        elastic_client=elastic_client,
+        elastic_client=kspm_client,
         timeout=cloudbeat_agent.findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),
