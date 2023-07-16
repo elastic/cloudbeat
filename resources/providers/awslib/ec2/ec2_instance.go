@@ -30,7 +30,7 @@ type Ec2Instance struct {
 	types.Instance
 	Region     string
 	awsAccount string
-	RootVolume *EC2Volume
+	RootVolume *Volume
 }
 
 func (i Ec2Instance) GetResourceArn() string {

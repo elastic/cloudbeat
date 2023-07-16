@@ -296,9 +296,9 @@ func (p *Provider) GetRouteTableForSubnet(ctx context.Context, region string, su
 	return routeTables.RouteTables[0], nil
 }
 
-func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance) ([]*EC2Volume, error) {
+func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance) ([]*Volume, error) {
 	instanceFilter := lo.Map(instances, func(ins *Ec2Instance, _ int) string { return *ins.InstanceId })
-	insances, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]*EC2Volume, error) {
+	insances, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]*Volume, error) {
 		input := &ec2.DescribeVolumesInput{
 			Filters: []types.Filter{
 				{
@@ -320,14 +320,14 @@ func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance
 			input.NextToken = output.NextToken
 		}
 
-		var result []*EC2Volume
+		var result []*Volume
 		for _, vol := range allVolumes {
 			if len(vol.Attachments) != 1 {
 				p.log.Errorf("Volume %s has %d attachments", *vol.VolumeId, len(vol.Attachments))
 				continue
 			}
 
-			result = append(result, &EC2Volume{
+			result = append(result, &Volume{
 				VolumeId:   *vol.VolumeId,
 				Size:       int(*vol.Size),
 				awsAccount: p.awsAccountID,

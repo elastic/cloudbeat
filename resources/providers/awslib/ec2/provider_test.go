@@ -511,7 +511,7 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 			},
 		},
 	}
-	expectedVolume := &EC2Volume{
+	expectedVolume := &Volume{
 		awsAccount: "aws-account",
 		VolumeId:   "vol-123456789",
 		InstanceId: "i-123456789",
@@ -525,7 +525,7 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 		name      string
 		client    func() Client
 		instances []*Ec2Instance
-		want      []*EC2Volume
+		want      []*Volume
 		wantErr   bool
 		regions   []string
 	}{
@@ -539,7 +539,7 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 				m.EXPECT().DescribeVolumes(mock.Anything, mock.MatchedBy(expectToken("2"))).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult}}, nil).Once()
 				return m
 			},
-			want:    []*EC2Volume{expectedVolume, expectedVolume, expectedVolume},
+			want:    []*Volume{expectedVolume, expectedVolume, expectedVolume},
 			wantErr: false,
 			regions: onlyDefaultRegion,
 		},
@@ -551,7 +551,7 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 				m.EXPECT().DescribeVolumes(mock.Anything, mock.Anything).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult, mockResult, mockResult}}, nil).Once()
 				return m
 			},
-			want:    []*EC2Volume{expectedVolume, expectedVolume, expectedVolume},
+			want:    []*Volume{expectedVolume, expectedVolume, expectedVolume},
 			wantErr: false,
 			regions: onlyDefaultRegion,
 		},
@@ -567,7 +567,7 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 				m.EXPECT().DescribeVolumes(mock.Anything, mock.MatchedBy(expectInstances("123", "456"))).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult}}, nil).Once()
 				return m
 			},
-			want:    []*EC2Volume{expectedVolume, expectedVolume},
+			want:    []*Volume{expectedVolume, expectedVolume},
 			wantErr: false,
 			regions: onlyDefaultRegion,
 		},
@@ -581,7 +581,7 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 				m.EXPECT().DescribeVolumes(mock.Anything, mock.Anything).Return(nil, errors.New("bla")).Once()
 				return m
 			},
-			want:    []*EC2Volume{},
+			want:    []*Volume{},
 			wantErr: true,
 			regions: onlyDefaultRegion,
 		},

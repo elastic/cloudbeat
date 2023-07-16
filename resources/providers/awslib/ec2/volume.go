@@ -17,7 +17,7 @@
 
 package ec2
 
-type EC2Volume struct {
+type Volume struct {
 	VolumeId   string
 	InstanceId string
 	Region     string
