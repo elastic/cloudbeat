@@ -16,7 +16,7 @@ variable "ami_map" {
   }
 }
 
-# Elactic Cloud variables
+# Elastic Cloud variables
 # ===========================================
 variable "ec_api_key" {
   description = "Provide Elastic Cloud API key or use export TF_VAR_ec_api_key={TOKEN}"
