@@ -62,6 +62,10 @@ if [ "$INTERACTIVE" = true ]; then
     read -r -p "Are you sure you want to delete these environments? (y/n): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
 fi
 
+# Arrays to keep track of successful and failed deletions
+DELETED_ENVS=()
+FAILED_ENVS=()
+
 # Delete the environments
 for ENV in "${TO_DELETE[@]}"
 do
@@ -73,10 +77,18 @@ do
     terraform destroy -var="region=eu-west-1" -state "$tfstate" --auto-approve && \
     aws s3 rm $BUCKET/"$ENV" --recursive; then
         echo "Successfully deleted $ENV"
+        DELETED_ENVS+=("$ENV")
     else
         echo "Failed to delete $ENV"
-        exit 1
+        FAILED_ENVS+=("$ENV")
     fi
 
     rm "$tfstate"
 done
+
+# Print summary of deletions
+echo "Successfully deleted (${#DELETED_ENVS[@]}):"
+printf "%s\n" "${DELETED_ENVS[@]}"
+
+echo "Failed to delete (${#FAILED_ENVS[@]}):"
+printf "%s\n" "${FAILED_ENVS[@]}"
