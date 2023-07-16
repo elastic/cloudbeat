@@ -53,6 +53,7 @@ type devConfig struct {
 
 func parseConfig() (*config, error) {
 	viper.AddConfigPath("./")
+	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read configuration: %v", err)
