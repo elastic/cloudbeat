@@ -47,7 +47,8 @@ Follow these steps to run the workflow:
       e.g. `elastic / unified-release - staging # 8.9 - 11 - 8.9.0-c6bb8f7a Success after 4 hr 58 min`. Now just copy it
       and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.9.0-c6bb8f7a`.
 
-    - `cleanup-env` (optional): Set to `true` if you want the resources to be cleaned up after provisioning.
+    - `cleanup-env` (optional): Set to `true` if you want the resources to automatically be cleaned up after
+      provisioning - useful if you don't want to test the env manually after deployment.
       Default: `false`.
 
     - `run-sanity-tests` (optional): Set to `true` to run sanity tests after the environment is set up. Default: `false`
