@@ -10,30 +10,28 @@ class ElasticWrapper:
     Wrapper that uses elasticsearch official package
     """
 
-    def __init__(self, elastic_params):
-        self.index = elastic_params.cis_index
+    def __init__(self, url: str, basic_auth: tuple, index: str):
+        self.index = index
         self.es_client = Elasticsearch(
-            hosts=elastic_params.url,
-            basic_auth=elastic_params.basic_auth,
+            hosts=url,
+            basic_auth=basic_auth,
         )
 
     def get_index_data(
         self,
-        index_name: str,
         query: dict,
         sort: list,
         size: int = 1,
     ) -> dict:
         """
         This method retrieves data from specified index
-        @param index_name: Name of index the data should be received from
         @param query: Query to be applied on index
         @param size: The number of hits to return.
         @param sort: Sorting order
         @return: Result dictionary
         """
         result = self.es_client.search(
-            index=index_name,
+            index=self.index,
             query=query,
             size=size,
             sort=sort,

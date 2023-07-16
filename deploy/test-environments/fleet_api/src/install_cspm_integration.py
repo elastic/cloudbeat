@@ -24,12 +24,13 @@ from api.common_api import (
 from loguru import logger
 from utils import (
     read_json,
-    save_state,
     render_template,
 )
+from state_file_manager import state_manager, PolicyState
 
 CSPM_AGENT_POLICY = "../../../cloud/data/agent_policy_cspm_aws.json"
 CSPM_PACKAGE_POLICY = "../../../cloud/data/package_policy_cspm_aws.json"
+CSPM_EXPECTED_AGENTS = 1
 
 cspm_agent_policy_data = Path(__file__).parent / CSPM_AGENT_POLICY
 cspm_pkg_policy_data = Path(__file__).parent / CSPM_PACKAGE_POLICY
@@ -75,15 +76,8 @@ if __name__ == "__main__":
         cspm_data=cspm_data,
     )
 
-    save_state(
-        cnfg.state_data_file,
-        [
-            {
-                "pkg_policy_id": package_policy_id,
-                "agnt_policy_id": agent_policy_id,
-            },
-        ],
-    )
+    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, CSPM_EXPECTED_AGENTS))
+
     manifest_params = Munch()
     manifest_params.enrollment_token = get_enrollment_token(
         cfg=cnfg.elk_config,
