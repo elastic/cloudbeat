@@ -22,7 +22,7 @@ To run the workflow, perform the following steps:
 
 - `deployment_name` (required): Name your environment (Only a-zA-Z0-9 and `-`). For example: `john-8-7-2-June01`.
 
-- `ec-api-key` (required): Elastic Cloud API KEY. Follow the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for step-by-step instructions on generating the token.
+- `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API KEY. Follow the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for step-by-step instructions on generating the token.
 
 - `elk-stack-version` (required): The version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC) version. The default value is `8.7.2-SNAPSHOT`. You can find the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
 
