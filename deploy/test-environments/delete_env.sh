@@ -35,7 +35,7 @@ done
 : "${TF_VAR_ec_api_key:?Please set TF_VAR_ec_api_key with an Elastic Cloud API Key}"
 
 BUCKET=s3://tf-state-bucket-test-infra
-ALL_ENVS=$(aws s3 ls $BUCKET/$ENV_PREFIX | awk '{print $2}' | sed 's/\///g')
+ALL_ENVS=$(aws s3 ls $BUCKET/"$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g')
 
 # Divide environments into those to be deleted and those to be skipped
 TO_DELETE=()
@@ -66,17 +66,17 @@ fi
 for ENV in "${TO_DELETE[@]}"
 do
     echo "Deleting $ENV"
-    local="./$ENV-terraform.tfstate"
+    tfstate="./$ENV-terraform.tfstate"
 
     # Copy state file, destroy environment, and remove environment data from S3
-    if aws s3 cp $BUCKET/$ENV/terraform.tfstate $local && \
-    terraform destroy -var="region=eu-west-1" -state $local --auto-approve && \
-    aws s3 rm $BUCKET/$ENV --recursive; then
+    if aws s3 cp $BUCKET/"$ENV"/terraform.tfstate "$tfstate" && \
+    terraform destroy -var="region=eu-west-1" -state "$tfstate" --auto-approve && \
+    aws s3 rm $BUCKET/"$ENV" --recursive; then
         echo "Successfully deleted $ENV"
     else
         echo "Failed to delete $ENV"
         exit 1
     fi
 
-    rm $local
+    rm "$tfstate"
 done

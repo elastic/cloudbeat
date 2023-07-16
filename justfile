@@ -151,7 +151,7 @@ expose-ports:
   kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
 
 
-delete-cloud-env prefix ignore-prefix interactive:
+delete-cloud-env prefix ignore-prefix="" interactive="true":
   # delete all cloud environments that start with {{prefix}} and do not start with {{ignore-prefix}}
   # ask for confirmation before deleting each environment: {{interactive}}
   cd deploy/test-environments && \
