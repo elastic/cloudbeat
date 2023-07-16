@@ -21,9 +21,9 @@ Follow these steps to run the workflow:
     - **`deployment_name`**: Name your environment (Allowed characters: a-zA-Z0-9 and `-`). For
       instance: `john-8-7-2-June01`.
 
-    - **`ec-api-key`**: Elastic Cloud API Key. Refer to
-      the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation to
-      generate your token.
+    - `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API KEY. Follow
+      the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for
+      step-by-step instructions on generating the token.
 
     - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
       version. The default value is `8.8.0`. Check the available
@@ -34,7 +34,7 @@ Follow these steps to run the workflow:
       supports
       snapshot and build candidate (BC) versions. Specify a different region only if necessary.
 
-   ![Enter Inputs](https://github.com/elastic/cloudbeat/assets/99176494/06d8144d-13cc-4e13-92fc-19f52ce8206b)
+![Enter Inputs](https://github.com/elastic/cloudbeat/assets/99176494/06d8144d-13cc-4e13-92fc-19f52ce8206b)
 
 4. Optionally, modify other input values if required:
 
