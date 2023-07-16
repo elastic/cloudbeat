@@ -1,4 +1,5 @@
 name: Create Environment
+run-name: Creating ${{ github.event.inputs.deployment_name }} by @${{ github.actor }}
 
 on:
   # Ability to execute on demand
