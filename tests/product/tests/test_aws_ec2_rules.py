@@ -14,7 +14,7 @@ from .data.constants import RES_NAME
 
 @pytest.mark.aws_ec2_rules
 def test_aws_ec2_service_rules(
-    elastic_client,
+    cspm_client,
     cloudbeat_agent,
     rule_tag,
     case_identifier,
@@ -33,7 +33,7 @@ def test_aws_ec2_service_rules(
     ec2_identifier = partial(res_identifier, RES_NAME, case_identifier)
 
     evaluation = get_ES_evaluation(
-        elastic_client=elastic_client,
+        elastic_client=cspm_client,
         timeout=cloudbeat_agent.aws_findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow() - timedelta(minutes=30),
