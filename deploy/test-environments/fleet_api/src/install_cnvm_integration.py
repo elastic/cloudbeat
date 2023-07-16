@@ -20,13 +20,12 @@ from api.common_api import (
     get_artifact_server,
 )
 from loguru import logger
-from utils import (
-    read_json,
-    save_state,
-)
+from utils import read_json
+from state_file_manager import state_manager, PolicyState
 
 CNVM_AGENT_POLICY = "../../../cloud/data/agent_policy_cnvm_aws.json"
 CNVM_PACKAGE_POLICY = "../../../cloud/data/package_policy_cnvm_aws.json"
+CNVM_EXPECTED_AGENTS = 1
 CNVM_CLOUDFORMATION_CONFIG = "../../../cloudformation/config.json"
 
 cnvm_agent_policy_data = Path(__file__).parent / CNVM_AGENT_POLICY
@@ -61,15 +60,8 @@ if __name__ == "__main__":
         agent_policy_id=agent_policy_id,
     )
 
-    save_state(
-        cnfg.state_data_file,
-        [
-            {
-                "pkg_policy_id": package_policy_id,
-                "agnt_policy_id": agent_policy_id,
-            },
-        ],
-    )
+    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, CNVM_EXPECTED_AGENTS))
+
     cloudformation_params = Munch()
     cloudformation_params.ENROLLMENT_TOKEN = get_enrollment_token(
         cfg=cnfg.elk_config,

@@ -148,16 +148,31 @@ def eks_cluster():
     return configuration.eks
 
 
-@pytest.fixture(scope="session", autouse=True)
-def elastic_client():
+@pytest.fixture
+def cspm_client():
     """
     This function (fixture) instantiate ElasticWrapper.
-    @return: ElasticWrapper client
+    @return: ElasticWrapper client with cspm index.
     """
-    elastic_config = configuration.elasticsearch
-    es_client = ElasticWrapper(elastic_params=elastic_config)
-    logger.info(f"ElasticSearch url: {elastic_config.url}")
-    return es_client
+    return create_es_client(configuration.elasticsearch.cspm_index)
+
+
+@pytest.fixture
+def cnvm_client():
+    """
+    This function (fixture) instantiate ElasticWrapper.
+    @return: ElasticWrapper client with cnvm index.
+    """
+    return create_es_client(configuration.elasticsearch.cnvm_index)
+
+
+@pytest.fixture
+def kspm_client():
+    """
+    This function (fixture) instantiate ElasticWrapper.
+    @return: ElasticWrapper client with kspm index.
+    """
+    return create_es_client(configuration.elasticsearch.kspm_index)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -249,3 +264,17 @@ def pytest_sessionfinish(session):
                     )
         except ValueError:
             logger.warning("Warning fail to create allure environment report")
+
+
+def create_es_client(index: str) -> ElasticWrapper:
+    """
+    This function (fixture) instantiate ElasticWrapper.
+    @return: ElasticWrapper client with cspm index.
+    """
+    es_client = ElasticWrapper(
+        configuration.elasticsearch.url,
+        configuration.elasticsearch.basic_auth,
+        index,
+    )
+    logger.info(f"client with ElasticSearch url: {configuration.elasticsearch.url}")
+    return es_client

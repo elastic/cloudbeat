@@ -7,6 +7,9 @@ import os
 from munch import Munch
 from loguru import logger
 
+FINDINGS_INDEX_PATTERN = "*cloud_security_posture.findings*"
+VULNERABILITIES_INDEX_PATTERN = "*cloud_security_posture.vulnerabilities*"
+
 # --- Cloudbeat agent environment definition ----------------
 agent = Munch()
 agent.name = os.getenv("AGENT_NAME", "cloudbeat")
@@ -59,7 +62,9 @@ elasticsearch.basic_auth = (elasticsearch.user, elasticsearch.password)
 elasticsearch.port = os.getenv("ES_PORT", "9200")
 elasticsearch.protocol = os.getenv("ES_PROTOCOL", "http")
 elasticsearch.url = os.getenv("ES_URL", f"{elasticsearch.protocol}://{elasticsearch.hosts}:{elasticsearch.port}")
-elasticsearch.cis_index = os.getenv("CIS_INDEX", "*cloud_security_posture.findings*")
+elasticsearch.kspm_index = os.getenv("KSPM_INDEX", FINDINGS_INDEX_PATTERN)
+elasticsearch.cspm_index = os.getenv("CSPM_INDEX", FINDINGS_INDEX_PATTERN)
+elasticsearch.cnvm_index = os.getenv("CNVM_INDEX", VULNERABILITIES_INDEX_PATTERN)
 
 # --- Docker environment definition
 docker = Munch()
