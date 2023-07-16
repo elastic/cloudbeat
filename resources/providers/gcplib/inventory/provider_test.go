@@ -23,12 +23,13 @@ import (
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	iampb "cloud.google.com/go/iam/apiv1/iampb"
-	utils "github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
+
+	utils "github.com/elastic/cloudbeat/resources/utils/testhelper"
 
 	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
