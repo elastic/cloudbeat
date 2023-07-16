@@ -19,7 +19,6 @@ from loguru import logger
 
 def get_events_from_index(
     elastic_client,
-    index_name: str,
     rule_tag: str,
     time_after: datetime,
 ) -> list[Munch]:
@@ -27,7 +26,6 @@ def get_events_from_index(
     This function returns events from the given index,
     filtering for the given rule_tag, and after the given time.
     @param elastic_client: Client to connect to Elasticsearch.
-    @param index_name: Index to get events from.
     @param rule_tag: Rule tag to filter.
     @param time_after: Filter events having timestamp > time_after
     @return: List of Munch objects
@@ -48,7 +46,6 @@ def get_events_from_index(
     }
     sort = [{"@timestamp": {"order": "desc"}}]
     result = elastic_client.get_index_data(
-        index_name=index_name,
         query=query,
         sort=sort,
         size=1000,
