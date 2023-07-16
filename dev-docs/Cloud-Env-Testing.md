@@ -27,7 +27,8 @@ Follow these steps to run the workflow:
 
     - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
       version. The default value is `8.8.0`. Check the available
-      versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
+      versions [here](https://artifacts-staging.elastic.co/dra-info/index.html). For BC, enter only the
+      version without additions/commit sha, e.g. `8.8.1`. For SNAPSHOT, enter the full version, e.g. `8.8.1-SNAPSHOT`.
 
     - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
       supports
@@ -37,10 +38,14 @@ Follow these steps to run the workflow:
 
 4. Optionally, modify other input values if required:
 
-    - `docker-image-override` (optional): Use this to replace the default Docker image for build candidate (BC)
-      versions.
+    - `docker-image-override` (optional): Use this to replace the default Docker image for build candidate (BC) or
+      SNAPSHOT versions.
       Provide the full image path. Leave this field blank for snapshot versions. Follow this format for the image
-      path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`.
+      path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`. If you're not sure where to get this
+      image path from, look for message like [this](https://elastic.slack.com/archives/C0JFN9HJL/p1689227472876399) in
+      #mission-control channel, you can see it specify the stack version and the BC commit sha in the first line,
+      e.g. `elastic / unified-release - staging # 8.9 - 11 - 8.9.0-c6bb8f7a Success after 4 hr 58 min`. Now just copy it
+      and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.9.0-c6bb8f7a`.
 
     - `cleanup-env` (optional): Set to `true` if you want the resources to be cleaned up after provisioning.
       Default: `false`.

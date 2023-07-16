@@ -156,7 +156,7 @@ delete-cloud-env prefix ignore-prefix="" interactive="true":
   # ask for confirmation before deleting each environment: {{interactive}}
   cd deploy/test-environments && \
   terraform init && \
-  pwd && ./delete_env.sh --prefix {{prefix}} --ignore-prefix {{ignore-prefix}} --interactive {{interactive}}
+  pwd && ./delete_env.sh --prefix {{prefix}} --ignore-prefix '{{ignore-prefix}}' --interactive {{interactive}}
 
 
 #### MOCKS #####
