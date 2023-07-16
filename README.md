@@ -1,39 +1,41 @@
-```
+[![Coverage Status](https://coveralls.io/repos/github/elastic/cloudbeat/badge.svg?branch=main)](https://coveralls.io/github/elastic/cloudbeat?branch=main)
+[![Go Report Card](https://goreportcard.com/badge/github.com/elastic/cloudbeat)](https://goreportcard.com/report/github.com/elastic/cloudbeat)
+[![Build status](https://badge.buildkite.com/82f39bb3a95eeb7f46e28891fb48a623cf184fbfca2eff545a.svg)](https://buildkite.com/elastic/cloudbeat)
+
+# Cloudbeat
+
+Cloudbeat is a tool that analyzes cloud assets for security compliance and sends findings to Elasticsearch.
+It is designed to be used as part of the [Cloud Security](https://www.elastic.co/blog/secure-your-cloud-with-elastic-security) plugin in Kibana.
 
 
+### CSP Security Policies
 
+Cloudbeat uses security policies from the [CSP Security Policies](https://github.com/elastic/csp-security-policies) repository to evaluate cloud resources.
 
+## Getting Started
 
+To get started with Cloud Security on your cluster, please refer to our documentation:
 
+- [Get started with Kubernetes Security Posture Management (KSPM)](https://www.elastic.co/guide/en/security/master/get-started-with-kspm.html#get-started-with-kspm)
 
-1. THE USER INSTALLS THE CSPM INTEGRATION
+- [Get started with Cloud Security Posture Management (CSPM)](https://www.elastic.co/guide/en/security/master/cspm-get-started.html#cspm-get-started)
 
-2. KIBANA GENERATES A COMMAND FOR THE USER TO COPY
+- [Get started with Cloud Native Vulnerability Management (CNVM)](https://www.elastic.co/guide/en/security/master/vuln-management-overview.html)
 
-3. THE USER IS COPYING THE COMMAND
+---
 
-4. THE USER IS PRESSING THE LINK TO THE CLOUD SHELL
+## Deployment
 
-5. THE USER IS RUNNING THE COMMAND IN GCP's CLOUD SHELL
+To run Cloudbeat, you need to have Elastic Stack (Elasticsearch, Kibana, etc) running (locally/cloud). See our [Elastic Stack Deployment options](dev-docs/ELK-Deployment.md) documentation.
 
+Once your Elastic Stack is deployed, you can proceed with the deployment of Cloudbeat. For deployment instructions, see [Cloudbeat Deployment options](dev-docs/Cloudbeat-Deployment.md).
 
+## Development
 
+### Prerequisites
 
+We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to manage our development tooling. Please refer to our [README](/bin/README.hermit.md) for detailed instructions on setting it up.
 
+___
 
-
-```
-
-
-
-
-```
-gcloud deployment-manager deployments create --automatic-rollback-on-error uri-test --template compute-engine.py --properties zone:europe-west2-a,elasticAgentVersion:8.8.0,fleetUrl:<URL>,enrollmentToken:<TOKEN>
-```
-
-
-
-
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Furi-weisman%2Fcloudbeat&cloudshell_git_branch=deployment_manager&cloudshell_print=instructions.txt&cloudshell_workspace=deploy%2Fdeployment-manager&show=terminal)
-
-```
+> **Note*** If you are a developer or contributor, or if you are looking for additional information, please visit our [development documentation](dev-docs/Development.md)
