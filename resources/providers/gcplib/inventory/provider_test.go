@@ -23,6 +23,7 @@ import (
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	iampb "cloud.google.com/go/iam/apiv1/iampb"
+	utils "github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/stretchr/testify/suite"
@@ -68,35 +69,13 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	mockIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	value, err := provider.ListAllAssetTypesByName([]string{"test"})
-	assetNames := Map(value, func(asset *assetpb.Asset) string { return asset.Name })
-	resourceAssets := Filter(value, func(asset *assetpb.Asset) bool { return asset.Resource != nil })
-	policyAssets := Filter(value, func(asset *assetpb.Asset) bool { return asset.IamPolicy != nil })
+	assetNames := utils.Map(value, func(asset *assetpb.Asset) string { return asset.Name })
+	resourceAssets := utils.Filter(value, func(asset *assetpb.Asset) bool { return asset.Resource != nil })
+	policyAssets := utils.Filter(value, func(asset *assetpb.Asset) bool { return asset.IamPolicy != nil })
 
 	s.Assert().NoError(err)
-	s.Assert().Equal(ContainsString(assetNames, "AssetName1"), true)
+	s.Assert().Equal(utils.ContainsString(assetNames, "AssetName1"), true)
 	s.Assert().Equal(len(resourceAssets), 2) // 2 assets with resources (assetName1, assetName2)
 	s.Assert().Equal(len(policyAssets), 1)   // 1 assets with policy 	(assetName1)
 	s.Assert().Equal(len(value), 2)          // 2 assets in total 		(assetName1 merged resource/policy, assetName2)
-}
-
-func Map[T, V any](ts []T, fn func(T) V) []V {
-	result := make([]V, len(ts))
-	for i, t := range ts {
-		result[i] = fn(t)
-	}
-	return result
-}
-
-func Filter[T any](ts []T, fn func(T) bool) []T {
-	var result []T
-	for _, t := range ts {
-		if fn(t) {
-			result = append(result, t)
-		}
-	}
-	return result
-}
-
-func ContainsString(arr []string, value string) bool {
-	return Filter(arr, func(s string) bool { return s == value }) != nil
 }
