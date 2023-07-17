@@ -21,6 +21,8 @@ import (
 	"context"
 	"fmt"
 
+	dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -33,20 +35,20 @@ type MonitoringFetcher struct {
 	log           *logp.Logger
 	provider      monitoring.Client
 	resourceCh    chan fetching.ResourceInfo
-	cloudIdentity *awslib.Identity
+	cloudIdentity *dataprovider.Identity
 	securityhub   securityhub.Service
 }
 
 type MonitoringResource struct {
 	monitoring.Resource
-	identity *awslib.Identity
+	identity *dataprovider.Identity
 }
 
 type SecurityHubResource struct {
 	securityhub.SecurityHub
 }
 
-func NewMonitoringFetcher(log *logp.Logger, provider monitoring.Client, securityHubProvider securityhub.Service, ch chan fetching.ResourceInfo, identity *awslib.Identity) *MonitoringFetcher {
+func NewMonitoringFetcher(log *logp.Logger, provider monitoring.Client, securityHubProvider securityhub.Service, ch chan fetching.ResourceInfo, identity *dataprovider.Identity) *MonitoringFetcher {
 	return &MonitoringFetcher{
 		log:           log,
 		provider:      provider,

@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/elastic/cloudbeat/resources/providers/gcplib"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -72,6 +74,7 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh, benchmark.NewDependencies(
 		awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 		awslib.IdentityProvider{},
+		gcplib.NewIdentityProvider(ctx, cfg, log),
 		k8s.ClientGetter{},
 		awslib.Ec2MetadataProvider{},
 		awslib.EKSClusterNameProvider{},

@@ -28,8 +28,11 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
 
+	"github.com/elastic/cloudbeat/resources/providers/gcplib"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
+	dp "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -58,7 +61,8 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 
 type Dependencies struct {
 	awsCfgProvider         awslib.ConfigProviderAPI
-	identityProvider       awslib.IdentityProviderGetter
+	awsIdentityProvider    awslib.IdentityProviderGetter
+	gcpIdentityProvider    gcplib.IdentityProviderGetter
 	kubernetesProvider     k8sprovider.ClientGetterAPI
 	metadataProvider       awslib.MetadataProvider
 	eksClusterNameProvider awslib.EKSClusterNameProviderAPI
@@ -66,14 +70,16 @@ type Dependencies struct {
 
 func NewDependencies(
 	awsCfgProvider awslib.ConfigProviderAPI,
-	identityProvider awslib.IdentityProviderGetter,
+	awsIdentityProvider awslib.IdentityProviderGetter,
+	gcpIdentityProvider gcplib.IdentityProviderGetter,
 	kubernetesProvider k8sprovider.ClientGetterAPI,
 	metadataProvider awslib.MetadataProvider,
 	eksClusterNameProvider awslib.EKSClusterNameProviderAPI,
 ) *Dependencies {
 	return &Dependencies{
 		awsCfgProvider:         awsCfgProvider,
-		identityProvider:       identityProvider,
+		awsIdentityProvider:    awsIdentityProvider,
+		gcpIdentityProvider:    gcpIdentityProvider,
 		kubernetesProvider:     kubernetesProvider,
 		metadataProvider:       metadataProvider,
 		eksClusterNameProvider: eksClusterNameProvider,
@@ -94,9 +100,16 @@ func (d *Dependencies) AWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssd
 	return d.awsCfgProvider.InitializeAWSConfig(ctx, cfg)
 }
 
-func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*awslib.Identity, error) {
-	if d.identityProvider == nil {
+func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*dp.Identity, error) {
+	if d.awsIdentityProvider == nil {
 		return nil, errors.New("aws identity provider is uninitialized")
 	}
-	return d.identityProvider.GetIdentity(ctx, cfg)
+	return d.awsIdentityProvider.GetIdentity(ctx, cfg)
+}
+
+func (d *Dependencies) GCPIdentity(ctx context.Context, cfg config.GcpConfig) (*dp.Identity, error) {
+	if d.gcpIdentityProvider == nil {
+		return nil, errors.New("gcp identity provider is uninitialized")
+	}
+	return d.gcpIdentityProvider.GetIdentity(ctx, cfg)
 }

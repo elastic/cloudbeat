@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -119,7 +121,7 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				loggingProvider:       tt.loggingProvider(),
 				configserviceProvider: tt.configServiceProvider(),
 				resourceCh:            ch,
-				cloudIdentity: &awslib.Identity{
+				cloudIdentity: &aws_dataprovider.Identity{
 					Account: testAccount,
 				},
 			}
@@ -156,7 +158,7 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 func TestConfigResource_GetMetadata(t *testing.T) {
 	r := ConfigResource{
 		configs: nil,
-		identity: &awslib.Identity{
+		identity: &aws_dataprovider.Identity{
 			Account: "test-account",
 		},
 	}

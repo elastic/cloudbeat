@@ -28,6 +28,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -120,7 +121,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 				provider:      mockClient,
 				securityhub:   hub,
 				resourceCh:    ch,
-				cloudIdentity: &awslib.Identity{Account: "account"},
+				cloudIdentity: &aws_dataprovider.Identity{Account: "account"},
 			}
 
 			err := m.Fetch(ctx, fetching.CycleMetadata{})
@@ -138,7 +139,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 func TestMonitoringResource_GetMetadata(t *testing.T) {
 	type fields struct {
 		Resource monitoring.Resource
-		identity *awslib.Identity
+		identity *aws_dataprovider.Identity
 	}
 	tests := []struct {
 		name    string
@@ -149,7 +150,7 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 		{
 			name: "without trails",
 			fields: fields{
-				identity: &awslib.Identity{Account: "aws-account-id"},
+				identity: &aws_dataprovider.Identity{Account: "aws-account-id"},
 				Resource: monitoring.Resource{
 					Items: []monitoring.MonitoringItem{},
 				},
@@ -165,7 +166,7 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 		{
 			name: "with trails",
 			fields: fields{
-				identity: &awslib.Identity{Account: "aws-account-id"},
+				identity: &aws_dataprovider.Identity{Account: "aws-account-id"},
 				Resource: monitoring.Resource{
 					Items: []monitoring.MonitoringItem{
 						{},

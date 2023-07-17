@@ -22,6 +22,8 @@ import (
 	"errors"
 	"fmt"
 
+	dp "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
@@ -33,7 +35,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 
@@ -78,7 +79,7 @@ func getEksAwsConfig(
 	ctx context.Context,
 	cfg *config.Config,
 	dependencies *Dependencies,
-) (awssdk.Config, *awslib.Identity, error) {
+) (awssdk.Config, *dp.Identity, error) {
 	if cfg.CloudConfig == (config.CloudConfig{}) || cfg.CloudConfig.Aws.Cred == (aws.ConfigAWS{}) {
 		// Optional for EKS
 		return awssdk.Config{}, nil, nil

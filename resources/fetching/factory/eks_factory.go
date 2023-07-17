@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"regexp"
 
+	dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
@@ -45,7 +47,7 @@ var (
 		"/hostfs/var/lib/kubelet/kubeconfig"}
 )
 
-func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *awslib.Identity) FetchersMap {
+func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *dataprovider.Identity) FetchersMap {
 	log.Infof("Initializing EKS fetchers")
 	m := make(FetchersMap)
 

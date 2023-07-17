@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	aatypes "github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go/aws"
@@ -219,7 +221,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				log:         testhelper.NewLogger(s.T()),
 				iamProvider: iamProviderMock,
 				resourceCh:  s.resourceCh,
-				cloudIdentity: &awslib.Identity{
+				cloudIdentity: &aws_dataprovider.Identity{
 					Account: test.account,
 				},
 			}

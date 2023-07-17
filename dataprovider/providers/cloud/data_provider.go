@@ -31,13 +31,25 @@ const (
 	cloudAccountNameField = "cloud.account.name"
 	cloudProviderField    = "cloud.provider"
 	cloudRegionField      = "cloud.region"
+	cloudProjectIdField   = "cloud.project.id"
+	cloudProjectNameField = "cloud.project.name"
 )
+
+type Identity struct {
+	Provider     string
+	Account      string
+	AccountAlias string
+	ProjectId    string
+	ProjectName  string
+}
 
 type DataProvider struct {
 	log          *logp.Logger
-	accountId    string
-	accountName  string
-	providerName string
+	accountId    string `json:"accountId,omitempty"`
+	accountName  string `json:"accountName,omitempty"`
+	providerName string `json:"providerName,omitempty"`
+	projectName  string `json:"projectName,omitempty"`
+	projectId    string `json:"projectId,omitempty"`
 }
 
 func New(options ...Option) DataProvider {
@@ -59,25 +71,43 @@ func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 }
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
-	_, err := event.Fields.Put(cloudAccountIdField, a.accountId)
+	err := InsertIfNotEmpty(cloudAccountIdField, a.accountId, event)
 	if err != nil {
 		return err
 	}
 
-	_, err = event.Fields.Put(cloudAccountNameField, a.accountName)
+	err = InsertIfNotEmpty(cloudAccountNameField, a.accountName, event)
 	if err != nil {
 		return err
 	}
 
-	_, err = event.Fields.Put(cloudProviderField, a.providerName)
+	err = InsertIfNotEmpty(cloudProviderField, a.providerName, event)
 	if err != nil {
 		return err
 	}
 
-	_, err = event.Fields.Put(cloudRegionField, resMetadata.Region)
+	err = InsertIfNotEmpty(cloudRegionField, resMetadata.Region, event)
 	if err != nil {
 		return err
 	}
 
+	err = InsertIfNotEmpty(cloudProjectIdField, a.projectId, event)
+	if err != nil {
+		return err
+	}
+
+	err = InsertIfNotEmpty(cloudProjectNameField, a.projectName, event)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func InsertIfNotEmpty(field string, value string, event *beat.Event) error {
+	if value != "" {
+		_, err := event.Fields.Put(field, value)
+		return err
+	}
 	return nil
 }

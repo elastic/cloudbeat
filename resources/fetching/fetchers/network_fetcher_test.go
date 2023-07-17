@@ -22,6 +22,8 @@ import (
 	"testing"
 	"time"
 
+	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -134,7 +136,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 				log:           logp.NewLogger(tt.name),
 				ec2Client:     tt.networkProvider(),
 				resourceCh:    ch,
-				cloudIdentity: &awslib.Identity{Account: tt.name},
+				cloudIdentity: &aws_dataprovider.Identity{Account: tt.name},
 			}
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})
@@ -152,7 +154,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 func TestACLResource_GetMetadata(t *testing.T) {
 	r := NetworkResource{
 		AwsResource: ec2.NACLInfo{},
-		identity:    &awslib.Identity{},
+		identity:    &aws_dataprovider.Identity{},
 	}
 	meta, err := r.GetMetadata()
 	assert.NoError(t, err)

@@ -20,55 +20,156 @@ package gcplib
 import (
 	"context"
 	"fmt"
+	"strings"
 
-	"google.golang.org/api/cloudresourcemanager/v1"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
+
+	gcpdataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 
 	"github.com/elastic/cloudbeat/config"
 )
 
+const provider = "gcp"
+
 type IdentityProviderGetter interface {
-	GetIdentity(context.Context, []option.ClientOption, config.GcpConfig) (*Identity, error)
+	GetIdentity(ctx context.Context, cfg config.GcpConfig) (*gcpdataprovider.Identity, error)
 }
 
-type Identity struct {
-	OrgId       string
-	OrgName     string
-	ProjectId   string
-	ProjectName string
-	Provider    string
+type organizationInfo struct {
+	id   string
+	name string
 }
 
-type IdentityProvider struct{}
+type IdentityProvider struct {
+	service ResourceManager
+}
 
-// GetIdentity returns GCP identity information
-func (p IdentityProvider) GetIdentity(ctx context.Context, gcpClientOpt []option.ClientOption, cfg config.GcpConfig) (*Identity, error) {
+// CloudResourceManagerService is wrapper around the GCP resource manager service to make it easier to mock
+type CloudResourceManagerService struct {
+	service *cloudresourcemanager.Service
+}
+
+type ResourceManager interface {
+	projectsGet(context.Context, string) (*cloudresourcemanager.Project, error)
+	foldersGet(context.Context, string) (*cloudresourcemanager.Folder, error)
+	organizationsGet(context.Context, string) (*cloudresourcemanager.Organization, error)
+}
+
+func NewIdentityProvider(ctx context.Context, cfg *config.Config, logger *logp.Logger) *IdentityProvider {
+	gcpClientOpt, err := gcplib.GetGcpClientConfig(cfg, logger)
+	if err != nil {
+		logger.Errorf("failed to get GCP client config: %v", err)
+		return nil
+	}
 	gcpClientOpt = append(gcpClientOpt, option.WithScopes(cloudresourcemanager.CloudPlatformReadOnlyScope))
 	crmService, err := cloudresourcemanager.NewService(ctx, gcpClientOpt...)
 	if err != nil {
-		return nil, err
+		logger.Errorf("failed to create GCP resource manager service: %v", err)
+		return nil
 	}
 
-	proj, err := crmService.Projects.Get(cfg.ProjectId).Context(ctx).Do()
+	return &IdentityProvider{service: &CloudResourceManagerService{service: crmService}}
+}
+
+// GetIdentity returns GCP identity information
+func (p *IdentityProvider) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*gcpdataprovider.Identity, error) {
+	proj, err := p.service.projectsGet(ctx, "projects/"+cfg.ProjectId)
 	if err != nil {
 		return nil, err
 	}
 
-	var org *cloudresourcemanager.Organization
-	if proj.Parent != nil {
-		if proj.Parent.Type == "organization" {
-			org, err = crmService.Organizations.Get("organizations/" + proj.Parent.Id).Do()
-			if err != nil {
-				return nil, fmt.Errorf("failed to get GCP project organization: %v", err)
-			}
+	// Check if the project has a parent.
+	var orgInfo *organizationInfo
+	if proj.Parent != "" {
+		// Start recursive traversal to handle nested folders or organization.
+		orgInfo, err = p.traverseResourceHierarchy(ctx, proj.Parent)
+		if err != nil {
+			return &gcpdataprovider.Identity{
+				ProjectId:   proj.ProjectId,
+				ProjectName: proj.Name,
+				Provider:    provider,
+			}, nil
 		}
 	}
 
-	return &Identity{
-		OrgId:       proj.Parent.Id,
-		OrgName:     org.DisplayName,
-		ProjectId:   proj.ProjectId,
-		ProjectName: proj.Name,
-		Provider:    "gcp",
+	var orgId, orgAlias string
+	if orgInfo != nil {
+		orgId = orgInfo.id
+		orgAlias = orgInfo.name
+	}
+
+	return &gcpdataprovider.Identity{
+		Account:      orgId,
+		AccountAlias: orgAlias,
+		ProjectId:    proj.ProjectId,
+		ProjectName:  proj.Name,
+		Provider:     provider,
 	}, nil
+}
+
+// traverseResourceHierarchy recursively traverses the resource hierarchy.
+func (p *IdentityProvider) traverseResourceHierarchy(ctx context.Context, parent string) (*organizationInfo, error) {
+	if parent == "" {
+		fmt.Println("The project is not associated with any organization or folder.")
+		return nil, nil
+	}
+
+	if isOrganization(parent) {
+		// If the parent is an organization, display the organization ID.
+		organizationID := getResourceIDFromName(parent)
+		organization, err := p.service.organizationsGet(ctx, organizationID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get organization details: %v", err)
+		}
+		return &organizationInfo{
+			id:   organizationID,
+			name: organization.DisplayName,
+		}, nil
+	}
+
+	// If the resource is a folder, fetch folder details and continue the recursion.
+	folder, err := p.service.foldersGet(ctx, parent)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get folder details: %v", err)
+	}
+
+	// Continue the recursion with the parent folder ID.
+	return p.traverseResourceHierarchy(ctx, folder.Parent)
+}
+
+func (p *CloudResourceManagerService) projectsGet(ctx context.Context, id string) (*cloudresourcemanager.Project, error) {
+	project, err := p.service.Projects.Get(id).Context(ctx).Do()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get project with id '%v': %v", id, err)
+	}
+	return project, nil
+}
+
+func (p *CloudResourceManagerService) organizationsGet(ctx context.Context, name string) (*cloudresourcemanager.Organization, error) {
+	org, err := p.service.Organizations.Get(name).Context(ctx).Do()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get oragnization with name '%v': %v", name, err)
+	}
+	return org, nil
+}
+
+func (p *CloudResourceManagerService) foldersGet(ctx context.Context, name string) (*cloudresourcemanager.Folder, error) {
+	folder, err := p.service.Folders.Get(name).Context(ctx).Do()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get oragnization with name '%v': %v", name, err)
+	}
+	return folder, nil
+}
+
+// isOrganization checks if the resource name corresponds to an organization.
+func isOrganization(resource string) bool {
+	return strings.HasPrefix(resource, "organizations/")
+}
+
+// getResourceIDFromName extracts the resource ID from the resource name.
+func getResourceIDFromName(resource string) string {
+	return resource[strings.LastIndex(resource, "/")+1:]
 }
