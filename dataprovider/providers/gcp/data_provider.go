@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package gcp
 
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -23,22 +23,11 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/utils/strings"
 	"github.com/elastic/cloudbeat/version"
 )
 
-const (
-	cloudAccountIdField   = "cloud.account.id"
-	cloudAccountNameField = "cloud.account.name"
-	cloudProviderField    = "cloud.provider"
-	cloudRegionField      = "cloud.region"
-	cloudProviderValue    = "aws"
-)
-
 type DataProvider struct {
-	log         *logp.Logger
-	accountId   string
-	accountName string
+	log *logp.Logger
 }
 
 func New(options ...Option) DataProvider {
@@ -60,25 +49,5 @@ func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 }
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
-	_, err := event.Fields.Put(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AwsAccountId, a.accountId))
-	if err != nil {
-		return err
-	}
-
-	_, err = event.Fields.Put(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AwsAccountAlias, a.accountName))
-	if err != nil {
-		return err
-	}
-
-	_, err = event.Fields.Put(cloudProviderField, cloudProviderValue)
-	if err != nil {
-		return err
-	}
-
-	_, err = event.Fields.Put(cloudRegionField, resMetadata.Region)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
