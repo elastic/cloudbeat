@@ -53,14 +53,14 @@ func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, fmt.Errorf("failed to initialize AWS config: %w", err)
 	}
 
-	if dependencies.eksClusterNameProvider == nil || dependencies.metadataProvider == nil {
+	if dependencies.EksClusterNameProvider == nil || dependencies.AwsMetadataProvider == nil {
 		return nil, nil, errors.New("EKS dependencies uninitialized")
 	}
 
 	clusterNameProvider := k8s.EKSClusterNameProvider{
 		AwsCfg:              awsConfig,
-		EKSMetadataProvider: dependencies.metadataProvider,
-		ClusterNameProvider: dependencies.eksClusterNameProvider,
+		EKSMetadataProvider: dependencies.AwsMetadataProvider,
+		ClusterNameProvider: dependencies.EksClusterNameProvider,
 		KubeClient:          kubeClient,
 	}
 	dp, err := getK8sDataProvider(ctx, log, *cfg, kubeClient, clusterNameProvider)

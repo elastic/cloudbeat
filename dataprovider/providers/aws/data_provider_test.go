@@ -23,6 +23,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/dataprovider/types"
@@ -92,35 +93,87 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 	}
 }
 
-func TestAWSDataProvider_EnrichEvent(t *testing.T) {
-	options := []Option{
-		WithLogger(testhelper.NewLogger(t)),
-		WithAccount(awslib.Identity{
-			Account: accountId,
-			Alias:   accountName,
-		}),
+func TestDataProvider_EnrichEvent(t *testing.T) {
+	tests := []struct {
+		name           string
+		resMetadata    fetching.ResourceMetadata
+		identity       awslib.Identity
+		expectedFields map[string]string
+	}{
+		{
+			name: "no replacement",
+			resMetadata: fetching.ResourceMetadata{
+				Region: someRegion,
+			},
+			identity: awslib.Identity{
+				Account: accountId,
+				Alias:   accountName,
+			},
+			expectedFields: map[string]string{
+				cloudAccountIdField:   accountId,
+				cloudAccountNameField: accountName,
+				cloudProviderField:    "aws",
+				cloudRegionField:      someRegion,
+			},
+		},
+		{
+			name: "replace alias",
+			resMetadata: fetching.ResourceMetadata{
+				Region:          someRegion,
+				AwsAccountId:    "",
+				AwsAccountAlias: "some alias",
+			},
+			identity: awslib.Identity{
+				Account: accountId,
+				Alias:   accountName,
+			},
+			expectedFields: map[string]string{
+				cloudAccountIdField:   accountId,
+				cloudAccountNameField: "some alias",
+				cloudProviderField:    "aws",
+				cloudRegionField:      someRegion,
+			},
+		},
+		{
+			name: "replace both",
+			resMetadata: fetching.ResourceMetadata{
+				Region:          someRegion,
+				AwsAccountId:    "12345654321",
+				AwsAccountAlias: "some alias",
+			},
+			identity: awslib.Identity{
+				Account: accountId,
+				Alias:   accountName,
+			},
+			expectedFields: map[string]string{
+				cloudAccountIdField:   "12345654321",
+				cloudAccountNameField: "some alias",
+				cloudProviderField:    "aws",
+				cloudRegionField:      someRegion,
+			},
+		},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := New(WithLogger(testhelper.NewLogger(t)), WithAccount(tt.identity))
+			e := &beat.Event{
+				Fields: mapstr.M{},
+			}
 
-	k := New(options...)
-	e := &beat.Event{
-		Fields: mapstr.M{},
+			err := p.EnrichEvent(e, tt.resMetadata)
+			require.NoError(t, err)
+
+			for key, expectedValue := range tt.expectedFields {
+				assertField(t, e.Fields, key, expectedValue)
+			}
+		})
 	}
-	err := k.EnrichEvent(e, fetching.ResourceMetadata{Region: someRegion})
-	assert.NoError(t, err)
+}
 
-	accountID, err := e.Fields.GetValue(cloudAccountIdField)
-	assert.NoError(t, err)
-	assert.Equal(t, "accountId", accountID)
+func assertField(t *testing.T, fields mapstr.M, key string, expectedValue string) {
+	t.Helper()
 
-	accountName, err := e.Fields.GetValue(cloudAccountNameField)
-	assert.NoError(t, err)
-	assert.Equal(t, "accountName", accountName)
-
-	cloud, err := e.Fields.GetValue(cloudProviderField)
-	assert.NoError(t, err)
-	assert.Equal(t, "aws", cloud)
-
-	region, err := e.Fields.GetValue(cloudRegionField)
-	assert.NoError(t, err)
-	assert.Equal(t, someRegion, region)
+	got, err := fields.GetValue(key)
+	require.NoError(t, err)
+	assert.Equal(t, expectedValue, got)
 }

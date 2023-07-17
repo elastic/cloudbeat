@@ -23,6 +23,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/strings"
 	"github.com/elastic/cloudbeat/version"
 )
 
@@ -59,12 +60,12 @@ func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 }
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
-	_, err := event.Fields.Put(cloudAccountIdField, a.accountId)
+	_, err := event.Fields.Put(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AwsAccountId, a.accountId))
 	if err != nil {
 		return err
 	}
 
-	_, err = event.Fields.Put(cloudAccountNameField, a.accountName)
+	_, err = event.Fields.Put(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AwsAccountAlias, a.accountName))
 	if err != nil {
 		return err
 	}
