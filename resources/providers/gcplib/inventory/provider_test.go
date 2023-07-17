@@ -29,9 +29,8 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
-	utils "github.com/elastic/cloudbeat/resources/utils/testhelper"
-
 	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
+	"github.com/samber/lo"
 )
 
 type ProviderTestSuite struct {
@@ -70,12 +69,13 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	mockIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	value, err := provider.ListAllAssetTypesByName([]string{"test"})
-	assetNames := utils.Map(value, func(asset *assetpb.Asset) string { return asset.Name })
-	resourceAssets := utils.Filter(value, func(asset *assetpb.Asset) bool { return asset.Resource != nil })
-	policyAssets := utils.Filter(value, func(asset *assetpb.Asset) bool { return asset.IamPolicy != nil })
+
+	assetNames := lo.Map(value, func(asset *assetpb.Asset, _ int) string { return asset.Name })
+	resourceAssets := lo.Filter(value, func(asset *assetpb.Asset, _ int) bool { return asset.Resource != nil })
+	policyAssets := lo.Filter(value, func(asset *assetpb.Asset, _ int) bool { return asset.IamPolicy != nil })
 
 	s.Assert().NoError(err)
-	s.Assert().Equal(utils.ContainsString(assetNames, "AssetName1"), true)
+	s.Assert().Equal(lo.Contains(assetNames, "AssetName1"), true)
 	s.Assert().Equal(len(resourceAssets), 2) // 2 assets with resources (assetName1, assetName2)
 	s.Assert().Equal(len(policyAssets), 1)   // 1 assets with policy 	(assetName1)
 	s.Assert().Equal(len(value), 2)          // 2 assets in total 		(assetName1 merged resource/policy, assetName2)
