@@ -3,8 +3,9 @@ cloudbeat:
     v1:
       benchmark: cis_gcp
       gcp:
+        project_id: ${GCP_PROJECT_ID}
         credentials:
-#          credentials_json:
+          # credentials_json:
           credentials_file_path: ${GOOGLE_APPLICATION_CREDENTIALS:""}
   type: cloudbeat/cis_gcp
   # Defines how often an event is sent to the output
