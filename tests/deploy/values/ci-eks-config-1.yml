@@ -8,6 +8,7 @@ image:
 
 cloudbeat:
   deploy: false
+  repository: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat
 
 cloudbeatEks:
   deploy: true

@@ -3,12 +3,13 @@ elasticsearch:
     storageClassName: gp2
 
 image:
-  repository: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat-test
+  repository: 391946104644.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat-test
   pullPolicy: Always
+  ecr: 391946104644.dkr.ecr.eu-west-2.amazonaws.com
 
 cloudbeat:
   deploy: false
-  repository: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat
+  repository: 391946104644.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat
 
 cloudbeatEks:
   deploy: true
@@ -22,3 +23,5 @@ testData:
   clusterType: eks
   markerCmd: -k # -k command line option to specify a substring match on the test names instead of the exact match
   clusterConfig: test-eks-config-2
+  conf2Node1: "ip-192-168-33-106.eu-west-2.compute.internal"
+  conf2Node2: "ip-192-168-6-157.eu-west-2.compute.internal"
