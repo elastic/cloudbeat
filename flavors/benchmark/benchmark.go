@@ -50,6 +50,8 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 		return &EKS{}, nil
 	case config.CIS_K8S:
 		return &K8S{}, nil
+	case config.CIS_GCP:
+		return &GCP{}, nil
 	}
 	return nil, fmt.Errorf("unknown benchmark: '%s'", cfg.Benchmark)
 }
