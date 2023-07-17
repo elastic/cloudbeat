@@ -22,13 +22,13 @@ repos:
       - id: add-trailing-comma
 
   ## Golang hooks
-#  - repo: https://github.com/dnephin/pre-commit-golang
-#    rev: v0.5.1
-#    hooks:
-#      - id: go-imports
-#        args: [-local, "github.com/elastic/cloudbeat"]
-#        exclude: 'mock_.*\.go'
-#      - id: golangci-lint
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-imports
+        args: [-local, "github.com/elastic/cloudbeat"]
+        exclude: 'mock_.*\.go'
+      - id: golangci-lint
 
   ## Python
   - repo: https://github.com/PyCQA/flake8
@@ -87,17 +87,11 @@ repos:
         files: .*.go
         pass_filenames: false
 
-#  - repo: local
-#    hooks:
-#      - id: golangci-lint
-#        name: golangci-lint
-#        description: Fast linters runner for Go.
-#        entry: golangci-lint run --new-from-rev HEAD
-#        exclude: 'mock_.*\.go'
-#        types: [go]
-#        language: golang
-#        require_serial: true
-#        pass_filenames: false
-
-
-
+  - repo: local
+    hooks:
+      - id: mage
+        name: mage
+        entry: bash -c 'mage'
+        language: system
+        files: (^_meta\/.*|^cloudbeat.*yml)$
+        pass_filenames: false
