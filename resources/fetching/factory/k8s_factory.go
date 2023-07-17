@@ -23,7 +23,7 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/condition"
-	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
+	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 
