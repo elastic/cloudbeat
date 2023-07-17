@@ -16,8 +16,8 @@ on:
       - "[0-9]+.[0-9]+"
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CONTAINER_SUFFIX: ${{ github.run_id }}
   TEST_TARGETS_DEFAULT: '["pre_merge"]'
@@ -25,7 +25,7 @@ env:
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
   CI_ELASTIC_AGENT_DOCKER_TAG: "8.7.0-SNAPSHOT"
-  CI_ELASTIC_AGENT_DOCKER_IMAGE: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
+  CI_ELASTIC_AGENT_DOCKER_IMAGE: "391946104644.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 # run only a single job at a time
 concurrency: EKS-Functional-Tests
@@ -155,12 +155,12 @@ jobs:
         include:
           - test-target: eks
             range: ""
-            values_file: tests/deploy/values/ci-eks-config-1.yml
+            values_file: tests/deploy/values/ci-eks-config-1-test-acc.yml
             k8s_context: "test-eks-config-1"
             label: "EKS functional tests: config 1"
           - test-target: eks
             range: ""
-            values_file: tests/deploy/values/ci-eks-config-2.yml
+            values_file: tests/deploy/values/ci-eks-config-2-test-acc.yml
             k8s_context: "test-eks-config-2"
             label: "EKS functional tests: config 2"
     name: ${{ matrix.label }}
@@ -238,6 +238,8 @@ jobs:
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: eu-west-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS }}
         with:
           storageType: s3
           resultsGlob: "tests/allure/results"
