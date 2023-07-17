@@ -277,25 +277,6 @@ just load-pytest-kind
 
 ## Tests Execution
 
-Tests execution depends on the developers needs and currently this framework supports the following modes:
-
-1. Dev Mode - Writing test and executing tests on dev machine
-2. Integration Mode (Production) - Writing tests on dev machine, building test's docker image, and executing tests in
-   kubernetes cluster.
-
-### Dev Mode
-
-To run all test targets with just cloudbeat, without testing against Kibana or Elasticsearch, run
-
-```
-just run-test-targets
-```
-
-Note that this will create and destroy the test cluster several times. Logs can be found in the `test-logs` directory
-and test results can be found in `tests/allure/results`.
-
-----
-
 Before running tests verify that **System Under Test (SUT) Setup** is done and running.
 Since elasticsearch is deployed inside cluster, for reaching it from outside execute the following command:
 
