@@ -19,20 +19,19 @@ package registry
 
 import (
 	"context"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"sync"
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/suite"
-	"sync"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type RegistryTestSuite struct {
 	suite.Suite
 
-	log        *logp.Logger
 	fetchers   factory.FetchersMap
 	registry   Registry
 	resourceCh chan fetching.ResourceInfo
@@ -41,18 +40,13 @@ type RegistryTestSuite struct {
 
 func TestRegistryTestSuite(t *testing.T) {
 	s := new(RegistryTestSuite)
-	s.log = logp.NewLogger("cloudbeat_registry_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
 
 func (s *RegistryTestSuite) SetupTest() {
 	s.fetchers = make(factory.FetchersMap, 0)
-	s.registry = NewRegistry(s.log, s.fetchers)
+	s.registry = NewRegistry(testhelper.NewLogger(s.T()), s.fetchers)
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
@@ -166,7 +160,7 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	for _, test := range tests {
 		f := NewNumberFetcher(1, nil, s.wg)
 		RegisterFetcher(s.fetchers, f, "some-key", test.conditions)
-		s.registry = NewRegistry(s.log, s.fetchers)
+		s.registry = NewRegistry(testhelper.NewLogger(s.T()), s.fetchers)
 
 		should := s.registry.ShouldRun("some-key")
 		s.Equal(test.expected, should)

@@ -20,11 +20,11 @@ package cloudtrail
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
+	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type Provider struct {

@@ -24,15 +24,15 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type AccessManagement interface {
 	GetIAMRolePermissions(ctx context.Context, roleName string) ([]RolePolicyInfo, error)
 	GetPasswordPolicy(ctx context.Context) (awslib.AwsResource, error)
 	GetUsers(ctx context.Context) ([]awslib.AwsResource, error)
-	GetAccountAlias(ctx context.Context) (string, error)
 	GetPolicies(ctx context.Context) ([]awslib.AwsResource, error)
 	ListServerCertificates(ctx context.Context) (awslib.AwsResource, error)
 	GetAccessAnalyzers(ctx context.Context) (awslib.AwsResource, error)
@@ -52,7 +52,6 @@ type Client interface {
 	GetCredentialReport(ctx context.Context, params *iamsdk.GetCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetCredentialReportOutput, error)
 	GetUserPolicy(ctx context.Context, params *iamsdk.GetUserPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetUserPolicyOutput, error)
 	GenerateCredentialReport(ctx context.Context, params *iamsdk.GenerateCredentialReportInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GenerateCredentialReportOutput, error)
-	ListAccountAliases(ctx context.Context, params *iamsdk.ListAccountAliasesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListAccountAliasesOutput, error)
 	ListPolicies(ctx context.Context, params *iamsdk.ListPoliciesInput, optFns ...func(*iamsdk.Options)) (*iamsdk.ListPoliciesOutput, error)
 	GetPolicy(ctx context.Context, params *iamsdk.GetPolicyInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyOutput, error)
 	GetPolicyVersion(ctx context.Context, params *iamsdk.GetPolicyVersionInput, optFns ...func(*iamsdk.Options)) (*iamsdk.GetPolicyVersionOutput, error)

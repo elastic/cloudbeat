@@ -19,15 +19,17 @@ package iam
 
 import (
 	"context"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/smithy-go"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type mocksReturnVals map[string][][]any
@@ -145,7 +147,7 @@ func Test_GetUsers(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		p := createProviderFromMockValues(test.mocksReturnVals)
+		p := createProviderFromMockValues(t, test.mocksReturnVals)
 
 		users, err := p.GetUsers(context.TODO())
 
@@ -169,7 +171,7 @@ func Test_GetUsers(t *testing.T) {
 	}
 }
 
-func createProviderFromMockValues(mockReturnValues mocksReturnVals) *Provider {
+func createProviderFromMockValues(t *testing.T, mockReturnValues mocksReturnVals) *Provider {
 	mockedClient := MockClient{}
 	for funcName, returnValues := range mockReturnValues {
 		for _, values := range returnValues {
@@ -177,7 +179,7 @@ func createProviderFromMockValues(mockReturnValues mocksReturnVals) *Provider {
 		}
 	}
 	return &Provider{
-		log:    logp.NewLogger("iam-provider"),
+		log:    testhelper.NewLogger(t),
 		client: &mockedClient,
 	}
 }

@@ -20,7 +20,6 @@ package uniqueness
 import (
 	"context"
 	"fmt"
-	k8s "k8s.io/client-go/kubernetes"
 	"os"
 	"reflect"
 	"strings"
@@ -28,22 +27,23 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/hashicorp/go-uuid"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 	v1 "k8s.io/api/coordination/v1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8s "k8s.io/client-go/kubernetes"
 	k8sFake "k8s.io/client-go/kubernetes/fake"
 	le "k8s.io/client-go/tools/leaderelection"
 	rl "k8s.io/client-go/tools/leaderelection/resourcelock"
+
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type LeaderElectionTestSuite struct {
 	suite.Suite
-	log        *logp.Logger
 	wg         *sync.WaitGroup
 	manager    *LeaderelectionManager
 	opts       goleak.Option
@@ -52,20 +52,15 @@ type LeaderElectionTestSuite struct {
 
 func TestLeaderElectionTestSuite(t *testing.T) {
 	s := new(LeaderElectionTestSuite)
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
-
 	suite.Run(t, s)
 }
 
 func (s *LeaderElectionTestSuite) SetupTest() {
 	s.wg = &sync.WaitGroup{}
-	s.log = logp.NewLogger("cloudbeat_leader_election_test_suite")
 	s.opts = goleak.IgnoreCurrent()
 	s.kubeClient = k8sFake.NewSimpleClientset()
 	s.manager = &LeaderelectionManager{
-		log:        s.log,
+		log:        testhelper.NewLogger(s.T()),
 		leader:     nil,
 		wg:         s.wg,
 		cancelFunc: nil,
@@ -84,7 +79,6 @@ func (s *LeaderElectionTestSuite) TearDownTest() {
 
 func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
 	type args struct {
-		log       *logp.Logger
 		cfg       *config.Config
 		k8sClient k8s.Interface
 	}
@@ -96,7 +90,6 @@ func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
 		{
 			name: "Should receive the leader election manager",
 			args: args{
-				log:       s.log,
 				cfg:       &config.Config{},
 				k8sClient: s.kubeClient,
 			},
@@ -105,7 +98,6 @@ func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
 		{
 			name: "k8s client couldn't established - should receive the default unique manager",
 			args: args{
-				log:       s.log,
 				cfg:       &config.Config{},
 				k8sClient: nil,
 			},
@@ -113,7 +105,7 @@ func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
 		},
 	}
 	for _, tt := range tests {
-		got := NewLeaderElector(tt.args.log, tt.args.k8sClient)
+		got := NewLeaderElector(testhelper.NewLogger(s.T()), tt.args.k8sClient)
 		s.Truef(reflect.TypeOf(got) == reflect.TypeOf(tt.want), "NewLeaderElector() = %v, want %v", got, tt.want)
 	}
 }

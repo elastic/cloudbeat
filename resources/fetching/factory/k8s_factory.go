@@ -18,13 +18,13 @@
 package factory
 
 import (
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/condition"
-	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
-	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/condition"
+	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
+	"github.com/elastic/cloudbeat/uniqueness"
 )
 
 var vanillaFsPatterns = []string{
@@ -51,7 +51,7 @@ var vanillaRequiredProcesses = fetchers.ProcessesConfigMap{
 	"kubelet":         {ConfigFileArguments: []string{"config"}},
 }
 
-func NewCisK8sFactory(log *logp.Logger, _ *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) (FetchersMap, error) {
+func NewCisK8sFactory(log *logp.Logger, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) FetchersMap {
 	log.Infof("Initializing K8s fetchers")
 	m := make(FetchersMap)
 	fsFetcher := fetchers.NewFsFetcher(log, ch, vanillaFsPatterns)
@@ -63,5 +63,5 @@ func NewCisK8sFactory(log *logp.Logger, _ *config.Config, ch chan fetching.Resou
 	kubeFetcher := fetchers.NewKubeFetcher(log, ch, k8sClient)
 	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 
-	return m, nil
+	return m
 }

@@ -25,7 +25,9 @@ repos:
   - repo: https://github.com/dnephin/pre-commit-golang
     rev: v0.5.1
     hooks:
-      - id: go-fmt
+      - id: go-imports
+        args: [-local, "github.com/elastic/cloudbeat"]
+        exclude: 'mock_.*\.go'
       - id: golangci-lint
 
   ## Python
@@ -68,7 +70,7 @@ repos:
     rev: v0.77.5
     hooks:
     -   id: cfn-python-lint
-        files: deploy/cloudformation/(organization|elastic-agent-ec2).yml
+        files: deploy/cloudformation/.*.yml
 
   - repo: local
     hooks:
@@ -77,4 +79,10 @@ repos:
         entry: bash -c 'mage config'
         language: system
         files: (^_meta\/.*|^cloudbeat.*yml)$
+        pass_filenames: false
+      - id: mage-license-headers
+        name: mage AddLicenseHeaders
+        entry: bash -c 'mage AddLicenseHeaders'
+        language: system
+        files: .*.go
         pass_filenames: false

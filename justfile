@@ -6,6 +6,7 @@ kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 kustomizeAwsOverlay := "deploy/kustomize/overlays/cloudbeat-aws"
 cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
+AWS_DEFAULT_TAGS := 'Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments'
 
 # use env var if available
 export LOCAL_GOARCH := `go env GOARCH`
@@ -113,7 +114,8 @@ create-eks-deployment-file:
 deploy-eks-cloudbeat:
   kubectl delete -k {{kustomizeEksOverlay}} -n kube-system & kubectl apply -k {{kustomizeEksOverlay}} -n kube-system
 
-#General
+
+#### GENERAL ####
 
 logs-cloudbeat:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
@@ -121,6 +123,9 @@ logs-cloudbeat:
 
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
+
+create-cnvm-stack-tags region stack_name tags=(AWS_DEFAULT_TAGS):
+  ./scripts/add_cnvm_tags.sh {{region}} {{stack_name}} '{{tags}}'
 
 build-kibana-docker:
   node scripts/build --docker-images --skip-docker-ubi --skip-docker-centos -v
@@ -145,6 +150,15 @@ expose-ports:
   CLOUDBEAT_POD=$( kubectl get pods -o=name -n kube-system | grep -m 1 "cloudbeat" ) && \
   kubectl port-forward $CLOUDBEAT_POD -n kube-system 40000:40000 8080:8080
 
+
+delete-cloud-env prefix ignore-prefix="" interactive="true":
+  # delete all cloud environments that start with {{prefix}} and do not start with {{ignore-prefix}}
+  # ask for confirmation before deleting each environment: {{interactive}}
+  cd deploy/test-environments && \
+  terraform init && \
+  pwd && ./delete_env.sh --prefix {{prefix}} --ignore-prefix '{{ignore-prefix}}' --interactive {{interactive}}
+
+
 #### MOCKS #####
 
 # generate new and update existing mocks from golang interfaces
@@ -160,13 +174,7 @@ validate-mocks:
 
 #### TESTS ####
 
-TEST_POD := 'test-pod-v1'
-
 TESTS_RELEASE := 'cloudbeat-test'
-TEST_LOGS_DIRECTORY := 'test-logs'
-POD_STATUS_UNKNOWN := 'Unknown'
-POD_STATUS_PENDING := 'Pending'
-POD_STATUS_RUNNING := 'Running'
 TIMEOUT := '1200s'
 TESTS_TIMEOUT := '60m'
 ELK_STACK_VERSION := env_var('ELK_VERSION')
@@ -209,61 +217,3 @@ cleanup-create-local-helm-cluster target range='..' $GOARCH=LOCAL_GOARCH: delete
   just load-cloudbeat-image
   just deploy-tests-helm {{target}} tests/deploy/values/ci.yml {{range}}
 
-
-test-pod-status:
-  #!/usr/bin/env sh
-
-  if [ ${STATUS=`kubectl get pod -n kube-system test-pod-v1 --template {{{{.status.phase}}`} ]; then
-    echo $STATUS
-  else
-    echo {{POD_STATUS_UNKNOWN}}
-  fi
-
-collect-logs target:
-  #!/usr/bin/env sh
-
-  echo 'Collecting logs for target {{target}}...'
-
-  LOG_FILE={{TEST_LOGS_DIRECTORY}}/{{target}}.log
-  LOG_FILE_TMP={{TEST_LOGS_DIRECTORY}}/{{target}}.log.tmp
-
-  mkdir -p {{TEST_LOGS_DIRECTORY}}
-  echo '' > $LOG_FILE
-
-  STATUS={{POD_STATUS_UNKNOWN}}
-  while [ $STATUS = {{POD_STATUS_UNKNOWN}} ] || [ $STATUS = {{POD_STATUS_PENDING}} ] || [ $STATUS = {{POD_STATUS_RUNNING}} ]; do
-    sleep 5
-
-    STATUS=`just test-pod-status`
-    if [ $STATUS = {{POD_STATUS_UNKNOWN}} ]; then
-      continue
-    fi
-
-    kubectl logs test-pod-v1 -n kube-system 2>&1 > $LOG_FILE_TMP
-
-    if [ `stat -c%s "${LOG_FILE_TMP}"` -gt `stat -c%s "${LOG_FILE}"` ]; then
-      cp $LOG_FILE_TMP $LOG_FILE
-      echo "Wrote logs to ${LOG_FILE}"
-    fi
-  done
-
-  rm $LOG_FILE_TMP
-  echo 'Done collecting logs for target {{target}}.'
-
-run-test-target target range='..':
-  echo 'Cleaning up cluster for running test target: {{target}}'
-  just cleanup-create-local-helm-cluster {{target}} {{range}}
-
-  echo 'Running test target: {{target}}'
-  just build-load-run-tests &
-
-
-run-test-targets range='..' +targets='file_system_rules k8s_object_rules process_api_server_rules process_controller_manager_rules process_etcd_rules process_kubelet_rules process_scheduler_rules':
-  #!/usr/bin/env sh
-
-  echo 'Running tests: {{targets}}'
-
-  for TARGET in {{targets}}; do
-    just run-test-target $TARGET {{range}}
-    just collect-logs $TARGET
-  done

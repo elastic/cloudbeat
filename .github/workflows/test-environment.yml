@@ -1,4 +1,5 @@
-name: Sanity tests
+name: Create Environment
+run-name: Creating ${{ github.event.inputs.deployment_name }} by @${{ github.actor }}
 
 on:
   # Ability to execute on demand
@@ -16,15 +17,19 @@ on:
         required: true
       elk-stack-version:
         required: true
-        description: "Elastic Cloud stack SNAPSHOT or BC version"
-        default: "8.7.2-SNAPSHOT"
+        description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        default: "8.8.0"
       ess-region:
         required: true
         description: "Elastic Cloud deployment region"
         default: "gcp-us-west2"
       docker-image-override:
         required: false
-        description: "Provide the full Docker image path to override the default image (BC versions only)"
+        description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
+      run-sanity-tests:
+          description: "Run sanity tests after provision"
+          default: false
+          type: boolean
       cleanup-env:
         description: "Cleanup resources after provision"
         default: false
@@ -36,6 +41,7 @@ env:
   AWS_REGION: "eu-west-1"
   WORKING_DIR: deploy/test-environments
   FLEET_API_DIR: fleet_api/src
+  AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
 
 jobs:
   Deploy:
@@ -51,6 +57,7 @@ jobs:
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ github.event.inputs.docker-image-override }}
       STACK_VERSION: ${{ github.event.inputs.elk-stack-version }}
+      CNVM_STACK_NAME: "${{ github.event.inputs.deployment_name }}-cnvm-sanity-test-stack"
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -76,8 +83,9 @@ jobs:
           poetry --version
 
       - name: Install Fleet API dependencies
+        id: fleet-api-deps
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd fleet_api
           poetry install
 
       - name: Configure AWS credentials
@@ -163,10 +171,21 @@ jobs:
           echo "$summary" >> $GITHUB_STEP_SUMMARY
           echo "$summary" # Print the summary to the workflow log
 
+      - name: Install CNVM integration
+        id: cnvm
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/install_cnvm_integration.py
+
+      - name: Deploy CNVM agent
+        env:
+          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+        run: just deploy-cloudformation
+
       - name: Install KSPM EKS integration
         id: kspm-eks
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd fleet_api
           poetry run python src/install_kspm_eks_integration.py
 
       - name: Deploy KSPM EKS agent
@@ -182,8 +201,8 @@ jobs:
 
       - name: Install KSPM Unmanaged integration
         id: kspm-unmanaged
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd fleet_api
           poetry run python src/install_kspm_unmanaged_integration.py
 
       - name: Deploy KSPM Unmanaged agent
@@ -196,8 +215,8 @@ jobs:
 
       - name: Install CSPM integration
         id: cspm
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd fleet_api
           poetry run python src/install_cspm_integration.py
 
       - name: Deploy CSPM agent
@@ -217,10 +236,16 @@ jobs:
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
 
-      - name: Run Sanity checks
-        if: success()
+      - name: Wait for agents to enroll
+        id: wait-for-agents
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
-          cd ../../tests
+          poetry run python src/agents_enrolled.py
+
+      - name: Run Sanity checks
+        if: ${{ success() && github.event.inputs.run-sanity-tests == 'true' }}
+        working-directory: ./tests
+        run: |
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
@@ -228,3 +253,10 @@ jobs:
         if: github.event.inputs.cleanup-env == 'true'
         run: |
           terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
+          aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
+
+      - name: Tag CNVM Instance
+        if: github.event.inputs.cleanup-env == 'false'
+        env:
+          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} '${{ env.AWS_DEFAULT_TAGS }} Key=owner,Value=${{ github.actor }}'

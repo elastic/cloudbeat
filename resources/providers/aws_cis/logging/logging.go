@@ -19,12 +19,13 @@ package logging
 
 import (
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 )
 
 type Client interface {
@@ -44,7 +45,6 @@ func NewProvider(
 	multiRegionS3Factory awslib.CrossRegionFactory[s3.Client],
 	accountId string,
 ) *Provider {
-
 	return &Provider{
 		log:           log,
 		s3Provider:    s3.NewProvider(log, cfg, multiRegionS3Factory, accountId),

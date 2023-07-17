@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
@@ -29,6 +30,11 @@ type Ec2Instance struct {
 	types.Instance
 	Region     string
 	awsAccount string
+}
+
+type SecurityGroupInfo struct {
+	GroupId   *string `json:"group_id,omitempty"`
+	GroupName *string `json:"group_name,omitempty"`
 }
 
 func (i Ec2Instance) GetResourceArn() string {
@@ -59,4 +65,34 @@ func (i Ec2Instance) GetResourceId() string {
 
 func (i Ec2Instance) GetResourceType() string {
 	return fetching.EC2Type
+}
+
+// TODO: Use genertic implementation with custom functions
+func (i Ec2Instance) GetResourceTags() map[string]string {
+	instanceTags := make(map[string]string, len(i.Tags))
+	for _, tag := range i.Tags {
+		instanceTags[*tag.Key] = *tag.Value
+	}
+	return instanceTags
+}
+
+// TODO: Use genertic implementation with custom functions
+func (i Ec2Instance) GetResourceMacAddresses() []string {
+	macAddresses := make([]string, len(i.NetworkInterfaces))
+	for i, iface := range i.NetworkInterfaces {
+		macAddresses[i] = *iface.MacAddress
+	}
+	return macAddresses
+}
+
+// TODO: Use genertic implementation with custom functions
+func (i Ec2Instance) GetResourceSecurityGroups() []SecurityGroupInfo {
+	securityGroups := make([]SecurityGroupInfo, len(i.SecurityGroups))
+	for i, group := range i.SecurityGroups {
+		securityGroups[i] = SecurityGroupInfo{
+			GroupId:   group.GroupId,
+			GroupName: group.GroupName,
+		}
+	}
+	return securityGroups
 }

@@ -11,6 +11,7 @@ Before running the scripts, ensure that you have set the following environment v
 - `ES_USER`: The username for the Elasticsearch instance.
 - `ES_PASSWORD`: The password for the Elasticsearch instance.
 - `KIBANA_URL`: The URL of the Kibana instance.
+- `STACK_VERSION`: The version of the Elastic Stack being used.
 
 ### AWS Configuration
 
@@ -53,7 +54,13 @@ Follow these steps to install the dependencies and execute the different scripts
     poetry run python src/install_cspm_integration.py
     ```
 
-6. To purge integrations, use the following command:
+6. To execute the CNVM integration, use the following command:
+
+    ``` bash
+    poetry run python src/install_cnvm_integration.py
+    ```
+
+7. To purge integrations, use the following command:
 
     ``` bash
     poetry run python src/purge_integrations.py

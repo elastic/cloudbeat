@@ -25,13 +25,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
+
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type DummyResource struct {
@@ -54,7 +56,7 @@ type OpaTestSuite struct {
 
 func TestOpaTestSuite(t *testing.T) {
 	s := new(OpaTestSuite)
-	s.log = logp.NewLogger("opa_evaluator_test")
+	s.log = testhelper.NewLogger(t)
 
 	suite.Run(t, s)
 }

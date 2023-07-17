@@ -18,16 +18,16 @@ from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     create_kubernetes_manifest,
+    get_cloud_security_posture_version,
+    update_package_version,
 )
 from loguru import logger
-from utils import (
-    read_json,
-    save_state,
-)
+from utils import read_json
+from state_file_manager import state_manager, PolicyState
 
 KSPM_EKS_AGENT_POLICY = "../../../cloud/data/agent_policy_eks.json"
 KSPM_EKS_PACKAGE_POLICY = "../../../cloud/data/package_policy_eks.json"
-
+KSPM_EKS_EXPECTED_AGENTS = 2
 
 kspm_agent_policy_data = Path(__file__).parent / KSPM_EKS_AGENT_POLICY
 kspm_eks_pkg_policy_data = Path(__file__).parent / KSPM_EKS_PACKAGE_POLICY
@@ -47,6 +47,10 @@ def load_data() -> Tuple[Dict, Dict]:
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
+    package_version = get_cloud_security_posture_version(cfg=cnfg.elk_config)
+    logger.info(f"Package version: {package_version}")
+    update_package_version(cfg=cnfg.elk_config, package_version=package_version)
+
     logger.info("Starting installation of KSPM EKS integration.")
     agent_data, package_data = load_data()
 
@@ -67,15 +71,8 @@ if __name__ == "__main__":
         eks_data=eks_data,
     )
 
-    save_state(
-        cnfg.state_data_file,
-        [
-            {
-                "pkg_policy_id": package_policy_id,
-                "agnt_policy_id": agent_policy_id,
-            },
-        ],
-    )
+    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, KSPM_EKS_EXPECTED_AGENTS))
+
     manifest_params = Munch()
     manifest_params.enrollment_token = get_enrollment_token(
         cfg=cnfg.elk_config,

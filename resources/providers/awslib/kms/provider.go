@@ -22,10 +22,11 @@ import (
 
 	kmsClient "github.com/aws/aws-sdk-go-v2/service/kms"
 	"github.com/aws/aws-sdk-go-v2/service/kms/types"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type Provider struct {
@@ -57,7 +58,6 @@ func (p *Provider) DescribeSymmetricKeys(ctx context.Context) ([]awslib.AwsResou
 
 		var result []awslib.AwsResource
 		for _, keyEntry := range kmsKeys {
-
 			keyInfo, err := c.DescribeKey(ctx, &kmsClient.DescribeKeyInput{
 				KeyId: keyEntry.KeyId,
 			})
@@ -95,7 +95,6 @@ func (k KmsInfo) GetResourceArn() string {
 		return ""
 	}
 	return *k.KeyMetadata.Arn
-
 }
 
 func (k KmsInfo) GetResourceName() string {
