@@ -210,6 +210,19 @@ func Test_Initialize(t *testing.T) {
 		},
 	}
 
+	baseGcpConfig := config.Config{
+		CloudConfig: config.CloudConfig{
+			Gcp: config.GcpConfig{
+				ProjectId:    "some-project",
+				GcpClientOpt: config.GcpClientOpt{},
+			},
+		},
+	}
+	validGcpConfig := baseGcpConfig
+	validGcpConfig.CloudConfig.Gcp.CredentialsJSON = `{
+		"type": "authorized_user"
+	}`
+
 	tests := []struct {
 		name         string
 		benchmark    Benchmark
@@ -435,6 +448,28 @@ func Test_Initialize(t *testing.T) {
 				AwsMetadataProvider:      mockMetadataProvider(errors.New("some error")),       // ignored
 				EksClusterNameProvider:   mockEksClusterNameProvider(errors.New("some error")), // ignored
 			},
+		},
+		// GCP tests
+		{
+			name:         "no error",
+			benchmark:    &GCP{},
+			cfg:          validGcpConfig,
+			dependencies: Dependencies{},
+		},
+		// TODO: mock client
+		// {
+		// 	name:         "return an error",
+		// 	benchmark:    &GCP{},
+		// 	cfg:          validGcpConfig,
+		// 	dependencies: Dependencies{},
+		// 	wantErr: 	"failed to initialize gcp fetchers",
+		// },
+		{
+			name:         "missing credentials",
+			benchmark:    &GCP{},
+			cfg:          baseGcpConfig, // missing credentials
+			dependencies: Dependencies{},
+			wantErr:      "failed to initialize gcp config",
 		},
 	}
 	for _, tt := range tests {
