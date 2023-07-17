@@ -29,8 +29,9 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
-	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	"github.com/samber/lo"
+
+	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
 
 type ProviderTestSuite struct {
