@@ -18,10 +18,10 @@ testData:
   markerCmd: -m
   clusterConfig: test-eks-config-1
   eksNodes:
-    EKS_CONFIG_1_NODE_1: "ip-192-168-15-75.eu-west-2.compute.internal"
-    EKS_CONFIG_1_NODE_2: "ip-192-168-38-87.eu-west-2.compute.internal"
-    EKS_CONFIG_2_NODE_1: "ip-192-168-14-74.eu-west-2.compute.internal"
-    EKS_CONFIG_2_NODE_2: "ip-192-168-89-216.eu-west-2.compute.internal"
+    EKS_CONFIG_1_NODE_1: "ip-192-168-29-162.eu-west-2.compute.internal"
+    EKS_CONFIG_1_NODE_2: "ip-192-168-93-227.eu-west-2.compute.internal"
+    EKS_CONFIG_2_NODE_1: "ip-192-168-33-106.eu-west-2.compute.internal"
+    EKS_CONFIG_2_NODE_2: "ip-192-168-6-157.eu-west-2.compute.internal"
 
 imagePullSecrets: []
 nameOverride: ""
