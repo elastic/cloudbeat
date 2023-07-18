@@ -6,6 +6,7 @@ linters:
   enable:
     - contextcheck
     - exhaustruct
+    - exportloopref
     - gocyclo
     - reassign
     - misspell

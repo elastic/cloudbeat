@@ -40,31 +40,24 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-type expectedFetchers struct {
-	names []string
-	count int
-}
-
 func TestNewBenchmark(t *testing.T) {
 	t.Setenv("NODE_NAME", "node-name")
+
 	tests := []struct {
 		name    string
 		cfg     *config.Config
 		wantErr bool
-		want    expectedFetchers
+		want    []string
 	}{
 		{
 			name: "Get k8s benchmark",
 			cfg: &config.Config{
 				Benchmark: config.CIS_K8S,
 			},
-			want: expectedFetchers{
-				names: []string{
-					fetching.FileSystemType,
-					fetching.KubeAPIType,
-					fetching.ProcessType,
-				},
-				count: 3,
+			want: []string{
+				fetching.FileSystemType,
+				fetching.KubeAPIType,
+				fetching.ProcessType,
 			},
 		},
 		{
@@ -79,17 +72,44 @@ func TestNewBenchmark(t *testing.T) {
 					},
 				},
 			},
-			want: expectedFetchers{
-				names: []string{
-					fetching.IAMType,
-					fetching.KmsType,
-					fetching.TrailType,
-					fetching.MonitoringType,
-					fetching.EC2NetworkingType,
-					fetching.RdsType,
-					fetching.S3Type,
+			want: []string{
+				fetching.IAMType,
+				fetching.KmsType,
+				fetching.TrailType,
+				fetching.MonitoringType,
+				fetching.EC2NetworkingType,
+				fetching.RdsType,
+				fetching.S3Type,
+			},
+		},
+		{
+			name: "Get CIS AWS org benchmark",
+			cfg: &config.Config{
+				Benchmark: config.CIS_AWS,
+				CloudConfig: config.CloudConfig{
+					Aws: config.AwsConfig{
+						Cred: aws.ConfigAWS{
+							AccessKeyID: "test",
+						},
+						AccountType: "organization_account",
+					},
 				},
-				count: 7,
+			},
+			want: []string{
+				"123-" + fetching.IAMType,
+				"123-" + fetching.KmsType,
+				"123-" + fetching.TrailType,
+				"123-" + fetching.MonitoringType,
+				"123-" + fetching.EC2NetworkingType,
+				"123-" + fetching.RdsType,
+				"123-" + fetching.S3Type,
+				"test-account-" + fetching.IAMType,
+				"test-account-" + fetching.KmsType,
+				"test-account-" + fetching.TrailType,
+				"test-account-" + fetching.MonitoringType,
+				"test-account-" + fetching.EC2NetworkingType,
+				"test-account-" + fetching.RdsType,
+				"test-account-" + fetching.S3Type,
 			},
 		},
 		{
@@ -97,13 +117,10 @@ func TestNewBenchmark(t *testing.T) {
 			cfg: &config.Config{
 				Benchmark: config.CIS_EKS,
 			},
-			want: expectedFetchers{
-				names: []string{
-					fetching.FileSystemType,
-					fetching.KubeAPIType,
-					fetching.ProcessType,
-				},
-				count: 3,
+			want: []string{
+				fetching.FileSystemType,
+				fetching.KubeAPIType,
+				fetching.ProcessType,
 			},
 		},
 		{
@@ -118,15 +135,12 @@ func TestNewBenchmark(t *testing.T) {
 					},
 				},
 			},
-			want: expectedFetchers{
-				names: []string{
-					fetching.FileSystemType,
-					fetching.KubeAPIType,
-					fetching.ProcessType,
-					fetching.EcrType,
-					fetching.ElbType,
-				},
-				count: 5,
+			want: []string{
+				fetching.FileSystemType,
+				fetching.KubeAPIType,
+				fetching.ProcessType,
+				fetching.EcrType,
+				fetching.ElbType,
 			},
 		},
 		{
@@ -134,10 +148,7 @@ func TestNewBenchmark(t *testing.T) {
 			cfg: &config.Config{
 				Benchmark: "Non existing benchmark",
 			},
-			want: expectedFetchers{
-				names: []string{},
-				count: 0,
-			},
+			want:    []string{},
 			wantErr: true,
 		},
 	}
@@ -160,24 +171,25 @@ func TestNewBenchmark(t *testing.T) {
 				testhelper.NewLogger(t),
 				tt.cfg,
 				make(chan fetching.ResourceInfo),
-				NewDependencies(
-					mockAwsCfg(nil),
-					mockIdentityProvider(nil),
-					mockKubeClient(nil),
-					mockMetadataProvider(nil),
-					mockEksClusterNameProvider(nil),
-				),
+				&Dependencies{
+					AwsCfgProvider:           mockAwsCfg(nil),
+					AwsIdentityProvider:      mockIdentityProvider(nil),
+					AwsAccountProvider:       mockAccountProvider(nil),
+					KubernetesClientProvider: mockKubeClient(nil),
+					AwsMetadataProvider:      mockMetadataProvider(nil),
+					EksClusterNameProvider:   mockEksClusterNameProvider(nil),
+				},
 			)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
 			}
 			require.NoError(t, err)
-			assert.Equal(t, tt.want.count, len(fetchersMap.Keys()))
+			assert.Len(t, fetchersMap.Keys(), len(tt.want))
 
 			require.NoError(t, b.Run(context.Background()))
 			defer b.Stop()
-			for _, fetcher := range tt.want.names {
+			for _, fetcher := range tt.want {
 				ok := fetchersMap.ShouldRun(fetcher)
 				assert.Truef(t, ok, "fetcher %s enabled", fetcher)
 			}
@@ -186,6 +198,8 @@ func TestNewBenchmark(t *testing.T) {
 }
 
 func Test_Initialize(t *testing.T) {
+	t.Setenv("NODE_NAME", "node-name")
+
 	awsCfg := config.Config{
 		CloudConfig: config.CloudConfig{
 			Aws: config.AwsConfig{
@@ -216,6 +230,7 @@ func Test_Initialize(t *testing.T) {
 		cfg          config.Config
 		wantErr      string
 	}{
+		// AWS test
 		{
 			name:      "nothing initialized",
 			benchmark: &AWS{},
@@ -225,7 +240,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "identity provider error",
 			benchmark: &AWS{},
 			dependencies: Dependencies{
-				identityProvider: mockIdentityProvider(errors.New("some error")),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: nil,
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			wantErr: "some error",
 		},
@@ -234,8 +254,69 @@ func Test_Initialize(t *testing.T) {
 			name:      "no error",
 			benchmark: &AWS{},
 			dependencies: Dependencies{
-				identityProvider:   mockIdentityProvider(nil),
-				kubernetesProvider: mockKubeClient(errors.New("some error")), // ineffectual
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(errors.New("some error")), // ineffectual
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
+			},
+		},
+		// AWS org tests
+		{
+			name:      "nothing initialized",
+			benchmark: &AWSOrg{},
+			wantErr:   "aws identity provider is uninitialized",
+		},
+		{
+			name:      "account provider uninitialized",
+			benchmark: &AWSOrg{},
+			dependencies: Dependencies{
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: nil,
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
+			},
+			wantErr: "account provider is uninitialized",
+		},
+		{
+			name:      "identity provider error",
+			benchmark: &AWSOrg{},
+			dependencies: Dependencies{
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: nil,
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
+			},
+			wantErr: "some error",
+		},
+		{
+			name:      "account provider error",
+			benchmark: &AWSOrg{},
+			dependencies: Dependencies{
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsAccountProvider:       mockAccountProvider(errors.New("some error")),
+				KubernetesClientProvider: nil,
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
+			},
+			wantErr: "some error",
+		},
+		{
+			name:      "no error",
+			benchmark: &AWSOrg{},
+			dependencies: Dependencies{
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsAccountProvider:       mockAccountProvider(nil),
+				KubernetesClientProvider: mockKubeClient(errors.New("some error")), // ineffectual
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 		},
 		// K8S tests
@@ -248,7 +329,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "kubernetes provider error",
 			benchmark: &K8S{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(errors.New("some error")),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(errors.New("some error")),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			wantErr: "some error",
 		},
@@ -256,7 +342,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "ignored uninitialized aws provider",
 			benchmark: &K8S{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			cfg: awsCfg,
 		},
@@ -264,8 +355,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "no error",
 			benchmark: &K8S{},
 			dependencies: Dependencies{
-				identityProvider:   mockIdentityProvider(errors.New("some error")), // ineffectual
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")), // ineffectual
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 		},
 		// EKS tests
@@ -278,7 +373,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "kubernetes provider error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(errors.New("some error")),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(errors.New("some error")),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			wantErr: "some error",
 		},
@@ -286,7 +386,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "uninitialized aws provider",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			cfg:     awsCfg,
 			wantErr: "aws config provider is uninitialized",
@@ -295,8 +400,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "aws error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				awsCfgProvider:     mockAwsCfg(errors.New("some error")),
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           mockAwsCfg(errors.New("some error")),
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			cfg:     awsCfg,
 			wantErr: "some error",
@@ -305,9 +414,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "aws identity provider error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				awsCfgProvider:     mockAwsCfg(nil),
-				identityProvider:   mockIdentityProvider(errors.New("some error")),
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           mockAwsCfg(nil),
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			cfg:     awsCfg,
 			wantErr: "some error",
@@ -316,7 +428,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "dependencies uninitialized",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				kubernetesProvider: mockKubeClient(nil),
+				AwsCfgProvider:           nil,
+				AwsIdentityProvider:      nil,
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      nil,
+				EksClusterNameProvider:   nil,
 			},
 			wantErr: "EKS dependencies uninitialized",
 		},
@@ -324,11 +441,12 @@ func Test_Initialize(t *testing.T) {
 			name:      "no error",
 			benchmark: &EKS{},
 			dependencies: Dependencies{
-				awsCfgProvider:         mockAwsCfg(nil),
-				identityProvider:       mockIdentityProvider(errors.New("some error")), // ineffectual
-				kubernetesProvider:     mockKubeClient(nil),
-				metadataProvider:       mockMetadataProvider(errors.New("some error")),       // ignored
-				eksClusterNameProvider: mockEksClusterNameProvider(errors.New("some error")), // ignored
+				AwsCfgProvider:           mockAwsCfg(nil),
+				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")), // ineffectual
+				AwsAccountProvider:       nil,
+				KubernetesClientProvider: mockKubeClient(nil),
+				AwsMetadataProvider:      mockMetadataProvider(errors.New("some error")),       // ignored
+				EksClusterNameProvider:   mockEksClusterNameProvider(errors.New("some error")), // ignored
 			},
 		},
 		// GCP tests
@@ -355,8 +473,9 @@ func Test_Initialize(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
 		t.Run(fmt.Sprintf("%T: %s", tt.benchmark, tt.name), func(t *testing.T) {
-			t.Setenv("NODE_NAME", "node-name")
+			t.Parallel()
 
 			reg, dp, err := tt.benchmark.Initialize(
 				context.Background(),
@@ -468,5 +587,27 @@ func mockEksClusterNameProvider(err error) *awslib.MockEKSClusterNameProviderAPI
 		on.Return("", err)
 	}
 
+	return &provider
+}
+
+func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
+	provider := awslib.MockAccountProviderAPI{}
+	on := provider.EXPECT().ListAccounts(mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return([]awslib.Identity{
+			{
+				Account: "123",
+				Alias:   "some-name",
+			},
+		}, nil)
+	} else {
+		on.Return(nil, err)
+	}
+	return &provider
+}
+
+func mockAccountProviderWithIdentities(identities []awslib.Identity) *awslib.MockAccountProviderAPI {
+	provider := awslib.MockAccountProviderAPI{}
+	provider.EXPECT().ListAccounts(mock.Anything, mock.Anything).Return(identities, nil)
 	return &provider
 }
