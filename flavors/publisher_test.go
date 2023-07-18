@@ -30,7 +30,7 @@ import (
 )
 
 func TestPublisher_HandleEvents(t *testing.T) {
-	testCases := []struct {
+	type testCase struct {
 		name              string
 		interval          time.Duration
 		threshold         int
@@ -38,7 +38,8 @@ func TestPublisher_HandleEvents(t *testing.T) {
 		eventCount        int
 		expectedEventSize []int
 		closeChannel      bool
-	}{
+	}
+	testCases := []testCase{
 		{
 			name:              "Publish events on threshold reached",
 			interval:          time.Minute,
@@ -129,7 +130,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 
 			eventsChannel := make(chan beat.Event)
 
-			go func() {
+			go func(tc testCase) {
 				for i := 0; i < tc.eventCount; i++ {
 					select {
 					case <-ctx.Done():
@@ -142,7 +143,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 				if tc.closeChannel {
 					close(eventsChannel)
 				}
-			}()
+			}(tc)
 
 			publisher.HandleEvents(ctx, eventsChannel)
 		})
