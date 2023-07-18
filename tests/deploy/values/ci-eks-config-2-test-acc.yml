@@ -23,5 +23,6 @@ testData:
   clusterType: eks
   markerCmd: -k # -k command line option to specify a substring match on the test names instead of the exact match
   clusterConfig: test-eks-config-2
-  conf2Node1: "ip-192-168-33-106.eu-west-2.compute.internal"
-  conf2Node2: "ip-192-168-6-157.eu-west-2.compute.internal"
+  eksNodes:
+    EKS_CONFIG_2_NODE_1: "ip-192-168-33-106.eu-west-2.compute.internal"
+    EKS_CONFIG_2_NODE_2: "ip-192-168-6-157.eu-west-2.compute.internal"

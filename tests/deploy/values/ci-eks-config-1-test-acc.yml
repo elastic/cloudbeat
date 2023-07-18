@@ -23,5 +23,6 @@ testData:
   clusterType: eks
   markerCmd: -k
   clusterConfig: test-eks-config-1
-  conf1Node1: "ip-192-168-29-162.eu-west-2.compute.internal"
-  conf1Node2: "ip-192-168-93-227.eu-west-2.compute.internal"
+  eksNodes:
+    EKS_CONFIG_1_NODE_1: "ip-192-168-29-162.eu-west-2.compute.internal"
+    EKS_CONFIG_1_NODE_2: "ip-192-168-93-227.eu-west-2.compute.internal"

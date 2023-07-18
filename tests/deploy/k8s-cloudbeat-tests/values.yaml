@@ -17,10 +17,11 @@ testData:
   agentName: cloudbeat
   markerCmd: -m
   clusterConfig: test-eks-config-1
-  conf1Node1: "ip-192-168-15-75.eu-west-2.compute.internal"
-  conf1Node2: "ip-192-168-38-87.eu-west-2.compute.internal"
-  conf2Node1: "ip-192-168-14-74.eu-west-2.compute.internal"
-  conf2Node2: "ip-192-168-89-216.eu-west-2.compute.internal"
+  eksNodes:
+    EKS_CONFIG_1_NODE_1: "ip-192-168-15-75.eu-west-2.compute.internal"
+    EKS_CONFIG_1_NODE_2: "ip-192-168-38-87.eu-west-2.compute.internal"
+    EKS_CONFIG_2_NODE_1: "ip-192-168-14-74.eu-west-2.compute.internal"
+    EKS_CONFIG_2_NODE_2: "ip-192-168-89-216.eu-west-2.compute.internal"
 
 imagePullSecrets: []
 nameOverride: ""

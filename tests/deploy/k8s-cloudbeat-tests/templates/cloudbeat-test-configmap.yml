@@ -10,10 +10,9 @@ data:
   ES_PASSWORD: "changeme"
   ES_HOST: "elasticsearch-master.kube-system"
   USE_DOCKER: "false"
-  EKS_CONFIG_1_NODE_1: {{ .Values.testData.conf1Node1}}
-  EKS_CONFIG_1_NODE_2: {{ .Values.testData.conf1Node2}}
-  EKS_CONFIG_2_NODE_1: {{ .Values.testData.conf2Node1}}
-  EKS_CONFIG_2_NODE_2: {{ .Values.testData.conf2Node2}}
+  {{- range $key, $value := .Values.testData.eksNodes }}
+  {{ $key }}: {{ $value }}
+  {{- end }}
   MARKER_CMD: {{ .Values.testData.markerCmd}}
   TEST_MARKER: {{ .Values.testData.marker }}
   {{- if .Values.testData.range }}
