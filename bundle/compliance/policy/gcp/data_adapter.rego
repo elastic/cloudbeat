@@ -1,8 +1,12 @@
 package compliance.policy.gcp.data_adapter
 
-resource = input.resource.asset.resource
+import data.compliance.lib.common
 
-iam_policy = object.get(input.resource.asset, "iam_policy", {})
+resource = input.resource.resource
+
+iam_policy = input.resource.iam_policy
+
+has_policy = common.contains_key(input.resource, "iam_policy")
 
 is_gcs_bucket {
 	input.subType == "gcp-gcs"
