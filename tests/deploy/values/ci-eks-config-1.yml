@@ -5,7 +5,6 @@ elasticsearch:
 image:
   repository: 391946104644.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat-test
   pullPolicy: Always
-  ecr: 391946104644.dkr.ecr.eu-west-2.amazonaws.com
 
 cloudbeat:
   deploy: false

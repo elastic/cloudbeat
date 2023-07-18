@@ -10,7 +10,7 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
-  ecr: 704479110758.dkr.ecr.eu-west-2.amazonaws.com
+  ecr: 391946104644.dkr.ecr.eu-west-2.amazonaws.com
 
 testData:
   marker: rules
