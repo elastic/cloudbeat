@@ -96,7 +96,7 @@ func (f *GcpAssetsFetcher) Stop() {
 }
 
 func (r *GcpAsset) GetData() interface{} {
-	return r
+	return r.Asset
 }
 
 func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {

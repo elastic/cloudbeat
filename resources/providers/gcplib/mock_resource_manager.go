@@ -22,7 +22,7 @@ package gcplib
 import (
 	context "context"
 
-	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v3"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -40,8 +40,63 @@ func (_m *MockResourceManager) EXPECT() *MockResourceManager_Expecter {
 	return &MockResourceManager_Expecter{mock: &_m.Mock}
 }
 
-// OrganizationsGet provides a mock function with given fields: _a0, _a1
-func (_m *MockResourceManager) OrganizationsGet(_a0 context.Context, _a1 string) (*cloudresourcemanager.Organization, error) {
+// foldersGet provides a mock function with given fields: _a0, _a1
+func (_m *MockResourceManager) foldersGet(_a0 context.Context, _a1 string) (*cloudresourcemanager.Folder, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *cloudresourcemanager.Folder
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*cloudresourcemanager.Folder, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *cloudresourcemanager.Folder); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*cloudresourcemanager.Folder)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockResourceManager_foldersGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'foldersGet'
+type MockResourceManager_foldersGet_Call struct {
+	*mock.Call
+}
+
+// foldersGet is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 string
+func (_e *MockResourceManager_Expecter) foldersGet(_a0 interface{}, _a1 interface{}) *MockResourceManager_foldersGet_Call {
+	return &MockResourceManager_foldersGet_Call{Call: _e.mock.On("foldersGet", _a0, _a1)}
+}
+
+func (_c *MockResourceManager_foldersGet_Call) Run(run func(_a0 context.Context, _a1 string)) *MockResourceManager_foldersGet_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockResourceManager_foldersGet_Call) Return(_a0 *cloudresourcemanager.Folder, _a1 error) *MockResourceManager_foldersGet_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockResourceManager_foldersGet_Call) RunAndReturn(run func(context.Context, string) (*cloudresourcemanager.Folder, error)) *MockResourceManager_foldersGet_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// organizationsGet provides a mock function with given fields: _a0, _a1
+func (_m *MockResourceManager) organizationsGet(_a0 context.Context, _a1 string) (*cloudresourcemanager.Organization, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *cloudresourcemanager.Organization
@@ -66,37 +121,37 @@ func (_m *MockResourceManager) OrganizationsGet(_a0 context.Context, _a1 string)
 	return r0, r1
 }
 
-// MockResourceManager_OrganizationsGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'OrganizationsGet'
-type MockResourceManager_OrganizationsGet_Call struct {
+// MockResourceManager_organizationsGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'organizationsGet'
+type MockResourceManager_organizationsGet_Call struct {
 	*mock.Call
 }
 
-// OrganizationsGet is a helper method to define mock.On call
+// organizationsGet is a helper method to define mock.On call
 //   - _a0 context.Context
 //   - _a1 string
-func (_e *MockResourceManager_Expecter) OrganizationsGet(_a0 interface{}, _a1 interface{}) *MockResourceManager_OrganizationsGet_Call {
-	return &MockResourceManager_OrganizationsGet_Call{Call: _e.mock.On("OrganizationsGet", _a0, _a1)}
+func (_e *MockResourceManager_Expecter) organizationsGet(_a0 interface{}, _a1 interface{}) *MockResourceManager_organizationsGet_Call {
+	return &MockResourceManager_organizationsGet_Call{Call: _e.mock.On("organizationsGet", _a0, _a1)}
 }
 
-func (_c *MockResourceManager_OrganizationsGet_Call) Run(run func(_a0 context.Context, _a1 string)) *MockResourceManager_OrganizationsGet_Call {
+func (_c *MockResourceManager_organizationsGet_Call) Run(run func(_a0 context.Context, _a1 string)) *MockResourceManager_organizationsGet_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *MockResourceManager_OrganizationsGet_Call) Return(_a0 *cloudresourcemanager.Organization, _a1 error) *MockResourceManager_OrganizationsGet_Call {
+func (_c *MockResourceManager_organizationsGet_Call) Return(_a0 *cloudresourcemanager.Organization, _a1 error) *MockResourceManager_organizationsGet_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockResourceManager_OrganizationsGet_Call) RunAndReturn(run func(context.Context, string) (*cloudresourcemanager.Organization, error)) *MockResourceManager_OrganizationsGet_Call {
+func (_c *MockResourceManager_organizationsGet_Call) RunAndReturn(run func(context.Context, string) (*cloudresourcemanager.Organization, error)) *MockResourceManager_organizationsGet_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// ProjectsGet provides a mock function with given fields: _a0, _a1
-func (_m *MockResourceManager) ProjectsGet(_a0 context.Context, _a1 string) (*cloudresourcemanager.Project, error) {
+// projectsGet provides a mock function with given fields: _a0, _a1
+func (_m *MockResourceManager) projectsGet(_a0 context.Context, _a1 string) (*cloudresourcemanager.Project, error) {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 *cloudresourcemanager.Project
@@ -121,31 +176,31 @@ func (_m *MockResourceManager) ProjectsGet(_a0 context.Context, _a1 string) (*cl
 	return r0, r1
 }
 
-// MockResourceManager_ProjectsGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ProjectsGet'
-type MockResourceManager_ProjectsGet_Call struct {
+// MockResourceManager_projectsGet_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'projectsGet'
+type MockResourceManager_projectsGet_Call struct {
 	*mock.Call
 }
 
-// ProjectsGet is a helper method to define mock.On call
+// projectsGet is a helper method to define mock.On call
 //   - _a0 context.Context
 //   - _a1 string
-func (_e *MockResourceManager_Expecter) ProjectsGet(_a0 interface{}, _a1 interface{}) *MockResourceManager_ProjectsGet_Call {
-	return &MockResourceManager_ProjectsGet_Call{Call: _e.mock.On("ProjectsGet", _a0, _a1)}
+func (_e *MockResourceManager_Expecter) projectsGet(_a0 interface{}, _a1 interface{}) *MockResourceManager_projectsGet_Call {
+	return &MockResourceManager_projectsGet_Call{Call: _e.mock.On("projectsGet", _a0, _a1)}
 }
 
-func (_c *MockResourceManager_ProjectsGet_Call) Run(run func(_a0 context.Context, _a1 string)) *MockResourceManager_ProjectsGet_Call {
+func (_c *MockResourceManager_projectsGet_Call) Run(run func(_a0 context.Context, _a1 string)) *MockResourceManager_projectsGet_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *MockResourceManager_ProjectsGet_Call) Return(_a0 *cloudresourcemanager.Project, _a1 error) *MockResourceManager_ProjectsGet_Call {
+func (_c *MockResourceManager_projectsGet_Call) Return(_a0 *cloudresourcemanager.Project, _a1 error) *MockResourceManager_projectsGet_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockResourceManager_ProjectsGet_Call) RunAndReturn(run func(context.Context, string) (*cloudresourcemanager.Project, error)) *MockResourceManager_ProjectsGet_Call {
+func (_c *MockResourceManager_projectsGet_Call) RunAndReturn(run func(context.Context, string) (*cloudresourcemanager.Project, error)) *MockResourceManager_projectsGet_Call {
 	_c.Call.Return(run)
 	return _c
 }

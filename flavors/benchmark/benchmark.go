@@ -32,7 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
-	dp "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -48,6 +48,10 @@ type Benchmark interface {
 func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 	switch cfg.Benchmark {
 	case config.CIS_AWS:
+		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
+			return &AWSOrg{}, nil
+		}
+
 		return &AWS{}, nil
 	case config.CIS_EKS:
 		return &EKS{}, nil
@@ -60,56 +64,47 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 }
 
 type Dependencies struct {
-	awsCfgProvider         awslib.ConfigProviderAPI
-	awsIdentityProvider    awslib.IdentityProviderGetter
-	gcpIdentityProvider    gcplib.IdentityProviderGetter
-	kubernetesProvider     k8sprovider.ClientGetterAPI
-	metadataProvider       awslib.MetadataProvider
-	eksClusterNameProvider awslib.EKSClusterNameProviderAPI
-}
+	AwsCfgProvider           awslib.ConfigProviderAPI
+	AwsIdentityProvider      awslib.IdentityProviderGetter
+	AwsAccountProvider       awslib.AccountProviderAPI
+	GcpIdentityProvider      gcplib.IdentityProviderGetter
+	KubernetesClientProvider k8sprovider.ClientGetterAPI
 
-func NewDependencies(
-	awsCfgProvider awslib.ConfigProviderAPI,
-	awsIdentityProvider awslib.IdentityProviderGetter,
-	gcpIdentityProvider gcplib.IdentityProviderGetter,
-	kubernetesProvider k8sprovider.ClientGetterAPI,
-	metadataProvider awslib.MetadataProvider,
-	eksClusterNameProvider awslib.EKSClusterNameProviderAPI,
-) *Dependencies {
-	return &Dependencies{
-		awsCfgProvider:         awsCfgProvider,
-		awsIdentityProvider:    awsIdentityProvider,
-		gcpIdentityProvider:    gcpIdentityProvider,
-		kubernetesProvider:     kubernetesProvider,
-		metadataProvider:       metadataProvider,
-		eksClusterNameProvider: eksClusterNameProvider,
-	}
+	AwsMetadataProvider    awslib.MetadataProvider
+	EksClusterNameProvider awslib.EKSClusterNameProviderAPI
 }
 
 func (d *Dependencies) KubernetesClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
-	if d.kubernetesProvider == nil {
+	if d.KubernetesClientProvider == nil {
 		return nil, fmt.Errorf("k8s provider is uninitialized")
 	}
-	return d.kubernetesProvider.GetClient(log, kubeConfig, options)
+	return d.KubernetesClientProvider.GetClient(log, kubeConfig, options)
 }
 
 func (d *Dependencies) AWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error) {
-	if d.awsCfgProvider == nil {
+	if d.AwsCfgProvider == nil {
 		return nil, errors.New("aws config provider is uninitialized")
 	}
-	return d.awsCfgProvider.InitializeAWSConfig(ctx, cfg)
+	return d.AwsCfgProvider.InitializeAWSConfig(ctx, cfg)
 }
 
-func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*dp.Identity, error) {
-	if d.awsIdentityProvider == nil {
+func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*aws_dataprovider.Identity, error) {
+	if d.AwsIdentityProvider == nil {
 		return nil, errors.New("aws identity provider is uninitialized")
 	}
-	return d.awsIdentityProvider.GetIdentity(ctx, cfg)
+	return d.AwsIdentityProvider.GetIdentity(ctx, cfg)
 }
 
-func (d *Dependencies) GCPIdentity(ctx context.Context, cfg config.GcpConfig) (*dp.Identity, error) {
-	if d.gcpIdentityProvider == nil {
+func (d *Dependencies) AWSAccounts(ctx context.Context, cfg awssdk.Config) ([]aws_dataprovider.Identity, error) {
+	if d.AwsAccountProvider == nil {
+		return nil, errors.New("aws account provider is uninitialized")
+	}
+	return d.AwsAccountProvider.ListAccounts(ctx, cfg)
+}
+
+func (d *Dependencies) GCPIdentity(ctx context.Context, cfg config.GcpConfig) (*aws_dataprovider.Identity, error) {
+	if d.GcpIdentityProvider == nil {
 		return nil, errors.New("gcp identity provider is uninitialized")
 	}
-	return d.gcpIdentityProvider.GetIdentity(ctx, cfg)
+	return d.GcpIdentityProvider.GetIdentity(ctx, cfg)
 }

@@ -20,6 +20,7 @@ package testhelper
 import (
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/require"
@@ -33,9 +34,29 @@ func CollectResources[T any](ch chan T) []T {
 	var results []T
 	for {
 		select {
-		case value := <-ch:
+		case value, ok := <-ch:
+			if !ok {
+				return results
+			}
 			results = append(results, value)
 		default:
+			return results
+		}
+	}
+}
+
+// CollectResourcesWithTimeout fetches items from a channel and returns them in a slice after no elements have been
+// received for the specified timeout duration.
+func CollectResourcesWithTimeout[T any](ch chan T, timeout time.Duration) []T {
+	var results []T
+	for {
+		select {
+		case value, ok := <-ch:
+			if !ok {
+				return results
+			}
+			results = append(results, value)
+		case <-time.After(timeout):
 			return results
 		}
 	}

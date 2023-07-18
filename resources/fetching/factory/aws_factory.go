@@ -18,13 +18,16 @@
 package factory
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"go.uber.org/zap"
 
-	dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-
+	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
+	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/aws"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -41,7 +44,88 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib/sns"
 )
 
-func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *dataprovider.Identity) FetchersMap {
+type AwsAccount struct {
+	aws_dataprovider.Identity
+	aws.Config
+}
+
+type wrapResource struct {
+	wrapped  fetching.Resource
+	identity aws_dataprovider.Identity
+}
+
+func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	mdata, err := w.wrapped.GetMetadata()
+	if err != nil {
+		return mdata, err
+	}
+	mdata.AwsAccountAlias = w.identity.AccountAlias
+	mdata.AwsAccountId = w.identity.Account
+	return mdata, nil
+}
+
+func (w *wrapResource) GetData() any              { return w.wrapped.GetData() }
+func (w *wrapResource) GetElasticCommonData() any { return w.wrapped.GetElasticCommonData() }
+
+func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount) FetchersMap {
+	return newCisAwsOrganizationFactory(ctx, log, rootCh, accounts, NewCisAwsFactory)
+}
+
+// awsFactory is the same function type as NewCisAwsFactory, and it's used to mock the function in tests
+type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *aws_dataprovider.Identity) FetchersMap
+
+func newCisAwsOrganizationFactory(
+	ctx context.Context,
+	log *logp.Logger,
+	rootCh chan fetching.ResourceInfo,
+	accounts []AwsAccount,
+	factory awsFactory,
+) FetchersMap {
+	m := make(FetchersMap)
+	for _, account := range accounts {
+		ch := make(chan fetching.ResourceInfo)
+		go func(identity aws_dataprovider.Identity) {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case resourceInfo, ok := <-ch:
+					if !ok {
+						return
+					}
+
+					wrappedResourceInfo := fetching.ResourceInfo{
+						Resource: &wrapResource{
+							wrapped:  resourceInfo.Resource,
+							identity: identity,
+						},
+						CycleMetadata: resourceInfo.CycleMetadata,
+					}
+
+					select {
+					case <-ctx.Done():
+						return
+					case rootCh <- wrappedResourceInfo:
+					}
+				}
+			}
+		}(account.Identity)
+
+		fm := factory(
+			log.Named("aws").WithOptions(zap.Fields(zap.String("cloud.account.id", account.Identity.Account))),
+			account.Config,
+			ch,
+			&account.Identity,
+		)
+
+		for k, v := range fm {
+			m[fmt.Sprintf("%s-%s", account.Identity.Account, k)] = v
+		}
+	}
+	return m
+}
+
+func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *aws_dataprovider.Identity) FetchersMap {
 	log.Infof("Initializing AWS fetchers for account: '%s'", identity.Account)
 
 	m := make(FetchersMap)

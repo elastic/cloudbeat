@@ -15,61 +15,39 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package k8s
+package gcp
 
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/gofrs/uuid"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/version"
 )
 
-const (
-	clusterNameField = "orchestrator.cluster.name"
-)
-
-var uuidNamespace = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
-
 type DataProvider struct {
-	log       *logp.Logger
-	cfg       *config.Config
-	info      version.CloudbeatVersionInfo
-	cluster   string
-	clusterID string
-	nodeID    string
+	log *logp.Logger
 }
 
 func New(options ...Option) DataProvider {
-	kdp := DataProvider{}
+	adp := DataProvider{}
 	for _, opt := range options {
-		opt(&kdp)
+		opt(&adp)
 	}
-	return kdp
+	return adp
 }
 
-func (k DataProvider) FetchData(resource string, id string) (types.Data, error) {
-	switch resource {
-	case fetchers.ProcessResourceType, fetchers.FSResourceType:
-		id = uuid.NewV5(uuidNamespace, k.clusterID+k.nodeID+id).String()
-	case fetching.CloudContainerMgmt, fetching.CloudIdentity, fetching.CloudLoadBalancer, fetching.CloudContainerRegistry:
-		id = uuid.NewV5(uuidNamespace, k.clusterID).String()
-	}
+func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 	return types.Data{
-		ResourceID:  id,
-		VersionInfo: k.info,
+		ResourceID: id,
+		VersionInfo: version.CloudbeatVersionInfo{
+			Version: version.CloudbeatVersion(),
+			Policy:  version.PolicyVersion(),
+		},
 	}, nil
 }
 
-func (k DataProvider) EnrichEvent(event *beat.Event, _ fetching.ResourceMetadata) error {
-	name := k.cluster
-	if name == "" {
-		return nil
-	}
-	_, err := event.Fields.Put(clusterNameField, name)
-	return err
+func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
+	return nil
 }

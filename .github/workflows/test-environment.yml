@@ -1,4 +1,5 @@
 name: Create Environment
+run-name: Creating ${{ github.event.inputs.deployment_name }} by @${{ github.actor }}
 
 on:
   # Ability to execute on demand
@@ -16,7 +17,7 @@ on:
         required: true
       elk-stack-version:
         required: true
-        description: "Elastic Cloud stack SNAPSHOT or BC version"
+        description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.8.0"
       ess-region:
         required: true
@@ -24,7 +25,7 @@ on:
         default: "gcp-us-west2"
       docker-image-override:
         required: false
-        description: "Provide the full Docker image path to override the default image (BC versions only)"
+        description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
       run-sanity-tests:
           description: "Run sanity tests after provision"
           default: false

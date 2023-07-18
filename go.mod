@@ -53,6 +53,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.14.8
 	github.com/aws/aws-sdk-go-v2/service/iam v1.19.12
 	github.com/aws/aws-sdk-go-v2/service/kms v1.21.1
+	github.com/aws/aws-sdk-go-v2/service/organizations v1.15.2
 	github.com/aws/aws-sdk-go-v2/service/rds v1.40.2
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.11
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.29.2
@@ -92,7 +93,7 @@ require (
 	cloud.google.com/go/longrunning v0.5.0 // indirect
 	cloud.google.com/go/orgpolicy v1.11.0 // indirect
 	cloud.google.com/go/osconfig v1.12.0 // indirect
-	cloud.google.com/go/storage v1.30.1 // indirect
+	cloud.google.com/go/storage v1.29.0 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230106234847-43070de90fa1 // indirect
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20221215162035-5330a85ea652 // indirect
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible // indirect
