@@ -77,7 +77,7 @@ func (p *Publisher) HandleEvents(ctx context.Context, ch chan beat.Event) {
 				continue
 			}
 
-			p.log.Infof("Publisher buffer threshold reached", len(eventsToSend))
+			p.log.Infof("Publisher buffer threshold:%d reached", p.treshold)
 			p.publish(&eventsToSend)
 		}
 	}
@@ -88,7 +88,7 @@ func (p *Publisher) publish(events *[]beat.Event) {
 		return
 	}
 
-	p.log.Infof("Publishing %d events to elasticsearch")
+	p.log.Infof("Publishing %d events to elasticsearch", len(*events))
 	p.client.PublishAll(*events)
-	events = nil
+	*events = nil
 }

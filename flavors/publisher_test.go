@@ -37,42 +37,51 @@ func TestPublisher_HandleEvents(t *testing.T) {
 		ctxTimeout        time.Duration
 		eventCount        int
 		expectedEventSize []int
+		closeChannel      bool
 	}{
 		{
 			name:              "Publish events on threshold reached",
-			interval:          100 * time.Millisecond,
+			interval:          time.Minute,
 			threshold:         5,
-			ctxTimeout:        500 * time.Millisecond,
+			ctxTimeout:        200 * time.Millisecond,
 			eventCount:        5,
 			expectedEventSize: []int{5},
 		},
 		{
 			name:              "Publish events on threshold reached twice",
-			interval:          100 * time.Millisecond,
+			interval:          time.Minute,
 			threshold:         5,
-			ctxTimeout:        500 * time.Millisecond,
+			ctxTimeout:        200 * time.Millisecond,
 			eventCount:        10,
 			expectedEventSize: []int{5, 5},
 		},
 		{
-			name:              "Publish events on threshold reached twice and timeout",
+			name:              "Publish events on threshold reached twice and interval reached",
 			interval:          100 * time.Millisecond,
 			threshold:         5,
-			ctxTimeout:        500 * time.Millisecond,
+			ctxTimeout:        200 * time.Millisecond,
+			eventCount:        13,
+			expectedEventSize: []int{5, 5, 3},
+		},
+		{
+			name:              "Publish events on threshold reached twice and context reached",
+			interval:          time.Minute,
+			threshold:         5,
+			ctxTimeout:        200 * time.Millisecond,
 			eventCount:        13,
 			expectedEventSize: []int{5, 5, 3},
 		},
 		{
 			name:              "Publish events on context done",
-			interval:          100 * time.Millisecond,
+			interval:          time.Minute,
 			threshold:         5,
-			ctxTimeout:        20 * time.Millisecond,
-			eventCount:        1,
-			expectedEventSize: []int{1},
+			ctxTimeout:        100 * time.Millisecond,
+			eventCount:        3,
+			expectedEventSize: []int{3},
 		},
 		{
 			name:              "Publish 0 events on context done",
-			interval:          100 * time.Millisecond,
+			interval:          time.Minute,
 			threshold:         5,
 			ctxTimeout:        0,
 			eventCount:        5,
@@ -87,38 +96,51 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			expectedEventSize: []int{5},
 		},
 		{
-			name:              "Publish events on interval reached twice",
+			name:              "Publish events on interval reached 2 times",
 			interval:          45 * time.Millisecond,
 			threshold:         10,
 			ctxTimeout:        200 * time.Millisecond,
 			eventCount:        10,
-			expectedEventSize: []int{5, 5},
+			expectedEventSize: []int{5, 4, 1},
+		},
+		{
+			name:              "Publish events on closed channel",
+			interval:          time.Minute,
+			threshold:         10,
+			ctxTimeout:        time.Minute,
+			eventCount:        5,
+			expectedEventSize: []int{5},
+			closeChannel:      true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			goleak.VerifyNone(t, goleak.IgnoreCurrent())
 			log := testhelper.NewLogger(t)
+			goleak.VerifyNone(t, goleak.IgnoreCurrent())
+			ctx, cancel := context.WithTimeout(context.Background(), tc.ctxTimeout)
+			defer cancel()
+
 			client := newMockClient(t)
 			for _, size := range tc.expectedEventSize {
 				client.EXPECT().PublishAll(mock.MatchedBy(LengthMatcher(size)))
 			}
 			publisher := NewPublisher(log, tc.interval, tc.threshold, client)
-			ctx, cancel := context.WithTimeout(context.Background(), tc.ctxTimeout)
-			defer cancel()
 
-			// Simulate events being sent to the channel
 			eventsChannel := make(chan beat.Event)
-			defer close(eventsChannel)
 
 			go func() {
 				for i := 0; i < tc.eventCount; i++ {
 					select {
-					case eventsChannel <- beat.Event{}:
 					case <-ctx.Done():
+						return
+					// Simulate events being sent to the channel
+					case eventsChannel <- beat.Event{}:
 					}
 					time.Sleep(10 * time.Millisecond)
+				}
+				if tc.closeChannel {
+					close(eventsChannel)
 				}
 			}()
 
@@ -129,7 +151,6 @@ func TestPublisher_HandleEvents(t *testing.T) {
 
 func LengthMatcher(length int) func(events []beat.Event) bool {
 	return func(events []beat.Event) bool {
-		return true
-		// return len(events) == 2
+		return len(events) == length
 	}
 }
