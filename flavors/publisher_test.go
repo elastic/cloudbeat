@@ -23,9 +23,10 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/goleak"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestPublisher_HandleEvents(t *testing.T) {

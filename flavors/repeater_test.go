@@ -23,8 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestRepeater_Run(t *testing.T) {
