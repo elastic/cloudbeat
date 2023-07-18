@@ -37,7 +37,18 @@ func TestRepeater_Run(t *testing.T) {
 		expectedErrMsg string
 	}{
 		{
-			name:       "Function succeeds",
+			name:       "Function succeeds once",
+			interval:   100 * time.Millisecond,
+			ctxTimeout: 20 * time.Millisecond,
+			fnMock: func(t *testing.T) *MockRepeaterFunc {
+				m := NewMockRepeaterFunc(t)
+				m.EXPECT().Execute().Return(nil).Once()
+				return m
+			},
+			expectedErrMsg: "",
+		},
+		{
+			name:       "Function succeeds 4 times",
 			interval:   100 * time.Millisecond,
 			ctxTimeout: 350 * time.Millisecond,
 			fnMock: func(t *testing.T) *MockRepeaterFunc {
@@ -48,23 +59,25 @@ func TestRepeater_Run(t *testing.T) {
 			expectedErrMsg: "",
 		},
 		{
-			name:       "Function delays in interval",
-			interval:   100 * time.Millisecond,
-			ctxTimeout: 350 * time.Millisecond,
+			name:       "Function delays in less than interval",
+			interval:   80 * time.Millisecond,
+			ctxTimeout: 320 * time.Millisecond,
 			fnMock: func(t *testing.T) *MockRepeaterFunc {
 				m := NewMockRepeaterFunc(t)
 				m.EXPECT().Execute().After(100 * time.Millisecond).Return(nil).Times(4)
+				m.EXPECT().Execute().Maybe().Return(nil)
 				return m
 			},
 			expectedErrMsg: "",
 		},
 		{
-			name:       "Function delays more than interval",
+			name:       "Function delays in more than interval",
 			interval:   100 * time.Millisecond,
 			ctxTimeout: 350 * time.Millisecond,
 			fnMock: func(t *testing.T) *MockRepeaterFunc {
 				m := NewMockRepeaterFunc(t)
 				m.EXPECT().Execute().After(200 * time.Millisecond).Return(nil).Times(2)
+				m.EXPECT().Execute().Maybe().Return(nil)
 				return m
 			},
 			expectedErrMsg: "",
@@ -96,7 +109,7 @@ func TestRepeater_Run(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			log := testhelper.NewLogger(t)
 			repeater := NewRepeater(log, tc.interval)
-			ctx, cancel := context.WithTimeout(context.TODO(), tc.ctxTimeout)
+			ctx, cancel := context.WithTimeout(context.Background(), tc.ctxTimeout)
 			defer cancel()
 
 			m := tc.fnMock(t)
