@@ -86,12 +86,3 @@ repos:
         language: system
         files: .*.go
         pass_filenames: false
-
-  - repo: local
-    hooks:
-      - id: mage
-        name: mage
-        entry: bash -c 'mage'
-        language: system
-        files: (^_meta\/.*|^cloudbeat.*yml)$
-        pass_filenames: false

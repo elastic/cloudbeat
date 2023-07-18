@@ -32,7 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
-	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	cloud_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -88,21 +88,21 @@ func (d *Dependencies) AWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssd
 	return d.AwsCfgProvider.InitializeAWSConfig(ctx, cfg)
 }
 
-func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*aws_dataprovider.Identity, error) {
+func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*cloud_dataprovider.Identity, error) {
 	if d.AwsIdentityProvider == nil {
 		return nil, errors.New("aws identity provider is uninitialized")
 	}
 	return d.AwsIdentityProvider.GetIdentity(ctx, cfg)
 }
 
-func (d *Dependencies) AWSAccounts(ctx context.Context, cfg awssdk.Config) ([]aws_dataprovider.Identity, error) {
+func (d *Dependencies) AWSAccounts(ctx context.Context, cfg awssdk.Config) ([]cloud_dataprovider.Identity, error) {
 	if d.AwsAccountProvider == nil {
 		return nil, errors.New("aws account provider is uninitialized")
 	}
 	return d.AwsAccountProvider.ListAccounts(ctx, cfg)
 }
 
-func (d *Dependencies) GCPIdentity(ctx context.Context, cfg config.GcpConfig) (*aws_dataprovider.Identity, error) {
+func (d *Dependencies) GCPIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud_dataprovider.Identity, error) {
 	if d.GcpIdentityProvider == nil {
 		return nil, errors.New("gcp identity provider is uninitialized")
 	}

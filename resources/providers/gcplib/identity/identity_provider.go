@@ -48,7 +48,7 @@ type IdentityProvider struct {
 	logger  *logp.Logger
 }
 
-// CloudResourceManagerService is wrapper around the GCP resource manager service to make it easier to mock
+// CloudResourceManagerService is a wrapper around the GCP resource manager service to make it easier to mock
 type CloudResourceManagerService struct {
 	service *cloudresourcemanager.Service
 }
@@ -98,8 +98,8 @@ func (p *IdentityProvider) GetIdentity(ctx context.Context, cfg config.GcpConfig
 		// Start recursive traversal to handle nested folders or organization.
 		orgInfo, err = p.traverseResourceHierarchy(ctx, proj.Parent)
 		if err != nil {
-			// In case of error, try to search for the organization the user has access to.
-			// Being used only in case of error because user might have access to multiple organizations.
+			// In case of an error, we try to search for the organization the user has access to.
+			// It's used as a fallback, as user might have access to multiple organizations.
 			org, err := p.service.organizationsSearch(ctx)
 			if err != nil {
 				p.logger.Errorf("failed to search for organization: %v", err)
@@ -199,5 +199,10 @@ func isOrganization(resource string) bool {
 
 // getResourceIDFromName extracts the resource ID from the resource name.
 func getResourceIDFromName(resource string) string {
-	return resource[strings.LastIndex(resource, "/")+1:]
+	parts := strings.Split(resource, "/")
+	if len(parts) < 2 {
+		return ""
+	}
+
+	return parts[1]
 }

@@ -93,25 +93,3 @@ func NewLogger(t *testing.T) *logp.Logger {
 
 	return logp.NewLogger(t.Name())
 }
-
-func Map[T, V any](ts []T, fn func(T) V) []V {
-	result := make([]V, len(ts))
-	for i, t := range ts {
-		result[i] = fn(t)
-	}
-	return result
-}
-
-func Filter[T any](ts []T, fn func(T) bool) []T {
-	var result []T
-	for _, t := range ts {
-		if fn(t) {
-			result = append(result, t)
-		}
-	}
-	return result
-}
-
-func ContainsString(arr []string, value string) bool {
-	return Filter(arr, func(s string) bool { return s == value }) != nil
-}

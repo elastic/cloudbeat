@@ -101,6 +101,22 @@ func TestIdentityProvider_GetIdentity(t *testing.T) {
 			},
 		},
 		{
+			name: "Project is not associated with any organization or folder",
+			service: func() ResourceManager {
+				m := MockResourceManager{}
+				m.EXPECT().projectsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Project{
+					DisplayName: "my proj",
+					ProjectId:   "test-proj",
+				}, nil)
+				return &m
+			},
+			want: &gcpdataprovider.Identity{
+				Provider:    "gcp",
+				ProjectId:   "test-proj",
+				ProjectName: "my proj",
+			},
+		},
+		{
 			name: "failed to get org alias returns identity without",
 			service: func() ResourceManager {
 				m := MockResourceManager{}
@@ -124,7 +140,26 @@ func TestIdentityProvider_GetIdentity(t *testing.T) {
 			},
 		},
 		{
-			name: "failed to get organization return identity without org info",
+			name: "no organization returned in search request - return identity without org info",
+			service: func() ResourceManager {
+				m := MockResourceManager{}
+				m.EXPECT().projectsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Project{
+					DisplayName: "my proj",
+					Parent:      "folders/456",
+					ProjectId:   "test-proj",
+				}, nil)
+				m.EXPECT().foldersGet(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("permission denied"))
+				m.EXPECT().organizationsSearch(mock.Anything).Return(nil, nil)
+				return &m
+			},
+			want: &gcpdataprovider.Identity{
+				Provider:    "gcp",
+				ProjectId:   "test-proj",
+				ProjectName: "my proj",
+			},
+		},
+		{
+			name: "failed to search organization return identity without org info",
 			service: func() ResourceManager {
 				m := MockResourceManager{}
 				m.EXPECT().projectsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Project{
