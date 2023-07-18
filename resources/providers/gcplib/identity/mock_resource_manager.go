@@ -150,6 +150,60 @@ func (_c *MockResourceManager_organizationsGet_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// organizationsSearch provides a mock function with given fields: _a0
+func (_m *MockResourceManager) organizationsSearch(_a0 context.Context) (*cloudresourcemanager.Organization, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *cloudresourcemanager.Organization
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*cloudresourcemanager.Organization, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *cloudresourcemanager.Organization); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*cloudresourcemanager.Organization)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockResourceManager_organizationsSearch_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'organizationsSearch'
+type MockResourceManager_organizationsSearch_Call struct {
+	*mock.Call
+}
+
+// organizationsSearch is a helper method to define mock.On call
+//   - _a0 context.Context
+func (_e *MockResourceManager_Expecter) organizationsSearch(_a0 interface{}) *MockResourceManager_organizationsSearch_Call {
+	return &MockResourceManager_organizationsSearch_Call{Call: _e.mock.On("organizationsSearch", _a0)}
+}
+
+func (_c *MockResourceManager_organizationsSearch_Call) Run(run func(_a0 context.Context)) *MockResourceManager_organizationsSearch_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockResourceManager_organizationsSearch_Call) Return(_a0 *cloudresourcemanager.Organization, _a1 error) *MockResourceManager_organizationsSearch_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockResourceManager_organizationsSearch_Call) RunAndReturn(run func(context.Context) (*cloudresourcemanager.Organization, error)) *MockResourceManager_organizationsSearch_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // projectsGet provides a mock function with given fields: _a0, _a1
 func (_m *MockResourceManager) projectsGet(_a0 context.Context, _a1 string) (*cloudresourcemanager.Project, error) {
 	ret := _m.Called(_a0, _a1)

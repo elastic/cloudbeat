@@ -28,32 +28,37 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
 )
 
 var (
-	accountName = "accountName"
-	accountId   = "accountId"
-	someRegion  = "eu-west-1"
+	accountName    = "accountName"
+	accountId      = "accountId"
+	awsProvider    = "aws"
+	gcpProvider    = "gcp"
+	gcpOrgId       = "1234567890"
+	gcpOrgName     = "test-org"
+	gcpProjectName = "projectName"
+	gcpProjectId   = "projectId"
+	someRegion     = "eu-west-1"
 )
 
-type AwsDataProviderTestSuite struct {
+type CloudDataProviderTestSuite struct {
 	suite.Suite
 }
 
-func TestAwsDataProviderTestSuite(t *testing.T) {
-	s := new(AwsDataProviderTestSuite)
+func TestCloudDataProviderTestSuite(t *testing.T) {
+	s := new(CloudDataProviderTestSuite)
 
 	suite.Run(t, s)
 }
 
-func (s *AwsDataProviderTestSuite) SetupTest() {}
+func (s *CloudDataProviderTestSuite) SetupTest() {}
 
-func (s *AwsDataProviderTestSuite) TearDownTest() {}
+func (s *CloudDataProviderTestSuite) TearDownTest() {}
 
-func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
+func (s *CloudDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 	tests := []struct {
 		name        string
 		options     []Option
@@ -66,9 +71,9 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 			name: "get data",
 			options: []Option{
 				WithLogger(testhelper.NewLogger(s.T())),
-				WithAccount(awslib.Identity{
-					Account: accountId,
-					Alias:   accountName,
+				WithAccount(Identity{
+					Account:      accountId,
+					AccountAlias: accountName,
 				}),
 			},
 			expected: types.Data{
@@ -97,7 +102,7 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 	tests := []struct {
 		name           string
 		resMetadata    fetching.ResourceMetadata
-		identity       awslib.Identity
+		identity       Identity
 		expectedFields map[string]string
 	}{
 		{
@@ -105,14 +110,15 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 			resMetadata: fetching.ResourceMetadata{
 				Region: someRegion,
 			},
-			identity: awslib.Identity{
-				Account: accountId,
-				Alias:   accountName,
+			identity: Identity{
+				Account:      accountId,
+				AccountAlias: accountName,
+				Provider:     awsProvider,
 			},
 			expectedFields: map[string]string{
 				cloudAccountIdField:   accountId,
 				cloudAccountNameField: accountName,
-				cloudProviderField:    "aws",
+				cloudProviderField:    awsProvider,
 				cloudRegionField:      someRegion,
 			},
 		},
@@ -123,14 +129,15 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 				AwsAccountId:    "",
 				AwsAccountAlias: "some alias",
 			},
-			identity: awslib.Identity{
-				Account: accountId,
-				Alias:   accountName,
+			identity: Identity{
+				Account:      accountId,
+				AccountAlias: accountName,
+				Provider:     awsProvider,
 			},
 			expectedFields: map[string]string{
 				cloudAccountIdField:   accountId,
 				cloudAccountNameField: "some alias",
-				cloudProviderField:    "aws",
+				cloudProviderField:    awsProvider,
 				cloudRegionField:      someRegion,
 			},
 		},
@@ -141,15 +148,54 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 				AwsAccountId:    "12345654321",
 				AwsAccountAlias: "some alias",
 			},
-			identity: awslib.Identity{
-				Account: accountId,
-				Alias:   accountName,
+			identity: Identity{
+				Account:      accountId,
+				AccountAlias: accountName,
+				Provider:     awsProvider,
 			},
 			expectedFields: map[string]string{
 				cloudAccountIdField:   "12345654321",
 				cloudAccountNameField: "some alias",
-				cloudProviderField:    "aws",
+				cloudProviderField:    awsProvider,
 				cloudRegionField:      someRegion,
+			},
+		},
+		{
+			name: "enrich a gcp event",
+			resMetadata: fetching.ResourceMetadata{
+				Region: someRegion,
+			},
+			identity: Identity{
+				Provider:     gcpProvider,
+				Account:      gcpOrgId,
+				AccountAlias: gcpOrgName,
+				ProjectId:    gcpProjectId,
+				ProjectName:  gcpProjectName,
+			},
+			expectedFields: map[string]string{
+				cloudAccountIdField:   gcpOrgId,
+				cloudAccountNameField: gcpOrgName,
+				cloudProviderField:    gcpProvider,
+				cloudRegionField:      someRegion,
+				cloudProjectIdField:   gcpProjectId,
+				cloudProjectNameField: gcpProjectName,
+			},
+		},
+		{
+			name: "enrich a gcp event without org info",
+			resMetadata: fetching.ResourceMetadata{
+				Region: someRegion,
+			},
+			identity: Identity{
+				Provider:    gcpProvider,
+				ProjectId:   gcpProjectId,
+				ProjectName: gcpProjectName,
+			},
+			expectedFields: map[string]string{
+				cloudProviderField:    gcpProvider,
+				cloudRegionField:      someRegion,
+				cloudProjectIdField:   gcpProjectId,
+				cloudProjectNameField: gcpProjectName,
 			},
 		},
 	}

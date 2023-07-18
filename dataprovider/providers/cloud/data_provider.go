@@ -46,11 +46,11 @@ type Identity struct {
 
 type DataProvider struct {
 	log          *logp.Logger
-	accountId    string `json:"accountId,omitempty"`
-	accountName  string `json:"accountName,omitempty"`
-	providerName string `json:"providerName,omitempty"`
-	projectName  string `json:"projectName,omitempty"`
-	projectId    string `json:"projectId,omitempty"`
+	accountId    string
+	accountName  string
+	providerName string
+	projectName  string
+	projectId    string
 }
 
 func New(options ...Option) DataProvider {

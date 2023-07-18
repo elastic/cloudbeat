@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/elastic/cloudbeat/resources/providers/gcplib"
+	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"

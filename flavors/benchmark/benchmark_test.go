@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/providers/gcplib"
+	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -458,21 +458,20 @@ func Test_Initialize(t *testing.T) {
 			name:         "no error",
 			benchmark:    &GCP{},
 			cfg:          validGcpConfig,
-			dependencies: Dependencies{},
+			dependencies: Dependencies{GcpIdentityProvider: mockGcpIdentityProvider(nil)},
 		},
-		// TODO: mock client
-		// {
-		// 	name:         "return an error",
-		// 	benchmark:    &GCP{},
-		// 	cfg:          validGcpConfig,
-		// 	dependencies: Dependencies{},
-		// 	wantErr: 	"failed to initialize gcp fetchers",
-		// },
+		{
+			name:         "return an error",
+			benchmark:    &GCP{},
+			cfg:          validGcpConfig,
+			dependencies: Dependencies{GcpIdentityProvider: mockGcpIdentityProvider(errors.New("failed to get gcp identity"))},
+			wantErr:      "failed to get gcp identity",
+		},
 		{
 			name:         "missing credentials",
 			benchmark:    &GCP{},
 			cfg:          baseGcpConfig, // missing credentials
-			dependencies: Dependencies{},
+			dependencies: Dependencies{GcpIdentityProvider: mockGcpIdentityProvider(nil)},
 			wantErr:      "failed to initialize gcp config",
 		},
 	}

@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
 
-	"github.com/elastic/cloudbeat/resources/providers/gcplib"
+	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
