@@ -23,6 +23,9 @@ testData:
     EKS_CONFIG_2_NODE_1: "ip-192-168-33-106.eu-west-2.compute.internal"
     EKS_CONFIG_2_NODE_2: "ip-192-168-6-157.eu-west-2.compute.internal"
 
+cloudbeat:
+  repository: 391946104644.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
