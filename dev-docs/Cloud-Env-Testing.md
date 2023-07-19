@@ -121,3 +121,17 @@ Before running the script, ensure that:
 
 **Note**: The script will ask for confirmation before deleting each environment, unless you set the `interactive` flag
 to `false`.
+
+### Delete Environment Workflow
+
+The new **Delete Environment** GitHub workflow automates the process of cleaning up environments. When activated, it automatically performs the cleanup of environments, ensuring that all associated resources are correctly removed.
+
+Inputs:
+
+- `EC_API_KEY`: The Elastic Cloud API Key required for environment deletion.
+- `prefix`: The prefix used to identify the environments to be deleted.
+- `ignore-prefix`: (Optional) The prefix used to identify environments that should be excluded from deletion.
+
+Usage:
+
+To utilize the **Delete Environment** workflow, provide the required inputs during the workflow activation. The workflow will then handle the deletion process based on the provided information.
