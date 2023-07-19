@@ -11,7 +11,7 @@ env:
   DEV: true
   SNAPSHOT: true
   PLATFORMS: linux/amd64
-  GOPATH: /Users/runner/go
+  GOPATH: ~/go
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
