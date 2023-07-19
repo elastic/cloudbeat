@@ -25,7 +25,7 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/fetchers"
+	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/version"
 )
 

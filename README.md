@@ -38,4 +38,4 @@ We use [Hermit](https://cashapp.github.io/hermit/usage/get-started/) to manage o
 
 ___
 
-> **Note*** If you are a developer or contributor, or if you are looking for additional information, please visit our [development documentation](dev-docs/Development.md)
+> **Note** If you are a developer or contributor, or if you are looking for additional information, please visit our [development documentation](dev-docs/Development.md)

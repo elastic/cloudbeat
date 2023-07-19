@@ -14,7 +14,7 @@ from product.tests.parameters import register_params, Parameters
 
 @pytest.mark.process_kubelet_rules
 def test_process_kubelet(
-    elastic_client,
+    kspm_client,
     config_node_pre_test,
     rule_tag,
     dictionary,
@@ -65,7 +65,7 @@ def test_process_kubelet(
         return config_contains_arguments(kubelet_config, dictionary)
 
     evaluation = get_ES_evaluation(
-        elastic_client=elastic_client,
+        elastic_client=kspm_client,
         timeout=cloudbeat_agent.findings_timeout,
         rule_tag=rule_tag,
         exec_timestamp=datetime.utcnow(),

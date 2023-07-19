@@ -30,6 +30,11 @@ import (
 	"github.com/elastic/cloudbeat/config"
 )
 
+type GcpFactoryConfig struct {
+	ProjectId  string
+	ClientOpts []option.ClientOption
+}
+
 func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOption, error) {
 	log.Info("GetGCPClientConfig create credentials options")
 	gcpCred := cfg.CloudConfig.Gcp
