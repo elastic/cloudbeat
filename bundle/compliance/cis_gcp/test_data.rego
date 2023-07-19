@@ -1,5 +1,17 @@
 package cis_gcp.test_data
 
+generate_iam_policy(members, role) = {
+	"resource": {
+		"resource": {},
+		"iam_policy": {"bindings": [{
+			"role": role,
+			"members": members,
+		}]},
+	},
+	"type": "key-management",
+	"subType": "gcp-iam",
+}
+
 generate_kms_resource(members, rotationPeriod, nextRotationTime, primary) = {
 	"resource": {
 		"resource": {"data": {
@@ -44,4 +56,11 @@ not_eval_resource = {
 	"resource": {},
 	"type": "key-management",
 	"subType": "no-exisitng-type",
+}
+
+# missing resource.iam_policy
+no_policy_resource = {
+	"resource": {"resource": {}},
+	"type": "key-management",
+	"subType": "gcp-iam",
 }
