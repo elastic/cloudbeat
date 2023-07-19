@@ -25,7 +25,7 @@ jobs:
           version: latest
           args: build
 
-      - name: Runs Elasticsearch
+      - name: Run Elasticsearch
         uses: elastic/elastic-github-actions/elasticsearch@master
         with:
           stack-version: 8.8.0
@@ -37,7 +37,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'us-east-1'
 
-      - name: Runs cloudbeat CNVM
+      - name: Run cloudbeat CNVM
         env:
           ES_HOST: https://localhost:9200
           ES_USERNAME: elastic
