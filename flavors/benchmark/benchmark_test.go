@@ -573,11 +573,9 @@ func mockGcpIdentityProvider(err error) *gcplib.MockIdentityProviderGetter {
 	if err == nil {
 		on.Return(
 			&dataprovider.Identity{
-				Provider:     "gcp",
-				Account:      "12345",
-				AccountAlias: "test-org-alias",
-				ProjectId:    "test-project-id",
-				ProjectName:  "test-project-name",
+				Provider:    "gcp",
+				ProjectId:   "test-project-id",
+				ProjectName: "test-project-name",
 			},
 			nil,
 		)

@@ -49,126 +49,13 @@ func TestIdentityProvider_GetIdentity(t *testing.T) {
 			want:    nil,
 		},
 		{
-			name: "successfully traverse the resource hierarchy",
-			service: func() ResourceManager {
-				m := MockResourceManager{}
-				m.EXPECT().projectsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Project{
-					DisplayName: "my proj",
-					Parent:      "folders/456",
-					ProjectId:   "test-proj",
-				}, nil)
-				m.EXPECT().foldersGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Folder{
-					Name:   "folders/456",
-					Parent: "organizations/789",
-				}, nil)
-
-				m.EXPECT().organizationsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Organization{
-					Name:        "organizations/789",
-					DisplayName: "test-org",
-				}, nil)
-				return &m
-			},
-			want: &gcpdataprovider.Identity{
-				Provider:     "gcp",
-				Account:      "789",
-				AccountAlias: "test-org",
-				ProjectId:    "test-proj",
-				ProjectName:  "my proj",
-			},
-		},
-		{
-			name: "failed to get folder info returns the first organization",
-			service: func() ResourceManager {
-				m := MockResourceManager{}
-				m.EXPECT().projectsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Project{
-					DisplayName: "my proj",
-					Parent:      "folders/456",
-					ProjectId:   "test-proj",
-				}, nil)
-				m.EXPECT().foldersGet(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("permission denied"))
-				m.EXPECT().organizationsSearch(mock.Anything).Return(&cloudresourcemanager.Organization{
-					Name:        "organizations/789",
-					DisplayName: "test-org",
-				}, nil)
-				return &m
-			},
-			want: &gcpdataprovider.Identity{
-				Provider:     "gcp",
-				Account:      "789",
-				AccountAlias: "test-org",
-				ProjectId:    "test-proj",
-				ProjectName:  "my proj",
-			},
-		},
-		{
-			name: "Project is not associated with any organization or folder",
+			name: "Project info returned successfully",
 			service: func() ResourceManager {
 				m := MockResourceManager{}
 				m.EXPECT().projectsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Project{
 					DisplayName: "my proj",
 					ProjectId:   "test-proj",
 				}, nil)
-				return &m
-			},
-			want: &gcpdataprovider.Identity{
-				Provider:    "gcp",
-				ProjectId:   "test-proj",
-				ProjectName: "my proj",
-			},
-		},
-		{
-			name: "failed to get org alias returns identity without",
-			service: func() ResourceManager {
-				m := MockResourceManager{}
-				m.EXPECT().projectsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Project{
-					DisplayName: "my proj",
-					Parent:      "folders/456",
-					ProjectId:   "test-proj",
-				}, nil)
-				m.EXPECT().foldersGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Folder{
-					Name:   "folders/456",
-					Parent: "organizations/789",
-				}, nil)
-				m.EXPECT().organizationsGet(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("permission denied"))
-				return &m
-			},
-			want: &gcpdataprovider.Identity{
-				Provider:    "gcp",
-				Account:     "789",
-				ProjectId:   "test-proj",
-				ProjectName: "my proj",
-			},
-		},
-		{
-			name: "no organization returned in search request - return identity without org info",
-			service: func() ResourceManager {
-				m := MockResourceManager{}
-				m.EXPECT().projectsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Project{
-					DisplayName: "my proj",
-					Parent:      "folders/456",
-					ProjectId:   "test-proj",
-				}, nil)
-				m.EXPECT().foldersGet(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("permission denied"))
-				m.EXPECT().organizationsSearch(mock.Anything).Return(nil, nil)
-				return &m
-			},
-			want: &gcpdataprovider.Identity{
-				Provider:    "gcp",
-				ProjectId:   "test-proj",
-				ProjectName: "my proj",
-			},
-		},
-		{
-			name: "failed to search organization return identity without org info",
-			service: func() ResourceManager {
-				m := MockResourceManager{}
-				m.EXPECT().projectsGet(mock.Anything, mock.Anything).Return(&cloudresourcemanager.Project{
-					DisplayName: "my proj",
-					Parent:      "folders/456",
-					ProjectId:   "test-proj",
-				}, nil)
-				m.EXPECT().foldersGet(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("permission denied"))
-				m.EXPECT().organizationsSearch(mock.Anything).Return(nil, fmt.Errorf("permission denied"))
 				return &m
 			},
 			want: &gcpdataprovider.Identity{

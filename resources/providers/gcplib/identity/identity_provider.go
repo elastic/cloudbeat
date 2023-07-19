@@ -20,7 +20,6 @@ package gcplib
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"google.golang.org/api/cloudresourcemanager/v3"
@@ -38,11 +37,6 @@ type IdentityProviderGetter interface {
 	GetIdentity(ctx context.Context, cfg config.GcpConfig) (*gcpdataprovider.Identity, error)
 }
 
-type organizationInfo struct {
-	id   string
-	name string
-}
-
 type IdentityProvider struct {
 	service ResourceManager
 	logger  *logp.Logger
@@ -55,9 +49,6 @@ type CloudResourceManagerService struct {
 
 type ResourceManager interface {
 	projectsGet(context.Context, string) (*cloudresourcemanager.Project, error)
-	foldersGet(context.Context, string) (*cloudresourcemanager.Folder, error)
-	organizationsGet(context.Context, string) (*cloudresourcemanager.Organization, error)
-	organizationsSearch(context.Context) (*cloudresourcemanager.Organization, error)
 }
 
 func NewIdentityProvider(ctx context.Context, cfg *config.Config, logger *logp.Logger) *IdentityProvider {
@@ -86,73 +77,11 @@ func (p *IdentityProvider) GetIdentity(ctx context.Context, cfg config.GcpConfig
 		return nil, err
 	}
 
-	identity := &gcpdataprovider.Identity{
+	return &gcpdataprovider.Identity{
 		Provider:    provider,
 		ProjectId:   proj.ProjectId,
 		ProjectName: proj.DisplayName,
-	}
-
-	// Check if the project has a parent.
-	var orgInfo *organizationInfo
-	if proj.Parent != "" {
-		// Start recursive traversal to handle nested folders or organization.
-		orgInfo, err = p.traverseResourceHierarchy(ctx, proj.Parent)
-		if err != nil {
-			// In case of an error, we try to search for the organization the user has access to.
-			// It's used as a fallback, as user might have access to multiple organizations.
-			org, err := p.service.organizationsSearch(ctx)
-			if err != nil {
-				p.logger.Errorf("failed to search for organization: %v", err)
-				return identity, nil
-			}
-
-			if org != nil {
-				identity.Account = getResourceIDFromName(org.Name)
-				identity.AccountAlias = org.DisplayName
-			}
-
-			return identity, nil
-		}
-
-		if orgInfo != nil {
-			identity.Account = orgInfo.id
-			identity.AccountAlias = orgInfo.name
-		}
-	}
-
-	return identity, nil
-}
-
-// traverseResourceHierarchy recursively traverses the resource hierarchy.
-func (p *IdentityProvider) traverseResourceHierarchy(ctx context.Context, parent string) (*organizationInfo, error) {
-	if parent == "" {
-		fmt.Println("The project is not associated with any organization or folder.")
-		return nil, nil
-	}
-
-	if isOrganization(parent) {
-		organizationID := getResourceIDFromName(parent)
-		orgInfo := &organizationInfo{
-			id: organizationID,
-		}
-		organization, err := p.service.organizationsGet(ctx, organizationID)
-		p.logger.Errorf("failed to get organization details: %v", err)
-		if err != nil {
-			return orgInfo, nil
-		}
-
-		orgInfo.name = organization.DisplayName
-		return orgInfo, nil
-	}
-
-	// If the resource is a folder, fetch folder details and continue the recursion.
-	folder, err := p.service.foldersGet(ctx, parent)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get folder details: %v", err)
-	}
-
-	// Continue the recursion with the parent folder ID.
-	return p.traverseResourceHierarchy(ctx, folder.Parent)
+	}, nil
 }
 
 func (p *CloudResourceManagerService) projectsGet(ctx context.Context, id string) (*cloudresourcemanager.Project, error) {
@@ -161,48 +90,4 @@ func (p *CloudResourceManagerService) projectsGet(ctx context.Context, id string
 		return nil, fmt.Errorf("unable to get project with id '%v': %v", id, err)
 	}
 	return project, nil
-}
-
-func (p *CloudResourceManagerService) organizationsGet(ctx context.Context, name string) (*cloudresourcemanager.Organization, error) {
-	org, err := p.service.Organizations.Get(name).Context(ctx).Do()
-	if err != nil {
-		return nil, fmt.Errorf("unable to get oragnization with name '%v': %v", name, err)
-	}
-	return org, nil
-}
-
-func (p *CloudResourceManagerService) organizationsSearch(ctx context.Context) (*cloudresourcemanager.Organization, error) {
-	res, err := p.service.Organizations.Search().Context(ctx).PageSize(1).Do()
-	if err != nil {
-		return nil, fmt.Errorf("unable to get oragnization: %v", err)
-	}
-
-	if len(res.Organizations) == 0 {
-		return nil, nil
-	}
-
-	return res.Organizations[0], nil
-}
-
-func (p *CloudResourceManagerService) foldersGet(ctx context.Context, name string) (*cloudresourcemanager.Folder, error) {
-	folder, err := p.service.Folders.Get(name).Context(ctx).Do()
-	if err != nil {
-		return nil, fmt.Errorf("unable to get oragnization with name '%v': %v", name, err)
-	}
-	return folder, nil
-}
-
-// isOrganization checks if the resource name corresponds to an organization.
-func isOrganization(resource string) bool {
-	return strings.HasPrefix(resource, "organizations/")
-}
-
-// getResourceIDFromName extracts the resource ID from the resource name.
-func getResourceIDFromName(resource string) string {
-	parts := strings.Split(resource, "/")
-	if len(parts) < 2 {
-		return ""
-	}
-
-	return parts[1]
 }
