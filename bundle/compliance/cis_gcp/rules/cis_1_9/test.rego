@@ -11,7 +11,7 @@ test_violation {
 }
 
 test_pass {
-	eval_pass with input as {"subType": "gcp-kms", "resource": {}} # a resource without an iam_policy
+	eval_pass with input as {"subType": "gcp-cloudkms-crypto-key", "resource": {}} # a resource without an iam_policy
 	eval_pass with input as rule_input([], "", "", {"state": "ENABLED"})
 	eval_pass with input as rule_input(["test.user@google.com"], "", "", {"state": "ENABLED"})
 	eval_pass with input as rule_input(["test.user@google.com", "test.user2@google.com"], "", "", {"state": "ENABLED"})

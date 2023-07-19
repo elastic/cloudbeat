@@ -11,7 +11,7 @@ test_violation {
 }
 
 test_pass {
-	eval_pass with input as {"subType": "gcp-bq-dataset", "resource": {}}
+	eval_pass with input as {"subType": "gcp-bigquery-dataset", "resource": {}}
 	eval_pass with input as rule_input([])
 	eval_pass with input as rule_input(["test.user@google.com"])
 	eval_pass with input as rule_input(["test.user@google.com", "test.user2@google.com"])
@@ -21,7 +21,7 @@ test_not_evaluated {
 	not_eval with input as test_data.not_eval_resource
 }
 
-rule_input(members) = test_data.generate_bq_resource(null, "gcp-bq-dataset", members)
+rule_input(members) = test_data.generate_bq_resource(null, "gcp-bigquery-dataset", members)
 
 eval_fail {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter

@@ -10,7 +10,7 @@ default rule_evaluation = false
 
 finding = result if {
 	# filter
-	data_adapter.is_kms_key
+	data_adapter.is_cloudkms_crypto_key
 
 	# In order for an encryption key to be available,
 	# it needs to have a primary key version which is enabled

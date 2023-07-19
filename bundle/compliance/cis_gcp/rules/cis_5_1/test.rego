@@ -11,7 +11,7 @@ test_violation {
 }
 
 test_pass {
-	eval_pass with input as {"subType": "gcp-gcs", "resource": {}}
+	eval_pass with input as {"subType": "gcp-storage-bucket", "resource": {}}
 	eval_pass with input as rule_input([])
 	eval_pass with input as rule_input(["test.user@google.com"])
 	eval_pass with input as rule_input(["test.user@google.com"])

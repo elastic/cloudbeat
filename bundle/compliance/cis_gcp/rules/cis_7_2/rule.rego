@@ -7,7 +7,7 @@ import data.compliance.policy.gcp.data_adapter
 # Ensure That All BigQuery Tables Are Encrypted With Customer-Managed Encryption Keys (CMEK).
 finding = result {
 	# filter
-	data_adapter.is_bq_table
+	data_adapter.is_bigquery_table
 
 	# set result
 	result := common.generate_result_without_expected(

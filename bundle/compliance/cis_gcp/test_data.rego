@@ -25,7 +25,7 @@ generate_kms_resource(members, rotationPeriod, nextRotationTime, primary) = {
 		}]},
 	},
 	"type": "key-management",
-	"subType": "gcp-kms",
+	"subType": "gcp-cloudkms-crypto-key",
 }
 
 generate_gcs_resource(members, isBucketLevelAccessEnabled) = {
@@ -37,7 +37,7 @@ generate_gcs_resource(members, isBucketLevelAccessEnabled) = {
 		}]},
 	},
 	"type": "cloud-storage",
-	"subType": "gcp-gcs",
+	"subType": "gcp-storage-bucket",
 }
 
 generate_bq_resource(config, subType, members) = {

@@ -8,7 +8,7 @@ default rule_evaluation = false
 # Ensure That Cloud Storage Buckets Have Uniform Bucket- Level Access Enabled.
 finding = result {
 	# filter
-	data_adapter.is_gcs_bucket
+	data_adapter.is_storage_bucket
 
 	# set result
 	result := common.generate_result_without_expected(

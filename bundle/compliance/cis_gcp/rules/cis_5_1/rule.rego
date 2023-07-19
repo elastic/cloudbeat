@@ -8,7 +8,7 @@ import data.compliance.policy.gcp.iam.ensure_no_public_access as audit
 # Ensure That Cloud Storage Bucket Is Not Anonymously or Publicly Accessible.
 finding = result {
 	# filter
-	data_adapter.is_gcs_bucket
+	data_adapter.is_storage_bucket
 
 	# set result
 	result := common.generate_result_without_expected(

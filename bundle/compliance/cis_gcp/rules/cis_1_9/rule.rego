@@ -8,7 +8,7 @@ import data.compliance.policy.gcp.iam.ensure_no_public_access as audit
 # Ensure That Cloud KMS Cryptokeys Are Not Anonymously or Publicly Accessible.
 finding = result {
 	# filter
-	data_adapter.is_kms_key
+	data_adapter.is_cloudkms_crypto_key
 
 	# set result
 	result := common.generate_result_without_expected(

@@ -8,7 +8,7 @@ import data.compliance.policy.gcp.iam.ensure_no_public_access as audit
 # Ensure That BigQuery Datasets Are Not Anonymously or Publicly Accessible.
 finding = result {
 	# filter
-	data_adapter.is_bq_dataset
+	data_adapter.is_bigquery_dataset
 
 	# set result
 	result := common.generate_result_without_expected(
