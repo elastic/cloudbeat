@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slices"
 )
 
 type config struct {
@@ -34,9 +35,16 @@ type config struct {
 	EnrollmentToken       string     `mapstructure:"ENROLLMENT_TOKEN"`
 	ElasticArtifactServer *string    `mapstructure:"ELASTIC_ARTIFACT_SERVER"`
 	ElasticAgentVersion   string     `mapstructure:"ELASTIC_AGENT_VERSION"`
-	IntegrationType       *string    `mapstructure:"INTEGRATION"`
 	Dev                   *devConfig `mapstructure:"DEV"`
+	DeploymentType        string     `mapstructure:"DEPLOYMENT_TYPE"`
 }
+
+const (
+	DeploymentTypeCSPM = "CSPM"
+	DeploymentTypeCNVM = "CNVM"
+)
+
+var ValidDeploymentTypes = []string{DeploymentTypeCSPM, DeploymentTypeCNVM}
 
 type devConfig struct {
 	AllowSSH bool   `mapstructure:"ALLOW_SSH"`
@@ -45,6 +53,7 @@ type devConfig struct {
 
 func parseConfig() (*config, error) {
 	viper.AddConfigPath("./")
+	viper.SetConfigFile(".env")
 	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read configuration: %v", err)
@@ -112,6 +121,11 @@ func validateConfig(cfg *config) error {
 
 	if cfg.Dev != nil {
 		return validateDevConfig(cfg.Dev)
+	}
+
+	if cfg.DeploymentType != "" &&
+		!slices.Contains(ValidDeploymentTypes, cfg.DeploymentType) {
+		return fmt.Errorf("DeploymentType %s invalid", cfg.DeploymentType)
 	}
 
 	return nil
