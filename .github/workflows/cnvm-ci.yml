@@ -1,0 +1,44 @@
+name: CNVM-CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+    types: [opened, synchronize, reopened]
+
+jobs:
+  Run-CNVM-Tests:
+    name: Build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+
+      - name: Build cloudbeat binary
+        uses: magefile/mage-action@v2
+        with:
+          version: latest
+          args: build
+
+      - name: Runs Elasticsearch
+        uses: elastic/elastic-github-actions/elasticsearch@master
+        with:
+          stack-version: 8.8.0
+
+      - name: Runs cloudbeat CNVM
+        env:
+          ES_HOST: https://localhost:9200
+          ES_USERNAME: elastic
+          ES_PASSWORD: changeme
+        run: |
+          & ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -e -d '*'
+
+      - name: Check for vulnerabilities
+        run: |
+          poetry run pytest -k "cnvm"
+
