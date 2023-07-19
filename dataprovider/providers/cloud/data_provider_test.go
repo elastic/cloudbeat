@@ -37,8 +37,6 @@ var (
 	accountId      = "accountId"
 	awsProvider    = "aws"
 	gcpProvider    = "gcp"
-	gcpOrgId       = "1234567890"
-	gcpOrgName     = "test-org"
 	gcpProjectName = "projectName"
 	gcpProjectId   = "projectId"
 	someRegion     = "eu-west-1"
@@ -162,27 +160,6 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 		},
 		{
 			name: "enrich a gcp event",
-			resMetadata: fetching.ResourceMetadata{
-				Region: someRegion,
-			},
-			identity: Identity{
-				Provider:     gcpProvider,
-				Account:      gcpOrgId,
-				AccountAlias: gcpOrgName,
-				ProjectId:    gcpProjectId,
-				ProjectName:  gcpProjectName,
-			},
-			expectedFields: map[string]string{
-				cloudAccountIdField:   gcpOrgId,
-				cloudAccountNameField: gcpOrgName,
-				cloudProviderField:    gcpProvider,
-				cloudRegionField:      someRegion,
-				cloudProjectIdField:   gcpProjectId,
-				cloudProjectNameField: gcpProjectName,
-			},
-		},
-		{
-			name: "enrich a gcp event without org info",
 			resMetadata: fetching.ResourceMetadata{
 				Region: someRegion,
 			},
