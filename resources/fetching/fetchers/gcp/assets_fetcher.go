@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/huandu/xstrings"
+
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -128,5 +130,5 @@ func getGcpSubType(assetType string) string {
 	prefix := assetType[:dotIndex]
 	suffix := assetType[slashIndex+1:]
 
-	return strings.ToLower(fmt.Sprintf("gcp-%s-%s", prefix, suffix))
+	return strings.ToLower(fmt.Sprintf("gcp-%s-%s", prefix, xstrings.ToKebabCase(suffix)))
 }
