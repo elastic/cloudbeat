@@ -132,11 +132,6 @@ func Package() {
 		filterPackages(packageTypes)
 	}
 
-	if err := sh.Run("git", "config", "--global", "--add", "safe.directory", "/go/src/github.com/elastic/cloudbeat"); err != nil {
-		log.Printf("Package failed to configure git safe.directory: %v", err)
-		return
-	}
-
 	mg.Deps(Update)
 	mg.Deps(CrossBuild, CrossBuildGoDaemon)
 	mg.SerialDeps(devtools.Package)
