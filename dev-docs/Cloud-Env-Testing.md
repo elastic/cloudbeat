@@ -129,7 +129,7 @@ Follow these steps to run the workflow:
 
    <img width="411" alt="Enter Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/04973b00-5411-4ace-ab3a-534371877c91">
 
-1. Optionally, modify other input values if required:
+1. Optionally, modify other input value if required:
 
     - `ignore-prefix` (optional): The prefix used to identify environments that should be excluded from deletion.
 
