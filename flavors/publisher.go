@@ -45,7 +45,7 @@ func NewPublisher(log *logp.Logger, interval time.Duration, treshold int, client
 	}
 }
 
-func (p *Publisher) HandleEvents(ctx context.Context, ch chan beat.Event) {
+func (p *Publisher) HandleEvents(ctx context.Context, ch chan []beat.Event) {
 	var eventsToSend []beat.Event
 	flushTicker := time.NewTicker(p.interval)
 	for {
@@ -72,7 +72,7 @@ func (p *Publisher) HandleEvents(ctx context.Context, ch chan beat.Event) {
 				return
 			}
 
-			eventsToSend = append(eventsToSend, event)
+			eventsToSend = append(eventsToSend, event...)
 			if len(eventsToSend) < p.treshold {
 				continue
 			}

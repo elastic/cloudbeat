@@ -43,34 +43,51 @@ func TestPublisher_HandleEvents(t *testing.T) {
 		{
 			name:              "Publish events on threshold reached",
 			interval:          time.Minute,
-			threshold:         5,
+			threshold:         1,
+			ctxTimeout:        200 * time.Millisecond,
+			eventCount:        2,
+			expectedEventSize: []int{1},
+		},
+		{
+			name:              "Publish events on threshold reached",
+			interval:          time.Minute,
+			threshold:         10,
 			ctxTimeout:        200 * time.Millisecond,
 			eventCount:        5,
-			expectedEventSize: []int{5},
+			expectedEventSize: []int{10},
 		},
 		{
 			name:              "Publish events on threshold reached twice",
 			interval:          time.Minute,
 			threshold:         5,
 			ctxTimeout:        200 * time.Millisecond,
-			eventCount:        10,
-			expectedEventSize: []int{5, 5},
+			eventCount:        6,
+			expectedEventSize: []int{6, 9},
 		},
 		{
 			name:              "Publish events on threshold reached twice and interval reached",
 			interval:          100 * time.Millisecond,
-			threshold:         5,
+			threshold:         10,
 			ctxTimeout:        200 * time.Millisecond,
-			eventCount:        13,
-			expectedEventSize: []int{5, 5, 3},
+			eventCount:        8,
+			expectedEventSize: []int{10, 11, 7},
+		},
+		{
+			name:              "Publish events on threshold reached twice and channel closed",
+			interval:          time.Minute,
+			threshold:         10,
+			ctxTimeout:        time.Minute,
+			eventCount:        8,
+			expectedEventSize: []int{10, 11, 7},
+			closeChannel:      true,
 		},
 		{
 			name:              "Publish events on threshold reached twice and context reached",
 			interval:          time.Minute,
-			threshold:         5,
+			threshold:         10,
 			ctxTimeout:        200 * time.Millisecond,
-			eventCount:        13,
-			expectedEventSize: []int{5, 5, 3},
+			eventCount:        8,
+			expectedEventSize: []int{10, 11, 7},
 		},
 		{
 			name:              "Publish events on context done",
@@ -93,24 +110,24 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			interval:          100 * time.Millisecond,
 			threshold:         10,
 			ctxTimeout:        200 * time.Millisecond,
-			eventCount:        5,
-			expectedEventSize: []int{5},
+			eventCount:        4,
+			expectedEventSize: []int{6},
 		},
 		{
 			name:              "Publish events on interval reached 2 times",
 			interval:          45 * time.Millisecond,
-			threshold:         10,
+			threshold:         100,
 			ctxTimeout:        200 * time.Millisecond,
 			eventCount:        10,
-			expectedEventSize: []int{5, 4, 1},
+			expectedEventSize: []int{10, 26, 9},
 		},
 		{
 			name:              "Publish events on closed channel",
 			interval:          time.Minute,
 			threshold:         10,
 			ctxTimeout:        time.Minute,
-			eventCount:        5,
-			expectedEventSize: []int{5},
+			eventCount:        4,
+			expectedEventSize: []int{6},
 			closeChannel:      true,
 		},
 	}
@@ -128,7 +145,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 			}
 			publisher := NewPublisher(log, tc.interval, tc.threshold, client)
 
-			eventsChannel := make(chan beat.Event)
+			eventsChannel := make(chan []beat.Event)
 
 			go func(tc testCase) {
 				for i := 0; i < tc.eventCount; i++ {
@@ -136,7 +153,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 					case <-ctx.Done():
 						return
 					// Simulate events being sent to the channel
-					case eventsChannel <- beat.Event{}:
+					case eventsChannel <- generateEvents(i):
 					}
 					time.Sleep(10 * time.Millisecond)
 				}
@@ -154,4 +171,12 @@ func LengthMatcher(length int) func(events []beat.Event) bool {
 	return func(events []beat.Event) bool {
 		return len(events) == length
 	}
+}
+
+func generateEvents(size int) []beat.Event {
+	results := make([]beat.Event, size)
+	for i := 0; i < size; i++ {
+		results[i] = beat.Event{}
+	}
+	return results
 }
