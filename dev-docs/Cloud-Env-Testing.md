@@ -127,15 +127,15 @@ Follow these steps to run the workflow:
     - `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API KEY.
     - `prefix` (required): The prefix used to identify the environments to be deleted.
 
-   <img width="462" alt="Enter Inputs" src="https://github.com/gurevichdmitry/cloudbeat/assets/99176494/dde955f1-21fe-4cb1-a7bc-674d8969b001">
+   <img width="411" alt="Enter Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/04973b00-5411-4ace-ab3a-534371877c91">
 
-4. Optionally, modify other input values if required:
+1. Optionally, modify other input values if required:
 
     - `ignore-prefix` (optional): The prefix used to identify environments that should be excluded from deletion.
 
-   <img width="490" alt="Optional Inputs" src="https://github.com/gurevichdmitry/cloudbeat/assets/99176494/5b4f732f-16b9-4b97-8c1c-6955e66d387b">
+   <img width="411" alt="Optional Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/aa89ad4e-fd32-461d-ab2d-3fee28094a9d">
 
-5. Click the `Run workflow` button to start.
+2. Click the `Run workflow` button to start.
 
    ![Run Workflow](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/64b554d5-70f0-4cf3-b2b9-8f8429d1fc07)
 
