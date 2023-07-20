@@ -34,13 +34,12 @@ Parameters:
     Type: String
 
 Resources:
-
   # Security Group for EC2 instance
   ElasticAgentSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Join
-        - '-'
+        - "-"
         - - elastic-agent-security-group
           - !Select
             - 2
@@ -124,19 +123,19 @@ Resources:
                 Action:
                   - iam:ListAccountAliases
                 Resource: "arn:aws:iam::*:*"
-
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName: !Join
-        - '-'
-        - - elastic-agent-instance-profile
-          - !Select
-            - 2
-            - !Split
-              - /
-              - !Ref "AWS::StackId"
+      InstanceProfileName:
+        Fn::Join:
+          - "-"
+          - - "elastic-agent-instance-profile"
+            - Fn::Select:
+                - 2
+                - Fn::Split:
+                    - "/"
+                    - Ref: "AWS::StackId"
       Path: /
       Roles:
         - !Ref "ElasticAgentRole"
@@ -148,7 +147,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join
-            - '-'
+            - "-"
             - - elastic-agent-instance
               - !Select
                 - 2
