@@ -11,7 +11,7 @@ on:
         required: true
       prefix:
         type: string
-        description: "delete all cloud environments that start with {{prefix}}"
+        description: "Delete all environments starting with `prefix`"
         required: true
       ignore-prefix:
         type: string
