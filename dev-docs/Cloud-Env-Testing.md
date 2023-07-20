@@ -104,27 +104,11 @@ Follow these steps to log in to the created environment:
 
 If you wish to automatically delete the environment after the tests finish, set the `cleanup-env` input to `true`.
 
-In addition to the automatic cleanup, you can manually delete environments using:
+In addition to the automatic cleanup, you can manually delete environments using the [Destroy Environment](https://github.com/elastic/cloudbeat/actions/workflows/destroy-environment.yml) workflow or by directly executing the `delete-cloud-env` command.
 
-```bash
-just delete-cloud-env <prefix> <ignore-prefix> <interactive>
-```
+### Destroy Environment Workflow
 
-This script deletes all environments that match a given prefix, and ignores environments that match a given ignore
-prefix.
-
-Before running the script, ensure that:
-
-- The AWS CLI is installed and configured.
-- The Terraform CLI is installed and configured.
-- The `TF_VAR_ec_api_key` environment variable is set.
-
-**Note**: The script will ask for confirmation before deleting each environment, unless you set the `interactive` flag
-to `false`.
-
-### Delete Environment Workflow
-
-The new **Delete Environment** GitHub workflow automates the process of cleaning up environments. When activated, it automatically performs the cleanup of environments, ensuring that all associated resources are correctly removed.
+The **Destroy Environment** GitHub workflow automates the process of cleaning up environments. When activated, it automatically performs the cleanup of environments, ensuring that all associated resources are correctly removed.
 
 #### How to Run the Flow
 
@@ -143,14 +127,34 @@ Follow these steps to run the workflow:
     - `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API KEY.
     - `prefix` (required): The prefix used to identify the environments to be deleted.
 
-   ![Enter Inputs](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/dde955f1-21fe-4cb1-a7bc-674d8969b001)
+   <img width="462" alt="Enter Inputs" src="https://github.com/gurevichdmitry/cloudbeat/assets/99176494/dde955f1-21fe-4cb1-a7bc-674d8969b001">
 
 4. Optionally, modify other input values if required:
 
     - `ignore-prefix` (optional): The prefix used to identify environments that should be excluded from deletion.
 
-   ![Optional Inputs](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/5b4f732f-16b9-4b97-8c1c-6955e66d387b)
+   <img width="490" alt="Optional Inputs" src="https://github.com/gurevichdmitry/cloudbeat/assets/99176494/5b4f732f-16b9-4b97-8c1c-6955e66d387b">
 
 5. Click the `Run workflow` button to start.
 
    ![Run Workflow](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/64b554d5-70f0-4cf3-b2b9-8f8429d1fc07)
+
+### Manual Environment Deletion
+
+In addition to the automatic cleanup, you can manually delete environments using:
+
+```bash
+just delete-cloud-env <prefix> <ignore-prefix> <interactive>
+```
+
+This script deletes all environments that match a given prefix, and ignores environments that match a given ignore
+prefix.
+
+Before running the script, ensure that:
+
+- The AWS CLI is installed and configured.
+- The Terraform CLI is installed and configured.
+- The `TF_VAR_ec_api_key` environment variable is set.
+
+**Note**: The script will ask for confirmation before deleting each environment, unless you set the `interactive` flag
+to `false`.
