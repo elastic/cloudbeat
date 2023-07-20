@@ -126,12 +126,31 @@ to `false`.
 
 The new **Delete Environment** GitHub workflow automates the process of cleaning up environments. When activated, it automatically performs the cleanup of environments, ensuring that all associated resources are correctly removed.
 
-Inputs:
+#### How to Run the Flow
 
-- `EC_API_KEY`: The Elastic Cloud API Key required for environment deletion.
-- `prefix`: The prefix used to identify the environments to be deleted.
-- `ignore-prefix`: (Optional) The prefix used to identify environments that should be excluded from deletion.
+Follow these steps to run the workflow:
 
-Usage:
+1. Go to [`Actions > Destroy Environment`](https://github.com/elastic/cloudbeat/actions/workflows/destroy-environment.yml)
 
-To utilize the **Delete Environment** workflow, provide the required inputs during the workflow activation. The workflow will then handle the deletion process based on the provided information.
+   ![Destroy Environment](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/505d6553-7780-4450-83e9-3617f64442ad)
+
+2. Click the `Run workflow` button.
+
+   ![Run Workflow](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/8965311c-eeac-492f-a564-a57c46854a3a)
+
+3. Complete the required input fields:
+
+    - `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API KEY.
+    - `prefix` (required): The prefix used to identify the environments to be deleted.
+
+   ![Enter Inputs](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/dde955f1-21fe-4cb1-a7bc-674d8969b001)
+
+4. Optionally, modify other input values if required:
+
+    - `ignore-prefix` (optional): The prefix used to identify environments that should be excluded from deletion.
+
+   ![Optional Inputs](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/5b4f732f-16b9-4b97-8c1c-6955e66d387b)
+
+5. Click the `Run workflow` button to start.
+
+   ![Run Workflow](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/64b554d5-70f0-4cf3-b2b9-8f8429d1fc07)
