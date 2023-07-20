@@ -124,7 +124,7 @@ Follow these steps to run the workflow:
 
 3. Complete the required input fields:
 
-    - `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API KEY.
+    - `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API key.
     - `prefix` (required): The prefix used to identify the environments to be deleted.
 
    <img width="411" alt="Enter Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/04973b00-5411-4ace-ab3a-534371877c91">
