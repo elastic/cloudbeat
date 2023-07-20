@@ -1,17 +1,18 @@
 # Install CSPM integration on a cloud deployment with standalone docker agent
 
 ## Prerequiste
+
 1. Docker
 2. [Connect to AWS account using the CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html)
 
 ## 1. Deploy Cloud Environment
+
 - Go to https://cloud.elastic.co/home
 - Log into with your elastic account
 - Select `Create Deployment`
 - Adjust the settings for your need, note that certain versions only exist on certain regions.
 - At the time of writing this, `latest` and `snapshot` versions are avilable on `us-west2`
-> **Note**
-> `latest` is the build candidate for pre-released versions
+  > **Note** > `latest` is the build candidate for pre-released versions
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222231445-5033bd97-9f19-4241-9784-876e92417a23.png">
 
@@ -50,6 +51,7 @@ To prevent cases of working with an incorrect commit, confirm that the commit SH
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222495899-7164a25f-b8e6-4970-8b83-a39a3e1d094a.png">
 
 ## 3. Create Agent Policy
+
 - Navigate to Fleet > Agent policies and select `Create agent policy`
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222233724-fcdc7d5d-d35b-4fb8-aed9-c157471c789d.png">
@@ -70,14 +72,15 @@ To prevent cases of working with an incorrect commit, confirm that the commit SH
 Save the intergation
 
 ## 4. Add Standalone Docker Agent
+
 - Now that you have an agent policy with a configured CSPM intergation navigate to Fleet > Agents and select `Add Agent`
 - Select your CSPM intergation from the drop down list under `What type of host are you adding?`
 - On step 3 of the Flyout, you will be provided with the setup command for the agent, for example:
 
 ```
-curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.7.0-SNAPSHOT-darwin-x86_64.tar.gz
-tar xzvf elastic-agent-8.7.0-SNAPSHOT-darwin-x86_64.tar.gz
-cd elastic-agent-8.7.0-SNAPSHOT-darwin-x86_64
+curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.10.0-SNAPSHOT-darwin-x86_64.tar.gz
+tar xzvf elastic-agent-8.10.0-SNAPSHOT-darwin-x86_64.tar.gz
+cd elastic-agent-8.10.0-SNAPSHOT-darwin-x86_64
 sudo ./elastic-agent install --url=https://901181905d2049f98455066cda0e6717.fleet.us-west2.gcp.elastic-cloud.com:443 --enrollment-token=cUV0Mm5vWUJlaUVHQ3hJWTJqOXQ6bEJnZUNmWGFRWkMzR3BHeEFRS2dYZw==
 ```
 
@@ -91,11 +94,13 @@ docker run -d --platform=linux/x86_64 \
 -e "FLEET_ENROLL=1" \
 docker.elastic.co/cloud-release/elastic-agent-cloud:8.7.0-046d305b
 ```
+
 > **Note**
 > make sure to change the agent docker image according to what you are using)
 
 At this point you should see your agent working in your docker and under `Confirm agent enrollment` section of the Flyout.
 
 ## 5. Discover
+
 - Go to Discover and make sure you have docs in the `findings` and `findings-latest` indecies, `findings-latest` can take a few minutes to populate.
 - If you do, congrats you have a working CSPM cloud deployment.

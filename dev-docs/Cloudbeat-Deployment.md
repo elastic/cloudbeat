@@ -1,9 +1,10 @@
 # Cloudbeat Deployment
 
 ## Table of Contents
+
 - [Deploying Cloudbeat as a process](#deploying-cloudbeat-as-a-process)
-   - [Self-Managed Kubernetes](#self-managed-kubernetes)
-   - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-eks)
+  - [Self-Managed Kubernetes](#self-managed-kubernetes)
+  - [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-eks)
 - [Deploying Cloudbeat with managed Elastic Agent](#deploying-cloudbeat-with-managed-elastic-agent)
 - [Deploying Cloudbeat with standalone Elastic Agent](#deploying-cloudbeat-with-standalone-elastic-agent)
 
@@ -56,6 +57,7 @@ just build-deploy-cloudbeat-nocert amd64
 
 If you are using `elastic-package` to run the Elastic Stack locally and need to take it down
 with `elastic-package stack down`, you might run into errors:
+
 ```shell
 failed to remove network elastic-package-stack_default: Error response from daemon: error while removing network: network elastic-package-stack_default id <id> has active endpoints
 Error: tearing down the stack failed: stopping docker containers failed: running command failed: running Docker Compose down command failed: exit status 1
@@ -91,7 +93,6 @@ This is useful for testing and development purposes.
    just deploy-eks-cloudbeat
    ```
 
-
 ## Deploying Cloudbeat with managed Elastic Agent
 
 1. Spin up Elastic stack (See [ELK stack setup](ELK-Deployment.md))
@@ -99,7 +100,6 @@ This is useful for testing and development purposes.
 3. Now, when adding a new agent, you will get the K8s deployment instructions of elastic-agent.
    - For KSPM it's recommended to use the `DaemonSet` deployment.
    - For CSPM it's recommended to use the run the agent as a linux binary (darwin is not supported yet).
-
 
 ## Deploying Fleet enrolled Elastic Agent in a container
 
@@ -113,7 +113,7 @@ This is useful for testing and development purposes.
    -e "FLEET_URL=<fleet-server-host-url>" \
    -e "FLEET_ENROLLMENT_TOKEN=<enrollment-token>" \
    -e "FLEET_ENROLL=1" \
-   docker.elastic.co/beats/elastic-agent:8.7.0-SNAPSHOT
+   docker.elastic.co/beats/elastic-agent:8.10.0-SNAPSHOT
    ```
 
 For more information see [Run Elastic Agent in a container](https://www.elastic.co/guide/en/fleet/current/elastic-agent-container.html#elastic-agent-container).
