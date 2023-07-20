@@ -1,5 +1,5 @@
 name: Destroy Environment
-run-name: Destroying environments starting with ${{ github.event.inputs.prefix }} by @${{ github.actor }}
+run-name: Destroying ${{ github.event.inputs.prefix }}* by @${{ github.actor }}
 
 on:
   # Ability to execute on demand
@@ -11,11 +11,11 @@ on:
         required: true
       prefix:
         type: string
-        description: "delete all cloud environments that start with {{prefix}}"
+        description: "Delete all environments starting with `prefix`"
         required: true
       ignore-prefix:
         type: string
-        description: "delete all cloud environments that do not start with {{ignore-prefix}}"
+        description: "Ignore all environments starting with `ignore-prefix`"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
