@@ -1,5 +1,5 @@
 name: Destroy Environment
-run-name: Destroying environments starting with ${{ github.event.inputs.prefix }} by @${{ github.actor }}
+run-name: Destroying ${{ github.event.inputs.prefix }}* by @${{ github.actor }}
 
 on:
   # Ability to execute on demand
