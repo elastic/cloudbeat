@@ -52,6 +52,7 @@ type devConfig struct {
 }
 
 func parseConfig() (*config, error) {
+	// Read in configuration from on of the files: config.json, config.yml or config.env
 	viper.AddConfigPath("./")
 	err := viper.ReadInConfig()
 	if err != nil {
