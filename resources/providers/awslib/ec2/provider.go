@@ -298,7 +298,7 @@ func (p *Provider) GetRouteTableForSubnet(ctx context.Context, region string, su
 
 func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance) ([]*Volume, error) {
 	instanceFilter := lo.Map(instances, func(ins *Ec2Instance, _ int) string { return *ins.InstanceId })
-	insances, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]*Volume, error) {
+	volumes, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]*Volume, error) {
 		input := &ec2.DescribeVolumesInput{
 			Filters: []types.Filter{
 				{
@@ -339,5 +339,5 @@ func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance
 		}
 		return result, nil
 	})
-	return lo.Flatten(insances), err
+	return lo.Flatten(volumes), err
 }
