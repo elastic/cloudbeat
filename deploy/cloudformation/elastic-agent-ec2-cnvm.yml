@@ -3,8 +3,8 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Creates an EC2 instance with permissions to run elastic-agent
 Parameters:
   LatestAmiId:
-    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-    Default: '/aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-arm64'
+    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+    Default: "/aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-arm64"
   InstanceType:
     Type: String
     Default: m6g.xlarge
@@ -26,46 +26,6 @@ Parameters:
   ElasticAgentVersion:
     Type: String
     Description: The version of elastic-agent to install
-  Integration:
-    Type: String
-    Default: VulnerabilityManagement
-    AllowedValues:
-      - VulnerabilityManagement
-      - CloudSecurityPostureManagement
-Mappings:
-  IntegrationMap:
-    VulnerabilityManagement:
-      EC2TaskTag: "Vulnerability Management Scanner"
-      Policies:
-        - PolicyName: vuln-mgmt-permissions
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ec2:DescribeInstances
-                  - ec2:DescribeImages
-                  - ec2:DescribeTags
-                  - ec2:DescribeSnapshots
-                  - ec2:CreateSnapshots
-                  - ec2:CreateTags
-                  - ec2:DeleteSnapshot
-                Resource: "*"
-              - Effect: Allow
-                Action:
-                  - ebs:ListSnapshotBlocks
-                  - ebs:ListChangedBlocks
-                  - ebs:GetSnapshotBlock
-                Resource: "*"
-              - Effect: Allow
-                Action:
-                  - iam:ListAccountAliases
-                Resource: "*"
-      ManagedPolicyArns: []
-    CloudSecurityPostureManagement:
-      EC2TaskTag: "Cloud Security Posture Management Scanner"
-      Policies: []
-      ManagedPolicyArns: ["arn:aws:iam::aws:policy/SecurityAudit"]
 Resources:
   # Security Group for EC2 instance
   ElasticAgentSecurityGroup:
@@ -97,15 +57,30 @@ Resources:
               - sts:AssumeRole
       Path: /
       Policies:
-        Fn::FindInMap:
-          - IntegrationMap
-          - !Ref Integration
-          - Policies
-      ManagedPolicyArns:
-        Fn::FindInMap:
-          - IntegrationMap
-          - !Ref Integration
-          - ManagedPolicyArns
+        - PolicyName: vuln-mgmt-permissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                  - ec2:DescribeImages
+                  - ec2:DescribeTags
+                  - ec2:DescribeSnapshots
+                  - ec2:CreateSnapshots
+                  - ec2:CreateTags
+                  - ec2:DeleteSnapshot
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ebs:ListSnapshotBlocks
+                  - ebs:ListChangedBlocks
+                  - ebs:GetSnapshotBlock
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - iam:ListAccountAliases
+                Resource: "*"
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -138,11 +113,7 @@ Resources:
                         - "/"
                         - Ref: "AWS::StackId"
         - Key: Task
-          Value:
-            Fn::FindInMap:
-              - IntegrationMap
-              - !Ref Integration
-              - EC2TaskTag
+          Value: Vulnerability Management Scanner
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ElasticAgentInstanceProfile
