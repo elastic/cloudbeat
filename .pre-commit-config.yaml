@@ -55,11 +55,14 @@ repos:
 
   - repo: local
     hooks:
-      - id: yq
-        name: format with yq
-        entry: sh -c 'for file in "$@"; do yq -i "$file"; done'
+      - id: rain
+        name: format with rain
         language: system
-        args: [-i]
+        entry: rain
+        args: [
+          "fmt",
+          "-w",
+        ]
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
