@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to deploy"
+        description: 'Environment to deploy'
         type: choice
         options:
           - weekly environment
       logLevel:
-        description: "Log level"
+        description: 'Log level'
         required: true
-        default: "INFO"
+        default: 'INFO'
         type: choice
         options:
           - TRACE
@@ -26,7 +26,7 @@ env:
   TF_VAR_ec_api_key: ${{ secrets.WEEKLY_ENVIRONMENT_EC_API_KEY }}
   TF_VAR_environment: ${{ github.event.inputs.logLevel }}
   TF_LOG: ${{ github.event.inputs.logLevel }}
-  TF_VAR_stack_version: 8.10.0-SNAPSHOT
+  TF_VAR_stack_version: 8.7.0-SNAPSHOT
 
 jobs:
   terraform:

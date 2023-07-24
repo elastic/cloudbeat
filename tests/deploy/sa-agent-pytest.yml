@@ -403,7 +403,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
-          image: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent:8.10.0-SNAPSHOT
+          image: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent:8.7.0-SNAPSHOT
           imagePullPolicy: IfNotPresent
           args: ["-c", "/etc/agent.yml", "-e"]
           env:
@@ -625,4 +625,3 @@ metadata:
   labels:
     k8s-app: elastic-agent
 ---
-
