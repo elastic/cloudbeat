@@ -24,7 +24,7 @@ concurrency:
 jobs:
   Build:
     name: Build
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 40
     steps:
       - name: Check out the repo
@@ -103,7 +103,7 @@ jobs:
     if: github.event_name == 'pull_request'
     name: ${{ matrix.test-target }}-tests
     needs: [Build]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
       fail-fast: false
@@ -182,7 +182,7 @@ jobs:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
     if: github.event_name == 'push'
     needs: [Build]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
       fail-fast: false
