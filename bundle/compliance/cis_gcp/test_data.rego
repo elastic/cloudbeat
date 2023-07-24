@@ -9,7 +9,7 @@ generate_iam_policy(members, role) = {
 		}]},
 	},
 	"type": "key-management",
-	"subType": "gcp-iam",
+	"subType": "gcp-iam-service-account",
 }
 
 generate_kms_resource(members, rotationPeriod, nextRotationTime, primary) = {

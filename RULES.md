@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 7/84 implemented rules (8%)
+### 8/84 implemented rules (10%)
 
-#### Automated rules: 7/73 (10%)
+#### Automated rules: 8/73 (11%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -297,7 +297,7 @@
 |                       1.3                        | Identity and Access Management | Ensure that Security Key Enforcement is Enabled for All Admin Accounts                                                            |        :x:         |  Manual   |
 |                       1.4                        | Identity and Access Management | Ensure That There Are Only GCP-Managed Service Account Keys for Each Service Account                                              |        :x:         | Automated |
 |                       1.5                        | Identity and Access Management | Ensure That Service Account Has No Admin Privileges                                                                               |        :x:         | Automated |
-|                       1.6                        | Identity and Access Management | Ensure That IAM Users Are Not Assigned the Service Account User or Service Account Token Creator Roles at Project Level           |        :x:         | Automated |
+|  [1.6](bundle/compliance/cis_gcp/rules/cis_1_6)  | Identity and Access Management | Ensure That IAM Users Are Not Assigned the Service Account User or Service Account Token Creator Roles at Project Level           | :white_check_mark: | Automated |
 |                       1.7                        | Identity and Access Management | Ensure User-Managed/External Keys for Service Accounts Are Rotated Every 90 Days or Fewer                                         |        :x:         | Automated |
 |                       1.8                        | Identity and Access Management | Ensure That Separation of Duties Is Enforced While Assigning Service Account Related Roles to Users                               |        :x:         | Automated |
 |  [1.9](bundle/compliance/cis_gcp/rules/cis_1_9)  | Identity and Access Management | Ensure That Cloud KMS Cryptokeys Are Not Anonymously or Publicly Accessible                                                       | :white_check_mark: | Automated |
