@@ -7,7 +7,7 @@ on:
       - "[0-9]+.[0-9]+"
     paths:
       - deploy/cloudformation/*.yml
-      - .github/workflows/publish-artifacts.yml
+      - .github/workflows/publish-cloudformation.yml
 
 jobs:
   publish_cloudformation:
@@ -30,10 +30,10 @@ jobs:
           echo "Uploading $CNVM_FILENAME to S3"
           aws s3 cp deploy/cloudformation/elastic-agent-ec2-cnvm.yml s3://elastic-cspm-cft/$CNVM_FILENAME
 
-          CSPM_FILENAME="cloudformation-cspm-$VERSION-$DATE.yml"
+          CSPM_FILENAME="cloudformation-cspm-single-account-$VERSION-$DATE.yml"
           echo "Uploading $CSPM_FILENAME to S3"
           aws s3 cp deploy/cloudformation/elastic-agent-ec2-cspm.yml s3://elastic-cspm-cft/$CSPM_FILENAME
 
-          FILENAME="cloudformation-organization-$VERSION-$DATE.yml"
+          FILENAME="cloudformation-cspm-organization-account-$VERSION-$DATE.yml"
           echo "Uploading $FILENAME to S3"
           aws s3 cp deploy/cloudformation/organization.yml s3://elastic-cspm-cft/$FILENAME
