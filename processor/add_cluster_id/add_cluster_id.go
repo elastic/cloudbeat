@@ -43,7 +43,7 @@ type addClusterID struct {
 }
 
 // New constructs a new Add ID processor.
-func New(cfg *agentconfig.C) (processors.Processor, error) {
+func New(cfg *agentconfig.C) (beat.Processor, error) {
 	config := config{}
 	if err := cfg.Unpack(&config); err != nil {
 		return nil, makeErrConfigUnpack(err)

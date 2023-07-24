@@ -32,6 +32,12 @@ require (
 )
 
 require (
+<<<<<<< HEAD
+=======
+	cloud.google.com/go/asset v1.14.1
+	cloud.google.com/go/iam v1.1.0
+	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6
+>>>>>>> 2a899e3 (Bump libbeat version (#1143))
 	github.com/aquasecurity/trivy v0.42.1
 	github.com/aquasecurity/trivy-db v0.0.0-20230515061101-378ab9ed302c
 	github.com/aws/aws-sdk-go v1.44.245
@@ -42,7 +48,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.24.4
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.20.4
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.24.4
-	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.24.0
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.26.0
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.19.0
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.29.2
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.98.0
@@ -61,12 +67,17 @@ require (
 	github.com/aws/smithy-go v1.13.5
 	github.com/djherbis/times v1.5.0
 	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
-	github.com/elastic/elastic-agent-autodiscover v0.5.0
+	github.com/elastic/elastic-agent-autodiscover v0.6.2
 	github.com/elastic/elastic-agent-libs v0.3.9
 	github.com/elastic/go-licenser v0.4.1
 	github.com/go-errors/errors v1.0.1
 	github.com/go-git/go-git/v5 v5.7.0
 	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
+<<<<<<< HEAD
+=======
+	github.com/googleapis/gax-go/v2 v2.11.0
+	github.com/masahiro331/go-xfs-filesystem v0.0.0-20230608043311-a335f4599b70
+>>>>>>> 2a899e3 (Bump libbeat version (#1143))
 	github.com/mikefarah/yq/v4 v4.33.3
 	github.com/open-policy-agent/opa v0.45.0
 	github.com/pkg/errors v0.9.1
@@ -83,8 +94,15 @@ require (
 	cloud.google.com/go v0.110.0 // indirect
 	cloud.google.com/go/compute v1.19.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+<<<<<<< HEAD
 	cloud.google.com/go/iam v0.13.0 // indirect
 	cloud.google.com/go/storage v1.29.0 // indirect
+=======
+	cloud.google.com/go/longrunning v0.5.0 // indirect
+	cloud.google.com/go/orgpolicy v1.11.0 // indirect
+	cloud.google.com/go/osconfig v1.12.0 // indirect
+	cloud.google.com/go/storage v1.30.1 // indirect
+>>>>>>> 2a899e3 (Bump libbeat version (#1143))
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230106234847-43070de90fa1 // indirect
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20221215162035-5330a85ea652 // indirect
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible // indirect
@@ -186,7 +204,10 @@ require (
 	github.com/google/s2a-go v0.1.3 // indirect
 	github.com/google/wire v0.5.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
+<<<<<<< HEAD
 	github.com/googleapis/gax-go/v2 v2.8.0 // indirect
+=======
+>>>>>>> 2a899e3 (Bump libbeat version (#1143))
 	github.com/gosuri/uitable v0.0.4 // indirect
 	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7 // indirect
 	github.com/hashicorp/go-getter v1.7.1 // indirect
@@ -262,7 +283,7 @@ require (
 	github.com/secure-systems-lab/go-securesystemslib v0.6.0 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
-	github.com/shopspring/decimal v1.2.0 // indirect
+	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sigstore/rekor v1.2.1 // indirect
 	github.com/skeema/knownhosts v1.1.1 // indirect
 	github.com/smartystreets/assertions v1.0.0 // indirect
@@ -323,7 +344,7 @@ require (
 	github.com/docker/distribution v2.8.2+incompatible
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20230309010449-b6aa37560e13
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20230720121404-8a9d6f6c8a68
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
@@ -349,7 +370,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.16.0 // indirect
+	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
@@ -383,7 +404,7 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Jeffail/gabs/v2 v2.6.0 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
-	github.com/Microsoft/go-winio v0.6.0 // indirect
+	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/Shopify/sarama v1.27.0 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -405,13 +426,13 @@ require (
 	github.com/dop251/goja_nodejs v0.0.0-20230226152057-060fa99b809f // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
-	github.com/elastic/elastic-agent-client/v7 v7.0.3
-	github.com/elastic/elastic-agent-system-metrics v0.4.6 // indirect
+	github.com/elastic/elastic-agent-client/v7 v7.1.2
+	github.com/elastic/elastic-agent-system-metrics v0.6.1 // indirect
 	github.com/elastic/go-concert v0.2.0 // indirect
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.3.0 // indirect
 	github.com/elastic/go-structform v0.0.10 // indirect
-	github.com/elastic/go-sysinfo v1.9.0 // indirect
+	github.com/elastic/go-sysinfo v1.11.0 // indirect
 	github.com/elastic/go-ucfg v0.8.6
 	github.com/elastic/go-windows v1.0.1 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
@@ -427,7 +448,11 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gomodule/redigo v1.8.3 // indirect
+<<<<<<< HEAD
 	github.com/google/flatbuffers v1.12.1 // indirect
+=======
+	github.com/google/flatbuffers v23.3.3+incompatible // indirect
+>>>>>>> 2a899e3 (Bump libbeat version (#1143))
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/licenseclassifier v0.0.0-20221004142553-c1ed8fcf4bab // indirect
@@ -459,12 +484,12 @@ require (
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
-	github.com/shirou/gopsutil/v3 v3.21.12 // indirect
+	github.com/shirou/gopsutil/v3 v3.22.10 // indirect
 	github.com/spf13/cobra v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/tklauser/go-sysconf v0.3.9 // indirect
-	github.com/tklauser/numcpus v0.3.0 // indirect
+	github.com/tklauser/go-sysconf v0.3.10 // indirect
+	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/ugorji/go/codec v1.1.8 // indirect
 	github.com/urso/sderr v0.0.0-20210525210834-52b04e8f5c71 // indirect
 	github.com/xdg/scram v1.0.3 // indirect
@@ -482,7 +507,7 @@ require (
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
