@@ -37,3 +37,10 @@ jobs:
           CSPM_ORG_FILENAME="cloudformation-cspm-organization-account-$VERSION-$DATE.yml"
           echo "Uploading $CSPM_ORG_FILENAME to S3"
           aws s3 cp deploy/cloudformation/organization.yml s3://elastic-cspm-cft/$CSPM_ORG_FILENAME
+
+          # TODO: HACK: remove this after https://github.com/elastic/kibana/issues/161265 is resolved
+          CSPM_FILENAME="cloudformation-cspm-ACCOUNT_TYPE-$VERSION-$DATE.yml"
+          echo "Uploading $CSPM_FILENAME to S3"
+          aws s3 cp deploy/cloudformation/elastic-agent-ec2-cspm.yml s3://elastic-cspm-cft/$CSPM_FILENAME
+          # fail the pipeline if issue is not open
+          curl -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/elastic/kibana/issues/161265 | grep '"state": "open"' || exit 1
