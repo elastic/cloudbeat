@@ -72,32 +72,32 @@ func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 }
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
-	err := InsertIfNotEmpty(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AwsAccountId, a.accountId), event)
+	err := insertIfNotEmpty(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AwsAccountId, a.accountId), event)
 	if err != nil {
 		return err
 	}
 
-	err = InsertIfNotEmpty(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AwsAccountAlias, a.accountName), event)
+	err = insertIfNotEmpty(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AwsAccountAlias, a.accountName), event)
 	if err != nil {
 		return err
 	}
 
-	err = InsertIfNotEmpty(cloudProviderField, a.providerName, event)
+	err = insertIfNotEmpty(cloudProviderField, a.providerName, event)
 	if err != nil {
 		return err
 	}
 
-	err = InsertIfNotEmpty(cloudRegionField, resMetadata.Region, event)
+	err = insertIfNotEmpty(cloudRegionField, resMetadata.Region, event)
 	if err != nil {
 		return err
 	}
 
-	err = InsertIfNotEmpty(cloudProjectIdField, a.projectId, event)
+	err = insertIfNotEmpty(cloudProjectIdField, a.projectId, event)
 	if err != nil {
 		return err
 	}
 
-	err = InsertIfNotEmpty(cloudProjectNameField, a.projectName, event)
+	err = insertIfNotEmpty(cloudProjectNameField, a.projectName, event)
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.Resour
 	return nil
 }
 
-func InsertIfNotEmpty(field string, value string, event *beat.Event) error {
+func insertIfNotEmpty(field string, value string, event *beat.Event) error {
 	if value != "" {
 		_, err := event.Fields.Put(field, value)
 		return err

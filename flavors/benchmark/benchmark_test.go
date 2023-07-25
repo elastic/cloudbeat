@@ -36,7 +36,7 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/config"
-	dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -556,7 +556,7 @@ func mockAwsIdentityProvider(err error) *awslib.MockIdentityProviderGetter {
 	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return(
-			&dataprovider.Identity{
+			&cloud.Identity{
 				Account: "test-account",
 			},
 			nil,
@@ -572,7 +572,7 @@ func mockGcpIdentityProvider(err error) *gcplib.MockIdentityProviderGetter {
 	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return(
-			&dataprovider.Identity{
+			&cloud.Identity{
 				Provider:    "gcp",
 				ProjectId:   "test-project-id",
 				ProjectName: "test-project-name",
@@ -615,7 +615,7 @@ func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
 	provider := awslib.MockAccountProviderAPI{}
 	on := provider.EXPECT().ListAccounts(mock.Anything, mock.Anything)
 	if err == nil {
-		on.Return([]dataprovider.Identity{
+		on.Return([]cloud.Identity{
 			{
 				Account:      "123",
 				AccountAlias: "some-name",
@@ -627,7 +627,7 @@ func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
 	return &provider
 }
 
-func mockAccountProviderWithIdentities(identities []dataprovider.Identity) *awslib.MockAccountProviderAPI {
+func mockAccountProviderWithIdentities(identities []cloud.Identity) *awslib.MockAccountProviderAPI {
 	provider := awslib.MockAccountProviderAPI{}
 	provider.EXPECT().ListAccounts(mock.Anything, mock.Anything).Return(identities, nil)
 	return &provider

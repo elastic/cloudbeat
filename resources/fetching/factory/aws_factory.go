@@ -21,11 +21,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"go.uber.org/zap"
 
-	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/aws"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
@@ -45,13 +46,13 @@ import (
 )
 
 type AwsAccount struct {
-	aws_dataprovider.Identity
+	cloud.Identity
 	aws.Config
 }
 
 type wrapResource struct {
 	wrapped  fetching.Resource
-	identity aws_dataprovider.Identity
+	identity cloud.Identity
 }
 
 func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
@@ -72,7 +73,7 @@ func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh 
 }
 
 // awsFactory is the same function type as NewCisAwsFactory, and it's used to mock the function in tests
-type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *aws_dataprovider.Identity) FetchersMap
+type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) FetchersMap
 
 func newCisAwsOrganizationFactory(
 	ctx context.Context,
@@ -84,7 +85,7 @@ func newCisAwsOrganizationFactory(
 	m := make(FetchersMap)
 	for _, account := range accounts {
 		ch := make(chan fetching.ResourceInfo)
-		go func(identity aws_dataprovider.Identity) {
+		go func(identity cloud.Identity) {
 			for {
 				select {
 				case <-ctx.Done():
@@ -125,7 +126,7 @@ func newCisAwsOrganizationFactory(
 	return m
 }
 
-func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *aws_dataprovider.Identity) FetchersMap {
+func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) FetchersMap {
 	log.Infof("Initializing AWS fetchers for account: '%s'", identity.Account)
 
 	m := make(FetchersMap)

@@ -21,11 +21,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
-	gcpdataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -58,9 +59,9 @@ func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %w", err)
 	}
 
-	return registry.NewRegistry(log, fetchers), gcpdataprovider.New(
-		gcpdataprovider.WithLogger(log),
-		gcpdataprovider.WithAccount(*gcpIdentity),
+	return registry.NewRegistry(log, fetchers), cloud.New(
+		cloud.WithLogger(log),
+		cloud.WithAccount(*gcpIdentity),
 	), nil
 }
 

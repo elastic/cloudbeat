@@ -25,7 +25,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
 
-	gcpdataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 
 	"github.com/elastic/cloudbeat/config"
@@ -34,7 +34,7 @@ import (
 const provider = "gcp"
 
 type IdentityProviderGetter interface {
-	GetIdentity(ctx context.Context, cfg config.GcpConfig) (*gcpdataprovider.Identity, error)
+	GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error)
 }
 
 type IdentityProvider struct {
@@ -71,13 +71,13 @@ func NewIdentityProvider(ctx context.Context, cfg *config.Config, logger *logp.L
 }
 
 // GetIdentity returns GCP identity information
-func (p *IdentityProvider) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*gcpdataprovider.Identity, error) {
+func (p *IdentityProvider) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error) {
 	proj, err := p.service.projectsGet(ctx, "projects/"+cfg.ProjectId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &gcpdataprovider.Identity{
+	return &cloud.Identity{
 		Provider:    provider,
 		ProjectId:   proj.ProjectId,
 		ProjectName: proj.DisplayName,

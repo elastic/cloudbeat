@@ -20,27 +20,28 @@ package awslib
 import (
 	"context"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
 
-	dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type AccountProviderAPI interface {
-	ListAccounts(ctx context.Context, cfg aws.Config) ([]dataprovider.Identity, error)
+	ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error)
 }
 
 type AccountProvider struct{}
 
-func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]dataprovider.Identity, error) {
+func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error) {
 	return listAccounts(ctx, organizations.NewFromConfig(cfg))
 }
 
-func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClient) ([]dataprovider.Identity, error) {
+func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClient) ([]cloud.Identity, error) {
 	input := organizations.ListAccountsInput{}
-	var accounts []dataprovider.Identity
+	var accounts []cloud.Identity
 	for {
 		o, err := client.ListAccounts(ctx, &input)
 		if err != nil {
@@ -52,7 +53,7 @@ func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClien
 				continue
 			}
 
-			accounts = append(accounts, dataprovider.Identity{
+			accounts = append(accounts, cloud.Identity{
 				Account:      *account.Id,
 				AccountAlias: strings.Dereference(account.Name),
 			})

@@ -21,6 +21,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
@@ -29,7 +31,6 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
-	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -63,9 +64,9 @@ func (A *AWSOrg) Initialize(
 	return registry.NewRegistry(
 			log,
 			factory.NewCisAwsOrganizationFactory(ctx, log, ch, accounts),
-		), aws_dataprovider.New(
-			aws_dataprovider.WithLogger(log),
-			aws_dataprovider.WithAccount(*awsIdentity),
+		), cloud.New(
+			cloud.WithLogger(log),
+			cloud.WithAccount(*awsIdentity),
 		), nil
 }
 
@@ -73,7 +74,7 @@ func getAwsAccounts(
 	ctx context.Context,
 	initialCfg awssdk.Config,
 	dependencies *Dependencies,
-	rootIdentity *aws_dataprovider.Identity,
+	rootIdentity *cloud.Identity,
 ) ([]factory.AwsAccount, error) {
 	const (
 		rootRole   = "cloudbeat-root"

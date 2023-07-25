@@ -23,11 +23,12 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/api/cloudresourcemanager/v3"
 
 	"github.com/elastic/cloudbeat/config"
-	gcpdataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -35,7 +36,7 @@ func TestIdentityProvider_GetIdentity(t *testing.T) {
 	tests := []struct {
 		name    string
 		service func() ResourceManager
-		want    *gcpdataprovider.Identity
+		want    *cloud.Identity
 		wantErr bool
 	}{
 		{
@@ -58,7 +59,7 @@ func TestIdentityProvider_GetIdentity(t *testing.T) {
 				}, nil)
 				return &m
 			},
-			want: &gcpdataprovider.Identity{
+			want: &cloud.Identity{
 				Provider:    "gcp",
 				ProjectId:   "test-proj",
 				ProjectName: "my proj",

@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
@@ -34,19 +34,19 @@ func Test_getAwsAccounts(t *testing.T) {
 	tests := []struct {
 		name            string
 		accountProvider awslib.AccountProviderAPI
-		rootIdentity    dataprovider.Identity
-		want            []dataprovider.Identity
+		rootIdentity    cloud.Identity
+		want            []cloud.Identity
 		wantErr         string
 	}{
 		{
 			name:            "error",
 			accountProvider: mockAccountProvider(errors.New("some error")),
-			rootIdentity:    dataprovider.Identity{Account: "123"},
+			rootIdentity:    cloud.Identity{Account: "123"},
 			wantErr:         "some error",
 		},
 		{
 			name: "",
-			accountProvider: mockAccountProviderWithIdentities([]dataprovider.Identity{
+			accountProvider: mockAccountProviderWithIdentities([]cloud.Identity{
 				{
 					Account: "123",
 				},
@@ -55,11 +55,11 @@ func Test_getAwsAccounts(t *testing.T) {
 					AccountAlias: "alias2",
 				},
 			}),
-			rootIdentity: dataprovider.Identity{
+			rootIdentity: cloud.Identity{
 				Account:      "123",
 				AccountAlias: "alias",
 			},
-			want: []dataprovider.Identity{
+			want: []cloud.Identity{
 				{
 					Account:      "123",
 					AccountAlias: "alias",

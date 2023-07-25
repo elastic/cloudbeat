@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 
-	dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -54,7 +54,7 @@ func subtest(t *testing.T, drain bool) {
 	var accounts []AwsAccount
 	for i := 0; i < nAccounts; i++ {
 		accounts = append(accounts, AwsAccount{
-			Identity: dataprovider.Identity{
+			Identity: cloud.Identity{
 				Account:      fmt.Sprintf("account-%d", i),
 				AccountAlias: fmt.Sprintf("alias-%d", i),
 			},
@@ -66,7 +66,7 @@ func subtest(t *testing.T, drain bool) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	factory := mockFactory(nAccounts,
-		func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *dataprovider.Identity) FetchersMap {
+		func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
 			if drain {
 				// create some resources if we are testing for that
 				go func() {
@@ -131,13 +131,13 @@ func TestNewCisAwsOrganizationFactory_LeakContextDone(t *testing.T) {
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
 		[]AwsAccount{{
-			Identity: dataprovider.Identity{
+			Identity: cloud.Identity{
 				Account:      "1",
 				AccountAlias: "account",
 			},
 		}},
 		mockFactory(1,
-			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *dataprovider.Identity) FetchersMap {
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
 				ch <- fetching.ResourceInfo{
 					Resource:      mockResource(),
 					CycleMetadata: fetching.CycleMetadata{Sequence: 1},
@@ -159,13 +159,13 @@ func TestNewCisAwsOrganizationFactory_CloseChannel(t *testing.T) {
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
 		[]AwsAccount{{
-			Identity: dataprovider.Identity{
+			Identity: cloud.Identity{
 				Account:      "1",
 				AccountAlias: "account",
 			},
 		}},
 		mockFactory(1,
-			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *dataprovider.Identity) FetchersMap {
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
 				defer close(ch)
 				return FetchersMap{"fetcher": RegisteredFetcher{}}
 			},
