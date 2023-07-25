@@ -173,7 +173,7 @@ func (s *LauncherTestSuite) MockBeatManager(mocks *launcherMocks) {
 	}
 	b, err := instance.NewInitializedBeat(settings)
 	s.NoError(err)
-	b.Manager, err = management.Factory(b.Config.Management)(b.Config.Management, reload.RegisterV2, b.Beat.Info.ID)
+	b.Manager, err = management.NewManager(b.Config.Management, reload.RegisterV2)
 	s.NoError(err)
 	mocks.beat = &b.Beat
 }
