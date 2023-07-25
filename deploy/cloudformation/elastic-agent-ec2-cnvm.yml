@@ -34,12 +34,13 @@ Parameters:
     Type: String
 
 Resources:
+
   # Security Group for EC2 instance
   ElasticAgentSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Join
-        - "-"
+        - '-'
         - - elastic-agent-security-group
           - !Select
             - 2
@@ -75,36 +76,36 @@ Resources:
                   - ec2:CreateTags
                 Resource: !Join
                   - ""
-                  - - "arn:aws:ec2:"
+                  - - 'arn:aws:ec2:'
                     - !Ref AWS::Region
-                    - "::instance/*"
+                    - ::instance/*
               - Effect: Allow
                 Action:
                   - ec2:DescribeImages
                   - ec2:CreateTags
                 Resource: !Join
                   - ""
-                  - - "arn:aws:ec2:"
+                  - - 'arn:aws:ec2:'
                     - !Ref AWS::Region
-                    - "::image/*"
+                    - ::image/*
               - Effect: Allow
                 Action:
                   - ec2:DescribeSnapshots
                   - ec2:CreateSnapshots
                 Resource: !Join
                   - ""
-                  - - "arn:aws:ec2:"
+                  - - 'arn:aws:ec2:'
                     - !Ref AWS::Region
-                    - "::snapshot/*"
+                    - ::snapshot/*
               - Effect: Allow
                 Action:
                   - ec2:DescribeTags
                   - ec2:CreateTags
                 Resource: !Join
                   - ""
-                  - - "arn:aws:ec2:"
+                  - - 'arn:aws:ec2:'
                     - !Ref AWS::Region
-                    - "::snapshot/*"
+                    - ::snapshot/*
               - Effect: Allow
                 Action:
                   - ebs:ListSnapshotBlocks
@@ -114,22 +115,23 @@ Resources:
                   - ec2:DescribeVolumes
                 Resource: !Join
                   - ""
-                  - - "arn:aws:ec2:"
+                  - - 'arn:aws:ec2:'
                     - !Ref AWS::Region
-                    - "::snapshot/*"
+                    - ::snapshot/*
                 Condition:
                   StringEqualsIgnoreCase:
-                    aws:ResourceTag/Workload: "Cloudbeat Vulnerability Snapshot"
+                    aws:ResourceTag/Workload: Cloudbeat Vulnerability Snapshot
               - Effect: Allow
                 Action:
                   - iam:ListAccountAliases
-                Resource: "arn:aws:iam::*:*"
+                Resource: arn:aws:iam::*:*
+
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       InstanceProfileName: !Join
-        - "-"
+        - '-'
         - - elastic-agent-instance-profile
           - !Select
             - 2
@@ -147,7 +149,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join
-            - "-"
+            - '-'
             - - elastic-agent-instance
               - !Select
                 - 2
