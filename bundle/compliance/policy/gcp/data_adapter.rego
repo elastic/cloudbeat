@@ -31,3 +31,7 @@ is_bigquery_dataset {
 is_bigquery_table {
 	input.subType == "gcp-bigquery-table"
 }
+
+is_compute_instance {
+	input.subType == "gcp-compute-instance"
+}

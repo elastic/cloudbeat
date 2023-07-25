@@ -52,6 +52,12 @@ generate_bq_resource(config, subType, members) = {
 	"subType": subType,
 }
 
+generate_compute_resource(subType, info) = {
+	"resource": {"resource": {"data": info}},
+	"type": "cloud-compute",
+	"subType": subType,
+}
+
 not_eval_resource = {
 	"resource": {},
 	"type": "key-management",

@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 9/84 implemented rules (11%)
+### 11/84 implemented rules (13%)
 
-#### Automated rules: 9/73 (12%)
+#### Automated rules: 11/73 (15%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -327,11 +327,11 @@
 |                       3.7                        | Networking                     | Ensure That RDP Access Is Restricted From the Internet                                                                            |        :x:         | Automated |
 |                       3.8                        | Networking                     | Ensure that VPC Flow Logs is Enabled for Every Subnet in a VPC Network                                                            |        :x:         | Automated |
 |                       3.9                        | Networking                     | Ensure No HTTPS or SSL Proxy Load Balancers Permit SSL Policies With Weak Cipher Suites                                           |        :x:         |  Manual   |
-|                       4.1                        | Virtual Machines               | Ensure That Instances Are Not Configured To Use the Default Service Account                                                       |        :x:         | Automated |
+|  [4.1](bundle/compliance/cis_gcp/rules/cis_4_1)  | Virtual Machines               | Ensure That Instances Are Not Configured To Use the Default Service Account                                                       | :white_check_mark: | Automated |
 |                       4.10                       | Virtual Machines               | Ensure That App Engine Applications Enforce HTTPS Connections                                                                     |        :x:         |  Manual   |
 |                       4.11                       | Virtual Machines               | Ensure That Compute Instances Have Confidential Computing Enabled                                                                 |        :x:         | Automated |
 |                       4.12                       | Virtual Machines               | Ensure the Latest Operating System Updates Are Installed On Your Virtual Machines in All Projects                                 |        :x:         |  Manual   |
-|                       4.2                        | Virtual Machines               | Ensure That Instances Are Not Configured To Use the Default Service Account With Full Access to All Cloud APIs                    |        :x:         | Automated |
+|  [4.2](bundle/compliance/cis_gcp/rules/cis_4_2)  | Virtual Machines               | Ensure That Instances Are Not Configured To Use the Default Service Account With Full Access to All Cloud APIs                    | :white_check_mark: | Automated |
 |                       4.3                        | Virtual Machines               | Ensure “Block Project-Wide SSH Keys” Is Enabled for VM Instances                                                                  |        :x:         | Automated |
 |                       4.4                        | Virtual Machines               | Ensure Oslogin Is Enabled for a Project                                                                                           |        :x:         | Automated |
 |                       4.5                        | Virtual Machines               | Ensure ‘Enable Connecting to Serial Ports’ Is Not Enabled for VM Instance                                                         |        :x:         | Automated |
