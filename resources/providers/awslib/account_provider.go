@@ -24,22 +24,23 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type AccountProviderAPI interface {
-	ListAccounts(ctx context.Context, cfg aws.Config) ([]Identity, error)
+	ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error)
 }
 
 type AccountProvider struct{}
 
-func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]Identity, error) {
+func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error) {
 	return listAccounts(ctx, organizations.NewFromConfig(cfg))
 }
 
-func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClient) ([]Identity, error) {
+func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClient) ([]cloud.Identity, error) {
 	input := organizations.ListAccountsInput{}
-	var accounts []Identity
+	var accounts []cloud.Identity
 	for {
 		o, err := client.ListAccounts(ctx, &input)
 		if err != nil {
@@ -51,9 +52,9 @@ func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClien
 				continue
 			}
 
-			accounts = append(accounts, Identity{
-				Account: *account.Id,
-				Alias:   strings.Dereference(account.Name),
+			accounts = append(accounts, cloud.Identity{
+				Account:      *account.Id,
+				AccountAlias: strings.Dereference(account.Name),
 			})
 		}
 

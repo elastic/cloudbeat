@@ -29,11 +29,11 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 
@@ -78,7 +78,7 @@ func getEksAwsConfig(
 	ctx context.Context,
 	cfg *config.Config,
 	dependencies *Dependencies,
-) (awssdk.Config, *awslib.Identity, error) {
+) (awssdk.Config, *cloud.Identity, error) {
 	if cfg.CloudConfig == (config.CloudConfig{}) || cfg.CloudConfig.Aws.Cred == (aws.ConfigAWS{}) {
 		// Optional for EKS
 		return awssdk.Config{}, nil, nil

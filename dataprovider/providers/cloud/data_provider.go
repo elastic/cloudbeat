@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package aws
+package cloud
 
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
@@ -32,16 +32,28 @@ const (
 	cloudAccountNameField = "cloud.account.name"
 	cloudProviderField    = "cloud.provider"
 	cloudRegionField      = "cloud.region"
-	cloudProviderValue    = "aws"
+	cloudProjectIdField   = "cloud.project.id"
+	cloudProjectNameField = "cloud.project.name"
 )
 
-type DataProvider struct {
-	log         *logp.Logger
-	accountId   string
-	accountName string
+type Identity struct {
+	Provider     string
+	Account      string
+	AccountAlias string
+	ProjectId    string
+	ProjectName  string
 }
 
-func New(options ...Option) DataProvider {
+type DataProvider struct {
+	log          *logp.Logger
+	accountId    string
+	accountName  string
+	providerName string
+	projectName  string
+	projectId    string
+}
+
+func NewDataProvider(options ...Option) DataProvider {
 	adp := DataProvider{}
 	for _, opt := range options {
 		opt(&adp)
@@ -60,25 +72,43 @@ func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 }
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
-	_, err := event.Fields.Put(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AwsAccountId, a.accountId))
+	err := insertIfNotEmpty(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AwsAccountId, a.accountId), event)
 	if err != nil {
 		return err
 	}
 
-	_, err = event.Fields.Put(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AwsAccountAlias, a.accountName))
+	err = insertIfNotEmpty(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AwsAccountAlias, a.accountName), event)
 	if err != nil {
 		return err
 	}
 
-	_, err = event.Fields.Put(cloudProviderField, cloudProviderValue)
+	err = insertIfNotEmpty(cloudProviderField, a.providerName, event)
 	if err != nil {
 		return err
 	}
 
-	_, err = event.Fields.Put(cloudRegionField, resMetadata.Region)
+	err = insertIfNotEmpty(cloudRegionField, resMetadata.Region, event)
 	if err != nil {
 		return err
 	}
 
+	err = insertIfNotEmpty(cloudProjectIdField, a.projectId, event)
+	if err != nil {
+		return err
+	}
+
+	err = insertIfNotEmpty(cloudProjectNameField, a.projectName, event)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func insertIfNotEmpty(field string, value string, event *beat.Event) error {
+	if value != "" {
+		_, err := event.Fields.Put(field, value)
+		return err
+	}
 	return nil
 }
