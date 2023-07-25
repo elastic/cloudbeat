@@ -127,15 +127,14 @@ Resources:
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName:
-        Fn::Join:
-          - "-"
-          - - "elastic-agent-instance-profile"
-            - Fn::Select:
-                - 2
-                - Fn::Split:
-                    - "/"
-                    - Ref: "AWS::StackId"
+      InstanceProfileName: !Join
+        - "-"
+        - - elastic-agent-instance-profile
+          - !Select
+            - 2
+            - !Split
+              - /
+              - !Ref "AWS::StackId"
       Path: /
       Roles:
         - !Ref "ElasticAgentRole"
