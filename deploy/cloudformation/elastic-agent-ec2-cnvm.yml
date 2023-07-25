@@ -111,6 +111,7 @@ Resources:
                   - ebs:ListChangedBlocks
                   - ebs:GetSnapshotBlock
                   - ec2:DeleteSnapshot
+                  - ec2:DescribeVolumes
                 Resource: !Join
                   - ""
                   - - "arn:aws:ec2:"
