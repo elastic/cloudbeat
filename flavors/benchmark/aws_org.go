@@ -64,7 +64,7 @@ func (A *AWSOrg) Initialize(
 	return registry.NewRegistry(
 			log,
 			factory.NewCisAwsOrganizationFactory(ctx, log, ch, accounts),
-		), cloud.New(
+		), cloud.NewDataProvider(
 			cloud.WithLogger(log),
 			cloud.WithAccount(*awsIdentity),
 		), nil

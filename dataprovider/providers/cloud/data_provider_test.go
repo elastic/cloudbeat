@@ -85,7 +85,7 @@ func (s *CloudDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 	}
 
 	for _, test := range tests {
-		p := New(test.options...)
+		p := NewDataProvider(test.options...)
 		result, err := p.FetchData(test.resource, test.id)
 		if test.expectError {
 			s.Error(err)
@@ -178,7 +178,7 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := New(WithLogger(testhelper.NewLogger(t)), WithAccount(tt.identity))
+			p := NewDataProvider(WithLogger(testhelper.NewLogger(t)), WithAccount(tt.identity))
 			e := &beat.Event{
 				Fields: mapstr.M{},
 			}

@@ -56,7 +56,7 @@ func (A *AWS) Initialize(
 	return registry.NewRegistry(
 			log,
 			factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity),
-		), cloud.New(
+		), cloud.NewDataProvider(
 			cloud.WithLogger(log),
 			cloud.WithAccount(*awsIdentity),
 		), nil

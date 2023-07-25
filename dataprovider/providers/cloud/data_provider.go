@@ -53,7 +53,7 @@ type DataProvider struct {
 	projectId    string
 }
 
-func New(options ...Option) DataProvider {
+func NewDataProvider(options ...Option) DataProvider {
 	adp := DataProvider{}
 	for _, opt := range options {
 		opt(&adp)

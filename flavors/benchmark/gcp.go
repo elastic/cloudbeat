@@ -59,7 +59,7 @@ func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %w", err)
 	}
 
-	return registry.NewRegistry(log, fetchers), cloud.New(
+	return registry.NewRegistry(log, fetchers), cloud.NewDataProvider(
 		cloud.WithLogger(log),
 		cloud.WithAccount(*gcpIdentity),
 	), nil
