@@ -216,6 +216,9 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
+			iamCfg := IAMFetcherConfig{
+				AwsBaseFetcherConfig: fetching.AwsBaseFetcherConfig{},
+			}
 
 			iamProviderMock := &iam.MockAccessManagement{}
 			for funcName, returnVals := range test.mocksReturnVals {
@@ -225,6 +228,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 			iamFetcher := IAMFetcher{
 				log:         s.log,
 				iamProvider: iamProviderMock,
+				cfg:         iamCfg,
 				resourceCh:  s.resourceCh,
 				cloudIdentity: &awslib.Identity{
 					Account: &test.account,

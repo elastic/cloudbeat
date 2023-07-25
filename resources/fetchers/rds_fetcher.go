@@ -28,6 +28,7 @@ import (
 
 type RdsFetcher struct {
 	log        *logp.Logger
+	cfg        RdsFetcherConfig
 	resourceCh chan fetching.ResourceInfo
 	provider   rds.Rds
 }
@@ -38,14 +39,6 @@ type RdsFetcherConfig struct {
 
 type RdsResource struct {
 	dbInstance awslib.AwsResource
-}
-
-func NewRdsFetcher(log *logp.Logger, provider rds.Rds, ch chan fetching.ResourceInfo) *RdsFetcher {
-	return &RdsFetcher{
-		log:        log,
-		resourceCh: ch,
-		provider:   provider,
-	}
 }
 
 func (f *RdsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {

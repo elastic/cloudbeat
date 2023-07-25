@@ -22,33 +22,28 @@ import (
 	"fmt"
 	"time"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/pipeline"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources/fetchersManager/factory"
-	"github.com/elastic/cloudbeat/resources/fetchersManager/manager"
-	"github.com/elastic/cloudbeat/resources/fetchersManager/registry"
+	"github.com/elastic/cloudbeat/resources/fetchersManager"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/transformer"
 	"github.com/elastic/cloudbeat/uniqueness"
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
+
+	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
-	k8s "k8s.io/client-go/kubernetes"
 )
 
 // posture configuration.
 type posture struct {
 	flavorBase
-	fetcherManager *manager.Manager
-	evaluator      evaluator.Evaluator
-	resourceCh     chan fetching.ResourceInfo
-	leader         uniqueness.Manager
+	data       *fetchersManager.Data
+	evaluator  evaluator.Evaluator
+	resourceCh chan fetching.ResourceInfo
+	leader     uniqueness.Manager
 }
 
 // NewPosture creates an instance of posture.
@@ -67,15 +62,9 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
-	kubeClient, err := providers.GetK8sClient(log, c.KubeConfig, kubernetes.KubeClientOptions{})
-	if err != nil {
-		log.Errorf("failed to create kubernetes client: %v", err)
-	}
-	le := uniqueness.NewLeaderElector(log, kubeClient)
+	le := uniqueness.NewLeaderElector(log, c, &providers.KubernetesProvider{})
 
-	awsConfigProvider := awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}}
-
-	fetchersRegistry, err := initRegistry(ctx, log, c, resourceCh, le, kubeClient, awslib.GetIdentityClient, awsConfigProvider)
+	fetchersRegistry, err := initRegistry(log, c, resourceCh, le)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -83,7 +72,7 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 
 	// TODO: timeout should be configurable and not hard-coded. Setting to 10 minutes for now to account for CSPM fetchers
 	// 	https://github.com/elastic/cloudbeat/issues/653
-	fetcherManager, err := manager.NewManager(ctx, log, c.Period, time.Minute*10, fetchersRegistry)
+	data, err := fetchersManager.NewData(ctx, log, c.Period, time.Minute*10, fetchersRegistry)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -115,11 +104,11 @@ func NewPosture(_ *beat.Beat, cfg *agentconfig.C) (*posture, error) {
 	}
 
 	bt := &posture{
-		flavorBase:     base,
-		evaluator:      eval,
-		fetcherManager: fetcherManager,
-		resourceCh:     resourceCh,
-		leader:         le,
+		flavorBase: base,
+		evaluator:  eval,
+		data:       data,
+		resourceCh: resourceCh,
+		leader:     le,
 	}
 	return bt, nil
 }
@@ -132,7 +121,7 @@ func (bt *posture) Run(b *beat.Beat) error {
 		return err
 	}
 
-	bt.fetcherManager.Run()
+	bt.data.Run()
 
 	procs, err := ConfigureProcessors(bt.config.Processors)
 	if err != nil {
@@ -185,18 +174,24 @@ func (bt *posture) Run(b *beat.Beat) error {
 	}
 }
 
-func initRegistry(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identityProvider func(cfg awssdk.Config) awslib.IdentityProviderGetter, awsConfigProvider awslib.ConfigProviderAPI) (registry.FetchersRegistry, error) {
-	f, err := factory.NewFactory(ctx, log, cfg, ch, le, k8sClient, identityProvider, awsConfigProvider)
+func initRegistry(log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager) (fetchersManager.FetchersRegistry, error) {
+	registry := fetchersManager.NewFetcherRegistry(log)
+
+	parsedList, err := fetchersManager.Factories.ParseConfigFetchers(log, cfg, ch)
 	if err != nil {
 		return nil, err
 	}
 
-	return registry.NewFetcherRegistry(log, f), nil
+	if err := registry.RegisterFetchers(parsedList, le); err != nil {
+		return nil, err
+	}
+
+	return registry, nil
 }
 
 // Stop stops posture.
 func (bt *posture) Stop() {
-	bt.fetcherManager.Stop()
+	bt.data.Stop()
 	bt.evaluator.Stop(bt.ctx)
 	bt.leader.Stop()
 	close(bt.resourceCh)

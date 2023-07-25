@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -44,7 +43,6 @@ const (
 	CMDArgumentMatcher  = "\\b%s[\\s=]\\/?(\\S+)"
 	ProcessResourceType = "process"
 	ProcessSubType      = "process"
-	directory           = "/hostfs"
 	userHz              = 100
 )
 
@@ -106,9 +104,9 @@ type ProcResource struct {
 
 type ProcessesFetcher struct {
 	log        *logp.Logger
+	cfg        ProcessFetcherConfig
 	Fs         fs.FS
 	resourceCh chan fetching.ResourceInfo
-	processes  ProcessesConfigMap
 }
 
 type ProcessInputConfiguration struct {
@@ -117,13 +115,10 @@ type ProcessInputConfiguration struct {
 
 type ProcessesConfigMap map[string]ProcessInputConfiguration
 
-func NewProcessFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, processes ProcessesConfigMap) *ProcessesFetcher {
-	return &ProcessesFetcher{
-		log:        log,
-		Fs:         os.DirFS(directory),
-		resourceCh: ch,
-		processes:  processes,
-	}
+type ProcessFetcherConfig struct {
+	fetching.BaseFetcherConfig
+	Directory         string             `config:"directory"` // parent directory of target procfs
+	RequiredProcesses ProcessesConfigMap `config:"processes"`
 }
 
 func (f *ProcessesFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
@@ -141,7 +136,7 @@ func (f *ProcessesFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMeta
 		if err != nil {
 			return err
 		}
-		processConfig, isProcessRequired := f.processes[stat.Name]
+		processConfig, isProcessRequired := f.cfg.RequiredProcesses[stat.Name]
 		if !isProcessRequired {
 			continue
 		}

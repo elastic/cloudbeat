@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/kms"
@@ -38,14 +39,6 @@ type KmsFetcherConfig struct {
 
 type KmsResource struct {
 	key awslib.AwsResource
-}
-
-func NewKMSFetcher(log *logp.Logger, provider kms.KMS, ch chan fetching.ResourceInfo) *KmsFetcher {
-	return &KmsFetcher{
-		log:        log,
-		kms:        provider,
-		resourceCh: ch,
-	}
 }
 
 func (f *KmsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
