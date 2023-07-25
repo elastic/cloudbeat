@@ -29,7 +29,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-
 	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
 

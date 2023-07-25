@@ -22,10 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/huandu/xstrings"
-
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/huandu/xstrings"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
