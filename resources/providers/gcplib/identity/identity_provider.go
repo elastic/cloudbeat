@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package gcplib
+package identity
 
 import (
 	"context"
@@ -25,19 +25,18 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
 
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
-
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
 
 const provider = "gcp"
 
-type IdentityProviderGetter interface {
+type ProviderGetter interface {
 	GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error)
 }
 
-type IdentityProvider struct {
+type Provider struct {
 	service ResourceManager
 	logger  *logp.Logger
 }
@@ -51,8 +50,8 @@ type ResourceManager interface {
 	projectsGet(context.Context, string) (*cloudresourcemanager.Project, error)
 }
 
-func NewIdentityProvider(ctx context.Context, cfg *config.Config, logger *logp.Logger) *IdentityProvider {
-	gcpClientOpt, err := gcplib.GetGcpClientConfig(cfg, logger)
+func NewProvider(ctx context.Context, cfg *config.Config, logger *logp.Logger) *Provider {
+	gcpClientOpt, err := auth.GetGcpClientConfig(cfg, logger)
 	if err != nil {
 		logger.Errorf("failed to get GCP client config: %v", err)
 		return nil
@@ -64,14 +63,14 @@ func NewIdentityProvider(ctx context.Context, cfg *config.Config, logger *logp.L
 		return nil
 	}
 
-	return &IdentityProvider{
+	return &Provider{
 		service: &CloudResourceManagerService{service: crmService},
 		logger:  logger,
 	}
 }
 
 // GetIdentity returns GCP identity information
-func (p *IdentityProvider) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error) {
+func (p *Provider) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error) {
 	proj, err := p.service.projectsGet(ctx, "projects/"+cfg.ProjectId)
 	if err != nil {
 		return nil, err

@@ -22,22 +22,20 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
 
-	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
-
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 )
 
 type Benchmark interface {
@@ -68,7 +66,7 @@ type Dependencies struct {
 	AwsCfgProvider           awslib.ConfigProviderAPI
 	AwsIdentityProvider      awslib.IdentityProviderGetter
 	AwsAccountProvider       awslib.AccountProviderAPI
-	GcpIdentityProvider      gcplib.IdentityProviderGetter
+	GcpIdentityProvider      identity.ProviderGetter
 	KubernetesClientProvider k8sprovider.ClientGetterAPI
 
 	AwsMetadataProvider    awslib.MetadataProvider

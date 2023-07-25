@@ -21,12 +21,11 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
 	k8s "k8s.io/client-go/kubernetes"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/condition"
 	awsfetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/aws"

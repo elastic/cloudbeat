@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package gcplib
+package identity
 
 import (
 	"context"
@@ -69,7 +69,7 @@ func TestIdentityProvider_GetIdentity(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &IdentityProvider{
+			p := &Provider{
 				service: tt.service(),
 				logger:  testhelper.NewLogger(t),
 			}

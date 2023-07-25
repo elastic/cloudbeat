@@ -23,8 +23,6 @@ import (
 	"fmt"
 	"testing"
 
-	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
-
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
@@ -40,6 +38,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -567,8 +566,8 @@ func mockAwsIdentityProvider(err error) *awslib.MockIdentityProviderGetter {
 	return identityProvider
 }
 
-func mockGcpIdentityProvider(err error) *gcplib.MockIdentityProviderGetter {
-	identityProvider := &gcplib.MockIdentityProviderGetter{}
+func mockGcpIdentityProvider(err error) *identity.MockIdentityProviderGetter {
+	identityProvider := &identity.MockIdentityProviderGetter{}
 	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return(

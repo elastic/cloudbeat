@@ -29,14 +29,14 @@ import (
 	asset "cloud.google.com/go/asset/apiv1"
 	"cloud.google.com/go/asset/apiv1/assetpb"
 
-	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
 
 type Provider struct {
 	log    *logp.Logger
 	client *GcpClientWrapper
 	ctx    context.Context
-	Config gcplib.GcpFactoryConfig
+	Config auth.GcpFactoryConfig
 }
 
 type Iterator interface {
@@ -56,7 +56,7 @@ type InventoryService interface {
 	Close() error
 }
 
-func NewAssetsInventoryProvider(ctx context.Context, log *logp.Logger, gcpConfig gcplib.GcpFactoryConfig) (*Provider, error) {
+func NewAssetsInventoryProvider(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig) (*Provider, error) {
 	client, err := asset.NewClient(ctx, gcpConfig.ClientOpts...)
 
 	if err != nil {

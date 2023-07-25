@@ -21,17 +21,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-
-	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
 
 type GCP struct{}
@@ -39,12 +37,12 @@ type GCP struct{}
 func (G *GCP) Run(context.Context) error { return nil }
 
 func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error) {
-	gcpClientConfig, err := gcplib.GetGcpClientConfig(cfg, log)
+	gcpClientConfig, err := auth.GetGcpClientConfig(cfg, log)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
 
-	gcpFactoryConfig := &gcplib.GcpFactoryConfig{
+	gcpFactoryConfig := &auth.GcpFactoryConfig{
 		ProjectId:  cfg.CloudConfig.Gcp.ProjectId,
 		ClientOpts: gcpClientConfig,
 	}
