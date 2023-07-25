@@ -141,7 +141,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 
 			client := newMockClient(t)
 			for _, size := range tc.expectedEventSize {
-				client.EXPECT().PublishAll(mock.MatchedBy(LengthMatcher(size)))
+				client.EXPECT().PublishAll(mock.MatchedBy(lengthMatcher(size)))
 			}
 			publisher := NewPublisher(log, tc.interval, tc.threshold, client)
 
@@ -167,7 +167,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 	}
 }
 
-func LengthMatcher(length int) func(events []beat.Event) bool {
+func lengthMatcher(length int) func(events []beat.Event) bool {
 	return func(events []beat.Event) bool {
 		return len(events) == length
 	}
