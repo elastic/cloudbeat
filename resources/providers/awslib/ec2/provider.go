@@ -52,6 +52,7 @@ type Client interface {
 	DescribeSnapshots(ctx context.Context, params *ec2.DescribeSnapshotsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSnapshotsOutput, error)
 	DeleteSnapshot(ctx context.Context, params *ec2.DeleteSnapshotInput, optFns ...func(*ec2.Options)) (*ec2.DeleteSnapshotOutput, error)
 	DescribeRouteTables(ctx context.Context, params *ec2.DescribeRouteTablesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeRouteTablesOutput, error)
+	DescribeVolumes(ctx context.Context, params *ec2.DescribeVolumesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeVolumesOutput, error)
 }
 
 func (p *Provider) DescribeNetworkAcl(ctx context.Context) ([]awslib.AwsResource, error) {
@@ -163,8 +164,8 @@ func (p *Provider) GetEbsEncryptionByDefault(ctx context.Context) ([]awslib.AwsR
 	})
 }
 
-func (p *Provider) DescribeInstances(ctx context.Context) ([]Ec2Instance, error) {
-	insances, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]Ec2Instance, error) {
+func (p *Provider) DescribeInstances(ctx context.Context) ([]*Ec2Instance, error) {
+	insances, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]*Ec2Instance, error) {
 		input := &ec2.DescribeInstancesInput{}
 		allInstances := []types.Instance{}
 		for {
@@ -181,9 +182,9 @@ func (p *Provider) DescribeInstances(ctx context.Context) ([]Ec2Instance, error)
 			input.NextToken = output.NextToken
 		}
 
-		var result []Ec2Instance
+		var result []*Ec2Instance
 		for _, instance := range allInstances {
-			result = append(result, Ec2Instance{
+			result = append(result, &Ec2Instance{
 				Instance:   instance,
 				awsAccount: p.awsAccountID,
 				Region:     region,
@@ -194,7 +195,7 @@ func (p *Provider) DescribeInstances(ctx context.Context) ([]Ec2Instance, error)
 	return lo.Flatten(insances), err
 }
 
-func (p *Provider) CreateSnapshots(ctx context.Context, ins Ec2Instance) ([]EBSSnapshot, error) {
+func (p *Provider) CreateSnapshots(ctx context.Context, ins *Ec2Instance) ([]EBSSnapshot, error) {
 	client := p.clients[ins.Region]
 	if client == nil {
 		return nil, fmt.Errorf("error in CreateSnapshots no client for region %s", ins.Region)
@@ -220,7 +221,7 @@ func (p *Provider) CreateSnapshots(ctx context.Context, ins Ec2Instance) ([]EBSS
 
 	var result []EBSSnapshot
 	for _, snap := range res.Snapshots {
-		result = append(result, FromSnapshotInfo(snap, ins.Region, p.awsAccountID, ins))
+		result = append(result, FromSnapshotInfo(snap, ins.Region, p.awsAccountID, *ins))
 	}
 	return result, nil
 }
@@ -293,4 +294,50 @@ func (p *Provider) GetRouteTableForSubnet(ctx context.Context, region string, su
 	}
 
 	return routeTables.RouteTables[0], nil
+}
+
+func (p *Provider) DescribeVolumes(ctx context.Context, instances []*Ec2Instance) ([]*Volume, error) {
+	instanceFilter := lo.Map(instances, func(ins *Ec2Instance, _ int) string { return *ins.InstanceId })
+	volumes, err := awslib.MultiRegionFetch(ctx, p.clients, func(ctx context.Context, region string, c Client) ([]*Volume, error) {
+		input := &ec2.DescribeVolumesInput{
+			Filters: []types.Filter{
+				{
+					Name:   aws.String("attachment.instance-id"),
+					Values: instanceFilter,
+				},
+			},
+		}
+		allVolumes := []types.Volume{}
+		for {
+			output, err := c.DescribeVolumes(ctx, input)
+			if err != nil {
+				return nil, err
+			}
+			allVolumes = append(allVolumes, output.Volumes...)
+			if output.NextToken == nil {
+				break
+			}
+			input.NextToken = output.NextToken
+		}
+
+		var result []*Volume
+		for _, vol := range allVolumes {
+			if len(vol.Attachments) != 1 {
+				p.log.Errorf("Volume %s has %d attachments", *vol.VolumeId, len(vol.Attachments))
+				continue
+			}
+
+			result = append(result, &Volume{
+				VolumeId:   *vol.VolumeId,
+				Size:       int(*vol.Size),
+				awsAccount: p.awsAccountID,
+				Region:     region,
+				Encrypted:  *vol.Encrypted,
+				InstanceId: *vol.Attachments[0].InstanceId,
+				Device:     *vol.Attachments[0].Device,
+			})
+		}
+		return result, nil
+	})
+	return lo.Flatten(volumes), err
 }

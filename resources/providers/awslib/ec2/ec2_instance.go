@@ -30,6 +30,7 @@ type Ec2Instance struct {
 	types.Instance
 	Region     string
 	awsAccount string
+	RootVolume *Volume
 }
 
 type SecurityGroupInfo struct {
