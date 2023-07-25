@@ -65,23 +65,15 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		return true
 	})).Return(
 		[]*assetpb.Asset{
-			{Name: "a"}, // 1 asset for each subtype
+			{Name: "a", AssetType: "iam.googleapis.com/ServiceAccount"},
 		}, nil,
 	)
 
 	err := GcpAssetsFetcher.Fetch(ctx, fetching.CycleMetadata{})
 	s.NoError(err)
-
 	results := testhelper.CollectResources(s.resourceCh)
-	s.Equal(getSubtypesCount(), len(results))
-}
 
-func getSubtypesCount() int {
-	var count int
-	for _, subtypes := range GcpAssetTypes {
-		for range subtypes {
-			count++
-		}
-	}
-	return count
+	// ListAllAssetTypesByName mocked to return a single asset
+	// Will be called N times, where N is the number of types in GcpAssetTypes
+	s.Equal(len(GcpAssetTypes), len(results))
 }
