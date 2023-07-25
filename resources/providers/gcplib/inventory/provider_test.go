@@ -25,11 +25,10 @@ import (
 	iampb "cloud.google.com/go/iam/apiv1/iampb"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
-
-	"github.com/samber/lo"
 
 	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
