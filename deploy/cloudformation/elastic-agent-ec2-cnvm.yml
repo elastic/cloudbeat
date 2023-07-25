@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates an EC2 instance with permissions to run elastic-agent
+
+Parameters:
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-arm64
+
+  InstanceType:
+    Description: The type of EC2 instance to create
+    Type: String
+    AllowedValues:
+      - m6g.xlarge
+      - m6g.2xlarge
+      - m6g.4xlarge
+    Default: m6g.xlarge
+
+  EnrollmentToken:
+    Description: The enrollment token of elastic-agent
+    Type: String
+
+  FleetUrl:
+    Description: The fleet URL of elastic-agent
+    Type: String
+
+  ElasticArtifactServer:
+    Description: The URL of the artifact server
+    Type: String
+    Default: https://artifacts.elastic.co/downloads/beats/elastic-agent
+
+  ElasticAgentVersion:
+    Description: The version of elastic-agent to install
+    Type: String
+
+Resources:
+
+  # Security Group for EC2 instance
+  ElasticAgentSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join
+        - '-'
+        - - elastic-agent-security-group
+          - !Select
+            - 2
+            - !Split
+              - /
+              - !Ref "AWS::StackId"
+      GroupDescription: Block incoming traffic
+      SecurityGroupIngress: []
+
+  # IAM Role for EC2 instance
+  ElasticAgentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: vuln-mgmt-permissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                  - ec2:DescribeImages
+                  - ec2:DescribeTags
+                  - ec2:DescribeSnapshots
+                  - ec2:CreateSnapshots
+                  - ec2:CreateTags
+                  - ec2:DeleteSnapshot
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ebs:ListSnapshotBlocks
+                  - ebs:ListChangedBlocks
+                  - ebs:GetSnapshotBlock
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:ListAccountAliases
+                Resource: '*'
+
+  # Instance profile to attach to EC2 instance
+  ElasticAgentInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Join
+        - '-'
+        - - elastic-agent-instance-profile
+          - !Select
+            - 2
+            - !Split
+              - /
+              - !Ref "AWS::StackId"
+      Path: /
+      Roles:
+        - !Ref "ElasticAgentRole"
+
+  # EC2 Instance to run elastic-agent
+  ElasticAgentEc2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - '-'
+            - - elastic-agent-instance
+              - !Select
+                - 2
+                - !Split
+                  - /
+                  - !Ref "AWS::StackId"
+        - Key: Task
+          Value: Vulnerability Management Scanner
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref ElasticAgentInstanceProfile
+      SecurityGroupIds:
+        - !Ref ElasticAgentSecurityGroup
+      UserData: !Base64
+        Fn::Sub: |
+          #!/bin/bash
+          ElasticAgentArtifact=elastic-agent-${ElasticAgentVersion}-linux-arm64
+          curl -L -O ${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz
+          tar xzvf $ElasticAgentArtifact.tar.gz
+          cd $ElasticAgentArtifact
+          sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken}
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 32
+
+Outputs:
+  Ec2InstanceId:
+    Description: The EC2 instance ID
+    Value: !Ref ElasticAgentEc2Instance
+
+  Ec2InstancePublicIp:
+    Description: The EC2 instance public IP
+    Value: !GetAtt ElasticAgentEc2Instance.PublicIp
