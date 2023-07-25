@@ -54,9 +54,13 @@ jobs:
 
   Build:
     name: Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
+      # Disk cleanup
+      - name: Free Disk Space (Ubuntu)
+        uses: easimon/maximize-build-space@master
+
       - name: Check out the repo
         uses: actions/checkout@v3
 
