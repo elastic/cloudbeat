@@ -18,11 +18,11 @@
 package inventory
 
 import (
-	context "context"
+	"context"
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	iampb "cloud.google.com/go/iam/apiv1/iampb"
+	"cloud.google.com/go/iam/apiv1/iampb"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/samber/lo"
@@ -30,7 +30,7 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
-	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
 
 type ProviderTestSuite struct {
@@ -56,7 +56,7 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 		log:    logp.NewLogger("test"),
 		client: gcpClientWrapper,
 		ctx:    ctx,
-		Config: gcplib.GcpFactoryConfig{
+		Config: auth.GcpFactoryConfig{
 			ProjectId:  "1",
 			ClientOpts: []option.ClientOption{},
 		},
