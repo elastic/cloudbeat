@@ -23,12 +23,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/api/cloudresourcemanager/v3"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 

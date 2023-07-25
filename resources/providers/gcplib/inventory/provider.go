@@ -22,12 +22,11 @@ import (
 	"fmt"
 	"sync"
 
+	asset "cloud.google.com/go/asset/apiv1"
+	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"google.golang.org/api/iterator"
-
-	asset "cloud.google.com/go/asset/apiv1"
-	"cloud.google.com/go/asset/apiv1/assetpb"
 
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
