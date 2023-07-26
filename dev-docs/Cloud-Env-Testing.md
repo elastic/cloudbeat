@@ -104,6 +104,43 @@ Follow these steps to log in to the created environment:
 
 If you wish to automatically delete the environment after the tests finish, set the `cleanup-env` input to `true`.
 
+In addition to the automatic cleanup, you can manually delete environments using the [Destroy Environment](https://github.com/elastic/cloudbeat/actions/workflows/destroy-environment.yml) workflow or by directly executing the `delete-cloud-env` command.
+
+### Destroy Environment Workflow
+
+The **Destroy Environment** GitHub workflow automates the process of cleaning up environments. When activated, it automatically performs the cleanup of environments, ensuring that all associated resources are correctly removed.
+
+#### How to Run the Flow
+
+Follow these steps to run the workflow:
+
+1. Go to [`Actions > Destroy Environment`](https://github.com/elastic/cloudbeat/actions/workflows/destroy-environment.yml)
+
+   ![Destroy Environment](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/505d6553-7780-4450-83e9-3617f64442ad)
+
+2. Click the `Run workflow` button.
+
+   ![Run Workflow](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/8965311c-eeac-492f-a564-a57c46854a3a)
+
+3. Complete the required input fields:
+
+    - `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API key.
+    - `prefix` (required): The prefix used to identify the environments to be deleted.
+
+   <img width="411" alt="Enter Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/04973b00-5411-4ace-ab3a-534371877c91">
+
+1. Optionally, modify other input value if required:
+
+    - `ignore-prefix` (optional): The prefix used to identify environments that should be excluded from deletion.
+
+   <img width="411" alt="Optional Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/aa89ad4e-fd32-461d-ab2d-3fee28094a9d">
+
+2. Click the `Run workflow` button to start.
+
+   ![Run Workflow](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/64b554d5-70f0-4cf3-b2b9-8f8429d1fc07)
+
+### Manual Environment Deletion
+
 In addition to the automatic cleanup, you can manually delete environments using:
 
 ```bash
