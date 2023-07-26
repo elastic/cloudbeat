@@ -7,7 +7,8 @@ metadata:
     k8s-app: elastic-agent
 data:
   agent.yml: |-
-    id: 018a9260-6a50-11ed-8f5e-0d25f77fe149
+    id: 006e3460-2bc8-11ee-8d16-8b1f5e2cde7c
+    revision: 2
     outputs:
       default:
         type: elasticsearch
@@ -16,232 +17,6 @@ data:
             elasticsearch-master.kube-system:9200
         username: '${ES_USERNAME}'
         password: '${ES_PASSWORD}'
-    inputs:
-      - id: logfile-system-c0895400-34c2-473f-a802-566f866f9186
-        revision: 1
-        name: system-2
-        type: logfile
-        data_stream:
-          namespace: default
-        use_output: default
-        package_policy_id: c0895400-34c2-473f-a802-566f866f9186
-        streams:
-          - id: logfile-system.auth-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: logs
-              dataset: system.auth
-            ignore_older: 72h
-            paths:
-              - /var/log/auth.log*
-              - /var/log/secure*
-            exclude_files:
-              - .gz$
-            multiline:
-              pattern: ^\s
-              match: after
-            tags:
-              - system-auth
-            processors:
-              - add_locale: null
-          - id: logfile-system.syslog-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: logs
-              dataset: system.syslog
-            paths:
-              - /var/log/messages*
-              - /var/log/syslog*
-            exclude_files:
-              - .gz$
-            multiline:
-              pattern: ^\s
-              match: after
-            processors:
-              - add_locale: null
-            ignore_older: 72h
-        meta:
-          package:
-            name: system
-            version: 1.20.4
-      - id: winlog-system-c0895400-34c2-473f-a802-566f866f9186
-        revision: 1
-        name: system-2
-        type: winlog
-        data_stream:
-          namespace: default
-        use_output: default
-        package_policy_id: c0895400-34c2-473f-a802-566f866f9186
-        streams:
-          - id: winlog-system.application-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: logs
-              dataset: system.application
-            name: Application
-            condition: '${host.platform} == ''windows'''
-            ignore_older: 72h
-          - id: winlog-system.security-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: logs
-              dataset: system.security
-            name: Security
-            condition: '${host.platform} == ''windows'''
-            ignore_older: 72h
-          - id: winlog-system.system-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: logs
-              dataset: system.system
-            name: System
-            condition: '${host.platform} == ''windows'''
-            ignore_older: 72h
-        meta:
-          package:
-            name: system
-            version: 1.20.4
-      - id: system/metrics-system-c0895400-34c2-473f-a802-566f866f9186
-        revision: 1
-        name: system-2
-        type: system/metrics
-        data_stream:
-          namespace: default
-        use_output: default
-        package_policy_id: c0895400-34c2-473f-a802-566f866f9186
-        streams:
-          - id: system/metrics-system.cpu-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.cpu
-            metricsets:
-              - cpu
-            cpu.metrics:
-              - percentages
-              - normalized_percentages
-            period: 10s
-          - id: system/metrics-system.diskio-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.diskio
-            metricsets:
-              - diskio
-            diskio.include_devices: null
-            period: 10s
-          - id: >-
-              system/metrics-system.filesystem-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.filesystem
-            metricsets:
-              - filesystem
-            period: 1m
-            processors:
-              - drop_event.when.regexp:
-                  system.filesystem.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
-          - id: system/metrics-system.fsstat-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.fsstat
-            metricsets:
-              - fsstat
-            period: 1m
-            processors:
-              - drop_event.when.regexp:
-                  system.fsstat.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
-          - id: system/metrics-system.load-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.load
-            metricsets:
-              - load
-            condition: '${host.platform} != ''windows'''
-            period: 10s
-          - id: system/metrics-system.memory-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.memory
-            metricsets:
-              - memory
-            period: 10s
-          - id: system/metrics-system.network-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.network
-            metricsets:
-              - network
-            period: 10s
-            network.interfaces: null
-          - id: system/metrics-system.process-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.process
-            metricsets:
-              - process
-            period: 10s
-            process.include_top_n.by_cpu: 5
-            process.include_top_n.by_memory: 5
-            process.cmdline.cache.enabled: true
-            process.cgroups.enabled: false
-            process.include_cpu_ticks: false
-            processes:
-              - .*
-          - id: >-
-              system/metrics-system.process.summary-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.process.summary
-            metricsets:
-              - process_summary
-            period: 10s
-          - id: >-
-              system/metrics-system.socket_summary-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.socket_summary
-            metricsets:
-              - socket_summary
-            period: 10s
-          - id: system/metrics-system.uptime-c0895400-34c2-473f-a802-566f866f9186
-            data_stream:
-              type: metrics
-              dataset: system.uptime
-            metricsets:
-              - uptime
-            period: 10s
-        meta:
-          package:
-            name: system
-            version: 1.20.4
-      - id: 147702c3-409a-4a63-81a3-5d9ab84c620c
-        revision: 1
-        name: cloud_security_posture-2
-        type: cloudbeat/cis_k8s
-        data_stream:
-          namespace: default
-        use_output: default
-        package_policy_id: 147702c3-409a-4a63-81a3-5d9ab84c620c
-        streams:
-          - id: >-
-              cloudbeat/cis_k8s-cloud_security_posture.findings-147702c3-409a-4a63-81a3-5d9ab84c620c
-            data_stream:
-              type: logs
-              dataset: cloud_security_posture.findings
-            name: Findings
-            config:
-              v1:
-                benchmark: cis_k8s
-            processors:
-              - add_cluster_id: null
-        meta:
-          package:
-            name: cloud_security_posture
-            version: 1.0.7
-    revision: 2
-    agent:
-      download:
-        source_uri: 'https://artifacts.elastic.co/downloads/'
-      monitoring:
-        namespace: default
-        use_output: default
-        enabled: true
-        logs: true
-        metrics: true
     output_permissions:
       default:
         _elastic_agent_monitoring:
@@ -261,6 +36,9 @@ data:
                 - metrics-elastic_agent.auditbeat-default
               privileges: *ref_0
             - names:
+                - logs-elastic_agent.cloud_defend-default
+              privileges: *ref_0
+            - names:
                 - logs-elastic_agent.cloudbeat-default
               privileges: *ref_0
             - names:
@@ -277,6 +55,12 @@ data:
               privileges: *ref_0
             - names:
                 - logs-elastic_agent.endpoint_security-default
+              privileges: *ref_0
+            - names:
+                - logs-elastic_agent.filebeat_input-default
+              privileges: *ref_0
+            - names:
+                - metrics-elastic_agent.filebeat_input-default
               privileges: *ref_0
             - names:
                 - logs-elastic_agent.filebeat-default
@@ -317,7 +101,7 @@ data:
         _elastic_agent_checks:
           cluster:
             - monitor
-        c0895400-34c2-473f-a802-566f866f9186:
+        ea17b334-c752-4b35-b2e4-d431ceff86ec:
           indices:
             - names:
                 - logs-system.auth-default
@@ -367,12 +151,360 @@ data:
             - names:
                 - metrics-system.uptime-default
               privileges: *ref_0
-        147702c3-409a-4a63-81a3-5d9ab84c620c:
+        bca92db1-0f62-4e3c-bf1f-ccfb806b3676:
           indices:
             - names:
                 - logs-cloud_security_posture.findings-default
               privileges: *ref_0
-
+    agent:
+      download:
+        sourceURI: 'https://artifacts.elastic.co/downloads/'
+      monitoring:
+        enabled: true
+        use_output: default
+        namespace: default
+        logs: true
+        metrics: true
+      features: {}
+    inputs:
+      - id: logfile-system-ea17b334-c752-4b35-b2e4-d431ceff86ec
+        name: system-1
+        revision: 1
+        type: logfile
+        use_output: default
+        meta:
+          package:
+            name: system
+            version: 1.38.1
+        data_stream:
+          namespace: default
+        package_policy_id: ea17b334-c752-4b35-b2e4-d431ceff86ec
+        streams:
+          - id: logfile-system.auth-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.auth
+              type: logs
+            ignore_older: 72h
+            paths:
+              - /var/log/auth.log*
+              - /var/log/secure*
+            exclude_files:
+              - .gz$
+            multiline:
+              pattern: ^\s
+              match: after
+            tags:
+              - system-auth
+            processors:
+              - add_locale: null
+          - id: logfile-system.syslog-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.syslog
+              type: logs
+            paths:
+              - /var/log/messages*
+              - /var/log/syslog*
+              - /var/log/system*
+            exclude_files:
+              - .gz$
+            multiline:
+              pattern: ^\s
+              match: after
+            processors:
+              - add_locale: null
+            ignore_older: 72h
+      - id: winlog-system-ea17b334-c752-4b35-b2e4-d431ceff86ec
+        name: system-1
+        revision: 1
+        type: winlog
+        use_output: default
+        meta:
+          package:
+            name: system
+            version: 1.38.1
+        data_stream:
+          namespace: default
+        package_policy_id: ea17b334-c752-4b35-b2e4-d431ceff86ec
+        streams:
+          - id: winlog-system.application-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            name: Application
+            data_stream:
+              dataset: system.application
+              type: logs
+            condition: '${host.platform} == ''windows'''
+            ignore_older: 72h
+          - id: winlog-system.security-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            name: Security
+            data_stream:
+              dataset: system.security
+              type: logs
+            condition: '${host.platform} == ''windows'''
+            ignore_older: 72h
+          - id: winlog-system.system-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            name: System
+            data_stream:
+              dataset: system.system
+              type: logs
+            condition: '${host.platform} == ''windows'''
+            ignore_older: 72h
+      - id: system/metrics-system-ea17b334-c752-4b35-b2e4-d431ceff86ec
+        name: system-1
+        revision: 1
+        type: system/metrics
+        use_output: default
+        meta:
+          package:
+            name: system
+            version: 1.38.1
+        data_stream:
+          namespace: default
+        package_policy_id: ea17b334-c752-4b35-b2e4-d431ceff86ec
+        streams:
+          - id: system/metrics-system.cpu-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.cpu
+              type: metrics
+            metricsets:
+              - cpu
+            cpu.metrics:
+              - percentages
+              - normalized_percentages
+            period: 10s
+          - id: system/metrics-system.diskio-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.diskio
+              type: metrics
+            metricsets:
+              - diskio
+            diskio.include_devices: null
+            period: 10s
+          - id: system/metrics-system.filesystem-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.filesystem
+              type: metrics
+            metricsets:
+              - filesystem
+            period: 1m
+            processors:
+              - drop_event.when.regexp:
+                  system.filesystem.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+          - id: system/metrics-system.fsstat-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.fsstat
+              type: metrics
+            metricsets:
+              - fsstat
+            period: 1m
+            processors:
+              - drop_event.when.regexp:
+                  system.fsstat.mount_point: ^/(sys|cgroup|proc|dev|etc|host|lib|snap)($|/)
+          - id: system/metrics-system.load-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.load
+              type: metrics
+            metricsets:
+              - load
+            condition: '${host.platform} != ''windows'''
+            period: 10s
+          - id: system/metrics-system.memory-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.memory
+              type: metrics
+            metricsets:
+              - memory
+            period: 10s
+          - id: system/metrics-system.network-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.network
+              type: metrics
+            metricsets:
+              - network
+            period: 10s
+            network.interfaces: null
+          - id: system/metrics-system.process-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.process
+              type: metrics
+            metricsets:
+              - process
+            period: 10s
+            process.include_top_n.by_cpu: 5
+            process.include_top_n.by_memory: 5
+            process.cmdline.cache.enabled: true
+            process.cgroups.enabled: false
+            process.include_cpu_ticks: false
+            processes:
+              - .*
+          - id: >-
+              system/metrics-system.process.summary-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.process.summary
+              type: metrics
+            metricsets:
+              - process_summary
+            period: 10s
+          - id: >-
+              system/metrics-system.socket_summary-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.socket_summary
+              type: metrics
+            metricsets:
+              - socket_summary
+            period: 10s
+          - id: system/metrics-system.uptime-ea17b334-c752-4b35-b2e4-d431ceff86ec
+            data_stream:
+              dataset: system.uptime
+              type: metrics
+            metricsets:
+              - uptime
+            period: 10s
+      - id: bca92db1-0f62-4e3c-bf1f-ccfb806b3676
+        name: kspm-1
+        revision: 1
+        type: cloudbeat/cis_k8s
+        use_output: default
+        meta:
+          package:
+            name: cloud_security_posture
+            version: 1.4.0
+        data_stream:
+          namespace: default
+        package_policy_id: bca92db1-0f62-4e3c-bf1f-ccfb806b3676
+        streams:
+          - id: >-
+              cloudbeat/cis_k8s-cloud_security_posture.findings-bca92db1-0f62-4e3c-bf1f-ccfb806b3676
+            data_stream:
+              dataset: cloud_security_posture.findings
+              type: logs
+            config:
+              v1:
+                type: kspm
+                deployment: self_managed
+                benchmark: cis_k8s
+            fetchers:
+              - name: kube-api
+              - name: process
+                directory: /hostfs
+                processes:
+                  etcd: null
+                  kube-apiserver: null
+                  kube-controller: null
+                  kube-scheduler: null
+                  kubelet:
+                    config-file-arguments:
+                      - config
+              - name: file-system
+                patterns:
+                  - /hostfs/etc/kubernetes/scheduler.conf
+                  - /hostfs/etc/kubernetes/controller-manager.conf
+                  - /hostfs/etc/kubernetes/admin.conf
+                  - /hostfs/etc/kubernetes/kubelet.conf
+                  - /hostfs/etc/kubernetes/manifests/etcd.yaml
+                  - /hostfs/etc/kubernetes/manifests/kube-apiserver.yaml
+                  - /hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml
+                  - /hostfs/etc/kubernetes/manifests/kube-scheduler.yaml
+                  - /hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+                  - /hostfs/etc/kubernetes/pki/**
+                  - /hostfs/var/lib/kubelet/config.yaml
+                  - /hostfs/var/lib/etcd
+                  - /hostfs/etc/kubernetes/pki
+            processors:
+              - add_cluster_id: null
+            runtime_cfg:
+              activated_rules:
+                cis_k8s:
+                  - cis_1_1_1
+                  - cis_1_1_2
+                  - cis_1_1_3
+                  - cis_1_1_4
+                  - cis_1_1_5
+                  - cis_1_1_6
+                  - cis_1_1_7
+                  - cis_1_1_8
+                  - cis_1_1_11
+                  - cis_1_1_12
+                  - cis_1_1_13
+                  - cis_1_1_14
+                  - cis_1_1_15
+                  - cis_1_1_16
+                  - cis_1_1_17
+                  - cis_1_1_18
+                  - cis_1_1_19
+                  - cis_1_1_20
+                  - cis_1_1_21
+                  - cis_1_2_2
+                  - cis_1_2_4
+                  - cis_1_2_5
+                  - cis_1_2_6
+                  - cis_1_2_7
+                  - cis_1_2_8
+                  - cis_1_2_9
+                  - cis_1_2_10
+                  - cis_1_2_11
+                  - cis_1_2_12
+                  - cis_1_2_13
+                  - cis_1_2_14
+                  - cis_1_2_15
+                  - cis_1_2_16
+                  - cis_1_2_17
+                  - cis_1_2_18
+                  - cis_1_2_19
+                  - cis_1_2_20
+                  - cis_1_2_21
+                  - cis_1_2_22
+                  - cis_1_2_23
+                  - cis_1_2_24
+                  - cis_1_2_25
+                  - cis_1_2_26
+                  - cis_1_2_27
+                  - cis_1_2_28
+                  - cis_1_2_29
+                  - cis_1_2_32
+                  - cis_1_3_2
+                  - cis_1_3_3
+                  - cis_1_3_4
+                  - cis_1_3_5
+                  - cis_1_3_6
+                  - cis_1_3_7
+                  - cis_1_4_1
+                  - cis_1_4_2
+                  - cis_2_1
+                  - cis_2_2
+                  - cis_2_3
+                  - cis_2_4
+                  - cis_2_5
+                  - cis_2_6
+                  - cis_4_1_1
+                  - cis_4_1_2
+                  - cis_4_1_5
+                  - cis_4_1_6
+                  - cis_4_1_9
+                  - cis_4_1_10
+                  - cis_4_2_1
+                  - cis_4_2_2
+                  - cis_4_2_3
+                  - cis_4_2_4
+                  - cis_4_2_5
+                  - cis_4_2_6
+                  - cis_4_2_7
+                  - cis_4_2_8
+                  - cis_4_2_9
+                  - cis_4_2_10
+                  - cis_4_2_11
+                  - cis_4_2_12
+                  - cis_4_2_13
+                  - cis_5_1_3
+                  - cis_5_1_5
+                  - cis_5_1_6
+                  - cis_5_2_2
+                  - cis_5_2_3
+                  - cis_5_2_4
+                  - cis_5_2_5
+                  - cis_5_2_6
+                  - cis_5_2_7
+                  - cis_5_2_8
+                  - cis_5_2_9
+                  - cis_5_2_10
 ---
 # For more information refer https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
 apiVersion: apps/v1
