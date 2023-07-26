@@ -37,7 +37,7 @@ type GCP struct{}
 func (G *GCP) Run(context.Context) error { return nil }
 
 func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error) {
-	gcpClientConfig, err := auth.GetGcpClientConfig(cfg, log)
+	gcpClientConfig, err := auth.GetGcpClientConfig(cfg.CloudConfig.Gcp, log)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
