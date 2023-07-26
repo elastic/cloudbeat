@@ -63,6 +63,7 @@ jobs:
           root-reserve-mb: 512
           swap-size-mb: 1024
           remove-dotnet: 'true'
+          remove-android: 'true'
 
       - name: Check out the repo
         uses: actions/checkout@v3
