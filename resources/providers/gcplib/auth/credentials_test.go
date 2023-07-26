@@ -117,6 +117,18 @@ func TestGetGcpClientConfig(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Should return nil and use application default credentials",
+			cfg: &config.Config{
+				CloudConfig: config.CloudConfig{
+					Gcp: config.GcpConfig{
+						GcpClientOpt: config.GcpClientOpt{},
+					},
+				},
+			},
+			want:    nil,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
