@@ -1,50 +1,58 @@
----
 AWSTemplateFormatVersion: "2010-09-09"
+
 Description: Creates an EC2 instance with permissions to run elastic-agent
+
 Parameters:
   LatestAmiId:
-    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
-    Default: "/aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-arm64"
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-arm64
+
   InstanceType:
+    Description: The type of EC2 instance to create
     Type: String
-    Default: m6g.xlarge
     AllowedValues:
       - m6g.xlarge
       - m6g.2xlarge
       - m6g.4xlarge
-    Description: The type of EC2 instance to create
+    Default: m6g.xlarge
+
   EnrollmentToken:
-    Type: String
     Description: The enrollment token of elastic-agent
+    Type: String
+
   FleetUrl:
-    Type: String
     Description: The fleet URL of elastic-agent
+    Type: String
+
   ElasticArtifactServer:
-    Type: String
     Description: The URL of the artifact server
-    Default: https://artifacts.elastic.co/downloads/beats/elastic-agent
-  ElasticAgentVersion:
     Type: String
+    Default: https://artifacts.elastic.co/downloads/beats/elastic-agent
+
+  ElasticAgentVersion:
     Description: The version of elastic-agent to install
+    Type: String
+
 Resources:
+
   # Security Group for EC2 instance
   ElasticAgentSecurityGroup:
-    Type: "AWS::EC2::SecurityGroup"
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupName:
-        Fn::Join:
-          - "-"
-          - - "elastic-agent-security-group"
-            - Fn::Select:
-                - 2
-                - Fn::Split:
-                    - "/"
-                    - Ref: "AWS::StackId"
+      GroupName: !Join
+        - '-'
+        - - elastic-agent-security-group
+          - !Select
+            - 2
+            - !Split
+              - /
+              - !Ref "AWS::StackId"
       GroupDescription: Block incoming traffic
       SecurityGroupIngress: []
+
   # IAM Role for EC2 instance
   ElasticAgentRole:
-    Type: "AWS::IAM::Role"
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -70,48 +78,49 @@ Resources:
                   - ec2:CreateSnapshots
                   - ec2:CreateTags
                   - ec2:DeleteSnapshot
-                Resource: "*"
+                  - ec2:DescribeVolumes
+                Resource: '*'
               - Effect: Allow
                 Action:
                   - ebs:ListSnapshotBlocks
                   - ebs:ListChangedBlocks
                   - ebs:GetSnapshotBlock
-                Resource: "*"
+                Resource: '*'
               - Effect: Allow
                 Action:
                   - iam:ListAccountAliases
-                Resource: "*"
+                Resource: '*'
+
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-      InstanceProfileName:
-        Fn::Join:
-          - "-"
-          - - "elastic-agent-instance-profile"
-            - Fn::Select:
-                - 2
-                - Fn::Split:
-                    - "/"
-                    - Ref: "AWS::StackId"
+      InstanceProfileName: !Join
+        - '-'
+        - - elastic-agent-instance-profile
+          - !Select
+            - 2
+            - !Split
+              - /
+              - !Ref "AWS::StackId"
       Path: /
       Roles:
-        - Ref: "ElasticAgentRole"
+        - !Ref "ElasticAgentRole"
+
   # EC2 Instance to run elastic-agent
   ElasticAgentEc2Instance:
-    Type: "AWS::EC2::Instance"
+    Type: AWS::EC2::Instance
     Properties:
       Tags:
         - Key: Name
-          Value:
-            Fn::Join:
-              - "-"
-              - - "elastic-agent-instance"
-                - Fn::Select:
-                    - 2
-                    - Fn::Split:
-                        - "/"
-                        - Ref: "AWS::StackId"
+          Value: !Join
+            - '-'
+            - - elastic-agent-instance
+              - !Select
+                - 2
+                - !Split
+                  - /
+                  - !Ref "AWS::StackId"
         - Key: Task
           Value: Vulnerability Management Scanner
       ImageId: !Ref LatestAmiId
@@ -119,8 +128,8 @@ Resources:
       IamInstanceProfile: !Ref ElasticAgentInstanceProfile
       SecurityGroupIds:
         - !Ref ElasticAgentSecurityGroup
-      UserData:
-        Fn::Base64: !Sub |
+      UserData: !Base64
+        Fn::Sub: |
           #!/bin/bash
           ElasticAgentArtifact=elastic-agent-${ElasticAgentVersion}-linux-arm64
           curl -L -O ${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz
@@ -131,10 +140,12 @@ Resources:
         - DeviceName: /dev/xvda
           Ebs:
             VolumeSize: 32
+
 Outputs:
   Ec2InstanceId:
-    Value: !Ref ElasticAgentEc2Instance
     Description: The EC2 instance ID
+    Value: !Ref ElasticAgentEc2Instance
+
   Ec2InstancePublicIp:
-    Value: !GetAtt ElasticAgentEc2Instance.PublicIp
     Description: The EC2 instance public IP
+    Value: !GetAtt ElasticAgentEc2Instance.PublicIp

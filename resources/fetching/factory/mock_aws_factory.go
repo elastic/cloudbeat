@@ -21,8 +21,8 @@ package factory
 
 import (
 	aws "github.com/aws/aws-sdk-go-v2/aws"
+	cloud "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	fetching "github.com/elastic/cloudbeat/resources/fetching"
-	awslib "github.com/elastic/cloudbeat/resources/providers/awslib"
 
 	logp "github.com/elastic/elastic-agent-libs/logp"
 
@@ -43,11 +43,11 @@ func (_m *mockAwsFactory) EXPECT() *mockAwsFactory_Expecter {
 }
 
 // Execute provides a mock function with given fields: _a0, _a1, _a2, _a3
-func (_m *mockAwsFactory) Execute(_a0 *logp.Logger, _a1 aws.Config, _a2 chan fetching.ResourceInfo, _a3 *awslib.Identity) FetchersMap {
+func (_m *mockAwsFactory) Execute(_a0 *logp.Logger, _a1 aws.Config, _a2 chan fetching.ResourceInfo, _a3 *cloud.Identity) FetchersMap {
 	ret := _m.Called(_a0, _a1, _a2, _a3)
 
 	var r0 FetchersMap
-	if rf, ok := ret.Get(0).(func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *awslib.Identity) FetchersMap); ok {
+	if rf, ok := ret.Get(0).(func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) FetchersMap); ok {
 		r0 = rf(_a0, _a1, _a2, _a3)
 	} else {
 		if ret.Get(0) != nil {
@@ -67,14 +67,14 @@ type mockAwsFactory_Execute_Call struct {
 //   - _a0 *logp.Logger
 //   - _a1 aws.Config
 //   - _a2 chan fetching.ResourceInfo
-//   - _a3 *awslib.Identity
+//   - _a3 *cloud.Identity
 func (_e *mockAwsFactory_Expecter) Execute(_a0 interface{}, _a1 interface{}, _a2 interface{}, _a3 interface{}) *mockAwsFactory_Execute_Call {
 	return &mockAwsFactory_Execute_Call{Call: _e.mock.On("Execute", _a0, _a1, _a2, _a3)}
 }
 
-func (_c *mockAwsFactory_Execute_Call) Run(run func(_a0 *logp.Logger, _a1 aws.Config, _a2 chan fetching.ResourceInfo, _a3 *awslib.Identity)) *mockAwsFactory_Execute_Call {
+func (_c *mockAwsFactory_Execute_Call) Run(run func(_a0 *logp.Logger, _a1 aws.Config, _a2 chan fetching.ResourceInfo, _a3 *cloud.Identity)) *mockAwsFactory_Execute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*logp.Logger), args[1].(aws.Config), args[2].(chan fetching.ResourceInfo), args[3].(*awslib.Identity))
+		run(args[0].(*logp.Logger), args[1].(aws.Config), args[2].(chan fetching.ResourceInfo), args[3].(*cloud.Identity))
 	})
 	return _c
 }
@@ -84,7 +84,7 @@ func (_c *mockAwsFactory_Execute_Call) Return(_a0 FetchersMap) *mockAwsFactory_E
 	return _c
 }
 
-func (_c *mockAwsFactory_Execute_Call) RunAndReturn(run func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *awslib.Identity) FetchersMap) *mockAwsFactory_Execute_Call {
+func (_c *mockAwsFactory_Execute_Call) RunAndReturn(run func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) FetchersMap) *mockAwsFactory_Execute_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -15,39 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package gcp
+package ec2
 
-import (
-	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/dataprovider/types"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/version"
-)
-
-type DataProvider struct {
-	log *logp.Logger
-}
-
-func New(options ...Option) DataProvider {
-	adp := DataProvider{}
-	for _, opt := range options {
-		opt(&adp)
-	}
-	return adp
-}
-
-func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
-	return types.Data{
-		ResourceID: id,
-		VersionInfo: version.CloudbeatVersionInfo{
-			Version: version.CloudbeatVersion(),
-			Policy:  version.PolicyVersion(),
-		},
-	}, nil
-}
-
-func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
-	return nil
+type Volume struct {
+	VolumeId   string
+	InstanceId string
+	Region     string
+	awsAccount string
+	Size       int
+	Encrypted  bool
+	Device     string
 }
