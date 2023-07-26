@@ -128,9 +128,6 @@ jobs:
           - test-target: pre_merge
             range: ""
     steps:
-      # Disk cleanup
-      - name: Free Disk Space (Ubuntu)
-      # Disk cleanup
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
         with:
@@ -138,7 +135,6 @@ jobs:
           android: true
           dotnet: true
           haskell: true
-          large-packages: true
           docker-images: true
           swap-storage: true
 
