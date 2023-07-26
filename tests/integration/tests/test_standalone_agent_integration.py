@@ -84,7 +84,7 @@ def test_cloudbeat_status(k8s, cloudbeat_agent):
         "/usr/share/elastic-agent/elastic-agent",
         "status",
         "--output",
-        "json",
+        "full",
     ]
     for pod in pods:
         response = k8s.pod_exec(
