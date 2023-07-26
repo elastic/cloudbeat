@@ -10,12 +10,18 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
+  ecr: 391946104644.dkr.ecr.eu-west-2.amazonaws.com
 
 testData:
   marker: rules
   agentName: cloudbeat
   markerCmd: -m
   clusterConfig: test-eks-config-1
+  eksNodes:
+    EKS_CONFIG_1_NODE_1: "ip-192-168-29-162.eu-west-2.compute.internal"
+    EKS_CONFIG_1_NODE_2: "ip-192-168-93-227.eu-west-2.compute.internal"
+    EKS_CONFIG_2_NODE_1: "ip-192-168-33-106.eu-west-2.compute.internal"
+    EKS_CONFIG_2_NODE_2: "ip-192-168-6-157.eu-west-2.compute.internal"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -99,6 +105,7 @@ job:
 
 cloudbeat:
   deploy: false
+  repository: 391946104644.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat
 
 cloudbeatEks:
   deploy: false
