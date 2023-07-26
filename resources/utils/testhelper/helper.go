@@ -47,9 +47,13 @@ func CollectResources[T any](ch chan T) []T {
 
 // CollectResourcesWithTimeout fetches items from a channel and returns them in a slice after no elements have been
 // received for the specified timeout duration.
-func CollectResourcesWithTimeout[T any](ch chan T, timeout time.Duration) []T {
+func CollectResourcesWithTimeout[T any](ch chan T, maxCount int, timeout time.Duration) []T {
 	var results []T
 	for {
+		if len(results) >= maxCount {
+			return results
+		}
+
 		select {
 		case value, ok := <-ch:
 			if !ok {

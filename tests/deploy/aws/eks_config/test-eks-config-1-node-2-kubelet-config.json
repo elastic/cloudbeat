@@ -44,6 +44,8 @@
   "clusterDNS": [
     "10.100.0.10"
   ],
+  "kubeAPIQPS": 10,
+  "kubeAPIBurst": 20,
   "evictionHard": {
     "memory.available": "100Mi",
     "nodefs.available": "10%",
