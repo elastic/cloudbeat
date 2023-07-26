@@ -22,6 +22,7 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
@@ -31,7 +32,7 @@ type NetworkFetcher struct {
 	log           *logp.Logger
 	ec2Client     ec2.ElasticCompute
 	resourceCh    chan fetching.ResourceInfo
-	cloudIdentity *awslib.Identity
+	cloudIdentity *cloud.Identity
 }
 
 type ACLFetcherConfig struct {
@@ -40,10 +41,10 @@ type ACLFetcherConfig struct {
 
 type NetworkResource struct {
 	awslib.AwsResource
-	identity *awslib.Identity
+	identity *cloud.Identity
 }
 
-func NewNetworkFetcher(log *logp.Logger, ec2Client ec2.ElasticCompute, ch chan fetching.ResourceInfo, identity *awslib.Identity) *NetworkFetcher {
+func NewNetworkFetcher(log *logp.Logger, ec2Client ec2.ElasticCompute, ch chan fetching.ResourceInfo, identity *cloud.Identity) *NetworkFetcher {
 	return &NetworkFetcher{
 		log:           log,
 		ec2Client:     ec2Client,

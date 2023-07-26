@@ -30,10 +30,12 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 )
 
 type Benchmark interface {
@@ -61,10 +63,10 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 }
 
 type Dependencies struct {
-	AwsCfgProvider      awslib.ConfigProviderAPI
-	AwsIdentityProvider awslib.IdentityProviderGetter
-	AwsAccountProvider  awslib.AccountProviderAPI
-
+	AwsCfgProvider           awslib.ConfigProviderAPI
+	AwsIdentityProvider      awslib.IdentityProviderGetter
+	AwsAccountProvider       awslib.AccountProviderAPI
+	GcpIdentityProvider      identity.ProviderGetter
 	KubernetesClientProvider k8sprovider.ClientGetterAPI
 
 	AwsMetadataProvider    awslib.MetadataProvider
@@ -85,16 +87,23 @@ func (d *Dependencies) AWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssd
 	return d.AwsCfgProvider.InitializeAWSConfig(ctx, cfg)
 }
 
-func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*awslib.Identity, error) {
+func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*cloud.Identity, error) {
 	if d.AwsIdentityProvider == nil {
 		return nil, errors.New("aws identity provider is uninitialized")
 	}
 	return d.AwsIdentityProvider.GetIdentity(ctx, cfg)
 }
 
-func (d *Dependencies) AWSAccounts(ctx context.Context, cfg awssdk.Config) ([]awslib.Identity, error) {
+func (d *Dependencies) AWSAccounts(ctx context.Context, cfg awssdk.Config) ([]cloud.Identity, error) {
 	if d.AwsAccountProvider == nil {
 		return nil, errors.New("aws account provider is uninitialized")
 	}
 	return d.AwsAccountProvider.ListAccounts(ctx, cfg)
+}
+
+func (d *Dependencies) GCPIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error) {
+	if d.GcpIdentityProvider == nil {
+		return nil, errors.New("gcp identity provider is uninitialized")
+	}
+	return d.GcpIdentityProvider.GetIdentity(ctx, cfg)
 }
