@@ -28,8 +28,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8s "k8s.io/client-go/kubernetes"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
 )
 
@@ -39,15 +39,15 @@ type ElbFetcher struct {
 	kubeClient      k8s.Interface
 	lbRegexMatchers []*regexp.Regexp
 	resourceCh      chan fetching.ResourceInfo
-	cloudIdentity   *awslib.Identity
+	cloudIdentity   *cloud.Identity
 }
 
 type ElbResource struct {
 	lb       types.LoadBalancerDescription
-	identity *awslib.Identity
+	identity *cloud.Identity
 }
 
-func NewElbFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider k8s.Interface, provider elb.LoadBalancerDescriber, identity *awslib.Identity, matchers string) *ElbFetcher {
+func NewElbFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider k8s.Interface, provider elb.LoadBalancerDescriber, identity *cloud.Identity, matchers string) *ElbFetcher {
 	return &ElbFetcher{
 		log:             log,
 		elbProvider:     provider,

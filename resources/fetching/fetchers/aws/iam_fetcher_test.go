@@ -28,6 +28,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
@@ -219,7 +220,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				log:         testhelper.NewLogger(s.T()),
 				iamProvider: iamProviderMock,
 				resourceCh:  s.resourceCh,
-				cloudIdentity: &awslib.Identity{
+				cloudIdentity: &cloud.Identity{
 					Account: test.account,
 				},
 			}

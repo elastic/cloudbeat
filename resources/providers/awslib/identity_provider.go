@@ -24,21 +24,20 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 )
 
-type Identity struct {
-	Account string
-	Alias   string
-}
+const provider = "aws"
 
 type IdentityProviderGetter interface {
-	GetIdentity(ctx context.Context, cfg aws.Config) (*Identity, error)
+	GetIdentity(ctx context.Context, cfg aws.Config) (*cloud.Identity, error)
 }
 
 type IdentityProvider struct{}
 
 // GetIdentity returns AWS identity information
-func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*Identity, error) {
+func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*cloud.Identity, error) {
 	response, err := sts.NewFromConfig(cfg).GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get caller identity: %w", err)
@@ -49,9 +48,10 @@ func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*Ide
 		return nil, fmt.Errorf("failed to get aliases: %w", err)
 	}
 
-	return &Identity{
-		Account: *response.Account,
-		Alias:   alias,
+	return &cloud.Identity{
+		Account:      *response.Account,
+		AccountAlias: alias,
+		Provider:     provider,
 	}, nil
 }
 
