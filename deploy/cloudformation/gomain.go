@@ -26,19 +26,30 @@ import (
 	"log"
 	"os"
 
-	"github.com/elastic/cloudbeat/deploy/util"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation/types"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
+
+	"github.com/elastic/cloudbeat/deploy/util"
 )
 
 const (
-	prodTemplatePath = "elastic-agent-ec2.yml"
-	devTemplatePath  = "elastic-agent-ec2-dev.yml"
+	DEV  = "DEV_TEMPLATE"
+	PROD = "PROD_TEMPLATE"
 )
+
+var templatePaths = map[string]map[string]string{
+	DeploymentTypeCSPM: {
+		DEV:  "elastic-agent-ec2-dev-cspm.yml",
+		PROD: "elastic-agent-ec2-cspm.yml",
+	},
+	DeploymentTypeCNVM: {
+		DEV:  "elastic-agent-ec2-dev-cnvm.yml",
+		PROD: "elastic-agent-ec2-cnvm.yml",
+	},
+}
 
 func main() {
 	cfg, err := util.ParseConfig[config]()
@@ -68,18 +79,18 @@ func createFromConfig(cfg *config) error {
 		params["ElasticArtifactServer"] = *cfg.ElasticArtifactServer
 	}
 
-	if cfg.IntegrationType != nil {
-		params["Integration"] = *cfg.IntegrationType
-	}
+	templatePath := getTemplatePath(cfg.DeploymentType, PROD)
 
-	templatePath := prodTemplatePath
 	if cfg.Dev != nil && cfg.Dev.AllowSSH {
 		params["KeyName"] = cfg.Dev.KeyName
 
-		err := generateDevTemplate()
+		devTemplatePath := getTemplatePath(cfg.DeploymentType, DEV)
+
+		err := generateDevTemplate(templatePath, devTemplatePath)
 		if err != nil {
 			return fmt.Errorf("could not generate dev template: %v", err)
 		}
+
 		templatePath = devTemplatePath
 	}
 
@@ -91,7 +102,7 @@ func createFromConfig(cfg *config) error {
 	return nil
 }
 
-func generateDevTemplate() (err error) {
+func generateDevTemplate(prodTemplatePath string, devTemplatePath string) (err error) {
 	const yqExpression = `
 .Parameters.KeyName = {
 	"Description": "SSH Keypair to login to the instance",
@@ -177,4 +188,12 @@ func createStack(stackName string, templatePath string, params map[string]string
 
 	log.Printf("Created stack %s", *stackOutput.StackId)
 	return nil
+}
+
+func getTemplatePath(deploymentType string, env string) string {
+	if deploymentType == "" {
+		// Default is CNVM
+		deploymentType = DeploymentTypeCNVM
+	}
+	return templatePaths[deploymentType][env]
 }

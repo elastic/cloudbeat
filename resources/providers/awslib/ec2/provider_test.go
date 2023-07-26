@@ -32,6 +32,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 var onlyDefaultRegion = []string{awslib.DefaultRegion}
@@ -314,7 +315,7 @@ func TestProvider_CreateSnapshots(t *testing.T) {
 	}
 	type args struct {
 		ctx context.Context
-		ins Ec2Instance
+		ins *Ec2Instance
 	}
 	tests := []struct {
 		name    string
@@ -462,6 +463,141 @@ func TestProvider_GetRouteTableForSubnet(t *testing.T) {
 				awsAccountID: "aws-account",
 			}
 			got, err := p.GetRouteTableForSubnet(context.Background(), tt.regions[0], "", "")
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestProvider_DescribeVolumes(t *testing.T) {
+	expectToken := func(token string) func(input *ec2.DescribeVolumesInput) bool {
+		return func(input *ec2.DescribeVolumesInput) bool {
+			return *input.NextToken == token
+		}
+	}
+
+	expectInstances := func(ids ...string) func(input *ec2.DescribeVolumesInput) bool {
+		return func(input *ec2.DescribeVolumesInput) bool {
+			if len(input.Filters) != 1 {
+				return false
+			}
+			if *input.Filters[0].Name != "attachment.instance-id" {
+				return false
+			}
+			if len(input.Filters[0].Values) != len(ids) {
+				return false
+			}
+			for i, id := range ids {
+				if input.Filters[0].Values[i] != id {
+					return false
+				}
+			}
+			return true
+		}
+	}
+	mockResult := types.Volume{
+		VolumeId:  aws.String("vol-123456789"),
+		Encrypted: aws.Bool(true),
+		Size:      aws.Int32(8),
+		Attachments: []types.VolumeAttachment{
+			{
+				InstanceId: aws.String("i-123456789"),
+				Device:     aws.String("/dev/sda1"),
+			},
+		},
+	}
+	expectedVolume := &Volume{
+		awsAccount: "aws-account",
+		VolumeId:   "vol-123456789",
+		InstanceId: "i-123456789",
+		Device:     "/dev/sda1",
+		Encrypted:  true,
+		Size:       8,
+		Region:     awslib.DefaultRegion,
+	}
+
+	tests := []struct {
+		name      string
+		client    func() Client
+		instances []*Ec2Instance
+		want      []*Volume
+		wantErr   bool
+		regions   []string
+	}{
+		{
+			name:      "Get 3 volumes from 3 pages",
+			instances: []*Ec2Instance{},
+			client: func() Client {
+				m := &MockClient{}
+				m.EXPECT().DescribeVolumes(mock.Anything, mock.MatchedBy(expectInstances())).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult}, NextToken: aws.String("1")}, nil).Once()
+				m.EXPECT().DescribeVolumes(mock.Anything, mock.MatchedBy(expectToken("1"))).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult}, NextToken: aws.String("2")}, nil).Once()
+				m.EXPECT().DescribeVolumes(mock.Anything, mock.MatchedBy(expectToken("2"))).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult}}, nil).Once()
+				return m
+			},
+			want:    []*Volume{expectedVolume, expectedVolume, expectedVolume},
+			wantErr: false,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name:      "Get 3 volumes from 1 page",
+			instances: []*Ec2Instance{},
+			client: func() Client {
+				m := &MockClient{}
+				m.EXPECT().DescribeVolumes(mock.Anything, mock.Anything).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult, mockResult, mockResult}}, nil).Once()
+				return m
+			},
+			want:    []*Volume{expectedVolume, expectedVolume, expectedVolume},
+			wantErr: false,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name: "Get volumes filtered by instance id from 2 pages",
+			instances: []*Ec2Instance{
+				{Instance: types.Instance{InstanceId: aws.String("123")}},
+				{Instance: types.Instance{InstanceId: aws.String("456")}},
+			},
+			client: func() Client {
+				m := &MockClient{}
+				m.EXPECT().DescribeVolumes(mock.Anything, mock.MatchedBy(expectInstances("123", "456"))).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult}, NextToken: aws.String("1")}, nil).Once()
+				m.EXPECT().DescribeVolumes(mock.Anything, mock.MatchedBy(expectInstances("123", "456"))).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult}}, nil).Once()
+				return m
+			},
+			want:    []*Volume{expectedVolume, expectedVolume},
+			wantErr: false,
+			regions: onlyDefaultRegion,
+		},
+		{
+			name:      "Get error at 3rd page",
+			instances: []*Ec2Instance{},
+			client: func() Client {
+				m := &MockClient{}
+				m.EXPECT().DescribeVolumes(mock.Anything, mock.Anything).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult}, NextToken: aws.String("1")}, nil).Once()
+				m.EXPECT().DescribeVolumes(mock.Anything, mock.Anything).Return(&ec2.DescribeVolumesOutput{Volumes: []types.Volume{mockResult}, NextToken: aws.String("2")}, nil).Once()
+				m.EXPECT().DescribeVolumes(mock.Anything, mock.Anything).Return(nil, errors.New("bla")).Once()
+				return m
+			},
+			want:    []*Volume{},
+			wantErr: true,
+			regions: onlyDefaultRegion,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			clients := map[string]Client{}
+			for _, r := range tt.regions {
+				clients[r] = tt.client()
+			}
+			p := &Provider{
+				log:          testhelper.NewLogger(t),
+				clients:      clients,
+				awsAccountID: "aws-account",
+			}
+			got, err := p.DescribeVolumes(context.Background(), tt.instances)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return

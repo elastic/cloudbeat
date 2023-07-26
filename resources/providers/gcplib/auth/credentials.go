@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package gcplib
+package auth
 
 import (
 	"encoding/json"
@@ -40,7 +40,7 @@ func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOp
 	gcpCred := cfg.CloudConfig.Gcp
 	var opts []option.ClientOption
 	if gcpCred.CredentialsJSON == "" && gcpCred.CredentialsFilePath == "" {
-		log.Info("No credentials provided, using application default credentials (ADC)")
+		log.Info("No credentials file or JSON were provided, using application default credentials (ADC)")
 		return opts, nil
 	}
 

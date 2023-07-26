@@ -19,9 +19,12 @@ package fetchers
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/huandu/xstrings"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
@@ -40,19 +43,23 @@ type GcpAsset struct {
 	Asset *assetpb.Asset `json:"asset,omitempty"`
 }
 
-var GcpAssetTypes = map[string]map[string][]string{
+// map of types to asset types.
+// sub-type is derived from asset type by using the first and last segments of the asset type name
+// example: gcp-cloudkms-crypto-key
+var GcpAssetTypes = map[string][]string{
 	fetching.KeyManagement: {
-		"gcp-kms": {"cloudkms.googleapis.com/CryptoKey"},
+		"cloudkms.googleapis.com/CryptoKey",
 	},
 	fetching.CloudIdentity: {
-		"gcp-iam": {"iam.googleapis.com/ServiceAccount"},
+		"iam.googleapis.com/ServiceAccount",
+		"iam.googleapis.com/ServiceAccountKey",
 	},
 	fetching.CloudDatabase: {
-		"gcp-bq-dataset": {"bigquery.googleapis.com/Dataset"},
-		"gcp-bq-table":   {"bigquery.googleapis.com/Table"},
+		"bigquery.googleapis.com/Dataset",
+		"bigquery.googleapis.com/Table",
 	},
 	fetching.CloudStorage: {
-		"gcp-gcs": {"storage.googleapis.com/Bucket"},
+		"storage.googleapis.com/Bucket",
 	},
 }
 
@@ -67,23 +74,21 @@ func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.R
 func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting GcpAssetsFetcher.Fetch")
 
-	for typeName, subtypes := range GcpAssetTypes {
-		for subTypeName, assetTypes := range subtypes {
-			assets, err := f.provider.ListAllAssetTypesByName(assetTypes)
-			if err != nil {
-				f.log.Errorf("Failed to list assets for type %s: %s", typeName, err)
-				continue
-			}
+	for typeName, assetTypes := range GcpAssetTypes {
+		assets, err := f.provider.ListAllAssetTypesByName(assetTypes)
+		if err != nil {
+			f.log.Errorf("Failed to list assets for type %s: %s", typeName, err)
+			continue
+		}
 
-			for _, asset := range assets {
-				f.resourceCh <- fetching.ResourceInfo{
-					CycleMetadata: cMetadata,
-					Resource: &GcpAsset{
-						Type:    typeName,
-						SubType: subTypeName,
-						Asset:   asset,
-					},
-				}
+		for _, asset := range assets {
+			f.resourceCh <- fetching.ResourceInfo{
+				CycleMetadata: cMetadata,
+				Resource: &GcpAsset{
+					Type:    typeName,
+					SubType: getGcpSubType(asset.AssetType),
+					Asset:   asset,
+				},
 			}
 		}
 	}
@@ -116,3 +121,13 @@ func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r *GcpAsset) GetElasticCommonData() any { return nil }
+
+func getGcpSubType(assetType string) string {
+	dotIndex := strings.Index(assetType, ".")
+	slashIndex := strings.Index(assetType, "/")
+
+	prefix := assetType[:dotIndex]
+	suffix := assetType[slashIndex+1:]
+
+	return strings.ToLower(fmt.Sprintf("gcp-%s-%s", prefix, xstrings.ToKebabCase(suffix)))
+}

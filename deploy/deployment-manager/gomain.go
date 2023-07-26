@@ -23,10 +23,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/elastic/cloudbeat/deploy/util"
-
 	"google.golang.org/api/deploymentmanager/v2"
 	"gopkg.in/yaml.v3"
+
+	"github.com/elastic/cloudbeat/deploy/util"
 )
 
 const (

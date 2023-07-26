@@ -1,22 +1,24 @@
----
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
+
 Description: Creates IAM roles needed for multi-account access
+
 Parameters:
   OrganizationalUnitIds:
-    Type: CommaDelimitedList
     Description: |
       Comma-separated list of organizational units to deploy the IAM roles to.
       Specify the unique IDs of the organizational units where the roles should be deployed.
       Example: ou-abc123,ou-def456,ou-ghi789
-    AllowedPattern: '.+'
+    Type: CommaDelimitedList
+    AllowedPattern: .+
+
 Resources:
   CloudbeatRootRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       RoleName: cloudbeat-root
       Description: Role that cloudbeat uses to assume roles in other accounts
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -27,20 +29,21 @@ Resources:
       Policies:
         - PolicyName: cloudbeat-root-permissions
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
                   - organizations:ListAccounts
-                Resource: "*"
+                Resource: '*'
               - Effect: Allow
                 Action:
                   - sts:AssumeRole
-                Resource: "*"
+                Resource: '*'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/SecurityAudit
+
   CloudbeatRoleStackSet:
-    Type: 'AWS::CloudFormation::StackSet'
+    Type: AWS::CloudFormation::StackSet
     Properties:
       StackSetName: cloudbeat-role-stackset
       Description: StackSet for deploying the cloudbeat-securityaudit IAM role to member accounts in the specified organizational units.
@@ -82,7 +85,8 @@ Resources:
               Path: /
               ManagedPolicyArns:
                 - arn:aws:iam::aws:policy/SecurityAudit
+
 Outputs:
   CloudbeatRootRoleArn:
-    Value: !GetAtt CloudbeatRootRole.Arn
     Description: The cloudbeat IAM role in the management account
+    Value: !GetAtt CloudbeatRootRole.Arn

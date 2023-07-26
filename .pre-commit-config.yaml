@@ -7,7 +7,7 @@ repos:
       - id: check-added-large-files
       - id: check-yaml
         args: [--allow-multiple-documents, --unsafe]
-        exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*)$|(^deploy/cloudformation/elastic-agent-ec2.yml)$
+        exclude: (^tests/deploy/k8s-cloudbeat-tests/templates/.*)$
       - id: check-json
       - id: check-executables-have-shebangs
       - id: trailing-whitespace
@@ -25,9 +25,6 @@ repos:
   - repo: https://github.com/dnephin/pre-commit-golang
     rev: v0.5.1
     hooks:
-      - id: go-imports
-        args: [-local, "github.com/elastic/cloudbeat"]
-        exclude: 'mock_.*\.go'
       - id: golangci-lint
 
   ## Python
@@ -43,33 +40,32 @@ repos:
     hooks:
       - id: pylint
         args: [
-          "-rn", # Only display messages
-          "--rcfile=tests/pylintrc", # Link to your config file
-        ]
+            "-rn", # Only display messages
+            "--rcfile=tests/pylintrc", # Link to your config file
+          ]
 
   - repo: https://github.com/psf/black
     rev: 23.3.0
     hooks:
       - id: black
-        args: [
-          --line-length=120,
-          --check,
-          --diff,
-        ]
+        args: [--line-length=120, --check, --diff]
 
   - repo: local
     hooks:
-      - id: yq
-        name: format with yq
-        entry: sh -c 'for file in "$@"; do yq -i "$file"; done'
+      - id: rain
+        name: format with rain
         language: system
-        args: [ -i ]
+        entry: rain
+        args: [
+          "fmt",
+          "-w",
+        ]
         files: deploy/cloudformation/.*yml
 
   - repo: https://github.com/awslabs/cfn-python-lint
     rev: v0.77.5
     hooks:
-    -   id: cfn-python-lint
+      - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
 
   - repo: local

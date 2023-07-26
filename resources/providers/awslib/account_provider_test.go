@@ -29,6 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
@@ -65,7 +66,7 @@ func Test_listAccounts(t *testing.T) {
 	tests := []struct {
 		name    string
 		client  *mockClient
-		want    []Identity
+		want    []cloud.Identity
 		wantErr string
 	}{
 		{
@@ -117,10 +118,10 @@ func Test_listAccounts(t *testing.T) {
 					},
 				},
 			},
-			want: []Identity{
+			want: []cloud.Identity{
 				{
-					Account: "1",
-					Alias:   "name",
+					Account:      "1",
+					AccountAlias: "name",
 				},
 			},
 		},
@@ -173,17 +174,17 @@ func Test_listAccounts(t *testing.T) {
 					},
 				},
 			},
-			want: []Identity{
+			want: []cloud.Identity{
 				{
-					Account: "1",
-					Alias:   "name",
+					Account:      "1",
+					AccountAlias: "name",
 				},
 				{
 					Account: "123",
 				},
 				{
-					Account: "1000",
-					Alias:   "some name",
+					Account:      "1000",
+					AccountAlias: "some name",
 				},
 			},
 		},
