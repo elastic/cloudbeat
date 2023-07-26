@@ -60,7 +60,10 @@ jobs:
       # Disk cleanup
       - name: Free Disk Space (Ubuntu)
         uses: easimon/maximize-build-space@master
-
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
       - name: Check out the repo
         uses: actions/checkout@v3
 
