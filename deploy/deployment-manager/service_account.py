@@ -28,6 +28,7 @@ def generate_config(context):
                 "includedPermissions": [
                     "cloudasset.assets.listResource",
                     "cloudasset.assets.listIamPolicy",
+                    "resourcemanager.projects.get",
                 ],
             },
         },
