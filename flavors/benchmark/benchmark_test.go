@@ -34,9 +34,11 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -173,8 +175,9 @@ func TestNewBenchmark(t *testing.T) {
 				make(chan fetching.ResourceInfo),
 				&Dependencies{
 					AwsCfgProvider:           mockAwsCfg(nil),
-					AwsIdentityProvider:      mockIdentityProvider(nil),
+					AwsIdentityProvider:      mockAwsIdentityProvider(nil),
 					AwsAccountProvider:       mockAccountProvider(nil),
+					GcpIdentityProvider:      mockGcpIdentityProvider(nil),
 					KubernetesClientProvider: mockKubeClient(nil),
 					AwsMetadataProvider:      mockMetadataProvider(nil),
 					EksClusterNameProvider:   mockEksClusterNameProvider(nil),
@@ -241,7 +244,7 @@ func Test_Initialize(t *testing.T) {
 			benchmark: &AWS{},
 			dependencies: Dependencies{
 				AwsCfgProvider:           nil,
-				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
+				AwsIdentityProvider:      mockAwsIdentityProvider(errors.New("some error")),
 				AwsAccountProvider:       nil,
 				KubernetesClientProvider: nil,
 				AwsMetadataProvider:      nil,
@@ -255,7 +258,7 @@ func Test_Initialize(t *testing.T) {
 			benchmark: &AWS{},
 			dependencies: Dependencies{
 				AwsCfgProvider:           nil,
-				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsIdentityProvider:      mockAwsIdentityProvider(nil),
 				AwsAccountProvider:       nil,
 				KubernetesClientProvider: mockKubeClient(errors.New("some error")), // ineffectual
 				AwsMetadataProvider:      nil,
@@ -273,7 +276,7 @@ func Test_Initialize(t *testing.T) {
 			benchmark: &AWSOrg{},
 			dependencies: Dependencies{
 				AwsCfgProvider:           nil,
-				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsIdentityProvider:      mockAwsIdentityProvider(nil),
 				AwsAccountProvider:       nil,
 				KubernetesClientProvider: nil,
 				AwsMetadataProvider:      nil,
@@ -286,7 +289,7 @@ func Test_Initialize(t *testing.T) {
 			benchmark: &AWSOrg{},
 			dependencies: Dependencies{
 				AwsCfgProvider:           nil,
-				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
+				AwsIdentityProvider:      mockAwsIdentityProvider(errors.New("some error")),
 				AwsAccountProvider:       nil,
 				KubernetesClientProvider: nil,
 				AwsMetadataProvider:      nil,
@@ -299,7 +302,7 @@ func Test_Initialize(t *testing.T) {
 			benchmark: &AWSOrg{},
 			dependencies: Dependencies{
 				AwsCfgProvider:           nil,
-				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsIdentityProvider:      mockAwsIdentityProvider(nil),
 				AwsAccountProvider:       mockAccountProvider(errors.New("some error")),
 				KubernetesClientProvider: nil,
 				AwsMetadataProvider:      nil,
@@ -312,7 +315,7 @@ func Test_Initialize(t *testing.T) {
 			benchmark: &AWSOrg{},
 			dependencies: Dependencies{
 				AwsCfgProvider:           nil,
-				AwsIdentityProvider:      mockIdentityProvider(nil),
+				AwsIdentityProvider:      mockAwsIdentityProvider(nil),
 				AwsAccountProvider:       mockAccountProvider(nil),
 				KubernetesClientProvider: mockKubeClient(errors.New("some error")), // ineffectual
 				AwsMetadataProvider:      nil,
@@ -356,7 +359,7 @@ func Test_Initialize(t *testing.T) {
 			benchmark: &K8S{},
 			dependencies: Dependencies{
 				AwsCfgProvider:           nil,
-				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")), // ineffectual
+				AwsIdentityProvider:      mockAwsIdentityProvider(errors.New("some error")), // ineffectual
 				AwsAccountProvider:       nil,
 				KubernetesClientProvider: mockKubeClient(nil),
 				AwsMetadataProvider:      nil,
@@ -415,7 +418,7 @@ func Test_Initialize(t *testing.T) {
 			benchmark: &EKS{},
 			dependencies: Dependencies{
 				AwsCfgProvider:           mockAwsCfg(nil),
-				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")),
+				AwsIdentityProvider:      mockAwsIdentityProvider(errors.New("some error")),
 				AwsAccountProvider:       nil,
 				KubernetesClientProvider: mockKubeClient(nil),
 				AwsMetadataProvider:      nil,
@@ -442,7 +445,7 @@ func Test_Initialize(t *testing.T) {
 			benchmark: &EKS{},
 			dependencies: Dependencies{
 				AwsCfgProvider:           mockAwsCfg(nil),
-				AwsIdentityProvider:      mockIdentityProvider(errors.New("some error")), // ineffectual
+				AwsIdentityProvider:      mockAwsIdentityProvider(errors.New("some error")), // ineffectual
 				AwsAccountProvider:       nil,
 				KubernetesClientProvider: mockKubeClient(nil),
 				AwsMetadataProvider:      mockMetadataProvider(errors.New("some error")),       // ignored
@@ -454,21 +457,20 @@ func Test_Initialize(t *testing.T) {
 			name:         "no error",
 			benchmark:    &GCP{},
 			cfg:          validGcpConfig,
-			dependencies: Dependencies{},
+			dependencies: Dependencies{GcpIdentityProvider: mockGcpIdentityProvider(nil)},
 		},
-		// TODO: mock client
-		// {
-		// 	name:         "return an error",
-		// 	benchmark:    &GCP{},
-		// 	cfg:          validGcpConfig,
-		// 	dependencies: Dependencies{},
-		// 	wantErr: 	"failed to initialize gcp fetchers",
-		// },
+		{
+			name:         "return an error",
+			benchmark:    &GCP{},
+			cfg:          validGcpConfig,
+			dependencies: Dependencies{GcpIdentityProvider: mockGcpIdentityProvider(errors.New("failed to get gcp identity"))},
+			wantErr:      "failed to get gcp identity",
+		},
 		{
 			name:         "missing credentials",
 			benchmark:    &GCP{},
 			cfg:          baseGcpConfig, // missing credentials
-			dependencies: Dependencies{},
+			dependencies: Dependencies{GcpIdentityProvider: mockGcpIdentityProvider(nil)},
 			wantErr:      "failed to initialize gcp config",
 		},
 	}
@@ -548,13 +550,31 @@ func mockKubeClient(err error) k8s.ClientGetterAPI {
 	return &kube
 }
 
-func mockIdentityProvider(err error) *awslib.MockIdentityProviderGetter {
+func mockAwsIdentityProvider(err error) *awslib.MockIdentityProviderGetter {
 	identityProvider := &awslib.MockIdentityProviderGetter{}
 	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return(
-			&awslib.Identity{
+			&cloud.Identity{
 				Account: "test-account",
+			},
+			nil,
+		)
+	} else {
+		on.Return(nil, err)
+	}
+	return identityProvider
+}
+
+func mockGcpIdentityProvider(err error) *identity.MockIdentityProviderGetter {
+	identityProvider := &identity.MockIdentityProviderGetter{}
+	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return(
+			&cloud.Identity{
+				Provider:    "gcp",
+				ProjectId:   "test-project-id",
+				ProjectName: "test-project-name",
 			},
 			nil,
 		)
@@ -594,10 +614,10 @@ func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
 	provider := awslib.MockAccountProviderAPI{}
 	on := provider.EXPECT().ListAccounts(mock.Anything, mock.Anything)
 	if err == nil {
-		on.Return([]awslib.Identity{
+		on.Return([]cloud.Identity{
 			{
-				Account: "123",
-				Alias:   "some-name",
+				Account:      "123",
+				AccountAlias: "some-name",
 			},
 		}, nil)
 	} else {
@@ -606,7 +626,7 @@ func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
 	return &provider
 }
 
-func mockAccountProviderWithIdentities(identities []awslib.Identity) *awslib.MockAccountProviderAPI {
+func mockAccountProviderWithIdentities(identities []cloud.Identity) *awslib.MockAccountProviderAPI {
 	provider := awslib.MockAccountProviderAPI{}
 	provider.EXPECT().ListAccounts(mock.Anything, mock.Anything).Return(identities, nil)
 	return &provider

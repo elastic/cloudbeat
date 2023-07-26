@@ -23,6 +23,7 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -33,20 +34,20 @@ type MonitoringFetcher struct {
 	log           *logp.Logger
 	provider      monitoring.Client
 	resourceCh    chan fetching.ResourceInfo
-	cloudIdentity *awslib.Identity
+	cloudIdentity *cloud.Identity
 	securityhub   securityhub.Service
 }
 
 type MonitoringResource struct {
 	monitoring.Resource
-	identity *awslib.Identity
+	identity *cloud.Identity
 }
 
 type SecurityHubResource struct {
 	securityhub.SecurityHub
 }
 
-func NewMonitoringFetcher(log *logp.Logger, provider monitoring.Client, securityHubProvider securityhub.Service, ch chan fetching.ResourceInfo, identity *awslib.Identity) *MonitoringFetcher {
+func NewMonitoringFetcher(log *logp.Logger, provider monitoring.Client, securityHubProvider securityhub.Service, ch chan fetching.ResourceInfo, identity *cloud.Identity) *MonitoringFetcher {
 	return &MonitoringFetcher{
 		log:           log,
 		provider:      provider,
