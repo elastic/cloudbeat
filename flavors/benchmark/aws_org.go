@@ -29,11 +29,10 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
-	aws_dataprovider "github.com/elastic/cloudbeat/dataprovider/providers/aws"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 type AWSOrg struct{}
@@ -64,9 +63,9 @@ func (A *AWSOrg) Initialize(
 	return registry.NewRegistry(
 			log,
 			factory.NewCisAwsOrganizationFactory(ctx, log, ch, accounts),
-		), aws_dataprovider.New(
-			aws_dataprovider.WithLogger(log),
-			aws_dataprovider.WithAccount(*awsIdentity),
+		), cloud.NewDataProvider(
+			cloud.WithLogger(log),
+			cloud.WithAccount(*awsIdentity),
 		), nil
 }
 
@@ -74,7 +73,7 @@ func getAwsAccounts(
 	ctx context.Context,
 	initialCfg awssdk.Config,
 	dependencies *Dependencies,
-	rootIdentity *awslib.Identity,
+	rootIdentity *cloud.Identity,
 ) ([]factory.AwsAccount, error) {
 	const (
 		rootRole   = "cloudbeat-root"

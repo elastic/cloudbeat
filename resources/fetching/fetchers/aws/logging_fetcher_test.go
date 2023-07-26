@@ -29,6 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -119,7 +120,7 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				loggingProvider:       tt.loggingProvider(),
 				configserviceProvider: tt.configServiceProvider(),
 				resourceCh:            ch,
-				cloudIdentity: &awslib.Identity{
+				cloudIdentity: &cloud.Identity{
 					Account: testAccount,
 				},
 			}
@@ -156,7 +157,7 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 func TestConfigResource_GetMetadata(t *testing.T) {
 	r := ConfigResource{
 		configs: nil,
-		identity: &awslib.Identity{
+		identity: &cloud.Identity{
 			Account: "test-account",
 		},
 	}

@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - "[0-9]+.[0-9]+"
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
 
   push:
     branches:
@@ -102,7 +102,7 @@ jobs:
     # Run only selected tests on PRs
     if: github.event_name == 'pull_request'
     name: ${{ matrix.test-target }}-tests
-    needs: [Build]
+    needs: [ Build ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
@@ -118,8 +118,8 @@ jobs:
             process_etcd_rules,
             process_kubelet_rules,
           ]
-        values_file: [tests/deploy/values/ci.yml]
-        range: ["0..4"]
+        values_file: [ tests/deploy/values/ci.yml ]
+        range: [ "0..4" ]
         include:
           # Skip agent tests until resolved
           # - test-target: pre_merge_agent
@@ -128,6 +128,17 @@ jobs:
           - test-target: pre_merge
             range: ""
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - name: Check out the repo
         uses: actions/checkout@v3
 
@@ -175,7 +186,7 @@ jobs:
     # Run full test suit on post-merge
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
     if: github.event_name == 'push'
-    needs: [Build]
+    needs: [ Build ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
