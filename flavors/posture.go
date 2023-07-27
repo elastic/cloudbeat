@@ -71,6 +71,7 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
+	log.Infof("Initializing benchmark %T", b)
 	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh, &benchmark.Dependencies{
 		AwsCfgProvider:           awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 		AwsIdentityProvider:      awslib.IdentityProvider{},
