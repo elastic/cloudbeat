@@ -120,7 +120,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3.6.0
         with:
           version: latest
-          args: --timeout=10m --whole-files -v
+          args: --timeout=15m --whole-files -v
 
 
   dependency-review:
