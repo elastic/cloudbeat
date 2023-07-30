@@ -75,8 +75,8 @@ type GcpClientOpt struct {
 }
 
 const (
-	SingleAccount       = "single_account"
-	OrganizationAccount = "organization_account"
+	SingleAccount       = "single-account"
+	OrganizationAccount = "organization-account"
 )
 
 func New(cfg *config.C) (*Config, error) {
