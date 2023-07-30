@@ -467,11 +467,10 @@ func Test_Initialize(t *testing.T) {
 			wantErr:      "failed to get gcp identity",
 		},
 		{
-			name:         "missing credentials",
+			name:         "missing credentials options, fallback to using ADC",
 			benchmark:    &GCP{},
 			cfg:          baseGcpConfig, // missing credentials
 			dependencies: Dependencies{GcpIdentityProvider: mockGcpIdentityProvider(nil)},
-			wantErr:      "failed to initialize gcp config",
 		},
 	}
 	for _, tt := range tests {
