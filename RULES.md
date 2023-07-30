@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 12/84 implemented rules (14%)
+### 13/84 implemented rules (15%)
 
-#### Automated rules: 12/73 (16%)
+#### Automated rules: 13/73 (18%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -298,7 +298,7 @@
 |  [1.4](bundle/compliance/cis_gcp/rules/cis_1_4)  | Identity and Access Management | Ensure That There Are Only GCP-Managed Service Account Keys for Each Service Account                                              | :white_check_mark: | Automated |
 |  [1.5](bundle/compliance/cis_gcp/rules/cis_1_5)  | Identity and Access Management | Ensure That Service Account Has No Admin Privileges                                                                               | :white_check_mark: | Automated |
 |  [1.6](bundle/compliance/cis_gcp/rules/cis_1_6)  | Identity and Access Management | Ensure That IAM Users Are Not Assigned the Service Account User or Service Account Token Creator Roles at Project Level           | :white_check_mark: | Automated |
-|                       1.7                        | Identity and Access Management | Ensure User-Managed/External Keys for Service Accounts Are Rotated Every 90 Days or Fewer                                         |        :x:         | Automated |
+|  [1.7](bundle/compliance/cis_gcp/rules/cis_1_7)  | Identity and Access Management | Ensure User-Managed/External Keys for Service Accounts Are Rotated Every 90 Days or Fewer                                         | :white_check_mark: | Automated |
 |                       1.8                        | Identity and Access Management | Ensure That Separation of Duties Is Enforced While Assigning Service Account Related Roles to Users                               |        :x:         | Automated |
 |  [1.9](bundle/compliance/cis_gcp/rules/cis_1_9)  | Identity and Access Management | Ensure That Cloud KMS Cryptokeys Are Not Anonymously or Publicly Accessible                                                       | :white_check_mark: | Automated |
 |                       2.1                        | Logging and Monitoring         | Ensure That Cloud Audit Logging Is Configured Properly                                                                            |        :x:         | Automated |

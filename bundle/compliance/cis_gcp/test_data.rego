@@ -58,6 +58,15 @@ generate_compute_resource(subType, info) = {
 	"subType": subType,
 }
 
+generate_iam_service_account_key(resourceData) = {
+	"resource": {
+		"resource": {"data": resourceData},
+		"iam_policy": {},
+	},
+	"type": "kidentity-management",
+	"subType": "gcp-iam-service-account-key",
+}
+
 not_eval_resource = {
 	"resource": {},
 	"type": "key-management",
