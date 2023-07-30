@@ -30,6 +30,7 @@ jobs:
         uses: elastic/elastic-github-actions/elasticsearch@master
         with:
           stack-version: 8.8.0
+          security-enabled: false
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
@@ -40,7 +41,7 @@ jobs:
 
       - name: Run cloudbeat CNVM
         env:
-          ES_HOST: https://localhost:9200
+          ES_HOST: http://localhost:9200
           ES_USERNAME: elastic
           ES_PASSWORD: changeme
         run: |
