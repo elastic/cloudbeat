@@ -93,7 +93,7 @@ func TestNewBenchmark(t *testing.T) {
 						Cred: aws.ConfigAWS{
 							AccessKeyID: "test",
 						},
-						AccountType: "organization_account",
+						AccountType: "organization-account",
 					},
 				},
 			},
