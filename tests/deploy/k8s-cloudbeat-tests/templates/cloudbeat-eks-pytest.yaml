@@ -291,7 +291,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-          image: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat:latest
+          image: "{{ .Values.cloudbeat.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{.Values.image.pullPolicy}}
           name: cloudbeat
           resources:
             requests:

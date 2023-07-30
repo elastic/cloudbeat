@@ -92,13 +92,21 @@ func subtest(t *testing.T, drain bool) {
 	assert.Lenf(t, fetcherMap, nFetchers*nAccounts, "Correct amount of fetchers")
 
 	if drain {
-		resources := testhelper.CollectResourcesWithTimeout(rootCh, 10*time.Millisecond)
+		expectedResources := nAccounts * resourcesPerAccount
+		resources := testhelper.CollectResourcesWithTimeout(rootCh, expectedResources, 1*time.Second)
 		assert.Lenf(
 			t,
 			resources,
-			nAccounts*resourcesPerAccount,
+			expectedResources,
 			"Correct amount of resources fetched",
 		)
+		defer func() {
+			assert.Emptyf(
+				t,
+				testhelper.CollectResourcesWithTimeout(rootCh, 1, 100*time.Millisecond),
+				"Channel not drained",
+			)
+		}()
 
 		nameCounts := make(map[string]int)
 		for _, resource := range resources {
