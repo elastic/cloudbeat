@@ -1,9 +1,10 @@
 """A template file for deploying a service account for the elastic agent."""
 
 
+# pylint:disable=duplicate-code
 def generate_config(context):
     """Generates configuration."""
-    role_id = "elastic_agent_cspm_role"
+    role_id = "elastic_cspm_role"
     project = context.env["project"]
 
     service_account = {
