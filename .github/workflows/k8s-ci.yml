@@ -24,7 +24,7 @@ concurrency:
 jobs:
   Build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     timeout-minutes: 40
     steps:
       # Disk cleanup
@@ -115,7 +115,7 @@ jobs:
     if: github.event_name == 'pull_request'
     name: ${{ matrix.test-target }}-tests
     needs: [ Build ]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     timeout-minutes: 55
     strategy:
       fail-fast: false

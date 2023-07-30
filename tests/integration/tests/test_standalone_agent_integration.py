@@ -92,7 +92,7 @@ def test_cloudbeat_status(k8s, cloudbeat_agent):
             namespace=cloudbeat_agent.namespace,
             command=exec_command,
         )
-        logger.debug(response)
+        logger.debug(f"Command response: {response}")
         status = FsClient.get_beat_status_from_json(
             response=response,
             beat_name="cloudbeat",
