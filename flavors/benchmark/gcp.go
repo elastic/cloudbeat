@@ -36,16 +36,17 @@ import (
 
 type GCP struct {
 	IdentityProvider identity.ProviderGetter
+	CfgProvider      auth.ConfigProviderAPI
 }
 
-func (G *GCP) Run(context.Context) error { return nil }
+func (g *GCP) Run(context.Context) error { return nil }
 
-func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
-	if err := G.checkDependencies(); err != nil {
+func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+	if err := g.checkDependencies(); err != nil {
 		return nil, nil, err
 	}
 
-	gcpClientConfig, err := auth.GetGcpClientConfig(cfg.CloudConfig.Gcp, log)
+	gcpClientConfig, err := g.CfgProvider.GetGcpClientConfig(cfg.CloudConfig.Gcp, log)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
@@ -55,7 +56,7 @@ func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		ClientOpts: gcpClientConfig,
 	}
 
-	gcpIdentity, err := G.IdentityProvider.GetIdentity(ctx, cfg.CloudConfig.Gcp, log)
+	gcpIdentity, err := g.IdentityProvider.GetIdentity(ctx, cfg.CloudConfig.Gcp, log)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get GCP identity: %v", err)
 	}
@@ -71,11 +72,15 @@ func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	), nil
 }
 
-func (G *GCP) Stop() {}
+func (g *GCP) Stop() {}
 
-func (G *GCP) checkDependencies() error {
-	if G.IdentityProvider == nil {
+func (g *GCP) checkDependencies() error {
+	if g.IdentityProvider == nil {
 		return errors.New("gcp identity provider is uninitialized")
+	}
+
+	if g.CfgProvider == nil {
+		return errors.New("gcp config provider is uninitialized")
 	}
 	return nil
 }

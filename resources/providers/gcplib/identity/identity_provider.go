@@ -68,21 +68,21 @@ func (p *Provider) GetIdentity(ctx context.Context, cfg config.GcpConfig, log *l
 }
 
 func (p *Provider) initialize(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) error {
-	if p.service != nil {
+	if p.service == nil {
 		return nil
 	}
 
-	gcpClientOpt, err := auth.GetGcpClientConfig(cfg, log)
+	gcpClientOpt, err := auth.ConfigProvider{}.GetGcpClientConfig(cfg, log)
 	if err != nil {
-		return err
-	}
-	gcpClientOpt = append(gcpClientOpt, option.WithScopes(cloudresourcemanager.CloudPlatformReadOnlyScope))
-	crmService, err := cloudresourcemanager.NewService(ctx, gcpClientOpt...)
-	if err != nil {
-		return err
-	}
+		gcpClientOpt = append(gcpClientOpt, option.WithScopes(cloudresourcemanager.CloudPlatformReadOnlyScope))
+		crmService, err := cloudresourcemanager.NewService(ctx, gcpClientOpt...)
+		if err != nil {
+			return err
+		}
 
-	p.service = &CloudResourceManagerService{service: crmService}
+		p.service = &CloudResourceManagerService{service: crmService}
+		return err
+	}
 	return nil
 }
 

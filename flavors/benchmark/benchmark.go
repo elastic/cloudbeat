@@ -29,6 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 )
 
@@ -70,6 +71,7 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 	case config.CIS_GCP:
 		return &GCP{
 			IdentityProvider: &identity.Provider{},
+			CfgProvider:      &auth.ConfigProvider{},
 		}, nil
 	}
 	return nil, fmt.Errorf("unknown benchmark: '%s'", cfg.Benchmark)

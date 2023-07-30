@@ -22,9 +22,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/mock"
+	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 )
 
@@ -45,6 +47,7 @@ func TestGCP_Initialize(t *testing.T) {
 	tests := []struct {
 		name             string
 		identityProvider identity.ProviderGetter
+		configProvider   auth.ConfigProviderAPI
 		cfg              config.Config
 		want             []string
 		wantErr          string
@@ -55,21 +58,33 @@ func TestGCP_Initialize(t *testing.T) {
 			wantErr: "gcp identity provider is uninitialized",
 		},
 		{
-			name:             "missing credentials",
+			name:             "missing credentials options, fallback to using ADC",
 			cfg:              baseGcpConfig,
 			identityProvider: mockGcpIdentityProvider(nil),
-			wantErr:          "failed to initialize gcp config",
+			configProvider:   mockGcpCfgProvider(nil),
+			want: []string{
+				"gcp_cloud_assets_fetcher",
+			},
+		},
+		{
+			name:             "config provider error",
+			cfg:              baseGcpConfig,
+			identityProvider: mockGcpIdentityProvider(nil),
+			configProvider:   mockGcpCfgProvider(errors.New("some error")),
+			wantErr:          "some error",
 		},
 		{
 			name:             "identity provider error",
 			cfg:              validGcpConfig,
 			identityProvider: mockGcpIdentityProvider(errors.New("some error")),
+			configProvider:   mockGcpCfgProvider(nil),
 			wantErr:          "some error",
 		},
 		{
 			name:             "no error",
 			cfg:              validGcpConfig,
 			identityProvider: mockGcpIdentityProvider(nil),
+			configProvider:   mockGcpCfgProvider(nil),
 			want: []string{
 				"gcp_cloud_assets_fetcher",
 			},
@@ -82,6 +97,7 @@ func TestGCP_Initialize(t *testing.T) {
 
 			testInitialize(t, &GCP{
 				IdentityProvider: tt.identityProvider,
+				CfgProvider:      tt.configProvider,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
@@ -103,4 +119,18 @@ func mockGcpIdentityProvider(err error) *identity.MockProviderGetter {
 		on.Return(nil, err)
 	}
 	return identityProvider
+}
+
+func mockGcpCfgProvider(err error) auth.ConfigProviderAPI {
+	cfgProvider := &auth.MockConfigProviderAPI{}
+	on := cfgProvider.EXPECT().GetGcpClientConfig(mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return(
+			[]option.ClientOption{},
+			nil,
+		)
+	} else {
+		on.Return(nil, err)
+	}
+	return cfgProvider
 }
