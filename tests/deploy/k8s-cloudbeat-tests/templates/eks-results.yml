@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: busybox
-          image: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/test-eks-scan-true:latest
+          image: "{{ .Values.image.ecr }}/test-eks-scan-true:latest"
           imagePullPolicy: IfNotPresent
           command:
             - sleep
