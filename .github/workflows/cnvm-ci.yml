@@ -11,7 +11,7 @@ on:
 jobs:
   Run-CNVM-Tests:
     name: Build
-    runs-on: macos-12-xl
+    runs-on: ubuntu-22.04
     timeout-minutes: 40
     steps:
       - name: Check out the repo
@@ -26,10 +26,10 @@ jobs:
           version: latest
           args: build
 
-      # - name: Run Elasticsearch
-      #   uses: elastic/elastic-github-actions/elasticsearch@master
-      #   with:
-      #     stack-version: 8.8.0
+      - name: Run Elasticsearch
+        uses: elastic/elastic-github-actions/elasticsearch@master
+        with:
+          stack-version: 8.8.0
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
