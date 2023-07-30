@@ -73,58 +73,31 @@ Resources:
                 Action:
                   - ec2:DescribeInstances
                   - ec2:CreateSnapshots
-                  - ec2:CreateTags
-                Resource: !Join
-                  - ""
-                  - - 'arn:aws:ec2:'
-                    - !Ref AWS::Region
-                    - ::instance/*
-              - Effect: Allow
-                Action:
-                  - ec2:DescribeImages
-                  - ec2:CreateTags
-                Resource: !Join
-                  - ""
-                  - - 'arn:aws:ec2:'
-                    - !Ref AWS::Region
-                    - ::image/*
-              - Effect: Allow
-                Action:
                   - ec2:DescribeSnapshots
-                  - ec2:CreateSnapshots
-                Resource: !Join
-                  - ""
-                  - - 'arn:aws:ec2:'
-                    - !Ref AWS::Region
-                    - ::snapshot/*
-              - Effect: Allow
-                Action:
-                  - ec2:DescribeTags
                   - ec2:CreateTags
-                Resource: !Join
-                  - ""
-                  - - 'arn:aws:ec2:'
-                    - !Ref AWS::Region
-                    - ::snapshot/*
+                  - ec2:DescribeImages
+                  - ec2:DescribeTags
+                  - ec2:DescribeVolumes
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    aws:RequestedRegion: !Ref AWS::Region
               - Effect: Allow
                 Action:
+                  - ec2:DeleteSnapshot
                   - ebs:ListSnapshotBlocks
                   - ebs:ListChangedBlocks
                   - ebs:GetSnapshotBlock
-                  - ec2:DeleteSnapshot
-                  - ec2:DescribeVolumes
-                Resource: !Join
-                  - ""
-                  - - 'arn:aws:ec2:'
-                    - !Ref AWS::Region
-                    - ::snapshot/*
+                Resource: '*'
                 Condition:
                   StringEqualsIgnoreCase:
                     aws:ResourceTag/Workload: Cloudbeat Vulnerability Snapshot
+                  StringEquals:
+                    aws:RequestedRegion: !Ref AWS::Region
               - Effect: Allow
                 Action:
                   - iam:ListAccountAliases
-                Resource: arn:aws:iam::*:*
+                Resource: '*'
 
   # Instance profile to attach to EC2 instance
   ElasticAgentInstanceProfile:
