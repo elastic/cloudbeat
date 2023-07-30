@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 11/84 implemented rules (13%)
+### 12/84 implemented rules (14%)
 
-#### Automated rules: 11/73 (15%)
+#### Automated rules: 12/73 (16%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -295,7 +295,7 @@
 |                       1.18                       | Identity and Access Management | Ensure Secrets are Not Stored in Cloud Functions Environment Variables by Using Secret Manager                                    |        :x:         |  Manual   |
 |                       1.2                        | Identity and Access Management | Ensure that Multi-Factor Authentication is 'Enabled' for All Non-Service Accounts                                                 |        :x:         |  Manual   |
 |                       1.3                        | Identity and Access Management | Ensure that Security Key Enforcement is Enabled for All Admin Accounts                                                            |        :x:         |  Manual   |
-|                       1.4                        | Identity and Access Management | Ensure That There Are Only GCP-Managed Service Account Keys for Each Service Account                                              |        :x:         | Automated |
+|  [1.4](bundle/compliance/cis_gcp/rules/cis_1_4)  | Identity and Access Management | Ensure That There Are Only GCP-Managed Service Account Keys for Each Service Account                                              | :white_check_mark: | Automated |
 |  [1.5](bundle/compliance/cis_gcp/rules/cis_1_5)  | Identity and Access Management | Ensure That Service Account Has No Admin Privileges                                                                               | :white_check_mark: | Automated |
 |  [1.6](bundle/compliance/cis_gcp/rules/cis_1_6)  | Identity and Access Management | Ensure That IAM Users Are Not Assigned the Service Account User or Service Account Token Creator Roles at Project Level           | :white_check_mark: | Automated |
 |                       1.7                        | Identity and Access Management | Ensure User-Managed/External Keys for Service Accounts Are Rotated Every 90 Days or Fewer                                         |        :x:         | Automated |
