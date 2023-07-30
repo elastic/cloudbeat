@@ -6,18 +6,23 @@ COMPUTE_URL_BASE = "https://www.googleapis.com/compute/v1/"
 def generate_config(context):
     """Generates configuration."""
     project = context.env["project"]
+    deployment_name = context.env["deployment"]
     zone = context.properties["zone"]
     enrollment_token = context.properties["enrollmentToken"]
     fleet_url = context.properties["fleetUrl"]
     agent_version = context.properties["elasticAgentVersion"]
     artifact_server = context.properties["elasticArtifactServer"]
-    role_id = "elastic_agent_cspm_role"
 
-    ssh_fw_rule = {  # firewall
+    role_id = "elastic_cspm_role"
+    network_name = f"{deployment_name}-network"
+    sa_name = f"{deployment_name}-cspm-sa"
+    custom_role_name = f"{deployment_name}-cspm-role"
+
+    ssh_fw_rule = {
         "name": "elastic-agent-firewall-rule",
         "type": "compute.v1.firewall",
         "properties": {
-            "network": "$(ref.elastic-agent-network.selfLink)",
+            "network": f"$(ref.{network_name}.selfLink)",
             "sourceRanges": ["0.0.0.0/0"],
             "allowed": [
                 {
@@ -29,7 +34,7 @@ def generate_config(context):
     }
 
     instance = {
-        "name": "elastic-agent",
+        "name": deployment_name,
         "type": "compute.v1.instance",
         "properties": {
             "zone": zone,
@@ -46,7 +51,7 @@ def generate_config(context):
             ),
             "serviceAccounts": [
                 {
-                    "email": "$(ref.elastic-agent-cspm-sa.email)",
+                    "email": f"$(ref.{sa_name}.email)",
                     "scopes": ["https://www.googleapis.com/auth/cloud-platform"],
                 },
             ],
@@ -70,7 +75,7 @@ def generate_config(context):
                 },
             ],
             "metadata": {
-                "dependsOn": ["elastic-agent-cspm-sa"],
+                "dependsOn": [sa_name],
                 "items": [
                     {
                         "key": "startup-script",
@@ -91,7 +96,7 @@ def generate_config(context):
             },
             "networkInterfaces": [
                 {
-                    "network": "$(ref.elastic-agent-network.selfLink)",
+                    "network": f"$(ref.{network_name}.selfLink)",
                     "accessConfigs": [
                         {
                             "name": "External NAT",
@@ -107,17 +112,17 @@ def generate_config(context):
     }
 
     service_account = {
-        "name": "elastic-agent-cspm-sa",
+        "name": sa_name,
         "type": "iam.v1.serviceAccount",
         "properties": {
-            "accountId": "elastic-agent-cspm-sa",
+            "accountId": sa_name,
             "displayName": "Elastic agent service account for CSPM",
             "projectId": context.env["project"],
         },
     }
 
     custom_role = {
-        "name": "elastic-cspm-role",
+        "name": custom_role_name,
         "type": "gcp-types/iam-v1:projects.roles",
         "properties": {
             "roleId": role_id,
@@ -135,20 +140,20 @@ def generate_config(context):
     }
 
     iam_role_binding = {
-        "name": "elastic-agent-iam-binding-cspm",
+        "name": f"{deployment_name}-iam-binding-cspm",
         "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
         "properties": {
             "resource": context.env["project"],
             "role": f"projects/{project}/roles/{role_id}",
-            "member": "serviceAccount:$(ref.elastic-agent-cspm-sa.email)",
+            "member": f"serviceAccount:$(ref.{sa_name}.email)",
         },
         "metadata": {
-            "dependsOn": ["elastic-agent-cspm-sa", "elastic-cspm-role"],
+            "dependsOn": [sa_name, custom_role_name],
         },
     }
 
     network = {
-        "name": "elastic-agent-network",
+        "name": network_name,
         "type": "compute.v1.network",
         "properties": {
             "routingConfig": {
