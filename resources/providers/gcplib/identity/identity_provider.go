@@ -33,12 +33,11 @@ import (
 const provider = "gcp"
 
 type ProviderGetter interface {
-	GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error)
+	GetIdentity(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*cloud.Identity, error)
 }
 
 type Provider struct {
 	service ResourceManager
-	logger  *logp.Logger
 }
 
 // CloudResourceManagerService is a wrapper around the GCP resource manager service to make it easier to mock
@@ -50,13 +49,9 @@ type ResourceManager interface {
 	projectsGet(context.Context, string) (*cloudresourcemanager.Project, error)
 }
 
-func NewProvider(logger *logp.Logger) *Provider {
-	return &Provider{logger: logger.Named("gcp.identity")}
-}
-
 // GetIdentity returns GCP identity information
-func (p *Provider) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error) {
-	if err := p.initialize(ctx, cfg); err != nil {
+func (p *Provider) GetIdentity(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*cloud.Identity, error) {
+	if err := p.initialize(ctx, cfg, log.Named("gcp.identity")); err != nil {
 		return nil, err
 	}
 
@@ -72,12 +67,12 @@ func (p *Provider) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*clou
 	}, nil
 }
 
-func (p *Provider) initialize(ctx context.Context, cfg config.GcpConfig) error {
+func (p *Provider) initialize(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) error {
 	if p.service != nil {
 		return nil
 	}
 
-	gcpClientOpt, err := auth.GetGcpClientConfig(cfg, p.logger)
+	gcpClientOpt, err := auth.GetGcpClientConfig(cfg, log)
 	if err != nil {
 		return err
 	}

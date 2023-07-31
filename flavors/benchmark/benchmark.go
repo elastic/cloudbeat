@@ -19,19 +19,13 @@ package benchmark
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/elastic/elastic-agent-libs/logp"
-	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
+	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -40,70 +34,43 @@ import (
 
 type Benchmark interface {
 	Run(ctx context.Context) error
-	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error)
+	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error)
 	Stop()
+
+	checkDependencies() error
 }
 
 func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 	switch cfg.Benchmark {
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
-			return &AWSOrg{}, nil
+			return &AWSOrg{
+				IdentityProvider: awslib.IdentityProvider{},
+				AccountProvider:  awslib.AccountProvider{},
+			}, nil
 		}
 
-		return &AWS{}, nil
+		return &AWS{
+			IdentityProvider: awslib.IdentityProvider{},
+		}, nil
 	case config.CIS_EKS:
-		return &EKS{}, nil
+		return &EKS{
+			AWSCfgProvider:         awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
+			AWSIdentityProvider:    awslib.IdentityProvider{},
+			AWSMetadataProvider:    awslib.Ec2MetadataProvider{},
+			EKSClusterNameProvider: awslib.EKSClusterNameProvider{},
+			ClientProvider:         k8s.ClientGetter{},
+			leaderElector:          nil,
+		}, nil
 	case config.CIS_K8S:
-		return &K8S{}, nil
+		return &K8S{
+			ClientProvider: k8s.ClientGetter{},
+			leaderElector:  nil,
+		}, nil
 	case config.CIS_GCP:
-		return &GCP{}, nil
+		return &GCP{
+			IdentityProvider: &identity.Provider{},
+		}, nil
 	}
 	return nil, fmt.Errorf("unknown benchmark: '%s'", cfg.Benchmark)
-}
-
-type Dependencies struct {
-	AwsCfgProvider           awslib.ConfigProviderAPI
-	AwsIdentityProvider      awslib.IdentityProviderGetter
-	AwsAccountProvider       awslib.AccountProviderAPI
-	GcpIdentityProvider      identity.ProviderGetter
-	KubernetesClientProvider k8sprovider.ClientGetterAPI
-
-	AwsMetadataProvider    awslib.MetadataProvider
-	EksClusterNameProvider awslib.EKSClusterNameProviderAPI
-}
-
-func (d *Dependencies) KubernetesClient(log *logp.Logger, kubeConfig string, options kubernetes.KubeClientOptions) (k8s.Interface, error) {
-	if d.KubernetesClientProvider == nil {
-		return nil, fmt.Errorf("k8s provider is uninitialized")
-	}
-	return d.KubernetesClientProvider.GetClient(log, kubeConfig, options)
-}
-
-func (d *Dependencies) AWSConfig(ctx context.Context, cfg aws.ConfigAWS) (*awssdk.Config, error) {
-	if d.AwsCfgProvider == nil {
-		return nil, errors.New("aws config provider is uninitialized")
-	}
-	return d.AwsCfgProvider.InitializeAWSConfig(ctx, cfg)
-}
-
-func (d *Dependencies) AWSIdentity(ctx context.Context, cfg awssdk.Config) (*cloud.Identity, error) {
-	if d.AwsIdentityProvider == nil {
-		return nil, errors.New("aws identity provider is uninitialized")
-	}
-	return d.AwsIdentityProvider.GetIdentity(ctx, cfg)
-}
-
-func (d *Dependencies) AWSAccounts(ctx context.Context, cfg awssdk.Config) ([]cloud.Identity, error) {
-	if d.AwsAccountProvider == nil {
-		return nil, errors.New("aws account provider is uninitialized")
-	}
-	return d.AwsAccountProvider.ListAccounts(ctx, cfg)
-}
-
-func (d *Dependencies) GCPIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error) {
-	if d.GcpIdentityProvider == nil {
-		return nil, errors.New("gcp identity provider is uninitialized")
-	}
-	return d.GcpIdentityProvider.GetIdentity(ctx, cfg)
 }
