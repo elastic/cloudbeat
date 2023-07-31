@@ -27,15 +27,12 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/flavors/benchmark"
 	"github.com/elastic/cloudbeat/pipeline"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/manager"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 	"github.com/elastic/cloudbeat/transformer"
 )
 
@@ -71,15 +68,7 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
-	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh, &benchmark.Dependencies{
-		AwsCfgProvider:           awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
-		AwsIdentityProvider:      awslib.IdentityProvider{},
-		AwsAccountProvider:       awslib.AccountProvider{},
-		GcpIdentityProvider:      identity.NewProvider(ctx, cfg, log),
-		KubernetesClientProvider: k8s.ClientGetter{},
-		AwsMetadataProvider:      awslib.Ec2MetadataProvider{},
-		EksClusterNameProvider:   awslib.EKSClusterNameProvider{},
-	})
+	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		cancel()
 		return nil, err
