@@ -111,10 +111,10 @@ func (k *EKS) checkDependencies() error {
 		return fmt.Errorf("kubernetes client provider is uninitialized")
 	}
 	if k.EKSClusterNameProvider == nil {
-		return fmt.Errorf("EKS cluster name provider is uninitialized")
+		return fmt.Errorf("eks cluster name provider is uninitialized")
 	}
 	if k.AWSMetadataProvider == nil {
-		return fmt.Errorf("AWS metadata provideri is uninitialized")
+		return fmt.Errorf("aws metadata provider is uninitialized")
 	}
 	return nil
 }
