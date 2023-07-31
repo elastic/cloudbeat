@@ -44,9 +44,9 @@ type addClusterID struct {
 }
 
 // New constructs a new Add ID processor.
-func New(cfg *agentconfig.C) (beat.Processor, error) {
-	config := config{}
-	if err := cfg.Unpack(&config); err != nil {
+func New(agentCfg *agentconfig.C) (beat.Processor, error) {
+	cfg := config{}
+	if err := agentCfg.Unpack(&cfg); err != nil {
 		return nil, makeErrConfigUnpack(err)
 	}
 
@@ -59,12 +59,10 @@ func New(cfg *agentconfig.C) (beat.Processor, error) {
 	if err != nil {
 		return nil, err
 	}
-	p := &addClusterID{
-		config,
+	return &addClusterID{
+		cfg,
 		helper,
-	}
-
-	return p, nil
+	}, nil
 }
 
 // Run enriches the given event with an ID
