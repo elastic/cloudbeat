@@ -1,6 +1,6 @@
 # https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
 run:
-  timeout: 10m
+  timeout: 15m
 
 linters:
   enable:
@@ -36,6 +36,9 @@ linters-settings:
     # If `true`, make the section order the same as the order of `sections`.
     custom-order: false
   govet:
+    enable-all: true
+    disable:
+      - fieldalignment
     settings:
       printf:
         funcs:
@@ -58,3 +61,5 @@ linters-settings:
     exclude:
       - '.*cloudbeat.*fetching.fetchers.k8s.FileCommonData'
       - '.*cloudbeat.*fetching.fetchers.k8s.ProcCommonData'
+  tenv:
+    all: true

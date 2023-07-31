@@ -233,14 +233,14 @@ func (p Provider) getCredentialReport(ctx context.Context) (map[string]*Credenti
 		if errors.As(err, &apiErr) {
 			if apiErr.ErrorCode() == "ReportNotPresent" || apiErr.ErrorCode() == "ReportExpired" {
 				// generate a new report
-				_, err := p.client.GenerateCredentialReport(ctx, &iamsdk.GenerateCredentialReportInput{})
+				_, err = p.client.GenerateCredentialReport(ctx, &iamsdk.GenerateCredentialReportInput{})
 				if err != nil {
 					return nil, err
 				}
 			}
 		}
 
-		// loop until max retires or till the report is ready
+		// loop until max retries or till the report is ready
 		var countRetries = 0
 		report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
 		if errors.As(err, &apiErr) {
