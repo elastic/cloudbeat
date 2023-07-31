@@ -48,9 +48,15 @@ jobs:
           ES_USERNAME: elastic
           ES_PASSWORD: changeme
         run: |
-          ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -e -d '*'
+          ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
 
       - name: Check for vulnerabilities
         run: |
           poetry run pytest -k "cnvm"
+
+      - name: Upload cloudbeat logs
+        uses: actions/upload-artifact@v2
+        with:
+          name: cloudbeat-logs
+          path: logs/cloudbeat*
 
