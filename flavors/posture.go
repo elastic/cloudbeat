@@ -68,6 +68,7 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
+	log.Infof("Initializing benchmark %T", b)
 	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		cancel()
