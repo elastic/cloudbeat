@@ -105,7 +105,7 @@ func TestGCP_Initialize(t *testing.T) {
 
 func mockGcpIdentityProvider(err error) *identity.MockProviderGetter {
 	identityProvider := &identity.MockProviderGetter{}
-	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything, mock.Anything)
+	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return(
 			&cloud.Identity{

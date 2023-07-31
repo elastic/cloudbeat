@@ -56,7 +56,7 @@ func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		ClientOpts: gcpClientConfig,
 	}
 
-	gcpIdentity, err := g.IdentityProvider.GetIdentity(ctx, cfg.CloudConfig.Gcp, log)
+	gcpIdentity, err := g.IdentityProvider.GetIdentity(ctx, gcpFactoryConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get GCP identity: %v", err)
 	}

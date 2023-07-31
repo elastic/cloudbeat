@@ -21,11 +21,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
@@ -33,7 +31,7 @@ import (
 const provider = "gcp"
 
 type ProviderGetter interface {
-	GetIdentity(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*cloud.Identity, error)
+	GetIdentity(ctx context.Context, factoryConfig *auth.GcpFactoryConfig) (*cloud.Identity, error)
 }
 
 type Provider struct {
@@ -50,12 +48,12 @@ type ResourceManager interface {
 }
 
 // GetIdentity returns GCP identity information
-func (p *Provider) GetIdentity(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*cloud.Identity, error) {
-	if err := p.initialize(ctx, cfg, log.Named("gcp.identity")); err != nil {
+func (p *Provider) GetIdentity(ctx context.Context, factoryConfig *auth.GcpFactoryConfig) (*cloud.Identity, error) {
+	if err := p.initialize(ctx, factoryConfig.ClientOpts); err != nil {
 		return nil, err
 	}
 
-	proj, err := p.service.projectsGet(ctx, "projects/"+cfg.ProjectId)
+	proj, err := p.service.projectsGet(ctx, "projects/"+factoryConfig.ProjectId)
 	if err != nil {
 		return nil, err
 	}
@@ -67,22 +65,18 @@ func (p *Provider) GetIdentity(ctx context.Context, cfg config.GcpConfig, log *l
 	}, nil
 }
 
-func (p *Provider) initialize(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) error {
-	if p.service == nil {
+func (p *Provider) initialize(ctx context.Context, gcpClientOpt []option.ClientOption) error {
+	if p.service != nil {
 		return nil
 	}
 
-	gcpClientOpt, err := auth.ConfigProvider{}.GetGcpClientConfig(cfg, log)
+	gcpClientOpt = append(gcpClientOpt, option.WithScopes(cloudresourcemanager.CloudPlatformReadOnlyScope))
+	crmService, err := cloudresourcemanager.NewService(ctx, gcpClientOpt...)
 	if err != nil {
-		gcpClientOpt = append(gcpClientOpt, option.WithScopes(cloudresourcemanager.CloudPlatformReadOnlyScope))
-		crmService, err := cloudresourcemanager.NewService(ctx, gcpClientOpt...)
-		if err != nil {
-			return err
-		}
-
-		p.service = &CloudResourceManagerService{service: crmService}
 		return err
 	}
+
+	p.service = &CloudResourceManagerService{service: crmService}
 	return nil
 }
 
