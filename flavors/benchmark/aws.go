@@ -38,8 +38,8 @@ type AWS struct {
 	IdentityProvider awslib.IdentityProviderGetter
 }
 
-func (A *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
-	if err := A.checkDependencies(); err != nil {
+func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+	if err := a.checkDependencies(); err != nil {
 		return nil, nil, err
 	}
 
@@ -49,7 +49,7 @@ func (A *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	awsIdentity, err := A.IdentityProvider.GetIdentity(ctx, awsConfig)
+	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
@@ -63,11 +63,11 @@ func (A *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		), nil
 }
 
-func (A *AWS) Run(context.Context) error { return nil }
-func (A *AWS) Stop()                     {}
+func (a *AWS) Run(context.Context) error { return nil }
+func (a *AWS) Stop()                     {}
 
-func (A *AWS) checkDependencies() error {
-	if A.IdentityProvider == nil {
+func (a *AWS) checkDependencies() error {
+	if a.IdentityProvider == nil {
 		return errors.New("aws identity provider is uninitialized")
 	}
 	return nil
