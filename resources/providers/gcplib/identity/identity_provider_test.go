@@ -70,10 +70,9 @@ func TestIdentityProvider_GetIdentity(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Provider{
 				service: tt.service(),
-				logger:  testhelper.NewLogger(t),
 			}
 
-			got, err := p.GetIdentity(context.Background(), config.GcpConfig{ProjectId: "test-proj"})
+			got, err := p.GetIdentity(context.Background(), config.GcpConfig{ProjectId: "test-proj"}, testhelper.NewLogger(t))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetIdentity() error = %v, wantErr %v", err, tt.wantErr)
 				return
