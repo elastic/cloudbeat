@@ -52,13 +52,21 @@ jobs:
           stack-version: 8.8.0
           security-enabled: false
 
-      - name: Run cloudbeat CNVM
+      - name: Run cloudbeat CNVM in background
         env:
           ES_HOST: http://localhost:9200
           ES_USERNAME: elastic
           ES_PASSWORD: changeme
         run: |
           ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
+
+      - name: Tail logs for 5 minutes
+        run: |
+          until [[ -d logs ]]
+          do
+              sleep 3
+          done
+          tail -f logs/cloudbeat.* & sleep 300; kill $!
 
       - name: Check for vulnerabilities
         working-directory: ./tests
