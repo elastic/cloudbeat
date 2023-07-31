@@ -36,8 +36,6 @@ type GcpAssetsFetcherTestSuite struct {
 	resourceCh chan fetching.ResourceInfo
 }
 
-type GcpAssetsMocksReturnVals map[string]any
-
 func TestGcpAssetsFetcherTestSuite(t *testing.T) {
 	s := new(GcpAssetsFetcherTestSuite)
 
@@ -55,7 +53,7 @@ func (s *GcpAssetsFetcherTestSuite) TearDownTest() {
 func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockInventoryService{}
-	GcpAssetsFetcher := GcpAssetsFetcher{
+	fetcher := GcpAssetsFetcher{
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
 		provider:   mockInventoryService,
@@ -69,7 +67,7 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		}, nil,
 	)
 
-	err := GcpAssetsFetcher.Fetch(ctx, fetching.CycleMetadata{})
+	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
 	s.NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
