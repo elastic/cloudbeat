@@ -30,18 +30,18 @@ type client interface {
 }
 
 type Publisher struct {
-	log      *logp.Logger
-	interval time.Duration
-	treshold int
-	client   client
+	log       *logp.Logger
+	interval  time.Duration
+	threshold int
+	client    client
 }
 
-func NewPublisher(log *logp.Logger, interval time.Duration, treshold int, client client) *Publisher {
+func NewPublisher(log *logp.Logger, interval time.Duration, threshold int, client client) *Publisher {
 	return &Publisher{
-		log:      log,
-		interval: interval,
-		treshold: treshold,
-		client:   client,
+		log:       log,
+		interval:  interval,
+		threshold: threshold,
+		client:    client,
 	}
 }
 
@@ -73,11 +73,11 @@ func (p *Publisher) HandleEvents(ctx context.Context, ch chan []beat.Event) {
 			}
 
 			eventsToSend = append(eventsToSend, event...)
-			if len(eventsToSend) < p.treshold {
+			if len(eventsToSend) < p.threshold {
 				continue
 			}
 
-			p.log.Infof("Publisher buffer threshold:%d reached", p.treshold)
+			p.log.Infof("Publisher buffer threshold:%d reached", p.threshold)
 			p.publish(&eventsToSend)
 		}
 	}
