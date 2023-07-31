@@ -19,6 +19,7 @@ package benchmark
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
@@ -30,24 +31,25 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
-type AWS struct{}
+type AWS struct {
+	IdentityProvider awslib.IdentityProviderGetter
+}
 
-func (A *AWS) Initialize(
-	ctx context.Context,
-	log *logp.Logger,
-	cfg *config.Config,
-	ch chan fetching.ResourceInfo,
-	dependencies *Dependencies,
-) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+	if err := a.checkDependencies(); err != nil {
+		return nil, nil, err
+	}
+
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	awsIdentity, err := dependencies.AWSIdentity(ctx, awsConfig)
+	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
@@ -61,5 +63,12 @@ func (A *AWS) Initialize(
 		), nil
 }
 
-func (A *AWS) Run(context.Context) error { return nil }
-func (A *AWS) Stop()                     {}
+func (a *AWS) Run(context.Context) error { return nil }
+func (a *AWS) Stop()                     {}
+
+func (a *AWS) checkDependencies() error {
+	if a.IdentityProvider == nil {
+		return errors.New("aws identity provider is uninitialized")
+	}
+	return nil
+}
