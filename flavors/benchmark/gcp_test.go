@@ -103,6 +103,30 @@ func TestGCP_Initialize(t *testing.T) {
 				"gcp_cloud_assets_fetcher",
 			},
 		},
+		{
+			name:                 "no identity provider",
+			cfg:                  validGcpConfig,
+			identityProvider:     nil,
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(nil),
+			wantErr:              "gcp identity provider is uninitialized",
+		},
+		{
+			name:                 "no inventory initializer",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: nil,
+			wantErr:              "gcp asset inventory is uninitialized",
+		},
+		{
+			name:                 "no config provider",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       nil,
+			inventoryInitializer: mockInventoryInitializerService(nil),
+			wantErr:              "gcp config provider is uninitialized",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
