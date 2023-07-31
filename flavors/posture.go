@@ -76,7 +76,7 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 		AwsCfgProvider:           awslib.ConfigProvider{MetadataProvider: awslib.Ec2MetadataProvider{}},
 		AwsIdentityProvider:      awslib.IdentityProvider{},
 		AwsAccountProvider:       awslib.AccountProvider{},
-		GcpIdentityProvider:      identity.NewProvider(ctx, cfg, log),
+		GcpIdentityProvider:      identity.NewProvider(log),
 		KubernetesClientProvider: k8s.ClientGetter{},
 		AwsMetadataProvider:      awslib.Ec2MetadataProvider{},
 		EksClusterNameProvider:   awslib.EKSClusterNameProvider{},

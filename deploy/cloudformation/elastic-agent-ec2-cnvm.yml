@@ -72,20 +72,28 @@ Resources:
               - Effect: Allow
                 Action:
                   - ec2:DescribeInstances
+                  - ec2:CreateSnapshots
+                  - ec2:DescribeSnapshots
+                  - ec2:CreateTags
                   - ec2:DescribeImages
                   - ec2:DescribeTags
-                  - ec2:DescribeSnapshots
-                  - ec2:CreateSnapshots
-                  - ec2:CreateTags
-                  - ec2:DeleteSnapshot
                   - ec2:DescribeVolumes
                 Resource: '*'
+                Condition:
+                  StringEquals:
+                    aws:RequestedRegion: !Ref AWS::Region
               - Effect: Allow
                 Action:
+                  - ec2:DeleteSnapshot
                   - ebs:ListSnapshotBlocks
                   - ebs:ListChangedBlocks
                   - ebs:GetSnapshotBlock
                 Resource: '*'
+                Condition:
+                  StringEqualsIgnoreCase:
+                    aws:ResourceTag/Workload: Cloudbeat Vulnerability Snapshot
+                  StringEquals:
+                    aws:RequestedRegion: !Ref AWS::Region
               - Effect: Allow
                 Action:
                   - iam:ListAccountAliases

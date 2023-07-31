@@ -19,10 +19,11 @@ package auth
 
 import (
 	"os"
-	"reflect"
 	"testing"
 
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/config"
@@ -35,23 +36,21 @@ const (
 
 func TestGetGcpClientConfig(t *testing.T) {
 	f := createServiceAccountFile(t)
-	defer os.Remove(f.Name())
+	defer func() {
+		require.NoError(t, os.Remove(f.Name()))
+	}()
 
 	tests := []struct {
 		name    string
-		cfg     *config.Config
+		cfg     config.GcpConfig
 		want    []option.ClientOption
 		wantErr bool
 	}{
 		{
 			name: "Should return a GcpClientConfig using SA credentials file path",
-			cfg: &config.Config{
-				CloudConfig: config.CloudConfig{
-					Gcp: config.GcpConfig{
-						GcpClientOpt: config.GcpClientOpt{
-							CredentialsFilePath: saFilePath,
-						},
-					},
+			cfg: config.GcpConfig{
+				GcpClientOpt: config.GcpClientOpt{
+					CredentialsFilePath: saFilePath,
 				},
 			},
 			want:    []option.ClientOption{option.WithCredentialsFile(saFilePath)},
@@ -59,13 +58,9 @@ func TestGetGcpClientConfig(t *testing.T) {
 		},
 		{
 			name: "Should return an error due to invalid SA credentials file path",
-			cfg: &config.Config{
-				CloudConfig: config.CloudConfig{
-					Gcp: config.GcpConfig{
-						GcpClientOpt: config.GcpClientOpt{
-							CredentialsFilePath: "invalid path",
-						},
-					},
+			cfg: config.GcpConfig{
+				GcpClientOpt: config.GcpClientOpt{
+					CredentialsFilePath: "invalid path",
 				},
 			},
 			want:    nil,
@@ -73,13 +68,9 @@ func TestGetGcpClientConfig(t *testing.T) {
 		},
 		{
 			name: "Should return a GcpClientConfig using SA credentials json",
-			cfg: &config.Config{
-				CloudConfig: config.CloudConfig{
-					Gcp: config.GcpConfig{
-						GcpClientOpt: config.GcpClientOpt{
-							CredentialsJSON: saCredentialsJSON,
-						},
-					},
+			cfg: config.GcpConfig{
+				GcpClientOpt: config.GcpClientOpt{
+					CredentialsJSON: saCredentialsJSON,
 				},
 			},
 			want:    []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
@@ -87,13 +78,9 @@ func TestGetGcpClientConfig(t *testing.T) {
 		},
 		{
 			name: "Should return an error due to invalid SA json",
-			cfg: &config.Config{
-				CloudConfig: config.CloudConfig{
-					Gcp: config.GcpConfig{
-						GcpClientOpt: config.GcpClientOpt{
-							CredentialsJSON: "invalid json",
-						},
-					},
+			cfg: config.GcpConfig{
+				GcpClientOpt: config.GcpClientOpt{
+					CredentialsJSON: "invalid json",
 				},
 			},
 			want:    nil,
@@ -101,14 +88,10 @@ func TestGetGcpClientConfig(t *testing.T) {
 		},
 		{
 			name: "Should return client options with both credentials_file_path and credentials_json",
-			cfg: &config.Config{
-				CloudConfig: config.CloudConfig{
-					Gcp: config.GcpConfig{
-						GcpClientOpt: config.GcpClientOpt{
-							CredentialsFilePath: saFilePath,
-							CredentialsJSON:     saCredentialsJSON,
-						},
-					},
+			cfg: config.GcpConfig{
+				GcpClientOpt: config.GcpClientOpt{
+					CredentialsFilePath: saFilePath,
+					CredentialsJSON:     saCredentialsJSON,
 				},
 			},
 			want: []option.ClientOption{
@@ -121,14 +104,13 @@ func TestGetGcpClientConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetGcpClientConfig(tt.cfg, logp.NewLogger("gcp credentials test"))
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetGcpClientConfig() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				require.NoError(t, err)
 			}
 
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetGcpClientConfig() got = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -136,16 +118,12 @@ func TestGetGcpClientConfig(t *testing.T) {
 // Creates a test sa account file to be used in the tests
 func createServiceAccountFile(t *testing.T) *os.File {
 	f, err := os.Create(saFilePath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
+	require.NoError(t, err)
+	defer func() {
+		require.NoError(t, f.Close())
+	}()
 
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := f.WriteString(saCredentialsJSON); err != nil {
-		t.Fatal(err)
-	}
+	_, err = f.WriteString(saCredentialsJSON)
+	require.NoError(t, err)
 	return f
 }
