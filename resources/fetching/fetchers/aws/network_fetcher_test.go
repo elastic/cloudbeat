@@ -27,6 +27,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
@@ -134,7 +135,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 				log:           logp.NewLogger(tt.name),
 				ec2Client:     tt.networkProvider(),
 				resourceCh:    ch,
-				cloudIdentity: &awslib.Identity{Account: tt.name},
+				cloudIdentity: &cloud.Identity{Account: tt.name},
 			}
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})
@@ -152,7 +153,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 func TestACLResource_GetMetadata(t *testing.T) {
 	r := NetworkResource{
 		AwsResource: ec2.NACLInfo{},
-		identity:    &awslib.Identity{},
+		identity:    &cloud.Identity{},
 	}
 	meta, err := r.GetMetadata()
 	assert.NoError(t, err)

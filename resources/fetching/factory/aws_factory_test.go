@@ -30,8 +30,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -54,9 +54,9 @@ func subtest(t *testing.T, drain bool) {
 	var accounts []AwsAccount
 	for i := 0; i < nAccounts; i++ {
 		accounts = append(accounts, AwsAccount{
-			Identity: awslib.Identity{
-				Account: fmt.Sprintf("account-%d", i),
-				Alias:   fmt.Sprintf("alias-%d", i),
+			Identity: cloud.Identity{
+				Account:      fmt.Sprintf("account-%d", i),
+				AccountAlias: fmt.Sprintf("alias-%d", i),
 			},
 		})
 	}
@@ -66,7 +66,7 @@ func subtest(t *testing.T, drain bool) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	factory := mockFactory(nAccounts,
-		func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *awslib.Identity) FetchersMap {
+		func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
 			if drain {
 				// create some resources if we are testing for that
 				go func() {
@@ -92,13 +92,21 @@ func subtest(t *testing.T, drain bool) {
 	assert.Lenf(t, fetcherMap, nFetchers*nAccounts, "Correct amount of fetchers")
 
 	if drain {
-		resources := testhelper.CollectResourcesWithTimeout(rootCh, 10*time.Millisecond)
+		expectedResources := nAccounts * resourcesPerAccount
+		resources := testhelper.CollectResourcesWithTimeout(rootCh, expectedResources, 1*time.Second)
 		assert.Lenf(
 			t,
 			resources,
-			nAccounts*resourcesPerAccount,
+			expectedResources,
 			"Correct amount of resources fetched",
 		)
+		defer func() {
+			assert.Emptyf(
+				t,
+				testhelper.CollectResourcesWithTimeout(rootCh, 1, 100*time.Millisecond),
+				"Channel not drained",
+			)
+		}()
 
 		nameCounts := make(map[string]int)
 		for _, resource := range resources {
@@ -131,13 +139,13 @@ func TestNewCisAwsOrganizationFactory_LeakContextDone(t *testing.T) {
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
 		[]AwsAccount{{
-			Identity: awslib.Identity{
-				Account: "1",
-				Alias:   "account",
+			Identity: cloud.Identity{
+				Account:      "1",
+				AccountAlias: "account",
 			},
 		}},
 		mockFactory(1,
-			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *awslib.Identity) FetchersMap {
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
 				ch <- fetching.ResourceInfo{
 					Resource:      mockResource(),
 					CycleMetadata: fetching.CycleMetadata{Sequence: 1},
@@ -159,13 +167,13 @@ func TestNewCisAwsOrganizationFactory_CloseChannel(t *testing.T) {
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
 		[]AwsAccount{{
-			Identity: awslib.Identity{
-				Account: "1",
-				Alias:   "account",
+			Identity: cloud.Identity{
+				Account:      "1",
+				AccountAlias: "account",
 			},
 		}},
 		mockFactory(1,
-			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *awslib.Identity) FetchersMap {
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
 				defer close(ch)
 				return FetchersMap{"fetcher": RegisteredFetcher{}}
 			},

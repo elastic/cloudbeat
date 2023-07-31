@@ -23,6 +23,7 @@ import (
 	context "context"
 
 	aws "github.com/aws/aws-sdk-go-v2/aws"
+	cloud "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 
 	mock "github.com/stretchr/testify/mock"
 )
@@ -41,19 +42,19 @@ func (_m *MockAccountProviderAPI) EXPECT() *MockAccountProviderAPI_Expecter {
 }
 
 // ListAccounts provides a mock function with given fields: ctx, cfg
-func (_m *MockAccountProviderAPI) ListAccounts(ctx context.Context, cfg aws.Config) ([]Identity, error) {
+func (_m *MockAccountProviderAPI) ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error) {
 	ret := _m.Called(ctx, cfg)
 
-	var r0 []Identity
+	var r0 []cloud.Identity
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, aws.Config) ([]Identity, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, aws.Config) ([]cloud.Identity, error)); ok {
 		return rf(ctx, cfg)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, aws.Config) []Identity); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, aws.Config) []cloud.Identity); ok {
 		r0 = rf(ctx, cfg)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]Identity)
+			r0 = ret.Get(0).([]cloud.Identity)
 		}
 	}
 
@@ -85,12 +86,12 @@ func (_c *MockAccountProviderAPI_ListAccounts_Call) Run(run func(ctx context.Con
 	return _c
 }
 
-func (_c *MockAccountProviderAPI_ListAccounts_Call) Return(_a0 []Identity, _a1 error) *MockAccountProviderAPI_ListAccounts_Call {
+func (_c *MockAccountProviderAPI_ListAccounts_Call) Return(_a0 []cloud.Identity, _a1 error) *MockAccountProviderAPI_ListAccounts_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockAccountProviderAPI_ListAccounts_Call) RunAndReturn(run func(context.Context, aws.Config) ([]Identity, error)) *MockAccountProviderAPI_ListAccounts_Call {
+func (_c *MockAccountProviderAPI_ListAccounts_Call) RunAndReturn(run func(context.Context, aws.Config) ([]cloud.Identity, error)) *MockAccountProviderAPI_ListAccounts_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -30,8 +30,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -121,7 +121,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		elbProvider := &elb.MockLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
 
-		identity := awslib.Identity{
+		identity := cloud.Identity{
 			Account: testAccount,
 		}
 

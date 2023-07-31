@@ -93,8 +93,8 @@ func TestCollectResourcesWithTimeout(t *testing.T) {
 			ch <- struct{}{}
 		})
 
-		assert.Len(t, CollectResourcesWithTimeout(ch, 10*time.Millisecond), 0)
-		assert.Len(t, CollectResourcesWithTimeout(ch, 100*time.Millisecond), 3)
+		assert.Len(t, CollectResourcesWithTimeout(ch, 100, 10*time.Millisecond), 0)
+		assert.Len(t, CollectResourcesWithTimeout(ch, 100, 100*time.Millisecond), 3)
 	})
 	t.Run("closed channel", func(t *testing.T) {
 		done := make(chan struct{})
@@ -102,7 +102,7 @@ func TestCollectResourcesWithTimeout(t *testing.T) {
 		go func() {
 			ch := make(chan struct{})
 			close(ch)
-			assert.Len(t, CollectResourcesWithTimeout(ch, 10*time.Hour), 0)
+			assert.Len(t, CollectResourcesWithTimeout(ch, 100, 10*time.Hour), 0)
 			done <- struct{}{}
 		}()
 
@@ -111,6 +111,26 @@ func TestCollectResourcesWithTimeout(t *testing.T) {
 		case <-time.After(100 * time.Millisecond):
 			t.Fatal("time out")
 		}
+	})
+	t.Run("max count", func(t *testing.T) {
+		ch := make(chan struct{})
+		assert.Empty(t, CollectResourcesWithTimeout(ch, 0, time.Hour))
+
+		time.AfterFunc(10*time.Millisecond, func() {
+			ch <- struct{}{}
+			ch <- struct{}{}
+			ch <- struct{}{}
+		})
+
+		time.AfterFunc(100*time.Millisecond, func() {
+			ch <- struct{}{}
+			ch <- struct{}{}
+			ch <- struct{}{}
+		})
+
+		assert.Len(t, CollectResourcesWithTimeout(ch, 2, 20*time.Millisecond), 2)
+		assert.Len(t, CollectResourcesWithTimeout(ch, 4, 200*time.Millisecond), 1+3)
+		assert.Empty(t, CollectResourcesWithTimeout(ch, 100, 10*time.Millisecond))
 	})
 }
 

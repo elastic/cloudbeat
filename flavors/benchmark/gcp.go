@@ -25,12 +25,11 @@ import (
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
-	gcpdataprovider "github.com/elastic/cloudbeat/dataprovider/providers/gcp"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-
-	gcplib "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
 
 type GCP struct{}
@@ -38,15 +37,19 @@ type GCP struct{}
 func (G *GCP) Run(context.Context) error { return nil }
 
 func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error) {
-	gcpClientConfig, err := gcplib.GetGcpClientConfig(cfg, log)
-
+	gcpClientConfig, err := auth.GetGcpClientConfig(cfg.CloudConfig.Gcp, log)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
 
-	gcpFactoryConfig := &gcplib.GcpFactoryConfig{
+	gcpFactoryConfig := &auth.GcpFactoryConfig{
 		ProjectId:  cfg.CloudConfig.Gcp.ProjectId,
 		ClientOpts: gcpClientConfig,
+	}
+
+	gcpIdentity, identityErr := dependencies.GCPIdentity(ctx, cfg.CloudConfig.Gcp)
+	if identityErr != nil {
+		return nil, nil, fmt.Errorf("failed to get GCP identity: %v", identityErr)
 	}
 
 	fetchers, err := factory.NewCisGcpFactory(ctx, log, ch, *gcpFactoryConfig)
@@ -54,8 +57,9 @@ func (G *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %w", err)
 	}
 
-	return registry.NewRegistry(log, fetchers), gcpdataprovider.New(
-		gcpdataprovider.WithLogger(log),
+	return registry.NewRegistry(log, fetchers), cloud.NewDataProvider(
+		cloud.WithLogger(log),
+		cloud.WithAccount(*gcpIdentity),
 	), nil
 }
 
