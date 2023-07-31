@@ -101,28 +101,20 @@ func (k *EKS) getEksAwsConfig(ctx context.Context, cfg *config.Config) (awssdk.C
 }
 
 func (k *EKS) checkDependencies() error {
-	missing := k.missingDependency()
-	if missing != "" {
-		return fmt.Errorf("%s is uninitialized", missing)
-	}
-	return nil
-}
-
-func (k *EKS) missingDependency() string {
 	if k.AWSCfgProvider == nil {
-		return "aws config provider"
+		return fmt.Errorf("aws config provider is uninitialized")
 	}
 	if k.AWSIdentityProvider == nil {
-		return "aws identity provider"
+		return fmt.Errorf("aws identity provider is uninitialized")
 	}
 	if k.ClientProvider == nil {
-		return "kubernetes client provider"
+		return fmt.Errorf("kubernetes client provider is uninitialized")
 	}
 	if k.EKSClusterNameProvider == nil {
-		return "EKS cluster name provider"
+		return fmt.Errorf("EKS cluster name provider is uninitialized")
 	}
 	if k.AWSMetadataProvider == nil {
-		return "AWS metadata provider"
+		return fmt.Errorf("AWS metadata provideri is uninitialized")
 	}
-	return ""
+	return nil
 }
