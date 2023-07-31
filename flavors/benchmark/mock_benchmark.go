@@ -48,34 +48,34 @@ func (_m *MockBenchmark) EXPECT() *MockBenchmark_Expecter {
 	return &MockBenchmark_Expecter{mock: &_m.Mock}
 }
 
-// Initialize provides a mock function with given fields: ctx, log, cfg, ch, dependencies
-func (_m *MockBenchmark) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error) {
-	ret := _m.Called(ctx, log, cfg, ch, dependencies)
+// Initialize provides a mock function with given fields: ctx, log, cfg, ch
+func (_m *MockBenchmark) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+	ret := _m.Called(ctx, log, cfg, ch)
 
 	var r0 registry.Registry
 	var r1 dataprovider.CommonDataProvider
 	var r2 error
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error)); ok {
-		return rf(ctx, log, cfg, ch, dependencies)
+	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error)); ok {
+		return rf(ctx, log, cfg, ch)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) registry.Registry); ok {
-		r0 = rf(ctx, log, cfg, ch, dependencies)
+	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) registry.Registry); ok {
+		r0 = rf(ctx, log, cfg, ch)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(registry.Registry)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) dataprovider.CommonDataProvider); ok {
-		r1 = rf(ctx, log, cfg, ch, dependencies)
+	if rf, ok := ret.Get(1).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) dataprovider.CommonDataProvider); ok {
+		r1 = rf(ctx, log, cfg, ch)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(dataprovider.CommonDataProvider)
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) error); ok {
-		r2 = rf(ctx, log, cfg, ch, dependencies)
+	if rf, ok := ret.Get(2).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) error); ok {
+		r2 = rf(ctx, log, cfg, ch)
 	} else {
 		r2 = ret.Error(2)
 	}
@@ -93,14 +93,13 @@ type MockBenchmark_Initialize_Call struct {
 //   - log *logp.Logger
 //   - cfg *config.Config
 //   - ch chan fetching.ResourceInfo
-//   - dependencies *Dependencies
-func (_e *MockBenchmark_Expecter) Initialize(ctx interface{}, log interface{}, cfg interface{}, ch interface{}, dependencies interface{}) *MockBenchmark_Initialize_Call {
-	return &MockBenchmark_Initialize_Call{Call: _e.mock.On("Initialize", ctx, log, cfg, ch, dependencies)}
+func (_e *MockBenchmark_Expecter) Initialize(ctx interface{}, log interface{}, cfg interface{}, ch interface{}) *MockBenchmark_Initialize_Call {
+	return &MockBenchmark_Initialize_Call{Call: _e.mock.On("Initialize", ctx, log, cfg, ch)}
 }
 
-func (_c *MockBenchmark_Initialize_Call) Run(run func(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo, dependencies *Dependencies)) *MockBenchmark_Initialize_Call {
+func (_c *MockBenchmark_Initialize_Call) Run(run func(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo)) *MockBenchmark_Initialize_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*logp.Logger), args[2].(*config.Config), args[3].(chan fetching.ResourceInfo), args[4].(*Dependencies))
+		run(args[0].(context.Context), args[1].(*logp.Logger), args[2].(*config.Config), args[3].(chan fetching.ResourceInfo))
 	})
 	return _c
 }
@@ -110,7 +109,7 @@ func (_c *MockBenchmark_Initialize_Call) Return(_a0 registry.Registry, _a1 datap
 	return _c
 }
 
-func (_c *MockBenchmark_Initialize_Call) RunAndReturn(run func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo, *Dependencies) (registry.Registry, dataprovider.CommonDataProvider, error)) *MockBenchmark_Initialize_Call {
+func (_c *MockBenchmark_Initialize_Call) RunAndReturn(run func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error)) *MockBenchmark_Initialize_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -185,6 +184,47 @@ func (_c *MockBenchmark_Stop_Call) Return() *MockBenchmark_Stop_Call {
 }
 
 func (_c *MockBenchmark_Stop_Call) RunAndReturn(run func()) *MockBenchmark_Stop_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// checkDependencies provides a mock function with given fields:
+func (_m *MockBenchmark) checkDependencies() error {
+	ret := _m.Called()
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func() error); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockBenchmark_checkDependencies_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'checkDependencies'
+type MockBenchmark_checkDependencies_Call struct {
+	*mock.Call
+}
+
+// checkDependencies is a helper method to define mock.On call
+func (_e *MockBenchmark_Expecter) checkDependencies() *MockBenchmark_checkDependencies_Call {
+	return &MockBenchmark_checkDependencies_Call{Call: _e.mock.On("checkDependencies")}
+}
+
+func (_c *MockBenchmark_checkDependencies_Call) Run(run func()) *MockBenchmark_checkDependencies_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockBenchmark_checkDependencies_Call) Return(_a0 error) *MockBenchmark_checkDependencies_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockBenchmark_checkDependencies_Call) RunAndReturn(run func() error) *MockBenchmark_checkDependencies_Call {
 	_c.Call.Return(run)
 	return _c
 }
