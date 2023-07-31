@@ -62,6 +62,8 @@ jobs:
 
       - name: Check for vulnerabilities
         working-directory: ./tests
+        env:
+          USE_K8S: false
         run: |
           poetry install
           poetry run pytest -k "cnvm"
