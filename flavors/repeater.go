@@ -46,7 +46,7 @@ func (r *Repeater) Run(ctx context.Context, fn RepeaterFunc) error {
 	for {
 		select {
 		case <-ctx.Done():
-			r.log.Warn("Repeater context is done")
+			r.log.Warnf("Repeater context is done: %v", ctx.Err())
 			return nil
 		case <-immediate.C:
 		case <-ticker.C:

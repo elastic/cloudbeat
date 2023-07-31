@@ -51,7 +51,7 @@ func (p *Publisher) HandleEvents(ctx context.Context, ch chan []beat.Event) {
 	for {
 		select {
 		case <-ctx.Done():
-			p.log.Warn("Publisher context is done")
+			p.log.Warnf("Publisher context is done: %v", ctx.Err())
 			p.publish(&eventsToSend)
 			return
 
