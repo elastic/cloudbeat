@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
 func TestGCP_Initialize(t *testing.T) {
@@ -45,12 +46,13 @@ func TestGCP_Initialize(t *testing.T) {
        }`
 
 	tests := []struct {
-		name             string
-		identityProvider identity.ProviderGetter
-		configProvider   auth.ConfigProviderAPI
-		cfg              config.Config
-		want             []string
-		wantErr          string
+		name                 string
+		identityProvider     identity.ProviderGetter
+		configProvider       auth.ConfigProviderAPI
+		inventoryInitializer inventory.ProviderInitializerAPI
+		cfg                  config.Config
+		want                 []string
+		wantErr              string
 	}{
 		{
 			name:    "nothing initialized",
@@ -58,46 +60,59 @@ func TestGCP_Initialize(t *testing.T) {
 			wantErr: "gcp identity provider is uninitialized",
 		},
 		{
-			name:             "missing credentials options, fallback to using ADC",
-			cfg:              baseGcpConfig,
-			identityProvider: mockGcpIdentityProvider(nil),
-			configProvider:   mockGcpCfgProvider(nil),
+			name:                 "missing credentials options, fallback to using ADC",
+			cfg:                  baseGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(nil),
 			want: []string{
 				"gcp_cloud_assets_fetcher",
 			},
 		},
 		{
-			name:             "config provider error",
-			cfg:              baseGcpConfig,
-			identityProvider: mockGcpIdentityProvider(nil),
-			configProvider:   mockGcpCfgProvider(errors.New("some error")),
-			wantErr:          "some error",
+			name:                 "config provider error",
+			cfg:                  baseGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(errors.New("some error")),
+			inventoryInitializer: mockInventoryInitializerService(nil),
+			wantErr:              "some error",
 		},
 		{
-			name:             "identity provider error",
-			cfg:              validGcpConfig,
-			identityProvider: mockGcpIdentityProvider(errors.New("some error")),
-			configProvider:   mockGcpCfgProvider(nil),
-			wantErr:          "some error",
+			name:                 "identity provider error",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(errors.New("some error")),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(nil),
+			wantErr:              "some error",
 		},
 		{
-			name:             "no error",
-			cfg:              validGcpConfig,
-			identityProvider: mockGcpIdentityProvider(nil),
-			configProvider:   mockGcpCfgProvider(nil),
+			name:                 "inventory init error",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(errors.New("some error")),
+			wantErr:              "some error",
+		},
+		{
+			name:                 "no error",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(nil),
 			want: []string{
 				"gcp_cloud_assets_fetcher",
 			},
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			t.Parallel()
 
 			testInitialize(t, &GCP{
-				IdentityProvider: tt.identityProvider,
-				CfgProvider:      tt.configProvider,
+				IdentityProvider:     tt.identityProvider,
+				CfgProvider:          tt.configProvider,
+				inventoryInitializer: tt.inventoryInitializer,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
@@ -133,4 +148,20 @@ func mockGcpCfgProvider(err error) auth.ConfigProviderAPI {
 		on.Return(nil, err)
 	}
 	return cfgProvider
+}
+
+func mockInventoryInitializerService(err error) inventory.ProviderInitializerAPI {
+	initializer := &inventory.MockProviderInitializerAPI{}
+	inventoryService := &inventory.MockServiceAPI{}
+	//inventoryMock := inventoryService.EXPECT().ListAllAssetTypesByName(mock.Anything)
+	initializerMock := initializer.EXPECT().Init(mock.Anything, mock.Anything, mock.Anything)
+	if err == nil {
+		initializerMock.Return(
+			inventoryService,
+			nil,
+		)
+	} else {
+		initializerMock.Return(nil, err)
+	}
+	return initializer
 }

@@ -33,7 +33,7 @@ import (
 type GcpAssetsFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	provider   inventory.InventoryService
+	provider   inventory.ServiceAPI
 }
 
 type GcpAsset struct {
@@ -63,7 +63,7 @@ var GcpAssetTypes = map[string][]string{
 	},
 }
 
-func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.InventoryService) *GcpAssetsFetcher {
+func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpAssetsFetcher {
 	return &GcpAssetsFetcher{
 		log:        log,
 		resourceCh: ch,

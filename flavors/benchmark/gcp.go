@@ -32,11 +32,13 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
 type GCP struct {
-	IdentityProvider identity.ProviderGetter
-	CfgProvider      auth.ConfigProviderAPI
+	IdentityProvider     identity.ProviderGetter
+	CfgProvider          auth.ConfigProviderAPI
+	inventoryInitializer inventory.ProviderInitializerAPI
 }
 
 func (g *GCP) Run(context.Context) error { return nil }
@@ -61,9 +63,14 @@ func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, fmt.Errorf("failed to get GCP identity: %v", err)
 	}
 
-	fetchers, err := factory.NewCisGcpFactory(ctx, log, ch, *gcpFactoryConfig)
+	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpFactoryConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %w", err)
+		return nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
+	}
+
+	fetchers, err := factory.NewCisGcpFactory(ctx, log, ch, assetProvider)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
 	}
 
 	return registry.NewRegistry(log, fetchers), cloud.NewDataProvider(
@@ -81,6 +88,10 @@ func (g *GCP) checkDependencies() error {
 
 	if g.CfgProvider == nil {
 		return errors.New("gcp config provider is uninitialized")
+	}
+
+	if g.inventoryInitializer == nil {
+		return errors.New("gcp asset inventory is uninitialized")
 	}
 	return nil
 }
