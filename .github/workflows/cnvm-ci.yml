@@ -56,10 +56,13 @@ jobs:
           ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
 
       - name: Check for vulnerabilities
+        working-directory: ./tests
         run: |
+          poetry install
           poetry run pytest -k "cnvm"
 
       - name: Upload cloudbeat logs
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v2
         with:
           name: cloudbeat-logs
