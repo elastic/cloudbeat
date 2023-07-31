@@ -22,7 +22,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -132,7 +131,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 			f := NetworkFetcher{
-				log:           logp.NewLogger(tt.name),
+				log:           testhelper.NewLogger(t),
 				ec2Client:     tt.networkProvider(),
 				resourceCh:    ch,
 				cloudIdentity: &cloud.Identity{Account: tt.name},
