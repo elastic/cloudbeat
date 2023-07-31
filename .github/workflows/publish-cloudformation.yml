@@ -36,4 +36,4 @@ jobs:
 
           CSPM_ORG_FILENAME="cloudformation-cspm-organization-account-$VERSION-$DATE.yml"
           echo "Uploading $CSPM_ORG_FILENAME to S3"
-          aws s3 cp deploy/cloudformation/organization.yml s3://elastic-cspm-cft/$CSPM_ORG_FILENAME
+          aws s3 cp deploy/cloudformation/elastic-agent-ec2-cspm-organization.yml s3://elastic-cspm-cft/$CSPM_ORG_FILENAME
