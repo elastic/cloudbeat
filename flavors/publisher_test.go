@@ -41,7 +41,7 @@ func TestPublisher_HandleEvents(t *testing.T) {
 	}
 	testCases := []testCase{
 		{
-			name:              "Publish events on threshold reached",
+			name:              "Publish single event on threshold reached",
 			interval:          time.Minute,
 			threshold:         1,
 			ctxTimeout:        200 * time.Millisecond,
