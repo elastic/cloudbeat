@@ -24,11 +24,80 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
+
+func TestAWSOrg_Initialize(t *testing.T) {
+	tests := []struct {
+		name             string
+		identityProvider awslib.IdentityProviderGetter
+		accountProvider  awslib.AccountProviderAPI
+		cfg              config.Config
+		want             []string
+		wantErr          string
+	}{
+		{
+			name:    "nothing initialized",
+			wantErr: "aws identity provider is uninitialized",
+		},
+		{
+			name:             "account provider uninitialized",
+			identityProvider: mockAwsIdentityProvider(nil),
+			accountProvider:  nil,
+			wantErr:          "account provider is uninitialized",
+		},
+		{
+			name:             "identity provider error",
+			identityProvider: mockAwsIdentityProvider(errors.New("some error")),
+			accountProvider:  mockAccountProvider(errors.New("not this error")),
+			wantErr:          "some error",
+		},
+		{
+			name:             "account provider error",
+			identityProvider: mockAwsIdentityProvider(nil),
+			accountProvider:  mockAccountProvider(errors.New("some error")),
+			wantErr:          "some error",
+		},
+		{
+			name:             "no error",
+			identityProvider: mockAwsIdentityProvider(nil),
+			accountProvider:  mockAccountProvider(nil),
+			want: []string{
+				"123-" + fetching.IAMType,
+				"123-" + fetching.KmsType,
+				"123-" + fetching.TrailType,
+				"123-" + fetching.MonitoringType,
+				"123-" + fetching.EC2NetworkingType,
+				"123-" + fetching.RdsType,
+				"123-" + fetching.S3Type,
+				"test-account-" + fetching.IAMType,
+				"test-account-" + fetching.KmsType,
+				"test-account-" + fetching.TrailType,
+				"test-account-" + fetching.MonitoringType,
+				"test-account-" + fetching.EC2NetworkingType,
+				"test-account-" + fetching.RdsType,
+				"test-account-" + fetching.S3Type,
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			testInitialize(t, &AWSOrg{
+				IdentityProvider: tt.identityProvider,
+				AccountProvider:  tt.accountProvider,
+			}, &tt.cfg, tt.wantErr, tt.want)
+		})
+	}
+}
 
 func Test_getAwsAccounts(t *testing.T) {
 	tests := []struct {
@@ -73,19 +142,11 @@ func Test_getAwsAccounts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getAwsAccounts(
-				context.Background(),
-				aws.Config{},
-				&Dependencies{
-					AwsCfgProvider:           nil,
-					AwsIdentityProvider:      nil,
-					AwsAccountProvider:       tt.accountProvider,
-					KubernetesClientProvider: nil,
-					AwsMetadataProvider:      nil,
-					EksClusterNameProvider:   nil,
-				},
-				&tt.rootIdentity,
-			)
+			A := AWSOrg{
+				IdentityProvider: nil,
+				AccountProvider:  tt.accountProvider,
+			}
+			got, err := A.getAwsAccounts(context.Background(), aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
 				assert.ErrorContains(t, err, tt.wantErr)
 				return
@@ -99,4 +160,26 @@ func Test_getAwsAccounts(t *testing.T) {
 			}
 		})
 	}
+}
+
+func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
+	provider := awslib.MockAccountProviderAPI{}
+	on := provider.EXPECT().ListAccounts(mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return([]cloud.Identity{
+			{
+				Account:      "123",
+				AccountAlias: "some-name",
+			},
+		}, nil)
+	} else {
+		on.Return(nil, err)
+	}
+	return &provider
+}
+
+func mockAccountProviderWithIdentities(identities []cloud.Identity) *awslib.MockAccountProviderAPI {
+	provider := awslib.MockAccountProviderAPI{}
+	provider.EXPECT().ListAccounts(mock.Anything, mock.Anything).Return(identities, nil)
+	return &provider
 }
