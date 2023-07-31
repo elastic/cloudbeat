@@ -78,7 +78,7 @@ func TestProvider_DescribeNetworkAcl(t *testing.T) {
 				clients[r] = tt.client()
 			}
 			p := &Provider{
-				log:     logp.NewLogger(tt.name),
+				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
 			got, err := p.DescribeNetworkAcl(context.Background())
@@ -134,7 +134,7 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 				clients[r] = tt.client()
 			}
 			p := &Provider{
-				log:     logp.NewLogger(tt.name),
+				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
 
@@ -194,7 +194,7 @@ func TestProvider_DescribeVPCs(t *testing.T) {
 				clients[r] = tt.client()
 			}
 			p := &Provider{
-				log:     logp.NewLogger(tt.name),
+				log:     testhelper.NewLogger(t),
 				clients: clients,
 			}
 
@@ -254,7 +254,7 @@ func TestProvider_GetEbsEncryptionByDefault(t *testing.T) {
 				clients[r] = tt.client()
 			}
 			p := &Provider{
-				log:          logp.NewLogger(tt.name),
+				log:          testhelper.NewLogger(t),
 				clients:      clients,
 				awsAccountID: "aws-account",
 			}
@@ -458,7 +458,7 @@ func TestProvider_GetRouteTableForSubnet(t *testing.T) {
 				clients[r] = tt.client()
 			}
 			p := &Provider{
-				log:          logp.NewLogger(tt.name),
+				log:          testhelper.NewLogger(t),
 				clients:      clients,
 				awsAccountID: "aws-account",
 			}
