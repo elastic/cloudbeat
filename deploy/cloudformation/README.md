@@ -29,3 +29,7 @@ DEV.KEY_NAME="" # When SSH is allowed, you must provide the key name that will b
 *Debugging:*
 1. CloudFormation stack creation may take a few minutes, to see the progress, find your stack on https://console.aws.amazon.com/cloudformation/ and check the "Event" tab.
 2. If the stack was created successfully but elastic-agent didn't enroll to your fleet, try to ssh into the EC2 by running `ssh -i ~/.ssh/<EC2 Key File> ubuntu@<EC2 IP Address>` and then get the initialization logs by `cat /var/log/cloud-init-output.log`.
+3. If ssh is not enabled, you can get the system logs from the EC2 instance
+![right click on instance -> monitor and troubleshoot -> get sytem logs](https://github.com/orestisfl/cloudbeat/assets/5778622/3f0158ed-ba46-4fe5-b7e9-7a800b3de020)
+![system logs window](https://github.com/orestisfl/cloudbeat/assets/5778622/af8105d1-7d6c-47d0-b386-eea124816b53)
+You might need to wait a bit until the logs become available but terminating the instance doesn't immediately delete them
