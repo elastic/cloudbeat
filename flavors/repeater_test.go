@@ -95,10 +95,11 @@ func TestRepeater_Run(t *testing.T) {
 		},
 		{
 			name:       "Context canceled",
-			interval:   100 * time.Millisecond,
-			ctxTimeout: 0 * time.Millisecond,
+			interval:   500 * time.Millisecond,
+			ctxTimeout: 100 * time.Millisecond,
 			fnMock: func(t *testing.T) *MockRepeaterFunc {
 				m := NewMockRepeaterFunc(t)
+				m.EXPECT().Execute().Return(nil).Once()
 				return m
 			},
 			expectedErrMsg: "",
