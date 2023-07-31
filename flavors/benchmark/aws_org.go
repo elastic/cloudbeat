@@ -42,8 +42,8 @@ type AWSOrg struct {
 	AccountProvider  awslib.AccountProviderAPI
 }
 
-func (A *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
-	if err := A.checkDependencies(); err != nil {
+func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+	if err := a.checkDependencies(); err != nil {
 		return nil, nil, err
 	}
 
@@ -53,12 +53,12 @@ func (A *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	awsIdentity, err := A.IdentityProvider.GetIdentity(ctx, awsConfig)
+	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	accounts, err := A.getAwsAccounts(ctx, awsConfig, awsIdentity)
+	accounts, err := a.getAwsAccounts(ctx, awsConfig, awsIdentity)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 	}
@@ -72,7 +72,7 @@ func (A *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		), nil
 }
 
-func (A *AWSOrg) getAwsAccounts(ctx context.Context, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {
+func (a *AWSOrg) getAwsAccounts(ctx context.Context, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {
 	const (
 		rootRole   = "cloudbeat-root"
 		memberRole = "cloudbeat-securityaudit"
@@ -85,7 +85,7 @@ func (A *AWSOrg) getAwsAccounts(ctx context.Context, initialCfg awssdk.Config, r
 	)
 	stsClient := sts.NewFromConfig(rootCfg)
 
-	accountIdentities, err := A.AccountProvider.ListAccounts(ctx, rootCfg)
+	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, rootCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -115,11 +115,11 @@ func (A *AWSOrg) getAwsAccounts(ctx context.Context, initialCfg awssdk.Config, r
 	return accounts, nil
 }
 
-func (A *AWSOrg) checkDependencies() error {
-	if A.IdentityProvider == nil {
+func (a *AWSOrg) checkDependencies() error {
+	if a.IdentityProvider == nil {
 		return errors.New("aws identity provider is uninitialized")
 	}
-	if A.AccountProvider == nil {
+	if a.AccountProvider == nil {
 		return errors.New("aws account provider is uninitialized")
 	}
 	return nil
@@ -134,5 +134,5 @@ func fmtIAMRole(account string, role string) string {
 	return fmt.Sprintf("arn:aws:iam::%s:role/%s", account, role)
 }
 
-func (A *AWSOrg) Run(context.Context) error { return nil }
-func (A *AWSOrg) Stop()                     {}
+func (a *AWSOrg) Run(context.Context) error { return nil }
+func (a *AWSOrg) Stop()                     {}
