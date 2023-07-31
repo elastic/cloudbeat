@@ -19,6 +19,7 @@ package benchmark
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -33,29 +34,31 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
-type AWSOrg struct{}
+type AWSOrg struct {
+	IdentityProvider awslib.IdentityProviderGetter
+	AccountProvider  awslib.AccountProviderAPI
+}
 
-func (A *AWSOrg) Initialize(
-	ctx context.Context,
-	log *logp.Logger,
-	cfg *config.Config,
-	ch chan fetching.ResourceInfo,
-	dependencies *Dependencies,
-) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+	if err := a.checkDependencies(); err != nil {
+		return nil, nil, err
+	}
+
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
-	awsIdentity, err := dependencies.AWSIdentity(ctx, awsConfig)
+	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	accounts, err := getAwsAccounts(ctx, awsConfig, dependencies, awsIdentity)
+	accounts, err := a.getAwsAccounts(ctx, awsConfig, awsIdentity)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 	}
@@ -69,12 +72,7 @@ func (A *AWSOrg) Initialize(
 		), nil
 }
 
-func getAwsAccounts(
-	ctx context.Context,
-	initialCfg awssdk.Config,
-	dependencies *Dependencies,
-	rootIdentity *cloud.Identity,
-) ([]factory.AwsAccount, error) {
+func (a *AWSOrg) getAwsAccounts(ctx context.Context, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {
 	const (
 		rootRole   = "cloudbeat-root"
 		memberRole = "cloudbeat-securityaudit"
@@ -87,7 +85,7 @@ func getAwsAccounts(
 	)
 	stsClient := sts.NewFromConfig(rootCfg)
 
-	accountIdentities, err := dependencies.AWSAccounts(ctx, rootCfg)
+	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, rootCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -117,6 +115,16 @@ func getAwsAccounts(
 	return accounts, nil
 }
 
+func (a *AWSOrg) checkDependencies() error {
+	if a.IdentityProvider == nil {
+		return errors.New("aws identity provider is uninitialized")
+	}
+	if a.AccountProvider == nil {
+		return errors.New("aws account provider is uninitialized")
+	}
+	return nil
+}
+
 func assumeRole(client *sts.Client, cfg awssdk.Config, arn string) awssdk.Config {
 	cfg.Credentials = awssdk.NewCredentialsCache(stscreds.NewAssumeRoleProvider(client, arn))
 	return cfg
@@ -126,5 +134,5 @@ func fmtIAMRole(account string, role string) string {
 	return fmt.Sprintf("arn:aws:iam::%s:role/%s", account, role)
 }
 
-func (A *AWSOrg) Run(context.Context) error { return nil }
-func (A *AWSOrg) Stop()                     {}
+func (a *AWSOrg) Run(context.Context) error { return nil }
+func (a *AWSOrg) Stop()                     {}
