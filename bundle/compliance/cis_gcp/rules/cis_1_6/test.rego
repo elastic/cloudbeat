@@ -4,13 +4,26 @@ import data.cis_gcp.test_data
 import data.compliance.policy.gcp.data_adapter
 import data.lib.test
 
+type := "key-management"
+
+subtype := "gcp-iam-service-account"
+
 test_violation {
-	eval_fail with input as test_data.generate_iam_policy(["foo"], "roles/iam.serviceAccountUser")
-	eval_fail with input as test_data.generate_iam_policy(["foo"], "roles/iam.serviceAccountTokenCreator")
+	eval_fail with input as test_data.generate_gcp_asset(type, subtype, {}, {"bindings": [{
+		"role": "roles/iam.serviceAccountUser",
+		"members": ["user:c"],
+	}]})
+	eval_fail with input as test_data.generate_gcp_asset(type, subtype, {}, {"bindings": [{
+		"role": "roles/iam.serviceAccountTokenCreator",
+		"members": ["user:c"],
+	}]})
 }
 
 test_pass {
-	eval_pass with input as test_data.generate_iam_policy(["foo"], "some_other_role")
+	eval_pass with input as test_data.generate_gcp_asset(type, subtype, {}, {"bindings": [{
+		"role": "roles/some_other_role",
+		"members": ["user:c"],
+	}]})
 }
 
 test_not_evaluated {

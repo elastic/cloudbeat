@@ -12,6 +12,15 @@ generate_iam_policy(members, role) = {
 	"subType": "gcp-iam-service-account",
 }
 
+generate_gcp_asset(type, subtype, resource, iam_policy) = {
+	"resource": {
+		"resource": resource,
+		"iam_policy": iam_policy,
+	},
+	"type": type,
+	"subType": subtype,
+}
+
 generate_kms_resource(members, rotationPeriod, nextRotationTime, primary) = {
 	"resource": {
 		"resource": {"data": {
