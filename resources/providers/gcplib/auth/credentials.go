@@ -35,27 +35,26 @@ type GcpFactoryConfig struct {
 	ClientOpts []option.ClientOption
 }
 
-func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOption, error) {
+func GetGcpClientConfig(cfg config.GcpConfig, log *logp.Logger) ([]option.ClientOption, error) {
 	log.Info("GetGCPClientConfig create credentials options")
-	gcpCred := cfg.CloudConfig.Gcp
-	if gcpCred.CredentialsJSON == "" && gcpCred.CredentialsFilePath == "" {
+	if cfg.CredentialsJSON == "" && cfg.CredentialsFilePath == "" {
 		return nil, errors.New("the credentials file path or credentials JSON have not been specified")
 	}
 
 	var opts []option.ClientOption
-	if gcpCred.CredentialsFilePath != "" {
-		if err := validateJSONFromFile(gcpCred.CredentialsFilePath); err == nil {
-			log.Infof("Appending credentials file path to gcp client options: %s", gcpCred.CredentialsFilePath)
-			opts = append(opts, option.WithCredentialsFile(gcpCred.CredentialsFilePath))
+	if cfg.CredentialsFilePath != "" {
+		if err := validateJSONFromFile(cfg.CredentialsFilePath); err == nil {
+			log.Infof("Appending credentials file path to gcp client options: %s", cfg.CredentialsFilePath)
+			opts = append(opts, option.WithCredentialsFile(cfg.CredentialsFilePath))
 		} else {
 			return nil, err
 		}
 	}
 
-	if gcpCred.CredentialsJSON != "" {
-		if json.Valid([]byte(gcpCred.CredentialsJSON)) {
+	if cfg.CredentialsJSON != "" {
+		if json.Valid([]byte(cfg.CredentialsJSON)) {
 			log.Info("Appending credentials JSON to client options")
-			opts = append(opts, option.WithCredentialsJSON([]byte(gcpCred.CredentialsJSON)))
+			opts = append(opts, option.WithCredentialsJSON([]byte(cfg.CredentialsJSON)))
 		} else {
 			return nil, errors.New("invalid credentials JSON")
 		}
@@ -66,7 +65,7 @@ func GetGcpClientConfig(cfg *config.Config, log *logp.Logger) ([]option.ClientOp
 
 func validateJSONFromFile(filePath string) error {
 	if _, err := os.Stat(filePath); errors.Is(err, fs.ErrNotExist) {
-		return fmt.Errorf("The file %q cannot be found", filePath)
+		return fmt.Errorf("file %q cannot be found", filePath)
 	}
 
 	b, err := os.ReadFile(filePath)
