@@ -21,29 +21,41 @@ import (
 	"context"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider"
-	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/transformer"
 )
 
-const (
-	flushInterval    = 10 * time.Second
-	eventsThreshold  = 75
-	resourceChBuffer = 10000
-)
+type RepeaterFunc func() error
 
-// flavorBase configuration.
-type flavorBase struct {
-	ctx         context.Context
-	cancel      context.CancelFunc
-	config      *config.Config
-	client      beat.Client
-	transformer transformer.Transformer
-	log         *logp.Logger
-	cdp         dataprovider.CommonDataProvider
-	publisher   *Publisher
+func NewRepeater(log *logp.Logger, interval time.Duration) *Repeater {
+	return &Repeater{
+		log:      log,
+		interval: interval,
+	}
+}
+
+type Repeater struct {
+	log      *logp.Logger
+	interval time.Duration
+}
+
+func (r *Repeater) Run(ctx context.Context, fn RepeaterFunc) error {
+	r.log.Warn("Repeater ticker running for period ", r.interval)
+	ticker := time.NewTicker(r.interval)
+	immediate := time.NewTimer(0)
+
+	for {
+		select {
+		case <-ctx.Done():
+			r.log.Warnf("Repeater context is done: %v", ctx.Err())
+			return nil
+		case <-immediate.C:
+		case <-ticker.C:
+		}
+
+		r.log.Warn("Repeater cycle triggered")
+		err := fn()
+		if err != nil {
+			return err
+		}
+	}
 }
