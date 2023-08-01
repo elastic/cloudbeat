@@ -62,9 +62,7 @@ jobs:
 
       - name: Tail logs for 5 minutes
         run: |
-          until [[ -f logs/cloudbeat.* ]]; do
-              sleep 3
-          done
+          ./scripts/wait_for_file.sh logs/cloudbeat*
           tail -f logs/cloudbeat.* & sleep 300; kill $!
 
       - name: Check for vulnerabilities
