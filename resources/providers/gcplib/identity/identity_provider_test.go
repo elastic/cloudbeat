@@ -26,9 +26,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/api/cloudresourcemanager/v3"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
 
 func TestIdentityProvider_GetIdentity(t *testing.T) {
@@ -70,10 +69,9 @@ func TestIdentityProvider_GetIdentity(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Provider{
 				service: tt.service(),
-				logger:  testhelper.NewLogger(t),
 			}
 
-			got, err := p.GetIdentity(context.Background(), config.GcpConfig{ProjectId: "test-proj"})
+			got, err := p.GetIdentity(context.Background(), &auth.GcpFactoryConfig{})
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetIdentity() error = %v, wantErr %v", err, tt.wantErr)
 				return

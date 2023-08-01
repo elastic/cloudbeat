@@ -22,7 +22,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: "eu-west-1"
   ENV_PREFIX: ${{ github.event.inputs.prefix }}
-  ENV_IGNORE_PREFIX: ${{ github.event.inputs.ingore-prefix }}
+  ENV_IGNORE_PREFIX: ${{ github.event.inputs.ignore-prefix }}
 
 jobs:
   Destroy:

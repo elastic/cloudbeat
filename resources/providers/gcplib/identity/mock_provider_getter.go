@@ -20,8 +20,8 @@
 package identity
 
 import (
-	config "github.com/elastic/cloudbeat/config"
 	cloud "github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	auth "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 
 	context "context"
 
@@ -41,25 +41,25 @@ func (_m *MockProviderGetter) EXPECT() *MockProviderGetter_Expecter {
 	return &MockProviderGetter_Expecter{mock: &_m.Mock}
 }
 
-// GetIdentity provides a mock function with given fields: ctx, cfg
-func (_m *MockProviderGetter) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error) {
-	ret := _m.Called(ctx, cfg)
+// GetIdentity provides a mock function with given fields: ctx, factoryConfig
+func (_m *MockProviderGetter) GetIdentity(ctx context.Context, factoryConfig *auth.GcpFactoryConfig) (*cloud.Identity, error) {
+	ret := _m.Called(ctx, factoryConfig)
 
 	var r0 *cloud.Identity
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, config.GcpConfig) (*cloud.Identity, error)); ok {
-		return rf(ctx, cfg)
+	if rf, ok := ret.Get(0).(func(context.Context, *auth.GcpFactoryConfig) (*cloud.Identity, error)); ok {
+		return rf(ctx, factoryConfig)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, config.GcpConfig) *cloud.Identity); ok {
-		r0 = rf(ctx, cfg)
+	if rf, ok := ret.Get(0).(func(context.Context, *auth.GcpFactoryConfig) *cloud.Identity); ok {
+		r0 = rf(ctx, factoryConfig)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*cloud.Identity)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, config.GcpConfig) error); ok {
-		r1 = rf(ctx, cfg)
+	if rf, ok := ret.Get(1).(func(context.Context, *auth.GcpFactoryConfig) error); ok {
+		r1 = rf(ctx, factoryConfig)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -74,14 +74,14 @@ type MockProviderGetter_GetIdentity_Call struct {
 
 // GetIdentity is a helper method to define mock.On call
 //   - ctx context.Context
-//   - cfg config.GcpConfig
-func (_e *MockProviderGetter_Expecter) GetIdentity(ctx interface{}, cfg interface{}) *MockProviderGetter_GetIdentity_Call {
-	return &MockProviderGetter_GetIdentity_Call{Call: _e.mock.On("GetIdentity", ctx, cfg)}
+//   - factoryConfig *auth.GcpFactoryConfig
+func (_e *MockProviderGetter_Expecter) GetIdentity(ctx interface{}, factoryConfig interface{}) *MockProviderGetter_GetIdentity_Call {
+	return &MockProviderGetter_GetIdentity_Call{Call: _e.mock.On("GetIdentity", ctx, factoryConfig)}
 }
 
-func (_c *MockProviderGetter_GetIdentity_Call) Run(run func(ctx context.Context, cfg config.GcpConfig)) *MockProviderGetter_GetIdentity_Call {
+func (_c *MockProviderGetter_GetIdentity_Call) Run(run func(ctx context.Context, factoryConfig *auth.GcpFactoryConfig)) *MockProviderGetter_GetIdentity_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(config.GcpConfig))
+		run(args[0].(context.Context), args[1].(*auth.GcpFactoryConfig))
 	})
 	return _c
 }
@@ -91,7 +91,7 @@ func (_c *MockProviderGetter_GetIdentity_Call) Return(_a0 *cloud.Identity, _a1 e
 	return _c
 }
 
-func (_c *MockProviderGetter_GetIdentity_Call) RunAndReturn(run func(context.Context, config.GcpConfig) (*cloud.Identity, error)) *MockProviderGetter_GetIdentity_Call {
+func (_c *MockProviderGetter_GetIdentity_Call) RunAndReturn(run func(context.Context, *auth.GcpFactoryConfig) (*cloud.Identity, error)) *MockProviderGetter_GetIdentity_Call {
 	_c.Call.Return(run)
 	return _c
 }

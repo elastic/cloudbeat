@@ -14,7 +14,7 @@ on:
 
 env:
   CONTAINER_SUFFIX: ${{ github.run_id }}
-  CI_ELASTIC_AGENT_DOCKER_TAG: "8.7.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_TAG: "8.10.0-SNAPSHOT"
   CI_ELASTIC_AGENT_DOCKER_IMAGE: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 concurrency:
@@ -24,9 +24,21 @@ concurrency:
 jobs:
   Build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     timeout-minutes: 40
     steps:
+      # Disk cleanup
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - name: Check out the repo
         uses: actions/checkout@v3
 
@@ -121,10 +133,9 @@ jobs:
         values_file: [ tests/deploy/values/ci.yml ]
         range: [ "0..4" ]
         include:
-          # Skip agent tests until resolved
-          # - test-target: pre_merge_agent
-          #   range: ''
-          #   values_file: tests/deploy/values/ci-sa-agent.yml
+          - test-target: pre_merge_agent
+            range: ''
+            values_file: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
             range: ""
     steps:
@@ -193,10 +204,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Skip agent tests until resolved
-          # - test-target: pre_merge_agent
-          #   range: ''
-          #   values_file: tests/deploy/values/ci-sa-agent.yml
+          - test-target: pre_merge_agent
+            range: ''
+            values_file: tests/deploy/values/ci-sa-agent.yml
           - test-target: pre_merge
             range: ""
             values_file: tests/deploy/values/ci.yml
@@ -349,6 +359,16 @@ jobs:
             range: "20.."
             values_file: tests/deploy/values/ci.yml
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
       - name: Check out the repo
         uses: actions/checkout@v3
 
