@@ -1,7 +1,7 @@
 ## Elastic Agent Deployment manager template
 
 ### What it does
-This template creates a service account to be used by the machine running the elastic-agent.
+This template creates a compute instance and attach a service account with a custom role with the relevant permissions to run the CIS GCP integration.
 The compute engine instance has elastic-agent preinstalled in it using the fleet URL and enrollment token.
 
 ### How to test it
@@ -22,7 +22,7 @@ ELASTIC_AGENT_VERSION="<Elastic Agent Version>" # e.g: 8.8.0 | 8.8.0-SNAPSHOT
 ZONE="<GCP Zone>" # e.g: us-central1-a
 ALLOW_SSH=false # Set to true to allow SSH connections to the deployed instance
 ```
-4. Run `just deploy-deployment-manager` to create a new deployment with an elastic-agent that will automatically enroll to your fleet.
+4. Run `just deploy-dm` to create a new deployment with an elastic-agent that will automatically enroll to your fleet.
 
 *Debugging:*
 1. Deployments creation may take a few minutes, to see the progress, find your deployment on https://console.cloud.google.com/dm/deployments/ and click on it.
