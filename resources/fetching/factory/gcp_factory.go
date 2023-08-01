@@ -24,20 +24,14 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/gcp"
-	auth "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
-func NewCisGcpFactory(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, gcpConfig auth.GcpFactoryConfig) (FetchersMap, error) {
+func NewCisGcpFactory(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (FetchersMap, error) {
 	log.Infof("Initializing GCP fetchers")
 	m := make(FetchersMap)
 
-	assetsProvider, err := inventory.NewAssetsInventoryProvider(ctx, log, gcpConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	assetsFetcher := fetchers.NewGcpAssetsFetcher(ctx, log, ch, assetsProvider)
+	assetsFetcher := fetchers.NewGcpAssetsFetcher(ctx, log, ch, inventory)
 	m["gcp_cloud_assets_fetcher"] = RegisteredFetcher{Fetcher: assetsFetcher}
 
 	return m, nil

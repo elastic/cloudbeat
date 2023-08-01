@@ -35,13 +35,20 @@ type GcpFactoryConfig struct {
 	ClientOpts []option.ClientOption
 }
 
-func GetGcpClientConfig(cfg config.GcpConfig, log *logp.Logger) ([]option.ClientOption, error) {
+type ConfigProviderAPI interface {
+	GetGcpClientConfig(cfg config.GcpConfig, log *logp.Logger) ([]option.ClientOption, error)
+}
+
+type ConfigProvider struct{}
+
+func (p ConfigProvider) GetGcpClientConfig(cfg config.GcpConfig, log *logp.Logger) ([]option.ClientOption, error) {
 	log.Info("GetGCPClientConfig create credentials options")
+	var opts []option.ClientOption
 	if cfg.CredentialsJSON == "" && cfg.CredentialsFilePath == "" {
-		return nil, errors.New("the credentials file path or credentials JSON have not been specified")
+		log.Info("No credentials file or JSON were provided, using application default credentials (ADC)")
+		return opts, nil
 	}
 
-	var opts []option.ClientOption
 	if cfg.CredentialsFilePath != "" {
 		if err := validateJSONFromFile(cfg.CredentialsFilePath); err == nil {
 			log.Infof("Appending credentials file path to gcp client options: %s", cfg.CredentialsFilePath)
