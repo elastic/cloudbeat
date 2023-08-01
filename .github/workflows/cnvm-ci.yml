@@ -73,10 +73,8 @@ jobs:
           poetry install
           poetry run pytest -k "cnvm"
 
-      - name: Upload cloudbeat logs
+      - name: Print cloudbeat logs
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: cloudbeat-logs
-          path: logs/cloudbeat*
+        run: |
+          cat logs/cloudbeat*
 
