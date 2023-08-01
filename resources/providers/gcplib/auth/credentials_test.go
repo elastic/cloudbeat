@@ -100,10 +100,17 @@ func TestGetGcpClientConfig(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name:    "Should return nil and use application default credentials",
+			cfg:     config.GcpConfig{GcpClientOpt: config.GcpClientOpt{}},
+			want:    nil,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
+		p := ConfigProvider{}
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetGcpClientConfig(tt.cfg, logp.NewLogger("gcp credentials test"))
+			got, err := p.GetGcpClientConfig(tt.cfg, logp.NewLogger("gcp credentials test"))
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
