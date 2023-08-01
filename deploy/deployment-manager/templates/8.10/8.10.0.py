@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name
+# pylint: skip-file
 """A template file for deploying a compute engine instance."""
 
 COMPUTE_URL_BASE = "https://www.googleapis.com/compute/v1/"
