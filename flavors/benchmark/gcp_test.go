@@ -148,9 +148,9 @@ func mockGcpIdentityProvider(err error) *identity.MockProviderGetter {
 	if err == nil {
 		on.Return(
 			&cloud.Identity{
-				Provider:    "gcp",
-				ProjectId:   "test-project-id",
-				ProjectName: "test-project-name",
+				Provider:     "gcp",
+				Account:      "test-project-id",
+				AccountAlias: "test-project-name",
 			},
 			nil,
 		)

@@ -32,16 +32,12 @@ const (
 	cloudAccountNameField = "cloud.account.name"
 	cloudProviderField    = "cloud.provider"
 	cloudRegionField      = "cloud.region"
-	cloudProjectIdField   = "cloud.project.id"
-	cloudProjectNameField = "cloud.project.name"
 )
 
 type Identity struct {
 	Provider     string
 	Account      string
 	AccountAlias string
-	ProjectId    string
-	ProjectName  string
 }
 
 type DataProvider struct {
@@ -49,8 +45,6 @@ type DataProvider struct {
 	accountId    string
 	accountName  string
 	providerName string
-	projectName  string
-	projectId    string
 }
 
 func NewDataProvider(options ...Option) DataProvider {
@@ -88,16 +82,6 @@ func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.Resour
 	}
 
 	err = insertIfNotEmpty(cloudRegionField, resMetadata.Region, event)
-	if err != nil {
-		return err
-	}
-
-	err = insertIfNotEmpty(cloudProjectIdField, a.projectId, event)
-	if err != nil {
-		return err
-	}
-
-	err = insertIfNotEmpty(cloudProjectNameField, a.projectName, event)
 	if err != nil {
 		return err
 	}
