@@ -11,13 +11,13 @@ CIS_2_2_1 = "CIS 2.2.1"
 
 cis_aws_ec2_2_2_1_pass = EksAwsServiceCase(
     rule_tag=CIS_2_2_1,
-    case_identifier="ebs-encryption-by-default-704479110758-us-east-1",
+    case_identifier="ebs-encryption-by-default-391946104644-eu-north-1",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_ec2_2_2_1_fail = EksAwsServiceCase(
     rule_tag=CIS_2_2_1,
-    case_identifier="ebs-encryption-by-default-704479110758-eu-west-2",
+    case_identifier="ebs-encryption-by-default-391946104644-eu-west-1",
     expected=RULE_FAIL_STATUS,
 )
 
