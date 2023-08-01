@@ -8,6 +8,10 @@ iam_policy = input.resource.iam_policy
 
 has_policy = common.contains_key(input.resource, "iam_policy")
 
+is_api_key {
+	input.subType == "gcp-apikeys-key"
+}
+
 is_storage_bucket {
 	input.subType == "gcp-storage-bucket"
 }
