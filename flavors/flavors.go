@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
@@ -46,9 +45,5 @@ type flavorBase struct {
 	transformer transformer.Transformer
 	log         *logp.Logger
 	cdp         dataprovider.CommonDataProvider
-}
-
-// ConfigureProcessors configure processors to be used by the beat
-func ConfigureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
-	return processors.New(processorsList)
+	publisher   *Publisher
 }

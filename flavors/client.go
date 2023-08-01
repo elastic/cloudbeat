@@ -15,24 +15,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package flavors
 
 import (
-	"context"
-
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/gcp"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
+	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/beats/v7/libbeat/processors"
 )
 
-func NewCisGcpFactory(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (FetchersMap, error) {
-	log.Infof("Initializing GCP fetchers")
-	m := make(FetchersMap)
+func NewClient(pipeline beat.Pipeline, processorsList processors.PluginConfig) (beat.Client, error) {
+	procs, err := ConfigureProcessors(processorsList)
+	if err != nil {
+		return nil, err
+	}
 
-	assetsFetcher := fetchers.NewGcpAssetsFetcher(ctx, log, ch, inventory)
-	m["gcp_cloud_assets_fetcher"] = RegisteredFetcher{Fetcher: assetsFetcher}
+	return pipeline.ConnectWith(beat.ClientConfig{
+		Processing: beat.ProcessingConfig{
+			Processor: procs,
+		},
+	})
+}
 
-	return m, nil
+// ConfigureProcessors configure processors to be used by the beat
+func ConfigureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
+	return processors.New(processorsList)
 }

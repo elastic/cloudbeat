@@ -21,11 +21,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elastic/elastic-agent-libs/logp"
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
@@ -33,12 +31,11 @@ import (
 const provider = "gcp"
 
 type ProviderGetter interface {
-	GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error)
+	GetIdentity(ctx context.Context, factoryConfig *auth.GcpFactoryConfig) (*cloud.Identity, error)
 }
 
 type Provider struct {
 	service ResourceManager
-	logger  *logp.Logger
 }
 
 // CloudResourceManagerService is a wrapper around the GCP resource manager service to make it easier to mock
@@ -50,28 +47,13 @@ type ResourceManager interface {
 	projectsGet(context.Context, string) (*cloudresourcemanager.Project, error)
 }
 
-func NewProvider(ctx context.Context, cfg *config.Config, logger *logp.Logger) *Provider {
-	gcpClientOpt, err := auth.GetGcpClientConfig(cfg, logger)
-	if err != nil {
-		logger.Errorf("failed to get GCP client config: %v", err)
-		return nil
-	}
-	gcpClientOpt = append(gcpClientOpt, option.WithScopes(cloudresourcemanager.CloudPlatformReadOnlyScope))
-	crmService, err := cloudresourcemanager.NewService(ctx, gcpClientOpt...)
-	if err != nil {
-		logger.Errorf("failed to create GCP resource manager service: %v", err)
-		return nil
-	}
-
-	return &Provider{
-		service: &CloudResourceManagerService{service: crmService},
-		logger:  logger,
-	}
-}
-
 // GetIdentity returns GCP identity information
-func (p *Provider) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*cloud.Identity, error) {
-	proj, err := p.service.projectsGet(ctx, "projects/"+cfg.ProjectId)
+func (p *Provider) GetIdentity(ctx context.Context, factoryConfig *auth.GcpFactoryConfig) (*cloud.Identity, error) {
+	if err := p.initialize(ctx, factoryConfig.ClientOpts); err != nil {
+		return nil, err
+	}
+
+	proj, err := p.service.projectsGet(ctx, "projects/"+factoryConfig.ProjectId)
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +63,21 @@ func (p *Provider) GetIdentity(ctx context.Context, cfg config.GcpConfig) (*clou
 		ProjectId:   proj.ProjectId,
 		ProjectName: proj.DisplayName,
 	}, nil
+}
+
+func (p *Provider) initialize(ctx context.Context, gcpClientOpt []option.ClientOption) error {
+	if p.service != nil {
+		return nil
+	}
+
+	gcpClientOpt = append(gcpClientOpt, option.WithScopes(cloudresourcemanager.CloudPlatformReadOnlyScope))
+	crmService, err := cloudresourcemanager.NewService(ctx, gcpClientOpt...)
+	if err != nil {
+		return err
+	}
+
+	p.service = &CloudResourceManagerService{service: crmService}
+	return nil
 }
 
 func (p *CloudResourceManagerService) projectsGet(ctx context.Context, id string) (*cloudresourcemanager.Project, error) {

@@ -15,24 +15,47 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package flavors
 
 import (
 	"context"
+	"time"
 
 	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/gcp"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
-func NewCisGcpFactory(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (FetchersMap, error) {
-	log.Infof("Initializing GCP fetchers")
-	m := make(FetchersMap)
+type RepeaterFunc func() error
 
-	assetsFetcher := fetchers.NewGcpAssetsFetcher(ctx, log, ch, inventory)
-	m["gcp_cloud_assets_fetcher"] = RegisteredFetcher{Fetcher: assetsFetcher}
+func NewRepeater(log *logp.Logger, interval time.Duration) *Repeater {
+	return &Repeater{
+		log:      log,
+		interval: interval,
+	}
+}
 
-	return m, nil
+type Repeater struct {
+	log      *logp.Logger
+	interval time.Duration
+}
+
+func (r *Repeater) Run(ctx context.Context, fn RepeaterFunc) error {
+	r.log.Warn("Repeater ticker running for period ", r.interval)
+	ticker := time.NewTicker(r.interval)
+	immediate := time.NewTimer(0)
+
+	for {
+		select {
+		case <-ctx.Done():
+			r.log.Warnf("Repeater context is done: %v", ctx.Err())
+			return nil
+		case <-immediate.C:
+		case <-ticker.C:
+		}
+
+		r.log.Warn("Repeater cycle triggered")
+		err := fn()
+		if err != nil {
+			return err
+		}
+	}
 }
