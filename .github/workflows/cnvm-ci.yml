@@ -62,8 +62,7 @@ jobs:
 
       - name: Tail logs for 5 minutes
         run: |
-          until [[ -d logs ]]
-          do
+          until [[ -f logs/cloudbeat.* ]]; do
               sleep 3
           done
           tail -f logs/cloudbeat.* & sleep 300; kill $!
