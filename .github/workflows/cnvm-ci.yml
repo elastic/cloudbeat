@@ -60,11 +60,6 @@ jobs:
         run: |
           ./cloudbeat -c deploy/vulnerability/cloudbeat-vuln-mgmt.yml -d '*' &
 
-      - name: Tail logs for 5 minutes
-        run: |
-          ./scripts/wait_for_file.sh logs/cloudbeat*
-          tail -f logs/cloudbeat* & sleep 300; kill $!
-
       - name: Check for vulnerabilities
         working-directory: ./tests
         env:
