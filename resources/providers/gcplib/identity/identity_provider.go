@@ -59,9 +59,9 @@ func (p *Provider) GetIdentity(ctx context.Context, factoryConfig *auth.GcpFacto
 	}
 
 	return &cloud.Identity{
-		Provider:    provider,
-		ProjectId:   proj.ProjectId,
-		ProjectName: proj.DisplayName,
+		Provider:     provider,
+		Account:      proj.ProjectId,
+		AccountAlias: proj.DisplayName,
 	}, nil
 }
 
