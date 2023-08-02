@@ -13,10 +13,10 @@ def generate_config(context):
     agent_version = context.properties["elasticAgentVersion"]
     artifact_server = context.properties["elasticArtifactServer"]
 
-    role_id = "elastic_cspm_role"
+    role_id = "elastic_cspm_role5"
     network_name = f"{deployment_name}-network"
-    sa_name = f"{deployment_name}-cspm-sa"
-    custom_role_name = f"{deployment_name}-cspm-role"
+    sa_name = f"{deployment_name}-sa"
+    custom_role_name = f"{deployment_name}-role"
 
     ssh_fw_rule = {
         "name": "elastic-agent-firewall-rule",
@@ -87,7 +87,7 @@ def generate_config(context):
                                 f"curl -L -O {artifact_server}/$ElasticAgentArtifact.tar.gz\n",
                                 "tar xzvf $ElasticAgentArtifact.tar.gz\n",
                                 "cd $ElasticAgentArtifact\n",
-                                f"PROJECT_ID={project} sudo ./elastic-agent install "
+                                f"sudo ./elastic-agent install "
                                 f"--non-interactive --url={fleet_url} --enrollment-token={enrollment_token}",
                             ],
                         ),
@@ -140,7 +140,7 @@ def generate_config(context):
     }
 
     iam_role_binding = {
-        "name": f"{deployment_name}-iam-binding-cspm",
+        "name": f"{deployment_name}-iam-binding",
         "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
         "properties": {
             "resource": context.env["project"],
