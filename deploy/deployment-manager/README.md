@@ -11,8 +11,8 @@ The compute engine instance has elastic-agent preinstalled in it using the fleet
 
 *Steps:*
 1. Install the GCP CSPM integration on a new agent policy, you might have to check the "Display beta integrations" checkbox.
-2. After you installed the integration you can install a new elastic-agent, you should keep the fleet URL and the enrollment token.
-3. On cloudbeat repo, create a `deploy/deployment-manager/config.env` file of the form:
+2. After you installed the integration, deploy a new agent, you should keep the fleet URL and the enrollment token.
+3. Run `just deploy-dm <DEPLOYMENT_NAME> <FLEET_URL> <ENROLLMENT_TOKEN> <ELASTIC_ARTIFACT_SERVER> <ELASTIC_AGENT_VERSION> <ZONE> <ALLOW_SSH>` to create a new deployment with an elastic-agent that will automatically enroll to your fleet.
 ```
 DEPLOYMENT_NAME="<Unique stack name>" # john-qa-bc2-8-9-0-May28
 FLEET_URL="<Elastic Agent Fleet URL>"
@@ -22,7 +22,7 @@ ELASTIC_AGENT_VERSION="<Elastic Agent Version>" # e.g: 8.8.0 | 8.8.0-SNAPSHOT
 ZONE="<GCP Zone>" # e.g: us-central1-a
 ALLOW_SSH=false # Set to true to allow SSH connections to the deployed instance
 ```
-4. Run `just deploy-dm` to create a new deployment with an elastic-agent that will automatically enroll to your fleet.
+4. For deleting the deployment, run `just delete-dm <DEPLOYMENT_NAME>`.
 
 *Debugging:*
 1. Deployments creation may take a few minutes, to see the progress, find your deployment on https://console.cloud.google.com/dm/deployments/ and click on it.

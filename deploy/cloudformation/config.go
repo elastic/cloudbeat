@@ -22,7 +22,10 @@ package main
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 
+	"github.com/spf13/viper"
 	"golang.org/x/exp/slices"
 )
 
@@ -46,6 +49,57 @@ var ValidDeploymentTypes = []string{DeploymentTypeCSPM, DeploymentTypeCNVM}
 type devConfig struct {
 	AllowSSH bool   `mapstructure:"ALLOW_SSH"`
 	KeyName  string `mapstructure:"KEY_NAME"`
+}
+
+func parseConfig() (*config, error) {
+	// Read in configuration from on of the files: config.json, config.yml or config.env
+	viper.AddConfigPath("./")
+	err := viper.ReadInConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed to read configuration: %v", err)
+	}
+
+	var cfg config
+	err = bindEnvs(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to bind environment variables: %v", err)
+	}
+
+	err = viper.Unmarshal(&cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal configuration file: %v", err)
+	}
+
+	err = validateConfig(&cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cfg, nil
+}
+
+func bindEnvs(iface interface{}, parts ...string) error {
+	ifv := reflect.ValueOf(iface)
+	ift := reflect.TypeOf(iface)
+	for i := 0; i < ift.NumField(); i++ {
+		v := ifv.Field(i)
+		t := ift.Field(i)
+		tv, ok := t.Tag.Lookup("mapstructure")
+		if !ok {
+			continue
+		}
+		var err error
+		switch v.Kind() {
+		case reflect.Struct:
+			err = bindEnvs(v.Interface(), append(parts, tv)...)
+		default:
+			err = viper.BindEnv(strings.Join(append(parts, tv), "."))
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func validateConfig(cfg *config) error {

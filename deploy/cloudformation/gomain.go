@@ -31,8 +31,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation/types"
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
-
-	"github.com/elastic/cloudbeat/deploy/util"
 )
 
 const (
@@ -52,12 +50,7 @@ var templatePaths = map[string]map[string]string{
 }
 
 func main() {
-	cfg, err := util.ParseConfig[config]()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = validateConfig(cfg)
+	cfg, err := parseConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
