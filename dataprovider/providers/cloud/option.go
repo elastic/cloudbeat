@@ -34,7 +34,5 @@ func WithAccount(identity Identity) Option {
 		dp.accountId = identity.Account
 		dp.accountName = identity.AccountAlias
 		dp.providerName = identity.Provider
-		dp.projectId = identity.ProjectId
-		dp.projectName = identity.ProjectName
 	}
 }

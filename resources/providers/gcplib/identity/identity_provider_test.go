@@ -58,9 +58,9 @@ func TestIdentityProvider_GetIdentity(t *testing.T) {
 				return &m
 			},
 			want: &cloud.Identity{
-				Provider:    "gcp",
-				ProjectId:   "test-proj",
-				ProjectName: "my proj",
+				Provider:     "gcp",
+				Account:      "test-proj",
+				AccountAlias: "my proj",
 			},
 		},
 	}
