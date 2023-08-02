@@ -164,15 +164,15 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 				Region: someRegion,
 			},
 			identity: Identity{
-				Provider:    gcpProvider,
-				ProjectId:   gcpProjectId,
-				ProjectName: gcpProjectName,
+				Provider:     gcpProvider,
+				Account:      gcpProjectId,
+				AccountAlias: gcpProjectName,
 			},
 			expectedFields: map[string]string{
 				cloudProviderField:    gcpProvider,
 				cloudRegionField:      someRegion,
-				cloudProjectIdField:   gcpProjectId,
-				cloudProjectNameField: gcpProjectName,
+				cloudAccountIdField:   gcpProjectId,
+				cloudAccountNameField: gcpProjectName,
 			},
 		},
 	}
