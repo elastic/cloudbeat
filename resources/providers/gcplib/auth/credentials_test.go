@@ -18,12 +18,16 @@
 package auth
 
 import (
+	"context"
+	"errors"
 	"os"
 	"testing"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/config"
@@ -32,6 +36,7 @@ import (
 const (
 	saCredentialsJSON = `{ "client_id": "test" }`
 	saFilePath        = "sa-credentials.json"
+	testProjectId     = "test-project"
 )
 
 func TestGetGcpClientConfig(t *testing.T) {
@@ -41,10 +46,11 @@ func TestGetGcpClientConfig(t *testing.T) {
 	}()
 
 	tests := []struct {
-		name    string
-		cfg     config.GcpConfig
-		want    []option.ClientOption
-		wantErr bool
+		name         string
+		cfg          config.GcpConfig
+		authProvider GoogleAuthProviderAPI
+		want         *GcpFactoryConfig
+		wantErr      bool
 	}{
 		{
 			name: "Should return a GcpClientConfig using SA credentials file path",
@@ -53,7 +59,11 @@ func TestGetGcpClientConfig(t *testing.T) {
 					CredentialsFilePath: saFilePath,
 				},
 			},
-			want:    []option.ClientOption{option.WithCredentialsFile(saFilePath)},
+			authProvider: mockGoogleAuthProvider(nil),
+			want: &GcpFactoryConfig{
+				ProjectId:  testProjectId,
+				ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
+			},
 			wantErr: false,
 		},
 		{
@@ -63,8 +73,9 @@ func TestGetGcpClientConfig(t *testing.T) {
 					CredentialsFilePath: "invalid path",
 				},
 			},
-			want:    nil,
-			wantErr: true,
+			authProvider: mockGoogleAuthProvider(nil),
+			want:         nil,
+			wantErr:      true,
 		},
 		{
 			name: "Should return a GcpClientConfig using SA credentials json",
@@ -73,7 +84,11 @@ func TestGetGcpClientConfig(t *testing.T) {
 					CredentialsJSON: saCredentialsJSON,
 				},
 			},
-			want:    []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+			authProvider: mockGoogleAuthProvider(nil),
+			want: &GcpFactoryConfig{
+				ProjectId:  testProjectId,
+				ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+			},
 			wantErr: false,
 		},
 		{
@@ -83,8 +98,9 @@ func TestGetGcpClientConfig(t *testing.T) {
 					CredentialsJSON: "invalid json",
 				},
 			},
-			want:    nil,
-			wantErr: true,
+			authProvider: mockGoogleAuthProvider(nil),
+			want:         nil,
+			wantErr:      true,
 		},
 		{
 			name: "Should return client options with both credentials_file_path and credentials_json",
@@ -94,23 +110,44 @@ func TestGetGcpClientConfig(t *testing.T) {
 					CredentialsJSON:     saCredentialsJSON,
 				},
 			},
-			want: []option.ClientOption{
-				option.WithCredentialsFile(saFilePath),
-				option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+			authProvider: mockGoogleAuthProvider(nil),
+			want: &GcpFactoryConfig{
+				ProjectId: testProjectId,
+				ClientOpts: []option.ClientOption{
+					option.WithCredentialsFile(saFilePath),
+					option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+				},
 			},
 			wantErr: false,
 		},
 		{
-			name:    "Should return nil and use application default credentials",
-			cfg:     config.GcpConfig{GcpClientOpt: config.GcpClientOpt{}},
-			want:    nil,
-			wantErr: false,
+			name:         "Should return nil and use application default credentials",
+			cfg:          config.GcpConfig{GcpClientOpt: config.GcpClientOpt{}},
+			authProvider: mockGoogleAuthProvider(nil),
+			want:         &GcpFactoryConfig{ProjectId: testProjectId, ClientOpts: nil},
+			wantErr:      false,
+		},
+		{
+			name:         "Should return the project id retrieved from configuration",
+			cfg:          config.GcpConfig{ProjectId: "config-proj-id", GcpClientOpt: config.GcpClientOpt{}},
+			authProvider: mockGoogleAuthProvider(nil),
+			want:         &GcpFactoryConfig{ProjectId: "config-proj-id", ClientOpts: nil},
+			wantErr:      false,
+		},
+		{
+			name:         "Should return nil due to error getting application default credentials",
+			cfg:          config.GcpConfig{GcpClientOpt: config.GcpClientOpt{}},
+			authProvider: mockGoogleAuthProvider(errors.New("fail to retrieve ADC")),
+			want:         nil,
+			wantErr:      true,
 		},
 	}
 	for _, tt := range tests {
-		p := ConfigProvider{}
+		p := ConfigProvider{
+			AuthProvider: tt.authProvider,
+		}
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := p.GetGcpClientConfig(tt.cfg, logp.NewLogger("gcp credentials test"))
+			got, err := p.GetGcpClientConfig(context.Background(), tt.cfg, logp.NewLogger("gcp credentials test"))
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -133,4 +170,18 @@ func createServiceAccountFile(t *testing.T) *os.File {
 	_, err = f.WriteString(saCredentialsJSON)
 	require.NoError(t, err)
 	return f
+}
+
+func mockGoogleAuthProvider(err error) *MockGoogleProviderAPI {
+	googleProviderAPI := &MockGoogleProviderAPI{}
+	on := googleProviderAPI.EXPECT().FindDefaultCredentials(mock.Anything)
+	if err == nil {
+		on.Return(
+			&google.Credentials{ProjectID: testProjectId},
+			nil,
+		)
+	} else {
+		on.Return(nil, err)
+	}
+	return googleProviderAPI
 }
