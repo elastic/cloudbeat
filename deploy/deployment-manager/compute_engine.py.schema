@@ -28,12 +28,10 @@ properties:
 
   zone:
     type: string
-    default: us-central1-a
     description: Zone to run, default is Iowa
     metadata: gce-zone
 
   allowSSH:
     type: boolean
-    default: false
     description: Allow SSH access to the instance
     metadata: allow-ssh

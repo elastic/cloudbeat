@@ -12,8 +12,9 @@ def generate_config(context):
     fleet_url = context.properties["fleetUrl"]
     agent_version = context.properties["elasticAgentVersion"]
     artifact_server = context.properties["elasticArtifactServer"]
+    role_prefix = deployment_name.replace("-", "_")
 
-    role_id = "elastic_cspm_role5"
+    role_id = f"{role_prefix}_elastic_cspm_role"
     network_name = f"{deployment_name}-network"
     sa_name = f"{deployment_name}-sa"
     custom_role_name = f"{deployment_name}-role"
