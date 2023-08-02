@@ -52,12 +52,7 @@ var templatePaths = map[string]map[string]string{
 }
 
 func main() {
-	cfg, err := util.ParseConfig[config]()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = validateConfig(cfg)
+	cfg, err := parseConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
