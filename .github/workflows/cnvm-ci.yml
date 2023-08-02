@@ -68,7 +68,7 @@ jobs:
           poetry run pytest -k "cnvm"
 
       - name: Print cloudbeat logs
-        if: ${{ !cancelled() }}
+        if: always()
         run: |
           cat logs/cloudbeat*
 
