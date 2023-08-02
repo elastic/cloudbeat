@@ -64,11 +64,11 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 					return m
 				},
 				cfg: awssdk.Config{
-					Region: "some-region",
+					Region: afRegion,
 				},
 				log: testhelper.NewLogger(t),
 			},
-			want: map[string]string{"some-region": "some-region"},
+			want: map[string]string{afRegion: afRegion},
 		},
 		{
 			name: "Should return enabled regions",
