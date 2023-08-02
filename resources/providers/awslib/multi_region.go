@@ -53,8 +53,8 @@ func (w *MultiRegionClientFactory[T]) NewMultiRegionClients(selector RegionsSele
 	clientsMap := make(map[string]T, 0)
 	regionList, err := selector.Regions(context.TODO(), cfg)
 	if err != nil {
-		log.Errorf("Default region selected after failure to retrieve aws regions: %v", err)
-		regionList = []string{DefaultRegion}
+		log.Errorf("Region '%s' selected after failure to retrieve aws regions: %v", cfg.Region, err)
+		regionList = []string{cfg.Region}
 	}
 	for _, region := range regionList {
 		cfg.Region = region
