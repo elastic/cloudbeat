@@ -20,7 +20,7 @@ CIS_3_11 = "CIS 3.11"
 
 cis_aws_log_3_1_pass = EksAwsServiceCase(
     rule_tag=CIS_3_1,
-    case_identifier="cloudtrail-704479110758",
+    case_identifier="cloudtrail-391946104644",
     expected=RULE_PASS_STATUS,
 )
 
@@ -79,13 +79,13 @@ cis_aws_log_3_1_skip = {
 
 cis_aws_log_3_2_pass = EksAwsServiceCase(
     rule_tag=CIS_3_2,
-    case_identifier="test-aws-file-validation-on-pass",
+    case_identifier="elastic-eng-org-cloudtrail",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_log_3_2_fail = EksAwsServiceCase(
     rule_tag=CIS_3_2,
-    case_identifier="test-aws-file-validation-off-failed",
+    case_identifier="test-aws-bench-trail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -96,7 +96,7 @@ cis_aws_log_3_2 = {
 
 cis_aws_log_3_3_pass = EksAwsServiceCase(
     rule_tag=CIS_3_3,
-    case_identifier="test-aws-file-validation-on-pass",
+    case_identifier="test-aws-bench-trail",
     expected=RULE_PASS_STATUS,
 )
 
@@ -116,13 +116,13 @@ cis_aws_log_3_3_skip = {
 
 cis_aws_log_3_4_pass = EksAwsServiceCase(
     rule_tag=CIS_3_4,
-    case_identifier="cloudtrail-ingest-buildsecurity",
+    case_identifier="test-aws-bench-trail",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_log_3_4_fail = EksAwsServiceCase(
     rule_tag=CIS_3_4,
-    case_identifier="test-aws-file-validation-off-failed",
+    case_identifier="elastic-eng-org-cloudtrail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -133,13 +133,13 @@ cis_aws_log_3_4 = {
 
 cis_aws_log_3_6_pass = EksAwsServiceCase(
     rule_tag=CIS_3_6,
-    case_identifier="test-aws-file-validation-on-pass",
+    case_identifier="test-aws-bench-trail",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_log_3_6_fail = EksAwsServiceCase(
     rule_tag=CIS_3_6,
-    case_identifier="test-aws-file-validation-off-failed",
+    case_identifier="elastic-eng-org-cloudtrail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -150,13 +150,13 @@ cis_aws_log_3_6 = {
 
 cis_aws_log_3_7_pass = EksAwsServiceCase(
     rule_tag=CIS_3_7,
-    case_identifier="test-aws-file-validation-off-failed",
+    case_identifier="test-aws-bench-trail",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_log_3_7_fail = EksAwsServiceCase(
     rule_tag=CIS_3_7,
-    case_identifier="test-aws-file-validation-on-pass",
+    case_identifier="cloudtrail-ingest-cloud-security-tests",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -166,24 +166,24 @@ cis_aws_log_3_7 = {
 }
 
 
-# VPC location is eu-west-1
+# VPC location is eu-north-1
 cis_aws_log_3_9_pass = EksAwsServiceCase(
     rule_tag=CIS_3_9,
-    case_identifier="vpc-0638280d81fcb9719",
+    case_identifier="vpc-0370ad7241170e623",
     expected=RULE_PASS_STATUS,
 )
 
 # VPC location is eu-west-1
 cis_aws_log_3_9_fail_1 = EksAwsServiceCase(
     rule_tag=CIS_3_9,
-    case_identifier="vpc-05bc238c5bdc9ce0b",
+    case_identifier="vpc-0cabbadbef30124b0",
     expected=RULE_FAIL_STATUS,
 )
 
 # VPC location is eu-west-2
 cis_aws_log_3_9_fail_2 = EksAwsServiceCase(
     rule_tag=CIS_3_9,
-    case_identifier="vpc-7d397e15",
+    case_identifier="vpc-03c8060bbdc893af6",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -201,7 +201,7 @@ cis_aws_log_3_10_pass = EksAwsServiceCase(
 
 cis_aws_log_3_10_fail = EksAwsServiceCase(
     rule_tag=CIS_3_10,
-    case_identifier="test-aws-file-validation-off-failed",
+    case_identifier="test-aws-bench-trail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -215,13 +215,13 @@ cis_aws_log_3_10_skip = {
 
 cis_aws_log_3_11_pass = EksAwsServiceCase(
     rule_tag=CIS_3_11,
-    case_identifier="test-aws-file-validation-on-pass",
+    case_identifier="test-aws-bench-trail",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_log_3_11_fail = EksAwsServiceCase(
     rule_tag=CIS_3_11,
-    case_identifier="test-aws-file-validation-off-failed",
+    case_identifier="elastic-eng-org-cloudtrail",
     expected=RULE_FAIL_STATUS,
 )
 
