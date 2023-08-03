@@ -86,7 +86,7 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 }
 
 func (p *Provider) ListAllAssetTypesByName(assets []string) ([]*assetpb.Asset, error) {
-	p.log.Infof("Listing GCP assets: %s", assets)
+	p.log.Infof("Listing GCP assets: %v", assets)
 
 	wg := sync.WaitGroup{}
 	scope := fmt.Sprintf("projects/%s", p.Config.ProjectId)
