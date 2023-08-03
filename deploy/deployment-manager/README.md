@@ -12,7 +12,7 @@ The compute engine instance has elastic-agent preinstalled in it using the fleet
 *Steps:*
 1. Install the GCP CSPM integration on a new agent policy, you might have to check the "Display beta integrations" checkbox.
 2. After you installed the integration, deploy a new agent, you should keep the fleet URL and the enrollment token.
-3. Run `just deploy-dm <DEPLOYMENT_NAME> <FLEET_URL> <ENROLLMENT_TOKEN> <ELASTIC_ARTIFACT_SERVER> <ELASTIC_AGENT_VERSION> <ZONE> <ALLOW_SSH>` to create a new deployment with an elastic-agent that will automatically enroll to your fleet.
+3. Run `DEPLOYMENT_NAME=<NAME> FLEET_URL=<URL> ENROLLMENT_TOKEN=<TOKEN> ELASTIC_ARTIFACT_SERVER=<ARTIFACT_SERVER> STACK_VERSION=<VERSION> ZONE=<ZONE> ALLOW_SSH=<true|false> just deploy-dm` to create a new deployment with an elastic-agent that will automatically enroll to your fleet.
 ```
 DEPLOYMENT_NAME="<Unique stack name>" # john-qa-bc2-8-9-0-May28
 FLEET_URL="<Elastic Agent Fleet URL>"

@@ -124,8 +124,8 @@ logs-cloudbeat:
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
-deploy-dm name fleet_url token artifact_server version zone allow_ssh:
-  DEPLOYMENT_NAME={{name}} FLEET_URL={{fleet_url}} ENROLLMENT_TOKEN={{token}} ELASTIC_ARTIFACT_SERVER={{artifact_server}} STACK_VERSION={{version}} ZONE={{zone}} ALLOW_SSH={{allow_ssh}} ./deploy/deployment-manager/deploy.sh
+deploy-dm:
+ ./deploy/deployment-manager/deploy.sh
 
 delete-dm name:
   gcloud deployment-manager deployments delete {{name}} -q
