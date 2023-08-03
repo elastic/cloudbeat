@@ -36,6 +36,21 @@ ALLOW_SSH=${ALLOW_SSH:-false}
 ZONE=${ZONE:-us-central1-a}
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}
 
+# Function to check if an environment variable is not provided
+check_env_not_provided() {
+  local var_name="$1"
+
+  if [ -z "${!var_name}" ]; then
+    echo "Error: $var_name not provided. Please set the environment variable $var_name."
+    exit 1
+  fi
+}
+
+# Fail fast if any of the required environment variables are not provided
+check_env_not_provided "FLEET_URL"
+check_env_not_provided "ENROLLMENT_TOKEN"
+check_env_not_provided "STACK_VERSION"
+
 # Function to run a gcloud command and check its exit code
 run_command() {
     eval $1
