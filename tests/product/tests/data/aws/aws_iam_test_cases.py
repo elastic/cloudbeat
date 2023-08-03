@@ -158,7 +158,7 @@ cis_aws_iam_1_10_pass_2 = EksAwsServiceCase(
 
 cis_aws_iam_1_10_fail = EksAwsServiceCase(
     rule_tag=CIS_1_10,
-    case_identifier="dev_test",  # test-no-mfa-fail
+    case_identifier="test-no-mfa",  # test-no-mfa-fail
     expected=RULE_FAIL_STATUS,
 )
 
@@ -182,6 +182,10 @@ cis_aws_iam_1_11_fail = EksAwsServiceCase(
 
 cis_aws_iam_1_11 = {
     "1.11 Access key during user init: no access key, expect: passed": cis_aws_iam_1_11_pass,
+}
+
+cis_aws_iam_1_11_skip = {
+    # Skipping this test because creating access keys through user init is not possible.
     "1.11 Access key during user init: access key is not not used, expect: failed": cis_aws_iam_1_11_fail,
 }
 
@@ -193,13 +197,13 @@ cis_aws_iam_1_13_fail = EksAwsServiceCase(
 
 cis_aws_iam_1_13_pass = EksAwsServiceCase(
     rule_tag=CIS_1_13,
-    case_identifier="test-user-one-active-key",
+    case_identifier="test-setup-access-keys-during-init",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_iam_1_13_pass_2 = EksAwsServiceCase(
     rule_tag=CIS_1_13,
-    case_identifier="test-user-1-active-1-not-active-keys-pass",
+    case_identifier="test-user-1-active-1-not-active-keys",
     expected=RULE_PASS_STATUS,
 )
 
