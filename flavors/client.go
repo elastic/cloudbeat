@@ -23,7 +23,7 @@ import (
 )
 
 func NewClient(pipeline beat.Pipeline, processorsList processors.PluginConfig) (beat.Client, error) {
-	procs, err := ConfigureProcessors(processorsList)
+	procs, err := configureProcessors(processorsList)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func NewClient(pipeline beat.Pipeline, processorsList processors.PluginConfig) (
 	})
 }
 
-// ConfigureProcessors configure processors to be used by the beat
-func ConfigureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
+// configureProcessors configure processors to be used by the beat
+func configureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
 	return processors.New(processorsList)
 }
