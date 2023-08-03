@@ -46,21 +46,21 @@ type posture struct {
 }
 
 // NewPosture creates an instance of posture.
-func NewPosture(_ *beat.Beat, agentConfig *agentconfig.C) (beat.Beater, error) {
+func NewPosture(b *beat.Beat, agentConfig *agentconfig.C) (beat.Beater, error) {
 	cfg, err := config.New(agentConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
-	return newPostureFromCfg(cfg)
+	return newPostureFromCfg(b, cfg)
 }
 
 // NewPosture creates an instance of posture.
-func newPostureFromCfg(cfg *config.Config) (*posture, error) {
+func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	log := logp.NewLogger("posture")
 	log.Info("Config initiated with cycle period of ", cfg.Period)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	b, err := benchmark.NewBenchmark(cfg)
+	bench, err := benchmark.NewBenchmark(cfg)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -69,7 +69,7 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
 	log.Infof("Initializing benchmark %T", b)
-	fetchersRegistry, cdp, err := b.Initialize(ctx, log, cfg, resourceCh)
+	fetchersRegistry, cdp, err := bench.Initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -94,10 +94,20 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 
 	t := transformer.NewTransformer(log, cdp, resultsIndex)
 
+	client, err := NewClient(b.Publisher, cfg.Processors)
+	if err != nil {
+		cancel()
+		return nil, fmt.Errorf("failed to init client: %w", err)
+	}
+	log.Infof("posture configured %d processors", len(cfg.Processors))
+
+	publisher := NewPublisher(log, flushInterval, eventsThreshold, client)
+
 	return &posture{
 		flavorBase: flavorBase{
 			ctx:         ctx,
 			cancel:      cancel,
+			publisher:   publisher,
 			config:      cfg,
 			transformer: t,
 			log:         log,
@@ -105,7 +115,7 @@ func newPostureFromCfg(cfg *config.Config) (*posture, error) {
 		fetcherManager: fetcherManager,
 		evaluator:      eval,
 		resourceCh:     resourceCh,
-		benchmark:      b,
+		benchmark:      bench,
 	}, nil
 }
 
@@ -119,55 +129,13 @@ func (bt *posture) Run(b *beat.Beat) error {
 
 	bt.fetcherManager.Run()
 
-	procs, err := ConfigureProcessors(bt.config.Processors)
-	if err != nil {
-		return err
-	}
-	bt.log.Debugf("posture configured %d processors", len(bt.config.Processors))
-
-	// Connect publisher (with beat's processors)
-	if bt.client, err = b.Publisher.ConnectWith(beat.ClientConfig{
-		Processing: beat.ProcessingConfig{
-			Processor: procs,
-		},
-	}); err != nil {
-		return err
-	}
-
 	// Creating the data pipeline
 	findingsCh := pipeline.Step(bt.ctx, bt.log, bt.resourceCh, bt.evaluator.Eval)
 	eventsCh := pipeline.Step(bt.ctx, bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
-	var eventsToSend []beat.Event
-	ticker := time.NewTicker(flushInterval)
-	for {
-		select {
-		case <-bt.ctx.Done():
-			bt.log.Warn("Posture context is done")
-			return nil
-
-		// Flush events to ES after a pre-defined interval, meant to clean residuals after a cycle is finished.
-		case <-ticker.C:
-			if len(eventsToSend) == 0 {
-				continue
-			}
-
-			bt.log.Infof("Publishing %d posture events to elasticsearch, time interval reached", len(eventsToSend))
-			bt.client.PublishAll(eventsToSend)
-			eventsToSend = nil
-
-		// Flush events to ES when reaching a certain threshold
-		case events := <-eventsCh:
-			eventsToSend = append(eventsToSend, events...)
-			if len(eventsToSend) < eventsThreshold {
-				continue
-			}
-
-			bt.log.Infof("Publishing %d posture events to elasticsearch, buffer threshold reached", len(eventsToSend))
-			bt.client.PublishAll(eventsToSend)
-			eventsToSend = nil
-		}
-	}
+	bt.publisher.HandleEvents(bt.ctx, eventsCh)
+	bt.log.Warn("Posture has finished running")
+	return nil
 }
 
 // Stop stops posture.

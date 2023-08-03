@@ -33,7 +33,7 @@ import (
 type GcpAssetsFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	provider   inventory.InventoryService
+	provider   inventory.ServiceAPI
 }
 
 type GcpAsset struct {
@@ -43,11 +43,13 @@ type GcpAsset struct {
 	Asset *assetpb.Asset `json:"asset,omitempty"`
 }
 
+// https://cloud.google.com/asset-inventory/docs/supported-asset-types
 // map of types to asset types.
 // sub-type is derived from asset type by using the first and last segments of the asset type name
 // example: gcp-cloudkms-crypto-key
 var GcpAssetTypes = map[string][]string{
 	fetching.KeyManagement: {
+		"apikeys.googleapis.com/Key",
 		"cloudkms.googleapis.com/CryptoKey",
 	},
 	fetching.CloudIdentity: {
@@ -63,7 +65,7 @@ var GcpAssetTypes = map[string][]string{
 	},
 }
 
-func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.InventoryService) *GcpAssetsFetcher {
+func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpAssetsFetcher {
 	return &GcpAssetsFetcher{
 		log:        log,
 		resourceCh: ch,

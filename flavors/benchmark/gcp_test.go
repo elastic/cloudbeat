@@ -22,10 +22,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/mock"
+	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
 func TestGCP_Initialize(t *testing.T) {
@@ -43,11 +46,13 @@ func TestGCP_Initialize(t *testing.T) {
        }`
 
 	tests := []struct {
-		name             string
-		identityProvider identity.ProviderGetter
-		cfg              config.Config
-		want             []string
-		wantErr          string
+		name                 string
+		identityProvider     identity.ProviderGetter
+		configProvider       auth.ConfigProviderAPI
+		inventoryInitializer inventory.ProviderInitializerAPI
+		cfg                  config.Config
+		want                 []string
+		wantErr              string
 	}{
 		{
 			name:    "nothing initialized",
@@ -55,33 +60,83 @@ func TestGCP_Initialize(t *testing.T) {
 			wantErr: "gcp identity provider is uninitialized",
 		},
 		{
-			name:             "missing credentials",
-			cfg:              baseGcpConfig,
-			identityProvider: mockGcpIdentityProvider(nil),
-			wantErr:          "failed to initialize gcp config",
-		},
-		{
-			name:             "identity provider error",
-			cfg:              validGcpConfig,
-			identityProvider: mockGcpIdentityProvider(errors.New("some error")),
-			wantErr:          "some error",
-		},
-		{
-			name:             "no error",
-			cfg:              validGcpConfig,
-			identityProvider: mockGcpIdentityProvider(nil),
+			name:                 "missing credentials options, fallback to using ADC",
+			cfg:                  baseGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(nil),
 			want: []string{
 				"gcp_cloud_assets_fetcher",
 			},
 		},
+		{
+			name:                 "config provider error",
+			cfg:                  baseGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(errors.New("some error")),
+			inventoryInitializer: mockInventoryInitializerService(nil),
+			wantErr:              "some error",
+		},
+		{
+			name:                 "identity provider error",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(errors.New("some error")),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(nil),
+			wantErr:              "some error",
+		},
+		{
+			name:                 "inventory init error",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(errors.New("some error")),
+			wantErr:              "some error",
+		},
+		{
+			name:                 "no error",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(nil),
+			want: []string{
+				"gcp_cloud_assets_fetcher",
+			},
+		},
+		{
+			name:                 "no identity provider",
+			cfg:                  validGcpConfig,
+			identityProvider:     nil,
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: mockInventoryInitializerService(nil),
+			wantErr:              "gcp identity provider is uninitialized",
+		},
+		{
+			name:                 "no inventory initializer",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       mockGcpCfgProvider(nil),
+			inventoryInitializer: nil,
+			wantErr:              "gcp asset inventory is uninitialized",
+		},
+		{
+			name:                 "no config provider",
+			cfg:                  validGcpConfig,
+			identityProvider:     mockGcpIdentityProvider(nil),
+			configProvider:       nil,
+			inventoryInitializer: mockInventoryInitializerService(nil),
+			wantErr:              "gcp config provider is uninitialized",
+		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			tt := tt
 			t.Parallel()
 
 			testInitialize(t, &GCP{
-				IdentityProvider: tt.identityProvider,
+				IdentityProvider:     tt.identityProvider,
+				CfgProvider:          tt.configProvider,
+				inventoryInitializer: tt.inventoryInitializer,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
@@ -89,13 +144,13 @@ func TestGCP_Initialize(t *testing.T) {
 
 func mockGcpIdentityProvider(err error) *identity.MockProviderGetter {
 	identityProvider := &identity.MockProviderGetter{}
-	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything, mock.Anything)
+	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return(
 			&cloud.Identity{
-				Provider:    "gcp",
-				ProjectId:   "test-project-id",
-				ProjectName: "test-project-name",
+				Provider:     "gcp",
+				Account:      "test-project-id",
+				AccountAlias: "test-project-name",
 			},
 			nil,
 		)
@@ -103,4 +158,34 @@ func mockGcpIdentityProvider(err error) *identity.MockProviderGetter {
 		on.Return(nil, err)
 	}
 	return identityProvider
+}
+
+func mockGcpCfgProvider(err error) auth.ConfigProviderAPI {
+	cfgProvider := &auth.MockConfigProviderAPI{}
+	on := cfgProvider.EXPECT().GetGcpClientConfig(mock.Anything, mock.Anything)
+	if err == nil {
+		on.Return(
+			[]option.ClientOption{},
+			nil,
+		)
+	} else {
+		on.Return(nil, err)
+	}
+	return cfgProvider
+}
+
+func mockInventoryInitializerService(err error) inventory.ProviderInitializerAPI {
+	initializer := &inventory.MockProviderInitializerAPI{}
+	inventoryService := &inventory.MockServiceAPI{}
+	//inventoryMock := inventoryService.EXPECT().ListAllAssetTypesByName(mock.Anything)
+	initializerMock := initializer.EXPECT().Init(mock.Anything, mock.Anything, mock.Anything)
+	if err == nil {
+		initializerMock.Return(
+			inventoryService,
+			nil,
+		)
+	} else {
+		initializerMock.Return(nil, err)
+	}
+	return initializer
 }
