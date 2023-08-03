@@ -59,7 +59,7 @@ run_command "gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=ser
 
 # Apply the deployment manager templates
 run_command "gcloud deployment-manager deployments create --automatic-rollback-on-error ${DEPLOYMENT_NAME} --project ${PROJECT_NAME} \
-    --template deploy/deployment-manager/compute_engine.py \
+    --template compute_engine.py \
     --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER}"
 
 # Remove the roles required to deploy the DM templates
