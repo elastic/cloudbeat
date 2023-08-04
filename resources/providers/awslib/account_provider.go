@@ -19,18 +19,18 @@ package awslib
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type AccountProviderAPI interface {
-	ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error)
+	ListAccounts(ctx context.Context, log *logp.Logger, cfg aws.Config) ([]cloud.Identity, error)
 }
 
 type organizationsAPI interface {
@@ -40,17 +40,22 @@ type organizationsAPI interface {
 
 type AccountProvider struct{}
 
-func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error) {
-	return listAccounts(ctx, organizations.NewFromConfig(cfg))
+func (a AccountProvider) ListAccounts(ctx context.Context, log *logp.Logger, cfg aws.Config) ([]cloud.Identity, error) {
+	return listAccounts(ctx, log, organizations.NewFromConfig(cfg))
 }
 
-func listAccounts(ctx context.Context, client organizationsAPI) ([]cloud.Identity, error) {
+func listAccounts(ctx context.Context, log *logp.Logger, client organizationsAPI) ([]cloud.Identity, error) {
+	organization := struct {
+		name string
+		id   string
+	}{}
 	describeOrganizationOutput, err := client.DescribeOrganization(ctx, &organizations.DescribeOrganizationInput{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to describe organization: %w", err)
+	if err == nil {
+		organization.id = strings.Dereference(describeOrganizationOutput.Organization.Id)
+		organization.name = strings.Dereference(describeOrganizationOutput.Organization.MasterAccountEmail)
+	} else {
+		log.Errorf("Failed to describe organization: %v", err)
 	}
-	organizationId := strings.Dereference(describeOrganizationOutput.Organization.Id)
-	organizationName := strings.Dereference(describeOrganizationOutput.Organization.MasterAccountEmail)
 
 	input := organizations.ListAccountsInput{}
 	var accounts []cloud.Identity
@@ -69,8 +74,8 @@ func listAccounts(ctx context.Context, client organizationsAPI) ([]cloud.Identit
 				Provider:         "aws",
 				Account:          *account.Id,
 				AccountAlias:     strings.Dereference(account.Name),
-				OrganizationId:   organizationId,
-				OrganizationName: organizationName,
+				OrganizationId:   organization.id,
+				OrganizationName: organization.name,
 			})
 		}
 

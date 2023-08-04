@@ -32,6 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type apiResult struct {
@@ -47,10 +48,11 @@ func Test_listAccounts(t *testing.T) {
 	}
 
 	tests := []struct {
-		name      string
-		resultMap map[string]apiResult
-		want      []cloud.Identity
-		wantErr   string
+		name                      string
+		resultMap                 map[string]apiResult
+		describeOrganizationError error
+		want                      []cloud.Identity
+		wantErr                   string
 	}{
 		{
 			name:      "sanity check error",
@@ -174,13 +176,35 @@ func Test_listAccounts(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "ignore describe organization error",
+			resultMap: map[string]apiResult{
+				"": {
+					output: &organizations.ListAccountsOutput{
+						Accounts:  []types.Account{account1},
+						NextToken: nil,
+					},
+					err: nil,
+				},
+			},
+			want: []cloud.Identity{
+				{
+					Provider:         "aws",
+					Account:          "1",
+					AccountAlias:     "name",
+					OrganizationId:   "",
+					OrganizationName: "",
+				},
+			},
+			describeOrganizationError: errors.New("some error"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := mockFromResultMap(tt.resultMap)
+			m := mockFromResultMap(tt.resultMap, tt.describeOrganizationError)
 			defer m.AssertExpectations(t)
 
-			got, err := listAccounts(context.Background(), m)
+			got, err := listAccounts(context.Background(), testhelper.NewLogger(t), m)
 			if tt.wantErr != "" {
 				assert.ErrorContains(t, err, tt.wantErr)
 			} else {
@@ -192,7 +216,7 @@ func Test_listAccounts(t *testing.T) {
 	}
 }
 
-func mockFromResultMap(resultMap map[string]apiResult) *mockOrganizationsAPI {
+func mockFromResultMap(resultMap map[string]apiResult, describeOrganizationError error) *mockOrganizationsAPI {
 	m := mockOrganizationsAPI{}
 	m.EXPECT().DescribeOrganization(mock.Anything, mock.Anything).Return(&organizations.DescribeOrganizationOutput{
 		Organization: &types.Organization{
@@ -202,7 +226,7 @@ func mockFromResultMap(resultMap map[string]apiResult) *mockOrganizationsAPI {
 			MasterAccountEmail: aws.String("email@email.com"),
 			MasterAccountId:    aws.String("master-account-id"),
 		},
-	}, nil).Once()
+	}, describeOrganizationError).Once()
 	m.EXPECT().ListAccounts(mock.Anything, mock.Anything).RunAndReturn(
 		func(_ context.Context, input *organizations.ListAccountsInput, _ ...func(*organizations.Options)) (*organizations.ListAccountsOutput, error) {
 			token := strings.Dereference(input.NextToken)
