@@ -19,6 +19,7 @@ package awslib
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
@@ -32,13 +33,25 @@ type AccountProviderAPI interface {
 	ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error)
 }
 
+type organizationsAPI interface {
+	organizations.ListAccountsAPIClient
+	DescribeOrganization(ctx context.Context, params *organizations.DescribeOrganizationInput, optFns ...func(*organizations.Options)) (*organizations.DescribeOrganizationOutput, error)
+}
+
 type AccountProvider struct{}
 
 func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error) {
 	return listAccounts(ctx, organizations.NewFromConfig(cfg))
 }
 
-func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClient) ([]cloud.Identity, error) {
+func listAccounts(ctx context.Context, client organizationsAPI) ([]cloud.Identity, error) {
+	describeOrganizationOutput, err := client.DescribeOrganization(ctx, &organizations.DescribeOrganizationInput{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to describe organization: %w", err)
+	}
+	organizationId := strings.Dereference(describeOrganizationOutput.Organization.Id)
+	organizationName := strings.Dereference(describeOrganizationOutput.Organization.MasterAccountEmail)
+
 	input := organizations.ListAccountsInput{}
 	var accounts []cloud.Identity
 	for {
@@ -53,8 +66,11 @@ func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClien
 			}
 
 			accounts = append(accounts, cloud.Identity{
-				Account:      *account.Id,
-				AccountAlias: strings.Dereference(account.Name),
+				Provider:         "aws",
+				Account:          *account.Id,
+				AccountAlias:     strings.Dereference(account.Name),
+				OrganizationId:   organizationId,
+				OrganizationName: organizationName,
 			})
 		}
 

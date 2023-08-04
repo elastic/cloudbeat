@@ -27,6 +27,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
@@ -38,24 +39,6 @@ type apiResult struct {
 	err    error
 }
 
-type mockClient struct {
-	resultMap map[string]apiResult
-}
-
-func (m *mockClient) ListAccounts(_ context.Context, input *organizations.ListAccountsInput, _ ...func(*organizations.Options)) (*organizations.ListAccountsOutput, error) {
-	token := strings.Dereference(input.NextToken)
-	result, ok := m.resultMap[token]
-	err := result.err
-	if !ok {
-		err = fmt.Errorf("could not find token: %s", token)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	return result.output, nil
-}
-
 func Test_listAccounts(t *testing.T) {
 	account1 := types.Account{
 		Id:     aws.String("1"),
@@ -64,134 +47,137 @@ func Test_listAccounts(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		client  *mockClient
-		want    []cloud.Identity
-		wantErr string
+		name      string
+		resultMap map[string]apiResult
+		want      []cloud.Identity
+		wantErr   string
 	}{
 		{
-			name: "sanity check error",
-			client: &mockClient{
-				resultMap: map[string]apiResult{},
-			},
-			wantErr: "could not find token",
+			name:      "sanity check error",
+			resultMap: map[string]apiResult{},
+			wantErr:   "could not find token",
 		},
 		{
 			name: "api error in first call",
-			client: &mockClient{
-				resultMap: map[string]apiResult{
-					"": {
-						err: errors.New("some error"),
-					},
+			resultMap: map[string]apiResult{
+				"": {
+					err: errors.New("some error"),
 				},
 			},
 			wantErr: "some error",
 		},
 		{
 			name: "api error in second call",
-			client: &mockClient{
-				resultMap: map[string]apiResult{
-					"": {
-						output: &organizations.ListAccountsOutput{
-							Accounts:  []types.Account{account1},
-							NextToken: aws.String("second"),
-						},
-						err: nil,
+			resultMap: map[string]apiResult{
+				"": {
+					output: &organizations.ListAccountsOutput{
+						Accounts:  []types.Account{account1},
+						NextToken: aws.String("second"),
 					},
-					"second": {
-						err: errors.New("some error"),
-					},
+					err: nil,
+				},
+				"second": {
+					err: errors.New("some error"),
 				},
 			},
 			wantErr: "some error",
 		},
 		{
 			name: "single account",
-			client: &mockClient{
-				resultMap: map[string]apiResult{
-					"": {
-						output: &organizations.ListAccountsOutput{
-							Accounts:  []types.Account{account1},
-							NextToken: nil,
-						},
-						err: nil,
+			resultMap: map[string]apiResult{
+				"": {
+					output: &organizations.ListAccountsOutput{
+						Accounts:  []types.Account{account1},
+						NextToken: nil,
 					},
+					err: nil,
 				},
 			},
 			want: []cloud.Identity{
 				{
-					Account:      "1",
-					AccountAlias: "name",
+					Provider:         "aws",
+					Account:          "1",
+					AccountAlias:     "name",
+					OrganizationId:   "some-id",
+					OrganizationName: "email@email.com",
 				},
 			},
 		},
 		{
 			name: "many accounts",
-			client: &mockClient{
-				resultMap: map[string]apiResult{
-					"": {
-						output: &organizations.ListAccountsOutput{
-							Accounts:  []types.Account{account1},
-							NextToken: aws.String("second"),
-						},
+			resultMap: map[string]apiResult{
+				"": {
+					output: &organizations.ListAccountsOutput{
+						Accounts:  []types.Account{account1},
+						NextToken: aws.String("second"),
 					},
-					"second": {
-						output: &organizations.ListAccountsOutput{
-							Accounts: []types.Account{
-								{
-									Id:     aws.String("123"),
-									Status: types.AccountStatusActive,
-								},
-								{
-									Id:     aws.String("456"),
-									Name:   aws.String("suspended"),
-									Status: types.AccountStatusSuspended,
-								},
-								{
-									Id:     aws.String("567"),
-									Status: types.AccountStatusPendingClosure,
-								},
+				},
+				"second": {
+					output: &organizations.ListAccountsOutput{
+						Accounts: []types.Account{
+							{
+								Id:     aws.String("123"),
+								Status: types.AccountStatusActive,
 							},
-							NextToken: aws.String("third"),
-						},
-					},
-					"third": {
-						output: &organizations.ListAccountsOutput{
-							Accounts: []types.Account{
-								{
-									Id:     aws.String("1000"),
-									Name:   aws.String("some name"),
-									Status: types.AccountStatusActive,
-								},
-								{
-									Id:     nil, // shouldn't really happen
-									Status: types.AccountStatusActive,
-								},
+							{
+								Id:     aws.String("456"),
+								Name:   aws.String("suspended"),
+								Status: types.AccountStatusSuspended,
 							},
-							NextToken: nil,
+							{
+								Id:     aws.String("567"),
+								Status: types.AccountStatusPendingClosure,
+							},
 						},
-						err: nil,
+						NextToken: aws.String("third"),
 					},
+				},
+				"third": {
+					output: &organizations.ListAccountsOutput{
+						Accounts: []types.Account{
+							{
+								Id:     aws.String("1000"),
+								Name:   aws.String("some name"),
+								Status: types.AccountStatusActive,
+							},
+							{
+								Id:     nil, // shouldn't really happen
+								Status: types.AccountStatusActive,
+							},
+						},
+						NextToken: nil,
+					},
+					err: nil,
 				},
 			},
 			want: []cloud.Identity{
 				{
-					Account:      "1",
-					AccountAlias: "name",
+					Provider:         "aws",
+					Account:          "1",
+					AccountAlias:     "name",
+					OrganizationId:   "some-id",
+					OrganizationName: "email@email.com",
 				},
 				{
-					Account: "123",
+					Provider:         "aws",
+					Account:          "123",
+					AccountAlias:     "",
+					OrganizationId:   "some-id",
+					OrganizationName: "email@email.com",
 				},
 				{
-					Account:      "1000",
-					AccountAlias: "some name",
+					Provider:         "aws",
+					Account:          "1000",
+					AccountAlias:     "some name",
+					OrganizationId:   "some-id",
+					OrganizationName: "email@email.com",
 				},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := listAccounts(context.Background(), tt.client)
+			got, err := listAccounts(context.Background(), mockFromResultMap(tt.resultMap))
 			if tt.wantErr != "" {
 				assert.ErrorContains(t, err, tt.wantErr)
 			} else {
@@ -201,4 +187,33 @@ func Test_listAccounts(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func mockFromResultMap(resultMap map[string]apiResult) *mockOrganizationsAPI {
+	m := mockOrganizationsAPI{}
+	m.EXPECT().DescribeOrganization(mock.Anything, mock.Anything).Return(&organizations.DescribeOrganizationOutput{
+		Organization: &types.Organization{
+			Arn:                aws.String("some-arn"),
+			Id:                 aws.String("some-id"),
+			MasterAccountArn:   aws.String("master-account-arn"),
+			MasterAccountEmail: aws.String("email@email.com"),
+			MasterAccountId:    aws.String("master-account-id"),
+		},
+	}, nil)
+	m.EXPECT().ListAccounts(mock.Anything, mock.Anything).RunAndReturn(
+		func(_ context.Context, input *organizations.ListAccountsInput, _ ...func(*organizations.Options)) (*organizations.ListAccountsOutput, error) {
+			token := strings.Dereference(input.NextToken)
+			result, ok := resultMap[token]
+			err := result.err
+			if !ok {
+				err = fmt.Errorf("could not find token: %s", token)
+			}
+			if err != nil {
+				return nil, err
+			}
+
+			return result.output, nil
+		},
+	)
+	return &m
 }
