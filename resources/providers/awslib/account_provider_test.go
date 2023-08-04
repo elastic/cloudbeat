@@ -177,7 +177,10 @@ func Test_listAccounts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := listAccounts(context.Background(), mockFromResultMap(tt.resultMap))
+			m := mockFromResultMap(tt.resultMap)
+			defer m.AssertExpectations(t)
+
+			got, err := listAccounts(context.Background(), m)
 			if tt.wantErr != "" {
 				assert.ErrorContains(t, err, tt.wantErr)
 			} else {
@@ -199,7 +202,7 @@ func mockFromResultMap(resultMap map[string]apiResult) *mockOrganizationsAPI {
 			MasterAccountEmail: aws.String("email@email.com"),
 			MasterAccountId:    aws.String("master-account-id"),
 		},
-	}, nil)
+	}, nil).Once()
 	m.EXPECT().ListAccounts(mock.Anything, mock.Anything).RunAndReturn(
 		func(_ context.Context, input *organizations.ListAccountsInput, _ ...func(*organizations.Options)) (*organizations.ListAccountsOutput, error) {
 			token := strings.Dereference(input.NextToken)
@@ -214,6 +217,6 @@ func mockFromResultMap(resultMap map[string]apiResult) *mockOrganizationsAPI {
 
 			return result.output, nil
 		},
-	)
+	).Times(len(resultMap))
 	return &m
 }
