@@ -42,7 +42,7 @@ New account -> single cloudtrail
 """
 cis_aws_log_3_1_fail_2 = EksAwsServiceCase(
     rule_tag=CIS_3_1,
-    case_identifier="cloudtrail-account-2",
+    case_identifier="cloudtrail-391946104644",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -67,12 +67,12 @@ cis_aws_log_3_1_fail_4 = EksAwsServiceCase(
 )
 
 cis_aws_log_3_1 = {
-    "3.1 Ensure CloudTrail is enabled in all regions expect: passed": cis_aws_log_3_1_pass,
+    "3.1 Ensure CloudTrail is enabled in all regions: not all regions enabled, expect: failed": cis_aws_log_3_1_fail_2,
 }
 
 cis_aws_log_3_1_skip = {
+    "3.1 Ensure CloudTrail is enabled in all regions expect: passed": cis_aws_log_3_1_pass,
     "3.1 Ensure CloudTrail is enabled in all regions: no cloudtrail enabled, expect: failed": cis_aws_log_3_1_fail_1,
-    "3.1 Ensure CloudTrail is enabled in all regions: not all regions enabled, expect: failed": cis_aws_log_3_1_fail_2,
     "3.1 Ensure CloudTrail is enabled in all regions: logging is off, expect: failed": cis_aws_log_3_1_fail_3,
     "3.1 Ensure CloudTrail is enabled in all regions: Read/Write event is None, expect: failed": cis_aws_log_3_1_fail_4,
 }
@@ -150,13 +150,13 @@ cis_aws_log_3_6 = {
 
 cis_aws_log_3_7_pass = EksAwsServiceCase(
     rule_tag=CIS_3_7,
-    case_identifier="test-aws-bench-trail",
+    case_identifier="elastic-eng-org-cloudtrail",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_log_3_7_fail = EksAwsServiceCase(
     rule_tag=CIS_3_7,
-    case_identifier="cloudtrail-ingest-cloud-security-tests",
+    case_identifier="test-aws-bench-trail",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -227,8 +227,12 @@ cis_aws_log_3_11_fail = EksAwsServiceCase(
 
 cis_aws_log_3_11 = {
     "3.11 Ensure Object-level logging read events, enabled=false, expected failed ": cis_aws_log_3_11_fail,
+}
+
+cis_aws_log_3_11_skip = {
     "3.11 Ensure Object-level logging read events, enabled=true, expected passed": cis_aws_log_3_11_pass,
 }
+
 
 cis_aws_log_cases = {
     **cis_aws_log_3_1,

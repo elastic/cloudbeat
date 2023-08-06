@@ -26,7 +26,7 @@ CIS_4_14 = "CIS 4.14"
 CIS_4_15 = "CIS 4.15"
 CIS_4_16 = "CIS 4.16"
 
-VALID_METRICS_ACCOUNT_ID = "cloudtrail-704479110758"
+VALID_METRICS_ACCOUNT_ID = "cloudtrail-391946104644"
 INVALID_METRICS_ACCOUNT_ID = "to-define-user-account"
 
 cis_aws_monitoring_4_1_pass = EksAwsServiceCase(
@@ -331,13 +331,13 @@ cis_aws_monitoring_4_15_skip = {
 
 cis_aws_monitoring_4_16_pass = EksAwsServiceCase(
     rule_tag=CIS_4_16,
-    case_identifier="arn:aws:securityhub:eu-west-1:704479110758:hub/default",
+    case_identifier="arn:aws:securityhub:eu-north-1:391946104644:hub/default",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_monitoring_4_16_fail = EksAwsServiceCase(
     rule_tag=CIS_4_16,
-    case_identifier="securityhub-eu-north-1-704479110758",
+    case_identifier="securityhub-eu-west-1-391946104644",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -365,14 +365,15 @@ cis_aws_monitoring_cases = {
             url_link="https://github.com/elastic/security-team/issues/6204",
         ),
     ),
-    **skip_param_case(
-        cis_aws_monitoring_4_3,
-        data_to_report=SkipReportData(
-            skip_reason="Evaluation passes even though the alert is not set",
-            url_title="cloudbeat: #826",
-            url_link="https://github.com/elastic/cloudbeat/issues/826",
-        ),
-    ),
+    **cis_aws_monitoring_4_3,
+    # **skip_param_case(
+    #     cis_aws_monitoring_4_3,
+    #     data_to_report=SkipReportData(
+    #         skip_reason="Evaluation passes even though the alert is not set",
+    #         url_title="cloudbeat: #826",
+    #         url_link="https://github.com/elastic/cloudbeat/issues/826",
+    #     ),
+    # ),
     **skip_param_case(
         cis_aws_monitoring_4_3_skip,
         data_to_report=SkipReportData(
@@ -381,14 +382,7 @@ cis_aws_monitoring_cases = {
             url_link="https://github.com/elastic/security-team/issues/6204",
         ),
     ),
-    **skip_param_case(
-        cis_aws_monitoring_4_4,
-        data_to_report=SkipReportData(
-            skip_reason="Correctly defined metric and filter for IAM policy is evaluated as failure.",
-            url_title="cloudbeat: #827",
-            url_link="https://github.com/elastic/cloudbeat/issues/827",
-        ),
-    ),
+    **cis_aws_monitoring_4_4,
     **skip_param_case(
         cis_aws_monitoring_4_4_skip,
         data_to_report=SkipReportData(
