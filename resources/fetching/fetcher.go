@@ -62,6 +62,7 @@ const (
 	CloudAudit             = "cloud-audit"
 	CloudDatabase          = "cloud-database"
 	CloudConfig            = "cloud-config"
+	CloudDns               = "cloud-dns"
 	KeyManagement          = "key-management"
 )
 
