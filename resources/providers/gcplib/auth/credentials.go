@@ -18,13 +18,14 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 
 	"github.com/elastic/elastic-agent-libs/logp"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/config"
@@ -36,18 +37,48 @@ type GcpFactoryConfig struct {
 }
 
 type ConfigProviderAPI interface {
-	GetGcpClientConfig(cfg config.GcpConfig, log *logp.Logger) ([]option.ClientOption, error)
+	GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error)
 }
 
-type ConfigProvider struct{}
+type GoogleAuthProviderAPI interface {
+	FindDefaultCredentials(ctx context.Context) (*google.Credentials, error)
+}
 
-func (p ConfigProvider) GetGcpClientConfig(cfg config.GcpConfig, log *logp.Logger) ([]option.ClientOption, error) {
-	log.Info("GetGCPClientConfig create credentials options")
-	var opts []option.ClientOption
+type ConfigProvider struct {
+	AuthProvider GoogleAuthProviderAPI
+}
+
+func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
 	if cfg.CredentialsJSON == "" && cfg.CredentialsFilePath == "" {
-		log.Info("No credentials file or JSON were provided, using application default credentials (ADC)")
-		return opts, nil
+		return p.getDefaultCredentialsConfig(ctx, cfg, log)
 	}
+
+	return p.getCustomCredentialsConfig(ctx, cfg, log)
+}
+
+func (p *ConfigProvider) getDefaultCredentialsConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+	log.Info("GetGCPClientConfig create credentials options")
+
+	projectId, err := p.getProjectId(ctx, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get project ID: %v", err)
+	}
+
+	return &GcpFactoryConfig{
+		ProjectId:  projectId,
+		ClientOpts: nil, // No custom options needed for default credentials
+	}, nil
+}
+
+func (p *ConfigProvider) getCustomCredentialsConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+	log.Info("getCustomCredentialsConfig create credentials options")
+
+	projectId, err := p.getProjectId(ctx, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get project ID: %v", err)
+	}
+
+	var opts []option.ClientOption
 
 	if cfg.CredentialsFilePath != "" {
 		if err := validateJSONFromFile(cfg.CredentialsFilePath); err == nil {
@@ -67,11 +98,28 @@ func (p ConfigProvider) GetGcpClientConfig(cfg config.GcpConfig, log *logp.Logge
 		}
 	}
 
-	return opts, nil
+	return &GcpFactoryConfig{
+		ProjectId:  projectId,
+		ClientOpts: opts,
+	}, nil
+}
+
+func (p *ConfigProvider) getProjectId(ctx context.Context, cfg config.GcpConfig) (string, error) {
+	if cfg.ProjectId != "" {
+		return cfg.ProjectId, nil
+	}
+
+	// Try to get project ID from metadata server in case we are running on GCP VM
+	cred, err := p.AuthProvider.FindDefaultCredentials(ctx)
+	if err == nil {
+		return cred.ProjectID, nil
+	}
+
+	return "", errors.New("no project ID was found")
 }
 
 func validateJSONFromFile(filePath string) error {
-	if _, err := os.Stat(filePath); errors.Is(err, fs.ErrNotExist) {
+	if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("file %q cannot be found", filePath)
 	}
 

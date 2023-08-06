@@ -72,7 +72,7 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 	case config.CIS_GCP:
 		return &GCP{
 			IdentityProvider:     &identity.Provider{},
-			CfgProvider:          &auth.ConfigProvider{},
+			CfgProvider:          &auth.ConfigProvider{AuthProvider: &auth.GoogleAuthProvider{}},
 			inventoryInitializer: &inventory.ProviderInitializer{},
 		}, nil
 	}
