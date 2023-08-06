@@ -3,7 +3,10 @@
 function usage() {
   cat <<EOF
 Usage: $0 <local-file> <file-pattern>
-Upload the local file to S3, replacing VERSION and DATE in the file pattern.
+Create a concrete remote file name from the pattern.
+Replace CFT_VERSION with the remote file name.
+Upload the local file to the remote file name.
+
 EOF
 }
 
