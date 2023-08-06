@@ -88,7 +88,7 @@ def generate_config(context):
                                 f"curl -L -O {artifact_server}/$ElasticAgentArtifact.tar.gz\n",
                                 "tar xzvf $ElasticAgentArtifact.tar.gz\n",
                                 "cd $ElasticAgentArtifact\n",
-                                f"PROJECT_ID={project} sudo ./elastic-agent install "
+                                f"sudo ./elastic-agent install "
                                 f"--non-interactive --url={fleet_url} --enrollment-token={enrollment_token}",
                             ],
                         ),
