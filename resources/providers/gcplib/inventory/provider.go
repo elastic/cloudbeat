@@ -38,6 +38,8 @@ type Provider struct {
 	Config auth.GcpFactoryConfig
 }
 
+type ProviderInitializer struct{}
+
 type Iterator interface {
 	Next() (*assetpb.Asset, error)
 }
@@ -47,15 +49,20 @@ type GcpClientWrapper struct {
 	ListAssets func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator
 }
 
-type InventoryService interface {
-	// List all content types of the given assets types
+type ServiceAPI interface {
+	// ListAllAssetTypesByName List all content types of the given assets types
 	ListAllAssetTypesByName(assets []string) ([]*assetpb.Asset, error)
 
 	// Close the GCP asset client
 	Close() error
 }
 
-func NewAssetsInventoryProvider(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig) (*Provider, error) {
+type ProviderInitializerAPI interface {
+	// Init initializes the GCP asset client
+	Init(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error)
+}
+
+func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpConfig auth.GcpFactoryConfig) (ServiceAPI, error) {
 	client, err := asset.NewClient(ctx, gcpConfig.ClientOpts...)
 
 	if err != nil {
@@ -71,15 +78,15 @@ func NewAssetsInventoryProvider(ctx context.Context, log *logp.Logger, gcpConfig
 	}
 
 	return &Provider{
-		log:    log,
-		client: wrapper,
-		ctx:    ctx,
 		Config: gcpConfig,
+		client: wrapper,
+		log:    log,
+		ctx:    ctx,
 	}, nil
 }
 
 func (p *Provider) ListAllAssetTypesByName(assets []string) ([]*assetpb.Asset, error) {
-	p.log.Infof("Listing GCP assets: %s", assets)
+	p.log.Infof("Listing GCP assets: %v", assets)
 
 	wg := sync.WaitGroup{}
 	scope := fmt.Sprintf("projects/%s", p.Config.ProjectId)

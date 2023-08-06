@@ -124,6 +124,12 @@ logs-cloudbeat:
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
+deploy-dm:
+ ./deploy/deployment-manager/deploy.sh
+
+delete-dm name:
+  gcloud deployment-manager deployments delete {{name}} -q
+
 create-cnvm-stack-tags region stack_name tags=(AWS_DEFAULT_TAGS):
   ./scripts/add_cnvm_tags.sh {{region}} {{stack_name}} '{{tags}}'
 
