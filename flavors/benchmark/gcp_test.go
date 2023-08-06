@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/mock"
-	"google.golang.org/api/option"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
@@ -162,10 +161,10 @@ func mockGcpIdentityProvider(err error) *identity.MockProviderGetter {
 
 func mockGcpCfgProvider(err error) auth.ConfigProviderAPI {
 	cfgProvider := &auth.MockConfigProviderAPI{}
-	on := cfgProvider.EXPECT().GetGcpClientConfig(mock.Anything, mock.Anything)
+	on := cfgProvider.EXPECT().GetGcpClientConfig(mock.Anything, mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return(
-			[]option.ClientOption{},
+			&auth.GcpFactoryConfig{},
 			nil,
 		)
 	} else {
@@ -177,7 +176,6 @@ func mockGcpCfgProvider(err error) auth.ConfigProviderAPI {
 func mockInventoryInitializerService(err error) inventory.ProviderInitializerAPI {
 	initializer := &inventory.MockProviderInitializerAPI{}
 	inventoryService := &inventory.MockServiceAPI{}
-	//inventoryMock := inventoryService.EXPECT().ListAllAssetTypesByName(mock.Anything)
 	initializerMock := initializer.EXPECT().Init(mock.Anything, mock.Anything, mock.Anything)
 	if err == nil {
 		initializerMock.Return(
