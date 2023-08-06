@@ -81,7 +81,7 @@ func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	identifier := r.GetResourceArn()
 	return fetching.ResourceMetadata{
 		ID:      identifier,
-		Type:    fetching.EC2Identity,
+		Type:    fetching.CloudCompute,
 		SubType: r.GetResourceType(),
 		Name:    r.GetResourceName(),
 		Region:  r.GetRegion(),
