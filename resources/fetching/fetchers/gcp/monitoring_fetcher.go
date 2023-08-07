@@ -67,14 +67,19 @@ func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.Cyc
 	case <-ctx.Done():
 		f.log.Info("GcpMonitoringFetcher.ListMonitoringAssets context canceled")
 		return nil
-	case f.resourceCh <- fetching.ResourceInfo{
-		CycleMetadata: cMetadata,
-		Resource: &GcpMonitoringAsset{
-			Type:    fetching.MonitoringIdentity,
-			subType: fetching.GcpMonitoringType,
-			Asset:   monitoringAsset,
-		},
-	}:
+	default:
+		select {
+		case <-ctx.Done():
+			return nil
+		case f.resourceCh <- fetching.ResourceInfo{
+			CycleMetadata: cMetadata,
+			Resource: &GcpMonitoringAsset{
+				Type:    fetching.MonitoringIdentity,
+				subType: fetching.GcpMonitoringType,
+				Asset:   monitoringAsset,
+			},
+		}:
+		}
 	}
 
 	return nil

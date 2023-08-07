@@ -20,16 +20,21 @@ package fetchers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/gcplib"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
+
+const projectId = "test-project"
 
 type GcpMonitoringFetcherTestSuite struct {
 	suite.Suite
@@ -61,10 +66,10 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Success() {
 	}
 
 	mockInventoryService.On("ListMonitoringAssets", mock.Anything).Return(
-		&inventory.MonitoringAsset{LogMetrics: []*assetpb.Asset{
-			{Name: "a", AssetType: "logging.googleapis.com/LogMetric"}},
-			Alerts: []*assetpb.Asset{
-				{Name: "b", AssetType: "monitoring.googleapis.com/AlertPolicy"}}}, nil,
+		&inventory.MonitoringAsset{
+			LogMetrics: []*assetpb.Asset{{Name: "a", AssetType: "logging.googleapis.com/LogMetric"}},
+			Alerts:     []*assetpb.Asset{{Name: "b", AssetType: "monitoring.googleapis.com/AlertPolicy"}},
+		}, nil,
 	)
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
@@ -88,4 +93,68 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Error() {
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
 	s.Error(err)
+}
+
+func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Canceled_Ctx() {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	mockInventoryService := &inventory.MockServiceAPI{}
+	fetcher := GcpMonitoringFetcher{
+		log:        testhelper.NewLogger(s.T()),
+		resourceCh: s.resourceCh,
+		provider:   mockInventoryService,
+	}
+
+	mockInventoryService.On("ListMonitoringAssets", mock.Anything).Return(
+		&inventory.MonitoringAsset{
+			LogMetrics: []*assetpb.Asset{{Name: "a", AssetType: "logging.googleapis.com/LogMetric"}},
+			Alerts:     []*assetpb.Asset{{Name: "b", AssetType: "monitoring.googleapis.com/AlertPolicy"}},
+		}, nil,
+	)
+
+	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
+	s.NoError(err)
+
+	results := testhelper.CollectResources(s.resourceCh)
+
+	// ListMonitoringAssets mocked to return a single asset
+	s.Equal(0, len(results))
+}
+
+func TestMonitoringResource_GetMetadata(t *testing.T) {
+	tests := []struct {
+		name     string
+		resource GcpMonitoringAsset
+		want     fetching.ResourceMetadata
+		wantErr  bool
+	}{
+		{
+			name: "happy path",
+			resource: GcpMonitoringAsset{
+				Type:    fetching.MonitoringIdentity,
+				subType: fetching.GcpMonitoringType,
+				Asset: &inventory.MonitoringAsset{
+					ProjectId:  projectId,
+					LogMetrics: []*assetpb.Asset{},
+					Alerts:     []*assetpb.Asset{},
+				},
+			},
+			want: fetching.ResourceMetadata{
+				ID:      fmt.Sprintf("%s-%s", fetching.GcpMonitoringType, projectId),
+				Name:    fmt.Sprintf("%s-%s", fetching.GcpMonitoringType, projectId),
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.GcpMonitoringType,
+				Region:  gcplib.GlobalRegion,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.resource.GetMetadata()
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
 }

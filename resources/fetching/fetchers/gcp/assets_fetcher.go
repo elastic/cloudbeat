@@ -92,16 +92,21 @@ func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 		for _, asset := range assets {
 			select {
 			case <-ctx.Done():
-				f.log.Info("GcpAssetsFetcher.Fetch context canceled")
+				f.log.Infof("GcpAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
 				return nil
-			case f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cMetadata,
-				Resource: &GcpAsset{
-					Type:    typeName,
-					SubType: getGcpSubType(asset.AssetType),
-					Asset:   asset,
-				},
-			}:
+			default:
+				select {
+				case <-ctx.Done():
+					return nil
+				case f.resourceCh <- fetching.ResourceInfo{
+					CycleMetadata: cMetadata,
+					Resource: &GcpAsset{
+						Type:    typeName,
+						SubType: getGcpSubType(asset.AssetType),
+						Asset:   asset,
+					},
+				}:
+				}
 			}
 		}
 	}
