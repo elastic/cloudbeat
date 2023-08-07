@@ -59,7 +59,6 @@ func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.Cyc
 
 	monitoringAsset, err := f.provider.ListMonitoringAssets(monitoringAssetTypes)
 	if err != nil {
-		f.log.Errorf("Failed to list monitoring assets: %s", err.Error())
 		return err
 	}
 
