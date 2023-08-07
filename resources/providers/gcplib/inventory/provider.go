@@ -38,6 +38,12 @@ type Provider struct {
 	Config auth.GcpFactoryConfig
 }
 
+type MonitoringAsset struct {
+	ProjectId  string
+	LogMetrics []*assetpb.Asset `json:"log_metrics,omitempty"`
+	Alerts     []*assetpb.Asset `json:"alerts,omitempty"`
+}
+
 type ProviderInitializer struct{}
 
 type Iterator interface {
@@ -52,6 +58,9 @@ type GcpClientWrapper struct {
 type ServiceAPI interface {
 	// ListAllAssetTypesByName List all content types of the given assets types
 	ListAllAssetTypesByName(assets []string) ([]*assetpb.Asset, error)
+
+	// ListMonitoringAssets List all monitoring assets
+	ListMonitoringAssets(map[string][]string) (*MonitoringAsset, error)
 
 	// Close the GCP asset client
 	Close() error
@@ -119,6 +128,24 @@ func (p *Provider) ListAllAssetTypesByName(assets []string) ([]*assetpb.Asset, e
 
 	results := append(resourceAssets, policyAssets...)
 	return mergeAssetContentType(results), nil
+}
+
+func (p *Provider) ListMonitoringAssets(monitoringAssetTypes map[string][]string) (*MonitoringAsset, error) {
+	logMetrics, err := p.ListAllAssetTypesByName(monitoringAssetTypes["LogMetric"])
+	if err != nil {
+		return nil, err
+	}
+
+	alertPolicies, err := p.ListAllAssetTypesByName(monitoringAssetTypes["AlertPolicy"])
+	if err != nil {
+		return nil, err
+	}
+
+	return &MonitoringAsset{
+		ProjectId:  p.Config.ProjectId,
+		LogMetrics: logMetrics,
+		Alerts:     alertPolicies,
+	}, nil
 }
 
 func (p *Provider) Close() error {

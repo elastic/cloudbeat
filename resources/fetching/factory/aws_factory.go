@@ -153,7 +153,7 @@ func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.Resourc
 
 	securityHubProvider := securityhub.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[securityhub.Client]{}, identity.Account)
 	monitoringFetcher := fetchers.NewMonitoringFetcher(log, monitoringProvider, securityHubProvider, ch, identity)
-	m[fetching.MonitoringType] = RegisteredFetcher{Fetcher: monitoringFetcher}
+	m[fetching.AwsMonitoringType] = RegisteredFetcher{Fetcher: monitoringFetcher}
 
 	ec2Provider := ec2.NewEC2Provider(log, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
 	networkFetcher := fetchers.NewNetworkFetcher(log, ec2Provider, ch, identity)
