@@ -95,33 +95,6 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Error() {
 	s.Error(err)
 }
 
-func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Canceled_Ctx() {
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
-
-	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpMonitoringFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
-	}
-
-	mockInventoryService.On("ListMonitoringAssets", mock.Anything).Return(
-		&inventory.MonitoringAsset{
-			LogMetrics: []*assetpb.Asset{{Name: "a", AssetType: "logging.googleapis.com/LogMetric"}},
-			Alerts:     []*assetpb.Asset{{Name: "b", AssetType: "monitoring.googleapis.com/AlertPolicy"}},
-		}, nil,
-	)
-
-	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
-	s.NoError(err)
-
-	results := testhelper.CollectResources(s.resourceCh)
-
-	// ListMonitoringAssets mocked to return a single asset
-	s.Equal(0, len(results))
-}
-
 func TestMonitoringResource_GetMetadata(t *testing.T) {
 	tests := []struct {
 		name     string

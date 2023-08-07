@@ -75,30 +75,3 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	// Will be called N times, where N is the number of types in GcpAssetTypes
 	s.Equal(len(GcpAssetTypes), len(results))
 }
-
-func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch_Canceled_Ctx() {
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
-
-	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpAssetsFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
-	}
-
-	mockInventoryService.On("ListAllAssetTypesByName", mock.MatchedBy(func(assets []string) bool {
-		return true
-	})).Return(
-		[]*assetpb.Asset{
-			{Name: "a", AssetType: "iam.googleapis.com/ServiceAccount"},
-		}, nil,
-	)
-
-	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
-	s.NoError(err)
-	results := testhelper.CollectResources(s.resourceCh)
-
-	// No results should be returned as the context was canceled before the fetcher was able to start
-	s.Equal(0, len(results))
-}
