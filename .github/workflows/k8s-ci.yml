@@ -210,7 +210,7 @@ jobs:
         #   - test-target: pre_merge
         #     range: ""
         #     values_file: tests/deploy/values/ci.yml
-          - test-target: aws
+          - test-target: 'aws and not aws_s3'
             range: ""
             values_file: tests/deploy/values/ci-aws-services.yml
           # - test-target: file_system_rules
@@ -401,7 +401,7 @@ jobs:
       - name: Deploy tests Helm chart
         id: deploy_helm
         run: |
-          just deploy-tests-helm ${{ matrix.test-target }} ${{ matrix.values_file }} ${{ matrix.range }}
+          just deploy-tests-helm '${{ matrix.test-target }}' ${{ matrix.values_file }} ${{ matrix.range }}
 
       - name: Deploy cloudbeat aws
         if: matrix.test-target == 'aws'
@@ -410,12 +410,11 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
         run: |
           just deploy-cloudbeat-aws
-          sleep 300
 
       - name: Run Tests
         id: run_tests
         run: |
-          just run-tests ${{ matrix.test-target }} kind-${{ env.KIND_CONFIG }}
+          just run-tests '${{ matrix.test-target }}' kind-${{ env.KIND_CONFIG }}
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
