@@ -48,6 +48,9 @@ type GcpAsset struct {
 // sub-type is derived from asset type by using the first and last segments of the asset type name
 // example: gcp-cloudkms-crypto-key
 var GcpAssetTypes = map[string][]string{
+	fetching.ProjectManagement: {
+		"cloudresourcemanager.googleapis.com/Project",
+	},
 	fetching.KeyManagement: {
 		"apikeys.googleapis.com/Key",
 		"cloudkms.googleapis.com/CryptoKey",
