@@ -66,6 +66,7 @@ func TestGCP_Initialize(t *testing.T) {
 			inventoryInitializer: mockInventoryInitializerService(nil),
 			want: []string{
 				"gcp_cloud_assets_fetcher",
+				"gcp_monitoring_fetcher",
 			},
 		},
 		{
@@ -100,6 +101,7 @@ func TestGCP_Initialize(t *testing.T) {
 			inventoryInitializer: mockInventoryInitializerService(nil),
 			want: []string{
 				"gcp_cloud_assets_fetcher",
+				"gcp_monitoring_fetcher",
 			},
 		},
 		{

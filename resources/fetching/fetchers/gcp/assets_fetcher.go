@@ -85,18 +85,23 @@ func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 	for typeName, assetTypes := range GcpAssetTypes {
 		assets, err := f.provider.ListAllAssetTypesByName(assetTypes)
 		if err != nil {
-			f.log.Errorf("Failed to list assets for type %s: %s", typeName, err)
+			f.log.Errorf("Failed to list assets for type %s: %s", typeName, err.Error())
 			continue
 		}
 
 		for _, asset := range assets {
-			f.resourceCh <- fetching.ResourceInfo{
+			select {
+			case <-ctx.Done():
+				f.log.Info("GcpAssetsFetcher.Fetch context canceled")
+				return nil
+			case f.resourceCh <- fetching.ResourceInfo{
 				CycleMetadata: cMetadata,
 				Resource: &GcpAsset{
 					Type:    typeName,
 					SubType: getGcpSubType(asset.AssetType),
 					Asset:   asset,
 				},
+			}:
 			}
 		}
 	}

@@ -51,7 +51,7 @@ func TestAWS_Initialize(t *testing.T) {
 				fetching.IAMType,
 				fetching.KmsType,
 				fetching.TrailType,
-				fetching.MonitoringType,
+				fetching.AwsMonitoringType,
 				fetching.EC2NetworkingType,
 				fetching.RdsType,
 				fetching.S3Type,
