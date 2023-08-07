@@ -67,12 +67,12 @@ cis_aws_log_3_1_fail_4 = EksAwsServiceCase(
 )
 
 cis_aws_log_3_1 = {
-    "3.1 Ensure CloudTrail is enabled in all regions: not all regions enabled, expect: failed": cis_aws_log_3_1_fail_2,
+    "3.1 Ensure CloudTrail is enabled in all regions expect: passed": cis_aws_log_3_1_pass,
 }
 
 cis_aws_log_3_1_skip = {
-    "3.1 Ensure CloudTrail is enabled in all regions expect: passed": cis_aws_log_3_1_pass,
     "3.1 Ensure CloudTrail is enabled in all regions: no cloudtrail enabled, expect: failed": cis_aws_log_3_1_fail_1,
+    "3.1 Ensure CloudTrail is enabled in all regions: not all regions enabled, expect: failed": cis_aws_log_3_1_fail_2,
     "3.1 Ensure CloudTrail is enabled in all regions: logging is off, expect: failed": cis_aws_log_3_1_fail_3,
     "3.1 Ensure CloudTrail is enabled in all regions: Read/Write event is None, expect: failed": cis_aws_log_3_1_fail_4,
 }
@@ -195,7 +195,7 @@ cis_aws_log_3_9 = {
 
 cis_aws_log_3_10_pass = EksAwsServiceCase(
     rule_tag=CIS_3_10,
-    case_identifier="test-aws-file-validation-on-pass",
+    case_identifier="test-aws-bench-trail",
     expected=RULE_PASS_STATUS,
 )
 
@@ -205,11 +205,11 @@ cis_aws_log_3_10_fail = EksAwsServiceCase(
     expected=RULE_FAIL_STATUS,
 )
 
-cis_aws_log_3_10 = {
+cis_aws_log_3_10_skip = {
     "3.10 Ensure Object-level logging, enabled=false, expected failed ": cis_aws_log_3_10_fail,
 }
 
-cis_aws_log_3_10_skip = {
+cis_aws_log_3_10 = {
     "3.10 Ensure Object-level logging, enabled=true, expected passed": cis_aws_log_3_10_pass,
 }
 
