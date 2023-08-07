@@ -199,7 +199,7 @@ jobs:
     if: github.event_name == 'push'
     needs: [ Build ]
     runs-on: ubuntu-22.04
-    timeout-minutes: 120
+    timeout-minutes: 55
     strategy:
       fail-fast: false
       matrix:
@@ -210,7 +210,7 @@ jobs:
         #   - test-target: pre_merge
         #     range: ""
         #     values_file: tests/deploy/values/ci.yml
-          - test-target: 'aws and not aws_s3'
+          - test-target: 'aws'
             range: ""
             values_file: tests/deploy/values/ci-aws-services.yml
           # - test-target: file_system_rules
@@ -410,6 +410,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
         run: |
           just deploy-cloudbeat-aws
+          sleep 300
 
       - name: Run Tests
         id: run_tests
