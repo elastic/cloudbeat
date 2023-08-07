@@ -34,5 +34,8 @@ func NewCisGcpFactory(ctx context.Context, log *logp.Logger, ch chan fetching.Re
 	assetsFetcher := fetchers.NewGcpAssetsFetcher(ctx, log, ch, inventory)
 	m["gcp_cloud_assets_fetcher"] = RegisteredFetcher{Fetcher: assetsFetcher}
 
+	monitoringFetcher := fetchers.NewGcpMonitoringFetcher(ctx, log, ch, inventory)
+	m["gcp_monitoring_fetcher"] = RegisteredFetcher{Fetcher: monitoringFetcher}
+
 	return m, nil
 }
