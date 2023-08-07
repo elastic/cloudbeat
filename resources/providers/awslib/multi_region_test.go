@@ -63,10 +63,12 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 					m.On("Regions", mock.Anything, mock.Anything).Return(nil, errors.New("fail to query endpoint"))
 					return m
 				},
-				cfg: awssdk.Config{},
+				cfg: awssdk.Config{
+					Region: afRegion,
+				},
 				log: testhelper.NewLogger(t),
 			},
-			want: map[string]string{DefaultRegion: DefaultRegion},
+			want: map[string]string{afRegion: afRegion},
 		},
 		{
 			name: "Should return enabled regions",

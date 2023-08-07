@@ -15,27 +15,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package flavors
+package auth
 
 import (
-	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/processors"
+	"context"
+
+	"golang.org/x/oauth2/google"
 )
 
-func NewClient(pipeline beat.Pipeline, processorsList processors.PluginConfig) (beat.Client, error) {
-	procs, err := configureProcessors(processorsList)
-	if err != nil {
-		return nil, err
-	}
+type GoogleAuthProvider struct{}
 
-	return pipeline.ConnectWith(beat.ClientConfig{
-		Processing: beat.ProcessingConfig{
-			Processor: procs,
-		},
-	})
-}
-
-// configureProcessors configure processors to be used by the beat
-func configureProcessors(processorsList processors.PluginConfig) (procs *processors.Processors, err error) {
-	return processors.New(processorsList)
+// FindDefaultCredentials is a wrapper around google.FindDefaultCredentials to make it easier to mock
+func (p *GoogleAuthProvider) FindDefaultCredentials(ctx context.Context) (*google.Credentials, error) {
+	return google.FindDefaultCredentials(ctx)
 }

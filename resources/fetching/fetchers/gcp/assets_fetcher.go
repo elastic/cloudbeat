@@ -43,7 +43,7 @@ type GcpAsset struct {
 	Asset *assetpb.Asset `json:"asset,omitempty"`
 }
 
-// https://cloud.google.com/asset-inventory/docs/supported-asset-types
+// GcpAssetTypes https://cloud.google.com/asset-inventory/docs/supported-asset-types
 // map of types to asset types.
 // sub-type is derived from asset type by using the first and last segments of the asset type name
 // example: gcp-cloudkms-crypto-key
@@ -65,6 +65,12 @@ var GcpAssetTypes = map[string][]string{
 	},
 	fetching.CloudStorage: {
 		"storage.googleapis.com/Bucket",
+	},
+	fetching.CloudCompute: {
+		"compute.googleapis.com/Instance",
+	},
+	fetching.CloudDns: {
+		"dns.googleapis.com/ManagedZone",
 	},
 }
 

@@ -53,7 +53,7 @@ const (
 	AccessAnalyzers           = "aws-access-analyzers"
 
 	CloudIdentity          = "identity-management"
-	EC2Identity            = "cloud-compute"
+	CloudCompute           = "cloud-compute"
 	MonitoringIdentity     = "monitoring"
 	CloudContainerMgmt     = "caas" // containers as a service
 	CloudLoadBalancer      = "load-balancer"
@@ -62,6 +62,7 @@ const (
 	CloudAudit             = "cloud-audit"
 	CloudDatabase          = "cloud-database"
 	CloudConfig            = "cloud-config"
+	CloudDns               = "cloud-dns"
 	KeyManagement          = "key-management"
 	ProjectManagement      = "project-management"
 )
