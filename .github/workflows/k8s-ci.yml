@@ -377,7 +377,7 @@ jobs:
       - name: Set Kind Configuration
         run: |
           echo "KIND_CONFIG=kind-multi" >> $GITHUB_ENV
-          if [[ $VAR == "aws" ]]; then
+          if [[ $VAR == *"aws"* ]]; then
             echo "KIND_CONFIG=kind-mono" >> $GITHUB_ENV
           fi
         env:
