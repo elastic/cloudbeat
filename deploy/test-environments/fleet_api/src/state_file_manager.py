@@ -27,7 +27,7 @@ class PolicyState:
     Class to represent a policy state.
     """
 
-    def __init__(self, agnt_policy_id: str, pkg_policy_id: str, expected_agents: int):
+    def __init__(self, agnt_policy_id: str, pkg_policy_id: str, expected_agents: int, expected_tags: list[str]):
         """
         Args:
             agnt_policy_id (str): ID of the agent policy.
@@ -37,6 +37,7 @@ class PolicyState:
         self.agnt_policy_id = agnt_policy_id
         self.pkg_policy_id = pkg_policy_id
         self.expected_agents = expected_agents
+        self.expected_tags = expected_tags
 
 
 class StateFileManager:

@@ -12,6 +12,20 @@ from loguru import logger
 TIMEOUT = 600
 
 
+class AgentPolicyEnrolled:
+    """
+    Class to represent the details of an enrolled agent.
+    """
+    def __init__(self, count: int, tags: list[str]) -> None:
+        """
+        Args:
+            count (int): Number of agents to be enrolled.
+            tags (list[str]): Tags of the agent.
+        """
+        self.count = count
+        self.tags = tags
+
+
 def get_expected_agents() -> dict:
     """
     Returns:
@@ -20,7 +34,7 @@ def get_expected_agents() -> dict:
     logger.info("Loading agent policies state file")
     policies_dict = {}
     for policy in state_manager.get_policies():
-        policies_dict[policy.agnt_policy_id] = policy.expected_agents
+        policies_dict[policy.agnt_policy_id] = AgentPolicyEnrolled(policy.expected_agents, policy.expected_tags)
     return policies_dict
 
 
@@ -36,12 +50,10 @@ def get_actual_agents() -> dict:
     return policies_dict
 
 
-def verify_agents_enrolled() -> bool:
+def all_agents_enrolled(expected: dict, actual: dict) -> bool:
     """
     Verify that the expected number of agents are enrolled
     """
-    expected = get_expected_agents()
-    actual = get_actual_agents()
     result = True
     for policy_id, expected_count in expected.items():
         if policy_id not in actual:
@@ -51,6 +63,25 @@ def verify_agents_enrolled() -> bool:
             result = False
             logger.info(f"Policy {policy_id} expected {expected_count} agents, but got {actual[policy_id]}")
     return result
+
+
+def verify_agents_enrolled() -> bool:
+    """
+    Construct a dictionary of the expected agents and the actual agents
+    Returns:
+        bool: True if the expected agents are enrolled, False otherwise
+    """
+    expected = get_expected_agents()
+    agents = get_agents(cfg=cnfg.elk_config)
+    actual = {}
+    for agent in agents:
+        expected_tags = []
+        if agent.policy_id in expected:
+            expected_tags = expected[agent.policy_id].tags
+
+        if all(tag in agent.tags for tag in expected_tags):
+            actual[agent.policy_id] = actual.get(agent.policy_id, 0) + 1
+    return all_agents_enrolled(expected, actual)
 
 
 def wait_for_agents_enrolled(timeout) -> bool:
