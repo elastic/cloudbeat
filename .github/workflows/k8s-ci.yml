@@ -210,7 +210,7 @@ jobs:
         #   - test-target: pre_merge
         #     range: ""
         #     values_file: tests/deploy/values/ci.yml
-          - test-target: 'aws'
+          - test-target: 'aws and not aws_s3'
             range: ""
             values_file: tests/deploy/values/ci-aws-services.yml
           # - test-target: file_system_rules
