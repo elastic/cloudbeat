@@ -410,11 +410,18 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
         run: |
           just deploy-cloudbeat-aws
+          sleep 300
 
       - name: Run Tests
         id: run_tests
         run: |
           just run-tests ${{ matrix.test-target }} kind-${{ env.KIND_CONFIG }}
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
 
       - name: Upload Test Results
         if: always()

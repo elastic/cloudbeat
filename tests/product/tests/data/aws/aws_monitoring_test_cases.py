@@ -366,14 +366,6 @@ cis_aws_monitoring_cases = {
         ),
     ),
     **cis_aws_monitoring_4_3,
-    # **skip_param_case(
-    #     cis_aws_monitoring_4_3,
-    #     data_to_report=SkipReportData(
-    #         skip_reason="Evaluation passes even though the alert is not set",
-    #         url_title="cloudbeat: #826",
-    #         url_link="https://github.com/elastic/cloudbeat/issues/826",
-    #     ),
-    # ),
     **skip_param_case(
         cis_aws_monitoring_4_3_skip,
         data_to_report=SkipReportData(
