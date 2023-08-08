@@ -66,6 +66,7 @@ const (
 	CloudConfig            = "cloud-config"
 	CloudDns               = "cloud-dns"
 	KeyManagement          = "key-management"
+	ProjectManagement      = "project-management"
 )
 
 // Fetcher represents a data fetcher.
