@@ -60,6 +60,8 @@ def verify_agent_count(expected: dict, actual: dict) -> bool:
         elif actual[policy_id] != expected_agents.count:
             result = False
             logger.info(f"Policy {policy_id} expected {expected_agents.count} agents, but got {actual[policy_id]}")
+        else:
+            logger.info(f"Policy {policy_id} has {actual[policy_id]} agents as expected")
     return result
 
 
