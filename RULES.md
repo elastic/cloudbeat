@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 14/84 implemented rules (17%)
+### 17/84 implemented rules (20%)
 
-#### Automated rules: 14/73 (19%)
+#### Automated rules: 17/73 (23%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -320,9 +320,9 @@
 |                       3.1                        | Networking                     | Ensure That the Default Network Does Not Exist in a Project                                                                       |        :x:         | Automated |
 |                       3.10                       | Networking                     | Use Identity Aware Proxy (IAP) to Ensure Only Traffic From Google IP Addresses are 'Allowed'                                      |        :x:         |  Manual   |
 |                       3.2                        | Networking                     | Ensure Legacy Networks Do Not Exist for Older Projects                                                                            |        :x:         | Automated |
-|                       3.3                        | Networking                     | Ensure That DNSSEC Is Enabled for Cloud DNS                                                                                       |        :x:         | Automated |
-|                       3.4                        | Networking                     | Ensure That RSASHA1 Is Not Used for the Key-Signing Key in Cloud DNS DNSSEC                                                       |        :x:         | Automated |
-|                       3.5                        | Networking                     | Ensure That RSASHA1 Is Not Used for the Zone-Signing Key in Cloud DNS DNSSEC                                                      |        :x:         | Automated |
+|  [3.3](bundle/compliance/cis_gcp/rules/cis_3_3)  | Networking                     | Ensure That DNSSEC Is Enabled for Cloud DNS                                                                                       | :white_check_mark: | Automated |
+|  [3.4](bundle/compliance/cis_gcp/rules/cis_3_4)  | Networking                     | Ensure That RSASHA1 Is Not Used for the Key-Signing Key in Cloud DNS DNSSEC                                                       | :white_check_mark: | Automated |
+|  [3.5](bundle/compliance/cis_gcp/rules/cis_3_5)  | Networking                     | Ensure That RSASHA1 Is Not Used for the Zone-Signing Key in Cloud DNS DNSSEC                                                      | :white_check_mark: | Automated |
 |                       3.6                        | Networking                     | Ensure That SSH Access Is Restricted From the Internet                                                                            |        :x:         | Automated |
 |                       3.7                        | Networking                     | Ensure That RDP Access Is Restricted From the Internet                                                                            |        :x:         | Automated |
 |                       3.8                        | Networking                     | Ensure that VPC Flow Logs is Enabled for Every Subnet in a VPC Network                                                            |        :x:         | Automated |
