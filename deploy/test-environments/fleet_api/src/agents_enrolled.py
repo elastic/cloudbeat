@@ -17,6 +17,7 @@ class AgentPolicyEnrolled:
     """
     Class to represent the details of an enrolled agent.
     """
+
     def __init__(self, count: int, tags: list[str]) -> None:
         """
         Args:
@@ -67,6 +68,9 @@ def verify_agent_count(expected: dict, actual: dict) -> bool:
 
 
 def verify_agent_tags(agent, expected_agents) -> bool:
+    """
+    Verify that the agent has the expected tags
+    """
     expected_tags = []
     if agent.policy_id in expected_agents:
         expected_tags = expected_agents[agent.policy_id].tags
