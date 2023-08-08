@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 20/84 implemented rules (24%)
+### 28/84 implemented rules (33%)
 
-#### Automated rules: 20/73 (27%)
+#### Automated rules: 28/73 (38%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -302,8 +302,8 @@
 |                       1.8                        | Identity and Access Management | Ensure That Separation of Duties Is Enforced While Assigning Service Account Related Roles to Users                               |        :x:         | Automated |
 |  [1.9](bundle/compliance/cis_gcp/rules/cis_1_9)  | Identity and Access Management | Ensure That Cloud KMS Cryptokeys Are Not Anonymously or Publicly Accessible                                                       | :white_check_mark: | Automated |
 |                       2.1                        | Logging and Monitoring         | Ensure That Cloud Audit Logging Is Configured Properly                                                                            |        :x:         | Automated |
-|                       2.10                       | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Cloud Storage IAM Permission Changes                                       |        :x:         | Automated |
-|                       2.11                       | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for SQL Instance Configuration Changes                                         |        :x:         | Automated |
+| [2.10](bundle/compliance/cis_gcp/rules/cis_2_10) | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Cloud Storage IAM Permission Changes                                       | :white_check_mark: | Automated |
+| [2.11](bundle/compliance/cis_gcp/rules/cis_2_11) | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for SQL Instance Configuration Changes                                         | :white_check_mark: | Automated |
 |                       2.12                       | Logging and Monitoring         | Ensure That Cloud DNS Logging Is Enabled for All VPC Networks                                                                     |        :x:         | Automated |
 |                       2.13                       | Logging and Monitoring         | Ensure Cloud Asset Inventory Is Enabled                                                                                           |        :x:         | Automated |
 |                       2.14                       | Logging and Monitoring         | Ensure 'Access Transparency' is 'Enabled'                                                                                         |        :x:         |  Manual   |
@@ -311,12 +311,12 @@
 |                       2.16                       | Logging and Monitoring         | Ensure Logging is enabled for HTTP(S) Load Balancer                                                                               |        :x:         | Automated |
 |                       2.2                        | Logging and Monitoring         | Ensure That Sinks Are Configured for All Log Entries                                                                              |        :x:         | Automated |
 |                       2.3                        | Logging and Monitoring         | Ensure That Retention Policies on Cloud Storage Buckets Used for Exporting Logs Are Configured Using Bucket Lock                  |        :x:         | Automated |
-|                       2.4                        | Logging and Monitoring         | Ensure Log Metric Filter and Alerts Exist for Project Ownership Assignments/Changes                                               |        :x:         | Automated |
-|                       2.5                        | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Audit Configuration Changes                                                |        :x:         | Automated |
-|                       2.6                        | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Custom Role Changes                                                        |        :x:         | Automated |
-|                       2.7                        | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for VPC Network Firewall Rule Changes                                          |        :x:         | Automated |
-|                       2.8                        | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for VPC Network Route Changes                                                  |        :x:         | Automated |
-|                       2.9                        | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for VPC Network Changes                                                        |        :x:         | Automated |
+|  [2.4](bundle/compliance/cis_gcp/rules/cis_2_4)  | Logging and Monitoring         | Ensure Log Metric Filter and Alerts Exist for Project Ownership Assignments/Changes                                               | :white_check_mark: | Automated |
+|  [2.5](bundle/compliance/cis_gcp/rules/cis_2_5)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Audit Configuration Changes                                                | :white_check_mark: | Automated |
+|  [2.6](bundle/compliance/cis_gcp/rules/cis_2_6)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Custom Role Changes                                                        | :white_check_mark: | Automated |
+|  [2.7](bundle/compliance/cis_gcp/rules/cis_2_7)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for VPC Network Firewall Rule Changes                                          | :white_check_mark: | Automated |
+|  [2.8](bundle/compliance/cis_gcp/rules/cis_2_8)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for VPC Network Route Changes                                                  | :white_check_mark: | Automated |
+|  [2.9](bundle/compliance/cis_gcp/rules/cis_2_9)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for VPC Network Changes                                                        | :white_check_mark: | Automated |
 |                       3.1                        | Networking                     | Ensure That the Default Network Does Not Exist in a Project                                                                       |        :x:         | Automated |
 |                       3.10                       | Networking                     | Use Identity Aware Proxy (IAP) to Ensure Only Traffic From Google IP Addresses are 'Allowed'                                      |        :x:         |  Manual   |
 |                       3.2                        | Networking                     | Ensure Legacy Networks Do Not Exist for Older Projects                                                                            |        :x:         | Automated |

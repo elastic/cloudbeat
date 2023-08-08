@@ -48,6 +48,10 @@ is_compute_instance {
 	input.subType == "gcp-compute-instance"
 }
 
+is_monitoring_asset {
+	input.subType == "gcp-monitoring"
+}
+
 is_dns_managed_zone {
 	input.subType == "gcp-dns-managed-zone"
 }

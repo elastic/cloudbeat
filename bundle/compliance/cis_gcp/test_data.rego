@@ -21,6 +21,15 @@ generate_gcp_asset(type, subtype, resource, iam_policy) = {
 	"subType": subtype,
 }
 
+generate_monitoring_asset(log_metrics, alerts) = {
+	"resource": {
+		"log_metrics": log_metrics,
+		"alerts": alerts,
+	},
+	"type": "monitoring",
+	"subType": "gcp-monitoring",
+}
+
 generate_kms_resource(members, rotationPeriod, nextRotationTime, primary) = {
 	"resource": {
 		"resource": {"data": {
