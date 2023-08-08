@@ -1,6 +1,7 @@
 name: Packaging
 
 on:
+  merge_queue_ci:
   pull_request:
     branches:
       - main
