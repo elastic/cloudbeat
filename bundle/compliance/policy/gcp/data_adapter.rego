@@ -16,6 +16,10 @@ is_storage_bucket {
 	input.subType == "gcp-storage-bucket"
 }
 
+is_cloud_resource_manager_project {
+	input.subType == "gcp-cloudresourcemanager-project"
+}
+
 is_iam_service_account {
 	input.subType == "gcp-iam-service-account"
 }
