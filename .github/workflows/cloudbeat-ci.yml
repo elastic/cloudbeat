@@ -1,7 +1,8 @@
 name: Cloudbeat-CI
 
 on:
-  merge_queue_ci:
+  merge_group:
+    branches: ['main']
   pull_request:
     branches:
       - main
