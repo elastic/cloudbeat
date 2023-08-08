@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 19/84 implemented rules (23%)
+### 20/84 implemented rules (24%)
 
-#### Automated rules: 19/73 (26%)
+#### Automated rules: 20/73 (27%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -288,7 +288,7 @@
 | [1.11](bundle/compliance/cis_gcp/rules/cis_1_11) | Identity and Access Management | Ensure That Separation of Duties Is Enforced While Assigning KMS Related Roles to Users                                           | :white_check_mark: | Automated |
 | [1.12](bundle/compliance/cis_gcp/rules/cis_1_12) | Identity and Access Management | Ensure API Keys Only Exist for Active Services                                                                                    | :white_check_mark: | Automated |
 |                       1.13                       | Identity and Access Management | Ensure API Keys Are Restricted To Use by Only Specified Hosts and Apps                                                            |        :x:         |  Manual   |
-|                       1.14                       | Identity and Access Management | Ensure API Keys Are Restricted to Only APIs That Application Needs Access                                                         |        :x:         | Automated |
+| [1.14](bundle/compliance/cis_gcp/rules/cis_1_14) | Identity and Access Management | Ensure API Keys Are Restricted to Only APIs That Application Needs Access                                                         | :white_check_mark: | Automated |
 | [1.15](bundle/compliance/cis_gcp/rules/cis_1_15) | Identity and Access Management | Ensure API Keys Are Rotated Every 90 Days                                                                                         | :white_check_mark: | Automated |
 |                       1.16                       | Identity and Access Management | Ensure Essential Contacts is Configured for Organization                                                                          |        :x:         | Automated |
 |                       1.17                       | Identity and Access Management | Ensure that Dataproc Cluster is encrypted using Customer-Managed Encryption Key                                                   |        :x:         | Automated |
