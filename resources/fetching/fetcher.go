@@ -32,7 +32,7 @@ const (
 	IAMType                   = "aws-iam"
 	EC2Type                   = "aws-ec2"
 	EC2NetworkingType         = "aws-ec2-network"
-	MonitoringType            = "aws-monitoring"
+	AwsMonitoringType         = "aws-monitoring"
 	NetworkNACLType           = "aws-nacl"
 	TrailType                 = "aws-trail"
 	MultiTrailsType           = "aws-multi-trails"
@@ -52,6 +52,8 @@ const (
 	PolicyType                = "aws-policy"
 	AccessAnalyzers           = "aws-access-analyzers"
 
+	GcpMonitoringType = "gcp-monitoring"
+
 	CloudIdentity          = "identity-management"
 	CloudCompute           = "cloud-compute"
 	MonitoringIdentity     = "monitoring"
@@ -62,7 +64,9 @@ const (
 	CloudAudit             = "cloud-audit"
 	CloudDatabase          = "cloud-database"
 	CloudConfig            = "cloud-config"
+	CloudDns               = "cloud-dns"
 	KeyManagement          = "key-management"
+	ProjectManagement      = "project-management"
 )
 
 // Fetcher represents a data fetcher.

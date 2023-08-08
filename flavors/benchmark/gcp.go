@@ -48,22 +48,17 @@ func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, err
 	}
 
-	gcpClientConfig, err := g.CfgProvider.GetGcpClientConfig(cfg.CloudConfig.Gcp, log)
+	gcpConfig, err := g.CfgProvider.GetGcpClientConfig(ctx, cfg.CloudConfig.Gcp, log)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
 
-	gcpFactoryConfig := &auth.GcpFactoryConfig{
-		ProjectId:  cfg.CloudConfig.Gcp.ProjectId,
-		ClientOpts: gcpClientConfig,
-	}
-
-	gcpIdentity, err := g.IdentityProvider.GetIdentity(ctx, gcpFactoryConfig)
+	gcpIdentity, err := g.IdentityProvider.GetIdentity(ctx, gcpConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get GCP identity: %v", err)
 	}
 
-	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpFactoryConfig)
+	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
 	}
