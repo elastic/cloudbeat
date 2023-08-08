@@ -5,6 +5,7 @@ If the expected number of agents is not enrolled within the timeout, the test wi
 import sys
 import time
 import re
+from dataclasses import dataclass
 from api.agent_policy_api import get_agents
 import configuration_fleet as cnfg
 from state_file_manager import state_manager
@@ -13,19 +14,14 @@ from loguru import logger
 TIMEOUT = 600
 
 
-class AgentPolicyEnrolled:
+@dataclass
+class AgentExpected:
     """
     Class to represent the details of an enrolled agent.
     """
 
-    def __init__(self, count: int, tags: list[str]) -> None:
-        """
-        Args:
-            count (int): Number of agents to be enrolled.
-            tags (list[str]): Tags of the agent.
-        """
-        self.count = count
-        self.tags = tags
+    count: int
+    tags: list[str]
 
 
 def get_expected_agents() -> dict:
@@ -36,7 +32,7 @@ def get_expected_agents() -> dict:
     logger.info("Loading agent policies state file")
     policies_dict = {}
     for policy in state_manager.get_policies():
-        policies_dict[policy.agnt_policy_id] = AgentPolicyEnrolled(policy.expected_agents, policy.expected_tags)
+        policies_dict[policy.agnt_policy_id] = AgentExpected(policy.expected_agents, policy.expected_tags)
     return policies_dict
 
 
@@ -81,7 +77,7 @@ def verify_agent_tags(agent, expected_agents) -> bool:
                 pattern_exist = True
                 break
         if not pattern_exist:
-            logger.info(f"Agent {agent.id} does not have the expected tag {pattern}")
+            logger.warning(f"Agent {agent.id} does not have the expected tag {pattern}")
             return False
     return True
 
