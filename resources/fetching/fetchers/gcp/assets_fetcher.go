@@ -72,6 +72,9 @@ var GcpAssetTypes = map[string][]string{
 	fetching.CloudDns: {
 		"dns.googleapis.com/ManagedZone",
 	},
+	fetching.DataProcessing: {
+		"dataproc.googleapis.com/Cluster",
+	},
 }
 
 func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpAssetsFetcher {
