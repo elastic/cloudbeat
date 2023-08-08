@@ -77,6 +77,7 @@ def verify_agent_tags(agent, expected_agents) -> bool:
                 pattern_exist = True
                 break
         if not pattern_exist:
+            logger.info(f"Agent {agent.id} does not have the expected tag {pattern}")
             return False
     return True
 
