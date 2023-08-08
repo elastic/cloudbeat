@@ -48,6 +48,9 @@ type GcpAsset struct {
 // sub-type is derived from asset type by using the first and last segments of the asset type name
 // example: gcp-cloudkms-crypto-key
 var GcpAssetTypes = map[string][]string{
+	fetching.ProjectManagement: {
+		"cloudresourcemanager.googleapis.com/Project",
+	},
 	fetching.KeyManagement: {
 		"apikeys.googleapis.com/Key",
 		"cloudkms.googleapis.com/CryptoKey",
@@ -66,6 +69,9 @@ var GcpAssetTypes = map[string][]string{
 	fetching.CloudCompute: {
 		"compute.googleapis.com/Instance",
 	},
+	fetching.CloudDns: {
+		"dns.googleapis.com/ManagedZone",
+	},
 }
 
 func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpAssetsFetcher {
@@ -82,18 +88,23 @@ func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 	for typeName, assetTypes := range GcpAssetTypes {
 		assets, err := f.provider.ListAllAssetTypesByName(assetTypes)
 		if err != nil {
-			f.log.Errorf("Failed to list assets for type %s: %s", typeName, err)
+			f.log.Errorf("Failed to list assets for type %s: %s", typeName, err.Error())
 			continue
 		}
 
 		for _, asset := range assets {
-			f.resourceCh <- fetching.ResourceInfo{
+			select {
+			case <-ctx.Done():
+				f.log.Infof("GcpAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
+				return nil
+			case f.resourceCh <- fetching.ResourceInfo{
 				CycleMetadata: cMetadata,
 				Resource: &GcpAsset{
 					Type:    typeName,
 					SubType: getGcpSubType(asset.AssetType),
 					Asset:   asset,
 				},
+			}:
 			}
 		}
 	}

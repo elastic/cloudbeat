@@ -24,16 +24,11 @@ jobs:
 
       - name: Upload to S3 if elastic-agent CloudFormation template has changed
         run: |
-          VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
-          DATE=$(date +"%Y-%m-%d-%H-%M-%S")
-          CNVM_FILENAME="cloudformation-cnvm-$VERSION-$DATE.yml"
-          echo "Uploading $CNVM_FILENAME to S3"
-          aws s3 cp deploy/cloudformation/elastic-agent-ec2-cnvm.yml s3://elastic-cspm-cft/$CNVM_FILENAME
+          CNVM_FILENAME="cloudformation-cnvm-VERSION-DATE.yml"
+          ./scripts/publish_cft.sh deploy/cloudformation/elastic-agent-ec2-cnvm.yml $CNVM_FILENAME
 
-          CSPM_FILENAME="cloudformation-cspm-single-account-$VERSION-$DATE.yml"
-          echo "Uploading $CSPM_FILENAME to S3"
-          aws s3 cp deploy/cloudformation/elastic-agent-ec2-cspm.yml s3://elastic-cspm-cft/$CSPM_FILENAME
+          CSPM_FILENAME="cloudformation-cspm-single-account-VERSION-DATE.yml"
+          ./scripts/publish_cft.sh deploy/cloudformation/elastic-agent-ec2-cspm.yml $CSPM_FILENAME
 
-          CSPM_ORG_FILENAME="cloudformation-cspm-organization-account-$VERSION-$DATE.yml"
-          echo "Uploading $CSPM_ORG_FILENAME to S3"
-          aws s3 cp deploy/cloudformation/elastic-agent-ec2-cspm-organization.yml s3://elastic-cspm-cft/$CSPM_ORG_FILENAME
+          CSPM_ORG_FILENAME="cloudformation-cspm-organization-account-VERSION-DATE.yml"
+          ./scripts/publish_cft.sh deploy/cloudformation/elastic-agent-ec2-cspm-organization.yml $CSPM_ORG_FILENAME

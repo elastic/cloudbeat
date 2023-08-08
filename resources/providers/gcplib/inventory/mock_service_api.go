@@ -132,6 +132,60 @@ func (_c *MockServiceAPI_ListAllAssetTypesByName_Call) RunAndReturn(run func([]s
 	return _c
 }
 
+// ListMonitoringAssets provides a mock function with given fields: _a0
+func (_m *MockServiceAPI) ListMonitoringAssets(_a0 map[string][]string) (*MonitoringAsset, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *MonitoringAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(map[string][]string) (*MonitoringAsset, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(map[string][]string) *MonitoringAsset); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*MonitoringAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(map[string][]string) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockServiceAPI_ListMonitoringAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListMonitoringAssets'
+type MockServiceAPI_ListMonitoringAssets_Call struct {
+	*mock.Call
+}
+
+// ListMonitoringAssets is a helper method to define mock.On call
+//   - _a0 map[string][]string
+func (_e *MockServiceAPI_Expecter) ListMonitoringAssets(_a0 interface{}) *MockServiceAPI_ListMonitoringAssets_Call {
+	return &MockServiceAPI_ListMonitoringAssets_Call{Call: _e.mock.On("ListMonitoringAssets", _a0)}
+}
+
+func (_c *MockServiceAPI_ListMonitoringAssets_Call) Run(run func(_a0 map[string][]string)) *MockServiceAPI_ListMonitoringAssets_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(map[string][]string))
+	})
+	return _c
+}
+
+func (_c *MockServiceAPI_ListMonitoringAssets_Call) Return(_a0 *MonitoringAsset, _a1 error) *MockServiceAPI_ListMonitoringAssets_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockServiceAPI_ListMonitoringAssets_Call) RunAndReturn(run func(map[string][]string) (*MonitoringAsset, error)) *MockServiceAPI_ListMonitoringAssets_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 type mockConstructorTestingTNewMockServiceAPI interface {
 	mock.TestingT
 	Cleanup(func())
