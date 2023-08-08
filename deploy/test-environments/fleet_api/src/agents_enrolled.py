@@ -57,13 +57,13 @@ def verify_agent_count(expected: dict, actual: dict) -> bool:
     Verify that the expected number of agents are enrolled
     """
     result = True
-    for policy_id, expected_count in expected.items():
+    for policy_id, expected_agents in expected.items():
         if policy_id not in actual:
             result = False
             logger.info(f"Policy {policy_id} not found in the actual agents mapping")
-        elif actual[policy_id] != expected_count:
+        elif actual[policy_id] != expected_agents.count:
             result = False
-            logger.info(f"Policy {policy_id} expected {expected_count} agents, but got {actual[policy_id]}")
+            logger.info(f"Policy {policy_id} expected {expected_agents.count} agents, but got {actual[policy_id]}")
     return result
 
 
