@@ -4,6 +4,7 @@ If the expected number of agents is not enrolled within the timeout, the test wi
 """
 import sys
 import time
+import re
 from api.agent_policy_api import get_agents
 import configuration_fleet as cnfg
 from state_file_manager import state_manager
@@ -50,7 +51,7 @@ def get_actual_agents() -> dict:
     return policies_dict
 
 
-def all_agents_enrolled(expected: dict, actual: dict) -> bool:
+def verify_agent_count(expected: dict, actual: dict) -> bool:
     """
     Verify that the expected number of agents are enrolled
     """
@@ -65,6 +66,21 @@ def all_agents_enrolled(expected: dict, actual: dict) -> bool:
     return result
 
 
+def verify_agent_tags(agent, expected_agents) -> bool:
+    expected_tags = []
+    if agent.policy_id in expected_agents:
+        expected_tags = expected_agents[agent.policy_id].tags
+    for pattern in expected_tags:
+        pattern_exist = False
+        for tag in agent.tags:
+            if re.match(pattern, tag):
+                pattern_exist = True
+                break
+        if not pattern_exist:
+            return False
+    return True
+
+
 def verify_agents_enrolled() -> bool:
     """
     Construct a dictionary of the expected agents and the actual agents
@@ -75,13 +91,9 @@ def verify_agents_enrolled() -> bool:
     agents = get_agents(cfg=cnfg.elk_config)
     actual = {}
     for agent in agents:
-        expected_tags = []
-        if agent.policy_id in expected:
-            expected_tags = expected[agent.policy_id].tags
-
-        if all(tag in agent.tags for tag in expected_tags):
+        if verify_agent_tags(agent, expected):
             actual[agent.policy_id] = actual.get(agent.policy_id, 0) + 1
-    return all_agents_enrolled(expected, actual)
+    return verify_agent_count(expected, actual)
 
 
 def wait_for_agents_enrolled(timeout) -> bool:
