@@ -24,6 +24,10 @@ is_iam_service_account {
 	input.subType == "gcp-iam-service-account"
 }
 
+is_api_key {
+	input.subType == "gcp-apikeys-key"
+}
+
 is_iam_service_account_key {
 	input.subType == "gcp-iam-service-account-key"
 }

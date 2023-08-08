@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 18/84 implemented rules (21%)
+### 19/84 implemented rules (23%)
 
-#### Automated rules: 18/73 (25%)
+#### Automated rules: 19/73 (26%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -286,7 +286,7 @@
 |                       1.1                        | Identity and Access Management | Ensure that Corporate Login Credentials are Used                                                                                  |        :x:         |  Manual   |
 | [1.10](bundle/compliance/cis_gcp/rules/cis_1_10) | Identity and Access Management | Ensure KMS Encryption Keys Are Rotated Within a Period of 90 Days                                                                 | :white_check_mark: | Automated |
 | [1.11](bundle/compliance/cis_gcp/rules/cis_1_11) | Identity and Access Management | Ensure That Separation of Duties Is Enforced While Assigning KMS Related Roles to Users                                           | :white_check_mark: | Automated |
-|                       1.12                       | Identity and Access Management | Ensure API Keys Only Exist for Active Services                                                                                    |        :x:         | Automated |
+| [1.12](bundle/compliance/cis_gcp/rules/cis_1_12) | Identity and Access Management | Ensure API Keys Only Exist for Active Services                                                                                    | :white_check_mark: | Automated |
 |                       1.13                       | Identity and Access Management | Ensure API Keys Are Restricted To Use by Only Specified Hosts and Apps                                                            |        :x:         |  Manual   |
 |                       1.14                       | Identity and Access Management | Ensure API Keys Are Restricted to Only APIs That Application Needs Access                                                         |        :x:         | Automated |
 | [1.15](bundle/compliance/cis_gcp/rules/cis_1_15) | Identity and Access Management | Ensure API Keys Are Rotated Every 90 Days                                                                                         | :white_check_mark: | Automated |
