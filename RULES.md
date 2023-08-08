@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 29/84 implemented rules (35%)
+### 32/84 implemented rules (38%)
 
-#### Automated rules: 29/73 (40%)
+#### Automated rules: 32/73 (44%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -329,7 +329,7 @@
 |                       3.9                        | Networking                     | Ensure No HTTPS or SSL Proxy Load Balancers Permit SSL Policies With Weak Cipher Suites                                           |        :x:         |  Manual   |
 |  [4.1](bundle/compliance/cis_gcp/rules/cis_4_1)  | Virtual Machines               | Ensure That Instances Are Not Configured To Use the Default Service Account                                                       | :white_check_mark: | Automated |
 |                       4.10                       | Virtual Machines               | Ensure That App Engine Applications Enforce HTTPS Connections                                                                     |        :x:         |  Manual   |
-|                       4.11                       | Virtual Machines               | Ensure That Compute Instances Have Confidential Computing Enabled                                                                 |        :x:         | Automated |
+| [4.11](bundle/compliance/cis_gcp/rules/cis_4_11) | Virtual Machines               | Ensure That Compute Instances Have Confidential Computing Enabled                                                                 | :white_check_mark: | Automated |
 |                       4.12                       | Virtual Machines               | Ensure the Latest Operating System Updates Are Installed On Your Virtual Machines in All Projects                                 |        :x:         |  Manual   |
 |  [4.2](bundle/compliance/cis_gcp/rules/cis_4_2)  | Virtual Machines               | Ensure That Instances Are Not Configured To Use the Default Service Account With Full Access to All Cloud APIs                    | :white_check_mark: | Automated |
 |                       4.3                        | Virtual Machines               | Ensure “Block Project-Wide SSH Keys” Is Enabled for VM Instances                                                                  |        :x:         | Automated |
@@ -337,8 +337,8 @@
 |                       4.5                        | Virtual Machines               | Ensure ‘Enable Connecting to Serial Ports’ Is Not Enabled for VM Instance                                                         |        :x:         | Automated |
 |                       4.6                        | Virtual Machines               | Ensure That IP Forwarding Is Not Enabled on Instances                                                                             |        :x:         | Automated |
 |                       4.7                        | Virtual Machines               | Ensure VM Disks for Critical VMs Are Encrypted With Customer-Supplied Encryption Keys (CSEK)                                      |        :x:         | Automated |
-|                       4.8                        | Virtual Machines               | Ensure Compute Instances Are Launched With Shielded VM Enabled                                                                    |        :x:         | Automated |
-|                       4.9                        | Virtual Machines               | Ensure That Compute Instances Do Not Have Public IP Addresses                                                                     |        :x:         | Automated |
+|  [4.8](bundle/compliance/cis_gcp/rules/cis_4_8)  | Virtual Machines               | Ensure Compute Instances Are Launched With Shielded VM Enabled                                                                    | :white_check_mark: | Automated |
+|  [4.9](bundle/compliance/cis_gcp/rules/cis_4_9)  | Virtual Machines               | Ensure That Compute Instances Do Not Have Public IP Addresses                                                                     | :white_check_mark: | Automated |
 |  [5.1](bundle/compliance/cis_gcp/rules/cis_5_1)  | Storage                        | Ensure That Cloud Storage Bucket Is Not Anonymously or Publicly Accessible                                                        | :white_check_mark: | Automated |
 |  [5.2](bundle/compliance/cis_gcp/rules/cis_5_2)  | Storage                        | Ensure That Cloud Storage Buckets Have Uniform Bucket-Level Access Enabled                                                        | :white_check_mark: | Automated |
 |                      6.1.1                       | MySQL Database                 | Ensure That a MySQL Database Instance Does Not Allow Anyone To Connect With Administrative Privileges                             |        :x:         |  Manual   |

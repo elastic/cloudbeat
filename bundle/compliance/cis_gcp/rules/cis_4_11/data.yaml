@@ -1,0 +1,89 @@
+metadata:
+  id: e833e6a8-673d-56b2-a979-f9aa4e52cb71
+  name: Ensure That Compute Instances Have Confidential Computing Enabled
+  profile_applicability: '* Level 2'
+  description: |-
+    Google Cloud encrypts data at-rest and in-transit, but customer data must be decrypted for processing.
+    Confidential Computing is a breakthrough technology which encrypts data in-use—while it is being processed.
+    Confidential Computing environments keep data encrypted in memory and elsewhere outside the central processing unit (CPU).
+
+
+    Confidential VMs leverage the Secure Encrypted Virtualization (SEV) feature of AMD EPYC™ CPUs.
+    Customer data will stay encrypted while it is used, indexed, queried, or trained on.
+    Encryption keys are generated in hardware, per VM, and not exportable.
+    Thanks to built-in hardware optimizations of both performance and security, there is no significant performance penalty to Confidential Computing workloads.
+  rationale: |-
+    Confidential Computing enables customers' sensitive code and other data encrypted in memory during processing.
+    Google does not have access to the encryption keys.
+    Confidential VM can help alleviate concerns about risk related to either dependency on Google infrastructure or Google insiders' access to customer data in the clear.
+  audit: |-
+    Note: Confidential Computing is currently only supported on N2D machines.
+    To learn more about types of N2D machines, visit [https://cloud.google.com/compute/docs/machine-types#n2d_machine_types](https://cloud.google.com/compute/docs/machine-types#n2d_machine_types)
+
+    **From Google Cloud Console**
+
+    1. Go to the `VM instances` page by visiting: [https://console.cloud.google.com/compute/instances](https://console.cloud.google.com/compute/instances).
+
+    2. Click on the instance name to see its VM instance details page.
+
+    3. Ensure that `Confidential VM service` is `Enabled`.
+
+    **From Google Cloud CLI**
+
+    4. List the instances in your project and get details on each instance:
+
+    ```
+    gcloud compute instances list --format=json
+    ```
+    5. Ensure that `enableConfidentialCompute` is set to `true` for all instances with machine type starting with "n2d-".
+
+    ```
+    confidentialInstanceConfig:
+     enableConfidentialCompute: true
+    ```
+  remediation: |-
+    Confidential Computing can only be enabled when an instance is created.
+    You must delete the current instance and create a new one.
+
+    **From Google Cloud Console**
+
+    1. Go to the VM instances page by visiting: [https://console.cloud.google.com/compute/instances](https://console.cloud.google.com/compute/instances).
+
+    2. Click `CREATE INSTANCE`.
+
+    3. Fill out the desired configuration for your instance.
+
+    4. Under the `Confidential VM service` section, check the option `Enable the Confidential Computing service on this VM instance`.
+
+    5. Click `Create`.
+
+    **From Google Cloud CLI**
+
+    Create a new instance with Confidential Compute enabled.
+
+
+    ```
+    gcloud compute instances create <INSTANCE_NAME> --zone <ZONE> --confidential-compute --maintenance-policy=TERMINATE 
+    ```
+  impact: |-
+    '- Confidential Computing for Compute instances does not support live migration. Unlike regular Compute instances, Confidential VMs experience disruptions during maintenance events like a software or hardware update.
+    - Additional charges may be incurred when enabling this security feature. See [https://cloud.google.com/compute/confidential-vm/pricing](https://cloud.google.com/compute/confidential-vm/pricing) for more info.
+  default_value: ''
+  references: |-
+    1. https://cloud.google.com/compute/confidential-vm/docs/creating-cvm-instance
+    2. https://cloud.google.com/compute/confidential-vm/docs/about-cvm
+    3. https://cloud.google.com/confidential-computing
+    4. https://cloud.google.com/blog/products/identity-security/introducing-google-cloud-confidential-computing-with-confidential-vms
+  section: Virtual Machines
+  version: '1.0'
+  tags:
+  - CIS
+  - GCP
+  - CIS 4.11
+  - Virtual Machines
+  benchmark:
+    name: CIS Google Cloud Platform Foundation
+    version: v2.0.0
+    id: cis_gcp
+    rule_number: '4.11'
+    posture_type: cspm
