@@ -63,3 +63,7 @@ is_monitoring_asset {
 is_dns_managed_zone {
 	input.subType == "gcp-dns-managed-zone"
 }
+
+is_sql_instance {
+	input.subType == "gcp-sqladmin-instance"
+}
