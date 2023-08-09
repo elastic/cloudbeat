@@ -76,7 +76,7 @@ if __name__ == "__main__":
         cspm_data=cspm_data,
     )
 
-    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, CSPM_EXPECTED_AGENTS))
+    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, CSPM_EXPECTED_AGENTS, []))
 
     manifest_params = Munch()
     manifest_params.enrollment_token = get_enrollment_token(

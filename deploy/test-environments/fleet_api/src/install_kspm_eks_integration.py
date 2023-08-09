@@ -71,7 +71,7 @@ if __name__ == "__main__":
         eks_data=eks_data,
     )
 
-    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, KSPM_EKS_EXPECTED_AGENTS))
+    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, KSPM_EKS_EXPECTED_AGENTS, []))
 
     manifest_params = Munch()
     manifest_params.enrollment_token = get_enrollment_token(

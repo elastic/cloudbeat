@@ -13,13 +13,13 @@ CIS_2_3_3 = "CIS 2.3.3"
 
 cis_aws_rds_2_3_1_pass = EksAwsServiceCase(
     rule_tag=CIS_2_3_1,
-    case_identifier="qa-postgres-rds",
+    case_identifier="test-rds-instance-1",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_rds_2_3_1_fail = EksAwsServiceCase(
     rule_tag=CIS_2_3_1,
-    case_identifier="test-aws-db-enc-disabled",
+    case_identifier="test-rds-fail-instance-1",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -30,13 +30,13 @@ cis_aws_rds_2_3_1 = {
 
 cis_aws_rds_2_3_2_pass = EksAwsServiceCase(
     rule_tag=CIS_2_3_2,
-    case_identifier="qa-postgres-rds",
+    case_identifier="test-rds-instance-1",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_rds_2_3_2_fail = EksAwsServiceCase(
     rule_tag=CIS_2_3_2,
-    case_identifier="test-aws-db-enc-disabled",
+    case_identifier="test-rds-fail-instance-1",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -47,13 +47,13 @@ cis_aws_rds_2_3_2 = {
 
 cis_aws_rds_2_3_3_pass = EksAwsServiceCase(
     rule_tag=CIS_2_3_3,
-    case_identifier="test-aws-db-no-public-access-allowed-pass",
+    case_identifier="test-rds-instance-1",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_rds_2_3_3_fail = EksAwsServiceCase(
     rule_tag=CIS_2_3_3,
-    case_identifier="test-aws-db-public-access-on-fail",
+    case_identifier="test-rds-fail-instance-1",
     expected=RULE_FAIL_STATUS,
 )
 

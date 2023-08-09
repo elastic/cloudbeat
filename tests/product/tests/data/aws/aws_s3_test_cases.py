@@ -15,13 +15,13 @@ CIS_2_1_5 = "CIS 2.1.5"
 
 cis_aws_s3_2_1_1_pass = EksAwsServiceCase(
     rule_tag=CIS_2_1_1,
-    case_identifier="test-aws-sse-s3-pass",
+    case_identifier="test-aws-sse-s3",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_s3_2_1_1_pass_2 = EksAwsServiceCase(
     rule_tag=CIS_2_1_1,
-    case_identifier="test-aws-kms-key-pass",
+    case_identifier="test-aws-kms-key",
     expected=RULE_PASS_STATUS,
 )
 
@@ -42,19 +42,19 @@ cis_aws_s3_2_1_1_skip = {
 
 cis_aws_s3_2_1_2_pass = EksAwsServiceCase(
     rule_tag=CIS_2_1_2,
-    case_identifier="test-aws-sse-s3-pass",
+    case_identifier="test-aws-sse-s3",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_s3_2_1_2_fail = EksAwsServiceCase(
     rule_tag=CIS_2_1_2,
-    case_identifier="test-aws-sec-transport-fail",
+    case_identifier="test-aws-kms-key",
     expected=RULE_FAIL_STATUS,
 )
 
 cis_aws_s3_2_1_2_fail_2 = EksAwsServiceCase(
     rule_tag=CIS_2_1_2,
-    case_identifier="test-aws-sec-transport-no-condition-fail",
+    case_identifier="test-aws-sec-transport-no-condition",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -66,7 +66,7 @@ cis_aws_s3_2_1_2 = {
 
 cis_aws_s3_2_1_3_fail = EksAwsServiceCase(
     rule_tag=CIS_2_1_3,
-    case_identifier="test-aws-mfa-disabled-fail",
+    case_identifier="test-aws-sse-s3",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -77,23 +77,22 @@ cis_aws_s3_2_1_3_pass = EksAwsServiceCase(
 )
 
 cis_aws_s3_2_1_3 = {
-    "2.1.2 Ensure MFA Delete is enabled: default -> disabled -> expect: failed": cis_aws_s3_2_1_3_fail,
-    "2.1.2 Ensure MFA Delete is enabled, expect: failed": cis_aws_s3_2_1_3_pass,
+    "2.1.3 Ensure MFA Delete is enabled: default -> disabled -> expect: failed": cis_aws_s3_2_1_3_fail,
 }
 
 cis_aws_s3_2_1_3_skip = {
-    "2.1.2 Ensure MFA Delete is enabled, expect: failed": cis_aws_s3_2_1_3_pass,
+    "2.1.3 Ensure MFA Delete is enabled, expect: failed": cis_aws_s3_2_1_3_pass,
 }
 
 cis_aws_s3_2_1_5_pass = EksAwsServiceCase(
     rule_tag=CIS_2_1_5,
-    case_identifier="test-aws-no-public-access-pass",
+    case_identifier="test-aws-sse-s3",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_s3_2_1_5_fail = EksAwsServiceCase(
     rule_tag=CIS_2_1_5,
-    case_identifier="test-aws-public-access-allowed-fail",
+    case_identifier="test-aws-kms-key",
     expected=RULE_FAIL_STATUS,
 )
 

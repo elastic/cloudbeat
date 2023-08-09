@@ -66,7 +66,7 @@ if __name__ == "__main__":
         agent_policy_id=agent_policy_id,
     )
 
-    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, KSPM_UNMANAGED_EXPECTED_AGENTS))
+    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, KSPM_UNMANAGED_EXPECTED_AGENTS, []))
 
     manifest_params = Munch()
     manifest_params.enrollment_token = get_enrollment_token(
