@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 46/84 implemented rules (55%)
+### 47/84 implemented rules (56%)
 
-#### Automated rules: 46/73 (63%)
+#### Automated rules: 47/73 (64%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -362,7 +362,7 @@
 | [6.3.7](bundle/compliance/cis_gcp/rules/cis_6_3_7) | SQL Server                     | Ensure that the 'contained database authentication' database flag for Cloud SQL on the SQL Server instance is set to 'off'        | :white_check_mark: | Automated |
 |   [6.4](bundle/compliance/cis_gcp/rules/cis_6_4)   | Cloud SQL Database Services    | Ensure That the Cloud SQL Database Instance Requires All Incoming Connections To Use SSL                                          | :white_check_mark: | Automated |
 |                        6.5                         | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Do Not Implicitly Whitelist All Public IP Addresses                                      |        :x:         | Automated |
-|                        6.6                         | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Do Not Have Public IPs                                                                   |        :x:         | Automated |
+|   [6.6](bundle/compliance/cis_gcp/rules/cis_6_6)   | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Do Not Have Public IPs                                                                   | :white_check_mark: | Automated |
 |   [6.7](bundle/compliance/cis_gcp/rules/cis_6_7)   | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Are Configured With Automated Backups                                                    | :white_check_mark: | Automated |
 |   [7.1](bundle/compliance/cis_gcp/rules/cis_7_1)   | BigQuery                       | Ensure That BigQuery Datasets Are Not Anonymously or Publicly Accessible                                                          | :white_check_mark: | Automated |
 |   [7.2](bundle/compliance/cis_gcp/rules/cis_7_2)   | BigQuery                       | Ensure That All BigQuery Tables Are Encrypted With Customer-Managed Encryption Key (CMEK)                                         | :white_check_mark: | Automated |
