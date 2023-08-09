@@ -16,6 +16,10 @@ is_api_key {
 	input.subType == "gcp-apikeys-key"
 }
 
+is_dataproc_cluster {
+	input.subType == "gcp-dataproc-cluster"
+}
+
 is_storage_bucket {
 	input.subType == "gcp-storage-bucket"
 }

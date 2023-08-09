@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 36/84 implemented rules (43%)
+### 37/84 implemented rules (44%)
 
-#### Automated rules: 36/73 (49%)
+#### Automated rules: 37/73 (51%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -291,7 +291,7 @@
 | [1.14](bundle/compliance/cis_gcp/rules/cis_1_14) | Identity and Access Management | Ensure API Keys Are Restricted to Only APIs That Application Needs Access                                                         | :white_check_mark: | Automated |
 | [1.15](bundle/compliance/cis_gcp/rules/cis_1_15) | Identity and Access Management | Ensure API Keys Are Rotated Every 90 Days                                                                                         | :white_check_mark: | Automated |
 |                       1.16                       | Identity and Access Management | Ensure Essential Contacts is Configured for Organization                                                                          |        :x:         | Automated |
-|                       1.17                       | Identity and Access Management | Ensure that Dataproc Cluster is encrypted using Customer-Managed Encryption Key                                                   |        :x:         | Automated |
+| [1.17](bundle/compliance/cis_gcp/rules/cis_1_17) | Identity and Access Management | Ensure that Dataproc Cluster is encrypted using Customer-Managed Encryption Key                                                   | :white_check_mark: | Automated |
 |                       1.18                       | Identity and Access Management | Ensure Secrets are Not Stored in Cloud Functions Environment Variables by Using Secret Manager                                    |        :x:         |  Manual   |
 |                       1.2                        | Identity and Access Management | Ensure that Multi-Factor Authentication is 'Enabled' for All Non-Service Accounts                                                 |        :x:         |  Manual   |
 |                       1.3                        | Identity and Access Management | Ensure that Security Key Enforcement is Enabled for All Admin Accounts                                                            |        :x:         |  Manual   |
