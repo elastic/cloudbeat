@@ -3,7 +3,7 @@ cloudbeat:
     v1:
       benchmark: cis_gcp
       gcp:
-        project_id: elastic-security-test
+        project_id: ${GCP_PROJECT_ID}
         credentials:
           # credentials_json:
           credentials_file_path: ${GOOGLE_APPLICATION_CREDENTIALS:""}
@@ -15,7 +15,7 @@ cloudbeat:
 # =================================== Kibana ===================================
 setup.kibana:
   # Kibana Host
-  host: https://cis-gcp.kb.us-west2.gcp.elastic-cloud.com:9243
+  host: "http://host.docker.internal:5601"
 # =============================== Elastic Cloud ================================
 
 # These settings simplify using Cloudbeat with the Elastic Cloud (https://cloud.elastic.co/).
@@ -32,14 +32,14 @@ setup.kibana:
 # ---------------------------- Elasticsearch Output ----------------------------
 output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: https://cis-gcp.es.us-west2.gcp.elastic-cloud.com:443
+  hosts: ${ES_HOST}
 
   # Protocol - either `http` (default) or `https`.
   #  protocol: "https"
 
   # Authentication credentials - either API key or username/password.
   #api_key: "id:api_key"
-  username: elastic
+  username: ${ES_USERNAME}
   password: ${ES_PASSWORD}
 
   # Enable to allow sending output to older ES versions
