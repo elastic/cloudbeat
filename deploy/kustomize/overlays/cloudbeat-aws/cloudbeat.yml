@@ -3,6 +3,7 @@ cloudbeat:
     v1:
       benchmark: cis_aws
       aws:
+        account_type: single-account
         credentials:
           access_key_id: ${AWS_ACCESS_KEY_ID:no_access_key_was_set}
           secret_access_key: ${AWS_SECRET_ACCESS_KEY:no_secret_was_set}
