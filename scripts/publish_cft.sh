@@ -3,8 +3,8 @@
 function usage() {
   cat <<EOF
 Usage: $0 <local-file> <remote-file>
-Replace CFT_VERSION with the remote file name.
-Upload the local file to the remote file name.
+Replace the CFT_VERSION placeholder in the local-file.
+Upload the local-file to S3 with the remote-file name.
 
 EOF
 }
