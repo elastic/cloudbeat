@@ -38,17 +38,17 @@ metadata:
 
     ```
     {
-     "ConfigurationRecorders": [
-     {
-     "recordingGroup": {
-     "allSupported": true,
-     "resourceTypes": [],
-     "includeGlobalResourceTypes": true
-     },
-     "roleARN": "arn:aws:iam::<AWS_Account_ID>:role/service-role/<config-role-name>",
-     "name": "default"
-     }
-     ]
+        "ConfigurationRecorders": [
+            {
+                "recordingGroup": {
+                    "allSupported": true,
+                    "resourceTypes": [],
+                    "includeGlobalResourceTypes": true
+                },
+                "roleARN": "arn:aws:iam::<AWS_Account_ID>:role/service-role/<config-role-name>",
+                "name": "default"
+            }
+        ]
     }
     ```
 

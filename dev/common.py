@@ -1,5 +1,6 @@
 import os
 
+import json
 import git
 import pandas as pd
 import regex as re
@@ -141,8 +142,29 @@ def add_new_line_after_period(text):
     return '\n'.join(lines)
 
 
+def format_json_in_text(text):
+    try:
+        # Search for JSON-like content in the text
+        start_index = text.find('{')
+        end_index = text.rfind('}') + 1
+        json_str = text[start_index:end_index]
+
+        # Try to load and format the JSON
+        parsed_json = json.loads(json_str)
+        formatted_json = json.dumps(parsed_json, indent=4)
+
+        # Replace the original JSON string in the text with the formatted one
+        formatted_text = text[:start_index] + formatted_json + text[end_index:]
+
+        return formatted_text
+    except:
+        # If JSON extraction or formatting fails, return the original text
+        return text
+
+
 def fix_code_blocks(text: str):
     text = add_new_line_after_period(text)
+    text = format_json_in_text(text)
     return check_and_fix_numbered_list(text)
 
 

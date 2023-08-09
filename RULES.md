@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 32/84 implemented rules (38%)
+### 36/84 implemented rules (43%)
 
-#### Automated rules: 32/73 (44%)
+#### Automated rules: 36/73 (49%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -332,10 +332,10 @@
 | [4.11](bundle/compliance/cis_gcp/rules/cis_4_11) | Virtual Machines               | Ensure That Compute Instances Have Confidential Computing Enabled                                                                 | :white_check_mark: | Automated |
 |                       4.12                       | Virtual Machines               | Ensure the Latest Operating System Updates Are Installed On Your Virtual Machines in All Projects                                 |        :x:         |  Manual   |
 |  [4.2](bundle/compliance/cis_gcp/rules/cis_4_2)  | Virtual Machines               | Ensure That Instances Are Not Configured To Use the Default Service Account With Full Access to All Cloud APIs                    | :white_check_mark: | Automated |
-|                       4.3                        | Virtual Machines               | Ensure “Block Project-Wide SSH Keys” Is Enabled for VM Instances                                                                  |        :x:         | Automated |
-|                       4.4                        | Virtual Machines               | Ensure Oslogin Is Enabled for a Project                                                                                           |        :x:         | Automated |
-|                       4.5                        | Virtual Machines               | Ensure ‘Enable Connecting to Serial Ports’ Is Not Enabled for VM Instance                                                         |        :x:         | Automated |
-|                       4.6                        | Virtual Machines               | Ensure That IP Forwarding Is Not Enabled on Instances                                                                             |        :x:         | Automated |
+|  [4.3](bundle/compliance/cis_gcp/rules/cis_4_3)  | Virtual Machines               | Ensure “Block Project-Wide SSH Keys” Is Enabled for VM Instances                                                                  | :white_check_mark: | Automated |
+|  [4.4](bundle/compliance/cis_gcp/rules/cis_4_4)  | Virtual Machines               | Ensure Oslogin Is Enabled for a Project                                                                                           | :white_check_mark: | Automated |
+|  [4.5](bundle/compliance/cis_gcp/rules/cis_4_5)  | Virtual Machines               | Ensure ‘Enable Connecting to Serial Ports’ Is Not Enabled for VM Instance                                                         | :white_check_mark: | Automated |
+|  [4.6](bundle/compliance/cis_gcp/rules/cis_4_6)  | Virtual Machines               | Ensure That IP Forwarding Is Not Enabled on Instances                                                                             | :white_check_mark: | Automated |
 |                       4.7                        | Virtual Machines               | Ensure VM Disks for Critical VMs Are Encrypted With Customer-Supplied Encryption Keys (CSEK)                                      |        :x:         | Automated |
 |  [4.8](bundle/compliance/cis_gcp/rules/cis_4_8)  | Virtual Machines               | Ensure Compute Instances Are Launched With Shielded VM Enabled                                                                    | :white_check_mark: | Automated |
 |  [4.9](bundle/compliance/cis_gcp/rules/cis_4_9)  | Virtual Machines               | Ensure That Compute Instances Do Not Have Public IP Addresses                                                                     | :white_check_mark: | Automated |

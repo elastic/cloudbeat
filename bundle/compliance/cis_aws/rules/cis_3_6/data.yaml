@@ -39,10 +39,10 @@ metadata:
 
     ```
     {
-     "LoggingEnabled": {
-     "TargetPrefix": "<Prefix_Test>",
-     "TargetBucket": "<Bucket_name_for_Storing_Logs>"
-     }
+        "LoggingEnabled": {
+            "TargetPrefix": "<Prefix_Test>",
+            "TargetBucket": "<Bucket_name_for_Storing_Logs>"
+        }
     }
     ```
   remediation: |-
@@ -69,19 +69,19 @@ metadata:
     8. Copy and add target bucket name at `<Logging_BucketName>`, Prefix for logfile at `<LogFilePrefix>` and optionally add an email address in the following template and save it as `<FileName.Json>`:
     ```
     {
-     "LoggingEnabled": {
-     "TargetBucket": "<Logging_BucketName>",
-     "TargetPrefix": "<LogFilePrefix>",
-     "TargetGrants": [
-     {
-     "Grantee": {
-     "Type": "AmazonCustomerByEmail",
-     "EmailAddress": "<EmailID>"
-     },
-     "Permission": "FULL_CONTROL"
-     }
-     ]
-     } 
+        "LoggingEnabled": {
+            "TargetBucket": "<Logging_BucketName>",
+            "TargetPrefix": "<LogFilePrefix>",
+            "TargetGrants": [
+                {
+                    "Grantee": {
+                        "Type": "AmazonCustomerByEmail",
+                        "EmailAddress": "<EmailID>"
+                    },
+                    "Permission": "FULL_CONTROL"
+                }
+            ]
+        }
     }
     ```
     9. Run the `put-bucket-logging` command with bucket name and `<FileName.Json>` as input, for more information refer at [put-bucket-logging](https://docs.aws.amazon.com/cli/latest/reference/s3api/put-bucket-logging.html):
