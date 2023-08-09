@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 38/84 implemented rules (45%)
+### 39/84 implemented rules (46%)
 
-#### Automated rules: 38/73 (52%)
+#### Automated rules: 39/73 (53%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -360,7 +360,7 @@
 |                      6.3.5                       | SQL Server                     | Ensure 'remote access' database flag for Cloud SQL SQL Server instance is set to 'off'                                            |        :x:         | Automated |
 |                      6.3.6                       | SQL Server                     | Ensure '3625 (trace flag)' database flag for all Cloud SQL Server instances is set to 'on'                                        |        :x:         | Automated |
 |                      6.3.7                       | SQL Server                     | Ensure that the 'contained database authentication' database flag for Cloud SQL on the SQL Server instance is set to 'off'        |        :x:         | Automated |
-|                       6.4                        | Cloud SQL Database Services    | Ensure That the Cloud SQL Database Instance Requires All Incoming Connections To Use SSL                                          |        :x:         | Automated |
+|  [6.4](bundle/compliance/cis_gcp/rules/cis_6_4)  | Cloud SQL Database Services    | Ensure That the Cloud SQL Database Instance Requires All Incoming Connections To Use SSL                                          | :white_check_mark: | Automated |
 |                       6.5                        | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Do Not Implicitly Whitelist All Public IP Addresses                                      |        :x:         | Automated |
 |                       6.6                        | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Do Not Have Public IPs                                                                   |        :x:         | Automated |
 |  [6.7](bundle/compliance/cis_gcp/rules/cis_6_7)  | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Are Configured With Automated Backups                                                    | :white_check_mark: | Automated |
