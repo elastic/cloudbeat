@@ -49,11 +49,7 @@ jobs:
         run: mage checkLicenseHeaders
 
       - name: Validate mocks
-        run: |
-          # delete and re-generate files to check nothing is different / missing
-          find . -name 'mock_*.go' -exec rm -f {} \;
-          just generate-mocks
-          git diff --exit-code
+        run: just validate-mocks
 
   Build:
     name: Build
