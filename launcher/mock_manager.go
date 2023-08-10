@@ -157,6 +157,43 @@ func (_c *MockManager_RegisterAction_Call) RunAndReturn(run func(client.Action))
 	return _c
 }
 
+// RegisterDiagnosticHook provides a mock function with given fields: name, description, filename, contentType, hook
+func (_m *MockManager) RegisterDiagnosticHook(name string, description string, filename string, contentType string, hook client.DiagnosticHook) {
+	_m.Called(name, description, filename, contentType, hook)
+}
+
+// MockManager_RegisterDiagnosticHook_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RegisterDiagnosticHook'
+type MockManager_RegisterDiagnosticHook_Call struct {
+	*mock.Call
+}
+
+// RegisterDiagnosticHook is a helper method to define mock.On call
+//   - name string
+//   - description string
+//   - filename string
+//   - contentType string
+//   - hook client.DiagnosticHook
+func (_e *MockManager_Expecter) RegisterDiagnosticHook(name interface{}, description interface{}, filename interface{}, contentType interface{}, hook interface{}) *MockManager_RegisterDiagnosticHook_Call {
+	return &MockManager_RegisterDiagnosticHook_Call{Call: _e.mock.On("RegisterDiagnosticHook", name, description, filename, contentType, hook)}
+}
+
+func (_c *MockManager_RegisterDiagnosticHook_Call) Run(run func(name string, description string, filename string, contentType string, hook client.DiagnosticHook)) *MockManager_RegisterDiagnosticHook_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string), args[2].(string), args[3].(string), args[4].(client.DiagnosticHook))
+	})
+	return _c
+}
+
+func (_c *MockManager_RegisterDiagnosticHook_Call) Return() *MockManager_RegisterDiagnosticHook_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockManager_RegisterDiagnosticHook_Call) RunAndReturn(run func(string, string, string, string, client.DiagnosticHook)) *MockManager_RegisterDiagnosticHook_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SetPayload provides a mock function with given fields: _a0
 func (_m *MockManager) SetPayload(_a0 map[string]interface{}) {
 	_m.Called(_a0)
