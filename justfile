@@ -173,10 +173,6 @@ generate-mocks:
   mockery --dir . --inpackage --all --with-expecter --case underscore --recursive --exclude vendor
   mage AddLicenseHeaders
 
-# run to validate no mocks are missing
-validate-mocks:
-  ./scripts/validate-mocks.sh
-
 
 #### TESTS ####
 
