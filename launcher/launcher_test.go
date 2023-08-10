@@ -469,7 +469,7 @@ func (s *LauncherTestSuite) TestHealthReporter() {
 		sut.Stop()
 	}()
 	err = sut.run()
-	s.NoError(err)
+	s.ErrorIs(err, ErrorGracefulExit)
 }
 
 // TestLauncherErrorBeater should not call sut.Stop as the launcher should stop without callling it
@@ -530,7 +530,7 @@ func (s *LauncherTestSuite) TestLauncherErrorBeaterCreation() {
 
 func (s *LauncherTestSuite) TestLauncherStop() {
 	mocks := s.InitMocks()
-	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
 
 	go func() {
@@ -543,7 +543,7 @@ func (s *LauncherTestSuite) TestLauncherStop() {
 
 func (s *LauncherTestSuite) TestLauncherStopTimeout() {
 	mocks := s.InitMocks()
-	sut, err := New(s.log, dummyBeaterName, mocks.reloader, nil, beaterMockCreator, config.NewConfig())
+	sut, err := New(s.log, dummyBeaterName, mocks.reloader, mocks.health, nil, beaterMockCreator, config.NewConfig())
 	s.NoError(err)
 
 	sut.wg.Add(1) // keep waiting for graceful period
