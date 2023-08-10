@@ -18,12 +18,16 @@ from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     create_kubernetes_manifest,
+    get_cloud_security_posture_version,
+    update_package_version,
 )
 from loguru import logger
-from utils import read_json, save_state
+from utils import read_json
+from state_file_manager import state_manager, PolicyState
 
 KSPM_UNMANAGED_AGENT_POLICY = "../../../cloud/data/agent_policy_vanilla.json"
 KSPM_UNMANAGED_PACKAGE_POLICY = "../../../cloud/data/package_policy_vanilla.json"
+KSPM_UNMANAGED_EXPECTED_AGENTS = 2
 
 
 kspm_agent_policy_data = Path(__file__).parent / KSPM_UNMANAGED_AGENT_POLICY
@@ -39,11 +43,16 @@ def load_data() -> Tuple[Dict, Dict]:
     logger.info("Loading agent and package policies")
     agent_policy = read_json(json_path=kspm_agent_policy_data)
     package_policy = read_json(json_path=kspm_unmanached_pkg_policy_data)
+
     return agent_policy, package_policy
 
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
+    package_version = get_cloud_security_posture_version(cfg=cnfg.elk_config)
+    logger.info(f"Package version: {package_version}")
+    update_package_version(cfg=cnfg.elk_config, package_version=package_version)
+
     logger.info("Starting installation of KSPM integration.")
     agent_data, package_data = load_data()
 
@@ -57,15 +66,8 @@ if __name__ == "__main__":
         agent_policy_id=agent_policy_id,
     )
 
-    save_state(
-        cnfg.state_data_file,
-        [
-            {
-                "pkg_policy_id": package_policy_id,
-                "agnt_policy_id": agent_policy_id,
-            },
-        ],
-    )
+    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, KSPM_UNMANAGED_EXPECTED_AGENTS, []))
+
     manifest_params = Munch()
     manifest_params.enrollment_token = get_enrollment_token(
         cfg=cnfg.elk_config,
@@ -74,6 +76,7 @@ if __name__ == "__main__":
 
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
     manifest_params.yaml_path = Path(__file__).parent / "kspm_unmanaged.yaml"
+    manifest_params.docker_image_override = cnfg.kspm_config.docker_image_override
     logger.info("Creating KSPM unmanaged manifest")
     create_kubernetes_manifest(cfg=cnfg.elk_config, params=manifest_params)
     logger.info("Installation of KSPM integration is done")

@@ -20,17 +20,19 @@ package iam
 import (
 	"bytes"
 	"context"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/smithy-go"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/gocarina/gocsv"
 	"github.com/pkg/errors"
-	"strconv"
-	"strings"
-	"time"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
 const (
@@ -231,14 +233,14 @@ func (p Provider) getCredentialReport(ctx context.Context) (map[string]*Credenti
 		if errors.As(err, &apiErr) {
 			if apiErr.ErrorCode() == "ReportNotPresent" || apiErr.ErrorCode() == "ReportExpired" {
 				// generate a new report
-				_, err := p.client.GenerateCredentialReport(ctx, &iamsdk.GenerateCredentialReportInput{})
+				_, err = p.client.GenerateCredentialReport(ctx, &iamsdk.GenerateCredentialReportInput{})
 				if err != nil {
 					return nil, err
 				}
 			}
 		}
 
-		// loop until max retires or till the report is ready
+		// loop until max retries or till the report is ready
 		var countRetries = 0
 		report, err = p.client.GetCredentialReport(ctx, &iamsdk.GetCredentialReportInput{})
 		if errors.As(err, &apiErr) {

@@ -19,11 +19,12 @@ package iam
 
 import (
 	"context"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
-	"strings"
-	"time"
 )
 
 func (p Provider) getRootAccountUser(rootAccount *CredentialReport) *types.User {
@@ -92,7 +93,6 @@ func (p Provider) listRootMFADevice(ctx context.Context, userAccount *Credential
 			}
 			return append(devices, rootMFADevice), nil
 		}
-
 	}
 
 	// represent a hardware mfa device assigned to the root account user

@@ -24,22 +24,16 @@ import (
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
 type ConfigTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
 }
 
 func TestConfigTestSuite(t *testing.T) {
 	s := new(ConfigTestSuite)
-	s.log = logp.NewLogger("cloudbeat_config_test_suite")
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }
@@ -49,24 +43,19 @@ func (s *ConfigTestSuite) SetupTest() {
 
 func (s *ConfigTestSuite) TestNew() {
 	tests := []struct {
-		config            string
-		expectedType      string
-		expectedAWSConfig aws.ConfigAWS
-		expectedFetchers  int
+		config              string
+		expectedType        string
+		expectedCloudConfig CloudConfig
+		expectedFetchers    int
 	}{
 		{
 			`
 config:
   v1:
     benchmark: cis_k8s
-fetchers:
-  - name: a
-    directory: b
-  - name: b
-    directory: b
 `,
 			"cis_k8s",
-			aws.ConfigAWS{},
+			CloudConfig{},
 			2,
 		},
 		{
@@ -75,6 +64,7 @@ config:
   v1:
     benchmark: cis_eks
     aws:
+      account_type: organization-account
       credentials:
         access_key_id: key
         secret_access_key: secret
@@ -82,22 +72,20 @@ config:
         shared_credential_file: shared_credential_file
         credential_profile_name: credential_profile_name
         role_arn: role_arn
-fetchers:
-  - name: a
-    directory: b
-  - name: b
-    directory: b
-  - name: c
-    directory: c
 `,
 			"cis_eks",
-			aws.ConfigAWS{
-				AccessKeyID:          "key",
-				SecretAccessKey:      "secret",
-				SessionToken:         "session",
-				SharedCredentialFile: "shared_credential_file",
-				ProfileName:          "credential_profile_name",
-				RoleArn:              "role_arn",
+			CloudConfig{
+				Aws: AwsConfig{
+					Cred: aws.ConfigAWS{
+						AccessKeyID:          "key",
+						SecretAccessKey:      "secret",
+						SessionToken:         "session",
+						SharedCredentialFile: "shared_credential_file",
+						ProfileName:          "credential_profile_name",
+						RoleArn:              "role_arn",
+					},
+					AccountType: "organization-account",
+				},
 			},
 			3,
 		},
@@ -106,14 +94,13 @@ fetchers:
 	for i, test := range tests {
 		s.Run(fmt.Sprint(i), func() {
 			cfg, err := config.NewConfigFrom(test.config)
-			s.NoError(err)
+			require.NoError(s.T(), err)
 
 			c, err := New(cfg)
-			s.NoError(err)
+			require.NoError(s.T(), err)
 
 			s.Equal(test.expectedType, c.Benchmark)
-			s.Equal(test.expectedAWSConfig, c.CloudConfig.AwsCred)
-			s.Equal(test.expectedFetchers, len(c.Fetchers))
+			s.Equal(test.expectedCloudConfig, c.CloudConfig)
 		})
 	}
 }
@@ -132,15 +119,6 @@ config:
 `,
 			"cis_eks",
 			false,
-		},
-		{
-			`
-config:
-  v1:
-    benchmark: cis_gcp
-`,
-			"",
-			true,
 		},
 	}
 

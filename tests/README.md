@@ -1,9 +1,5 @@
 # Cloudbeat Automated Tests Framework (C-ATF)
 
->
-
->
-
 This project provides a framework for developing component and integration tests for Cloudbeat.
 
 ## Getting started
@@ -49,7 +45,7 @@ for executing **pre_merge** marker tests.
 
 Automated test framework is built on top of the following:
 
-- [pytest](https://docs.pytest.org/en/7.1.x/) -  Python testing framework.
+- [pytest](https://docs.pytest.org/en/7.1.x/) - Python testing framework.
 - [poetry](https://python-poetry.org/docs/) - Dependency management for Python.
 - [allure](https://docs.qameta.io/allure/#_pytest) - Generates html test reports.
 
@@ -134,15 +130,18 @@ The project main folders are:
 
 This project uses [loguru](https://github.com/Delgan/loguru) for logging.
 To start logging, just import logger from loguru lib
+
 ```shell
 from loguru import logger
 
 logger.info("Start logging")
 ```
 
-Basic logging configuration is realized through [environment variables](https://github.com/Delgan/loguru/blob/master/loguru/_defaults.py)
+Basic logging configuration is realized
+through [environment variables](https://github.com/Delgan/loguru/blob/master/loguru/_defaults.py)
 
 Additional functionality
+
 - **caplog fixture** - add a sink that propagates Loguru to the caplog handler.
 - **logger_wraps** - useful to log entry and exit values of a function
 
@@ -155,6 +154,7 @@ The tests are located under [product folder](./product/tests).
 Test file identification prefix: `test_aws_`
 
 CSPM tests are grouped by:
+
 - Elastic Compute Cloud (EC2)
 - Identification And Management (IAM)
 - Logging
@@ -179,6 +179,7 @@ For example `EC2` data cases will be located under `aws_ec2_test_cases.py`.
 
 - Define data manually in AWS Cloud and define / get property for resource unique identification
 - Create test case data in `data` folder, for example in file `aws_logging_test_cases.py`
+
 ```python
 cis_aws_log_3_1_pass = EksAwsServiceCase(
     rule_tag=CIS_3_1,
@@ -186,21 +187,28 @@ cis_aws_log_3_1_pass = EksAwsServiceCase(
     expected=RULE_PASS_STATUS,
 )
 ```
+
 - Update the test cases dictionary or create a new one if it didn't exist, for example:
+
 ```python
 cis_aws_log_3_1 = {
     "3.1 Ensure CloudTrail is enabled in all regions expect: passed": cis_aws_log_3_1_pass,
 }
 ```
+
 - Finally, reference created dictionary in the group of all test cases, for example
+
 ```python
 cis_aws_log_cases = {
     **cis_aws_log_3_1,
     ...
 ```
-- If just adding a new test case to existing test suite, no additional steps are required, the case will be added automatically
+
+- If just adding a new test case to existing test suite, no additional steps are required, the case will be added
+  automatically
 - For new test suite create a test file in [product folder](./product/tests), like `test_aws_logging_rules.py`
 - Implement test method or just copy from any `test_aws_` and updated accordingly data section
+
 ```python
 register_params(
     test_aws_logging_rules, # should be updated
@@ -211,7 +219,9 @@ register_params(
     ),
 )
 ```
+
 - Define new marker, for example
+
 ```python
 @pytest.mark.aws_logging_rules # <-- new marker should be created
 def test_aws_logging_rules(
@@ -220,6 +230,7 @@ def test_aws_logging_rules(
 ```
 
 - Update markers section in `pyproject.toml` with newly created marker
+
 ```python
 [tool.pytest.ini_options]
 markers = [
@@ -228,7 +239,9 @@ markers = [
     ... # <-- add new marker
 ```
 
-- Execute the test suite by running the following command and replacing marker `aws_logging_rules` with newly defined marker
+- Execute the test suite by running the following command and replacing marker `aws_logging_rules` with newly defined
+  marker
+
 ```shell
 poetry run pytest -m "aws_logging_rules" --alluredir=./allure/results/ --clean-alluredir
 ```
@@ -264,25 +277,6 @@ just load-pytest-kind
 
 ## Tests Execution
 
-Tests execution depends on the developers needs and currently this framework supports the following modes:
-
-1. Dev Mode - Writing test and executing tests on dev machine
-2. Integration Mode (Production) - Writing tests on dev machine, building test's docker image, and executing tests in
-   kubernetes cluster.
-
-### Dev Mode
-
-To run all test targets with just cloudbeat, without testing against Kibana or Elasticsearch, run
-
-```
-just run-test-targets
-```
-
-Note that this will create and destroy the test cluster several times. Logs can be found in the `test-logs` directory
-and test results can be found in `tests/allure/results`.
-
-----
-
 Before running tests verify that **System Under Test (SUT) Setup** is done and running.
 Since elasticsearch is deployed inside cluster, for reaching it from outside execute the following command:
 
@@ -310,7 +304,8 @@ allure serve ./reports
 
     ```shell
     just build-test-docker
-    just load-tests-image-kind```
+    just load-tests-image-kind
+    ```
 
 
 2. If test suite is not deployed initiate:

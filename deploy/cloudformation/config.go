@@ -22,8 +22,11 @@ package main
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slices"
 )
 
 type config struct {
@@ -32,9 +35,16 @@ type config struct {
 	EnrollmentToken       string     `mapstructure:"ENROLLMENT_TOKEN"`
 	ElasticArtifactServer *string    `mapstructure:"ELASTIC_ARTIFACT_SERVER"`
 	ElasticAgentVersion   string     `mapstructure:"ELASTIC_AGENT_VERSION"`
-	IntegrationType       *string    `mapstructure:"INTEGRATION"`
 	Dev                   *devConfig `mapstructure:"DEV"`
+	DeploymentType        string     `mapstructure:"DEPLOYMENT_TYPE"`
 }
+
+const (
+	DeploymentTypeCSPM = "CSPM"
+	DeploymentTypeCNVM = "CNVM"
+)
+
+var ValidDeploymentTypes = []string{DeploymentTypeCSPM, DeploymentTypeCNVM}
 
 type devConfig struct {
 	AllowSSH bool   `mapstructure:"ALLOW_SSH"`
@@ -42,14 +52,19 @@ type devConfig struct {
 }
 
 func parseConfig() (*config, error) {
-	viper.SetConfigFile(".env")
-	viper.AutomaticEnv()
+	// Read in configuration from on of the files: config.json, config.yml or config.env
+	viper.AddConfigPath("./")
 	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read configuration: %v", err)
 	}
 
 	var cfg config
+	err = bindEnvs(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to bind environment variables: %v", err)
+	}
+
 	err = viper.Unmarshal(&cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal configuration file: %v", err)
@@ -61,6 +76,30 @@ func parseConfig() (*config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func bindEnvs(iface interface{}, parts ...string) error {
+	ifv := reflect.ValueOf(iface)
+	ift := reflect.TypeOf(iface)
+	for i := 0; i < ift.NumField(); i++ {
+		v := ifv.Field(i)
+		t := ift.Field(i)
+		tv, ok := t.Tag.Lookup("mapstructure")
+		if !ok {
+			continue
+		}
+		var err error
+		switch v.Kind() {
+		case reflect.Struct:
+			err = bindEnvs(v.Interface(), append(parts, tv)...)
+		default:
+			err = viper.BindEnv(strings.Join(append(parts, tv), "."))
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func validateConfig(cfg *config) error {
@@ -82,6 +121,11 @@ func validateConfig(cfg *config) error {
 
 	if cfg.Dev != nil {
 		return validateDevConfig(cfg.Dev)
+	}
+
+	if cfg.DeploymentType != "" &&
+		!slices.Contains(ValidDeploymentTypes, cfg.DeploymentType) {
+		return fmt.Errorf("DeploymentType %s invalid", cfg.DeploymentType)
 	}
 
 	return nil

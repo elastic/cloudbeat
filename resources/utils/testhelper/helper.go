@@ -17,6 +17,15 @@
 
 package testhelper
 
+import (
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/stretchr/testify/require"
+)
+
 // CollectResources fetches items from a channel and returns them in a slice.
 //
 // Warning: this function does not wait for the channel to close, using it can cause race conditions.
@@ -25,9 +34,33 @@ func CollectResources[T any](ch chan T) []T {
 	var results []T
 	for {
 		select {
-		case value := <-ch:
+		case value, ok := <-ch:
+			if !ok {
+				return results
+			}
 			results = append(results, value)
 		default:
+			return results
+		}
+	}
+}
+
+// CollectResourcesWithTimeout fetches items from a channel and returns them in a slice after no elements have been
+// received for the specified timeout duration.
+func CollectResourcesWithTimeout[T any](ch chan T, maxCount int, timeout time.Duration) []T {
+	var results []T
+	for {
+		if len(results) >= maxCount {
+			return results
+		}
+
+		select {
+		case value, ok := <-ch:
+			if !ok {
+				return results
+			}
+			results = append(results, value)
+		case <-time.After(timeout):
 			return results
 		}
 	}
@@ -51,4 +84,16 @@ func CreateMockClients[T any](client T, regions []string) map[string]T {
 	}
 
 	return m
+}
+
+var once sync.Once
+
+func NewLogger(t *testing.T) *logp.Logger {
+	t.Helper()
+
+	once.Do(func() {
+		require.NoError(t, logp.TestingSetup())
+	})
+
+	return logp.NewLogger(t.Name())
 }

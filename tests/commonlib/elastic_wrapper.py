@@ -10,30 +10,29 @@ class ElasticWrapper:
     Wrapper that uses elasticsearch official package
     """
 
-    def __init__(self, elastic_params):
-        self.index = elastic_params.cis_index
+    def __init__(self, url: str, basic_auth: tuple, index: str):
+        self.index = index
         self.es_client = Elasticsearch(
-            hosts=elastic_params.url,
-            basic_auth=elastic_params.basic_auth,
+            hosts=url,
+            basic_auth=basic_auth,
+            retry_on_timeout=True,
         )
 
     def get_index_data(
         self,
-        index_name: str,
         query: dict,
         sort: list,
         size: int = 1,
     ) -> dict:
         """
         This method retrieves data from specified index
-        @param index_name: Name of index the data should be received from
         @param query: Query to be applied on index
         @param size: The number of hits to return.
         @param sort: Sorting order
         @return: Result dictionary
         """
         result = self.es_client.search(
-            index=index_name,
+            index=self.index,
             query=query,
             size=size,
             sort=sort,
@@ -95,16 +94,22 @@ class ElasticWrapper:
         return query, sort
 
     @staticmethod
-    def build_es_must_match_query(must_query_list: list[dict]):
+    def build_es_must_match_query(must_query_list: list[dict], time_range: str):
         """
-        This method builds an ES 'must' query with the given query list.
-        @param must_query_list: list of queries
-        @return: ES query and sorting order
+        Build an Elasticsearch 'must' query with the given query list.
+
+        Args:
+            must_query_list (list[dict]): List of queries.
+            time_range (str): Time range for filtering the query.
+
+        Returns:
+            tuple: Tuple containing the Elasticsearch query and sorting order.
+
         """
         query = {
             "bool": {
                 "must": must_query_list,
-                "filter": [{"range": {"@timestamp": {"gte": "now-30m"}}}],
+                "filter": [{"range": {"@timestamp": {"gte": time_range}}}],
             },
         }
 

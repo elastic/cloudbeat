@@ -19,44 +19,51 @@ package awslib
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 )
 
-type Identity struct {
-	Account *string
-	Arn     *string
-	UserId  *string
-}
-
-type IdentityProvider struct {
-	client *sts.Client
-}
+const provider = "aws"
 
 type IdentityProviderGetter interface {
-	GetIdentity(ctx context.Context) (*Identity, error)
+	GetIdentity(ctx context.Context, cfg aws.Config) (*cloud.Identity, error)
 }
 
-func GetIdentityClient(cfg aws.Config) IdentityProviderGetter {
-	svc := sts.NewFromConfig(cfg)
+type IdentityProvider struct{}
 
-	return &IdentityProvider{
-		client: svc,
-	}
-}
-
-// GetIdentity This method will return your identity (Arn, user-id...)
-func (provider *IdentityProvider) GetIdentity(ctx context.Context) (*Identity, error) {
-	input := &sts.GetCallerIdentityInput{}
-	response, err := provider.client.GetCallerIdentity(ctx, input)
+// GetIdentity returns AWS identity information
+func (p IdentityProvider) GetIdentity(ctx context.Context, cfg aws.Config) (*cloud.Identity, error) {
+	response, err := sts.NewFromConfig(cfg).GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get caller identity: %w", err)
 	}
 
-	identity := &Identity{
-		Account: response.Account,
-		UserId:  response.UserId,
-		Arn:     response.Arn,
+	alias, err := p.getAccountAlias(ctx, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get aliases: %w", err)
 	}
-	return identity, nil
+
+	return &cloud.Identity{
+		Account:      *response.Account,
+		AccountAlias: alias,
+		Provider:     provider,
+	}, nil
+}
+
+func (IdentityProvider) getAccountAlias(ctx context.Context, cfg aws.Config) (string, error) {
+	aliases, err := iam.NewFromConfig(cfg).ListAccountAliases(ctx, &iam.ListAccountAliasesInput{})
+	if err != nil {
+		return "", err
+	}
+
+	if len(aliases.AccountAliases) > 0 {
+		return aliases.AccountAliases[0], nil
+	}
+
+	return "", nil
 }

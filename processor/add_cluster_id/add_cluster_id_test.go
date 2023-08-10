@@ -21,24 +21,16 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/suite"
 )
 
 type AddClusterIdTestSuite struct {
 	suite.Suite
-
-	log *logp.Logger
 }
 
 func TestAddClusterIdTestSuite(t *testing.T) {
 	s := new(AddClusterIdTestSuite)
-	s.log = logp.NewLogger("cloudbeat_add_cluster_id_test_suite")
-
-	if err := logp.TestingSetup(); err != nil {
-		t.Error(err)
-	}
 
 	suite.Run(t, s)
 }

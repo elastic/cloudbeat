@@ -121,9 +121,13 @@ def k8s():
     @return: Kubernetes Helper instance.
     """
     logger.debug(f"Kubernetes 'in_cluster_config': {configuration.kubernetes.is_in_cluster_config}")
-    return KubernetesHelper(
-        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
-    )
+    logger.debug(f"Kubernetes 'use_k8s': {configuration.kubernetes.use_kubernetes}")
+    if configuration.kubernetes.use_kubernetes:
+        return KubernetesHelper(
+            is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
+        )
+
+    return None
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -144,16 +148,31 @@ def eks_cluster():
     return configuration.eks
 
 
-@pytest.fixture(scope="session", autouse=True)
-def elastic_client():
+@pytest.fixture
+def cspm_client():
     """
     This function (fixture) instantiate ElasticWrapper.
-    @return: ElasticWrapper client
+    @return: ElasticWrapper client with cspm index.
     """
-    elastic_config = configuration.elasticsearch
-    es_client = ElasticWrapper(elastic_params=elastic_config)
-    logger.info(f"ElasticSearch url: {elastic_config.url}")
-    return es_client
+    return create_es_client(configuration.elasticsearch.cspm_index)
+
+
+@pytest.fixture
+def cnvm_client():
+    """
+    This function (fixture) instantiate ElasticWrapper.
+    @return: ElasticWrapper client with cnvm index.
+    """
+    return create_es_client(configuration.elasticsearch.cnvm_index)
+
+
+@pytest.fixture
+def kspm_client():
+    """
+    This function (fixture) instantiate ElasticWrapper.
+    @return: ElasticWrapper client with kspm index.
+    """
+    return create_es_client(configuration.elasticsearch.kspm_index)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -217,29 +236,45 @@ def pytest_sessionfinish(session):
     """
     report_dir = session.config.option.allure_report_dir
     cloudbeat = configuration.agent
-    kube_client = KubernetesHelper(
-        is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
-    )
-    app_list = [cloudbeat.name, "kibana", "elasticsearch"]
-    apps_dict = {}
-    for app in app_list:
-        apps_dict.update(
-            kube_client.get_pod_image_version(
-                pod_name=app,
-                namespace=cloudbeat.namespace,
-            ),
+    use_kubernetes = configuration.kubernetes.use_kubernetes
+    if use_kubernetes:
+        kube_client = KubernetesHelper(
+            is_in_cluster_config=configuration.kubernetes.is_in_cluster_config,
         )
-    kubernetes_data = kube_client.get_nodes_versions()
-    report_data = {**apps_dict, **kubernetes_data}
-    try:
-        if report_dir:
-            with open(
-                f"{report_dir}/{'environment.properties'}",
-                "w",
-                encoding="utf8",
-            ) as allure_env:
-                allure_env.writelines(
-                    [f"{key}:{value}\n" for key, value in report_data.items()],
-                )
-    except ValueError:
-        logger.warning("Warning fail to create allure environment report")
+        app_list = [cloudbeat.name, "kibana", "elasticsearch"]
+        apps_dict = {}
+        for app in app_list:
+            apps_dict.update(
+                kube_client.get_pod_image_version(
+                    pod_name=app,
+                    namespace=cloudbeat.namespace,
+                ),
+            )
+        kubernetes_data = kube_client.get_nodes_versions()
+        report_data = {**apps_dict, **kubernetes_data}
+        try:
+            if report_dir:
+                with open(
+                    f"{report_dir}/{'environment.properties'}",
+                    "w",
+                    encoding="utf8",
+                ) as allure_env:
+                    allure_env.writelines(
+                        [f"{key}:{value}\n" for key, value in report_data.items()],
+                    )
+        except ValueError:
+            logger.warning("Warning fail to create allure environment report")
+
+
+def create_es_client(index: str) -> ElasticWrapper:
+    """
+    This function (fixture) instantiate ElasticWrapper.
+    @return: ElasticWrapper client with cspm index.
+    """
+    es_client = ElasticWrapper(
+        configuration.elasticsearch.url,
+        configuration.elasticsearch.basic_auth,
+        index,
+    )
+    logger.info(f"client with ElasticSearch url: {configuration.elasticsearch.url}")
+    return es_client

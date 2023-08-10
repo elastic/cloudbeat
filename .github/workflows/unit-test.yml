@@ -21,7 +21,7 @@ jobs:
   unit_tests:
     name: Unit Tests
     runs-on: ubuntu-20.04
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -96,7 +96,7 @@ jobs:
           kubectl: 1.18.4
           kubeval: v0.16.1
           command: |
-            kubeval --strict -d ${{ env.K8S_MANIFEST_DIR }} --ignore-missing-schemas --ignored-filename-patterns kustomization,kind,patch,cloudbeat,cloudformation --skip-kinds ClusterConfig
+            kubeval --strict -d ${{ env.K8S_MANIFEST_DIR }} --ignore-missing-schemas --ignored-filename-patterns kustomization,kind,patch,cloudbeat,cloudformation,deployment-manager --skip-kinds ClusterConfig
 
   golangci:
     name: golangci-lint
@@ -105,24 +105,23 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-
-      - name: Set up GO (with caching)
-        uses: magnetikonline/action-golang-cache@v4
-        with:
-          go-version-file: .go-version
-
-      - name: Check out the repo
-        uses: actions/checkout@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ (github.event.pull_request_target || github.event.pull_request).head.repo.full_name }}
           ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: .go-version
+          cache: false
+
       - name: Go linter
-        uses: golangci/golangci-lint-action@v3.5.0
+        uses: golangci/golangci-lint-action@v3.6.0
         with:
           version: latest
-          args: --timeout=10m --whole-files
+          args: --whole-files --verbose
+
 
   dependency-review:
     runs-on: ubuntu-20.04

@@ -14,52 +14,9 @@ cloudbeat:
   type: cloudbeat/cis_k8s
   # Defines how often an event is sent to the output
   period: 4h
-  fetchers:
-    - name: kube-api
-    - name: process
-      directory: "/hostfs"
-      processes:
-        etcd:
-        kube-apiserver:
-        kube-controller:
-        kube-scheduler:
-        kubelet:
-          config-file-arguments:
-            - config
-    - name: file-system
-      patterns: [
-        "/hostfs/etc/kubernetes/scheduler.conf",
-        "/hostfs/etc/kubernetes/controller-manager.conf",
-        "/hostfs/etc/kubernetes/admin.conf",
-        "/hostfs/etc/kubernetes/kubelet.conf",
-        "/hostfs/etc/kubernetes/manifests/etcd.yaml",
-        "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
-        "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
-        "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
-        "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
-        "/hostfs/etc/kubernetes/pki/**",
-        "/hostfs/var/lib/kubelet/config.yaml",
-        "/hostfs/var/lib/etcd",
-        "/hostfs/etc/kubernetes/pki"
-      ]
   config:
     v1:
       benchmark: cis_k8s
-#    # EKS Fetchers configuration
-#      - name: kube-api
-#      - name: process
-#        directory: "/hostfs"
-#        processes:
-#          kubelet:
-#            config-file-arguments:
-#              - config
-#      - name: aws-ecr
-#      - name: aws-elb
-#      - name: file-system
-#        patterns: [
-#          "/hostfs/etc/kubernetes/kubelet/kubelet-config.json",
-#          "/hostfs/var/lib/kubelet/kubeconfig",
-#        ]
 
 
 # ================================== General ===================================
@@ -68,7 +25,7 @@ cloudbeat:
 # all the transactions sent by a single shipper in the web interface.
 #name:
 
-# The tags of the shipper are included in their own field with each
+# The tags of the shipper are included in their field with each
 # transaction published.
 #tags: ["service-X", "web-tier"]
 
@@ -83,8 +40,8 @@ cloudbeat:
 # options here or by using the `setup` command.
 #setup.dashboards.enabled: false
 
-# The URL from where to download the dashboards archive. By default this URL
-# has a value which is computed based on the Beat name and version. For released
+# The URL from where to download the dashboard archive. By default, this URL
+# has a value that is computed based on the Beat name and version. For released
 # versions, this URL points to the dashboard archive on the artifacts.elastic.co
 # website.
 #setup.dashboards.url:
@@ -169,7 +126,7 @@ processors:
 #logging.level: debug
 
 # At debug level, you can selectively enable logging only for some components.
-# To enable all selectors use ["*"]. Examples of other selectors are "beat",
+# To enable all selectors, use ["*"]. Examples of other selectors are "beat",
 # "publisher", "service".
 #logging.selectors: ["*"]
 
@@ -187,7 +144,7 @@ processors:
 #monitoring.cluster_uuid:
 
 # Uncomment to send the metrics to Elasticsearch. Most settings from the
-# Elasticsearch output are accepted here as well.
+# Elasticsearch outputs are accepted here as well.
 # Note that the settings should point to your Elasticsearch *monitoring* cluster.
 # Any setting that is not set is automatically inherited from the Elasticsearch
 # output configuration, so if you have the Elasticsearch output configured such

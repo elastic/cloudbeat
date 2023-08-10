@@ -29,6 +29,8 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 const (
@@ -61,10 +63,12 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 					m.On("Regions", mock.Anything, mock.Anything).Return(nil, errors.New("fail to query endpoint"))
 					return m
 				},
-				cfg: awssdk.Config{},
-				log: logp.NewLogger("multi-region-test"),
+				cfg: awssdk.Config{
+					Region: afRegion,
+				},
+				log: testhelper.NewLogger(t),
 			},
-			want: map[string]string{DefaultRegion: DefaultRegion},
+			want: map[string]string{afRegion: afRegion},
 		},
 		{
 			name: "Should return enabled regions",
@@ -75,7 +79,7 @@ func TestMultiRegionWrapper_NewMultiRegionClients(t *testing.T) {
 					return m
 				},
 				cfg: awssdk.Config{},
-				log: logp.NewLogger("multi-region-test"),
+				log: testhelper.NewLogger(t),
 			},
 			want: map[string]string{DefaultRegion: DefaultRegion, euRegion: euRegion},
 		},

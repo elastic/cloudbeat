@@ -22,13 +22,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
-)
 
-var (
-	log = logp.NewLogger("cloudbeat_config_test_suite")
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestStep(t *testing.T) {
@@ -54,7 +50,7 @@ func TestStep(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			inputChannel := make(chan int)
-			outCh := Step(context.Background(), log, inputChannel, tt.fn)
+			outCh := Step(context.Background(), testhelper.NewLogger(t), inputChannel, tt.fn)
 			inputChannel <- tt.input
 			close(inputChannel)
 

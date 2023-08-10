@@ -24,17 +24,18 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	s3Client "github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
-	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
+	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestProvider_DescribeTrails(t *testing.T) {
-	logger := logp.NewLogger("cloudbeat_logging_provider_test")
+	logger := testhelper.NewLogger(t)
 
 	tests := []struct {
 		name    string

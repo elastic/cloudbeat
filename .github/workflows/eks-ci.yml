@@ -13,29 +13,29 @@ on:
   push:
     branches:
       - main
-      - '[0-9]+.[0-9]+'
+      - "[0-9]+.[0-9]+"
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST_ACC }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST_ACC }}
   GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CONTAINER_SUFFIX: ${{ github.run_id }}
   TEST_TARGETS_DEFAULT: '["pre_merge"]'
   AWS_REGION: eu-west-2
   REPORTS_DIR: tests/allure/results/
   KUBE_NAMESPACE: kube-system
-  CI_ELASTIC_AGENT_DOCKER_TAG: "8.7.0-SNAPSHOT"
-  CI_ELASTIC_AGENT_DOCKER_IMAGE: "704479110758.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
+  CI_ELASTIC_AGENT_DOCKER_TAG: "8.10.0-SNAPSHOT"
+  CI_ELASTIC_AGENT_DOCKER_IMAGE: "391946104644.dkr.ecr.eu-west-2.amazonaws.com/elastic-agent"
 
 # run only a single job at a time
 concurrency: EKS-Functional-Tests
 
 jobs:
   Setup:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-    timeout-minutes: 15
+    timeout-minutes: 40
     steps:
       - id: set-default-matrix
         env:
@@ -54,9 +54,21 @@ jobs:
 
   Build:
     name: Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
+      # Disk cleanup
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - name: Check out the repo
         uses: actions/checkout@v3
 
@@ -92,6 +104,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
+          file: ./deploy/Dockerfile
           push: false
           tags: cloudbeat:latest
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -123,7 +136,7 @@ jobs:
           key: ${{ runner.os }}-dockers-cache-${{ env.CONTAINER_SUFFIX }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -141,14 +154,13 @@ jobs:
           ./.ci/scripts/ecr-images.sh ${{ env.CONTAINER_SUFFIX }}  ${{ env.ECR_REGISTRY }} ${{ env.CI_ELASTIC_AGENT_DOCKER_TAG }}
         shell: bash
 
-
       - name: Move cache
         run: |
           ./.ci/scripts/gh-cache.sh
         shell: bash
 
   Test_Matrix:
-    needs: [ "Setup", "Build" ]
+    needs: ["Setup", "Build"]
     strategy:
       fail-fast: false
       matrix:
@@ -238,6 +250,8 @@ jobs:
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_REGION: eu-west-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
           resultsGlob: "tests/allure/results"

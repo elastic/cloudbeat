@@ -21,14 +21,16 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/cloudbeat/launcher"
 	"github.com/elastic/elastic-agent-libs/config"
+
+	"github.com/elastic/cloudbeat/launcher"
 )
 
 const (
@@ -36,8 +38,6 @@ const (
 	VulnerabilityType            = "vuln_mgmt"
 	ResultsDatastreamIndexPrefix = "logs-cloud_security_posture.findings"
 )
-
-var ErrBenchmarkNotSupported = launcher.NewUnhealthyError("benchmark is not supported")
 
 type Fetcher struct {
 	Name string `config:"name"` // Name of the fetcher
@@ -48,7 +48,6 @@ type Config struct {
 	Type        string                  `config:"config.v1.type"`
 	Deployment  string                  `config:"config.v1.deployment"`
 	CloudConfig CloudConfig             `config:"config.v1"`
-	Fetchers    []*config.C             `config:"fetchers"`
 	KubeConfig  string                  `config:"kube_config"`
 	Period      time.Duration           `config:"period"`
 	Processors  processors.PluginConfig `config:"processors"`
@@ -56,8 +55,29 @@ type Config struct {
 }
 
 type CloudConfig struct {
-	AwsCred aws.ConfigAWS `config:"aws.credentials"`
+	Aws AwsConfig `config:"aws"`
+	Gcp GcpConfig `config:"gcp"`
 }
+
+type AwsConfig struct {
+	Cred        aws.ConfigAWS `config:"credentials"`
+	AccountType string        `config:"account_type"`
+}
+
+type GcpConfig struct {
+	ProjectId    string `config:"project_id"`
+	GcpClientOpt `config:"credentials"`
+}
+
+type GcpClientOpt struct {
+	CredentialsJSON     string `config:"credentials_json"`
+	CredentialsFilePath string `config:"credentials_file_path"`
+}
+
+const (
+	SingleAccount       = "single-account"
+	OrganizationAccount = "organization-account"
+)
 
 func New(cfg *config.C) (*Config, error) {
 	c, err := defaultConfig()
@@ -71,9 +91,21 @@ func New(cfg *config.C) (*Config, error) {
 
 	if c.Benchmark != "" {
 		if !isSupportedBenchmark(c.Benchmark) {
-			return c, ErrBenchmarkNotSupported
+			return c, launcher.NewUnhealthyError(fmt.Sprintf("benchmark '%s' is not supported", c.Benchmark))
 		}
 	}
+
+	switch c.CloudConfig.Aws.AccountType {
+	case "":
+	case SingleAccount:
+	case OrganizationAccount:
+	default:
+		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
+			"aws.account_type '%s' is not supported",
+			c.CloudConfig.Aws.AccountType,
+		))
+	}
+
 	return c, nil
 }
 

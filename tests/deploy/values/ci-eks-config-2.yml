@@ -3,7 +3,7 @@ elasticsearch:
     storageClassName: gp2
 
 image:
-  repository: 704479110758.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat-test
+  repository: 391946104644.dkr.ecr.eu-west-2.amazonaws.com/cloudbeat-test
   pullPolicy: Always
 
 cloudbeat:

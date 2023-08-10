@@ -20,16 +20,18 @@ package iam
 import (
 	"context"
 	"errors"
+	"sort"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer/types"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"sort"
-	"testing"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestProvider_GetAccessAnalyzers(t *testing.T) {
@@ -104,7 +106,7 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Provider{
-				log:                   logp.NewLogger("iam-provider"),
+				log:                   testhelper.NewLogger(t),
 				client:                nil,
 				accessAnalyzerClients: tt.clients,
 			}

@@ -76,14 +76,15 @@ def test_cloudbeat_pods_running(k8s, cloudbeat_agent):
 @pytest.mark.order(2)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
 @pytest.mark.parametrize("match_type", testdata)
-def test_elastic_index_exists(elastic_client, match_type):
+def test_elastic_index_exists(kspm_client, match_type):
     """
     This test verifies that findings of all types are sending to elasticsearch
-    :param elastic_client: Elastic API client
+    :param kspm_client: Elastic API client
     :param match_type: Findings type for matching
     :return:
     """
-    result = get_findings(elastic_client, CONFIG_TIMEOUT, match_type)
+    query, sort = kspm_client.build_es_query(term={"resource.type": match_type})
+    result = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
 
     assert len(result) > 0, f"The findings of type {match_type} not found"
 
@@ -91,27 +92,26 @@ def test_elastic_index_exists(elastic_client, match_type):
 @pytest.mark.pre_merge
 @pytest.mark.order(4)
 @pytest.mark.dependency(depends=["test_cloudbeat_pod_exist"])
-def test_leader_election(fixture_data, elastic_client, cloudbeat_agent, k8s):
+def test_leader_election(fixture_data, kspm_client, cloudbeat_agent, k8s):
     """
     This test verifies that k8s related findings are sent by a single agent
     :param fixture_data: (Pods list, Nodes list)
-    :param elastic_client: Elastic API client
+    :param kspm_client: Elastic API client
     :param cloudbeat_agent: Cloudbeat configuration
     :param k8s: Kubernetes client object
     :return:
     """
 
-    query, sort = elastic_client.build_es_query(term={"type": "k8s_object"})
+    query, sort = kspm_client.build_es_query(term={"type": "k8s_object"})
     pods, nodes = fixture_data
     leader_node = k8s.get_cluster_leader(namespace=cloudbeat_agent.namespace, pods=pods)
     assert leader_node != "", "The Leader node could not be found"
 
     # Wait for all agents to send resources to ES
-    res = wait_for_cycle_completion(elastic_client=elastic_client, nodes=nodes)
+    res = wait_for_cycle_completion(elastic_client=kspm_client, nodes=nodes)
     assert res, "Not all nodes have completed a cycle within the configured threshold"
 
-    result = elastic_client.get_index_data(
-        index_name=elastic_client.index,
+    result = kspm_client.get_index_data(
         query=query,
         size=1000,
         sort=sort,

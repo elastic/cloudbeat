@@ -21,18 +21,18 @@ import (
 	"context"
 
 	awssdk "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
-	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (
-	KubeAPIType = "kube-api"
+	KubeAPIType    = "kube-api"
+	FileSystemType = "file-system"
+	ProcessType    = "process"
 
 	EcrType                   = "aws-ecr"
 	IAMType                   = "aws-iam"
 	EC2Type                   = "aws-ec2"
 	EC2NetworkingType         = "aws-ec2-network"
-	MonitoringType            = "aws-monitoring"
+	AwsMonitoringType         = "aws-monitoring"
 	NetworkNACLType           = "aws-nacl"
 	TrailType                 = "aws-trail"
 	MultiTrailsType           = "aws-multi-trails"
@@ -43,7 +43,6 @@ const (
 	IAMUserType               = "aws-iam-user"
 	IAMServerCertificateType  = "aws-iam-server-certificate"
 	PwdPolicyType             = "aws-password-policy"
-	EksType                   = "aws-eks"
 	S3Type                    = "aws-s3"
 	KmsType                   = "aws-kms"
 	SecurityHubType           = "aws-securityhub"
@@ -53,8 +52,10 @@ const (
 	PolicyType                = "aws-policy"
 	AccessAnalyzers           = "aws-access-analyzers"
 
+	GcpMonitoringType = "gcp-monitoring"
+
 	CloudIdentity          = "identity-management"
-	EC2Identity            = "cloud-compute"
+	CloudCompute           = "cloud-compute"
 	MonitoringIdentity     = "monitoring"
 	CloudContainerMgmt     = "caas" // containers as a service
 	CloudLoadBalancer      = "load-balancer"
@@ -63,13 +64,11 @@ const (
 	CloudAudit             = "cloud-audit"
 	CloudDatabase          = "cloud-database"
 	CloudConfig            = "cloud-config"
+	CloudDns               = "cloud-dns"
 	KeyManagement          = "key-management"
+	ProjectManagement      = "project-management"
+	DataProcessing         = "data-processing"
 )
-
-// Factory can create fetcher instances based on configuration
-type Factory interface {
-	Create(*logp.Logger, *config.C, chan ResourceInfo) (Fetcher, error)
-}
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {
@@ -103,12 +102,14 @@ type ResourceFields struct {
 }
 
 type ResourceMetadata struct {
-	ID        string `json:"id"`
-	Type      string `json:"type"`
-	SubType   string `json:"sub_type,omitempty"`
-	Name      string `json:"name,omitempty"`
-	ECSFormat string `json:"ecsFormat,omitempty"`
-	Region    string `json:"region,omitempty"`
+	ID              string `json:"id"`
+	Type            string `json:"type"`
+	SubType         string `json:"sub_type,omitempty"`
+	Name            string `json:"name,omitempty"`
+	ECSFormat       string `json:"ecsFormat,omitempty"`
+	Region          string `json:"region,omitempty"`
+	AwsAccountId    string `json:"aws_account_id,omitempty"`
+	AwsAccountAlias string `json:"aws_account_alias,omitempty"`
 }
 
 type Result struct {

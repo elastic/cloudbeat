@@ -14,13 +14,13 @@ CIS_5_4 = "CIS 5.4"
 
 cis_aws_vpc_5_1_pass = EksAwsServiceCase(
     rule_tag=CIS_5_1,
-    case_identifier="arn:aws:ec2:eu-west-1:704479110758:network-acl/acl-0919ec1794cb66140",
+    case_identifier="arn:aws:ec2:eu-north-1:391946104644:network-acl/acl-05b25ae6744e862cc",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_vpc_5_1_fail = EksAwsServiceCase(
     rule_tag=CIS_5_1,
-    case_identifier="arn:aws:ec2:eu-west-1:704479110758:network-acl/acl-053fe94e40a49c818",
+    case_identifier="arn:aws:ec2:eu-west-1:391946104644:network-acl/acl-0deecaa33cc9b0ea2",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -31,13 +31,13 @@ cis_aws_vpc_5_1 = {
 
 cis_aws_vpc_5_2_pass = EksAwsServiceCase(
     rule_tag=CIS_5_2,
-    case_identifier="arn:aws:ec2:eu-west-1:704479110758:security-group/sg-092c2ffc0a4633dd1",
+    case_identifier="arn:aws:ec2:eu-north-1:391946104644:security-group/sg-0fa75b3c7e90cf03a",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_vpc_5_2_fail = EksAwsServiceCase(
     rule_tag=CIS_5_2,
-    case_identifier="arn:aws:ec2:eu-west-1:704479110758:security-group/sg-00f97c5fd4c506f7f",
+    case_identifier="arn:aws:ec2:eu-north-1:391946104644:security-group/sg-07dea7d21e0777476",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -48,13 +48,13 @@ cis_aws_vpc_5_2 = {
 
 cis_aws_vpc_5_3_pass = EksAwsServiceCase(
     rule_tag=CIS_5_3,
-    case_identifier="arn:aws:ec2:eu-west-1:704479110758:security-group/sg-092c2ffc0a4633dd1",
+    case_identifier="arn:aws:ec2:eu-north-1:391946104644:security-group/sg-0fa75b3c7e90cf03a",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_vpc_5_3_fail = EksAwsServiceCase(
     rule_tag=CIS_5_3,
-    case_identifier="arn:aws:ec2:eu-west-1:704479110758:security-group/sg-00f97c5fd4c506f7f",
+    case_identifier="arn:aws:ec2:eu-north-1:391946104644:security-group/sg-07dea7d21e0777476",
     expected=RULE_FAIL_STATUS,
 )
 
@@ -65,13 +65,13 @@ cis_aws_vpc_5_3 = {
 
 cis_aws_vpc_5_4_pass = EksAwsServiceCase(
     rule_tag=CIS_5_4,
-    case_identifier="arn:aws:ec2:sa-east-1:704479110758:security-group/sg-df30b9a0",
+    case_identifier="arn:aws:ec2:eu-central-1:391946104644:security-group/sg-03f2e4eb9617f108a",
     expected=RULE_PASS_STATUS,
 )
 
 cis_aws_vpc_5_4_fail = EksAwsServiceCase(
     rule_tag=CIS_5_4,
-    case_identifier="arn:aws:ec2:eu-west-1:704479110758:security-group/sg-09db26534cc0105a2",
+    case_identifier="arn:aws:ec2:eu-north-1:391946104644:security-group/sg-0fa75b3c7e90cf03a",
     expected=RULE_FAIL_STATUS,
 )
 

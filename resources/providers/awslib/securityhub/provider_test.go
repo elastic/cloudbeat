@@ -23,10 +23,11 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
-	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type (
@@ -118,7 +119,7 @@ func TestProvider_Describe(t *testing.T) {
 				clients[r] = c
 			}
 			p := &Provider{
-				log:       logp.NewLogger("TestProvider_Describe"),
+				log:       testhelper.NewLogger(t),
 				accountId: accountId,
 				clients:   clients,
 			}

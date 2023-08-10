@@ -185,7 +185,7 @@ func (l *launcher) Stop() {
 	close(l.beaterErr)
 }
 
-// runBeater creates a new beater and starts a goroutine for running it
+// runBeater creates a new beater and starts a goroutine for running it.
 // It is protected from panics and ship errors back to beaterErr
 func (l *launcher) runBeater() error {
 	l.log.Infof("Launcher is creating a new %s", l.name)
