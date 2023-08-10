@@ -56,6 +56,10 @@ is_compute_instance {
 	input.subType == "gcp-compute-instance"
 }
 
+is_firewall_rule {
+	input.subType == "gcp-compute-firewall"
+}
+
 is_cloud_sql {
 	input.subType == "gcp-sqladmin-instance"
 }

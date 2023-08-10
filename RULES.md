@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 47/84 implemented rules (56%)
+### 49/84 implemented rules (58%)
 
-#### Automated rules: 47/73 (64%)
+#### Automated rules: 49/73 (67%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -323,8 +323,8 @@
 |   [3.3](bundle/compliance/cis_gcp/rules/cis_3_3)   | Networking                     | Ensure That DNSSEC Is Enabled for Cloud DNS                                                                                       | :white_check_mark: | Automated |
 |   [3.4](bundle/compliance/cis_gcp/rules/cis_3_4)   | Networking                     | Ensure That RSASHA1 Is Not Used for the Key-Signing Key in Cloud DNS DNSSEC                                                       | :white_check_mark: | Automated |
 |   [3.5](bundle/compliance/cis_gcp/rules/cis_3_5)   | Networking                     | Ensure That RSASHA1 Is Not Used for the Zone-Signing Key in Cloud DNS DNSSEC                                                      | :white_check_mark: | Automated |
-|                        3.6                         | Networking                     | Ensure That SSH Access Is Restricted From the Internet                                                                            |        :x:         | Automated |
-|                        3.7                         | Networking                     | Ensure That RDP Access Is Restricted From the Internet                                                                            |        :x:         | Automated |
+|   [3.6](bundle/compliance/cis_gcp/rules/cis_3_6)   | Networking                     | Ensure That SSH Access Is Restricted From the Internet                                                                            | :white_check_mark: | Automated |
+|   [3.7](bundle/compliance/cis_gcp/rules/cis_3_7)   | Networking                     | Ensure That RDP Access Is Restricted From the Internet                                                                            | :white_check_mark: | Automated |
 |                        3.8                         | Networking                     | Ensure that VPC Flow Logs is Enabled for Every Subnet in a VPC Network                                                            |        :x:         | Automated |
 |                        3.9                         | Networking                     | Ensure No HTTPS or SSL Proxy Load Balancers Permit SSL Policies With Weak Cipher Suites                                           |        :x:         |  Manual   |
 |   [4.1](bundle/compliance/cis_gcp/rules/cis_4_1)   | Virtual Machines               | Ensure That Instances Are Not Configured To Use the Default Service Account                                                       | :white_check_mark: | Automated |
