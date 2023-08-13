@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 51/84 implemented rules (61%)
+### 52/84 implemented rules (62%)
 
-#### Automated rules: 51/73 (70%)
+#### Automated rules: 52/73 (71%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -361,7 +361,7 @@
 | [6.3.6](bundle/compliance/cis_gcp/rules/cis_6_3_6) | SQL Server                     | Ensure '3625 (trace flag)' database flag for all Cloud SQL Server instances is set to 'on'                                        | :white_check_mark: | Automated |
 | [6.3.7](bundle/compliance/cis_gcp/rules/cis_6_3_7) | SQL Server                     | Ensure that the 'contained database authentication' database flag for Cloud SQL on the SQL Server instance is set to 'off'        | :white_check_mark: | Automated |
 |   [6.4](bundle/compliance/cis_gcp/rules/cis_6_4)   | Cloud SQL Database Services    | Ensure That the Cloud SQL Database Instance Requires All Incoming Connections To Use SSL                                          | :white_check_mark: | Automated |
-|                        6.5                         | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Do Not Implicitly Whitelist All Public IP Addresses                                      |        :x:         | Automated |
+|   [6.5](bundle/compliance/cis_gcp/rules/cis_6_5)   | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Do Not Implicitly Whitelist All Public IP Addresses                                      | :white_check_mark: | Automated |
 |   [6.6](bundle/compliance/cis_gcp/rules/cis_6_6)   | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Do Not Have Public IPs                                                                   | :white_check_mark: | Automated |
 |   [6.7](bundle/compliance/cis_gcp/rules/cis_6_7)   | Cloud SQL Database Services    | Ensure That Cloud SQL Database Instances Are Configured With Automated Backups                                                    | :white_check_mark: | Automated |
 |   [7.1](bundle/compliance/cis_gcp/rules/cis_7_1)   | BigQuery                       | Ensure That BigQuery Datasets Are Not Anonymously or Publicly Accessible                                                          | :white_check_mark: | Automated |
