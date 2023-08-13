@@ -5,8 +5,6 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-default is_relevant_sql_instance = false
-
 finding = result if {
 	data_adapter.is_sql_instance
 	is_relevant_sql_instance
@@ -23,12 +21,8 @@ ssl_is_required if {
 
 is_relevant_sql_instance if {
 	startswith(data_adapter.resource.data.databaseVersion, "POSTGRES")
-}
-
-is_relevant_sql_instance if {
+} else if {
 	startswith(data_adapter.resource.data.databaseVersion, "MYSQL")
-}
-
-is_relevant_sql_instance if {
+} else if {
 	startswith(data_adapter.resource.data.databaseVersion, "SQLSERVER_2017")
-}
+} else = false

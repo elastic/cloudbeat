@@ -5,10 +5,6 @@ import data.compliance.policy.gcp.data_adapter
 import data.compliance.policy.gcp.iam.ensure_role_not_service_account_user as audit
 import future.keywords.if
 
-roles if {
-	data_adapter.iam_policy.bindings[i].role
-}
-
 finding = result if {
 	data_adapter.is_iam_service_account
 	data_adapter.has_policy
@@ -17,4 +13,8 @@ finding = result if {
 		common.calculate_result(audit.is_role_not_service_account_user),
 		roles,
 	)
+}
+
+roles if {
+	data_adapter.iam_policy.bindings[i].role
 }

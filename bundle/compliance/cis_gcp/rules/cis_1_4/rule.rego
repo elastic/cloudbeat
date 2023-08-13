@@ -11,6 +11,10 @@ finding = result if {
 
 	result := common.generate_result_without_expected(
 		common.calculate_result(audit.is_policy_not_managed_by_user),
-		input.resource.iam_policy.bindings[i].members,
+		members,
 	)
+}
+
+members if {
+	input.resource.iam_policy.bindings[i].members
 }
