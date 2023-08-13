@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 49/84 implemented rules (58%)
+### 50/84 implemented rules (60%)
 
-#### Automated rules: 49/73 (67%)
+#### Automated rules: 50/73 (68%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -343,7 +343,7 @@
 |   [5.2](bundle/compliance/cis_gcp/rules/cis_5_2)   | Storage                        | Ensure That Cloud Storage Buckets Have Uniform Bucket-Level Access Enabled                                                        | :white_check_mark: | Automated |
 |                       6.1.1                        | MySQL Database                 | Ensure That a MySQL Database Instance Does Not Allow Anyone To Connect With Administrative Privileges                             |        :x:         |  Manual   |
 |                       6.1.2                        | MySQL Database                 | Ensure ‘Skip_show_database’ Database Flag for Cloud SQL MySQL Instance Is Set to ‘On’                                             |        :x:         | Automated |
-|                       6.1.3                        | MySQL Database                 | Ensure That the ‘Local_infile’ Database Flag for a Cloud SQL MySQL Instance Is Set to ‘Off’                                       |        :x:         | Automated |
+| [6.1.3](bundle/compliance/cis_gcp/rules/cis_6_1_3) | MySQL Database                 | Ensure That the ‘Local_infile’ Database Flag for a Cloud SQL MySQL Instance Is Set to ‘Off’                                       | :white_check_mark: | Automated |
 |                       6.2.1                        | PostgreSQL Database            | Ensure ‘Log_error_verbosity’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘DEFAULT’ or Stricter                      |        :x:         | Automated |
 |                       6.2.2                        | PostgreSQL Database            | Ensure That the ‘Log_connections’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘On’                                  |        :x:         | Automated |
 |                       6.2.3                        | PostgreSQL Database            | Ensure That the ‘Log_disconnections’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘On’                               |        :x:         | Automated |
