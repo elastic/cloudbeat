@@ -9,12 +9,13 @@ on:
         description: "Specify test markers to run"
         default: '[\"pre_merge\", \"file_system_rules\", \"k8s_object_rules\", \"process_api_server_rules\", \"process_controller_manager_rules\", \"process_etcd_rules\", \"process_kubelet_rules\", \"process_scheduler_rules\"]'
 
-  schedule:
-    # Nightly job. Running every day at 2 am
-    - cron: "00 02 * * 0-4"
+  # Skip the scheduler until we resolve the issue at https://github.com/elastic/cloudbeat/issues/1220
+  # schedule:
+  #   # Nightly job. Running every day at 2 am
+  #   - cron: "00 02 * * 0-4"
 
-    # Weekly job running every saturday at 2 am
-    - cron: "00 02 * * 6"
+  #   # Weekly job running every saturday at 2 am
+  #   - cron: "00 02 * * 6"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
