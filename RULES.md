@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 50/84 implemented rules (60%)
+### 51/84 implemented rules (61%)
 
-#### Automated rules: 50/73 (68%)
+#### Automated rules: 51/73 (70%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -336,7 +336,7 @@
 |   [4.4](bundle/compliance/cis_gcp/rules/cis_4_4)   | Virtual Machines               | Ensure Oslogin Is Enabled for a Project                                                                                           | :white_check_mark: | Automated |
 |   [4.5](bundle/compliance/cis_gcp/rules/cis_4_5)   | Virtual Machines               | Ensure ‘Enable Connecting to Serial Ports’ Is Not Enabled for VM Instance                                                         | :white_check_mark: | Automated |
 |   [4.6](bundle/compliance/cis_gcp/rules/cis_4_6)   | Virtual Machines               | Ensure That IP Forwarding Is Not Enabled on Instances                                                                             | :white_check_mark: | Automated |
-|                        4.7                         | Virtual Machines               | Ensure VM Disks for Critical VMs Are Encrypted With Customer-Supplied Encryption Keys (CSEK)                                      |        :x:         | Automated |
+|   [4.7](bundle/compliance/cis_gcp/rules/cis_4_7)   | Virtual Machines               | Ensure VM Disks for Critical VMs Are Encrypted With Customer-Supplied Encryption Keys (CSEK)                                      | :white_check_mark: | Automated |
 |   [4.8](bundle/compliance/cis_gcp/rules/cis_4_8)   | Virtual Machines               | Ensure Compute Instances Are Launched With Shielded VM Enabled                                                                    | :white_check_mark: | Automated |
 |   [4.9](bundle/compliance/cis_gcp/rules/cis_4_9)   | Virtual Machines               | Ensure That Compute Instances Do Not Have Public IP Addresses                                                                     | :white_check_mark: | Automated |
 |   [5.1](bundle/compliance/cis_gcp/rules/cis_5_1)   | Storage                        | Ensure That Cloud Storage Bucket Is Not Anonymously or Publicly Accessible                                                        | :white_check_mark: | Automated |

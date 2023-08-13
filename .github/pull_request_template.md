@@ -18,6 +18,7 @@ Provide a description of the main changes, as well as any additional information
 - [ ] I have added the necessary README/documentation (if appropriate)
 
 #### Introducing a new rule?
+
 - [ ] Generate rule metadata using [this script](https://github.com/elastic/csp-security-policies/tree/main/dev#generate-rules-metadata)
 - [ ] Add relevant unit tests
 - [ ] Generate relevant rule templates using [this script](https://github.com/elastic/csp-security-policies/tree/main/dev#generate-rule-templates), and open a PR in [elastic/packages/cloud_security_posture](https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture)
