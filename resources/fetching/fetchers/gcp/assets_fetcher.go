@@ -69,6 +69,8 @@ var GcpAssetTypes = map[string][]string{
 	},
 	fetching.CloudCompute: {
 		"compute.googleapis.com/Instance",
+		"compute.googleapis.com/Firewall",
+		"compute.googleapis.com/Disk",
 	},
 	fetching.CloudDns: {
 		"dns.googleapis.com/ManagedZone",
