@@ -64,6 +64,10 @@ is_compute_disk {
 	input.subType == "gcp-compute-disk"
 }
 
+is_compute_network {
+	input.subType == "gcp-compute-network"
+}
+
 is_cloud_sql {
 	input.subType == "gcp-sqladmin-instance"
 }
@@ -74,6 +78,14 @@ is_sql_server {
 
 is_cloud_my_sql {
 	startswith(resource.data.databaseVersion, "MYSQL")
+}
+
+is_backend_service {
+	input.subType == "gcp-compute-region-backend-service"
+}
+
+is_https_lb {
+	resource.data.protocol == "HTTPS"
 }
 
 is_postgres_sql {

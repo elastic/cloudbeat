@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 62/84 implemented rules (74%)
+### 64/84 implemented rules (76%)
 
-#### Automated rules: 62/73 (85%)
+#### Automated rules: 64/73 (88%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -308,7 +308,7 @@
 |                        2.13                        | Logging and Monitoring         | Ensure Cloud Asset Inventory Is Enabled                                                                                           |        :x:         | Automated |
 |                        2.14                        | Logging and Monitoring         | Ensure 'Access Transparency' is 'Enabled'                                                                                         |        :x:         |  Manual   |
 |                        2.15                        | Logging and Monitoring         | Ensure 'Access Approval' is 'Enabled'                                                                                             |        :x:         | Automated |
-|                        2.16                        | Logging and Monitoring         | Ensure Logging is enabled for HTTP(S) Load Balancer                                                                               |        :x:         | Automated |
+|  [2.16](bundle/compliance/cis_gcp/rules/cis_2_16)  | Logging and Monitoring         | Ensure Logging is enabled for HTTP(S) Load Balancer                                                                               | :white_check_mark: | Automated |
 |                        2.2                         | Logging and Monitoring         | Ensure That Sinks Are Configured for All Log Entries                                                                              |        :x:         | Automated |
 |                        2.3                         | Logging and Monitoring         | Ensure That Retention Policies on Cloud Storage Buckets Used for Exporting Logs Are Configured Using Bucket Lock                  |        :x:         | Automated |
 |   [2.4](bundle/compliance/cis_gcp/rules/cis_2_4)   | Logging and Monitoring         | Ensure Log Metric Filter and Alerts Exist for Project Ownership Assignments/Changes                                               | :white_check_mark: | Automated |
@@ -317,7 +317,7 @@
 |   [2.7](bundle/compliance/cis_gcp/rules/cis_2_7)   | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for VPC Network Firewall Rule Changes                                          | :white_check_mark: | Automated |
 |   [2.8](bundle/compliance/cis_gcp/rules/cis_2_8)   | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for VPC Network Route Changes                                                  | :white_check_mark: | Automated |
 |   [2.9](bundle/compliance/cis_gcp/rules/cis_2_9)   | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for VPC Network Changes                                                        | :white_check_mark: | Automated |
-|                        3.1                         | Networking                     | Ensure That the Default Network Does Not Exist in a Project                                                                       |        :x:         | Automated |
+|   [3.1](bundle/compliance/cis_gcp/rules/cis_3_1)   | Networking                     | Ensure That the Default Network Does Not Exist in a Project                                                                       | :white_check_mark: | Automated |
 |                        3.10                        | Networking                     | Use Identity Aware Proxy (IAP) to Ensure Only Traffic From Google IP Addresses are 'Allowed'                                      |        :x:         |  Manual   |
 |                        3.2                         | Networking                     | Ensure Legacy Networks Do Not Exist for Older Projects                                                                            |        :x:         | Automated |
 |   [3.3](bundle/compliance/cis_gcp/rules/cis_3_3)   | Networking                     | Ensure That DNSSEC Is Enabled for Cloud DNS                                                                                       | :white_check_mark: | Automated |
