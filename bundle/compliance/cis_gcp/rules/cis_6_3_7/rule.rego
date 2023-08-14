@@ -12,9 +12,9 @@ finding = result {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(assert.is_false(is_flag_enabled)),
+		common.calculate_result(assert.is_false(is_flag_configured_as_expected)),
 		{"DB Instance": data_adapter.resource},
 	)
 }
 
-is_flag_enabled := audit.is_flag_enabled("contained database authentication")
+is_flag_configured_as_expected := audit.is_flag_configured_as_expected("contained database authentication", ["on"])

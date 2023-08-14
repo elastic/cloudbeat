@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 53/84 implemented rules (63%)
+### 62/84 implemented rules (74%)
 
-#### Automated rules: 53/73 (73%)
+#### Automated rules: 62/73 (85%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -344,15 +344,15 @@
 |                       6.1.1                        | MySQL Database                 | Ensure That a MySQL Database Instance Does Not Allow Anyone To Connect With Administrative Privileges                             |        :x:         |  Manual   |
 | [6.1.2](bundle/compliance/cis_gcp/rules/cis_6_1_2) | MySQL Database                 | Ensure ‘Skip_show_database’ Database Flag for Cloud SQL MySQL Instance Is Set to ‘On’                                             | :white_check_mark: | Automated |
 | [6.1.3](bundle/compliance/cis_gcp/rules/cis_6_1_3) | MySQL Database                 | Ensure That the ‘Local_infile’ Database Flag for a Cloud SQL MySQL Instance Is Set to ‘Off’                                       | :white_check_mark: | Automated |
-|                       6.2.1                        | PostgreSQL Database            | Ensure ‘Log_error_verbosity’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘DEFAULT’ or Stricter                      |        :x:         | Automated |
-|                       6.2.2                        | PostgreSQL Database            | Ensure That the ‘Log_connections’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘On’                                  |        :x:         | Automated |
-|                       6.2.3                        | PostgreSQL Database            | Ensure That the ‘Log_disconnections’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘On’                               |        :x:         | Automated |
-|                       6.2.4                        | PostgreSQL Database            | Ensure ‘Log_statement’ Database Flag for Cloud SQL PostgreSQL Instance Is Set Appropriately                                       |        :x:         | Automated |
-|                       6.2.5                        | PostgreSQL Database            | Ensure that the ‘Log_min_messages’ Flag for a Cloud SQL PostgreSQL Instance is set at minimum to 'Warning'                        |        :x:         | Automated |
-|                       6.2.6                        | PostgreSQL Database            | Ensure ‘Log_min_error_statement’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘Error’ or Stricter                    |        :x:         | Automated |
-|                       6.2.7                        | PostgreSQL Database            | Ensure That the ‘Log_min_duration_statement’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘-1′ (Disabled)            |        :x:         | Automated |
-|                       6.2.8                        | PostgreSQL Database            | Ensure That 'cloudsql.enable_pgaudit' Database Flag for each Cloud Sql Postgresql Instance Is Set to 'on' For Centralized Logging |        :x:         | Automated |
-|                       6.2.9                        | PostgreSQL Database            | Ensure Instance IP assignment is set to private                                                                                   |        :x:         | Automated |
+| [6.2.1](bundle/compliance/cis_gcp/rules/cis_6_2_1) | PostgreSQL Database            | Ensure ‘Log_error_verbosity’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘DEFAULT’ or Stricter                      | :white_check_mark: | Automated |
+| [6.2.2](bundle/compliance/cis_gcp/rules/cis_6_2_2) | PostgreSQL Database            | Ensure That the ‘Log_connections’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘On’                                  | :white_check_mark: | Automated |
+| [6.2.3](bundle/compliance/cis_gcp/rules/cis_6_2_3) | PostgreSQL Database            | Ensure That the ‘Log_disconnections’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘On’                               | :white_check_mark: | Automated |
+| [6.2.4](bundle/compliance/cis_gcp/rules/cis_6_2_4) | PostgreSQL Database            | Ensure ‘Log_statement’ Database Flag for Cloud SQL PostgreSQL Instance Is Set Appropriately                                       | :white_check_mark: | Automated |
+| [6.2.5](bundle/compliance/cis_gcp/rules/cis_6_2_5) | PostgreSQL Database            | Ensure that the ‘Log_min_messages’ Flag for a Cloud SQL PostgreSQL Instance is set at minimum to 'Warning'                        | :white_check_mark: | Automated |
+| [6.2.6](bundle/compliance/cis_gcp/rules/cis_6_2_6) | PostgreSQL Database            | Ensure ‘Log_min_error_statement’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘Error’ or Stricter                    | :white_check_mark: | Automated |
+| [6.2.7](bundle/compliance/cis_gcp/rules/cis_6_2_7) | PostgreSQL Database            | Ensure That the ‘Log_min_duration_statement’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘-1′ (Disabled)            | :white_check_mark: | Automated |
+| [6.2.8](bundle/compliance/cis_gcp/rules/cis_6_2_8) | PostgreSQL Database            | Ensure That 'cloudsql.enable_pgaudit' Database Flag for each Cloud Sql Postgresql Instance Is Set to 'on' For Centralized Logging | :white_check_mark: | Automated |
+| [6.2.9](bundle/compliance/cis_gcp/rules/cis_6_2_9) | PostgreSQL Database            | Ensure Instance IP assignment is set to private                                                                                   | :white_check_mark: | Automated |
 | [6.3.1](bundle/compliance/cis_gcp/rules/cis_6_3_1) | SQL Server                     | Ensure 'external scripts enabled' database flag for Cloud SQL SQL Server instance is set to 'off'                                 | :white_check_mark: | Automated |
 | [6.3.2](bundle/compliance/cis_gcp/rules/cis_6_3_2) | SQL Server                     | Ensure that the 'cross db ownership chaining' database flag for Cloud SQL SQL Server instance is set to 'off'                     | :white_check_mark: | Automated |
 | [6.3.3](bundle/compliance/cis_gcp/rules/cis_6_3_3) | SQL Server                     | Ensure 'user Connections' Database Flag for Cloud Sql Sql Server Instance Is Set to a Non-limiting Value                          | :white_check_mark: | Automated |

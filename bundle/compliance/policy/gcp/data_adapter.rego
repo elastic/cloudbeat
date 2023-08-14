@@ -76,6 +76,10 @@ is_cloud_my_sql {
 	startswith(resource.data.databaseVersion, "MYSQL")
 }
 
+is_postgres_sql {
+	startswith(resource.data.databaseVersion, "POSTGRES")
+}
+
 is_monitoring_asset {
 	input.subType == "gcp-monitoring"
 }

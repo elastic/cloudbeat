@@ -15,7 +15,7 @@ test_violation {
 		{"data": {
 			"instanceType": "CLOUD_SQL_INSTANCE",
 			"backendType": "SECOND_GEN",
-			"ipAddresses": [{"type": "PRIMARY"}],
+			"ipAddresses": [{"type": "PRIMARY"}, {"type": "PRIVATE"}],
 		}},
 		{},
 	)
