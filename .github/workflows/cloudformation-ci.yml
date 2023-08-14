@@ -25,7 +25,8 @@ env:
   CNVM_STACK_NAME: cnvm-stack-pr${{ github.event.number }}
 
 jobs:
-  Deploy:
+  Deploy-CloudFormation:
+    name: "Deploy CloudFormation"
     runs-on: ubuntu-20.04
     timeout-minutes: 120
     defaults:
@@ -116,20 +117,17 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
           poetry run python src/install_cnvm_integration.py
-          poetry run python src/install_cspm_integration.py          
 
       - name: Deploy CNVM agent
         env:
           STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
         run: |
           just deploy-cloudformation
-      
-      
+
       - name: Wait for CloudFormation stack
         id: wait-for-cfn
         run: |
           aws cloudformation wait stack-create-complete --stack-name ${{ env.CNVM_STACK_NAME }}
-
 
       - name: Wait for agents to enroll
         id: wait-for-agents
