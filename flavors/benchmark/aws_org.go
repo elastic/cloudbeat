@@ -90,22 +90,18 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, initialCfg awssdk.Config, r
 		return nil, err
 	}
 
-	accounts := []factory.AwsAccount{
-		{
-			Identity: *rootIdentity,
-			Config:   rootCfg,
-		},
-	}
+	var accounts []factory.AwsAccount
 	for _, identity := range accountIdentities {
+		var memberCfg awssdk.Config
 		if identity.Account == rootIdentity.Account {
-			continue
+			memberCfg = rootCfg
+		} else {
+			memberCfg = assumeRole(
+				stsClient,
+				rootCfg,
+				fmtIAMRole(identity.Account, memberRole),
+			)
 		}
-
-		memberCfg := assumeRole(
-			stsClient,
-			rootCfg,
-			fmtIAMRole(identity.Account, memberRole),
-		)
 
 		accounts = append(accounts, factory.AwsAccount{
 			Identity: identity,

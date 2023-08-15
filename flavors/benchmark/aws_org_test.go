@@ -76,13 +76,13 @@ func TestAWSOrg_Initialize(t *testing.T) {
 				"123-" + fetching.EC2NetworkingType,
 				"123-" + fetching.RdsType,
 				"123-" + fetching.S3Type,
-				"test-account-" + fetching.IAMType,
-				"test-account-" + fetching.KmsType,
-				"test-account-" + fetching.TrailType,
-				"test-account-" + fetching.AwsMonitoringType,
-				"test-account-" + fetching.EC2NetworkingType,
-				"test-account-" + fetching.RdsType,
-				"test-account-" + fetching.S3Type,
+				"456-" + fetching.IAMType,
+				"456-" + fetching.KmsType,
+				"456-" + fetching.TrailType,
+				"456-" + fetching.AwsMonitoringType,
+				"456-" + fetching.EC2NetworkingType,
+				"456-" + fetching.RdsType,
+				"456-" + fetching.S3Type,
 			},
 		},
 	}
@@ -114,10 +114,11 @@ func Test_getAwsAccounts(t *testing.T) {
 			wantErr:         "some error",
 		},
 		{
-			name: "",
+			name: "success",
 			accountProvider: mockAccountProviderWithIdentities([]cloud.Identity{
 				{
-					Account: "123",
+					Account:      "123",
+					AccountAlias: "alias",
 				},
 				{
 					Account:      "456",
@@ -125,8 +126,7 @@ func Test_getAwsAccounts(t *testing.T) {
 				},
 			}),
 			rootIdentity: cloud.Identity{
-				Account:      "123",
-				AccountAlias: "alias",
+				Account: "123",
 			},
 			want: []cloud.Identity{
 				{
@@ -170,6 +170,10 @@ func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
 			{
 				Account:      "123",
 				AccountAlias: "some-name",
+			},
+			{
+				Account:      "456",
+				AccountAlias: "some-other-name",
 			},
 		}, nil)
 	} else {
