@@ -17,6 +17,8 @@ env:
   DEPLOYMENT_NAME: DEPLOY_PR${{ github.event.number }}
   S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
   CNVM_STACK_NAME: cnvm-stack-pr${{ github.event.number }}
+  TF_VAR_ess_region: "gcp-us-west2"
+  TF_VAR_ec_api_key: ${{ secrets.TF_VAR_ec_api_key }}
 
 jobs:
   Deploy-CloudFormation:
@@ -71,9 +73,8 @@ jobs:
         id: apply
         if: success()
         env:
-          TF_VAR_ess_region: "gcp-us-west2"
           TF_VAR_stack_version: ${{ env.ELK_VERSION }}
-          TF_VAR_ec_api_key: ${{ secrets.TF_VAR_ec_api_key }}
+
         run: |
           terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -target=module.ec_deployment
 
