@@ -16,7 +16,7 @@ env:
   DEPLOYMENT_NAME: DEPLOY_PR${{ github.event.number }}
   S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
   CNVM_STACK_NAME: cnvm-stack-pr${{ github.event.number }}
-  TF_VAR_ec_api_key: ${{ secrets.TF_VAR_ec_api_key }}
+  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
   Deploy-CloudFormation:
