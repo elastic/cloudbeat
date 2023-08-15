@@ -103,3 +103,7 @@ is_dns_managed_zone {
 is_sql_instance {
 	input.subType == "gcp-sqladmin-instance"
 }
+
+is_subnetwork {
+	input.subType == "gcp-compute-subnetwork"
+}

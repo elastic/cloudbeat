@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 64/84 implemented rules (76%)
+### 65/84 implemented rules (77%)
 
-#### Automated rules: 64/73 (88%)
+#### Automated rules: 65/73 (89%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -325,7 +325,7 @@
 |   [3.5](bundle/compliance/cis_gcp/rules/cis_3_5)   | Networking                     | Ensure That RSASHA1 Is Not Used for the Zone-Signing Key in Cloud DNS DNSSEC                                                      | :white_check_mark: | Automated |
 |   [3.6](bundle/compliance/cis_gcp/rules/cis_3_6)   | Networking                     | Ensure That SSH Access Is Restricted From the Internet                                                                            | :white_check_mark: | Automated |
 |   [3.7](bundle/compliance/cis_gcp/rules/cis_3_7)   | Networking                     | Ensure That RDP Access Is Restricted From the Internet                                                                            | :white_check_mark: | Automated |
-|                        3.8                         | Networking                     | Ensure that VPC Flow Logs is Enabled for Every Subnet in a VPC Network                                                            |        :x:         | Automated |
+|   [3.8](bundle/compliance/cis_gcp/rules/cis_3_8)   | Networking                     | Ensure that VPC Flow Logs is Enabled for Every Subnet in a VPC Network                                                            | :white_check_mark: | Automated |
 |                        3.9                         | Networking                     | Ensure No HTTPS or SSL Proxy Load Balancers Permit SSL Policies With Weak Cipher Suites                                           |        :x:         |  Manual   |
 |   [4.1](bundle/compliance/cis_gcp/rules/cis_4_1)   | Virtual Machines               | Ensure That Instances Are Not Configured To Use the Default Service Account                                                       | :white_check_mark: | Automated |
 |                        4.10                        | Virtual Machines               | Ensure That App Engine Applications Enforce HTTPS Connections                                                                     |        :x:         |  Manual   |
