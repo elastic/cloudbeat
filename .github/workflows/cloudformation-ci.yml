@@ -115,7 +115,7 @@ jobs:
       - name: Install integrations
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
         env:
-          STACK_VERIOIN: ${{ env.ELK_VERSION }}
+          STACK_VERSION: ${{ env.ELK_VERSION }}
         run: |
           poetry run python src/install_cnvm_integration.py
 
