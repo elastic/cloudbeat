@@ -126,8 +126,7 @@ func (p *Provider) ListAllAssetTypesByName(assets []string) ([]*assetpb.Asset, e
 
 	wg.Wait()
 
-	results := append(resourceAssets, policyAssets...)
-	return mergeAssetContentType(results), nil
+	return mergeAssetContentType(append(resourceAssets, policyAssets...)), nil
 }
 
 func (p *Provider) ListMonitoringAssets(monitoringAssetTypes map[string][]string) (*MonitoringAsset, error) {

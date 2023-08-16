@@ -44,10 +44,10 @@ var vanillaFsPatterns = []string{
 }
 
 var vanillaRequiredProcesses = fetchers.ProcessesConfigMap{
-	"etcd":            {},
-	"kube-apiserver":  {},
-	"kube-controller": {},
-	"kube-scheduler":  {},
+	"etcd":            {ConfigFileArguments: nil},
+	"kube-apiserver":  {ConfigFileArguments: nil},
+	"kube-controller": {ConfigFileArguments: nil},
+	"kube-scheduler":  {ConfigFileArguments: nil},
 	"kubelet":         {ConfigFileArguments: []string{"config"}},
 }
 

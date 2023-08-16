@@ -175,8 +175,10 @@ generate-mocks:
 
 # run to validate no mocks are missing
 validate-mocks:
-  ./scripts/validate-mocks.sh
-
+  # delete and re-generate files to check nothing is different / missing
+  find . -name 'mock_*.go' -exec rm -f {} \;
+  just generate-mocks
+  git diff --exit-code
 
 #### TESTS ####
 
