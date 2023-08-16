@@ -86,7 +86,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - organizations:ListAccounts
+                  - organizations:List*
+                  - organizations:Describe*
                 Resource: '*'
               - Effect: Allow
                 Action:

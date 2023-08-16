@@ -75,7 +75,13 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 			rdsMocksReturnVals: rdsMocksReturnVals{
 				"DescribeDBInstances": {[]awslib.AwsResource{dbInstance1, dbInstance2}, nil},
 			},
-			expected: []fetching.ResourceInfo{{Resource: RdsResource{dbInstance: dbInstance1}}, {Resource: RdsResource{dbInstance: dbInstance2}}},
+			expected: []fetching.ResourceInfo{{
+				Resource:      RdsResource{dbInstance: dbInstance1},
+				CycleMetadata: fetching.CycleMetadata{},
+			}, {
+				Resource:      RdsResource{dbInstance: dbInstance2},
+				CycleMetadata: fetching.CycleMetadata{},
+			}},
 		},
 	}
 

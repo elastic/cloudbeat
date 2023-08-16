@@ -62,12 +62,18 @@ var GcpAssetTypes = map[string][]string{
 	fetching.CloudDatabase: {
 		"bigquery.googleapis.com/Dataset",
 		"bigquery.googleapis.com/Table",
+		"sqladmin.googleapis.com/Instance",
 	},
 	fetching.CloudStorage: {
 		"storage.googleapis.com/Bucket",
 	},
 	fetching.CloudCompute: {
 		"compute.googleapis.com/Instance",
+		"compute.googleapis.com/Firewall",
+		"compute.googleapis.com/Disk",
+		"compute.googleapis.com/Network",
+		"compute.googleapis.com/RegionBackendService",
+		"compute.googleapis.com/Subnetwork",
 	},
 	fetching.CloudDns: {
 		"dns.googleapis.com/ManagedZone",
