@@ -99,6 +99,8 @@ jobs:
       - name: Wait for agents to enroll
         id: wait-for-agents
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        env:
+          TIMEOUT: 20
         run: |
           poetry run python src/agents_enrolled.py
 
