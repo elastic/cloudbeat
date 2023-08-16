@@ -8,6 +8,7 @@ linters:
     - exhaustruct
     - exportloopref
     - gci
+    - gocritic
     - gocyclo
     - gofmt
     - misspell
@@ -17,10 +18,13 @@ linters:
     - unparam
     - whitespace
 # TODO: These are good but need some work to fix everything
-#    - gocritic
 #    - revive
 
 linters-settings:
+  gocritic:
+    settings:
+      ifElseChain:
+        minThreshold: 3
   gci:
     # Section configuration to compare against.
     # Section names are case-insensitive and may contain parameters in ().
