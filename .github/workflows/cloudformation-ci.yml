@@ -1,0 +1,111 @@
+name: CloudFormation-CI
+
+on:
+  pull_request_target:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+"
+    types: [opened, synchronize, reopened]
+    paths:
+      - deploy/cloudformation/*.yml
+      - .github/workflows/cloudformation-ci.yml
+
+env:
+  WORKING_DIR: deploy/test-environments
+  FLEET_API_DIR: fleet_api/src
+  DEPLOYMENT_NAME: DEPLOY_PR${{ github.event.number }}
+  CNVM_STACK_NAME: cnvm-stack-pr${{ github.event.number }}
+  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+
+jobs:
+  Deploy-CloudFormation:
+    name: "Deploy CloudFormation"
+    runs-on: ubuntu-20.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+        working-directory: ./
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry --version
+
+      - name: Install Fleet API dependencies
+        id: fleet-api-deps
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry install
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "eu-west-1"
+
+      - name: Provision Elastic Cloud Environment
+        id: apply
+        if: success()
+        env:
+          TF_VAR_stack_version: ${{ env.ELK_VERSION }}
+          TF_VAR_ess_region: "gcp-us-west2"
+        run: |
+          terraform init
+          terraform validate
+          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -target=module.ec_deployment
+
+      - name: Set Environment Output
+        id: env-output
+        run: |
+          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
+          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
+          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
+
+          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
+          echo "::add-mask::$ES_PASSWORD"
+          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+
+      - name: Install integrations
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        env:
+          STACK_VERSION: ${{ env.ELK_VERSION }}
+        run: |
+          poetry run python src/install_cnvm_integration.py
+
+      - name: Deploy CNVM agent
+        env:
+          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
+        run: |
+          just deploy-cloudformation
+
+      - name: Wait for CloudFormation stack
+        id: wait-for-cfn
+        run: |
+          aws cloudformation wait stack-create-complete --stack-name ${{ env.CNVM_STACK_NAME }}
+
+      - name: Wait for agents to enroll
+        id: wait-for-agents
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        timeout-minutes: 1
+        run: |
+          poetry run python src/agents_enrolled.py
+
+      - name: Cleanup Environment
+        if: always()
+        run: |
+          terraform destroy --auto-approve
+          aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
+          aws cloudformation wait stack-delete-complete --stack-name ${{ env.CNVM_STACK_NAME }}

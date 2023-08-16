@@ -172,8 +172,8 @@ func createServiceAccountFile(t *testing.T) *os.File {
 	return f
 }
 
-func mockGoogleAuthProvider(err error) *MockGoogleProviderAPI {
-	googleProviderAPI := &MockGoogleProviderAPI{}
+func mockGoogleAuthProvider(err error) *MockGoogleAuthProviderAPI {
+	googleProviderAPI := &MockGoogleAuthProviderAPI{}
 	on := googleProviderAPI.EXPECT().FindDefaultCredentials(mock.Anything)
 	if err == nil {
 		on.Return(
