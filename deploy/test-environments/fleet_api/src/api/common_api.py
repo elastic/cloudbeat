@@ -104,7 +104,7 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
                 response_obj.item,
                 new_image=params.docker_image_override,
             )
-        if params.capabilities:
+        if hasattr(params, "capabilities") and params.capabilities:
             manifest_yaml = add_capabilities(yaml_content=manifest_yaml)
         with codecs.open(params.yaml_path, "w", encoding="utf-8-sig") as k8s_yaml:
             k8s_yaml.write(manifest_yaml)

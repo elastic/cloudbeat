@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 from munch import Munch
 import configuration_fleet as cnfg
-from api.agent_policy_api import create_agent_policy
+from api.agent_policy_api import create_agent_policy, get_agent_policy_id_by_name
 from api.package_policy_api import create_kspm_eks_integration
 from api.common_api import (
     get_enrollment_token,
@@ -28,6 +28,7 @@ from state_file_manager import state_manager, PolicyState
 KSPM_EKS_AGENT_POLICY = "../../../cloud/data/agent_policy_eks.json"
 KSPM_EKS_PACKAGE_POLICY = "../../../cloud/data/package_policy_eks.json"
 KSPM_EKS_EXPECTED_AGENTS = 2
+D4C_AGENT_POLICY_NAME = "tf-ap-d4c"
 
 kspm_agent_policy_data = Path(__file__).parent / KSPM_EKS_AGENT_POLICY
 kspm_eks_pkg_policy_data = Path(__file__).parent / KSPM_EKS_PACKAGE_POLICY
@@ -59,7 +60,15 @@ if __name__ == "__main__":
     agent_data, package_data = load_data()
 
     logger.info("Create agent policy")
-    agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
+    agent_policy_id = get_agent_policy_id_by_name(
+        cfg=cnfg.elk_config,
+        policy_name=D4C_AGENT_POLICY_NAME,
+    )
+    if not agent_policy_id:
+        agent_policy_id = create_agent_policy(
+            cfg=cnfg.elk_config,
+            json_policy=agent_data,
+        )
 
     aws_config = cnfg.aws_config
     eks_data = {
