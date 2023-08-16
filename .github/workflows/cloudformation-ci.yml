@@ -14,7 +14,6 @@ env:
   WORKING_DIR: deploy/test-environments
   FLEET_API_DIR: fleet_api/src
   DEPLOYMENT_NAME: DEPLOY_PR${{ github.event.number }}
-  S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
   CNVM_STACK_NAME: cnvm-stack-pr${{ github.event.number }}
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
@@ -22,7 +21,7 @@ jobs:
   Deploy-CloudFormation:
     name: "Deploy CloudFormation"
     runs-on: ubuntu-20.04
-    timeout-minutes: 120
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: ${{ env.WORKING_DIR }}
@@ -87,29 +86,6 @@ jobs:
           export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
           echo "::add-mask::$ES_PASSWORD"
           echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
-
-      - name: Upload tf state
-        if: always()
-        env:
-          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
-        run: |
-          aws s3 cp "./terraform.tfstate" "${{ env.S3_BUCKET }}/terraform.tfstate"
-
-      - name: Summary
-        if: success()
-        run: |
-          kibana_url=$(terraform output -raw kibana_url)
-          summary="Kibana URL: $kibana_url"
-          bucket_name="${{ env.S3_BASE_BUCKET }}"
-          bucket_name="${bucket_name#s3://}"
-          s3_bucket_link="[creds and keys](https://s3.console.aws.amazon.com/s3/buckets/$bucket_name)"
-          summary=$(cat <<-EOF
-          Kibana URL: [kibana]($kibana_url)
-          Environment Details: $s3_bucket_link
-          EOF
-          )
-          echo "$summary" >> $GITHUB_STEP_SUMMARY
-          echo "$summary" # Print the summary to the workflow log
 
       - name: Install integrations
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
