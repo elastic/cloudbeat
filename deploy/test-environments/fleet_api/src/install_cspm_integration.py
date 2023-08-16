@@ -53,7 +53,11 @@ if __name__ == "__main__":
     # pylint: disable=duplicate-code
     package_version = get_cloud_security_posture_version(cfg=cnfg.elk_config)
     logger.info(f"Package version: {package_version}")
-    update_package_version(cfg=cnfg.elk_config, package_version=package_version)
+    update_package_version(
+        cfg=cnfg.elk_config,
+        package_name="cloud_security_posture",
+        package_version=package_version,
+    )
 
     logger.info("Starting installation of CSPM AWS integration.")
     agent_data, package_data = load_data()

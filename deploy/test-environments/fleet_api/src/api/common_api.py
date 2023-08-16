@@ -5,7 +5,7 @@ import codecs
 from munch import Munch, munchify
 from loguru import logger
 from api.base_call_api import APICallException, perform_api_call
-from utils import replace_image_field
+from utils import replace_image_field, add_capabilities
 
 AGENT_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
 
@@ -104,6 +104,8 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
                 response_obj.item,
                 new_image=params.docker_image_override,
             )
+        if hasattr(params, "capabilities") and params.capabilities:
+            manifest_yaml = add_capabilities(yaml_content=manifest_yaml)
         with codecs.open(params.yaml_path, "w", encoding="utf-8-sig") as k8s_yaml:
             k8s_yaml.write(manifest_yaml)
         logger.info(f"KSPM manifest is available at: '{params.yaml_path}'")
@@ -208,18 +210,18 @@ def get_stack_latest_version() -> str:
         return ""
 
 
-def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> str:
+def get_package_version(cfg: Munch, package_name: str, prerelease: bool = True) -> str:
     """
-    Retrieve the version of the cloud_security_posture package.
+    Retrieve the version of the specified package.
 
     Args:
         cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
+        package_name (str): Name of the package to retrieve the version for.
         prerelease (bool, optional): Flag indicating whether to include
-                                        prerelease versions.Defaults to True.
+                                    prerelease versions. Defaults to True.
 
     Returns:
-        str: The version of the cloud_security_posture package, or None if the API call fails.
-
+        str: The version of the specified package, or None if the API call fails or the package is not found.
     """
     url = f"{cfg.kibana_url}/api/fleet/epm/packages"
 
@@ -237,7 +239,7 @@ def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> s
 
         cloud_security_posture_version = None
         for package in response["response"]:
-            if package.get("name", "") == "cloud_security_posture":
+            if package.get("name", "") == package_name:
                 cloud_security_posture_version = package.get("version", "")
                 break
 
@@ -249,9 +251,45 @@ def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> s
         return None
 
 
-def update_package_version(cfg: Munch, package_version: str):
+def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> str:
     """
-    Updates the version of the 'cloud_security_posture' package.
+    Retrieve the version of the cloud_security_posture package.
+
+    Args:
+        cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
+        prerelease (bool, optional): Flag indicating whether to include
+                                        prerelease versions.Defaults to True.
+
+    Returns:
+        str: The version of the cloud_security_posture package, or None if the API call fails.
+
+    """
+    return get_package_version(
+        cfg=cfg,
+        package_name="cloud_security_posture",
+        prerelease=prerelease,
+    )
+
+
+def get_cloud_defend_version(cfg: Munch, prerelease: bool = True) -> str:
+    """
+    Retrieve the version of the cloud_defend package.
+
+    Args:
+        cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
+        prerelease (bool, optional): Flag indicating whether to include
+                                        prerelease versions.Defaults to True.
+
+    Returns:
+        str: The version of the cloud_defend package, or None if the API call fails.
+
+    """
+    return get_package_version(cfg=cfg, package_name="cloud_defend", prerelease=prerelease)
+
+
+def update_package_version(cfg: Munch, package_name: str, package_version: str):
+    """
+    Updates the version of a package.
 
     Args:
         cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
@@ -262,7 +300,7 @@ def update_package_version(cfg: Munch, package_version: str):
 
     """
     # pylint: disable=duplicate-code
-    url = f"{cfg.kibana_url}/api/fleet/epm/packages/cloud_security_posture/{package_version}"
+    url = f"{cfg.kibana_url}/api/fleet/epm/packages/{package_name}/{package_version}"
     try:
         perform_api_call(
             method="POST",

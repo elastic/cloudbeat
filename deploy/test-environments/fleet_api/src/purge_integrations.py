@@ -41,6 +41,13 @@ def purge_integrations():
         if agents_list:
             unenroll_agents_from_policy(cfg=cnfg.elk_config, agents=agents_list)
 
+        # Check if there is more than one package policy using the same agent policy
+        agent_policy_id = policy.agnt_policy_id
+        agent_policies = [p for p in state_manager.get_policies() if p.agnt_policy_id == agent_policy_id]
+        if len(agent_policies) > 1:
+            state_manager.delete_by_package_policy(pkg_policy_id=policy.pkg_policy_id)
+            continue
+
         delete_agent_policy(cfg=cnfg.elk_config, agent_policy_id=policy.agnt_policy_id)
 
     state_manager.delete_all()

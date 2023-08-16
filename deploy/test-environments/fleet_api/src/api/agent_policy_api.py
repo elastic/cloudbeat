@@ -70,6 +70,39 @@ def delete_agent_policy(cfg: Munch, agent_policy_id: str):
         return
 
 
+def get_agent_policy_id_by_name(cfg: Munch, policy_name: str) -> str:
+    """
+    Check if an agent policy with the specified name exists and return its ID.
+
+    Args:
+        cfg (Munch): Config object containing authentication data and endpoint URLs.
+        policy_name (str): The name of the agent policy to check.
+
+    Returns:
+        str: The ID of the agent policy if it exists, otherwise None.
+    """
+    # pylint: disable=duplicate-code
+    url = f"{cfg.kibana_url}/api/fleet/agent_policies"
+
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            auth=cfg.auth,
+        )
+        agent_policies = munchify(response).get("items", [])
+        for policy in agent_policies:
+            if policy.name == policy_name:
+                return policy.id
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        raise api_ex
+
+    return None
+
+
 def get_agents(cfg: Munch) -> list:
     """
     Retrieves a list of agents from the specified Kibana URL.

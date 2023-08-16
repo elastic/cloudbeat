@@ -197,3 +197,44 @@ def replace_image_field(yaml_string: str, new_image: str) -> str:
     yaml_string = output_stream.getvalue()
 
     return yaml_string
+
+
+def add_capabilities(yaml_content: str) -> str:
+    """
+    Adds capabilities to the 'securityContext' if not already present.
+
+    Args:
+        yaml_content (str): The YAML content (collection of documents) to be processed.
+
+    Returns:
+        str: The modified YAML content with added capabilities.
+    """
+    yaml = ruamel.yaml.YAML()
+    yaml.preserve_quotes = True
+    yaml.indent(mapping=2, sequence=4, offset=2)
+    yaml.explicit_start = True
+
+    # Process each document individually and add capabilities
+    documents = list(yaml.load_all(yaml_content))
+    for doc in documents:
+        if isinstance(doc, dict) and doc.get("kind") == "DaemonSet":
+            containers = doc["spec"]["template"]["spec"].get("containers", [])
+            for container in containers:
+                security_context = container.setdefault("securityContext", {})
+                capabilities = security_context.setdefault("capabilities", {})
+                add_list = capabilities.setdefault("add", [])
+                capabilities_to_add = ["BPF", "PERFMON", "SYS_RESOURCE"]
+                for cap in capabilities_to_add:
+                    if cap not in add_list:
+                        add_list.append(cap)
+
+    # Create an output stream
+    output_stream = ruamel.yaml.compat.StringIO()
+
+    # Dump the modified YAML data to the output stream
+    yaml.dump_all(documents, output_stream)
+
+    # Get the YAML string from the output stream
+    modified_content = output_stream.getvalue()
+
+    return modified_content
