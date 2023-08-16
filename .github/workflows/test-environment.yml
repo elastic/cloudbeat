@@ -26,6 +26,10 @@ on:
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
+      add-d4c-integration:
+          description: "Enable Defend For Containers (D4C). When enabled, installs both the D4C and the KSPM EKS integrations under the same agent policy."
+          default: false
+          type: boolean
       run-sanity-tests:
           description: "Run sanity tests after provision"
           default: false
@@ -182,11 +186,28 @@ jobs:
           STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
         run: just deploy-cloudformation
 
+      - name: Install D4C integration
+        if: ${{ success() && github.event.inputs.add-d4c-integration == 'true' }}
+        id: kspm-d4c
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/install_d4c_integration.py
+
       - name: Install KSPM EKS integration
         id: kspm-eks
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
           poetry run python src/install_kspm_eks_integration.py
+
+      - name: Set deployment YAML file
+        id: set-yaml
+        run: |
+          if [ "${{ github.event.inputs.add-d4c-integration }}" == "true" ]; then
+            echo "YAML_FILE=kspm_d4c.yaml" >> $GITHUB_ENV
+          else
+            echo "YAML_FILE=kspm_eks.yaml" >> $GITHUB_ENV
+          fi
+        continue-on-error: true
 
       - name: Deploy KSPM EKS agent
         env:
@@ -197,7 +218,7 @@ jobs:
           echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
           aws s3 cp ~/.kube/config "${{ env.S3_BUCKET }}/kubeconfig"
           kubectl config use-context eks-config
-          kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_eks.yaml
+          kubectl apply -f ${{ env.FLEET_API_DIR}}/${{ env.YAML_FILE }}
 
       - name: Install KSPM Unmanaged integration
         id: kspm-unmanaged
@@ -233,7 +254,7 @@ jobs:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
         run: |
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
-          aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
+          aws s3 cp "${{ env.FLEET_API_DIR}}/${{ env.YAML_FILE }}" "${{ env.S3_BUCKET }}/${{ env.YAML_FILE }}"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
 
       - name: Wait for agents to enroll
