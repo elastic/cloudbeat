@@ -2,7 +2,6 @@
 Wait for agents to be enrolled for a given policies
 If the expected number of agents is not enrolled within the timeout, the test will fail
 """
-import os
 import sys
 import time
 import re
@@ -12,7 +11,7 @@ import configuration_fleet as cnfg
 from state_file_manager import state_manager
 from loguru import logger
 
-DEFAULT_TIMEOUT = 600
+TIMEOUT = 600
 
 
 @dataclass
@@ -106,7 +105,6 @@ def wait_for_agents_enrolled(timeout) -> bool:
     """
     start_time = time.time()
     while time.time() - start_time < timeout:
-        logger.debug(f"Checking if all agents are enrolled")
         if verify_agents_enrolled():
             return True
         time.sleep(10)
@@ -115,8 +113,7 @@ def wait_for_agents_enrolled(timeout) -> bool:
 
 
 if __name__ == "__main__":
-    TIMEOUT = os.getenv("TIMEOUT", DEFAULT_TIMEOUT)
-    logger.info(f"Waiting for agents to be enrolled for {TIMEOUT} seconds")
+    logger.info("Waiting for agents to be enrolled...")
     if wait_for_agents_enrolled(TIMEOUT):
         logger.info("All agents enrolled successfully")
     else:
