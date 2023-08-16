@@ -214,6 +214,7 @@ def add_capabilities(yaml_content: str) -> str:
     yaml.indent(mapping=2, sequence=4, offset=2)
     yaml.explicit_start = True
 
+    output = []
     # Process each document individually and add capabilities
     documents = list(yaml.load_all(yaml_content))
     for doc in documents:
@@ -227,12 +228,14 @@ def add_capabilities(yaml_content: str) -> str:
                 for cap in capabilities_to_add:
                     if cap not in add_list:
                         add_list.append(cap)
+        if doc:
+            output.append(doc)
 
     # Create an output stream
     output_stream = ruamel.yaml.compat.StringIO()
 
     # Dump the modified YAML data to the output stream
-    yaml.dump_all(documents, output_stream)
+    yaml.dump_all(output, output_stream)
 
     # Get the YAML string from the output stream
     modified_content = output_stream.getvalue()
