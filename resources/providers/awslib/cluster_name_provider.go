@@ -127,7 +127,7 @@ func (provider EKSClusterNameProvider) getClusterNameFromAutoscalingGroup(ctx co
 						stringifyTag := *tag.Key
 						if *tag.Value == "owned" && asgCompiledRegex.MatchString(stringifyTag) {
 							groups := asgCompiledRegex.FindStringSubmatch(stringifyTag)
-							clusterName := groups[1][:]
+							clusterName := groups[1]
 							return clusterName, nil
 						}
 					}
