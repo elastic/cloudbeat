@@ -27,7 +27,7 @@ on:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
       add-d4c-integration:
-          description: "Enable Defend For Containers (D4C). When enabled, installs both the D4C and the KSPM EKS integrations under the same agent policy."
+          description: "Enable Defend For Containers"
           default: false
           type: boolean
       run-sanity-tests:
