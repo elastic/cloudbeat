@@ -388,3 +388,51 @@ func Test_getOUInfoForAccount(t *testing.T) {
 		}, got)
 	})
 }
+
+func Test_describeOU(t *testing.T) {
+	ctx := context.Background()
+	ouID := "123"
+	ou := types.OrganizationalUnit{
+		Arn:  aws.String("some-arn"),
+		Id:   &ouID,
+		Name: aws.String("some-name"),
+	}
+
+	m := &mockOrganizationsAPI{}
+	defer m.AssertExpectations(t)
+	m.EXPECT().DescribeOrganizationalUnit(mock.Anything, &organizations.DescribeOrganizationalUnitInput{OrganizationalUnitId: &ouID}).
+		Return(&organizations.DescribeOrganizationalUnitOutput{
+			OrganizationalUnit: &ou,
+		}, nil).Times(2)
+
+	t.Run("protect against nil cache", func(t *testing.T) {
+		got, err := describeOU(ctx, m, nil, &ouID)
+		assert.Equal(t, organizationalUnitInfo{
+			id:   ouID,
+			name: "some-name",
+		}, got)
+		assert.NoError(t, err)
+	})
+
+	cache := map[string]string{}
+
+	t.Run("first", func(t *testing.T) {
+		got, err := describeOU(ctx, m, cache, &ouID)
+		assert.Equal(t, organizationalUnitInfo{
+			id:   ouID,
+			name: "some-name",
+		}, got)
+		assert.NoError(t, err)
+		assert.Len(t, cache, 1)
+	})
+
+	t.Run("use cache", func(t *testing.T) {
+		got, err := describeOU(ctx, m, cache, &ouID)
+		assert.Equal(t, organizationalUnitInfo{
+			id:   ouID,
+			name: "some-name",
+		}, got)
+		assert.NoError(t, err)
+		assert.Len(t, cache, 1)
+	})
+}

@@ -134,7 +134,9 @@ func describeOU(ctx context.Context, client organizationsAPI, cache map[string]s
 	}
 
 	name := strings.Dereference(o.OrganizationalUnit.Name)
-	cache[*id] = name
+	if cache != nil {
+		cache[*id] = name
+	}
 	return organizationalUnitInfo{
 		id:   *id,
 		name: name,
