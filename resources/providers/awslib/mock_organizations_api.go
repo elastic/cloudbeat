@@ -39,32 +39,32 @@ func (_m *mockOrganizationsAPI) EXPECT() *mockOrganizationsAPI_Expecter {
 	return &mockOrganizationsAPI_Expecter{mock: &_m.Mock}
 }
 
-// DescribeOrganization provides a mock function with given fields: ctx, params, optFns
-func (_m *mockOrganizationsAPI) DescribeOrganization(ctx context.Context, params *organizations.DescribeOrganizationInput, optFns ...func(*organizations.Options)) (*organizations.DescribeOrganizationOutput, error) {
-	_va := make([]interface{}, len(optFns))
-	for _i := range optFns {
-		_va[_i] = optFns[_i]
+// DescribeOrganizationalUnit provides a mock function with given fields: _a0, _a1, _a2
+func (_m *mockOrganizationsAPI) DescribeOrganizationalUnit(_a0 context.Context, _a1 *organizations.DescribeOrganizationalUnitInput, _a2 ...func(*organizations.Options)) (*organizations.DescribeOrganizationalUnitOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, params)
+	_ca = append(_ca, _a0, _a1)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *organizations.DescribeOrganizationOutput
+	var r0 *organizations.DescribeOrganizationalUnitOutput
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, *organizations.DescribeOrganizationInput, ...func(*organizations.Options)) (*organizations.DescribeOrganizationOutput, error)); ok {
-		return rf(ctx, params, optFns...)
+	if rf, ok := ret.Get(0).(func(context.Context, *organizations.DescribeOrganizationalUnitInput, ...func(*organizations.Options)) (*organizations.DescribeOrganizationalUnitOutput, error)); ok {
+		return rf(_a0, _a1, _a2...)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, *organizations.DescribeOrganizationInput, ...func(*organizations.Options)) *organizations.DescribeOrganizationOutput); ok {
-		r0 = rf(ctx, params, optFns...)
+	if rf, ok := ret.Get(0).(func(context.Context, *organizations.DescribeOrganizationalUnitInput, ...func(*organizations.Options)) *organizations.DescribeOrganizationalUnitOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*organizations.DescribeOrganizationOutput)
+			r0 = ret.Get(0).(*organizations.DescribeOrganizationalUnitOutput)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, *organizations.DescribeOrganizationInput, ...func(*organizations.Options)) error); ok {
-		r1 = rf(ctx, params, optFns...)
+	if rf, ok := ret.Get(1).(func(context.Context, *organizations.DescribeOrganizationalUnitInput, ...func(*organizations.Options)) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -72,21 +72,21 @@ func (_m *mockOrganizationsAPI) DescribeOrganization(ctx context.Context, params
 	return r0, r1
 }
 
-// mockOrganizationsAPI_DescribeOrganization_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeOrganization'
-type mockOrganizationsAPI_DescribeOrganization_Call struct {
+// mockOrganizationsAPI_DescribeOrganizationalUnit_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DescribeOrganizationalUnit'
+type mockOrganizationsAPI_DescribeOrganizationalUnit_Call struct {
 	*mock.Call
 }
 
-// DescribeOrganization is a helper method to define mock.On call
-//   - ctx context.Context
-//   - params *organizations.DescribeOrganizationInput
-//   - optFns ...func(*organizations.Options)
-func (_e *mockOrganizationsAPI_Expecter) DescribeOrganization(ctx interface{}, params interface{}, optFns ...interface{}) *mockOrganizationsAPI_DescribeOrganization_Call {
-	return &mockOrganizationsAPI_DescribeOrganization_Call{Call: _e.mock.On("DescribeOrganization",
-		append([]interface{}{ctx, params}, optFns...)...)}
+// DescribeOrganizationalUnit is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 *organizations.DescribeOrganizationalUnitInput
+//   - _a2 ...func(*organizations.Options)
+func (_e *mockOrganizationsAPI_Expecter) DescribeOrganizationalUnit(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *mockOrganizationsAPI_DescribeOrganizationalUnit_Call {
+	return &mockOrganizationsAPI_DescribeOrganizationalUnit_Call{Call: _e.mock.On("DescribeOrganizationalUnit",
+		append([]interface{}{_a0, _a1}, _a2...)...)}
 }
 
-func (_c *mockOrganizationsAPI_DescribeOrganization_Call) Run(run func(ctx context.Context, params *organizations.DescribeOrganizationInput, optFns ...func(*organizations.Options))) *mockOrganizationsAPI_DescribeOrganization_Call {
+func (_c *mockOrganizationsAPI_DescribeOrganizationalUnit_Call) Run(run func(_a0 context.Context, _a1 *organizations.DescribeOrganizationalUnitInput, _a2 ...func(*organizations.Options))) *mockOrganizationsAPI_DescribeOrganizationalUnit_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		variadicArgs := make([]func(*organizations.Options), len(args)-2)
 		for i, a := range args[2:] {
@@ -94,17 +94,17 @@ func (_c *mockOrganizationsAPI_DescribeOrganization_Call) Run(run func(ctx conte
 				variadicArgs[i] = a.(func(*organizations.Options))
 			}
 		}
-		run(args[0].(context.Context), args[1].(*organizations.DescribeOrganizationInput), variadicArgs...)
+		run(args[0].(context.Context), args[1].(*organizations.DescribeOrganizationalUnitInput), variadicArgs...)
 	})
 	return _c
 }
 
-func (_c *mockOrganizationsAPI_DescribeOrganization_Call) Return(_a0 *organizations.DescribeOrganizationOutput, _a1 error) *mockOrganizationsAPI_DescribeOrganization_Call {
+func (_c *mockOrganizationsAPI_DescribeOrganizationalUnit_Call) Return(_a0 *organizations.DescribeOrganizationalUnitOutput, _a1 error) *mockOrganizationsAPI_DescribeOrganizationalUnit_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *mockOrganizationsAPI_DescribeOrganization_Call) RunAndReturn(run func(context.Context, *organizations.DescribeOrganizationInput, ...func(*organizations.Options)) (*organizations.DescribeOrganizationOutput, error)) *mockOrganizationsAPI_DescribeOrganization_Call {
+func (_c *mockOrganizationsAPI_DescribeOrganizationalUnit_Call) RunAndReturn(run func(context.Context, *organizations.DescribeOrganizationalUnitInput, ...func(*organizations.Options)) (*organizations.DescribeOrganizationalUnitOutput, error)) *mockOrganizationsAPI_DescribeOrganizationalUnit_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -175,6 +175,76 @@ func (_c *mockOrganizationsAPI_ListAccounts_Call) Return(_a0 *organizations.List
 }
 
 func (_c *mockOrganizationsAPI_ListAccounts_Call) RunAndReturn(run func(context.Context, *organizations.ListAccountsInput, ...func(*organizations.Options)) (*organizations.ListAccountsOutput, error)) *mockOrganizationsAPI_ListAccounts_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListParents provides a mock function with given fields: _a0, _a1, _a2
+func (_m *mockOrganizationsAPI) ListParents(_a0 context.Context, _a1 *organizations.ListParentsInput, _a2 ...func(*organizations.Options)) (*organizations.ListParentsOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *organizations.ListParentsOutput
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *organizations.ListParentsInput, ...func(*organizations.Options)) (*organizations.ListParentsOutput, error)); ok {
+		return rf(_a0, _a1, _a2...)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *organizations.ListParentsInput, ...func(*organizations.Options)) *organizations.ListParentsOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*organizations.ListParentsOutput)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *organizations.ListParentsInput, ...func(*organizations.Options)) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// mockOrganizationsAPI_ListParents_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListParents'
+type mockOrganizationsAPI_ListParents_Call struct {
+	*mock.Call
+}
+
+// ListParents is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 *organizations.ListParentsInput
+//   - _a2 ...func(*organizations.Options)
+func (_e *mockOrganizationsAPI_Expecter) ListParents(_a0 interface{}, _a1 interface{}, _a2 ...interface{}) *mockOrganizationsAPI_ListParents_Call {
+	return &mockOrganizationsAPI_ListParents_Call{Call: _e.mock.On("ListParents",
+		append([]interface{}{_a0, _a1}, _a2...)...)}
+}
+
+func (_c *mockOrganizationsAPI_ListParents_Call) Run(run func(_a0 context.Context, _a1 *organizations.ListParentsInput, _a2 ...func(*organizations.Options))) *mockOrganizationsAPI_ListParents_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		variadicArgs := make([]func(*organizations.Options), len(args)-2)
+		for i, a := range args[2:] {
+			if a != nil {
+				variadicArgs[i] = a.(func(*organizations.Options))
+			}
+		}
+		run(args[0].(context.Context), args[1].(*organizations.ListParentsInput), variadicArgs...)
+	})
+	return _c
+}
+
+func (_c *mockOrganizationsAPI_ListParents_Call) Return(_a0 *organizations.ListParentsOutput, _a1 error) *mockOrganizationsAPI_ListParents_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *mockOrganizationsAPI_ListParents_Call) RunAndReturn(run func(context.Context, *organizations.ListParentsInput, ...func(*organizations.Options)) (*organizations.ListParentsOutput, error)) *mockOrganizationsAPI_ListParents_Call {
 	_c.Call.Return(run)
 	return _c
 }

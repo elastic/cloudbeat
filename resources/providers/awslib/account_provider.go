@@ -19,6 +19,7 @@ package awslib
 
 import (
 	"context"
+	"errors"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
@@ -35,7 +36,8 @@ type AccountProviderAPI interface {
 
 type organizationsAPI interface {
 	organizations.ListAccountsAPIClient
-	DescribeOrganization(ctx context.Context, params *organizations.DescribeOrganizationInput, optFns ...func(*organizations.Options)) (*organizations.DescribeOrganizationOutput, error)
+	organizations.ListParentsAPIClient
+	DescribeOrganizationalUnit(context.Context, *organizations.DescribeOrganizationalUnitInput, ...func(*organizations.Options)) (*organizations.DescribeOrganizationalUnitOutput, error)
 }
 
 type AccountProvider struct{}
@@ -45,17 +47,7 @@ func (a AccountProvider) ListAccounts(ctx context.Context, log *logp.Logger, cfg
 }
 
 func listAccounts(ctx context.Context, log *logp.Logger, client organizationsAPI) ([]cloud.Identity, error) {
-	organization := struct {
-		name string
-		id   string
-	}{}
-	describeOrganizationOutput, err := client.DescribeOrganization(ctx, &organizations.DescribeOrganizationInput{})
-	if err == nil {
-		organization.id = strings.Dereference(describeOrganizationOutput.Organization.Id)
-		organization.name = strings.Dereference(describeOrganizationOutput.Organization.MasterAccountEmail)
-	} else {
-		log.Errorf("Failed to describe organization: %v", err)
-	}
+	organizationIdToName := make(map[string]string)
 
 	input := organizations.ListAccountsInput{}
 	var accounts []cloud.Identity
@@ -70,6 +62,10 @@ func listAccounts(ctx context.Context, log *logp.Logger, client organizationsAPI
 				continue
 			}
 
+			organization, err := getOUInfoForAccount(ctx, client, organizationIdToName, account.Id)
+			if err != nil {
+				log.Errorf("failed to get organizational unit info for account %s: %v", *account.Id, err)
+			}
 			accounts = append(accounts, cloud.Identity{
 				Provider:         "aws",
 				Account:          *account.Id,
@@ -85,4 +81,62 @@ func listAccounts(ctx context.Context, log *logp.Logger, client organizationsAPI
 		input.NextToken = o.NextToken
 	}
 	return accounts, nil
+}
+
+type organizationalUnitInfo struct {
+	id   string
+	name string
+}
+
+func getOUInfoForAccount(ctx context.Context, client organizationsAPI, cache map[string]string, accountId *string) (organizationalUnitInfo, error) {
+	paginator := organizations.NewListParentsPaginator(client, &organizations.ListParentsInput{ChildId: accountId})
+	for paginator.HasMorePages() {
+		o, err := paginator.NextPage(ctx)
+		if err != nil {
+			return organizationalUnitInfo{}, err
+		}
+		if len(o.Parents) == 0 {
+			continue
+		}
+
+		parent := o.Parents[0]
+
+		if parent.Type == types.ParentTypeRoot {
+			return organizationalUnitInfo{
+				id:   *parent.Id,
+				name: "Root",
+			}, nil
+		}
+
+		return describeOU(ctx, client, cache, parent.Id)
+	}
+
+	return organizationalUnitInfo{}, errors.New("empty response")
+}
+
+func describeOU(ctx context.Context, client organizationsAPI, cache map[string]string, id *string) (organizationalUnitInfo, error) {
+	if id == nil {
+		return organizationalUnitInfo{}, errors.New("nil id")
+	}
+
+	if savedName, ok := cache[*id]; ok {
+		return organizationalUnitInfo{
+			id:   *id,
+			name: savedName,
+		}, nil
+	}
+
+	o, err := client.DescribeOrganizationalUnit(ctx, &organizations.DescribeOrganizationalUnitInput{
+		OrganizationalUnitId: id,
+	})
+	if err != nil {
+		return organizationalUnitInfo{id: *id}, err
+	}
+
+	name := strings.Dereference(o.OrganizationalUnit.Name)
+	cache[*id] = name
+	return organizationalUnitInfo{
+		id:   *id,
+		name: name,
+	}, nil
 }

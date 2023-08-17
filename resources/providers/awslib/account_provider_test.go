@@ -35,8 +35,13 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-type apiResult struct {
+type listAccountsResult struct {
 	output *organizations.ListAccountsOutput
+	err    error
+}
+
+type listParentsResult struct {
+	output *organizations.ListParentsOutput
 	err    error
 }
 
@@ -46,22 +51,30 @@ func Test_listAccounts(t *testing.T) {
 		Name:   aws.String("name"),
 		Status: types.AccountStatusActive,
 	}
+	ou1Result := listParentsResult{
+		output: &organizations.ListParentsOutput{
+			Parents: []types.Parent{{
+				Id:   aws.String("ou-1"),
+				Type: types.ParentTypeOrganizationalUnit,
+			}},
+		},
+	}
 
 	tests := []struct {
 		name                      string
-		resultMap                 map[string]apiResult
+		listAccountsResults       map[string]listAccountsResult
+		listParentsResults        map[string]listParentsResult
 		describeOrganizationError error
 		want                      []cloud.Identity
 		wantErr                   string
 	}{
 		{
-			name:      "sanity check error",
-			resultMap: map[string]apiResult{},
-			wantErr:   "could not find token",
+			name:    "sanity check error",
+			wantErr: "could not find token",
 		},
 		{
 			name: "api error in first call",
-			resultMap: map[string]apiResult{
+			listAccountsResults: map[string]listAccountsResult{
 				"": {
 					err: errors.New("some error"),
 				},
@@ -70,7 +83,7 @@ func Test_listAccounts(t *testing.T) {
 		},
 		{
 			name: "api error in second call",
-			resultMap: map[string]apiResult{
+			listAccountsResults: map[string]listAccountsResult{
 				"": {
 					output: &organizations.ListAccountsOutput{
 						Accounts:  []types.Account{account1},
@@ -82,11 +95,12 @@ func Test_listAccounts(t *testing.T) {
 					err: errors.New("some error"),
 				},
 			},
-			wantErr: "some error",
+			listParentsResults: map[string]listParentsResult{},
+			wantErr:            "some error",
 		},
 		{
 			name: "single account",
-			resultMap: map[string]apiResult{
+			listAccountsResults: map[string]listAccountsResult{
 				"": {
 					output: &organizations.ListAccountsOutput{
 						Accounts:  []types.Account{account1},
@@ -95,19 +109,22 @@ func Test_listAccounts(t *testing.T) {
 					err: nil,
 				},
 			},
+			listParentsResults: map[string]listParentsResult{
+				"1": ou1Result,
+			},
 			want: []cloud.Identity{
 				{
 					Provider:         "aws",
 					Account:          "1",
 					AccountAlias:     "name",
-					OrganizationId:   "some-id",
-					OrganizationName: "email@email.com",
+					OrganizationId:   "ou-1",
+					OrganizationName: "ou-1-name",
 				},
 			},
 		},
 		{
 			name: "many accounts",
-			resultMap: map[string]apiResult{
+			listAccountsResults: map[string]listAccountsResult{
 				"": {
 					output: &organizations.ListAccountsOutput{
 						Accounts:  []types.Account{account1},
@@ -157,28 +174,33 @@ func Test_listAccounts(t *testing.T) {
 					Provider:         "aws",
 					Account:          "1",
 					AccountAlias:     "name",
-					OrganizationId:   "some-id",
-					OrganizationName: "email@email.com",
+					OrganizationId:   "ou-1",
+					OrganizationName: "ou-1-name",
 				},
 				{
 					Provider:         "aws",
 					Account:          "123",
 					AccountAlias:     "",
-					OrganizationId:   "some-id",
-					OrganizationName: "email@email.com",
+					OrganizationId:   "ou-1",
+					OrganizationName: "ou-1-name",
 				},
 				{
 					Provider:         "aws",
 					Account:          "1000",
 					AccountAlias:     "some name",
-					OrganizationId:   "some-id",
-					OrganizationName: "email@email.com",
+					OrganizationId:   "",
+					OrganizationName: "",
 				},
+			},
+			listParentsResults: map[string]listParentsResult{
+				"1":    ou1Result,
+				"123":  ou1Result,
+				"1000": {err: errors.New("some-ignored-error")},
 			},
 		},
 		{
 			name: "ignore describe organization error",
-			resultMap: map[string]apiResult{
+			listAccountsResults: map[string]listAccountsResult{
 				"": {
 					output: &organizations.ListAccountsOutput{
 						Accounts:  []types.Account{account1},
@@ -187,12 +209,15 @@ func Test_listAccounts(t *testing.T) {
 					err: nil,
 				},
 			},
+			listParentsResults: map[string]listParentsResult{
+				"1": ou1Result,
+			},
 			want: []cloud.Identity{
 				{
 					Provider:         "aws",
 					Account:          "1",
 					AccountAlias:     "name",
-					OrganizationId:   "",
+					OrganizationId:   "ou-1",
 					OrganizationName: "",
 				},
 			},
@@ -201,7 +226,7 @@ func Test_listAccounts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := mockFromResultMap(tt.resultMap, tt.describeOrganizationError)
+			m := mockFromResultMap(tt.listAccountsResults, tt.listParentsResults, tt.describeOrganizationError)
 			defer m.AssertExpectations(t)
 
 			got, err := listAccounts(context.Background(), testhelper.NewLogger(t), m)
@@ -216,21 +241,16 @@ func Test_listAccounts(t *testing.T) {
 	}
 }
 
-func mockFromResultMap(resultMap map[string]apiResult, describeOrganizationError error) *mockOrganizationsAPI {
+func mockFromResultMap(
+	listAccountsResults map[string]listAccountsResult,
+	listParentsResults map[string]listParentsResult,
+	describeOrganizationalUnitError error,
+) *mockOrganizationsAPI {
 	m := mockOrganizationsAPI{}
-	m.EXPECT().DescribeOrganization(mock.Anything, mock.Anything).Return(&organizations.DescribeOrganizationOutput{
-		Organization: &types.Organization{
-			Arn:                aws.String("some-arn"),
-			Id:                 aws.String("some-id"),
-			MasterAccountArn:   aws.String("master-account-arn"),
-			MasterAccountEmail: aws.String("email@email.com"),
-			MasterAccountId:    aws.String("master-account-id"),
-		},
-	}, describeOrganizationError).Once()
 	m.EXPECT().ListAccounts(mock.Anything, mock.Anything).RunAndReturn(
 		func(_ context.Context, input *organizations.ListAccountsInput, _ ...func(*organizations.Options)) (*organizations.ListAccountsOutput, error) {
 			token := strings.Dereference(input.NextToken)
-			result, ok := resultMap[token]
+			result, ok := listAccountsResults[token]
 			err := result.err
 			if !ok {
 				err = fmt.Errorf("could not find token: %s", token)
@@ -241,6 +261,45 @@ func mockFromResultMap(resultMap map[string]apiResult, describeOrganizationError
 
 			return result.output, nil
 		},
-	).Times(len(resultMap))
+	).Times(len(listAccountsResults))
+
+	if listParentsResults == nil {
+		return &m
+	}
+
+	m.EXPECT().DescribeOrganizationalUnit(mock.Anything, mock.Anything).RunAndReturn(
+		func(ctx context.Context, input *organizations.DescribeOrganizationalUnitInput, f ...func(*organizations.Options)) (*organizations.DescribeOrganizationalUnitOutput, error) {
+			if input.OrganizationalUnitId == nil {
+				return nil, errors.New("organizational unit id is nil")
+			}
+			if describeOrganizationalUnitError != nil {
+				return nil, describeOrganizationalUnitError
+			}
+			id := *input.OrganizationalUnitId
+			return &organizations.DescribeOrganizationalUnitOutput{
+				OrganizationalUnit: &types.OrganizationalUnit{
+					Arn:  aws.String(fmt.Sprintf("%s-arn", id)),
+					Id:   &id,
+					Name: aws.String(fmt.Sprintf("%s-name", id)),
+				},
+			}, nil
+		},
+	).Maybe()
+	m.EXPECT().ListParents(mock.Anything, mock.Anything).RunAndReturn(
+		func(_ context.Context, input *organizations.ListParentsInput, _ ...func(*organizations.Options)) (*organizations.ListParentsOutput, error) {
+			id := strings.Dereference(input.ChildId)
+			result, ok := listParentsResults[id]
+			err := result.err
+			if !ok {
+				err = fmt.Errorf("could not find child: %s", id)
+			}
+			if err != nil {
+				return nil, err
+			}
+
+			return result.output, nil
+		},
+	).Times(len(listParentsResults))
+
 	return &m
 }
