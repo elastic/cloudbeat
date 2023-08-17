@@ -35,7 +35,9 @@ d4c_pkg_policy_data = Path(__file__).parent / D4C_PACKAGE_POLICY
 
 
 def load_data() -> Tuple[Dict, Dict]:
-    """Loads data.
+    """
+    Loads agent and package policies from JSON files.
+    This function reads JSON data from specific paths for agent and package policies.
 
     Returns:
         Tuple[Dict, Dict]: A tuple containing the loaded agent and package policies.
@@ -48,7 +50,6 @@ def load_data() -> Tuple[Dict, Dict]:
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
-    # package_version = get_cloud_security_posture_version(cfg=cnfg.elk_config)
     package_version = get_cloud_defend_version(cfg=cnfg.elk_config)
     logger.info(f"Package version: {package_version}")
     update_package_version(
@@ -62,12 +63,6 @@ if __name__ == "__main__":
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
-
-    # aws_config = cnfg.aws_config
-    # eks_data = {
-    #     "access_key_id": aws_config.access_key_id,
-    #     "secret_access_key": aws_config.secret_access_key,
-    # }
 
     logger.info(f"Create {INTEGRATAION_NAME} integration")
     package_policy_id = create_integration(
