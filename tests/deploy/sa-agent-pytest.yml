@@ -16,6 +16,7 @@ data:
             elasticsearch-master.kube-system:9200
         username: '${ES_USERNAME}'
         password: '${ES_PASSWORD}'
+        allow_older_versions: true
     inputs:
       - id: logfile-system-c0895400-34c2-473f-a802-566f866f9186
         revision: 1

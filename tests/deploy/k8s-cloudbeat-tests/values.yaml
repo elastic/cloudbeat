@@ -115,7 +115,6 @@ standaloneAgent:
 
 elasticsearch:
   imageTag: "8.5.0-SNAPSHOT"
-  allow_older_versions: true
 
   protocol: http
 
