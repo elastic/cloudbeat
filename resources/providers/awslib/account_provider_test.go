@@ -303,3 +303,88 @@ func mockFromResultMap(
 
 	return &m
 }
+
+func Test_getOUInfoForAccount(t *testing.T) {
+	ctx := context.Background()
+	accountId := "123"
+
+	t.Run("error in list", func(t *testing.T) {
+		m := &mockOrganizationsAPI{}
+		defer m.AssertExpectations(t)
+		m.EXPECT().ListParents(
+			mock.Anything,
+			&organizations.ListParentsInput{ChildId: &accountId},
+		).Return(nil, errors.New("some-error"))
+
+		_, err := getOUInfoForAccount(ctx, m, nil, &accountId)
+		assert.ErrorContains(t, err, "some-error")
+	})
+
+	t.Run("error in list with NextToken", func(t *testing.T) {
+		m := &mockOrganizationsAPI{}
+		defer m.AssertExpectations(t)
+		m.EXPECT().ListParents(
+			mock.Anything,
+			&organizations.ListParentsInput{ChildId: &accountId},
+		).Return(&organizations.ListParentsOutput{NextToken: aws.String("some-token")}, nil)
+		m.EXPECT().ListParents(
+			mock.Anything,
+			&organizations.ListParentsInput{
+				ChildId:   &accountId,
+				NextToken: aws.String("some-token"),
+			},
+		).Return(&organizations.ListParentsOutput{}, errors.New("some-error"))
+
+		_, err := getOUInfoForAccount(ctx, m, nil, &accountId)
+		assert.ErrorContains(t, err, "some-error")
+	})
+
+	t.Run("no parents?", func(t *testing.T) {
+		m := &mockOrganizationsAPI{}
+		defer m.AssertExpectations(t)
+		m.EXPECT().ListParents(
+			mock.Anything,
+			&organizations.ListParentsInput{ChildId: &accountId},
+		).Return(&organizations.ListParentsOutput{NextToken: aws.String("some-token")}, nil)
+		m.EXPECT().ListParents(
+			mock.Anything,
+			&organizations.ListParentsInput{
+				ChildId:   &accountId,
+				NextToken: aws.String("some-token"),
+			},
+		).Return(&organizations.ListParentsOutput{
+			Parents: []types.Parent{},
+		}, nil)
+
+		_, err := getOUInfoForAccount(ctx, m, nil, &accountId)
+		assert.ErrorContains(t, err, "empty response")
+	})
+
+	t.Run("root ou", func(t *testing.T) {
+		m := &mockOrganizationsAPI{}
+		defer m.AssertExpectations(t)
+		m.EXPECT().ListParents(
+			mock.Anything,
+			&organizations.ListParentsInput{ChildId: &accountId},
+		).Return(&organizations.ListParentsOutput{NextToken: aws.String("some-token")}, nil)
+		m.EXPECT().ListParents(
+			mock.Anything,
+			&organizations.ListParentsInput{
+				ChildId:   &accountId,
+				NextToken: aws.String("some-token"),
+			},
+		).Return(&organizations.ListParentsOutput{
+			Parents: []types.Parent{{
+				Id:   aws.String("root-id"),
+				Type: types.ParentTypeRoot,
+			}},
+		}, nil)
+
+		got, err := getOUInfoForAccount(ctx, m, nil, &accountId)
+		assert.NoError(t, err)
+		assert.Equal(t, organizationalUnitInfo{
+			id:   "root-id",
+			name: "Root",
+		}, got)
+	})
+}
