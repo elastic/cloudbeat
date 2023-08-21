@@ -116,7 +116,7 @@ jobs:
     if: false  # Skip job - Cache action issue
     # if: github.event_name == 'pull_request'
     name: ${{ matrix.test-target }}-tests
-    needs: [ Build ]
+    needs: [ build_k8s ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
@@ -200,7 +200,7 @@ jobs:
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
     if: false  # Skip job - Cache action issue
     # if: github.event_name == 'push'
-    needs: [ Build ]
+    needs: [ build_k8s ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
     strategy:
