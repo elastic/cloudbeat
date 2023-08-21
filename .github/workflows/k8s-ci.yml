@@ -23,6 +23,7 @@ concurrency:
 
 jobs:
   Build:
+    if: false  # Skip job - Cache action issue
     name: Build
     runs-on: ubuntu-20.04
     timeout-minutes: 40
@@ -112,7 +113,8 @@ jobs:
 
   k8s_functional_tests:
     # Run only selected tests on PRs
-    if: github.event_name == 'pull_request'
+    if: false  # Skip job - Cache action issue
+    # if: github.event_name == 'pull_request'
     name: ${{ matrix.test-target }}-tests
     needs: [ Build ]
     runs-on: ubuntu-22.04
@@ -196,7 +198,8 @@ jobs:
   k8s_functional_tests_full:
     # Run full test suit on post-merge
     name: ${{ matrix.test-target }}-${{ matrix.range }}-tests
-    if: github.event_name == 'push'
+    if: false  # Skip job - Cache action issue
+    # if: github.event_name == 'push'
     needs: [ Build ]
     runs-on: ubuntu-22.04
     timeout-minutes: 55
