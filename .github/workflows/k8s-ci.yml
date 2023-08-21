@@ -22,9 +22,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Build:
+  build_k8s:
     if: false  # Skip job - Cache action issue
-    name: Build
+    name: K8s Tests Build Job
     runs-on: ubuntu-20.04
     timeout-minutes: 40
     steps:
