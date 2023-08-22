@@ -18,7 +18,7 @@ from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     get_artifact_server,
-    get_cloud_security_posture_version,
+    get_package_version,
     update_package_version,
 )
 from loguru import logger
@@ -51,7 +51,7 @@ def load_data() -> Tuple[Dict, Dict]:
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
-    package_version = get_cloud_security_posture_version(cfg=cnfg.elk_config)
+    package_version = get_package_version(cfg=cnfg.elk_config)
     logger.info(f"Package version: {package_version}")
     update_package_version(
         cfg=cnfg.elk_config,

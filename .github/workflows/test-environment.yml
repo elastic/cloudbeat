@@ -26,10 +26,6 @@ on:
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
-      add-d4c-integration:
-          description: "Enable Defend For Containers (D4C). When enabled, installs both the D4C and the KSPM EKS integrations under the same agent policy."
-          default: false
-          type: boolean
       run-sanity-tests:
           description: "Run sanity tests after provision"
           default: false
@@ -197,16 +193,6 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
         run: |
           poetry run python src/install_kspm_eks_integration.py
-
-      - name: Set deployment YAML file
-        id: set-yaml
-        run: |
-          if [ "${{ github.event.inputs.add-d4c-integration }}" == "true" ]; then
-            echo "YAML_FILE=kspm_d4c.yaml" >> $GITHUB_ENV
-          else
-            echo "YAML_FILE=kspm_eks.yaml" >> $GITHUB_ENV
-          fi
-        continue-on-error: true
 
       - name: Deploy KSPM EKS agent
         env:

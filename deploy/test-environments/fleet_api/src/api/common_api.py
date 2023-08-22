@@ -210,15 +210,20 @@ def get_stack_latest_version() -> str:
         return ""
 
 
-def get_package_version(cfg: Munch, package_name: str, prerelease: bool = True) -> str:
+def get_package_version(
+    cfg: Munch,
+    package_name: str = "cloud_security_posture",
+    prerelease: bool = True,
+) -> str:
     """
-    Retrieve the version of the specified package.
+    Retrieve the version of a specified package.
 
     Args:
-        cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
-        package_name (str): Name of the package to retrieve the version for.
-        prerelease (bool, optional): Flag indicating whether to include
-                                    prerelease versions. Defaults to True.
+        cfg (Munch): A configuration object containing Kibana URL, authentication details, etc.
+        package_name (str, optional): The name of the package to retrieve the version for.
+                                      Default is "cloud_security_posture".
+        prerelease (bool, optional): A flag indicating whether to include prerelease versions.
+                                     Default is True.
 
     Returns:
         str: The version of the specified package, or None if the API call fails or the package is not found.
@@ -249,42 +254,6 @@ def get_package_version(cfg: Munch, package_name: str, prerelease: bool = True) 
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         return None
-
-
-def get_cloud_security_posture_version(cfg: Munch, prerelease: bool = True) -> str:
-    """
-    Retrieve the version of the cloud_security_posture package.
-
-    Args:
-        cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
-        prerelease (bool, optional): Flag indicating whether to include
-                                        prerelease versions.Defaults to True.
-
-    Returns:
-        str: The version of the cloud_security_posture package, or None if the API call fails.
-
-    """
-    return get_package_version(
-        cfg=cfg,
-        package_name="cloud_security_posture",
-        prerelease=prerelease,
-    )
-
-
-def get_cloud_defend_version(cfg: Munch, prerelease: bool = True) -> str:
-    """
-    Retrieve the version of the cloud_defend package.
-
-    Args:
-        cfg (Munch): Configuration object containing Kibana URL, authentication details, etc.
-        prerelease (bool, optional): Flag indicating whether to include
-                                        prerelease versions.Defaults to True.
-
-    Returns:
-        str: The version of the cloud_defend package, or None if the API call fails.
-
-    """
-    return get_package_version(cfg=cfg, package_name="cloud_defend", prerelease=prerelease)
 
 
 def update_package_version(cfg: Munch, package_name: str, package_version: str):
