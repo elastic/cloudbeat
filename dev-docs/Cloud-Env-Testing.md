@@ -1,7 +1,7 @@
 # Cloud Environment Testing
 
 The [Create Environment](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml) GitHub action
-deploys a full-featured cloud environment, pre-configured with all our integrations. It also includes features for
+deploys a full-featured cloud environment, pre-configured with all our integrations (KSPM, CSPM and D4C). It also includes features for
 running sanity testing and automated deletion.
 
 ## How to Run the Workflow
@@ -47,8 +47,6 @@ Follow these steps to run the workflow:
       e.g. `elastic / unified-release - staging # 8.9 - 11 - 8.9.0-c6bb8f7a Success after 4 hr 58 min`. Now just copy it
       and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.9.0-c6bb8f7a`.
 
-    - `add-d4c-integration` (optional): Set this to true to enable the Defend For Containers (D4C) integration. When enabled, the D4C integration will be installed alongside the KSPM EKS integration under the same agent policy.
-
     - `run-sanity-tests` (optional): Set to `true` to run sanity tests after the environment is set up. Default: `false`
 
     - `cleanup-env` (optional): Set to `true` if you want the resources to automatically be cleaned up after
@@ -56,7 +54,7 @@ Follow these steps to run the workflow:
       Default: `false`.
 
       .
-   <img width="418" alt="Adjust Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/52420fed-0852-4cef-a5cc-6c347cd8e790">
+   ![Adjust Inputs](https://github.com/elastic/cloudbeat/assets/99176494/bac5004d-7cbc-4a34-8127-3acd11acc90e)
 
 
 5. Click the `Run workflow` button to start.
