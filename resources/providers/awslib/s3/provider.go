@@ -216,7 +216,7 @@ func (p Provider) getBucketEncryptionAlgorithm(ctx context.Context, bucketName *
 		return nil, err
 	}
 
-	if len(encryption.ServerSideEncryptionConfiguration.Rules) <= 0 {
+	if len(encryption.ServerSideEncryptionConfiguration.Rules) == 0 {
 		return aws.String(NoEncryptionMessage), nil
 	}
 
