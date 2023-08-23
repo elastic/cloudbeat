@@ -10,6 +10,8 @@ on:
         description: |
           Name your environment (Only a-zA-Z0-9 and `-`).
           For example: john-8-7-2-June01'
+          Supported pattern: [a-zA-Z][-a-zA-Z0-9]*
+          Max chars: 20
         required: true
       ec-api-key:
         type: string
@@ -59,6 +61,22 @@ jobs:
       STACK_VERSION: ${{ github.event.inputs.elk-stack-version }}
       CNVM_STACK_NAME: "${{ github.event.inputs.deployment_name }}-cnvm-sanity-test-stack"
     steps:
+      - name: Check Deployment Name
+        run: |
+          deployment_name="${{ github.event.inputs.deployment_name }}"
+
+          # Check length
+          if [ ${#deployment_name} -gt 20 ]; then
+            echo "error: Deployment name is too long (max 20 characters)"
+            exit 1
+          fi
+
+          # Check pattern required for CNVM deployment
+          if ! [[ $deployment_name =~ ^[a-zA-Z][-a-zA-Z0-9]*$ ]]; then
+            echo "error: Deployment name doesn't match the required pattern"
+            exit 1
+          fi
+
       - name: Check out the repo
         uses: actions/checkout@v3
 
