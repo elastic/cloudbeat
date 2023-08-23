@@ -61,6 +61,13 @@ jobs:
       STACK_VERSION: ${{ github.event.inputs.elk-stack-version }}
       CNVM_STACK_NAME: "${{ github.event.inputs.deployment_name }}-cnvm-sanity-test-stack"
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+        working-directory: ./
+
       - name: Check Deployment Name
         run: |
           deployment_name="${{ github.event.inputs.deployment_name }}"
@@ -76,13 +83,6 @@ jobs:
             echo "error: Deployment name doesn't match the required pattern"
             exit 1
           fi
-
-      - name: Check out the repo
-        uses: actions/checkout@v3
-
-      - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
-        working-directory: ./
 
       - name: Mask API Key
         run: |
