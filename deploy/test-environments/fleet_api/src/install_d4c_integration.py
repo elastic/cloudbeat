@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-This script installs KSPM unmanaged integration.
+This script installs Defend for Containers (D4C) integration
 
 The following steps are performed:
 1. Create an agent policy.
-2. Create a KSPM unmanaged integration.
-3. Create a KSPM manifest to be deployed on a host.
+2. Create a D4C integration.
+3. Create a D4C Kubernetes manifest to be deployed on a host.
 """
 
 from pathlib import Path
@@ -13,7 +13,7 @@ from typing import Dict, Tuple
 from munch import Munch
 import configuration_fleet as cnfg
 from api.agent_policy_api import create_agent_policy
-from api.package_policy_api import create_kspm_unmanaged_integration
+from api.package_policy_api import create_integration
 from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
@@ -25,52 +25,61 @@ from loguru import logger
 from utils import read_json
 from state_file_manager import state_manager, PolicyState
 
-KSPM_UNMANAGED_AGENT_POLICY = "../../../cloud/data/agent_policy_vanilla.json"
-KSPM_UNMANAGED_PACKAGE_POLICY = "../../../cloud/data/package_policy_vanilla.json"
-KSPM_UNMANAGED_EXPECTED_AGENTS = 2
+D4C_AGENT_POLICY = "../../../cloud/data/agent_policy_d4c.json"
+D4C_PACKAGE_POLICY = "../../../cloud/data/package_policy_d4c.json"
+D4C_EXPECTED_AGENTS = 2
+INTEGRATAION_NAME = "D4C"
 
-
-kspm_agent_policy_data = Path(__file__).parent / KSPM_UNMANAGED_AGENT_POLICY
-kspm_unmanached_pkg_policy_data = Path(__file__).parent / KSPM_UNMANAGED_PACKAGE_POLICY
+d4c_agent_policy_data = Path(__file__).parent / D4C_AGENT_POLICY
+d4c_pkg_policy_data = Path(__file__).parent / D4C_PACKAGE_POLICY
 
 
 def load_data() -> Tuple[Dict, Dict]:
-    """Loads data.
+    """
+    Loads agent and package policies from JSON files.
+    This function reads JSON data from specific paths for agent and package policies.
 
     Returns:
         Tuple[Dict, Dict]: A tuple containing the loaded agent and package policies.
     """
     logger.info("Loading agent and package policies")
-    agent_policy = read_json(json_path=kspm_agent_policy_data)
-    package_policy = read_json(json_path=kspm_unmanached_pkg_policy_data)
-
+    agent_policy = read_json(json_path=d4c_agent_policy_data)
+    package_policy = read_json(json_path=d4c_pkg_policy_data)
     return agent_policy, package_policy
 
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
-    package_version = get_package_version(cfg=cnfg.elk_config)
+    package_version = get_package_version(cfg=cnfg.elk_config, package_name="cloud_defend")
     logger.info(f"Package version: {package_version}")
     update_package_version(
         cfg=cnfg.elk_config,
-        package_name="cloud_security_posture",
+        package_name="cloud_defend",
         package_version=package_version,
     )
 
-    logger.info("Starting installation of KSPM integration.")
+    logger.info(f"Starting installation of {INTEGRATAION_NAME} integration.")
     agent_data, package_data = load_data()
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
 
-    logger.info("Create KSPM unmanaged integration")
-    package_policy_id = create_kspm_unmanaged_integration(
+    logger.info(f"Create {INTEGRATAION_NAME} integration")
+    package_policy_id = create_integration(
         cfg=cnfg.elk_config,
         pkg_policy=package_data,
         agent_policy_id=agent_policy_id,
+        data={},
     )
 
-    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, KSPM_UNMANAGED_EXPECTED_AGENTS, []))
+    state_manager.add_policy(
+        PolicyState(
+            agent_policy_id,
+            package_policy_id,
+            D4C_EXPECTED_AGENTS,
+            [],
+        ),
+    )
 
     manifest_params = Munch()
     manifest_params.enrollment_token = get_enrollment_token(
@@ -79,8 +88,9 @@ if __name__ == "__main__":
     )
 
     manifest_params.fleet_url = get_fleet_server_host(cfg=cnfg.elk_config)
-    manifest_params.yaml_path = Path(__file__).parent / "kspm_unmanaged.yaml"
+    manifest_params.yaml_path = Path(__file__).parent / "kspm_d4c.yaml"
     manifest_params.docker_image_override = cnfg.kspm_config.docker_image_override
-    logger.info("Creating KSPM unmanaged manifest")
+    manifest_params.capabilities = True
+    logger.info(f"Creating {INTEGRATAION_NAME} manifest")
     create_kubernetes_manifest(cfg=cnfg.elk_config, params=manifest_params)
-    logger.info("Installation of KSPM integration is done")
+    logger.info(f"Installation of {INTEGRATAION_NAME} integration is done")
