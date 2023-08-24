@@ -329,7 +329,7 @@ require (
 	k8s.io/cli-runtime v0.28.0 // indirect
 	k8s.io/component-base v0.28.0 // indirect
 	k8s.io/kms v0.28.0 // indirect
-	k8s.io/kubectl v0.27.3 // indirect
+	k8s.io/kubectl v0.28.0 // indirect
 	lukechampine.com/uint128 v1.2.0 // indirect
 	modernc.org/cc/v3 v3.40.0 // indirect
 	modernc.org/ccgo/v3 v3.16.13 // indirect
