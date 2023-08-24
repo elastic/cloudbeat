@@ -28,7 +28,7 @@ require (
 	gopkg.in/jcmturner/rpc.v1 v1.1.0 // indirect
 	gotest.tools/gotestsum v1.7.0
 	k8s.io/apimachinery v0.28.0
-	k8s.io/client-go v0.27.3
+	k8s.io/client-go v0.28.0
 )
 
 require (
@@ -82,7 +82,7 @@ require (
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	google.golang.org/api v0.126.0
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.27.4
+	k8s.io/api v0.28.0
 	modernc.org/sqlite v1.23.1
 )
 
