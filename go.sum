@@ -1861,6 +1861,8 @@ github.com/owenrumney/go-sarif/v2 v2.2.0 h1:1DmZaijK0HBZCR1fgcDSGa7VzYkU9NDmbZ7q
 github.com/owenrumney/go-sarif/v2 v2.2.0/go.mod h1:MSqMMx9WqlBSY7pXoOZWgEsVB4FDNfhcaXDA1j6Sr+w=
 github.com/owenrumney/squealer v1.1.1 h1:e+fg29IxdNARSc4s7CbYnqVSepm9eOqErLNNNR5XbAs=
 github.com/owenrumney/squealer v1.1.1/go.mod h1:Q5ekVoyFSG2FlnCVIBGsyk/FSMA/ATv8PtwKIVX7t/o=
+github.com/owenrumney/squealer v1.2.1 h1:4ryMMT59aaz8VMsqsD+FDkarADJz0F1dcq2fd0DRR+c=
+github.com/owenrumney/squealer v1.2.1/go.mod h1:7D0a/+Bouwy504YhaWsBYW73kyklSEq1MNf6zsNoTRg=
 github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2 h1:CXwSGu/LYmbjEab5aMCs5usQRVBGThelUKBNnoSOuso=
 github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2/go.mod h1:L3UMQOThbttwfYRNFOWLLVXMhk5Lkio4GGOtw5UrxS0=
 github.com/package-url/packageurl-go v0.1.1-0.20220428063043-89078438f170 h1:DiLBVp4DAcZlBVBEtJpNWZpZVq0AEeCY7Hqk8URVs4o=
@@ -2025,6 +2027,8 @@ github.com/sirupsen/logrus v1.7.0/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/sirupsen/logrus v1.9.2 h1:oxx1eChJGI6Uks2ZC4W1zpLlVgqB8ner4EuQwV4Ik1Y=
 github.com/sirupsen/logrus v1.9.2/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
+github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=
+github.com/sirupsen/logrus v1.9.3/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/skeema/knownhosts v1.1.1 h1:MTk78x9FPgDFVFkDLTrsnnfCJl7g1C/nnKvePgrIngE=
 github.com/skeema/knownhosts v1.1.1/go.mod h1:g4fPeYpque7P0xefxtGzV81ihjC8sX2IqpAoNkjxbMo=
 github.com/skeema/knownhosts v1.2.0 h1:h9r9cf0+u7wSE+M183ZtMGgOJKiL96brpaz5ekfJCpM=
