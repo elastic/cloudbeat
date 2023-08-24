@@ -278,10 +278,15 @@ def get_findings(elastic_client, config_timeout, query, sort, match_type):
     start_time = time.time()
     result = {}
     while time.time() - start_time < config_timeout:
-        current_result = elastic_client.get_index_data(
-            query=query,
-            sort=sort,
-        )
+        try:
+            current_result = elastic_client.get_index_data(
+                query=query,
+                sort=sort,
+            )
+        except Exception as ex:
+            logger.warning(ex)
+            continue
+
         if elastic_client.get_total_value(data=current_result) != 0:
             allure.attach(
                 json.dumps(

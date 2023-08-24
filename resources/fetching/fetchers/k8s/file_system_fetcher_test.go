@@ -172,7 +172,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 		}
 	}(dir)
 
-	filePaths := []string{filepath.Join(dir)}
+	filePaths := []string{filepath.Clean(dir)}
 	osUserMock := &user.MockOSUser{}
 	osUserMock.EXPECT().GetUserNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))
 	osUserMock.EXPECT().GetGroupNameFromID(mock.Anything, mock.Anything).Return("", errors.New("err"))

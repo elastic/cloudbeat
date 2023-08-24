@@ -97,7 +97,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 				"resource":            resource,
 				"result":              finding.Result,
 				"rule":                finding.Rule,
-				"message":             fmt.Sprintf("Rule \"%s\": %s", finding.Rule.Name, finding.Result.Evaluation),
+				"message":             fmt.Sprintf("Rule %q: %s", finding.Rule.Name, finding.Result.Evaluation),
 				"cloudbeat":           cd.VersionInfo,
 			},
 		}

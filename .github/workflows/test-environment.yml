@@ -8,8 +8,7 @@ on:
       deployment_name:
         type: string
         description: |
-          Name your environment (Only a-zA-Z0-9 and `-`).
-          For example: john-8-7-2-June01'
+          Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
         required: true
       ec-api-key:
         type: string
@@ -65,6 +64,22 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
+
+      - name: Check Deployment Name
+        run: |
+          deployment_name="${{ github.event.inputs.deployment_name }}"
+
+          # Check length
+          if [ ${#deployment_name} -gt 20 ]; then
+            echo "error: Deployment name is too long (max 20 characters)"
+            exit 1
+          fi
+
+          # Check pattern required for CNVM deployment
+          if ! [[ $deployment_name =~ ^[a-zA-Z][-a-zA-Z0-9]*$ ]]; then
+            echo "error: Deployment name doesn't match the required pattern [a-zA-Z][-a-zA-Z0-9]*"
+            exit 1
+          fi
 
       - name: Mask API Key
         run: |
@@ -182,6 +197,12 @@ jobs:
           STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
         run: just deploy-cloudformation
 
+      - name: Install D4C integration
+        id: kspm-d4c
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/install_d4c_integration.py
+
       - name: Install KSPM EKS integration
         id: kspm-eks
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
@@ -197,7 +218,7 @@ jobs:
           echo 'KUBE_CONFIG_DATA=$(cat ~/.kube/config | base64)' >> $GITHUB_ENV
           aws s3 cp ~/.kube/config "${{ env.S3_BUCKET }}/kubeconfig"
           kubectl config use-context eks-config
-          kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_eks.yaml
+          kubectl apply -f ${{ env.FLEET_API_DIR}}/kspm_d4c.yaml
 
       - name: Install KSPM Unmanaged integration
         id: kspm-unmanaged
@@ -233,6 +254,7 @@ jobs:
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}/${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}"
         run: |
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_unmanaged.yaml" "${{ env.S3_BUCKET }}/kspm_unmanaged.yaml"
+          aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_d4c.yaml" "${{ env.S3_BUCKET }}/kspm_d4c.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
 
