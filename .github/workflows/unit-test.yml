@@ -42,7 +42,7 @@ jobs:
 
       - name: Unit-Test
         run: |
-          GOOS=linux go test -v -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
+          GOOS=linux TEST_DIRECTORY=./...  gotestsum --format pkgname -- -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
 
       - name: Upload coverage artifact
@@ -121,7 +121,6 @@ jobs:
         with:
           version: latest
           args: --whole-files --verbose
-
 
   dependency-review:
     runs-on: ubuntu-20.04
