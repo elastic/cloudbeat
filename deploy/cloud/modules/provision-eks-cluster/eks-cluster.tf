@@ -64,4 +64,15 @@ module "eks" {
       ]
     }
   }
+
+  manage_aws_auth_configmap = true
+
+  aws_auth_roles = [
+    {
+      groups = [
+        "system:masters",
+      ]
+      rolearn = "arn:aws:iam::704479110758:role/Developer_eks"
+    }
+  ]
 }
