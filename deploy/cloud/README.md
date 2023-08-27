@@ -79,6 +79,17 @@ See the ssh command `terraform output -raw cloudbeat_ssh_cmd`
 **Delete environment:**
 
 ```bash
+#!/bin/bash
+set -e
+
+RESOURCE_NAME="module.eks.module.eks.kubernetes_config_map_v1_data.aws_auth"
+
+if terraform state list | grep -q "$RESOURCE_NAME"; then
+    echo "Resource $RESOURCE_NAME exists in the Terraform state. Removing..."
+    terraform state rm "$RESOURCE_NAME"
+fi
+
+# Destroy resources
 terraform destroy --auto-approve
 ```
 
