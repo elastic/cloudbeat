@@ -8,8 +8,7 @@ on:
       deployment_name:
         type: string
         description: |
-          Name your environment (Only a-zA-Z0-9 and `-`).
-          For example: john-8-7-2-June01'
+          Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
         required: true
       ec-api-key:
         type: string
@@ -65,6 +64,22 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
+
+      - name: Check Deployment Name
+        run: |
+          deployment_name="${{ github.event.inputs.deployment_name }}"
+
+          # Check length
+          if [ ${#deployment_name} -gt 20 ]; then
+            echo "error: Deployment name is too long (max 20 characters)"
+            exit 1
+          fi
+
+          # Check pattern required for CNVM deployment
+          if ! [[ $deployment_name =~ ^[a-zA-Z][-a-zA-Z0-9]*$ ]]; then
+            echo "error: Deployment name doesn't match the required pattern [a-zA-Z][-a-zA-Z0-9]*"
+            exit 1
+          fi
 
       - name: Mask API Key
         run: |
