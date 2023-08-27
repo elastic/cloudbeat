@@ -1,0 +1,35 @@
+{
+    "policy_id": "${agent_policy_id}",
+    "package": {
+        "name": "cloud_defend",
+        "version": "1.2.0-preview"
+    },
+    "name": "pkg-plcy-d4c",
+    "description": "",
+    "namespace": "default",
+    "inputs": {
+        "cloud_defend-cloud_defend/control": {
+            "enabled": true,
+            "vars": {
+                "configuration": "process:\n  selectors:\n    - name: allProcesses\n      operation: [fork, exec]\n  responses:\n    - match: [allProcesses]\n      actions: [log]\nfile:\n  selectors:\n    - name: executableChanges\n      operation: [createExecutable, modifyExecutable]\n  responses:\n    - match: [executableChanges]\n      actions: [alert]\n"
+            },
+            "streams": {
+                "cloud_defend.alerts": {
+                    "enabled": true
+                },
+                "cloud_defend.file": {
+                    "enabled": true
+                },
+                "cloud_defend.metrics": {
+                    "enabled": true,
+                    "vars": {
+                        "period": "24h"
+                    }
+                },
+                "cloud_defend.process": {
+                    "enabled": true
+                }
+            }
+        }
+    }
+}

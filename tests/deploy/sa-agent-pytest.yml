@@ -11,6 +11,7 @@ data:
     outputs:
       default:
         type: elasticsearch
+        allow_older_versions: true
         hosts:
           - >-
             elasticsearch-master.kube-system:9200
