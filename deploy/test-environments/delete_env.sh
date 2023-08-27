@@ -23,18 +23,34 @@ function delete_environment() {
     echo "Deleting Terraform environment: $ENV"
     tfstate="./$ENV-terraform.tfstate"
 
-    # Copy state file, destroy environment, and remove environment data from S3
-    if aws s3 cp $BUCKET/"$ENV"/terraform.tfstate "$tfstate" && \
-    terraform destroy -var="region=$AWS_REGION" -state "$tfstate" --auto-approve && \
-    aws s3 rm $BUCKET/"$ENV" --recursive; then
-        echo "Successfully deleted $ENV"
-        DELETED_ENVS+=("$ENV")
+    # Copy state file
+    if aws s3 cp $BUCKET/"$ENV"/terraform.tfstate "$tfstate"; then
+        echo "Downloaded Terraform state file from S3."
+
+        # Check if the resource exists in the local state file
+        RESOURCE_NAME="module.eks.module.eks.kubernetes_config_map_v1_data.aws_auth"
+        if terraform state show -state="$tfstate" | grep -q "$RESOURCE_NAME"; then
+            echo "Resource $RESOURCE_NAME exists in the Terraform state. Removing..."
+            terraform state rm "$RESOURCE_NAME" -state="$tfstate"
+        else
+            echo "Resource $RESOURCE_NAME does not exist in the Terraform state."
+        fi
+
+        # Destroy environment and remove environment data from S3
+        if terraform destroy -var="region=$AWS_REGION" -state "$tfstate" --auto-approve && \
+        aws s3 rm $BUCKET/"$ENV" --recursive; then
+            echo "Successfully deleted $ENV"
+            DELETED_ENVS+=("$ENV")
+        else
+            echo "Failed to delete $ENV"
+            FAILED_ENVS+=("$ENV")
+        fi
+
+        rm "$tfstate"
     else
-        echo "Failed to delete $ENV"
+        echo "Failed to download Terraform state file from S3 for $ENV"
         FAILED_ENVS+=("$ENV")
     fi
-
-    rm "$tfstate"
 }
 
 # Function to delete CloudFormation stack
