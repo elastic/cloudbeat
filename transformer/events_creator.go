@@ -92,15 +92,17 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 			Meta:      mapstr.M{libevents.FieldMetaIndex: t.index},
 			Timestamp: timestamp,
 			Fields: mapstr.M{
-				resMetadata.ECSFormat: eventData.GetElasticCommonData(),
-				"event":               BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
-				"resource":            resource,
-				"result":              finding.Result,
-				"rule":                finding.Rule,
-				"message":             fmt.Sprintf("Rule %q: %s", finding.Rule.Name, finding.Result.Evaluation),
-				"cloudbeat":           cd.VersionInfo,
+				"event":     BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
+				"resource":  resource,
+				"result":    finding.Result,
+				"rule":      finding.Rule,
+				"message":   fmt.Sprintf("Rule %q: %s", finding.Rule.Name, finding.Result.Evaluation),
+				"cloudbeat": cd.VersionInfo,
 			},
 		}
+
+		enricher := dataprovider.NewEnricher(eventData)
+		enricher.EnrichEvent(&event)
 
 		err := t.commonDataProvider.EnrichEvent(&event, resMetadata)
 		if err != nil {

@@ -44,34 +44,34 @@ const (
 )
 
 type EvalFSResource struct {
-	Name    string `json:"name"`
-	Mode    string `json:"mode"`
-	Gid     string `json:"gid"`
-	Uid     string `json:"uid"`
-	Owner   string `json:"owner"`
-	Group   string `json:"group"`
-	Path    string `json:"path"`
-	Inode   string `json:"inode"`
-	SubType string `json:"sub_type"`
+	Name    string `json:"name" mapstructure:"file.name"`
+	Mode    string `json:"mode" mapstructure:"file.mode"`
+	Gid     string `json:"gid" mapstructure:"file.gid"`
+	Uid     string `json:"uid" mapstructure:"file.uid"`
+	Owner   string `json:"owner" mapstructure:"file.owner"`
+	Group   string `json:"group" mapstructure:"file.group"`
+	Path    string `json:"path" mapstructure:"file.path"`
+	Inode   string `json:"inode" mapstructure:"file.inode"`
+	SubType string `json:"sub_type" mapstructure:"file.sub_type"`
 }
 
 // FileCommonData According to https://www.elastic.co/guide/en/ecs/current/ecs-file.html
 type FileCommonData struct {
-	Name      string    `json:"name,omitempty"`
-	Mode      string    `json:"mode,omitempty"`
-	Gid       string    `json:"gid,omitempty"`
-	Uid       string    `json:"uid,omitempty"`
-	Owner     string    `json:"owner,omitempty"`
-	Group     string    `json:"group,omitempty"`
-	Path      string    `json:"path,omitempty"`
-	Inode     string    `json:"inode,omitempty"`
-	Extension string    `json:"extension,omitempty"`
-	Size      int64     `json:"size"`
-	Type      string    `json:"type,omitempty"`
-	Directory string    `json:"directory,omitempty"`
-	Accessed  time.Time `json:"accessed"`
-	Mtime     time.Time `json:"mtime"`
-	Ctime     time.Time `json:"ctime"`
+	Name      string    `mapstructure:"file.name,omitempty"`
+	Mode      string    `mapstructure:"file.mode,omitempty"`
+	Gid       string    `mapstructure:"file.gid,omitempty"`
+	Uid       string    `mapstructure:"file.uid,omitempty"`
+	Owner     string    `mapstructure:"file.owner,omitempty"`
+	Group     string    `mapstructure:"file.group,omitempty"`
+	Path      string    `mapstructure:"file.path,omitempty"`
+	Inode     string    `mapstructure:"file.inode,omitempty"`
+	Extension string    `mapstructure:"file.extension,omitempty"`
+	Size      int64     `mapstructure:"file.size"`
+	Type      string    `mapstructure:"file.type,omitempty"`
+	Directory string    `mapstructure:"file.directory,omitempty"`
+	Accessed  time.Time `mapstructure:"file.accessed"`
+	Mtime     time.Time `mapstructure:"file.mtime"`
+	Ctime     time.Time `mapstructure:"file.ctime"`
 }
 
 type FSResource struct {
@@ -182,17 +182,22 @@ func (r FSResource) GetData() any {
 	return r.EvalResource
 }
 
-func (r FSResource) GetElasticCommonData() any {
-	return r.ElasticCommon
+func (r FSResource) GetElasticCommonData() (map[string]interface{}, error) {
+	m := map[string]interface{}{}
+	err := mapstructure.Decode(r.ElasticCommon, &m)
+	if err != nil {
+		return nil, fmt.Errorf("cannot decode file common data: %w", err)
+	}
+
+	return m, nil
 }
 
 func (r FSResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:        r.EvalResource.Path,
-		Type:      FSResourceType,
-		SubType:   r.EvalResource.SubType,
-		Name:      r.EvalResource.Path, // The Path from the container and not from the host
-		ECSFormat: FSResourceType,
+		ID:      r.EvalResource.Path,
+		Type:    FSResourceType,
+		SubType: r.EvalResource.SubType,
+		Name:    r.EvalResource.Path, // The Path from the container and not from the host
 	}, nil
 }
 

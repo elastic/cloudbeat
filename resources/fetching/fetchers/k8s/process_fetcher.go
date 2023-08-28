@@ -31,6 +31,7 @@ import (
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
+	"github.com/mitchellh/mapstructure"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
 
@@ -59,45 +60,45 @@ type EvalProcResource struct {
 // ProcCommonData According to https://www.elastic.co/guide/en/ecs/current/ecs-process.html
 type ProcCommonData struct {
 	// Parent process.
-	Parent *ProcCommonData `json:"parent,omitempty"`
+	Parent *ProcCommonData `mapstructure:"process.parent,omitempty"`
 
 	// Process id.
-	PID int64 `json:"pid,omitempty"`
+	PID int64 `mapstructure:"process.pid,omitempty"`
 
 	// Process name.
 	// Sometimes called program name or similar.
-	Name string `json:"name,omitempty"`
+	Name string `mapstructure:"process.name,omitempty"`
 
 	// Identifier of the group of processes the process belongs to.
-	PGID int64 `json:"pgid,omitempty"`
+	PGID int64 `mapstructure:"process.pgid,omitempty"`
 
 	// Full command line that started the process, including the absolute path
 	// to the executable, and all arguments.
 	// Some arguments may be filtered to protect sensitive information.
-	CommandLine string `json:"command_line,omitempty"`
+	CommandLine string `mapstructure:"process.command_line,omitempty"`
 
 	// Array of process arguments, starting with the absolute path to the
 	// executable.
 	// May be filtered to protect sensitive information.
-	Args []string `json:"args,omitempty"`
+	Args []string `mapstructure:"process.args,omitempty"`
 
 	// Length of the process.args array.
 	// This field can be useful for querying or performing bucket analysis on
 	// how many arguments were provided to start a process. More arguments may
 	// be an indication of suspicious activity.
-	ArgsCount int64 `json:"args_count,omitempty"`
+	ArgsCount int64 `mapstructure:"process.args_count,omitempty"`
 
 	// Process title.
 	// The proctitle, sometimes the same as process name. Can also be
 	// different: for example a browser setting its title to the web page
 	// currently opened.
-	Title string `json:"title,omitempty"`
+	Title string `mapstructure:"process.title,omitempty"`
 
 	// The time the process started.
-	Start time.Time `json:"start"`
+	Start time.Time `mapstructure:"process.start"`
 
 	// Seconds the process has been up.
-	Uptime int64 `json:"uptime,omitempty"`
+	Uptime int64 `mapstructure:"process.uptime,omitempty"`
 }
 
 type ProcResource struct {
@@ -165,8 +166,8 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 	}
 	configMap := f.getProcessConfigurationFile(processConf, cmd, procStat.Name)
 	evalRes := EvalProcResource{PID: processId, Cmd: cmd, Stat: procStat, ExternalData: configMap}
-	ProcCd := f.enrichProcCommonData(procStat, cmd, processId)
-	return ProcResource{EvalResource: evalRes, ElasticCommon: ProcCd}, nil
+	procCd := f.enrichProcCommonData(procStat, cmd, processId)
+	return ProcResource{EvalResource: evalRes, ElasticCommon: procCd}, nil
 }
 
 func (f *ProcessesFetcher) enrichProcCommonData(stat proc.ProcStat, cmd string, pid string) ProcCommonData {
@@ -277,16 +278,21 @@ func (res ProcResource) GetData() interface{} {
 
 func (res ProcResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:        res.EvalResource.PID + res.EvalResource.Stat.StartTime,
-		Type:      ProcessResourceType,
-		SubType:   ProcessSubType,
-		Name:      res.EvalResource.Stat.Name,
-		ECSFormat: "process",
+		ID:      res.EvalResource.PID + res.EvalResource.Stat.StartTime,
+		Type:    ProcessResourceType,
+		SubType: ProcessSubType,
+		Name:    res.EvalResource.Stat.Name,
 	}, nil
 }
 
-func (res ProcResource) GetElasticCommonData() any {
-	return res.ElasticCommon
+func (res ProcResource) GetElasticCommonData() (map[string]interface{}, error) {
+	m := map[string]interface{}{}
+	err := mapstructure.Decode(res.ElasticCommon, &m)
+	if err != nil {
+		return nil, fmt.Errorf("cannot decode process common data: %w", err)
+	}
+
+	return m, nil
 }
 
 // Supported only in Linux

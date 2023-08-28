@@ -156,7 +156,9 @@ func TestACLResource_GetMetadata(t *testing.T) {
 	}
 	meta, err := r.GetMetadata()
 	assert.NoError(t, err)
-	assert.Equal(t, fetching.ResourceMetadata{ID: "", Type: "cloud-compute", SubType: "aws-nacl", Name: "", ECSFormat: ""}, meta)
+	assert.Equal(t, fetching.ResourceMetadata{ID: "", Type: "cloud-compute", SubType: "aws-nacl", Name: ""}, meta)
 	assert.Equal(t, ec2.NACLInfo{}, r.GetData())
-	assert.Equal(t, nil, r.GetElasticCommonData())
+	m, err := r.GetElasticCommonData()
+	assert.NoError(t, err)
+	assert.Equal(t, nil, m)
 }
