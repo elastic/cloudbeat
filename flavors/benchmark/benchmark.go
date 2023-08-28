@@ -29,9 +29,11 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
+	azure_auth "github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
+	azure_inventory "github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
+	gcp_auth "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
+	gcp_identity "github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
+	gcp_inventory "github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
 type Benchmark interface {
@@ -71,10 +73,17 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 		}, nil
 	case config.CIS_GCP:
 		return &GCP{
-			IdentityProvider:     &identity.Provider{},
-			CfgProvider:          &auth.ConfigProvider{AuthProvider: &auth.GoogleAuthProvider{}},
-			inventoryInitializer: &inventory.ProviderInitializer{},
+			IdentityProvider:     &gcp_identity.Provider{},
+			CfgProvider:          &gcp_auth.ConfigProvider{AuthProvider: &gcp_auth.GoogleAuthProvider{}},
+			inventoryInitializer: &gcp_inventory.ProviderInitializer{},
+		}, nil
+	case config.CIS_AZURE:
+		return &AZURE{
+			// IdentityProvider:     &azure_identity.Provider{},
+			CfgProvider:          &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}},
+			inventoryInitializer: &azure_inventory.ProviderInitializer{},
 		}, nil
 	}
+
 	return nil, fmt.Errorf("unknown benchmark: '%s'", cfg.Benchmark)
 }

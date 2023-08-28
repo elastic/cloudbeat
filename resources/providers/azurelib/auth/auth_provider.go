@@ -15,18 +15,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Config is put into a different package to prevent cyclic imports in case
-// it is needed in several locations
+package auth
 
-package config
-
-// https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture/data_stream/findings/agent/stream
-const (
-	CIS_K8S   = "cis_k8s"
-	CIS_EKS   = "cis_eks"
-	CIS_AWS   = "cis_aws"
-	CIS_GCP   = "cis_gcp"
-	CIS_AZURE = "cis_azure"
+import (
+	azidentity "github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 )
 
-var SupportedCIS = []string{CIS_AWS, CIS_K8S, CIS_EKS, CIS_GCP, CIS_AZURE}
+type AzureAuthProvider struct{}
+
+// FindDefaultCredentials is a wrapper around azidentity.NewDefaultAzureCredential to make it easier to mock
+func (a *AzureAuthProvider) FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error) {
+	return azidentity.NewDefaultAzureCredential(options)
+}
+
+// // FindEnvironmentCredential is a wrapper around azidentity.NewEnvironmentCredential to make it easier to mock
+// func (a *AzureAuthProvider) FindEnvironmentCredential(options *azidentity.EnvironmentCredentialOptions) (*azidentity.EnvironmentCredential, error) {
+// 	return azidentity.NewEnvironmentCredential(options)
+// }

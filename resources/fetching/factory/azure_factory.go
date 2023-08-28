@@ -15,18 +15,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// Config is put into a different package to prevent cyclic imports in case
-// it is needed in several locations
+package factory
 
-package config
+import (
+	"context"
 
-// https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture/data_stream/findings/agent/stream
-const (
-	CIS_K8S   = "cis_k8s"
-	CIS_EKS   = "cis_eks"
-	CIS_AWS   = "cis_aws"
-	CIS_GCP   = "cis_gcp"
-	CIS_AZURE = "cis_azure"
+	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/azure"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-var SupportedCIS = []string{CIS_AWS, CIS_K8S, CIS_EKS, CIS_GCP, CIS_AZURE}
+func NewCisAzureFactory(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (FetchersMap, error) {
+	log.Infof("Initializing Azure fetchers")
+	m := make(FetchersMap)
+
+	assetsFetcher := fetchers.NewAzureAssetsFetcher(ctx, log, ch, inventory)
+	m["azure_cloud_assets_fetcher"] = RegisteredFetcher{Fetcher: assetsFetcher}
+
+	return m, nil
+}
