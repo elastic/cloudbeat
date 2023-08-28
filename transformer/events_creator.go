@@ -101,12 +101,14 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 			},
 		}
 
-		enricher := dataprovider.NewEnricher(eventData)
-		enricher.EnrichEvent(&event)
-
 		err := t.commonDataProvider.EnrichEvent(&event, resMetadata)
 		if err != nil {
-			return nil, fmt.Errorf("failed to enrich event: %v", err)
+			return nil, fmt.Errorf("failed to enrich event with global context: %v", err)
+		}
+
+		err = dataprovider.NewEnricher(eventData).EnrichEvent(&event)
+		if err != nil {
+			return nil, fmt.Errorf("failed to enrich event with resource context: %v", err)
 		}
 
 		events = append(events, event)

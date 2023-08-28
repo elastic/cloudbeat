@@ -67,7 +67,6 @@ func TestEnrichSuccess(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			dp := NewMockElasticCommonDataProvider(t)
 			dp.EXPECT().GetElasticCommonData().Return(tt.data, nil)
 
