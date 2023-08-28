@@ -160,5 +160,5 @@ func TestACLResource_GetMetadata(t *testing.T) {
 	assert.Equal(t, ec2.NACLInfo{}, r.GetData())
 	m, err := r.GetElasticCommonData()
 	assert.NoError(t, err)
-	assert.Equal(t, nil, m)
+	assert.Empty(t, m)
 }

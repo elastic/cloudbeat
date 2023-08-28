@@ -152,7 +152,7 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 	}}}, r.GetData())
 	m, err := r.GetElasticCommonData()
 	assert.NoError(t, err)
-	assert.Equal(t, nil, m)
+	assert.Empty(t, m)
 }
 
 func TestConfigResource_GetMetadata(t *testing.T) {
@@ -170,5 +170,5 @@ func TestConfigResource_GetMetadata(t *testing.T) {
 	assert.Nil(t, r.GetData())
 	m, err := r.GetElasticCommonData()
 	assert.NoError(t, err)
-	assert.Equal(t, nil, m)
+	assert.Empty(t, m)
 }
