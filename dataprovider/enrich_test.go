@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -75,7 +74,8 @@ func TestEnrichSuccess(t *testing.T) {
 			ev := &beat.Event{
 				Fields: map[string]interface{}{},
 			}
-			NewEnricher(dp).EnrichEvent(ev)
+			err := NewEnricher(dp).EnrichEvent(ev)
+			assert.NoError(t, err)
 
 			for key, expectedValue := range tt.expected {
 				actualValue, err := ev.GetValue(key)
@@ -93,7 +93,6 @@ func TestEnrichError(t *testing.T) {
 	ev := &beat.Event{
 		Fields: map[string]interface{}{},
 	}
-	NewEnricher(dp).EnrichEvent(ev)
-
-	assert.Equal(t, mapstr.M{}, ev.Fields)
+	err := NewEnricher(dp).EnrichEvent(ev)
+	assert.Error(t, err)
 }
