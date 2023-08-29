@@ -101,6 +101,37 @@ Follow these steps to log in to the created environment:
 
 ![Open Environment](https://github.com/elastic/cloudbeat/assets/99176494/b2bcf5f3-d463-4d2c-8073-8ef9183c9ada)
 
+## Access AWS EKS Cluster
+
+Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cluster:
+
+1. **Assume Role for Access**:
+
+   Before connecting to the EKS cluster, you need to assume a role that provides the necessary permissions. Replace `<your-session-name>` with a meaningful session name and run the following command to assume the role:
+
+   ```bash
+   export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s"  $(aws sts assume-role --role-arn arn:aws:iam::704479110758:role/Developer_eks --role-session-name <your-session-name> --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" --output text))
+   ```
+
+   This command sets temporary AWS credentials that grant you access to your EKS cluster.
+
+2. **Update Kubeconfig**:
+
+   To configure kubectl to communicate with your EKS cluster, replace `<cluster_name>` with your EKS cluster's name and run the following command:
+
+   ```aws eks update-kubeconfig --region eu-west-1 --name <cluster_name>```
+
+   This command updates your ~/.kube/config file with the necessary cluster configuration.
+
+3. **Check Connectivity**:
+
+   To verify your connectivity to the EKS cluster, run the following kubectl command:
+
+   ```kubectl get po -n kube-system```
+
+   This command should list the pods in the kube-system namespace, confirming that you have successfully connected to your EKS cluster.
+
+
 ## Cleanup Procedure
 
 If you wish to automatically delete the environment after the tests finish, set the `cleanup-env` input to `true`.

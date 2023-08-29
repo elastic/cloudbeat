@@ -26,7 +26,7 @@ require (
 	gopkg.in/jcmturner/dnsutils.v1 v1.0.1 // indirect
 	gopkg.in/jcmturner/goidentity.v3 v3.0.0 // indirect
 	gopkg.in/jcmturner/rpc.v1 v1.1.0 // indirect
-	gotest.tools/gotestsum v1.7.0
+	gotest.tools/gotestsum v1.10.1
 	k8s.io/apimachinery v0.26.3
 	k8s.io/client-go v0.26.3
 )
