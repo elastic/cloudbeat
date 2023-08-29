@@ -119,7 +119,7 @@ Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cl
 
    To configure kubectl to communicate with your EKS cluster, replace `<cluster_name>` with your EKS cluster's name and run the following command:
 
-   `aws eks update-kubeconfig --region eu-west-1 --name <cluster_name>`
+   ```aws eks update-kubeconfig --region eu-west-1 --name <cluster_name>```
 
    This command updates your ~/.kube/config file with the necessary cluster configuration.
 
