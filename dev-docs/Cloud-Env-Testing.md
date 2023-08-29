@@ -127,7 +127,7 @@ Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cl
 
    To verify your connectivity to the EKS cluster, run the following kubectl command:
 
-   `kubectl get po -n kube-system`
+   ```kubectl get po -n kube-system```
 
    This command should list the pods in the kube-system namespace, confirming that you have successfully connected to your EKS cluster.
 
