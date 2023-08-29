@@ -42,6 +42,7 @@ jobs:
 
       - name: Unit-Test
         run: |
+          go install gotest.tools/gotestsum
           GOOS=linux TEST_DIRECTORY=./...  gotestsum --format pkgname -- -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
 
