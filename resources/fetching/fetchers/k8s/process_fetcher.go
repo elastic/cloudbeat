@@ -31,7 +31,6 @@ import (
 	"github.com/elastic/beats/v7/x-pack/osquerybeat/ext/osquery-extension/pkg/proc"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/elastic/elastic-agent-libs/mapstr"
-	"github.com/mitchellh/mapstructure"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/yaml"
 
@@ -60,45 +59,45 @@ type EvalProcResource struct {
 // ProcCommonData According to https://www.elastic.co/guide/en/ecs/current/ecs-process.html
 type ProcCommonData struct {
 	// Parent process.
-	Parent *ProcCommonData `mapstructure:"process.parent,omitempty"`
+	Parent *ProcCommonData `json:"parent,omitempty"`
 
 	// Process id.
-	PID int64 `mapstructure:"process.pid,omitempty"`
+	PID int64 `json:"pid,omitempty"`
 
 	// Process name.
 	// Sometimes called program name or similar.
-	Name string `mapstructure:"process.name,omitempty"`
+	Name string `json:"name,omitempty"`
 
 	// Identifier of the group of processes the process belongs to.
-	PGID int64 `mapstructure:"process.pgid,omitempty"`
+	PGID int64 `json:"pgid,omitempty"`
 
 	// Full command line that started the process, including the absolute path
 	// to the executable, and all arguments.
 	// Some arguments may be filtered to protect sensitive information.
-	CommandLine string `mapstructure:"process.command_line,omitempty"`
+	CommandLine string `json:"command_line,omitempty"`
 
 	// Array of process arguments, starting with the absolute path to the
 	// executable.
 	// May be filtered to protect sensitive information.
-	Args []string `mapstructure:"process.args,omitempty"`
+	Args []string `json:"args,omitempty"`
 
 	// Length of the process.args array.
 	// This field can be useful for querying or performing bucket analysis on
 	// how many arguments were provided to start a process. More arguments may
 	// be an indication of suspicious activity.
-	ArgsCount int64 `mapstructure:"process.args_count,omitempty"`
+	ArgsCount int64 `json:"args_count,omitempty"`
 
 	// Process title.
 	// The proctitle, sometimes the same as process name. Can also be
 	// different: for example a browser setting its title to the web page
 	// currently opened.
-	Title string `mapstructure:"process.title,omitempty"`
+	Title string `json:"title,omitempty"`
 
 	// The time the process started.
-	Start time.Time `mapstructure:"process.start"`
+	Start time.Time `json:"start"`
 
 	// Seconds the process has been up.
-	Uptime int64 `mapstructure:"process.uptime,omitempty"`
+	Uptime int64 `json:"uptime,omitempty"`
 }
 
 type ProcResource struct {
@@ -287,10 +286,16 @@ func (res ProcResource) GetMetadata() (fetching.ResourceMetadata, error) {
 
 func (res ProcResource) GetElasticCommonData() (map[string]interface{}, error) {
 	m := map[string]interface{}{}
-	err := mapstructure.Decode(res.ElasticCommon, &m)
-	if err != nil {
-		return nil, fmt.Errorf("cannot decode process common data: %w", err)
-	}
+	m["process.parent.pid"] = res.ElasticCommon.Parent.PID
+	m["process.pid"] = res.ElasticCommon.PID
+	m["process.name"] = res.ElasticCommon.Name
+	m["process.pgid"] = res.ElasticCommon.PGID
+	m["process.command_line"] = res.ElasticCommon.CommandLine
+	m["process.args"] = res.ElasticCommon.Args
+	m["process.args_count"] = res.ElasticCommon.ArgsCount
+	m["process.title"] = res.ElasticCommon.Title
+	m["process.start"] = res.ElasticCommon.Start
+	m["process.uptime"] = res.ElasticCommon.Uptime
 
 	return m, nil
 }
