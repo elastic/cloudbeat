@@ -60,7 +60,19 @@ Follow these steps to install the dependencies and execute the different scripts
     poetry run python src/install_cnvm_integration.py
     ```
 
-7. To purge integrations, use the following command:
+7. To execute the Defend for Containers (D4C) integration, use the following command:
+
+    ``` bash
+    poetry run python src/install_d4c_integration.py
+    ```
+
+8. To execute the CSPM GCP integration, use the following command:
+
+    ``` bash
+    poetry run python src/install_cspm_gcp_integration.py
+    ```
+
+9. To purge integrations, use the following command:
 
     ``` bash
     poetry run python src/purge_integrations.py
