@@ -28,7 +28,6 @@ import (
 
 	"github.com/djherbis/times"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -184,9 +183,28 @@ func (r FSResource) GetData() any {
 
 func (r FSResource) GetElasticCommonData() (map[string]interface{}, error) {
 	m := map[string]interface{}{}
-	err := mapstructure.Decode(r.ElasticCommon, &m)
-	if err != nil {
-		return nil, fmt.Errorf("cannot decode file common data: %w", err)
+
+	m["fail.name"] = r.ElasticCommon.Name
+	m["fail.mode"] = r.ElasticCommon.Mode
+	m["fail.gid"] = r.ElasticCommon.Gid
+	m["fail.uid"] = r.ElasticCommon.Uid
+	m["fail.owner"] = r.ElasticCommon.Owner
+	m["fail.group"] = r.ElasticCommon.Group
+	m["fail.path"] = r.ElasticCommon.Path
+	m["fail.inode"] = r.ElasticCommon.Inode
+	m["fail.extension"] = r.ElasticCommon.Extension
+	m["fail.directory"] = r.ElasticCommon.Directory
+	m["fail.size"] = r.ElasticCommon.Size
+	m["fail.type"] = r.ElasticCommon.Type
+
+	if !r.ElasticCommon.Accessed.IsZero() {
+		m["fail.accessed"] = r.ElasticCommon.Accessed
+	}
+	if !r.ElasticCommon.Mtime.IsZero() {
+		m["fail.mtime"] = r.ElasticCommon.Mtime
+	}
+	if !r.ElasticCommon.Ctime.IsZero() {
+		m["fail.ctime"] = r.ElasticCommon.Ctime
 	}
 
 	return m, nil
