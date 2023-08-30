@@ -38,8 +38,8 @@ def data(k8s, api_client, cloudbeat_agent):
     k8s.start_agent(yaml_file=file_path, namespace=cloudbeat_agent.namespace)
     time.sleep(5)
     yield k8s, api_client, cloudbeat_agent
-    k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
-    k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
+    # k8s_yaml_list = get_k8s_yaml_objects(file_path=file_path)
+    # k8s.delete_from_yaml(yaml_objects_list=k8s_yaml_list)  # stop agent
 
 
 @pytest.fixture(scope="module", name="config_node_pre_test")
