@@ -146,11 +146,13 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 	meta, err := r.GetMetadata()
 
 	assert.NoError(t, err)
-	assert.Equal(t, fetching.ResourceMetadata{ID: "test-arn", Type: "cloud-audit", SubType: "aws-trail", Name: "", ECSFormat: ""}, meta)
+	assert.Equal(t, fetching.ResourceMetadata{ID: "test-arn", Type: "cloud-audit", SubType: "aws-trail", Name: ""}, meta)
 	assert.Equal(t, logging.EnrichedTrail{TrailInfo: cloudtrail.TrailInfo{Trail: types.Trail{
 		TrailARN: aws.String("test-arn"),
 	}}}, r.GetData())
-	assert.Equal(t, nil, r.GetElasticCommonData())
+	m, err := r.GetElasticCommonData()
+	assert.NoError(t, err)
+	assert.Empty(t, m)
 }
 
 func TestConfigResource_GetMetadata(t *testing.T) {
@@ -164,7 +166,9 @@ func TestConfigResource_GetMetadata(t *testing.T) {
 	meta, err := r.GetMetadata()
 
 	assert.NoError(t, err)
-	assert.Equal(t, fetching.ResourceMetadata{ID: "configservice-test-account", Type: "cloud-config", SubType: "aws-config", Name: "configservice-test-account", ECSFormat: ""}, meta)
+	assert.Equal(t, fetching.ResourceMetadata{ID: "configservice-test-account", Type: "cloud-config", SubType: "aws-config", Name: "configservice-test-account"}, meta)
 	assert.Nil(t, r.GetData())
-	assert.Equal(t, nil, r.GetElasticCommonData())
+	m, err := r.GetElasticCommonData()
+	assert.NoError(t, err)
+	assert.Empty(t, m)
 }

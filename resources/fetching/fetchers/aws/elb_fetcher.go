@@ -119,4 +119,4 @@ func (r ElbResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Name:    *r.lb.LoadBalancerName,
 	}, nil
 }
-func (r ElbResource) GetElasticCommonData() any { return nil }
+func (r ElbResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }

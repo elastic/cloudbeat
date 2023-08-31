@@ -352,19 +352,20 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 
 	fsResource := results[0].Resource
 	fileInfo := fsResource.GetData().(EvalFSResource)
-	cd := fsResource.GetElasticCommonData().(FileCommonData)
+	fileCd, err := fsResource.GetElasticCommonData()
+	s.NoError(err)
 
-	s.NotNil(cd)
-	s.Equal(fileInfo.Name, cd.Name)
-	s.Equal(fileInfo.Owner, cd.Owner)
-	s.Equal(fileInfo.Mode, cd.Mode)
-	s.Equal(fileInfo.Group, cd.Group)
-	s.Equal(fileInfo.Gid, cd.Gid)
-	s.Equal(fileInfo.Uid, cd.Uid)
-	s.Equal(fileInfo.Path, cd.Path)
-	s.Equal(fileInfo.Inode, cd.Inode)
-	s.Equal(filepath.Ext(files[0]), cd.Extension)
-	s.Contains(cd.Directory, directoryName)
+	s.NotNil(fileCd)
+	s.Equal(fileInfo.Name, fileCd["file.name"])
+	s.Equal(fileInfo.Owner, fileCd["file.owner"])
+	s.Equal(fileInfo.Mode, fileCd["file.mode"])
+	s.Equal(fileInfo.Group, fileCd["file.group"])
+	s.Equal(fileInfo.Gid, fileCd["file.gid"])
+	s.Equal(fileInfo.Uid, fileCd["file.uid"])
+	s.Equal(fileInfo.Path, fileCd["file.path"])
+	s.Equal(fileInfo.Inode, fileCd["file.inode"])
+	s.Equal(filepath.Ext(files[0]), fileCd["file.extension"])
+	s.Contains(fileCd["file.directory"], directoryName)
 }
 
 // This function creates a new directory with files inside and returns the path of the new directory

@@ -82,4 +82,4 @@ func (r KmsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r KmsResource) GetElasticCommonData() any { return nil }
+func (r KmsResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
