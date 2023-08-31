@@ -125,7 +125,7 @@ deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
 deploy-dm-ci:
-  cd deploy/deployment-manager && ./set_env.sh && source set_env.sh && ./deploy.sh
+  cd deploy/deployment-manager && ./set_env.sh && source ./set_env.sh && ./deploy.sh
 
 deploy-dm:
  cd deploy/deployment-manager && ./deploy.sh
