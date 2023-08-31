@@ -79,6 +79,9 @@ See the ssh command `terraform output -raw cloudbeat_ssh_cmd`
 **Delete environment:**
 
 ```bash
+# Remove configmap aws_auth if exists
+terraform state rm $(terraform state list | grep "kubernetes_config_map_v1_data.aws_auth") || true
+# Destroy resources
 terraform destroy --auto-approve
 ```
 

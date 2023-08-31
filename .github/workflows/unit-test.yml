@@ -42,7 +42,8 @@ jobs:
 
       - name: Unit-Test
         run: |
-          GOOS=linux go test -v -race -coverpkg=./... -coverprofile=cover.out.tmp ./...
+          go install gotest.tools/gotestsum
+          GOOS=linux TEST_DIRECTORY=./...  gotestsum --format pkgname -- -race -coverpkg=./... -coverprofile=cover.out.tmp
           cat cover.out.tmp | grep -v "mock_.*.go" > cover.out # remove mock files from coverage report
 
       - name: Upload coverage artifact
@@ -117,11 +118,10 @@ jobs:
           cache: false
 
       - name: Go linter
-        uses: golangci/golangci-lint-action@v3.6.0
+        uses: golangci/golangci-lint-action@v3.7.0
         with:
           version: latest
           args: --whole-files --verbose
-
 
   dependency-review:
     runs-on: ubuntu-20.04

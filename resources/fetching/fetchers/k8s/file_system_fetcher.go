@@ -28,7 +28,6 @@ import (
 
 	"github.com/djherbis/times"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -57,21 +56,21 @@ type EvalFSResource struct {
 
 // FileCommonData According to https://www.elastic.co/guide/en/ecs/current/ecs-file.html
 type FileCommonData struct {
-	Name      string    `json:"name,omitempty"`
-	Mode      string    `json:"mode,omitempty"`
-	Gid       string    `json:"gid,omitempty"`
-	Uid       string    `json:"uid,omitempty"`
-	Owner     string    `json:"owner,omitempty"`
-	Group     string    `json:"group,omitempty"`
-	Path      string    `json:"path,omitempty"`
-	Inode     string    `json:"inode,omitempty"`
-	Extension string    `json:"extension,omitempty"`
-	Size      int64     `json:"size"`
-	Type      string    `json:"type,omitempty"`
-	Directory string    `json:"directory,omitempty"`
-	Accessed  time.Time `json:"accessed"`
-	Mtime     time.Time `json:"mtime"`
-	Ctime     time.Time `json:"ctime"`
+	Name      string    `mapstructure:"file.name,omitempty"`
+	Mode      string    `mapstructure:"file.mode,omitempty"`
+	Gid       string    `mapstructure:"file.gid,omitempty"`
+	Uid       string    `mapstructure:"file.uid,omitempty"`
+	Owner     string    `mapstructure:"file.owner,omitempty"`
+	Group     string    `mapstructure:"file.group,omitempty"`
+	Path      string    `mapstructure:"file.path,omitempty"`
+	Inode     string    `mapstructure:"file.inode,omitempty"`
+	Extension string    `mapstructure:"file.extension,omitempty"`
+	Size      int64     `mapstructure:"file.size"`
+	Type      string    `mapstructure:"file.type,omitempty"`
+	Directory string    `mapstructure:"file.directory,omitempty"`
+	Accessed  time.Time `mapstructure:"file.accessed"`
+	Mtime     time.Time `mapstructure:"file.mtime"`
+	Ctime     time.Time `mapstructure:"file.ctime"`
 }
 
 type FSResource struct {
@@ -171,7 +170,7 @@ func (f *FileSystemFetcher) fromFileInfo(info os.FileInfo, path string) (*FSReso
 
 	return &FSResource{
 		EvalResource:  data,
-		ElasticCommon: enrichFileCommonData(stat, data, path),
+		ElasticCommon: f.createFileCommonData(stat, data, path),
 	}, nil
 }
 
@@ -182,17 +181,41 @@ func (r FSResource) GetData() any {
 	return r.EvalResource
 }
 
-func (r FSResource) GetElasticCommonData() any {
-	return r.ElasticCommon
+func (r FSResource) GetElasticCommonData() (map[string]interface{}, error) {
+	m := map[string]interface{}{}
+
+	m["file.name"] = r.ElasticCommon.Name
+	m["file.mode"] = r.ElasticCommon.Mode
+	m["file.gid"] = r.ElasticCommon.Gid
+	m["file.uid"] = r.ElasticCommon.Uid
+	m["file.owner"] = r.ElasticCommon.Owner
+	m["file.group"] = r.ElasticCommon.Group
+	m["file.path"] = r.ElasticCommon.Path
+	m["file.inode"] = r.ElasticCommon.Inode
+	m["file.extension"] = r.ElasticCommon.Extension
+	m["file.directory"] = r.ElasticCommon.Directory
+	m["file.size"] = r.ElasticCommon.Size
+	m["file.type"] = r.ElasticCommon.Type
+
+	if !r.ElasticCommon.Accessed.IsZero() {
+		m["file.accessed"] = r.ElasticCommon.Accessed
+	}
+	if !r.ElasticCommon.Mtime.IsZero() {
+		m["file.mtime"] = r.ElasticCommon.Mtime
+	}
+	if !r.ElasticCommon.Ctime.IsZero() {
+		m["file.ctime"] = r.ElasticCommon.Ctime
+	}
+
+	return m, nil
 }
 
 func (r FSResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:        r.EvalResource.Path,
-		Type:      FSResourceType,
-		SubType:   r.EvalResource.SubType,
-		Name:      r.EvalResource.Path, // The Path from the container and not from the host
-		ECSFormat: FSResourceType,
+		ID:      r.EvalResource.Path,
+		Type:    FSResourceType,
+		SubType: r.EvalResource.SubType,
+		Name:    r.EvalResource.Path, // The Path from the container and not from the host
 	}, nil
 }
 
@@ -203,40 +226,32 @@ func getFSSubType(fileInfo os.FileInfo) string {
 	return FileSubType
 }
 
-func enrichFileCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) FileCommonData {
-	cd := FileCommonData{}
-	if err := enrichFromFileResource(&cd, data); err != nil {
-		logp.Error(fmt.Errorf("failed to decode data, Error: %v", err))
+func (f *FileSystemFetcher) createFileCommonData(stat *syscall.Stat_t, data EvalFSResource, path string) FileCommonData {
+	cd := FileCommonData{
+		Name:      data.Name,
+		Mode:      data.Mode,
+		Gid:       data.Gid,
+		Uid:       data.Uid,
+		Owner:     data.Owner,
+		Group:     data.Group,
+		Path:      data.Path,
+		Inode:     data.Inode,
+		Extension: filepath.Ext(path),
+		Directory: filepath.Dir(path),
+		Size:      stat.Size,
+		Type:      data.SubType,
 	}
 
-	if err := enrichFileTimes(&cd, path); err != nil {
-		logp.Error(err)
+	t, err := times.Stat(path)
+	if err != nil {
+		f.log.Error("failed to get file time data, error - %w", err)
+	} else {
+		cd.Accessed = t.AccessTime()
+		cd.Mtime = t.ModTime()
+		if t.HasChangeTime() {
+			cd.Ctime = t.ChangeTime()
+		}
 	}
-
-	cd.Extension = filepath.Ext(path)
-	cd.Directory = filepath.Dir(path)
-	cd.Size = stat.Size
-	cd.Type = data.SubType
 
 	return cd
-}
-
-func enrichFileTimes(cd *FileCommonData, filepath string) error {
-	t, err := times.Stat(filepath)
-	if err != nil {
-		return fmt.Errorf("failed to get file time data, error - %+v", err)
-	}
-
-	cd.Accessed = t.AccessTime()
-	cd.Mtime = t.ModTime()
-
-	if t.HasChangeTime() {
-		cd.Ctime = t.ChangeTime()
-	}
-
-	return nil
-}
-
-func enrichFromFileResource(cd *FileCommonData, data EvalFSResource) error {
-	return mapstructure.Decode(data, cd)
 }

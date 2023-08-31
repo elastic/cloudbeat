@@ -45,8 +45,8 @@ func (d *DummyResource) GetMetadata() (fetching.ResourceMetadata, error) {
 func (d *DummyResource) GetData() any {
 	return d
 }
-func (d *DummyResource) GetElasticCommonData() any {
-	return d
+func (d *DummyResource) GetElasticCommonData() (map[string]interface{}, error) {
+	return nil, nil
 }
 
 type OpaTestSuite struct {

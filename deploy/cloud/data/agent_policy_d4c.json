@@ -1,0 +1,5 @@
+{
+    "name": "tf-ap-d4c",
+    "namespace": "default",
+    "monitoring_enabled":["logs","metrics"]
+}

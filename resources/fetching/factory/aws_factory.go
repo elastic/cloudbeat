@@ -66,8 +66,10 @@ func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return mdata, nil
 }
 
-func (w *wrapResource) GetData() any              { return w.wrapped.GetData() }
-func (w *wrapResource) GetElasticCommonData() any { return w.wrapped.GetElasticCommonData() }
+func (w *wrapResource) GetData() any { return w.wrapped.GetData() }
+func (w *wrapResource) GetElasticCommonData() (map[string]interface{}, error) {
+	return w.wrapped.GetElasticCommonData()
+}
 
 func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount) FetchersMap {
 	return newCisAwsOrganizationFactory(ctx, log, rootCh, accounts, NewCisAwsFactory)

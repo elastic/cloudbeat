@@ -108,7 +108,7 @@ func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Region:  r.GetRegion(),
 	}, nil
 }
-func (r LoggingResource) GetElasticCommonData() any { return nil }
+func (r LoggingResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
 
 func (c ConfigResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	id := fmt.Sprintf("configservice-%s", c.identity.Account)
@@ -124,4 +124,4 @@ func (c ConfigResource) GetData() any {
 	return c.configs
 }
 
-func (c ConfigResource) GetElasticCommonData() any { return nil }
+func (c ConfigResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }

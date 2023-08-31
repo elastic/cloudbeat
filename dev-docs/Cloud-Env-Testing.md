@@ -1,7 +1,7 @@
 # Cloud Environment Testing
 
 The [Create Environment](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml) GitHub action
-deploys a full-featured cloud environment, pre-configured with all our integrations. It also includes features for
+deploys a full-featured cloud environment, pre-configured with all our integrations (KSPM, CSPM and D4C). It also includes features for
 running sanity testing and automated deletion.
 
 ## How to Run the Workflow
@@ -47,14 +47,15 @@ Follow these steps to run the workflow:
       e.g. `elastic / unified-release - staging # 8.9 - 11 - 8.9.0-c6bb8f7a Success after 4 hr 58 min`. Now just copy it
       and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.9.0-c6bb8f7a`.
 
+    - `run-sanity-tests` (optional): Set to `true` to run sanity tests after the environment is set up. Default: `false`
+
     - `cleanup-env` (optional): Set to `true` if you want the resources to automatically be cleaned up after
       provisioning - useful if you don't want to test the env manually after deployment.
       Default: `false`.
 
-    - `run-sanity-tests` (optional): Set to `true` to run sanity tests after the environment is set up. Default: `false`
       .
-
    ![Adjust Inputs](https://github.com/elastic/cloudbeat/assets/99176494/bac5004d-7cbc-4a34-8127-3acd11acc90e)
+
 
 5. Click the `Run workflow` button to start.
 
@@ -99,6 +100,37 @@ Follow these steps to log in to the created environment:
 4. In the Elastic Cloud dashboard, click `Open` next to the created environment.
 
 ![Open Environment](https://github.com/elastic/cloudbeat/assets/99176494/b2bcf5f3-d463-4d2c-8073-8ef9183c9ada)
+
+## Access AWS EKS Cluster
+
+Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cluster:
+
+1. **Assume Role for Access**:
+
+   Before connecting to the EKS cluster, you need to assume a role that provides the necessary permissions. Replace `<your-session-name>` with a meaningful session name and run the following command to assume the role:
+
+   ```bash
+   export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s"  $(aws sts assume-role --role-arn arn:aws:iam::704479110758:role/Developer_eks --role-session-name <your-session-name> --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" --output text))
+   ```
+
+   This command sets temporary AWS credentials that grant you access to your EKS cluster.
+
+2. **Update Kubeconfig**:
+
+   To configure kubectl to communicate with your EKS cluster, replace `<cluster_name>` with your EKS cluster's name and run the following command:
+
+   ```aws eks update-kubeconfig --region eu-west-1 --name <cluster_name>```
+
+   This command updates your ~/.kube/config file with the necessary cluster configuration.
+
+3. **Check Connectivity**:
+
+   To verify your connectivity to the EKS cluster, run the following kubectl command:
+
+   ```kubectl get po -n kube-system```
+
+   This command should list the pods in the kube-system namespace, confirming that you have successfully connected to your EKS cluster.
+
 
 ## Cleanup Procedure
 

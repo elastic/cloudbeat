@@ -94,6 +94,17 @@ class StateFileManager:
         """
         return self.__policies
 
+    def delete_by_package_policy(self, pkg_policy_id: str) -> None:
+        """
+        Delete policies with a given package policy ID.
+
+        Args:
+            pkg_policy_id (str): Package policy ID to match for deletion.
+        """
+        self.__policies = [policy for policy in self.__policies if policy.pkg_policy_id != pkg_policy_id]
+        self.__save()
+        logger.info(f"Policies with package policy ID {pkg_policy_id} deleted from state.")
+
     def delete_all(self) -> None:
         """
         Delete the current state.

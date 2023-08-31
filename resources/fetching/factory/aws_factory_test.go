@@ -111,7 +111,9 @@ func subtest(t *testing.T, drain bool) {
 		nameCounts := make(map[string]int)
 		for _, resource := range resources {
 			assert.NotNil(t, resource.GetData())
-			assert.NotNil(t, resource.GetElasticCommonData())
+			cd, err := resource.GetElasticCommonData()
+			assert.NoError(t, err)
+			assert.NotNil(t, cd)
 			mdata, err := resource.GetMetadata()
 			require.NotNil(t, mdata)
 			require.NoError(t, err)
@@ -189,7 +191,7 @@ func mockResource() *fetching.MockResource {
 		AwsAccountId:    "some-id",
 		AwsAccountAlias: "some-alias",
 	}, nil).Once()
-	m.EXPECT().GetElasticCommonData().Return(struct{}{}).Once()
+	m.EXPECT().GetElasticCommonData().Return(map[string]interface{}{}, nil).Once()
 	return &m
 }
 

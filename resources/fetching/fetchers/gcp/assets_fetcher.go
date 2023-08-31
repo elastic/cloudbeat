@@ -140,12 +140,20 @@ func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 		ID:      r.Asset.Name,
 		Type:    r.Type,
 		SubType: r.SubType,
-		Name:    r.Asset.Name,
+		Name:    getAssetResourceName(r.Asset),
 		Region:  region,
 	}, nil
 }
 
-func (r *GcpAsset) GetElasticCommonData() any { return nil }
+func (r *GcpAsset) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+
+// a GCP asset name is made up of its ancestors
+// the resource id is the last part of the name, which we use as name of the resource
+// see https://cloud.google.com/apis/design/resource_names#resource_id
+func getAssetResourceName(asset *assetpb.Asset) string {
+	parts := strings.Split(asset.Name, "/")
+	return parts[len(parts)-1]
+}
 
 func getGcpSubType(assetType string) string {
 	dotIndex := strings.Index(assetType, ".")
