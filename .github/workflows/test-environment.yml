@@ -197,6 +197,22 @@ jobs:
           STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
         run: just deploy-cloudformation
 
+      - name: Install CSPM GCP integration
+        id: cspm-gcp-integration
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/install_cspm_gcp_integration.py
+
+      - id: google-auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+
+      - name: Deploy CSPM GCP agent
+        id: cspm-gcp-agent
+        run: just deploy-dm-ci
+
       - name: Install D4C integration
         id: kspm-d4c
         working-directory: ${{ env.WORKING_DIR }}/fleet_api

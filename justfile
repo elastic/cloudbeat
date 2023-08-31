@@ -124,8 +124,11 @@ logs-cloudbeat:
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
+deploy-dm-ci:
+  cd deploy/deployment-manager && ./set_env.sh && source set_env.sh && ./deploy.sh
+
 deploy-dm:
- ./deploy/deployment-manager/deploy.sh
+ cd deploy/deployment-manager && ./deploy.sh
 
 delete-dm name:
   gcloud deployment-manager deployments delete {{name}} -q
