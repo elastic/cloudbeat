@@ -78,19 +78,29 @@ func (_c *MockResource_GetData_Call) RunAndReturn(run func() interface{}) *MockR
 }
 
 // GetElasticCommonData provides a mock function with given fields:
-func (_m *MockResource) GetElasticCommonData() interface{} {
+func (_m *MockResource) GetElasticCommonData() (map[string]interface{}, error) {
 	ret := _m.Called()
 
-	var r0 interface{}
-	if rf, ok := ret.Get(0).(func() interface{}); ok {
+	var r0 map[string]interface{}
+	var r1 error
+	if rf, ok := ret.Get(0).(func() (map[string]interface{}, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() map[string]interface{}); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(interface{})
+			r0 = ret.Get(0).(map[string]interface{})
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockResource_GetElasticCommonData_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetElasticCommonData'
@@ -110,12 +120,12 @@ func (_c *MockResource_GetElasticCommonData_Call) Run(run func()) *MockResource_
 	return _c
 }
 
-func (_c *MockResource_GetElasticCommonData_Call) Return(_a0 interface{}) *MockResource_GetElasticCommonData_Call {
-	_c.Call.Return(_a0)
+func (_c *MockResource_GetElasticCommonData_Call) Return(_a0 map[string]interface{}, _a1 error) *MockResource_GetElasticCommonData_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockResource_GetElasticCommonData_Call) RunAndReturn(run func() interface{}) *MockResource_GetElasticCommonData_Call {
+func (_c *MockResource_GetElasticCommonData_Call) RunAndReturn(run func() (map[string]interface{}, error)) *MockResource_GetElasticCommonData_Call {
 	_c.Call.Return(run)
 	return _c
 }

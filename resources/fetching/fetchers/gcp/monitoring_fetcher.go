@@ -98,4 +98,4 @@ func (g *GcpMonitoringAsset) GetData() any {
 	return g.Asset
 }
 
-func (g *GcpMonitoringAsset) GetElasticCommonData() any { return nil }
+func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }

@@ -128,4 +128,4 @@ func (r IAMResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Region:  r.GetRegion(),
 	}, nil
 }
-func (r IAMResource) GetElasticCommonData() any { return nil }
+func (r IAMResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
