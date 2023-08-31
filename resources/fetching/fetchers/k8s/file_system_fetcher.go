@@ -184,27 +184,27 @@ func (r FSResource) GetData() any {
 func (r FSResource) GetElasticCommonData() (map[string]interface{}, error) {
 	m := map[string]interface{}{}
 
-	m["fail.name"] = r.ElasticCommon.Name
-	m["fail.mode"] = r.ElasticCommon.Mode
-	m["fail.gid"] = r.ElasticCommon.Gid
-	m["fail.uid"] = r.ElasticCommon.Uid
-	m["fail.owner"] = r.ElasticCommon.Owner
-	m["fail.group"] = r.ElasticCommon.Group
-	m["fail.path"] = r.ElasticCommon.Path
-	m["fail.inode"] = r.ElasticCommon.Inode
-	m["fail.extension"] = r.ElasticCommon.Extension
-	m["fail.directory"] = r.ElasticCommon.Directory
-	m["fail.size"] = r.ElasticCommon.Size
-	m["fail.type"] = r.ElasticCommon.Type
+	m["file.name"] = r.ElasticCommon.Name
+	m["file.mode"] = r.ElasticCommon.Mode
+	m["file.gid"] = r.ElasticCommon.Gid
+	m["file.uid"] = r.ElasticCommon.Uid
+	m["file.owner"] = r.ElasticCommon.Owner
+	m["file.group"] = r.ElasticCommon.Group
+	m["file.path"] = r.ElasticCommon.Path
+	m["file.inode"] = r.ElasticCommon.Inode
+	m["file.extension"] = r.ElasticCommon.Extension
+	m["file.directory"] = r.ElasticCommon.Directory
+	m["file.size"] = r.ElasticCommon.Size
+	m["file.type"] = r.ElasticCommon.Type
 
 	if !r.ElasticCommon.Accessed.IsZero() {
-		m["fail.accessed"] = r.ElasticCommon.Accessed
+		m["file.accessed"] = r.ElasticCommon.Accessed
 	}
 	if !r.ElasticCommon.Mtime.IsZero() {
-		m["fail.mtime"] = r.ElasticCommon.Mtime
+		m["file.mtime"] = r.ElasticCommon.Mtime
 	}
 	if !r.ElasticCommon.Ctime.IsZero() {
-		m["fail.ctime"] = r.ElasticCommon.Ctime
+		m["file.ctime"] = r.ElasticCommon.Ctime
 	}
 
 	return m, nil
