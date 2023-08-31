@@ -132,12 +132,11 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 				},
 			},
 			want: fetching.ResourceMetadata{
-				ID:        fmt.Sprintf("%s-%s", fetching.GcpMonitoringType, projectId),
-				Name:      fmt.Sprintf("%s-%s", fetching.GcpMonitoringType, projectId),
-				Type:      fetching.MonitoringIdentity,
-				SubType:   fetching.GcpMonitoringType,
-				Region:    gcplib.GlobalRegion,
-				ECSFormat: "cloud",
+				ID:      fmt.Sprintf("%s-%s", fetching.GcpMonitoringType, projectId),
+				Name:    fmt.Sprintf("%s-%s", fetching.GcpMonitoringType, projectId),
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.GcpMonitoringType,
+				Region:  gcplib.GlobalRegion,
 			},
 		},
 	}
