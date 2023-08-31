@@ -138,4 +138,4 @@ func (res EcrResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res EcrResource) GetElasticCommonData() any { return nil }
+func (res EcrResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }

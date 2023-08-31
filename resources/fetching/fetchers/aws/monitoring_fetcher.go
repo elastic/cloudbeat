@@ -103,7 +103,7 @@ func (r MonitoringResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Region:  awslib.GlobalRegion,
 	}, nil
 }
-func (r MonitoringResource) GetElasticCommonData() any { return nil }
+func (r MonitoringResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
 
 func (s SecurityHubResource) GetData() any {
 	return s
@@ -119,4 +119,4 @@ func (s SecurityHubResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (s SecurityHubResource) GetElasticCommonData() any { return nil }
+func (s SecurityHubResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }

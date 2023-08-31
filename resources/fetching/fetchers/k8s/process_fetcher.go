@@ -165,11 +165,11 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 	}
 	configMap := f.getProcessConfigurationFile(processConf, cmd, procStat.Name)
 	evalRes := EvalProcResource{PID: processId, Cmd: cmd, Stat: procStat, ExternalData: configMap}
-	ProcCd := f.enrichProcCommonData(procStat, cmd, processId)
-	return ProcResource{EvalResource: evalRes, ElasticCommon: ProcCd}, nil
+	procCd := f.createProcCommonData(procStat, cmd, processId)
+	return ProcResource{EvalResource: evalRes, ElasticCommon: procCd}, nil
 }
 
-func (f *ProcessesFetcher) enrichProcCommonData(stat proc.ProcStat, cmd string, pid string) ProcCommonData {
+func (f *ProcessesFetcher) createProcCommonData(stat proc.ProcStat, cmd string, pid string) ProcCommonData {
 	processID, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
 		f.log.Errorf("Couldn't parse PID, pid: %s", pid)
@@ -277,16 +277,27 @@ func (res ProcResource) GetData() interface{} {
 
 func (res ProcResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:        res.EvalResource.PID + res.EvalResource.Stat.StartTime,
-		Type:      ProcessResourceType,
-		SubType:   ProcessSubType,
-		Name:      res.EvalResource.Stat.Name,
-		ECSFormat: "process",
+		ID:      res.EvalResource.PID + res.EvalResource.Stat.StartTime,
+		Type:    ProcessResourceType,
+		SubType: ProcessSubType,
+		Name:    res.EvalResource.Stat.Name,
 	}, nil
 }
 
-func (res ProcResource) GetElasticCommonData() any {
-	return res.ElasticCommon
+func (res ProcResource) GetElasticCommonData() (map[string]interface{}, error) {
+	m := map[string]interface{}{}
+	m["process.parent.pid"] = res.ElasticCommon.Parent.PID
+	m["process.pid"] = res.ElasticCommon.PID
+	m["process.name"] = res.ElasticCommon.Name
+	m["process.pgid"] = res.ElasticCommon.PGID
+	m["process.command_line"] = res.ElasticCommon.CommandLine
+	m["process.args"] = res.ElasticCommon.Args
+	m["process.args_count"] = res.ElasticCommon.ArgsCount
+	m["process.title"] = res.ElasticCommon.Title
+	m["process.start"] = res.ElasticCommon.Start
+	m["process.uptime"] = res.ElasticCommon.Uptime
+
+	return m, nil
 }
 
 // Supported only in Linux

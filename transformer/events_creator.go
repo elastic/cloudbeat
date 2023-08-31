@@ -92,19 +92,23 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 			Meta:      mapstr.M{libevents.FieldMetaIndex: t.index},
 			Timestamp: timestamp,
 			Fields: mapstr.M{
-				resMetadata.ECSFormat: eventData.GetElasticCommonData(),
-				"event":               BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
-				"resource":            resource,
-				"result":              finding.Result,
-				"rule":                finding.Rule,
-				"message":             fmt.Sprintf("Rule %q: %s", finding.Rule.Name, finding.Result.Evaluation),
-				"cloudbeat":           cd.VersionInfo,
+				"event":     BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
+				"resource":  resource,
+				"result":    finding.Result,
+				"rule":      finding.Rule,
+				"message":   fmt.Sprintf("Rule %q: %s", finding.Rule.Name, finding.Result.Evaluation),
+				"cloudbeat": cd.VersionInfo,
 			},
 		}
 
 		err := t.commonDataProvider.EnrichEvent(&event, resMetadata)
 		if err != nil {
-			return nil, fmt.Errorf("failed to enrich event: %v", err)
+			return nil, fmt.Errorf("failed to enrich event with global context: %v", err)
+		}
+
+		err = dataprovider.NewEnricher(eventData).EnrichEvent(&event)
+		if err != nil {
+			return nil, fmt.Errorf("failed to enrich event with resource context: %v", err)
 		}
 
 		events = append(events, event)

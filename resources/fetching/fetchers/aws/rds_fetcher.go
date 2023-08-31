@@ -84,4 +84,4 @@ func (r RdsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r RdsResource) GetElasticCommonData() any { return nil }
+func (r RdsResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
