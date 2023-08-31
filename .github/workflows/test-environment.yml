@@ -81,7 +81,7 @@ jobs:
             exit 1
           fi
 
-      - name: Mask Keys
+      - name: Mask Sensitive Data
         run: |
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
