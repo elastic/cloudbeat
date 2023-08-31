@@ -34,9 +34,12 @@ import (
 )
 
 const (
-	saCredentialsJSON = `{ "client_id": "test" }`
-	saFilePath        = "sa-credentials.json"
-	testProjectId     = "test-project"
+	saCredentialsJSON   = `{ "client_id": "test" }`
+	saFilePath          = "sa-credentials.json"
+	testProjectId       = "test-project"
+	testParentProjectId = "projects/test-project"
+	testOrgId           = "test-organization"
+	testParentOrgId     = "organizations/test-organization"
 )
 
 func TestGetGcpClientConfig(t *testing.T) {
@@ -47,30 +50,58 @@ func TestGetGcpClientConfig(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		cfg          config.GcpConfig
+		cfg          []config.GcpConfig
 		authProvider GoogleAuthProviderAPI
-		want         *GcpFactoryConfig
+		want         []*GcpFactoryConfig
 		wantErr      bool
 	}{
 		{
 			name: "Should return a GcpClientConfig using SA credentials file path",
-			cfg: config.GcpConfig{
-				GcpClientOpt: config.GcpClientOpt{
-					CredentialsFilePath: saFilePath,
+			cfg: []config.GcpConfig{
+				{
+					AccountType: config.SingleAccount,
+					ProjectId:   testProjectId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsFilePath: saFilePath,
+					},
+				},
+				{
+					AccountType:    config.OrganizationAccount,
+					OrganizationId: testOrgId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsFilePath: saFilePath,
+					},
 				},
 			},
 			authProvider: mockGoogleAuthProvider(nil),
-			want: &GcpFactoryConfig{
-				ProjectId:  testProjectId,
-				ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
+			want: []*GcpFactoryConfig{
+				{
+					Parent:     testParentProjectId,
+					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
+				},
+				{
+					Parent:     testParentOrgId,
+					ClientOpts: []option.ClientOption{option.WithCredentialsFile(saFilePath)},
+				},
 			},
 			wantErr: false,
 		},
 		{
 			name: "Should return an error due to invalid SA credentials file path",
-			cfg: config.GcpConfig{
-				GcpClientOpt: config.GcpClientOpt{
-					CredentialsFilePath: "invalid path",
+			cfg: []config.GcpConfig{
+				{
+					AccountType: config.SingleAccount,
+					ProjectId:   testProjectId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsFilePath: "invalid path",
+					},
+				},
+				{
+					AccountType:    config.OrganizationAccount,
+					OrganizationId: testOrgId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsFilePath: "invalid path",
+					},
 				},
 			},
 			authProvider: mockGoogleAuthProvider(nil),
@@ -79,23 +110,51 @@ func TestGetGcpClientConfig(t *testing.T) {
 		},
 		{
 			name: "Should return a GcpClientConfig using SA credentials json",
-			cfg: config.GcpConfig{
-				GcpClientOpt: config.GcpClientOpt{
-					CredentialsJSON: saCredentialsJSON,
+			cfg: []config.GcpConfig{
+				{
+					AccountType: config.SingleAccount,
+					ProjectId:   testProjectId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsJSON: saCredentialsJSON,
+					},
+				},
+				{
+					AccountType:    config.OrganizationAccount,
+					OrganizationId: testOrgId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsJSON: saCredentialsJSON,
+					},
 				},
 			},
 			authProvider: mockGoogleAuthProvider(nil),
-			want: &GcpFactoryConfig{
-				ProjectId:  testProjectId,
-				ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+			want: []*GcpFactoryConfig{
+				{
+					Parent:     testParentProjectId,
+					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+				},
+				{
+					Parent:     testParentOrgId,
+					ClientOpts: []option.ClientOption{option.WithCredentialsJSON([]byte(saCredentialsJSON))},
+				},
 			},
 			wantErr: false,
 		},
 		{
 			name: "Should return an error due to invalid SA json",
-			cfg: config.GcpConfig{
-				GcpClientOpt: config.GcpClientOpt{
-					CredentialsJSON: "invalid json",
+			cfg: []config.GcpConfig{
+				{
+					AccountType: config.SingleAccount,
+					ProjectId:   testProjectId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsJSON: "invalid json",
+					},
+				},
+				{
+					AccountType:    config.OrganizationAccount,
+					OrganizationId: testOrgId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsJSON: "invalid json",
+					},
 				},
 			},
 			authProvider: mockGoogleAuthProvider(nil),
@@ -104,42 +163,125 @@ func TestGetGcpClientConfig(t *testing.T) {
 		},
 		{
 			name: "Should return client options with both credentials_file_path and credentials_json",
-			cfg: config.GcpConfig{
-				GcpClientOpt: config.GcpClientOpt{
-					CredentialsFilePath: saFilePath,
-					CredentialsJSON:     saCredentialsJSON,
+			cfg: []config.GcpConfig{
+				{
+					AccountType: config.SingleAccount,
+					ProjectId:   testProjectId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsFilePath: saFilePath,
+						CredentialsJSON:     saCredentialsJSON,
+					},
+				},
+				{
+					AccountType:    config.OrganizationAccount,
+					OrganizationId: testOrgId,
+					GcpClientOpt: config.GcpClientOpt{
+						CredentialsFilePath: saFilePath,
+						CredentialsJSON:     saCredentialsJSON,
+					},
 				},
 			},
 			authProvider: mockGoogleAuthProvider(nil),
-			want: &GcpFactoryConfig{
-				ProjectId: testProjectId,
-				ClientOpts: []option.ClientOption{
-					option.WithCredentialsFile(saFilePath),
-					option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+			want: []*GcpFactoryConfig{
+				{
+					Parent: testParentProjectId,
+					ClientOpts: []option.ClientOption{
+						option.WithCredentialsFile(saFilePath),
+						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+					},
+				},
+				{
+					Parent: testParentOrgId,
+					ClientOpts: []option.ClientOption{
+						option.WithCredentialsFile(saFilePath),
+						option.WithCredentialsJSON([]byte(saCredentialsJSON)),
+					},
 				},
 			},
 			wantErr: false,
 		},
 		{
-			name:         "Should return nil and use application default credentials",
-			cfg:          config.GcpConfig{GcpClientOpt: config.GcpClientOpt{}},
+			name: "Should return nil and use application default credentials",
+			cfg: []config.GcpConfig{
+				{
+					AccountType:  config.SingleAccount,
+					ProjectId:    testProjectId,
+					GcpClientOpt: config.GcpClientOpt{},
+				},
+				{
+					AccountType:    config.OrganizationAccount,
+					OrganizationId: testOrgId,
+					GcpClientOpt:   config.GcpClientOpt{},
+				},
+			},
 			authProvider: mockGoogleAuthProvider(nil),
-			want:         &GcpFactoryConfig{ProjectId: testProjectId, ClientOpts: nil},
-			wantErr:      false,
+			want: []*GcpFactoryConfig{
+				{
+					Parent:     testParentProjectId,
+					ClientOpts: nil,
+				},
+				{
+					Parent:     testParentOrgId,
+					ClientOpts: nil,
+				},
+			},
+			wantErr: false,
 		},
 		{
-			name:         "Should return the project id retrieved from configuration",
-			cfg:          config.GcpConfig{ProjectId: "config-proj-id", GcpClientOpt: config.GcpClientOpt{}},
+			name: "Should return the project id retrieved from configuration",
+			cfg: []config.GcpConfig{
+				{
+					AccountType:  config.SingleAccount,
+					ProjectId:    testProjectId,
+					GcpClientOpt: config.GcpClientOpt{},
+				},
+				{
+					AccountType:    config.OrganizationAccount,
+					OrganizationId: testOrgId,
+					GcpClientOpt:   config.GcpClientOpt{},
+				},
+			},
 			authProvider: mockGoogleAuthProvider(nil),
-			want:         &GcpFactoryConfig{ProjectId: "config-proj-id", ClientOpts: nil},
-			wantErr:      false,
+			want: []*GcpFactoryConfig{
+				{
+					Parent:     testParentProjectId,
+					ClientOpts: nil,
+				},
+				{
+					Parent:     testParentOrgId,
+					ClientOpts: nil,
+				},
+			},
+			wantErr: false,
 		},
 		{
-			name:         "Should return nil due to error getting application default credentials",
-			cfg:          config.GcpConfig{GcpClientOpt: config.GcpClientOpt{}},
+			name: "Should return nil due to error getting application default credentials",
+			cfg: []config.GcpConfig{
+				{
+					AccountType:  config.SingleAccount,
+					GcpClientOpt: config.GcpClientOpt{},
+				},
+			},
 			authProvider: mockGoogleAuthProvider(errors.New("fail to retrieve ADC")),
 			want:         nil,
 			wantErr:      true,
+		},
+		{
+			name: "returns an error due to missing org ID in org account type",
+			cfg: []config.GcpConfig{
+				{
+					AccountType:  config.OrganizationAccount,
+					GcpClientOpt: config.GcpClientOpt{},
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "returns an error due to missing/unknown account type",
+			cfg:     []config.GcpConfig{{GcpClientOpt: config.GcpClientOpt{}}},
+			want:    nil,
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -147,14 +289,21 @@ func TestGetGcpClientConfig(t *testing.T) {
 			AuthProvider: tt.authProvider,
 		}
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := p.GetGcpClientConfig(context.Background(), tt.cfg, logp.NewLogger("gcp credentials test"))
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
+			for idx, cfg := range tt.cfg {
+				got, err := p.GetGcpClientConfig(context.Background(), cfg, logp.NewLogger("gcp credentials test"))
+				if tt.wantErr {
+					assert.Error(t, err)
+				} else {
+					require.NoError(t, err)
+				}
 
-			assert.Equal(t, tt.want, got)
+				if tt.want != nil {
+					assert.Equal(t, tt.want[idx], got)
+				}
+				if tt.want == nil {
+					assert.Nil(t, got)
+				}
+			}
 		})
 	}
 }

@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"strings"
 
-	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/huandu/xstrings"
 
@@ -40,7 +39,7 @@ type GcpAsset struct {
 	Type    string
 	SubType string
 
-	Asset *assetpb.Asset `json:"asset,omitempty"`
+	Asset *inventory.ExtendedGcpAsset `json:"asset,omitempty"`
 }
 
 // GcpAssetTypes https://cloud.google.com/asset-inventory/docs/supported-asset-types
@@ -145,12 +144,26 @@ func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r *GcpAsset) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+func (r *GcpAsset) GetElasticCommonData() (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"cloud": map[string]interface{}{
+			"provider": "gcp",
+			"account": map[string]interface{}{
+				"id":   r.Asset.ProjectId,
+				"name": r.Asset.ProjectName,
+			},
+			"organization": map[string]interface{}{
+				"id":   r.Asset.OrganizationId,
+				"name": r.Asset.OrganizationName,
+			},
+		},
+	}, nil
+}
 
 // a GCP asset name is made up of its ancestors
 // the resource id is the last part of the name, which we use as name of the resource
 // see https://cloud.google.com/apis/design/resource_names#resource_id
-func getAssetResourceName(asset *assetpb.Asset) string {
+func getAssetResourceName(asset *inventory.ExtendedGcpAsset) string {
 	parts := strings.Split(asset.Name, "/")
 	return parts[len(parts)-1]
 }

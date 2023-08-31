@@ -55,25 +55,27 @@ var monitoringAssetTypes = map[string][]string{
 }
 
 func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
+	f.log.Info("Starting GcpMonitoringFetcheqFetch")
 
-	monitoringAsset, err := f.provider.ListMonitoringAssets(monitoringAssetTypes)
+	monitoringAssets, err := f.provider.ListMonitoringAssets(monitoringAssetTypes)
 	if err != nil {
 		return err
 	}
 
-	select {
-	case <-ctx.Done():
-		f.log.Infof("GcpMonitoringFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
-		return nil
-	case f.resourceCh <- fetching.ResourceInfo{
-		CycleMetadata: cMetadata,
-		Resource: &GcpMonitoringAsset{
-			Type:    fetching.MonitoringIdentity,
-			subType: fetching.GcpMonitoringType,
-			Asset:   monitoringAsset,
-		},
-	}:
+	for _, monitoringAsset := range monitoringAssets {
+		select {
+		case <-ctx.Done():
+			f.log.Infof("GcpMonitoringFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
+			return nil
+		case f.resourceCh <- fetching.ResourceInfo{
+			CycleMetadata: cMetadata,
+			Resource: &GcpMonitoringAsset{
+				Type:    fetching.MonitoringIdentity,
+				subType: fetching.GcpMonitoringType,
+				Asset:   monitoringAsset,
+			},
+		}:
+		}
 	}
 
 	return nil
@@ -98,4 +100,18 @@ func (g *GcpMonitoringAsset) GetData() any {
 	return g.Asset
 }
 
-func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"cloud": map[string]interface{}{
+			"provider": "gcp",
+			"account": map[string]interface{}{
+				"id":   g.Asset.ProjectId,
+				"name": g.Asset.ProjectName,
+			},
+			"organization": map[string]interface{}{
+				"id":   g.Asset.OrganizationId,
+				"name": g.Asset.OrganizationName,
+			},
+		},
+	}, nil
+}
