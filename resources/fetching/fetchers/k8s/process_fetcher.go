@@ -165,11 +165,11 @@ func (f *ProcessesFetcher) fetchProcessData(procStat proc.ProcStat, processConf 
 	}
 	configMap := f.getProcessConfigurationFile(processConf, cmd, procStat.Name)
 	evalRes := EvalProcResource{PID: processId, Cmd: cmd, Stat: procStat, ExternalData: configMap}
-	procCd := f.enrichProcCommonData(procStat, cmd, processId)
+	procCd := f.createProcCommonData(procStat, cmd, processId)
 	return ProcResource{EvalResource: evalRes, ElasticCommon: procCd}, nil
 }
 
-func (f *ProcessesFetcher) enrichProcCommonData(stat proc.ProcStat, cmd string, pid string) ProcCommonData {
+func (f *ProcessesFetcher) createProcCommonData(stat proc.ProcStat, cmd string, pid string) ProcCommonData {
 	processID, err := strconv.ParseInt(pid, 10, 64)
 	if err != nil {
 		f.log.Errorf("Couldn't parse PID, pid: %s", pid)
