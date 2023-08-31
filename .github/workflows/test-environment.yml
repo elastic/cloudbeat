@@ -274,8 +274,7 @@ jobs:
       - name: Cleanup Environment
         if: github.event.inputs.cleanup-env == 'true'
         run: |
-          terraform destroy -var="region=${{ env.AWS_REGION }}" --auto-approve
-          aws cloudformation delete-stack --stack-name ${{ env.CNVM_STACK_NAME }}
+          just delete-cloud-env ${{ env.DEPLOYMENT_NAME }} '' "false"
 
       - name: Tag CNVM Instance
         if: github.event.inputs.cleanup-env == 'false'
