@@ -219,7 +219,14 @@ jobs:
 
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent
+        working-directory: ./deploy/deployment-manager
         run: just deploy-dm-ci
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
 
       - name: Install D4C integration
         id: kspm-d4c

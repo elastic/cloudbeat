@@ -125,10 +125,10 @@ deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
 deploy-dm-ci:
-  cd deploy/deployment-manager; . ./set_env.sh && ./deploy.sh
+  . ./set_env.sh && ./deploy.sh
 
 deploy-dm:
- cd deploy/deployment-manager; ./deploy.sh
+  .deploy/deployment-manager/deploy.sh
 
 delete-dm name:
   gcloud deployment-manager deployments delete {{name}} -q
