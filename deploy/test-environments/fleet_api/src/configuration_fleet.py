@@ -35,6 +35,4 @@ aws_config.secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "NA")
 gcp_dm_config = Munch()
 gcp_dm_config.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
 gcp_dm_config.zone = os.getenv("ZONE", "us-central1-a")
-gcp_dm_config.allow_ssh = bool(
-    os.getenv("ALLOW_SSH", "false") == "true",
-)
+gcp_dm_config.allow_ssh = os.getenv("ALLOW_SSH", "false") == "true"
