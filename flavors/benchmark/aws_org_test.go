@@ -146,7 +146,7 @@ func Test_getAwsAccounts(t *testing.T) {
 				IdentityProvider: nil,
 				AccountProvider:  tt.accountProvider,
 			}
-			got, err := A.getAwsAccounts(context.Background(), aws.Config{}, &tt.rootIdentity)
+			got, err := A.getAwsAccounts(context.Background(), nil, aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
 				assert.ErrorContains(t, err, tt.wantErr)
 				return
@@ -164,7 +164,7 @@ func Test_getAwsAccounts(t *testing.T) {
 
 func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
 	provider := awslib.MockAccountProviderAPI{}
-	on := provider.EXPECT().ListAccounts(mock.Anything, mock.Anything)
+	on := provider.EXPECT().ListAccounts(mock.Anything, mock.Anything, mock.Anything)
 	if err == nil {
 		on.Return([]cloud.Identity{
 			{
@@ -184,6 +184,6 @@ func mockAccountProvider(err error) *awslib.MockAccountProviderAPI {
 
 func mockAccountProviderWithIdentities(identities []cloud.Identity) *awslib.MockAccountProviderAPI {
 	provider := awslib.MockAccountProviderAPI{}
-	provider.EXPECT().ListAccounts(mock.Anything, mock.Anything).Return(identities, nil)
+	provider.EXPECT().ListAccounts(mock.Anything, mock.Anything, mock.Anything).Return(identities, nil)
 	return &provider
 }
