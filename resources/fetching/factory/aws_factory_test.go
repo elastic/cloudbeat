@@ -88,8 +88,8 @@ func subtest(t *testing.T, drain bool) {
 	)
 
 	rootCh := make(chan fetching.ResourceInfo)
-	fetcherMap := newCisAwsOrganizationFactory(ctx, testhelper.NewLogger(t), rootCh, accounts, factory)
-	assert.Lenf(t, fetcherMap, nFetchers*nAccounts, "Correct amount of fetchers")
+	fetcherMap := newCisAwsOrganizationFactory(ctx, testhelper.NewLogger(t), rootCh, accounts, nil, factory)
+	assert.Lenf(t, fetcherMap, nAccounts, "Correct amount of maps")
 
 	if drain {
 		expectedResources := nAccounts * resourcesPerAccount
@@ -146,6 +146,7 @@ func TestNewCisAwsOrganizationFactory_LeakContextDone(t *testing.T) {
 				AccountAlias: "account",
 			},
 		}},
+		nil,
 		mockFactory(1,
 			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
 				ch <- fetching.ResourceInfo{
@@ -174,6 +175,7 @@ func TestNewCisAwsOrganizationFactory_CloseChannel(t *testing.T) {
 				AccountAlias: "account",
 			},
 		}},
+		nil,
 		mockFactory(1,
 			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
 				defer close(ch)
@@ -181,6 +183,40 @@ func TestNewCisAwsOrganizationFactory_CloseChannel(t *testing.T) {
 			},
 		),
 	)
+}
+
+func TestNewCisAwsOrganizationFactory_Cache(t *testing.T) {
+	cache := map[string]FetchersMap{
+		"1": {"fetcher": RegisteredFetcher{}},
+	}
+	m := newCisAwsOrganizationFactory(
+		context.Background(),
+		testhelper.NewLogger(t),
+		make(chan fetching.ResourceInfo),
+		[]AwsAccount{
+			{
+				Identity: cloud.Identity{
+					Account:      "1",
+					AccountAlias: "account",
+				},
+			},
+			{
+				Identity: cloud.Identity{
+					Account:      "2",
+					AccountAlias: "account2",
+				},
+			},
+		},
+		cache,
+		mockFactory(1,
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) FetchersMap {
+				assert.Equal(t, "2", identity.Account)
+				return FetchersMap{"fetcher": RegisteredFetcher{}}
+			},
+		),
+	)
+	assert.Len(t, cache, 2)
+	assert.Len(t, m, 2)
 }
 
 func mockResource() *fetching.MockResource {

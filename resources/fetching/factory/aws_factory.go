@@ -19,7 +19,6 @@ package factory
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -71,8 +70,8 @@ func (w *wrapResource) GetElasticCommonData() (map[string]interface{}, error) {
 	return w.wrapped.GetElasticCommonData()
 }
 
-func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount) FetchersMap {
-	return newCisAwsOrganizationFactory(ctx, log, rootCh, accounts, NewCisAwsFactory)
+func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]FetchersMap) map[string]FetchersMap {
+	return newCisAwsOrganizationFactory(ctx, log, rootCh, accounts, cache, NewCisAwsFactory)
 }
 
 // awsFactory is the same function type as NewCisAwsFactory, and it's used to mock the function in tests
@@ -83,10 +82,16 @@ func newCisAwsOrganizationFactory(
 	log *logp.Logger,
 	rootCh chan fetching.ResourceInfo,
 	accounts []AwsAccount,
+	cache map[string]FetchersMap,
 	factory awsFactory,
-) FetchersMap {
-	m := make(FetchersMap)
+) map[string]FetchersMap {
+	m := make(map[string]FetchersMap)
 	for _, account := range accounts {
+		if existing := cache[account.Account]; existing != nil {
+			m[account.Account] = existing
+			continue
+		}
+
 		ch := make(chan fetching.ResourceInfo)
 		go func(identity cloud.Identity) {
 			for {
@@ -115,15 +120,15 @@ func newCisAwsOrganizationFactory(
 			}
 		}(account.Identity)
 
-		fm := factory(
+		f := factory(
 			log.Named("aws").WithOptions(zap.Fields(zap.String("cloud.account.id", account.Identity.Account))),
 			account.Config,
 			ch,
 			&account.Identity,
 		)
-
-		for k, v := range fm {
-			m[fmt.Sprintf("%s-%s", account.Identity.Account, k)] = v
+		m[account.Account] = f
+		if cache != nil {
+			cache[account.Account] = f
 		}
 	}
 	return m

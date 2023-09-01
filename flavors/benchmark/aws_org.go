@@ -58,18 +58,26 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get AWS accounts: %w", err)
-	}
+	cache := make(map[string]factory.FetchersMap)
+	rr := registry.NewDynamic(log, cfg.Period, func() (map[string]registry.Registry, error) {
+		accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
+		}
 
-	return registry.NewRegistry(
-			log,
-			factory.NewCisAwsOrganizationFactory(ctx, log, ch, accounts),
-		), cloud.NewDataProvider(
-			cloud.WithLogger(log),
-			cloud.WithAccount(*awsIdentity),
-		), nil
+		fm := factory.NewCisAwsOrganizationFactory(ctx, log, ch, accounts, cache)
+		m := make(map[string]registry.Registry)
+		for key, fetchersMap := range fm {
+			m[key] = registry.NewRegistry(log, fetchersMap)
+		}
+
+		return m, nil
+	})
+
+	return rr, cloud.NewDataProvider(
+		cloud.WithLogger(log),
+		cloud.WithAccount(*awsIdentity),
+	), nil
 }
 
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {
