@@ -89,6 +89,8 @@ type organizationalUnitInfo struct {
 }
 
 func getOUInfoForAccount(ctx context.Context, client organizationsAPI, cache map[string]string, accountId *string) (organizationalUnitInfo, error) {
+	// We need a paginator, according to the AWS docs:
+	// These operations can occasionally return an empty set of results even when there are more results available.
 	paginator := organizations.NewListParentsPaginator(client, &organizations.ListParentsInput{ChildId: accountId})
 	for paginator.HasMorePages() {
 		o, err := paginator.NextPage(ctx)
@@ -99,6 +101,7 @@ func getOUInfoForAccount(ctx context.Context, client organizationsAPI, cache map
 			continue
 		}
 
+		// According to AWS, in the current release, a child can have only a single parent.
 		parent := o.Parents[0]
 
 		if parent.Type == types.ParentTypeRoot {
