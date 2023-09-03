@@ -18,6 +18,8 @@
 package cloud
 
 import (
+	"errors"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -32,12 +34,17 @@ const (
 	cloudAccountNameField = "cloud.account.name"
 	cloudProviderField    = "cloud.provider"
 	cloudRegionField      = "cloud.region"
+	// TODO: update fields names when an ECS field is decided
+	cloudOrganizationIdField   = "cloud.Organization.id"
+	cloudOrganizationNameField = "cloud.Organization.name"
 )
 
 type Identity struct {
-	Provider     string
-	Account      string
-	AccountAlias string
+	Provider         string
+	Account          string
+	AccountAlias     string
+	OrganizationId   string
+	OrganizationName string
 }
 
 type DataProvider struct {
@@ -66,27 +73,14 @@ func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 }
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
-	err := insertIfNotEmpty(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AwsAccountId, a.accountId), event)
-	if err != nil {
-		return err
-	}
-
-	err = insertIfNotEmpty(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AwsAccountAlias, a.accountName), event)
-	if err != nil {
-		return err
-	}
-
-	err = insertIfNotEmpty(cloudProviderField, a.providerName, event)
-	if err != nil {
-		return err
-	}
-
-	err = insertIfNotEmpty(cloudRegionField, resMetadata.Region, event)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return errors.Join(
+		insertIfNotEmpty(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AwsAccountId, a.accountId), event),
+		insertIfNotEmpty(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AwsAccountAlias, a.accountName), event),
+		insertIfNotEmpty(cloudProviderField, a.providerName, event),
+		insertIfNotEmpty(cloudRegionField, resMetadata.Region, event),
+		insertIfNotEmpty(cloudOrganizationIdField, resMetadata.AwsOrganizationId, event),
+		insertIfNotEmpty(cloudOrganizationNameField, resMetadata.AwsOrganizationName, event),
+	)
 }
 
 func insertIfNotEmpty(field string, value string, event *beat.Event) error {

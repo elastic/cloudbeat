@@ -199,16 +199,17 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 
 		processResource := results[0].Resource
 		evalRes := processResource.GetData().(EvalProcResource)
-		procCD := processResource.GetElasticCommonData().(ProcCommonData)
+		procCD, err := processResource.GetElasticCommonData()
+		s.NoError(err)
 
 		s.Equal(testProcess.Pid, evalRes.PID)
 		s.Equal("kubelet", evalRes.Stat.Name)
 		s.Contains(evalRes.Cmd, "/usr/bin/kubelet")
 
-		s.Equal(testProcess.Pid, strconv.FormatInt(procCD.PID, 10))
-		s.True(procCD.ArgsCount > 0)
-		s.Contains(procCD.CommandLine, "/usr/bin/kubelet")
-		s.Equal("kubelet", procCD.Name)
+		s.Equal(testProcess.Pid, strconv.FormatInt((procCD["process.pid"].(int64)), 10))
+		s.True(procCD["process.args_count"].(int64) > 0)
+		s.Contains(procCD["process.command_line"], "/usr/bin/kubelet")
+		s.Equal("kubelet", procCD["process.name"])
 
 		configResource := evalRes.ExternalData[configFlagKey]
 		var result ProcessConfigTestStruct

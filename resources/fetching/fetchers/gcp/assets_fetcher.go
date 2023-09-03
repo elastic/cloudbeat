@@ -145,7 +145,7 @@ func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r *GcpAsset) GetElasticCommonData() any { return nil }
+func (r *GcpAsset) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
 
 // a GCP asset name is made up of its ancestors
 // the resource id is the last part of the name, which we use as name of the resource

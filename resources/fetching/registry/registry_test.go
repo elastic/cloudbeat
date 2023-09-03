@@ -217,8 +217,8 @@ func (res NumberResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res NumberResource) GetElasticCommonData() interface{} {
-	return nil
+func (res NumberResource) GetElasticCommonData() (map[string]interface{}, error) {
+	return nil, nil
 }
 
 func NewNumberFetcher(num int, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
