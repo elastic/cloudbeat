@@ -25,103 +25,14 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"github.com/elastic/cloudbeat/version"
-)
-
-var (
-	versionInfo = version.CloudbeatVersionInfo{
-		Version: version.CloudbeatVersion(),
-		Policy:  version.PolicyVersion(),
-		Kubernetes: version.Version{
-			Version: ".",
-		},
-	}
 )
 
 var (
 	clusterID = "kube-system_id"
 	nodeID    = "node_id"
 )
-
-func Test_k8sDataProvider_FetchData(t *testing.T) {
-	tests := []struct {
-		name     string
-		options  []Option
-		want     types.Data
-		resource string
-	}{
-		{
-			name: "should return the metadata.id when the resource is unknown",
-			want: types.Data{
-				ResourceID: "metadata_id",
-				VersionInfo: version.CloudbeatVersionInfo{
-					Version: version.CloudbeatVersion(),
-					Policy:  version.PolicyVersion(),
-					Kubernetes: version.Version{
-						Version: ".",
-					},
-				},
-			},
-			options: []Option{
-				WithLogger(testhelper.NewLogger(t)),
-				WithVersionInfo(versionInfo),
-			},
-		},
-		{
-			name: "should add cluster id",
-			want: types.Data{
-				ResourceID: "d3069a00-f692-57c3-9094-9741c52526ff",
-				VersionInfo: version.CloudbeatVersionInfo{
-					Version: version.CloudbeatVersion(),
-					Policy:  version.PolicyVersion(),
-					Kubernetes: version.Version{
-						Version: ".",
-					},
-				},
-			},
-			resource: fetching.CloudContainerMgmt,
-			options: []Option{
-				WithLogger(testhelper.NewLogger(t)),
-				WithVersionInfo(versionInfo),
-				WithClusterID(clusterID),
-			},
-		},
-		{
-			name: "should add cluster and node id",
-			want: types.Data{
-				ResourceID: "0afa24c0-4069-5b7d-93cd-d334469e42c0",
-				VersionInfo: version.CloudbeatVersionInfo{
-					Version: version.CloudbeatVersion(),
-					Policy:  version.PolicyVersion(),
-					Kubernetes: version.Version{
-						Version: ".",
-					},
-				},
-			},
-			resource: fetchers.ProcessResourceType,
-			options: []Option{
-				WithLogger(testhelper.NewLogger(t)),
-				WithVersionInfo(versionInfo),
-				WithClusterID(clusterID),
-				WithNodeID(nodeID),
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := New(tt.options...)
-			data, err := p.FetchData(tt.resource, "metadata_id")
-
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, data)
-		})
-	}
-}
 
 func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 	options := []Option{

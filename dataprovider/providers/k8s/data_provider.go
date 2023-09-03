@@ -20,28 +20,21 @@ package k8s
 import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/gofrs/uuid"
 
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
-	"github.com/elastic/cloudbeat/version"
 )
 
 const (
 	clusterNameField = "orchestrator.cluster.name"
 )
 
-var uuidNamespace = uuid.Must(uuid.FromString("971a1103-6b5d-4b60-ab3d-8a339a58c6c8"))
-
 type DataProvider struct {
-	log       *logp.Logger
-	cfg       *config.Config
-	info      version.CloudbeatVersionInfo
-	cluster   string
-	clusterID string
-	nodeID    string
+	log            *logp.Logger
+	cfg            *config.Config
+	cluster        string
+	clusterID      string
+	clusterVersion string
 }
 
 func New(options ...Option) DataProvider {
@@ -50,19 +43,6 @@ func New(options ...Option) DataProvider {
 		opt(&kdp)
 	}
 	return kdp
-}
-
-func (k DataProvider) FetchData(resource string, id string) (types.Data, error) {
-	switch resource {
-	case fetchers.ProcessResourceType, fetchers.FSResourceType:
-		id = uuid.NewV5(uuidNamespace, k.clusterID+k.nodeID+id).String()
-	case fetching.CloudContainerMgmt, fetching.CloudIdentity, fetching.CloudLoadBalancer, fetching.CloudContainerRegistry:
-		id = uuid.NewV5(uuidNamespace, k.clusterID).String()
-	}
-	return types.Data{
-		ResourceID:  id,
-		VersionInfo: k.info,
-	}, nil
 }
 
 func (k DataProvider) EnrichEvent(event *beat.Event, _ fetching.ResourceMetadata) error {

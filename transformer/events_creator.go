@@ -29,8 +29,10 @@ import (
 	"github.com/gofrs/uuid"
 
 	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/dataprovider/providers/common"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/version"
 )
 
 const (
@@ -41,9 +43,11 @@ const (
 )
 
 type Transformer struct {
-	log                *logp.Logger
-	index              string
-	commonDataProvider dataprovider.CommonDataProvider
+	log                   *logp.Logger
+	index                 string
+	idProvider            dataprovider.IdProvider
+	benchmarkDataProvider dataprovider.CommonDataProvider
+	commonDataProvider    dataprovider.ElasticCommonDataProvider
 }
 
 type ECSEvent struct {
@@ -56,11 +60,16 @@ type ECSEvent struct {
 	Type     []string  `json:"type"`
 }
 
-func NewTransformer(log *logp.Logger, cdp dataprovider.CommonDataProvider, index string) Transformer {
+func NewTransformer(log *logp.Logger, cdp dataprovider.CommonDataProvider, idp dataprovider.IdProvider, index string) Transformer {
 	return Transformer{
-		log:                log,
-		index:              index,
-		commonDataProvider: cdp,
+		log:                   log,
+		index:                 index,
+		idProvider:            idp,
+		benchmarkDataProvider: cdp,
+		commonDataProvider: common.New(log, version.CloudbeatVersionInfo{
+			Version: version.CloudbeatVersion(),
+			Policy:  version.PolicyVersion(),
+		}),
 	}
 }
 
@@ -75,12 +84,9 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
 	}
 	t.log.Infof("fetching data for %s and id %s", resMetadata.Type, resMetadata.ID)
-	cd, err := t.commonDataProvider.FetchData(resMetadata.Type, resMetadata.ID)
-	if err != nil {
-		return []beat.Event{}, err
-	}
-	t.log.Infof("got data for %s and id %s", resMetadata.Type, cd.ResourceID)
-	resMetadata.ID = cd.ResourceID
+	id := t.idProvider.GetId(resMetadata.Type, resMetadata.ID)
+	t.log.Infof("got data for %s and id %s", resMetadata.Type, id)
+	resMetadata.ID = id
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
@@ -92,16 +98,20 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 			Meta:      mapstr.M{libevents.FieldMetaIndex: t.index},
 			Timestamp: timestamp,
 			Fields: mapstr.M{
-				"event":     BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
-				"resource":  resource,
-				"result":    finding.Result,
-				"rule":      finding.Rule,
-				"message":   fmt.Sprintf("Rule %q: %s", finding.Rule.Name, finding.Result.Evaluation),
-				"cloudbeat": cd.VersionInfo,
+				"event":    BuildECSEvent(eventData.CycleMetadata.Sequence, eventData.Metadata.CreatedAt, []string{ecsCategoryConfiguration}),
+				"resource": resource,
+				"result":   finding.Result,
+				"rule":     finding.Rule,
+				"message":  fmt.Sprintf("Rule %q: %s", finding.Rule.Name, finding.Result.Evaluation),
 			},
 		}
 
-		err := t.commonDataProvider.EnrichEvent(&event, resMetadata)
+		err := t.benchmarkDataProvider.EnrichEvent(&event, resMetadata)
+		if err != nil {
+			return nil, fmt.Errorf("failed to enrich event with benchmark context: %v", err)
+		}
+
+		err = dataprovider.NewEnricher(t.commonDataProvider).EnrichEvent(&event)
 		if err != nil {
 			return nil, fmt.Errorf("failed to enrich event with global context: %v", err)
 		}

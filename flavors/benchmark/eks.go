@@ -48,20 +48,20 @@ type EKS struct {
 	leaderElector uniqueness.Manager
 }
 
-func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := k.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	kubeClient, err := k.ClientProvider.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create kubernetes client: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to create kubernetes client: %w", err)
 	}
 	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 
 	awsConfig, awsIdentity, err := k.getEksAwsConfig(ctx, cfg)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize AWS config: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize AWS config: %w", err)
 	}
 
 	clusterNameProvider := k8s.EKSClusterNameProvider{
@@ -72,10 +72,15 @@ func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 	}
 	dp, err := getK8sDataProvider(ctx, log, *cfg, kubeClient, clusterNameProvider)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create k8s data provider: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to create k8s data provider: %w", err)
 	}
 
-	return registry.NewRegistry(log, factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)), dp, nil
+	idp, err := getK8sIdProvider(ctx, log, kubeClient)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to create k8s id provider: %w", err)
+	}
+
+	return registry.NewRegistry(log, factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)), dp, idp, nil
 }
 
 func (k *EKS) Run(ctx context.Context) error { return k.leaderElector.Run(ctx) }

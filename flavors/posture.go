@@ -69,7 +69,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 
 	log.Infof("Initializing benchmark %T", b)
-	fetchersRegistry, cdp, err := bench.Initialize(ctx, log, cfg, resourceCh)
+	fetchersRegistry, cdp, idp, err := bench.Initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		cancel()
 		return nil, err
@@ -92,7 +92,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
-	t := transformer.NewTransformer(log, cdp, resultsIndex)
+	t := transformer.NewTransformer(log, cdp, idp, resultsIndex)
 
 	client, err := NewClient(b.Publisher, cfg.Processors)
 	if err != nil {

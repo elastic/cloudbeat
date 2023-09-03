@@ -29,6 +29,5 @@ type Version struct {
 
 type CloudbeatVersionInfo struct {
 	Version
-	Policy     Version `json:"policy,omitempty"`     // Policy version info for the rules policy
-	Kubernetes Version `json:"kubernetes,omitempty"` // Kubernetes version info for the rules policy
+	Policy Version `json:"policy,omitempty"` // Policy version info for the rules policy
 }

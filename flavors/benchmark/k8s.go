@@ -35,7 +35,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/uniqueness"
-	"github.com/elastic/cloudbeat/version"
 )
 
 type K8S struct {
@@ -44,23 +43,28 @@ type K8S struct {
 	leaderElector uniqueness.Manager
 }
 
-func (k *K8S) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (k *K8S) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := k.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	kubeClient, err := k.ClientProvider.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create kubernetes client :%w", err)
+		return nil, nil, nil, fmt.Errorf("failed to create kubernetes client :%w", err)
 	}
 	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 
 	dp, err := getK8sDataProvider(ctx, log, *cfg, kubeClient, k8s.KubernetesClusterNameProvider{KubeClient: kubeClient})
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create k8s data provider: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to create k8s data provider: %w", err)
 	}
 
-	return registry.NewRegistry(log, factory.NewCisK8sFactory(log, ch, k.leaderElector, kubeClient)), dp, nil
+	idp, err := getK8sIdProvider(ctx, log, kubeClient)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to create k8s id provider: %w", err)
+	}
+
+	return registry.NewRegistry(log, factory.NewCisK8sFactory(log, ch, k.leaderElector, kubeClient)), dp, idp, nil
 }
 
 func (k *K8S) Run(ctx context.Context) error { return k.leaderElector.Run(ctx) }
@@ -83,6 +87,46 @@ func getK8sDataProvider(
 		return nil, fmt.Errorf("failed to get server version: %w", err)
 	}
 
+	clusterId, err := getK8sClusterId(ctx, log, kubeClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cluster id: %w", err)
+	}
+
+	options := []k8s.Option{
+		k8s.WithConfig(&cfg),
+		k8s.WithLogger(log),
+		k8s.WithClusterName(clusterName),
+		k8s.WithClusterID(clusterId),
+		k8s.WithClusterVersion(serverVersion.String()),
+	}
+	return k8s.New(options...), nil
+}
+
+func getK8sIdProvider(ctx context.Context, log *logp.Logger, kubeClient client_gokubernetes.Interface) (dataprovider.IdProvider, error) {
+	nodeId, err := getK8sNodeId(ctx, log, kubeClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get node id: %w", err)
+	}
+
+	clusterId, err := getK8sClusterId(ctx, log, kubeClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get cluster id: %w", err)
+	}
+
+	return k8s.NewIdProvider(clusterId, nodeId), nil
+
+}
+
+func getK8sClusterId(ctx context.Context, log *logp.Logger, kubeClient client_gokubernetes.Interface) (string, error) {
+	namespace, err := kubeClient.CoreV1().Namespaces().Get(ctx, "kube-system", v1.GetOptions{})
+	if err != nil {
+		return "", fmt.Errorf("failed to get namespace data: %w", err)
+	}
+
+	return string(namespace.ObjectMeta.UID), nil
+}
+
+func getK8sNodeId(ctx context.Context, log *logp.Logger, kubeClient client_gokubernetes.Interface) (string, error) {
 	nodeName, err := kubernetes.DiscoverKubernetesNode(log, &kubernetes.DiscoverKubernetesNodeParams{
 		ConfigHost:  "",
 		Client:      kubeClient,
@@ -90,34 +134,15 @@ func getK8sDataProvider(
 		HostUtils:   &kubernetes.DefaultDiscoveryUtils{},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get node name: %w", err)
+		return "", fmt.Errorf("failed to get node name: %w", err)
 	}
 
 	node, err := kubeClient.CoreV1().Nodes().Get(ctx, nodeName, v1.GetOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get node data for node '%s': %w", nodeName, err)
+		return "", fmt.Errorf("failed to get node data for node '%s': %w", nodeName, err)
 	}
 
-	namespace, err := kubeClient.CoreV1().Namespaces().Get(ctx, "kube-system", v1.GetOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to get namespace data: %w", err)
-	}
-
-	options := []k8s.Option{
-		k8s.WithConfig(&cfg),
-		k8s.WithLogger(log),
-		k8s.WithClusterName(clusterName),
-		k8s.WithClusterID(string(namespace.ObjectMeta.UID)),
-		k8s.WithNodeID(string(node.ObjectMeta.UID)),
-		k8s.WithVersionInfo(version.CloudbeatVersionInfo{
-			Version: version.CloudbeatVersion(),
-			Policy:  version.PolicyVersion(),
-			Kubernetes: version.Version{
-				Version: serverVersion.Major + "." + serverVersion.Minor,
-			},
-		}),
-	}
-	return k8s.New(options...), nil
+	return string(node.ObjectMeta.UID), nil
 }
 
 func (k *K8S) checkDependencies() error {

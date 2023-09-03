@@ -42,25 +42,25 @@ type AWSOrg struct {
 	AccountProvider  awslib.AccountProviderAPI
 }
 
-func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
 	accounts, err := a.getAwsAccounts(ctx, awsConfig, awsIdentity)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get AWS accounts: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 	}
 
 	return registry.NewRegistry(
@@ -69,7 +69,7 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		), cloud.NewDataProvider(
 			cloud.WithLogger(log),
 			cloud.WithAccount(*awsIdentity),
-		), nil
+		), cloud.NewIdProvider(), nil
 }
 
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {
