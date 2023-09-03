@@ -203,7 +203,9 @@ jobs:
       - name: Deploy CNVM agent
         env:
           STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: just deploy-cloudformation
+        run: |
+          unset ENROLLMENT_TOKEN
+          just deploy-cloudformation
 
       - name: Install CSPM GCP integration
         id: cspm-gcp-integration
