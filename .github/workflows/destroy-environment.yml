@@ -28,6 +28,10 @@ jobs:
   Destroy:
     runs-on: ubuntu-20.04
     timeout-minutes: 120
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
