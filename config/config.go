@@ -55,13 +55,18 @@ type Config struct {
 }
 
 type CloudConfig struct {
-	Aws AwsConfig `config:"aws"`
-	Gcp GcpConfig `config:"gcp"`
+	Aws   AwsConfig   `config:"aws"`
+	Gcp   GcpConfig   `config:"gcp"`
+	Azure AzureConfig `config:"azure"`
 }
 
 type AwsConfig struct {
 	Cred        aws.ConfigAWS `config:"credentials"`
 	AccountType string        `config:"account_type"`
+}
+
+type AzureConfig struct {
+	AzureClientOpt `config:"credentials,omitempty"`
 }
 
 type GcpConfig struct {
@@ -72,6 +77,16 @@ type GcpConfig struct {
 type GcpClientOpt struct {
 	CredentialsJSON     string `config:"credentials_json"`
 	CredentialsFilePath string `config:"credentials_file_path"`
+}
+
+type AzureClientOpt struct {
+	ClientId                   string `config:"client_id"`
+	TenantId                   string `config:"tenant_id,omitempty"`
+	ClientSecret               string `config:"client_secret,omitempty"`
+	ClientCertificatePath      string `config:"client_certificate_path,omitempty"`
+	ClientCertificatePaassword string `config:"client_certificate_password,omitempty"`
+	Username                   string `config:"username,omitempty"`
+	Password                   string `config:"password,omitempty"`
 }
 
 const (

@@ -34,6 +34,7 @@ require (
 require (
 	cloud.google.com/go/asset v1.14.1
 	cloud.google.com/go/iam v1.1.0
+	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.3.0
 	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6
 	github.com/aquasecurity/trivy v0.42.1
 	github.com/aquasecurity/trivy-db v0.0.0-20230515061101-378ab9ed302c
@@ -99,7 +100,6 @@ require (
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20221215162035-5330a85ea652 // indirect
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.6.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.3.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.3.0 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.29 // indirect
