@@ -221,8 +221,7 @@ jobs:
         id: cspm-gcp-agent
         working-directory: deploy/deployment-manager
         run: |
-          tree
-          just deploy-dm-ci
+          . ./set_env.sh && ./deploy.sh
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3

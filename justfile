@@ -124,10 +124,6 @@ logs-cloudbeat:
 deploy-cloudformation:
   cd deploy/cloudformation && go run .
 
-deploy-dm-ci:
-  tree
-  . ./set_env.sh && ./deploy.sh
-
 deploy-dm:
   .deploy/deployment-manager/deploy.sh
 
