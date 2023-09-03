@@ -58,7 +58,7 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	accounts, err := a.getAwsAccounts(ctx, awsConfig, awsIdentity)
+	accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 	}
@@ -72,7 +72,7 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		), cloud.NewIdProvider(), nil
 }
 
-func (a *AWSOrg) getAwsAccounts(ctx context.Context, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {
+func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {
 	const (
 		rootRole   = "cloudbeat-root"
 		memberRole = "cloudbeat-securityaudit"
@@ -85,7 +85,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, initialCfg awssdk.Config, r
 	)
 	stsClient := sts.NewFromConfig(rootCfg)
 
-	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, rootCfg)
+	accountIdentities, err := a.AccountProvider.ListAccounts(ctx, log, rootCfg)
 	if err != nil {
 		return nil, err
 	}
