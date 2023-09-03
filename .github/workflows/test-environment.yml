@@ -219,7 +219,7 @@ jobs:
 
       - name: Deploy CSPM GCP agent
         id: cspm-gcp-agent
-        working-directory: deploy/deployment-manager
+        # working-directory: deploy/deployment-manager
         run: just deploy-dm-ci
 
       - name: Setup tmate session
