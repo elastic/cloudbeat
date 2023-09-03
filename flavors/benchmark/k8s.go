@@ -87,7 +87,7 @@ func getK8sDataProvider(
 		return nil, fmt.Errorf("failed to get server version: %w", err)
 	}
 
-	clusterId, err := getK8sClusterId(ctx, log, kubeClient)
+	clusterId, err := getK8sClusterId(ctx, kubeClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cluster id: %w", err)
 	}
@@ -108,16 +108,15 @@ func getK8sIdProvider(ctx context.Context, log *logp.Logger, kubeClient client_g
 		return nil, fmt.Errorf("failed to get node id: %w", err)
 	}
 
-	clusterId, err := getK8sClusterId(ctx, log, kubeClient)
+	clusterId, err := getK8sClusterId(ctx, kubeClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cluster id: %w", err)
 	}
 
 	return k8s.NewIdProvider(clusterId, nodeId), nil
-
 }
 
-func getK8sClusterId(ctx context.Context, log *logp.Logger, kubeClient client_gokubernetes.Interface) (string, error) {
+func getK8sClusterId(ctx context.Context, kubeClient client_gokubernetes.Interface) (string, error) {
 	namespace, err := kubeClient.CoreV1().Namespaces().Get(ctx, "kube-system", v1.GetOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to get namespace data: %w", err)

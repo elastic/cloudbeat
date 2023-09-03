@@ -31,7 +31,6 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/dataprovider"
-	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
@@ -136,13 +135,13 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				_, err := event.Fields.Put(enrichedKey, enrichedValue)
 				return err
 			}
-			dataProviderMock.EXPECT().FetchData(mock.Anything, mock.Anything).Return(types.Data{
-				ResourceID:  resourceId,
-				VersionInfo: versionInfo,
-			}, nil)
+
+			idProviderMock := dataprovider.NewMockIdProvider(s.T())
+			idProviderMock.EXPECT().GetId(mock.Anything, mock.Anything).Return(resourceId)
+
 			dataProviderMock.On("EnrichEvent", mock.Anything, mock.Anything).Return(mockEnrichEvent)
 
-			transformer := NewTransformer(testhelper.NewLogger(s.T()), &dataProviderMock, testIndex)
+			transformer := NewTransformer(testhelper.NewLogger(s.T()), &dataProviderMock, idProviderMock, testIndex)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {

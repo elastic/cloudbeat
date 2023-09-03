@@ -29,11 +29,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-var (
-	clusterID = "kube-system_id"
-	nodeID    = "node_id"
-)
-
 func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 	options := []Option{
 		WithClusterName("test_cluster"),
