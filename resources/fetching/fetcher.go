@@ -68,6 +68,14 @@ const (
 	KeyManagement          = "key-management"
 	ProjectManagement      = "project-management"
 	DataProcessing         = "data-processing"
+
+	// Azure resource types
+	AzureVMType               = "azure-vm"
+	AzureStorageAccountType   = "azure-storage-account"
+	AzureNetworkInterface     = "azure-network-interface"
+	AzureApplicationService   = "azure-application-service"
+	AzureLoggingAndMonitoring = "azure-logging-and-monitoring"
+	AzureDatabaseService      = "azure-database-service"
 )
 
 // Fetcher represents a data fetcher.
