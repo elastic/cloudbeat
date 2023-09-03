@@ -78,6 +78,7 @@ done
 BUCKET=s3://tf-state-bucket-test-infra
 ALL_ENVS=$(aws s3 ls $BUCKET/"$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g')
 ALL_STACKS=$(aws cloudformation list-stacks --stack-status-filter "CREATE_COMPLETE" "UPDATE_COMPLETE" --region "$AWS_REGION" | jq -r '.StackSummaries[] | select(.StackName | startswith("'$ENV_PREFIX'") and (if "'$IGNORE_PREFIX'" != "" then .StackName | startswith("'$IGNORE_PREFIX'") | not else true end)) | .StackName')
+ALL_GCP_DEPLOYMENTS=$(gcloud deployment-manager deployments list --filter="name:'$ENV_PREFIX' AND NOT name:'$IGNORE_PREFIX'" --format="value(name)")
 
 # Divide environments into those to be deleted and those to be skipped
 TO_DELETE_ENVS=()
@@ -137,3 +138,25 @@ printf "%s\n" "${DELETED_STACKS[@]}"
 
 echo "Failed to delete CloudFormation stacks (${#FAILED_STACKS[@]}):"
 printf "%s\n" "${FAILED_STACKS[@]}"
+
+DELETED_DEPLOYMENTS=()
+FAILED_DEPLOYMENTS=()
+
+# Delete GCP Deployments
+for DEPLOYMENT in $ALL_GCP_DEPLOYMENTS; do
+    gcloud deployment-manager deployments delete "$DEPLOYMENT" -q
+    if [ $? -eq 0 ]; then
+        echo "Successfully deleted GCP deployment: $DEPLOYMENT"
+        DELETED_DEPLOYMENTS+=("$DEPLOYMENT")
+    else
+        echo "Failed to delete GCP deployment: $DEPLOYMENT"
+        FAILED_DEPLOYMENTS+=("$DEPLOYMENT")
+    fi
+done
+
+# Print summary of gcp deployments deletions
+echo "Successfully deleted GCP deploments (${#DELETED_DEPLOYMENTS[@]}):"
+printf "%s\n" "${DELETED_DEPLOYMENTS[@]}"
+
+echo "Failed to delete GCP deployments (${#FAILED_DEPLOYMENTS[@]}):"
+printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
