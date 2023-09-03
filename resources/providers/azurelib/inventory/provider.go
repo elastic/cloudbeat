@@ -20,6 +20,7 @@ package inventory
 import (
 	"bytes"
 	"context"
+	"os"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
@@ -85,7 +86,7 @@ func (p *Provider) ListAllAssetTypesByName(assets []string) ([]interface{}, erro
 		},
 		Subscriptions: []*string{
 			// TODO: Populate from config or query (not sensitive but still don't want to commit)
-			to.Ptr("SUBSCRIPTION_ID")},
+			to.Ptr(os.Getenv("AZURE_SUBSCRIPTION_ID"))},
 	}
 
 	resourceAssets, err := p.runPaginatedQuery(query)
