@@ -18,8 +18,9 @@
 package common
 
 import (
-	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/elastic-agent-libs/logp"
+
+	"github.com/elastic/cloudbeat/version"
 )
 
 type DataProvider struct {

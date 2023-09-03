@@ -21,10 +21,11 @@ import (
 	"testing"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_CommonDataProvider_GetElasticCommonData(t *testing.T) {

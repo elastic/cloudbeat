@@ -20,9 +20,10 @@ package k8s
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/elastic/cloudbeat/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
-	"github.com/stretchr/testify/assert"
 )
 
 func Test_k8sIdProvider_GetId(t *testing.T) {
