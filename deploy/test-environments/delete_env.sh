@@ -142,6 +142,14 @@ printf "%s\n" "${FAILED_STACKS[@]}"
 DELETED_DEPLOYMENTS=()
 FAILED_DEPLOYMENTS=()
 
+
+export PROJECT_NAME=$(gcloud config get-value core/project)
+export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
+
+# Add the needed roles to delete the templates to the project using the deployment manager
+gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin
+gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin
+
 # Delete GCP Deployments
 for DEPLOYMENT in $ALL_GCP_DEPLOYMENTS; do
     gcloud deployment-manager deployments delete "$DEPLOYMENT" -q
@@ -153,6 +161,11 @@ for DEPLOYMENT in $ALL_GCP_DEPLOYMENTS; do
         FAILED_DEPLOYMENTS+=("$DEPLOYMENT")
     fi
 done
+
+# Remove the roles required to deploy the DM templates
+gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin
+gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin
+
 
 # Print summary of gcp deployments deletions
 echo "Successfully deleted GCP deploments (${#DELETED_DEPLOYMENTS[@]}):"
