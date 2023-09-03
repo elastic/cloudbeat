@@ -6,7 +6,7 @@ import data.lib.test
 
 type := "key-management"
 
-subtype := "gcp-iam-service-account"
+subtype := "gcp-cloudresourcemanager-project"
 
 test_violation {
 	eval_fail with input as test_data.generate_gcp_asset(type, subtype, {}, {"bindings": [{

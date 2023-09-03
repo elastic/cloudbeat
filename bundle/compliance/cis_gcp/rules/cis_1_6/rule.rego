@@ -6,7 +6,7 @@ import data.compliance.policy.gcp.iam.ensure_role_not_service_account_user as au
 import future.keywords.if
 
 finding = result if {
-	data_adapter.is_iam_service_account
+	data_adapter.is_cloud_resource_manager_project
 	data_adapter.has_policy
 
 	result := common.generate_result_without_expected(
