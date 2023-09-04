@@ -30,6 +30,7 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
+	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 )
 
@@ -83,6 +84,7 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 				return "OrganizationName"
 			},
 		},
+		crmCache: make(map[string]*fetching.EcsGcp),
 	}
 
 	mockIterator.On("Next").Return(&assetpb.Asset{Name: "AssetName1", Resource: &assetpb.Resource{}, Ancestors: []string{"projects/1", "organizations/1"}}, nil).Once()
@@ -139,6 +141,7 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 				return "OrganizationName1"
 			},
 		},
+		crmCache: make(map[string]*fetching.EcsGcp),
 	}
 
 	//  AssetType: "logging.googleapis.com/LogMetric"}

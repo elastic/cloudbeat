@@ -43,6 +43,7 @@ type Provider struct {
 	Config    auth.GcpFactoryConfig
 	inventory *AssetsInventoryWrapper
 	crm       *ResourceManagerWrapper
+	crmCache  map[string]*fetching.EcsGcp
 }
 
 type AssetsInventoryWrapper struct {
@@ -138,6 +139,7 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 		ctx:       ctx,
 		inventory: assetsInventoryWrapper,
 		crm:       crmServiceWrapper,
+		crmCache:  make(map[string]*fetching.EcsGcp),
 	}, nil
 }
 
@@ -173,7 +175,7 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 	var assets []*assetpb.Asset
 	assets = append(append(assets, resourceAssets...), policyAssets...)
 	mergedAssets := mergeAssetContentType(assets)
-	extendedAssets := extendAssets(p.ctx, p.crm, mergedAssets)
+	extendedAssets := extendAssets(p.ctx, p.crm, p.crmCache, mergedAssets)
 	return extendedAssets, nil
 }
 
@@ -266,9 +268,8 @@ func mergeAssetContentType(assets []*assetpb.Asset) []*assetpb.Asset {
 }
 
 // extends the assets with the project and organization display name
-func extendAssets(ctx context.Context, crm *ResourceManagerWrapper, assets []*assetpb.Asset) []*ExtendedGcpAsset {
+func extendAssets(ctx context.Context, crm *ResourceManagerWrapper, cache map[string]*fetching.EcsGcp, assets []*assetpb.Asset) []*ExtendedGcpAsset {
 	var extendedAssets []*ExtendedGcpAsset
-	var cache = make(map[string]*fetching.EcsGcp)
 	for _, asset := range assets {
 		keys := getAssetIds(asset)
 		cacheKey := fmt.Sprintf("%s/%s", keys.parentProject, keys.parentOrg)
