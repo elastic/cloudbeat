@@ -148,6 +148,6 @@ func getGcpConfigParentValue(ctx context.Context, provider ConfigProvider, cfg c
 		}
 		return fmt.Sprintf("projects/%s", projectId), nil
 	default:
-		return "", fmt.Errorf("invalid account type: %s", cfg.AccountType)
+		return "", fmt.Errorf("invalid gcp account type: %s", cfg.AccountType)
 	}
 }

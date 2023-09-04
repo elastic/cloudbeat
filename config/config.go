@@ -29,7 +29,6 @@ import (
 	"github.com/elastic/beats/v7/libbeat/processors"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/launcher"
 )
@@ -104,8 +103,15 @@ func New(cfg *config.C) (*Config, error) {
 		}
 	}
 
-	if err := isSupportedAccountType(*c); err != nil {
-		return nil, err
+	switch c.CloudConfig.Aws.AccountType {
+	case "":
+	case SingleAccount:
+	case OrganizationAccount:
+	default:
+		return nil, launcher.NewUnhealthyError(fmt.Sprintf(
+			"aws.account_type '%s' is not supported",
+			c.CloudConfig.Aws.AccountType,
+		))
 	}
 
 	return c, nil
@@ -149,28 +155,4 @@ func isSupportedBenchmark(benchmark string) bool {
 		}
 	}
 	return false
-}
-
-// TODO: move config validation to libs? (aws/gcp)
-// TODO: why is "" a valid case?
-func isSupportedAccountType(c Config) error {
-	var collection = []string{
-		"", SingleAccount, OrganizationAccount,
-	}
-
-	if !lo.Contains(collection, c.CloudConfig.Aws.AccountType) {
-		return launcher.NewUnhealthyError(fmt.Sprintf(
-			"aws.account_type '%s' is not supported",
-			c.CloudConfig.Aws.AccountType,
-		))
-	}
-
-	if !lo.Contains(collection, c.CloudConfig.Gcp.AccountType) {
-		return launcher.NewUnhealthyError(fmt.Sprintf(
-			"gcp.account_type '%s' is not supported",
-			c.CloudConfig.Gcp.AccountType,
-		))
-	}
-
-	return nil
 }

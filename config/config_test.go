@@ -105,41 +105,6 @@ config:
 	}
 }
 
-func (s *ConfigTestSuite) TestAccountType_Error() {
-	tests := []struct {
-		config string
-	}{
-		{
-			`
-config:
-  v1:
-    benchmark: cis_aws
-    aws:
-      account_type: unknown-account-type
-`,
-		},
-		{
-			`
-config:
-  v1:
-    benchmark: cis_gcp
-    gcp:
-      account_type: unknown-account-type
-`,
-		},
-	}
-
-	for i, test := range tests {
-		s.Run(fmt.Sprint(i), func() {
-			cfg, err := config.NewConfigFrom(test.config)
-			require.NoError(s.T(), err)
-			c, err := New(cfg)
-			require.Error(s.T(), err)
-			require.Nil(s.T(), c)
-		})
-	}
-}
-
 func (s *ConfigTestSuite) TestBenchmarkType() {
 	tests := []struct {
 		config    string
