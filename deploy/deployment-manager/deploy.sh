@@ -33,11 +33,15 @@
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-elastic-agent-cspm}
 ALLOW_SSH=${ALLOW_SSH:-false}
 ZONE=${ZONE:-us-central1-a}
-ROLE="roles/resourcemanager.projectIamAdmin" # The role required to apply the deployment manager templates to the project scope.
+ROLE="roles/resourcemanager.projectIamAdmin"
 
-# Set ELASTIC_ARTIFACT_SERVER to the provided value and trim any trailing slashes, or default to the Elastic Agent download URL.
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER%/}  # Remove trailing slash if present
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}
+DEPLOYMENT_LABELS=${DEPLOYMENT_LABELS:-type=cspm-gcp}
+
+# Set environment variables with the name and number of your project.
+export PROJECT_NAME=$(gcloud config get-value core/project)
+export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
 
 # Function to check if an environment variable is not provided
 check_env_not_provided() {

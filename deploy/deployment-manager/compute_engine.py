@@ -54,8 +54,8 @@ def generate_config(context):
                 {
                     "email": f"$(ref.{sa_name}.email)",
                     "scopes": [
-                        "https://www.googleapis.com/auth/cloud-platform.readonly",
-                        "https://www.googleapis.com/auth/cloudplatformorganizations.readonly",
+                        "https://www.googleapis.com/auth/cloud-platform",
+                        "https://www.googleapis.com/auth/cloudplatformorganizations",
                     ],
                 },
             ],
