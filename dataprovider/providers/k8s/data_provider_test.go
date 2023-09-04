@@ -24,27 +24,82 @@ import (
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestK8sDataProvider_EnrichEvent(t *testing.T) {
-	options := []Option{
-		WithClusterName("test_cluster"),
-		WithLogger(testhelper.NewLogger(t)),
-		WithConfig(&config.Config{
-			Benchmark: config.CIS_K8S,
-		}),
+	tests := []struct {
+		name    string
+		options []Option
+		want    map[string]interface{}
+	}{
+		{
+			name: "should return empty map",
+			options: []Option{
+				WithLogger(testhelper.NewLogger(t)),
+			},
+			want: map[string]interface{}{},
+		}, {
+			name: "should return cluster version",
+			options: []Option{
+				WithLogger(testhelper.NewLogger(t)),
+				WithClusterVersion("test_version"),
+			},
+			want: map[string]interface{}{
+				clusterVersionField: "test_version",
+			},
+		}, {
+			name: "should return cluster name",
+			options: []Option{
+				WithLogger(testhelper.NewLogger(t)),
+				WithClusterName("test_cluster"),
+			},
+			want: map[string]interface{}{
+				clusterNameField: "test_cluster",
+			},
+		}, {
+			name: "should return cluster id",
+			options: []Option{
+				WithLogger(testhelper.NewLogger(t)),
+				WithClusterID("test_id"),
+			},
+			want: map[string]interface{}{
+				clusterIdField: "test_id",
+			},
+		}, {
+			name: "should return all fields",
+			options: []Option{
+				WithLogger(testhelper.NewLogger(t)),
+				WithClusterID("test_id"),
+				WithClusterName("test_cluster"),
+				WithClusterVersion("test_version"),
+			},
+			want: map[string]interface{}{
+				clusterIdField:      "test_id",
+				clusterNameField:    "test_cluster",
+				clusterVersionField: "test_version",
+			},
+		},
 	}
 
-	k := New(options...)
-	e := &beat.Event{
-		Fields: mapstr.M{},
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			k := New(tt.options...)
+			e := &beat.Event{
+				Fields: mapstr.M{},
+			}
+			err := k.EnrichEvent(e, fetching.ResourceMetadata{})
+			assert.NoError(t, err)
+
+			fl := e.Fields.Flatten()
+
+			assert.Len(t, fl, len(tt.want))
+			for key, expectedValue := range tt.want {
+				actualValue, err := fl.GetValue(key)
+				assert.NoError(t, err)
+				assert.Equal(t, actualValue, expectedValue)
+			}
+		})
 	}
-	err := k.EnrichEvent(e, fetching.ResourceMetadata{})
-	assert.NoError(t, err)
-	v, err := e.Fields.GetValue(clusterNameField)
-	assert.NoError(t, err)
-	assert.Equal(t, "test_cluster", v)
 }

@@ -19,8 +19,6 @@ package k8s
 
 import (
 	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/config"
 )
 
 type Option func(*DataProvider)
@@ -28,12 +26,6 @@ type Option func(*DataProvider)
 func WithLogger(log *logp.Logger) Option {
 	return func(dp *DataProvider) {
 		dp.log = log
-	}
-}
-
-func WithConfig(cfg *config.Config) Option {
-	return func(dp *DataProvider) {
-		dp.cfg = cfg
 	}
 }
 

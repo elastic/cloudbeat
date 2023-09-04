@@ -18,20 +18,22 @@
 package k8s
 
 import (
+	"errors"
+
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
 const (
-	clusterNameField = "orchestrator.cluster.name"
+	clusterNameField    = "orchestrator.cluster.name"
+	clusterVersionField = "orchestrator.cluster.version"
+	clusterIdField      = "orchestrator.cluster.id"
 )
 
 type DataProvider struct {
 	log            *logp.Logger
-	cfg            *config.Config
 	cluster        string
 	clusterID      string
 	clusterVersion string
@@ -46,10 +48,17 @@ func New(options ...Option) DataProvider {
 }
 
 func (k DataProvider) EnrichEvent(event *beat.Event, _ fetching.ResourceMetadata) error {
-	name := k.cluster
-	if name == "" {
-		return nil
+	return errors.Join(
+		insertIfNotEmpty(clusterNameField, k.cluster, event),
+		insertIfNotEmpty(clusterIdField, k.clusterID, event),
+		insertIfNotEmpty(clusterVersionField, k.clusterVersion, event),
+	)
+}
+
+func insertIfNotEmpty(field string, value string, event *beat.Event) error {
+	if value != "" {
+		_, err := event.Fields.Put(field, value)
+		return err
 	}
-	_, err := event.Fields.Put(clusterNameField, name)
-	return err
+	return nil
 }
