@@ -59,16 +59,18 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 	}
 
 	cache := make(map[string]factory.FetchersMap)
-	rr := registry.NewDynamic(log, cfg.Period, func() (map[string]registry.Registry, error) {
+	rr := registry.NewDynamic(log, cfg.Period, func() (factory.FetchersMap, error) {
 		accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 		}
 
 		fm := factory.NewCisAwsOrganizationFactory(ctx, log, ch, accounts, cache)
-		m := make(map[string]registry.Registry)
-		for key, fetchersMap := range fm {
-			m[key] = registry.NewRegistry(log, fetchersMap)
+		m := make(factory.FetchersMap)
+		for accountId, fetchersMap := range fm {
+			for key, fetcher := range fetchersMap {
+				m[fmt.Sprintf("%s-%s", accountId, key)] = fetcher
+			}
 		}
 
 		return m, nil

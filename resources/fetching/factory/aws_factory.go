@@ -85,10 +85,16 @@ func newCisAwsOrganizationFactory(
 	cache map[string]FetchersMap,
 	factory awsFactory,
 ) map[string]FetchersMap {
+	seen := make(map[string]bool)
+	for key := range cache {
+		seen[key] = false
+	}
+
 	m := make(map[string]FetchersMap)
 	for _, account := range accounts {
 		if existing := cache[account.Account]; existing != nil {
 			m[account.Account] = existing
+			seen[account.Account] = true
 			continue
 		}
 
@@ -131,6 +137,13 @@ func newCisAwsOrganizationFactory(
 			cache[account.Account] = f
 		}
 	}
+
+	for key, v := range seen {
+		if !v {
+			delete(cache, key)
+		}
+	}
+
 	return m
 }
 
