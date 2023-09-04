@@ -25,11 +25,11 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
