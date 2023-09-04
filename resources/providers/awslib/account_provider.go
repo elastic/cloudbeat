@@ -19,26 +19,36 @@ package awslib
 
 import (
 	"context"
+	"errors"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/organizations"
 	"github.com/aws/aws-sdk-go-v2/service/organizations/types"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type AccountProviderAPI interface {
-	ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error)
+	ListAccounts(ctx context.Context, log *logp.Logger, cfg aws.Config) ([]cloud.Identity, error)
+}
+
+type organizationsAPI interface {
+	organizations.ListAccountsAPIClient
+	organizations.ListParentsAPIClient
+	DescribeOrganizationalUnit(context.Context, *organizations.DescribeOrganizationalUnitInput, ...func(*organizations.Options)) (*organizations.DescribeOrganizationalUnitOutput, error)
 }
 
 type AccountProvider struct{}
 
-func (a AccountProvider) ListAccounts(ctx context.Context, cfg aws.Config) ([]cloud.Identity, error) {
-	return listAccounts(ctx, organizations.NewFromConfig(cfg))
+func (a AccountProvider) ListAccounts(ctx context.Context, log *logp.Logger, cfg aws.Config) ([]cloud.Identity, error) {
+	return listAccounts(ctx, log, organizations.NewFromConfig(cfg))
 }
 
-func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClient) ([]cloud.Identity, error) {
+func listAccounts(ctx context.Context, log *logp.Logger, client organizationsAPI) ([]cloud.Identity, error) {
+	organizationIdToName := make(map[string]string)
+
 	input := organizations.ListAccountsInput{}
 	var accounts []cloud.Identity
 	for {
@@ -52,9 +62,16 @@ func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClien
 				continue
 			}
 
+			organization, err := getOUInfoForAccount(ctx, client, organizationIdToName, account.Id)
+			if err != nil {
+				log.Errorf("failed to get organizational unit info for account %s: %v", *account.Id, err)
+			}
 			accounts = append(accounts, cloud.Identity{
-				Account:      *account.Id,
-				AccountAlias: strings.Dereference(account.Name),
+				Provider:         "aws",
+				Account:          *account.Id,
+				AccountAlias:     strings.Dereference(account.Name),
+				OrganizationId:   organization.id,
+				OrganizationName: organization.name,
 			})
 		}
 
@@ -64,4 +81,67 @@ func listAccounts(ctx context.Context, client organizations.ListAccountsAPIClien
 		input.NextToken = o.NextToken
 	}
 	return accounts, nil
+}
+
+type organizationalUnitInfo struct {
+	id   string
+	name string
+}
+
+func getOUInfoForAccount(ctx context.Context, client organizationsAPI, cache map[string]string, accountId *string) (organizationalUnitInfo, error) {
+	// We need a paginator, according to the AWS docs:
+	// These operations can occasionally return an empty set of results even when there are more results available.
+	paginator := organizations.NewListParentsPaginator(client, &organizations.ListParentsInput{ChildId: accountId})
+	for paginator.HasMorePages() {
+		o, err := paginator.NextPage(ctx)
+		if err != nil {
+			return organizationalUnitInfo{}, err
+		}
+		if len(o.Parents) == 0 {
+			continue
+		}
+
+		// According to AWS, in the current release, a child can have only a single parent.
+		parent := o.Parents[0]
+
+		if parent.Type == types.ParentTypeRoot {
+			return organizationalUnitInfo{
+				id:   *parent.Id,
+				name: "Root",
+			}, nil
+		}
+
+		return describeOU(ctx, client, cache, parent.Id)
+	}
+
+	return organizationalUnitInfo{}, errors.New("empty response")
+}
+
+func describeOU(ctx context.Context, client organizationsAPI, cache map[string]string, id *string) (organizationalUnitInfo, error) {
+	if id == nil {
+		return organizationalUnitInfo{}, errors.New("nil id")
+	}
+
+	if savedName, ok := cache[*id]; ok {
+		return organizationalUnitInfo{
+			id:   *id,
+			name: savedName,
+		}, nil
+	}
+
+	o, err := client.DescribeOrganizationalUnit(ctx, &organizations.DescribeOrganizationalUnitInput{
+		OrganizationalUnitId: id,
+	})
+	if err != nil {
+		return organizationalUnitInfo{id: *id}, err
+	}
+
+	name := strings.Dereference(o.OrganizationalUnit.Name)
+	if cache != nil {
+		cache[*id] = name
+	}
+	return organizationalUnitInfo{
+		id:   *id,
+		name: name,
+	}, nil
 }
