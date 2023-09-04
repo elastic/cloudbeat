@@ -98,7 +98,7 @@ func (p *Provider) ListAllAssetTypesByName(assets []string) ([]*assetpb.Asset, e
 	p.log.Infof("Listing GCP assets: %v", assets)
 
 	wg := sync.WaitGroup{}
-	scope := fmt.Sprintf("organizations/%s", "693506308612")
+	scope := fmt.Sprintf("projects/%s", p.Config.ProjectId)
 	var resourceAssets []*assetpb.Asset
 	var policyAssets []*assetpb.Asset
 
