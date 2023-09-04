@@ -25,11 +25,11 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -41,6 +41,9 @@ import (
 type testAttr struct {
 	name  string
 	input evaluator.EventData
+	bdpp  func() dataprovider.CommonDataProvider
+	cdpp  func() dataprovider.ElasticCommonDataProvider
+	idpp  func() dataprovider.IdProvider
 }
 
 const (
@@ -111,6 +114,28 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 					CycleMetadata: fetching.CycleMetadata{},
 				},
 			},
+			bdpp: func() dataprovider.CommonDataProvider {
+				dataProviderMock := dataprovider.NewMockCommonDataProvider(s.T())
+				mockEnrichEvent := func(event *beat.Event, meta fetching.ResourceMetadata) {
+					_, err := event.Fields.Put(enrichedKey, enrichedValue)
+					s.NoError(err)
+				}
+				dataProviderMock.EXPECT().EnrichEvent(mock.Anything, mock.Anything).Run(mockEnrichEvent).Return(nil)
+				return dataProviderMock
+			},
+			cdpp: func() dataprovider.ElasticCommonDataProvider {
+				dataProviderMock := dataprovider.NewMockElasticCommonDataProvider(s.T())
+				ret := map[string]interface{}{
+					"cloudbeat": versionInfo,
+				}
+				dataProviderMock.EXPECT().GetElasticCommonData().Return(ret, nil)
+				return dataProviderMock
+			},
+			idpp: func() dataprovider.IdProvider {
+				idProviderMock := dataprovider.NewMockIdProvider(s.T())
+				idProviderMock.EXPECT().GetId(mock.Anything, mock.Anything).Return(resourceId)
+				return idProviderMock
+			},
 		},
 		{
 			name: "Events should not be created due zero findings",
@@ -125,23 +150,28 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 					CycleMetadata: fetching.CycleMetadata{},
 				},
 			},
+			bdpp: func() dataprovider.CommonDataProvider {
+				dataProviderMock := dataprovider.NewMockCommonDataProvider(s.T())
+				return dataProviderMock
+			},
+			cdpp: func() dataprovider.ElasticCommonDataProvider {
+				dataProviderMock := dataprovider.NewMockElasticCommonDataProvider(s.T())
+				return dataProviderMock
+			},
+			idpp: func() dataprovider.IdProvider {
+				idProviderMock := dataprovider.NewMockIdProvider(s.T())
+				return idProviderMock
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		s.Run(tt.name, func() {
-			dataProviderMock := dataprovider.MockCommonDataProvider{}
-			mockEnrichEvent := func(event *beat.Event, meta fetching.ResourceMetadata) error {
-				_, err := event.Fields.Put(enrichedKey, enrichedValue)
-				return err
-			}
+			cdp := tt.cdpp()
+			bdp := tt.bdpp()
+			idp := tt.idpp()
 
-			idProviderMock := dataprovider.NewMockIdProvider(s.T())
-			idProviderMock.EXPECT().GetId(mock.Anything, mock.Anything).Return(resourceId)
-
-			dataProviderMock.On("EnrichEvent", mock.Anything, mock.Anything).Return(mockEnrichEvent)
-
-			transformer := NewTransformer(testhelper.NewLogger(s.T()), &dataProviderMock, idProviderMock, testIndex)
+			transformer := NewTransformer(testhelper.NewLogger(s.T()), bdp, cdp, idp, testIndex)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {

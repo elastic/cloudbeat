@@ -29,10 +29,8 @@ import (
 	"github.com/gofrs/uuid"
 
 	"github.com/elastic/cloudbeat/dataprovider"
-	"github.com/elastic/cloudbeat/dataprovider/providers/common"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/version"
 )
 
 const (
@@ -60,16 +58,13 @@ type ECSEvent struct {
 	Type     []string  `json:"type"`
 }
 
-func NewTransformer(log *logp.Logger, cdp dataprovider.CommonDataProvider, idp dataprovider.IdProvider, index string) Transformer {
+func NewTransformer(log *logp.Logger, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider, index string) Transformer {
 	return Transformer{
 		log:                   log,
 		index:                 index,
 		idProvider:            idp,
-		benchmarkDataProvider: cdp,
-		commonDataProvider: common.New(log, version.CloudbeatVersionInfo{
-			Version: version.CloudbeatVersion(),
-			Policy:  version.PolicyVersion(),
-		}),
+		benchmarkDataProvider: bdp,
+		commonDataProvider:    cdp,
 	}
 }
 
