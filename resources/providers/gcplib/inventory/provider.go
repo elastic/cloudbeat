@@ -59,14 +59,14 @@ type ResourceManagerWrapper struct {
 }
 
 type MonitoringAsset struct {
-	*fetching.EcsGcpCloud `json:"project_id,omitempty"`
-	LogMetrics            []*ExtendedGcpAsset `json:"log_metrics,omitempty"`
-	Alerts                []*ExtendedGcpAsset `json:"alerts,omitempty"`
+	Ecs        *fetching.EcsGcp    `json:"project_id,omitempty"`
+	LogMetrics []*ExtendedGcpAsset `json:"log_metrics,omitempty"`
+	Alerts     []*ExtendedGcpAsset `json:"alerts,omitempty"`
 }
 
 type ExtendedGcpAsset struct {
 	*assetpb.Asset
-	*fetching.EcsGcpCloud
+	Ecs *fetching.EcsGcp
 }
 
 type ProviderInitializer struct{}
@@ -201,7 +201,7 @@ func (p *Provider) Close() error {
 // single project for project scoped accounts
 // multiple projects for organization scoped accounts
 func getMonitoringAssetsByProject(assets []*ExtendedGcpAsset, log *logp.Logger) []*MonitoringAsset {
-	assetsByProject := lo.GroupBy(assets, func(asset *ExtendedGcpAsset) string { return asset.ProjectId })
+	assetsByProject := lo.GroupBy(assets, func(asset *ExtendedGcpAsset) string { return asset.Ecs.ProjectId })
 	var monitoringAssets []*MonitoringAsset
 	for projectId, projectAssets := range assetsByProject {
 		projectName, organizationId, organizationName, err := getProjectAssetsMetadata(projectAssets)
@@ -210,9 +210,9 @@ func getMonitoringAssetsByProject(assets []*ExtendedGcpAsset, log *logp.Logger) 
 			continue
 		}
 		monitoringAssets = append(monitoringAssets, &MonitoringAsset{
-			LogMetrics: getProjectLogMetricAssets(projectAssets),
-			Alerts:     getProjectAlertPolicyAssets(projectAssets),
-			EcsGcpCloud: &fetching.EcsGcpCloud{
+			LogMetrics: getAssetsByType(projectAssets, LogMetricAssetType),
+			Alerts:     getAssetsByType(projectAssets, AlertPolicyAssetType),
+			Ecs: &fetching.EcsGcp{
 				Provider:         "gcp",
 				ProjectId:        projectId,
 				ProjectName:      projectName,
@@ -268,20 +268,21 @@ func mergeAssetContentType(assets []*assetpb.Asset) []*assetpb.Asset {
 // extends the assets with the project and organization display name
 func extendAssets(ctx context.Context, crm *ResourceManagerWrapper, assets []*assetpb.Asset) []*ExtendedGcpAsset {
 	var extendedAssets []*ExtendedGcpAsset
-	var cache = make(map[string]*fetching.EcsGcpCloud)
+	var cache = make(map[string]*fetching.EcsGcp)
 	for _, asset := range assets {
 		keys := getAssetIds(asset)
-		if ecsGcpCloudCached, ok := cache[keys.cacheKey]; ok {
+		cacheKey := fmt.Sprintf("%s/%s", keys.parentProject, keys.parentOrg)
+		if ecsGcpCloudCached, ok := cache[cacheKey]; ok {
 			extendedAssets = append(extendedAssets, &ExtendedGcpAsset{
-				Asset:       asset,
-				EcsGcpCloud: ecsGcpCloudCached,
+				Asset: asset,
+				Ecs:   ecsGcpCloudCached,
 			})
 			continue
 		}
-		cache[keys.cacheKey] = getEcsGcpCloudData(ctx, crm, keys)
+		cache[cacheKey] = getEcsGcpCloudData(ctx, crm, keys)
 		extendedAssets = append(extendedAssets, &ExtendedGcpAsset{
-			Asset:       asset,
-			EcsGcpCloud: cache[keys.cacheKey],
+			Asset: asset,
+			Ecs:   cache[cacheKey],
 		})
 	}
 	return extendedAssets
@@ -292,7 +293,6 @@ type GcpAssetIDs struct {
 	projectId     string
 	parentProject string
 	parentOrg     string
-	cacheKey      string
 }
 
 func getAssetIds(asset *assetpb.Asset) GcpAssetIDs {
@@ -305,11 +305,10 @@ func getAssetIds(asset *assetpb.Asset) GcpAssetIDs {
 		projectId:     projectId,
 		parentProject: parentProject,
 		parentOrg:     parentOrg,
-		cacheKey:      fmt.Sprintf("%s/%s", parentProject, parentOrg),
 	}
 }
 
-func getEcsGcpCloudData(ctx context.Context, crm *ResourceManagerWrapper, keys GcpAssetIDs) *fetching.EcsGcpCloud {
+func getEcsGcpCloudData(ctx context.Context, crm *ResourceManagerWrapper, keys GcpAssetIDs) *fetching.EcsGcp {
 	var orgName string
 	var projectName string
 	wg := sync.WaitGroup{}
@@ -324,7 +323,7 @@ func getEcsGcpCloudData(ctx context.Context, crm *ResourceManagerWrapper, keys G
 		wg.Done()
 	}()
 	wg.Wait()
-	return &fetching.EcsGcpCloud{
+	return &fetching.EcsGcp{
 		ProjectId:        keys.projectId,
 		ProjectName:      projectName,
 		OrganizationId:   keys.orgId,
@@ -341,15 +340,12 @@ func getProjectId(ancestors []string) string {
 	return strings.Split(ancestors[0], "/")[1]
 }
 
-func getProjectLogMetricAssets(projectAssets []*ExtendedGcpAsset) []*ExtendedGcpAsset {
-	return lo.Filter(projectAssets, func(asset *ExtendedGcpAsset, _ int) bool {
-		return asset.AssetType == "logging.googleapis.com/LogMetric"
-	})
-}
+const LogMetricAssetType = "logging.googleapis.com/LogMetric"
+const AlertPolicyAssetType = "monitoring.googleapis.com/AlertPolicy"
 
-func getProjectAlertPolicyAssets(projectAssets []*ExtendedGcpAsset) []*ExtendedGcpAsset {
+func getAssetsByType(projectAssets []*ExtendedGcpAsset, assetType string) []*ExtendedGcpAsset {
 	return lo.Filter(projectAssets, func(asset *ExtendedGcpAsset, _ int) bool {
-		return asset.AssetType == "monitoring.googleapis.com/AlertPolicy"
+		return asset.AssetType == assetType
 	})
 }
 
@@ -359,8 +355,8 @@ func getProjectAssetsMetadata(projectAssets []*ExtendedGcpAsset) (string, string
 	}
 	// We grouped the assets by project id, so we can get the project metadata from the first asset
 	asset := projectAssets[0]
-	return asset.ProjectName,
-		asset.OrganizationId,
-		asset.OrganizationName,
+	return asset.Ecs.ProjectName,
+		asset.Ecs.OrganizationId,
+		asset.Ecs.OrganizationName,
 		nil
 }

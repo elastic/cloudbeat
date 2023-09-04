@@ -90,7 +90,7 @@ type CycleMetadata struct {
 	Sequence int64
 }
 
-type EcsGcpCloud struct {
+type EcsGcp struct {
 	Provider         string
 	ProjectId        string
 	ProjectName      string

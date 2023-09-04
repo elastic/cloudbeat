@@ -68,7 +68,7 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Success() {
 	mockInventoryService.On("ListMonitoringAssets", mock.Anything).Return(
 		[]*inventory.MonitoringAsset{
 			{
-				EcsGcpCloud: &fetching.EcsGcpCloud{
+				Ecs: &fetching.EcsGcp{
 					Provider:         "gcp",
 					ProjectId:        "a",
 					ProjectName:      "a",
@@ -121,7 +121,7 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 				Type:    fetching.MonitoringIdentity,
 				subType: fetching.GcpMonitoringType,
 				Asset: &inventory.MonitoringAsset{
-					EcsGcpCloud: &fetching.EcsGcpCloud{
+					Ecs: &fetching.EcsGcp{
 						ProjectId:        projectId,
 						ProjectName:      "a",
 						OrganizationId:   "a",

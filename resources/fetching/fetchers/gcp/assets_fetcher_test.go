@@ -65,7 +65,7 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	})).Return(
 		[]*inventory.ExtendedGcpAsset{
 			{
-				EcsGcpCloud: &fetching.EcsGcpCloud{
+				Ecs: &fetching.EcsGcp{
 					Provider:         "gcp",
 					ProjectId:        "prjId",
 					ProjectName:      "prjName",
@@ -92,7 +92,7 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		s.NoError(err)
 		cloud := ecs["cloud"].(map[string]interface{})
 		account := cloud["account"].(map[string]interface{})
-		org := cloud["organization"].(map[string]interface{})
+		org := cloud["Organization"].(map[string]interface{})
 
 		s.Equal(account["name"], "prjName")
 		s.Equal(account["id"], "prjId")

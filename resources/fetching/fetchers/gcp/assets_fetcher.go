@@ -144,17 +144,17 @@ func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r *GcpAsset) GetElasticCommonData() (map[string]interface{}, error) {
-	return map[string]interface{}{
-		"cloud": map[string]interface{}{
+func (r *GcpAsset) GetElasticCommonData() (map[string]any, error) {
+	return map[string]any{
+		"cloud": map[string]any{
 			"provider": "gcp",
-			"account": map[string]interface{}{
-				"id":   r.Asset.ProjectId,
-				"name": r.Asset.ProjectName,
+			"account": map[string]any{
+				"id":   r.Asset.Ecs.ProjectId,
+				"name": r.Asset.Ecs.ProjectName,
 			},
-			"organization": map[string]interface{}{
-				"id":   r.Asset.OrganizationId,
-				"name": r.Asset.OrganizationName,
+			"Organization": map[string]any{
+				"id":   r.Asset.Ecs.OrganizationId,
+				"name": r.Asset.Ecs.OrganizationName,
 			},
 		},
 	}, nil

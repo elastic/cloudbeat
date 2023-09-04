@@ -104,12 +104,12 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	s.Assert().Equal(len(value), 2)          // 2 assets in total 		(assetName1 merged resource/policy, assetName2)
 
 	// tests extending assets with display names for org/prj:
-	projectNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.ProjectName })
-	orgNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.OrganizationName })
+	projectNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.Ecs.ProjectName })
+	orgNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.Ecs.OrganizationName })
 	s.Assert().Equal(len(projectNames), 1)
-	s.Assert().Equal(projectNames[0].EcsGcpCloud.ProjectName, "ProjectName")
+	s.Assert().Equal(projectNames[0].Ecs.ProjectName, "ProjectName")
 	s.Assert().Equal(len(orgNames), 1)
-	s.Assert().Equal(orgNames[0].EcsGcpCloud.OrganizationName, "OrganizationName")
+	s.Assert().Equal(orgNames[0].Ecs.OrganizationName, "OrganizationName")
 }
 
 func (s *ProviderTestSuite) TestListMonitoringAssets() {
@@ -166,17 +166,17 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 	s.Assert().Equal(len(value[0].Alerts), 0)
 	s.Assert().Equal(len(value[0].LogMetrics), 1)
 	s.Assert().Equal(value[0].LogMetrics[0].Name, "LogMetric1")
-	s.Assert().Equal(value[0].EcsGcpCloud.ProjectId, "1")
-	s.Assert().Equal(value[0].EcsGcpCloud.ProjectName, "ProjectName1")
-	s.Assert().Equal(value[0].EcsGcpCloud.OrganizationId, "1")
-	s.Assert().Equal(value[0].EcsGcpCloud.OrganizationName, "OrganizationName1")
+	s.Assert().Equal(value[0].Ecs.ProjectId, "1")
+	s.Assert().Equal(value[0].Ecs.ProjectName, "ProjectName1")
+	s.Assert().Equal(value[0].Ecs.OrganizationId, "1")
+	s.Assert().Equal(value[0].Ecs.OrganizationName, "OrganizationName1")
 
 	// project2 has 1 alertPolicy
 	s.Assert().Equal(len(value[1].LogMetrics), 0)
 	s.Assert().Equal(len(value[1].Alerts), 1)
 	s.Assert().Equal(value[1].Alerts[0].Name, "AlertPolicy1")
-	s.Assert().Equal(value[1].EcsGcpCloud.ProjectId, "2")
-	s.Assert().Equal(value[1].EcsGcpCloud.ProjectName, "ProjectName2")
-	s.Assert().Equal(value[1].EcsGcpCloud.OrganizationId, "1")
-	s.Assert().Equal(value[1].EcsGcpCloud.OrganizationName, "OrganizationName1")
+	s.Assert().Equal(value[1].Ecs.ProjectId, "2")
+	s.Assert().Equal(value[1].Ecs.ProjectName, "ProjectName2")
+	s.Assert().Equal(value[1].Ecs.OrganizationId, "1")
+	s.Assert().Equal(value[1].Ecs.OrganizationName, "OrganizationName1")
 }

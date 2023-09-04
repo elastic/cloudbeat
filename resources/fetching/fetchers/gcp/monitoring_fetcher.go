@@ -55,7 +55,7 @@ var monitoringAssetTypes = map[string][]string{
 }
 
 func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Info("Starting GcpMonitoringFetcheqFetch")
+	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
 
 	monitoringAssets, err := f.provider.ListMonitoringAssets(monitoringAssetTypes)
 	if err != nil {
@@ -86,7 +86,7 @@ func (f *GcpMonitoringFetcher) Stop() {
 }
 
 func (g *GcpMonitoringAsset) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.ProjectId)
+	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.Ecs.ProjectId)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    g.Type,
@@ -100,17 +100,17 @@ func (g *GcpMonitoringAsset) GetData() any {
 	return g.Asset
 }
 
-func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]interface{}, error) {
-	return map[string]interface{}{
-		"cloud": map[string]interface{}{
+func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]any, error) {
+	return map[string]any{
+		"cloud": map[string]any{
 			"provider": "gcp",
-			"account": map[string]interface{}{
-				"id":   g.Asset.ProjectId,
-				"name": g.Asset.ProjectName,
+			"account": map[string]any{
+				"id":   g.Asset.Ecs.ProjectId,
+				"name": g.Asset.Ecs.ProjectName,
 			},
-			"organization": map[string]interface{}{
-				"id":   g.Asset.OrganizationId,
-				"name": g.Asset.OrganizationName,
+			"Organization": map[string]any{
+				"id":   g.Asset.Ecs.OrganizationId,
+				"name": g.Asset.Ecs.OrganizationName,
 			},
 		},
 	}, nil

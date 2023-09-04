@@ -56,11 +56,11 @@ var ErrProjectNotFound = errors.New("no project ID was found")
 func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
 	// used in cloud shell flow (and development)
 	if cfg.CredentialsJSON == "" && cfg.CredentialsFilePath == "" {
-		return p.getDefaultCredentialsConfig(ctx, cfg, log)
+		return p.getApplicationDefaultCredentials(ctx, cfg, log)
 	}
 
 	// used in the manual flow
-	return p.getCustomCredentialsConfig(ctx, cfg, log)
+	return p.getCustomCredentials(ctx, cfg, log)
 }
 
 func (p *ConfigProvider) getGcpFactoryConfig(ctx context.Context, cfg config.GcpConfig, clientOpts []option.ClientOption) (*GcpFactoryConfig, error) {
@@ -74,12 +74,13 @@ func (p *ConfigProvider) getGcpFactoryConfig(ctx context.Context, cfg config.Gcp
 	}, nil
 }
 
-func (p *ConfigProvider) getDefaultCredentialsConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+// https://cloud.google.com/docs/authentication/application-default-credentials
+func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
 	log.Info("getDefaultCredentialsConfig create credentials options")
 	return p.getGcpFactoryConfig(ctx, cfg, nil)
 }
 
-func (p *ConfigProvider) getCustomCredentialsConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
 	log.Info("getCustomCredentialsConfig create credentials options")
 
 	var opts []option.ClientOption
