@@ -31,3 +31,8 @@ kspm_config.docker_image_override = os.getenv("DOCKER_IMAGE_OVERRIDE", "")
 aws_config = Munch()
 aws_config.access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "NA")
 aws_config.secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "NA")
+
+gcp_dm_config = Munch()
+gcp_dm_config.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
+gcp_dm_config.zone = os.getenv("ZONE", "us-central1-a")
+gcp_dm_config.allow_ssh = os.getenv("ALLOW_SSH", "false") == "true"
