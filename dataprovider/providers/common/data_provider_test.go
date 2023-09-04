@@ -55,7 +55,7 @@ func Test_CommonDataProvider_GetElasticCommonData(t *testing.T) {
 				"cloudbeat.policy.version": "test_version",
 			},
 		}, {
-			name: "should return kubernetes version",
+			name: "should return full version",
 			info: version.CloudbeatVersionInfo{
 				Version: version.Version{Version: "test_cloudbeat_version"},
 				Policy:  version.Version{Version: "test_policy_version"},
