@@ -21,6 +21,17 @@ tests_data = {
         "cloud-database",
         "cloud-config",
     ],  # Exclude "cloud-storage" due to lack of fetcher control and potential delays.
+    "cis_gcp": [
+        "cloud-compute",
+        "cloud-database",
+        "key-management",
+        "identity-management",
+        "monitoring",
+        "cloud-storage",
+        "cloud-dns",
+        "project-management",
+        "data-processing",
+    ],
     "cis_k8s": ["file", "process", "k8s_object"],
     "cis_eks": ["process", "k8s_object"],  # Optimize search findings by excluding 'file'.
     "cnvm": ["vulnerability"],
@@ -115,4 +126,27 @@ def test_cnvm_findings(cnvm_client, match_type):
     query_list = []
     query, sort = cnvm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
     results = get_findings(cnvm_client, CNVM_CONFIG_TIMEOUT, query, sort, match_type)
+    assert len(results) > 0, f"The resource type '{match_type}' is missing"
+
+
+@pytest.mark.sanity
+@pytest.mark.parametrize("match_type", tests_data["cis_gcp"])
+def test_cspm_g_c_p_findings(cspm_client, match_type):
+    """
+    Test case to check for GCP findings in CSPM.
+
+    Args:
+        cspm_client: The elastic client object.
+        match_type (str): The resource type to match.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the resource type is missing.
+    """
+    query_list = [{"term": {"rule.benchmark.id": "cis_gcp"}}, {"term": {"resource.type": match_type}}]
+    query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
+
+    results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
