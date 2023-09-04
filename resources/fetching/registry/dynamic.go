@@ -43,7 +43,7 @@ func NewDynamic(
 	period time.Duration,
 	updater UpdaterFunc,
 ) Registry {
-	a := &dynamic{
+	d := &dynamic{
 		registry: registry{
 			log: log,
 			reg: factory.FetchersMap{},
@@ -53,54 +53,54 @@ func NewDynamic(
 		lock:    sync.RWMutex{},
 	}
 
-	go a.scheduleUpdate()
-	return a
+	go d.scheduleUpdate()
+	return d
 }
 
-func (a *dynamic) Keys() []string {
-	a.lock.RLock()
-	defer a.lock.RUnlock()
-	return a.registry.Keys()
+func (d *dynamic) Keys() []string {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+	return d.registry.Keys()
 }
 
-func (a *dynamic) ShouldRun(key string) bool {
-	a.lock.RLock()
-	defer a.lock.RUnlock()
-	return a.registry.ShouldRun(key)
+func (d *dynamic) ShouldRun(key string) bool {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+	return d.registry.ShouldRun(key)
 }
 
-func (a *dynamic) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
-	a.lock.RLock()
-	defer a.lock.RUnlock()
-	return a.registry.Run(ctx, key, metadata)
+func (d *dynamic) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+	return d.registry.Run(ctx, key, metadata)
 }
 
-func (a *dynamic) Stop() {
-	a.lock.RLock()
-	defer a.lock.RUnlock()
+func (d *dynamic) Stop() {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
 
-	a.registry.Stop()
+	d.registry.Stop()
 }
 
-func (a *dynamic) scheduleUpdate() {
-	a.lock.Lock()
-	defer a.lock.Unlock()
-	time.AfterFunc(a.period, a.scheduleUpdate)
+func (d *dynamic) scheduleUpdate() {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+	time.AfterFunc(d.period, d.scheduleUpdate)
 
-	err := a.doUpdate()
+	err := d.doUpdate()
 	if err != nil {
-		a.log.Errorf("failed to update accounts: %v", err)
+		d.log.Errorf("failed to update accounts: %v", err)
 	}
 }
 
-func (a *dynamic) doUpdate() error {
-	m, err := a.updater()
+func (d *dynamic) doUpdate() error {
+	m, err := d.updater()
 	if err != nil {
 		return fmt.Errorf("failed to update: %w", err)
 	}
 
-	a.registry = registry{
-		log: a.log,
+	d.registry = registry{
+		log: d.log,
 		reg: m,
 	}
 	return nil
