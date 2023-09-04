@@ -102,13 +102,15 @@ type ResourceFields struct {
 }
 
 type ResourceMetadata struct {
-	ID              string `json:"id"`
-	Type            string `json:"type"`
-	SubType         string `json:"sub_type,omitempty"`
-	Name            string `json:"name,omitempty"`
-	Region          string `json:"region,omitempty"`
-	AwsAccountId    string `json:"aws_account_id,omitempty"`
-	AwsAccountAlias string `json:"aws_account_alias,omitempty"`
+	ID                  string `json:"id"`
+	Type                string `json:"type"`
+	SubType             string `json:"sub_type,omitempty"`
+	Name                string `json:"name,omitempty"`
+	Region              string `json:"region,omitempty"`
+	AwsAccountId        string `json:"aws_account_id,omitempty"`
+	AwsAccountAlias     string `json:"aws_account_alias,omitempty"`
+	AwsOrganizationId   string `json:"aws_organization_id,omitempty"`
+	AwsOrganizationName string `json:"aws_organization_name,omitempty"`
 }
 
 type Result struct {
