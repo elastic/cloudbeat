@@ -108,7 +108,11 @@ func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Region:  r.GetRegion(),
 	}, nil
 }
-func (r LoggingResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+func (r LoggingResource) GetElasticCommonData() (map[string]interface{}, error) {
+	return map[string]interface{}{
+		"cloud.service.name": "AWS CloudTrail",
+	}, nil
+}
 
 func (c ConfigResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	id := fmt.Sprintf("configservice-%s", c.identity.Account)
