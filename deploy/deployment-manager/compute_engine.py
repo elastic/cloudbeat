@@ -53,7 +53,10 @@ def generate_config(context):
             "serviceAccounts": [
                 {
                     "email": f"$(ref.{sa_name}.email)",
-                    "scopes": ["https://www.googleapis.com/auth/cloud-platform"],
+                    "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform.readonly",
+                        "https://www.googleapis.com/auth/cloudplatformorganizations.readonly",
+                    ],
                 },
             ],
             "disks": [
@@ -140,7 +143,7 @@ def generate_config(context):
                 "name": f"{deployment_name}-iam-binding-{role}",
                 "type": f"gcp-types/cloudresourcemanager-v1:virtual.{scope}.iamMemberBinding",
                 "properties": {
-                    "resource": parent_id,
+                    "resource": get_resource_name(scope, parent_id),
                     "role": role,
                     "member": f"serviceAccount:$(ref.{sa_name}.email)",
                 },
@@ -157,3 +160,10 @@ def generate_config(context):
         resources.append(ssh_fw_rule)
 
     return {"resources": resources}
+
+
+def get_resource_name(scope, parent_id):
+    """return the resource name based on the scope."""
+    if scope == "organizations":
+        return f"{scope}/{parent_id}"
+    return parent_id
