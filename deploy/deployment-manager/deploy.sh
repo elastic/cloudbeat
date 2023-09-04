@@ -35,7 +35,7 @@ DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-elastic-agent-cspm}
 ALLOW_SSH=${ALLOW_SSH:-false}
 ZONE=${ZONE:-us-central1-a}
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}
-DEPLOYMENT_LABELS=${DEPLOYMENT_LABELS:-}
+DEPLOYMENT_LABELS=${DEPLOYMENT_LABELS:-type=cspm-gcp}
 
 # Function to check if an environment variable is not provided
 check_env_not_provided() {
