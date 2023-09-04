@@ -12,6 +12,8 @@ def generate_config(context):
     fleet_url = context.properties["fleetUrl"]
     agent_version = context.properties["elasticAgentVersion"]
     artifact_server = context.properties["elasticArtifactServer"]
+    scope = context.properties["scope"]
+    parent_id = context.properties["parentId"]
     role_prefix = deployment_name.replace("-", "_")
 
     role_id = f"{role_prefix}_elastic_cspm_role"
@@ -124,10 +126,10 @@ def generate_config(context):
 
     custom_role = {
         "name": custom_role_name,
-        "type": "gcp-types/iam-v1:projects.roles",
+        "type": f"gcp-types/iam-v1:{scope}.roles",
         "properties": {
             "roleId": role_id,
-            "parent": f"projects/{project}",
+            "parent": f"{scope}/{parent_id}",
             "role": {
                 "title": "Elastic CSPM role",
                 "description": "Elastic CSPM role for GCP",
@@ -142,10 +144,10 @@ def generate_config(context):
 
     iam_role_binding = {
         "name": f"{deployment_name}-iam-binding",
-        "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
+        "type": f"gcp-types/cloudresourcemanager-v1:virtual.{scope}.iamMemberBinding",
         "properties": {
-            "resource": context.env["project"],
-            "role": f"projects/{project}/roles/{role_id}",
+            "resource": parent_id,
+            "role": f"{scope}/{parent_id}/roles/{role_id}",
             "member": f"serviceAccount:$(ref.{sa_name}.email)",
         },
         "metadata": {

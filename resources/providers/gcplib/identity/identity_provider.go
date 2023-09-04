@@ -55,7 +55,7 @@ func (p *Provider) GetIdentity(ctx context.Context, factoryConfig *auth.GcpFacto
 
 	proj, err := p.service.projectsGet(ctx, "projects/"+factoryConfig.ProjectId)
 	if err != nil {
-		return nil, err
+		return &cloud.Identity{Provider: "gcp"}, nil
 	}
 
 	return &cloud.Identity{
