@@ -78,15 +78,16 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 	if err != nil {
 		return []beat.Event{}, fmt.Errorf("failed to get resource metadata: %v", err)
 	}
-	t.log.Infof("fetching data for %s and id %s", resMetadata.Type, resMetadata.ID)
 	id := t.idProvider.GetId(resMetadata.Type, resMetadata.ID)
-	t.log.Infof("got data for %s and id %s", resMetadata.Type, id)
+	t.log.Infof("resource of type %s with id %s got a new id %s", resMetadata.Type, resMetadata.ID, id)
 	resMetadata.ID = id
 	timestamp := time.Now().UTC()
 	resource := fetching.ResourceFields{
 		ResourceMetadata: resMetadata,
 		Raw:              eventData.RuleResult.Resource,
 	}
+
+	globalEnricher := dataprovider.NewEnricher(t.commonDataProvider)
 
 	for _, finding := range eventData.Findings {
 		event := beat.Event{
@@ -106,7 +107,7 @@ func (t *Transformer) CreateBeatEvents(_ context.Context, eventData evaluator.Ev
 			return nil, fmt.Errorf("failed to enrich event with benchmark context: %v", err)
 		}
 
-		err = dataprovider.NewEnricher(t.commonDataProvider).EnrichEvent(&event)
+		err = globalEnricher.EnrichEvent(&event)
 		if err != nil {
 			return nil, fmt.Errorf("failed to enrich event with global context: %v", err)
 		}
