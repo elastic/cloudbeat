@@ -22,12 +22,12 @@ const defaultBeatVersion = "8.11.0"
 
 // Version represents version information for a package
 type Version struct {
-	Version    string `json:"version,omitempty"`     // Version is the semantic version of the package
-	CommitHash string `json:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
-	CommitTime string `json:"commit_time,omitempty"` // CommitTime is the git commit time of the package
+	Version    string `mapstructure:"version,omitempty"`     // Version is the semantic version of the package
+	CommitHash string `mapstructure:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
+	CommitTime string `mapstructure:"commit_time,omitempty"` // CommitTime is the git commit time of the package
 }
 
 type CloudbeatVersionInfo struct {
-	Version
-	Policy Version `json:"policy,omitempty"` // Policy version info for the rules policy
+	Version `mapstructure:",squash"` // Version info for cloudbeat
+	Policy  Version                  `mapstructure:"policy,omitempty"` // Policy version info for the rules policy
 }

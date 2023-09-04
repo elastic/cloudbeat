@@ -41,27 +41,28 @@ func Test_CommonDataProvider_GetElasticCommonData(t *testing.T) {
 		}, {
 			name: "should return cloudbeat version",
 			info: version.CloudbeatVersionInfo{
-				Version: version.CloudbeatVersion(),
+				Version: version.Version{Version: "test_version"},
 			},
 			want: map[string]interface{}{
-				"cloudbeat.version": map[string]interface{}{},
+				"cloudbeat.version": "test_version",
 			},
 		}, {
 			name: "should return policy version",
 			info: version.CloudbeatVersionInfo{
-				Policy: version.PolicyVersion(),
+				Policy: version.Version{Version: "test_version"},
 			},
 			want: map[string]interface{}{
-				"cloudbeat.policy.version": "v1.5.4",
+				"cloudbeat.policy.version": "test_version",
 			},
 		}, {
 			name: "should return kubernetes version",
 			info: version.CloudbeatVersionInfo{
-				Policy:  version.PolicyVersion(),
-				Version: version.CloudbeatVersion(),
+				Version: version.Version{Version: "test_cloudbeat_version"},
+				Policy:  version.Version{Version: "test_policy_version"},
 			},
 			want: map[string]interface{}{
-				"cloudbeat": map[string]interface{}{},
+				"cloudbeat.policy.version": "test_policy_version",
+				"cloudbeat.version":        "test_cloudbeat_version",
 			},
 		},
 	}
@@ -76,9 +77,11 @@ func Test_CommonDataProvider_GetElasticCommonData(t *testing.T) {
 			err := dataprovider.NewEnricher(p).EnrichEvent(ev)
 			assert.NoError(t, err)
 
+			fl := ev.Fields.Flatten()
+
+			assert.Len(t, fl, len(tt.want))
 			for key, expectedValue := range tt.want {
-				actualValue, err := ev.GetValue(key)
-				assert.NoError(t, err)
+				actualValue := fl[key]
 				assert.Equal(t, expectedValue, actualValue)
 			}
 		})

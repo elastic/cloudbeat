@@ -19,6 +19,7 @@ package common
 
 import (
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/elastic/cloudbeat/version"
 )
@@ -34,7 +35,12 @@ func New(log *logp.Logger, info version.CloudbeatVersionInfo) *DataProvider {
 }
 
 func (c *DataProvider) GetElasticCommonData() (map[string]interface{}, error) {
+	m := map[string]interface{}{}
+	err := mapstructure.Decode(c.info, &m)
+	if err != nil {
+		return nil, err
+	}
 	return map[string]interface{}{
-		"cloudbeat": c.info,
+		"cloudbeat": m,
 	}, nil
 }
