@@ -3,7 +3,7 @@
 # Deploying the CIS GCP integration using Deployment Manager
 
 ## Script Overview
-# The script you are about to execute automates the creation of a new deployment, a compute instance, and the attachment of a service account with a custom role that holds the necessary permissions for running the CIS GCP integration.
+# The script you are about to execute automates the creation of a new deployment, a compute instance, and the attachment of a service account with a builtin roles that holds the necessary permissions for running the CIS GCP integration.
 # The following steps are involved in the script execution:
 
 #### Step 1: Enabling Required APIs
@@ -16,17 +16,17 @@
 #5. Cloud Asset Inventory: Facilitates data collection about assets linked to the project.
 
 #### Step 2: Adding Roles to the Default Service Account
-#The template used in this deployment creates a service account, custom IAM role, and service account bindings.
-#However, prior to the successful deployment, the Google APIs Service Agent service account must be granted the `Role Administrator` and `Project IAM Admin` roles. For more information on this account, you can refer to the [Google-managed service account documentation](https://cloud.google.com/iam/docs/maintain-custom-roles-deployment-manager).
-#Once the deployment is completed, the script will remove the roles from the default service account. If you wish to delete the deployment, you will need to manually add the roles back to the default service account.
+#The template used in this deployment creates a service account and service account bindings.
+#However, prior to the successful deployment, the Google APIs Service Agent service account must be granted the `Project IAM Admin` role to be able attaching the service account to the compute instance.
+#Once the deployment is completed, the script will remove the role from the default service account. If you wish to delete the deployment, you will need to manually add the role back to the default service account.
 
 ### Step 3: Applying the Deployment Manager Templates
 #Upon executing the script, the following resources will be created:
 
 #1. A compute instance with the Elastic agent installed.
-#2. A service account with a custom role attached.
-#3. A role with appropriate permissions required for the integration.
-#4. A service account binding that associates the custom role with the compute instance.
+#2. A service account.
+#3. A dedicated network for the compute instance.
+#4. A service account bindings that associates the builtin roles with the service account.
 
 #In case the deployment encounters any issues and fails, the script will attempt to delete the deployment along with all the associated resources that were created during the process.
 
@@ -34,7 +34,15 @@
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-elastic-agent-cspm}
 ALLOW_SSH=${ALLOW_SSH:-false}
 ZONE=${ZONE:-us-central1-a}
+ROLE="roles/resourcemanager.projectIamAdmin"
+
+ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER%/}  # Remove trailing slash if present
 ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/downloads/beats/elastic-agent}
+DEPLOYMENT_LABELS=${DEPLOYMENT_LABELS:-type=cspm-gcp}
+
+# Set environment variables with the name and number of your project.
+export PROJECT_NAME=$(gcloud config get-value core/project)
+export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
 
 # Function to check if an environment variable is not provided
 check_env_not_provided() {
@@ -61,22 +69,42 @@ run_command() {
     fi
 }
 
-# Set environment variables with the name and number of your project.
-export PROJECT_NAME=$(gcloud config get-value core/project)
-export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
+# Function to check if a role is assigned to the service account
+is_role_not_assigned() {
+  local role_assigned
+  role_assigned=$(gcloud projects get-iam-policy "${PROJECT_NAME}" \
+    --flatten="bindings[].members" --format="value(bindings.members)" \
+    --filter="bindings.role=${ROLE}" \
+    --limit=1 \
+    --format="table[no-heading](bindings.members)" \
+    | grep "${PROJECT_NUMBER}@cloudservices.gserviceaccount.com")
+
+  if [ -n "${role_assigned}" ]; then
+    return 1  # Role is assigned
+  else
+    return 0  # Role is not assigned
+  fi
+}
 
 # Enable the Google Cloud APIs needed for misconfiguration scanning
 run_command "gcloud services enable iam.googleapis.com deploymentmanager.googleapis.com compute.googleapis.com cloudresourcemanager.googleapis.com cloudasset.googleapis.com"
 
-# Add the needed roles to apply the templates to the project using the deployment manager
-run_command "gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin"
-run_command "gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin"
+## If needed add the required role to apply the templates to the project using the deployment manager
+ADD_ROLE=false
+if is_role_not_assigned; then
+  run_command "gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
+  ADD_ROLE=true
+fi
 
 # Apply the deployment manager templates
 run_command "gcloud deployment-manager deployments create --automatic-rollback-on-error ${DEPLOYMENT_NAME} --project ${PROJECT_NAME} \
     --template compute_engine.py \
-    --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER}"
+    --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER} \
+    --labels $DEPLOYMENT_LABELS"
 
-# Remove the roles required to deploy the DM templates
-run_command "gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin"
-run_command "gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin"
+## Remove the role required to deploy the DM templates
+if [ "$ADD_ROLE" = "true" ]; then
+  run_command "gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
+fi
+
+echo -e "\nDeployment completed successfully, elastic agent enrollment might take a few minutes."
