@@ -87,6 +87,11 @@ func TestNewBenchmark(t *testing.T) {
 			cfg:      config.Config{Benchmark: config.CIS_GCP},
 			wantType: &GCP{}, //nolint:exhaustruct
 		},
+		// TODO: Uncomment when azure.go and configuration is merged
+		// {
+		// 	cfg:      config.Config{Benchmark: config.CIS_AZURE},
+		// 	wantType: &Azure{}, //nolint:exhaustruct
+		// },
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%T", tt.wantType), func(t *testing.T) {

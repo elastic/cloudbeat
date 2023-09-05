@@ -58,6 +58,17 @@ config:
 			CloudConfig{},
 			2,
 		},
+		// TODO: Uncomment when cis_azure fetchers are merged
+		// 		{
+		// 			`
+		// config:
+		//   v1:
+		//     benchmark: cis_azure
+		// `,
+		// 			"cis_azure",
+		// 			CloudConfig{},
+		// 			1,
+		// 		},
 		{
 			`
 config:
@@ -118,6 +129,15 @@ config:
     benchmark: cis_eks
 `,
 			"cis_eks",
+			false,
+		},
+		{
+			`
+config:
+  v1:
+    benchmark: cis_azure
+`,
+			"cis_azure",
 			false,
 		},
 	}
