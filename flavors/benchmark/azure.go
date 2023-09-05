@@ -34,15 +34,15 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-type AZURE struct {
+type Azure struct {
 	// IdentityProvider     identity.ProviderGetter
 	CfgProvider          auth.ConfigProviderAPI
 	inventoryInitializer inventory.ProviderInitializerAPI
 }
 
-func (a *AZURE) Run(context.Context) error { return nil }
+func (a *Azure) Run(context.Context) error { return nil }
 
-func (a *AZURE) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (a *Azure) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, err
 	}
@@ -73,9 +73,9 @@ func (a *AZURE) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Co
 	), nil
 }
 
-func (a *AZURE) Stop() {}
+func (a *Azure) Stop() {}
 
-func (a *AZURE) checkDependencies() error {
+func (a *Azure) checkDependencies() error {
 	// if a.IdentityProvider == nil {
 	// 	return errors.New("azure identity provider is uninitialized")
 	// }

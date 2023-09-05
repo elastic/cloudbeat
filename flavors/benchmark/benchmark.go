@@ -78,7 +78,7 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 			inventoryInitializer: &gcp_inventory.ProviderInitializer{},
 		}, nil
 	case config.CIS_AZURE:
-		return &AZURE{
+		return &Azure{
 			// IdentityProvider:     &azure_identity.Provider{},
 			CfgProvider:          &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}},
 			inventoryInitializer: &azure_inventory.ProviderInitializer{}}, nil
