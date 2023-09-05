@@ -79,6 +79,16 @@ BUCKET=s3://tf-state-bucket-test-infra
 ALL_ENVS=$(aws s3 ls $BUCKET/"$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g')
 ALL_STACKS=$(aws cloudformation list-stacks --stack-status-filter "CREATE_COMPLETE" "UPDATE_COMPLETE" --region "$AWS_REGION" | jq -r '.StackSummaries[] | select(.StackName | startswith("'$ENV_PREFIX'") and (if "'$IGNORE_PREFIX'" != "" then .StackName | startswith("'$IGNORE_PREFIX'") | not else true end)) | .StackName')
 
+if [ -n "$IGNORE_PREFIX" ]; then
+  # If IGNORE_PREFIX exists and is not empty
+  GCP_FILTER="name:'$ENV_PREFIX*' AND NOT name:'$IGNORE_PREFIX*'"
+else
+  # If IGNORE_PREFIX is empty or does not exist
+  GCP_FILTER="name:'$ENV_PREFIX*'"
+fi
+
+ALL_GCP_DEPLOYMENTS=$(gcloud deployment-manager deployments list --filter="$GCP_FILTER" --format="value(name)")
+
 # Divide environments into those to be deleted and those to be skipped
 TO_DELETE_ENVS=()
 TO_SKIP_ENVS=()
@@ -137,3 +147,39 @@ printf "%s\n" "${DELETED_STACKS[@]}"
 
 echo "Failed to delete CloudFormation stacks (${#FAILED_STACKS[@]}):"
 printf "%s\n" "${FAILED_STACKS[@]}"
+
+DELETED_DEPLOYMENTS=()
+FAILED_DEPLOYMENTS=()
+
+
+export PROJECT_NAME=$(gcloud config get-value core/project)
+export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
+
+# Delete GCP Deployments
+for DEPLOYMENT in $ALL_GCP_DEPLOYMENTS; do
+    # Add the needed roles to delete the templates to the project using the deployment manager
+    gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin --no-user-output-enabled
+    gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
+
+    gcloud deployment-manager deployments delete "$DEPLOYMENT" -q
+    if [ $? -eq 0 ]; then
+        echo "Successfully deleted GCP deployment: $DEPLOYMENT"
+        DELETED_DEPLOYMENTS+=("$DEPLOYMENT")
+    else
+        echo "Failed to delete GCP deployment: $DEPLOYMENT"
+        FAILED_DEPLOYMENTS+=("$DEPLOYMENT")
+    fi
+
+    # Remove the roles required to deploy the DM templates
+    gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin --no-user-output-enabled
+    gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
+
+done
+
+
+# Print summary of gcp deployments deletions
+echo "Successfully deleted GCP deploments (${#DELETED_DEPLOYMENTS[@]}):"
+printf "%s\n" "${DELETED_DEPLOYMENTS[@]}"
+
+echo "Failed to delete GCP deployments (${#FAILED_DEPLOYMENTS[@]}):"
+printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"

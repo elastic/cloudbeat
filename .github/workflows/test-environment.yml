@@ -41,6 +41,7 @@ env:
   WORKING_DIR: deploy/test-environments
   FLEET_API_DIR: fleet_api/src
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
+  GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
 
 jobs:
   Deploy:
@@ -57,9 +58,13 @@ jobs:
       DOCKER_IMAGE_OVERRIDE: ${{ github.event.inputs.docker-image-override }}
       STACK_VERSION: ${{ github.event.inputs.elk-stack-version }}
       CNVM_STACK_NAME: "${{ github.event.inputs.deployment_name }}-cnvm-sanity-test-stack"
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -81,11 +86,14 @@ jobs:
             exit 1
           fi
 
-      - name: Mask API Key
+      - name: Mask Sensitive Data
         run: |
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
           echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+          enrollment_token="init"
+          echo "::add-mask::$enrollment_token"
+          echo "ENROLLMENT_TOKEN=$enrollment_token" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -195,7 +203,30 @@ jobs:
       - name: Deploy CNVM agent
         env:
           STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: just deploy-cloudformation
+        run: |
+          unset ENROLLMENT_TOKEN
+          just deploy-cloudformation
+
+      - name: Install CSPM GCP integration
+        id: cspm-gcp-integration
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/install_cspm_gcp_integration.py
+
+      - id: google-auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Deploy CSPM GCP agent
+        id: cspm-gcp-agent
+        working-directory: deploy/deployment-manager
+        env:
+          DEPLOYMENT_LABELS: ${{ env.GCP_DEFAULT_TAGS }}
+        run: |
+          . ./set_env.sh && ./deploy.sh
 
       - name: Install D4C integration
         id: kspm-d4c
