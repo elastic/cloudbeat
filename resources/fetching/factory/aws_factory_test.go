@@ -188,6 +188,7 @@ func TestNewCisAwsOrganizationFactory_CloseChannel(t *testing.T) {
 func TestNewCisAwsOrganizationFactory_Cache(t *testing.T) {
 	cache := map[string]FetchersMap{
 		"1": {"fetcher": RegisteredFetcher{}},
+		"3": {"fetcher": RegisteredFetcher{}},
 	}
 	m := newCisAwsOrganizationFactory(
 		context.Background(),
@@ -217,6 +218,7 @@ func TestNewCisAwsOrganizationFactory_Cache(t *testing.T) {
 	)
 	assert.Len(t, cache, 2)
 	assert.Len(t, m, 2)
+	assert.NotContains(t, cache, "3")
 }
 
 func mockResource() *fetching.MockResource {

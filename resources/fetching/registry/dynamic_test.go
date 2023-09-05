@@ -128,4 +128,11 @@ func TestDynamic(t *testing.T) {
 		assert.False(t, d.ShouldRun("some-key"))
 		assert.Empty(t, d.Keys())
 	})
+
+	t.Run("stop again", func(t *testing.T) {
+		d.Stop()
+		d.Stop()
+		d.Stop()
+		assert.Nil(t, d.(*dynamic).timer)
+	})
 }
