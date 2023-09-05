@@ -52,42 +52,37 @@ func NewDynamic(
 		lock:    sync.RWMutex{},
 	}
 
-	// make sure to return a locked object to avoid race issues where the empty registry is used on the first run.
-	d.lock.Lock()
-
 	return d
 }
 
 func (d *dynamic) Keys() []string {
 	d.ensureRunning()
-
-	d.lock.RLock()
 	defer d.lock.RUnlock()
+
 	return d.registry.Keys()
 }
 
 func (d *dynamic) ShouldRun(key string) bool {
 	d.ensureRunning()
-
-	d.lock.RLock()
 	defer d.lock.RUnlock()
+
 	return d.registry.ShouldRun(key)
 }
 
 func (d *dynamic) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
 	d.ensureRunning()
-
-	d.lock.RLock()
 	defer d.lock.RUnlock()
+
 	return d.registry.Run(ctx, key, metadata)
 }
 
 func (d *dynamic) Stop() {
-	if d.timer == nil {
-		return
-	}
+	d.lock.Lock()
+	defer d.lock.Unlock()
 
-	d.lock.Lock() // keep locked
+	if d.timer == nil {
+		return // assume stopped
+	}
 
 	d.timer.Stop()
 	d.registry.Stop()
@@ -96,12 +91,21 @@ func (d *dynamic) Stop() {
 }
 
 func (d *dynamic) ensureRunning() {
+	d.lock.RLock()
 	if d.timer != nil {
-		return
+		return // keep RLock
 	}
-	defer d.lock.Unlock()
 
-	d.scheduleUpdateLocked()
+	d.lock.RUnlock()
+	func() {
+		d.lock.Lock()
+		defer d.lock.Unlock()
+		if d.timer == nil {
+			d.scheduleUpdateLocked()
+		}
+	}()
+
+	d.ensureRunning() // RLock and re-validate
 }
 
 func (d *dynamic) scheduleUpdate() {
