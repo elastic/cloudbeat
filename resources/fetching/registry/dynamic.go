@@ -31,9 +31,11 @@ import (
 
 type dynamic struct {
 	registry
+	log     *logp.Logger
 	period  time.Duration
 	updater UpdaterFunc
 	lock    sync.RWMutex
+	timer   *time.Timer
 }
 
 type UpdaterFunc func() (factory.FetchersMap, error)
@@ -44,48 +46,72 @@ func NewDynamic(
 	updater UpdaterFunc,
 ) Registry {
 	d := &dynamic{
-		registry: registry{
-			log: log,
-			reg: factory.FetchersMap{},
-		},
+		log:     log,
 		period:  period,
 		updater: updater,
 		lock:    sync.RWMutex{},
 	}
 
-	go d.scheduleUpdate()
+	// make sure to return a locked object to avoid race issues where the empty registry is used on the first run.
+	d.lock.Lock()
+
 	return d
 }
 
 func (d *dynamic) Keys() []string {
+	d.ensureRunning()
+
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return d.registry.Keys()
 }
 
 func (d *dynamic) ShouldRun(key string) bool {
+	d.ensureRunning()
+
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return d.registry.ShouldRun(key)
 }
 
 func (d *dynamic) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
+	d.ensureRunning()
+
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return d.registry.Run(ctx, key, metadata)
 }
 
 func (d *dynamic) Stop() {
-	d.lock.RLock()
-	defer d.lock.RUnlock()
+	if d.timer == nil {
+		return
+	}
 
+	d.lock.Lock() // keep locked
+
+	d.timer.Stop()
 	d.registry.Stop()
+	d.timer = nil
+	d.registry = registry{}
+}
+
+func (d *dynamic) ensureRunning() {
+	if d.timer != nil {
+		return
+	}
+	defer d.lock.Unlock()
+
+	d.scheduleUpdateLocked()
 }
 
 func (d *dynamic) scheduleUpdate() {
 	d.lock.Lock()
 	defer d.lock.Unlock()
-	time.AfterFunc(d.period, d.scheduleUpdate)
+	d.scheduleUpdateLocked()
+}
+
+func (d *dynamic) scheduleUpdateLocked() {
+	d.timer = time.AfterFunc(d.period, d.scheduleUpdate)
 
 	err := d.doUpdate()
 	if err != nil {

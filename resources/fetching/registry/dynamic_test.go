@@ -53,16 +53,14 @@ func TestDynamic(t *testing.T) {
 		f := fetching.NewMockFetcher(t)
 		f.EXPECT().Fetch(mock.Anything, mock.Anything).Once().Return(nil)
 		f.EXPECT().Stop().Once()
-		defer f.AssertExpectations(t)
 		m["some-key"] = factory.RegisteredFetcher{Fetcher: f}
 
 		f = fetching.NewMockFetcher(t)
 		f.EXPECT().Fetch(mock.Anything, mock.Anything).Once().Return(errors.New("some-error"))
 		f.EXPECT().Stop().Once()
-		defer f.AssertExpectations(t)
 		m["fetcher-with-error"] = factory.RegisteredFetcher{Fetcher: f}
 
-		defer d.Stop() // needs to happen first
+		defer d.Stop()
 
 		time.Sleep(2 * period)
 		assert.True(t, d.ShouldRun("some-key"))
@@ -72,15 +70,15 @@ func TestDynamic(t *testing.T) {
 
 		assert.NoError(t, d.Run(context.Background(), "some-key", fetching.CycleMetadata{}))
 		assert.ErrorContains(t, d.Run(context.Background(), "fetcher-with-error", fetching.CycleMetadata{}), "some-error")
-	})
 
-	for k := range m {
-		delete(m, k)
-	}
-	t.Run("error is ignored", func(t *testing.T) {
-		updateError = errors.New("update error")
-		time.Sleep(2 * period)
-		assert.Len(t, d.Keys(), 2)
+		for k := range m {
+			delete(m, k)
+		}
+		t.Run("error is ignored", func(t *testing.T) {
+			updateError = errors.New("update error")
+			time.Sleep(2 * period)
+			assert.Len(t, d.Keys(), 2)
+		})
 	})
 
 	t.Run("empty again", func(t *testing.T) {

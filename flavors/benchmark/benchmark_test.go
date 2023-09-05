@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -104,11 +105,16 @@ func TestNewBenchmark(t *testing.T) {
 func testInitialize(t *testing.T, benchmark Benchmark, cfg *config.Config, wantErr string, want []string) {
 	t.Helper()
 
+	if cfg.Period == 0 {
+		cfg.Period = 50 * time.Millisecond
+	}
+
 	reg, dp, err := benchmark.Initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
 	if wantErr != "" {
 		assert.ErrorContains(t, err, wantErr)
 		return
 	}
+	defer reg.Stop()
 
 	require.NoError(t, err)
 	assert.Len(t, reg.Keys(), len(want))

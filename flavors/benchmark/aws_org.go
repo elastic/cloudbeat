@@ -59,7 +59,7 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 	}
 
 	cache := make(map[string]factory.FetchersMap)
-	rr := registry.NewDynamic(log, cfg.Period, func() (factory.FetchersMap, error) {
+	reg := registry.NewDynamic(log, cfg.Period, func() (factory.FetchersMap, error) {
 		accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
@@ -76,7 +76,7 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		return m, nil
 	})
 
-	return rr, cloud.NewDataProvider(
+	return reg, cloud.NewDataProvider(
 		cloud.WithLogger(log),
 		cloud.WithAccount(*awsIdentity),
 	), nil
