@@ -72,7 +72,7 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 			},
 		},
 		ctx: ctx,
-		Config: auth.GcpFactoryConfig{
+		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
 		},
@@ -126,7 +126,7 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 			},
 		},
 		ctx: ctx,
-		Config: auth.GcpFactoryConfig{
+		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
 		},

@@ -40,7 +40,7 @@ import (
 type Provider struct {
 	log       *logp.Logger
 	ctx       context.Context
-	Config    auth.GcpFactoryConfig
+	config    auth.GcpFactoryConfig
 	inventory *AssetsInventoryWrapper
 	crm       *ResourceManagerWrapper
 	crmCache  map[string]*fetching.EcsGcp
@@ -134,7 +134,7 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 	}
 
 	return &Provider{
-		Config:    gcpConfig,
+		config:    gcpConfig,
 		log:       log,
 		ctx:       ctx,
 		inventory: assetsInventoryWrapper,
@@ -144,7 +144,7 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 }
 
 func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpAsset, error) {
-	p.log.Infof("Listing GCP asset types: %v in %v", assetTypes, p.Config.Parent)
+	p.log.Infof("Listing GCP asset types: %v in %v", assetTypes, p.config.Parent)
 
 	wg := sync.WaitGroup{}
 	var resourceAssets []*assetpb.Asset
@@ -153,7 +153,7 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 	wg.Add(1)
 	go func() {
 		request := &assetpb.ListAssetsRequest{
-			Parent:      p.Config.Parent,
+			Parent:      p.config.Parent,
 			AssetTypes:  assetTypes,
 			ContentType: assetpb.ContentType_RESOURCE,
 		}
@@ -163,7 +163,7 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 	wg.Add(1)
 	go func() {
 		request := &assetpb.ListAssetsRequest{
-			Parent:      p.Config.Parent,
+			Parent:      p.config.Parent,
 			AssetTypes:  assetTypes,
 			ContentType: assetpb.ContentType_IAM_POLICY,
 		}
