@@ -32,7 +32,8 @@ import (
 )
 
 type GcpFactoryConfig struct {
-	ProjectId  string
+	// organizations/%s or projects/%s
+	Parent     string
 	ClientOpts []option.ClientOption
 }
 
@@ -48,38 +49,41 @@ type ConfigProvider struct {
 	AuthProvider GoogleAuthProviderAPI
 }
 
+var ErrMissingOrgId = errors.New("organization ID is required for organization account type")
+var ErrInvalidCredentialsJSON = errors.New("invalid credentials JSON")
+var ErrProjectNotFound = errors.New("no project ID was found")
+
 func (p *ConfigProvider) GetGcpClientConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+	// used in cloud shell flow (and development)
 	if cfg.CredentialsJSON == "" && cfg.CredentialsFilePath == "" {
-		return p.getDefaultCredentialsConfig(ctx, cfg, log)
+		return p.getApplicationDefaultCredentials(ctx, cfg, log)
 	}
 
-	return p.getCustomCredentialsConfig(ctx, cfg, log)
+	// used in the manual flow
+	return p.getCustomCredentials(ctx, cfg, log)
 }
 
-func (p *ConfigProvider) getDefaultCredentialsConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
-	log.Info("GetGCPClientConfig create credentials options")
-
-	projectId, err := p.getProjectId(ctx, cfg)
+func (p *ConfigProvider) getGcpFactoryConfig(ctx context.Context, cfg config.GcpConfig, clientOpts []option.ClientOption) (*GcpFactoryConfig, error) {
+	parent, err := getGcpConfigParentValue(ctx, *p, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get project ID: %v", err)
+		return nil, err
 	}
-
 	return &GcpFactoryConfig{
-		ProjectId:  projectId,
-		ClientOpts: nil, // No custom options needed for default credentials
+		Parent:     parent,
+		ClientOpts: clientOpts,
 	}, nil
 }
 
-func (p *ConfigProvider) getCustomCredentialsConfig(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+// https://cloud.google.com/docs/authentication/application-default-credentials
+func (p *ConfigProvider) getApplicationDefaultCredentials(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
+	log.Info("getDefaultCredentialsConfig create credentials options")
+	return p.getGcpFactoryConfig(ctx, cfg, nil)
+}
+
+func (p *ConfigProvider) getCustomCredentials(ctx context.Context, cfg config.GcpConfig, log *logp.Logger) (*GcpFactoryConfig, error) {
 	log.Info("getCustomCredentialsConfig create credentials options")
 
-	projectId, err := p.getProjectId(ctx, cfg)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get project ID: %v", err)
-	}
-
 	var opts []option.ClientOption
-
 	if cfg.CredentialsFilePath != "" {
 		if err := validateJSONFromFile(cfg.CredentialsFilePath); err == nil {
 			log.Infof("Appending credentials file path to gcp client options: %s", cfg.CredentialsFilePath)
@@ -88,22 +92,17 @@ func (p *ConfigProvider) getCustomCredentialsConfig(ctx context.Context, cfg con
 			return nil, err
 		}
 	}
-
 	if cfg.CredentialsJSON != "" {
 		if json.Valid([]byte(cfg.CredentialsJSON)) {
 			log.Info("Appending credentials JSON to client options")
 			opts = append(opts, option.WithCredentialsJSON([]byte(cfg.CredentialsJSON)))
 		} else {
-			return nil, errors.New("invalid credentials JSON")
+			return nil, ErrInvalidCredentialsJSON
 		}
 	}
 
-	return &GcpFactoryConfig{
-		ProjectId:  projectId,
-		ClientOpts: opts,
-	}, nil
+	return p.getGcpFactoryConfig(ctx, cfg, opts)
 }
-
 func (p *ConfigProvider) getProjectId(ctx context.Context, cfg config.GcpConfig) (string, error) {
 	if cfg.ProjectId != "" {
 		return cfg.ProjectId, nil
@@ -115,7 +114,7 @@ func (p *ConfigProvider) getProjectId(ctx context.Context, cfg config.GcpConfig)
 		return cred.ProjectID, nil
 	}
 
-	return "", errors.New("no project ID was found")
+	return "", ErrProjectNotFound
 }
 
 func validateJSONFromFile(filePath string) error {
@@ -133,4 +132,22 @@ func validateJSONFromFile(filePath string) error {
 	}
 
 	return nil
+}
+
+func getGcpConfigParentValue(ctx context.Context, provider ConfigProvider, cfg config.GcpConfig) (string, error) {
+	switch cfg.AccountType {
+	case config.OrganizationAccount:
+		if cfg.OrganizationId == "" {
+			return "", ErrMissingOrgId
+		}
+		return fmt.Sprintf("organizations/%s", cfg.OrganizationId), nil
+	case config.SingleAccount:
+		projectId, err := provider.getProjectId(ctx, cfg)
+		if err != nil {
+			return "", fmt.Errorf("failed to get project ID: %v", err)
+		}
+		return fmt.Sprintf("projects/%s", projectId), nil
+	default:
+		return "", fmt.Errorf("invalid gcp account type: %s", cfg.AccountType)
+	}
 }
