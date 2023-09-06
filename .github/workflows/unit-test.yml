@@ -122,7 +122,6 @@ jobs:
         with:
           version: latest
           args: --whole-files --verbose
-          skip-cache: true
 
   dependency-review:
     runs-on: ubuntu-20.04
