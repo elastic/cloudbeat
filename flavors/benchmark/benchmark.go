@@ -30,7 +30,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
@@ -71,7 +70,6 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 		}, nil
 	case config.CIS_GCP:
 		return &GCP{
-			IdentityProvider:     &identity.Provider{},
 			CfgProvider:          &auth.ConfigProvider{AuthProvider: &auth.GoogleAuthProvider{}},
 			inventoryInitializer: &inventory.ProviderInitializer{},
 		}, nil
