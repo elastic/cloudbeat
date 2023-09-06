@@ -40,7 +40,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup GO (with caching)
         uses: magnetikonline/action-golang-cache@v4
@@ -151,7 +151,7 @@ jobs:
           swap-storage: true
 
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
@@ -369,7 +369,7 @@ jobs:
           docker-images: true
           swap-storage: true
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV

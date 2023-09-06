@@ -65,7 +65,15 @@ type AwsConfig struct {
 }
 
 type GcpConfig struct {
-	ProjectId    string `config:"project_id"`
+	// empty for OrganizationAccount
+	ProjectId string `config:"project_id"`
+
+	// empty for SingleAccount
+	OrganizationId string `config:"organization_id"`
+
+	// SingleAccount or OrganizationAccount
+	AccountType string `config:"account_type"`
+
 	GcpClientOpt `config:"credentials"`
 }
 

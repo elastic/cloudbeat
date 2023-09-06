@@ -28,7 +28,7 @@ jobs:
         types: [tar.gz, docker]
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup GO (with caching)
         uses: magnetikonline/action-golang-cache@v4
