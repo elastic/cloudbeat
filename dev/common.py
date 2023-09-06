@@ -15,7 +15,8 @@ benchmark = {
     "cis_k8s": "CIS_Kubernetes_V1.23_Benchmark_v1.0.1.xlsx",
     "cis_eks": "CIS_Amazon_Elastic_Kubernetes_Service_(EKS)_Benchmark_v1.0.1.xlsx",
     "cis_aws": "CIS_Amazon_Web_Services_Foundations_Benchmark_v1.5.0.xlsx",
-    "cis_gcp": "CIS_Google_Cloud_Platform_Foundation_Benchmark_v2.0.0.xlsx"
+    "cis_gcp": "CIS_Google_Cloud_Platform_Foundation_Benchmark_v2.0.0.xlsx",
+    "cis_azure": "CIS_Microsoft_Azure_Foundations_Benchmark_v2.0.0.xlsx",
 }
 
 relevant_sheets = {
@@ -23,6 +24,7 @@ relevant_sheets = {
     "cis_eks": ["Level 1", "Level 2"],
     "cis_aws": ["Level 1", "Level 2"],
     "cis_gcp": ["Level 1", "Level 2"],
+    "cis_azure": ["Level 1", "Level 2"],
 }
 
 default_selected_columns_map = {
@@ -47,6 +49,12 @@ default_selected_columns_map = {
         "Assessment Status": "Type",
     },
     "cis_gcp": {
+        "Section #": "Section",
+        "Recommendation #": "Rule Number",
+        "Title": "Title",
+        "Assessment Status": "Type",
+    },
+    "cis_azure": {
         "Section #": "Section",
         "Recommendation #": "Rule Number",
         "Title": "Title",

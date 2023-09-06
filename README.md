@@ -4,6 +4,7 @@
 [![CIS EKS](https://img.shields.io/badge/CIS-Amazon%20EKS%20(60%25)-FF9900?logo=Amazon+EKS)](RULES.md#eks-cis-benchmark)
 [![CIS AWS](https://img.shields.io/badge/CIS-AWS%20(87%25)-232F3E?logo=Amazon+AWS)](RULES.md#aws-cis-benchmark)
 [![CIS GCP](https://img.shields.io/badge/CIS-GCP%20(77%25)-4285F4?logo=Google+Cloud)](RULES.md#gcp-cis-benchmark)
+[![CIS AZURE](https://img.shields.io/badge/CIS-AZURE%20(1%25)-F00EE8?logo=Microsoft+Azure)](RULES.md#azure-cis-benchmark)
 
 ![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/oren-zohar/a7160df46e48dff45b24096de9302d38/raw/csp-security-policies_coverage.json)
 
@@ -86,9 +87,7 @@ opa eval data.main.findings --format pretty -i input.json -b ./bundle > output.j
           "name": "aws-node",
           "securityContext": {
             "capabilities": {
-              "add": [
-                "NET_ADMIN"
-              ]
+              "add": ["NET_ADMIN"]
             }
           }
         }
@@ -113,12 +112,7 @@ opa eval data.main.findings --format pretty -i input.json -b ./bundle > output.j
     "references": "1. https://kubernetes.io/docs/concepts/policy/pod-security-policy/#enabling-pod-security-policies\n2. https://www.nccgroup.trust/uk/our-research/abusing-privileged-and-unprivileged-linux-containers/",
     "remediation": "Review the use of capabilites in applications runnning on your cluster.\nWhere a namespace contains applicaions which do not require any Linux capabities to operate consider adding a PSP which forbids the admission of containers which do not drop all capabilities.",
     "section": "Pod Security Policies",
-    "tags": [
-      "CIS",
-      "EKS",
-      "CIS 4.2.9",
-      "Pod Security Policies"
-    ],
+    "tags": ["CIS", "EKS", "CIS 4.2.9", "Pod Security Policies"],
     "version": "1.0"
   }
 }
