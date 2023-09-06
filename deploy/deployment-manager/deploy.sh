@@ -30,7 +30,6 @@
 
 #In case the deployment encounters any issues and fails, the script will attempt to delete the deployment along with all the associated resources that were created during the process.
 
-
 DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-elastic-agent-cspm}
 ALLOW_SSH=${ALLOW_SSH:-false}
 ZONE=${ZONE:-us-central1-a}
@@ -54,11 +53,6 @@ check_env_not_provided() {
   fi
 }
 
-# Fail fast if any of the required environment variables are not provided
-check_env_not_provided "FLEET_URL"
-check_env_not_provided "ENROLLMENT_TOKEN"
-check_env_not_provided "STACK_VERSION"
-
 # Function to run a gcloud command and check its exit code
 run_command() {
     eval $1
@@ -69,13 +63,24 @@ run_command() {
     fi
 }
 
+configure_scope() {
+    if [ -n "$ORG_ID" ]; then
+        SCOPE="organizations"
+        PARENT_ID="$ORG_ID"
+        ROLE="roles/resourcemanager.organizationAdmin"
+    fi
+
+    # If ORG_ID is not set, SCOPE defaults to "projects" and PARENT_ID defaults to PROJECT_NAME
+    SCOPE=${SCOPE:-"projects"}
+    PARENT_ID=${PARENT_ID:-"$PROJECT_NAME"}
+}
+
 # Function to check if a role is assigned to the service account
 is_role_not_assigned() {
   local role_assigned
-  role_assigned=$(gcloud projects get-iam-policy "${PROJECT_NAME}" \
+  role_assigned=$(gcloud ${SCOPE} get-iam-policy "${PARENT_ID}" \
     --flatten="bindings[].members" --format="value(bindings.members)" \
     --filter="bindings.role=${ROLE}" \
-    --limit=1 \
     --format="table[no-heading](bindings.members)" \
     | grep "${PROJECT_NUMBER}@cloudservices.gserviceaccount.com")
 
@@ -86,25 +91,36 @@ is_role_not_assigned() {
   fi
 }
 
+# Set environment variables with the name and number of your project.
+export PROJECT_NAME=$(gcloud config get-value core/project)
+export PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+
+# Fail fast if any of the required environment variables are not provided
+check_env_not_provided "FLEET_URL"
+check_env_not_provided "ENROLLMENT_TOKEN"
+check_env_not_provided "STACK_VERSION"
+
+configure_scope
+
 # Enable the Google Cloud APIs needed for misconfiguration scanning
 run_command "gcloud services enable iam.googleapis.com deploymentmanager.googleapis.com compute.googleapis.com cloudresourcemanager.googleapis.com cloudasset.googleapis.com"
 
 ## If needed add the required role to apply the templates to the project using the deployment manager
 ADD_ROLE=false
 if is_role_not_assigned; then
-  run_command "gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
+  run_command "gcloud ${SCOPE} add-iam-policy-binding ${PARENT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
   ADD_ROLE=true
 fi
 
 # Apply the deployment manager templates
 run_command "gcloud deployment-manager deployments create --automatic-rollback-on-error ${DEPLOYMENT_NAME} --project ${PROJECT_NAME} \
     --template compute_engine.py \
-    --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER} \
-    --labels $DEPLOYMENT_LABELS"
+    --properties elasticAgentVersion:${STACK_VERSION},fleetUrl:${FLEET_URL},enrollmentToken:${ENROLLMENT_TOKEN},allowSSH:${ALLOW_SSH},zone:${ZONE},elasticArtifactServer:${ELASTIC_ARTIFACT_SERVER},scope:${SCOPE},parentId:${PARENT_ID}"
 
 ## Remove the role required to deploy the DM templates
 if [ "$ADD_ROLE" = "true" ]; then
-  run_command "gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
+  run_command "gcloud ${SCOPE} remove-iam-policy-binding ${PARENT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
 fi
 
+run_command "gcloud deployment-manager deployments describe ${DEPLOYMENT_NAME}"
 echo -e "\nDeployment completed successfully, elastic agent enrollment might take a few minutes."
