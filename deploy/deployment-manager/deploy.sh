@@ -121,3 +121,6 @@ run_command "gcloud deployment-manager deployments create --automatic-rollback-o
 if [ "$ADD_ROLE" = "true" ]; then
   run_command "gcloud ${SCOPE} remove-iam-policy-binding ${PARENT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
 fi
+
+run_command "gcloud deployment-manager deployments describe ${DEPLOYMENT_NAME}"
+echo -e "\nDeployment completed successfully, elastic agent enrollment might take a few minutes."
