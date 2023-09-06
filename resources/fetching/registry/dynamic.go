@@ -19,7 +19,6 @@ package registry
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -34,8 +33,10 @@ type dynamic struct {
 	log     *logp.Logger
 	period  time.Duration
 	updater UpdaterFunc
+
 	lock    sync.RWMutex
-	timer   *time.Timer
+	running bool
+	done    chan struct{}
 }
 
 type UpdaterFunc func() (factory.FetchersMap, error)
@@ -50,6 +51,7 @@ func NewDynamic(
 		period:  period,
 		updater: updater,
 		lock:    sync.RWMutex{},
+		done:    make(chan struct{}, 1),
 	}
 
 	return d
@@ -77,61 +79,76 @@ func (d *dynamic) Run(ctx context.Context, key string, metadata fetching.CycleMe
 }
 
 func (d *dynamic) Stop() {
-	d.lock.Lock()
+	if !d.setRunning(false) {
+		return
+	}
 	defer d.lock.Unlock()
 
-	if d.timer == nil {
-		return // assume stopped
-	}
+	d.done <- struct{}{}
 
-	d.timer.Stop()
 	d.registry.Stop()
-	d.timer = nil
 	d.registry = registry{}
 }
 
 func (d *dynamic) ensureRunning() {
-	d.lock.RLock()
-	if d.timer != nil {
-		return // keep RLock
+	defer d.lock.RLock() // return object locked and ready to use registry functions
+	if !d.setRunning(true) {
+		return
 	}
 
-	d.lock.RUnlock()
-	func() {
-		d.lock.Lock()
-		defer d.lock.Unlock()
-		if d.timer == nil {
-			d.scheduleUpdateLocked()
+	d.doUpdateLocked() // first update
+	d.lock.Unlock()
+
+	go func() {
+		timer := time.NewTimer(d.period)
+		for {
+			select {
+			case <-timer.C:
+				d.doUpdate()
+				timer.Reset(d.period)
+			case <-d.done:
+				return
+			}
 		}
 	}()
-
-	d.ensureRunning() // RLock and re-validate
 }
 
-func (d *dynamic) scheduleUpdate() {
+func (d *dynamic) setRunning(newValue bool) bool {
+	// Optimization: try with RLock first
+	if d.isRunning() == newValue {
+		return false
+	}
+	// Need to re-check after Lock(), otherwise there is a race condition
+	d.lock.Lock()
+	if d.running == newValue {
+		d.lock.Unlock()
+		return false
+	}
+	d.running = newValue
+	return true // return object locked
+}
+
+func (d *dynamic) isRunning() bool {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+	return d.running
+}
+
+func (d *dynamic) doUpdate() {
 	d.lock.Lock()
 	defer d.lock.Unlock()
-	d.scheduleUpdateLocked()
+	d.doUpdateLocked()
 }
 
-func (d *dynamic) scheduleUpdateLocked() {
-	d.timer = time.AfterFunc(d.period, d.scheduleUpdate)
-
-	err := d.doUpdate()
-	if err != nil {
-		d.log.Errorf("failed to update accounts: %v", err)
-	}
-}
-
-func (d *dynamic) doUpdate() error {
+func (d *dynamic) doUpdateLocked() {
 	m, err := d.updater()
 	if err != nil {
-		return fmt.Errorf("failed to update: %w", err)
+		d.log.Errorf("failed to update accounts: %v", err)
+		return
 	}
 
 	d.registry = registry{
 		log: d.log,
 		reg: m,
 	}
-	return nil
 }

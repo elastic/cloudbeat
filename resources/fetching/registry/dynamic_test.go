@@ -133,6 +133,6 @@ func TestDynamic(t *testing.T) {
 		d.Stop()
 		d.Stop()
 		d.Stop()
-		assert.Nil(t, d.(*dynamic).timer)
+		assert.False(t, d.(*dynamic).running)
 	})
 }
