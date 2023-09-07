@@ -163,11 +163,11 @@ func (r *GcpAsset) GetElasticCommonData() (map[string]any, error) {
 // try to retrieve the resource name from the asset data fields (name or displayName), in case it is not set
 // get the last part of the asset name (https://cloud.google.com/apis/design/resource_names#resource_id)
 func getAssetResourceName(asset *inventory.ExtendedGcpAsset) string {
-	if name, exist := asset.GetResource().GetData().GetFields()["name"]; exist && name.GetStringValue() != "" {
+	if name, exist := asset.GetResource().GetData().GetFields()["displayName"]; exist && name.GetStringValue() != "" {
 		return name.GetStringValue()
 	}
 
-	if name, exist := asset.GetResource().GetData().GetFields()["displayName"]; exist && name.GetStringValue() != "" {
+	if name, exist := asset.GetResource().GetData().GetFields()["name"]; exist && name.GetStringValue() != "" {
 		return name.GetStringValue()
 	}
 
