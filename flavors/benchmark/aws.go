@@ -38,20 +38,20 @@ type AWS struct {
 	IdentityProvider awslib.IdentityProviderGetter
 }
 
-func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
 	return registry.NewRegistry(
@@ -60,7 +60,7 @@ func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		), cloud.NewDataProvider(
 			cloud.WithLogger(log),
 			cloud.WithAccount(*awsIdentity),
-		), nil
+		), cloud.NewIdProvider(), nil
 }
 
 func (a *AWS) Run(context.Context) error { return nil }

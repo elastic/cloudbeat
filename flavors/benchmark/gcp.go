@@ -41,29 +41,29 @@ type GCP struct {
 
 func (g *GCP) Run(context.Context) error { return nil }
 
-func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := g.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	gcpConfig, err := g.CfgProvider.GetGcpClientConfig(ctx, cfg.CloudConfig.Gcp, log)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
 
 	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
 	}
 
 	fetchers, err := factory.NewCisGcpFactory(ctx, log, ch, assetProvider)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
 	}
 
 	return registry.NewRegistry(log, fetchers), cloud.NewDataProvider(
 		cloud.WithLogger(log),
-	), nil
+	), cloud.NewIdProvider(), nil
 }
 
 func (g *GCP) Stop() {}
