@@ -90,6 +90,14 @@ type CycleMetadata struct {
 	Sequence int64
 }
 
+type EcsGcp struct {
+	Provider         string
+	ProjectId        string
+	ProjectName      string
+	OrganizationId   string
+	OrganizationName string
+}
+
 type Resource interface {
 	GetMetadata() (ResourceMetadata, error)
 	GetData() any

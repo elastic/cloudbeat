@@ -12,6 +12,8 @@ def generate_config(context):
     fleet_url = context.properties["fleetUrl"]
     agent_version = context.properties["elasticAgentVersion"]
     artifact_server = context.properties["elasticArtifactServer"]
+    scope = context.properties["scope"]
+    parent_id = context.properties["parentId"]
 
     roles = ["roles/cloudasset.viewer", "roles/browser"]
     network_name = f"{deployment_name}-network"
@@ -51,7 +53,10 @@ def generate_config(context):
             "serviceAccounts": [
                 {
                     "email": f"$(ref.{sa_name}.email)",
-                    "scopes": ["https://www.googleapis.com/auth/cloud-platform"],
+                    "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform",
+                        "https://www.googleapis.com/auth/cloudplatformorganizations",
+                    ],
                 },
             ],
             "disks": [
@@ -136,9 +141,9 @@ def generate_config(context):
         bindings.append(
             {
                 "name": f"{deployment_name}-iam-binding-{role}",
-                "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
+                "type": f"gcp-types/cloudresourcemanager-v1:virtual.{scope}.iamMemberBinding",
                 "properties": {
-                    "resource": context.env["project"],
+                    "resource": get_resource_name(scope, parent_id),
                     "role": role,
                     "member": f"serviceAccount:$(ref.{sa_name}.email)",
                 },
@@ -155,3 +160,10 @@ def generate_config(context):
         resources.append(ssh_fw_rule)
 
     return {"resources": resources}
+
+
+def get_resource_name(scope, parent_id):
+    """return the resource name based on the scope."""
+    if scope == "organizations":
+        return f"{scope}/{parent_id}"
+    return parent_id

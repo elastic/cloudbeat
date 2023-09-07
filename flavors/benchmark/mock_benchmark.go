@@ -49,13 +49,14 @@ func (_m *MockBenchmark) EXPECT() *MockBenchmark_Expecter {
 }
 
 // Initialize provides a mock function with given fields: ctx, log, cfg, ch
-func (_m *MockBenchmark) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (_m *MockBenchmark) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	ret := _m.Called(ctx, log, cfg, ch)
 
 	var r0 registry.Registry
 	var r1 dataprovider.CommonDataProvider
-	var r2 error
-	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error)); ok {
+	var r2 dataprovider.IdProvider
+	var r3 error
+	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)); ok {
 		return rf(ctx, log, cfg, ch)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) registry.Registry); ok {
@@ -74,13 +75,21 @@ func (_m *MockBenchmark) Initialize(ctx context.Context, log *logp.Logger, cfg *
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) error); ok {
+	if rf, ok := ret.Get(2).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) dataprovider.IdProvider); ok {
 		r2 = rf(ctx, log, cfg, ch)
 	} else {
-		r2 = ret.Error(2)
+		if ret.Get(2) != nil {
+			r2 = ret.Get(2).(dataprovider.IdProvider)
+		}
 	}
 
-	return r0, r1, r2
+	if rf, ok := ret.Get(3).(func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) error); ok {
+		r3 = rf(ctx, log, cfg, ch)
+	} else {
+		r3 = ret.Error(3)
+	}
+
+	return r0, r1, r2, r3
 }
 
 // MockBenchmark_Initialize_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Initialize'
@@ -104,12 +113,12 @@ func (_c *MockBenchmark_Initialize_Call) Run(run func(ctx context.Context, log *
 	return _c
 }
 
-func (_c *MockBenchmark_Initialize_Call) Return(_a0 registry.Registry, _a1 dataprovider.CommonDataProvider, _a2 error) *MockBenchmark_Initialize_Call {
-	_c.Call.Return(_a0, _a1, _a2)
+func (_c *MockBenchmark_Initialize_Call) Return(_a0 registry.Registry, _a1 dataprovider.CommonDataProvider, _a2 dataprovider.IdProvider, _a3 error) *MockBenchmark_Initialize_Call {
+	_c.Call.Return(_a0, _a1, _a2, _a3)
 	return _c
 }
 
-func (_c *MockBenchmark_Initialize_Call) RunAndReturn(run func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error)) *MockBenchmark_Initialize_Call {
+func (_c *MockBenchmark_Initialize_Call) RunAndReturn(run func(context.Context, *logp.Logger, *config.Config, chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)) *MockBenchmark_Initialize_Call {
 	_c.Call.Return(run)
 	return _c
 }

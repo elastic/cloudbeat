@@ -38,7 +38,7 @@ import (
 
 type Benchmark interface {
 	Run(ctx context.Context) error
-	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error)
+	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)
 	Stop()
 
 	checkDependencies() error
@@ -73,7 +73,6 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 		}, nil
 	case config.CIS_GCP:
 		return &GCP{
-			IdentityProvider:     &gcp_identity.Provider{},
 			CfgProvider:          &gcp_auth.ConfigProvider{AuthProvider: &gcp_auth.GoogleAuthProvider{}},
 			inventoryInitializer: &gcp_inventory.ProviderInitializer{},
 		}, nil

@@ -66,9 +66,22 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Success() {
 	}
 
 	mockInventoryService.On("ListMonitoringAssets", mock.Anything).Return(
-		&inventory.MonitoringAsset{
-			LogMetrics: []*assetpb.Asset{{Name: "a", AssetType: "logging.googleapis.com/LogMetric"}},
-			Alerts:     []*assetpb.Asset{{Name: "b", AssetType: "monitoring.googleapis.com/AlertPolicy"}},
+		[]*inventory.MonitoringAsset{
+			{
+				Ecs: &fetching.EcsGcp{
+					Provider:         "gcp",
+					ProjectId:        "a",
+					ProjectName:      "a",
+					OrganizationId:   "a",
+					OrganizationName: "a",
+				},
+				LogMetrics: []*inventory.ExtendedGcpAsset{
+					{Asset: &assetpb.Asset{Name: "a", AssetType: "logging.googleapis.com/LogMetric"}},
+				},
+				Alerts: []*inventory.ExtendedGcpAsset{
+					{Asset: &assetpb.Asset{Name: "b", AssetType: "monitoring.googleapis.com/AlertPolicy"}},
+				},
+			},
 		}, nil,
 	)
 
@@ -108,9 +121,14 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 				Type:    fetching.MonitoringIdentity,
 				subType: fetching.GcpMonitoringType,
 				Asset: &inventory.MonitoringAsset{
-					ProjectId:  projectId,
-					LogMetrics: []*assetpb.Asset{},
-					Alerts:     []*assetpb.Asset{},
+					Ecs: &fetching.EcsGcp{
+						ProjectId:        projectId,
+						ProjectName:      "a",
+						OrganizationId:   "a",
+						OrganizationName: "a",
+					},
+					LogMetrics: []*inventory.ExtendedGcpAsset{},
+					Alerts:     []*inventory.ExtendedGcpAsset{},
 				},
 			},
 			want: fetching.ResourceMetadata{
