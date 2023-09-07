@@ -56,7 +56,7 @@ func (p *ConfigProvider) getDefaultCredentialsConfig(log *logp.Logger) (*AzureFa
 
 	creds, err := p.AuthProvider.FindDefaultCredentials(nil)
 	if err != nil {
-		return nil, fmt.Errorf("getDefaultCredentialsConfig failed to get default credentials: %v", err)
+		return nil, fmt.Errorf("getDefaultCredentialsConfig failed to get default credentials: %w", err)
 	}
 
 	return &AzureFactoryConfig{
@@ -69,7 +69,7 @@ func (p *ConfigProvider) getDefaultCredentialsConfig(log *logp.Logger) (*AzureFa
 
 // 	creds, err := p.AuthProvider.FindEnvironmentCredential(&azidentity.EnvironmentCredentialOptions{})
 // 	if err != nil {
-// 		return nil, fmt.Errorf("getCustomCredentialsConfig failed to get default credentials: %v", err)
+// 		return nil, fmt.Errorf("getCustomCredentialsConfig failed to get default credentials: %w", err)
 // 	}
 
 // 	return &AzureFactoryConfig{
