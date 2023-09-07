@@ -32,7 +32,6 @@ import (
 	azure_auth "github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 	azure_inventory "github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 	gcp_auth "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
-	gcp_identity "github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 	gcp_inventory "github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 

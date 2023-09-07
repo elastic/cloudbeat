@@ -42,14 +42,14 @@ type Azure struct {
 
 func (a *Azure) Run(context.Context) error { return nil }
 
-func (a *Azure) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (a *Azure) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	azureConfig, err := a.CfgProvider.GetAzureClientConfig(cfg.CloudConfig.Azure, log)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
 	}
 
 	// azureIdentity, err := a.IdentityProvider.GetIdentity(ctx, azureConfig)
@@ -59,18 +59,18 @@ func (a *Azure) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Co
 
 	assetProvider, err := a.inventoryInitializer.Init(ctx, log, *azureConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize azure asset inventory: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize azure asset inventory: %v", err)
 	}
 
 	fetchers, err := factory.NewCisAzureFactory(ctx, log, ch, assetProvider)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize azure fetchers: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize azure fetchers: %v", err)
 	}
 
 	return registry.NewRegistry(log, fetchers), cloud.NewDataProvider(
 		cloud.WithLogger(log),
 		// cloud.WithAccount(*azureIdentity),
-	), nil
+	), cloud.NewIdProvider(), nil
 }
 
 func (a *Azure) Stop() {}
