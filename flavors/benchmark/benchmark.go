@@ -30,13 +30,12 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
 type Benchmark interface {
 	Run(ctx context.Context) error
-	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error)
+	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)
 	Stop()
 
 	checkDependencies() error
@@ -71,7 +70,6 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 		}, nil
 	case config.CIS_GCP:
 		return &GCP{
-			IdentityProvider:     &identity.Provider{},
 			CfgProvider:          &auth.ConfigProvider{AuthProvider: &auth.GoogleAuthProvider{}},
 			inventoryInitializer: &inventory.ProviderInitializer{},
 		}, nil
