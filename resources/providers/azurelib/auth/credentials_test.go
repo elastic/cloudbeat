@@ -22,9 +22,10 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 	mock "github.com/stretchr/testify/mock"
+
+	"github.com/elastic/cloudbeat/config"
 )
 
 func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
