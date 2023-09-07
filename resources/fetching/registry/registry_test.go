@@ -19,9 +19,13 @@ package registry
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -29,7 +33,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-type RegistryTestSuite struct {
+type registryTestSuite struct {
 	suite.Suite
 
 	fetchers   factory.FetchersMap
@@ -39,19 +43,23 @@ type RegistryTestSuite struct {
 }
 
 func TestRegistryTestSuite(t *testing.T) {
-	s := new(RegistryTestSuite)
+	s := new(registryTestSuite)
 
 	suite.Run(t, s)
 }
 
-func (s *RegistryTestSuite) SetupTest() {
-	s.fetchers = make(factory.FetchersMap, 0)
-	s.registry = NewRegistry(testhelper.NewLogger(s.T()), s.fetchers)
+func (s *registryTestSuite) SetupTest() {
+	s.fetchers = make(factory.FetchersMap)
+	s.registry = NewRegistry(testhelper.NewLogger(s.T()), WithFetchersMap(s.fetchers))
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
 
-func (s *RegistryTestSuite) TestKeys() {
+func (s *registryTestSuite) registerFetcher(f fetching.Fetcher, key string, conditions ...fetching.Condition) {
+	s.fetchers[key] = factory.RegisteredFetcher{Fetcher: f, Condition: conditions}
+}
+
+func (s *registryTestSuite) TestKeys() {
 	var tests = []struct {
 		key   string
 		value int
@@ -68,8 +76,8 @@ func (s *RegistryTestSuite) TestKeys() {
 	}
 
 	for i, test := range tests {
-		f := NewNumberFetcher(test.value, nil, s.wg)
-		RegisterFetcher(s.fetchers, f, test.key, nil)
+		f := newNumberFetcher(test.value, s.wg)
+		s.registerFetcher(f, test.key)
 
 		s.Equal(i+1, len(s.registry.Keys()))
 	}
@@ -81,36 +89,36 @@ func (s *RegistryTestSuite) TestKeys() {
 	s.Contains(keys, "new_fetcher")
 }
 
-func (s *RegistryTestSuite) TestRunNotRegistered() {
-	f := NewNumberFetcher(1, nil, s.wg)
-	RegisterFetcher(s.fetchers, f, "some-key", nil)
+func (s *registryTestSuite) TestRunNotRegistered() {
+	f := newNumberFetcher(1, s.wg)
+	s.registerFetcher(f, "some-key")
 
 	err := s.registry.Run(context.TODO(), "unknown", fetching.CycleMetadata{})
 	s.Error(err)
 }
 
-func (s *RegistryTestSuite) TestRunRegistered() {
-	f1 := NewSyncNumberFetcher(1, s.resourceCh)
-	RegisterFetcher(s.fetchers, f1, "some-key-1", nil)
+func (s *registryTestSuite) TestRunRegistered() {
+	f1 := newSyncNumberFetcher(1, s.resourceCh)
+	s.registerFetcher(f1, "some-key-1")
 
-	f2 := NewSyncNumberFetcher(2, s.resourceCh)
-	RegisterFetcher(s.fetchers, f2, "some-key-2", nil)
+	f2 := newSyncNumberFetcher(2, s.resourceCh)
+	s.registerFetcher(f2, "some-key-2")
 
-	f3 := NewSyncNumberFetcher(3, s.resourceCh)
-	RegisterFetcher(s.fetchers, f3, "some-key-3", nil)
+	f3 := newSyncNumberFetcher(3, s.resourceCh)
+	s.registerFetcher(f3, "some-key-3")
 
 	var tests = []struct {
 		key string
-		res NumberResource
+		res numberResource
 	}{
 		{
-			"some-key-1", NumberResource{Num: 1},
+			"some-key-1", numberResource{Num: 1},
 		},
 		{
-			"some-key-2", NumberResource{Num: 2},
+			"some-key-2", numberResource{Num: 2},
 		},
 		{
-			"some-key-3", NumberResource{Num: 3},
+			"some-key-3", numberResource{Num: 3},
 		},
 	}
 
@@ -119,22 +127,22 @@ func (s *RegistryTestSuite) TestRunRegistered() {
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.NoError(err)
-		s.Equal(1, len(results))
+		s.Len(results, 1)
 		s.Equal(test.res.Num, results[0].GetData())
 	}
 }
 
-func (s *RegistryTestSuite) TestShouldRunNotRegistered() {
-	f := NewNumberFetcher(1, nil, s.wg)
-	RegisterFetcher(s.fetchers, f, "some-key", nil)
+func (s *registryTestSuite) TestShouldRunNotRegistered() {
+	f := newNumberFetcher(1, s.wg)
+	s.registerFetcher(f, "some-key")
 
 	res := s.registry.ShouldRun("unknown")
 	s.False(res)
 }
 
-func (s *RegistryTestSuite) TestShouldRun() {
-	conditionTrue := NewBoolFetcherCondition(true, "always-fetcher-condition")
-	conditionFalse := NewBoolFetcherCondition(false, "never-fetcher-condition")
+func (s *registryTestSuite) TestShouldRun() {
+	conditionTrue := newBoolFetcherCondition(true, "always-fetcher-condition")
+	conditionFalse := newBoolFetcherCondition(false, "never-fetcher-condition")
 
 	var tests = []struct {
 		conditions []fetching.Condition
@@ -158,20 +166,16 @@ func (s *RegistryTestSuite) TestShouldRun() {
 	}
 
 	for _, test := range tests {
-		f := NewNumberFetcher(1, nil, s.wg)
-		RegisterFetcher(s.fetchers, f, "some-key", test.conditions)
-		s.registry = NewRegistry(testhelper.NewLogger(s.T()), s.fetchers)
+		f := newNumberFetcher(1, s.wg)
+		s.registerFetcher(f, "some-key", test.conditions...)
+		s.registry = NewRegistry(testhelper.NewLogger(s.T()), WithFetchersMap(s.fetchers))
 
 		should := s.registry.ShouldRun("some-key")
 		s.Equal(test.expected, should)
 	}
 }
 
-func RegisterFetcher(fMap factory.FetchersMap, f fetching.Fetcher, key string, condition []fetching.Condition) {
-	fMap[key] = factory.RegisteredFetcher{Fetcher: f, Condition: condition}
-}
-
-type NumberFetcher struct {
+type numberFetcher struct {
 	num        int
 	stopCalled bool
 	resourceCh chan fetching.ResourceInfo
@@ -185,7 +189,7 @@ type syncNumberFetcher struct {
 
 func (f *syncNumberFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	f.resourceCh <- fetching.ResourceInfo{
-		Resource:      NumberResource{f.num},
+		Resource:      numberResource{f.num},
 		CycleMetadata: cMetadata,
 	}
 
@@ -196,19 +200,19 @@ func (f *syncNumberFetcher) Stop() {
 	f.stopCalled = true
 }
 
-func NewSyncNumberFetcher(num int, ch chan fetching.ResourceInfo) fetching.Fetcher {
+func newSyncNumberFetcher(num int, ch chan fetching.ResourceInfo) fetching.Fetcher {
 	return &syncNumberFetcher{num, false, ch}
 }
 
-type NumberResource struct {
+type numberResource struct {
 	Num int
 }
 
-func (res NumberResource) GetData() interface{} {
+func (res numberResource) GetData() interface{} {
 	return res.Num
 }
 
-func (res NumberResource) GetMetadata() (fetching.ResourceMetadata, error) {
+func (res numberResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      "",
 		Type:    "number",
@@ -217,26 +221,26 @@ func (res NumberResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res NumberResource) GetElasticCommonData() (map[string]interface{}, error) {
+func (res numberResource) GetElasticCommonData() (map[string]interface{}, error) {
 	return nil, nil
 }
 
-func NewNumberFetcher(num int, ch chan fetching.ResourceInfo, wg *sync.WaitGroup) fetching.Fetcher {
-	return &NumberFetcher{num, false, ch, wg}
+func newNumberFetcher(num int, wg *sync.WaitGroup) fetching.Fetcher {
+	return &numberFetcher{num, false, nil, wg}
 }
 
-func (f *NumberFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *numberFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
 	defer f.wg.Done()
 
 	f.resourceCh <- fetching.ResourceInfo{
-		Resource:      NumberResource{f.num},
+		Resource:      numberResource{f.num},
 		CycleMetadata: cMetadata,
 	}
 
 	return nil
 }
 
-func (f *NumberFetcher) Stop() {
+func (f *numberFetcher) Stop() {
 	f.stopCalled = true
 }
 
@@ -245,7 +249,7 @@ type boolFetcherCondition struct {
 	name string
 }
 
-func NewBoolFetcherCondition(val bool, name string) fetching.Condition {
+func newBoolFetcherCondition(val bool, name string) fetching.Condition {
 	return &boolFetcherCondition{val, name}
 }
 
@@ -255,4 +259,98 @@ func (c *boolFetcherCondition) Condition() bool {
 
 func (c *boolFetcherCondition) Name() string {
 	return c.name
+}
+
+func Test_registry_Update(t *testing.T) {
+	emptyFn := func(t *testing.T, r Registry) {
+		assert.Empty(t, r.Keys())
+		assert.False(t, r.ShouldRun("some-key"))
+	}
+	count := 0
+
+	tp := t
+	tests := []struct {
+		name    string
+		updater UpdaterFunc
+		testFn  func(t *testing.T, r Registry)
+	}{
+		{
+			name:    "check nil",
+			updater: nil,
+			testFn:  emptyFn,
+		},
+		{
+			name: "error",
+			updater: func() (factory.FetchersMap, error) {
+				return nil, errors.New("some-error")
+			},
+			testFn: emptyFn,
+		},
+		{
+			name: "success after fail",
+			updater: func() (factory.FetchersMap, error) {
+				switch count {
+				case 0:
+					count++
+					return nil, errors.New("some-error")
+				case 1:
+					count++
+					return factory.FetchersMap{"fetcher": newMockFetcher(tp, nil, 1)}, nil
+				default:
+					panic("unexpected count")
+				}
+			},
+			testFn: func(t *testing.T, r Registry) {
+				emptyFn(t, r) // empty at beginning because of error
+				r.Update()
+				assert.Len(t, r.Keys(), 1)
+				assert.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
+				assert.Panics(t, r.Update)
+			},
+		},
+		{
+			name: "fail after success",
+			updater: func() (factory.FetchersMap, error) {
+				switch count {
+				case 0:
+					count++
+					return factory.FetchersMap{"fetcher": newMockFetcher(tp, nil, 2)}, nil
+				case 1:
+					count++
+					return nil, errors.New("some-error")
+				default:
+					panic("unexpected count")
+				}
+			},
+			testFn: func(t *testing.T, r Registry) {
+				assert.Len(t, r.Keys(), 1)
+				assert.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
+
+				r.Update() // update fails, registry remains as is
+				assert.Len(t, r.Keys(), 1)
+				assert.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
+
+				assert.Panics(t, r.Update)
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tp = t
+			count = 0
+
+			r := NewRegistry(testhelper.NewLogger(t), WithUpdater(tt.updater))
+			defer r.Stop()
+			r.Update()
+			require.NotNil(t, tt.testFn)
+			tt.testFn(t, r)
+		})
+	}
+}
+
+func newMockFetcher(t *testing.T, err error, times int) factory.RegisteredFetcher {
+	m := fetching.NewMockFetcher(t)
+	m.EXPECT().Stop().Once()
+	m.EXPECT().Fetch(mock.Anything, mock.Anything).Return(err).Times(times)
+	return factory.RegisteredFetcher{Fetcher: m}
 }
