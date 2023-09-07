@@ -65,6 +65,7 @@ var GcpAssetTypes = map[string][]string{
 	},
 	fetching.CloudStorage: {
 		"storage.googleapis.com/Bucket",
+		"logging.googleapis.com/LogBucket",
 	},
 	fetching.CloudCompute: {
 		"compute.googleapis.com/Instance",
