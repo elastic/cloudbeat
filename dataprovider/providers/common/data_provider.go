@@ -15,18 +15,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package dataprovider
+package common
 
 import (
-	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/mitchellh/mapstructure"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/version"
 )
 
-type CommonDataProvider interface {
-	EnrichEvent(event *beat.Event, resource fetching.ResourceMetadata) error
+type DataProvider struct {
+	info version.CloudbeatVersionInfo
 }
 
-type IdProvider interface {
-	GetId(resourceType string, resourceId string) string
+func New(log *logp.Logger, info version.CloudbeatVersionInfo) *DataProvider {
+	return &DataProvider{
+		info: info,
+	}
+}
+
+func (c *DataProvider) GetElasticCommonData() (map[string]interface{}, error) {
+	m := map[string]interface{}{}
+	err := mapstructure.Decode(c.info, &m)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]interface{}{
+		"cloudbeat": m,
+	}, nil
 }

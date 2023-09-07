@@ -42,20 +42,20 @@ type AWSOrg struct {
 	AccountProvider  awslib.AccountProviderAPI
 }
 
-func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
 	cache := make(map[string]factory.FetchersMap)
@@ -80,7 +80,7 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 	return reg, cloud.NewDataProvider(
 		cloud.WithLogger(log),
 		cloud.WithAccount(*awsIdentity),
-	), nil
+	), cloud.NewIdProvider(), nil
 }
 
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {

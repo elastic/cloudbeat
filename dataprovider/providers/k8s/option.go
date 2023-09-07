@@ -19,9 +19,6 @@ package k8s
 
 import (
 	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/version"
 )
 
 type Option func(*DataProvider)
@@ -32,15 +29,9 @@ func WithLogger(log *logp.Logger) Option {
 	}
 }
 
-func WithConfig(cfg *config.Config) Option {
+func WithClusterVersion(version string) Option {
 	return func(dp *DataProvider) {
-		dp.cfg = cfg
-	}
-}
-
-func WithVersionInfo(info version.CloudbeatVersionInfo) Option {
-	return func(dp *DataProvider) {
-		dp.info = info
+		dp.clusterVersion = version
 	}
 }
 
@@ -53,11 +44,5 @@ func WithClusterName(name string) Option {
 func WithClusterID(id string) Option {
 	return func(dp *DataProvider) {
 		dp.clusterID = id
-	}
-}
-
-func WithNodeID(id string) Option {
-	return func(dp *DataProvider) {
-		dp.nodeID = id
 	}
 }

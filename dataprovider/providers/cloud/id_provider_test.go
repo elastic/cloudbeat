@@ -15,18 +15,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package dataprovider
+package cloud
 
 import (
-	"github.com/elastic/beats/v7/libbeat/beat"
+	"testing"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/stretchr/testify/assert"
 )
 
-type CommonDataProvider interface {
-	EnrichEvent(event *beat.Event, resource fetching.ResourceMetadata) error
-}
+func Test_k8sIdProvider_GetId(t *testing.T) {
+	tests := []struct {
+		name     string
+		want     string
+		id       string
+		resource string
+	}{
+		{
+			name:     "should return the raw id",
+			want:     "metadata_id",
+			id:       "metadata_id",
+			resource: "unknown",
+		},
+	}
 
-type IdProvider interface {
-	GetId(resourceType string, resourceId string) string
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewIdProvider()
+			data := p.GetId(tt.resource, tt.id)
+			assert.Equal(t, tt.want, data)
+		})
+	}
 }
