@@ -63,7 +63,10 @@ func (k *K8S) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, nil, fmt.Errorf("failed to create k8s id provider: %w", err)
 	}
 
-	return registry.NewRegistry(log, factory.NewCisK8sFactory(log, ch, k.leaderElector, kubeClient)), dp, idp, nil
+	return registry.NewRegistry(
+		log,
+		registry.WithFetchersMap(factory.NewCisK8sFactory(log, ch, k.leaderElector, kubeClient)),
+	), dp, idp, nil
 }
 
 func (k *K8S) Run(ctx context.Context) error { return k.leaderElector.Run(ctx) }
