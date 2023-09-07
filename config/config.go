@@ -88,13 +88,13 @@ type GcpClientOpt struct {
 }
 
 type AzureClientOpt struct {
-	ClientId                   string `config:"client_id"`
-	TenantId                   string `config:"tenant_id,omitempty"`
-	ClientSecret               string `config:"client_secret,omitempty"`
-	ClientCertificatePath      string `config:"client_certificate_path,omitempty"`
-	ClientCertificatePaassword string `config:"client_certificate_password,omitempty"`
-	Username                   string `config:"username,omitempty"`
-	Password                   string `config:"password,omitempty"`
+	ClientId                  string `config:"client_id"`
+	TenantId                  string `config:"tenant_id,omitempty"`
+	ClientSecret              string `config:"client_secret,omitempty"`
+	ClientCertificatePath     string `config:"client_certificate_path,omitempty"`
+	ClientCertificatePassword string `config:"client_certificate_password,omitempty"`
+	Username                  string `config:"username,omitempty"`
+	Password                  string `config:"password,omitempty"`
 }
 
 const (
