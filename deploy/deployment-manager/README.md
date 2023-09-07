@@ -22,7 +22,8 @@ ELASTIC_AGENT_VERSION="<Elastic Agent Version>" # e.g: 8.8.0 | 8.8.0-SNAPSHOT
 ZONE="<GCP Zone>" # e.g: us-central1-a
 ALLOW_SSH=false # Set to true to allow SSH connections to the deployed instance
 ```
-4. For deleting the deployment, run `just delete-dm <DEPLOYMENT_NAME>`.
+4. For running the integration at the **Organization level**, run the same command mentioned in step 3 but with another environment variable `ORG_ID=<ORG_ID>`.
+5. For deleting the deployment, run `just delete-dm <DEPLOYMENT_NAME>`.
 
 *Debugging:*
 1. Deployments creation may take a few minutes, to see the progress, find your deployment on https://console.cloud.google.com/dm/deployments/ and click on it.

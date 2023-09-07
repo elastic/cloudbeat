@@ -15,18 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package dataprovider
+package cloud
 
-import (
-	"github.com/elastic/beats/v7/libbeat/beat"
-
-	"github.com/elastic/cloudbeat/resources/fetching"
-)
-
-type CommonDataProvider interface {
-	EnrichEvent(event *beat.Event, resource fetching.ResourceMetadata) error
+type idProvider struct {
 }
 
-type IdProvider interface {
-	GetId(resourceType string, resourceId string) string
+func NewIdProvider() *idProvider {
+	return &idProvider{}
+}
+
+func (p *idProvider) GetId(resourceType string, resourceId string) string {
+	return resourceId
 }

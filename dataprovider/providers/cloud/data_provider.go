@@ -23,10 +23,8 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
-	"github.com/elastic/cloudbeat/version"
 )
 
 const (
@@ -60,16 +58,6 @@ func NewDataProvider(options ...Option) DataProvider {
 		opt(&adp)
 	}
 	return adp
-}
-
-func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
-	return types.Data{
-		ResourceID: id,
-		VersionInfo: version.CloudbeatVersionInfo{
-			Version: version.CloudbeatVersion(),
-			Policy:  version.PolicyVersion(),
-		},
-	}, nil
 }
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
