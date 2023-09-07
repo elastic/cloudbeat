@@ -75,7 +75,10 @@ func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, fmt.Errorf("failed to create k8s data provider: %w", err)
 	}
 
-	return registry.NewRegistry(log, factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)), dp, nil
+	return registry.NewRegistry(
+		log,
+		registry.WithFetchersMap(factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)),
+	), dp, nil
 }
 
 func (k *EKS) Run(ctx context.Context) error { return k.leaderElector.Run(ctx) }
