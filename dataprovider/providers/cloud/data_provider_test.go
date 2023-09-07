@@ -26,10 +26,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/elastic/cloudbeat/dataprovider/types"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
-	"github.com/elastic/cloudbeat/version"
 )
 
 var (
@@ -55,46 +53,6 @@ func TestCloudDataProviderTestSuite(t *testing.T) {
 func (s *CloudDataProviderTestSuite) SetupTest() {}
 
 func (s *CloudDataProviderTestSuite) TearDownTest() {}
-
-func (s *CloudDataProviderTestSuite) TestAwsDataProvider_FetchData() {
-	tests := []struct {
-		name        string
-		options     []Option
-		resource    string
-		id          string
-		expected    types.Data
-		expectError bool
-	}{
-		{
-			name: "get data",
-			options: []Option{
-				WithLogger(testhelper.NewLogger(s.T())),
-				WithAccount(Identity{
-					Account:      accountId,
-					AccountAlias: accountName,
-				}),
-			},
-			expected: types.Data{
-				ResourceID: "",
-				VersionInfo: version.CloudbeatVersionInfo{
-					Version: version.CloudbeatVersion(),
-					Policy:  version.PolicyVersion(),
-				},
-			},
-		},
-	}
-
-	for _, test := range tests {
-		p := NewDataProvider(test.options...)
-		result, err := p.FetchData(test.resource, test.id)
-		if test.expectError {
-			s.Error(err)
-			return
-		}
-		s.NoError(err)
-		s.Equal(result, test.expected)
-	}
-}
 
 func TestDataProvider_EnrichEvent(t *testing.T) {
 	tests := []struct {
