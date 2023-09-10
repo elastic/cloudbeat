@@ -1,17 +1,5 @@
 package cis_gcp.test_data
 
-generate_iam_policy(members, role) = {
-	"resource": {
-		"resource": {},
-		"iam_policy": {"bindings": [{
-			"role": role,
-			"members": members,
-		}]},
-	},
-	"type": "key-management",
-	"subType": "gcp-iam-service-account",
-}
-
 generate_gcp_asset(type, subtype, resource, iam_policy) = {
 	"resource": {
 		"resource": resource,
@@ -20,6 +8,13 @@ generate_gcp_asset(type, subtype, resource, iam_policy) = {
 	"type": type,
 	"subType": subtype,
 }
+
+generate_iam_policy(members, role) = generate_gcp_asset(
+	"key-management",
+	"gcp-iam-service-account",
+	{},
+	{"bindings": [{"role": role, "members": members}]},
+)
 
 generate_monitoring_asset(log_metrics, alerts) = {
 	"resource": {
@@ -30,70 +25,44 @@ generate_monitoring_asset(log_metrics, alerts) = {
 	"subType": "gcp-monitoring",
 }
 
-generate_kms_resource(members, rotationPeriod, nextRotationTime, primary) = {
-	"resource": {
-		"resource": {"data": {
-			"nextRotationTime": nextRotationTime,
-			"rotationPeriod": rotationPeriod,
-			"primary": primary,
-		}},
-		"iam_policy": {"bindings": [{
-			"role": "roles/cloudkms.cryptoKeyEncrypterDecrypter",
-			"members": members,
-		}]},
-	},
-	"type": "key-management",
-	"subType": "gcp-cloudkms-crypto-key",
-}
+generate_kms_resource(members, rotationPeriod, nextRotationTime, primary) = generate_gcp_asset(
+	"key-management",
+	"gcp-cloudkms-crypto-key",
+	{"data": {"nextRotationTime": nextRotationTime, "rotationPeriod": rotationPeriod, "primary": primary}},
+	{"bindings": [{"role": "roles/cloudkms.cryptoKeyEncrypterDecrypter", "members": members}]},
+)
 
-generate_gcs_resource(members, isBucketLevelAccessEnabled) = {
-	"resource": {
-		"resource": {"data": {"iamConfiguration": {"uniformBucketLevelAccess": {"enabled": isBucketLevelAccessEnabled}}}},
-		"iam_policy": {"bindings": [{
-			"role": "roles/storage.objectViewer",
-			"members": members,
-		}]},
-	},
-	"type": "cloud-storage",
-	"subType": "gcp-storage-bucket",
-}
+generate_gcs_resource(members, isBucketLevelAccessEnabled) = generate_gcp_asset(
+	"cloud-storage",
+	"gcp-storage-bucket",
+	{"data": {"iamConfiguration": {"uniformBucketLevelAccess": {"enabled": isBucketLevelAccessEnabled}}}},
+	{"bindings": [{"role": "roles/storage.objectViewer", "members": members}]},
+)
 
-generate_bq_resource(config, subType, members) = {
-	"resource": {
-		"resource": {"data": {"defaultEncryptionConfiguration": config}},
-		"iam_policy": {"bindings": [{
-			"role": "roles/bigquery.dataViewer",
-			"members": members,
-		}]},
-	},
-	"type": "cloud-storage",
-	"subType": subType,
-}
+generate_bq_resource(config, subType, members) = generate_gcp_asset(
+	"cloud-storage",
+	subType,
+	{"data": {"defaultEncryptionConfiguration": config}},
+	{"bindings": [{"role": "roles/bigquery.dataViewer", "members": members}]},
+)
 
-generate_compute_resource(subType, info) = {
-	"resource": {"resource": {"data": info}},
-	"type": "cloud-compute",
-	"subType": subType,
-}
+generate_compute_resource(subType, info) = generate_gcp_asset(
+	"cloud-compute",
+	subType,
+	{"data": info},
+	{},
+)
 
-generate_iam_service_account_key(resourceData) = {
-	"resource": {
-		"resource": {"data": resourceData},
-		"iam_policy": {},
-	},
-	"type": "kidentity-management",
-	"subType": "gcp-iam-service-account-key",
-}
+not_eval_resource = generate_gcp_asset(
+	"key-management",
+	"non-existing-subtype",
+	{},
+	{},
+)
 
-not_eval_resource = {
-	"resource": {},
-	"type": "key-management",
-	"subType": "no-exisitng-type",
-}
-
-# missing resource.iam_policy
-no_policy_resource = {
-	"resource": {"resource": {}},
-	"type": "key-management",
-	"subType": "gcp-iam",
-}
+no_policy_resource = generate_gcp_asset(
+	"key-management",
+	"gcp-iam",
+	{},
+	null, # missing resource.iam_policy
+)

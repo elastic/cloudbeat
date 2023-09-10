@@ -9,12 +9,24 @@ date_within_last_90_days := time.format(time.add_date(time.now_ns(), 0, 0, -2))
 
 date_before_last_90_days := time.format(time.add_date(time.now_ns(), 0, 0, -91))
 
+type := "identity-management"
+
+subType := "gcp-iam-service-account-key"
+
 test_violation {
-	eval_fail with input as test_data.generate_iam_service_account_key({"validAfterTime": date_before_last_90_days})
+	eval_fail with input as test_data.generate_gcp_asset(
+		type, subType,
+		{"data": {"validAfterTime": date_before_last_90_days}},
+		{},
+	)
 }
 
 test_pass {
-	eval_pass with input as test_data.generate_iam_service_account_key({"validAfterTime": date_within_last_90_days})
+	eval_pass with input as test_data.generate_gcp_asset(
+		type, subType,
+		{"data": {"validAfterTime": date_within_last_90_days}},
+		{},
+	)
 }
 
 test_not_evaluated {
