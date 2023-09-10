@@ -90,6 +90,7 @@ func (m *Manager) fetchAndSleep(ctx context.Context) {
 // fetchIteration waits for all the registered fetchers and trigger them to fetch relevant resources.
 // The function must not get called in parallel.
 func (m *Manager) fetchIteration(ctx context.Context) {
+	m.fetcherRegistry.Update()
 	m.log.Infof("Manager triggered fetching for %d fetchers", len(m.fetcherRegistry.Keys()))
 
 	start := time.Now()

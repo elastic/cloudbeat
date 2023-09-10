@@ -200,6 +200,38 @@ func (_c *MockRegistry_Stop_Call) RunAndReturn(run func()) *MockRegistry_Stop_Ca
 	return _c
 }
 
+// Update provides a mock function with given fields:
+func (_m *MockRegistry) Update() {
+	_m.Called()
+}
+
+// MockRegistry_Update_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Update'
+type MockRegistry_Update_Call struct {
+	*mock.Call
+}
+
+// Update is a helper method to define mock.On call
+func (_e *MockRegistry_Expecter) Update() *MockRegistry_Update_Call {
+	return &MockRegistry_Update_Call{Call: _e.mock.On("Update")}
+}
+
+func (_c *MockRegistry_Update_Call) Run(run func()) *MockRegistry_Update_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockRegistry_Update_Call) Return() *MockRegistry_Update_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockRegistry_Update_Call) RunAndReturn(run func()) *MockRegistry_Update_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 type mockConstructorTestingTNewMockRegistry interface {
 	mock.TestingT
 	Cleanup(func())
