@@ -84,11 +84,11 @@ func (r KmsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r KmsResource) GetElasticCommonData() (map[string]any, error) {
-	key, ok := r.key.(*kms.KmsInfo)
 	m := map[string]interface{}{
 		"cloud.service.name": "AWS KMS",
 	}
 
+	key, ok := r.key.(*kms.KmsInfo)
 	if ok {
 		m["x509.not_after"] = key.KeyMetadata.ValidTo
 		m["x509.not_before"] = key.KeyMetadata.CreationDate
