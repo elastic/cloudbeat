@@ -39,7 +39,7 @@ type GcpAsset struct {
 	Type    string
 	SubType string
 
-	Asset *inventory.ExtendedGcpAsset `json:"asset,omitempty"`
+	ExtendedAsset *inventory.ExtendedGcpAsset `json:"asset,omitempty"`
 }
 
 // GcpAssetTypes https://cloud.google.com/asset-inventory/docs/supported-asset-types
@@ -109,9 +109,9 @@ func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 			case f.resourceCh <- fetching.ResourceInfo{
 				CycleMetadata: cMetadata,
 				Resource: &GcpAsset{
-					Type:    typeName,
-					SubType: getGcpSubType(asset.AssetType),
-					Asset:   asset,
+					Type:          typeName,
+					SubType:       getGcpSubType(asset.AssetType),
+					ExtendedAsset: asset,
 				},
 			}:
 			}
@@ -126,21 +126,21 @@ func (f *GcpAssetsFetcher) Stop() {
 }
 
 func (r *GcpAsset) GetData() interface{} {
-	return r.Asset
+	return r.ExtendedAsset.Asset
 }
 
 func (r *GcpAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	var region string
 
-	if r.Asset.Resource != nil {
-		region = r.Asset.Resource.Location
+	if r.ExtendedAsset.Resource != nil {
+		region = r.ExtendedAsset.Resource.Location
 	}
 
 	return fetching.ResourceMetadata{
-		ID:      r.Asset.Name,
+		ID:      r.ExtendedAsset.Name,
 		Type:    r.Type,
 		SubType: r.SubType,
-		Name:    getAssetResourceName(r.Asset),
+		Name:    getAssetResourceName(r.ExtendedAsset),
 		Region:  region,
 	}, nil
 }
@@ -150,21 +150,28 @@ func (r *GcpAsset) GetElasticCommonData() (map[string]any, error) {
 		"cloud": map[string]any{
 			"provider": "gcp",
 			"account": map[string]any{
-				"id":   r.Asset.Ecs.ProjectId,
-				"name": r.Asset.Ecs.ProjectName,
+				"id":   r.ExtendedAsset.Ecs.ProjectId,
+				"name": r.ExtendedAsset.Ecs.ProjectName,
 			},
 			"Organization": map[string]any{
-				"id":   r.Asset.Ecs.OrganizationId,
-				"name": r.Asset.Ecs.OrganizationName,
+				"id":   r.ExtendedAsset.Ecs.OrganizationId,
+				"name": r.ExtendedAsset.Ecs.OrganizationName,
 			},
 		},
 	}, nil
 }
 
-// a GCP asset name is made up of its ancestors
-// the resource id is the last part of the name, which we use as name of the resource
-// see https://cloud.google.com/apis/design/resource_names#resource_id
+// try to retrieve the resource name from the asset data fields (name or displayName), in case it is not set
+// get the last part of the asset name (https://cloud.google.com/apis/design/resource_names#resource_id)
 func getAssetResourceName(asset *inventory.ExtendedGcpAsset) string {
+	if name, exist := asset.GetResource().GetData().GetFields()["displayName"]; exist && name.GetStringValue() != "" {
+		return name.GetStringValue()
+	}
+
+	if name, exist := asset.GetResource().GetData().GetFields()["name"]; exist && name.GetStringValue() != "" {
+		return name.GetStringValue()
+	}
+
 	parts := strings.Split(asset.Name, "/")
 	return parts[len(parts)-1]
 }

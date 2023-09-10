@@ -56,7 +56,7 @@ func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(
 			log,
-			factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity),
+			registry.WithFetchersMap(factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity)),
 		), cloud.NewDataProvider(
 			cloud.WithLogger(log),
 			cloud.WithAccount(*awsIdentity),

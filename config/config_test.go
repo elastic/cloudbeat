@@ -46,7 +46,6 @@ func (s *ConfigTestSuite) TestNew() {
 		config              string
 		expectedType        string
 		expectedCloudConfig CloudConfig
-		expectedFetchers    int
 	}{
 		{
 			`
@@ -56,7 +55,15 @@ config:
 `,
 			"cis_k8s",
 			CloudConfig{},
-			2,
+		},
+		{
+			`
+config:
+  v1:
+    benchmark: cis_azure
+`,
+			"cis_azure",
+			CloudConfig{},
 		},
 		{
 			`
@@ -87,7 +94,6 @@ config:
 					AccountType: "organization-account",
 				},
 			},
-			3,
 		},
 	}
 
@@ -118,6 +124,15 @@ config:
     benchmark: cis_eks
 `,
 			"cis_eks",
+			false,
+		},
+		{
+			`
+config:
+  v1:
+    benchmark: cis_azure
+`,
+			"cis_azure",
 			false,
 		},
 	}

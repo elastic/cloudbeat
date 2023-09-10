@@ -130,6 +130,7 @@ func mockGcpCfgProvider(err error) auth.ConfigProviderAPI {
 func mockInventoryInitializerService(err error) inventory.ProviderInitializerAPI {
 	initializer := &inventory.MockProviderInitializerAPI{}
 	inventoryService := &inventory.MockServiceAPI{}
+	inventoryService.EXPECT().Close().Maybe().Return(nil)
 	initializerMock := initializer.EXPECT().Init(mock.Anything, mock.Anything, mock.Anything)
 	if err == nil {
 		initializerMock.Return(
