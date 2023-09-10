@@ -138,7 +138,7 @@ func (res EcrResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res EcrResource) GetElasticCommonData() (map[string]interface{}, error) {
+func (res EcrResource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]interface{}{
 		"cloud.service.name": "AWS ECR",
 	}, nil
