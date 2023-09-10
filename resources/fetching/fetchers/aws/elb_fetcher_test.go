@@ -23,6 +23,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -213,4 +214,22 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		s.Nil(results)
 		s.EqualError(err, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))
 	}
+}
+
+func (s *ElbFetcherTestSuite) TestElbResource_GetMetadata() {
+	r := ElbResource{
+		identity: &cloud.Identity{
+			Account: "test-account",
+		},
+		lb: types.LoadBalancerDescription{
+			LoadBalancerName: aws.String("test-lb-name"),
+		},
+	}
+	meta, err := r.GetMetadata()
+	s.NoError(err)
+	s.Equal(fetching.ResourceMetadata{ID: "test-account-test-lb-name", Type: "load-balancer", SubType: "aws-elb", Name: "test-lb-name"}, meta)
+	m, err := r.GetElasticCommonData()
+	s.NoError(err)
+	s.Len(m, 1)
+	s.Contains(m, "cloud.service.name")
 }
