@@ -88,14 +88,14 @@ func (r KmsResource) GetElasticCommonData() (map[string]any, error) {
 		"cloud.service.name": "AWS KMS",
 	}
 
-	key, ok := r.key.(*kms.KmsInfo)
+	key, ok := r.key.(kms.KmsInfo)
 	if ok {
 		m["x509.not_after"] = key.KeyMetadata.ValidTo
 		m["x509.not_before"] = key.KeyMetadata.CreationDate
 		if key.KeyMetadata.KeyUsage == types.KeyUsageTypeSignVerify {
-			m["x509.public_key_algorithm"] = key.KeyMetadata.KeySpec
-		} else if key.KeyMetadata.KeyUsage == types.KeyUsageTypeEncryptDecrypt {
 			m["x509.signature_algorithm"] = key.KeyMetadata.KeySpec
+		} else if key.KeyMetadata.KeyUsage == types.KeyUsageTypeEncryptDecrypt {
+			m["x509.public_key_algorithm"] = key.KeyMetadata.KeySpec
 		}
 	}
 
