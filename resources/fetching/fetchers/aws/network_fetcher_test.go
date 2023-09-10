@@ -160,5 +160,6 @@ func TestACLResource_GetMetadata(t *testing.T) {
 	assert.Equal(t, ec2.NACLInfo{}, r.GetData())
 	m, err := r.GetElasticCommonData()
 	assert.NoError(t, err)
-	assert.Empty(t, m)
+	assert.Len(t, m, 1)
+	assert.Contains(t, m, "cloud.service.name")
 }
