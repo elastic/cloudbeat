@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 65/84 implemented rules (77%)
+### 66/84 implemented rules (79%)
 
-#### Automated rules: 65/73 (89%)
+#### Automated rules: 66/73 (90%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -310,7 +310,7 @@
 |                        2.15                        | Logging and Monitoring         | Ensure 'Access Approval' is 'Enabled'                                                                                             |        :x:         | Automated |
 |  [2.16](bundle/compliance/cis_gcp/rules/cis_2_16)  | Logging and Monitoring         | Ensure Logging is enabled for HTTP(S) Load Balancer                                                                               | :white_check_mark: | Automated |
 |                        2.2                         | Logging and Monitoring         | Ensure That Sinks Are Configured for All Log Entries                                                                              |        :x:         | Automated |
-|                        2.3                         | Logging and Monitoring         | Ensure That Retention Policies on Cloud Storage Buckets Used for Exporting Logs Are Configured Using Bucket Lock                  |        :x:         | Automated |
+|   [2.3](bundle/compliance/cis_gcp/rules/cis_2_3)   | Logging and Monitoring         | Ensure That Retention Policies on Cloud Storage Buckets Used for Exporting Logs Are Configured Using Bucket Lock                  | :white_check_mark: | Automated |
 |   [2.4](bundle/compliance/cis_gcp/rules/cis_2_4)   | Logging and Monitoring         | Ensure Log Metric Filter and Alerts Exist for Project Ownership Assignments/Changes                                               | :white_check_mark: | Automated |
 |   [2.5](bundle/compliance/cis_gcp/rules/cis_2_5)   | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Audit Configuration Changes                                                | :white_check_mark: | Automated |
 |   [2.6](bundle/compliance/cis_gcp/rules/cis_2_6)   | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Custom Role Changes                                                        | :white_check_mark: | Automated |

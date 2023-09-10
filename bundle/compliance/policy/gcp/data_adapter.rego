@@ -107,3 +107,7 @@ is_sql_instance {
 is_subnetwork {
 	input.subType == "gcp-compute-subnetwork"
 }
+
+is_log_bucket {
+	input.subType == "gcp-logging-log-bucket"
+}
