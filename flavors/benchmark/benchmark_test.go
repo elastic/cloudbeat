@@ -104,11 +104,13 @@ func TestNewBenchmark(t *testing.T) {
 func testInitialize(t *testing.T, benchmark Benchmark, cfg *config.Config, wantErr string, want []string) {
 	t.Helper()
 
-	reg, dp, err := benchmark.Initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
+	reg, dp, idp, err := benchmark.Initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
 	if wantErr != "" {
 		assert.ErrorContains(t, err, wantErr)
 		return
 	}
+	reg.Update()
+	defer reg.Stop()
 
 	require.NoError(t, err)
 	assert.Len(t, reg.Keys(), len(want))
@@ -123,6 +125,7 @@ func testInitialize(t *testing.T, benchmark Benchmark, cfg *config.Config, wantE
 
 	// TODO: gcp diff tests cover
 	assert.NotNil(t, dp)
+	assert.NotNil(t, idp)
 }
 
 func mockAwsCfg(err error) *awslib.MockConfigProviderAPI {

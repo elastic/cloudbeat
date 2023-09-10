@@ -42,34 +42,45 @@ type AWSOrg struct {
 	AccountProvider  awslib.AccountProviderAPI
 }
 
-func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get AWS accounts: %w", err)
-	}
+	cache := make(map[string]factory.FetchersMap)
+	reg := registry.NewRegistry(log, registry.WithUpdater(
+		func() (factory.FetchersMap, error) {
+			accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
+			}
 
-	return registry.NewRegistry(
-			log,
-			factory.NewCisAwsOrganizationFactory(ctx, log, ch, accounts),
-		), cloud.NewDataProvider(
-			cloud.WithLogger(log),
-			cloud.WithAccount(*awsIdentity),
-		), nil
+			fm := factory.NewCisAwsOrganizationFactory(ctx, log, ch, accounts, cache)
+			m := make(factory.FetchersMap)
+			for accountId, fetchersMap := range fm {
+				for key, fetcher := range fetchersMap {
+					m[fmt.Sprintf("%s-%s", accountId, key)] = fetcher
+				}
+			}
+
+			return m, nil
+		}))
+
+	return reg, cloud.NewDataProvider(
+		cloud.WithLogger(log),
+		cloud.WithAccount(*awsIdentity),
+	), cloud.NewIdProvider(), nil
 }
 
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {
