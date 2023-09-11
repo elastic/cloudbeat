@@ -1,0 +1,116 @@
+package preset
+
+import (
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"go.uber.org/zap"
+)
+
+type AwsAccount struct {
+	cloud.Identity
+	aws.Config
+}
+
+type wrapResource struct {
+	wrapped  fetching.Resource
+	identity cloud.Identity
+}
+
+func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	mdata, err := w.wrapped.GetMetadata()
+	if err != nil {
+		return mdata, err
+	}
+	mdata.AwsAccountAlias = w.identity.AccountAlias
+	mdata.AwsAccountId = w.identity.Account
+	mdata.AwsOrganizationId = w.identity.OrganizationId
+	mdata.AwsOrganizationName = w.identity.OrganizationName
+	return mdata, nil
+}
+
+func (w *wrapResource) GetData() any { return w.wrapped.GetData() }
+func (w *wrapResource) GetElasticCommonData() (map[string]interface{}, error) {
+	return w.wrapped.GetElasticCommonData()
+}
+
+func NewCisAwsOrganizationFetchers(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap) map[string]registry.FetchersMap {
+	return newCisAwsOrganizationFetchers(ctx, log, rootCh, accounts, cache, NewCisAwsFetchers)
+}
+
+// awsFactory is the same function type as NewCisAwsFetchers, and it's used to mock the function in tests
+type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap
+
+func newCisAwsOrganizationFetchers(
+	ctx context.Context,
+	log *logp.Logger,
+	rootCh chan fetching.ResourceInfo,
+	accounts []AwsAccount,
+	cache map[string]registry.FetchersMap,
+	factory awsFactory,
+) map[string]registry.FetchersMap {
+	seen := make(map[string]bool)
+	for key := range cache {
+		seen[key] = false
+	}
+
+	m := make(map[string]registry.FetchersMap)
+	for _, account := range accounts {
+		if existing := cache[account.Account]; existing != nil {
+			m[account.Account] = existing
+			seen[account.Account] = true
+			continue
+		}
+
+		ch := make(chan fetching.ResourceInfo)
+		go func(identity cloud.Identity) {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case resourceInfo, ok := <-ch:
+					if !ok {
+						return
+					}
+
+					wrappedResourceInfo := fetching.ResourceInfo{
+						Resource: &wrapResource{
+							wrapped:  resourceInfo.Resource,
+							identity: identity,
+						},
+						CycleMetadata: resourceInfo.CycleMetadata,
+					}
+
+					select {
+					case <-ctx.Done():
+						return
+					case rootCh <- wrappedResourceInfo:
+					}
+				}
+			}
+		}(account.Identity)
+
+		f := factory(
+			log.Named("aws").WithOptions(zap.Fields(zap.String("cloud.account.id", account.Identity.Account))),
+			account.Config,
+			ch,
+			&account.Identity,
+		)
+		m[account.Account] = f
+		if cache != nil {
+			cache[account.Account] = f
+		}
+	}
+
+	for key, v := range seen {
+		if !v {
+			delete(cache, key)
+		}
+	}
+
+	return m
+}
