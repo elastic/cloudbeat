@@ -35,6 +35,8 @@ import (
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
 	"github.com/elastic/e2e-testing/pkg/downloads"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 
@@ -364,28 +366,39 @@ func BuildOpaBundle() (err error) {
 	if err != nil {
 		return err
 	}
-
-	// Find the commit associated with the relevant policy version tag
-	policyVersion := version.PolicyVersion().Version
-	ref, err := repo.Tag(policyVersion)
+	err = repo.Fetch(&git.FetchOptions{
+		RefSpecs: []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
+	})
 	if err != nil {
 		return err
 	}
-
-	log.Printf("Latest production release commit hash: %s", ref.Hash().String())
 	// Check out the provided release tag commit
 	wt, err := repo.Worktree()
 	if err != nil {
 		return err
 	}
-
-	if err = wt.Checkout(&git.CheckoutOptions{Hash: ref.Hash()}); err != nil {
-		return err
+	// Try a version branch, fallback to 'main' branch on failure
+	// until we have a new version branch, next release will fallback to 'main' branch
+	versionBranchMajorMinor := strings.Join(strings.Split(version.CloudbeatVersion().Version, ".")[:2], ".")
+	versionBranch := fmt.Sprintf("refs/heads/%s", versionBranchMajorMinor)
+	mainBranch := plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", "main"))
+	if err = wt.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.ReferenceName(versionBranch),
+	}); err != nil {
+		fmt.Println("Failed to checkout branch", versionBranch)
+		fmt.Println("Trying main branch")
+		if err = wt.Checkout(&git.CheckoutOptions{
+			Branch: mainBranch,
+		}); err != nil {
+			return err
+		}
 	}
 
 	if err = sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance"); err != nil {
 		return err
 	}
+
+	fmt.Println("Generated OPA bundle at", cspPoliciesPkgDir+"/bundle.tar.gz")
 
 	return nil
 }
