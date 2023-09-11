@@ -56,7 +56,7 @@ func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
 	}
 
-	fetchers, err := preset.NewCisGcpFactory(ctx, log, ch, assetProvider)
+	fetchers, err := preset.NewCisGcpFetchers(ctx, log, ch, assetProvider)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
 	}

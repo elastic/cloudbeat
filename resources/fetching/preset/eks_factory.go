@@ -48,7 +48,7 @@ var (
 		"/hostfs/var/lib/kubelet/kubeconfig"}
 )
 
-func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *cloud.Identity) registry.FetchersMap {
+func NewCisEksFetchers(log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *cloud.Identity) registry.FetchersMap {
 	log.Infof("Initializing EKS fetchers")
 	m := make(registry.FetchersMap)
 

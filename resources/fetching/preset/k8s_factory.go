@@ -52,7 +52,7 @@ var vanillaRequiredProcesses = fetchers.ProcessesConfigMap{
 	"kubelet":         {ConfigFileArguments: []string{"config"}},
 }
 
-func NewCisK8sFactory(log *logp.Logger, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) registry.FetchersMap {
+func NewCisK8sFetchers(log *logp.Logger, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) registry.FetchersMap {
 	log.Infof("Initializing K8s fetchers")
 	m := make(registry.FetchersMap)
 	fsFetcher := fetchers.NewFsFetcher(log, ch, vanillaFsPatterns)

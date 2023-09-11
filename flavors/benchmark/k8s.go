@@ -65,7 +65,7 @@ func (k *K8S) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(
 		log,
-		registry.WithFetchersMap(preset.NewCisK8sFactory(log, ch, k.leaderElector, kubeClient)),
+		registry.WithFetchersMap(preset.NewCisK8sFetchers(log, ch, k.leaderElector, kubeClient)),
 	), dp, idp, nil
 }
 
