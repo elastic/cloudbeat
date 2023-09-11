@@ -21,11 +21,12 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
+	"go.uber.org/zap"
+
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/elastic-agent-libs/logp"
-	"go.uber.org/zap"
 )
 
 type AwsAccount struct {
