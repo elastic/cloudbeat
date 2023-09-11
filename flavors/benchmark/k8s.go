@@ -29,7 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/uniqueness"
 )
@@ -65,7 +65,7 @@ func (k *K8S) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(
 		log,
-		registry.WithFetchersMap(factory.NewCisK8sFactory(log, ch, k.leaderElector, kubeClient)),
+		registry.WithFetchersMap(preset.NewCisK8sFactory(log, ch, k.leaderElector, kubeClient)),
 	), dp, idp, nil
 }
 

@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package preset
 
 import (
 	"fmt"
@@ -30,6 +30,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching/condition"
 	awsfetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/aws"
 	k8sfetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
@@ -47,9 +48,9 @@ var (
 		"/hostfs/var/lib/kubelet/kubeconfig"}
 )
 
-func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *cloud.Identity) FetchersMap {
+func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface, identity *cloud.Identity) registry.FetchersMap {
 	log.Infof("Initializing EKS fetchers")
-	m := make(FetchersMap)
+	m := make(registry.FetchersMap)
 
 	if identity != nil {
 		log.Info("Initialize aws-related fetchers")
@@ -62,21 +63,21 @@ func NewCisEksFactory(log *logp.Logger, awsConfig aws.Config, ch chan fetching.R
 		}
 
 		ecrFetcher := awsfetchers.NewEcrFetcher(log, ch, k8sClient, ecrPodDescriber)
-		m[fetching.EcrType] = RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
+		m[fetching.EcrType] = registry.RegisteredFetcher{Fetcher: ecrFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 
 		elbProvider := elb.NewElbProvider(awsConfig)
 		loadBalancerRegex := fmt.Sprintf(elbRegexTemplate, awsConfig.Region)
 		elbFetcher := awsfetchers.NewElbFetcher(log, ch, k8sClient, elbProvider, identity, loadBalancerRegex)
-		m[fetching.ElbType] = RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
+		m[fetching.ElbType] = registry.RegisteredFetcher{Fetcher: elbFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 	}
 
 	fsFetcher := k8sfetchers.NewFsFetcher(log, ch, eksFsPatterns)
-	m[fetching.FileSystemType] = RegisteredFetcher{Fetcher: fsFetcher}
+	m[fetching.FileSystemType] = registry.RegisteredFetcher{Fetcher: fsFetcher}
 
 	procFetcher := k8sfetchers.NewProcessFetcher(log, ch, eksRequiredProcesses)
-	m[fetching.ProcessType] = RegisteredFetcher{Fetcher: procFetcher}
+	m[fetching.ProcessType] = registry.RegisteredFetcher{Fetcher: procFetcher}
 
 	kubeFetcher := k8sfetchers.NewKubeFetcher(log, ch, k8sClient)
-	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
+	m[fetching.KubeAPIType] = registry.RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 	return m
 }

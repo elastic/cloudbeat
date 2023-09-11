@@ -29,7 +29,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
@@ -56,7 +56,7 @@ func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(
 			log,
-			registry.WithFetchersMap(factory.NewCisAwsFactory(log, awsConfig, ch, awsIdentity)),
+			registry.WithFetchersMap(preset.NewCisAwsFactory(log, awsConfig, ch, awsIdentity)),
 		), cloud.NewDataProvider(
 			cloud.WithLogger(log),
 			cloud.WithAccount(*awsIdentity),

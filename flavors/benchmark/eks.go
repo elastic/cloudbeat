@@ -31,7 +31,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/uniqueness"
@@ -83,7 +83,7 @@ func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(
 		log,
-		registry.WithFetchersMap(factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)),
+		registry.WithFetchersMap(preset.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)),
 	), dp, idp, nil
 }
 
