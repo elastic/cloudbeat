@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package registry
 
 import (
 	"github.com/elastic/cloudbeat/resources/fetching"

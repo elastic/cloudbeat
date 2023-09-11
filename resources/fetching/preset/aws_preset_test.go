@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package preset
 
 import (
 	"context"
@@ -32,6 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -66,7 +67,7 @@ func subtest(t *testing.T, drain bool) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	factory := mockFactory(nAccounts,
-		func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
+		func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) registry.FetchersMap {
 			if drain {
 				// create some resources if we are testing for that
 				go func() {
@@ -79,9 +80,9 @@ func subtest(t *testing.T, drain bool) {
 				}()
 			}
 
-			fm := FetchersMap{}
+			fm := registry.FetchersMap{}
 			for i := 0; i < nFetchers; i++ {
-				fm[fmt.Sprintf("fetcher-%d", i)] = RegisteredFetcher{}
+				fm[fmt.Sprintf("fetcher-%d", i)] = registry.RegisteredFetcher{}
 			}
 			return fm
 		},
@@ -148,13 +149,13 @@ func TestNewCisAwsOrganizationFactory_LeakContextDone(t *testing.T) {
 		}},
 		nil,
 		mockFactory(1,
-			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) registry.FetchersMap {
 				ch <- fetching.ResourceInfo{
 					Resource:      mockResource(),
 					CycleMetadata: fetching.CycleMetadata{Sequence: 1},
 				}
 
-				return FetchersMap{"fetcher": RegisteredFetcher{}}
+				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
 			},
 		),
 	)
@@ -177,18 +178,18 @@ func TestNewCisAwsOrganizationFactory_CloseChannel(t *testing.T) {
 		}},
 		nil,
 		mockFactory(1,
-			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) FetchersMap {
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) registry.FetchersMap {
 				defer close(ch)
-				return FetchersMap{"fetcher": RegisteredFetcher{}}
+				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
 			},
 		),
 	)
 }
 
 func TestNewCisAwsOrganizationFactory_Cache(t *testing.T) {
-	cache := map[string]FetchersMap{
-		"1": {"fetcher": RegisteredFetcher{}},
-		"3": {"fetcher": RegisteredFetcher{}},
+	cache := map[string]registry.FetchersMap{
+		"1": {"fetcher": registry.RegisteredFetcher{}},
+		"3": {"fetcher": registry.RegisteredFetcher{}},
 	}
 	m := newCisAwsOrganizationFactory(
 		context.Background(),
@@ -210,9 +211,9 @@ func TestNewCisAwsOrganizationFactory_Cache(t *testing.T) {
 		},
 		cache,
 		mockFactory(1,
-			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) FetchersMap {
+			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) registry.FetchersMap {
 				assert.Equal(t, "2", identity.Account)
-				return FetchersMap{"fetcher": RegisteredFetcher{}}
+				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
 			},
 		),
 	)

@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package preset
 
 import (
 	"context"
@@ -23,19 +23,17 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/gcp"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
+	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/azure"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-func NewCisGcpFactory(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (FetchersMap, error) {
-	log.Infof("Initializing GCP fetchers")
-	m := make(FetchersMap)
+func NewCisAzureFactory(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (FetchersMap, error) {
+	log.Infof("Initializing Azure fetchers")
+	m := make(registry.FetchersMap)
 
-	assetsFetcher := fetchers.NewGcpAssetsFetcher(ctx, log, ch, inventory)
-	m["gcp_cloud_assets_fetcher"] = RegisteredFetcher{Fetcher: assetsFetcher}
-
-	monitoringFetcher := fetchers.NewGcpMonitoringFetcher(ctx, log, ch, inventory)
-	m["gcp_monitoring_fetcher"] = RegisteredFetcher{Fetcher: monitoringFetcher}
+	assetsFetcher := fetchers.NewAzureAssetsFetcher(ctx, log, ch, inventory)
+	m["azure_cloud_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: assetsFetcher}
 
 	return m, nil
 }
