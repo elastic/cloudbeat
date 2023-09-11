@@ -71,14 +71,14 @@ func (w *wrapResource) GetElasticCommonData() (map[string]interface{}, error) {
 	return w.wrapped.GetElasticCommonData()
 }
 
-func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap) map[string]registry.FetchersMap {
-	return newCisAwsOrganizationFactory(ctx, log, rootCh, accounts, cache, NewCisAwsFetchers)
+func NewCisAwsOrganizationFetchers(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap) map[string]registry.FetchersMap {
+	return newCisAwsOrganizationFetchers(ctx, log, rootCh, accounts, cache, NewCisAwsFetchers)
 }
 
 // awsFactory is the same function type as NewCisAwsFetchers, and it's used to mock the function in tests
 type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap
 
-func newCisAwsOrganizationFactory(
+func newCisAwsOrganizationFetchers(
 	ctx context.Context,
 	log *logp.Logger,
 	rootCh chan fetching.ResourceInfo,
