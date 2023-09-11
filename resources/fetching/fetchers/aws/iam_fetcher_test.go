@@ -371,5 +371,4 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 			s.Contains(m, "cloud.service.name")
 		})
 	}
-
 }
