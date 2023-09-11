@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package preset
 
 import (
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/condition"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 
@@ -51,17 +52,17 @@ var vanillaRequiredProcesses = fetchers.ProcessesConfigMap{
 	"kubelet":         {ConfigFileArguments: []string{"config"}},
 }
 
-func NewCisK8sFactory(log *logp.Logger, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) FetchersMap {
+func NewCisK8sFetchers(log *logp.Logger, ch chan fetching.ResourceInfo, le uniqueness.Manager, k8sClient k8s.Interface) registry.FetchersMap {
 	log.Infof("Initializing K8s fetchers")
-	m := make(FetchersMap)
+	m := make(registry.FetchersMap)
 	fsFetcher := fetchers.NewFsFetcher(log, ch, vanillaFsPatterns)
-	m[fetching.FileSystemType] = RegisteredFetcher{Fetcher: fsFetcher}
+	m[fetching.FileSystemType] = registry.RegisteredFetcher{Fetcher: fsFetcher}
 
 	procFetcher := fetchers.NewProcessFetcher(log, ch, vanillaRequiredProcesses)
-	m[fetching.ProcessType] = RegisteredFetcher{Fetcher: procFetcher}
+	m[fetching.ProcessType] = registry.RegisteredFetcher{Fetcher: procFetcher}
 
 	kubeFetcher := fetchers.NewKubeFetcher(log, ch, k8sClient)
-	m[fetching.KubeAPIType] = RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
+	m[fetching.KubeAPIType] = registry.RegisteredFetcher{Fetcher: kubeFetcher, Condition: []fetching.Condition{condition.NewIsLeader(log, le)}}
 
 	return m
 }

@@ -24,7 +24,6 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
 )
 
 type Registry interface {
@@ -37,13 +36,13 @@ type Registry interface {
 
 type registry struct {
 	log     *logp.Logger
-	reg     factory.FetchersMap
+	reg     FetchersMap
 	updater UpdaterFunc
 }
 
 type Option func(r *registry)
 
-type UpdaterFunc func() (factory.FetchersMap, error)
+type UpdaterFunc func() (FetchersMap, error)
 
 func WithUpdater(fn UpdaterFunc) Option {
 	return func(r *registry) {
@@ -51,7 +50,7 @@ func WithUpdater(fn UpdaterFunc) Option {
 	}
 }
 
-func WithFetchersMap(f factory.FetchersMap) Option {
+func WithFetchersMap(f FetchersMap) Option {
 	return func(r *registry) {
 		r.reg = f
 	}

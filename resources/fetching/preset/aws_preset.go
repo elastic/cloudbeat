@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package preset
 
 import (
 	"context"
@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/aws"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -70,27 +71,27 @@ func (w *wrapResource) GetElasticCommonData() (map[string]any, error) {
 	return w.wrapped.GetElasticCommonData()
 }
 
-func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]FetchersMap) map[string]FetchersMap {
-	return newCisAwsOrganizationFactory(ctx, log, rootCh, accounts, cache, NewCisAwsFactory)
+func NewCisAwsOrganizationFactory(ctx context.Context, log *logp.Logger, rootCh chan fetching.ResourceInfo, accounts []AwsAccount, cache map[string]registry.FetchersMap) map[string]registry.FetchersMap {
+	return newCisAwsOrganizationFactory(ctx, log, rootCh, accounts, cache, NewCisAwsFetchers)
 }
 
-// awsFactory is the same function type as NewCisAwsFactory, and it's used to mock the function in tests
-type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) FetchersMap
+// awsFactory is the same function type as NewCisAwsFetchers, and it's used to mock the function in tests
+type awsFactory func(*logp.Logger, aws.Config, chan fetching.ResourceInfo, *cloud.Identity) registry.FetchersMap
 
 func newCisAwsOrganizationFactory(
 	ctx context.Context,
 	log *logp.Logger,
 	rootCh chan fetching.ResourceInfo,
 	accounts []AwsAccount,
-	cache map[string]FetchersMap,
+	cache map[string]registry.FetchersMap,
 	factory awsFactory,
-) map[string]FetchersMap {
+) map[string]registry.FetchersMap {
 	seen := make(map[string]bool)
 	for key := range cache {
 		seen[key] = false
 	}
 
-	m := make(map[string]FetchersMap)
+	m := make(map[string]registry.FetchersMap)
 	for _, account := range accounts {
 		if existing := cache[account.Account]; existing != nil {
 			m[account.Account] = existing
@@ -147,22 +148,22 @@ func newCisAwsOrganizationFactory(
 	return m
 }
 
-func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) FetchersMap {
+func NewCisAwsFetchers(log *logp.Logger, cfg aws.Config, ch chan fetching.ResourceInfo, identity *cloud.Identity) registry.FetchersMap {
 	log.Infof("Initializing AWS fetchers for account: '%s'", identity.Account)
 
-	m := make(FetchersMap)
+	m := make(registry.FetchersMap)
 	iamProvider := iam.NewIAMProvider(log, cfg, &awslib.MultiRegionClientFactory[iam.AccessAnalyzerClient]{})
 	iamFetcher := fetchers.NewIAMFetcher(log, iamProvider, ch, identity)
-	m[fetching.IAMType] = RegisteredFetcher{Fetcher: iamFetcher}
+	m[fetching.IAMType] = registry.RegisteredFetcher{Fetcher: iamFetcher}
 
 	kmsProvider := kms.NewKMSProvider(log, cfg, &awslib.MultiRegionClientFactory[kms.Client]{})
 	kmsFetcher := fetchers.NewKMSFetcher(log, kmsProvider, ch)
-	m[fetching.KmsType] = RegisteredFetcher{Fetcher: kmsFetcher}
+	m[fetching.KmsType] = registry.RegisteredFetcher{Fetcher: kmsFetcher}
 
 	loggingProvider := logging.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[cloudtrail.Client]{}, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
 	configserviceProvider := configservice.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[configservice.Client]{}, identity.Account)
 	loggingFetcher := fetchers.NewLoggingFetcher(log, loggingProvider, configserviceProvider, ch, identity)
-	m[fetching.TrailType] = RegisteredFetcher{Fetcher: loggingFetcher}
+	m[fetching.TrailType] = registry.RegisteredFetcher{Fetcher: loggingFetcher}
 
 	monitoringProvider := monitoring.NewProvider(
 		log,
@@ -175,19 +176,19 @@ func NewCisAwsFactory(log *logp.Logger, cfg aws.Config, ch chan fetching.Resourc
 
 	securityHubProvider := securityhub.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[securityhub.Client]{}, identity.Account)
 	monitoringFetcher := fetchers.NewMonitoringFetcher(log, monitoringProvider, securityHubProvider, ch, identity)
-	m[fetching.AwsMonitoringType] = RegisteredFetcher{Fetcher: monitoringFetcher}
+	m[fetching.AwsMonitoringType] = registry.RegisteredFetcher{Fetcher: monitoringFetcher}
 
 	ec2Provider := ec2.NewEC2Provider(log, identity.Account, cfg, &awslib.MultiRegionClientFactory[ec2.Client]{})
 	networkFetcher := fetchers.NewNetworkFetcher(log, ec2Provider, ch, identity)
-	m[fetching.EC2NetworkingType] = RegisteredFetcher{Fetcher: networkFetcher}
+	m[fetching.EC2NetworkingType] = registry.RegisteredFetcher{Fetcher: networkFetcher}
 
 	rdsProvider := rds.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[rds.Client]{}, ec2Provider)
 	rdsFetcher := fetchers.NewRdsFetcher(log, rdsProvider, ch)
-	m[fetching.RdsType] = RegisteredFetcher{Fetcher: rdsFetcher}
+	m[fetching.RdsType] = registry.RegisteredFetcher{Fetcher: rdsFetcher}
 
 	s3Provider := s3.NewProvider(log, cfg, &awslib.MultiRegionClientFactory[s3.Client]{}, identity.Account)
 	s3Fetcher := fetchers.NewS3Fetcher(log, s3Provider, ch)
-	m[fetching.S3Type] = RegisteredFetcher{Fetcher: s3Fetcher}
+	m[fetching.S3Type] = registry.RegisteredFetcher{Fetcher: s3Fetcher}
 
 	return m
 }
