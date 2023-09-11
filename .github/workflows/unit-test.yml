@@ -32,7 +32,7 @@ jobs:
           go-version-file: .go-version
 
       - name: Mage build bundle before unit tests
-        uses: magefile/mage-action@v2
+        uses: magefile/mage-action@v3
         with:
           args: buildOpaBundle
 

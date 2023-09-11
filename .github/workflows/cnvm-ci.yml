@@ -37,7 +37,7 @@ jobs:
           aws-region: 'us-east-2'
 
       - name: Build cloudbeat binary
-        uses: magefile/mage-action@v2
+        uses: magefile/mage-action@v3
         with:
           version: latest
           args: build
