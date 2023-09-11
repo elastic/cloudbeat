@@ -339,6 +339,10 @@ func PythonEnv() error {
 	return err
 }
 
+func getMajorMinorVersion(version string) string {
+	return strings.Join(strings.Split(version, ".")[:2], ".")
+}
+
 func BuildOpaBundle() (err error) {
 	owner := "elastic"
 	repoName := "csp-security-policies"
@@ -379,16 +383,14 @@ func BuildOpaBundle() (err error) {
 	}
 	// Try a version branch, fallback to 'main' branch on failure
 	// until we have a new version branch, next release will fallback to 'main' branch
-	versionBranchMajorMinor := strings.Join(strings.Split(version.CloudbeatVersion().Version, ".")[:2], ".")
-	versionBranch := fmt.Sprintf("refs/heads/%s", versionBranchMajorMinor)
-	mainBranch := plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", "main"))
+	versionBranchMajorMinor := getMajorMinorVersion(version.PolicyVersion().Version)
 	if err = wt.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.ReferenceName(versionBranch),
+		Branch: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", versionBranchMajorMinor)),
 	}); err != nil {
-		fmt.Println("Failed to checkout branch", versionBranch)
+		fmt.Println("Failed to checkout branch", versionBranchMajorMinor)
 		fmt.Println("Trying main branch")
 		if err = wt.Checkout(&git.CheckoutOptions{
-			Branch: mainBranch,
+			Branch: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", "main")),
 		}); err != nil {
 			return err
 		}
