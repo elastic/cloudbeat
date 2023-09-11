@@ -36,7 +36,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-func TestNewCisAwsOrganizationFactory_Leak(t *testing.T) {
+func TestNewCisAwsOrganizationFetchers_Leak(t *testing.T) {
 	t.Run("drain", func(t *testing.T) {
 		subtest(t, true)
 	})
@@ -89,7 +89,7 @@ func subtest(t *testing.T, drain bool) {
 	)
 
 	rootCh := make(chan fetching.ResourceInfo)
-	fetcherMap := newCisAwsOrganizationFactory(ctx, testhelper.NewLogger(t), rootCh, accounts, nil, factory)
+	fetcherMap := newCisAwsOrganizationFetchers(ctx, testhelper.NewLogger(t), rootCh, accounts, nil, factory)
 	assert.Lenf(t, fetcherMap, nAccounts, "Correct amount of maps")
 
 	if drain {
@@ -133,11 +133,11 @@ func subtest(t *testing.T, drain bool) {
 	cancel()
 }
 
-func TestNewCisAwsOrganizationFactory_LeakContextDone(t *testing.T) {
+func TestNewCisAwsOrganizationFetchers_LeakContextDone(t *testing.T) {
 	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 	ctx, cancel := context.WithCancel(context.Background())
 
-	newCisAwsOrganizationFactory(
+	newCisAwsOrganizationFetchers(
 		ctx,
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
@@ -163,10 +163,10 @@ func TestNewCisAwsOrganizationFactory_LeakContextDone(t *testing.T) {
 	cancel()
 }
 
-func TestNewCisAwsOrganizationFactory_CloseChannel(t *testing.T) {
+func TestNewCisAwsOrganizationFetchers_CloseChannel(t *testing.T) {
 	defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 
-	newCisAwsOrganizationFactory(
+	newCisAwsOrganizationFetchers(
 		context.Background(),
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
@@ -186,12 +186,12 @@ func TestNewCisAwsOrganizationFactory_CloseChannel(t *testing.T) {
 	)
 }
 
-func TestNewCisAwsOrganizationFactory_Cache(t *testing.T) {
+func TestNewCisAwsOrganizationFetchers_Cache(t *testing.T) {
 	cache := map[string]registry.FetchersMap{
 		"1": {"fetcher": registry.RegisteredFetcher{}},
 		"3": {"fetcher": registry.RegisteredFetcher{}},
 	}
-	m := newCisAwsOrganizationFactory(
+	m := newCisAwsOrganizationFetchers(
 		context.Background(),
 		testhelper.NewLogger(t),
 		make(chan fetching.ResourceInfo),
