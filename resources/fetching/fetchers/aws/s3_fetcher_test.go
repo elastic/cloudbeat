@@ -97,3 +97,19 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 		})
 	}
 }
+
+func (s *S3FetcherTestSuite) TestS3Resource_GetMetadata() {
+	r := S3Resource{
+		bucket: s3.BucketDescription{
+			Name:         "test-bucket-name",
+			SSEAlgorithm: nil,
+		},
+	}
+	meta, err := r.GetMetadata()
+	s.NoError(err)
+	s.Equal(fetching.ResourceMetadata{ID: "arn:aws:s3:::test-bucket-name", Type: "cloud-storage", SubType: "aws-s3", Name: "test-bucket-name"}, meta)
+	m, err := r.GetElasticCommonData()
+	s.NoError(err)
+	s.Len(m, 1)
+	s.Contains(m, "cloud.service.name")
+}
