@@ -24,25 +24,44 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
 )
 
 type Registry interface {
 	Keys() []string
 	ShouldRun(key string) bool
 	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
+	Update()
 	Stop()
 }
 
 type registry struct {
-	log *logp.Logger
-	reg factory.FetchersMap
+	log     *logp.Logger
+	reg     FetchersMap
+	updater UpdaterFunc
 }
 
-func NewRegistry(log *logp.Logger, f factory.FetchersMap) Registry {
+type Option func(r *registry)
+
+type UpdaterFunc func() (FetchersMap, error)
+
+func WithUpdater(fn UpdaterFunc) Option {
+	return func(r *registry) {
+		r.updater = fn
+	}
+}
+
+func WithFetchersMap(f FetchersMap) Option {
+	return func(r *registry) {
+		r.reg = f
+	}
+}
+
+func NewRegistry(log *logp.Logger, options ...Option) Registry {
 	r := &registry{
 		log: log,
-		reg: f,
+	}
+	for _, fn := range options {
+		fn(r)
 	}
 	return r
 }
@@ -79,6 +98,18 @@ func (r *registry) Run(ctx context.Context, key string, metadata fetching.CycleM
 	}
 
 	return registered.Fetcher.Fetch(ctx, metadata)
+}
+
+func (r *registry) Update() {
+	if r.updater == nil {
+		return
+	}
+	fm, err := r.updater()
+	if err != nil {
+		r.log.Errorf("Failed to update registry: %v", err)
+		return
+	}
+	r.reg = fm
 }
 
 func (r *registry) Stop() {

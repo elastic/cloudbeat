@@ -235,3 +235,140 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 		})
 	}
 }
+
+func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
+	tests := []struct {
+		name     string
+		resource awslib.AwsResource
+		expected fetching.ResourceMetadata
+	}{
+		{
+			name: "Should return correct metadata for iam pwd policy",
+			resource: iam.PasswordPolicy{
+				ReusePreventionCount: 5,
+				RequireLowercase:     true,
+				RequireUppercase:     true,
+				RequireNumbers:       true,
+				RequireSymbols:       false,
+				MaxAgeDays:           90,
+				MinimumLength:        8,
+			},
+			expected: fetching.ResourceMetadata{
+				Region:  "global",
+				ID:      "test-account-account-password-policy",
+				Type:    "identity-management",
+				SubType: "aws-password-policy",
+				Name:    "account-password-policy",
+			},
+		},
+		{
+			name: "Should return correct metadata for iam user",
+			resource: iam.User{
+				AccessKeys: []iam.AccessKey{{
+					Active:       false,
+					HasUsed:      false,
+					LastAccess:   "",
+					RotationDate: "",
+				},
+				},
+				MFADevices:          nil,
+				Name:                "test",
+				LastAccess:          "",
+				Arn:                 "test-user-arn",
+				PasswordEnabled:     true,
+				PasswordLastChanged: "",
+				MfaActive:           true,
+			},
+			expected: fetching.ResourceMetadata{
+				Region:  "global",
+				ID:      "test-user-arn",
+				Type:    "identity-management",
+				SubType: "aws-iam-user",
+				Name:    "test",
+			},
+		},
+		{
+			name: "Should return correct metadata for iam policy",
+			resource: iam.Policy{
+				Policy: types.Policy{
+					PolicyName:      aws.String("test-policy"),
+					Arn:             aws.String("test-policy-arn"),
+					AttachmentCount: aws.Int32(1),
+					IsAttachable:    true,
+				},
+				Document: map[string]interface{}{
+					"Statements": []map[string]interface{}{
+						{
+							"Resource": "*",
+							"Action":   "*",
+							"Effect":   "Allow",
+						},
+					},
+				},
+			},
+			expected: fetching.ResourceMetadata{
+				Region:  "global",
+				ID:      "test-policy-arn",
+				Type:    "identity-management",
+				SubType: "aws-policy",
+				Name:    "test-policy",
+			},
+		},
+		{
+			name: "Should return correct metadata for iam certificate",
+			resource: iam.ServerCertificatesInfo{
+				Certificates: []types.ServerCertificateMetadata{
+					{
+						Expiration: &time.Time{},
+					},
+				},
+			},
+			expected: fetching.ResourceMetadata{
+				Region:  "global",
+				ID:      "test-account-account-iam-server-certificates",
+				Type:    "identity-management",
+				SubType: "aws-iam-server-certificate",
+				Name:    "account-iam-server-certificates",
+			},
+		},
+		{
+			name: "Should return correct metadata for access analyzer",
+			resource: iam.AccessAnalyzers{
+				Analyzers: []iam.AccessAnalyzer{
+					{
+
+						AnalyzerSummary: aatypes.AnalyzerSummary{Arn: aws.String("some-arn")},
+						Region:          "region-1",
+					},
+				},
+			},
+			expected: fetching.ResourceMetadata{
+				Region:  "global",
+				ID:      "test-account-account-access-analyzers",
+				Type:    "identity-management",
+				SubType: "aws-access-analyzers",
+				Name:    "account-access-analyzers",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			iamResource := IAMResource{
+				AwsResource: test.resource,
+				identity: &cloud.Identity{
+					Account: "test-account",
+				},
+			}
+
+			meta, err := iamResource.GetMetadata()
+			s.NoError(err)
+			s.Equal(test.expected, meta)
+
+			m, err := iamResource.GetElasticCommonData()
+			s.NoError(err)
+			s.Len(m, 1)
+			s.Contains(m, "cloud.service.name")
+		})
+	}
+}

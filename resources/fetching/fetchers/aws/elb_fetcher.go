@@ -119,4 +119,9 @@ func (r ElbResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		Name:    *r.lb.LoadBalancerName,
 	}, nil
 }
-func (r ElbResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+
+func (res ElbResource) GetElasticCommonData() (map[string]any, error) {
+	return map[string]interface{}{
+		"cloud.service.name": "ELB",
+	}, nil
+}

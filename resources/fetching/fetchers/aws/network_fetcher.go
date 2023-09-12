@@ -88,7 +88,11 @@ func (r NetworkResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r NetworkResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+func (r NetworkResource) GetElasticCommonData() (map[string]any, error) {
+	return map[string]interface{}{
+		"cloud.service.name": "EC2",
+	}, nil
+}
 
 func (f NetworkFetcher) aggregateResources(ctx context.Context, client ec2.ElasticCompute) []awslib.AwsResource {
 	var resources []awslib.AwsResource

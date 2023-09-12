@@ -15,15 +15,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package cloud
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-type RegisteredFetcher struct {
-	Fetcher   fetching.Fetcher
-	Condition []fetching.Condition
-}
+func Test_k8sIdProvider_GetId(t *testing.T) {
+	tests := []struct {
+		name     string
+		want     string
+		id       string
+		resource string
+	}{
+		{
+			name:     "should return the raw id",
+			want:     "metadata_id",
+			id:       "metadata_id",
+			resource: "unknown",
+		},
+	}
 
-type FetchersMap map[string]RegisteredFetcher
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewIdProvider()
+			data := p.GetId(tt.resource, tt.id)
+			assert.Equal(t, tt.want, data)
+		})
+	}
+}

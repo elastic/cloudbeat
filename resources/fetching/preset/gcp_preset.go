@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package factory
+package preset
 
 import (
 	"context"
@@ -24,18 +24,19 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/gcp"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
-func NewCisGcpFactory(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (FetchersMap, error) {
+func NewCisGcpFetchers(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (registry.FetchersMap, error) {
 	log.Infof("Initializing GCP fetchers")
-	m := make(FetchersMap)
+	m := make(registry.FetchersMap)
 
 	assetsFetcher := fetchers.NewGcpAssetsFetcher(ctx, log, ch, inventory)
-	m["gcp_cloud_assets_fetcher"] = RegisteredFetcher{Fetcher: assetsFetcher}
+	m["gcp_cloud_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: assetsFetcher}
 
 	monitoringFetcher := fetchers.NewGcpMonitoringFetcher(ctx, log, ch, inventory)
-	m["gcp_monitoring_fetcher"] = RegisteredFetcher{Fetcher: monitoringFetcher}
+	m["gcp_monitoring_fetcher"] = registry.RegisteredFetcher{Fetcher: monitoringFetcher}
 
 	return m, nil
 }

@@ -35,7 +35,7 @@ import (
 
 type Benchmark interface {
 	Run(ctx context.Context) error
-	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error)
+	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)
 	Stop()
 
 	checkDependencies() error

@@ -21,7 +21,10 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -96,4 +99,32 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 			s.Equal(test.numExpectedResults, len(results))
 		})
 	}
+}
+
+func (s *KmsFetcherTestSuite) TestKmsResource_GetMetadata() {
+	validFrom := aws.Time(time.Date(1992, 9, 1, 0, 0, 0, 0, time.UTC))
+	validTo := aws.Time(time.Date(2022, 9, 1, 0, 0, 0, 0, time.UTC))
+	r := KmsResource{
+		key: kms.KmsInfo{
+			KeyMetadata: types.KeyMetadata{
+				KeyId:        aws.String("test-key-id"),
+				Arn:          aws.String("test-key-arn"),
+				KeyUsage:     types.KeyUsageTypeEncryptDecrypt,
+				KeySpec:      types.KeySpecEccNistP256,
+				ValidTo:      validTo,
+				CreationDate: validFrom,
+			},
+		},
+	}
+	meta, err := r.GetMetadata()
+	s.NoError(err)
+	s.Equal(fetching.ResourceMetadata{ID: "test-key-arn", Type: "key-management", SubType: "aws-kms", Name: "test-key-id"}, meta)
+
+	m, err := r.GetElasticCommonData()
+	s.NoError(err)
+	s.Len(m, 4)
+	s.Contains(m, "cloud.service.name")
+	s.Equal(types.KeySpecEccNistP256, m["x509.public_key_algorithm"])
+	s.Equal(validTo, m["x509.not_after"])
+	s.Equal(validFrom, m["x509.not_before"])
 }
