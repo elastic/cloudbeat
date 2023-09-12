@@ -181,7 +181,7 @@ func (r FSResource) GetData() any {
 	return r.EvalResource
 }
 
-func (r FSResource) GetElasticCommonData() (map[string]interface{}, error) {
+func (r FSResource) GetElasticCommonData() (map[string]any, error) {
 	m := map[string]interface{}{}
 
 	m["file.name"] = r.ElasticCommon.Name

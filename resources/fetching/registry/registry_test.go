@@ -220,7 +220,7 @@ func (res numberResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res numberResource) GetElasticCommonData() (map[string]interface{}, error) {
+func (res numberResource) GetElasticCommonData() (map[string]any, error) {
 	return nil, nil
 }
 
