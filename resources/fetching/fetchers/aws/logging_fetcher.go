@@ -110,7 +110,7 @@ func (r LoggingResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 func (r LoggingResource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]interface{}{
-		"cloud.service.name": "AWS CloudTrail",
+		"cloud.service.name": "CloudTrail",
 	}, nil
 }
 

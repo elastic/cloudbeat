@@ -83,6 +83,6 @@ func (r S3Resource) GetMetadata() (fetching.ResourceMetadata, error) {
 
 func (r S3Resource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]interface{}{
-		"cloud.service.name": "AWS S3",
+		"cloud.service.name": "S3",
 	}, nil
 }

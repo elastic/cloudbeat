@@ -140,6 +140,6 @@ func (res EcrResource) GetMetadata() (fetching.ResourceMetadata, error) {
 
 func (res EcrResource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]interface{}{
-		"cloud.service.name": "AWS ECR",
+		"cloud.service.name": "ECR",
 	}, nil
 }

@@ -86,6 +86,6 @@ func (r RdsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 
 func (r RdsResource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]interface{}{
-		"cloud.service.name": "AWS RDS",
+		"cloud.service.name": "RDS",
 	}, nil
 }
