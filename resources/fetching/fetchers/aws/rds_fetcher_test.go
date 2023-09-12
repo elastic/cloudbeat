@@ -108,3 +108,19 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 		})
 	}
 }
+
+func (s *RdsFetcherTestSuite) TestRdsResource_GetMetadata() {
+	r := RdsResource{
+		dbInstance: rds.DBInstance{
+			Identifier: "test-rds-name",
+			Arn:        "test-rds-arn",
+		},
+	}
+	meta, err := r.GetMetadata()
+	s.NoError(err)
+	s.Equal(fetching.ResourceMetadata{ID: "test-rds-arn", Type: "cloud-database", SubType: "aws-rds", Name: "test-rds-name"}, meta)
+	m, err := r.GetElasticCommonData()
+	s.NoError(err)
+	s.Len(m, 1)
+	s.Contains(m, "cloud.service.name")
+}
