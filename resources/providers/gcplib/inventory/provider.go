@@ -213,6 +213,7 @@ func (p *Provider) Close() error {
 // EnrichNetworkAssets enriches the network assets with dns policy if exists
 func (p *Provider) EnrichNetworkAssets(assets []*ExtendedGcpAsset) []*ExtendedGcpAsset {
 	if len(assets) == 0 {
+		p.log.Infof("no %s assets were listed", ComputeNetworkAssetType)
 		return assets
 	}
 
