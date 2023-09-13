@@ -392,8 +392,7 @@ func BuildOpaBundle() (err error) {
 	if err := checkoutBranch(wt, branch); err != nil {
 		fmt.Println("Fallback from", branch, "to main branch")
 		branch = "main"
-		err = checkoutBranch(wt, branch)
-		if err != nil {
+		if err = checkoutBranch(wt, branch); err != nil {
 			return err
 		}
 	}
