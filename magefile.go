@@ -343,6 +343,12 @@ func getMajorMinorVersion(version string) string {
 	return strings.Join(strings.Split(version, ".")[:2], ".")
 }
 
+func checkoutBranch(wt *git.Worktree, branch string) error {
+	return wt.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", branch)),
+	})
+}
+
 func BuildOpaBundle() (err error) {
 	owner := "elastic"
 	repoName := "csp-security-policies"
@@ -381,24 +387,24 @@ func BuildOpaBundle() (err error) {
 	if err != nil {
 		return err
 	}
-	// Try a version branch, fallback to 'main' branch on failure
-	// until we have a new version branch, next release will fallback to 'main' branch
-	versionBranchMajorMinor := getMajorMinorVersion(version.PolicyVersion().Version)
-	policiesVersionBranch := versionBranchMajorMinor
-	if err = wt.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", policiesVersionBranch)),
-	}); err != nil {
-		fmt.Println("Failed to checkout branch", policiesVersionBranch)
-		policiesVersionBranch = "main"
-		if err = wt.Checkout(&git.CheckoutOptions{
-			Branch: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", policiesVersionBranch)),
-		}); err != nil {
-			return err
+
+	branch := version.PolicyVersion().Version
+	if err := checkoutBranch(wt, branch); err != nil {
+		fmt.Println("Fallback from", branch)
+		branch = getMajorMinorVersion(branch)
+		if err := checkoutBranch(wt, branch); err != nil {
+			fmt.Println("Fallback from", branch, "to main branch")
+			branch = "main"
+			err = checkoutBranch(wt, branch)
+			if err != nil {
+				return err
+			}
 		}
 	}
+
 	if err = sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance"); err != nil {
 		return err
 	}
-	fmt.Println("Generated OPA from "+policiesVersionBranch+", bundle at", cspPoliciesPkgDir+"/bundle.tar.gz")
+	fmt.Println("Generated OPA bundle from "+branch+" branch at", cspPoliciesPkgDir+"/bundle.tar.gz")
 	return nil
 }
