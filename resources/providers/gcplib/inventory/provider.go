@@ -72,6 +72,13 @@ type ExtendedGcpAsset struct {
 
 type ProviderInitializer struct{}
 
+type GcpAssetIDs struct {
+	orgId         string
+	projectId     string
+	parentProject string
+	parentOrg     string
+}
+
 type Iterator interface {
 	Next() (*assetpb.Asset, error)
 }
@@ -82,6 +89,9 @@ type ServiceAPI interface {
 
 	// ListMonitoringAssets List all monitoring assets by project id
 	ListMonitoringAssets(map[string][]string) ([]*MonitoringAsset, error)
+
+	// EnrichNetworkAssets enriches the network assets with dns policy if exists
+	EnrichNetworkAssets(assets []*ExtendedGcpAsset) []*ExtendedGcpAsset
 
 	// Close the GCP asset client
 	Close() error
@@ -176,10 +186,11 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 	assets = append(append(assets, resourceAssets...), policyAssets...)
 	mergedAssets := mergeAssetContentType(assets)
 	extendedAssets := extendAssets(p.ctx, p.crm, p.crmCache, mergedAssets)
+
 	return extendedAssets, nil
 }
 
-// returns a list of monitoring assets grouped by project id
+// ListMonitoringAssets returns a list of monitoring assets grouped by project idb
 func (p *Provider) ListMonitoringAssets(monitoringAssetTypes map[string][]string) ([]*MonitoringAsset, error) {
 	logMetrics, err := p.ListAllAssetTypesByName(monitoringAssetTypes["LogMetric"])
 	if err != nil {
@@ -199,6 +210,49 @@ func (p *Provider) Close() error {
 	return p.inventory.Close()
 }
 
+// EnrichNetworkAssets enriches the network assets with dns policy if exists
+func (p *Provider) EnrichNetworkAssets(assets []*ExtendedGcpAsset) []*ExtendedGcpAsset {
+	if len(assets) == 0 {
+		return assets
+	}
+
+	dnsPolicyAssets := getAllAssets(p.log, p.inventory.ListAssets(p.ctx, &assetpb.ListAssetsRequest{
+		Parent:      p.config.Parent,
+		AssetTypes:  []string{DnsPolicyAssetType},
+		ContentType: assetpb.ContentType_RESOURCE,
+	}))
+
+	if len(dnsPolicyAssets) == 0 {
+		p.log.Infof("no %s assets were listed, return original assets", DnsPolicyAssetType)
+		return assets
+	}
+
+	p.log.Infof("attempting to enrich %d %s assets with dns policy", len(assets), ComputeNetworkAssetType)
+
+outerLoop:
+	for i := 0; i < len(assets); i++ {
+		networkAssetFields := assets[i].GetResource().GetData().GetFields()
+		// "//compute.googleapis.com/projects/<project-id>/global/networks/<name>" => "/projects/<project-id>/global/networks/<name>"
+		networkIdentifier := strings.TrimPrefix(assets[i].GetName(), "//compute.googleapis.com")
+
+		for _, dnsPolicyAsset := range dnsPolicyAssets {
+			dnsPolicyFields := dnsPolicyAsset.GetResource().GetData().GetFields()
+			attachedNetworks := dnsPolicyFields["networks"].GetListValue().GetValues()
+
+			for _, network := range attachedNetworks {
+				networkUrl := network.GetStructValue().GetFields()["networkUrl"].GetStringValue()
+				if strings.HasSuffix(networkUrl, networkIdentifier) {
+					p.log.Infof("enrich a %s asset with dns policy, name: %s", ComputeNetworkAssetType, networkIdentifier)
+					networkAssetFields["enabledDnsLogging"] = dnsPolicyFields["enableLogging"]
+					continue outerLoop
+				}
+			}
+		}
+	}
+
+	return assets
+}
+
 // returns monitoring assets grouped by project id
 // single project for project scoped accounts
 // multiple projects for organization scoped accounts
@@ -212,8 +266,8 @@ func getMonitoringAssetsByProject(assets []*ExtendedGcpAsset, log *logp.Logger) 
 			continue
 		}
 		monitoringAssets = append(monitoringAssets, &MonitoringAsset{
-			LogMetrics: getAssetsByType(projectAssets, LogMetricAssetType),
-			Alerts:     getAssetsByType(projectAssets, AlertPolicyAssetType),
+			LogMetrics: getAssetsByType(projectAssets, MonitoringLogMetricAssetType),
+			Alerts:     getAssetsByType(projectAssets, MonitoringAlertPolicyAssetType),
 			Ecs: &fetching.EcsGcp{
 				Provider:         "gcp",
 				ProjectId:        projectId,
@@ -225,7 +279,6 @@ func getMonitoringAssetsByProject(assets []*ExtendedGcpAsset, log *logp.Logger) 
 	}
 	return monitoringAssets
 }
-
 func getAllAssets(log *logp.Logger, it Iterator) []*assetpb.Asset {
 	results := make([]*assetpb.Asset, 0)
 	for {
@@ -289,13 +342,6 @@ func extendAssets(ctx context.Context, crm *ResourceManagerWrapper, cache map[st
 	return extendedAssets
 }
 
-type GcpAssetIDs struct {
-	orgId         string
-	projectId     string
-	parentProject string
-	parentOrg     string
-}
-
 func getAssetIds(asset *assetpb.Asset) GcpAssetIDs {
 	orgId := getOrganizationId(asset.Ancestors)
 	projectId := getProjectId(asset.Ancestors)
@@ -340,9 +386,6 @@ func getOrganizationId(ancestors []string) string {
 func getProjectId(ancestors []string) string {
 	return strings.Split(ancestors[0], "/")[1]
 }
-
-const LogMetricAssetType = "logging.googleapis.com/LogMetric"
-const AlertPolicyAssetType = "monitoring.googleapis.com/AlertPolicy"
 
 func getAssetsByType(projectAssets []*ExtendedGcpAsset, assetType string) []*ExtendedGcpAsset {
 	return lo.Filter(projectAssets, func(asset *ExtendedGcpAsset, _ int) bool {

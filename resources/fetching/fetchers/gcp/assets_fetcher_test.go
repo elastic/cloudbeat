@@ -25,6 +25,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
@@ -77,15 +78,48 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 				},
 			},
 		}, nil,
-	)
+	).Once()
+
+	mockInventoryService.On("ListAllAssetTypesByName", mock.Anything).Return([]*inventory.ExtendedGcpAsset{
+		{
+			Ecs: &fetching.EcsGcp{
+				Provider:         "gcp",
+				ProjectId:        "prjId",
+				ProjectName:      "prjName",
+				OrganizationId:   "orgId",
+				OrganizationName: "orgName",
+			},
+			Asset: &assetpb.Asset{
+				Name: "b", AssetType: "compute.googleapis.com/Network",
+			},
+		},
+	}, nil).Once()
+
+	mockInventoryService.On("EnrichNetworkAssets", mock.Anything).Return([]*inventory.ExtendedGcpAsset{
+		{
+			Ecs: &fetching.EcsGcp{
+				Provider:         "gcp",
+				ProjectId:        "prjId",
+				ProjectName:      "prjName",
+				OrganizationId:   "orgId",
+				OrganizationName: "orgName",
+			},
+			Asset: &assetpb.Asset{
+				Name: "b", AssetType: "compute.googleapis.com/Network", Resource: &assetpb.Resource{Data: &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						"enabledDnsLogging": {Kind: &structpb.Value_BoolValue{BoolValue: true}},
+					},
+				},
+				},
+			},
+		},
+	}, nil).Once()
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
 	s.NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	// ListAllAssetTypesByName mocked to return a single asset
-	// Will be called N times, where N is the number of types in GcpAssetTypes
-	s.Equal(len(GcpAssetTypes), len(results))
+	s.Equal(2, len(results))
 
 	lo.ForEach(results, func(r fetching.ResourceInfo, _ int) {
 		ecs, err := r.Resource.GetElasticCommonData()
