@@ -183,3 +183,73 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 	s.Assert().Equal(value[1].Ecs.OrganizationId, "1")
 	s.Assert().Equal(value[1].Ecs.OrganizationName, "OrganizationName1")
 }
+
+func (s *ProviderTestSuite) TestListServiceUsageAssets() {
+	ctx := context.Background()
+	mockIterator := new(MockIterator)
+	provider := &Provider{
+		log: logp.NewLogger("test"),
+		inventory: &AssetsInventoryWrapper{
+			Close: func() error { return nil },
+			ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
+				return mockIterator
+			},
+		},
+		ctx: ctx,
+		config: auth.GcpFactoryConfig{
+			Parent:     "projects/1",
+			ClientOpts: []option.ClientOption{},
+		},
+		crm: &ResourceManagerWrapper{
+			getProjectDisplayName: func(ctx context.Context, parent string) string {
+				if parent == "projects/1" {
+					return "ProjectName1"
+				}
+				return "ProjectName2"
+			},
+			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+				return "OrganizationName1"
+			},
+		},
+		crmCache: make(map[string]*fetching.EcsGcp),
+	}
+
+	//  AssetType: "logging.googleapis.com/LogMetric"}
+	mockIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage1", Resource: &assetpb.Resource{}, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "logging.googleapis.com/LogMetric"}, nil).Once()
+	mockIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+	mockIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage1", IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "logging.googleapis.com/LogMetric"}, nil).Once()
+	mockIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+
+	//  AssetType: "monitoring.googleapis.com/AlertPolicy"}
+	mockIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage2", Resource: nil, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "monitoring.googleapis.com/AlertPolicy"}, nil).Once()
+	mockIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+	mockIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage2", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "monitoring.googleapis.com/AlertPolicy"}, nil).Once()
+	mockIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+
+	var monitoringAssetTypes = map[string][]string{
+		"LogMetric":   {"logging.googleapis.com/LogMetric"},
+		"AlertPolicy": {"monitoring.googleapis.com/AlertPolicy"},
+	}
+	value, err := provider.ListMonitoringAssets(monitoringAssetTypes)
+	s.Assert().NoError(err)
+
+	// 2 assets, 1 for each project
+	s.Assert().Equal(len(value), 2)
+	// project1 has 1 logMetric
+	s.Assert().Equal(len(value[0].Alerts), 0)
+	s.Assert().Equal(len(value[0].LogMetrics), 1)
+	s.Assert().Equal(value[0].LogMetrics[0].Name, "ServiceUsage1")
+	s.Assert().Equal(value[0].Ecs.ProjectId, "1")
+	s.Assert().Equal(value[0].Ecs.ProjectName, "ProjectName1")
+	s.Assert().Equal(value[0].Ecs.OrganizationId, "1")
+	s.Assert().Equal(value[0].Ecs.OrganizationName, "OrganizationName1")
+
+	// project2 has 1 alertPolicy
+	s.Assert().Equal(len(value[1].LogMetrics), 0)
+	s.Assert().Equal(len(value[1].Alerts), 1)
+	s.Assert().Equal(value[1].Alerts[0].Name, "ServiceUsage2")
+	s.Assert().Equal(value[1].Ecs.ProjectId, "2")
+	s.Assert().Equal(value[1].Ecs.ProjectName, "ProjectName2")
+	s.Assert().Equal(value[1].Ecs.OrganizationId, "1")
+	s.Assert().Equal(value[1].Ecs.OrganizationName, "OrganizationName1")
+}
