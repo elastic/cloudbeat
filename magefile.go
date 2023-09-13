@@ -388,17 +388,13 @@ func BuildOpaBundle() (err error) {
 		return err
 	}
 
-	branch := version.PolicyVersion().Version
+	branch := getMajorMinorVersion(version.CloudbeatVersion().Version)
 	if err := checkoutBranch(wt, branch); err != nil {
-		fmt.Println("Fallback from", branch)
-		branch = getMajorMinorVersion(branch)
-		if err := checkoutBranch(wt, branch); err != nil {
-			fmt.Println("Fallback from", branch, "to main branch")
-			branch = "main"
-			err = checkoutBranch(wt, branch)
-			if err != nil {
-				return err
-			}
+		fmt.Println("Fallback from", branch, "to main branch")
+		branch = "main"
+		err = checkoutBranch(wt, branch)
+		if err != nil {
+			return err
 		}
 	}
 
