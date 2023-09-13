@@ -390,7 +390,7 @@ func BuildOpaBundle() (err error) {
 
 	branch := getMajorMinorVersion(version.CloudbeatVersion().Version)
 	if err := checkoutBranch(wt, branch); err != nil {
-		fmt.Println("Fallback from", branch, "to main branch")
+		fmt.Printf("Fallback from %s to main branch\n", branch)
 		branch = "main"
 		if err = checkoutBranch(wt, branch); err != nil {
 			return err
@@ -400,6 +400,7 @@ func BuildOpaBundle() (err error) {
 	if err = sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance"); err != nil {
 		return err
 	}
-	fmt.Println("Generated OPA bundle from "+branch+" branch at", cspPoliciesPkgDir+"/bundle.tar.gz")
+
+	fmt.Printf("Generated OPA bundle from %s branch at %s", branch, cspPoliciesPkgDir)
 	return nil
 }
