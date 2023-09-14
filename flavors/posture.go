@@ -92,7 +92,17 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
+<<<<<<< HEAD
 	t := transformer.NewTransformer(log, cdp, resultsIndex)
+=======
+	cdp := common.New(log, version.CloudbeatVersionInfo{
+		Version: version.CloudbeatVersion(),
+		// Keeping Policy field for backward compatibility
+		Policy: version.CloudbeatVersion(),
+	})
+
+	t := transformer.NewTransformer(log, bdp, cdp, idp, resultsIndex)
+>>>>>>> b113664 (Use branches to get bundles (#1332))
 
 	client, err := NewClient(b.Publisher, cfg.Processors)
 	if err != nil {
