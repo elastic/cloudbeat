@@ -111,7 +111,7 @@ func getK8sDataProvider(
 		k8s.WithNodeID(string(node.ObjectMeta.UID)),
 		k8s.WithVersionInfo(version.CloudbeatVersionInfo{
 			Version: version.CloudbeatVersion(),
-			Policy:  version.PolicyVersion(),
+			Policy:  version.CloudbeatVersion(),
 			Kubernetes: version.Version{
 				Version: serverVersion.Major + "." + serverVersion.Minor,
 			},
