@@ -92,7 +92,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
-	t := transformer.NewTransformer(log, bdp, cdp, idp, resultsIndex)
+	t := transformer.NewTransformer(log, cdp, resultsIndex)
 
 	client, err := NewClient(b.Publisher, cfg.Processors)
 	if err != nil {
