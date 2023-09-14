@@ -60,7 +60,8 @@ func (a DataProvider) FetchData(_ string, id string) (types.Data, error) {
 		ResourceID: id,
 		VersionInfo: version.CloudbeatVersionInfo{
 			Version: version.CloudbeatVersion(),
-			Policy:  version.PolicyVersion(),
+			// Keep policy field for backward compatibility.
+			Policy: version.CloudbeatVersion(),
 		},
 	}, nil
 }

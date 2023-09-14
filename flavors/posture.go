@@ -34,7 +34,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/manager"
 	"github.com/elastic/cloudbeat/transformer"
-	"github.com/elastic/cloudbeat/version"
 )
 
 // posture configuration.
@@ -92,12 +91,6 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 
 	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
 	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
-
-	cdp := common.New(log, version.CloudbeatVersionInfo{
-		Version: version.CloudbeatVersion(),
-		// Keeping Policy field for backward compatibility
-		Policy: version.CloudbeatVersion(),
-	})
 
 	t := transformer.NewTransformer(log, bdp, cdp, idp, resultsIndex)
 
