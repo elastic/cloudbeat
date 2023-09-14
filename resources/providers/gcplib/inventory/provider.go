@@ -91,7 +91,7 @@ type ServiceAPI interface {
 	ListMonitoringAssets(map[string][]string) ([]*MonitoringAsset, error)
 
 	// EnrichNetworkAssets enriches the network assets with dns policy if exists
-	EnrichNetworkAssets(assets []*ExtendedGcpAsset) []*ExtendedGcpAsset
+	EnrichNetworkAssets(assets []*ExtendedGcpAsset)
 
 	// Close the GCP asset client
 	Close() error
@@ -186,6 +186,8 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 	assets = append(append(assets, resourceAssets...), policyAssets...)
 	mergedAssets := mergeAssetContentType(assets)
 	extendedAssets := extendAssets(p.ctx, p.crm, p.crmCache, mergedAssets)
+	// Enrich network assets with dns policy
+	p.EnrichNetworkAssets(extendedAssets)
 
 	return extendedAssets, nil
 }
@@ -211,10 +213,11 @@ func (p *Provider) Close() error {
 }
 
 // EnrichNetworkAssets enriches the network assets with dns policy if exists
-func (p *Provider) EnrichNetworkAssets(assets []*ExtendedGcpAsset) []*ExtendedGcpAsset {
-	if len(assets) == 0 {
+func (p *Provider) EnrichNetworkAssets(assets []*ExtendedGcpAsset) {
+	networkAssets := getAssetsByType(assets, ComputeNetworkAssetType)
+	if len(networkAssets) == 0 {
 		p.log.Infof("no %s assets were listed", ComputeNetworkAssetType)
-		return assets
+		return
 	}
 
 	dnsPolicyAssets := getAllAssets(p.log, p.inventory.ListAssets(p.ctx, &assetpb.ListAssetsRequest{
@@ -225,16 +228,16 @@ func (p *Provider) EnrichNetworkAssets(assets []*ExtendedGcpAsset) []*ExtendedGc
 
 	if len(dnsPolicyAssets) == 0 {
 		p.log.Infof("no %s assets were listed, return original assets", DnsPolicyAssetType)
-		return assets
+		return
 	}
 
 	p.log.Infof("attempting to enrich %d %s assets with dns policy", len(assets), ComputeNetworkAssetType)
 
 outerLoop:
-	for i := 0; i < len(assets); i++ {
-		networkAssetFields := assets[i].GetResource().GetData().GetFields()
+	for i := 0; i < len(networkAssets); i++ {
+		networkAssetFields := networkAssets[i].GetResource().GetData().GetFields()
 		// "//compute.googleapis.com/projects/<project-id>/global/networks/<name>" => "/projects/<project-id>/global/networks/<name>"
-		networkIdentifier := strings.TrimPrefix(assets[i].GetName(), "//compute.googleapis.com")
+		networkIdentifier := strings.TrimPrefix(networkAssets[i].GetName(), "//compute.googleapis.com")
 
 		for _, dnsPolicyAsset := range dnsPolicyAssets {
 			dnsPolicyFields := dnsPolicyAsset.GetResource().GetData().GetFields()
@@ -250,8 +253,6 @@ outerLoop:
 			}
 		}
 	}
-
-	return assets
 }
 
 // returns monitoring assets grouped by project id

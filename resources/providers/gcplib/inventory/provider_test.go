@@ -226,6 +226,33 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 		crmCache: make(map[string]*fetching.EcsGcp),
 	}
 
+	assets := []*ExtendedGcpAsset{
+		{
+			Asset: &assetpb.Asset{Name: "//compute.googleapis.com/projects/test-project/global/networks/test-network-1",
+				AssetType: ComputeNetworkAssetType,
+				Resource:  &assetpb.Resource{Data: &structpb.Struct{Fields: map[string]*structpb.Value{}}},
+				Ancestors: []string{"projects/1", "organizations/1"}},
+		},
+		{
+			Asset: &assetpb.Asset{Name: "//compute.googleapis.com/projects/test-project/global/networks/test-network-2", AssetType: ComputeNetworkAssetType, Resource: &assetpb.Resource{
+				Data: &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						"name": {Kind: &structpb.Value_StringValue{StringValue: "network2"}},
+					},
+				},
+			}, Ancestors: []string{"projects/1", "organizations/1"}},
+		},
+		{
+			Asset: &assetpb.Asset{Name: "//compute.googleapis.com/projects/test-project/global/networks/test-network-3", AssetType: ComputeNetworkAssetType, Resource: &assetpb.Resource{
+				Data: &structpb.Struct{
+					Fields: map[string]*structpb.Value{
+						"name": {Kind: &structpb.Value_StringValue{StringValue: "network2"}},
+					},
+				},
+			}, Ancestors: []string{"projects/1", "organizations/1"}},
+		},
+	}
+
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "dnsPolicyAsset", Resource: &assetpb.Resource{
 		Data: &structpb.Struct{
 			Fields: map[string]*structpb.Value{
@@ -243,31 +270,7 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 	}, Ancestors: []string{"projects/1", "organizations/1"}}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	assets := provider.EnrichNetworkAssets([]*ExtendedGcpAsset{
-		{
-			Asset: &assetpb.Asset{Name: "//compute.googleapis.com/projects/test-project/global/networks/test-network-1",
-				Resource:  &assetpb.Resource{Data: &structpb.Struct{Fields: map[string]*structpb.Value{}}},
-				Ancestors: []string{"projects/1", "organizations/1"}},
-		},
-		{
-			Asset: &assetpb.Asset{Name: "//compute.googleapis.com/projects/test-project/global/networks/test-network-2", Resource: &assetpb.Resource{
-				Data: &structpb.Struct{
-					Fields: map[string]*structpb.Value{
-						"name": {Kind: &structpb.Value_StringValue{StringValue: "network2"}},
-					},
-				},
-			}, Ancestors: []string{"projects/1", "organizations/1"}},
-		},
-		{
-			Asset: &assetpb.Asset{Name: "//compute.googleapis.com/projects/test-project/global/networks/test-network-3", Resource: &assetpb.Resource{
-				Data: &structpb.Struct{
-					Fields: map[string]*structpb.Value{
-						"name": {Kind: &structpb.Value_StringValue{StringValue: "network2"}},
-					},
-				},
-			}, Ancestors: []string{"projects/1", "organizations/1"}},
-		},
-	})
+	provider.EnrichNetworkAssets(assets)
 
 	enrichedAssets := lo.Filter(assets, func(asset *ExtendedGcpAsset, _ int) bool {
 		return asset.GetResource().GetData().GetFields()["enabledDnsLogging"] != nil

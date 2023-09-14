@@ -94,57 +94,27 @@ func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.R
 func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting GcpAssetsFetcher.Fetch")
 
-	assetsToEvaluate := make([]*inventory.ExtendedGcpAsset, 0)
+	for typeName, assetTypes := range GcpAssetTypes {
+		assets, err := f.provider.ListAllAssetTypesByName(assetTypes)
+		if err != nil {
+			f.log.Errorf("Failed to list assets for type %s: %s", typeName, err.Error())
+			continue
+		}
 
-	// Create a reverse map (value-to-key) for the asset types
-	// Example: "storage.googleapis.com/Bucket" -> "CloudStorage"
-	subTypeToTypeMap := createReverseMap(GcpAssetTypes)
-
-	// Listing Assets that do not need modification
-	assets, err := f.provider.ListAllAssetTypesByName([]string{
-		inventory.StorageBucketAssetType,
-		inventory.ComputeFirewallAssetType,
-		inventory.ComputeInstanceAssetType,
-		inventory.ComputeBackendServiceAssetType,
-		inventory.ComputeSubnetworkAssetType,
-		inventory.ComputeDiskAssetType,
-		inventory.DnsManagedZoneAssetType,
-		inventory.BigqueryDatasetAssetType,
-		inventory.BigqueryTableAssetType,
-		inventory.CloudResourceManagerProjectAssetType,
-		inventory.ApiKeysKeyAssetType,
-		inventory.CloudKmsCryptoKeyAssetType,
-		inventory.IamServiceAccountAssetType,
-		inventory.IamServiceAccountKeyAssetType,
-		inventory.SqlDatabaseInstanceAssetType,
-		inventory.LoggingBucketAssetType,
-		inventory.DataprocClusterAssetType,
-	})
-	if err != nil {
-		f.log.Errorf("Failed to list assets: %s", err.Error())
-	}
-	assetsToEvaluate = append(assetsToEvaluate, assets...)
-
-	networkAssets, err := f.provider.ListAllAssetTypesByName([]string{inventory.ComputeNetworkAssetType})
-	if err != nil {
-		f.log.Errorf("Failed to list network assets: %s", err.Error())
-	}
-	enrichedNetworkAssets := f.provider.EnrichNetworkAssets(networkAssets)
-
-	assetsToEvaluate = append(assetsToEvaluate, enrichedNetworkAssets...)
-	for _, asset := range assetsToEvaluate {
-		select {
-		case <-ctx.Done():
-			f.log.Infof("GcpAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
-			return nil
-		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cMetadata,
-			Resource: &GcpAsset{
-				Type:          subTypeToTypeMap[asset.AssetType],
-				SubType:       getGcpSubType(asset.AssetType),
-				ExtendedAsset: asset,
-			},
-		}:
+		for _, asset := range assets {
+			select {
+			case <-ctx.Done():
+				f.log.Infof("GcpAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
+				return nil
+			case f.resourceCh <- fetching.ResourceInfo{
+				CycleMetadata: cMetadata,
+				Resource: &GcpAsset{
+					Type:          typeName,
+					SubType:       getGcpSubType(asset.AssetType),
+					ExtendedAsset: asset,
+				},
+			}:
+			}
 		}
 	}
 
@@ -214,16 +184,4 @@ func getGcpSubType(assetType string) string {
 	suffix := assetType[slashIndex+1:]
 
 	return strings.ToLower(fmt.Sprintf("gcp-%s-%s", prefix, xstrings.ToKebabCase(suffix)))
-}
-
-func createReverseMap(originalMap map[string][]string) map[string]string {
-	reverseMap := make(map[string]string)
-
-	for key, values := range originalMap {
-		for _, value := range values {
-			reverseMap[value] = key
-		}
-	}
-
-	return reverseMap
 }

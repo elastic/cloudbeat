@@ -76,19 +76,8 @@ func (_c *MockServiceAPI_Close_Call) RunAndReturn(run func() error) *MockService
 }
 
 // EnrichNetworkAssets provides a mock function with given fields: assets
-func (_m *MockServiceAPI) EnrichNetworkAssets(assets []*ExtendedGcpAsset) []*ExtendedGcpAsset {
-	ret := _m.Called(assets)
-
-	var r0 []*ExtendedGcpAsset
-	if rf, ok := ret.Get(0).(func([]*ExtendedGcpAsset) []*ExtendedGcpAsset); ok {
-		r0 = rf(assets)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*ExtendedGcpAsset)
-		}
-	}
-
-	return r0
+func (_m *MockServiceAPI) EnrichNetworkAssets(assets []*ExtendedGcpAsset) {
+	_m.Called(assets)
 }
 
 // MockServiceAPI_EnrichNetworkAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EnrichNetworkAssets'
@@ -109,12 +98,12 @@ func (_c *MockServiceAPI_EnrichNetworkAssets_Call) Run(run func(assets []*Extend
 	return _c
 }
 
-func (_c *MockServiceAPI_EnrichNetworkAssets_Call) Return(_a0 []*ExtendedGcpAsset) *MockServiceAPI_EnrichNetworkAssets_Call {
-	_c.Call.Return(_a0)
+func (_c *MockServiceAPI_EnrichNetworkAssets_Call) Return() *MockServiceAPI_EnrichNetworkAssets_Call {
+	_c.Call.Return()
 	return _c
 }
 
-func (_c *MockServiceAPI_EnrichNetworkAssets_Call) RunAndReturn(run func([]*ExtendedGcpAsset) []*ExtendedGcpAsset) *MockServiceAPI_EnrichNetworkAssets_Call {
+func (_c *MockServiceAPI_EnrichNetworkAssets_Call) RunAndReturn(run func([]*ExtendedGcpAsset)) *MockServiceAPI_EnrichNetworkAssets_Call {
 	_c.Call.Return(run)
 	return _c
 }
