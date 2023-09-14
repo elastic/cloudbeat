@@ -78,7 +78,7 @@ func (s *CloudDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 				ResourceID: "",
 				VersionInfo: version.CloudbeatVersionInfo{
 					Version: version.CloudbeatVersion(),
-					Policy:  version.PolicyVersion(),
+					Policy:  version.CloudbeatVersion(),
 				},
 			},
 		},
