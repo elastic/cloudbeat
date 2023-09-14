@@ -111,3 +111,7 @@ is_subnetwork {
 is_log_bucket {
 	input.subType == "gcp-logging-log-bucket"
 }
+
+is_services_usage {
+	input.subType == "gcp-service-usage"
+}

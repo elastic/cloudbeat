@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 66/84 implemented rules (79%)
+### 67/84 implemented rules (80%)
 
-#### Automated rules: 66/73 (90%)
+#### Automated rules: 67/73 (92%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -305,7 +305,7 @@
 |  [2.10](bundle/compliance/cis_gcp/rules/cis_2_10)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Cloud Storage IAM Permission Changes                                       | :white_check_mark: | Automated |
 |  [2.11](bundle/compliance/cis_gcp/rules/cis_2_11)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for SQL Instance Configuration Changes                                         | :white_check_mark: | Automated |
 |                        2.12                        | Logging and Monitoring         | Ensure That Cloud DNS Logging Is Enabled for All VPC Networks                                                                     |        :x:         | Automated |
-|                        2.13                        | Logging and Monitoring         | Ensure Cloud Asset Inventory Is Enabled                                                                                           |        :x:         | Automated |
+|  [2.13](bundle/compliance/cis_gcp/rules/cis_2_13)  | Logging and Monitoring         | Ensure Cloud Asset Inventory Is Enabled                                                                                           | :white_check_mark: | Automated |
 |                        2.14                        | Logging and Monitoring         | Ensure 'Access Transparency' is 'Enabled'                                                                                         |        :x:         |  Manual   |
 |                        2.15                        | Logging and Monitoring         | Ensure 'Access Approval' is 'Enabled'                                                                                             |        :x:         | Automated |
 |  [2.16](bundle/compliance/cis_gcp/rules/cis_2_16)  | Logging and Monitoring         | Ensure Logging is enabled for HTTP(S) Load Balancer                                                                               | :white_check_mark: | Automated |

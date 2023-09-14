@@ -25,6 +25,12 @@ generate_monitoring_asset(log_metrics, alerts) = {
 	"subType": "gcp-monitoring",
 }
 
+generate_serviceusage_asset(services) = {
+	"resource": {"services": services},
+	"type": "monitoring",
+	"subType": "gcp-service-usage",
+}
+
 generate_kms_resource(members, rotationPeriod, nextRotationTime, primary) = generate_gcp_asset(
 	"key-management",
 	"gcp-cloudkms-crypto-key",
