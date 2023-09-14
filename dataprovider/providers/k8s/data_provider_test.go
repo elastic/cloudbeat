@@ -37,7 +37,7 @@ var (
 	logger      = logp.NewLogger("cloudbeat_k8s_common_data_provider_test")
 	versionInfo = version.CloudbeatVersionInfo{
 		Version: version.CloudbeatVersion(),
-		Policy:  version.PolicyVersion(),
+		Policy:  version.CloudbeatVersion(),
 		Kubernetes: version.Version{
 			Version: ".",
 		},
@@ -62,7 +62,7 @@ func Test_k8sDataProvider_FetchData(t *testing.T) {
 				ResourceID: "metadata_id",
 				VersionInfo: version.CloudbeatVersionInfo{
 					Version: version.CloudbeatVersion(),
-					Policy:  version.PolicyVersion(),
+					Policy:  version.CloudbeatVersion(),
 					Kubernetes: version.Version{
 						Version: ".",
 					},
@@ -79,7 +79,7 @@ func Test_k8sDataProvider_FetchData(t *testing.T) {
 				ResourceID: "d3069a00-f692-57c3-9094-9741c52526ff",
 				VersionInfo: version.CloudbeatVersionInfo{
 					Version: version.CloudbeatVersion(),
-					Policy:  version.PolicyVersion(),
+					Policy:  version.CloudbeatVersion(),
 					Kubernetes: version.Version{
 						Version: ".",
 					},
@@ -98,7 +98,7 @@ func Test_k8sDataProvider_FetchData(t *testing.T) {
 				ResourceID: "0afa24c0-4069-5b7d-93cd-d334469e42c0",
 				VersionInfo: version.CloudbeatVersionInfo{
 					Version: version.CloudbeatVersion(),
-					Policy:  version.PolicyVersion(),
+					Policy:  version.CloudbeatVersion(),
 					Kubernetes: version.Version{
 						Version: ".",
 					},

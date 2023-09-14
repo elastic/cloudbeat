@@ -18,8 +18,9 @@
 package aws
 
 import (
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"testing"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/cloudbeat/dataprovider/types"
@@ -75,7 +76,7 @@ func (s *AwsDataProviderTestSuite) TestAwsDataProvider_FetchData() {
 				ResourceID: "",
 				VersionInfo: version.CloudbeatVersionInfo{
 					Version: version.CloudbeatVersion(),
-					Policy:  version.PolicyVersion(),
+					Policy:  version.CloudbeatVersion(),
 				},
 			},
 		},

@@ -30,16 +30,6 @@ import (
 	"strings"
 	"time"
 
-<<<<<<< HEAD
-=======
-	"github.com/elastic/beats/v7/dev-tools/mage"
-	devtools "github.com/elastic/beats/v7/dev-tools/mage"
-	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
-	"github.com/elastic/e2e-testing/pkg/downloads"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/config"
-	"github.com/go-git/go-git/v5/plumbing"
->>>>>>> b113664 (Use branches to get bundles (#1332))
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 
@@ -49,6 +39,9 @@ import (
 	"github.com/elastic/cloudbeat/version"
 	"github.com/elastic/e2e-testing/pkg/downloads"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
+
 	// mage:import
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/pkg"
 	// mage:import

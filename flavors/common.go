@@ -124,7 +124,8 @@ func getK8sDataProvider(ctx context.Context, log *logp.Logger, cfg config.Config
 		k8s_dataprovider.WithNodeID(string(n.ObjectMeta.UID)),
 		k8s_dataprovider.WithVersionInfo(version.CloudbeatVersionInfo{
 			Version: version.CloudbeatVersion(),
-			Policy:  version.PolicyVersion(),
+			// Keeping Policy field for backward compatibility
+			Policy:  version.CloudbeatVersion(),
 			Kubernetes: version.Version{
 				Version: v.Major + "." + v.Minor,
 			},
