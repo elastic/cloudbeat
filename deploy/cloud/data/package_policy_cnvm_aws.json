@@ -116,7 +116,7 @@
         }
     ],
     "vars": {
-        "type": { "value": "vuln_mgmt", "type": "text" },
+        "posture": { "value": "vuln_mgmt", "type": "text" },
         "deployment": { "value": "aws", "type": "text" }
     },
     "package": {
