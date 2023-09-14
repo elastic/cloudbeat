@@ -143,3 +143,62 @@ func TestServiceUsageResource_GetMetadata(t *testing.T) {
 		})
 	}
 }
+
+func TestGcpServiceUsageAsset_GetElasticCommonData(t *testing.T) {
+	type fields struct {
+		Type    string
+		subType string
+		Asset   *inventory.ServiceUsageAsset
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   map[string]any
+	}{
+		{
+			name: "happy path",
+			fields: fields{
+				Type:    fetching.MonitoringIdentity,
+				subType: fetching.GcpServiceUsage,
+				Asset: &inventory.ServiceUsageAsset{
+					Ecs: &fetching.EcsGcp{
+						ProjectId:        projectId,
+						ProjectName:      "a",
+						OrganizationId:   "a",
+						OrganizationName: "a",
+					},
+					Services: []*inventory.ExtendedGcpAsset{
+						{Asset: &assetpb.Asset{Name: "a", AssetType: "serviceusage.googleapis.com/Service"}},
+					},
+				},
+			},
+			want: map[string]any{
+				"cloud": map[string]any{
+					"provider": "gcp",
+					"account": map[string]any{
+						"id":   projectId,
+						"name": "a",
+					},
+					"Organization": map[string]any{
+						"id":   "a",
+						"name": "a",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := &GcpServiceUsageAsset{
+				Type:    tt.fields.Type,
+				subType: tt.fields.subType,
+				Asset:   tt.fields.Asset,
+			}
+
+			got, err := g.GetElasticCommonData()
+
+			assert.NoError(t, err)
+			assert.Equalf(t, tt.want, got, "GetElasticCommonData()")
+		})
+	}
+}
