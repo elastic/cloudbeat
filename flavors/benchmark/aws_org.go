@@ -66,7 +66,7 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 				return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 			}
 
-			fm := preset.NewCisAwsOrganizationFactory(ctx, log, ch, accounts, cache)
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, log, ch, accounts, cache)
 			m := make(registry.FetchersMap)
 			for accountId, fetchersMap := range fm {
 				for key, fetcher := range fetchersMap {

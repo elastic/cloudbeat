@@ -45,7 +45,7 @@ func (d *DummyResource) GetMetadata() (fetching.ResourceMetadata, error) {
 func (d *DummyResource) GetData() any {
 	return d
 }
-func (d *DummyResource) GetElasticCommonData() (map[string]interface{}, error) {
+func (d *DummyResource) GetElasticCommonData() (map[string]any, error) {
 	return nil, nil
 }
 
