@@ -32,10 +32,7 @@ Follow these steps to run the workflow:
 
    ![Required Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/6159129e-6d4d-46b1-97a1-f0d3859500fd)
 
-
-
-
-5. Optionally, modify other parameters if required:
+4. Optionally, modify other parameters if required:
 
     - **`docker-image-override`** (**optional**): Use this to replace the default Docker image for build candidate (BC) or
       SNAPSHOT versions.
@@ -58,11 +55,9 @@ Follow these steps to run the workflow:
       [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for
       step-by-step instructions on generating the token.
 
-   ![Optinal Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/17933589-ee0e-4181-a244-f501f54bda6c)
+   ![Optional Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/17933589-ee0e-4181-a244-f501f54bda6c)
 
-
-
-7. Click the `Run workflow` button to start.
+5. Click the `Run workflow` button to start.
 
    ![Run Workflow](https://github.com/oren-zohar/cloudbeat/assets/85433724/7b05bf58-cc0b-4ec9-8e49-55d117673df8)
 
