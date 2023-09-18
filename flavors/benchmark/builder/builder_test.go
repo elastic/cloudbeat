@@ -38,7 +38,7 @@ func TestBase_Success(t *testing.T) {
 	}{
 		{
 			name:      "by default create base benchmark",
-			benchType: &basebenchmark{},
+			benchType: &basebenchmark{}, //nolint:exhaustruct
 		},
 		{
 			name: "with opts create base benchmark",
@@ -47,14 +47,14 @@ func TestBase_Success(t *testing.T) {
 				WithManagerTimeout(0),
 				WithBenchmarkDataProvider(dataprovider.NewMockCommonDataProvider(t)),
 			},
-			benchType: &basebenchmark{},
+			benchType: &basebenchmark{}, //nolint:exhaustruct
 		},
 		{
 			name: "with leader elector create k8s benchmark",
 			opts: []Option{
 				WithK8sLeaderElector(uniqueness.NewMockManager(t)),
 			},
-			benchType: &k8sbenchmark{},
+			benchType: &k8sbenchmark{}, //nolint:exhaustruct
 		},
 	}
 

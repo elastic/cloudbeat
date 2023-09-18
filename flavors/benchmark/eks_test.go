@@ -134,6 +134,7 @@ func TestEKS_Initialize(t *testing.T) {
 				AWSMetadataProvider:    tt.awsMetadataProvider,
 				EKSClusterNameProvider: tt.eksClusterNameProvider,
 				ClientProvider:         tt.clientProvider,
+				leaderElector:          nil,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}

@@ -54,9 +54,10 @@ type builder struct {
 
 func New(options ...Option) *builder {
 	b := &builder{
-		managerTimeout: defaultManagerTimeout,
-		idp:            &idProvider{},
-		bdp:            &dataProvider{},
+		managerTimeout:   defaultManagerTimeout,
+		idp:              &idProvider{},
+		bdp:              &dataProvider{},
+		k8sLeaderElector: nil,
 	}
 	for _, fn := range options {
 		fn(b)

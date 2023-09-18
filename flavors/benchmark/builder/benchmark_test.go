@@ -29,6 +29,7 @@ import (
 
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 func TestRun_ReturnEvents(t *testing.T) {
@@ -121,6 +122,7 @@ func TestRun_ReturnEvents(t *testing.T) {
 			defer goleak.VerifyNone(t, goleak.IgnoreCurrent())
 
 			sut := &basebenchmark{
+				log:         testhelper.NewLogger(t),
 				manager:     tt.manager(NewMockManager(t)),
 				evaluator:   tt.evaluator(NewMockEvaluator(t)),
 				transformer: tt.transformer(NewMockTransformer(t)),
@@ -130,7 +132,7 @@ func TestRun_ReturnEvents(t *testing.T) {
 			eventsCh, err := sut.Run(context.Background())
 			assert.NoError(t, err)
 			for i := 0; i < tt.resources; i++ {
-				sut.resourceCh <- fetching.ResourceInfo{}
+				sut.resourceCh <- fetching.ResourceInfo{} // nolint:exhaustruct
 			}
 
 			time.Sleep(100 * time.Millisecond)
