@@ -18,10 +18,15 @@
 package auth
 
 import (
-	azidentity "github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 )
 
 type AzureAuthProvider struct{}
+
+type AzureAuthProviderAPI interface {
+	FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error)
+	// FindEnvironmentCredential(options *azidentity.EnvironmentCredentialOptions) (*azidentity.EnvironmentCredential, error)
+}
 
 // FindDefaultCredentials is a wrapper around azidentity.NewDefaultAzureCredential to make it easier to mock
 func (a *AzureAuthProvider) FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error) {

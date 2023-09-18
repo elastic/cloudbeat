@@ -35,11 +35,6 @@ type ConfigProviderAPI interface {
 	GetAzureClientConfig(cfg config.AzureConfig, log *logp.Logger) (*AzureFactoryConfig, error)
 }
 
-type AzureAuthProviderAPI interface {
-	FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error)
-	// FindEnvironmentCredential(options *azidentity.EnvironmentCredentialOptions) (*azidentity.EnvironmentCredential, error)
-}
-
 type ConfigProvider struct {
 	AuthProvider AzureAuthProviderAPI
 }
