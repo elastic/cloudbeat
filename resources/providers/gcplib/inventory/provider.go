@@ -32,6 +32,7 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
@@ -231,28 +232,39 @@ func (p *Provider) EnrichNetworkAssets(assets []*ExtendedGcpAsset) {
 		return
 	}
 
+	// Extract dnsPolicyFields
+	dnsPolicies := make([]map[string]*structpb.Value, 0)
+	for _, dnsPolicyAsset := range dnsPolicyAssets {
+		dnsPolicyFields := dnsPolicyAsset.GetResource().GetData().GetFields()
+		dnsPolicies = append(dnsPolicies, dnsPolicyFields)
+	}
+
 	p.log.Infof("attempting to enrich %d %s assets with dns policy", len(assets), ComputeNetworkAssetType)
+	for _, networkAsset := range networkAssets {
+		networkAssetFields := networkAsset.GetResource().GetData().GetFields()
+		networkIdentifier := strings.TrimPrefix(networkAsset.GetName(), "//compute.googleapis.com")
 
-outerLoop:
-	for i := 0; i < len(networkAssets); i++ {
-		networkAssetFields := networkAssets[i].GetResource().GetData().GetFields()
-		// "//compute.googleapis.com/projects/<project-id>/global/networks/<name>" => "/projects/<project-id>/global/networks/<name>"
-		networkIdentifier := strings.TrimPrefix(networkAssets[i].GetName(), "//compute.googleapis.com")
-
-		for _, dnsPolicyAsset := range dnsPolicyAssets {
-			dnsPolicyFields := dnsPolicyAsset.GetResource().GetData().GetFields()
-			attachedNetworks := dnsPolicyFields["networks"].GetListValue().GetValues()
-
-			for _, network := range attachedNetworks {
-				networkUrl := network.GetStructValue().GetFields()["networkUrl"].GetStringValue()
-				if strings.HasSuffix(networkUrl, networkIdentifier) {
-					p.log.Infof("enrich a %s asset with dns policy, name: %s", ComputeNetworkAssetType, networkIdentifier)
-					networkAssetFields["enabledDnsLogging"] = dnsPolicyFields["enableLogging"]
-					continue outerLoop
-				}
-			}
+		dnsPolicyFields := findDNSPolicyByNetwork(dnsPolicies, networkIdentifier)
+		if dnsPolicyFields != nil {
+			p.log.Infof("enrich a %s asset with dns policy, name: %s", ComputeNetworkAssetType, networkIdentifier)
+			networkAssetFields["enabledDnsLogging"] = dnsPolicyFields["enableLogging"]
 		}
 	}
+}
+
+// findDNSPolicyByNetwork finds DNS policy by network identifier
+func findDNSPolicyByNetwork(dnsPolicies []map[string]*structpb.Value, networkIdentifier string) map[string]*structpb.Value {
+	for _, dnsPolicyFields := range dnsPolicies {
+		attachedNetworks := dnsPolicyFields["networks"].GetListValue().GetValues()
+
+		if lo.SomeBy(attachedNetworks, func(network *structpb.Value) bool {
+			networkUrl := network.GetStructValue().GetFields()["networkUrl"].GetStringValue()
+			return strings.HasSuffix(networkUrl, networkIdentifier)
+		}) {
+			return dnsPolicyFields
+		}
+	}
+	return nil
 }
 
 // returns monitoring assets grouped by project id
