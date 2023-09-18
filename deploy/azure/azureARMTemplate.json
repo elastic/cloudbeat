@@ -63,9 +63,7 @@
                     }
                 },
                 "osProfile": {
-                    "computerName": "cloudbeatVM",
-                    "adminUsername": "cloudbeat",
-                    "adminPassword": "dummyCloudbeat1@"
+                    "computerName": "cloudbeatVM"
                 },
                 "networkProfile": {
                     "networkInterfaces": [
