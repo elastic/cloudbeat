@@ -25,6 +25,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -41,31 +42,40 @@ type GCP struct {
 
 func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
-	if err := g.checkDependencies(); err != nil {
+	reg, bdp, _, err := g.Initialize(ctx, log, cfg, resourceCh)
+	if err != nil {
 		return nil, err
 	}
-
-	gcpConfig, err := g.CfgProvider.GetGcpClientConfig(ctx, cfg.CloudConfig.Gcp, log)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize gcp config: %w", err)
-	}
-
-	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
-	}
-
-	fetchers, err := preset.NewCisGcpFetchers(ctx, log, resourceCh, assetProvider)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
-	}
-
-	reg := registry.NewRegistry(log, registry.WithFetchersMap(fetchers))
-	bdp := cloud.NewDataProvider(cloud.WithLogger(log))
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
 	).Build(ctx, log, cfg, resourceCh, reg)
+}
+
+func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+	if err := g.checkDependencies(); err != nil {
+		return nil, nil, nil, err
+	}
+
+	gcpConfig, err := g.CfgProvider.GetGcpClientConfig(ctx, cfg.CloudConfig.Gcp, log)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
+	}
+
+	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
+	}
+
+	fetchers, err := preset.NewCisGcpFetchers(ctx, log, ch, assetProvider)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
+	}
+
+	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
+		cloud.NewDataProvider(cloud.WithLogger(log)),
+		nil,
+		nil
 }
 
 func (g *GCP) checkDependencies() error {

@@ -26,6 +26,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -36,39 +37,50 @@ import (
 
 type K8S struct {
 	ClientProvider k8s.ClientGetterAPI
+
+	leaderElector uniqueness.Manager
 }
 
 func (k *K8S) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
-	if err := k.checkDependencies(); err != nil {
+	reg, bdp, idp, err := k.Initialize(ctx, log, cfg, resourceCh)
+	if err != nil {
 		return nil, err
 	}
-
-	kubeClient, err := k.ClientProvider.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to create kubernetes client :%w", err)
-	}
-
-	benchmarkHelper := NewK8sBenchmarkHelper(log, cfg, kubeClient)
-	leaderElector := uniqueness.NewLeaderElector(log, kubeClient)
-
-	bdp, err := benchmarkHelper.GetK8sDataProvider(ctx, k8s.KubernetesClusterNameProvider{KubeClient: kubeClient})
-	if err != nil {
-		return nil, fmt.Errorf("failed to create k8s data provider: %w", err)
-	}
-
-	idp, err := benchmarkHelper.GetK8sIdProvider(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create k8s id provider: %w", err)
-	}
-
-	fetchers := preset.NewCisK8sFetchers(log, resourceCh, leaderElector, kubeClient)
-	reg := registry.NewRegistry(log, registry.WithFetchersMap(fetchers))
 
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
 		builder.WithIdProvider(idp),
 	).Build(ctx, log, cfg, resourceCh, reg)
+}
+
+func (k *K8S) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+	if err := k.checkDependencies(); err != nil {
+		return nil, nil, nil, err
+	}
+
+	kubeClient, err := k.ClientProvider.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to create kubernetes client :%w", err)
+	}
+
+	benchmarkHelper := NewK8sBenchmarkHelper(log, cfg, kubeClient)
+	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
+
+	dp, err := benchmarkHelper.GetK8sDataProvider(ctx, k8s.KubernetesClusterNameProvider{KubeClient: kubeClient})
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to create k8s data provider: %w", err)
+	}
+
+	idp, err := benchmarkHelper.GetK8sIdProvider(ctx)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to create k8s id provider: %w", err)
+	}
+
+	return registry.NewRegistry(
+		log,
+		registry.WithFetchersMap(preset.NewCisK8sFetchers(log, ch, k.leaderElector, kubeClient)),
+	), dp, idp, nil
 }
 
 func (k *K8S) checkDependencies() error {

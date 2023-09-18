@@ -25,6 +25,7 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -34,8 +35,11 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -100,10 +104,14 @@ func TestGetStrategy(t *testing.T) {
 	}
 }
 
-func testInitialize(t *testing.T, s strategy, cfg *config.Config, wantErr string, want []string) {
+type benchInit interface {
+	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)
+}
+
+func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr string, want []string) {
 	t.Helper()
 
-	benchmark, err := s.NewBenchmark(context.Background(), testhelper.NewLogger(t), cfg)
+	reg, dp, idp, err := s.Initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
 	if wantErr != "" {
 		assert.ErrorContains(t, err, wantErr)
 		return
@@ -113,11 +121,6 @@ func testInitialize(t *testing.T, s strategy, cfg *config.Config, wantErr string
 
 	require.NoError(t, err)
 	assert.Len(t, reg.Keys(), len(want))
-
-	ch, err := benchmark.Run(context.Background())
-	require.NoError(t, err)
-	require.NotNil(t, ch)
-	defer benchmark.Stop()
 
 	for _, fetcher := range want {
 		ok := reg.ShouldRun(fetcher)
