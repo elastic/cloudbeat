@@ -35,6 +35,8 @@ import (
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
 	"github.com/elastic/e2e-testing/pkg/downloads"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 
@@ -337,6 +339,16 @@ func PythonEnv() error {
 	return err
 }
 
+func getMajorMinorVersion(version string) string {
+	return strings.Join(strings.Split(version, ".")[:2], ".")
+}
+
+func checkoutBranch(wt *git.Worktree, branch string) error {
+	return wt.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", branch)),
+	})
+}
+
 func BuildOpaBundle() (err error) {
 	owner := "elastic"
 	repoName := "csp-security-policies"
@@ -364,28 +376,31 @@ func BuildOpaBundle() (err error) {
 	if err != nil {
 		return err
 	}
-
-	// Find the commit associated with the relevant policy version tag
-	policyVersion := version.PolicyVersion().Version
-	ref, err := repo.Tag(policyVersion)
+	err = repo.Fetch(&git.FetchOptions{
+		RefSpecs: []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
+	})
 	if err != nil {
 		return err
 	}
-
-	log.Printf("Latest production release commit hash: %s", ref.Hash().String())
 	// Check out the provided release tag commit
 	wt, err := repo.Worktree()
 	if err != nil {
 		return err
 	}
 
-	if err = wt.Checkout(&git.CheckoutOptions{Hash: ref.Hash()}); err != nil {
-		return err
+	branch := getMajorMinorVersion(version.CloudbeatVersion().Version)
+	if err := checkoutBranch(wt, branch); err != nil {
+		fmt.Printf("Fallback from %s to main branch\n", branch)
+		branch = "main"
+		if err = checkoutBranch(wt, branch); err != nil {
+			return err
+		}
 	}
 
 	if err = sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance"); err != nil {
 		return err
 	}
 
+	fmt.Printf("Generated OPA bundle from %s branch at %s", branch, cspPoliciesPkgDir)
 	return nil
 }
