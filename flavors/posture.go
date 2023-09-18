@@ -96,7 +96,8 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 
 	cdp := common.New(log, version.CloudbeatVersionInfo{
 		Version: version.CloudbeatVersion(),
-		Policy:  version.PolicyVersion(),
+		// Keeping Policy field for backward compatibility
+		Policy: version.CloudbeatVersion(),
 	})
 
 	t := transformer.NewTransformer(log, bdp, cdp, idp, resultsIndex)

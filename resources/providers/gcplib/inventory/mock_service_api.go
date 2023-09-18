@@ -75,39 +75,6 @@ func (_c *MockServiceAPI_Close_Call) RunAndReturn(run func() error) *MockService
 	return _c
 }
 
-// EnrichNetworkAssets provides a mock function with given fields: assets
-func (_m *MockServiceAPI) EnrichNetworkAssets(assets []*ExtendedGcpAsset) {
-	_m.Called(assets)
-}
-
-// MockServiceAPI_EnrichNetworkAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EnrichNetworkAssets'
-type MockServiceAPI_EnrichNetworkAssets_Call struct {
-	*mock.Call
-}
-
-// EnrichNetworkAssets is a helper method to define mock.On call
-//   - assets []*ExtendedGcpAsset
-func (_e *MockServiceAPI_Expecter) EnrichNetworkAssets(assets interface{}) *MockServiceAPI_EnrichNetworkAssets_Call {
-	return &MockServiceAPI_EnrichNetworkAssets_Call{Call: _e.mock.On("EnrichNetworkAssets", assets)}
-}
-
-func (_c *MockServiceAPI_EnrichNetworkAssets_Call) Run(run func(assets []*ExtendedGcpAsset)) *MockServiceAPI_EnrichNetworkAssets_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]*ExtendedGcpAsset))
-	})
-	return _c
-}
-
-func (_c *MockServiceAPI_EnrichNetworkAssets_Call) Return() *MockServiceAPI_EnrichNetworkAssets_Call {
-	_c.Call.Return()
-	return _c
-}
-
-func (_c *MockServiceAPI_EnrichNetworkAssets_Call) RunAndReturn(run func([]*ExtendedGcpAsset)) *MockServiceAPI_EnrichNetworkAssets_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // ListAllAssetTypesByName provides a mock function with given fields: assets
 func (_m *MockServiceAPI) ListAllAssetTypesByName(assets []string) ([]*ExtendedGcpAsset, error) {
 	ret := _m.Called(assets)
@@ -212,6 +179,59 @@ func (_c *MockServiceAPI_ListMonitoringAssets_Call) Return(_a0 []*MonitoringAsse
 }
 
 func (_c *MockServiceAPI_ListMonitoringAssets_Call) RunAndReturn(run func(map[string][]string) ([]*MonitoringAsset, error)) *MockServiceAPI_ListMonitoringAssets_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListServiceUsageAssets provides a mock function with given fields:
+func (_m *MockServiceAPI) ListServiceUsageAssets() ([]*ServiceUsageAsset, error) {
+	ret := _m.Called()
+
+	var r0 []*ServiceUsageAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]*ServiceUsageAsset, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []*ServiceUsageAsset); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*ServiceUsageAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockServiceAPI_ListServiceUsageAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListServiceUsageAssets'
+type MockServiceAPI_ListServiceUsageAssets_Call struct {
+	*mock.Call
+}
+
+// ListServiceUsageAssets is a helper method to define mock.On call
+func (_e *MockServiceAPI_Expecter) ListServiceUsageAssets() *MockServiceAPI_ListServiceUsageAssets_Call {
+	return &MockServiceAPI_ListServiceUsageAssets_Call{Call: _e.mock.On("ListServiceUsageAssets")}
+}
+
+func (_c *MockServiceAPI_ListServiceUsageAssets_Call) Run(run func()) *MockServiceAPI_ListServiceUsageAssets_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockServiceAPI_ListServiceUsageAssets_Call) Return(_a0 []*ServiceUsageAsset, _a1 error) *MockServiceAPI_ListServiceUsageAssets_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockServiceAPI_ListServiceUsageAssets_Call) RunAndReturn(run func() ([]*ServiceUsageAsset, error)) *MockServiceAPI_ListServiceUsageAssets_Call {
 	_c.Call.Return(run)
 	return _c
 }
