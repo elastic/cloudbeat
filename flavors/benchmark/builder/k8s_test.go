@@ -29,6 +29,7 @@ import (
 
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 
@@ -77,6 +78,7 @@ func TestK8sRun_ReturnEvents(t *testing.T) {
 
 			sut := &k8sbenchmark{
 				basebenchmark: basebenchmark{
+					log:         testhelper.NewLogger(t),
 					manager:     tt.manager(NewMockManager(t)),
 					evaluator:   tt.evaluator(NewMockEvaluator(t)),
 					transformer: tt.transformer(NewMockTransformer(t)),
@@ -88,7 +90,7 @@ func TestK8sRun_ReturnEvents(t *testing.T) {
 			eventsCh, err := sut.Run(context.Background())
 			assert.NoError(t, err)
 			for i := 0; i < tt.resources; i++ {
-				sut.resourceCh <- fetching.ResourceInfo{}
+				sut.resourceCh <- fetching.ResourceInfo{} //nolint:exhaustruct
 			}
 
 			time.Sleep(100 * time.Millisecond)

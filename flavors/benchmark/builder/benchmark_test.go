@@ -132,7 +132,7 @@ func TestRun_ReturnEvents(t *testing.T) {
 			eventsCh, err := sut.Run(context.Background())
 			assert.NoError(t, err)
 			for i := 0; i < tt.resources; i++ {
-				sut.resourceCh <- fetching.ResourceInfo{} // nolint:exhaustruct
+				sut.resourceCh <- fetching.ResourceInfo{} //nolint:exhaustruct
 			}
 
 			time.Sleep(100 * time.Millisecond)
