@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 68/84 implemented rules (81%)
+### 69/84 implemented rules (82%)
 
-#### Automated rules: 68/73 (93%)
+#### Automated rules: 69/73 (95%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -304,7 +304,7 @@
 |                        2.1                         | Logging and Monitoring         | Ensure That Cloud Audit Logging Is Configured Properly                                                                            |        :x:         | Automated |
 |  [2.10](bundle/compliance/cis_gcp/rules/cis_2_10)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Cloud Storage IAM Permission Changes                                       | :white_check_mark: | Automated |
 |  [2.11](bundle/compliance/cis_gcp/rules/cis_2_11)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for SQL Instance Configuration Changes                                         | :white_check_mark: | Automated |
-|                        2.12                        | Logging and Monitoring         | Ensure That Cloud DNS Logging Is Enabled for All VPC Networks                                                                     |        :x:         | Automated |
+|  [2.12](bundle/compliance/cis_gcp/rules/cis_2_12)  | Logging and Monitoring         | Ensure That Cloud DNS Logging Is Enabled for All VPC Networks                                                                     | :white_check_mark: | Automated |
 |  [2.13](bundle/compliance/cis_gcp/rules/cis_2_13)  | Logging and Monitoring         | Ensure Cloud Asset Inventory Is Enabled                                                                                           | :white_check_mark: | Automated |
 |                        2.14                        | Logging and Monitoring         | Ensure 'Access Transparency' is 'Enabled'                                                                                         |        :x:         |  Manual   |
 |                        2.15                        | Logging and Monitoring         | Ensure 'Access Approval' is 'Enabled'                                                                                             |        :x:         | Automated |
