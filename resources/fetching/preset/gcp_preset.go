@@ -38,5 +38,8 @@ func NewCisGcpFetchers(ctx context.Context, log *logp.Logger, ch chan fetching.R
 	monitoringFetcher := fetchers.NewGcpMonitoringFetcher(ctx, log, ch, inventory)
 	m["gcp_monitoring_fetcher"] = registry.RegisteredFetcher{Fetcher: monitoringFetcher}
 
+	serviceUsageFetcher := fetchers.NewGcpServiceUsageFetcher(ctx, log, ch, inventory)
+	m["gcp_service_usage_fetcher"] = registry.RegisteredFetcher{Fetcher: serviceUsageFetcher}
+
 	return m, nil
 }
