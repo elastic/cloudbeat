@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/elastic/elastic-agent-libs/logp"
+	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -40,13 +41,13 @@ type AzureAsset struct {
 
 // TODO: Fill this struct with the required fields
 type AzureAssetInfo struct {
-	Id             string                 `json:"id,omitempty"`
-	Name           string                 `json:"name,omitempty"`
-	Location       string                 `json:"location,omitempty"`
-	Properties     map[string]interface{} `json:"properties,omitempty"`
-	ResourceGroup  string                 `json:"resource_group,omitempty"`
-	SubscriptionId string                 `json:"subscription_id,omitempty"`
-	TenantId       string                 `json:"tenant_id,omitempty"`
+	Id             string         `json:"id,omitempty"`
+	Name           string         `json:"name,omitempty"`
+	Location       string         `json:"location,omitempty"`
+	Properties     map[string]any `json:"properties,omitempty"`
+	ResourceGroup  string         `json:"resource_group,omitempty"`
+	SubscriptionId string         `json:"subscription_id,omitempty"`
+	TenantId       string         `json:"tenant_id,omitempty"`
 }
 
 // TODO: Implement other types
@@ -55,7 +56,7 @@ var AzureAssetTypes = map[string]string{
 	"microsoft.storage/storageaccounts": fetching.AzureStorageAccountType,
 }
 
-func NewAzureAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
+func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
 	return &AzureAssetsFetcher{
 		log:        log,
 		resourceCh: ch,
@@ -63,24 +64,11 @@ func NewAzureAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching
 	}
 }
 
-func getAssetTypes() []string {
-	types := make([]string, len(AzureAssetTypes))
-	i := 0
-
-	for k := range AzureAssetTypes {
-		types[i] = k
-		i++
-	}
-
-	return types
-}
-
 func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
 	// TODO: Maybe we should use a query per type instead of listing all assets in a single query
-	assets, err := f.provider.ListAllAssetTypesByName(getAssetTypes())
+	assets, err := f.provider.ListAllAssetTypesByName(maps.Keys(AzureAssetTypes))
 	if err != nil {
-		f.log.Errorf("Failed to list assets: %s", err.Error())
 		return err
 	}
 
@@ -91,8 +79,8 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 			return nil
 		case f.resourceCh <- fetching.ResourceInfo{
 			CycleMetadata: cMetadata,
-			// TODO: Safe guard this convertion
-			Resource: getAssetFromData(asset.(map[string]interface{})),
+			// TODO: Safe guard this conversion
+			Resource: getAssetFromData(asset.(map[string]any)),
 		}:
 		}
 	}
@@ -100,25 +88,28 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 	return nil
 }
 
-// TODO: Safe guard this function
-func getAssetFromData(data map[string]interface{}) *AzureAsset {
-	assetType := data["type"].(string)
+func getAssetFromData(data map[string]any) *AzureAsset {
+	assetType := getString(data, "type")
+	properties, _ := data["properties"].(map[string]any)
 
-	asset := &AzureAsset{
+	return &AzureAsset{
 		Type:    AzureAssetTypes[assetType],
 		SubType: getAzureSubType(assetType),
 		Asset: AzureAssetInfo{
-			Id:             data["id"].(string),
-			Name:           data["name"].(string),
-			Location:       data["location"].(string),
-			Properties:     data["properties"].(map[string]interface{}),
-			ResourceGroup:  data["resourceGroup"].(string),
-			SubscriptionId: data["subscriptionId"].(string),
-			TenantId:       data["tenantId"].(string),
+			Id:             getString(data, "id"),
+			Name:           getString(data, "name"),
+			Location:       getString(data, "location"),
+			Properties:     properties,
+			ResourceGroup:  getString(data, "resourceGroup"),
+			SubscriptionId: getString(data, "subscriptionId"),
+			TenantId:       getString(data, "tenantId"),
 		},
 	}
+}
 
-	return asset
+func getString(data map[string]any, key string) string {
+	value, _ := data[key].(string)
+	return value
 }
 
 // TODO: Handle this function
@@ -126,7 +117,7 @@ func (f *AzureAssetsFetcher) Stop() {
 	// f.provider.Close()
 }
 
-func (r *AzureAsset) GetData() interface{} {
+func (r *AzureAsset) GetData() any {
 	return r.Asset
 }
 
@@ -140,7 +131,7 @@ func (r *AzureAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r *AzureAsset) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+func (r *AzureAsset) GetElasticCommonData() (map[string]any, error) { return nil, nil }
 
 // TODO: Implement this function
 func getAzureSubType(assetType string) string {

@@ -18,8 +18,6 @@
 package preset
 
 import (
-	"context"
-
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -28,11 +26,11 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-func NewCisAzureFactory(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (FetchersMap, error) {
+func NewCisAzureFactory(log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (FetchersMap, error) {
 	log.Infof("Initializing Azure fetchers")
 	m := make(registry.FetchersMap)
 
-	assetsFetcher := fetchers.NewAzureAssetsFetcher(ctx, log, ch, inventory)
+	assetsFetcher := fetchers.NewAzureAssetsFetcher(log, ch, inventory)
 	m["azure_cloud_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: assetsFetcher}
 
 	return m, nil
