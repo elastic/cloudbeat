@@ -152,7 +152,8 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 	}}}, r.GetData())
 	m, err := r.GetElasticCommonData()
 	assert.NoError(t, err)
-	assert.Empty(t, m)
+	assert.Len(t, m, 1)
+	assert.Contains(t, m, "cloud.service.name")
 }
 
 func TestConfigResource_GetMetadata(t *testing.T) {

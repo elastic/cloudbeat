@@ -32,7 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
@@ -58,21 +58,32 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
-	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get AWS accounts: %w", err)
-	}
+	cache := make(map[string]registry.FetchersMap)
+	reg := registry.NewRegistry(log, registry.WithUpdater(
+		func() (registry.FetchersMap, error) {
+			accounts, err := a.getAwsAccounts(ctx, log, awsConfig, awsIdentity)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
+			}
 
-	return registry.NewRegistry(
-			log,
-			factory.NewCisAwsOrganizationFactory(ctx, log, ch, accounts),
-		), cloud.NewDataProvider(
-			cloud.WithLogger(log),
-			cloud.WithAccount(*awsIdentity),
-		), cloud.NewIdProvider(), nil
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, log, ch, accounts, cache)
+			m := make(registry.FetchersMap)
+			for accountId, fetchersMap := range fm {
+				for key, fetcher := range fetchersMap {
+					m[fmt.Sprintf("%s-%s", accountId, key)] = fetcher
+				}
+			}
+
+			return m, nil
+		}))
+
+	return reg, cloud.NewDataProvider(
+		cloud.WithLogger(log),
+		cloud.WithAccount(*awsIdentity),
+	), cloud.NewIdProvider(), nil
 }
 
-func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]factory.AwsAccount, error) {
+func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
 	const (
 		rootRole   = "cloudbeat-root"
 		memberRole = "cloudbeat-securityaudit"
@@ -90,7 +101,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 		return nil, err
 	}
 
-	var accounts []factory.AwsAccount
+	var accounts []preset.AwsAccount
 	for _, identity := range accountIdentities {
 		var memberCfg awssdk.Config
 		if identity.Account == rootIdentity.Account {
@@ -103,7 +114,7 @@ func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCf
 			)
 		}
 
-		accounts = append(accounts, factory.AwsAccount{
+		accounts = append(accounts, preset.AwsAccount{
 			Identity: identity,
 			Config:   memberCfg,
 		})

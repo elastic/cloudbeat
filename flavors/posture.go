@@ -96,7 +96,8 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 
 	cdp := common.New(log, version.CloudbeatVersionInfo{
 		Version: version.CloudbeatVersion(),
-		Policy:  version.PolicyVersion(),
+		// Keeping Policy field for backward compatibility
+		Policy: version.CloudbeatVersion(),
 	})
 
 	t := transformer.NewTransformer(log, bdp, cdp, idp, resultsIndex)
@@ -127,7 +128,7 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 }
 
 // Run starts posture.
-func (bt *posture) Run(b *beat.Beat) error {
+func (bt *posture) Run(*beat.Beat) error {
 	bt.log.Info("posture is running! Hit CTRL-C to stop it")
 
 	if err := bt.benchmark.Run(bt.ctx); err != nil {

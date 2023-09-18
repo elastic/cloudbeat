@@ -284,7 +284,7 @@ func (res ProcResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res ProcResource) GetElasticCommonData() (map[string]interface{}, error) {
+func (res ProcResource) GetElasticCommonData() (map[string]any, error) {
 	m := map[string]interface{}{}
 	m["process.parent.pid"] = res.ElasticCommon.Parent.PID
 	m["process.pid"] = res.ElasticCommon.PID

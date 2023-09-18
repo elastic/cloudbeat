@@ -15,13 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package version
+package registry
 
-const policyVersion = "v1.5.5"
+import (
+	"github.com/elastic/cloudbeat/resources/fetching"
+)
 
-// PolicyVersion returns cloudbeat version info used for the build.
-func PolicyVersion() Version {
-	return Version{
-		Version: policyVersion,
-	}
+type RegisteredFetcher struct {
+	Fetcher   fetching.Fetcher
+	Condition []fetching.Condition
 }
+
+type FetchersMap map[string]RegisteredFetcher

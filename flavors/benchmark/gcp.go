@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
@@ -56,14 +56,15 @@ func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
 	}
 
-	fetchers, err := factory.NewCisGcpFactory(ctx, log, ch, assetProvider)
+	fetchers, err := preset.NewCisGcpFetchers(ctx, log, ch, assetProvider)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
 	}
 
-	return registry.NewRegistry(log, fetchers), cloud.NewDataProvider(
-		cloud.WithLogger(log),
-	), cloud.NewIdProvider(), nil
+	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
+		cloud.NewDataProvider(cloud.WithLogger(log)),
+		cloud.NewIdProvider(),
+		nil
 }
 
 func (g *GCP) Stop() {}

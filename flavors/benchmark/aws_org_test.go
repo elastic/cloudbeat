@@ -62,7 +62,7 @@ func TestAWSOrg_Initialize(t *testing.T) {
 			name:             "account provider error",
 			identityProvider: mockAwsIdentityProvider(nil),
 			accountProvider:  mockAccountProvider(errors.New("some error")),
-			wantErr:          "some error",
+			want:             []string{},
 		},
 		{
 			name:             "no error",

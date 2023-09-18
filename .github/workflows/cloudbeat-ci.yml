@@ -77,16 +77,10 @@ jobs:
           go-version-file: .go-version
 
       - name: build cloudbeat binary
-        uses: magefile/mage-action@v2
+        uses: magefile/mage-action@v3
         with:
           version: latest
           args: build
-
-      - name: build opa bundle
-        uses: magefile/mage-action@v2
-        with:
-          version: latest
-          args: BuildOpaBundle
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -100,7 +94,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build cloudbeat-docker
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./deploy/Dockerfile
@@ -119,7 +113,7 @@ jobs:
         shell: bash
 
       - name: Build pytest-docker
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ./tests/.
           push: false

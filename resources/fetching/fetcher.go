@@ -101,7 +101,7 @@ type EcsGcp struct {
 type Resource interface {
 	GetMetadata() (ResourceMetadata, error)
 	GetData() any
-	GetElasticCommonData() (map[string]interface{}, error)
+	GetElasticCommonData() (map[string]any, error)
 }
 
 type ResourceFields struct {

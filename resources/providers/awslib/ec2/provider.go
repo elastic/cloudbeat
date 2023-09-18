@@ -25,7 +25,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/go-errors/errors"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
@@ -291,7 +290,7 @@ func (p *Provider) GetRouteTableForSubnet(ctx context.Context, region string, su
 
 	// A subnet should not have more than 1 attached route table
 	if len(routeTables.RouteTables) != 1 {
-		return types.RouteTable{}, errors.Errorf("subnet %s has %d route tables", subnetId, len(routeTables.RouteTables))
+		return types.RouteTable{}, fmt.Errorf("subnet %s has %d route tables", subnetId, len(routeTables.RouteTables))
 	}
 
 	return routeTables.RouteTables[0], nil
