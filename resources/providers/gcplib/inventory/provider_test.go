@@ -185,6 +185,35 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 }
 
 func (s *ProviderTestSuite) TestListServiceUsageAssets() {
+	expected := []*ServiceUsageAsset{
+		{
+			Ecs: &fetching.EcsGcp{
+				Provider:         "gcp",
+				ProjectId:        "1",
+				ProjectName:      "ProjectName1",
+				OrganizationId:   "1",
+				OrganizationName: "OrganizationName1",
+			},
+			Services: []*ExtendedGcpAsset{{
+				Asset: &assetpb.Asset{Name: "ServiceUsage1", Resource: &assetpb.Resource{}, IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"},
+				Ecs:   &fetching.EcsGcp{ProjectId: "1", ProjectName: "ProjectName1", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+			}},
+		},
+		{
+			Ecs: &fetching.EcsGcp{
+				Provider:         "gcp",
+				ProjectId:        "2",
+				ProjectName:      "ProjectName2",
+				OrganizationId:   "1",
+				OrganizationName: "OrganizationName1",
+			},
+			Services: []*ExtendedGcpAsset{{
+				Asset: &assetpb.Asset{Name: "ServiceUsage2", Resource: nil, IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"},
+				Ecs:   &fetching.EcsGcp{ProjectId: "2", ProjectName: "ProjectName2", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+			}},
+		},
+	}
+
 	ctx := context.Background()
 	mockIterator := new(MockIterator)
 	provider := &Provider{
@@ -224,21 +253,10 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 	mockIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage2", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
 	mockIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	value, err := provider.ListServiceUsageAssets()
+	values, err := provider.ListServiceUsageAssets()
 	s.Assert().NoError(err)
 
 	// 2 assets, 1 for each project
-	s.Assert().Equal(2, len(value))
-	s.Assert().Equal(1, len(value[0].Services))
-	s.Assert().Equal(value[0].Ecs.ProjectId, "1")
-	s.Assert().Equal(value[0].Ecs.ProjectName, "ProjectName1")
-	s.Assert().Equal(value[0].Ecs.OrganizationId, "1")
-	s.Assert().Equal(value[0].Ecs.OrganizationName, "OrganizationName1")
-
-	s.Assert().Equal(2, len(value))
-	s.Assert().Equal(1, len(value[1].Services))
-	s.Assert().Equal(value[1].Ecs.ProjectId, "2")
-	s.Assert().Equal(value[1].Ecs.ProjectName, "ProjectName2")
-	s.Assert().Equal(value[1].Ecs.OrganizationId, "1")
-	s.Assert().Equal(value[1].Ecs.OrganizationName, "OrganizationName1")
+	s.Assert().Equal(2, len(values))
+	s.ElementsMatch(expected, values)
 }
