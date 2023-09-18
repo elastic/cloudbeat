@@ -111,7 +111,7 @@ type benchInit interface {
 func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr string, want []string) {
 	t.Helper()
 
-	reg, dp, idp, err := s.Initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
+	reg, dp, _, err := s.Initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
 	if wantErr != "" {
 		assert.ErrorContains(t, err, wantErr)
 		return
