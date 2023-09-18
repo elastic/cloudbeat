@@ -18,16 +18,10 @@
 package evaluator
 
 import (
-	"context"
 	"time"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
-
-type Evaluator interface {
-	Eval(ctx context.Context, resourceInfo fetching.ResourceInfo) (EventData, error)
-	Stop(context.Context)
-}
 
 type Metadata struct {
 	Version   string    `json:"opa_version"`
