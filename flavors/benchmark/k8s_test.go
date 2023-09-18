@@ -61,6 +61,7 @@ func TestK8S_Initialize(t *testing.T) {
 
 			testInitialize(t, &K8S{
 				ClientProvider: tt.clientProvider,
+				leaderElector:  nil,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
