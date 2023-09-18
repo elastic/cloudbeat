@@ -34,7 +34,7 @@ func New(log *logp.Logger, info version.CloudbeatVersionInfo) *DataProvider {
 	}
 }
 
-func (c *DataProvider) GetElasticCommonData() (map[string]interface{}, error) {
+func (c *DataProvider) GetElasticCommonData() (map[string]any, error) {
 	m := map[string]interface{}{}
 	err := mapstructure.Decode(c.info, &m)
 	if err != nil {
