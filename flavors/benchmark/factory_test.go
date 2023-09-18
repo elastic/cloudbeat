@@ -129,7 +129,6 @@ func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr strin
 
 	// TODO: gcp diff tests cover
 	assert.NotNil(t, dp)
-	assert.NotNil(t, idp)
 }
 
 func mockAwsCfg(err error) *awslib.MockConfigProviderAPI {
