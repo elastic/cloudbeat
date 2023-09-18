@@ -22,6 +22,8 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/elastic-agent-libs/logp"
+
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/common"
@@ -32,7 +34,6 @@ import (
 	"github.com/elastic/cloudbeat/transformer"
 	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/cloudbeat/version"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 const (

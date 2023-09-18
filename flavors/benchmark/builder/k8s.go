@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 

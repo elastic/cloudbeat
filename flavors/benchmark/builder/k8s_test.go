@@ -23,12 +23,13 @@ import (
 	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/cloudbeat/evaluator"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/goleak"
+
+	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/uniqueness"
 )
 
 func TestK8sRun_ReturnEvents(t *testing.T) {
