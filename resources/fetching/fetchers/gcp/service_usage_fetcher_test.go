@@ -111,7 +111,7 @@ func TestServiceUsageResource_GetMetadata(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name: "happy path",
+			name: "retrieve successfully service usage assets",
 			resource: GcpServiceUsageAsset{
 				Type:    fetching.MonitoringIdentity,
 				subType: fetching.GcpServiceUsage,
