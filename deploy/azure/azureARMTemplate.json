@@ -26,13 +26,6 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             }
-        },
-        "NamePrefix": {
-            "type": "string",
-            "metadata": {
-                "description": "Prefix to use for resources"
-            },
-            "defaultValue": "[resourceGroup().name]"
         }
     },
     "resources": [
