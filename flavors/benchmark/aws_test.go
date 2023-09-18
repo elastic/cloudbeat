@@ -26,7 +26,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
-func TestAWS_Initialize(t *testing.T) {
+func TestAWS_NewBenchmark(t *testing.T) {
 	tests := []struct {
 		name             string
 		identityProvider awslib.IdentityProviderGetter

@@ -26,7 +26,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-func TestK8S_Initialize(t *testing.T) {
+func TestK8S_NewBenchmark(t *testing.T) {
 	t.Setenv("NODE_NAME", "node-name")
 	tests := []struct {
 		name           string
@@ -61,7 +61,6 @@ func TestK8S_Initialize(t *testing.T) {
 
 			testInitialize(t, &K8S{
 				ClientProvider: tt.clientProvider,
-				leaderElector:  nil,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}

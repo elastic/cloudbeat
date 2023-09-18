@@ -15,32 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package flavors
+package builder
 
 import (
-	"context"
-	"time"
-
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider"
-	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/resources/fetching"
 )
 
-const (
-	flushInterval   = 10 * time.Second
-	eventsThreshold = 75
-)
+type dataProvider struct{}
 
-// flavorBase configuration.
-type flavorBase struct {
-	ctx       context.Context
-	cancel    context.CancelFunc
-	config    *config.Config
-	client    beat.Client
-	log       *logp.Logger
-	cdp       dataprovider.CommonDataProvider
-	publisher *Publisher
-}
+func (d dataProvider) EnrichEvent(event *beat.Event, _ fetching.ResourceMetadata) error { return nil }

@@ -33,7 +33,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
-func TestAWSOrg_Initialize(t *testing.T) {
+func TestAWSOrg_NewBenchmark(t *testing.T) {
 	tests := []struct {
 		name             string
 		identityProvider awslib.IdentityProviderGetter

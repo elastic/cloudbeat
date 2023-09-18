@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
-func TestGCP_Initialize(t *testing.T) {
+func TestGCP_NewBenchmark(t *testing.T) {
 	baseGcpConfig := config.Config{
 		CloudConfig: config.CloudConfig{
 			Gcp: config.GcpConfig{

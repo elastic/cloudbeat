@@ -15,32 +15,30 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package flavors
+package builder
 
 import (
 	"context"
-	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider"
-	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
+	"github.com/elastic/cloudbeat/uniqueness"
 )
 
-const (
-	flushInterval   = 10 * time.Second
-	eventsThreshold = 75
-)
+type k8sbenchmark struct {
+	basebenchmark
+	leaderElector uniqueness.Manager
+}
 
-// flavorBase configuration.
-type flavorBase struct {
-	ctx       context.Context
-	cancel    context.CancelFunc
-	config    *config.Config
-	client    beat.Client
-	log       *logp.Logger
-	cdp       dataprovider.CommonDataProvider
-	publisher *Publisher
+func (b *k8sbenchmark) Run(ctx context.Context) (<-chan []beat.Event, error) {
+	err := b.leaderElector.Run(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return b.basebenchmark.Run(ctx)
+}
+
+func (b *k8sbenchmark) Stop() {
+	b.leaderElector.Stop()
+	b.basebenchmark.Stop()
 }

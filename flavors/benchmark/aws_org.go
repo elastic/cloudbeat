@@ -29,8 +29,8 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -42,20 +42,21 @@ type AWSOrg struct {
 	AccountProvider  awslib.AccountProviderAPI
 }
 
-func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *AWSOrg) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
 	if err := a.checkDependencies(); err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
 	cache := make(map[string]registry.FetchersMap)
@@ -66,7 +67,7 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 				return nil, fmt.Errorf("failed to get AWS accounts: %w", err)
 			}
 
-			fm := preset.NewCisAwsOrganizationFetchers(ctx, log, ch, accounts, cache)
+			fm := preset.NewCisAwsOrganizationFetchers(ctx, log, resourceCh, accounts, cache)
 			m := make(registry.FetchersMap)
 			for accountId, fetchersMap := range fm {
 				for key, fetcher := range fetchersMap {
@@ -77,10 +78,14 @@ func (a *AWSOrg) Initialize(ctx context.Context, log *logp.Logger, cfg *config.C
 			return m, nil
 		}))
 
-	return reg, cloud.NewDataProvider(
+	bdp := cloud.NewDataProvider(
 		cloud.WithLogger(log),
 		cloud.WithAccount(*awsIdentity),
-	), cloud.NewIdProvider(), nil
+	)
+
+	return builder.New(
+		builder.WithBenchmarkDataProvider(bdp),
+	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
 func (a *AWSOrg) getAwsAccounts(ctx context.Context, log *logp.Logger, initialCfg awssdk.Config, rootIdentity *cloud.Identity) ([]preset.AwsAccount, error) {
@@ -140,6 +145,3 @@ func assumeRole(client *sts.Client, cfg awssdk.Config, arn string) awssdk.Config
 func fmtIAMRole(account string, role string) string {
 	return fmt.Sprintf("arn:aws:iam::%s:role/%s", account, role)
 }
-
-func (a *AWSOrg) Run(context.Context) error { return nil }
-func (a *AWSOrg) Stop()                     {}

@@ -1,0 +1,106 @@
+// Licensed to Elasticsearch B.V. under one or more contributor
+// license agreements. See the NOTICE file distributed with
+// this work for additional information regarding copyright
+// ownership. Elasticsearch B.V. licenses this file to you under
+// the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+package builder
+
+import (
+	"context"
+	"time"
+
+	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider"
+	"github.com/elastic/cloudbeat/dataprovider/providers/common"
+	"github.com/elastic/cloudbeat/evaluator"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/manager"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/transformer"
+	"github.com/elastic/cloudbeat/uniqueness"
+	"github.com/elastic/cloudbeat/version"
+	"github.com/elastic/elastic-agent-libs/logp"
+)
+
+const (
+	defaultManagerTimeout = 10 * time.Minute
+)
+
+type Benchmark interface {
+	Run(ctx context.Context) (<-chan []beat.Event, error)
+	Stop()
+}
+
+type builder struct {
+	managerTimeout   time.Duration
+	idp              dataprovider.IdProvider
+	bdp              dataprovider.CommonDataProvider
+	k8sLeaderElector uniqueness.Manager
+}
+
+func New(options ...Option) *builder {
+	b := &builder{
+		managerTimeout: defaultManagerTimeout,
+		idp:            &idProvider{},
+		bdp:            &dataProvider{},
+	}
+	for _, fn := range options {
+		fn(b)
+	}
+	return b
+}
+
+func (b *builder) Build(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (Benchmark, error) {
+	base, err := b.buildBase(ctx, log, cfg, resourceCh, reg)
+	if err != nil {
+		return nil, err
+	}
+
+	if b.k8sLeaderElector != nil {
+		return &k8sbenchmark{
+			basebenchmark: *base,
+			leaderElector: b.k8sLeaderElector,
+		}, nil
+	}
+
+	return base, nil
+}
+
+func (b *builder) buildBase(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (*basebenchmark, error) {
+	manager, err := manager.NewManager(ctx, log, cfg.Period, b.managerTimeout, reg)
+	if err != nil {
+		return nil, err
+	}
+
+	evaluator, err := evaluator.NewOpaEvaluator(ctx, log, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	cdp := common.New(log, version.CloudbeatVersionInfo{
+		Version: version.CloudbeatVersion(),
+		Policy:  version.PolicyVersion(),
+	})
+
+	transformer := transformer.NewTransformer(log, b.bdp, cdp, b.idp)
+	return &basebenchmark{
+		log:         log,
+		manager:     manager,
+		evaluator:   evaluator,
+		transformer: transformer,
+		resourceCh:  resourceCh,
+	}, nil
+}

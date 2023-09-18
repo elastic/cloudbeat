@@ -26,45 +26,50 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
+const resourceChBuffer = 10000
+
 type AWS struct {
 	IdentityProvider awslib.IdentityProviderGetter
 }
 
-func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
+
 	if err := a.checkDependencies(); err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// TODO: make this mock-able
 	awsConfig, err := aws.InitializeAWSConfig(cfg.CloudConfig.Aws.Cred)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
+		return nil, fmt.Errorf("failed to initialize AWS credentials: %w", err)
 	}
 
 	awsIdentity, err := a.IdentityProvider.GetIdentity(ctx, awsConfig)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to get AWS identity: %w", err)
+		return nil, fmt.Errorf("failed to get AWS identity: %w", err)
 	}
 
-	return registry.NewRegistry(
-			log,
-			registry.WithFetchersMap(preset.NewCisAwsFetchers(log, awsConfig, ch, awsIdentity)),
-		), cloud.NewDataProvider(
-			cloud.WithLogger(log),
-			cloud.WithAccount(*awsIdentity),
-		), cloud.NewIdProvider(), nil
-}
+	fetchers := preset.NewCisAwsFetchers(log, awsConfig, resourceCh, awsIdentity)
+	reg := registry.NewRegistry(log, registry.WithFetchersMap(fetchers))
 
-func (a *AWS) Run(context.Context) error { return nil }
-func (a *AWS) Stop()                     {}
+	bdp := cloud.NewDataProvider(
+		cloud.WithLogger(log),
+		cloud.WithAccount(*awsIdentity),
+	)
+
+	return builder.New(
+		builder.WithBenchmarkDataProvider(bdp),
+	).Build(ctx, log, cfg, resourceCh, reg)
+}
 
 func (a *AWS) checkDependencies() error {
 	if a.IdentityProvider == nil {

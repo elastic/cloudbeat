@@ -36,17 +36,16 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
-	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-func TestNewBenchmark(t *testing.T) {
-	defer goleak.VerifyNone(t, goleak.IgnoreCurrent()) // NewBenchmark should not start anything
+func TestGetStrategy(t *testing.T) {
+	defer goleak.VerifyNone(t, goleak.IgnoreCurrent()) // GetStrategy should not start anything
 
 	tests := []struct {
 		cfg      config.Config
-		wantType Benchmark
+		wantType strategy
 		wantErr  bool
 	}{
 		{
@@ -90,7 +89,7 @@ func TestNewBenchmark(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%T", tt.wantType), func(t *testing.T) {
-			got, err := NewBenchmark(&tt.cfg)
+			got, err := GetStrategy(&tt.cfg)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -101,10 +100,10 @@ func TestNewBenchmark(t *testing.T) {
 	}
 }
 
-func testInitialize(t *testing.T, benchmark Benchmark, cfg *config.Config, wantErr string, want []string) {
+func testInitialize(t *testing.T, s strategy, cfg *config.Config, wantErr string, want []string) {
 	t.Helper()
 
-	reg, dp, idp, err := benchmark.Initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
+	benchmark, err := s.NewBenchmark(context.Background(), testhelper.NewLogger(t), cfg)
 	if wantErr != "" {
 		assert.ErrorContains(t, err, wantErr)
 		return
@@ -115,7 +114,9 @@ func testInitialize(t *testing.T, benchmark Benchmark, cfg *config.Config, wantE
 	require.NoError(t, err)
 	assert.Len(t, reg.Keys(), len(want))
 
-	require.NoError(t, benchmark.Run(context.Background()))
+	ch, err := benchmark.Run(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, ch)
 	defer benchmark.Stop()
 
 	for _, fetcher := range want {

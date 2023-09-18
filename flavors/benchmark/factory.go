@@ -24,24 +24,19 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
-type Benchmark interface {
-	Run(ctx context.Context) error
-	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)
-	Stop()
-
+type strategy interface {
+	NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error)
 	checkDependencies() error
 }
 
-func NewBenchmark(cfg *config.Config) (Benchmark, error) {
+func GetStrategy(cfg *config.Config) (strategy, error) {
 	switch cfg.Benchmark {
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {
@@ -61,12 +56,10 @@ func NewBenchmark(cfg *config.Config) (Benchmark, error) {
 			AWSMetadataProvider:    awslib.Ec2MetadataProvider{},
 			EKSClusterNameProvider: awslib.EKSClusterNameProvider{},
 			ClientProvider:         k8s.ClientGetter{},
-			leaderElector:          nil,
 		}, nil
 	case config.CIS_K8S:
 		return &K8S{
 			ClientProvider: k8s.ClientGetter{},
-			leaderElector:  nil,
 		}, nil
 	case config.CIS_GCP:
 		return &GCP{

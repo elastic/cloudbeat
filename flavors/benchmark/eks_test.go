@@ -30,7 +30,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
-func TestEKS_Initialize(t *testing.T) {
+func TestEKS_NewBenchmark(t *testing.T) {
 	t.Setenv("NODE_NAME", "node-name")
 	awsCfg := config.Config{
 		CloudConfig: config.CloudConfig{
@@ -134,7 +134,6 @@ func TestEKS_Initialize(t *testing.T) {
 				AWSMetadataProvider:    tt.awsMetadataProvider,
 				EKSClusterNameProvider: tt.eksClusterNameProvider,
 				ClientProvider:         tt.clientProvider,
-				leaderElector:          nil,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
