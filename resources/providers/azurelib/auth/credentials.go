@@ -21,53 +21,31 @@ import (
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/config"
 )
 
 type AzureFactoryConfig struct {
-	// TODO: Add other credentials
 	Credentials *azidentity.DefaultAzureCredential
 }
 
 type ConfigProviderAPI interface {
-	GetAzureClientConfig(cfg config.AzureConfig, log *logp.Logger) (*AzureFactoryConfig, error)
+	GetAzureClientConfig() (*AzureFactoryConfig, error)
 }
 
 type ConfigProvider struct {
 	AuthProvider AzureAuthProviderAPI
 }
 
-func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig, log *logp.Logger) (*AzureFactoryConfig, error) {
-	// if cfg.ClientId != "" {
-	// 	return p.getCustomCredentialsConfig(cfg, log)
-	// }
-	return p.getDefaultCredentialsConfig(log)
+func (p *ConfigProvider) GetAzureClientConfig() (*AzureFactoryConfig, error) {
+	return p.getDefaultCredentialsConfig()
 }
 
-func (p *ConfigProvider) getDefaultCredentialsConfig(log *logp.Logger) (*AzureFactoryConfig, error) {
-	log.Info("getDefaultCredentialsConfig")
-
+func (p *ConfigProvider) getDefaultCredentialsConfig() (*AzureFactoryConfig, error) {
 	creds, err := p.AuthProvider.FindDefaultCredentials(nil)
 	if err != nil {
-		return nil, fmt.Errorf("getDefaultCredentialsConfig failed to get default credentials: %w", err)
+		return nil, fmt.Errorf("failed to get default credentials: %w", err)
 	}
 
 	return &AzureFactoryConfig{
 		Credentials: creds,
 	}, nil
 }
-
-// func (p *ConfigProvider) getCustomCredentialsConfig(cfg config.AzureConfig, log *logp.Logger) (*AzureFactoryConfig, error) {
-// 	log.Info("getCustomCredentialsConfig")
-
-// 	creds, err := p.AuthProvider.FindEnvironmentCredential(&azidentity.EnvironmentCredentialOptions{})
-// 	if err != nil {
-// 		return nil, fmt.Errorf("getCustomCredentialsConfig failed to get default credentials: %w", err)
-// 	}
-
-// 	return &AzureFactoryConfig{
-// 		Credentials: creds,
-// 	}, nil
-// }

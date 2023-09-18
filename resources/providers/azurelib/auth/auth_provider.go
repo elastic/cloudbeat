@@ -25,15 +25,9 @@ type AzureAuthProvider struct{}
 
 type AzureAuthProviderAPI interface {
 	FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error)
-	// FindEnvironmentCredential(options *azidentity.EnvironmentCredentialOptions) (*azidentity.EnvironmentCredential, error)
 }
 
 // FindDefaultCredentials is a wrapper around azidentity.NewDefaultAzureCredential to make it easier to mock
 func (a *AzureAuthProvider) FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error) {
 	return azidentity.NewDefaultAzureCredential(options)
 }
-
-// // FindEnvironmentCredential is a wrapper around azidentity.NewEnvironmentCredential to make it easier to mock
-// func (a *AzureAuthProvider) FindEnvironmentCredential(options *azidentity.EnvironmentCredentialOptions) (*azidentity.EnvironmentCredential, error) {
-// 	return azidentity.NewEnvironmentCredential(options)
-// }

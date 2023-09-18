@@ -18,40 +18,23 @@
 package auth
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/elastic/elastic-agent-libs/logp"
-	mock "github.com/stretchr/testify/mock"
-
-	"github.com/elastic/cloudbeat/config"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
-	type fields struct {
-		AuthProvider AzureAuthProviderAPI
-	}
-	type args struct {
-		cfg config.AzureConfig
-		log *logp.Logger
-	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *AzureFactoryConfig
-		wantErr bool
+		name         string
+		want         *AzureFactoryConfig
+		wantErr      bool
+		authProvider *MockAzureAuthProviderAPI
 	}{
 		{
-			name: "Should return a DefaultAzureCredential",
-			fields: fields{
-				AuthProvider: mockAzureAuthProvider(nil),
-			},
-			args: args{
-				cfg: config.AzureConfig{},
-				log: logp.NewLogger("Should return a DefaultAzureCredential"),
-			},
+			name:         "Should return a DefaultAzureCredential",
+			authProvider: mockAzureAuthProvider(nil),
 			want: &AzureFactoryConfig{
 				Credentials: &azidentity.DefaultAzureCredential{},
 			},
@@ -62,16 +45,15 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &ConfigProvider{
-				AuthProvider: tt.fields.AuthProvider,
+				AuthProvider: tt.authProvider,
 			}
-			got, err := p.GetAzureClientConfig(tt.args.cfg, tt.args.log)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ConfigProvider.GetAzureClientConfig() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			got, err := p.GetAzureClientConfig()
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ConfigProvider.GetAzureClientConfig() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
