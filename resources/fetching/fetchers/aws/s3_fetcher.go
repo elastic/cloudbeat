@@ -81,4 +81,8 @@ func (r S3Resource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r S3Resource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+func (r S3Resource) GetElasticCommonData() (map[string]any, error) {
+	return map[string]interface{}{
+		"cloud.service.name": "S3",
+	}, nil
+}

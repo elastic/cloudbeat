@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/service/kms/types"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -82,4 +83,21 @@ func (r KmsResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r KmsResource) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+func (r KmsResource) GetElasticCommonData() (map[string]any, error) {
+	m := map[string]interface{}{
+		"cloud.service.name": "KMS",
+	}
+
+	key, ok := r.key.(kms.KmsInfo)
+	if ok {
+		m["x509.not_after"] = key.KeyMetadata.ValidTo
+		m["x509.not_before"] = key.KeyMetadata.CreationDate
+		if key.KeyMetadata.KeyUsage == types.KeyUsageTypeSignVerify {
+			m["x509.signature_algorithm"] = key.KeyMetadata.KeySpec
+		} else if key.KeyMetadata.KeyUsage == types.KeyUsageTypeEncryptDecrypt {
+			m["x509.public_key_algorithm"] = key.KeyMetadata.KeySpec
+		}
+	}
+
+	return m, nil
+}

@@ -20,7 +20,7 @@ package dataprovider
 import "github.com/elastic/beats/v7/libbeat/beat"
 
 type ElasticCommonDataProvider interface {
-	GetElasticCommonData() (map[string]interface{}, error)
+	GetElasticCommonData() (map[string]any, error)
 }
 
 type enricher struct {
