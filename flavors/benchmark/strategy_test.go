@@ -122,6 +122,17 @@ func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr strin
 	require.NoError(t, err)
 	assert.Len(t, reg.Keys(), len(want))
 
+	eks, ok := s.(*EKS)
+	if ok {
+		require.NoError(t, eks.leaderElector.Run(context.Background()))
+		defer eks.leaderElector.Stop()
+	}
+	k8s, ok := s.(*K8S)
+	if ok {
+		require.NoError(t, k8s.leaderElector.Run(context.Background()))
+		defer k8s.leaderElector.Stop()
+	}
+
 	for _, fetcher := range want {
 		ok := reg.ShouldRun(fetcher)
 		assert.Truef(t, ok, "fetcher %s enabled", fetcher)
