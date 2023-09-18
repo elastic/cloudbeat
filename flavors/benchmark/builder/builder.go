@@ -93,7 +93,8 @@ func (b *builder) buildBase(ctx context.Context, log *logp.Logger, cfg *config.C
 
 	cdp := common.New(log, version.CloudbeatVersionInfo{
 		Version: version.CloudbeatVersion(),
-		Policy:  version.PolicyVersion(),
+		// Keeping Policy field for backward compatibility
+		Policy: version.CloudbeatVersion(),
 	})
 
 	transformer := transformer.NewTransformer(log, b.bdp, cdp, b.idp)
