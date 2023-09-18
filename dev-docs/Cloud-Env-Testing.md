@@ -16,7 +16,7 @@ Follow these steps to run the workflow:
 
    ![Run Workflow](https://github.com/elastic/cloudbeat/assets/99176494/115fdd53-cff7-406a-bc3d-d65d5199389f)
 
-3. Complete the required input fields:
+3. Complete the required parameters:
 
     - **`deployment_name`**: Name your environment (Allowed characters: a-zA-Z0-9 and `-`). For
       instance: `john-8-7-2-June01`.
@@ -30,11 +30,14 @@ Follow these steps to run the workflow:
       supports
       snapshot and build candidate (BC) versions. Specify a different region only if necessary.
 
-   ![Enter Inputs](https://github.com/elastic/cloudbeat/assets/99176494/06d8144d-13cc-4e13-92fc-19f52ce8206b)
+   ![Required Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/6159129e-6d4d-46b1-97a1-f0d3859500fd)
 
-4. Optionally, modify other input values if required:
 
-    - `docker-image-override` (optional): Use this to replace the default Docker image for build candidate (BC) or
+
+
+5. Optionally, modify other parameters if required:
+
+    - **`docker-image-override`** (**optional**): Use this to replace the default Docker image for build candidate (BC) or
       SNAPSHOT versions.
       Provide the full image path. Leave this field blank for snapshot versions. Follow this format for the image
       path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`. If you're not sure where to get this
@@ -43,23 +46,26 @@ Follow these steps to run the workflow:
       e.g. `elastic / unified-release - staging # 8.9 - 11 - 8.9.0-c6bb8f7a Success after 4 hr 58 min`. Now just copy it
       and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.9.0-c6bb8f7a`.
 
-    - `run-sanity-tests` (optional): Set to `true` to run sanity tests after the environment is set up. Default: `false`
+    - **`run-sanity-tests`** (**optional**): Set to `true` to run sanity tests after the environment is set up. Default: `false`
 
-    - `cleanup-env` (optional): Set to `true` if you want the resources to automatically be cleaned up after
+    - **`cleanup-env`** (**optional**): Set to `true` if you want the resources to automatically be cleaned up after
       provisioning - useful if you don't want to test the env manually after deployment.
       Default: `false`.
 
-    - `ec-api-key` (optional): By default, all the new environments will be created in our EC Cloud Security organization.
+    - **`ec-api-key`** (**optional**): By default, all the new environments will be created in our EC Cloud Security organization.
       If you want to create the environment on your personal org (`@elastic.co`) you can enter
       your private [Elastic Cloud](https://cloud.elastic.co/home) API key. Follow the
       [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for
       step-by-step instructions on generating the token.
 
-   ![Adjust Inputs](https://github.com/elastic/cloudbeat/assets/99176494/bac5004d-7cbc-4a34-8127-3acd11acc90e)
+   ![Optinal Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/17933589-ee0e-4181-a244-f501f54bda6c)
 
-5. Click the `Run workflow` button to start.
 
-   ![Run Workflow](https://github.com/elastic/cloudbeat/assets/99176494/5e5131ba-264e-4444-8879-aa612d5de778)
+
+7. Click the `Run workflow` button to start.
+
+   ![Run Workflow](https://github.com/oren-zohar/cloudbeat/assets/85433724/7b05bf58-cc0b-4ec9-8e49-55d117673df8)
+
 
 ## Tracking Workflow Execution
 
