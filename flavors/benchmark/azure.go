@@ -62,7 +62,7 @@ func (a *Azure) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Co
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure asset inventory: %v", err)
 	}
 
-	fetchers, err := factory.NewCisAzureFactory(ctx, log, ch, assetProvider)
+	fetchers, err := factory.NewCisAzureFactory(log, ch, assetProvider)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure fetchers: %v", err)
 	}
