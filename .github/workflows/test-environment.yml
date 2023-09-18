@@ -10,14 +10,10 @@ on:
         description: |
           Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
         required: true
-      ec-api-key:
-        type: string
-        description: "Elastic Cloud API KEY"
-        required: true
       elk-stack-version:
         required: true
         description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.8.0"
+        default: "8.10.0"
       ess-region:
         required: true
         description: "Elastic Cloud deployment region"
@@ -33,6 +29,10 @@ on:
         description: "Cleanup resources after provision"
         default: false
         type: boolean
+      ec-api-key:
+        type: string
+        description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
+        required: true
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

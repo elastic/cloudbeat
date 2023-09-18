@@ -1,6 +1,6 @@
 # Install CSPM integration on a cloud deployment with standalone docker agent
 
-## Prerequiste
+## Prerequisites
 1. Docker
 2. [Connect to AWS account using the CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html)
 
@@ -9,7 +9,7 @@
 - Log into with your elastic account
 - Select `Create Deployment`
 - Adjust the settings for your need, note that certain versions only exist on certain regions.
-- At the time of writing this, `latest` and `snapshot` versions are avilable on `us-west2`
+- At the time of writing this, `latest` and `snapshot` versions are available on `us-west2`
 > **Note**
 > `latest` is the build candidate for pre-released versions
 
@@ -19,7 +19,7 @@ Launch your Cloud Deployment
 
 ## 2. Optional Step - Verify Cloud Deployment Commit
 
-To prevent cases of working with an incorrect commit, confirm that the commit SHA of your deployment is matching the desired commit SHA, wheter its the [DRA](https://artifacts-staging.elastic.co/dra-info/index.html), BC, or just a specific commit. for this guide, we will use the latest BC commit SHA
+To prevent cases of working with an incorrect commit, confirm that the commit SHA of your deployment is matching the desired commit SHA, whether it's the [DRA](https://artifacts-staging.elastic.co/dra-info/index.html), BC, or just a specific commit. for this guide, we will use the latest BC commit SHA
 
 - In your deployment, navigate to `/app/status`, the commit of your Kibana version will be displayed at the top
 
@@ -56,7 +56,7 @@ To prevent cases of working with an incorrect commit, confirm that the commit SH
 
 - In the Flyout, give it a name (you'll need it later) and click on `Create agent policy`
 - A new policy has been added to your list of agent policies, click on its name and then on `Add integration`
-- In the intergations screen, select the needed integration. For this tutorial, we will use CSPM
+- In the integrations screen, select the needed integration. For this tutorial, we will use CSPM
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222234500-39dbda6c-8880-4f43-99f4-9cc2d3c7a655.png">
 
@@ -67,11 +67,11 @@ To prevent cases of working with an incorrect commit, confirm that the commit SH
 
 <img width="900" alt="image" src="https://user-images.githubusercontent.com/51442161/222235991-5ea07776-d5fe-4a9c-9629-a619c5326970.png">
 
-Save the intergation
+Save the integration
 
 ## 4. Add Standalone Docker Agent
-- Now that you have an agent policy with a configured CSPM intergation navigate to Fleet > Agents and select `Add Agent`
-- Select your CSPM intergation from the drop down list under `What type of host are you adding?`
+- Now that you have an agent policy with a configured CSPM integration navigate to Fleet > Agents and select `Add Agent`
+- Select your CSPM integration from the drop-down list under `What type of host are you adding?`
 - On step 3 of the Flyout, you will be provided with the setup command for the agent, for example:
 
 ```
@@ -92,10 +92,10 @@ docker run -d --platform=linux/x86_64 \
 docker.elastic.co/cloud-release/elastic-agent-cloud:8.7.0-046d305b
 ```
 > **Note**
-> make sure to change the agent docker image according to what you are using)
+> make sure to change the agent docker image according to what you are using
 
 At this point you should see your agent working in your docker and under `Confirm agent enrollment` section of the Flyout.
 
 ## 5. Discover
-- Go to Discover and make sure you have docs in the `findings` and `findings-latest` indecies, `findings-latest` can take a few minutes to populate.
+- Go to Discover and make sure you have docs in the `findings` and `findings-latest` indices, `findings-latest` can take a few minutes to populate.
 - If you do, congrats you have a working CSPM cloud deployment.

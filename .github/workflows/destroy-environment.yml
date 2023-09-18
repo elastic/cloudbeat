@@ -5,10 +5,6 @@ on:
   # Ability to execute on demand
   workflow_dispatch:
     inputs:
-      ec-api-key:
-        type: string
-        description: "Elastic Cloud API key"
-        required: true
       prefix:
         type: string
         description: "Delete all environments starting with `prefix`"
@@ -16,6 +12,10 @@ on:
       ignore-prefix:
         type: string
         description: "Ignore all environments starting with `ignore-prefix`"
+      ec-api-key:
+        type: string
+        description: "**Optional** To delete env environments on your own organization, enter your Elastic Cloud API key."
+        required: true
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
