@@ -22,9 +22,9 @@ Follow these steps to run the workflow:
       instance: `john-8-7-2-June01`.
 
     - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
-      version. The default value is `8.8.0`. Check the available
-      versions [here](https://artifacts-staging.elastic.co/dra-info/index.html). For BC, enter only the
-      version without additions/commit sha, e.g. `8.8.1`. For SNAPSHOT, enter the full version, e.g. `8.8.1-SNAPSHOT`.
+      version. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
+      For BC, enter only the version without additions/commit sha, e.g. `8.8.1`.
+      For SNAPSHOT, enter the full version, e.g. `8.8.1-SNAPSHOT`.
 
     - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
       supports
