@@ -44,6 +44,8 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			defer tt.authProvider.AssertExpectations(t)
+
 			p := &ConfigProvider{
 				AuthProvider: tt.authProvider,
 			}
@@ -65,9 +67,9 @@ func mockAzureAuthProvider(err error) *MockAzureAuthProviderAPI {
 		on.Return(
 			&azidentity.DefaultAzureCredential{},
 			nil,
-		)
+		).Once()
 	} else {
-		on.Return(nil, err)
+		on.Return(nil, err).Once()
 	}
 	return azureProviderAPI
 }
