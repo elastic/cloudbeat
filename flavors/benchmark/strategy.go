@@ -56,10 +56,12 @@ func GetStrategy(cfg *config.Config) (strategy, error) {
 			AWSMetadataProvider:    awslib.Ec2MetadataProvider{},
 			EKSClusterNameProvider: awslib.EKSClusterNameProvider{},
 			ClientProvider:         k8s.ClientGetter{},
+			leaderElector:          nil,
 		}, nil
 	case config.CIS_K8S:
 		return &K8S{
 			ClientProvider: k8s.ClientGetter{},
+			leaderElector:  nil,
 		}, nil
 	case config.CIS_GCP:
 		return &GCP{
