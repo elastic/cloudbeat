@@ -27,7 +27,7 @@ Self-Managed Kubernetes
 just create-vanilla-deployment-file
 ```
 
-Self-Managed Kubernetes wthout certificate
+Self-Managed Kubernetes without certificate
 
 ```zsh
 just create-vanilla-deployment-file-nocert
@@ -106,7 +106,7 @@ In general there are two major test suites:
 
 The tests written in Go use the Go Testing package. The tests written in Python depend on pytest and require a compiled and executable binary from the Go code. The python test run a beat with a specific config and params and either check if the output is as expected or if the correct things show up in the logs.
 
-Integration tests in Beats are tests which require an external system like Elasticsearch to test if the integration with this service works as expected. Beats provides in its testsuite docker containers and docker-compose files to start these environments but a developer can run the required services also locally.
+Integration tests in Beats are tests which require an external system like Elasticsearch to test if the integration with this service works as expected. Beats provide in its testsuite docker containers and docker-compose files to start these environments but a developer can run the required services also locally.
 
 For more information, see our [testing docs](/tests/README.md)
 
@@ -203,7 +203,7 @@ To run `act` with secrets, you can enter them interactively, supply them as envi
 
 ##### GitHub Upload Artifact
 
-[GithHub upload-artifact](https://github.com/actions/upload-artifact) action requires simple server running on local machine.
+[GitHub upload-artifact](https://github.com/actions/upload-artifact) action requires simple server running on local machine.
 
 The solution is described in [this](https://github.com/nektos/act/issues/329) issue.
 
