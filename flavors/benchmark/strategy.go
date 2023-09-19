@@ -31,12 +31,12 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
-type strategy interface {
+type Strategy interface {
 	NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error)
 	checkDependencies() error
 }
 
-func GetStrategy(cfg *config.Config) (strategy, error) {
+func GetStrategy(cfg *config.Config) (Strategy, error) {
 	switch cfg.Benchmark {
 	case config.CIS_AWS:
 		if cfg.CloudConfig.Aws.AccountType == config.OrganizationAccount {

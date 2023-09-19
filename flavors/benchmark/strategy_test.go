@@ -49,7 +49,7 @@ func TestGetStrategy(t *testing.T) {
 
 	tests := []struct {
 		cfg      config.Config
-		wantType strategy
+		wantType Strategy
 		wantErr  bool
 	}{
 		{
