@@ -56,7 +56,12 @@
                     }
                 },
                 "osProfile": {
-                    "computerName": "cloudbeatVM"
+                    "computerName": "cloudbeat",
+                    "adminUsername": "cloudbeatVM",
+                    "adminPassword": "[guid('')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    }
                 },
                 "networkProfile": {
                     "networkInterfaces": [
