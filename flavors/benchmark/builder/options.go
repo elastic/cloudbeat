@@ -24,28 +24,28 @@ import (
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 
-type Option func(b *builder)
+type Option func(b *Builder)
 
 func WithManagerTimeout(timeout time.Duration) Option {
-	return func(b *builder) {
+	return func(b *Builder) {
 		b.managerTimeout = timeout
 	}
 }
 
 func WithK8sLeaderElector(le uniqueness.Manager) Option {
-	return func(b *builder) {
+	return func(b *Builder) {
 		b.k8sLeaderElector = le
 	}
 }
 
 func WithIdProvider(idp dataprovider.IdProvider) Option {
-	return func(b *builder) {
+	return func(b *Builder) {
 		b.idp = idp
 	}
 }
 
 func WithBenchmarkDataProvider(cdp dataprovider.CommonDataProvider) Option {
-	return func(b *builder) {
+	return func(b *Builder) {
 		b.bdp = cdp
 	}
 }

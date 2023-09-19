@@ -35,7 +35,7 @@ func (_m *MockOption) EXPECT() *MockOption_Expecter {
 }
 
 // Execute provides a mock function with given fields: b
-func (_m *MockOption) Execute(b *builder) {
+func (_m *MockOption) Execute(b *Builder) {
 	_m.Called(b)
 }
 
@@ -45,14 +45,14 @@ type MockOption_Execute_Call struct {
 }
 
 // Execute is a helper method to define mock.On call
-//   - b *builder
+//   - b *Builder
 func (_e *MockOption_Expecter) Execute(b interface{}) *MockOption_Execute_Call {
 	return &MockOption_Execute_Call{Call: _e.mock.On("Execute", b)}
 }
 
-func (_c *MockOption_Execute_Call) Run(run func(b *builder)) *MockOption_Execute_Call {
+func (_c *MockOption_Execute_Call) Run(run func(b *Builder)) *MockOption_Execute_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*builder))
+		run(args[0].(*Builder))
 	})
 	return _c
 }
@@ -62,7 +62,7 @@ func (_c *MockOption_Execute_Call) Return() *MockOption_Execute_Call {
 	return _c
 }
 
-func (_c *MockOption_Execute_Call) RunAndReturn(run func(*builder)) *MockOption_Execute_Call {
+func (_c *MockOption_Execute_Call) RunAndReturn(run func(*Builder)) *MockOption_Execute_Call {
 	_c.Call.Return(run)
 	return _c
 }

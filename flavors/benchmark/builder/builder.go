@@ -45,15 +45,15 @@ type Benchmark interface {
 	Stop()
 }
 
-type builder struct {
+type Builder struct {
 	managerTimeout   time.Duration
 	idp              dataprovider.IdProvider
 	bdp              dataprovider.CommonDataProvider
 	k8sLeaderElector uniqueness.Manager
 }
 
-func New(options ...Option) *builder {
-	b := &builder{
+func New(options ...Option) *Builder {
+	b := &Builder{
 		managerTimeout:   defaultManagerTimeout,
 		idp:              &idProvider{},
 		bdp:              &dataProvider{},
@@ -65,7 +65,7 @@ func New(options ...Option) *builder {
 	return b
 }
 
-func (b *builder) Build(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (Benchmark, error) {
+func (b *Builder) Build(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (Benchmark, error) {
 	base, err := b.buildBase(ctx, log, cfg, resourceCh, reg)
 	if err != nil {
 		return nil, err
@@ -81,7 +81,7 @@ func (b *builder) Build(ctx context.Context, log *logp.Logger, cfg *config.Confi
 	return base, nil
 }
 
-func (b *builder) buildBase(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (*basebenchmark, error) {
+func (b *Builder) buildBase(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (*basebenchmark, error) {
 	manager, err := manager.NewManager(ctx, log, cfg.Period, b.managerTimeout, reg)
 	if err != nil {
 		return nil, err
