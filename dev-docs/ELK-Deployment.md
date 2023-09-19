@@ -20,7 +20,7 @@ For example, spinning up 8.6.0 stack locally:
   ```
 
 ## Elastic Cloud Deployment
-This is the recommended way to deploy the stack for development and testing purposes. As it dosn't require any local resources, configuration, and maintenance.
+This is the recommended way to deploy the stack for development and testing purposes. As it doesn't require any local resources, configuration, and maintenance.
 You can just spin up a new deployment, and connect to it:
 
 Spin up Elastic stack using [cloud](https://cloud.elastic.co/home) or [staging](https://staging.found.no/home) (which will be deleted after 14 days)
