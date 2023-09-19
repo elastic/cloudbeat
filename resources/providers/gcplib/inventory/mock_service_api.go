@@ -129,6 +129,59 @@ func (_c *MockServiceAPI_ListAllAssetTypesByName_Call) RunAndReturn(run func([]s
 	return _c
 }
 
+// ListLoggingAssets provides a mock function with given fields:
+func (_m *MockServiceAPI) ListLoggingAssets() ([]*LoggingAsset, error) {
+	ret := _m.Called()
+
+	var r0 []*LoggingAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]*LoggingAsset, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []*LoggingAsset); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*LoggingAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockServiceAPI_ListLoggingAssets_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListLoggingAssets'
+type MockServiceAPI_ListLoggingAssets_Call struct {
+	*mock.Call
+}
+
+// ListLoggingAssets is a helper method to define mock.On call
+func (_e *MockServiceAPI_Expecter) ListLoggingAssets() *MockServiceAPI_ListLoggingAssets_Call {
+	return &MockServiceAPI_ListLoggingAssets_Call{Call: _e.mock.On("ListLoggingAssets")}
+}
+
+func (_c *MockServiceAPI_ListLoggingAssets_Call) Run(run func()) *MockServiceAPI_ListLoggingAssets_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockServiceAPI_ListLoggingAssets_Call) Return(_a0 []*LoggingAsset, _a1 error) *MockServiceAPI_ListLoggingAssets_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockServiceAPI_ListLoggingAssets_Call) RunAndReturn(run func() ([]*LoggingAsset, error)) *MockServiceAPI_ListLoggingAssets_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListMonitoringAssets provides a mock function with given fields: _a0
 func (_m *MockServiceAPI) ListMonitoringAssets(_a0 map[string][]string) ([]*MonitoringAsset, error) {
 	ret := _m.Called(_a0)
