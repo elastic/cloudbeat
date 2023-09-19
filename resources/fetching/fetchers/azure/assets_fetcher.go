@@ -50,7 +50,6 @@ type AzureAssetInfo struct {
 	TenantId       string         `json:"tenant_id,omitempty"`
 }
 
-// TODO: Implement other types
 var AzureAssetTypes = map[string]string{
 	"microsoft.compute/virtualmachines": fetching.AzureVMType,
 	"microsoft.storage/storageaccounts": fetching.AzureStorageAccountType,
@@ -67,6 +66,7 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
 	// TODO: Maybe we should use a query per type instead of listing all assets in a single query
+	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
 	assets, err := f.provider.ListAllAssetTypesByName(maps.Keys(AzureAssetTypes))
 	if err != nil {
 		return err
