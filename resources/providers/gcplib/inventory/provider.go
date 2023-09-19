@@ -240,7 +240,7 @@ func (p *Provider) ListLoggingAssets() ([]*LoggingAsset, error) {
 
 // ListServiceUsageAssets returns a list of service usage assets grouped by project id
 func (p *Provider) ListServiceUsageAssets() ([]*ServiceUsageAsset, error) {
-	services, err := p.ListAllAssetTypesByName([]string{"serviceusage.googleapis.com/Service"})
+	services, err := p.ListAllAssetTypesByName([]string{serviceUsageAssetType})
 	if err != nil {
 		return nil, err
 	}
