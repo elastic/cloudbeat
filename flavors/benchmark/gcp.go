@@ -42,7 +42,7 @@ type GCP struct {
 
 func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
-	reg, bdp, _, err := g.Initialize(ctx, log, cfg, resourceCh)
+	reg, bdp, _, err := g.initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
-func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (g *GCP) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := g.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}

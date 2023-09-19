@@ -105,13 +105,13 @@ func TestGetStrategy(t *testing.T) {
 }
 
 type benchInit interface {
-	Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)
+	initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)
 }
 
 func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr string, want []string) {
 	t.Helper()
 
-	reg, dp, _, err := s.Initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
+	reg, dp, _, err := s.initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
 	if wantErr != "" {
 		assert.ErrorContains(t, err, wantErr)
 		return
