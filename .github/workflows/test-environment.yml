@@ -10,14 +10,10 @@ on:
         description: |
           Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
         required: true
-      ec-api-key:
-        type: string
-        description: "Elastic Cloud API KEY"
-        required: true
       elk-stack-version:
         required: true
         description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
-        default: "8.8.0"
+        default: "8.10.0"
       ess-region:
         required: true
         description: "Elastic Cloud deployment region"
@@ -33,6 +29,10 @@ on:
         description: "Cleanup resources after provision"
         default: false
         type: boolean
+      ec-api-key:
+        type: string
+        description: "**Optional** By default, the environment will be created in our Cloud Security Organization. If you want to use your own cloud account, enter your Elastic Cloud API key."
+        required: false
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -42,6 +42,7 @@ env:
   FLEET_API_DIR: fleet_api/src
   AWS_DEFAULT_TAGS: "Key=division,Value=engineering Key=org,Value=security Key=team,Value=cloud-security-posture Key=project,Value=test-environments"
   GCP_DEFAULT_TAGS: "division=engineering,org=security,team=cloud-security-posture,project=test-environments"
+  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
   Deploy:
@@ -87,10 +88,14 @@ jobs:
           fi
 
       - name: Mask Sensitive Data
+        if: github.event.inputs.ec-api-key != ''
         run: |
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
           echo "TF_VAR_ec_api_key=$ec_api_key" >> $GITHUB_ENV
+
+      - name: Init Enrollment Token
+        run: |
           enrollment_token="init"
           echo "::add-mask::$enrollment_token"
           echo "ENROLLMENT_TOKEN=$enrollment_token" >> $GITHUB_ENV
