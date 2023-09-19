@@ -50,8 +50,8 @@ func NewGcpMonitoringFetcher(_ context.Context, log *logp.Logger, ch chan fetchi
 }
 
 var monitoringAssetTypes = map[string][]string{
-	"LogMetric":   {"logging.googleapis.com/LogMetric"},
-	"AlertPolicy": {"monitoring.googleapis.com/AlertPolicy"},
+	"LogMetric":   {inventory.MonitoringLogMetricAssetType},
+	"AlertPolicy": {inventory.MonitoringAlertPolicyAssetType},
 }
 
 func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
