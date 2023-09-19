@@ -29,14 +29,13 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type registryTestSuite struct {
 	suite.Suite
 
-	fetchers   factory.FetchersMap
+	fetchers   FetchersMap
 	registry   Registry
 	resourceCh chan fetching.ResourceInfo
 	wg         *sync.WaitGroup
@@ -49,14 +48,14 @@ func TestRegistryTestSuite(t *testing.T) {
 }
 
 func (s *registryTestSuite) SetupTest() {
-	s.fetchers = make(factory.FetchersMap)
+	s.fetchers = make(FetchersMap)
 	s.registry = NewRegistry(testhelper.NewLogger(s.T()), WithFetchersMap(s.fetchers))
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.wg = &sync.WaitGroup{}
 }
 
 func (s *registryTestSuite) registerFetcher(f fetching.Fetcher, key string, conditions ...fetching.Condition) {
-	s.fetchers[key] = factory.RegisteredFetcher{Fetcher: f, Condition: conditions}
+	s.fetchers[key] = RegisteredFetcher{Fetcher: f, Condition: conditions}
 }
 
 func (s *registryTestSuite) TestKeys() {
@@ -221,7 +220,7 @@ func (res numberResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (res numberResource) GetElasticCommonData() (map[string]interface{}, error) {
+func (res numberResource) GetElasticCommonData() (map[string]any, error) {
 	return nil, nil
 }
 
@@ -281,21 +280,21 @@ func Test_registry_Update(t *testing.T) {
 		},
 		{
 			name: "error",
-			updater: func() (factory.FetchersMap, error) {
+			updater: func() (FetchersMap, error) {
 				return nil, errors.New("some-error")
 			},
 			testFn: emptyFn,
 		},
 		{
 			name: "success after fail",
-			updater: func() (factory.FetchersMap, error) {
+			updater: func() (FetchersMap, error) {
 				switch count {
 				case 0:
 					count++
 					return nil, errors.New("some-error")
 				case 1:
 					count++
-					return factory.FetchersMap{"fetcher": newMockFetcher(tp, nil, 1)}, nil
+					return FetchersMap{"fetcher": newMockFetcher(tp, nil, 1)}, nil
 				default:
 					panic("unexpected count")
 				}
@@ -310,11 +309,11 @@ func Test_registry_Update(t *testing.T) {
 		},
 		{
 			name: "fail after success",
-			updater: func() (factory.FetchersMap, error) {
+			updater: func() (FetchersMap, error) {
 				switch count {
 				case 0:
 					count++
-					return factory.FetchersMap{"fetcher": newMockFetcher(tp, nil, 2)}, nil
+					return FetchersMap{"fetcher": newMockFetcher(tp, nil, 2)}, nil
 				case 1:
 					count++
 					return nil, errors.New("some-error")
@@ -348,9 +347,9 @@ func Test_registry_Update(t *testing.T) {
 	}
 }
 
-func newMockFetcher(t *testing.T, err error, times int) factory.RegisteredFetcher {
+func newMockFetcher(t *testing.T, err error, times int) RegisteredFetcher {
 	m := fetching.NewMockFetcher(t)
 	m.EXPECT().Stop().Once()
 	m.EXPECT().Fetch(mock.Anything, mock.Anything).Return(err).Times(times)
-	return factory.RegisteredFetcher{Fetcher: m}
+	return RegisteredFetcher{Fetcher: m}
 }

@@ -24,6 +24,7 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 	"github.com/elastic/elastic-agent-autodiscover/kubernetes"
 	"github.com/stretchr/testify/mock"
@@ -332,4 +333,20 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 		results := testhelper.CollectResources(s.resourceCh)
 		s.Equal(0, len(results))
 	}
+}
+
+func (s *EcrFetcherTestSuite) TestEcrResource_GetMetadata() {
+	r := EcrResource{
+		Repository: ecr.Repository{
+			RepositoryArn:  aws.String("test-ecr-arn"),
+			RepositoryName: aws.String("test-ecr-name"),
+		},
+	}
+	meta, err := r.GetMetadata()
+	s.NoError(err)
+	s.Equal(fetching.ResourceMetadata{ID: "test-ecr-arn", Type: "container-registry", SubType: "aws-ecr", Name: "test-ecr-name"}, meta)
+	m, err := r.GetElasticCommonData()
+	s.NoError(err)
+	s.Len(m, 1)
+	s.Contains(m, "cloud.service.name")
 }

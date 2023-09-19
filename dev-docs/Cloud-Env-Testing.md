@@ -1,8 +1,8 @@
 # Cloud Environment Testing
 
-The [Create Environment](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml) GitHub action
-deploys a full-featured cloud environment, pre-configured with all our integrations (KSPM, CSPM and D4C). It also includes features for
-running sanity testing and automated deletion.
+The [`Create Environment`](https://github.com/elastic/cloudbeat/actions/workflows/test-environment.yml) GitHub action
+deploys a full-featured cloud environment, pre-configured with all our integrations (KSPM, CSPM and D4C).
+It also includes features for running sanity testing and automated deletion.
 
 ## How to Run the Workflow
 
@@ -16,29 +16,25 @@ Follow these steps to run the workflow:
 
    ![Run Workflow](https://github.com/elastic/cloudbeat/assets/99176494/115fdd53-cff7-406a-bc3d-d65d5199389f)
 
-3. Complete the required input fields:
+3. Complete the required parameters:
 
     - **`deployment_name`**: Name your environment (Allowed characters: a-zA-Z0-9 and `-`). For
       instance: `john-8-7-2-June01`.
 
-    - `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API KEY. Follow
-      the [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for
-      step-by-step instructions on generating the token.
-
     - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
-      version. The default value is `8.8.0`. Check the available
-      versions [here](https://artifacts-staging.elastic.co/dra-info/index.html). For BC, enter only the
-      version without additions/commit sha, e.g. `8.8.1`. For SNAPSHOT, enter the full version, e.g. `8.8.1-SNAPSHOT`.
+      version. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
+      For BC, enter only the version without additions/commit sha, e.g. `8.8.1`.
+      For SNAPSHOT, enter the full version, e.g. `8.8.1-SNAPSHOT`.
 
     - **`ess-region`**: Indicate the Elastic Cloud deployment region. The default value is `gcp-us-west2`, which
       supports
       snapshot and build candidate (BC) versions. Specify a different region only if necessary.
 
-   ![Enter Inputs](https://github.com/elastic/cloudbeat/assets/99176494/06d8144d-13cc-4e13-92fc-19f52ce8206b)
+   ![Required Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/6159129e-6d4d-46b1-97a1-f0d3859500fd)
 
-4. Optionally, modify other input values if required:
+4. Optionally, modify other parameters if required:
 
-    - `docker-image-override` (optional): Use this to replace the default Docker image for build candidate (BC) or
+    - **`docker-image-override`** (**optional**): Use this to replace the default Docker image for build candidate (BC) or
       SNAPSHOT versions.
       Provide the full image path. Leave this field blank for snapshot versions. Follow this format for the image
       path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.8.1-9ac7eb02`. If you're not sure where to get this
@@ -47,19 +43,24 @@ Follow these steps to run the workflow:
       e.g. `elastic / unified-release - staging # 8.9 - 11 - 8.9.0-c6bb8f7a Success after 4 hr 58 min`. Now just copy it
       and replace it the image path: `docker.elastic.co/cloud-release/elastic-agent-cloud:8.9.0-c6bb8f7a`.
 
-    - `run-sanity-tests` (optional): Set to `true` to run sanity tests after the environment is set up. Default: `false`
+    - **`run-sanity-tests`** (**optional**): Set to `true` to run sanity tests after the environment is set up. Default: `false`
 
-    - `cleanup-env` (optional): Set to `true` if you want the resources to automatically be cleaned up after
+    - **`cleanup-env`** (**optional**): Set to `true` if you want the resources to automatically be cleaned up after
       provisioning - useful if you don't want to test the env manually after deployment.
       Default: `false`.
 
-      .
-   ![Adjust Inputs](https://github.com/elastic/cloudbeat/assets/99176494/bac5004d-7cbc-4a34-8127-3acd11acc90e)
+    - **`ec-api-key`** (**optional**): By default, all the new environments will be created in our EC Cloud Security organization.
+      If you want to create the environment on your personal org (`@elastic.co`) you can enter
+      your private [Elastic Cloud](https://cloud.elastic.co/home) API key. Follow the
+      [Cloud API Keys](https://www.elastic.co/guide/en/cloud/current/ec-api-authentication.html) documentation for
+      step-by-step instructions on generating the token.
 
+   ![Optional Parameters](https://github.com/oren-zohar/cloudbeat/assets/85433724/17933589-ee0e-4181-a244-f501f54bda6c)
 
 5. Click the `Run workflow` button to start.
 
-   ![Run Workflow](https://github.com/elastic/cloudbeat/assets/99176494/5e5131ba-264e-4444-8879-aa612d5de778)
+   ![Run Workflow](https://github.com/oren-zohar/cloudbeat/assets/85433724/7b05bf58-cc0b-4ec9-8e49-55d117673df8)
+
 
 ## Tracking Workflow Execution
 
@@ -107,7 +108,8 @@ Follow these steps to connect to your Amazon Elastic Kubernetes Service (EKS) cl
 
 1. **Assume Role for Access**:
 
-   Before connecting to the EKS cluster, you need to assume a role that provides the necessary permissions. Replace `<your-session-name>` with a meaningful session name and run the following command to assume the role:
+   Before connecting to the EKS cluster, you need to assume a role that provides the necessary permissions.
+   Replace `<your-session-name>` with a meaningful session name and run the following command to assume the role:
 
    ```bash
    export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s"  $(aws sts assume-role --role-arn arn:aws:iam::704479110758:role/Developer_eks --role-session-name <your-session-name> --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" --output text))
@@ -156,18 +158,18 @@ Follow these steps to run the workflow:
 
 3. Complete the required input fields:
 
-    - `ec-api-key` (required): Use the [Production Elastic Cloud](https://cloud.elastic.co/home) API key.
     - `prefix` (required): The prefix used to identify the environments to be deleted.
 
    <img width="411" alt="Enter Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/04973b00-5411-4ace-ab3a-534371877c91">
 
-1. Optionally, modify other input value if required:
+4. Optionally, modify other input value if required:
 
     - `ignore-prefix` (optional): The prefix used to identify environments that should be excluded from deletion.
+    - `ec-api-key` (required): Use your own [Elastic Cloud](https://cloud.elastic.co/home) API key if you want to delete environments from your Elastic Cloud account.
 
    <img width="411" alt="Optional Inputs" src="https://github.com/elastic/cloudbeat/assets/99176494/aa89ad4e-fd32-461d-ab2d-3fee28094a9d">
 
-2. Click the `Run workflow` button to start.
+5. Click the `Run workflow` button to start.
 
    ![Run Workflow](https://github.com/gurevichdmitry/cloudbeat/assets/99176494/64b554d5-70f0-4cf3-b2b9-8f8429d1fc07)
 

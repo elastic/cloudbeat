@@ -83,8 +83,6 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	// ListAllAssetTypesByName mocked to return a single asset
-	// Will be called N times, where N is the number of types in GcpAssetTypes
 	s.Equal(len(GcpAssetTypes), len(results))
 
 	lo.ForEach(results, func(r fetching.ResourceInfo, _ int) {

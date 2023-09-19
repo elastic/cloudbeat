@@ -53,6 +53,7 @@ const (
 	AccessAnalyzers           = "aws-access-analyzers"
 
 	GcpMonitoringType = "gcp-monitoring"
+	GcpServiceUsage   = "gcp-service-usage"
 
 	CloudIdentity          = "identity-management"
 	CloudCompute           = "cloud-compute"
@@ -101,7 +102,7 @@ type EcsGcp struct {
 type Resource interface {
 	GetMetadata() (ResourceMetadata, error)
 	GetData() any
-	GetElasticCommonData() (map[string]interface{}, error)
+	GetElasticCommonData() (map[string]any, error)
 }
 
 type ResourceFields struct {
