@@ -42,7 +42,7 @@ type K8S struct {
 }
 
 func (k *K8S) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
-	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
 	reg, bdp, idp, err := k.Initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		return nil, err

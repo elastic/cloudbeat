@@ -35,14 +35,14 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
-const resourceChBuffer = 10000
+const resourceChBufferSize = 10000
 
 type AWS struct {
 	IdentityProvider awslib.IdentityProviderGetter
 }
 
 func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
-	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
 	reg, bdp, _, err := a.Initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		return nil, err
