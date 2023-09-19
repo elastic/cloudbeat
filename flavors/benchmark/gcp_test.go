@@ -59,6 +59,7 @@ func TestGCP_Initialize(t *testing.T) {
 			want: []string{
 				"gcp_cloud_assets_fetcher",
 				"gcp_monitoring_fetcher",
+				"gcp_service_usage_fetcher",
 			},
 		},
 		{
@@ -83,6 +84,7 @@ func TestGCP_Initialize(t *testing.T) {
 			want: []string{
 				"gcp_cloud_assets_fetcher",
 				"gcp_monitoring_fetcher",
+				"gcp_service_usage_fetcher",
 			},
 		},
 		{

@@ -15,23 +15,37 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package preset
+package auth
 
 import (
-	"github.com/elastic/elastic-agent-libs/logp"
+	"fmt"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/azure"
-	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 )
 
-func NewCisAzureFactory(log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (registry.FetchersMap, error) {
-	log.Infof("Initializing Azure fetchers")
-	m := make(registry.FetchersMap)
+type AzureFactoryConfig struct {
+	Credentials *azidentity.DefaultAzureCredential
+}
 
-	assetsFetcher := fetchers.NewAzureAssetsFetcher(log, ch, inventory)
-	m["azure_cloud_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: assetsFetcher}
+type ConfigProviderAPI interface {
+	GetAzureClientConfig() (*AzureFactoryConfig, error)
+}
 
-	return m, nil
+type ConfigProvider struct {
+	AuthProvider AzureAuthProviderAPI
+}
+
+func (p *ConfigProvider) GetAzureClientConfig() (*AzureFactoryConfig, error) {
+	return p.getDefaultCredentialsConfig()
+}
+
+func (p *ConfigProvider) getDefaultCredentialsConfig() (*AzureFactoryConfig, error) {
+	creds, err := p.AuthProvider.FindDefaultCredentials(nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get default credentials: %w", err)
+	}
+
+	return &AzureFactoryConfig{
+		Credentials: creds,
+	}, nil
 }

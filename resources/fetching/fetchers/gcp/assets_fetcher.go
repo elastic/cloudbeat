@@ -48,38 +48,38 @@ type GcpAsset struct {
 // example: gcp-cloudkms-crypto-key
 var GcpAssetTypes = map[string][]string{
 	fetching.ProjectManagement: {
-		"cloudresourcemanager.googleapis.com/Project",
+		inventory.CloudResourceManagerProjectAssetType,
 	},
 	fetching.KeyManagement: {
-		"apikeys.googleapis.com/Key",
-		"cloudkms.googleapis.com/CryptoKey",
+		inventory.ApiKeysKeyAssetType,
+		inventory.CloudKmsCryptoKeyAssetType,
 	},
 	fetching.CloudIdentity: {
-		"iam.googleapis.com/ServiceAccount",
-		"iam.googleapis.com/ServiceAccountKey",
+		inventory.IamServiceAccountAssetType,
+		inventory.IamServiceAccountKeyAssetType,
 	},
 	fetching.CloudDatabase: {
-		"bigquery.googleapis.com/Dataset",
-		"bigquery.googleapis.com/Table",
-		"sqladmin.googleapis.com/Instance",
+		inventory.BigqueryDatasetAssetType,
+		inventory.BigqueryTableAssetType,
+		inventory.SqlDatabaseInstanceAssetType,
 	},
 	fetching.CloudStorage: {
-		"storage.googleapis.com/Bucket",
-		"logging.googleapis.com/LogBucket",
+		inventory.StorageBucketAssetType,
+		inventory.LoggingBucketAssetType,
 	},
 	fetching.CloudCompute: {
-		"compute.googleapis.com/Instance",
-		"compute.googleapis.com/Firewall",
-		"compute.googleapis.com/Disk",
-		"compute.googleapis.com/Network",
-		"compute.googleapis.com/RegionBackendService",
-		"compute.googleapis.com/Subnetwork",
+		inventory.ComputeInstanceAssetType,
+		inventory.ComputeFirewallAssetType,
+		inventory.ComputeDiskAssetType,
+		inventory.ComputeNetworkAssetType,
+		inventory.ComputeBackendServiceAssetType,
+		inventory.ComputeSubnetworkAssetType,
 	},
 	fetching.CloudDns: {
-		"dns.googleapis.com/ManagedZone",
+		inventory.DnsManagedZoneAssetType,
 	},
 	fetching.DataProcessing: {
-		"dataproc.googleapis.com/Cluster",
+		inventory.DataprocClusterAssetType,
 	},
 }
 

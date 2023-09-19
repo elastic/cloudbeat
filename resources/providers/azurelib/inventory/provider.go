@@ -24,9 +24,9 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
-	"github.com/elastic/elastic-agent-libs/logp"
 )
 
 type Provider struct {
