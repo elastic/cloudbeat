@@ -18,29 +18,29 @@
 package common
 
 import (
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/elastic/cloudbeat/version"
 )
 
 type DataProvider struct {
-	info version.CloudbeatVersionInfo
+	info map[string]any
 }
 
-func New(log *logp.Logger, info version.CloudbeatVersionInfo) *DataProvider {
-	return &DataProvider{
-		info: info,
-	}
-}
-
-func (c *DataProvider) GetElasticCommonData() (map[string]any, error) {
-	m := map[string]interface{}{}
-	err := mapstructure.Decode(c.info, &m)
+func New(cloudbeatVersionInfo version.CloudbeatVersionInfo) (*DataProvider, error) {
+	m := map[string]any{}
+	err := mapstructure.Decode(cloudbeatVersionInfo, &m)
 	if err != nil {
 		return nil, err
 	}
-	return map[string]interface{}{
-		"cloudbeat": m,
+
+	return &DataProvider{
+		info: m,
+	}, nil
+}
+
+func (c *DataProvider) GetElasticCommonData() (map[string]any, error) {
+	return map[string]any{
+		"cloudbeat": c.info,
 	}, nil
 }
