@@ -72,10 +72,15 @@ jobs:
           USE_K8S: false
         run: |
           poetry install
-          poetry run pytest -k "finding"
+          poetry run pytest -m "gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Print cloudbeat logs
         if: always()
         run: |
           cat logs/cloudbeat*
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: failure()
+        with:
+          limit-access-to-actor: true
