@@ -10,7 +10,7 @@ PYTHON_BIN=./build/ve/$(go env GOOS)/bin
 PYTHON=$PYTHON_BIN/python
 
 if [ "$WORKFLOW" = "snapshot" ]; then
-	export SNAPSHOT="true"
+    export SNAPSHOT="true"
 fi
 
 mage pythonEnv

@@ -7,11 +7,11 @@ export VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
 MAJOR=$(echo $VERSION | awk -F. '{ print $1 }')
 MINOR=$(echo $VERSION | awk -F. '{ print $2 }')
 if [ -n "$(git ls-remote --heads origin $MAJOR.$MINOR)" ]; then
-	BRANCH=$MAJOR.$MINOR
+    BRANCH=$MAJOR.$MINOR
 elif [ -n "$(git ls-remote --heads origin $MAJOR.x)" ]; then
-	BRANCH=$MAJOR.x
+    BRANCH=$MAJOR.x
 else
-	BRANCH=main
+    BRANCH=main
 fi
 
 # Download artifacts from other stages
@@ -26,16 +26,16 @@ DRA_CREDS=$(vault kv get -field=data -format=json kv/ci-shared/release/dra-role)
 echo "Running release-manager container..."
 IMAGE="docker.elastic.co/infra/release-manager:latest"
 docker run --rm \
-	--name release-manager \
-	-e VAULT_ADDR=$(echo $DRA_CREDS | jq -r '.vault_addr') \
-	-e VAULT_ROLE_ID=$(echo $DRA_CREDS | jq -r '.role_id') \
-	-e VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id') \
-	--mount type=bind,readonly=false,src="${PWD}",target=/artifacts \
-	"$IMAGE" \
-	cli collect \
-	--project cloudbeat \
-	--branch "${BRANCH}" \
-	--commit "${BUILDKITE_COMMIT}" \
-	--workflow "${WORKFLOW}" \
-	--version "${VERSION}" \
-	--artifact-set main
+    --name release-manager \
+    -e VAULT_ADDR=$(echo $DRA_CREDS | jq -r '.vault_addr') \
+    -e VAULT_ROLE_ID=$(echo $DRA_CREDS | jq -r '.role_id') \
+    -e VAULT_SECRET_ID=$(echo $DRA_CREDS | jq -r '.secret_id') \
+    --mount type=bind,readonly=false,src="${PWD}",target=/artifacts \
+    "$IMAGE" \
+    cli collect \
+    --project cloudbeat \
+    --branch "${BRANCH}" \
+    --commit "${BUILDKITE_COMMIT}" \
+    --workflow "${WORKFLOW}" \
+    --version "${VERSION}" \
+    --artifact-set main

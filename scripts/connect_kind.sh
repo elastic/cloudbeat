@@ -6,5 +6,5 @@ action=${2:-connect}
 network="elastic-package-stack_default"
 containers=$(docker ps | grep "$kind" | awk '{ print $1 }')
 for container in $containers; do
-	docker network "$action" "$network" "$container"
+    docker network "$action" "$network" "$container"
 done

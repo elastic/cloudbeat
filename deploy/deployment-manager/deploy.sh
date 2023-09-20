@@ -45,50 +45,50 @@ export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="
 
 # Function to check if an environment variable is not provided
 check_env_not_provided() {
-	local var_name="$1"
+    local var_name="$1"
 
-	if [ -z "${!var_name}" ]; then
-		echo "Error: $var_name not provided. Please set the environment variable $var_name."
-		exit 1
-	fi
+    if [ -z "${!var_name}" ]; then
+        echo "Error: $var_name not provided. Please set the environment variable $var_name."
+        exit 1
+    fi
 }
 
 # Function to run a gcloud command and check its exit code
 run_command() {
-	eval $1
-	local status=$?
-	if [ $status -ne 0 ]; then
-		echo "Error: Command \"$1\" failed with exit code $status. Exiting..."
-		exit $status
-	fi
+    eval $1
+    local status=$?
+    if [ $status -ne 0 ]; then
+        echo "Error: Command \"$1\" failed with exit code $status. Exiting..."
+        exit $status
+    fi
 }
 
 configure_scope() {
-	if [ -n "$ORG_ID" ]; then
-		SCOPE="organizations"
-		PARENT_ID="$ORG_ID"
-		ROLE="roles/resourcemanager.organizationAdmin"
-	fi
+    if [ -n "$ORG_ID" ]; then
+        SCOPE="organizations"
+        PARENT_ID="$ORG_ID"
+        ROLE="roles/resourcemanager.organizationAdmin"
+    fi
 
-	# If ORG_ID is not set, SCOPE defaults to "projects" and PARENT_ID defaults to PROJECT_NAME
-	SCOPE=${SCOPE:-"projects"}
-	PARENT_ID=${PARENT_ID:-"$PROJECT_NAME"}
+    # If ORG_ID is not set, SCOPE defaults to "projects" and PARENT_ID defaults to PROJECT_NAME
+    SCOPE=${SCOPE:-"projects"}
+    PARENT_ID=${PARENT_ID:-"$PROJECT_NAME"}
 }
 
 # Function to check if a role is assigned to the service account
 is_role_not_assigned() {
-	local role_assigned
-	role_assigned=$(gcloud ${SCOPE} get-iam-policy "${PARENT_ID}" \
-		--flatten="bindings[].members" --format="value(bindings.members)" \
-		--filter="bindings.role=${ROLE}" \
-		--format="table[no-heading](bindings.members)" |
-		grep "${PROJECT_NUMBER}@cloudservices.gserviceaccount.com")
+    local role_assigned
+    role_assigned=$(gcloud ${SCOPE} get-iam-policy "${PARENT_ID}" \
+        --flatten="bindings[].members" --format="value(bindings.members)" \
+        --filter="bindings.role=${ROLE}" \
+        --format="table[no-heading](bindings.members)" |
+        grep "${PROJECT_NUMBER}@cloudservices.gserviceaccount.com")
 
-	if [ -n "${role_assigned}" ]; then
-		return 1 # Role is assigned
-	else
-		return 0 # Role is not assigned
-	fi
+    if [ -n "${role_assigned}" ]; then
+        return 1 # Role is assigned
+    else
+        return 0 # Role is not assigned
+    fi
 }
 
 # Set environment variables with the name and number of your project.
@@ -108,8 +108,8 @@ run_command "gcloud services enable iam.googleapis.com deploymentmanager.googlea
 ## If needed add the required role to apply the templates to the project using the deployment manager
 ADD_ROLE=false
 if is_role_not_assigned; then
-	run_command "gcloud ${SCOPE} add-iam-policy-binding ${PARENT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
-	ADD_ROLE=true
+    run_command "gcloud ${SCOPE} add-iam-policy-binding ${PARENT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
+    ADD_ROLE=true
 fi
 
 # Apply the deployment manager templates
@@ -119,7 +119,7 @@ run_command "gcloud deployment-manager deployments create --automatic-rollback-o
 
 ## Remove the role required to deploy the DM templates
 if [ "$ADD_ROLE" = "true" ]; then
-	run_command "gcloud ${SCOPE} remove-iam-policy-binding ${PARENT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
+    run_command "gcloud ${SCOPE} remove-iam-policy-binding ${PARENT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=${ROLE}"
 fi
 
 run_command "gcloud deployment-manager deployments describe ${DEPLOYMENT_NAME}"
