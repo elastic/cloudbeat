@@ -1,3 +1,4 @@
+exclude: bin/(activate-)?hermit
 repos:
   ## General
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -73,7 +74,6 @@ repos:
     rev: 3.0.0
     hooks:
       - id: shfmt
-        exclude: bin/hermit
 
   - repo: local
     hooks:
