@@ -28,6 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -40,7 +41,20 @@ type K8S struct {
 	leaderElector uniqueness.Manager
 }
 
-func (k *K8S) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (k *K8S) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
+	reg, bdp, idp, err := k.initialize(ctx, log, cfg, resourceCh)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.New(
+		builder.WithBenchmarkDataProvider(bdp),
+		builder.WithIdProvider(idp),
+	).BuildK8s(ctx, log, cfg, resourceCh, reg, k.leaderElector)
+}
+
+func (k *K8S) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := k.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
@@ -68,9 +82,6 @@ func (k *K8S) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		registry.WithFetchersMap(preset.NewCisK8sFetchers(log, ch, k.leaderElector, kubeClient)),
 	), dp, idp, nil
 }
-
-func (k *K8S) Run(ctx context.Context) error { return k.leaderElector.Run(ctx) }
-func (k *K8S) Stop()                         { k.leaderElector.Stop() }
 
 func (k *K8S) checkDependencies() error {
 	if k.ClientProvider == nil {
