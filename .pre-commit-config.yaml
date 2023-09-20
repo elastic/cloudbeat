@@ -1,3 +1,4 @@
+exclude: (bin/(activate-)?hermit)|(scripts/make/gimme/.*)
 repos:
   ## General
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -68,6 +69,12 @@ repos:
     hooks:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
+
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: shfmt
+        args: ["-i", "4"]
 
   - repo: local
     hooks:
