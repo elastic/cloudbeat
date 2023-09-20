@@ -15,32 +15,30 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package flavors
+package builder
 
 import (
-	"context"
 	"time"
 
-	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
-	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 )
 
-const (
-	flushInterval   = 10 * time.Second
-	eventsThreshold = 75
-)
+type Option func(b *Builder)
 
-// flavorBase configuration.
-type flavorBase struct {
-	ctx       context.Context
-	cancel    context.CancelFunc
-	config    *config.Config
-	client    beat.Client
-	log       *logp.Logger
-	cdp       dataprovider.CommonDataProvider
-	publisher *Publisher
+func WithManagerTimeout(timeout time.Duration) Option {
+	return func(b *Builder) {
+		b.managerTimeout = timeout
+	}
+}
+
+func WithIdProvider(idp dataprovider.IdProvider) Option {
+	return func(b *Builder) {
+		b.idp = idp
+	}
+}
+
+func WithBenchmarkDataProvider(cdp dataprovider.CommonDataProvider) Option {
+	return func(b *Builder) {
+		b.bdp = cdp
+	}
 }
