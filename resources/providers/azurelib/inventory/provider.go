@@ -157,10 +157,10 @@ func (p *Provider) runPaginatedQuery(query armresourcegraph.QueryRequest) ([]Azu
 			resourceAssets = append(resourceAssets, structuredAsset)
 		}
 
-		if response.SkipToken != nil && *response.SkipToken != "" {
-			query.Options = &armresourcegraph.QueryRequestOptions{
-				SkipToken: response.SkipToken,
-			}
+		if *response.ResultTruncated == *to.Ptr(armresourcegraph.ResultTruncatedTrue) &&
+			response.SkipToken != nil &&
+			*response.SkipToken != "" {
+			query.Options.SkipToken = response.SkipToken
 		} else {
 			break
 		}

@@ -18,46 +18,104 @@
 package fetchers
 
 import (
+	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
+
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-func Test_getString(t *testing.T) {
-	tests := []struct {
-		name string
-		data map[string]any
-		key  string
-		want string
-	}{
+type AzureAssetsFetcherTestSuite struct {
+	suite.Suite
+
+	resourceCh chan fetching.ResourceInfo
+}
+
+func TestAzureAssetsFetcherTestSuite(t *testing.T) {
+	s := new(AzureAssetsFetcherTestSuite)
+
+	suite.Run(t, s)
+}
+
+func (s *AzureAssetsFetcherTestSuite) SetupTest() {
+	s.resourceCh = make(chan fetching.ResourceInfo, 50)
+}
+
+func (s *AzureAssetsFetcherTestSuite) TearDownTest() {
+	close(s.resourceCh)
+}
+
+func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
+	ctx := context.Background()
+	mockInventoryService := &inventory.MockServiceAPI{}
+	fetcher := AzureAssetsFetcher{
+		log:        testhelper.NewLogger(s.T()),
+		resourceCh: s.resourceCh,
+		provider:   mockInventoryService,
+	}
+
+	mockAssets := []inventory.AzureAsset{
 		{
-			name: "nil map",
-			data: nil,
-			key:  "key",
-			want: "",
+			Id:             "id1",
+			Name:           "name1",
+			Location:       "location1",
+			Properties:     map[string]interface{}{"key1": "value1"},
+			ResourceGroup:  "rg1",
+			SubscriptionId: "subId1",
+			TenantId:       "tenantId1",
+			Type:           inventory.VirtualMachineAssetType,
 		},
 		{
-			name: "key does not exist",
-			data: map[string]any{"key": "value"},
-			key:  "other-key",
-			want: "",
-		},
-		{
-			name: "wrong type",
-			data: map[string]any{"key": 1},
-			key:  "key",
-			want: "",
-		},
-		{
-			name: "correct value",
-			data: map[string]any{"key": "value", "other-key": 1},
-			key:  "key",
-			want: "value",
+			Id:             "id2",
+			Name:           "name2",
+			Location:       "location2",
+			Properties:     map[string]interface{}{"key2": "value2"},
+			ResourceGroup:  "rg2",
+			SubscriptionId: "subId2",
+			TenantId:       "tenantId2",
+			Type:           inventory.StorageAccountAssetType,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, getString(tt.data, tt.key), "getString(%v, %s) = %s", tt.data, tt.key, tt.want)
-		})
-	}
+
+	mockInventoryService.On("ListAllAssetTypesByName", mock.MatchedBy(func(assets []string) bool {
+		return true
+	})).Return(
+		mockAssets, nil,
+	)
+
+	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
+	s.NoError(err)
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Equal(len(AzureResourceTypes), len(results))
+
+	lo.ForEach(results, func(r fetching.ResourceInfo, index int) {
+		data := r.GetData()
+		s.NotNil(data)
+		resource := data.(inventory.AzureAsset)
+		s.NotEmpty(resource)
+		s.Equal(mockAssets[index].Id, resource.Id)
+		s.Equal(mockAssets[index].Name, resource.Name)
+		s.Equal(mockAssets[index].Location, resource.Location)
+		s.Equal(mockAssets[index].Properties, resource.Properties)
+		s.Equal(mockAssets[index].ResourceGroup, resource.ResourceGroup)
+		s.Equal(mockAssets[index].SubscriptionId, resource.SubscriptionId)
+		s.Equal(mockAssets[index].TenantId, resource.TenantId)
+		s.Equal(mockAssets[index].Type, resource.Type)
+		meta, err := r.GetMetadata()
+		s.NoError(err)
+		s.NotNil(meta)
+		s.NoError(err)
+		s.NotEmpty(meta)
+		s.Equal(mockAssets[index].Id, meta.ID)
+		s.Equal(AzureResourceTypes[mockAssets[index].Type], meta.Type)
+		s.Equal("", meta.SubType)
+		s.Equal(mockAssets[index].Name, meta.Name)
+		s.Equal(mockAssets[index].Location, meta.Region)
+	})
 }
