@@ -94,7 +94,7 @@ func TestRun_ReturnEvents(t *testing.T) {
 			expectedEvents: []int{1},
 		},
 		{
-			name: "Should return a multiple results",
+			name: "Should return multiple results",
 			manager: func(m *MockManager) *MockManager {
 				m.EXPECT().Run().Return().Once()
 				m.EXPECT().Stop().Once()

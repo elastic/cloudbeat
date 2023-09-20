@@ -44,7 +44,7 @@ func TestK8sRun_ReturnEvents(t *testing.T) {
 		expectedEvents []int
 	}{
 		{
-			name: "Should return a multiple results",
+			name: "Should return multiple results",
 			manager: func(m *MockManager) *MockManager {
 				m.EXPECT().Run().Return().Once()
 				m.EXPECT().Stop().Once()
