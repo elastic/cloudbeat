@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function usage() {
-  cat <<EOF
+	cat <<EOF
 Usage: $0 <local-file> <remote-file>
 Replace the CFT_VERSION placeholder in the local-file.
 Upload the local-file to S3 with the remote-file name.

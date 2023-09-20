@@ -69,6 +69,12 @@ repos:
       - id: cfn-python-lint
         files: deploy/cloudformation/.*.yml
 
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: shfmt
+        exclude: bin/hermit
+
   - repo: local
     hooks:
       - id: mage-config

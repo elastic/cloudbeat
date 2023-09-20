@@ -2,9 +2,9 @@
 
 # Check if JSON file path and Allure report URL are provided as arguments
 if [ $# -ne 2 ]; then
-  echo "Error: history-trend.json file path and/or Allure report URL are missing."
-  echo "Usage: $0 <history_trend_path> <allure_report_url>"
-  exit 1
+	echo "Error: history-trend.json file path and/or Allure report URL are missing."
+	echo "Usage: $0 <history_trend_path> <allure_report_url>"
+	exit 1
 fi
 
 # JSON data file path
@@ -14,8 +14,8 @@ allure_report_url="$2"
 
 # Check if the JSON file exists
 if [ ! -f "$results" ]; then
-  echo "Error: JSON file '$results' not found."
-  exit 1
+	echo "Error: JSON file '$results' not found."
+	exit 1
 fi
 
 # Read JSON data from file
@@ -28,15 +28,15 @@ skipped=$(echo "$data" | jq -r '.[0].data.skipped')
 
 # Check if no tests were run
 if [ "$failed" -eq 0 ] && [ "$passed" -eq 0 ] && [ "$skipped" -eq 0 ]; then
-  echo "## :x: No tests were run  :x:"
-  exit 0
+	echo "## :x: No tests were run  :x:"
+	exit 0
 fi
 
 # Check if all tests either passed or were skipped
 if [ "$failed" -eq 0 ]; then
-  summary=":green_heart: No failures were reported."
+	summary=":green_heart: No failures were reported."
 else
-  summary=":broken_heart: Some tests failed or were broken."
+	summary=":broken_heart: Some tests failed or were broken."
 fi
 
 # Print Summary

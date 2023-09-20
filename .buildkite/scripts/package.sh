@@ -9,8 +9,8 @@ CLOUDBEAT_VERSION=$(grep defaultBeatVersion version/version.go | cut -d'=' -f2 |
 PYTHON_BIN=./build/ve/$(go env GOOS)/bin
 PYTHON=$PYTHON_BIN/python
 
-if [ "$WORKFLOW" = "snapshot" ] ; then
-    export SNAPSHOT="true"
+if [ "$WORKFLOW" = "snapshot" ]; then
+	export SNAPSHOT="true"
 fi
 
 mage pythonEnv
