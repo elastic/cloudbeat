@@ -75,6 +75,8 @@ repos:
     hooks:
       - id: shfmt
         args: ["-i", "4"]
+      - id: shellcheck
+        files: deploy/azure/.*sh
 
   - repo: local
     hooks:
