@@ -40,5 +40,5 @@ const (
 	MonitoringLogMetricAssetType         = "monitoring.googleapis.com/LogMetric"
 	MonitoringAlertPolicyAssetType       = "monitoring.googleapis.com/AlertPolicy"
 	DnsPolicyAssetType                   = "dns.googleapis.com/Policy"
-	serviceUsageAssetType                = "serviceusage.googleapis.com/Service"
+	ServiceUsageAssetType                = "serviceusage.googleapis.com/Service"
 )

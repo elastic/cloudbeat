@@ -34,37 +34,37 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-type GcpServiceUsageFetcherTestSuite struct {
+type GcpLoggingFetcherTestSuite struct {
 	suite.Suite
 
 	resourceCh chan fetching.ResourceInfo
 }
 
-func TestGcpServiceUsageFetcherTestSuite(t *testing.T) {
-	s := new(GcpServiceUsageFetcherTestSuite)
+func TestGcpLoggingFetcherTestSuite(t *testing.T) {
+	s := new(GcpLoggingFetcherTestSuite)
 
 	suite.Run(t, s)
 }
 
-func (s *GcpServiceUsageFetcherTestSuite) SetupTest() {
+func (s *GcpLoggingFetcherTestSuite) SetupTest() {
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
-func (s *GcpServiceUsageFetcherTestSuite) TearDownTest() {
+func (s *GcpLoggingFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *GcpServiceUsageFetcherTestSuite) TestFetcher_Fetch_Success() {
+func (s *GcpLoggingFetcherTestSuite) TestFetcher_Fetch_Success() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpServiceUsageFetcher{
+	fetcher := GcpLoggingFetcher{
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
 		provider:   mockInventoryService,
 	}
 
-	mockInventoryService.On("ListServiceUsageAssets", mock.Anything).Return(
-		[]*inventory.ServiceUsageAsset{
+	mockInventoryService.On("ListLoggingAssets", mock.Anything).Return(
+		[]*inventory.LoggingAsset{
 			{
 				Ecs: &fetching.EcsGcp{
 					Provider:         "gcp",
@@ -73,8 +73,8 @@ func (s *GcpServiceUsageFetcherTestSuite) TestFetcher_Fetch_Success() {
 					OrganizationId:   "a",
 					OrganizationName: "a",
 				},
-				Services: []*inventory.ExtendedGcpAsset{
-					{Asset: &assetpb.Asset{Name: "a", AssetType: inventory.ServiceUsageAssetType}},
+				LogSinks: []*inventory.ExtendedGcpAsset{
+					{Asset: &assetpb.Asset{Name: "a", AssetType: inventory.LogSinkAssetType}},
 				},
 			},
 		}, nil,
@@ -88,48 +88,48 @@ func (s *GcpServiceUsageFetcherTestSuite) TestFetcher_Fetch_Success() {
 	s.Equal(1, len(results))
 }
 
-func (s *GcpServiceUsageFetcherTestSuite) TestFetcher_Fetch_Error() {
+func (s *GcpLoggingFetcherTestSuite) TestFetcher_Fetch_Error() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpServiceUsageFetcher{
+	fetcher := GcpLoggingFetcher{
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
 		provider:   mockInventoryService,
 	}
 
-	mockInventoryService.On("ListServiceUsageAssets", mock.Anything).Return(nil, errors.New("api call error"))
+	mockInventoryService.On("ListLoggingAssets", mock.Anything).Return(nil, errors.New("api call error"))
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
 	s.Error(err)
 }
 
-func TestServiceUsageResource_GetMetadata(t *testing.T) {
+func TestLoggingAsset_GetMetadata(t *testing.T) {
 	tests := []struct {
 		name     string
-		resource GcpServiceUsageAsset
+		resource GcpLoggingAsset
 		want     fetching.ResourceMetadata
 		wantErr  bool
 	}{
 		{
 			name: "retrieve successfully service usage assets",
-			resource: GcpServiceUsageAsset{
-				Type:    fetching.MonitoringIdentity,
-				subType: fetching.GcpServiceUsage,
-				Asset: &inventory.ServiceUsageAsset{
+			resource: GcpLoggingAsset{
+				Type:    fetching.LoggingIdentity,
+				subType: fetching.GcpLoggingType,
+				Asset: &inventory.LoggingAsset{
 					Ecs: &fetching.EcsGcp{
 						ProjectId:        projectId,
 						ProjectName:      "a",
 						OrganizationId:   "a",
 						OrganizationName: "a",
 					},
-					Services: []*inventory.ExtendedGcpAsset{},
+					LogSinks: []*inventory.ExtendedGcpAsset{},
 				},
 			},
 			want: fetching.ResourceMetadata{
-				ID:      fmt.Sprintf("%s-%s", fetching.GcpServiceUsage, projectId),
-				Name:    fmt.Sprintf("%s-%s", fetching.GcpServiceUsage, projectId),
-				Type:    fetching.MonitoringIdentity,
-				SubType: fetching.GcpServiceUsage,
+				ID:      fmt.Sprintf("%s-%s", fetching.GcpLoggingType, projectId),
+				Name:    fmt.Sprintf("%s-%s", fetching.GcpLoggingType, projectId),
+				Type:    fetching.LoggingIdentity,
+				SubType: fetching.GcpLoggingType,
 				Region:  gcplib.GlobalRegion,
 			},
 		},
@@ -144,11 +144,11 @@ func TestServiceUsageResource_GetMetadata(t *testing.T) {
 	}
 }
 
-func TestGcpServiceUsageAsset_GetElasticCommonData(t *testing.T) {
+func TestGcpLoggingAsset_GetElasticCommonData(t *testing.T) {
 	type fields struct {
 		Type    string
 		subType string
-		Asset   *inventory.ServiceUsageAsset
+		Asset   *inventory.LoggingAsset
 	}
 	tests := []struct {
 		name   string
@@ -156,19 +156,19 @@ func TestGcpServiceUsageAsset_GetElasticCommonData(t *testing.T) {
 		want   map[string]any
 	}{
 		{
-			name: "happy path",
+			name: "verify elastic common data",
 			fields: fields{
-				Type:    fetching.MonitoringIdentity,
-				subType: fetching.GcpServiceUsage,
-				Asset: &inventory.ServiceUsageAsset{
+				Type:    fetching.LoggingIdentity,
+				subType: fetching.GcpLoggingType,
+				Asset: &inventory.LoggingAsset{
 					Ecs: &fetching.EcsGcp{
 						ProjectId:        projectId,
 						ProjectName:      "a",
 						OrganizationId:   "a",
 						OrganizationName: "a",
 					},
-					Services: []*inventory.ExtendedGcpAsset{
-						{Asset: &assetpb.Asset{Name: "a", AssetType: inventory.ServiceUsageAssetType}},
+					LogSinks: []*inventory.ExtendedGcpAsset{
+						{Asset: &assetpb.Asset{Name: "a", AssetType: inventory.LogSinkAssetType}},
 					},
 				},
 			},
@@ -189,7 +189,7 @@ func TestGcpServiceUsageAsset_GetElasticCommonData(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := &GcpServiceUsageAsset{
+			g := &GcpLoggingAsset{
 				Type:    tt.fields.Type,
 				subType: tt.fields.subType,
 				Asset:   tt.fields.Asset,

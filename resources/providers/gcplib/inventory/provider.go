@@ -95,6 +95,8 @@ type dnsPolicyFields struct {
 	enableLogging bool
 }
 
+type TypeGenerator[T any] func(assets []*ExtendedGcpAsset, projectId, projectName, orgId, orgName string) *T
+
 type Iterator interface {
 	Next() (*assetpb.Asset, error)
 }
@@ -217,13 +219,30 @@ func (p *Provider) ListMonitoringAssets(monitoringAssetTypes map[string][]string
 	if err != nil {
 		return nil, err
 	}
+
 	alertPolicies, err := p.ListAllAssetTypesByName(monitoringAssetTypes["AlertPolicy"])
 	if err != nil {
 		return nil, err
 	}
+
+	typeGenerator := func(assets []*ExtendedGcpAsset, projectId, projectName, orgId, orgName string) *MonitoringAsset {
+		return &MonitoringAsset{
+			LogMetrics: getAssetsByType(assets, MonitoringLogMetricAssetType),
+			Alerts:     getAssetsByType(assets, MonitoringAlertPolicyAssetType),
+			Ecs: &fetching.EcsGcp{
+				Provider:         "gcp",
+				ProjectId:        projectId,
+				ProjectName:      projectName,
+				OrganizationId:   orgId,
+				OrganizationName: orgName,
+			},
+		}
+	}
+
 	var assets []*ExtendedGcpAsset
 	assets = append(append(assets, logMetrics...), alertPolicies...)
-	monitoringAssets := getMonitoringAssetsByProject(assets, p.log)
+	monitoringAssets := getAssetsByProject[MonitoringAsset](assets, p.log, typeGenerator)
+
 	return monitoringAssets, nil
 }
 
@@ -234,18 +253,44 @@ func (p *Provider) ListLoggingAssets() ([]*LoggingAsset, error) {
 		return nil, err
 	}
 
-	loggingAssets := getLoggingAssetsByProject(logSinks, p.log)
+	typeGenerator := func(assets []*ExtendedGcpAsset, projectId, projectName, orgId, orgName string) *LoggingAsset {
+		return &LoggingAsset{
+			LogSinks: assets,
+			Ecs: &fetching.EcsGcp{
+				Provider:         "gcp",
+				ProjectId:        projectId,
+				ProjectName:      projectName,
+				OrganizationId:   orgId,
+				OrganizationName: orgName,
+			},
+		}
+	}
+
+	loggingAssets := getAssetsByProject[LoggingAsset](logSinks, p.log, typeGenerator)
 	return loggingAssets, nil
 }
 
 // ListServiceUsageAssets returns a list of service usage assets grouped by project id
 func (p *Provider) ListServiceUsageAssets() ([]*ServiceUsageAsset, error) {
-	services, err := p.ListAllAssetTypesByName([]string{serviceUsageAssetType})
+	services, err := p.ListAllAssetTypesByName([]string{ServiceUsageAssetType})
 	if err != nil {
 		return nil, err
 	}
 
-	assets := getServiceUsageAssetsByProject(services, p.log)
+	typeGenerator := func(assets []*ExtendedGcpAsset, projectId, projectName, orgId, orgName string) *ServiceUsageAsset {
+		return &ServiceUsageAsset{
+			Services: assets,
+			Ecs: &fetching.EcsGcp{
+				Provider:         "gcp",
+				ProjectId:        projectId,
+				ProjectName:      projectName,
+				OrganizationId:   orgId,
+				OrganizationName: orgName,
+			},
+		}
+	}
+
+	assets := getAssetsByProject[ServiceUsageAsset](services, p.log, typeGenerator)
 	return assets, nil
 }
 
@@ -325,39 +370,10 @@ func decodeDnsPolicies(dnsPolicyAssets []*assetpb.Asset) []*dnsPolicyFields {
 	return dnsPolicies
 }
 
-// returns monitoring assets grouped by project id
-// single project for project scoped accounts
-// multiple projects for organization scoped accounts
-func getMonitoringAssetsByProject(assets []*ExtendedGcpAsset, log *logp.Logger) []*MonitoringAsset {
+// getAssetsByProject groups assets by project, extracts metadata for each project, and adds folder and organization-level resources for each group.
+func getAssetsByProject[T any](assets []*ExtendedGcpAsset, log *logp.Logger, f TypeGenerator[T]) []*T {
 	assetsByProject := lo.GroupBy(assets, func(asset *ExtendedGcpAsset) string { return asset.Ecs.ProjectId })
-	var monitoringAssets []*MonitoringAsset
-	for projectId, projectAssets := range assetsByProject {
-		projectName, organizationId, organizationName, err := getProjectAssetsMetadata(projectAssets)
-		if err != nil {
-			log.Error(err)
-			continue
-		}
-		monitoringAssets = append(monitoringAssets, &MonitoringAsset{
-			LogMetrics: getAssetsByType(projectAssets, MonitoringLogMetricAssetType),
-			Alerts:     getAssetsByType(projectAssets, MonitoringAlertPolicyAssetType),
-			Ecs: &fetching.EcsGcp{
-				Provider:         "gcp",
-				ProjectId:        projectId,
-				ProjectName:      projectName,
-				OrganizationId:   organizationId,
-				OrganizationName: organizationName,
-			},
-		})
-	}
-	return monitoringAssets
-}
-
-// returns logging assets grouped by project id
-// single project for project scoped accounts
-// multiple projects for organization scoped accounts
-func getLoggingAssetsByProject(assets []*ExtendedGcpAsset, log *logp.Logger) []*LoggingAsset {
-	assetsByProject := lo.GroupBy(assets, func(asset *ExtendedGcpAsset) string { return asset.Ecs.ProjectId })
-	var loggingAssets []*LoggingAsset
+	var enrichedAssets []*T
 	for projectId, projectAssets := range assetsByProject {
 		if projectId == "" {
 			continue
@@ -371,45 +387,9 @@ func getLoggingAssetsByProject(assets []*ExtendedGcpAsset, log *logp.Logger) []*
 
 		// add folder and org level log sinks for each project
 		projectAssets = append(projectAssets, assetsByProject[""]...)
-
-		loggingAssets = append(loggingAssets, &LoggingAsset{
-			LogSinks: projectAssets,
-			Ecs: &fetching.EcsGcp{
-				Provider:         "gcp",
-				ProjectId:        projectId,
-				ProjectName:      projectName,
-				OrganizationId:   organizationId,
-				OrganizationName: organizationName,
-			},
-		})
+		enrichedAssets = append(enrichedAssets, f(projectAssets, projectId, projectName, organizationId, organizationName))
 	}
-	return loggingAssets
-}
-
-// returns service usage assets grouped by project id
-// single project for project scoped accounts
-// multiple projects for organization scoped accounts
-func getServiceUsageAssetsByProject(assets []*ExtendedGcpAsset, log *logp.Logger) []*ServiceUsageAsset {
-	assetsByProject := lo.GroupBy(assets, func(asset *ExtendedGcpAsset) string { return asset.Ecs.ProjectId })
-	var serviceUsageAssets []*ServiceUsageAsset
-	for projectId, projectAssets := range assetsByProject {
-		projectName, organizationId, organizationName, err := getProjectAssetsMetadata(projectAssets)
-		if err != nil {
-			log.Error(err)
-			continue
-		}
-		serviceUsageAssets = append(serviceUsageAssets, &ServiceUsageAsset{
-			Services: projectAssets,
-			Ecs: &fetching.EcsGcp{
-				Provider:         "gcp",
-				ProjectId:        projectId,
-				ProjectName:      projectName,
-				OrganizationId:   organizationId,
-				OrganizationName: organizationName,
-			},
-		})
-	}
-	return serviceUsageAssets
+	return enrichedAssets
 }
 
 func getAllAssets(log *logp.Logger, it Iterator) []*assetpb.Asset {
