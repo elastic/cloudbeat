@@ -2,7 +2,7 @@
 set -e
 
 function usage() {
-  cat <<EOF
+    cat <<EOF
 Usage: $0 -p|--prefix ENV_PREFIX [-n|--ignore-prefix IGNORE_PREFIX] [-i|--interactive true|false]
 Cleanup script to delete environments based on a prefix.
 Required flag: -p|--prefix
@@ -11,7 +11,7 @@ EOF
 
 # Defaults
 INTERACTIVE=true
-AWS_REGION="eu-west-1"  # Add your desired default AWS region here
+AWS_REGION="eu-west-1" # Add your desired default AWS region here
 
 # Arrays to keep track of successful and failed deletions
 DELETED_ENVS=()
@@ -30,8 +30,8 @@ function delete_environment() {
         # Check if the resource aws_auth exists in the local state file and remove it
         terraform state rm -state "$tfstate" $(terraform state list -state "$tfstate" | grep "kubernetes_config_map_v1_data.aws_auth") || true
         # Destroy environment and remove environment data from S3
-        if terraform destroy -var="region=$AWS_REGION" -state "$tfstate" --auto-approve && \
-        aws s3 rm $BUCKET/"$ENV" --recursive; then
+        if terraform destroy -var="region=$AWS_REGION" -state "$tfstate" --auto-approve &&
+            aws s3 rm $BUCKET/"$ENV" --recursive; then
             echo "Successfully deleted $ENV"
             DELETED_ENVS+=("$ENV")
         else
@@ -56,17 +56,31 @@ function delete_stack() {
 # Parsing command-line arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        -p|--prefix) ENV_PREFIX="$2"; shift ;;
-        -n|--ignore-prefix) IGNORE_PREFIX="$2"; shift ;;
-        -i|--interactive)
-            shift
-            case $1 in
-                true|True|TRUE) INTERACTIVE=true ;;
-                false|False|FALSE) INTERACTIVE=false ;;
-                *) echo "Invalid value for --interactive. Please use true or false"; usage; exit 1 ;;
-            esac
+    -p | --prefix)
+        ENV_PREFIX="$2"
+        shift
+        ;;
+    -n | --ignore-prefix)
+        IGNORE_PREFIX="$2"
+        shift
+        ;;
+    -i | --interactive)
+        shift
+        case $1 in
+        true | True | TRUE) INTERACTIVE=true ;;
+        false | False | FALSE) INTERACTIVE=false ;;
+        *)
+            echo "Invalid value for --interactive. Please use true or false"
+            usage
+            exit 1
             ;;
-        *) echo "Unknown parameter passed: $1"; usage; exit 1 ;;
+        esac
+        ;;
+    *)
+        echo "Unknown parameter passed: $1"
+        usage
+        exit 1
+        ;;
     esac
     shift
 done
@@ -80,11 +94,11 @@ ALL_ENVS=$(aws s3 ls $BUCKET/"$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g')
 ALL_STACKS=$(aws cloudformation list-stacks --stack-status-filter "CREATE_COMPLETE" "UPDATE_COMPLETE" --region "$AWS_REGION" | jq -r '.StackSummaries[] | select(.StackName | startswith("'$ENV_PREFIX'") and (if "'$IGNORE_PREFIX'" != "" then .StackName | startswith("'$IGNORE_PREFIX'") | not else true end)) | .StackName')
 
 if [ -n "$IGNORE_PREFIX" ]; then
-  # If IGNORE_PREFIX exists and is not empty
-  GCP_FILTER="name:'$ENV_PREFIX*' AND NOT name:'$IGNORE_PREFIX*'"
+    # If IGNORE_PREFIX exists and is not empty
+    GCP_FILTER="name:'$ENV_PREFIX*' AND NOT name:'$IGNORE_PREFIX*'"
 else
-  # If IGNORE_PREFIX is empty or does not exist
-  GCP_FILTER="name:'$ENV_PREFIX*'"
+    # If IGNORE_PREFIX is empty or does not exist
+    GCP_FILTER="name:'$ENV_PREFIX*'"
 fi
 
 ALL_GCP_DEPLOYMENTS=$(gcloud deployment-manager deployments list --filter="$GCP_FILTER" --format="value(name)")
@@ -151,7 +165,6 @@ printf "%s\n" "${FAILED_STACKS[@]}"
 DELETED_DEPLOYMENTS=()
 FAILED_DEPLOYMENTS=()
 
-
 export PROJECT_NAME=$(gcloud config get-value core/project)
 export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
 
@@ -175,7 +188,6 @@ for DEPLOYMENT in $ALL_GCP_DEPLOYMENTS; do
     gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
 
 done
-
 
 # Print summary of gcp deployments deletions
 echo "Successfully deleted GCP deploments (${#DELETED_DEPLOYMENTS[@]}):"

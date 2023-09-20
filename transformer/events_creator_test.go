@@ -48,7 +48,6 @@ type testAttr struct {
 
 const (
 	opaResultsFileName = "opa_results.json"
-	testIndex          = "test_index"
 	resourceId         = "test_resource_id"
 	enrichedKey        = "enriched_key"
 	enrichedValue      = "enrichedValue"
@@ -171,7 +170,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 			bdp := tt.bdpp()
 			idp := tt.idpp()
 
-			transformer := NewTransformer(testhelper.NewLogger(s.T()), bdp, cdp, idp, testIndex)
+			transformer := NewTransformer(testhelper.NewLogger(s.T()), bdp, cdp, idp)
 			generatedEvents, _ := transformer.CreateBeatEvents(ctx, tt.input)
 
 			for _, event := range generatedEvents {

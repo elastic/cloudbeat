@@ -20,31 +20,20 @@ package flavors
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	agentconfig "github.com/elastic/elastic-agent-libs/config"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider/providers/common"
-	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/flavors/benchmark"
-	"github.com/elastic/cloudbeat/pipeline"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/manager"
-	"github.com/elastic/cloudbeat/transformer"
-	"github.com/elastic/cloudbeat/version"
 )
 
-// posture configuration.
 type posture struct {
 	flavorBase
-	fetcherManager *manager.Manager
-	evaluator      evaluator.Evaluator
-	resourceCh     chan fetching.ResourceInfo
-	benchmark      benchmark.Benchmark
+	benchmark builder.Benchmark
 }
 
 // NewPosture creates an instance of posture.
@@ -62,50 +51,18 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 	log.Info("Config initiated with cycle period of ", cfg.Period)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	bench, err := benchmark.NewBenchmark(cfg)
+	strategy, err := benchmark.GetStrategy(cfg)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 
-	resourceCh := make(chan fetching.ResourceInfo, resourceChBuffer)
-
-	log.Infof("Initializing benchmark %T", b)
-	fetchersRegistry, bdp, idp, err := bench.Initialize(ctx, log, cfg, resourceCh)
+	log.Infof("Creating benchmark %T", strategy)
+	bench, err := strategy.NewBenchmark(ctx, log, cfg)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
-
-	// TODO: timeout should be configurable and not hard-coded. Setting to 10 minutes for now to account for CSPM fetchers
-	// 	https://github.com/elastic/cloudbeat/issues/653
-	fetcherManager, err := manager.NewManager(ctx, log, cfg.Period, time.Minute*10, fetchersRegistry)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-
-	eval, err := evaluator.NewOpaEvaluator(ctx, log, cfg)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-
-	// namespace will be passed as param from fleet on https://github.com/elastic/security-team/issues/2383 and it's user configurable
-	resultsIndex := config.Datastream("", config.ResultsDatastreamIndexPrefix)
-
-	cdp, err := common.New(version.CloudbeatVersionInfo{
-		Version: version.CloudbeatVersion(),
-		// Keeping Policy field for backward compatibility
-		Policy: version.CloudbeatVersion(),
-	})
-
-	if err != nil {
-		cancel()
-		return nil, fmt.Errorf("failed to init common data provider: %w", err)
-	}
-
-	t := transformer.NewTransformer(log, bdp, cdp, idp, resultsIndex)
 
 	client, err := NewClient(b.Publisher, cfg.Processors)
 	if err != nil {
@@ -118,33 +75,23 @@ func newPostureFromCfg(b *beat.Beat, cfg *config.Config) (*posture, error) {
 
 	return &posture{
 		flavorBase: flavorBase{
-			ctx:         ctx,
-			cancel:      cancel,
-			publisher:   publisher,
-			config:      cfg,
-			transformer: t,
-			log:         log,
+			ctx:       ctx,
+			cancel:    cancel,
+			publisher: publisher,
+			config:    cfg,
+			log:       log,
 		},
-		fetcherManager: fetcherManager,
-		evaluator:      eval,
-		resourceCh:     resourceCh,
-		benchmark:      bench,
+		benchmark: bench,
 	}, nil
 }
 
 // Run starts posture.
 func (bt *posture) Run(*beat.Beat) error {
 	bt.log.Info("posture is running! Hit CTRL-C to stop it")
-
-	if err := bt.benchmark.Run(bt.ctx); err != nil {
+	eventsCh, err := bt.benchmark.Run(bt.ctx)
+	if err != nil {
 		return err
 	}
-
-	bt.fetcherManager.Run()
-
-	// Creating the data pipeline
-	findingsCh := pipeline.Step(bt.ctx, bt.log, bt.resourceCh, bt.evaluator.Eval)
-	eventsCh := pipeline.Step(bt.ctx, bt.log, findingsCh, bt.transformer.CreateBeatEvents)
 
 	bt.publisher.HandleEvents(bt.ctx, eventsCh)
 	bt.log.Warn("Posture has finished running")
@@ -153,9 +100,8 @@ func (bt *posture) Run(*beat.Beat) error {
 
 // Stop stops posture.
 func (bt *posture) Stop() {
-	bt.fetcherManager.Stop()
-	bt.evaluator.Stop(bt.ctx)
-	close(bt.resourceCh)
+	bt.benchmark.Stop()
+
 	if err := bt.client.Close(); err != nil {
 		bt.log.Fatal("Cannot close client", err)
 	}
