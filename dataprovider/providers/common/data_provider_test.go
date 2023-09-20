@@ -24,7 +24,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/elastic/cloudbeat/dataprovider"
-	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
 )
 
@@ -69,12 +68,14 @@ func Test_CommonDataProvider_GetElasticCommonData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := New(testhelper.NewLogger(t), tt.info)
+			p, err := New(tt.info)
+			assert.NoError(t, err)
+
 			ev := &beat.Event{
 				Fields: map[string]interface{}{},
 			}
 
-			err := dataprovider.NewEnricher(p).EnrichEvent(ev)
+			err = dataprovider.NewEnricher(p).EnrichEvent(ev)
 			assert.NoError(t, err)
 
 			fl := ev.Fields.Flatten()
