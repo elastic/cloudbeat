@@ -25,6 +25,7 @@ import (
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -34,19 +35,21 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-func TestNewBenchmark(t *testing.T) {
-	defer goleak.VerifyNone(t, goleak.IgnoreCurrent()) // NewBenchmark should not start anything
+func TestGetStrategy(t *testing.T) {
+	defer goleak.VerifyNone(t, goleak.IgnoreCurrent()) // GetStrategy should not start anything
 
 	tests := []struct {
 		cfg      config.Config
-		wantType Benchmark
+		wantType Strategy
 		wantErr  bool
 	}{
 		{
@@ -90,7 +93,7 @@ func TestNewBenchmark(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%T", tt.wantType), func(t *testing.T) {
-			got, err := NewBenchmark(&tt.cfg)
+			got, err := GetStrategy(&tt.cfg)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -101,10 +104,14 @@ func TestNewBenchmark(t *testing.T) {
 	}
 }
 
-func testInitialize(t *testing.T, benchmark Benchmark, cfg *config.Config, wantErr string, want []string) {
+type benchInit interface {
+	initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error)
+}
+
+func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr string, want []string) {
 	t.Helper()
 
-	reg, dp, idp, err := benchmark.Initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
+	reg, dp, _, err := s.initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
 	if wantErr != "" {
 		assert.ErrorContains(t, err, wantErr)
 		return
@@ -115,8 +122,16 @@ func testInitialize(t *testing.T, benchmark Benchmark, cfg *config.Config, wantE
 	require.NoError(t, err)
 	assert.Len(t, reg.Keys(), len(want))
 
-	require.NoError(t, benchmark.Run(context.Background()))
-	defer benchmark.Stop()
+	eks, ok := s.(*EKS)
+	if ok {
+		require.NoError(t, eks.leaderElector.Run(context.Background()))
+		defer eks.leaderElector.Stop()
+	}
+	k8s, ok := s.(*K8S)
+	if ok {
+		require.NoError(t, k8s.leaderElector.Run(context.Background()))
+		defer k8s.leaderElector.Stop()
+	}
 
 	for _, fetcher := range want {
 		ok := reg.ShouldRun(fetcher)
@@ -125,7 +140,6 @@ func testInitialize(t *testing.T, benchmark Benchmark, cfg *config.Config, wantE
 
 	// TODO: gcp diff tests cover
 	assert.NotNil(t, dp)
-	assert.NotNil(t, idp)
 }
 
 func mockAwsCfg(err error) *awslib.MockConfigProviderAPI {
