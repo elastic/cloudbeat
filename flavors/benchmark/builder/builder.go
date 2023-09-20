@@ -32,7 +32,6 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching/manager"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/transformer"
-	"github.com/elastic/cloudbeat/uniqueness"
 	"github.com/elastic/cloudbeat/version"
 )
 
@@ -46,18 +45,16 @@ type Benchmark interface {
 }
 
 type Builder struct {
-	managerTimeout   time.Duration
-	idp              dataprovider.IdProvider
-	bdp              dataprovider.CommonDataProvider
-	k8sLeaderElector uniqueness.Manager
+	managerTimeout time.Duration
+	idp            dataprovider.IdProvider
+	bdp            dataprovider.CommonDataProvider
 }
 
 func New(options ...Option) *Builder {
 	b := &Builder{
-		managerTimeout:   defaultManagerTimeout,
-		idp:              &idProvider{},
-		bdp:              &dataProvider{},
-		k8sLeaderElector: nil,
+		managerTimeout: defaultManagerTimeout,
+		idp:            &idProvider{},
+		bdp:            &dataProvider{},
 	}
 	for _, fn := range options {
 		fn(b)
@@ -66,19 +63,7 @@ func New(options ...Option) *Builder {
 }
 
 func (b *Builder) Build(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (Benchmark, error) {
-	base, err := b.buildBase(ctx, log, cfg, resourceCh, reg)
-	if err != nil {
-		return nil, err
-	}
-
-	if b.k8sLeaderElector != nil {
-		return &k8sbenchmark{
-			basebenchmark: *base,
-			leaderElector: b.k8sLeaderElector,
-		}, nil
-	}
-
-	return base, nil
+	return b.buildBase(ctx, log, cfg, resourceCh, reg)
 }
 
 func (b *Builder) buildBase(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry) (*basebenchmark, error) {

@@ -21,13 +21,29 @@ import (
 	"context"
 
 	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/config"
+	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/uniqueness"
 )
 
 type k8sbenchmark struct {
 	basebenchmark
 	leaderElector uniqueness.Manager
+}
+
+func (b *Builder) BuildK8s(ctx context.Context, log *logp.Logger, cfg *config.Config, resourceCh chan fetching.ResourceInfo, reg registry.Registry, k8sLeaderElector uniqueness.Manager) (Benchmark, error) {
+	base, err := b.buildBase(ctx, log, cfg, resourceCh, reg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &k8sbenchmark{
+		basebenchmark: *base,
+		leaderElector: k8sLeaderElector,
+	}, nil
 }
 
 func (b *k8sbenchmark) Run(ctx context.Context) (<-chan []beat.Event, error) {

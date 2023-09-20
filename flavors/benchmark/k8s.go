@@ -51,8 +51,7 @@ func (k *K8S) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 	return builder.New(
 		builder.WithBenchmarkDataProvider(bdp),
 		builder.WithIdProvider(idp),
-		builder.WithK8sLeaderElector(k.leaderElector),
-	).Build(ctx, log, cfg, resourceCh, reg)
+	).BuildK8s(ctx, log, cfg, resourceCh, reg, k.leaderElector)
 }
 
 func (k *K8S) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
