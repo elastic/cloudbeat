@@ -77,11 +77,14 @@ func (b *Builder) buildBase(ctx context.Context, log *logp.Logger, cfg *config.C
 		return nil, err
 	}
 
-	cdp := common.New(log, version.CloudbeatVersionInfo{
+	cdp, err := common.New(version.CloudbeatVersionInfo{
 		Version: version.CloudbeatVersion(),
 		// Keeping Policy field for backward compatibility
 		Policy: version.CloudbeatVersion(),
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	transformer := transformer.NewTransformer(log, b.bdp, cdp, b.idp)
 	return &basebenchmark{
