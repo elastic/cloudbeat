@@ -42,9 +42,20 @@ type AzureClientWrapper struct {
 	AssetQuery func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error)
 }
 
+type AzureAsset struct {
+	Id             string         `json:"id,omitempty"`
+	Name           string         `json:"name,omitempty"`
+	Location       string         `json:"location,omitempty"`
+	Properties     map[string]any `json:"properties,omitempty"`
+	ResourceGroup  string         `json:"resource_group,omitempty"`
+	SubscriptionId string         `json:"subscription_id,omitempty"`
+	TenantId       string         `json:"tenant_id,omitempty"`
+	Type           string         `json:"type,omitempty"`
+}
+
 type ServiceAPI interface {
 	// ListAllAssetTypesByName List all content types of the given assets types
-	ListAllAssetTypesByName(assets []string) ([]interface{}, error)
+	ListAllAssetTypesByName(assets []string) ([]AzureAsset, error)
 }
 
 type ProviderInitializerAPI interface {
@@ -75,9 +86,9 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, azureC
 	}, nil
 }
 
-func (p *Provider) ListAllAssetTypesByName(assets []string) ([]interface{}, error) {
+func (p *Provider) ListAllAssetTypesByName(assets []string) ([]AzureAsset, error) {
 	p.log.Infof("Listing Azure assets: %v", assets)
-	var resourceAssets []interface{}
+	var resourceAssets []AzureAsset
 
 	query := armresourcegraph.QueryRequest{
 		Query: to.Ptr(generateQuery(assets)),
@@ -97,6 +108,26 @@ func (p *Provider) ListAllAssetTypesByName(assets []string) ([]interface{}, erro
 	return resourceAssets, nil
 }
 
+func getAssetFromData(data map[string]any) AzureAsset {
+	properties, _ := data["properties"].(map[string]any)
+
+	return AzureAsset{
+		Id:             getString(data, "id"),
+		Name:           getString(data, "name"),
+		Location:       getString(data, "location"),
+		Properties:     properties,
+		ResourceGroup:  getString(data, "resourceGroup"),
+		SubscriptionId: getString(data, "subscriptionId"),
+		TenantId:       getString(data, "tenantId"),
+		Type:           getString(data, "type"),
+	}
+}
+
+func getString(data map[string]any, key string) string {
+	value, _ := data[key].(string)
+	return value
+}
+
 func generateQuery(assets []string) string {
 	var query bytes.Buffer
 	query.WriteString("Resources")
@@ -112,8 +143,8 @@ func generateQuery(assets []string) string {
 	return query.String()
 }
 
-func (p *Provider) runPaginatedQuery(query armresourcegraph.QueryRequest) ([]interface{}, error) {
-	var resourceAssets []interface{}
+func (p *Provider) runPaginatedQuery(query armresourcegraph.QueryRequest) ([]AzureAsset, error) {
+	var resourceAssets []AzureAsset
 
 	for {
 		response, err := p.client.AssetQuery(p.ctx, query, nil)
@@ -121,7 +152,10 @@ func (p *Provider) runPaginatedQuery(query armresourcegraph.QueryRequest) ([]int
 			return nil, err
 		}
 
-		resourceAssets = append(resourceAssets, response.Data.([]interface{})...)
+		for _, asset := range response.Data.([]interface{}) {
+			structuredAsset := getAssetFromData(asset.(map[string]any))
+			resourceAssets = append(resourceAssets, structuredAsset)
+		}
 
 		if response.SkipToken != nil && *response.SkipToken != "" {
 			query.Options = &armresourcegraph.QueryRequestOptions{
@@ -133,9 +167,4 @@ func (p *Provider) runPaginatedQuery(query armresourcegraph.QueryRequest) ([]int
 	}
 
 	return resourceAssets, nil
-}
-
-// TODO: Handle this function
-func (p *Provider) Close() error {
-	return nil
 }

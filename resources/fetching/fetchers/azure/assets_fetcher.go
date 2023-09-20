@@ -33,26 +33,15 @@ type AzureAssetsFetcher struct {
 	provider   inventory.ServiceAPI
 }
 
-type AzureAsset struct {
+type AzureResource struct {
 	Type    string
 	SubType string
-	Asset   AzureAssetInfo `json:"asset,omitempty"`
+	Asset   inventory.AzureAsset `json:"asset,omitempty"`
 }
 
-// TODO: Fill this struct with the required fields
-type AzureAssetInfo struct {
-	Id             string         `json:"id,omitempty"`
-	Name           string         `json:"name,omitempty"`
-	Location       string         `json:"location,omitempty"`
-	Properties     map[string]any `json:"properties,omitempty"`
-	ResourceGroup  string         `json:"resource_group,omitempty"`
-	SubscriptionId string         `json:"subscription_id,omitempty"`
-	TenantId       string         `json:"tenant_id,omitempty"`
-}
-
-var AzureAssetTypes = map[string]string{
-	"microsoft.compute/virtualmachines": fetching.AzureVMType,
-	"microsoft.storage/storageaccounts": fetching.AzureStorageAccountType,
+var AzureResourceTypes = map[string]string{
+	inventory.VirtualMachineAssetType: fetching.AzureVMType,
+	inventory.StorageAccountAssetType: fetching.AzureStorageAccountType,
 }
 
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
@@ -67,7 +56,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
 	// TODO: Maybe we should use a query per type instead of listing all assets in a single query
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
-	assets, err := f.provider.ListAllAssetTypesByName(maps.Keys(AzureAssetTypes))
+	assets, err := f.provider.ListAllAssetTypesByName(maps.Keys(AzureResourceTypes))
 	if err != nil {
 		return err
 	}
@@ -79,8 +68,11 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 			return nil
 		case f.resourceCh <- fetching.ResourceInfo{
 			CycleMetadata: cMetadata,
-			// TODO: Safe guard this conversion
-			Resource: getAssetFromData(asset.(map[string]any)),
+			Resource: &AzureResource{
+				Type:    AzureResourceTypes[asset.Type],
+				SubType: getAzureSubType(asset.Type),
+				Asset:   asset,
+			},
 		}:
 		}
 	}
@@ -88,40 +80,17 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 	return nil
 }
 
-func getAssetFromData(data map[string]any) *AzureAsset {
-	assetType := getString(data, "type")
-	properties, _ := data["properties"].(map[string]any)
-
-	return &AzureAsset{
-		Type:    AzureAssetTypes[assetType],
-		SubType: getAzureSubType(assetType),
-		Asset: AzureAssetInfo{
-			Id:             getString(data, "id"),
-			Name:           getString(data, "name"),
-			Location:       getString(data, "location"),
-			Properties:     properties,
-			ResourceGroup:  getString(data, "resourceGroup"),
-			SubscriptionId: getString(data, "subscriptionId"),
-			TenantId:       getString(data, "tenantId"),
-		},
-	}
+func getAzureSubType(assetType string) string {
+	return ""
 }
 
-func getString(data map[string]any, key string) string {
-	value, _ := data[key].(string)
-	return value
-}
+func (f *AzureAssetsFetcher) Stop() {}
 
-// TODO: Handle this function
-func (f *AzureAssetsFetcher) Stop() {
-	// f.provider.Close()
-}
-
-func (r *AzureAsset) GetData() any {
+func (r *AzureResource) GetData() any {
 	return r.Asset
 }
 
-func (r *AzureAsset) GetMetadata() (fetching.ResourceMetadata, error) {
+func (r *AzureResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
 		ID:      r.Asset.Id,
 		Type:    r.Type,
@@ -131,9 +100,4 @@ func (r *AzureAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r *AzureAsset) GetElasticCommonData() (map[string]any, error) { return nil, nil }
-
-// TODO: Implement this function
-func getAzureSubType(assetType string) string {
-	return ""
-}
+func (r *AzureResource) GetElasticCommonData() (map[string]any, error) { return nil, nil }
