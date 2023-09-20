@@ -17,6 +17,9 @@ jobs:
     name: CIS GCP integration test
     runs-on: ubuntu-22.04
     timeout-minutes: 15
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
