@@ -28,10 +28,13 @@ import (
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/gofrs/uuid"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
 )
+
+var resultsIndex = config.Datastream("", config.ResultsDatastreamIndexPrefix)
 
 const (
 	ecsCategoryConfiguration = "configuration"
@@ -58,10 +61,10 @@ type ECSEvent struct {
 	Type     []string  `json:"type"`
 }
 
-func NewTransformer(log *logp.Logger, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider, index string) Transformer {
-	return Transformer{
+func NewTransformer(log *logp.Logger, bdp dataprovider.CommonDataProvider, cdp dataprovider.ElasticCommonDataProvider, idp dataprovider.IdProvider) *Transformer {
+	return &Transformer{
 		log:                   log,
-		index:                 index,
+		index:                 resultsIndex,
 		idProvider:            idp,
 		benchmarkDataProvider: bdp,
 		commonDataProvider:    cdp,
