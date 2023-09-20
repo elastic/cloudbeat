@@ -25,10 +25,11 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 )
 
 type ProviderTestSuite struct {
