@@ -1,11 +1,16 @@
 name: CIS-GCP-CI
 
 on:
-  pull_request_target:
+  push:
     branches:
-      - main
-      - "[0-9]+.[0-9]+"
-    types: [opened, synchronize, reopened]
+      - gcp_pre_merge
+
+#on:
+#  pull_request_target:
+#    branches:
+#      - main
+#      - "[0-9]+.[0-9]+"
+#    types: [opened, synchronize, reopened]
 
 jobs:
   Run-CNVM-Tests:
