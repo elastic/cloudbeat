@@ -53,6 +53,7 @@ const (
 	AccessAnalyzers           = "aws-access-analyzers"
 
 	GcpMonitoringType = "gcp-monitoring"
+	GcpServiceUsage   = "gcp-service-usage"
 
 	CloudIdentity          = "identity-management"
 	CloudCompute           = "cloud-compute"
@@ -68,6 +69,10 @@ const (
 	KeyManagement          = "key-management"
 	ProjectManagement      = "project-management"
 	DataProcessing         = "data-processing"
+
+	// Azure resource types
+	AzureVMType             = "azure-vm"
+	AzureStorageAccountType = "azure-storage-account"
 )
 
 // Fetcher represents a data fetcher.
