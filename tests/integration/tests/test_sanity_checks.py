@@ -130,7 +130,6 @@ def test_cnvm_findings(cnvm_client, match_type):
 
 
 @pytest.mark.sanity
-@pytest.mark.gcp
 @pytest.mark.parametrize("match_type", tests_data["cis_gcp"])
 def test_cspm_gcp_findings(cspm_client, match_type):
     """

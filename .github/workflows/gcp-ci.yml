@@ -72,7 +72,7 @@ jobs:
           USE_K8S: false
         run: |
           poetry install
-          poetry run pytest -m "gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+          poetry run pytest -k "cspm_gcp" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
       - name: Print cloudbeat logs
         if: always()
