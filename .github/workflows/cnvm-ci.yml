@@ -43,9 +43,11 @@ jobs:
           args: build
 
       - name: Run Elasticsearch
+        env:
+          VERSION=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
         uses: elastic/elastic-github-actions/elasticsearch@master
         with:
-          stack-version: 8.10.0
+          stack-version: ${{ VERSION }}-SNAPSHOT
           security-enabled: false
 
       - name: Run cloudbeat CNVM in background
