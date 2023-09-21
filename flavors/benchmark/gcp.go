@@ -27,6 +27,7 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
@@ -39,9 +40,19 @@ type GCP struct {
 	inventoryInitializer inventory.ProviderInitializerAPI
 }
 
-func (g *GCP) Run(context.Context) error { return nil }
+func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
+	reg, bdp, _, err := g.initialize(ctx, log, cfg, resourceCh)
+	if err != nil {
+		return nil, err
+	}
 
-func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+	return builder.New(
+		builder.WithBenchmarkDataProvider(bdp),
+	).Build(ctx, log, cfg, resourceCh, reg)
+}
+
+func (g *GCP) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := g.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
@@ -63,11 +74,9 @@ func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 
 	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
 		cloud.NewDataProvider(cloud.WithLogger(log)),
-		cloud.NewIdProvider(),
+		nil,
 		nil
 }
-
-func (g *GCP) Stop() {}
 
 func (g *GCP) checkDependencies() error {
 	if g.CfgProvider == nil {
