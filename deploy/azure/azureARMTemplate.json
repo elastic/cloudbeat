@@ -49,15 +49,15 @@
                         }
                     },
                     "imageReference": {
-                        "publisher": "Canonical",
-                        "offer": "UbuntuServer",
-                        "sku": "18.04-LTS",
+                        "publisher": "canonical",
+                        "offer": "0001-com-ubuntu-server-jammy",
+                        "sku": "22_04-lts-gen2",
                         "version": "latest"
                     }
                 },
                 "osProfile": {
-                    "computerName": "cloudbeat",
-                    "adminUsername": "cloudbeatVM",
+                    "computerName": "cloudbeatVM",
+                    "adminUsername": "cloudbeat",
                     "adminPassword": "[guid('')]",
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": false
@@ -158,7 +158,10 @@
                 "type": "CustomScript",
                 "typeHandlerVersion": "2.1",
                 "settings": {
-                    "script": "[base64(concat('touch ', '/tmp/', 'todo-install-agent', '.txt'))]"
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/elastic/cloudbeat/main/deploy/azure/install-agent.sh"
+                    ],
+                    "commandToExecute": "[concat('bash install-agent.sh ', parameters('ElasticAgentVersion'), ' ', parameters('ElasticArtifactServer'), ' ', parameters('FleetUrl'), ' ', parameters('EnrollmentToken'))]"
                 }
             }
         },
