@@ -28,51 +28,46 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
-type GcpMonitoringFetcher struct {
+type GcpServiceUsageFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   inventory.ServiceAPI
 }
 
-type GcpMonitoringAsset struct {
+type GcpServiceUsageAsset struct {
 	Type    string
 	subType string
 
-	Asset *inventory.MonitoringAsset `json:"assets,omitempty"`
+	Asset *inventory.ServiceUsageAsset `json:"assets,omitempty"`
 }
 
-func NewGcpMonitoringFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpMonitoringFetcher {
-	return &GcpMonitoringFetcher{
+func NewGcpServiceUsageFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpServiceUsageFetcher {
+	return &GcpServiceUsageFetcher{
 		log:        log,
 		resourceCh: ch,
 		provider:   provider,
 	}
 }
 
-var monitoringAssetTypes = map[string][]string{
-	"LogMetric":   {inventory.MonitoringLogMetricAssetType},
-	"AlertPolicy": {inventory.MonitoringAlertPolicyAssetType},
-}
+func (f *GcpServiceUsageFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Info("Starting GcpServiceUsageFetcher.Fetch")
 
-func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
-
-	monitoringAssets, err := f.provider.ListMonitoringAssets(monitoringAssetTypes)
+	serviceUsageAssets, err := f.provider.ListServiceUsageAssets()
 	if err != nil {
 		return err
 	}
 
-	for _, monitoringAsset := range monitoringAssets {
+	for _, serviceUsageAsset := range serviceUsageAssets {
 		select {
 		case <-ctx.Done():
-			f.log.Infof("GcpMonitoringFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
+			f.log.Infof("GcpServiceUsageFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
 			return nil
 		case f.resourceCh <- fetching.ResourceInfo{
 			CycleMetadata: cMetadata,
-			Resource: &GcpMonitoringAsset{
+			Resource: &GcpServiceUsageAsset{
 				Type:    fetching.MonitoringIdentity,
-				subType: fetching.GcpMonitoringType,
-				Asset:   monitoringAsset,
+				subType: fetching.GcpServiceUsage,
+				Asset:   serviceUsageAsset,
 			},
 		}:
 		}
@@ -81,11 +76,11 @@ func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.Cyc
 	return nil
 }
 
-func (f *GcpMonitoringFetcher) Stop() {
+func (f *GcpServiceUsageFetcher) Stop() {
 	f.provider.Close()
 }
 
-func (g *GcpMonitoringAsset) GetMetadata() (fetching.ResourceMetadata, error) {
+func (g *GcpServiceUsageAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.Ecs.ProjectId)
 	return fetching.ResourceMetadata{
 		ID:      id,
@@ -96,11 +91,11 @@ func (g *GcpMonitoringAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (g *GcpMonitoringAsset) GetData() any {
+func (g *GcpServiceUsageAsset) GetData() any {
 	return g.Asset
 }
 
-func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]any, error) {
+func (g *GcpServiceUsageAsset) GetElasticCommonData() (map[string]any, error) {
 	return map[string]any{
 		"cloud": map[string]any{
 			"provider": "gcp",
