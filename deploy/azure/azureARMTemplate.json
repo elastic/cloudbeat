@@ -168,13 +168,14 @@
         {
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
-            "name": "[guid(uniqueString('cloudbeatRoleAssignment'))]",
+            "name": "[guid(resourceGroup().id, deployment().name)]",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines', 'cloudbeatVM')]"
             ],
             "properties": {
                 "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-                "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]"
+                "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
+                "principalType": "ServicePrincipal"
             }
         }
     ],
