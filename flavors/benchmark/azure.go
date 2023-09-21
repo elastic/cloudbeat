@@ -55,7 +55,7 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
-func (a *Azure) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *Azure) initialize(ctx context.Context, log *logp.Logger, _ *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
@@ -80,10 +80,10 @@ func (a *Azure) initialize(ctx context.Context, log *logp.Logger, cfg *config.Co
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure fetchers: %v", err)
 	}
 
-	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)), cloud.NewDataProvider(
-		cloud.WithLogger(log),
-		// cloud.WithAccount(*azureIdentity),
-	), nil, nil
+	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
+		cloud.NewDataProvider(cloud.WithLogger(log)),
+		nil,
+		nil
 }
 
 func (a *Azure) checkDependencies() error {
