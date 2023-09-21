@@ -16,7 +16,7 @@ jobs:
   Run-CNVM-Tests:
     name: CIS GCP integration test
     runs-on: ubuntu-22.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: 'read'
       id-token: 'write'
