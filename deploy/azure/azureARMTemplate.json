@@ -26,6 +26,13 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             }
+        },
+        "Seed": {
+            "type": "securestring",
+            "metadata": {
+                "description": "A seed for randomness, only used to temporarily set the password to the virtual machine, no need to change it"
+            },
+            "defaultValue": "[newGuid()]"
         }
     },
     "resources": [
@@ -58,7 +65,7 @@
                 "osProfile": {
                     "computerName": "cloudbeatVM",
                     "adminUsername": "cloudbeat",
-                    "adminPassword": "[guid('')]",
+                    "adminPassword": "[concat('Salt123@', guid(parameters('Seed')))]",
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": false
                     }
@@ -118,7 +125,8 @@
             "name": "cloudbeatNic",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', 'cloudbeatVNet')]"
+                "[resourceId('Microsoft.Network/virtualNetworks', 'cloudbeatVNet')]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'cloudbeatPublicIP')]"
             ],
             "properties": {
                 "ipConfigurations": [
