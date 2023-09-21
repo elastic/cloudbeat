@@ -15,14 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package cloud
+package builder
 
-type idProvider struct {
-}
-
-func NewIdProvider() *idProvider {
-	return &idProvider{}
-}
+type idProvider struct{}
 
 func (p *idProvider) GetId(resourceType string, resourceId string) string {
 	return resourceId

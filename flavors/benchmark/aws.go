@@ -28,17 +28,32 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
 
+const resourceChBufferSize = 10000
+
 type AWS struct {
 	IdentityProvider awslib.IdentityProviderGetter
 }
 
-func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *AWS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
+	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.New(
+		builder.WithBenchmarkDataProvider(bdp),
+	).Build(ctx, log, cfg, resourceCh, reg)
+}
+
+func (a *AWS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
@@ -60,11 +75,8 @@ func (a *AWS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		), cloud.NewDataProvider(
 			cloud.WithLogger(log),
 			cloud.WithAccount(*awsIdentity),
-		), cloud.NewIdProvider(), nil
+		), nil, nil
 }
-
-func (a *AWS) Run(context.Context) error { return nil }
-func (a *AWS) Stop()                     {}
 
 func (a *AWS) checkDependencies() error {
 	if a.IdentityProvider == nil {
