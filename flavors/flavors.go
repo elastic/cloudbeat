@@ -27,23 +27,20 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
-	"github.com/elastic/cloudbeat/transformer"
 )
 
 const (
-	flushInterval    = 10 * time.Second
-	eventsThreshold  = 75
-	resourceChBuffer = 10000
+	flushInterval   = 10 * time.Second
+	eventsThreshold = 75
 )
 
 // flavorBase configuration.
 type flavorBase struct {
-	ctx         context.Context
-	cancel      context.CancelFunc
-	config      *config.Config
-	client      beat.Client
-	transformer transformer.Transformer
-	log         *logp.Logger
-	cdp         dataprovider.CommonDataProvider
-	publisher   *Publisher
+	ctx       context.Context
+	cancel    context.CancelFunc
+	config    *config.Config
+	client    beat.Client
+	log       *logp.Logger
+	cdp       dataprovider.CommonDataProvider
+	publisher *Publisher
 }
