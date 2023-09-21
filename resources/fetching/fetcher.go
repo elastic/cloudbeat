@@ -53,11 +53,13 @@ const (
 	AccessAnalyzers           = "aws-access-analyzers"
 
 	GcpMonitoringType = "gcp-monitoring"
+	GcpLoggingType    = "gcp-logging"
 	GcpServiceUsage   = "gcp-service-usage"
 
 	CloudIdentity          = "identity-management"
 	CloudCompute           = "cloud-compute"
 	MonitoringIdentity     = "monitoring"
+	LoggingIdentity        = "logging"
 	CloudContainerMgmt     = "caas" // containers as a service
 	CloudLoadBalancer      = "load-balancer"
 	CloudContainerRegistry = "container-registry"
