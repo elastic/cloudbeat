@@ -65,7 +65,7 @@ var GcpAssetTypes = map[string][]string{
 	},
 	fetching.CloudStorage: {
 		inventory.StorageBucketAssetType,
-		inventory.LoggingBucketAssetType,
+		inventory.LogBucketAssetType,
 	},
 	fetching.CloudCompute: {
 		inventory.ComputeInstanceAssetType,

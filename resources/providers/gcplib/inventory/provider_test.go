@@ -314,17 +314,15 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 		},
 	}
 
-	ctx := context.Background()
-	mockIterator := new(MockIterator)
 	provider := &Provider{
 		log: logp.NewLogger("test"),
 		inventory: &AssetsInventoryWrapper{
 			Close: func() error { return nil },
 			ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
-				return mockIterator
+				return s.mockedIterator
 			},
 		},
-		ctx: ctx,
+		ctx: s.ctx,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
@@ -344,16 +342,108 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 	}
 
 	// asset's resource
-	mockIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage1", Resource: &assetpb.Resource{}, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
-	mockIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage2", Resource: nil, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
-	mockIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage1", Resource: &assetpb.Resource{}, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage2", Resource: nil, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	// asset's iam policy
-	mockIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage1", IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
-	mockIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage2", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
-	mockIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage1", IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage2", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	values, err := provider.ListServiceUsageAssets()
+	s.Assert().NoError(err)
+
+	// 2 assets, 1 for each project
+	s.Assert().Equal(2, len(values))
+	s.ElementsMatch(expected, values)
+}
+
+func (s *ProviderTestSuite) TestListLoggingAssets() {
+	expected := []*LoggingAsset{{
+		Ecs: &fetching.EcsGcp{
+			Provider:         "gcp",
+			ProjectId:        "1",
+			ProjectName:      "ProjectName1",
+			OrganizationId:   "1",
+			OrganizationName: "OrganizationName1",
+		},
+		LogSinks: []*ExtendedGcpAsset{
+			{
+				Asset: &assetpb.Asset{Name: "LogSink1", Resource: &assetpb.Resource{}, IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+				Ecs:   &fetching.EcsGcp{ProjectId: "1", ProjectName: "ProjectName1", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+			},
+			{
+				Asset: &assetpb.Asset{Name: "LogSink3", Resource: nil, IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+				Ecs:   &fetching.EcsGcp{ProjectId: "", ProjectName: "", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+			}},
+	},
+		{
+			Ecs: &fetching.EcsGcp{
+				Provider:         "gcp",
+				ProjectId:        "2",
+				ProjectName:      "ProjectName2",
+				OrganizationId:   "1",
+				OrganizationName: "OrganizationName1",
+			},
+			LogSinks: []*ExtendedGcpAsset{
+				{
+					Asset: &assetpb.Asset{Name: "LogSink2", Resource: nil, IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+					Ecs:   &fetching.EcsGcp{ProjectId: "2", ProjectName: "ProjectName2", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+				},
+				{
+					Asset: &assetpb.Asset{Name: "LogSink3", Resource: nil, IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"},
+					Ecs:   &fetching.EcsGcp{ProjectId: "", ProjectName: "", OrganizationId: "1", OrganizationName: "OrganizationName1"},
+				},
+			},
+		},
+	}
+
+	provider := &Provider{
+		log: logp.NewLogger("test"),
+		inventory: &AssetsInventoryWrapper{
+			Close: func() error { return nil },
+			ListAssets: func(ctx context.Context, req *assetpb.ListAssetsRequest, opts ...gax.CallOption) Iterator {
+				return s.mockedIterator
+			},
+		},
+		ctx: s.ctx,
+		config: auth.GcpFactoryConfig{
+			Parent:     "projects/1",
+			ClientOpts: []option.ClientOption{},
+		},
+		crm: &ResourceManagerWrapper{
+			getProjectDisplayName: func(ctx context.Context, parent string) string {
+				if parent == "projects/1" {
+					return "ProjectName1"
+				}
+
+				if parent == "projects/2" {
+					return "ProjectName2"
+				}
+
+				return ""
+			},
+			getOrganizationDisplayName: func(ctx context.Context, parent string) string {
+				return "OrganizationName1"
+			},
+		},
+		crmCache: make(map[string]*fetching.EcsGcp),
+	}
+
+	// asset's resource
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "LogSink1", Resource: &assetpb.Resource{}, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"}, nil).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "LogSink2", Resource: nil, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"}, nil).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "LogSink3", Resource: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"}, nil).Once() // asset at the organization level
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+
+	// asset's iam policy
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "LogSink1", IamPolicy: nil, Ancestors: []string{"projects/1", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"}, nil).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "LogSink2", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "logging.googleapis.com/LogSink"}, nil).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "LogSink3", IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"}, nil).Once()
+	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
+
+	values, err := provider.ListLoggingAssets()
 	s.Assert().NoError(err)
 
 	// 2 assets, 1 for each project
