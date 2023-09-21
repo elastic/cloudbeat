@@ -27,8 +27,9 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -42,12 +43,24 @@ type Azure struct {
 
 func (a *Azure) Run(context.Context) error { return nil }
 
-func (a *Azure) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
+	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.New(
+		builder.WithBenchmarkDataProvider(bdp),
+	).Build(ctx, log, cfg, resourceCh, reg)
+}
+
+func (a *Azure) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
 
-	azureConfig, err := a.CfgProvider.GetAzureClientConfig(cfg.CloudConfig.Azure, log)
+	azureConfig, err := a.CfgProvider.GetAzureClientConfig()
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
 	}
@@ -62,18 +75,16 @@ func (a *Azure) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Co
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure asset inventory: %v", err)
 	}
 
-	fetchers, err := factory.NewCisAzureFactory(log, ch, assetProvider)
+	fetchers, err := preset.NewCisAzureFactory(log, ch, assetProvider)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure fetchers: %v", err)
 	}
 
-	return registry.NewRegistry(log, fetchers), cloud.NewDataProvider(
+	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)), cloud.NewDataProvider(
 		cloud.WithLogger(log),
 		// cloud.WithAccount(*azureIdentity),
-	), cloud.NewIdProvider(), nil
+	), nil, nil
 }
-
-func (a *Azure) Stop() {}
 
 func (a *Azure) checkDependencies() error {
 	// if a.IdentityProvider == nil {
