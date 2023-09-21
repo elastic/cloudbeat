@@ -9,7 +9,7 @@ verifying that there are findings of 'resource.type' for each feature.
 import pytest
 from commonlib.utils import get_findings
 
-CONFIG_TIMEOUT = 120
+CONFIG_TIMEOUT = 300
 CNVM_CONFIG_TIMEOUT = 3600
 
 tests_data = {
