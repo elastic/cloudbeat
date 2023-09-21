@@ -28,7 +28,7 @@ import (
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
-type GcpLoggingFetcher struct {
+type GcpLogSinkFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
 	provider   inventory.ServiceAPI
@@ -41,16 +41,16 @@ type GcpLoggingAsset struct {
 	Asset *inventory.LoggingAsset `json:"asset,omitempty"`
 }
 
-func NewGcpLoggingFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpLoggingFetcher {
-	return &GcpLoggingFetcher{
+func NewGcpLogSinkFetcher(_ context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *GcpLogSinkFetcher {
+	return &GcpLogSinkFetcher{
 		log:        log,
 		resourceCh: ch,
 		provider:   provider,
 	}
 }
 
-func (f *GcpLoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
-	f.log.Info("Starting GcpLoggingFetcher.Fetch")
+func (f *GcpLogSinkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+	f.log.Info("Starting GcpLogSinkFetcher.Fetch")
 
 	loggingAssets, err := f.provider.ListLoggingAssets()
 	if err != nil {
@@ -60,7 +60,7 @@ func (f *GcpLoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleM
 	for _, asset := range loggingAssets {
 		select {
 		case <-ctx.Done():
-			f.log.Infof("GcpLoggingFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
+			f.log.Infof("GcpLogSinkFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
 			return nil
 		case f.resourceCh <- fetching.ResourceInfo{
 			CycleMetadata: cMetadata,
@@ -76,7 +76,7 @@ func (f *GcpLoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleM
 	return nil
 }
 
-func (f *GcpLoggingFetcher) Stop() {
+func (f *GcpLogSinkFetcher) Stop() {
 	f.provider.Close()
 }
 

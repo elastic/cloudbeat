@@ -34,30 +34,30 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-type GcpLoggingFetcherTestSuite struct {
+type GcpLogSinkFetcherTestSuite struct {
 	suite.Suite
 
 	resourceCh chan fetching.ResourceInfo
 }
 
-func TestGcpLoggingFetcherTestSuite(t *testing.T) {
-	s := new(GcpLoggingFetcherTestSuite)
+func TestGcpLogSinkFetcherTestSuite(t *testing.T) {
+	s := new(GcpLogSinkFetcherTestSuite)
 
 	suite.Run(t, s)
 }
 
-func (s *GcpLoggingFetcherTestSuite) SetupTest() {
+func (s *GcpLogSinkFetcherTestSuite) SetupTest() {
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
-func (s *GcpLoggingFetcherTestSuite) TearDownTest() {
+func (s *GcpLogSinkFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *GcpLoggingFetcherTestSuite) TestFetcher_Fetch_Success() {
+func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Success() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpLoggingFetcher{
+	fetcher := GcpLogSinkFetcher{
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
 		provider:   mockInventoryService,
@@ -88,10 +88,10 @@ func (s *GcpLoggingFetcherTestSuite) TestFetcher_Fetch_Success() {
 	s.Equal(1, len(results))
 }
 
-func (s *GcpLoggingFetcherTestSuite) TestFetcher_Fetch_Error() {
+func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Error() {
 	ctx := context.Background()
 	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := GcpLoggingFetcher{
+	fetcher := GcpLogSinkFetcher{
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
 		provider:   mockInventoryService,

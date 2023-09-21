@@ -45,7 +45,7 @@ func NewCisGcpFetchers(ctx context.Context, log *logp.Logger, ch chan fetching.R
 	// The logging fetcher is only available for the organization scope as it requires the Cloud Asset Inventory API
 	// to be enabled for the organization/folders level.
 	if cfg.AccountType == config.OrganizationAccount {
-		loggingFetcher := fetchers.NewGcpLoggingFetcher(ctx, log, ch, inventory)
+		loggingFetcher := fetchers.NewGcpLogSinkFetcher(ctx, log, ch, inventory)
 		m["gcp_logging_fetcher"] = registry.RegisteredFetcher{Fetcher: loggingFetcher}
 	}
 
