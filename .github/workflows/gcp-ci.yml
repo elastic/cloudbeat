@@ -1,16 +1,11 @@
 name: CIS-GCP-CI
 
 on:
-  push:
+  pull_request_target:
     branches:
-      - gcp_pre_merge
-
-#on:
-#  pull_request_target:
-#    branches:
-#      - main
-#      - "[0-9]+.[0-9]+"
-#    types: [opened, synchronize, reopened]
+      - main
+      - "[0-9]+.[0-9]+"
+    types: [opened, synchronize, reopened]
 
 jobs:
   Run-CNVM-Tests:
@@ -78,9 +73,3 @@ jobs:
         if: always()
         run: |
           cat logs/cloudbeat*
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: failure()
-        with:
-          limit-access-to-actor: true
