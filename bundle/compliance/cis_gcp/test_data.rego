@@ -31,6 +31,12 @@ generate_serviceusage_asset(services) = {
 	"subType": "gcp-service-usage",
 }
 
+generate_logging_asset(sinks) = {
+	"resource": {"log_sinks": sinks},
+	"type": "logging",
+	"subType": "gcp-logging",
+}
+
 generate_kms_resource(members, rotationPeriod, nextRotationTime, primary) = generate_gcp_asset(
 	"key-management",
 	"gcp-cloudkms-crypto-key",

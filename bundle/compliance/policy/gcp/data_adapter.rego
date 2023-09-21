@@ -115,3 +115,7 @@ is_log_bucket {
 is_services_usage {
 	input.subType == "gcp-service-usage"
 }
+
+is_logging_asset {
+	input.subType == "gcp-logging"
+}
