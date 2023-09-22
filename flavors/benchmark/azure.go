@@ -36,7 +36,6 @@ import (
 )
 
 type Azure struct {
-	// IdentityProvider     identity.ProviderGetter
 	CfgProvider          auth.ConfigProviderAPI
 	inventoryInitializer inventory.ProviderInitializerAPI
 }
@@ -65,11 +64,6 @@ func (a *Azure) initialize(ctx context.Context, log *logp.Logger, _ *config.Conf
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
 	}
 
-	// azureIdentity, err := a.IdentityProvider.GetIdentity(ctx, azureConfig)
-	// if err != nil {
-	// 	return nil, nil, fmt.Errorf("failed to get Azure identity: %v", err)
-	// }
-
 	assetProvider, err := a.inventoryInitializer.Init(ctx, log, *azureConfig)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure asset inventory: %v", err)
@@ -87,10 +81,6 @@ func (a *Azure) initialize(ctx context.Context, log *logp.Logger, _ *config.Conf
 }
 
 func (a *Azure) checkDependencies() error {
-	// if a.IdentityProvider == nil {
-	// 	return errors.New("azure identity provider is uninitialized")
-	// }
-
 	if a.CfgProvider == nil {
 		return errors.New("azure config provider is uninitialized")
 	}
