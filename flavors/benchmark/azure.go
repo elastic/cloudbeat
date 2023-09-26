@@ -31,18 +31,20 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
-type GCP struct {
+type Azure struct {
 	CfgProvider          auth.ConfigProviderAPI
 	inventoryInitializer inventory.ProviderInitializerAPI
 }
 
-func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+func (a *Azure) Run(context.Context) error { return nil }
+
+func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
 	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
-	reg, bdp, _, err := g.initialize(ctx, log, cfg, resourceCh)
+	reg, bdp, _, err := a.initialize(ctx, log, cfg, resourceCh)
 	if err != nil {
 		return nil, err
 	}
@@ -52,24 +54,24 @@ func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Co
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
-func (g *GCP) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
-	if err := g.checkDependencies(); err != nil {
+func (a *Azure) initialize(ctx context.Context, log *logp.Logger, _ *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
 
-	gcpConfig, err := g.CfgProvider.GetGcpClientConfig(ctx, cfg.CloudConfig.Gcp, log)
+	azureConfig, err := a.CfgProvider.GetAzureClientConfig()
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
 	}
 
-	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig)
+	assetProvider, err := a.inventoryInitializer.Init(ctx, log, *azureConfig)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize azure asset inventory: %v", err)
 	}
 
-	fetchers, err := preset.NewCisGcpFetchers(ctx, log, ch, assetProvider, cfg.CloudConfig.Gcp)
+	fetchers, err := preset.NewCisAzureFactory(log, ch, assetProvider)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize azure fetchers: %v", err)
 	}
 
 	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
@@ -78,13 +80,13 @@ func (g *GCP) initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		nil
 }
 
-func (g *GCP) checkDependencies() error {
-	if g.CfgProvider == nil {
-		return errors.New("gcp config provider is uninitialized")
+func (a *Azure) checkDependencies() error {
+	if a.CfgProvider == nil {
+		return errors.New("azure config provider is uninitialized")
 	}
 
-	if g.inventoryInitializer == nil {
-		return errors.New("gcp asset inventory is uninitialized")
+	if a.inventoryInitializer == nil {
+		return errors.New("azure asset inventory is uninitialized")
 	}
 	return nil
 }

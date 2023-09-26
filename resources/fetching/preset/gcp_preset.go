@@ -22,13 +22,14 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/resources/fetching"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/gcp"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
-func NewCisGcpFetchers(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (registry.FetchersMap, error) {
+func NewCisGcpFetchers(ctx context.Context, log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI, cfg config.GcpConfig) (registry.FetchersMap, error) {
 	log.Infof("Initializing GCP fetchers")
 	m := make(registry.FetchersMap)
 
@@ -40,6 +41,13 @@ func NewCisGcpFetchers(ctx context.Context, log *logp.Logger, ch chan fetching.R
 
 	serviceUsageFetcher := fetchers.NewGcpServiceUsageFetcher(ctx, log, ch, inventory)
 	m["gcp_service_usage_fetcher"] = registry.RegisteredFetcher{Fetcher: serviceUsageFetcher}
+
+	// The logging fetcher is only available for the organization scope as it requires the Cloud Asset Inventory API
+	// to be enabled for the organization/folders level.
+	if cfg.AccountType == config.OrganizationAccount {
+		loggingFetcher := fetchers.NewGcpLogSinkFetcher(ctx, log, ch, inventory)
+		m["gcp_logging_fetcher"] = registry.RegisteredFetcher{Fetcher: loggingFetcher}
+	}
 
 	return m, nil
 }
