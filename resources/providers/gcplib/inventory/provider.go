@@ -468,9 +468,7 @@ func (p *Provider) ListProjectsAncestorsPolicies() ([]*ProjectPoliciesAsset, err
 	projects := getAllAssets(p.log, p.inventory.ListAssets(p.ctx, &assetpb.ListAssetsRequest{
 		ContentType: assetpb.ContentType_IAM_POLICY,
 		Parent:      p.config.Parent,
-		AssetTypes: []string{
-			"cloudresourcemanager.googleapis.com/Project",
-		},
+		AssetTypes:  []string{CrmProjectAssetType},
 	}))
 
 	var assets []*ProjectPoliciesAsset
@@ -490,10 +488,10 @@ func getAncestorsAssets(p *Provider, ancestors []string) []*ExtendedGcpAsset {
 	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
 		var assetType string
 		if strings.HasPrefix(parent, "folders") {
-			assetType = "cloudresourcemanager.googleapis.com/Folder"
+			assetType = CrmFolderAssetType
 		}
 		if strings.HasPrefix(parent, "organizations") {
-			assetType = "cloudresourcemanager.googleapis.com/Organization"
+			assetType = CrmOrgAssetType
 		}
 		assets := getAllAssets(p.log, p.inventory.ListAssets(p.ctx, &assetpb.ListAssetsRequest{
 			ContentType: assetpb.ContentType_IAM_POLICY,

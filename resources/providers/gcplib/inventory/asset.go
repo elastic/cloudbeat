@@ -29,6 +29,8 @@ const (
 	BigqueryDatasetAssetType       = "bigquery.googleapis.com/Dataset"
 	BigqueryTableAssetType         = "bigquery.googleapis.com/Table"
 	CrmProjectAssetType            = "cloudresourcemanager.googleapis.com/Project"
+	CrmOrgAssetType                = "cloudresourcemanager.googleapis.com/Organization"
+	CrmFolderAssetType             = "cloudresourcemanager.googleapis.com/Folder"
 	ApiKeysKeyAssetType            = "apikeys.googleapis.com/Key"
 	CloudKmsCryptoKeyAssetType     = "cloudkms.googleapis.com/CryptoKey"
 	IamServiceAccountAssetType     = "iam.googleapis.com/ServiceAccount"

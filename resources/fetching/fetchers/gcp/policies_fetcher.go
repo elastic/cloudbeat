@@ -91,7 +91,7 @@ func (g *GcpPoliciesAsset) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (g *GcpPoliciesAsset) GetData() any {
-	return g.Asset
+	return g.Asset.Policies
 }
 
 func (g *GcpPoliciesAsset) GetElasticCommonData() (map[string]any, error) {
