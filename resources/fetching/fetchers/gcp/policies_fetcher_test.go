@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
-	iampb "cloud.google.com/go/iam/apiv1/iampb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -75,21 +74,7 @@ func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Success() {
 					OrganizationName: "a",
 				},
 				Policies: []*inventory.ExtendedGcpAsset{
-					{Asset: &assetpb.Asset{
-						Name:      "prj-policy",
-						AssetType: inventory.CrmProjectAssetType,
-						IamPolicy: &iampb.Policy{},
-					}},
-					{Asset: &assetpb.Asset{
-						Name:      "folder-policy",
-						AssetType: inventory.CrmProjectAssetType,
-						IamPolicy: &iampb.Policy{},
-					}},
-					{Asset: &assetpb.Asset{
-						Name:      "org-policy",
-						AssetType: inventory.CrmProjectAssetType,
-						IamPolicy: &iampb.Policy{},
-					}},
+					{Asset: &assetpb.Asset{}},
 				},
 			},
 		}, nil,
