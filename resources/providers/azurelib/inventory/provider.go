@@ -20,20 +20,22 @@ package inventory
 import (
 	"bytes"
 	"context"
-	"os"
+	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions"
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 )
 
 type Provider struct {
-	log    *logp.Logger
-	client *AzureClientWrapper
-	ctx    context.Context
-	Config auth.AzureFactoryConfig
+	log           *logp.Logger
+	client        *AzureClientWrapper
+	subscriptions []*string
+	ctx           context.Context
+	Config        auth.AzureFactoryConfig
 }
 
 type ProviderInitializer struct{}
@@ -71,19 +73,49 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, azureC
 
 	client := clientFactory.NewClient()
 
-	// We wrap the client so we can mock it in tests
+	// We wrap the client, so we can mock it in tests
 	wrapper := &AzureClientWrapper{
 		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
 			return client.Resources(ctx, query, options)
 		},
 	}
 
+	subscriptions, err := p.getSubscriptionIds(ctx, azureConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get subscription ids: %w", err)
+	}
+
 	return &Provider{
-		Config: azureConfig,
-		client: wrapper,
-		log:    log,
-		ctx:    ctx,
+		log:           log,
+		client:        wrapper,
+		subscriptions: subscriptions,
+		ctx:           ctx,
+		Config:        azureConfig,
 	}, nil
+}
+
+func (p *ProviderInitializer) getSubscriptionIds(ctx context.Context, azureConfig auth.AzureFactoryConfig) ([]*string, error) {
+	// TODO: mockable
+
+	var result []*string
+
+	clientFactory, err := armsubscriptions.NewClientFactory(azureConfig.Credentials, nil)
+	if err != nil {
+		return nil, err
+	}
+	pager := clientFactory.NewClient().NewListPager(nil)
+	for pager.More() {
+		page, err := pager.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, subscription := range page.Value {
+			if subscription != nil {
+				result = append(result, subscription.SubscriptionID)
+			}
+		}
+	}
+	return result, nil
 }
 
 func (p *Provider) ListAllAssetTypesByName(assets []string) ([]AzureAsset, error) {
@@ -95,9 +127,7 @@ func (p *Provider) ListAllAssetTypesByName(assets []string) ([]AzureAsset, error
 		Options: &armresourcegraph.QueryRequestOptions{
 			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 		},
-		Subscriptions: []*string{
-			// TODO: Populate from config or query (not sensitive but still don't want to commit)
-			to.Ptr(os.Getenv("AZURE_SUBSCRIPTION_ID"))},
+		Subscriptions: p.subscriptions,
 	}
 
 	resourceAssets, err := p.runPaginatedQuery(query)

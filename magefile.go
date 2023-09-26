@@ -401,6 +401,6 @@ func BuildOpaBundle() (err error) {
 		return err
 	}
 
-	fmt.Printf("Generated OPA bundle from %s branch at %s", branch, cspPoliciesPkgDir)
+	fmt.Printf("Generated OPA bundle from %s branch at %s\n", branch, cspPoliciesPkgDir)
 	return nil
 }
