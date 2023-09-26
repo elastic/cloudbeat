@@ -26,8 +26,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions"
 	"github.com/elastic/elastic-agent-libs/logp"
+	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
+	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
 
 type Provider struct {
@@ -66,6 +68,8 @@ type ProviderInitializerAPI interface {
 }
 
 func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, azureConfig auth.AzureFactoryConfig) (ServiceAPI, error) {
+	log = log.Named("azure")
+
 	clientFactory, err := armresourcegraph.NewClientFactory(azureConfig.Credentials, nil)
 	if err != nil {
 		return nil, err
@@ -84,6 +88,11 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, azureC
 	if err != nil {
 		return nil, fmt.Errorf("failed to get subscription ids: %w", err)
 	}
+	log.Info(
+		lo.Reduce(subscriptions, func(agg string, item *string, _ int) string {
+			return fmt.Sprintf("%s %s", agg, strings.Dereference(item))
+		}, "subscriptions:"),
+	)
 
 	return &Provider{
 		log:           log,
