@@ -48,7 +48,7 @@ type GcpAsset struct {
 // example: gcp-cloudkms-crypto-key
 var GcpAssetTypes = map[string][]string{
 	fetching.ProjectManagement: {
-		inventory.CloudResourceManagerProjectAssetType,
+		inventory.CrmProjectAssetType,
 	},
 	fetching.KeyManagement: {
 		inventory.ApiKeysKeyAssetType,
