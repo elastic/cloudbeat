@@ -81,7 +81,7 @@ func (b *Builder) buildBase(ctx context.Context, log *logp.Logger, cfg *config.C
 		Version: version.CloudbeatVersion(),
 		// Keeping Policy field for backward compatibility
 		Policy: version.CloudbeatVersion(),
-	})
+	}, cfg)
 	if err != nil {
 		return nil, err
 	}

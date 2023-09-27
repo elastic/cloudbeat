@@ -41,6 +41,7 @@ type flavorBase struct {
 	config    *config.Config
 	client    beat.Client
 	log       *logp.Logger
-	cdp       dataprovider.CommonDataProvider
+	bdp       dataprovider.CommonDataProvider
+	cdp       dataprovider.ElasticCommonDataProvider
 	publisher *Publisher
 }

@@ -20,14 +20,16 @@ package common
 import (
 	"github.com/mitchellh/mapstructure"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/version"
 )
 
 type DataProvider struct {
 	info map[string]any
+	cfg  *config.Config
 }
 
-func New(cloudbeatVersionInfo version.CloudbeatVersionInfo) (*DataProvider, error) {
+func New(cloudbeatVersionInfo version.CloudbeatVersionInfo, cfg *config.Config) (*DataProvider, error) {
 	m := map[string]any{}
 	err := mapstructure.Decode(cloudbeatVersionInfo, &m)
 	if err != nil {
@@ -36,11 +38,20 @@ func New(cloudbeatVersionInfo version.CloudbeatVersionInfo) (*DataProvider, erro
 
 	return &DataProvider{
 		info: m,
+		cfg:  cfg,
 	}, nil
 }
 
 func (c *DataProvider) GetElasticCommonData() (map[string]any, error) {
-	return map[string]any{
-		"cloudbeat": c.info,
-	}, nil
+	m := map[string]any{}
+	m["cloudbeat"] = c.info
+
+	if c.cfg != nil {
+		m["cloud_security_posture.package_policy"] = map[string]any{
+			"id":       c.cfg.PackagePolicyId,
+			"revision": c.cfg.PackagePolicyRevision,
+		}
+	}
+
+	return m, nil
 }

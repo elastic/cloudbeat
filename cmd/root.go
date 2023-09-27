@@ -44,6 +44,22 @@ func cloudbeatCfg(rawIn *proto.UnitExpectedConfig, agentInfo *client.AgentInfo) 
 		return nil, fmt.Errorf("error creating input list from raw expected config: %w", err)
 	}
 
+	config := rawIn.Source.AsMap()
+	packagePolicyID, ok := config["package_policy_id"].(string)
+	if !ok {
+		return nil, fmt.Errorf("'package_policy_id' element does not exist or is not a string")
+	}
+
+	packagePolicyRevision, ok := config["revision"].(float64)
+	if !ok {
+		return nil, fmt.Errorf("'revision' element does not exist or is not an int")
+	}
+
+	for iter := range modules {
+		modules[iter]["package_policy_id"] = packagePolicyID
+		modules[iter]["revision"] = int(packagePolicyRevision)
+	}
+
 	// format for the reloadable list needed by the cm.Reload() method
 	configList, err := management.CreateReloadConfigFromInputs(modules)
 	if err != nil {
