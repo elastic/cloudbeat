@@ -215,7 +215,7 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 	var assets []*assetpb.Asset
 	assets = append(append(assets, resourceAssets...), policyAssets...)
 	mergedAssets := mergeAssetContentType(assets)
-	extendedAssets := extendAssetsWithDisplayNames(p.ctx, p.crm, p.crmCache, mergedAssets)
+	extendedAssets := extendWithECS(p.ctx, p.crm, p.crmCache, mergedAssets)
 	// Enrich network assets with dns policy
 	p.enrichNetworkAssets(extendedAssets)
 
@@ -443,7 +443,7 @@ func mergeAssetContentType(assets []*assetpb.Asset) []*assetpb.Asset {
 }
 
 // extends the assets with the project and organization display name
-func extendAssetsWithDisplayNames(ctx context.Context, crm *ResourceManagerWrapper, cache map[string]*fetching.EcsGcp, assets []*assetpb.Asset) []*ExtendedGcpAsset {
+func extendWithECS(ctx context.Context, crm *ResourceManagerWrapper, cache map[string]*fetching.EcsGcp, assets []*assetpb.Asset) []*ExtendedGcpAsset {
 	var extendedAssets []*ExtendedGcpAsset
 	for _, asset := range assets {
 		keys := getAssetIds(asset)
@@ -471,17 +471,12 @@ func (p *Provider) ListProjectsAncestorsPolicies() ([]*ProjectPoliciesAsset, err
 		AssetTypes:  []string{CrmProjectAssetType},
 	}))
 
-	var assets []*ProjectPoliciesAsset
-	for _, project := range projects {
-		extendedAsset := extendAssetsWithDisplayNames(p.ctx, p.crm, p.crmCache, []*assetpb.Asset{project})[0]
-		assets = append(assets, &ProjectPoliciesAsset{
-			Ecs: extendedAsset.Ecs,
-			Policies: append([]*ExtendedGcpAsset{
-				extendedAsset,
-			}, getAncestorsAssets(p, project.Ancestors[1:])...),
-		})
-	}
-	return assets, nil
+	return lo.Map(projects, func(project *assetpb.Asset, _ int) *ProjectPoliciesAsset {
+		projectAsset := extendWithECS(p.ctx, p.crm, p.crmCache, []*assetpb.Asset{project})[0]
+		// Skip first ancestor it as we already got it
+		policiesAssets := append([]*ExtendedGcpAsset{projectAsset}, getAncestorsAssets(p, project.Ancestors[1:])...)
+		return &ProjectPoliciesAsset{Ecs: projectAsset.Ecs, Policies: policiesAssets}
+	}), nil
 }
 
 func getAncestorsAssets(p *Provider, ancestors []string) []*ExtendedGcpAsset {
@@ -498,7 +493,7 @@ func getAncestorsAssets(p *Provider, ancestors []string) []*ExtendedGcpAsset {
 			Parent:      parent,
 			AssetTypes:  []string{assetType},
 		}))
-		return extendAssetsWithDisplayNames(p.ctx, p.crm, p.crmCache, assets)
+		return extendWithECS(p.ctx, p.crm, p.crmCache, assets)
 	}))
 }
 
