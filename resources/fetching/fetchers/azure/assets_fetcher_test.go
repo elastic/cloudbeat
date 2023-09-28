@@ -21,7 +21,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
@@ -52,13 +51,8 @@ func (s *AzureAssetsFetcherTestSuite) TearDownTest() {
 
 func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	ctx := context.Background()
-	mockInventoryService := &inventory.MockServiceAPI{}
-	fetcher := AzureAssetsFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
-	}
 
+	mockInventoryService := &inventory.MockServiceAPI{}
 	mockAssets := []inventory.AzureAsset{
 		{
 			Id:             "id1",
@@ -82,40 +76,41 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		},
 	}
 
-	mockInventoryService.On("ListAllAssetTypesByName", mock.MatchedBy(func(assets []string) bool {
-		return true
-	})).Return(
-		mockAssets, nil,
-	)
+	mockInventoryService.EXPECT().
+		ListAllAssetTypesByName(mock.AnythingOfType("[]string")).
+		Return(mockAssets, nil).Once()
+	defer mockInventoryService.AssertExpectations(s.T())
 
+	fetcher := AzureAssetsFetcher{
+		log:        testhelper.NewLogger(s.T()),
+		resourceCh: s.resourceCh,
+		provider:   mockInventoryService,
+	}
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
-	s.NoError(err)
+	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Equal(len(AzureResourceTypes), len(results))
+	s.Require().Len(results, len(AzureResourceTypes))
+	s.Require().Len(results, len(mockAssets))
 
-	lo.ForEach(results, func(r fetching.ResourceInfo, index int) {
-		data := r.GetData()
-		s.NotNil(data)
-		resource := data.(inventory.AzureAsset)
-		s.NotEmpty(resource)
-		s.Equal(mockAssets[index].Id, resource.Id)
-		s.Equal(mockAssets[index].Name, resource.Name)
-		s.Equal(mockAssets[index].Location, resource.Location)
-		s.Equal(mockAssets[index].Properties, resource.Properties)
-		s.Equal(mockAssets[index].ResourceGroup, resource.ResourceGroup)
-		s.Equal(mockAssets[index].SubscriptionId, resource.SubscriptionId)
-		s.Equal(mockAssets[index].TenantId, resource.TenantId)
-		s.Equal(mockAssets[index].Type, resource.Type)
-		meta, err := r.GetMetadata()
-		s.NoError(err)
-		s.NotNil(meta)
-		s.NoError(err)
-		s.NotEmpty(meta)
-		s.Equal(mockAssets[index].Id, meta.ID)
-		s.Equal(AzureResourceTypes[mockAssets[index].Type], meta.Type)
-		s.Equal("", meta.SubType)
-		s.Equal(mockAssets[index].Name, meta.Name)
-		s.Equal(mockAssets[index].Location, meta.Region)
-	})
+	for index, r := range results {
+		expected := mockAssets[index]
+		s.Run(expected.Type, func() {
+			s.Equal(expected, r.GetData())
+
+			meta, err := r.GetMetadata()
+			s.Require().NoError(err)
+			s.Equal(fetching.ResourceMetadata{
+				ID:                  expected.Id,
+				Type:                AzureResourceTypes[expected.Type],
+				SubType:             "",
+				Name:                expected.Name,
+				Region:              expected.Location,
+				AwsAccountId:        "",
+				AwsAccountAlias:     "",
+				AwsOrganizationId:   "",
+				AwsOrganizationName: "",
+			}, meta)
+		})
+	}
 }
