@@ -220,8 +220,7 @@ revision: 1`,
 
 	for i, test := range tests {
 		s.Run(fmt.Sprint(i), func() {
-			cfg, err := config.NewConfigFrom(test.config)
-			s.NoError(err)
+			cfg := config.MustNewConfigFrom(test.config)
 
 			c, err := New(cfg)
 			s.NoError(err)

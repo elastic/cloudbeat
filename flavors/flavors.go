@@ -25,7 +25,6 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider"
 	_ "github.com/elastic/cloudbeat/processor" // Add cloudbeat default processors.
 )
 
@@ -41,7 +40,5 @@ type flavorBase struct {
 	config    *config.Config
 	client    beat.Client
 	log       *logp.Logger
-	bdp       dataprovider.CommonDataProvider
-	cdp       dataprovider.ElasticCommonDataProvider
 	publisher *Publisher
 }
