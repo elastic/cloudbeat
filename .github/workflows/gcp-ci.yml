@@ -13,10 +13,10 @@ on:
 #    types: [opened, synchronize, reopened]
 
 jobs:
-  Run-CNVM-Tests:
+  Run-CSPM-GCP-Tests:
     name: CIS GCP integration test
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     permissions:
       contents: 'read'
       id-token: 'write'
