@@ -3,9 +3,11 @@ set -euxo pipefail
 
 # Delete password, stop and disable ssh
 sudo passwd --delete cloudbeat &
-sudo systemctl disable --now ssh &
-sudo systemctl mask ssh.service &
-sudo killall sshd &
+(
+    sudo systemctl disable --now ssh
+    sudo systemctl mask ssh.service
+    sudo killall sshd
+) &
 
 usage="$0 <elastic agent version> <elastic artifact server> <fleet url> <enrollment token>"
 ElasticAgentVersion=${1:?$usage}
