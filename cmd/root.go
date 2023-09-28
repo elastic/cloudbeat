@@ -45,14 +45,14 @@ func cloudbeatCfg(rawIn *proto.UnitExpectedConfig, agentInfo *client.AgentInfo) 
 	}
 
 	config := rawIn.Source.AsMap()
-	packagePolicyID, ok := config["package_policy_id"].(string)
+	packagePolicyID, ok := config["package_policy_id"]
 	if !ok {
-		return nil, fmt.Errorf("'package_policy_id' element does not exist or is not a string")
+		return nil, fmt.Errorf("'package_policy_id' element does not exist")
 	}
 
-	packagePolicyRevision, ok := config["revision"].(int)
+	packagePolicyRevision, ok := config["revision"]
 	if !ok {
-		return nil, fmt.Errorf("'revision' element does not exist or is not an int")
+		return nil, fmt.Errorf("'revision' element does not exist")
 	}
 
 	for iter := range modules {
