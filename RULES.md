@@ -275,9 +275,9 @@
 
 ## GCP CIS Benchmark
 
-### 70/84 implemented rules (83%)
+### 71/84 implemented rules (85%)
 
-#### Automated rules: 70/73 (96%)
+#### Automated rules: 71/73 (97%)
 
 #### Manual rules: 0/11 (0%)
 
@@ -301,7 +301,7 @@
 |   [1.7](bundle/compliance/cis_gcp/rules/cis_1_7)   | Identity and Access Management | Ensure User-Managed/External Keys for Service Accounts Are Rotated Every 90 Days or Fewer                                         | :white_check_mark: | Automated |
 |   [1.8](bundle/compliance/cis_gcp/rules/cis_1_8)   | Identity and Access Management | Ensure That Separation of Duties Is Enforced While Assigning Service Account Related Roles to Users                               | :white_check_mark: | Automated |
 |   [1.9](bundle/compliance/cis_gcp/rules/cis_1_9)   | Identity and Access Management | Ensure That Cloud KMS Cryptokeys Are Not Anonymously or Publicly Accessible                                                       | :white_check_mark: | Automated |
-|                        2.1                         | Logging and Monitoring         | Ensure That Cloud Audit Logging Is Configured Properly                                                                            |        :x:         | Automated |
+|   [2.1](bundle/compliance/cis_gcp/rules/cis_2_1)   | Logging and Monitoring         | Ensure That Cloud Audit Logging Is Configured Properly                                                                            | :white_check_mark: | Automated |
 |  [2.10](bundle/compliance/cis_gcp/rules/cis_2_10)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for Cloud Storage IAM Permission Changes                                       | :white_check_mark: | Automated |
 |  [2.11](bundle/compliance/cis_gcp/rules/cis_2_11)  | Logging and Monitoring         | Ensure That the Log Metric Filter and Alerts Exist for SQL Instance Configuration Changes                                         | :white_check_mark: | Automated |
 |  [2.12](bundle/compliance/cis_gcp/rules/cis_2_12)  | Logging and Monitoring         | Ensure That Cloud DNS Logging Is Enabled for All VPC Networks                                                                     | :white_check_mark: | Automated |

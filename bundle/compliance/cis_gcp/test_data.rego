@@ -25,6 +25,12 @@ generate_monitoring_asset(log_metrics, alerts) = {
 	"subType": "gcp-monitoring",
 }
 
+generate_policies_asset(policies) = {
+	"resource": policies,
+	"type": "project-managment",
+	"subType": "gcp-policies",
+}
+
 generate_serviceusage_asset(services) = {
 	"resource": {"services": services},
 	"type": "monitoring",
