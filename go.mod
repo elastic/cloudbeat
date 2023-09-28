@@ -7,6 +7,7 @@ require (
 	cloud.google.com/go/iam v1.1.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.3.1
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph v0.8.1
+	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions v1.2.0
 	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6
 	github.com/aquasecurity/trivy v0.42.1
 	github.com/aquasecurity/trivy-db v0.0.0-20230515061101-378ab9ed302c
