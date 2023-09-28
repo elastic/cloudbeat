@@ -31,8 +31,9 @@ SIMPLIFIED_AGENT_POLICY = {
 VERSION_MAP = {
     "cis_k8s": "1.1.0",
     "cis_eks": "1.2.0",
-    "cis_gcp": "1.5.0",
+    "cis_aws": "1.2.0",
     "vuln_mgmt_aws": "1.3.0",
+    "cis_gcp": "1.5.0",
 }
 
 
@@ -228,3 +229,22 @@ def generate_random_name(prefix: str) -> str:
     generated_name = f"{prefix}-{random_suffix}"
 
     return generated_name
+
+
+def patch_vars(var_dict, package_version):
+    """
+    Conditionally updates a dictionary based on the package version.
+
+    This function checks the provided package version and updates the given
+    dictionary 'var_dict' with additional fields based on version requirements.
+
+    Args:
+        var_dict (dict): The dictionary to be updated.
+        package_version (str): The version of the package to determine updates.
+
+    Returns:
+        None: This function modifies 'var_dict' in place.
+    """
+    if version.parse(package_version) >= version.parse("1.5.0"):
+        # Add or update fields in the vars_dict based on the version requirements
+        var_dict["aws.account_type"] = "single-account"
