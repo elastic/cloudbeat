@@ -113,7 +113,8 @@
                             "name": "cloudbeatVM",
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Network/networkInterfaces', 'cloudbeatNic')]"
+                                "cloudbeatNic",
+                                "cloudbeatGenerateKeypair"
                             ],
                             "properties": {
                                 "hardwareProfile": {
@@ -136,9 +137,16 @@
                                 "osProfile": {
                                     "computerName": "cloudbeatVM",
                                     "adminUsername": "cloudbeat",
-                                    "adminPassword": "[guid('')]",
                                     "linuxConfiguration": {
-                                        "disablePasswordAuthentication": false
+                                        "disablePasswordAuthentication": true,
+                                        "ssh": {
+                                            "publicKeys": [
+                                                {
+                                                    "path": "/home/cloudbeat/.ssh/authorized_keys",
+                                                    "keyData": "[reference('cloudbeatGenerateKeypair').outputs.public_key]"
+                                                }
+                                            ]
+                                        }
                                     }
                                 },
                                 "networkProfile": {
@@ -178,7 +186,7 @@
                             "name": "cloudbeatNic",
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Network/virtualNetworks', 'cloudbeatVNet')]"
+                                "cloudbeatVNet"
                             ],
                             "properties": {
                                 "ipConfigurations": [
@@ -199,7 +207,7 @@
                             "name": "cloudbeatVM/EnableMSIExtension",
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.Compute/virtualMachines', 'cloudbeatVM')]"
+                                "cloudbeatVM"
                             ],
                             "properties": {
                                 "publisher": "Microsoft.ManagedIdentity",
@@ -209,6 +217,20 @@
                                 "settings": {
                                     "port": 50342
                                 }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Resources/deploymentScripts",
+                            "apiVersion": "2020-10-01",
+                            "name": "cloudbeatGenerateKeypair",
+                            "location": "[resourceGroup().location]",
+                            "kind": "AzureCLI",
+                            "properties": {
+                                "azCliVersion": "2.51.0",
+                                "cleanupPreference": "Always",
+                                "retentionInterval": "P1D",
+                                "scriptContent": "#/bin/bash -e\nyes | ssh-keygen -f sshkey -N ''\necho \"{\\\"public_key\\\":\\\"$(cat sshkey.pub)\\\"}\" > $AZ_SCRIPTS_OUTPUT_PATH",
+                                "timeout": "PT30M"
                             }
                         }
                     ]
