@@ -50,14 +50,14 @@ func cloudbeatCfg(rawIn *proto.UnitExpectedConfig, agentInfo *client.AgentInfo) 
 		return nil, fmt.Errorf("'package_policy_id' element does not exist or is not a string")
 	}
 
-	packagePolicyRevision, ok := config["revision"].(float64)
+	packagePolicyRevision, ok := config["revision"].(int)
 	if !ok {
 		return nil, fmt.Errorf("'revision' element does not exist or is not an int")
 	}
 
 	for iter := range modules {
 		modules[iter]["package_policy_id"] = packagePolicyID
-		modules[iter]["revision"] = int(packagePolicyRevision)
+		modules[iter]["revision"] = packagePolicyRevision
 	}
 
 	// format for the reloadable list needed by the cm.Reload() method
