@@ -2,6 +2,7 @@
 This module contains API calls related to Fleet settings
 """
 import codecs
+from typing import Dict, Any
 from munch import Munch, munchify
 from loguru import logger
 from api.base_call_api import APICallException, perform_api_call
@@ -254,6 +255,48 @@ def get_package_version(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
         return None
+
+
+def get_package(
+    cfg: Munch,
+    package_name: str = "cloud_security_posture",
+    is_full: bool = True,
+    prerelease: bool = False,
+) -> Dict[str, Any]:
+    """
+    Retrieve package information from the Elastic Fleet Server API.
+
+    Args:
+        cfg (Munch): Configuration data.
+        package_name (str, optional): The name of the package to retrieve.
+                                      Default is "cloud_security_posture".
+        is_full (bool, optional): Whether to retrieve full package information. Default is True.
+        prerelease (bool, optional): Whether to include prerelease versions. Default is False.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the package information
+                        or an empty dictionary if the API call fails.
+    """
+    url = f"{cfg.kibana_url}/api/fleet/epm/packages/{package_name}"
+
+    request_params = {
+        "full": is_full,
+        "prerelease": prerelease,
+    }
+
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            auth=cfg.auth,
+            params={"params": request_params},
+        )
+        return response.get("response", {})
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return {}
 
 
 def update_package_version(cfg: Munch, package_name: str, package_version: str):
