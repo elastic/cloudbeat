@@ -20,6 +20,7 @@ package inventory
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
@@ -87,6 +88,9 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, azureC
 	subscriptions, err := p.getSubscriptionIds(ctx, azureConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get subscription ids: %w", err)
+	}
+	if len(subscriptions) == 0 {
+		return nil, errors.New("no subscriptions available to query")
 	}
 	log.Info(
 		lo.Reduce(subscriptions, func(agg string, item *string, _ int) string {
