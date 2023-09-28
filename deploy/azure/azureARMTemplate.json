@@ -35,7 +35,8 @@
             "name": "cloudbeatVM",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', 'cloudbeatNic')]"
+                "[resourceId('Microsoft.Network/networkInterfaces', 'cloudbeatNic')]",
+                "[resourceId('Microsoft.Resources/deploymentScripts', 'cloudbeatGenerateKeypair')]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -58,9 +59,16 @@
                 "osProfile": {
                     "computerName": "cloudbeatVM",
                     "adminUsername": "cloudbeat",
-                    "adminPassword": "[guid('')]",
                     "linuxConfiguration": {
-                        "disablePasswordAuthentication": false
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "/home/cloudbeat/.ssh/authorized_keys",
+                                    "keyData": "[reference('cloudbeatGenerateKeypair').outputs.public_key]"
+                                }
+                            ]
+                        }
                     }
                 },
                 "networkProfile": {
@@ -118,7 +126,8 @@
             "name": "cloudbeatNic",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', 'cloudbeatVNet')]"
+                "[resourceId('Microsoft.Network/virtualNetworks', 'cloudbeatVNet')]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', 'cloudbeatPublicIP')]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -163,6 +172,20 @@
                     ],
                     "commandToExecute": "[concat('bash install-agent.sh ', parameters('ElasticAgentVersion'), ' ', parameters('ElasticArtifactServer'), ' ', parameters('FleetUrl'), ' ', parameters('EnrollmentToken'))]"
                 }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2020-10-01",
+            "name": "cloudbeatGenerateKeypair",
+            "location": "[resourceGroup().location]",
+            "kind": "AzureCLI",
+            "properties": {
+                "azCliVersion": "2.51.0",
+                "cleanupPreference": "Always",
+                "retentionInterval": "P1D",
+                "scriptContent": "#/bin/bash -e\nyes | ssh-keygen -f sshkey -N ''\necho \"{\\\"public_key\\\":\\\"$(cat sshkey.pub)\\\"}\" > $AZ_SCRIPTS_OUTPUT_PATH",
+                "timeout": "PT30M"
             }
         },
         {
