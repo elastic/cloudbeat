@@ -31,6 +31,7 @@ SIMPLIFIED_AGENT_POLICY = {
 VERSION_MAP = {
     "cis_k8s": "1.1.0",
     "cis_gcp": "1.5.0",
+    "vuln_mgmt_aws": "1.3.0",
 }
 
 
