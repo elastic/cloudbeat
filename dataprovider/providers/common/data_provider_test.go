@@ -23,6 +23,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/version"
 )
@@ -31,18 +32,20 @@ func Test_CommonDataProvider_GetElasticCommonData(t *testing.T) {
 	tests := []struct {
 		name string
 		info version.CloudbeatVersionInfo
-		want map[string]interface{}
+		cfg  *config.Config
+		want map[string]any
 	}{
 		{
 			name: "should return empty map",
 			info: version.CloudbeatVersionInfo{},
-			want: map[string]interface{}{},
+			cfg:  nil,
+			want: map[string]any{},
 		}, {
 			name: "should return cloudbeat version",
 			info: version.CloudbeatVersionInfo{
 				Version: version.Version{Version: "test_version"},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"cloudbeat.version": "test_version",
 			},
 		}, {
@@ -50,7 +53,7 @@ func Test_CommonDataProvider_GetElasticCommonData(t *testing.T) {
 			info: version.CloudbeatVersionInfo{
 				Policy: version.Version{Version: "test_version"},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"cloudbeat.policy.version": "test_version",
 			},
 		}, {
@@ -59,20 +62,31 @@ func Test_CommonDataProvider_GetElasticCommonData(t *testing.T) {
 				Version: version.Version{Version: "test_cloudbeat_version"},
 				Policy:  version.Version{Version: "test_policy_version"},
 			},
-			want: map[string]interface{}{
+			want: map[string]any{
 				"cloudbeat.policy.version": "test_policy_version",
 				"cloudbeat.version":        "test_cloudbeat_version",
+			},
+		}, {
+			name: "should return package policy id and revision",
+			info: version.CloudbeatVersionInfo{},
+			cfg: &config.Config{
+				PackagePolicyId:       "test_package_policy_id",
+				PackagePolicyRevision: 1,
+			},
+			want: map[string]any{
+				"cloud_security_posture.package_policy.id":       "test_package_policy_id",
+				"cloud_security_posture.package_policy.revision": 1,
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p, err := New(tt.info)
+			p, err := New(tt.info, tt.cfg)
 			assert.NoError(t, err)
 
 			ev := &beat.Event{
-				Fields: map[string]interface{}{},
+				Fields: map[string]any{},
 			}
 
 			err = dataprovider.NewEnricher(p).EnrichEvent(ev)
