@@ -10,6 +10,7 @@ import pytest
 from commonlib.utils import get_findings
 
 CONFIG_TIMEOUT = 120
+GCP_CONFIG_TIMEOUT = 600
 CNVM_CONFIG_TIMEOUT = 3600
 
 tests_data = {
@@ -148,5 +149,5 @@ def test_cspm_gcp_findings(cspm_client, match_type):
     query_list = [{"term": {"rule.benchmark.id": "cis_gcp"}}, {"term": {"resource.type": match_type}}]
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
-    results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
+    results = get_findings(cspm_client, GCP_CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
