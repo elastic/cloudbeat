@@ -75,6 +75,7 @@ const (
 	// Azure resource types
 	AzureVMType             = "azure-vm"
 	AzureStorageAccountType = "azure-storage-account"
+	AzureDiskType           = "azure-disk"
 )
 
 // Fetcher represents a data fetcher.
