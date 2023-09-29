@@ -40,9 +40,9 @@ type AzureResource struct {
 }
 
 var AzureResourceTypes = map[string]string{
-	inventory.VirtualMachineAssetType: fetching.AzureVMType,
-	inventory.StorageAccountAssetType: fetching.AzureStorageAccountType,
 	inventory.DiskAssetType:           fetching.AzureDiskType,
+	inventory.StorageAccountAssetType: fetching.AzureStorageAccountType,
+	inventory.VirtualMachineAssetType: fetching.AzureVMType,
 }
 
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {

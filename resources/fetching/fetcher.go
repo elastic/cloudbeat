@@ -73,9 +73,9 @@ const (
 	DataProcessing         = "data-processing"
 
 	// Azure resource types
-	AzureVMType             = "azure-vm"
-	AzureStorageAccountType = "azure-storage-account"
 	AzureDiskType           = "azure-disk"
+	AzureStorageAccountType = "azure-storage-account"
+	AzureVMType             = "azure-vm"
 )
 
 // Fetcher represents a data fetcher.
