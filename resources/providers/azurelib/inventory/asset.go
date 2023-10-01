@@ -21,4 +21,5 @@ const (
 	VirtualMachineAssetType = "microsoft.compute/virtualmachines"
 	StorageAccountAssetType = "microsoft.storage/storageaccounts"
 	PostgreSQLDBAssetType   = "microsoft.dbforpostgresql/servers"
+	MySQDBAssetType         = "microsoft.dbformysql/servers"
 )

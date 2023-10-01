@@ -75,6 +75,7 @@ const (
 	AzureVMType             = "azure-vm"
 	AzureStorageAccountType = "azure-storage-account"
 	AzurePostgreSQLDBType   = "azure-postgresql-server-db"
+	AzureMySQLDBType        = "azure-mysql-server-db"
 )
 
 // Fetcher represents a data fetcher.
