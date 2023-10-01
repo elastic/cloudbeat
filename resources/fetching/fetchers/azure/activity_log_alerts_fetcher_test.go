@@ -104,7 +104,7 @@ func (s *AzureActivityLogAlertsFetcherTestSuite) TestFetcher_Fetch() {
 
 	meta, err := results[0].GetMetadata()
 	s.Require().NoError(err)
-	exNameAndId := "azure-activity-log-alert-" + subId
+	exNameAndId := AzureActivityLogAlertsResourceTypes[mockAssets[0].Type] + "-" + subId
 	s.Equal(fetching.ResourceMetadata{
 		ID:                  exNameAndId,
 		Type:                AzureActivityLogAlertsResourceTypes[mockAssets[0].Type],
