@@ -74,6 +74,16 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 			TenantId:       "tenantId2",
 			Type:           inventory.StorageAccountAssetType,
 		},
+		{
+			Id:             "id3",
+			Name:           "name3",
+			Location:       "location3",
+			Properties:     map[string]interface{}{"key3": "value3"},
+			ResourceGroup:  "rg3",
+			SubscriptionId: "subId3",
+			TenantId:       "tenantId3",
+			Type:           inventory.PostgreSQLDBAssetType,
+		},
 	}
 
 	mockInventoryService.EXPECT().

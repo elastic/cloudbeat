@@ -72,9 +72,9 @@ const (
 	ProjectManagement      = "project-management"
 	DataProcessing         = "data-processing"
 
-	// Azure resource types
 	AzureVMType             = "azure-vm"
 	AzureStorageAccountType = "azure-storage-account"
+	AzurePostgreSQLDBType   = "azure-postgresql-server-db"
 )
 
 // Fetcher represents a data fetcher.
