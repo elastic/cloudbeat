@@ -33,8 +33,8 @@ func NewCisAzureFactory(log *logp.Logger, ch chan fetching.ResourceInfo, invento
 	assetsFetcher := fetchers.NewAzureAssetsFetcher(log, ch, inventory)
 	m["azure_cloud_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: assetsFetcher}
 
-	activityLogsFetcher := fetchers.NewAzureActivityLogsFetcher(log, ch, inventory)
-	m["azure_cloud_activity_logs_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: activityLogsFetcher}
+	activityLogAlertsFetcher := fetchers.NewAzureActivityLogAlertsFetcher(log, ch, inventory)
+	m["azure_cloud_activity_log_alerts_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: activityLogAlertsFetcher}
 
 	return m, nil
 }

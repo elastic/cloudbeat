@@ -29,27 +29,27 @@ import (
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
-type AzureActivityLogsFetcherTestSuite struct {
+type AzureActivityLogAlertsFetcherTestSuite struct {
 	suite.Suite
 
 	resourceCh chan fetching.ResourceInfo
 }
 
-func TestAzureActivityLogsFetcherTestSuite(t *testing.T) {
-	s := new(AzureActivityLogsFetcherTestSuite)
+func TestAzureActivityLogAlertsFetcherTestSuite(t *testing.T) {
+	s := new(AzureActivityLogAlertsFetcherTestSuite)
 
 	suite.Run(t, s)
 }
 
-func (s *AzureActivityLogsFetcherTestSuite) SetupTest() {
+func (s *AzureActivityLogAlertsFetcherTestSuite) SetupTest() {
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 }
 
-func (s *AzureActivityLogsFetcherTestSuite) TearDownTest() {
+func (s *AzureActivityLogAlertsFetcherTestSuite) TearDownTest() {
 	close(s.resourceCh)
 }
 
-func (s *AzureActivityLogsFetcherTestSuite) TestFetcher_Fetch() {
+func (s *AzureActivityLogAlertsFetcherTestSuite) TestFetcher_Fetch() {
 	ctx := context.Background()
 
 	subId := "subId1"
@@ -83,7 +83,7 @@ func (s *AzureActivityLogsFetcherTestSuite) TestFetcher_Fetch() {
 		Return(mockAssets, nil).Once()
 	defer mockInventoryService.AssertExpectations(s.T())
 
-	fetcher := AzureActivityLogsFetcher{
+	fetcher := AzureActivityLogAlertsFetcher{
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
 		provider:   mockInventoryService,
@@ -94,8 +94,8 @@ func (s *AzureActivityLogsFetcherTestSuite) TestFetcher_Fetch() {
 
 	s.Require().Len(results, 1)
 
-	activityLogs := results[0].GetData().(AzureActivityLogsAsset).ActivityLogs
-	for index, r := range activityLogs {
+	activityLogAlerts := results[0].GetData().(AzureActivityLogAlertsAsset).ActivityLogAlerts
+	for index, r := range activityLogAlerts {
 		expected := mockAssets[index]
 		s.Run(expected.Type, func() {
 			s.Equal(expected, r)
@@ -107,7 +107,7 @@ func (s *AzureActivityLogsFetcherTestSuite) TestFetcher_Fetch() {
 	exNameAndId := "azure-activity-log-alert-" + subId
 	s.Equal(fetching.ResourceMetadata{
 		ID:                  exNameAndId,
-		Type:                AzureActivityLogsResourceTypes[mockAssets[0].Type],
+		Type:                AzureActivityLogAlertsResourceTypes[mockAssets[0].Type],
 		SubType:             "",
 		Name:                exNameAndId,
 		Region:              "",
@@ -116,5 +116,4 @@ func (s *AzureActivityLogsFetcherTestSuite) TestFetcher_Fetch() {
 		AwsOrganizationId:   "",
 		AwsOrganizationName: "",
 	}, meta)
-
 }
