@@ -72,8 +72,9 @@ const (
 	ProjectManagement      = "project-management"
 	DataProcessing         = "data-processing"
 
-	AzureVMType             = "azure-vm"
+	AzureDiskType           = "azure-disk"
 	AzureStorageAccountType = "azure-storage-account"
+	AzureVMType             = "azure-vm"
 	AzurePostgreSQLDBType   = "azure-postgresql-server-db"
 	AzureMySQLDBType        = "azure-mysql-server-db"
 )

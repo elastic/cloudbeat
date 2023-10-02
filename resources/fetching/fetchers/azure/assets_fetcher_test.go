@@ -53,49 +53,26 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	ctx := context.Background()
 
 	mockInventoryService := &inventory.MockServiceAPI{}
-	mockAssets := []inventory.AzureAsset{
-		{
-			Id:             "id1",
-			Name:           "name1",
-			Location:       "location1",
-			Properties:     map[string]interface{}{"key1": "value1"},
-			ResourceGroup:  "rg1",
-			SubscriptionId: "subId1",
-			TenantId:       "tenantId1",
-			Type:           inventory.VirtualMachineAssetType,
-		},
-		{
-			Id:             "id2",
-			Name:           "name2",
-			Location:       "location2",
-			Properties:     map[string]interface{}{"key2": "value2"},
-			ResourceGroup:  "rg2",
-			SubscriptionId: "subId2",
-			TenantId:       "tenantId2",
-			Type:           inventory.StorageAccountAssetType,
-		},
-		{
-			Id:             "id3",
-			Name:           "name3",
-			Location:       "location3",
-			Properties:     map[string]interface{}{"key3": "value3"},
-			ResourceGroup:  "rg3",
-			SubscriptionId: "subId3",
-			TenantId:       "tenantId3",
-			Type:           inventory.PostgreSQLDBAssetType,
-		},
-		{
-			Id:             "id4",
-			Name:           "name4",
-			Location:       "location4",
-			Properties:     map[string]interface{}{"key4": "value4"},
-			ResourceGroup:  "rg4",
-			SubscriptionId: "subId4",
-			TenantId:       "tenantId4",
-			Type:           inventory.MySQDBAssetType,
-		},
-	}
 
+	var mockAssets []inventory.AzureAsset
+	for _, assetType := range []string{
+		inventory.DiskAssetType,
+		inventory.StorageAccountAssetType,
+		inventory.VirtualMachineAssetType,
+	} {
+		mockAssets = append(mockAssets,
+			inventory.AzureAsset{
+				Id:             "id",
+				Name:           "name",
+				Location:       "location",
+				Properties:     map[string]interface{}{"key": "value"},
+				ResourceGroup:  "rg",
+				SubscriptionId: "subId",
+				TenantId:       "tenantId",
+				Type:           assetType,
+			},
+		)
+	}
 	mockInventoryService.EXPECT().
 		ListAllAssetTypesByName(mock.AnythingOfType("[]string")).
 		Return(mockAssets, nil).Once()

@@ -18,8 +18,9 @@
 package inventory
 
 const (
-	VirtualMachineAssetType = "microsoft.compute/virtualmachines"
+	DiskAssetType           = "microsoft.compute/disks"
 	StorageAccountAssetType = "microsoft.storage/storageaccounts"
 	PostgreSQLDBAssetType   = "microsoft.dbforpostgresql/servers"
 	MySQDBAssetType         = "microsoft.dbformysql/servers"
+	VirtualMachineAssetType = "microsoft.compute/virtualmachines"
 )
