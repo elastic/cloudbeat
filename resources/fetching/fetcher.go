@@ -72,16 +72,18 @@ const (
 	ProjectManagement      = "project-management"
 	DataProcessing         = "data-processing"
 
-	AzureActivityLogAlertType      = "azure-activity-log-alert"
-	AzureBastionType               = "azure-bastion"
-	AzureClassicStorageAccountType = "azure-classic-storage-account"
-	AzureClassicVMType             = "azure-classic-vm"
-	AzureDiskType                  = "azure-disk"
-	AzureMySQLDBType               = "azure-mysql-server-db"
-	AzurePostgreSQLDBType          = "azure-postgresql-server-db"
-	AzureStorageAccountType        = "azure-storage-account"
-	AzureVMType                    = "azure-vm"
-	AzureWebSiteType               = "azure-web-site"
+	AzureBastionType                   = "azure-bastion"
+	AzureDiskType                      = "azure-disk"
+	AzureStorageAccountType            = "azure-storage-account"
+	AzureVMType                        = "azure-vm"
+	AzurePostgreSQLDBType              = "azure-postgresql-server-db"
+	AzureMySQLDBType                   = "azure-mysql-server-db"
+	AzureSQLServerType                 = "azure-sql-server"
+	AzureDocumentDBDatabaseAccountType = "azure-document-db-database-account"
+	AzureClassicVMType                 = "azure-classic-vm"
+	AzureClassicStorageAccountType     = "azure-classic-storage-account"
+	AzureActivityLogAlertType          = "azure-activity-log-alert"
+	AzureWebSiteType                   = "azure-web-site"
 )
 
 // Fetcher represents a data fetcher.

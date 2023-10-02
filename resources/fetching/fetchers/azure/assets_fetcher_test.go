@@ -64,6 +64,8 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		inventory.WebsitesAssetType,
 		inventory.PostgreSQLDBAssetType,
 		inventory.MySQLDBAssetType,
+		inventory.SQLServersAssetType,
+		inventory.DocumentDBDatabaseAccountAssetType,
 	} {
 		mockAssets = append(mockAssets,
 			inventory.AzureAsset{

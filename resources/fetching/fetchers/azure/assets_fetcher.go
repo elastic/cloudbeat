@@ -40,15 +40,17 @@ type AzureResource struct {
 }
 
 var AzureResourceTypes = map[string]string{
-	inventory.ActivityLogAlertAssetType:      fetching.AzureActivityLogAlertType,
-	inventory.ClassicStorageAccountAssetType: fetching.AzureClassicStorageAccountType,
-	inventory.ClassicVirtualMachineAssetType: fetching.AzureClassicVMType,
-	inventory.DiskAssetType:                  fetching.AzureDiskType,
-	inventory.MySQLDBAssetType:               fetching.AzureMySQLDBType,
-	inventory.PostgreSQLDBAssetType:          fetching.AzurePostgreSQLDBType,
-	inventory.StorageAccountAssetType:        fetching.AzureStorageAccountType,
-	inventory.VirtualMachineAssetType:        fetching.AzureVMType,
-	inventory.WebsitesAssetType:              fetching.AzureWebSiteType,
+	inventory.DiskAssetType:                      fetching.AzureDiskType,
+	inventory.StorageAccountAssetType:            fetching.AzureStorageAccountType,
+	inventory.VirtualMachineAssetType:            fetching.AzureVMType,
+	inventory.ClassicStorageAccountAssetType:     inventory.ClassicStorageAccountAssetType,
+	inventory.ClassicVirtualMachineAssetType:     inventory.ClassicVirtualMachineAssetType,
+	inventory.ActivityLogAlertAssetType:          fetching.AzureActivityLogAlertType,
+	inventory.WebsitesAssetType:                  fetching.AzureWebSiteType,
+	inventory.PostgreSQLDBAssetType:              fetching.AzurePostgreSQLDBType,
+	inventory.MySQLDBAssetType:                   fetching.AzureMySQLDBType,
+	inventory.SQLServersAssetType:                fetching.AzureSQLServerType,
+	inventory.DocumentDBDatabaseAccountAssetType: fetching.AzureDocumentDBDatabaseAccountType,
 }
 
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
