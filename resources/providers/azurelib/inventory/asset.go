@@ -26,5 +26,5 @@ const (
 	ActivityLogAlertAssetType      = "microsoft.insights/activitylogalerts"
 	WebsitesAssetType              = "microsoft.web/sites"
 	PostgreSQLDBAssetType          = "microsoft.dbforpostgresql/servers"
-	MySQDBAssetType                = "microsoft.dbformysql/servers"
+	MySQLDBAssetType               = "microsoft.dbformysql/servers"
 )
