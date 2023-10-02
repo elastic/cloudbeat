@@ -56,6 +56,7 @@ type AzureAsset struct {
 	SubscriptionId string         `json:"subscription_id,omitempty"`
 	TenantId       string         `json:"tenant_id,omitempty"`
 	Type           string         `json:"type,omitempty"`
+	Sku            string         `json:"sku,omitempty"`
 }
 
 type ServiceAPI interface {
