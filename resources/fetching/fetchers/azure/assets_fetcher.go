@@ -51,6 +51,7 @@ var AzureResourceTypes = map[string]string{
 	inventory.MySQLDBAssetType:                   fetching.AzureMySQLDBType,
 	inventory.SQLServersAssetType:                fetching.AzureSQLServerType,
 	inventory.DocumentDBDatabaseAccountAssetType: fetching.AzureDocumentDBDatabaseAccountType,
+	inventory.NetworkWatchersFlowLogAssetType:    fetching.AzureNetworkWatchersFlowLogType,
 }
 
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {

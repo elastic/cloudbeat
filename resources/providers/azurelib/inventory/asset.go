@@ -30,4 +30,5 @@ const (
 	MySQLDBAssetType                   = "microsoft.dbformysql/servers"
 	SQLServersAssetType                = "microsoft.sql/servers"
 	DocumentDBDatabaseAccountAssetType = "microsoft.documentdb/databaseaccounts"
+	NetworkWatchersFlowLogAssetType    = "microsoft.network/networkwatchers/flowlogs"
 )
