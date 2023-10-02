@@ -79,6 +79,7 @@ const (
 	AzureStorageAccountType        = "azure-storage-account"
 	AzureClassicStorageAccountType = "azure-classic-storage-account"
 	AzureActivityLogAlertType      = "azure-activity-log-alert"
+	AzureWebSiteType               = "azure-web-site"
 )
 
 // Fetcher represents a data fetcher.

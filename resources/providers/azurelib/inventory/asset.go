@@ -24,4 +24,5 @@ const (
 	ClassicVirtualMachineAssetType = "microsoft.classiccompute/virtualmachines"
 	ClassicStorageAccountAssetType = "microsoft.classicstorage/storageaccounts"
 	ActivityLogAlertAssetType      = "microsoft.insights/activitylogalerts"
+	WebsitesAssetType              = "microsoft.web/sites"
 )
