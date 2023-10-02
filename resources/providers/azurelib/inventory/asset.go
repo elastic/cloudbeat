@@ -31,4 +31,5 @@ const (
 	SQLServersAssetType                = "microsoft.sql/servers"
 	DocumentDBDatabaseAccountAssetType = "microsoft.documentdb/databaseaccounts"
 	NetworkWatchersFlowLogAssetType    = "microsoft.network/networkwatchers/flowlogs"
+	NetworkWatchersAssetType           = "microsoft.network/networkwatchers"
 )

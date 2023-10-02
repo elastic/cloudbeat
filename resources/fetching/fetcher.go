@@ -85,6 +85,7 @@ const (
 	AzureActivityLogAlertType          = "azure-activity-log-alert"
 	AzureWebSiteType                   = "azure-web-site"
 	AzureNetworkWatchersFlowLogType    = "azure-network-watchers-flow-log"
+	AzureNetworkWatchersType           = "azure-network-watcher"
 )
 
 // Fetcher represents a data fetcher.

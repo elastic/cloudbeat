@@ -67,6 +67,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		inventory.SQLServersAssetType,
 		inventory.DocumentDBDatabaseAccountAssetType,
 		inventory.NetworkWatchersFlowLogAssetType,
+		inventory.NetworkWatchersAssetType,
 	} {
 		mockAssets = append(mockAssets,
 			inventory.AzureAsset{
