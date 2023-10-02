@@ -52,10 +52,10 @@ const (
 	PolicyType                = "aws-policy"
 	AccessAnalyzers           = "aws-access-analyzers"
 
-	GcpMonitoringType = "gcp-monitoring"
-	GcpLoggingType    = "gcp-logging"
-	GcpServiceUsage   = "gcp-service-usage"
-
+	GcpMonitoringType      = "gcp-monitoring"
+	GcpLoggingType         = "gcp-logging"
+	GcpServiceUsage        = "gcp-service-usage"
+	GcpPolicies            = "gcp-policies"
 	CloudIdentity          = "identity-management"
 	CloudCompute           = "cloud-compute"
 	MonitoringIdentity     = "monitoring"

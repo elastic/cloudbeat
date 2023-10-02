@@ -47,6 +47,9 @@ func NewCisGcpFetchers(ctx context.Context, log *logp.Logger, ch chan fetching.R
 	if cfg.AccountType == config.OrganizationAccount {
 		loggingFetcher := fetchers.NewGcpLogSinkFetcher(ctx, log, ch, inventory)
 		m["gcp_logging_fetcher"] = registry.RegisteredFetcher{Fetcher: loggingFetcher}
+
+		policiesFetcher := fetchers.NewGcpPoliciesFetcher(ctx, log, ch, inventory)
+		m["gcp_policies_fetcher"] = registry.RegisteredFetcher{Fetcher: policiesFetcher}
 	}
 
 	return m, nil

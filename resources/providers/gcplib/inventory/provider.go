@@ -71,6 +71,11 @@ type LoggingAsset struct {
 	LogSinks []*ExtendedGcpAsset `json:"log_sinks,omitempty"`
 }
 
+type ProjectPoliciesAsset struct {
+	Ecs      *fetching.EcsGcp
+	Policies []*ExtendedGcpAsset `json:"policies,omitempty"`
+}
+
 type ServiceUsageAsset struct {
 	Ecs      *fetching.EcsGcp
 	Services []*ExtendedGcpAsset `json:"services,omitempty"`
@@ -113,6 +118,9 @@ type ServiceAPI interface {
 
 	// ListServiceUsageAssets returns a list of service usage assets grouped by project id
 	ListServiceUsageAssets() ([]*ServiceUsageAsset, error)
+
+	// returns a project policies for all its ancestors
+	ListProjectsAncestorsPolicies() ([]*ProjectPoliciesAsset, error)
 
 	// Close the GCP asset client
 	Close() error
@@ -201,12 +209,13 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 		policyAssets = getAllAssets(p.log, p.inventory.ListAssets(p.ctx, request))
 		wg.Done()
 	}()
+
 	wg.Wait()
 
 	var assets []*assetpb.Asset
 	assets = append(append(assets, resourceAssets...), policyAssets...)
 	mergedAssets := mergeAssetContentType(assets)
-	extendedAssets := extendAssets(p.ctx, p.crm, p.crmCache, mergedAssets)
+	extendedAssets := extendWithECS(p.ctx, p.crm, p.crmCache, mergedAssets)
 	// Enrich network assets with dns policy
 	p.enrichNetworkAssets(extendedAssets)
 
@@ -411,7 +420,7 @@ func getAllAssets(log *logp.Logger, it Iterator) []*assetpb.Asset {
 }
 
 func mergeAssetContentType(assets []*assetpb.Asset) []*assetpb.Asset {
-	var resultsMap = make(map[string]*assetpb.Asset)
+	resultsMap := make(map[string]*assetpb.Asset)
 	for _, asset := range assets {
 		assetKey := asset.Name
 		if _, ok := resultsMap[assetKey]; !ok {
@@ -434,7 +443,7 @@ func mergeAssetContentType(assets []*assetpb.Asset) []*assetpb.Asset {
 }
 
 // extends the assets with the project and organization display name
-func extendAssets(ctx context.Context, crm *ResourceManagerWrapper, cache map[string]*fetching.EcsGcp, assets []*assetpb.Asset) []*ExtendedGcpAsset {
+func extendWithECS(ctx context.Context, crm *ResourceManagerWrapper, cache map[string]*fetching.EcsGcp, assets []*assetpb.Asset) []*ExtendedGcpAsset {
 	var extendedAssets []*ExtendedGcpAsset
 	for _, asset := range assets {
 		keys := getAssetIds(asset)
@@ -453,6 +462,39 @@ func extendAssets(ctx context.Context, crm *ResourceManagerWrapper, cache map[st
 		})
 	}
 	return extendedAssets
+}
+
+func (p *Provider) ListProjectsAncestorsPolicies() ([]*ProjectPoliciesAsset, error) {
+	projects := getAllAssets(p.log, p.inventory.ListAssets(p.ctx, &assetpb.ListAssetsRequest{
+		ContentType: assetpb.ContentType_IAM_POLICY,
+		Parent:      p.config.Parent,
+		AssetTypes:  []string{CrmProjectAssetType},
+	}))
+
+	return lo.Map(projects, func(project *assetpb.Asset, _ int) *ProjectPoliciesAsset {
+		projectAsset := extendWithECS(p.ctx, p.crm, p.crmCache, []*assetpb.Asset{project})[0]
+		// Skip first ancestor it as we already got it
+		policiesAssets := append([]*ExtendedGcpAsset{projectAsset}, getAncestorsAssets(p, project.Ancestors[1:])...)
+		return &ProjectPoliciesAsset{Ecs: projectAsset.Ecs, Policies: policiesAssets}
+	}), nil
+}
+
+func getAncestorsAssets(p *Provider, ancestors []string) []*ExtendedGcpAsset {
+	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
+		var assetType string
+		if strings.HasPrefix(parent, "folders") {
+			assetType = CrmFolderAssetType
+		}
+		if strings.HasPrefix(parent, "organizations") {
+			assetType = CrmOrgAssetType
+		}
+		assets := getAllAssets(p.log, p.inventory.ListAssets(p.ctx, &assetpb.ListAssetsRequest{
+			ContentType: assetpb.ContentType_IAM_POLICY,
+			Parent:      parent,
+			AssetTypes:  []string{assetType},
+		}))
+		return extendWithECS(p.ctx, p.crm, p.crmCache, assets)
+	}))
 }
 
 func getAssetIds(asset *assetpb.Asset) GcpAssetIDs {
