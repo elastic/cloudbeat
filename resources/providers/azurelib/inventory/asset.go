@@ -18,6 +18,7 @@
 package inventory
 
 const (
-	VirtualMachineAssetType = "microsoft.compute/virtualmachines"
+	DiskAssetType           = "microsoft.compute/disks"
 	StorageAccountAssetType = "microsoft.storage/storageaccounts"
+	VirtualMachineAssetType = "microsoft.compute/virtualmachines"
 )
