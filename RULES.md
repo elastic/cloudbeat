@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 9/151 implemented rules (6%)
+### 10/151 implemented rules (7%)
 
-#### Automated rules: 9/77 (12%)
+#### Automated rules: 10/77 (13%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -523,7 +523,7 @@
 |                         9.11                         | AppService                              | Ensure Azure Key Vaults are Used to Store Secrets                                                                                                      |        :x:         |  Manual   |
 |                         9.2                          | AppService                              | Ensure Web App Redirects All HTTP traffic to HTTPS in Azure App Service                                                                                |        :x:         | Automated |
 |                         9.3                          | AppService                              | Ensure Web App is using the latest version of TLS encryption                                                                                           |        :x:         | Automated |
-|                         9.4                          | AppService                              | Ensure the web app has 'Client Certificates (Incoming client certificates)' set to 'On'                                                                |        :x:         | Automated |
+|   [9.4](bundle/compliance/cis_azure/rules/cis_9_4)   | AppService                              | Ensure the web app has 'Client Certificates (Incoming client certificates)' set to 'On'                                                                | :white_check_mark: | Automated |
 |                         9.5                          | AppService                              | Ensure that Register with Azure Active Directory is enabled on App Service                                                                             |        :x:         | Automated |
 |                         9.6                          | AppService                              | Ensure That 'PHP version' is the Latest, If Used to Run the Web App                                                                                    |        :x:         |  Manual   |
 |                         9.7                          | AppService                              | Ensure that 'Python version' is the Latest Stable Version, if Used to Run the Web App                                                                  |        :x:         |  Manual   |

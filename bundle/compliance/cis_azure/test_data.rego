@@ -6,6 +6,12 @@ generate_storage_account_with_property(key, value) = {
 	"resource": {"properties": {key: value}},
 }
 
+generate_azure_asset(type, properties) = {
+	"type": type,
+	"subType": "",
+	"resource": {"properties": properties},
+}
+
 not_eval_storage_account_empty = {
 	"type": "azure-storage-account",
 	"subType": "",

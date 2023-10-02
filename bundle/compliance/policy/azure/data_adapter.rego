@@ -32,3 +32,7 @@ is_postgresql_server_db {
 is_mysql_server_db {
 	input.type == "azure-mysql-server-db"
 }
+
+is_website_asset {
+	input.type == "azure-web-site"
+}
