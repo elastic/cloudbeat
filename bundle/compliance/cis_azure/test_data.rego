@@ -17,3 +17,15 @@ not_eval_non_exist_type = {
 	"subType": "",
 	"resource": {"properties": {}},
 }
+
+generate_postgresql_server_with_ssl_enforcement(enabled) = {
+	"type": "azure-postgresql-server-db",
+	"subType": "",
+	"resource": {"properties": {"sslEnforcement": enabled}},
+}
+
+generate_mysql_server_with_ssl_enforcement(enabled) = {
+	"type": "azure-mysql-server-db",
+	"subType": "",
+	"resource": {"properties": {"sslEnforcement": enabled}},
+}
