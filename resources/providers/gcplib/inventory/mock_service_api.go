@@ -236,6 +236,59 @@ func (_c *MockServiceAPI_ListMonitoringAssets_Call) RunAndReturn(run func(map[st
 	return _c
 }
 
+// ListProjectsAncestorsPolicies provides a mock function with given fields:
+func (_m *MockServiceAPI) ListProjectsAncestorsPolicies() ([]*ProjectPoliciesAsset, error) {
+	ret := _m.Called()
+
+	var r0 []*ProjectPoliciesAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]*ProjectPoliciesAsset, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []*ProjectPoliciesAsset); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*ProjectPoliciesAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockServiceAPI_ListProjectsAncestorsPolicies_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListProjectsAncestorsPolicies'
+type MockServiceAPI_ListProjectsAncestorsPolicies_Call struct {
+	*mock.Call
+}
+
+// ListProjectsAncestorsPolicies is a helper method to define mock.On call
+func (_e *MockServiceAPI_Expecter) ListProjectsAncestorsPolicies() *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
+	return &MockServiceAPI_ListProjectsAncestorsPolicies_Call{Call: _e.mock.On("ListProjectsAncestorsPolicies")}
+}
+
+func (_c *MockServiceAPI_ListProjectsAncestorsPolicies_Call) Run(run func()) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockServiceAPI_ListProjectsAncestorsPolicies_Call) Return(_a0 []*ProjectPoliciesAsset, _a1 error) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockServiceAPI_ListProjectsAncestorsPolicies_Call) RunAndReturn(run func() ([]*ProjectPoliciesAsset, error)) *MockServiceAPI_ListProjectsAncestorsPolicies_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListServiceUsageAssets provides a mock function with given fields:
 func (_m *MockServiceAPI) ListServiceUsageAssets() ([]*ServiceUsageAsset, error) {
 	ret := _m.Called()
