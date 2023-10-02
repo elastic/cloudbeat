@@ -135,14 +135,25 @@ Resources:
       UserData: !Base64
         Fn::Sub: |
           #!/bin/bash -x
+          signal() {
+            sudo yum install -y aws-cfn-bootstrap || { sudo apt-get update && sudo apt-get -y install python3-pip && sudo pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz; }
+            cfn-signal --exit-code "$1" --stack ${AWS::StackName} --resource ElasticAgentEc2Instance --region ${AWS::Region}
+          }
+          is_version_valid() {
+            local min_version="$(echo "$2" | sed --regexp-extended 's/^[a-zA-Z-]+-(.*)-[[:digit:]]{4}(-[[:digit:]]{2}){5}.yml/\1/g')"
+            [[ "$min_version" = CFT_* ]] && return 0 # if the file is not published do not check
+            printf '%s\n%s\n' "$min_version" "$1" | sort --version-sort --check=quiet
+          }
+          if ! is_version_valid "${ElasticAgentVersion}" 'CFT_VERSION' &> /dev/null; then
+            signal 22
+            exit
+          fi
           ElasticAgentArtifact=elastic-agent-${ElasticAgentVersion}-linux-arm64
           curl -L -O ${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz
           tar xzvf $ElasticAgentArtifact.tar.gz
           cd $ElasticAgentArtifact
           sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken} --tag=cft_version:CFT_VERSION --tag=cft_arn:${AWS::StackId}
-          code=$?
-          sudo yum install -y aws-cfn-bootstrap || { sudo apt-get update && sudo apt-get -y install python3-pip && sudo pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz; }
-          cfn-signal -e $code --stack ${AWS::StackName} --resource ElasticAgentEc2Instance --region ${AWS::Region}
+          signal $?
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
