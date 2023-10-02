@@ -78,7 +78,7 @@ const (
 	AzureClassicVMType             = "azure-classic-vm"
 	AzureStorageAccountType        = "azure-storage-account"
 	AzureClassicStorageAccountType = "azure-classic-storage-account"
-	AzureActivityLogAlertType      = "azure-activity-log-alerts"
+	AzureActivityLogAlertType      = "azure-activity-log-alert"
 )
 
 // Fetcher represents a data fetcher.
