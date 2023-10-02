@@ -72,11 +72,15 @@ const (
 	ProjectManagement      = "project-management"
 	DataProcessing         = "data-processing"
 
-	AzureDiskType           = "azure-disk"
-	AzureStorageAccountType = "azure-storage-account"
-	AzureVMType             = "azure-vm"
-	AzurePostgreSQLDBType   = "azure-postgresql-server-db"
-	AzureMySQLDBType        = "azure-mysql-server-db"
+	AzureDiskType                  = "azure-disk"
+	AzureStorageAccountType        = "azure-storage-account"
+	AzureVMType                    = "azure-vm"
+	AzurePostgreSQLDBType          = "azure-postgresql-server-db"
+	AzureMySQLDBType               = "azure-mysql-server-db"
+	AzureClassicVMType             = "azure-classic-vm"
+	AzureClassicStorageAccountType = "azure-classic-storage-account"
+	AzureActivityLogAlertType      = "azure-activity-log-alert"
+	AzureWebSiteType               = "azure-web-site"
 )
 
 // Fetcher represents a data fetcher.
