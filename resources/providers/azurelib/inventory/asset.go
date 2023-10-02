@@ -25,4 +25,6 @@ const (
 	ClassicStorageAccountAssetType = "microsoft.classicstorage/storageaccounts"
 	ActivityLogAlertAssetType      = "microsoft.insights/activitylogalerts"
 	WebsitesAssetType              = "microsoft.web/sites"
+	PostgreSQLDBAssetType          = "microsoft.dbforpostgresql/servers"
+	MySQLDBAssetType               = "microsoft.dbformysql/servers"
 )
