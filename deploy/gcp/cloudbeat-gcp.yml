@@ -3,7 +3,9 @@ cloudbeat:
     v1:
       benchmark: cis_gcp
       gcp:
-        project_id: ${GCP_PROJECT_ID}
+        project_id: ${GCP_PROJECT_ID:""}
+        organization_id: ${GCP_ORGANIZATION_ID:""}
+        account_type: ${GCP_ACCOUNT_TYPE:""}
         credentials:
           # credentials_json:
           credentials_file_path: ${GOOGLE_APPLICATION_CREDENTIALS:""}

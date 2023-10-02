@@ -46,7 +46,6 @@ func (s *ConfigTestSuite) TestNew() {
 		config              string
 		expectedType        string
 		expectedCloudConfig CloudConfig
-		expectedFetchers    int
 	}{
 		{
 			`
@@ -56,7 +55,15 @@ config:
 `,
 			"cis_k8s",
 			CloudConfig{},
-			2,
+		},
+		{
+			`
+config:
+  v1:
+    benchmark: cis_azure
+`,
+			"cis_azure",
+			CloudConfig{},
 		},
 		{
 			`
@@ -87,7 +94,6 @@ config:
 					AccountType: "organization-account",
 				},
 			},
-			3,
 		},
 	}
 
@@ -118,6 +124,15 @@ config:
     benchmark: cis_eks
 `,
 			"cis_eks",
+			false,
+		},
+		{
+			`
+config:
+  v1:
+    benchmark: cis_azure
+`,
+			"cis_azure",
 			false,
 		},
 	}
@@ -170,6 +185,48 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 			s.NoError(err)
 
 			s.Equal(test.expectedPeriod, c.Period)
+		})
+	}
+}
+
+func (s *ConfigTestSuite) TestPackagePolicyFields() {
+	tests := []struct {
+		config                        string
+		expectedPackagePolicyID       string
+		expectedPackagePolicyRevision int
+	}{
+		{
+			config:                        "",
+			expectedPackagePolicyID:       "",
+			expectedPackagePolicyRevision: 0,
+		},
+		{
+			config:                        `package_policy_id: 123`,
+			expectedPackagePolicyID:       "123",
+			expectedPackagePolicyRevision: 0,
+		},
+		{
+			config:                        `revision: 123`,
+			expectedPackagePolicyID:       "",
+			expectedPackagePolicyRevision: 123,
+		},
+		{
+			config: `package_policy_id: 123
+revision: 1`,
+			expectedPackagePolicyID:       "123",
+			expectedPackagePolicyRevision: 1,
+		},
+	}
+
+	for i, test := range tests {
+		s.Run(fmt.Sprint(i), func() {
+			cfg := config.MustNewConfigFrom(test.config)
+
+			c, err := New(cfg)
+			s.NoError(err)
+
+			s.Equal(test.expectedPackagePolicyID, c.PackagePolicyId)
+			s.Equal(test.expectedPackagePolicyRevision, c.PackagePolicyRevision)
 		})
 	}
 }

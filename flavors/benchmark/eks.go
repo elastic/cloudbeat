@@ -30,9 +30,9 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
-	k8sprovider "github.com/elastic/cloudbeat/dataprovider/providers/k8s"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/uniqueness"
@@ -43,25 +43,40 @@ type EKS struct {
 	AWSIdentityProvider    awslib.IdentityProviderGetter
 	AWSMetadataProvider    awslib.MetadataProvider
 	EKSClusterNameProvider awslib.EKSClusterNameProviderAPI
-	ClientProvider         k8sprovider.ClientGetterAPI
+	ClientProvider         k8s.ClientGetterAPI
 
 	leaderElector uniqueness.Manager
 }
 
-func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+func (k *EKS) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
+	reg, bdp, idp, err := k.initialize(ctx, log, cfg, resourceCh)
+	if err != nil {
+		return nil, err
+	}
+
+	return builder.New(
+		builder.WithBenchmarkDataProvider(bdp),
+		builder.WithIdProvider(idp),
+	).BuildK8s(ctx, log, cfg, resourceCh, reg, k.leaderElector)
+}
+
+func (k *EKS) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := k.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	kubeClient, err := k.ClientProvider.GetClient(log, cfg.KubeConfig, kubernetes.KubeClientOptions{})
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create kubernetes client: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to create kubernetes client: %w", err)
 	}
+
+	benchmarkHelper := NewK8sBenchmarkHelper(log, cfg, kubeClient)
 	k.leaderElector = uniqueness.NewLeaderElector(log, kubeClient)
 
 	awsConfig, awsIdentity, err := k.getEksAwsConfig(ctx, cfg)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize AWS config: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize AWS config: %w", err)
 	}
 
 	clusterNameProvider := k8s.EKSClusterNameProvider{
@@ -70,16 +85,21 @@ func (k *EKS) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Conf
 		ClusterNameProvider: k.EKSClusterNameProvider,
 		KubeClient:          kubeClient,
 	}
-	dp, err := getK8sDataProvider(ctx, log, *cfg, kubeClient, clusterNameProvider)
+	dp, err := benchmarkHelper.GetK8sDataProvider(ctx, clusterNameProvider)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create k8s data provider: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to create k8s data provider: %w", err)
 	}
 
-	return registry.NewRegistry(log, factory.NewCisEksFactory(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)), dp, nil
-}
+	idp, err := benchmarkHelper.GetK8sIdProvider(ctx)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("failed to create k8s id provider: %w", err)
+	}
 
-func (k *EKS) Run(ctx context.Context) error { return k.leaderElector.Run(ctx) }
-func (k *EKS) Stop()                         { k.leaderElector.Stop() }
+	return registry.NewRegistry(
+		log,
+		registry.WithFetchersMap(preset.NewCisEksFetchers(log, awsConfig, ch, k.leaderElector, kubeClient, awsIdentity)),
+	), dp, idp, nil
+}
 
 func (k *EKS) getEksAwsConfig(ctx context.Context, cfg *config.Config) (awssdk.Config, *cloud.Identity, error) {
 	if cfg.CloudConfig == (config.CloudConfig{}) || cfg.CloudConfig.Aws.Cred == (aws.ConfigAWS{}) {

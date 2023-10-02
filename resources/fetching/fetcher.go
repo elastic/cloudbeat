@@ -52,11 +52,14 @@ const (
 	PolicyType                = "aws-policy"
 	AccessAnalyzers           = "aws-access-analyzers"
 
-	GcpMonitoringType = "gcp-monitoring"
-
+	GcpMonitoringType      = "gcp-monitoring"
+	GcpLoggingType         = "gcp-logging"
+	GcpServiceUsage        = "gcp-service-usage"
+	GcpPolicies            = "gcp-policies"
 	CloudIdentity          = "identity-management"
 	CloudCompute           = "cloud-compute"
 	MonitoringIdentity     = "monitoring"
+	LoggingIdentity        = "logging"
 	CloudContainerMgmt     = "caas" // containers as a service
 	CloudLoadBalancer      = "load-balancer"
 	CloudContainerRegistry = "container-registry"
@@ -68,6 +71,10 @@ const (
 	KeyManagement          = "key-management"
 	ProjectManagement      = "project-management"
 	DataProcessing         = "data-processing"
+
+	// Azure resource types
+	AzureVMType             = "azure-vm"
+	AzureStorageAccountType = "azure-storage-account"
 )
 
 // Fetcher represents a data fetcher.
@@ -90,10 +97,18 @@ type CycleMetadata struct {
 	Sequence int64
 }
 
+type EcsGcp struct {
+	Provider         string
+	ProjectId        string
+	ProjectName      string
+	OrganizationId   string
+	OrganizationName string
+}
+
 type Resource interface {
 	GetMetadata() (ResourceMetadata, error)
 	GetData() any
-	GetElasticCommonData() (map[string]interface{}, error)
+	GetElasticCommonData() (map[string]any, error)
 }
 
 type ResourceFields struct {

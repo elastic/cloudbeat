@@ -45,7 +45,7 @@ func NewPublisher(log *logp.Logger, interval time.Duration, threshold int, clien
 	}
 }
 
-func (p *Publisher) HandleEvents(ctx context.Context, ch chan []beat.Event) {
+func (p *Publisher) HandleEvents(ctx context.Context, ch <-chan []beat.Event) {
 	var eventsToSend []beat.Event
 	flushTicker := time.NewTicker(p.interval)
 	for {

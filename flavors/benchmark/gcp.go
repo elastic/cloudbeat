@@ -27,60 +27,58 @@ import (
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
+	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/fetching"
-	"github.com/elastic/cloudbeat/resources/fetching/factory"
+	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
 type GCP struct {
-	IdentityProvider     identity.ProviderGetter
 	CfgProvider          auth.ConfigProviderAPI
 	inventoryInitializer inventory.ProviderInitializerAPI
 }
 
-func (g *GCP) Run(context.Context) error { return nil }
+func (g *GCP) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.Config) (builder.Benchmark, error) {
+	resourceCh := make(chan fetching.ResourceInfo, resourceChBufferSize)
+	reg, bdp, _, err := g.initialize(ctx, log, cfg, resourceCh)
+	if err != nil {
+		return nil, err
+	}
 
-func (g *GCP) Initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, error) {
+	return builder.New(
+		builder.WithBenchmarkDataProvider(bdp),
+	).Build(ctx, log, cfg, resourceCh, reg)
+}
+
+func (g *GCP) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := g.checkDependencies(); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	gcpConfig, err := g.CfgProvider.GetGcpClientConfig(ctx, cfg.CloudConfig.Gcp, log)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
-	}
-
-	gcpIdentity, err := g.IdentityProvider.GetIdentity(ctx, gcpConfig)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get GCP identity: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp config: %w", err)
 	}
 
 	assetProvider, err := g.inventoryInitializer.Init(ctx, log, *gcpConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp asset inventory: %v", err)
 	}
 
-	fetchers, err := factory.NewCisGcpFactory(ctx, log, ch, assetProvider)
+	fetchers, err := preset.NewCisGcpFetchers(ctx, log, ch, assetProvider, cfg.CloudConfig.Gcp)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
+		return nil, nil, nil, fmt.Errorf("failed to initialize gcp fetchers: %v", err)
 	}
 
-	return registry.NewRegistry(log, fetchers), cloud.NewDataProvider(
-		cloud.WithLogger(log),
-		cloud.WithAccount(*gcpIdentity),
-	), nil
+	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
+		cloud.NewDataProvider(cloud.WithLogger(log)),
+		nil,
+		nil
 }
 
-func (g *GCP) Stop() {}
-
 func (g *GCP) checkDependencies() error {
-	if g.IdentityProvider == nil {
-		return errors.New("gcp identity provider is uninitialized")
-	}
-
 	if g.CfgProvider == nil {
 		return errors.New("gcp config provider is uninitialized")
 	}

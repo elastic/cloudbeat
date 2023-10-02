@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"cloud.google.com/go/asset/apiv1/assetpb"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
@@ -62,8 +63,19 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockInventoryService.On("ListAllAssetTypesByName", mock.MatchedBy(func(assets []string) bool {
 		return true
 	})).Return(
-		[]*assetpb.Asset{
-			{Name: "a", AssetType: "iam.googleapis.com/ServiceAccount"},
+		[]*inventory.ExtendedGcpAsset{
+			{
+				Ecs: &fetching.EcsGcp{
+					Provider:         "gcp",
+					ProjectId:        "prjId",
+					ProjectName:      "prjName",
+					OrganizationId:   "orgId",
+					OrganizationName: "orgName",
+				},
+				Asset: &assetpb.Asset{
+					Name: "a", AssetType: "iam.googleapis.com/ServiceAccount",
+				},
+			},
 		}, nil,
 	)
 
@@ -71,7 +83,19 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	// ListAllAssetTypesByName mocked to return a single asset
-	// Will be called N times, where N is the number of types in GcpAssetTypes
 	s.Equal(len(GcpAssetTypes), len(results))
+
+	lo.ForEach(results, func(r fetching.ResourceInfo, _ int) {
+		ecs, err := r.Resource.GetElasticCommonData()
+		s.NoError(err)
+		cloud := ecs["cloud"].(map[string]interface{})
+		account := cloud["account"].(map[string]interface{})
+		org := cloud["Organization"].(map[string]interface{})
+
+		s.Equal(account["name"], "prjName")
+		s.Equal(account["id"], "prjId")
+		s.Equal(org["id"], "orgId")
+		s.Equal(org["name"], "orgName")
+		s.Equal(cloud["provider"], "gcp")
+	})
 }

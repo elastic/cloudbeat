@@ -24,9 +24,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/elastic/cloudbeat/config"
-	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
-	"github.com/elastic/cloudbeat/resources/providers/gcplib/identity"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
@@ -35,6 +33,7 @@ func TestGCP_Initialize(t *testing.T) {
 		CloudConfig: config.CloudConfig{
 			Gcp: config.GcpConfig{
 				ProjectId:    "some-project",
+				AccountType:  "single-account",
 				GcpClientOpt: config.GcpClientOpt{},
 			},
 		},
@@ -46,7 +45,6 @@ func TestGCP_Initialize(t *testing.T) {
 
 	tests := []struct {
 		name                 string
-		identityProvider     identity.ProviderGetter
 		configProvider       auth.ConfigProviderAPI
 		inventoryInitializer inventory.ProviderInitializerAPI
 		cfg                  config.Config
@@ -54,41 +52,26 @@ func TestGCP_Initialize(t *testing.T) {
 		wantErr              string
 	}{
 		{
-			name:    "nothing initialized",
-			cfg:     baseGcpConfig,
-			wantErr: "gcp identity provider is uninitialized",
-		},
-		{
 			name:                 "missing credentials options, fallback to using ADC",
 			cfg:                  baseGcpConfig,
-			identityProvider:     mockGcpIdentityProvider(nil),
 			configProvider:       mockGcpCfgProvider(nil),
 			inventoryInitializer: mockInventoryInitializerService(nil),
 			want: []string{
 				"gcp_cloud_assets_fetcher",
 				"gcp_monitoring_fetcher",
+				"gcp_service_usage_fetcher",
 			},
 		},
 		{
 			name:                 "config provider error",
 			cfg:                  baseGcpConfig,
-			identityProvider:     mockGcpIdentityProvider(nil),
 			configProvider:       mockGcpCfgProvider(errors.New("some error")),
-			inventoryInitializer: mockInventoryInitializerService(nil),
-			wantErr:              "some error",
-		},
-		{
-			name:                 "identity provider error",
-			cfg:                  validGcpConfig,
-			identityProvider:     mockGcpIdentityProvider(errors.New("some error")),
-			configProvider:       mockGcpCfgProvider(nil),
 			inventoryInitializer: mockInventoryInitializerService(nil),
 			wantErr:              "some error",
 		},
 		{
 			name:                 "inventory init error",
 			cfg:                  validGcpConfig,
-			identityProvider:     mockGcpIdentityProvider(nil),
 			configProvider:       mockGcpCfgProvider(nil),
 			inventoryInitializer: mockInventoryInitializerService(errors.New("some error")),
 			wantErr:              "some error",
@@ -96,26 +79,17 @@ func TestGCP_Initialize(t *testing.T) {
 		{
 			name:                 "no error",
 			cfg:                  validGcpConfig,
-			identityProvider:     mockGcpIdentityProvider(nil),
 			configProvider:       mockGcpCfgProvider(nil),
 			inventoryInitializer: mockInventoryInitializerService(nil),
 			want: []string{
 				"gcp_cloud_assets_fetcher",
 				"gcp_monitoring_fetcher",
+				"gcp_service_usage_fetcher",
 			},
-		},
-		{
-			name:                 "no identity provider",
-			cfg:                  validGcpConfig,
-			identityProvider:     nil,
-			configProvider:       mockGcpCfgProvider(nil),
-			inventoryInitializer: mockInventoryInitializerService(nil),
-			wantErr:              "gcp identity provider is uninitialized",
 		},
 		{
 			name:                 "no inventory initializer",
 			cfg:                  validGcpConfig,
-			identityProvider:     mockGcpIdentityProvider(nil),
 			configProvider:       mockGcpCfgProvider(nil),
 			inventoryInitializer: nil,
 			wantErr:              "gcp asset inventory is uninitialized",
@@ -123,7 +97,6 @@ func TestGCP_Initialize(t *testing.T) {
 		{
 			name:                 "no config provider",
 			cfg:                  validGcpConfig,
-			identityProvider:     mockGcpIdentityProvider(nil),
 			configProvider:       nil,
 			inventoryInitializer: mockInventoryInitializerService(nil),
 			wantErr:              "gcp config provider is uninitialized",
@@ -135,30 +108,11 @@ func TestGCP_Initialize(t *testing.T) {
 			t.Parallel()
 
 			testInitialize(t, &GCP{
-				IdentityProvider:     tt.identityProvider,
 				CfgProvider:          tt.configProvider,
 				inventoryInitializer: tt.inventoryInitializer,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})
 	}
-}
-
-func mockGcpIdentityProvider(err error) *identity.MockProviderGetter {
-	identityProvider := &identity.MockProviderGetter{}
-	on := identityProvider.EXPECT().GetIdentity(mock.Anything, mock.Anything)
-	if err == nil {
-		on.Return(
-			&cloud.Identity{
-				Provider:     "gcp",
-				Account:      "test-project-id",
-				AccountAlias: "test-project-name",
-			},
-			nil,
-		)
-	} else {
-		on.Return(nil, err)
-	}
-	return identityProvider
 }
 
 func mockGcpCfgProvider(err error) auth.ConfigProviderAPI {
@@ -178,6 +132,7 @@ func mockGcpCfgProvider(err error) auth.ConfigProviderAPI {
 func mockInventoryInitializerService(err error) inventory.ProviderInitializerAPI {
 	initializer := &inventory.MockProviderInitializerAPI{}
 	inventoryService := &inventory.MockServiceAPI{}
+	inventoryService.EXPECT().Close().Maybe().Return(nil)
 	initializerMock := initializer.EXPECT().Init(mock.Anything, mock.Anything, mock.Anything)
 	if err == nil {
 		initializerMock.Return(

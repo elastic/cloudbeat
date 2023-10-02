@@ -50,30 +50,32 @@ func NewGcpMonitoringFetcher(_ context.Context, log *logp.Logger, ch chan fetchi
 }
 
 var monitoringAssetTypes = map[string][]string{
-	"LogMetric":   {"logging.googleapis.com/LogMetric"},
-	"AlertPolicy": {"monitoring.googleapis.com/AlertPolicy"},
+	"LogMetric":   {inventory.MonitoringLogMetricAssetType},
+	"AlertPolicy": {inventory.MonitoringAlertPolicyAssetType},
 }
 
 func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
 
-	monitoringAsset, err := f.provider.ListMonitoringAssets(monitoringAssetTypes)
+	monitoringAssets, err := f.provider.ListMonitoringAssets(monitoringAssetTypes)
 	if err != nil {
 		return err
 	}
 
-	select {
-	case <-ctx.Done():
-		f.log.Infof("GcpMonitoringFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
-		return nil
-	case f.resourceCh <- fetching.ResourceInfo{
-		CycleMetadata: cMetadata,
-		Resource: &GcpMonitoringAsset{
-			Type:    fetching.MonitoringIdentity,
-			subType: fetching.GcpMonitoringType,
-			Asset:   monitoringAsset,
-		},
-	}:
+	for _, monitoringAsset := range monitoringAssets {
+		select {
+		case <-ctx.Done():
+			f.log.Infof("GcpMonitoringFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
+			return nil
+		case f.resourceCh <- fetching.ResourceInfo{
+			CycleMetadata: cMetadata,
+			Resource: &GcpMonitoringAsset{
+				Type:    fetching.MonitoringIdentity,
+				subType: fetching.GcpMonitoringType,
+				Asset:   monitoringAsset,
+			},
+		}:
+		}
 	}
 
 	return nil
@@ -84,7 +86,7 @@ func (f *GcpMonitoringFetcher) Stop() {
 }
 
 func (g *GcpMonitoringAsset) GetMetadata() (fetching.ResourceMetadata, error) {
-	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.ProjectId)
+	id := fmt.Sprintf("%s-%s", g.subType, g.Asset.Ecs.ProjectId)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    g.Type,
@@ -98,4 +100,18 @@ func (g *GcpMonitoringAsset) GetData() any {
 	return g.Asset
 }
 
-func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]interface{}, error) { return nil, nil }
+func (g *GcpMonitoringAsset) GetElasticCommonData() (map[string]any, error) {
+	return map[string]any{
+		"cloud": map[string]any{
+			"provider": "gcp",
+			"account": map[string]any{
+				"id":   g.Asset.Ecs.ProjectId,
+				"name": g.Asset.Ecs.ProjectName,
+			},
+			"Organization": map[string]any{
+				"id":   g.Asset.Ecs.OrganizationId,
+				"name": g.Asset.Ecs.OrganizationName,
+			},
+		},
+	}, nil
+}

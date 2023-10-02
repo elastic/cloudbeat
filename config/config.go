@@ -44,14 +44,16 @@ type Fetcher struct {
 }
 
 type Config struct {
-	Benchmark   string                  `config:"config.v1.benchmark"`
-	Type        string                  `config:"config.v1.type"`
-	Deployment  string                  `config:"config.v1.deployment"`
-	CloudConfig CloudConfig             `config:"config.v1"`
-	KubeConfig  string                  `config:"kube_config"`
-	Period      time.Duration           `config:"period"`
-	Processors  processors.PluginConfig `config:"processors"`
-	BundlePath  string                  `config:"bundle_path"`
+	Benchmark             string                  `config:"config.v1.benchmark"`
+	Type                  string                  `config:"config.v1.type"`
+	Deployment            string                  `config:"config.v1.deployment"`
+	CloudConfig           CloudConfig             `config:"config.v1"`
+	KubeConfig            string                  `config:"kube_config"`
+	Period                time.Duration           `config:"period"`
+	Processors            processors.PluginConfig `config:"processors"`
+	BundlePath            string                  `config:"bundle_path"`
+	PackagePolicyId       string                  `config:"package_policy_id"`
+	PackagePolicyRevision int                     `config:"revision"`
 }
 
 type CloudConfig struct {
@@ -65,7 +67,15 @@ type AwsConfig struct {
 }
 
 type GcpConfig struct {
-	ProjectId    string `config:"project_id"`
+	// empty for OrganizationAccount
+	ProjectId string `config:"project_id"`
+
+	// empty for SingleAccount
+	OrganizationId string `config:"organization_id"`
+
+	// SingleAccount or OrganizationAccount
+	AccountType string `config:"account_type"`
+
 	GcpClientOpt `config:"credentials"`
 }
 

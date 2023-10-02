@@ -12,12 +12,12 @@ def generate_config(context):
     fleet_url = context.properties["fleetUrl"]
     agent_version = context.properties["elasticAgentVersion"]
     artifact_server = context.properties["elasticArtifactServer"]
-    role_prefix = deployment_name.replace("-", "_")
+    scope = context.properties["scope"]
+    parent_id = context.properties["parentId"]
 
-    role_id = f"{role_prefix}_elastic_cspm_role"
+    roles = ["roles/cloudasset.viewer", "roles/browser"]
     network_name = f"{deployment_name}-network"
     sa_name = f"{deployment_name}-sa"
-    custom_role_name = f"{deployment_name}-role"
 
     ssh_fw_rule = {
         "name": "elastic-agent-firewall-rule",
@@ -53,7 +53,10 @@ def generate_config(context):
             "serviceAccounts": [
                 {
                     "email": f"$(ref.{sa_name}.email)",
-                    "scopes": ["https://www.googleapis.com/auth/cloud-platform"],
+                    "scopes": [
+                        "https://www.googleapis.com/auth/cloud-platform",
+                        "https://www.googleapis.com/auth/cloudplatformorganizations",
+                    ],
                 },
             ],
             "disks": [
@@ -122,37 +125,6 @@ def generate_config(context):
         },
     }
 
-    custom_role = {
-        "name": custom_role_name,
-        "type": "gcp-types/iam-v1:projects.roles",
-        "properties": {
-            "roleId": role_id,
-            "parent": f"projects/{project}",
-            "role": {
-                "title": "Elastic CSPM role",
-                "description": "Elastic CSPM role for GCP",
-                "includedPermissions": [
-                    "cloudasset.assets.listResource",
-                    "cloudasset.assets.listIamPolicy",
-                    "resourcemanager.projects.get",
-                ],
-            },
-        },
-    }
-
-    iam_role_binding = {
-        "name": f"{deployment_name}-iam-binding",
-        "type": "gcp-types/cloudresourcemanager-v1:virtual.projects.iamMemberBinding",
-        "properties": {
-            "resource": context.env["project"],
-            "role": f"projects/{project}/roles/{role_id}",
-            "member": f"serviceAccount:$(ref.{sa_name}.email)",
-        },
-        "metadata": {
-            "dependsOn": [sa_name, custom_role_name],
-        },
-    }
-
     network = {
         "name": network_name,
         "type": "compute.v1.network",
@@ -164,9 +136,34 @@ def generate_config(context):
         },
     }
 
-    resources = [instance, service_account, custom_role, iam_role_binding, network]
+    bindings = []
+    for role in roles:
+        bindings.append(
+            {
+                "name": f"{deployment_name}-iam-binding-{role}",
+                "type": f"gcp-types/cloudresourcemanager-v1:virtual.{scope}.iamMemberBinding",
+                "properties": {
+                    "resource": get_resource_name(scope, parent_id),
+                    "role": role,
+                    "member": f"serviceAccount:$(ref.{sa_name}.email)",
+                },
+                "metadata": {
+                    "dependsOn": [sa_name],
+                },
+            },
+        )
+
+    resources = [instance, service_account, network]
+    resources.extend(bindings)
 
     if context.properties["allowSSH"]:
         resources.append(ssh_fw_rule)
 
     return {"resources": resources}
+
+
+def get_resource_name(scope, parent_id):
+    """return the resource name based on the scope."""
+    if scope == "organizations":
+        return f"{scope}/{parent_id}"
+    return parent_id
