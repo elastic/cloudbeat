@@ -166,7 +166,7 @@ def update_main_readme_status_badge(percentage, service):
             badge = f"[![CIS {service.upper()}]({badge_api}/CIS-GCP%20({percentage:.0f}%25)-4285F4?" \
                     f"logo=Google+Cloud)](RULES.md#gcp-cis-benchmark)\n"
         elif service == "azure":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-AZURE%20({percentage:.0f}%25)-F00EE8?" \
+            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-AZURE%20({percentage:.0f}%25)-0078D4?" \
                     f"logo=Microsoft+Azure)](RULES.md#azure-cis-benchmark)\n"
 
         badge_line = get_badge_line_number(readme, service)
