@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 10/151 implemented rules (7%)
+### 11/151 implemented rules (7%)
 
-#### Automated rules: 10/77 (13%)
+#### Automated rules: 11/77 (14%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -449,7 +449,7 @@
 |                         3.6                          | Storage Accounts                        | Ensure that Shared Access Signature Tokens Expire Within an Hour                                                                                       |        :x:         |  Manual   |
 |   [3.7](bundle/compliance/cis_azure/rules/cis_3_7)   | Storage Accounts                        | Ensure that 'Public access level' is disabled for storage accounts with blob containers                                                                | :white_check_mark: | Automated |
 |   [3.8](bundle/compliance/cis_azure/rules/cis_3_8)   | Storage Accounts                        | Ensure Default Network Access Rule for Storage Accounts is Set to Deny                                                                                 | :white_check_mark: | Automated |
-|                         3.9                          | Storage Accounts                        | Ensure 'Allow Azure services on the trusted services list to access this storage account' is Enabled for Storage Account Access                        |        :x:         | Automated |
+|   [3.9](bundle/compliance/cis_azure/rules/cis_3_9)   | Storage Accounts                        | Ensure 'Allow Azure services on the trusted services list to access this storage account' is Enabled for Storage Account Access                        | :white_check_mark: | Automated |
 |                        4.1.1                         | SQL Server - Auditing                   | Ensure that 'Auditing' is set to 'On'                                                                                                                  |        :x:         | Automated |
 |                        4.1.2                         | SQL Server - Auditing                   | Ensure no Azure SQL Databases allow ingress from 0.0.0.0/0 (ANY IP)                                                                                    |        :x:         | Automated |
 |                        4.1.3                         | SQL Server - Auditing                   | Ensure SQL server's Transparent Data Encryption (TDE) protector is encrypted with Customer-managed key                                                 |        :x:         | Automated |
