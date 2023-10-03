@@ -17,7 +17,7 @@ private_endpoint_connections = properties.privateEndpointConnections
 
 network_acls = properties.networkAcls
 
-activity_log_alerts = resource.activity_log_alerts
+activity_log_alerts = resource
 
 is_storage_account {
 	input.type == "azure-storage-account"
