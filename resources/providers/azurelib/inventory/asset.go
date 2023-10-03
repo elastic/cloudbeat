@@ -18,13 +18,13 @@
 package inventory
 
 const (
+	ActivityLogAlertAssetType      = "microsoft.insights/activitylogalerts"
+	ClassicStorageAccountAssetType = "microsoft.classicstorage/storageaccounts"
+	ClassicVirtualMachineAssetType = "microsoft.classiccompute/virtualmachines"
 	DiskAssetType                  = "microsoft.compute/disks"
+	MySQLDBAssetType               = "microsoft.dbformysql/servers"
+	PostgreSQLDBAssetType          = "microsoft.dbforpostgresql/servers"
 	StorageAccountAssetType        = "microsoft.storage/storageaccounts"
 	VirtualMachineAssetType        = "microsoft.compute/virtualmachines"
-	ClassicVirtualMachineAssetType = "microsoft.classiccompute/virtualmachines"
-	ClassicStorageAccountAssetType = "microsoft.classicstorage/storageaccounts"
-	ActivityLogAlertAssetType      = "microsoft.insights/activitylogalerts"
 	WebsitesAssetType              = "microsoft.web/sites"
-	PostgreSQLDBAssetType          = "microsoft.dbforpostgresql/servers"
-	MySQLDBAssetType               = "microsoft.dbformysql/servers"
 )

@@ -72,14 +72,14 @@ const (
 	ProjectManagement      = "project-management"
 	DataProcessing         = "data-processing"
 
+	AzureActivityLogAlertType      = "azure-activity-log-alert"
+	AzureClassicStorageAccountType = "azure-classic-storage-account"
+	AzureClassicVMType             = "azure-classic-vm"
 	AzureDiskType                  = "azure-disk"
+	AzureMySQLDBType               = "azure-mysql-server-db"
+	AzurePostgreSQLDBType          = "azure-postgresql-server-db"
 	AzureStorageAccountType        = "azure-storage-account"
 	AzureVMType                    = "azure-vm"
-	AzurePostgreSQLDBType          = "azure-postgresql-server-db"
-	AzureMySQLDBType               = "azure-mysql-server-db"
-	AzureClassicVMType             = "azure-classic-vm"
-	AzureClassicStorageAccountType = "azure-classic-storage-account"
-	AzureActivityLogAlertType      = "azure-activity-log-alert"
 	AzureWebSiteType               = "azure-web-site"
 )
 
