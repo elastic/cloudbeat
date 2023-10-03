@@ -73,6 +73,7 @@ const (
 	DataProcessing         = "data-processing"
 
 	AzureActivityLogAlertType      = "azure-activity-log-alert"
+	AzureBastionType               = "azure-bastion"
 	AzureClassicStorageAccountType = "azure-classic-storage-account"
 	AzureClassicVMType             = "azure-classic-vm"
 	AzureDiskType                  = "azure-disk"

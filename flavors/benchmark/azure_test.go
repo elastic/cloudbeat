@@ -63,7 +63,7 @@ func TestAzure_Initialize(t *testing.T) {
 			inventoryInitializer: mockAzureInventoryInitializerService(nil),
 			want: []string{
 				"azure_cloud_assets_fetcher",
-				"azure_cloud_activity_log_alerts_assets_fetcher",
+				"azure_cloud_batch_asset_fetcher",
 			},
 		},
 		{

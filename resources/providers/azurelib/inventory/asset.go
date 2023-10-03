@@ -19,6 +19,7 @@ package inventory
 
 const (
 	ActivityLogAlertAssetType      = "microsoft.insights/activitylogalerts"
+	BastionAssetType               = "microsoft.network/bastionhosts"
 	ClassicStorageAccountAssetType = "microsoft.classicstorage/storageaccounts"
 	ClassicVirtualMachineAssetType = "microsoft.classiccompute/virtualmachines"
 	DiskAssetType                  = "microsoft.compute/disks"
