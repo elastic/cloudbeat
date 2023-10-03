@@ -55,15 +55,19 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockInventoryService := &inventory.MockServiceAPI{}
 	var mockAssets []inventory.AzureAsset
 	for _, assetType := range []string{
-		inventory.DiskAssetType,
-		inventory.StorageAccountAssetType,
-		inventory.VirtualMachineAssetType,
+		inventory.ActivityLogAlertAssetType,
 		inventory.ClassicStorageAccountAssetType,
 		inventory.ClassicVirtualMachineAssetType,
-		inventory.ActivityLogAlertAssetType,
-		inventory.WebsitesAssetType,
-		inventory.PostgreSQLDBAssetType,
+		inventory.DiskAssetType,
+		inventory.DocumentDBDatabaseAccountAssetType,
 		inventory.MySQLDBAssetType,
+		inventory.NetworkWatchersAssetType,
+		inventory.NetworkWatchersFlowLogAssetType,
+		inventory.PostgreSQLDBAssetType,
+		inventory.SQLServersAssetType,
+		inventory.StorageAccountAssetType,
+		inventory.VirtualMachineAssetType,
+		inventory.WebsitesAssetType,
 	} {
 		mockAssets = append(mockAssets,
 			inventory.AzureAsset{

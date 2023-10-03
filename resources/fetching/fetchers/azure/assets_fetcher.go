@@ -40,15 +40,19 @@ type AzureResource struct {
 }
 
 var AzureResourceTypes = map[string]string{
-	inventory.ActivityLogAlertAssetType:      fetching.AzureActivityLogAlertType,
-	inventory.ClassicStorageAccountAssetType: fetching.AzureClassicStorageAccountType,
-	inventory.ClassicVirtualMachineAssetType: fetching.AzureClassicVMType,
-	inventory.DiskAssetType:                  fetching.AzureDiskType,
-	inventory.MySQLDBAssetType:               fetching.AzureMySQLDBType,
-	inventory.PostgreSQLDBAssetType:          fetching.AzurePostgreSQLDBType,
-	inventory.StorageAccountAssetType:        fetching.AzureStorageAccountType,
-	inventory.VirtualMachineAssetType:        fetching.AzureVMType,
-	inventory.WebsitesAssetType:              fetching.AzureWebSiteType,
+	inventory.ActivityLogAlertAssetType:          fetching.AzureActivityLogAlertType,
+	inventory.ClassicStorageAccountAssetType:     fetching.AzureClassicStorageAccountType,
+	inventory.ClassicVirtualMachineAssetType:     fetching.AzureClassicVMType,
+	inventory.DiskAssetType:                      fetching.AzureDiskType,
+	inventory.DocumentDBDatabaseAccountAssetType: fetching.AzureDocumentDBDatabaseAccountType,
+	inventory.MySQLDBAssetType:                   fetching.AzureMySQLDBType,
+	inventory.NetworkWatchersAssetType:           fetching.AzureNetworkWatchersType,
+	inventory.NetworkWatchersFlowLogAssetType:    fetching.AzureNetworkWatchersFlowLogType,
+	inventory.PostgreSQLDBAssetType:              fetching.AzurePostgreSQLDBType,
+	inventory.SQLServersAssetType:                fetching.AzureSQLServerType,
+	inventory.StorageAccountAssetType:            fetching.AzureStorageAccountType,
+	inventory.VirtualMachineAssetType:            fetching.AzureVMType,
+	inventory.WebsitesAssetType:                  fetching.AzureWebSiteType,
 }
 
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
