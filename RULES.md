@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 21/151 implemented rules (14%)
+### 22/151 implemented rules (15%)
 
-#### Automated rules: 21/77 (27%)
+#### Automated rules: 22/77 (29%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -503,7 +503,7 @@
 |                          6.5                           | Networking                              | Ensure that Network Security Group Flow Log retention period is 'greater than 90 days'                                                                 |        :x:         | Automated |
 |                          6.6                           | Networking                              | Ensure that Network Watcher is 'Enabled'                                                                                                               |        :x:         | Automated |
 |                          6.7                           | Networking                              | Ensure that Public IP addresses are Evaluated on a Periodic Basis                                                                                      |        :x:         |  Manual   |
-|                          7.1                           | Virtual Machines                        | Ensure an Azure Bastion Host Exists                                                                                                                    |        :x:         | Automated |
+|    [7.1](bundle/compliance/cis_azure/rules/cis_7_1)    | Virtual Machines                        | Ensure an Azure Bastion Host Exists                                                                                                                    | :white_check_mark: | Automated |
 |                          7.2                           | Virtual Machines                        | Ensure Virtual Machines are utilizing Managed Disks                                                                                                    |        :x:         | Automated |
 |                          7.3                           | Virtual Machines                        | Ensure that 'OS and Data' disks are encrypted with Customer Managed Key (CMK)                                                                          |        :x:         | Automated |
 |    [7.4](bundle/compliance/cis_azure/rules/cis_7_4)    | Virtual Machines                        | Ensure that 'Unattached disks' are encrypted with 'Customer Managed Key' (CMK)                                                                         | :white_check_mark: | Automated |
