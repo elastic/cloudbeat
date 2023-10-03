@@ -241,3 +241,28 @@ def add_capabilities(yaml_content: str) -> str:
     modified_content = output_stream.getvalue()
 
     return modified_content
+
+
+def rename_file_by_suffix(file_path: Path, suffix: str) -> None:
+    """
+    Rename a file by adding a specified suffix to its filename.
+
+    Args:
+        file_path (Path): The path to the file to be renamed.
+        suffix (str): The suffix to be added to the filename.
+
+    Returns:
+        None
+    """
+    if not file_path.exists():
+        logger.warning(f"File {file_path.name} not found")
+        return
+
+    try:
+        new_name = f"{file_path.stem}{suffix}{file_path.suffix}"
+        new_file_path = file_path.parent / new_name
+        Path(file_path).rename(new_file_path)
+    except FileNotFoundError:
+        logger.warning(f"File {file_path.name} not found")
+    except FileExistsError:
+        logger.warning(f"File {new_file_path} already exists")

@@ -6,6 +6,7 @@ and inputs based on provided data and templates.
 import copy
 import uuid
 from typing import Dict, Tuple
+from urllib.parse import urlparse, parse_qs
 from packaging import version
 from munch import Munch
 from loguru import logger
@@ -248,3 +249,57 @@ def patch_vars(var_dict, package_version):
     if version.parse(package_version) >= version.parse("1.5.0"):
         # Add or update fields in the vars_dict based on the version requirements
         var_dict["aws.account_type"] = "single-account"
+
+
+def get_package_default_url(cfg: Munch, policy_name: str, policy_type: str) -> str:
+    """
+    Get the package default URL for a specific policy and policy type from the configuration.
+
+    Args:
+        cfg (Munch): The configuration containing policy information.
+        policy_name (str): The name of the policy.
+        policy_type (str): The type of the policy.
+
+    Returns:
+        str: The default package URL for the specified policy and type.
+             An empty string is returned if not found.
+    """
+    package_policy = get_package(cfg=cfg)
+    policy_templates = package_policy.get("policy_templates", [])
+
+    for template in policy_templates:
+        if template.get("name", "") == policy_name:
+            inputs = template.get("inputs", [])
+
+            for policy_input in inputs:
+                if policy_input.get("type", "") == policy_type:
+                    vars_list = policy_input.get("vars", [])
+
+                    if vars_list:
+                        return vars_list[0].get("default", "")
+
+    return ""
+
+
+def extract_template_url(url_string: str) -> str:
+    """
+    Extracts the 'templateURL' parameter from a given URL string.
+
+    Args:
+        url_string (str): The URL string from which to extract the 'templateURL' parameter.
+
+    Returns:
+        str: The value of the 'templateURL' parameter if found in the URL,
+             or empty string if the parameter is not present.
+
+    """
+    parsed_url = urlparse(url_string, allow_fragments=False)
+    query_parameters = parse_qs(parsed_url.query)
+
+    template_url = query_parameters.get("templateURL")
+
+    if not template_url:
+        logger.warning("templateURL field is not found")
+        return ""
+
+    return template_url[0]

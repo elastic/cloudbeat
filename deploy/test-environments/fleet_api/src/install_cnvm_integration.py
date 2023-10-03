@@ -20,6 +20,7 @@ from api.common_api import (
     get_artifact_server,
     get_package_version,
 )
+from api.base_call_api import download_file
 from loguru import logger
 from state_file_manager import state_manager, PolicyState
 from package_policy import (
@@ -27,10 +28,14 @@ from package_policy import (
     VERSION_MAP,
     load_data,
     generate_random_name,
+    get_package_default_url,
+    extract_template_url,
 )
+from utils import rename_file_by_suffix
 
 CNVM_EXPECTED_AGENTS = 1
 CNVM_CLOUDFORMATION_CONFIG = "../../../cloudformation/config.json"
+CNMV_TEMPLATE = "../../../cloudformation/elastic-agent-ec2-cnvm.yml"
 CNVM_AGENT_TAGS = ["cft_version:CFT_VERSION", "cft_arn:arn:aws:cloudformation:.*"]
 PKG_DEFAULT_VERSION = VERSION_MAP.get("vuln_mgmt_aws", "")
 INTEGRATION_NAME = "CNVM AWS"
@@ -44,6 +49,7 @@ AGENT_INPUT = {
     "name": generate_random_name("cnvm-aws"),
 }
 cnvm_cloudformation_config = Path(__file__).parent / CNVM_CLOUDFORMATION_CONFIG
+cnvm_cloudformation_template = Path(__file__).parent / CNMV_TEMPLATE
 
 
 if __name__ == "__main__":
@@ -94,5 +100,21 @@ if __name__ == "__main__":
 
     with open(cnvm_cloudformation_config, "w") as file:
         json.dump(cloudformation_params, file)
+
+    logger.info(f"Get {INTEGRATION_NAME} template")
+    default_url = get_package_default_url(
+        cfg=cnfg.elk_config,
+        policy_name=INTEGRATION_INPUT["posture"],
+        policy_type="cloudbeat/vuln_mgmt_aws",
+    )
+    template_url = extract_template_url(url_string=default_url)
+
+    logger.info(f"Using {template_url} for stack creation")
+    if template_url:
+        rename_file_by_suffix(
+            file_path=cnvm_cloudformation_template,
+            suffix="-orig",
+        )
+    download_file(url=template_url, destination=cnvm_cloudformation_template)
 
     logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
