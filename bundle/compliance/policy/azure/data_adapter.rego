@@ -56,3 +56,11 @@ is_network_watchers_flow_log {
 is_network_watcher {
 	input.type == "azure-network-watcher"
 }
+
+is_sql_server {
+	input.type == "azure-sql-server"
+}
+
+is_document_db_database_account {
+	input.type == "azure-document-db-database-account"
+}

@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 25/151 implemented rules (17%)
+### 28/151 implemented rules (19%)
 
-#### Automated rules: 25/77 (32%)
+#### Automated rules: 28/77 (36%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -451,9 +451,9 @@
 |    [3.8](bundle/compliance/cis_azure/rules/cis_3_8)    | Storage Accounts                        | Ensure Default Network Access Rule for Storage Accounts is Set to Deny                                                                                 | :white_check_mark: | Automated |
 |    [3.9](bundle/compliance/cis_azure/rules/cis_3_9)    | Storage Accounts                        | Ensure 'Allow Azure services on the trusted services list to access this storage account' is Enabled for Storage Account Access                        | :white_check_mark: | Automated |
 |                         4.1.1                          | SQL Server - Auditing                   | Ensure that 'Auditing' is set to 'On'                                                                                                                  |        :x:         | Automated |
-|                         4.1.2                          | SQL Server - Auditing                   | Ensure no Azure SQL Databases allow ingress from 0.0.0.0/0 (ANY IP)                                                                                    |        :x:         | Automated |
+|  [4.1.2](bundle/compliance/cis_azure/rules/cis_4_1_2)  | SQL Server - Auditing                   | Ensure no Azure SQL Databases allow ingress from 0.0.0.0/0 (ANY IP)                                                                                    | :white_check_mark: | Automated |
 |                         4.1.3                          | SQL Server - Auditing                   | Ensure SQL server's Transparent Data Encryption (TDE) protector is encrypted with Customer-managed key                                                 |        :x:         | Automated |
-|                         4.1.4                          | SQL Server - Auditing                   | Ensure that Azure Active Directory Admin is Configured for SQL Servers                                                                                 |        :x:         | Automated |
+|  [4.1.4](bundle/compliance/cis_azure/rules/cis_4_1_4)  | SQL Server - Auditing                   | Ensure that Azure Active Directory Admin is Configured for SQL Servers                                                                                 | :white_check_mark: | Automated |
 |                         4.1.5                          | SQL Server - Auditing                   | Ensure that 'Data encryption' is set to 'On' on a SQL Database                                                                                         |        :x:         | Automated |
 |                         4.1.6                          | SQL Server - Auditing                   | Ensure that 'Auditing' Retention is 'greater than 90 days'                                                                                             |        :x:         | Automated |
 |                         4.2.1                          | SQL Server - Microsoft Defender for SQL | Ensure that Microsoft Defender for SQL is set to 'On' for critical SQL Servers                                                                         |        :x:         | Automated |
@@ -473,7 +473,7 @@
 |                         4.4.2                          | MySQL Database                          | Ensure 'TLS Version' is set to 'TLSV1.2' for MySQL flexible Database Server                                                                            |        :x:         | Automated |
 |                         4.4.3                          | MySQL Database                          | Ensure server parameter 'audit_log_enabled' is set to 'ON' for MySQL Database Server                                                                   |        :x:         |  Manual   |
 |                         4.4.4                          | MySQL Database                          | Ensure server parameter 'audit_log_events' has 'CONNECTION' set for MySQL Database Server                                                              |        :x:         |  Manual   |
-|                         4.5.1                          | Cosmos DB                               | Ensure That 'Firewalls & Networks' Is Limited to Use Selected Networks Instead of All Networks                                                         |        :x:         | Automated |
+|  [4.5.1](bundle/compliance/cis_azure/rules/cis_4_5_1)  | Cosmos DB                               | Ensure That 'Firewalls & Networks' Is Limited to Use Selected Networks Instead of All Networks                                                         | :white_check_mark: | Automated |
 |                         4.5.2                          | Cosmos DB                               | Ensure That Private Endpoints Are Used Where Possible                                                                                                  |        :x:         |  Manual   |
 |                         4.5.3                          | Cosmos DB                               | Use Azure Active Directory (AAD) Client Authentication and Azure RBAC where possible.                                                                  |        :x:         |  Manual   |
 |                         5.1.1                          | Configuring Diagnostic Settings         | Ensure that a 'Diagnostic Setting' exists                                                                                                              |        :x:         |  Manual   |
