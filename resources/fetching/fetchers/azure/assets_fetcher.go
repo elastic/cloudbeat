@@ -53,6 +53,7 @@ var AzureResourceTypes = map[string]string{
 	inventory.StorageAccountAssetType:            fetching.AzureStorageAccountType,
 	inventory.VirtualMachineAssetType:            fetching.AzureVMType,
 	inventory.WebsitesAssetType:                  fetching.AzureWebSiteType,
+	inventory.VaultAssetType:                     fetching.AzureVaultType,
 }
 
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
