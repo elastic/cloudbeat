@@ -84,7 +84,7 @@ func (f *AzureBatchAssetFetcher) Stop() {}
 type AzureBatchResource struct {
 	Type    string
 	SubType string
-	Assets  []inventory.AzureAsset
+	Assets  []inventory.AzureAsset `json:"assets,omitempty"`
 }
 
 func (r *AzureBatchResource) GetData() any {
