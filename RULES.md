@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 30/151 implemented rules (20%)
+### 31/151 implemented rules (21%)
 
-#### Automated rules: 30/77 (39%)
+#### Automated rules: 31/77 (40%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -514,7 +514,7 @@
 |                          8.2                           | Key Vault                               | Ensure that the Expiration Date is set for all Keys in Non-RBAC Key Vaults.                                                                            |        :x:         | Automated |
 |                          8.3                           | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in RBAC Key Vaults                                                                              |        :x:         | Automated |
 |                          8.4                           | Key Vault                               | Ensure that the Expiration Date is set for all Secrets in Non-RBAC Key Vaults                                                                          |        :x:         | Automated |
-|                          8.5                           | Key Vault                               | Ensure the Key Vault is Recoverable                                                                                                                    |        :x:         | Automated |
+|    [8.5](bundle/compliance/cis_azure/rules/cis_8_5)    | Key Vault                               | Ensure the Key Vault is Recoverable                                                                                                                    | :white_check_mark: | Automated |
 |                          8.6                           | Key Vault                               | Enable Role Based Access Control for Azure Key Vault                                                                                                   |        :x:         |  Manual   |
 |                          8.7                           | Key Vault                               | Ensure that Private Endpoints are Used for Azure Key Vault                                                                                             |        :x:         |  Manual   |
 |                          8.8                           | Key Vault                               | Ensure Automatic Key Rotation is Enabled Within Azure Key Vault for the Supported Services                                                             |        :x:         |  Manual   |

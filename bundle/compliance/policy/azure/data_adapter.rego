@@ -8,6 +8,10 @@ is_bastion {
 	input.type == "azure-bastion"
 }
 
+is_vault {
+	input.type == "azure-vault"
+}
+
 bastions = resource
 
 is_disk {
