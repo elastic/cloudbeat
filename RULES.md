@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 22/151 implemented rules (15%)
+### 25/151 implemented rules (17%)
 
-#### Automated rules: 22/77 (29%)
+#### Automated rules: 25/77 (32%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -495,13 +495,13 @@
 |  [5.2.9](bundle/compliance/cis_azure/rules/cis_5_2_9)  | Monitoring using Activity Log Alerts    | Ensure that Activity Log Alert exists for Create or Update Public IP Address rule                                                                      | :white_check_mark: | Automated |
 |                         5.3.1                          | Configuring Application Insights        | Ensure Application Insights are Configured                                                                                                             |        :x:         | Automated |
 |                          5.4                           | Logging and Monitoring                  | Ensure that Azure Monitor Resource Logging is Enabled for All Services that Support it                                                                 |        :x:         |  Manual   |
-|                          5.5                           | Logging and Monitoring                  | Ensure that SKU Basic/Consumption is not used on artifacts that need to be monitored (Particularly for Production Workloads)                           |        :x:         | Automated |
+|    [5.5](bundle/compliance/cis_azure/rules/cis_5_5)    | Logging and Monitoring                  | Ensure that SKU Basic/Consumption is not used on artifacts that need to be monitored (Particularly for Production Workloads)                           | :white_check_mark: | Automated |
 |                          6.1                           | Networking                              | Ensure that RDP access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
 |                          6.2                           | Networking                              | Ensure that SSH access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
 |                          6.3                           | Networking                              | Ensure that UDP access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
 |                          6.4                           | Networking                              | Ensure that HTTP(S) access from the Internet is evaluated and restricted                                                                               |        :x:         | Automated |
-|                          6.5                           | Networking                              | Ensure that Network Security Group Flow Log retention period is 'greater than 90 days'                                                                 |        :x:         | Automated |
-|                          6.6                           | Networking                              | Ensure that Network Watcher is 'Enabled'                                                                                                               |        :x:         | Automated |
+|    [6.5](bundle/compliance/cis_azure/rules/cis_6_5)    | Networking                              | Ensure that Network Security Group Flow Log retention period is 'greater than 90 days'                                                                 | :white_check_mark: | Automated |
+|    [6.6](bundle/compliance/cis_azure/rules/cis_6_6)    | Networking                              | Ensure that Network Watcher is 'Enabled'                                                                                                               | :white_check_mark: | Automated |
 |                          6.7                           | Networking                              | Ensure that Public IP addresses are Evaluated on a Periodic Basis                                                                                      |        :x:         |  Manual   |
 |    [7.1](bundle/compliance/cis_azure/rules/cis_7_1)    | Virtual Machines                        | Ensure an Azure Bastion Host Exists                                                                                                                    | :white_check_mark: | Automated |
 |                          7.2                           | Virtual Machines                        | Ensure Virtual Machines are utilizing Managed Disks                                                                                                    |        :x:         | Automated |

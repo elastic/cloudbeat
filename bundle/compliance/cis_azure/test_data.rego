@@ -18,6 +18,21 @@ generate_azure_asset(type, properties) = {
 	"resource": {"properties": properties},
 }
 
+generate_azure_sku_asset_with_properties(type, properties) = {
+	"type": type,
+	"subType": "",
+	"resource": {
+		"sku": properties,
+		"properties": {},
+	},
+}
+
+generate_azure_non_sku_asset(type) = {
+	"type": type,
+	"subType": "",
+	"resource": {"properties": {}},
+}
+
 not_eval_storage_account_empty = {
 	"type": "azure-storage-account",
 	"subType": "",
