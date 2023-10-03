@@ -86,6 +86,7 @@ const (
 	AzureStorageAccountType            = "azure-storage-account"
 	AzureVMType                        = "azure-vm"
 	AzureWebSiteType                   = "azure-web-site"
+	AzureVaultType                     = "azure-vault"
 )
 
 // Fetcher represents a data fetcher.

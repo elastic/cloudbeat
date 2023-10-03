@@ -32,4 +32,5 @@ const (
 	StorageAccountAssetType            = "microsoft.storage/storageaccounts"
 	VirtualMachineAssetType            = "microsoft.compute/virtualmachines"
 	WebsitesAssetType                  = "microsoft.web/sites"
+	VaultAssetType                     = "microsoft.keyvault/vaults"
 )

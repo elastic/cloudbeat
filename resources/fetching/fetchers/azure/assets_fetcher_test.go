@@ -68,6 +68,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		inventory.StorageAccountAssetType,
 		inventory.VirtualMachineAssetType,
 		inventory.WebsitesAssetType,
+		inventory.VaultAssetType,
 	} {
 		mockAssets = append(mockAssets,
 			inventory.AzureAsset{
