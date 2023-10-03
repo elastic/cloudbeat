@@ -14,9 +14,18 @@ is_disk {
 	input.type == "azure-disk"
 }
 
+is_attached_disk {
+	is_disk
+	properties.diskState == "Attached"
+}
+
 is_unattached_disk {
 	is_disk
 	properties.diskState == "Unattached"
+}
+
+is_vm {
+	input.type = "azure-vm"
 }
 
 private_endpoint_connections = properties.privateEndpointConnections
