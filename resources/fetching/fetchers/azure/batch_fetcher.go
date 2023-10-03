@@ -69,7 +69,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 			Resource: &AzureBatchResource{
 				// Every asset in the list has the same type and subtype
 				Type:    resourceType,
-				SubType: getAzureActivityLogAlertsSubType(assets[0].Type),
+				SubType: "", // TODO
 				Assets:  assets,
 			},
 		}:
@@ -77,10 +77,6 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 	}
 
 	return nil
-}
-
-func getAzureActivityLogAlertsSubType(assetType string) string {
-	return ""
 }
 
 func (f *AzureBatchAssetFetcher) Stop() {}
