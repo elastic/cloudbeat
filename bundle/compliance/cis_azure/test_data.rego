@@ -16,8 +16,7 @@ generate_attached_disk_with_encryption(settings) = generate_disk_with_encryption
 generate_unattached_disk_with_encryption(settings) = generate_disk_with_encryption("Unattached", settings)
 
 generate_disk_with_encryption(state, settings) = {
-	"type": "azure-disk",
-	"subType": "",
+	"subType": "azure-disk",
 	"resource": {
 		"id": "/subscriptions/dead-beef/resourceGroups/resourceGroup/providers/Microsoft.Compute/disks/unattached-disk",
 		"location": "eastus",
@@ -47,20 +46,17 @@ generate_disk_with_encryption(state, settings) = {
 }
 
 generate_storage_account_with_property(key, value) = {
-	"type": "azure-storage-account",
-	"subType": "",
+	"subType": "azure-storage-account",
 	"resource": {"properties": {key: value}},
 }
 
 generate_azure_asset(type, properties) = {
-	"type": type,
-	"subType": "",
+	"subType": type,
 	"resource": {"properties": properties},
 }
 
 generate_azure_sku_asset_with_properties(type, properties) = {
-	"type": type,
-	"subType": "",
+	"subType": type,
 	"resource": {
 		"sku": properties,
 		"properties": {},
@@ -68,50 +64,43 @@ generate_azure_sku_asset_with_properties(type, properties) = {
 }
 
 generate_azure_non_sku_asset(type) = {
-	"type": type,
-	"subType": "",
+	"subType": type,
 	"resource": {"properties": {}},
 }
 
 not_eval_storage_account_empty = {
-	"type": "azure-storage-account",
-	"subType": "",
+	"subType": "azure-storage-account",
 	"resource": {"properties": {}},
 }
 
 not_eval_non_exist_type = {
-	"type": "azure-non-exist",
-	"subType": "",
+	"subType": "azure-non-exist",
 	"resource": {"properties": {}},
 }
 
 generate_postgresql_server_with_ssl_enforcement(enabled) = {
-	"type": "azure-postgresql-server-db",
-	"subType": "",
+	"subType": "azure-postgresql-server-db",
 	"resource": {"properties": {"sslEnforcement": enabled}},
 }
 
 generate_mysql_server_with_ssl_enforcement(enabled) = {
-	"type": "azure-mysql-server-db",
-	"subType": "",
+	"subType": "azure-mysql-server-db",
 	"resource": {"properties": {"sslEnforcement": enabled}},
 }
 
 generate_activity_log_alerts_no_alerts = {
-	"type": "azure-activity-log-alert",
-	"subType": "",
+	"subType": "azure-activity-log-alert",
 	"resource": [],
 }
 
 generate_activity_log_alerts(rules) = {
-	"type": "azure-activity-log-alert",
-	"subType": "",
+	"subType": "azure-activity-log-alert",
 	"resource": rules,
 }
 
 generate_activity_log_alert(operation_name, category) = {
 	"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/activityLogAlerts/providers/microsoft.insights/activityLogAlerts/activityLogAlert",
-	"type": "microsoft.insights/activitylogalerts",
+	"subType": "microsoft.insights/activitylogalerts",
 	"kind": "activityLogAlert",
 	"name": "activityLogAlert",
 	"location": "global",
@@ -143,8 +132,7 @@ valid_managed_disk = {
 }
 
 generate_vm(managed_disk) = {
-	"type": "azure-vm",
-	"subType": "",
+	"subType": "azure-vm",
 	"resource": {
 		"extendedLocation": null,
 		"id": "/subscriptions/sub-id/resourceGroups/CLOUDBEAT-RESOURCE-GROUP-1695893762/providers/Microsoft.Compute/virtualMachines/CLOUDBEATVM",

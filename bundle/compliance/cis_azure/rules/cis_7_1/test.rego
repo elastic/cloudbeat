@@ -51,7 +51,7 @@ valid_bastion = {
 }
 
 generate_bastions(assets) = {
-	"type": "azure-bastion",
+	"subType": "azure-bastion",
 	"resource": assets,
 }
 
@@ -67,7 +67,7 @@ test_pass {
 
 test_not_evaluated {
 	not_eval with input as {}
-	not_eval with input as {"type": "other-type", "resource": {"assets": {}}}
+	not_eval with input as {"subType": "other-type", "resource": {"assets": {}}}
 }
 
 eval_fail {

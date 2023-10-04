@@ -20,7 +20,7 @@ test_pass {
 test_not_evaluated {
 	not_eval with input as {}
 	not_eval with input as test_data.not_eval_resource
-	not_eval with input as {"type": "other-type", "resource": {"encryption": {}}}
+	not_eval with input as {"subType": "other-type", "resource": {"encryption": {}}}
 	not_eval with input as test_data.generate_attached_disk_with_encryption(test_data.generate_disk_encryption_settings("EncryptionAtRestWithPlatformAndCustomerKeys"))
 	not_eval with input as test_data.generate_disk_with_encryption("OtherState", test_data.generate_disk_encryption_settings("EncryptionAtRestWithPlatformAndCustomerKeys"))
 }

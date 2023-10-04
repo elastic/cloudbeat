@@ -17,7 +17,7 @@ test_pass {
 
 test_not_evaluated {
 	not_eval with input as {}
-	not_eval with input as {"type": "other-type", "resource": {"properties": {"storageProfile": {"osDisk": {"managedDisk": {"id": "some-id"}}}}}}
+	not_eval with input as {"subType": "other-type", "resource": {"properties": {"storageProfile": {"osDisk": {"managedDisk": {"id": "some-id"}}}}}}
 }
 
 eval_fail {
