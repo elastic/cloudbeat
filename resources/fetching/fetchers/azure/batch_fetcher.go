@@ -33,9 +33,9 @@ type AzureBatchAssetFetcher struct {
 	provider   inventory.ServiceAPI
 }
 
-var AzureBatchAssets = map[string]string{
-	inventory.ActivityLogAlertAssetType: fetching.AzureActivityLogAlertType,
-	inventory.BastionAssetType:          fetching.AzureBastionType,
+var AzureBatchAssets = map[string]typePair{
+	inventory.ActivityLogAlertAssetType: newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
+	inventory.BastionAssetType:          newPair(fetching.AzureBastionType, fetching.CloudDns),
 }
 
 func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureBatchAssetFetcher {
@@ -49,7 +49,7 @@ func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, 
 func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
 
-	for assetType, resourceType := range AzureBatchAssets {
+	for assetType, pair := range AzureBatchAssets {
 		assets, err := f.provider.ListAllAssetTypesByName([]string{assetType})
 		if err != nil {
 			return err
@@ -68,8 +68,8 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 			CycleMetadata: cMetadata,
 			Resource: &AzureBatchResource{
 				// Every asset in the list has the same type and subtype
-				Type:    resourceType,
-				SubType: "", // TODO
+				Type:    pair.Type,
+				SubType: pair.SubType,
 				Assets:  assets,
 			},
 		}:
@@ -93,7 +93,7 @@ func (r *AzureBatchResource) GetData() any {
 
 func (r *AzureBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	// Assuming all batch in not empty includes assets of the same subscription
-	id := fmt.Sprintf("%s-%s", r.Type, r.Assets[0].SubscriptionId)
+	id := fmt.Sprintf("%s-%s", r.SubType, r.Assets[0].SubscriptionId)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    r.Type,
