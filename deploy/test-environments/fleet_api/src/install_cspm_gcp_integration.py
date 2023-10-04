@@ -7,9 +7,9 @@ The following steps are performed:
 2. Create a CSPM GCP integration.
 3. Create a deploy/deployment-manager/config.json file to be used by the just deploy-dm command.
 """
+import sys
 import json
 from pathlib import Path
-from typing import Dict, Tuple
 from munch import Munch
 import configuration_fleet as cnfg
 from api.agent_policy_api import create_agent_policy
@@ -22,35 +22,41 @@ from api.common_api import (
     update_package_version,
 )
 from loguru import logger
-from utils import read_json
 from state_file_manager import state_manager, PolicyState
+from package_policy import (
+    load_data,
+    version_compatible,
+    generate_random_name,
+    VERSION_MAP,
+)
 
-CSPM_GCP_AGENT_POLICY = "../../../cloud/data/agent_policy_cspm_gcp.json"
-CSPM_GCP_PACKAGE_POLICY = "../../../cloud/data/package_policy_cspm_gcp.json"
 CSPM_GCP_EXPECTED_AGENTS = 1
 DEPLOYMENT_MANAGER_CONFIG = "../../../deployment-manager/config.json"
 
-cspm_gcp_agent_policy_data = Path(__file__).parent / CSPM_GCP_AGENT_POLICY
-cspm_gcp_pkg_policy_data = Path(__file__).parent / CSPM_GCP_PACKAGE_POLICY
 cspm_gcp_deployment_manager_config = Path(__file__).parent / DEPLOYMENT_MANAGER_CONFIG
 INTEGRATION_NAME = "CSPM GCP"
-
-
-def load_data() -> Tuple[Dict, Dict]:
-    """Loads data.
-
-    Returns:
-        Tuple[Dict, Dict]: A tuple containing the loaded agent and package policies.
-    """
-    logger.info("Loading agent and package policies")
-    agent_policy = read_json(json_path=cspm_gcp_agent_policy_data)
-    package_policy = read_json(json_path=cspm_gcp_pkg_policy_data)
-    return agent_policy, package_policy
+PKG_DEFAULT_VERSION = VERSION_MAP.get("cis_gcp", "")
+INTEGRATION_INPUT = {
+    "name": generate_random_name("pkg-cspm-gcp"),
+    "input_name": "cis_gcp",
+    "posture": "cspm",
+    "deployment": "gcp",
+}
+AGENT_INPUT = {
+    "name": generate_random_name("cspm-gcp"),
+}
 
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
     package_version = get_package_version(cfg=cnfg.elk_config)
+    if not version_compatible(
+        current_version=package_version,
+        required_version=PKG_DEFAULT_VERSION,
+    ):
+        logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
+        sys.exit(0)
+
     logger.info(f"Package version: {package_version}")
     update_package_version(
         cfg=cnfg.elk_config,
@@ -58,7 +64,11 @@ if __name__ == "__main__":
         package_version=package_version,
     )
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
-    agent_data, package_data = load_data()
+    agent_data, package_data = load_data(
+        cfg=cnfg.elk_config,
+        agent_input=AGENT_INPUT,
+        package_input=INTEGRATION_INPUT,
+    )
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)

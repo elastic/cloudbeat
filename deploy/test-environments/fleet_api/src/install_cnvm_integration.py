@@ -7,9 +7,9 @@ The following steps are performed:
 2. Create a CNVM AWS integration.
 3. Create a deploy/cloudformation/config.json file to be used by the just deploy-cloudformation command.
 """
+import sys
 import json
 from pathlib import Path
-from typing import Dict, Tuple
 from munch import Munch
 import configuration_fleet as cnfg
 from api.agent_policy_api import create_agent_policy
@@ -18,50 +18,75 @@ from api.common_api import (
     get_enrollment_token,
     get_fleet_server_host,
     get_artifact_server,
+    get_package_version,
 )
+from api.base_call_api import download_file
 from loguru import logger
-from utils import read_json
 from state_file_manager import state_manager, PolicyState
+from package_policy import (
+    version_compatible,
+    VERSION_MAP,
+    load_data,
+    generate_random_name,
+    get_package_default_url,
+    extract_template_url,
+)
+from utils import rename_file_by_suffix
 
-CNVM_AGENT_POLICY = "../../../cloud/data/agent_policy_cnvm_aws.json"
-CNVM_PACKAGE_POLICY = "../../../cloud/data/package_policy_cnvm_aws.json"
 CNVM_EXPECTED_AGENTS = 1
 CNVM_CLOUDFORMATION_CONFIG = "../../../cloudformation/config.json"
+CNMV_TEMPLATE = "../../../cloudformation/elastic-agent-ec2-cnvm.yml"
 CNVM_AGENT_TAGS = ["cft_version:CFT_VERSION", "cft_arn:arn:aws:cloudformation:.*"]
-
-cnvm_agent_policy_data = Path(__file__).parent / CNVM_AGENT_POLICY
-cnvm_pkg_policy_data = Path(__file__).parent / CNVM_PACKAGE_POLICY
+PKG_DEFAULT_VERSION = VERSION_MAP.get("vuln_mgmt_aws", "")
+INTEGRATION_NAME = "CNVM AWS"
+INTEGRATION_INPUT = {
+    "name": generate_random_name("pkg-cnvm-aws"),
+    "input_name": "vuln_mgmt_aws",
+    "posture": "vuln_mgmt",
+    "deployment": "aws",
+}
+AGENT_INPUT = {
+    "name": generate_random_name("cnvm-aws"),
+}
 cnvm_cloudformation_config = Path(__file__).parent / CNVM_CLOUDFORMATION_CONFIG
-
-
-def load_data() -> Tuple[Dict, Dict]:
-    """Loads data.
-
-    Returns:
-        Tuple[Dict, Dict]: A tuple containing the loaded agent and package policies.
-    """
-    logger.info("Loading agent and package policies")
-    agent_policy = read_json(json_path=cnvm_agent_policy_data)
-    package_policy = read_json(json_path=cnvm_pkg_policy_data)
-    return agent_policy, package_policy
+cnvm_cloudformation_template = Path(__file__).parent / CNMV_TEMPLATE
 
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
-    logger.info("Starting installation of CNVM AWS integration.")
-    agent_data, package_data = load_data()
+    package_version = get_package_version(cfg=cnfg.elk_config)
+    logger.info(f"Package version: {package_version}")
+    if not version_compatible(
+        current_version=package_version,
+        required_version=PKG_DEFAULT_VERSION,
+    ):
+        logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
+        sys.exit(0)
+    logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
+    agent_data, package_data = load_data(
+        cfg=cnfg.elk_config,
+        agent_input=AGENT_INPUT,
+        package_input=INTEGRATION_INPUT,
+    )
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
 
-    logger.info("Create CNVM integration for policy", agent_policy_id)
+    logger.info(f"Create {INTEGRATION_NAME} integration for policy {agent_policy_id}")
     package_policy_id = create_cnvm_integration(
         cfg=cnfg.elk_config,
         pkg_policy=package_data,
         agent_policy_id=agent_policy_id,
     )
 
-    state_manager.add_policy(PolicyState(agent_policy_id, package_policy_id, CNVM_EXPECTED_AGENTS, CNVM_AGENT_TAGS))
+    state_manager.add_policy(
+        PolicyState(
+            agent_policy_id,
+            package_policy_id,
+            CNVM_EXPECTED_AGENTS,
+            CNVM_AGENT_TAGS,
+        ),
+    )
 
     cloudformation_params = Munch()
     cloudformation_params.ENROLLMENT_TOKEN = get_enrollment_token(
@@ -76,4 +101,20 @@ if __name__ == "__main__":
     with open(cnvm_cloudformation_config, "w") as file:
         json.dump(cloudformation_params, file)
 
-    logger.info("Installation of CNVM integration is done")
+    logger.info(f"Get {INTEGRATION_NAME} template")
+    default_url = get_package_default_url(
+        cfg=cnfg.elk_config,
+        policy_name=INTEGRATION_INPUT["posture"],
+        policy_type="cloudbeat/vuln_mgmt_aws",
+    )
+    template_url = extract_template_url(url_string=default_url)
+
+    logger.info(f"Using {template_url} for stack creation")
+    if template_url:
+        rename_file_by_suffix(
+            file_path=cnvm_cloudformation_template,
+            suffix="-orig",
+        )
+    download_file(url=template_url, destination=cnvm_cloudformation_template)
+
+    logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
