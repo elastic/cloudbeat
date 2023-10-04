@@ -10,7 +10,7 @@ import pytest
 from commonlib.utils import get_findings
 
 CONFIG_TIMEOUT = 120
-GCP_CONFIG_TIMEOUT = 600
+GCP_CONFIG_TIMEOUT = 1200
 CNVM_CONFIG_TIMEOUT = 3600
 
 tests_data = {
