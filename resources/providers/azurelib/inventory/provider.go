@@ -28,6 +28,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions"
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
+	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
@@ -36,7 +37,7 @@ import (
 type Provider struct {
 	log           *logp.Logger
 	client        *AzureClientWrapper
-	subscriptions []*string
+	subscriptions map[string]string
 	ctx           context.Context
 	Config        auth.AzureFactoryConfig
 }
@@ -48,15 +49,16 @@ type AzureClientWrapper struct {
 }
 
 type AzureAsset struct {
-	Id             string         `json:"id,omitempty"`
-	Name           string         `json:"name,omitempty"`
-	Location       string         `json:"location,omitempty"`
-	Properties     map[string]any `json:"properties,omitempty"`
-	ResourceGroup  string         `json:"resource_group,omitempty"`
-	SubscriptionId string         `json:"subscription_id,omitempty"`
-	TenantId       string         `json:"tenant_id,omitempty"`
-	Type           string         `json:"type,omitempty"`
-	Sku            string         `json:"sku,omitempty"`
+	Id               string         `json:"id,omitempty"`
+	Name             string         `json:"name,omitempty"`
+	Location         string         `json:"location,omitempty"`
+	Properties       map[string]any `json:"properties,omitempty"`
+	ResourceGroup    string         `json:"resource_group,omitempty"`
+	SubscriptionId   string         `json:"subscription_id,omitempty"`
+	SubscriptionName string         `json:"subscription_name,omitempty"`
+	TenantId         string         `json:"tenant_id,omitempty"`
+	Type             string         `json:"type,omitempty"`
+	Sku              string         `json:"sku,omitempty"`
 }
 
 type ServiceAPI interface {
@@ -94,8 +96,8 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, azureC
 		return nil, errors.New("no subscriptions available to query")
 	}
 	log.Info(
-		lo.Reduce(subscriptions, func(agg string, item *string, _ int) string {
-			return fmt.Sprintf("%s %s", agg, strings.Dereference(item))
+		lo.Reduce(maps.Keys(subscriptions), func(agg string, item string, _ int) string {
+			return fmt.Sprintf("%s %s", agg, item)
 		}, "subscriptions:"),
 	)
 
@@ -108,10 +110,10 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, azureC
 	}, nil
 }
 
-func (p *ProviderInitializer) getSubscriptionIds(ctx context.Context, azureConfig auth.AzureFactoryConfig) ([]*string, error) {
+func (p *ProviderInitializer) getSubscriptionIds(ctx context.Context, azureConfig auth.AzureFactoryConfig) (map[string]string, error) {
 	// TODO: mockable
 
-	var result []*string
+	result := make(map[string]string)
 
 	clientFactory, err := armsubscriptions.NewClientFactory(azureConfig.Credentials, nil)
 	if err != nil {
@@ -124,8 +126,8 @@ func (p *ProviderInitializer) getSubscriptionIds(ctx context.Context, azureConfi
 			return nil, err
 		}
 		for _, subscription := range page.Value {
-			if subscription != nil {
-				result = append(result, subscription.SubscriptionID)
+			if subscription != nil && subscription.SubscriptionID != nil {
+				result[*subscription.SubscriptionID] = strings.Dereference(subscription.DisplayName)
 			}
 		}
 	}
@@ -134,14 +136,18 @@ func (p *ProviderInitializer) getSubscriptionIds(ctx context.Context, azureConfi
 
 func (p *Provider) ListAllAssetTypesByName(assets []string) ([]AzureAsset, error) {
 	p.log.Infof("Listing Azure assets: %v", assets)
-	var resourceAssets []AzureAsset
+
+	var subscriptionKeys []*string
+	for subId := range p.subscriptions {
+		subscriptionKeys = append(subscriptionKeys, to.Ptr(subId))
+	}
 
 	query := armresourcegraph.QueryRequest{
 		Query: to.Ptr(generateQuery(assets)),
 		Options: &armresourcegraph.QueryRequestOptions{
 			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 		},
-		Subscriptions: p.subscriptions,
+		Subscriptions: subscriptionKeys,
 	}
 
 	resourceAssets, err := p.runPaginatedQuery(query)
@@ -150,21 +156,6 @@ func (p *Provider) ListAllAssetTypesByName(assets []string) ([]AzureAsset, error
 	}
 
 	return resourceAssets, nil
-}
-
-func getAssetFromData(data map[string]any) AzureAsset {
-	properties, _ := data["properties"].(map[string]any)
-
-	return AzureAsset{
-		Id:             getString(data, "id"),
-		Name:           getString(data, "name"),
-		Location:       getString(data, "location"),
-		Properties:     properties,
-		ResourceGroup:  getString(data, "resourceGroup"),
-		SubscriptionId: getString(data, "subscriptionId"),
-		TenantId:       getString(data, "tenantId"),
-		Type:           getString(data, "type"),
-	}
 }
 
 func getString(data map[string]any, key string) string {
@@ -197,7 +188,7 @@ func (p *Provider) runPaginatedQuery(query armresourcegraph.QueryRequest) ([]Azu
 		}
 
 		for _, asset := range response.Data.([]interface{}) {
-			structuredAsset := getAssetFromData(asset.(map[string]any))
+			structuredAsset := p.getAssetFromData(asset.(map[string]any))
 			resourceAssets = append(resourceAssets, structuredAsset)
 		}
 
@@ -211,4 +202,21 @@ func (p *Provider) runPaginatedQuery(query armresourcegraph.QueryRequest) ([]Azu
 	}
 
 	return resourceAssets, nil
+}
+
+func (p *Provider) getAssetFromData(data map[string]any) AzureAsset {
+	subId := getString(data, "subscriptionId")
+	properties, _ := data["properties"].(map[string]any)
+
+	return AzureAsset{
+		Id:               getString(data, "id"),
+		Name:             getString(data, "name"),
+		Location:         getString(data, "location"),
+		Properties:       properties,
+		ResourceGroup:    getString(data, "resourceGroup"),
+		SubscriptionId:   subId,
+		SubscriptionName: p.subscriptions[subId],
+		TenantId:         getString(data, "tenantId"),
+		Type:             getString(data, "type"),
+	}
 }
