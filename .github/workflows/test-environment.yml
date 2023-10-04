@@ -51,9 +51,11 @@ on:
         required: true
         description: "Elastic Cloud deployment region"
         default: "gcp-us-west2"
+        type: string
       docker-image-override:
         required: false
         description: "Provide the full Docker image path to override the default image (e.g. for testing BC/SNAPSHOT)"
+        type: string
       run-sanity-tests:
         description: "Run sanity tests after provision"
         default: false
@@ -70,6 +72,7 @@ on:
       s3-bucket:
         description: "Terraform state s3 bucket folder"
         value: ${{ jobs.Deploy.outputs.deploy-s3-bucket }}
+        type: string
 
 
 env:
