@@ -130,12 +130,24 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 				Type:                pair.Type,
 				SubType:             pair.SubType,
 				Name:                exNameAndId,
-				Region:              "",
+				Region:              "global",
 				AwsAccountId:        "",
 				AwsAccountAlias:     "",
 				AwsOrganizationId:   "",
 				AwsOrganizationName: "",
 			}, meta)
+
+			ecs, err := result.GetElasticCommonData()
+			s.Require().NoError(err)
+			s.Equal(map[string]any{
+				"cloud": map[string]any{
+					"provider": "azure",
+					"account": map[string]any{
+						"id":   expectedAssets[0].SubscriptionId,
+						"name": expectedAssets[0].SubscriptionId,
+					},
+				},
+			}, ecs)
 		})
 	}
 }
