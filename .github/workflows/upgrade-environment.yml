@@ -52,7 +52,7 @@ jobs:
     with:
       deployment_name: ${{ inputs.deployment_name }}
       elk-stack-version: ${{ needs.init.outputs.stack-version }}
-      ess-region: ${{ env.TF_VAR_ess_region }}
+      ess-region: ${{ needs.init.outputs.ess-region }}
       docker-image-override: ${{ inputs.docker-image-override }}
       run-sanity-tests: true
   upgrade:
