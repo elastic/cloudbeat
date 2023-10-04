@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
@@ -100,10 +101,19 @@ func (r *AzureBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
 		SubType: r.SubType,
 		Name:    id,
 		// TODO: Make sure ActivityLogAlerts are not location scoped (benchmarks do not check location)
-		Region: "",
+		Region: azurelib.GlobalRegion,
 	}, nil
 }
 
 func (r *AzureBatchResource) GetElasticCommonData() (map[string]any, error) {
-	return nil, nil
+	return map[string]any{
+		"cloud": map[string]any{
+			"provider": "azure",
+			"account": map[string]any{
+				"id":   r.Assets[0].SubscriptionId,
+				"name": r.Assets[0].SubscriptionId, // TODO: get subscription name
+			},
+			// TODO: Organization fields
+		},
+	}, nil
 }
