@@ -124,4 +124,15 @@ func (r *AzureResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r *AzureResource) GetElasticCommonData() (map[string]any, error) { return nil, nil }
+func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
+	return map[string]any{
+		"cloud": map[string]any{
+			"provider": "azure",
+			"account": map[string]any{
+				"id":   r.Asset.SubscriptionId,
+				"name": r.Asset.SubscriptionId, // TODO: get subscription name
+			},
+			// TODO: Organization fields
+		},
+	}, nil
+}

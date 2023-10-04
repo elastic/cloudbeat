@@ -130,7 +130,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 				Type:                pair.Type,
 				SubType:             pair.SubType,
 				Name:                exNameAndId,
-				Region:              "",
+				Region:              "global",
 				AwsAccountId:        "",
 				AwsAccountAlias:     "",
 				AwsOrganizationId:   "",
