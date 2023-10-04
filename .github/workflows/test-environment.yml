@@ -72,8 +72,6 @@ on:
       s3-bucket:
         description: "Terraform state s3 bucket folder"
         value: ${{ jobs.Deploy.outputs.deploy-s3-bucket }}
-        type: string
-
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
