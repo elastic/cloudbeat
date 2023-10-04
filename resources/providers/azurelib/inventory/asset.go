@@ -30,7 +30,7 @@ const (
 	PostgreSQLDBAssetType              = "microsoft.dbforpostgresql/servers"
 	SQLServersAssetType                = "microsoft.sql/servers"
 	StorageAccountAssetType            = "microsoft.storage/storageaccounts"
+	VaultAssetType                     = "microsoft.keyvault/vaults"
 	VirtualMachineAssetType            = "microsoft.compute/virtualmachines"
 	WebsitesAssetType                  = "microsoft.web/sites"
-	VaultAssetType                     = "microsoft.keyvault/vaults"
 )
