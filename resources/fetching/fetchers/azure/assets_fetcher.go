@@ -39,21 +39,33 @@ type AzureResource struct {
 	Asset   inventory.AzureAsset `json:"asset,omitempty"`
 }
 
-var AzureResourceTypes = map[string]string{
-	inventory.ActivityLogAlertAssetType:          fetching.AzureActivityLogAlertType,
-	inventory.ClassicStorageAccountAssetType:     fetching.AzureClassicStorageAccountType,
-	inventory.ClassicVirtualMachineAssetType:     fetching.AzureClassicVMType,
-	inventory.DiskAssetType:                      fetching.AzureDiskType,
-	inventory.DocumentDBDatabaseAccountAssetType: fetching.AzureDocumentDBDatabaseAccountType,
-	inventory.MySQLDBAssetType:                   fetching.AzureMySQLDBType,
-	inventory.NetworkWatchersAssetType:           fetching.AzureNetworkWatchersType,
-	inventory.NetworkWatchersFlowLogAssetType:    fetching.AzureNetworkWatchersFlowLogType,
-	inventory.PostgreSQLDBAssetType:              fetching.AzurePostgreSQLDBType,
-	inventory.SQLServersAssetType:                fetching.AzureSQLServerType,
-	inventory.StorageAccountAssetType:            fetching.AzureStorageAccountType,
-	inventory.VirtualMachineAssetType:            fetching.AzureVMType,
-	inventory.WebsitesAssetType:                  fetching.AzureWebSiteType,
-	inventory.VaultAssetType:                     fetching.AzureVaultType,
+type typePair struct {
+	SubType string
+	Type    string
+}
+
+func newPair(subType string, tpe string) typePair {
+	return typePair{
+		SubType: subType,
+		Type:    tpe,
+	}
+}
+
+var AzureAssetTypeToTypePair = map[string]typePair{
+	inventory.ActivityLogAlertAssetType:          newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
+	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
+	inventory.ClassicVirtualMachineAssetType:     newPair(fetching.AzureClassicVMType, fetching.CloudCompute),
+	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
+	inventory.DocumentDBDatabaseAccountAssetType: newPair(fetching.AzureDocumentDBDatabaseAccountType, fetching.CloudDatabase),
+	inventory.MySQLDBAssetType:                   newPair(fetching.AzureMySQLDBType, fetching.CloudDatabase),
+	inventory.NetworkWatchersAssetType:           newPair(fetching.AzureNetworkWatchersType, fetching.MonitoringIdentity),
+	inventory.NetworkWatchersFlowLogAssetType:    newPair(fetching.AzureNetworkWatchersFlowLogType, fetching.MonitoringIdentity),
+	inventory.PostgreSQLDBAssetType:              newPair(fetching.AzurePostgreSQLDBType, fetching.CloudDatabase),
+	inventory.SQLServersAssetType:                newPair(fetching.AzureSQLServerType, fetching.CloudDatabase),
+	inventory.StorageAccountAssetType:            newPair(fetching.AzureStorageAccountType, fetching.CloudStorage),
+	inventory.VirtualMachineAssetType:            newPair(fetching.AzureVMType, fetching.CloudCompute),
+	inventory.WebsitesAssetType:                  newPair(fetching.AzureWebSiteType, fetching.CloudCompute),
+	inventory.VaultAssetType:                     newPair(fetching.AzureVaultType, fetching.KeyManagement),
 }
 
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
@@ -67,7 +79,7 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
-	assets, err := f.provider.ListAllAssetTypesByName(maps.Keys(AzureResourceTypes))
+	assets, err := f.provider.ListAllAssetTypesByName(maps.Keys(AzureAssetTypeToTypePair))
 	if err != nil {
 		return err
 	}
@@ -77,22 +89,23 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 		case <-ctx.Done():
 			f.log.Infof("AzureAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
 			return nil
-		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cMetadata,
-			Resource: &AzureResource{
-				Type:    AzureResourceTypes[asset.Type],
-				SubType: getAzureSubType(asset.Type),
-				Asset:   asset,
-			},
-		}:
+		case f.resourceCh <- resourceFromAsset(asset, cMetadata):
 		}
 	}
 
 	return nil
 }
 
-func getAzureSubType(assetType string) string {
-	return ""
+func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetadata) fetching.ResourceInfo {
+	pair := AzureAssetTypeToTypePair[asset.Type]
+	return fetching.ResourceInfo{
+		CycleMetadata: cMetadata,
+		Resource: &AzureResource{
+			Type:    pair.Type,
+			SubType: pair.SubType,
+			Asset:   asset,
+		},
+	}
 }
 
 func (f *AzureAssetsFetcher) Stop() {}

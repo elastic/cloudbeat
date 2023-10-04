@@ -112,21 +112,23 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 
 	s.Require().Len(results, len(mockAssets))
 
-	idx := 0
 	for assetType, expectedAssets := range mockAssets {
+		result := findResult(results, assetType)
+		s.Require().NotNil(result)
+
 		s.Run(assetType, func() {
-			assets := results[idx].GetData().([]inventory.AzureAsset)
+			assets := result.GetData().([]inventory.AzureAsset)
 			s.Equal(expectedAssets, assets)
 
-			meta, err := results[idx].GetMetadata()
+			meta, err := result.GetMetadata()
 			s.Require().NoError(err)
 
-			resourceType := AzureBatchAssets[assetType]
-			exNameAndId := fmt.Sprintf("%s-subId1", resourceType)
+			pair := AzureBatchAssets[assetType]
+			exNameAndId := fmt.Sprintf("%s-subId1", pair.SubType)
 			s.Equal(fetching.ResourceMetadata{
 				ID:                  exNameAndId,
-				Type:                resourceType,
-				SubType:             "",
+				Type:                pair.Type,
+				SubType:             pair.SubType,
 				Name:                exNameAndId,
 				Region:              "",
 				AwsAccountId:        "",
@@ -135,6 +137,14 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 				AwsOrganizationName: "",
 			}, meta)
 		})
-		idx++
 	}
+}
+
+func findResult(results []fetching.ResourceInfo, assetType string) *fetching.ResourceInfo {
+	for _, result := range results {
+		if result.GetData().([]inventory.AzureAsset)[0].Type == assetType {
+			return &result
+		}
+	}
+	return nil
 }
