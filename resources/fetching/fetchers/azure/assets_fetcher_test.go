@@ -97,7 +97,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Require().Len(results, len(AzureAssetTypeToSubType))
+	s.Require().Len(results, len(AzureAssetTypeToTypePair))
 	s.Require().Len(results, len(mockAssets))
 
 	for index, r := range results {
@@ -107,7 +107,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 
 			meta, err := r.GetMetadata()
 			s.Require().NoError(err)
-			pair := AzureAssetTypeToSubType[expected.Type]
+			pair := AzureAssetTypeToTypePair[expected.Type]
 			s.Equal(fetching.ResourceMetadata{
 				ID:                  expected.Id,
 				Type:                pair.Type,
