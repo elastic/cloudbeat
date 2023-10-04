@@ -100,12 +100,12 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.Require().Len(results, len(AzureAssetTypeToTypePair))
 	s.Require().Len(results, len(mockAssets))
 
-	for index, r := range results {
+	for index, result := range results {
 		expected := mockAssets[index]
 		s.Run(expected.Type, func() {
-			s.Equal(expected, r.GetData())
+			s.Equal(expected, result.GetData())
 
-			meta, err := r.GetMetadata()
+			meta, err := result.GetMetadata()
 			s.Require().NoError(err)
 			pair := AzureAssetTypeToTypePair[expected.Type]
 			s.Equal(fetching.ResourceMetadata{
@@ -119,6 +119,18 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 				AwsOrganizationId:   "",
 				AwsOrganizationName: "",
 			}, meta)
+
+			ecs, err := result.GetElasticCommonData()
+			s.Require().NoError(err)
+			s.Equal(map[string]any{
+				"cloud": map[string]any{
+					"provider": "azure",
+					"account": map[string]any{
+						"id":   expected.SubscriptionId,
+						"name": expected.SubscriptionId,
+					},
+				},
+			}, ecs)
 		})
 	}
 }
