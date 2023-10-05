@@ -26,6 +26,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
@@ -167,4 +168,28 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 		s.Assert().Equal(r.Type, strIndex)
 		s.Assert().Equal(r.Properties, map[string]any{"test": "test"})
 	})
+}
+
+func Test_generateQuery(t *testing.T) {
+	tests := []struct {
+		assets []string
+		want   string
+	}{
+		{
+			want: "Resources",
+		},
+		{
+			assets: []string{"one"},
+			want:   "Resources | where type == 'one'",
+		},
+		{
+			assets: []string{"one", "two", "three four five"},
+			want:   "Resources | where type == 'one' or type == 'two' or type == 'three four five'",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			assert.Equal(t, tt.want, generateQuery(tt.assets))
+		})
+	}
 }
