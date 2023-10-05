@@ -51,7 +51,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
 
 	for assetType, pair := range AzureBatchAssets {
-		assets, err := f.provider.ListAllAssetTypesByName([]string{assetType})
+		assets, err := f.provider.ListAllAssetTypesByName(ctx, []string{assetType})
 		if err != nil {
 			return err
 		}

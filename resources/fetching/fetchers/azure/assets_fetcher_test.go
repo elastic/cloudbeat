@@ -84,7 +84,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		)
 	}
 	mockInventoryService.EXPECT().
-		ListAllAssetTypesByName(mock.AnythingOfType("[]string")).
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("[]string")).
 		Return(mockAssets, nil).Once()
 	defer mockInventoryService.AssertExpectations(s.T())
 

@@ -35,7 +35,6 @@ import (
 
 type ProviderTestSuite struct {
 	suite.Suite
-	ctx          context.Context
 	mockedClient *AzureClientWrapper
 }
 
@@ -91,7 +90,6 @@ func TestInventoryProviderTestSuite(t *testing.T) {
 }
 
 func (s *ProviderTestSuite) SetupTest() {
-	s.ctx = context.Background()
 	s.mockedClient = &AzureClientWrapper{
 		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
 			if query.Options.SkipToken != nil && *query.Options.SkipToken != "" {
@@ -148,13 +146,12 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	provider := &Provider{
 		log:    testhelper.NewLogger(s.T()),
 		client: s.mockedClient,
-		ctx:    s.ctx,
 		Config: auth.AzureFactoryConfig{
 			Credentials: &azidentity.DefaultAzureCredential{},
 		},
 	}
 
-	values, err := provider.ListAllAssetTypesByName([]string{"test"})
+	values, err := provider.ListAllAssetTypesByName(context.Background(), []string{"test"})
 	s.Assert().NoError(err)
 	s.Assert().Equal(int(*nonTruncatedResponse.Count+*truncatedResponse.Count), len(values))
 	lo.ForEach(values, func(r AzureAsset, index int) {

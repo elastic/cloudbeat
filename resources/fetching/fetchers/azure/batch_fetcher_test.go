@@ -92,8 +92,9 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 	}
 
 	mockInventoryService.EXPECT().
-		ListAllAssetTypesByName(mock.AnythingOfType("[]string")).
-		RunAndReturn(func(types []string) ([]inventory.AzureAsset, error) {
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("[]string")).
+		RunAndReturn(func(_ context.Context, types []string) ([]inventory.AzureAsset, error) {
+			s.NoError(ctx.Err())
 			s.Require().Len(types, 1)
 			mockAssetsList, ok := mockAssets[types[0]]
 			s.Require().True(ok)

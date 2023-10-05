@@ -79,7 +79,7 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
-	assets, err := f.provider.ListAllAssetTypesByName(maps.Keys(AzureAssetTypeToTypePair))
+	assets, err := f.provider.ListAllAssetTypesByName(ctx, maps.Keys(AzureAssetTypeToTypePair))
 	if err != nil {
 		return err
 	}
