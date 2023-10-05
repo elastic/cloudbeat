@@ -158,11 +158,6 @@ func (p *Provider) ListAllAssetTypesByName(assets []string) ([]AzureAsset, error
 	return resourceAssets, nil
 }
 
-func getString(data map[string]any, key string) string {
-	value, _ := data[key].(string)
-	return value
-}
-
 func generateQuery(assets []string) string {
 	var query bytes.Buffer
 	query.WriteString("Resources")
@@ -187,7 +182,7 @@ func (p *Provider) runPaginatedQuery(query armresourcegraph.QueryRequest) ([]Azu
 			return nil, err
 		}
 
-		for _, asset := range response.Data.([]interface{}) {
+		for _, asset := range response.Data.([]any) {
 			structuredAsset := p.getAssetFromData(asset.(map[string]any))
 			resourceAssets = append(resourceAssets, structuredAsset)
 		}
@@ -219,4 +214,9 @@ func (p *Provider) getAssetFromData(data map[string]any) AzureAsset {
 		TenantId:         getString(data, "tenantId"),
 		Type:             getString(data, "type"),
 	}
+}
+
+func getString(data map[string]any, key string) string {
+	value, _ := data[key].(string)
+	return value
 }
