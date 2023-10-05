@@ -65,7 +65,7 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Success() {
 		provider:   mockInventoryService,
 	}
 
-	mockInventoryService.On("ListMonitoringAssets", mock.Anything).Return(
+	mockInventoryService.EXPECT().ListMonitoringAssets(mock.Anything, mock.Anything).Return(
 		[]*inventory.MonitoringAsset{
 			{
 				Ecs: &fetching.EcsGcp{
@@ -102,10 +102,10 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Error() {
 		provider:   mockInventoryService,
 	}
 
-	mockInventoryService.On("ListMonitoringAssets", mock.Anything).Return(nil, errors.New("api call error"))
+	mockInventoryService.EXPECT().ListMonitoringAssets(mock.Anything, mock.Anything).Return(nil, errors.New("api call error"))
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
-	s.Error(err)
+	s.ErrorContains(err, "api call error")
 }
 
 func TestMonitoringResource_GetMetadata(t *testing.T) {
