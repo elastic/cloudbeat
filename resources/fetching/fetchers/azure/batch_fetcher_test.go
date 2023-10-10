@@ -20,10 +20,12 @@ package fetchers
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -51,9 +53,6 @@ func (s *AzureBatchAssetFetcherTestSuite) TearDownTest() {
 }
 
 func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
-	ctx := context.Background()
-
-	mockInventoryService := &inventory.MockServiceAPI{}
 	mockAssets := map[string][]inventory.AzureAsset{
 		inventory.ActivityLogAlertAssetType: {
 			{
@@ -97,27 +96,29 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 		},
 	}
 
+	mockInventoryService := inventory.NewMockServiceAPI(s.T())
 	mockInventoryService.EXPECT().
 		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("[]string")).
-		RunAndReturn(func(_ context.Context, types []string) ([]inventory.AzureAsset, error) {
-			s.NoError(ctx.Err())
-			s.Require().Len(types, 1)
-			mockAssetsList, ok := mockAssets[types[0]]
-			s.Require().True(ok)
-			return mockAssetsList, nil
-		}).Times(len(mockAssets))
-	defer mockInventoryService.AssertExpectations(s.T())
+		RunAndReturn(func(ctx context.Context, types []string) ([]inventory.AzureAsset, error) {
+			s.ElementsMatch(maps.Keys(mockAssets), types)
+
+			var result []inventory.AzureAsset
+			for _, tpe := range types {
+				result = append(result, mockAssets[tpe]...)
+			}
+			return result, nil
+		}).Once()
 
 	fetcher := AzureBatchAssetFetcher{
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
 		provider:   mockInventoryService,
 	}
-	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
+	err := fetcher.Fetch(context.Background(), fetching.CycleMetadata{})
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Require().Len(results, len(mockAssets))
+	s.Len(results, len(mockAssets))
 
 	for assetType, expectedAssets := range mockAssets {
 		result := findResult(results, assetType)
@@ -157,6 +158,126 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 			}, ecs)
 		})
 	}
+}
+
+func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Batches() {
+	var mockAssets []inventory.AzureAsset
+	for i, variableFields := range []struct {
+		sub string
+		tpe string
+	}{
+		{
+			// 0
+			sub: "1",
+			tpe: inventory.ActivityLogAlertAssetType,
+		},
+		{
+			// 1
+			sub: "1",
+			tpe: inventory.ActivityLogAlertAssetType,
+		},
+		{
+			// 2
+			sub: "2",
+			tpe: inventory.ActivityLogAlertAssetType,
+		},
+		{
+			// 3
+			sub: "3",
+			tpe: inventory.BastionAssetType,
+		},
+		{
+			// 4
+			sub: "1",
+			tpe: inventory.BastionAssetType,
+		},
+		{
+			// 5
+			sub: "2",
+			tpe: inventory.ActivityLogAlertAssetType,
+		},
+		{
+			// 6
+			sub: "3",
+			tpe: inventory.BastionAssetType,
+		},
+		{
+			// 7
+			sub: "4",
+			tpe: inventory.BastionAssetType,
+		},
+	} {
+		id := strconv.Itoa(i)
+		mockAssets = append(mockAssets, inventory.AzureAsset{
+			Id:             "id" + id,
+			Name:           "name" + id,
+			Location:       "loc" + id,
+			Properties:     map[string]any{"key" + id: "value" + id},
+			ResourceGroup:  "rg" + id,
+			SubscriptionId: variableFields.sub,
+			TenantId:       "tenant",
+			Type:           variableFields.tpe,
+			Sku:            "sku" + id,
+		})
+	}
+
+	mockInventoryService := inventory.NewMockServiceAPI(s.T())
+	mockInventoryService.EXPECT().
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("[]string")).
+		Return(mockAssets, nil)
+	fetcher := AzureBatchAssetFetcher{
+		log:        testhelper.NewLogger(s.T()),
+		resourceCh: s.resourceCh,
+		provider:   mockInventoryService,
+	}
+
+	err := fetcher.Fetch(context.Background(), fetching.CycleMetadata{})
+	s.Require().NoError(err)
+	results := testhelper.CollectResources(s.resourceCh)
+
+	s.Len(results, 5)
+	s.ElementsMatch([]fetching.ResourceInfo{
+		{ // sub 1
+			Resource: &AzureBatchResource{
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.AzureActivityLogAlertType,
+				Assets:  []inventory.AzureAsset{mockAssets[0], mockAssets[1]},
+			},
+			CycleMetadata: fetching.CycleMetadata{Sequence: 0},
+		},
+		{ // sub 2
+			Resource: &AzureBatchResource{
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.AzureActivityLogAlertType,
+				Assets:  []inventory.AzureAsset{mockAssets[2], mockAssets[5]},
+			},
+			CycleMetadata: fetching.CycleMetadata{Sequence: 0},
+		},
+		{ // sub 1
+			Resource: &AzureBatchResource{
+				Type:    fetching.CloudDns,
+				SubType: fetching.AzureBastionType,
+				Assets:  []inventory.AzureAsset{mockAssets[4]},
+			},
+			CycleMetadata: fetching.CycleMetadata{Sequence: 0},
+		},
+		{ // sub 3
+			Resource: &AzureBatchResource{
+				Type:    fetching.CloudDns,
+				SubType: fetching.AzureBastionType,
+				Assets:  []inventory.AzureAsset{mockAssets[3], mockAssets[6]},
+			},
+			CycleMetadata: fetching.CycleMetadata{Sequence: 0},
+		},
+		{ // sub 4
+			Resource: &AzureBatchResource{
+				Type:    fetching.CloudDns,
+				SubType: fetching.AzureBastionType,
+				Assets:  []inventory.AzureAsset{mockAssets[7]},
+			},
+			CycleMetadata: fetching.CycleMetadata{Sequence: 0},
+		},
+	}, results)
 }
 
 func findResult(results []fetching.ResourceInfo, assetType string) *fetching.ResourceInfo {
