@@ -118,7 +118,7 @@ func (r *AzureBatchResource) GetElasticCommonData() (map[string]any, error) {
 			"provider": "azure",
 			"account": map[string]any{
 				"id":   r.Assets[0].SubscriptionId,
-				"name": r.Assets[0].SubscriptionId, // TODO: get subscription name
+				"name": r.Assets[0].SubscriptionName,
 			},
 			// TODO: Organization fields
 		},
