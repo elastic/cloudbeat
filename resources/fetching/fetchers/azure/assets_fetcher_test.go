@@ -72,14 +72,16 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	} {
 		mockAssets = append(mockAssets,
 			inventory.AzureAsset{
-				Id:             "id",
-				Name:           "name",
-				Location:       "location",
-				Properties:     map[string]interface{}{"key": "value"},
-				ResourceGroup:  "rg",
-				SubscriptionId: "subId",
-				TenantId:       "tenantId",
-				Type:           assetType,
+				Id:               "id",
+				Name:             "name",
+				Location:         "location",
+				Properties:       map[string]interface{}{"key": "value"},
+				ResourceGroup:    "rg",
+				SubscriptionId:   "subId",
+				SubscriptionName: "subName",
+				TenantId:         "tenantId",
+				Type:             assetType,
+				Sku:              "",
 			},
 		)
 	}
@@ -127,7 +129,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 					"provider": "azure",
 					"account": map[string]any{
 						"id":   expected.SubscriptionId,
-						"name": expected.SubscriptionId,
+						"name": expected.SubscriptionName,
 					},
 				},
 			}, ecs)
