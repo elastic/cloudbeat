@@ -130,7 +130,7 @@ func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
 			"provider": "azure",
 			"account": map[string]any{
 				"id":   r.Asset.SubscriptionId,
-				"name": r.Asset.SubscriptionId, // TODO: get subscription name
+				"name": r.Asset.SubscriptionName,
 			},
 			// TODO: Organization fields
 		},
