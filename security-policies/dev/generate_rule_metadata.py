@@ -95,7 +95,7 @@ selected_columns_map = {
         "References": "references",
         "Assessment Status": "type",
     },
-     "cis_azure": {
+    "cis_azure": {
         "Section #": "Section",
         "Recommendation #": "Rule Number",
         "Title": "Title",
@@ -107,7 +107,7 @@ selected_columns_map = {
         # "": "default_value", # todo: talk with CIS team to add this column to the excel
         "References": "references",
         "Assessment Status": "type",
-    }
+    },
 }
 
 benchmark_to_posture_type = {
@@ -138,13 +138,19 @@ def read_existing_default_value(rule_number, benchmark_id):
     :param benchmark_id: Benchmark ID
     :return: Default value
     """
-    rule_dir = os.path.join(common.rules_dir, f"{benchmark_id}/rules", f"cis_{rule_number.replace('.', '_')}")
+    rule_dir = os.path.join(
+        common.rules_dir,
+        f"{benchmark_id}/rules",
+        f"cis_{rule_number.replace('.', '_')}",
+    )
     try:
         with open(os.path.join(rule_dir, "data.yaml"), "r") as f:
             data = yml.load(f)
             default_value = data["metadata"]["default_value"]
             if default_value is None or default_value == "":
-                print(f"{benchmark_id}/{rule_number} is missing default value - please make sure to add it manually")
+                print(
+                    f"{benchmark_id}/{rule_number} is missing default value - please make sure to add it manually",
+                )
                 return ""
             return data["metadata"]["default_value"]
     except FileNotFoundError:
@@ -171,7 +177,7 @@ def replace_nan_with_empty_string(data: pd.DataFrame):
     """
     Replace NaN values with empty strings (they are represented as `nan` in the Excel for some reason)
     """
-    return data.replace("nan", '')
+    return data.replace("nan", "")
 
 
 def rule_is_implemented(rule_number: str, benchmark_id: str):
@@ -181,7 +187,11 @@ def rule_is_implemented(rule_number: str, benchmark_id: str):
     :param benchmark_id: Benchmark ID
     :return: True if rule was implemented, False otherwise
     """
-    rule_path = os.path.join(common.rules_dir, f"{benchmark_id}/rules", f"cis_{rule_number.replace('.', '_')}")
+    rule_path = os.path.join(
+        common.rules_dir,
+        f"{benchmark_id}/rules",
+        f"cis_{rule_number.replace('.', '_')}",
+    )
     return os.path.isdir(rule_path)
 
 
@@ -201,9 +211,17 @@ def generate_metadata(benchmark_id: str, raw_data: pd.DataFrame, sections: dict)
         if not rule_is_implemented(rule["Rule Number"], benchmark_id):
             continue
 
-        benchmark_metadata = generate_rule_benchmark_metadata(benchmark_id, rule["Rule Number"])
+        benchmark_metadata = generate_rule_benchmark_metadata(
+            benchmark_id,
+            rule["Rule Number"],
+        )
         r = Rule(
-            id=str(uuid.uuid5(uuid.NAMESPACE_DNS, f"{benchmark_metadata.name} {rule['Title']} {rule['Rule Number']}")),
+            id=str(
+                uuid.uuid5(
+                    uuid.NAMESPACE_DNS,
+                    f"{benchmark_metadata.name} {rule['Title']} {rule['Rule Number']}",
+                ),
+            ),
             name=rule["Title"],
             profile_applicability=f"* {rule['profile_applicability']}",
             description=common.fix_code_blocks(rule["description"]),
@@ -211,10 +229,18 @@ def generate_metadata(benchmark_id: str, raw_data: pd.DataFrame, sections: dict)
             audit=common.fix_code_blocks(rule.get("audit", "")),
             remediation=common.fix_code_blocks(rule.get("remediation", "")),
             impact=rule.get("impact", ""),
-            default_value=rule.get("default_value", read_existing_default_value(rule["Rule Number"], benchmark_id)),
+            default_value=rule.get(
+                "default_value",
+                read_existing_default_value(rule["Rule Number"], benchmark_id),
+            ),
             references=parse_refs(rule.get("references", "")),
             section=sections[rule["Section"]],
-            tags=["CIS", benchmark_tag, f"CIS {rule['Rule Number']}", sections[rule["Section"]]],
+            tags=[
+                "CIS",
+                benchmark_tag,
+                f"CIS {rule['Rule Number']}",
+                sections[rule["Section"]],
+            ],
             version="1.0",
             benchmark=benchmark_metadata,
         )
@@ -242,7 +268,7 @@ def save_metadata(metadata: list[Rule], benchmark_id):
 
 
 if __name__ == "__main__":
-    os.chdir(common.repo_root.working_dir + "/dev")
+    os.chdir(os.path.join(common.repo_root.working_dir, "security-policies", "dev"))
 
     parser = argparse.ArgumentParser(
         description="CIS Benchmark parser CLI",
@@ -253,7 +279,7 @@ if __name__ == "__main__":
         default=common.benchmark.keys(),
         choices=common.benchmark.keys(),
         help="benchmark to be used for the rules metadata generation (default: all benchmarks). "
-             "for example: `--benchmark cis_eks` or `--benchmark cis_eks cis_aws`",
+        "for example: `--benchmark cis_eks` or `--benchmark cis_eks cis_aws`",
         nargs="+",
     )
     parser.add_argument(

@@ -9,7 +9,7 @@ type := "cloud-database"
 subtype := "gcp-sqladmin-instance"
 
 test_violation {
-	# fail when authorizedNetworks includes 0.0.0.0/0 
+	# fail when authorizedNetworks includes 0.0.0.0/0
 	eval_fail with input as test_data.generate_gcp_asset(
 		type, subtype,
 		{"data": {"settings": {"ipConfiguration": {"authorizedNetworks": [
@@ -21,7 +21,7 @@ test_violation {
 }
 
 test_pass {
-	# pass when authorizedNetworks is not defined 
+	# pass when authorizedNetworks is not defined
 	eval_pass with input as test_data.generate_gcp_asset(
 		type, subtype,
 		{"data": {"settings": {}}},

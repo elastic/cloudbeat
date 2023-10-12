@@ -6,8 +6,11 @@ import pandas as pd
 import regex as re
 from ruamel.yaml.scalarstring import PreservedScalarString as pss
 
-repo_root = git.Repo('.', search_parent_directories=True)
-rules_dir = os.path.join(repo_root.working_dir, "bundle/compliance")
+repo_root = git.Repo(".", search_parent_directories=True)
+rules_dir = os.path.join(
+    repo_root.working_dir,
+    "security-policies/bundle/compliance",
+)
 
 CODE_BLOCK_SIZE = 100
 
@@ -20,7 +23,12 @@ benchmark = {
 }
 
 relevant_sheets = {
-    "cis_k8s": ["Level 1 - Master Node", "Level 2 - Master Node", "Level 1 - Worker Node", "Level 2 - Worker Node"],
+    "cis_k8s": [
+        "Level 1 - Master Node",
+        "Level 2 - Master Node",
+        "Level 1 - Worker Node",
+        "Level 2 - Worker Node",
+    ],
     "cis_eks": ["Level 1", "Level 2"],
     "cis_aws": ["Level 1", "Level 2"],
     "cis_gcp": ["Level 1", "Level 2"],
@@ -33,14 +41,12 @@ default_selected_columns_map = {
         "Recommendation #": "Rule Number",
         "Title": "Title",
         "Assessment Status": "Type",
-
     },
     "cis_eks": {
         "section #": "Section",
         "recommendation #": "Rule Number",
         "title": "Title",
         "scoring status": "Type",
-
     },
     "cis_aws": {
         "Section #": "Section",
@@ -63,7 +69,11 @@ default_selected_columns_map = {
 }
 
 
-def parse_rules_data_from_excel(benchmark_id, selected_columns=None, selected_rules=None):
+def parse_rules_data_from_excel(
+    benchmark_id,
+    selected_columns=None,
+    selected_rules=None,
+):
     """
     Parse rules data from Excel file for current service.
     :param selected_rules: List of rules to parse
@@ -91,7 +101,10 @@ def parse_rules_data_from_excel(benchmark_id, selected_columns=None, selected_ru
         data.columns = selected_columns[benchmark_id].values()
 
         # Remove rows with empty values in the "Rule Number" column and convert to string
-        sections_curr_sheet = data.loc[data["Rule Number"].isna(), ["Section", "Title"]].astype(str)
+        sections_curr_sheet = data.loc[
+            data["Rule Number"].isna(),
+            ["Section", "Title"],
+        ].astype(str)
 
         # Filter out section information
         data = data[data["Rule Number"].notna()].astype(str)
@@ -104,8 +117,13 @@ def parse_rules_data_from_excel(benchmark_id, selected_columns=None, selected_ru
         data = data.assign(profile_applicability=sheet_name)
 
         rules_data = pd.concat([rules_data, data]).drop_duplicates(subset="Rule Number").reset_index(drop=True)
-        sections_df = pd.concat([sections_df, sections_curr_sheet]).drop_duplicates(subset="Section").reset_index(
-            drop=True)
+        sections_df = (
+            pd.concat([sections_df, sections_curr_sheet])
+            .drop_duplicates(subset="Section")
+            .reset_index(
+                drop=True,
+            )
+        )
 
     sections = {section: title for section, title in sections_df.values}
 
@@ -114,15 +132,15 @@ def parse_rules_data_from_excel(benchmark_id, selected_columns=None, selected_ru
 
 def check_and_fix_numbered_list(text):
     # Split the text into lines
-    lines = text.split('\n')
+    lines = text.split("\n")
 
     # Find the lines that start with a number and a period, and store their indices
-    numbered_lines = [(i, line) for i, line in enumerate(lines) if re.match(r'^\d+\.', line)]
+    numbered_lines = [(i, line) for i, line in enumerate(lines) if re.match(r"^\d+\.", line)]
 
     # Check if the numbered lines are consecutively numbered
     for i, (index, line) in enumerate(numbered_lines):
         # Extract the number from the line
-        line_number = int(line.split('.')[0])
+        line_number = int(line.split(".")[0])
 
         # Check if the line number is correct
         if line_number != i + 1:
@@ -131,15 +149,15 @@ def check_and_fix_numbered_list(text):
             lines[index] = corrected_line
 
     # Join the lines back into a single string and return the result
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def add_new_line_after_period(text):
     # Split the text into lines
-    lines = text.split('\n')
+    lines = text.split("\n")
 
     # Find the lines that start with a number and a period
-    numbered_lines = [line for line in lines if re.match(r'^\d+\.', line)]
+    numbered_lines = [line for line in lines if re.match(r"^\d+\.", line)]
 
     # Iterate through the lines and add a new line after a period, unless the line is a numbered line
     for i, line in enumerate(lines):
@@ -147,14 +165,14 @@ def add_new_line_after_period(text):
             lines[i] = line.replace(". ", ".\n")
 
     # Join the lines back into a single string and return the result
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def format_json_in_text(text):
     try:
         # Search for JSON-like content in the text
-        start_index = text.find('{')
-        end_index = text.rfind('}') + 1
+        start_index = text.find("{")
+        end_index = text.rfind("}") + 1
         json_str = text[start_index:end_index]
 
         # Try to load and format the JSON

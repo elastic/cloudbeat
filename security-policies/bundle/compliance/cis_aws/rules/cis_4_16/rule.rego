@@ -6,7 +6,7 @@ import data.compliance.policy.aws_securityhub.data_adapter
 default rule_evaluation = false
 
 finding = result {
-	# filter 
+	# filter
 	data_adapter.is_securityhub_subType
 
 	# set result

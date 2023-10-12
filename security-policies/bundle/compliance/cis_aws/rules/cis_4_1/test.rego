@@ -52,7 +52,7 @@ test_violation {
 		"MetricTopicBinding": {"filter_1": ["arn:aws:...sns"]},
 	}])
 
-	# The event selector does include management events 
+	# The event selector does include management events
 	eval_fail with input as rule_input([{
 		"TrailInfo": {
 			"Trail": {"IsMultiRegionTrail": true},

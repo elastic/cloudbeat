@@ -1,4 +1,4 @@
-name: Test Coverage
+name: Test OPA Coverage
 
 on:
   push:
@@ -8,15 +8,15 @@ on:
 jobs:
   test-coverage:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./security-policies
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Download OPA Binary
-        run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
-          chmod +x opa
-          ./opa -h
+      - name: Init Hermit
+        run: ../bin/hermit env -r >> $GITHUB_ENV
 
       - name: OPA test coverage
         run: |

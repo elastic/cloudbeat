@@ -19,3 +19,9 @@ If this PR adds a new feature, please add an example screenshot or data (finding
 ### Checklist
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] I have added the necessary README/documentation (if appropriate)
+
+#### Introducing a new rule?
+
+- [ ] Generate rule metadata using [this script](https://github.com/elastic/cloudbeat/tree/main/security-policies/dev#generate-rules-metadata)
+- [ ] Add relevant unit tests
+- [ ] Generate relevant rule templates using [this script](https://github.com/elastic/cloudbeat/tree/main/security-policies/dev#generate-rule-templates), and open a PR in [elastic/packages/cloud_security_posture](https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture)

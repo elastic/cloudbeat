@@ -8,7 +8,7 @@ import data.lib.test
 finding = audit.finding
 
 test_violation {
-	# single region, single recorder config 
+	# single region, single recorder config
 	eval_fail with input as rule_input(false, false)
 	eval_fail with input as rule_input(true, false)
 	eval_fail with input as rule_input(false, true)

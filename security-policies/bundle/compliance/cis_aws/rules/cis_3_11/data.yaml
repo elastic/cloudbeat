@@ -63,7 +63,8 @@ metadata:
     11. Change the AWS region by updating the `--region` command parameter and perform the process for other regions.
   impact: ''
   default_value: ''
-  references: 1. https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-cloudtrail-events.html
+  references: 1. 
+    https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-cloudtrail-events.html
   section: Logging
   version: '1.0'
   tags:

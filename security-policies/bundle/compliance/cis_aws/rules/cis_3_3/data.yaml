@@ -59,7 +59,8 @@ metadata:
     9. Remove any `Statement` having an `Effect` set to `Allow` and a `Principal` set to "\*" or {"AWS" : "\*"}.
   impact: ''
   default_value: ''
-  references: 1. https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html
+  references: 1. 
+    https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html
   section: Logging
   version: '1.0'
   tags:

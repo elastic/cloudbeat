@@ -123,7 +123,8 @@ metadata:
   impact: |-
     When you apply Block Public Access settings to an account, the settings apply to all AWS Regions globally. The settings might not take effect in all Regions immediately or simultaneously, but they eventually propagate to all Regions.
   default_value: ''
-  references: 1. https://docs.aws.amazon.com/AmazonS3/latest/user-guide/block-public-access-account.html
+  references: 1. 
+    https://docs.aws.amazon.com/AmazonS3/latest/user-guide/block-public-access-account.html
   section: Simple Storage Service (S3)
   version: '1.0'
   tags:

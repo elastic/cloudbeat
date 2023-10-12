@@ -24,7 +24,7 @@ has_read_write_logs(policy) if {
 	log_types := {t | t = policy.audit_configs[i].audit_log_configs[j].log_type}
 	1 in log_types # "ADMIN_READ"
 	2 in log_types # "DATA_WRITE"
-	3 in log_types # "DATA_READ" 
+	3 in log_types # "DATA_READ"
 	policy.audit_configs[_].service == "allServices"
 } else = false
 

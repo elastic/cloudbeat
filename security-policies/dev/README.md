@@ -73,7 +73,7 @@ poetry run python dev/generate_rule_templates.py --benchmark cis_aws --rules "1.
 poetry run python dev/generate_rule_templates.py --benchmark cis_aws --rules "1.8" "1.9"  --out "./rules_templates"
 ```
 
-> **Note**  
+> **Note**
 > Default output path is the csp integration templates' directory, assuming both repos are sharing the same directory,
 > i.e, `../../integrations/packages/cloud_security_posture/kibana/csp_rule_template/`
 > This can be configured with the `--out` parameter.

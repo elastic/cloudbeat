@@ -16,7 +16,7 @@ admin_role := {
 }
 
 test_violation {
-	# fail when same user (user:a) is both: 
+	# fail when same user (user:a) is both:
 	# roles/cloudkms.admin and roles/cloudkms.cryptoKeyEncrypter
 	eval_fail with input as test_data.generate_gcp_asset(type, subtype, {}, {"bindings": [
 		admin_role,

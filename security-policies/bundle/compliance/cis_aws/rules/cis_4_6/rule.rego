@@ -7,7 +7,7 @@ import data.compliance.policy.aws_cloudtrail.trail
 default rule_evaluation = false
 
 finding = result {
-	# filter 
+	# filter
 	data_adapter.is_multi_trails_type
 
 	# set result

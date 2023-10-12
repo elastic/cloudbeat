@@ -11,7 +11,7 @@ colalign = {
     "Section": "left",
     "Description": "left",
     "Status": "center",
-    "Type": "center"
+    "Type": "center",
 }
 
 
@@ -51,7 +51,7 @@ def generate_md_table(benchmark_id):
     rules_data, sections = common.parse_rules_data_from_excel(benchmark_id)
 
     # Rename "Title" column to "Description"
-    rules_data.rename(columns={'Title': 'Description'}, inplace=True)
+    rules_data.rename(columns={"Title": "Description"}, inplace=True)
 
     # Get list of all rules in sheet
     all_rules = rules_data["Rule Number"].to_list()
@@ -63,7 +63,9 @@ def generate_md_table(benchmark_id):
     for rule, total_status in implemented_rules.items():
         rules_data.loc[rules_data["Rule Number"] == rule, "Status"] = total_status
 
-    rules_data["Section"] = rules_data["Section"].apply(lambda section_id: sections[section_id])
+    rules_data["Section"] = rules_data["Section"].apply(
+        lambda section_id: sections[section_id],
+    )
 
     new_order = ["Rule Number", "Section", "Description", "Status", "Type"]
     rules_data = rules_data.reindex(columns=new_order)
@@ -72,15 +74,21 @@ def generate_md_table(benchmark_id):
     rules_data["Rule Number"] = rules_data["Rule Number"].apply(
         get_rule_path,
         benchmark_id=benchmark_id,
-        implemented_rules=implemented_rules
+        implemented_rules=implemented_rules,
     )
 
     # Convert DataFrame to Markdown table
-    table = rules_data.to_markdown(index=False, tablefmt="pipe", colalign=colalign.values())
+    table = rules_data.to_markdown(
+        index=False,
+        tablefmt="pipe",
+        colalign=colalign.values(),
+    )
 
     # Add table title
     total_rules, total_implemented, total_status = total_rules_status(rules_data)
-    total_automated, automated_implemented, automated_status = automated_rules_status(rules_data)
+    total_automated, automated_implemented, automated_status = automated_rules_status(
+        rules_data,
+    )
     total_manual, manual_implemented, manual_status = manual_rules_status(rules_data)
 
     description = f"### {total_implemented}/{total_rules} implemented rules ({total_status:.0%})\n\n"
@@ -154,20 +162,30 @@ def update_main_readme_status_badge(percentage, service):
         readme = f.readlines()
 
         if service == "k8s":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-Kubernetes%20({percentage:.0f}%25)-326CE5?" \
-                    f"logo=Kubernetes)](RULES.md#k8s-cis-benchmark)\n"
+            badge = (
+                f"[![CIS {service.upper()}]({badge_api}/CIS-Kubernetes%20({percentage:.0f}%25)-326CE5?"
+                f"logo=Kubernetes)](RULES.md#k8s-cis-benchmark)\n"
+            )
         elif service == "eks":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-Amazon%20EKS%20({percentage:.0f}%25)-FF9900?" \
-                    f"logo=Amazon+EKS)](RULES.md#eks-cis-benchmark)\n"
+            badge = (
+                f"[![CIS {service.upper()}]({badge_api}/CIS-Amazon%20EKS%20({percentage:.0f}%25)-FF9900?"
+                f"logo=Amazon+EKS)](RULES.md#eks-cis-benchmark)\n"
+            )
         elif service == "aws":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-AWS%20({percentage:.0f}%25)-232F3E?" \
-                    f"logo=Amazon+AWS)](RULES.md#aws-cis-benchmark)\n"
+            badge = (
+                f"[![CIS {service.upper()}]({badge_api}/CIS-AWS%20({percentage:.0f}%25)-232F3E?"
+                f"logo=Amazon+AWS)](RULES.md#aws-cis-benchmark)\n"
+            )
         elif service == "gcp":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-GCP%20({percentage:.0f}%25)-4285F4?" \
-                    f"logo=Google+Cloud)](RULES.md#gcp-cis-benchmark)\n"
+            badge = (
+                f"[![CIS {service.upper()}]({badge_api}/CIS-GCP%20({percentage:.0f}%25)-4285F4?"
+                f"logo=Google+Cloud)](RULES.md#gcp-cis-benchmark)\n"
+            )
         elif service == "azure":
-            badge = f"[![CIS {service.upper()}]({badge_api}/CIS-AZURE%20({percentage:.0f}%25)-0078D4?" \
-                    f"logo=Microsoft+Azure)](RULES.md#azure-cis-benchmark)\n"
+            badge = (
+                f"[![CIS {service.upper()}]({badge_api}/CIS-AZURE%20({percentage:.0f}%25)-0078D4?"
+                f"logo=Microsoft+Azure)](RULES.md#azure-cis-benchmark)\n"
+            )
 
         badge_line = get_badge_line_number(readme, service)
         readme[badge_line] = badge
@@ -190,16 +208,21 @@ def get_badge_line_number(readme, service):
 
 if __name__ == "__main__":
     # Set working directory to the dev directory
-    os.chdir(common.repo_root.working_dir + "/dev")
+    os.chdir(os.path.join(common.repo_root.working_dir, "security-policies", "dev"))
 
     # Write Markdown table to file
     with open("../RULES.md", "w") as f:
         f.write(f"# Rules Status")
         for benchmark_id in common.benchmark.keys():
             print(f"Generating Markdown table for '{benchmark_id}' service")
-            f.write(f"\n\n## {benchmark_id.removeprefix('cis_').upper()} CIS Benchmark\n\n")
+            f.write(
+                f"\n\n## {benchmark_id.removeprefix('cis_').upper()} CIS Benchmark\n\n",
+            )
             table, description, percentage = generate_md_table(benchmark_id)
             f.write(description)
             f.write(table)
-            update_main_readme_status_badge(percentage * 100, benchmark_id.removeprefix('cis_'))
+            update_main_readme_status_badge(
+                percentage * 100,
+                benchmark_id.removeprefix("cis_"),
+            )
         f.write("\n")

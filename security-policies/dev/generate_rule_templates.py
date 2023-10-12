@@ -5,10 +5,14 @@ import json
 import common
 from pathlib import Path
 
-INTEGRATION_RULE_TEMPLATE_DIR = "../../integrations/packages/cloud_security_posture/kibana/csp_rule_template/"
+INTEGRATION_RULE_TEMPLATE_DIR = "../../../integrations/packages/cloud_security_posture/kibana/csp_rule_template/"
 
 
-def generate_rule_templates(benchmark: str, selected_rules: list, rule_template_dir: str):
+def generate_rule_templates(
+    benchmark: str,
+    selected_rules: list,
+    rule_template_dir: str,
+):
     """
     Generate rule templates from existing rules
     """
@@ -26,7 +30,11 @@ def generate_rule_templates(benchmark: str, selected_rules: list, rule_template_
         if rule not in selected_rules and rule.removeprefix("cis_").replace("_", ".") not in selected_rules:
             continue
 
-        with open(os.path.join(benchmark_rules_dir, f"{rule}/data.yaml"), "r", encoding="utf-8") as f:
+        with open(
+            os.path.join(benchmark_rules_dir, f"{rule}/data.yaml"),
+            "r",
+            encoding="utf-8",
+        ) as f:
             rule_obj = yaml.safe_load(f.read())["metadata"]
             rule_obj["rego_rule_id"] = rule
 
@@ -34,8 +42,8 @@ def generate_rule_templates(benchmark: str, selected_rules: list, rule_template_
                 {
                     "id": rule_obj["id"],
                     "type": "csp-rule-template",
-                    "attributes": rule_obj
-                }
+                    "attributes": rule_obj,
+                },
             )
 
             rules_templates.append(rule_template)
@@ -56,7 +64,10 @@ def save_rule_templates(rule_templates: list[dict], rule_template_dir: str):
     Path(rule_template_dir).mkdir(parents=True, exist_ok=True)
 
     for rule_template in rule_templates:
-        with open(os.path.join(rule_template_dir, f"{rule_template['id']}.json"), "w") as f:
+        with open(
+            os.path.join(rule_template_dir, f"{rule_template['id']}.json"),
+            "w",
+        ) as f:
             json.dump(rule_template, f, indent=4)
 
 
@@ -70,7 +81,7 @@ def migrate_csp_rule_metadata(doc: dict) -> dict:
         "impact": attributes.pop("impact", None),
         "default_value": attributes.pop("default_value", None),
         "references": attributes.pop("references", None),
-        **attributes
+        **attributes,
     }
     return {
         **doc,
@@ -78,14 +89,14 @@ def migrate_csp_rule_metadata(doc: dict) -> dict:
             "metadata": metadata,
         },
         "migrationVersion": {
-            "csp-rule-template": "8.7.0"
+            "csp-rule-template": "8.7.0",
         },
-        "coreMigrationVersion": "8.7.0"
+        "coreMigrationVersion": "8.7.0",
     }
 
 
 if __name__ == "__main__":
-    os.chdir(common.repo_root.working_dir + "/dev")
+    os.chdir(os.path.join(common.repo_root.working_dir, "security-policies", "dev"))
 
     parser = argparse.ArgumentParser(
         description="CIS Benchmark Rules Templates Generator CLI",
@@ -96,7 +107,7 @@ if __name__ == "__main__":
         default=common.benchmark.keys(),
         choices=common.benchmark.keys(),
         help="benchmark to be used for the rules template generation (default: all benchmarks). "
-             "for example: `--benchmark cis_eks` or `--benchmark cis_eks cis_aws`",
+        "for example: `--benchmark cis_eks` or `--benchmark cis_eks cis_aws`",
         nargs="+",
     )
     parser.add_argument(
@@ -104,7 +115,7 @@ if __name__ == "__main__":
         "--rules",
         default=[],
         help="set of specific rules to be parsed (default: all rules)."
-             "for example: `--rules 1.1 1.2` or `--rules cis_1_1 cis_1_2`",
+        "for example: `--rules 1.1 1.2` or `--rules cis_1_1 cis_1_2`",
         nargs="+",
     )
     parser.add_argument(

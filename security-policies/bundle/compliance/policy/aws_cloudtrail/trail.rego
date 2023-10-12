@@ -28,7 +28,7 @@ cloudtrail_enabled(trail) {
 	# and it is avtive
 	trail.TrailInfo.Status.IsLogging
 
-	# and it captures all management events 
+	# and it captures all management events
 	some i
 	selector := trail.TrailInfo.EventSelectors[i]
 	selector.IncludeManagementEvents

@@ -55,7 +55,7 @@ test_violation {
 }
 
 test_pass {
-	# passes when project has DATA_READ/DATA_WRITE/ADMIN_READ  
+	# passes when project has DATA_READ/DATA_WRITE/ADMIN_READ
 	# for all services, and with no exempted members
 	eval_pass with input as test_data.generate_policies_asset([{"iam_policy": {"audit_configs": [{
 		"audit_log_configs": [

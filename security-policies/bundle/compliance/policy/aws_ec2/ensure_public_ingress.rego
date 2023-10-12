@@ -8,7 +8,7 @@ import future.keywords.every
 default rule_evaluation = false
 
 finding = result {
-	# filter 
+	# filter
 	data_adapter.is_nacl_policy
 
 	# set result

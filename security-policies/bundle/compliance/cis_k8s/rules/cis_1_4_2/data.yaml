@@ -19,7 +19,8 @@ metadata:
   impact: None
   default_value: |
     By default, the `--bind-address` parameter is set to 0.0.0.0
-  references: 1. https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/
+  references: 1. 
+    https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/
   section: Scheduler
   version: '1.0'
   tags:
