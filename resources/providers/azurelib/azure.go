@@ -15,19 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package version
+package azurelib
 
-// name matches github.com/elastic/beats/v7/dev-tools/mage/settings.go parseBeatVersion
-const defaultBeatVersion = "8.12.0"
-
-// Version represents version information for a package
-type Version struct {
-	Version    string `mapstructure:"version,omitempty"`     // Version is the semantic version of the package
-	CommitHash string `mapstructure:"commit_sha,omitempty"`  // CommitHash is the git commit hash of the package
-	CommitTime string `mapstructure:"commit_time,omitempty"` // CommitTime is the git commit time of the package
-}
-
-type CloudbeatVersionInfo struct {
-	Version `mapstructure:",squash"` // Version info for cloudbeat
-	Policy  Version                  `mapstructure:"policy,omitempty"` // Policy version info for the rules policy
-}
+const GlobalRegion = "global"
