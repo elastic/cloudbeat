@@ -24,7 +24,6 @@ import (
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -39,20 +38,6 @@ var (
 	gcpProjectId   = "projectId"
 	someRegion     = "eu-west-1"
 )
-
-type CloudDataProviderTestSuite struct {
-	suite.Suite
-}
-
-func TestCloudDataProviderTestSuite(t *testing.T) {
-	s := new(CloudDataProviderTestSuite)
-
-	suite.Run(t, s)
-}
-
-func (s *CloudDataProviderTestSuite) SetupTest() {}
-
-func (s *CloudDataProviderTestSuite) TearDownTest() {}
 
 func TestDataProvider_EnrichEvent(t *testing.T) {
 	tests := []struct {

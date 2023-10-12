@@ -53,29 +53,38 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	ctx := context.Background()
 
 	mockInventoryService := &inventory.MockServiceAPI{}
-	mockAssets := []inventory.AzureAsset{
-		{
-			Id:             "id1",
-			Name:           "name1",
-			Location:       "location1",
-			Properties:     map[string]interface{}{"key1": "value1"},
-			ResourceGroup:  "rg1",
-			SubscriptionId: "subId1",
-			TenantId:       "tenantId1",
-			Type:           inventory.VirtualMachineAssetType,
-		},
-		{
-			Id:             "id2",
-			Name:           "name2",
-			Location:       "location2",
-			Properties:     map[string]interface{}{"key2": "value2"},
-			ResourceGroup:  "rg2",
-			SubscriptionId: "subId2",
-			TenantId:       "tenantId2",
-			Type:           inventory.StorageAccountAssetType,
-		},
+	var mockAssets []inventory.AzureAsset
+	for _, assetType := range []string{
+		inventory.ActivityLogAlertAssetType,
+		inventory.ClassicStorageAccountAssetType,
+		inventory.ClassicVirtualMachineAssetType,
+		inventory.DiskAssetType,
+		inventory.DocumentDBDatabaseAccountAssetType,
+		inventory.MySQLDBAssetType,
+		inventory.NetworkWatchersAssetType,
+		inventory.NetworkWatchersFlowLogAssetType,
+		inventory.PostgreSQLDBAssetType,
+		inventory.SQLServersAssetType,
+		inventory.StorageAccountAssetType,
+		inventory.VirtualMachineAssetType,
+		inventory.WebsitesAssetType,
+		inventory.VaultAssetType,
+	} {
+		mockAssets = append(mockAssets,
+			inventory.AzureAsset{
+				Id:               "id",
+				Name:             "name",
+				Location:         "location",
+				Properties:       map[string]interface{}{"key": "value"},
+				ResourceGroup:    "rg",
+				SubscriptionId:   "subId",
+				SubscriptionName: "subName",
+				TenantId:         "tenantId",
+				Type:             assetType,
+				Sku:              "",
+			},
+		)
 	}
-
 	mockInventoryService.EXPECT().
 		ListAllAssetTypesByName(mock.AnythingOfType("[]string")).
 		Return(mockAssets, nil).Once()
@@ -90,20 +99,21 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Require().Len(results, len(AzureResourceTypes))
+	s.Require().Len(results, len(AzureAssetTypeToTypePair))
 	s.Require().Len(results, len(mockAssets))
 
-	for index, r := range results {
+	for index, result := range results {
 		expected := mockAssets[index]
 		s.Run(expected.Type, func() {
-			s.Equal(expected, r.GetData())
+			s.Equal(expected, result.GetData())
 
-			meta, err := r.GetMetadata()
+			meta, err := result.GetMetadata()
 			s.Require().NoError(err)
+			pair := AzureAssetTypeToTypePair[expected.Type]
 			s.Equal(fetching.ResourceMetadata{
 				ID:                  expected.Id,
-				Type:                AzureResourceTypes[expected.Type],
-				SubType:             "",
+				Type:                pair.Type,
+				SubType:             pair.SubType,
 				Name:                expected.Name,
 				Region:              expected.Location,
 				AwsAccountId:        "",
@@ -111,6 +121,18 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 				AwsOrganizationId:   "",
 				AwsOrganizationName: "",
 			}, meta)
+
+			ecs, err := result.GetElasticCommonData()
+			s.Require().NoError(err)
+			s.Equal(map[string]any{
+				"cloud": map[string]any{
+					"provider": "azure",
+					"account": map[string]any{
+						"id":   expected.SubscriptionId,
+						"name": expected.SubscriptionName,
+					},
+				},
+			}, ecs)
 		})
 	}
 }

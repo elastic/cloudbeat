@@ -15,23 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package preset
+package azurelib
 
-import (
-	"github.com/elastic/elastic-agent-libs/logp"
-
-	"github.com/elastic/cloudbeat/resources/fetching"
-	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/azure"
-	"github.com/elastic/cloudbeat/resources/fetching/registry"
-	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
-)
-
-func NewCisAzureFactory(log *logp.Logger, ch chan fetching.ResourceInfo, inventory inventory.ServiceAPI) (registry.FetchersMap, error) {
-	log.Infof("Initializing Azure fetchers")
-	m := make(registry.FetchersMap)
-
-	assetsFetcher := fetchers.NewAzureAssetsFetcher(log, ch, inventory)
-	m["azure_cloud_assets_fetcher"] = registry.RegisteredFetcher{Fetcher: assetsFetcher}
-
-	return m, nil
-}
+const GlobalRegion = "global"
