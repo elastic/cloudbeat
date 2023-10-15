@@ -6,7 +6,11 @@ from typing import Dict, Any
 from munch import Munch, munchify
 from loguru import logger
 from api.base_call_api import APICallException, perform_api_call
-from utils import replace_image_field, add_capabilities
+from utils import (
+    replace_image_field,
+    add_capabilities,
+    add_tags,
+)
 
 AGENT_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
 
@@ -110,6 +114,40 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
         with codecs.open(params.yaml_path, "w", encoding="utf-8-sig") as k8s_yaml:
             k8s_yaml.write(manifest_yaml)
         logger.info(f"KSPM manifest is available at: '{params.yaml_path}'")
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return
+
+
+def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
+    """
+    Download a CloudFormation template from a specified URL,
+    add custom tags to it, and save it to a file.
+
+    Args:
+        url (str): The URL to download the CloudFormation template.
+        template_path (str): The file path where the modified template will be saved.
+        cnvm_tags (str): Custom tags to be added to the template in the format "key1=value1 key2=value2 ...".
+
+    Returns:
+        None
+
+    Raises:
+        APICallException: If there's an issue with the API call.
+    """
+    try:
+        template_yaml = perform_api_call(
+            method="GET",
+            url=url,
+            return_json=False,
+        )
+        template_yaml = add_tags(tags=cnvm_tags, yaml_content=template_yaml)
+
+        with codecs.open(template_path, "w", encoding="utf-8") as cnvm_yaml:
+            cnvm_yaml.write(template_yaml)
+        logger.info(f"CNVM template is available at: '{template_path}'")
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",

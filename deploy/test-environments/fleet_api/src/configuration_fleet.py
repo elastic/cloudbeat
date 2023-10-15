@@ -18,6 +18,14 @@ have been set in the system environment.
 import os
 from munch import Munch
 
+CNVM_TAGS = (
+    "Key=division,Value=engineering "
+    "Key=org,Value=security "
+    "Key=team,Value=cloud-security-posture "
+    "Key=project,Value=test-environments"
+)
+
+
 elk_config = Munch()
 elk_config.user = os.getenv("ES_USER", "NA")
 elk_config.password = os.getenv("ES_PASSWORD", "NA")
@@ -31,6 +39,7 @@ kspm_config.docker_image_override = os.getenv("DOCKER_IMAGE_OVERRIDE", "")
 aws_config = Munch()
 aws_config.access_key_id = os.getenv("AWS_ACCESS_KEY_ID", "NA")
 aws_config.secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "NA")
+aws_config.cnvm_tags = os.getenv("AWS_CNVM_TAGS", CNVM_TAGS)
 
 gcp_dm_config = Munch()
 gcp_dm_config.deployment_name = os.getenv("DEPLOYMENT_NAME", "")

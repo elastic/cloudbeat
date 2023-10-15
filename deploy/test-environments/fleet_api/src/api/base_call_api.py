@@ -10,7 +10,6 @@ Dependencies:
     - requests: Library for making HTTP requests
 """
 import requests
-from loguru import logger
 
 
 class APICallException(Exception):
@@ -34,7 +33,7 @@ class APICallException(Exception):
         self.response_text = response_text
 
 
-def perform_api_call(method, url, headers=None, auth=None, params=None):
+def perform_api_call(method, url, return_json=True, headers=None, auth=None, params=None):
     """
     Perform an API call using the provided parameters.
 
@@ -69,33 +68,6 @@ def perform_api_call(method, url, headers=None, auth=None, params=None):
     if response.status_code != 200:
         raise APICallException(response.status_code, response.text)
 
+    if not return_json:
+        return response.content
     return response.json()
-
-
-def download_file(url, destination, timeout=30):
-    """
-    Download a file from a URL and save it to the specified destination.
-
-    Args:
-        url (str): The URL of the file to download.
-        destination (str): The path where the downloaded file will be saved.
-        timeout (int, optional): The maximum time (in seconds) to wait for the server's response.
-                                 Defaults to 30 seconds.
-
-    Raises:
-        APICallException: If there's an issue with the HTTP request.
-        IOError: If there's an issue with saving the downloaded file.
-    """
-    try:
-        response = requests.get(url, stream=True, timeout=timeout)
-        response.raise_for_status()
-
-        with open(destination, "wb") as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-
-        logger.info(f"File downloaded to {destination}")
-    except requests.exceptions.RequestException as ex:
-        raise APICallException(500, f"HTTP Request Error: {ex}") from ex
-    except IOError as io_ex:
-        raise IOError(f"IO Error: {io_ex}") from io_ex

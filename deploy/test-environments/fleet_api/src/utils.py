@@ -266,3 +266,55 @@ def rename_file_by_suffix(file_path: Path, suffix: str) -> None:
         logger.warning(f"File {file_path.name} not found")
     except FileExistsError:
         logger.warning(f"File {new_file_path} already exists")
+
+
+def add_tags(tags: str, yaml_content: str):
+    """
+    Add custom tags to a YAML content while preserving formatting.
+
+    Args:
+        tags (str): Custom tags in the format "key1=value1 key2=value2 ...".
+        yaml_content (str): YAML content to which custom tags will be added.
+
+    Returns:
+        str: The modified YAML content with custom tags.
+    """
+    # Create a ruamel.yaml instance with the ability to preserve formatting
+    yaml = ruamel.yaml.YAML()
+    yaml.preserve_quotes = True
+    yaml.explicit_start = True
+    yaml.indent(mapping=2, sequence=4, offset=2)
+
+    cnvm_template = yaml.load(yaml_content)
+
+    # Get custom tags from the input argument
+    custom_tags = tags.split()
+    tag_dicts = []
+
+    for tag in custom_tags:
+        key_values = tag.split(",")
+        tag_dict = {}
+
+        for key_value in key_values:
+            key, value = key_value.split("=")
+            tag_dict[key] = value
+        tag_dicts.append(tag_dict)
+
+    for resource in cnvm_template["Resources"].values():
+        if resource["Type"] == "AWS::EC2::Instance":
+            if "Properties" not in resource:
+                resource["Properties"] = {}
+            if "Tags" not in resource["Properties"]:
+                resource["Properties"]["Tags"] = []
+            resource["Properties"]["Tags"] += tag_dicts
+
+    # Create an output stream
+    output_stream = ruamel.yaml.compat.StringIO()
+
+    # Dump the modified YAML data to the output stream
+    yaml.dump(cnvm_template, output_stream)
+
+    # Get the YAML string from the output stream
+    modified_content = output_stream.getvalue()
+
+    return modified_content

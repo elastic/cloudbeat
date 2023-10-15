@@ -19,8 +19,8 @@ from api.common_api import (
     get_fleet_server_host,
     get_artifact_server,
     get_package_version,
+    get_cnvm_template,
 )
-from api.base_call_api import download_file
 from loguru import logger
 from state_file_manager import state_manager, PolicyState
 from package_policy import (
@@ -36,6 +36,7 @@ from utils import rename_file_by_suffix
 CNVM_EXPECTED_AGENTS = 1
 CNVM_CLOUDFORMATION_CONFIG = "../../../cloudformation/config.json"
 CNMV_TEMPLATE = "../../../cloudformation/elastic-agent-ec2-cnvm.yml"
+CNMV_TEMP_FILE = "elastic-agent-ec2-cnvm-temp.yml"
 CNVM_AGENT_TAGS = ["cft_version:CFT_VERSION", "cft_arn:arn:aws:cloudformation:.*"]
 PKG_DEFAULT_VERSION = VERSION_MAP.get("vuln_mgmt_aws", "")
 INTEGRATION_NAME = "CNVM AWS"
@@ -115,6 +116,10 @@ if __name__ == "__main__":
             file_path=cnvm_cloudformation_template,
             suffix="-orig",
         )
-    download_file(url=template_url, destination=cnvm_cloudformation_template)
+    get_cnvm_template(
+        url=template_url,
+        template_path=cnvm_cloudformation_template,
+        cnvm_tags=cnfg.aws_config.cnvm_tags,
+    )
 
     logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
