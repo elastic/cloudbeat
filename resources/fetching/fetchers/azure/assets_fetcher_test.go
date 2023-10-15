@@ -72,14 +72,16 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	} {
 		mockAssets = append(mockAssets,
 			inventory.AzureAsset{
-				Id:             "id",
-				Name:           "name",
-				Location:       "location",
-				Properties:     map[string]interface{}{"key": "value"},
-				ResourceGroup:  "rg",
-				SubscriptionId: "subId",
-				TenantId:       "tenantId",
-				Type:           assetType,
+				Id:               "id",
+				Name:             "name",
+				Location:         "location",
+				Properties:       map[string]interface{}{"key": "value"},
+				ResourceGroup:    "rg",
+				SubscriptionId:   "subId",
+				SubscriptionName: "subName",
+				TenantId:         "tenantId",
+				Type:             assetType,
+				Sku:              "",
 			},
 		)
 	}
@@ -97,20 +99,21 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Require().Len(results, len(AzureResourceTypes))
+	s.Require().Len(results, len(AzureAssetTypeToTypePair))
 	s.Require().Len(results, len(mockAssets))
 
-	for index, r := range results {
+	for index, result := range results {
 		expected := mockAssets[index]
 		s.Run(expected.Type, func() {
-			s.Equal(expected, r.GetData())
+			s.Equal(expected, result.GetData())
 
-			meta, err := r.GetMetadata()
+			meta, err := result.GetMetadata()
 			s.Require().NoError(err)
+			pair := AzureAssetTypeToTypePair[expected.Type]
 			s.Equal(fetching.ResourceMetadata{
 				ID:                  expected.Id,
-				Type:                AzureResourceTypes[expected.Type],
-				SubType:             "",
+				Type:                pair.Type,
+				SubType:             pair.SubType,
 				Name:                expected.Name,
 				Region:              expected.Location,
 				AwsAccountId:        "",
@@ -118,6 +121,18 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 				AwsOrganizationId:   "",
 				AwsOrganizationName: "",
 			}, meta)
+
+			ecs, err := result.GetElasticCommonData()
+			s.Require().NoError(err)
+			s.Equal(map[string]any{
+				"cloud": map[string]any{
+					"provider": "azure",
+					"account": map[string]any{
+						"id":   expected.SubscriptionId,
+						"name": expected.SubscriptionName,
+					},
+				},
+			}, ecs)
 		})
 	}
 }
