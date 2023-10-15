@@ -344,7 +344,7 @@ jobs:
           poetry run python src/agents_enrolled.py
 
       - name: Run Sanity checks
-        if: ${{ success() && inputs.run-sanity-tests == 'true' }}
+        if: ${{ success() && (inputs.run-sanity-tests == 'true' || inputs.run-sanity-tests == true) }}
         working-directory: ./tests
         run: |
           poetry install

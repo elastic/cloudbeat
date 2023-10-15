@@ -117,7 +117,7 @@ jobs:
 
       - name: Download tf state data
         env:
-          S3_BUCKET: ${{ needs.deploy.outputs.deploy-s3-bucket }}
+          S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
         run: |
           aws s3 cp "${{ env.S3_BUCKET }}/terraform.tfstate" "./terraform.tfstate"
 
