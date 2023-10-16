@@ -26,6 +26,7 @@ env:
   WORKING_DIR: deploy/test-environments
   TF_VAR_stack_version: ${{ inputs.elk-stack-version }}
   TF_VAR_ess_region: gcp-us-west2
+  TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
   init:
