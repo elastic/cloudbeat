@@ -311,9 +311,3 @@ jobs:
         if: github.event.inputs.cleanup-env == 'true'
         run: |
           just delete-cloud-env ${{ env.DEPLOYMENT_NAME }} '' "false"
-
-      - name: Tag CNVM Instance
-        if: github.event.inputs.cleanup-env == 'false'
-        env:
-          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} '${{ env.AWS_DEFAULT_TAGS }} Key=owner,Value=${{ github.actor }}'
