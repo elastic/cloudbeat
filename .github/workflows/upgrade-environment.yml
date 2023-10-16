@@ -27,6 +27,7 @@ env:
   TF_VAR_stack_version: ${{ inputs.elk-stack-version }}
   TF_VAR_ess_region: gcp-us-west2
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
+  DOCKER_IMAGE: ${{ inputs.docker-image-override }}
 
 jobs:
   init:
@@ -177,3 +178,22 @@ jobs:
         run: |
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+
+      - name: Set Docker Image version
+        if: ${{ ! inputs.docker-image-override }}
+        env:
+          VERSION: 'docker.elastic.co/beats/elastic-agent:${{ inputs.elk-stack-version }}'
+        run: |
+          echo "DOCKER_IMAGE=${{ env.VERSION }}" >> $GITHUB_ENV
+
+      - name: Download Integrations data
+        env:
+          S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
+        run: |
+          aws s3 cp "${{ env.S3_BUCKET }}/kspm.pem" "${{ env.EC2_KSPM_KEY }}"
+
+      - name: Upgrade KSPM Unmanaged agent
+        run: |
+          chmod 600 ${{ env.EC2_KSPM_KEY }}
+          # Update image
+          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}"
