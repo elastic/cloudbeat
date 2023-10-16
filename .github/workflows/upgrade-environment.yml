@@ -172,6 +172,8 @@ jobs:
       - name: Run Sanity checks
         if: success()
         working-directory: ./tests
+        env:
+          USE_K8S: false
         run: |
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
