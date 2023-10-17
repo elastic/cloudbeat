@@ -7,6 +7,17 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    groups:
+      azure:
+        "github.com/Azure/*"
+      aws:
+        "github.com/aws/*"
+      google:
+        "cloud.google.com/*"
+      elastic:
+        "github.com/elastic/*"
+      k8s:
+        "k8s.io/*"
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
