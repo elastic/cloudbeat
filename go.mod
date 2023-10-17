@@ -38,11 +38,11 @@ require (
 	github.com/aws/smithy-go v1.14.2
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.5.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20230814080252-bb0bf789534c
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231011163740-10b198c985eb
 	github.com/elastic/e2e-testing v1.99.2-0.20220117192005-d3365c99b9c4
 	github.com/elastic/elastic-agent-autodiscover v0.6.2
-	github.com/elastic/elastic-agent-client/v7 v7.3.0
-	github.com/elastic/elastic-agent-libs v0.3.11
+	github.com/elastic/elastic-agent-client/v7 v7.4.0
+	github.com/elastic/elastic-agent-libs v0.5.0
 	github.com/elastic/go-licenser v0.4.1
 	github.com/elastic/go-ucfg v0.8.6
 	github.com/go-git/go-git/v5 v5.7.0
@@ -65,7 +65,7 @@ require (
 	github.com/tsg/go-daemon v0.0.0-20200207173439-e704b93fd89b
 	go.elastic.co/go-licence-detector v0.6.0
 	go.uber.org/goleak v1.2.1
-	go.uber.org/zap v1.25.0
+	go.uber.org/zap v1.26.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.12.0
@@ -83,7 +83,7 @@ require (
 require golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 
 require (
-	cloud.google.com/go v0.110.7 // indirect
+	cloud.google.com/go v0.110.8 // indirect
 	cloud.google.com/go/accesscontextmanager v1.8.1 // indirect
 	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
@@ -186,7 +186,7 @@ require (
 	github.com/dgraph-io/badger/v3 v3.2103.5 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
-	github.com/dlclark/regexp2 v1.8.1 // indirect
+	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/dnephin/pflag v1.0.7 // indirect
 	github.com/docker/cli v23.0.1+incompatible // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
@@ -208,7 +208,7 @@ require (
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.3.0 // indirect
 	github.com/elastic/go-structform v0.0.10 // indirect
-	github.com/elastic/go-sysinfo v1.11.0 // indirect
+	github.com/elastic/go-sysinfo v1.11.1 // indirect
 	github.com/elastic/go-windows v1.0.1 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
 	github.com/elazarl/goproxy v0.0.0-20230731152917-f99041a5c027 // indirect
@@ -289,7 +289,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jarcoal/httpmock v1.0.5 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
-	github.com/jcchavezs/porto v0.4.0 // indirect
+	github.com/jcchavezs/porto v0.5.1 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
 	github.com/jcmturner/gofork v1.0.0 // indirect
@@ -331,7 +331,7 @@ require (
 	github.com/masahiro331/go-mvn-version v0.0.0-20210429150710-d3157d602a08 // indirect
 	github.com/masahiro331/go-vmdk-parser v0.0.0-20221225061455-612096e4bbbd // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/microsoft/go-rustaudit v0.0.0-20220808201409-204dfee52032 // indirect
@@ -381,7 +381,7 @@ require (
 	github.com/prometheus/client_golang v1.15.1 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
-	github.com/prometheus/procfs v0.9.0 // indirect
+	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
@@ -431,10 +431,10 @@ require (
 	github.com/zclconf/go-cty-yaml v1.0.2 // indirect
 	go.elastic.co/apm v1.13.0 // indirect
 	go.elastic.co/apm/module/apmelasticsearch/v2 v2.0.0 // indirect
-	go.elastic.co/apm/module/apmhttp/v2 v2.2.0 // indirect
-	go.elastic.co/apm/v2 v2.2.0 // indirect
-	go.elastic.co/ecszap v1.0.1 // indirect
-	go.elastic.co/fastjson v1.1.0 // indirect
+	go.elastic.co/apm/module/apmhttp/v2 v2.4.5 // indirect
+	go.elastic.co/apm/v2 v2.4.5 // indirect
+	go.elastic.co/ecszap v1.0.2 // indirect
+	go.elastic.co/fastjson v1.3.0 // indirect
 	go.etcd.io/bbolt v1.3.7 // indirect
 	go.mongodb.org/mongo-driver v1.11.3 // indirect
 	go.opencensus.io v0.24.0 // indirect
@@ -443,7 +443,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.14.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
@@ -454,10 +454,10 @@ require (
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230913181813-007df8e322eb // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20230913181813-007df8e322eb // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230920204549-e6e6cdab5c13 // indirect
-	google.golang.org/grpc v1.58.2 // indirect
+	google.golang.org/genproto v0.0.0-20231012201019-e917dd12ba7a // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20231002182017-d307bd883b97 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231016165738-49dd2c1f3d0b // indirect
+	google.golang.org/grpc v1.58.3 // indirect
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
