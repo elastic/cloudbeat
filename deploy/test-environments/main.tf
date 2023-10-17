@@ -4,10 +4,10 @@ provider "aws" {
 
 locals {
   common_tags = {
-    division = "engineering"
-    org      = "security"
-    team     = "cloud-security-posture"
-    project  = "test-environments"
+    division = "${var.division}"
+    org      = "${var.org}"
+    team     = "${var.team}"
+    project  = "${var.project}"
   }
 }
 
