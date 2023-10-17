@@ -69,7 +69,7 @@ require (
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.12.0
-	golang.org/x/tools v0.8.0
+	golang.org/x/tools v0.14.0
 	google.golang.org/api v0.146.0
 	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools/gotestsum v1.10.1
@@ -79,6 +79,8 @@ require (
 	k8s.io/klog/v2 v2.100.1
 	modernc.org/sqlite v1.23.1
 )
+
+require golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 
 require (
 	cloud.google.com/go v0.110.7 // indirect
@@ -443,9 +445,9 @@ require (
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/mod v0.10.0 // indirect
+	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sync v0.3.0 // indirect
+	golang.org/x/sync v0.4.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
