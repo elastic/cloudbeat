@@ -35,6 +35,10 @@ jobs:
     outputs:
       stack-version: ${{ steps.set-previous-version.outputs.PREVIOUS_VERSION }}
       ess-region: ${{ env.TF_VAR_ess_region }}
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -43,6 +47,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::704479110758:role/Developer_eks
+          role-session-name: github-ci
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Caller identity
