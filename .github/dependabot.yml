@@ -9,18 +9,32 @@ updates:
       interval: "daily"
     groups:
       azure:
-        "github.com/Azure/*"
+        patterns:
+          - "github.com/Azure/*"
       aws:
-        "github.com/aws/*"
+        patterns:
+          - "github.com/aws/*"
       google:
-        "cloud.google.com/*"
+        patterns:
+          - "cloud.google.com/*"
       elastic:
-        "github.com/elastic/*"
+        patterns:
+          - "github.com/elastic/*"
       k8s:
-        "k8s.io/*"
+        patterns:
+          - "k8s.io/*"
+    labels:
+      - "backport-skip"
+      - "dependency"
+      - "go"
+    open-pull-requests-limit: 10
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: ".github/workflows"
     schedule:
       interval: "weekly"
+    labels:
+      - "backport-skip"
+      - "dependency"
+      - "github_actions"
