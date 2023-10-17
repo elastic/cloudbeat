@@ -35,29 +35,7 @@ jobs:
     outputs:
       stack-version: ${{ steps.set-previous-version.outputs.PREVIOUS_VERSION }}
       ess-region: ${{ env.TF_VAR_ess_region }}
-    # Add "id-token" with the intended permissions.
-    permissions:
-      contents: 'read'
-      id-token: 'write'
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::704479110758:role/Developer_eks
-          role-session-name: github-ci
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Caller identity
-        run: |
-          aws sts get-caller-identity
-          aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
-              --name ${{ inputs.deployment_name }} --alias eks-config
-          kubectl config use-context eks-config
-          kubectl get po -n kube-system
-
       - name: Set Previous Version
         id: set-previous-version
         run: |
@@ -92,137 +70,140 @@ jobs:
           echo "Current Version: $VERSION"
           echo "Latest Released Version: $PREVIOUS_VERSION"
           echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
-  # deploy:
-  #   uses: ./.github/workflows/test-environment.yml
-  #   needs: init
-  #   with:
-  #     deployment_name: ${{ inputs.deployment_name }}
-  #     elk-stack-version: ${{ needs.init.outputs.stack-version }}
-  #     ess-region: ${{ needs.init.outputs.ess-region }}
-  #     run-sanity-tests: true
-  #   secrets: inherit
-  # upgrade:
-  #   runs-on: ubuntu-20.04
-  #   needs: deploy
-  #   timeout-minutes: 120
-  #   defaults:
-  #     run:
-  #       working-directory: ${{ env.WORKING_DIR }}
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v4
+  deploy:
+    uses: ./.github/workflows/test-environment.yml
+    needs: init
+    with:
+      deployment_name: ${{ inputs.deployment_name }}
+      elk-stack-version: ${{ needs.init.outputs.stack-version }}
+      ess-region: ${{ needs.init.outputs.ess-region }}
+      run-sanity-tests: true
+    secrets: inherit
+  upgrade:
+    runs-on: ubuntu-20.04
+    needs: deploy
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIR }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-  #     - name: Init Hermit
-  #       run: ./bin/hermit env -r >> $GITHUB_ENV
-  #       working-directory: ./
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+        working-directory: ./
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-  #     - name: Install Poetry
-  #       run: |
-  #         curl -sSL https://install.python-poetry.org | python3 -
-  #         poetry --version
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry --version
 
-  #     - name: Install Fleet API dependencies
-  #       id: fleet-api-deps
-  #       working-directory: ${{ env.WORKING_DIR }}/fleet_api
-  #       run: |
-  #         poetry install
+      - name: Install Fleet API dependencies
+        id: fleet-api-deps
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry install
 
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v2
-  #       with:
-  #         aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::704479110758:role/Developer_eks
+          role-session-name: github-ci
+          aws-region: ${{ env.AWS_REGION }}
 
-  #     - name: Download tf state data
-  #       env:
-  #         S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
-  #       run: |
-  #         aws s3 cp "${{ env.S3_BUCKET }}/terraform.tfstate" "./terraform.tfstate"
+      - name: Download tf state data
+        env:
+          S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
+        run: |
+          aws s3 cp "${{ env.S3_BUCKET }}/terraform.tfstate" "./terraform.tfstate"
 
-  #     - name: Terraform Init
-  #       run: terraform init
+      - name: Terraform Init
+        run: terraform init
 
-  #     - name: Terraform Validate
-  #       run: terraform validate
+      - name: Terraform Validate
+        run: terraform validate
 
-  #     - name: Update ELK stack version
-  #       id: apply
-  #       if: success()
-  #       run: |
-  #         terraform apply --auto-approve -var="deployment_name=${{ inputs.deployment_name }}" -var="region=${{ env.AWS_REGION }}"
+      - name: Update ELK stack version
+        id: apply
+        if: success()
+        run: |
+          terraform apply --auto-approve -var="deployment_name=${{ inputs.deployment_name }}" -var="region=${{ env.AWS_REGION }}"
 
-  #     - name: Set Environment Output
-  #       id: env-output
-  #       run: |
-  #         echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
-  #         echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
-  #         echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
+      - name: Set Environment Output
+        id: env-output
+        run: |
+          echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
+          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
+          echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
 
-  #         export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
-  #         echo "::add-mask::$ES_PASSWORD"
-  #         echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
+          export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
+          echo "::add-mask::$ES_PASSWORD"
+          echo "ES_PASSWORD=$ES_PASSWORD" >> $GITHUB_ENV
 
-  #         export EC2_CSPM=$(terraform output -raw ec2_cspm_ssh_cmd)
-  #         echo "::add-mask::$EC2_CSPM"
-  #         echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
+          export EC2_CSPM=$(terraform output -raw ec2_cspm_ssh_cmd)
+          echo "::add-mask::$EC2_CSPM"
+          echo "EC2_CSPM=$EC2_CSPM" >> $GITHUB_ENV
 
-  #         export EC2_KSPM=$(terraform output -raw ec2_kspm_ssh_cmd)
-  #         echo "::add-mask::$EC2_KSPM"
-  #         echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
+          export EC2_KSPM=$(terraform output -raw ec2_kspm_ssh_cmd)
+          echo "::add-mask::$EC2_KSPM"
+          echo "EC2_KSPM=$EC2_KSPM" >> $GITHUB_ENV
 
-  #         export EC2_CSPM_KEY=$(terraform output -raw ec2_cspm_key)
-  #         echo "::add-mask::$EC2_CSPM_KEY"
-  #         echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
+          export EC2_CSPM_KEY=$(terraform output -raw ec2_cspm_key)
+          echo "::add-mask::$EC2_CSPM_KEY"
+          echo "EC2_CSPM_KEY=$EC2_CSPM_KEY" >> $GITHUB_ENV
 
-  #         export EC2_KSPM_KEY=$(terraform output -raw ec2_kspm_key)
-  #         echo "::add-mask::$EC2_KSPM_KEY"
-  #         echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
+          export EC2_KSPM_KEY=$(terraform output -raw ec2_kspm_key)
+          echo "::add-mask::$EC2_KSPM_KEY"
+          echo "EC2_KSPM_KEY=$EC2_KSPM_KEY" >> $GITHUB_ENV
 
-  #         export KSPM_PUBLIC_IP=$(terraform output -raw ec2_kspm_public_ip)
-  #         echo "::add-mask::$KSPM_PUBLIC_IP"
-  #         echo "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
+          export KSPM_PUBLIC_IP=$(terraform output -raw ec2_kspm_public_ip)
+          echo "::add-mask::$KSPM_PUBLIC_IP"
+          echo "KSPM_PUBLIC_IP=$KSPM_PUBLIC_IP" >> $GITHUB_ENV
 
-  #         export CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
-  #         echo "::add-mask::$CSPM_PUBLIC_IP"
-  #         echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
+          export CSPM_PUBLIC_IP=$(terraform output -raw ec2_cspm_public_ip)
+          echo "::add-mask::$CSPM_PUBLIC_IP"
+          echo "CSPM_PUBLIC_IP=$CSPM_PUBLIC_IP" >> $GITHUB_ENV
 
-  #     - name: Run Sanity checks
-  #       if: success()
-  #       working-directory: ./tests
-  #       env:
-  #         USE_K8S: false
-  #       run: |
-  #         poetry install
-  #         poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+      - name: Run Sanity checks
+        if: success()
+        working-directory: ./tests
+        env:
+          USE_K8S: false
+        run: |
+          poetry install
+          poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
-  #     - name: Set Docker Image version
-  #       if: ${{ ! inputs.docker-image-override }}
-  #       env:
-  #         VERSION: 'docker.elastic.co/beats/elastic-agent:${{ inputs.elk-stack-version }}'
-  #       run: |
-  #         echo "DOCKER_IMAGE=${{ env.VERSION }}" >> $GITHUB_ENV
+      - name: Set Docker Image version
+        if: ${{ ! inputs.docker-image-override }}
+        env:
+          VERSION: 'docker.elastic.co/beats/elastic-agent:${{ inputs.elk-stack-version }}'
+        run: |
+          echo "DOCKER_IMAGE=${{ env.VERSION }}" >> $GITHUB_ENV
 
-  #     - name: Download Integrations data
-  #       env:
-  #         S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
-  #       run: |
-  #         aws s3 cp "${{ env.S3_BUCKET }}/kspm.pem" "${{ env.EC2_KSPM_KEY }}"
+      - name: Download Integrations data
+        env:
+          S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
+        run: |
+          aws s3 cp "${{ env.S3_BUCKET }}/kspm.pem" "${{ env.EC2_KSPM_KEY }}"
 
-  #     - name: Upgrade KSPM Unmanaged agent
-  #       run: |
-  #         chmod 600 ${{ env.EC2_KSPM_KEY }}
-  #         # Update image
-  #         ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}"
+      - name: Upgrade KSPM Unmanaged agent
+        run: |
+          chmod 600 ${{ env.EC2_KSPM_KEY }}
+          # Update image
+          ssh -o StrictHostKeyChecking=no -v -i ${{ env.EC2_KSPM_KEY }} "ubuntu@${{ env.KSPM_PUBLIC_IP }}" "kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}"
 
-  #     - name: Upgrade KSPM EKS agent
-  #       run: |
-  #         aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
-  #             --name $(terraform output -raw deployment_name) --alias eks-config
-  #         kubectl config use-context eks-config
-  #         kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}
+      - name: Upgrade KSPM EKS agent
+        run: |
+          aws eks --region ${{ env.AWS_REGION }} update-kubeconfig \
+              --name $(terraform output -raw deployment_name) --alias eks-config
+          kubectl config use-context eks-config
+          kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}
