@@ -7,12 +7,34 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    allow:
-      - dependency-name: "github.com/elastic/elastic-agent-libs"
-      - dependency-name: "github.com/elastic/beats*"
+    groups:
+      azure:
+        patterns:
+          - "github.com/Azure/*"
+      aws:
+        patterns:
+          - "github.com/aws/*"
+      google:
+        patterns:
+          - "cloud.google.com/*"
+      elastic:
+        patterns:
+          - "github.com/elastic/*"
+      k8s:
+        patterns:
+          - "k8s.io/*"
+    labels:
+      - "backport-skip"
+      - "dependency"
+      - "go"
+    open-pull-requests-limit: 10
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: ".github/workflows"
     schedule:
       interval: "weekly"
+    labels:
+      - "backport-skip"
+      - "dependency"
+      - "github_actions"
