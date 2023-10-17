@@ -25,6 +25,8 @@ updates:
           - "k8s.io/*"
     labels:
       - "backport-skip"
+      - "dependency"
+      - "go"
     open-pull-requests-limit: 10
 
   # Maintain dependencies for GitHub Actions
@@ -34,3 +36,5 @@ updates:
       interval: "weekly"
     labels:
       - "backport-skip"
+      - "dependency"
+      - "github_actions"
