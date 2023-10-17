@@ -140,9 +140,6 @@ jobs:
           terraform apply --auto-approve \
             -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
             -var="region=${{ env.AWS_REGION }}" \
-            -var="division=engineering" \
-            -var="org=security" \
-            -var="team=cloud-security-posture" \
             -var="project=${{ github.actor }}"
 
       - name: Set Environment Output
