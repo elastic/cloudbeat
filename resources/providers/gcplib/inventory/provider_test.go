@@ -67,7 +67,7 @@ func (s *ProviderTestSuite) TestProviderInit() {
 		ClientOpts: []option.ClientOption{},
 	}
 
-	initMock.On("Init", mock.Anything, s.logger, gcpConfig).Return(&Provider{}, nil).Once()
+	initMock.EXPECT().Init(mock.Anything, s.logger, gcpConfig).Return(&Provider{}, nil).Once()
 	provider, err := initMock.Init(context.Background(), s.logger, gcpConfig)
 	s.Assert().NoError(err)
 	s.Assert().NotNil(provider)
