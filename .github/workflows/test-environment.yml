@@ -72,6 +72,9 @@ on:
       s3-bucket:
         description: "Terraform state s3 bucket folder"
         value: ${{ jobs.Deploy.outputs.deploy-s3-bucket }}
+      cnvm-stack-name:
+        description: "AWS CNVM integration stack name"
+        value: ${{ jobs.Deploy.outputs.aws-cnvm-stack-name }}
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -104,6 +107,7 @@ jobs:
       id-token: 'write'
     outputs:
       deploy-s3-bucket: ${{ steps.upload-state.outputs.s3-bucket-folder }}
+      aws-cnvm-stack-name: ${{ steps.upload-state.outputs.aws-cnvm-stack }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -224,7 +228,9 @@ jobs:
           aws s3 cp "./terraform.tfstate" "${{ env.S3_BUCKET }}/terraform.tfstate"
           aws s3 cp "${{ env.EC2_CSPM_KEY }}" "${{ env.S3_BUCKET }}/cspm.pem"
           aws s3 cp "${{ env.EC2_KSPM_KEY }}" "${{ env.S3_BUCKET }}/kspm.pem"
+          aws s3 cp "../cloudformation/config.json" "${{ env.S3_BUCKET }}/cnvm_config.json"
           echo "s3-bucket-folder=${{ env.S3_BUCKET }}" >> $GITHUB_OUTPUT
+          echo "aws-cnvm-stack=${{ env.CNVM_STACK_NAME }}" >> $GITHUB_OUTPUT
 
       - name: Summary
         if: success()

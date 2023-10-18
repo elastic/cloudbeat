@@ -194,6 +194,7 @@ jobs:
           S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
         run: |
           aws s3 cp "${{ env.S3_BUCKET }}/kspm.pem" "${{ env.EC2_KSPM_KEY }}"
+          aws s3 cp "${{ env.S3_BUCKET }}/cnvm_config.json" "${{ env.WORKING_DIR }}/fleet_api/src/cnvm_config.json"
 
       - name: Upgrade KSPM Unmanaged agent
         run: |
@@ -207,3 +208,11 @@ jobs:
               --name $(terraform output -raw deployment_name) --alias eks-config
           kubectl config use-context eks-config
           kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}
+
+      - name: Upgrade AWS CNMV agent
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        env:
+          CNVM_STACK_NAME: ${{ needs.deploy.outputs.cnvm-stack-name }}
+          STACK_VERSION: ${{ inputs.elk-stack-version }}
+        run: |
+          poetry run python src/upgrade_cnvm.py
