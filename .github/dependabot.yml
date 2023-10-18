@@ -7,11 +7,6 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-<<<<<<< HEAD
-    allow:
-      - dependency-name: "github.com/elastic/elastic-agent-libs"
-      - dependency-name: "github.com/elastic/beats*"
-=======
     groups:
       azure:
         patterns:
@@ -37,10 +32,13 @@ updates:
     # go get -u github.com/elastic/beats/v7@<commit sha>
     ignore:
       - dependency-name: "github.com/elastic/beats/v7"
->>>>>>> 0ecf1f7 (go.mod: Update beats and elastic libraries (#1438))
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: ".github/workflows"
     schedule:
       interval: "weekly"
+    labels:
+      - "backport-skip"
+      - "dependency"
+      - "github_actions"
