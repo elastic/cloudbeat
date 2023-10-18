@@ -52,7 +52,7 @@ func NewGcpPoliciesFetcher(_ context.Context, log *logp.Logger, ch chan fetching
 func (f *GcpPoliciesFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting GcpPoliciesFetcher.Fetch")
 
-	projectsAssets, err := f.provider.ListProjectsAncestorsPolicies()
+	projectsAssets, err := f.provider.ListProjectsAncestorsPolicies(ctx)
 	if err != nil {
 		return err
 	}
