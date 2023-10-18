@@ -57,7 +57,7 @@ var monitoringAssetTypes = map[string][]string{
 func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
 
-	monitoringAssets, err := f.provider.ListMonitoringAssets(monitoringAssetTypes)
+	monitoringAssets, err := f.provider.ListMonitoringAssets(ctx, monitoringAssetTypes)
 	if err != nil {
 		return err
 	}
