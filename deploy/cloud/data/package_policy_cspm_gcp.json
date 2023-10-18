@@ -2,7 +2,7 @@
   "policy_id": "${agent_policy_id}",
   "package": {
     "name": "cloud_security_posture",
-    "version": "1.5.2-preview2"
+    "version": "1.5.2"
   },
   "name": "pkg-plcy-cspm-gcp-tf",
   "description": "",

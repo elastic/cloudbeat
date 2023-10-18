@@ -25,17 +25,16 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
-	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
+	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type ProviderTestSuite struct {
 	suite.Suite
-	ctx          context.Context
-	logger       *logp.Logger
 	mockedClient *AzureClientWrapper
 }
 
@@ -91,8 +90,6 @@ func TestInventoryProviderTestSuite(t *testing.T) {
 }
 
 func (s *ProviderTestSuite) SetupTest() {
-	s.ctx = context.Background()
-	s.logger = logp.NewLogger("test")
 	s.mockedClient = &AzureClientWrapper{
 		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
 			if query.Options.SkipToken != nil && *query.Options.SkipToken != "" {
@@ -145,29 +142,16 @@ func (s *ProviderTestSuite) TestGetString() {
 	}
 }
 
-func (s *ProviderTestSuite) TestProviderInit() {
-	initMock := new(MockProviderInitializerAPI)
-	azureConfig := auth.AzureFactoryConfig{
-		Credentials: &azidentity.DefaultAzureCredential{},
-	}
-
-	initMock.On("Init", s.ctx, s.logger, azureConfig).Return(&Provider{}, nil).Once()
-	provider, err := initMock.Init(s.ctx, s.logger, azureConfig)
-	s.Assert().NoError(err)
-	s.Assert().NotNil(provider)
-}
-
 func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	provider := &Provider{
-		log:    s.logger,
+		log:    testhelper.NewLogger(s.T()),
 		client: s.mockedClient,
-		ctx:    s.ctx,
 		Config: auth.AzureFactoryConfig{
 			Credentials: &azidentity.DefaultAzureCredential{},
 		},
 	}
 
-	values, err := provider.ListAllAssetTypesByName([]string{"test"})
+	values, err := provider.ListAllAssetTypesByName(context.Background(), []string{"test"})
 	s.Assert().NoError(err)
 	s.Assert().Equal(int(*nonTruncatedResponse.Count+*truncatedResponse.Count), len(values))
 	lo.ForEach(values, func(r AzureAsset, index int) {
@@ -181,4 +165,28 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 		s.Assert().Equal(r.Type, strIndex)
 		s.Assert().Equal(r.Properties, map[string]any{"test": "test"})
 	})
+}
+
+func Test_generateQuery(t *testing.T) {
+	tests := []struct {
+		assets []string
+		want   string
+	}{
+		{
+			want: "Resources",
+		},
+		{
+			assets: []string{"one"},
+			want:   "Resources | where type == 'one'",
+		},
+		{
+			assets: []string{"one", "two", "three four five"},
+			want:   "Resources | where type == 'one' or type == 'two' or type == 'three four five'",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.want, func(t *testing.T) {
+			assert.Equal(t, tt.want, generateQuery(tt.assets))
+		})
+	}
 }
