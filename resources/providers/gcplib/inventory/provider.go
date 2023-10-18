@@ -40,7 +40,6 @@ import (
 
 type Provider struct {
 	log       *logp.Logger
-	ctx       context.Context
 	config    auth.GcpFactoryConfig
 	inventory *AssetsInventoryWrapper
 	crm       *ResourceManagerWrapper
@@ -108,19 +107,19 @@ type Iterator interface {
 
 type ServiceAPI interface {
 	// ListAllAssetTypesByName List all content types of the given assets types
-	ListAllAssetTypesByName(assets []string) ([]*ExtendedGcpAsset, error)
+	ListAllAssetTypesByName(ctx context.Context, assets []string) ([]*ExtendedGcpAsset, error)
 
 	// ListMonitoringAssets List all monitoring assets by project id
-	ListMonitoringAssets(map[string][]string) ([]*MonitoringAsset, error)
+	ListMonitoringAssets(ctx context.Context, monitoringAssetTypes map[string][]string) ([]*MonitoringAsset, error)
 
 	// ListLoggingAssets returns a list of logging assets grouped by project id, extended with folder and org level log sinks
-	ListLoggingAssets() ([]*LoggingAsset, error)
+	ListLoggingAssets(ctx context.Context) ([]*LoggingAsset, error)
 
 	// ListServiceUsageAssets returns a list of service usage assets grouped by project id
-	ListServiceUsageAssets() ([]*ServiceUsageAsset, error)
+	ListServiceUsageAssets(ctx context.Context) ([]*ServiceUsageAsset, error)
 
 	// returns a project policies for all its ancestors
-	ListProjectsAncestorsPolicies() ([]*ProjectPoliciesAsset, error)
+	ListProjectsAncestorsPolicies(ctx context.Context) ([]*ProjectPoliciesAsset, error)
 
 	// Close the GCP asset client
 	Close() error
@@ -175,14 +174,13 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, gcpCon
 	return &Provider{
 		config:    gcpConfig,
 		log:       log,
-		ctx:       ctx,
 		inventory: assetsInventoryWrapper,
 		crm:       crmServiceWrapper,
 		crmCache:  make(map[string]*fetching.EcsGcp),
 	}, nil
 }
 
-func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpAsset, error) {
+func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetTypes []string) ([]*ExtendedGcpAsset, error) {
 	p.log.Infof("Listing GCP asset types: %v in %v", assetTypes, p.config.Parent)
 
 	wg := sync.WaitGroup{}
@@ -196,7 +194,7 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 			AssetTypes:  assetTypes,
 			ContentType: assetpb.ContentType_RESOURCE,
 		}
-		resourceAssets = getAllAssets(p.log, p.inventory.ListAssets(p.ctx, request))
+		resourceAssets = getAllAssets(p.log, p.inventory.ListAssets(ctx, request))
 		wg.Done()
 	}()
 	wg.Add(1)
@@ -206,7 +204,7 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 			AssetTypes:  assetTypes,
 			ContentType: assetpb.ContentType_IAM_POLICY,
 		}
-		policyAssets = getAllAssets(p.log, p.inventory.ListAssets(p.ctx, request))
+		policyAssets = getAllAssets(p.log, p.inventory.ListAssets(ctx, request))
 		wg.Done()
 	}()
 
@@ -215,21 +213,21 @@ func (p *Provider) ListAllAssetTypesByName(assetTypes []string) ([]*ExtendedGcpA
 	var assets []*assetpb.Asset
 	assets = append(append(assets, resourceAssets...), policyAssets...)
 	mergedAssets := mergeAssetContentType(assets)
-	extendedAssets := extendWithECS(p.ctx, p.crm, p.crmCache, mergedAssets)
+	extendedAssets := extendWithECS(ctx, p.crm, p.crmCache, mergedAssets)
 	// Enrich network assets with dns policy
-	p.enrichNetworkAssets(extendedAssets)
+	p.enrichNetworkAssets(ctx, extendedAssets)
 
 	return extendedAssets, nil
 }
 
 // ListMonitoringAssets returns a list of monitoring assets grouped by project id
-func (p *Provider) ListMonitoringAssets(monitoringAssetTypes map[string][]string) ([]*MonitoringAsset, error) {
-	logMetrics, err := p.ListAllAssetTypesByName(monitoringAssetTypes["LogMetric"])
+func (p *Provider) ListMonitoringAssets(ctx context.Context, monitoringAssetTypes map[string][]string) ([]*MonitoringAsset, error) {
+	logMetrics, err := p.ListAllAssetTypesByName(ctx, monitoringAssetTypes["LogMetric"])
 	if err != nil {
 		return nil, err
 	}
 
-	alertPolicies, err := p.ListAllAssetTypesByName(monitoringAssetTypes["AlertPolicy"])
+	alertPolicies, err := p.ListAllAssetTypesByName(ctx, monitoringAssetTypes["AlertPolicy"])
 	if err != nil {
 		return nil, err
 	}
@@ -256,8 +254,8 @@ func (p *Provider) ListMonitoringAssets(monitoringAssetTypes map[string][]string
 }
 
 // ListLoggingAssets returns a list of logging assets grouped by project id, extended with folder and org level log sinks
-func (p *Provider) ListLoggingAssets() ([]*LoggingAsset, error) {
-	logSinks, err := p.ListAllAssetTypesByName([]string{LogSinkAssetType})
+func (p *Provider) ListLoggingAssets(ctx context.Context) ([]*LoggingAsset, error) {
+	logSinks, err := p.ListAllAssetTypesByName(ctx, []string{LogSinkAssetType})
 	if err != nil {
 		return nil, err
 	}
@@ -280,8 +278,8 @@ func (p *Provider) ListLoggingAssets() ([]*LoggingAsset, error) {
 }
 
 // ListServiceUsageAssets returns a list of service usage assets grouped by project id
-func (p *Provider) ListServiceUsageAssets() ([]*ServiceUsageAsset, error) {
-	services, err := p.ListAllAssetTypesByName([]string{ServiceUsageAssetType})
+func (p *Provider) ListServiceUsageAssets(ctx context.Context) ([]*ServiceUsageAsset, error) {
+	services, err := p.ListAllAssetTypesByName(ctx, []string{ServiceUsageAssetType})
 	if err != nil {
 		return nil, err
 	}
@@ -308,14 +306,14 @@ func (p *Provider) Close() error {
 }
 
 // enrichNetworkAssets enriches the network assets with dns policy if exists
-func (p *Provider) enrichNetworkAssets(assets []*ExtendedGcpAsset) {
+func (p *Provider) enrichNetworkAssets(ctx context.Context, assets []*ExtendedGcpAsset) {
 	networkAssets := getAssetsByType(assets, ComputeNetworkAssetType)
 	if len(networkAssets) == 0 {
 		p.log.Infof("no %s assets were listed", ComputeNetworkAssetType)
 		return
 	}
 
-	dnsPolicyAssets := getAllAssets(p.log, p.inventory.ListAssets(p.ctx, &assetpb.ListAssetsRequest{
+	dnsPolicyAssets := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
 		Parent:      p.config.Parent,
 		AssetTypes:  []string{DnsPolicyAssetType},
 		ContentType: assetpb.ContentType_RESOURCE,
@@ -464,22 +462,22 @@ func extendWithECS(ctx context.Context, crm *ResourceManagerWrapper, cache map[s
 	return extendedAssets
 }
 
-func (p *Provider) ListProjectsAncestorsPolicies() ([]*ProjectPoliciesAsset, error) {
-	projects := getAllAssets(p.log, p.inventory.ListAssets(p.ctx, &assetpb.ListAssetsRequest{
+func (p *Provider) ListProjectsAncestorsPolicies(ctx context.Context) ([]*ProjectPoliciesAsset, error) {
+	projects := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
 		ContentType: assetpb.ContentType_IAM_POLICY,
 		Parent:      p.config.Parent,
 		AssetTypes:  []string{CrmProjectAssetType},
 	}))
 
 	return lo.Map(projects, func(project *assetpb.Asset, _ int) *ProjectPoliciesAsset {
-		projectAsset := extendWithECS(p.ctx, p.crm, p.crmCache, []*assetpb.Asset{project})[0]
+		projectAsset := extendWithECS(ctx, p.crm, p.crmCache, []*assetpb.Asset{project})[0]
 		// Skip first ancestor it as we already got it
-		policiesAssets := append([]*ExtendedGcpAsset{projectAsset}, getAncestorsAssets(p, project.Ancestors[1:])...)
+		policiesAssets := append([]*ExtendedGcpAsset{projectAsset}, getAncestorsAssets(ctx, p, project.Ancestors[1:])...)
 		return &ProjectPoliciesAsset{Ecs: projectAsset.Ecs, Policies: policiesAssets}
 	}), nil
 }
 
-func getAncestorsAssets(p *Provider, ancestors []string) []*ExtendedGcpAsset {
+func getAncestorsAssets(ctx context.Context, p *Provider, ancestors []string) []*ExtendedGcpAsset {
 	return lo.Flatten(lo.Map(ancestors, func(parent string, _ int) []*ExtendedGcpAsset {
 		var assetType string
 		if strings.HasPrefix(parent, "folders") {
@@ -488,12 +486,12 @@ func getAncestorsAssets(p *Provider, ancestors []string) []*ExtendedGcpAsset {
 		if strings.HasPrefix(parent, "organizations") {
 			assetType = CrmOrgAssetType
 		}
-		assets := getAllAssets(p.log, p.inventory.ListAssets(p.ctx, &assetpb.ListAssetsRequest{
+		assets := getAllAssets(p.log, p.inventory.ListAssets(ctx, &assetpb.ListAssetsRequest{
 			ContentType: assetpb.ContentType_IAM_POLICY,
 			Parent:      parent,
 			AssetTypes:  []string{assetType},
 		}))
-		return extendWithECS(p.ctx, p.crm, p.crmCache, assets)
+		return extendWithECS(ctx, p.crm, p.crmCache, assets)
 	}))
 }
 

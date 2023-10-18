@@ -40,7 +40,7 @@ type Manager struct {
 
 	fetcherRegistry registry.Registry
 
-	ctx    context.Context
+	ctx    context.Context //nolint:containedctx
 	cancel context.CancelFunc
 }
 

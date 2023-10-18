@@ -35,7 +35,7 @@ const (
 
 // flavorBase configuration.
 type flavorBase struct {
-	ctx       context.Context
+	ctx       context.Context //nolint:containedctx
 	cancel    context.CancelFunc
 	config    *config.Config
 	client    beat.Client
