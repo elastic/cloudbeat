@@ -52,7 +52,7 @@ func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, 
 func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
 
-	allAssets, err := f.provider.ListAllAssetTypesByName(maps.Keys(AzureBatchAssets))
+	allAssets, err := f.provider.ListAllAssetTypesByName(ctx, maps.Keys(AzureBatchAssets))
 	if err != nil {
 		return err
 	}

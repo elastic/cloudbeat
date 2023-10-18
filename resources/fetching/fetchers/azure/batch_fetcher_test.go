@@ -98,8 +98,8 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 
 	mockInventoryService := inventory.NewMockServiceAPI(s.T())
 	mockInventoryService.EXPECT().
-		ListAllAssetTypesByName(mock.AnythingOfType("[]string")).
-		RunAndReturn(func(types []string) ([]inventory.AzureAsset, error) {
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("[]string")).
+		RunAndReturn(func(ctx context.Context, types []string) ([]inventory.AzureAsset, error) {
 			s.ElementsMatch(maps.Keys(mockAssets), types)
 
 			var result []inventory.AzureAsset
@@ -223,7 +223,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Batches() {
 
 	mockInventoryService := inventory.NewMockServiceAPI(s.T())
 	mockInventoryService.EXPECT().
-		ListAllAssetTypesByName(mock.AnythingOfType("[]string")).
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("[]string")).
 		Return(mockAssets, nil)
 	fetcher := AzureBatchAssetFetcher{
 		log:        testhelper.NewLogger(s.T()),

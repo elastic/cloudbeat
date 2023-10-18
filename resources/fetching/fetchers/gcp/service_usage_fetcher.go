@@ -52,7 +52,7 @@ func NewGcpServiceUsageFetcher(_ context.Context, log *logp.Logger, ch chan fetc
 func (f *GcpServiceUsageFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting GcpServiceUsageFetcher.Fetch")
 
-	serviceUsageAssets, err := f.provider.ListServiceUsageAssets()
+	serviceUsageAssets, err := f.provider.ListServiceUsageAssets(ctx)
 	if err != nil {
 		return err
 	}
