@@ -24,4 +24,4 @@ jobs:
           aws-region: us-east-2
 
       - name: Upload to S3 if elastic-agent CloudFormation template has changed
-        run: scripts/publish_ft.sh
+        run: scripts/publish_cft.sh
