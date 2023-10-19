@@ -24,6 +24,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: "eu-west-1"
   WORKING_DIR: deploy/test-environments
+  FLEET_API_DIR: fleet_api/src
   TF_VAR_stack_version: ${{ inputs.elk-stack-version }}
   TF_VAR_ess_region: gcp-us-west2
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
@@ -194,7 +195,7 @@ jobs:
           S3_BUCKET: ${{ needs.deploy.outputs.s3-bucket }}
         run: |
           aws s3 cp "${{ env.S3_BUCKET }}/kspm.pem" "${{ env.EC2_KSPM_KEY }}"
-          aws s3 cp "${{ env.S3_BUCKET }}/cnvm_config.json" "${{ env.WORKING_DIR }}/fleet_api/src/cnvm_config.json"
+          aws s3 cp "${{ env.S3_BUCKET }}/cnvm_config.json" "${{ env.FLEET_API_DIR }}/cnvm_config.json"
 
       - name: Upgrade KSPM Unmanaged agent
         run: |
@@ -210,9 +211,9 @@ jobs:
           kubectl set image daemonset elastic-agent -n kube-system elastic-agent=${{ env.DOCKER_IMAGE }}
 
       - name: Upgrade AWS CNMV agent
-        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        working-directory: ${{ env.WORKING_DIR }}/${{ env.FLEET_API_DIR }}
         env:
           CNVM_STACK_NAME: ${{ needs.deploy.outputs.cnvm-stack-name }}
           STACK_VERSION: ${{ inputs.elk-stack-version }}
         run: |
-          poetry run python src/upgrade_cnvm.py
+          poetry run python upgrade_cnvm.py
