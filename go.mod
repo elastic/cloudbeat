@@ -11,7 +11,7 @@ require (
 	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6
 	github.com/aquasecurity/trivy v0.42.1
 	github.com/aquasecurity/trivy-db v0.0.0-20230515061101-378ab9ed302c
-	github.com/aws/aws-sdk-go v1.45.27
+	github.com/aws/aws-sdk-go v1.45.28
 	github.com/aws/aws-sdk-go-v2 v1.21.2
 	github.com/aws/aws-sdk-go-v2/config v1.19.0
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.43
@@ -29,7 +29,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/iam v1.22.7
 	github.com/aws/aws-sdk-go-v2/service/kms v1.24.7
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.20.8
-	github.com/aws/aws-sdk-go-v2/service/rds v1.56.0
+	github.com/aws/aws-sdk-go-v2/service/rds v1.57.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.40.2
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.33.2
 	github.com/aws/aws-sdk-go-v2/service/securityhub v1.37.2
@@ -42,7 +42,7 @@ require (
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
 	github.com/elastic/elastic-agent-autodiscover v0.6.4
 	github.com/elastic/elastic-agent-client/v7 v7.4.0
-	github.com/elastic/elastic-agent-libs v0.5.0
+	github.com/elastic/elastic-agent-libs v0.6.0
 	github.com/elastic/go-licenser v0.4.1
 	github.com/elastic/go-ucfg v0.8.6
 	github.com/go-git/go-git/v5 v5.7.0
