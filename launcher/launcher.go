@@ -40,13 +40,13 @@ const (
 	shutdownGracePeriod = 20 * time.Second
 )
 
-// used to indicate we got a stop signal
+// ErrorStopSignal is used to indicate we got a stop signal
 var ErrorStopSignal = errors.New("stop beater")
 
-// stopped before shutdownGracePeriod, after completed waiting for the beater to stop
+// ErrorGracefulExit is used when the launcher stops before shutdownGracePeriod, after waiting for the beater to stop
 var ErrorGracefulExit = beat.GracefulExit
 
-// stopped after shutdownGracePeriod, without waiting for the beater to stop
+// ErrorTimeoutExit is used when the launcher stops after shutdownGracePeriod, without waiting for the beater to stop
 var ErrorTimeoutExit = errors.New("exit after timeout")
 
 type launcher struct {
@@ -71,8 +71,8 @@ type Validator interface {
 	Validate(*config.C) error
 }
 
-func New(log *logp.Logger, name string, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) (*launcher, error) {
-	s := &launcher{
+func New(log *logp.Logger, name string, reloader Reloader, validator Validator, creator beat.Creator, cfg *config.C) beat.Beater {
+	return &launcher{
 		beaterErr: make(chan error, 1),
 		wg:        sync.WaitGroup{},
 		log:       log,
@@ -82,8 +82,6 @@ func New(log *logp.Logger, name string, reloader Reloader, validator Validator, 
 		creator:   creator,
 		latest:    cfg,
 	}
-
-	return s, nil
 }
 
 func (l *launcher) Run(b *beat.Beat) error {
@@ -116,15 +114,14 @@ func (l *launcher) Run(b *beat.Beat) error {
 func (l *launcher) run() error {
 	err := l.runLoop()
 
-	if err != nil {
-		switch err {
-		case ErrorGracefulExit:
-			l.log.Info("Launcher stopped successfully")
-		case ErrorTimeoutExit:
-			l.log.Info("Launcher stopped after timeout")
-		default:
-			l.log.Errorf("Launcher stopped by error: %v", err)
-		}
+	switch {
+	case errors.Is(err, ErrorGracefulExit):
+		l.log.Info("Launcher stopped successfully")
+	case errors.Is(err, ErrorTimeoutExit):
+		l.log.Info("Launcher stopped after timeout")
+	case err == nil: // unexpected
+	default:
+		l.log.Errorf("Launcher stopped by error: %v", err)
 	}
 
 	l.reloader.Stop()
@@ -263,7 +260,7 @@ func isConfigUpdate(cfg *config.C, err error) bool {
 }
 
 func isStopSignal(cfg *config.C, err error) bool {
-	return cfg == nil && err == ErrorStopSignal
+	return cfg == nil && errors.Is(err, ErrorStopSignal)
 }
 
 func isBeaterError(cfg *config.C, err error) bool {
