@@ -11,7 +11,7 @@ require (
 	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6
 	github.com/aquasecurity/trivy v0.42.1
 	github.com/aquasecurity/trivy-db v0.0.0-20230515061101-378ab9ed302c
-	github.com/aws/aws-sdk-go v1.45.28
+	github.com/aws/aws-sdk-go v1.46.0
 	github.com/aws/aws-sdk-go-v2 v1.21.2
 	github.com/aws/aws-sdk-go-v2/config v1.19.0
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.43
@@ -23,7 +23,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.27.9
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.24.2
 	github.com/aws/aws-sdk-go-v2/service/configservice v1.37.0
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.125.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.126.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.20.2
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.17.2
 	github.com/aws/aws-sdk-go-v2/service/iam v1.22.7
