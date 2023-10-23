@@ -44,7 +44,7 @@ func (s *CachedRegionSelectorTestSuite) InitTest() (*cachedRegionSelector, *Mock
 	mocked := &MockRegionsSelector{}
 	selector := newCachedRegionSelector(mocked, s.T().Name(), time.Second) // Unique cache space for each test
 	selector.cache, err = newCachedRegions()
-	s.NoError(err)
+	s.Require().NoError(err)
 	return selector, mocked
 }
 
@@ -52,7 +52,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_SingleCall() {
 	selector, mocked := s.InitTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 }
 
@@ -60,13 +60,13 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_DoubleCallCache
 	selector, mocked := s.InitTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 
 	time.Sleep(10 * time.Millisecond)
 
 	result, err = selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 
 	mocked.AssertNumberOfCalls(s.T(), "Regions", 1)
@@ -76,13 +76,13 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_DoubleCallEvict
 	selector, mocked := s.InitTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 
 	time.Sleep(1 * time.Second)
 
 	result, err = selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	mocked.AssertNumberOfCalls(s.T(), "Regions", 2)
 }
@@ -92,31 +92,31 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_CacheEvictionFl
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil)
 
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	mocked.AssertNumberOfCalls(s.T(), "Regions", 1)
 
 	time.Sleep(1 * time.Second)
 	result, err = selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	mocked.AssertNumberOfCalls(s.T(), "Regions", 2)
 
 	time.Sleep(20 * time.Millisecond)
 	result, err = selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	mocked.AssertNumberOfCalls(s.T(), "Regions", 2)
 
 	time.Sleep(1 * time.Second)
 	result, err = selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	mocked.AssertNumberOfCalls(s.T(), "Regions", 3)
 
 	time.Sleep(20 * time.Millisecond)
 	result, err = selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	mocked.AssertNumberOfCalls(s.T(), "Regions", 3)
 }
@@ -125,12 +125,12 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_FirstFail() {
 	selector, mocked := s.InitTest()
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(nil, errors.New("mock")).Once()
 	result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.Error(err)
-	s.Len(result, 0)
+	s.Require().Error(err)
+	s.Empty(result)
 
 	mocked.EXPECT().Regions(mock.Anything, mock.Anything).Return(successfulOutput, nil).Once()
 	result, err = selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	mocked.AssertNumberOfCalls(s.T(), "Regions", 2)
 }
@@ -146,7 +146,7 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_ParallelCalls()
 
 			time.Sleep(time.Duration(i*5) * time.Millisecond)
 			result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
-			s.NoError(err)
+			s.Require().NoError(err)
 			s.Equal([]string{usRegion, euRegion}, result)
 		}(i)
 	}
@@ -166,8 +166,8 @@ func (s *CachedRegionSelectorTestSuite) TestCachedRegionSelector_ParallelCallsFa
 
 			time.Sleep(time.Duration(i*5) * time.Millisecond)
 			result, err := selector.Regions(context.Background(), *awssdk.NewConfig())
-			s.Error(err)
-			s.Len(result, 0)
+			s.Require().Error(err)
+			s.Empty(result)
 		}(i)
 	}
 

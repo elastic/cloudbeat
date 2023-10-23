@@ -72,7 +72,7 @@ func (s *ManagerTestSuite) TestManagerRun() {
 	s.registry.EXPECT().Stop().Once()
 
 	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	m.Run()
 	waitForACycleToEnd(interval)
@@ -93,7 +93,7 @@ func (s *ManagerTestSuite) TestManagerRunPanic() {
 	s.registry.EXPECT().Stop().Once()
 
 	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	m.Run()
 	waitForACycleToEnd(interval)
@@ -114,7 +114,7 @@ func (s *ManagerTestSuite) TestManagerRunTimeout() {
 	s.registry.EXPECT().Stop().Once()
 
 	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	m.Run()
 	waitForACycleToEnd(interval)
@@ -140,10 +140,10 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 	}).Once()
 
 	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	err = m.fetchSingle(context.Background(), fetcherName, fetching.CycleMetadata{})
-	s.Error(err)
+	s.Require().Error(err)
 	s.registry.AssertExpectations(s.T())
 }
 
@@ -157,7 +157,7 @@ func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
 	s.registry.EXPECT().Stop().Once()
 
 	d, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	d.Run()
 	waitForACycleToEnd(interval)
@@ -176,7 +176,7 @@ func (s *ManagerTestSuite) TestManagerStop() {
 	s.registry.EXPECT().Stop().Once()
 
 	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	m.Run()
 	waitForACycleToEnd(2 * time.Second)
@@ -184,7 +184,7 @@ func (s *ManagerTestSuite) TestManagerStop() {
 	time.Sleep(2 * time.Second)
 
 	s.registry.AssertExpectations(s.T())
-	s.EqualError(context.Canceled, m.ctx.Err().Error())
+	s.Require().EqualError(context.Canceled, m.ctx.Err().Error())
 }
 
 func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
@@ -200,11 +200,11 @@ func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
 	s.registry.EXPECT().Update().Once()
 
 	m, err := NewManager(ctx, testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	m.Run()
 	time.Sleep(3 * time.Second)
-	s.EqualError(context.DeadlineExceeded, ctx.Err().Error())
+	s.Require().EqualError(context.DeadlineExceeded, ctx.Err().Error())
 	s.registry.AssertExpectations(s.T())
 }
 

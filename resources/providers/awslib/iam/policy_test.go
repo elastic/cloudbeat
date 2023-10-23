@@ -26,6 +26,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
@@ -108,9 +109,9 @@ func TestProvider_GetPolicies(t *testing.T) {
 
 			got, err := p.GetPolicies(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 			assert.Equal(t, tt.want, got)
 		})
@@ -214,9 +215,9 @@ func TestProvider_getPolicies(t *testing.T) {
 
 			got, err := p.getPolicies(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 			assert.Equal(t, tt.want, got)
 		})
@@ -325,9 +326,9 @@ func TestProvider_getSupportPolicy(t *testing.T) {
 
 			got, err := p.getSupportPolicy(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 			assert.Equal(t, tt.want, got)
 		})
@@ -381,9 +382,9 @@ func Test_decodePolicyDocument(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := decodePolicyDocument(tt.policyVersion)
 			if tt.wantErr != "" {
-				assert.ErrorContainsf(t, err, tt.wantErr, "decodePolicyDocument(%v)", tt.policyVersion)
+				require.ErrorContainsf(t, err, tt.wantErr, "decodePolicyDocument(%v)", tt.policyVersion)
 			} else {
-				assert.NoError(t, err, "decodePolicyDocument(%v)", tt.policyVersion)
+				require.NoError(t, err, "decodePolicyDocument(%v)", tt.policyVersion)
 			}
 			assert.Equalf(t, tt.want, got, "decodePolicyDocument(%v)", tt.policyVersion)
 		})

@@ -55,14 +55,14 @@ func (s *AddClusterIdTestSuite) TestClusterIdProcessor() {
 			Fields: make(mapstr.M),
 		}
 		event, err := processor.Run(&e)
-		s.NoError(err)
+		s.Require().NoError(err)
 
 		res, err := event.GetValue("cluster_id")
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.Equal(t, res)
 
 		res, err = event.GetValue("orchestrator.cluster.id")
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.Equal(t, res)
 	}
 }

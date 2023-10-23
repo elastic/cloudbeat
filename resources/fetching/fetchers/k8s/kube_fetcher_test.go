@@ -23,7 +23,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -190,8 +189,8 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 			err := kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 			results := testhelper.CollectResources(s.resourceCh)
 
-			s.NoError(err, "Fetcher was not able to fetch resources from kube api")
-			require.ElementsMatch(s.T(), MapItems(tests[i]), Map(results))
+			s.Require().NoError(err, "Fetcher was not able to fetch resources from kube api")
+			s.Require().ElementsMatch(MapItems(tests[i]), Map(results))
 
 			s.T().Cleanup(clean(kubeFetcher))
 		})

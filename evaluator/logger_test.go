@@ -42,7 +42,7 @@ func TestLoggerTestSuite(t *testing.T) {
 
 func (s *LoggerTestSuite) SetupSuite() {
 	err := logp.DevelopmentSetup(logp.ToObserverOutput())
-	s.NoError(err)
+	s.Require().NoError(err)
 }
 
 func (s *LoggerTestSuite) TestLogFormat() {

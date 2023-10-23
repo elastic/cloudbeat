@@ -69,8 +69,8 @@ func (s *ProviderTestSuite) TestProviderInit() {
 
 	initMock.EXPECT().Init(mock.Anything, s.logger, gcpConfig).Return(&Provider{}, nil).Once()
 	provider, err := initMock.Init(context.Background(), s.logger, gcpConfig)
-	s.Assert().NoError(err)
-	s.Assert().NotNil(provider)
+	s.Require().NoError(err)
+	s.NotNil(provider)
 }
 
 func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
@@ -99,24 +99,24 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	value, err := provider.ListAllAssetTypesByName(context.Background(), []string{"test"})
-	s.Assert().NoError(err)
+	s.Require().NoError(err)
 
 	// test merging assets with same name:
 	assetNames := lo.Map(value, func(asset *ExtendedGcpAsset, _ int) string { return asset.Name })
 	resourceAssets := lo.Filter(value, func(asset *ExtendedGcpAsset, _ int) bool { return asset.Resource != nil })
 	policyAssets := lo.Filter(value, func(asset *ExtendedGcpAsset, _ int) bool { return asset.IamPolicy != nil })
-	s.Assert().Equal(lo.Contains(assetNames, "AssetName1"), true)
-	s.Assert().Equal(2, len(resourceAssets)) // 2 assets with resources (assetName1, assetName2)
-	s.Assert().Equal(1, len(policyAssets))   // 1 asset with policy 	(assetName1)
-	s.Assert().Equal(2, len(value))          // 2 assets in total 		(assetName1 merged resource/policy, assetName2)
+	s.True(lo.Contains(assetNames, "AssetName1"))
+	s.Len(resourceAssets, 2) // 2 assets with resources (assetName1, assetName2)
+	s.Len(policyAssets, 1)   // 1 asset with policy 	(assetName1)
+	s.Len(value, 2)          // 2 assets in total 		(assetName1 merged resource/policy, assetName2)
 
 	// tests extending assets with display names for org/prj:
 	projectNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.Ecs.ProjectName })
 	orgNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.Ecs.OrganizationName })
-	s.Assert().Equal(1, len(projectNames))
-	s.Assert().Equal("ProjectName", projectNames[0].Ecs.ProjectName)
-	s.Assert().Equal(1, len(orgNames))
-	s.Assert().Equal("OrganizationName", orgNames[0].Ecs.OrganizationName)
+	s.Len(projectNames, 1)
+	s.Equal("ProjectName", projectNames[0].Ecs.ProjectName)
+	s.Len(orgNames, 1)
+	s.Equal("OrganizationName", orgNames[0].Ecs.OrganizationName)
 }
 
 func (s *ProviderTestSuite) TestListMonitoringAssets() {
@@ -200,7 +200,7 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 
 	values, err := provider.ListMonitoringAssets(context.Background(), monitoringAssetTypes)
 
-	s.Assert().NoError(err)
+	s.Require().NoError(err)
 	s.ElementsMatch(expected, values)
 }
 
@@ -274,11 +274,11 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 	})
 	assetNames := lo.Map(enrichedAssets, func(asset *ExtendedGcpAsset, _ int) string { return asset.Name })
 
-	s.Assert().Equal(lo.Contains(assetNames, "//compute.googleapis.com/projects/test-project/global/networks/test-network-1"), true)
-	s.Assert().Equal(lo.Contains(assetNames, "//compute.googleapis.com/projects/test-project/global/networks/test-network-2"), true)
+	s.True(lo.Contains(assetNames, "//compute.googleapis.com/projects/test-project/global/networks/test-network-1"))
+	s.True(lo.Contains(assetNames, "//compute.googleapis.com/projects/test-project/global/networks/test-network-2"))
 
-	s.Assert().Equal(3, len(assets))         // 3 network assets in total
-	s.Assert().Equal(2, len(enrichedAssets)) // 2 assets was enriched
+	s.Len(assets, 3)         // 3 network assets in total
+	s.Len(enrichedAssets, 2) // 2 assets was enriched
 }
 
 func (s *ProviderTestSuite) TestListServiceUsageAssets() {
@@ -348,10 +348,10 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	values, err := provider.ListServiceUsageAssets(context.Background())
-	s.Assert().NoError(err)
+	s.Require().NoError(err)
 
 	// 2 assets, 1 for each project
-	s.Assert().Equal(2, len(values))
+	s.Len(values, 2)
 	s.ElementsMatch(expected, values)
 }
 
@@ -439,10 +439,10 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	values, err := provider.ListLoggingAssets(context.Background())
-	s.Assert().NoError(err)
+	s.Require().NoError(err)
 
 	// 2 assets, 1 for each project
-	s.Assert().Equal(2, len(values))
+	s.Len(values, 2)
 	s.ElementsMatch(expected, values)
 }
 
@@ -471,12 +471,12 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
 	value, err := provider.ListProjectsAncestorsPolicies(context.Background())
-	s.Assert().NoError(err)
+	s.Require().NoError(err)
 
-	s.Assert().Equal(1, len(value))             // single project
-	s.Assert().Equal(2, len(value[0].Policies)) // multiple policies - project + org
-	s.Assert().Equal("ProjectName", value[0].Ecs.ProjectName)
-	s.Assert().Equal("OrganizationName", value[0].Ecs.OrganizationName)
-	s.Assert().Equal("AssetName1", value[0].Policies[0].Name)
-	s.Assert().Equal("AssetName2", value[0].Policies[1].Name)
+	s.Len(value, 1)             // single project
+	s.Len(value[0].Policies, 2) // multiple policies - project + org
+	s.Equal("ProjectName", value[0].Ecs.ProjectName)
+	s.Equal("OrganizationName", value[0].Ecs.OrganizationName)
+	s.Equal("AssetName1", value[0].Policies[0].Name)
+	s.Equal("AssetName2", value[0].Policies[1].Name)
 }
