@@ -5,10 +5,10 @@ import data.compliance.policy.azure.data_adapter
 import future.keywords.if
 
 verify_public_access if {
-	data_adapter.properties.encryption.publicNetworkAccess == "Disabled"
+	data_adapter.properties.publicNetworkAccess == "Disabled"
 } else = false
 
 is_public_access_disabled = r if {
-	data_adapter.properties.encryption.publicNetworkAccess
+	data_adapter.properties.publicNetworkAccess
 	r = verify_public_access
 }

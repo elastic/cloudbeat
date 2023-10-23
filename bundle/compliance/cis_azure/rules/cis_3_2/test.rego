@@ -7,6 +7,7 @@ import data.lib.test
 test_violation {
 	# fail if managed by user
 	eval_fail with input as test_data.generate_storage_account_with_property("encryption", {"requireInfrastructureEncryption": false})
+	eval_fail with input as test_data.generate_storage_account_with_property("encryption", {})
 }
 
 test_pass {
@@ -15,7 +16,7 @@ test_pass {
 }
 
 test_not_evaluated {
-	not_eval with input as test_data.generate_storage_account_with_property("encryption", {})
+	not_eval with input as test_data.not_eval_non_exist_type
 }
 
 eval_fail {

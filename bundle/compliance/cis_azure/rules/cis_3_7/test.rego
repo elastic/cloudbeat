@@ -5,11 +5,11 @@ import data.compliance.policy.azure.data_adapter
 import data.lib.test
 
 test_violation {
-	eval_fail with input as test_data.generate_storage_account_with_property("encryption", {"publicNetworkAccess": "Enabled"})
+	eval_fail with input as test_data.generate_storage_account_with_property("publicNetworkAccess", "Enabled")
 }
 
 test_pass {
-	eval_pass with input as test_data.generate_storage_account_with_property("encryption", {"publicNetworkAccess": "Disabled"})
+	eval_pass with input as test_data.generate_storage_account_with_property("publicNetworkAccess", "Disabled")
 }
 
 test_not_evaluated {

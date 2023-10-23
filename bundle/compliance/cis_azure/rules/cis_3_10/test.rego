@@ -5,7 +5,7 @@ import data.compliance.policy.azure.data_adapter
 import data.lib.test
 
 test_violation {
-	eval_fail with input as test_data.generate_storage_account_with_property("privateEndpointConnections", [{"properties": {"privateLinkServiceConnectionState": {"status": "NotApproved"}}}])
+	eval_fail with input as test_data.generate_storage_account_with_property("privateEndpointConnections", [])
 }
 
 test_pass {
