@@ -22,6 +22,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetClient(t *testing.T) {
@@ -58,10 +59,10 @@ func TestGetClient(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := GetClient(tt.args.region, tt.args.list)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}

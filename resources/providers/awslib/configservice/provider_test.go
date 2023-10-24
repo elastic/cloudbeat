@@ -117,7 +117,7 @@ func TestProvider_DescribeConfigRecorders(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, tt.expectedResults, len(got))
+			assert.Len(t, got, tt.expectedResults)
 		})
 	}
 }

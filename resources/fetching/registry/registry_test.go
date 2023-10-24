@@ -78,7 +78,7 @@ func (s *registryTestSuite) TestKeys() {
 		f := newNumberFetcher(test.value, s.wg)
 		s.registerFetcher(f, test.key)
 
-		s.Equal(i+1, len(s.registry.Keys()))
+		s.Len(s.registry.Keys(), i+1)
 	}
 
 	keys := s.registry.Keys()
@@ -93,7 +93,7 @@ func (s *registryTestSuite) TestRunNotRegistered() {
 	s.registerFetcher(f, "some-key")
 
 	err := s.registry.Run(context.TODO(), "unknown", fetching.CycleMetadata{})
-	s.Error(err)
+	s.Require().Error(err)
 }
 
 func (s *registryTestSuite) TestRunRegistered() {
@@ -125,7 +125,7 @@ func (s *registryTestSuite) TestRunRegistered() {
 		err := s.registry.Run(context.TODO(), test.key, fetching.CycleMetadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.Len(results, 1)
 		s.Equal(test.res.Num, results[0].GetData())
 	}
@@ -303,7 +303,7 @@ func Test_registry_Update(t *testing.T) {
 				emptyFn(t, r) // empty at beginning because of error
 				r.Update()
 				assert.Len(t, r.Keys(), 1)
-				assert.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
+				require.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
 				assert.Panics(t, r.Update)
 			},
 		},
@@ -323,11 +323,11 @@ func Test_registry_Update(t *testing.T) {
 			},
 			testFn: func(t *testing.T, r Registry) {
 				assert.Len(t, r.Keys(), 1)
-				assert.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
+				require.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
 
 				r.Update() // update fails, registry remains as is
 				assert.Len(t, r.Keys(), 1)
-				assert.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
+				require.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
 
 				assert.Panics(t, r.Update)
 			},

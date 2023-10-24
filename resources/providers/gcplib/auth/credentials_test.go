@@ -292,7 +292,7 @@ func TestGetGcpClientConfig(t *testing.T) {
 			for idx, cfg := range tt.cfg {
 				got, err := p.GetGcpClientConfig(context.Background(), cfg, logp.NewLogger("gcp credentials test"))
 				if tt.wantErr {
-					assert.Error(t, err)
+					require.Error(t, err)
 				} else {
 					require.NoError(t, err)
 				}

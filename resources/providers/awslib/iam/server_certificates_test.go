@@ -26,6 +26,7 @@ import (
 	iamsdk "github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 )
@@ -84,9 +85,9 @@ func TestProvider_ListServerCertificates(t *testing.T) {
 
 			got, err := p.ListServerCertificates(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 			assert.Equal(t, tt.want, got)
 		})

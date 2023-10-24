@@ -90,10 +90,10 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 			ctx := context.Background()
 
 			err := s3Fetcher.Fetch(ctx, fetching.CycleMetadata{})
-			s.NoError(err)
+			s.Require().NoError(err)
 
 			results := testhelper.CollectResources(s.resourceCh)
-			s.Equal(test.numExpectedResults, len(results))
+			s.Len(results, test.numExpectedResults)
 		})
 	}
 }
@@ -106,10 +106,10 @@ func (s *S3FetcherTestSuite) TestS3Resource_GetMetadata() {
 		},
 	}
 	meta, err := r.GetMetadata()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(fetching.ResourceMetadata{ID: "arn:aws:s3:::test-bucket-name", Type: "cloud-storage", SubType: "aws-s3", Name: "test-bucket-name"}, meta)
 	m, err := r.GetElasticCommonData()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Len(m, 1)
 	s.Contains(m, "cloud.service.name")
 }

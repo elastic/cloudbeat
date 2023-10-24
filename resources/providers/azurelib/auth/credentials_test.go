@@ -23,6 +23,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
@@ -51,9 +52,9 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 			}
 			got, err := p.GetAzureClientConfig()
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 			assert.Equal(t, tt.want, got)
 		})

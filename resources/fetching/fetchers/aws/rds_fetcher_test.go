@@ -101,7 +101,7 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 			ctx := context.Background()
 
 			err := rdsFetcher.Fetch(ctx, fetching.CycleMetadata{})
-			s.NoError(err)
+			s.Require().NoError(err)
 
 			results := testhelper.CollectResources(s.resourceCh)
 			s.ElementsMatch(test.expected, results)
@@ -117,10 +117,10 @@ func (s *RdsFetcherTestSuite) TestRdsResource_GetMetadata() {
 		},
 	}
 	meta, err := r.GetMetadata()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(fetching.ResourceMetadata{ID: "test-rds-arn", Type: "cloud-database", SubType: "aws-rds", Name: "test-rds-name"}, meta)
 	m, err := r.GetElasticCommonData()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Len(m, 1)
 	s.Contains(m, "cloud.service.name")
 }

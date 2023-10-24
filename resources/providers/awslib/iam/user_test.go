@@ -30,6 +30,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -199,12 +200,12 @@ func Test_GetUsers(t *testing.T) {
 		users, err := p.GetUsers(context.TODO())
 
 		if !test.wantErr {
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		} else {
-			assert.Error(t, err)
+			require.Error(t, err)
 		}
 
-		assert.Equal(t, test.expectedUsers, len(users))
+		assert.Len(t, users, test.expectedUsers)
 		for i, user := range users {
 			assert.Equal(t, test.expected[i].Arn, user.(User).Arn)
 			assert.Equal(t, test.expected[i].HasUsed, user.(User).AccessKeys[0].HasUsed)

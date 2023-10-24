@@ -113,7 +113,7 @@ func subtest(t *testing.T, drain bool) {
 		for _, resource := range resources {
 			assert.NotNil(t, resource.GetData())
 			cd, err := resource.GetElasticCommonData()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, cd)
 			mdata, err := resource.GetMetadata()
 			require.NotNil(t, mdata)

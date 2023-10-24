@@ -29,6 +29,7 @@ import (
 	sns_types "github.com/aws/aws-sdk-go-v2/service/sns/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudwatch"
@@ -219,10 +220,10 @@ func TestProvider_AggregateResources(t *testing.T) {
 			}
 			got, err := p.AggregateResources(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}

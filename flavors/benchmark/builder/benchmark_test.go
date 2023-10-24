@@ -25,6 +25,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 
 	"github.com/elastic/cloudbeat/evaluator"
@@ -130,7 +131,7 @@ func TestRun_ReturnEvents(t *testing.T) {
 			}
 
 			eventsCh, err := sut.Run(context.Background())
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			for i := 0; i < tt.resources; i++ {
 				sut.resourceCh <- fetching.ResourceInfo{} //nolint:exhaustruct
 			}
@@ -141,7 +142,7 @@ func TestRun_ReturnEvents(t *testing.T) {
 			for i, d := range tt.expectedEvents {
 				events, ok := <-eventsCh
 				assert.True(t, ok)
-				assert.Equal(t, d, len(events), "test %d", i)
+				assert.Len(t, events, d, "test %d", i)
 			}
 
 			_, ok := <-eventsCh

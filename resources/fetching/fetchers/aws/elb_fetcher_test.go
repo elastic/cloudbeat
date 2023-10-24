@@ -117,7 +117,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			Spec: v1.ServiceSpec{},
 		}
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
-		s.NoError(err)
+		s.Require().NoError(err)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(test.lbResponse, nil)
@@ -141,13 +141,13 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(len(test.expectedlbNames), len(results))
-		s.NoError(err)
+		s.Require().NoError(err)
 
 		for i, expectedLbName := range test.expectedlbNames {
 			elbResource := results[i].Resource.(ElbResource)
 			metadata, err := elbResource.GetMetadata()
 
-			s.NoError(err)
+			s.Require().NoError(err)
 			s.Equal(expectedLbName, *elbResource.lb.LoadBalancerName)
 			s.Equal(*elbResource.lb.LoadBalancerName, metadata.Name)
 			s.Equal(fmt.Sprintf("%s-%s", testAccount, *elbResource.lb.LoadBalancerName), metadata.ID)
@@ -190,7 +190,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 			Spec: v1.ServiceSpec{},
 		}
 		_, err := kubeclient.CoreV1().Services(test.ns).Create(context.Background(), services, metav1.CreateOptions{})
-		s.NoError(err)
+		s.Require().NoError(err)
 
 		elbProvider := &elb.MockLoadBalancerDescriber{}
 		elbProvider.EXPECT().DescribeLoadBalancer(mock.Anything, mock.Anything).Return(nil, test.error)
@@ -212,7 +212,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Nil(results)
-		s.EqualError(err, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))
+		s.Require().EqualError(err, fmt.Sprintf("failed to load balancers from ELB %s", test.error.Error()))
 	}
 }
 
@@ -226,10 +226,10 @@ func (s *ElbFetcherTestSuite) TestElbResource_GetMetadata() {
 		},
 	}
 	meta, err := r.GetMetadata()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(fetching.ResourceMetadata{ID: "test-account-test-lb-name", Type: "load-balancer", SubType: "aws-elb", Name: "test-lb-name"}, meta)
 	m, err := r.GetElasticCommonData()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Len(m, 1)
 	s.Contains(m, "cloud.service.name")
 }

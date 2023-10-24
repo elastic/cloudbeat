@@ -15,6 +15,7 @@ linters:
     - misspell
     - nolintlint
     - reassign
+    - testifylint
     - unconvert
     - unparam
     - whitespace

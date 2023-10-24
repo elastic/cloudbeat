@@ -49,7 +49,7 @@ func TestCollectResources(t *testing.T) {
 
 		write(ch)
 		assert.Len(t, CollectResources(ch), 1)
-		assert.Len(t, CollectResources(ch), 0)
+		assert.Empty(t, CollectResources(ch))
 
 		wg.Wait()
 	})
@@ -61,7 +61,7 @@ func TestCollectResources(t *testing.T) {
 	t.Run("closed channel", func(t *testing.T) {
 		ch := make(chan struct{})
 		close(ch)
-		assert.Len(t, CollectResources(ch), 0)
+		assert.Empty(t, CollectResources(ch))
 	})
 }
 
@@ -79,7 +79,7 @@ func TestCollectResourcesBlocking(t *testing.T) {
 	t.Run("closed channel", func(t *testing.T) {
 		ch := make(chan struct{})
 		close(ch)
-		assert.Len(t, CollectResourcesBlocking(ch), 0)
+		assert.Empty(t, CollectResourcesBlocking(ch))
 	})
 }
 
@@ -93,7 +93,7 @@ func TestCollectResourcesWithTimeout(t *testing.T) {
 			ch <- struct{}{}
 		})
 
-		assert.Len(t, CollectResourcesWithTimeout(ch, 100, 10*time.Millisecond), 0)
+		assert.Empty(t, CollectResourcesWithTimeout(ch, 100, 10*time.Millisecond))
 		assert.Len(t, CollectResourcesWithTimeout(ch, 100, 100*time.Millisecond), 3)
 	})
 	t.Run("closed channel", func(t *testing.T) {
@@ -102,7 +102,7 @@ func TestCollectResourcesWithTimeout(t *testing.T) {
 		go func() {
 			ch := make(chan struct{})
 			close(ch)
-			assert.Len(t, CollectResourcesWithTimeout(ch, 100, 10*time.Hour), 0)
+			assert.Empty(t, CollectResourcesWithTimeout(ch, 100, 10*time.Hour))
 			done <- struct{}{}
 		}()
 
