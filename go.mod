@@ -45,7 +45,7 @@ require (
 	github.com/elastic/elastic-agent-libs v0.6.0
 	github.com/elastic/go-licenser v0.4.1
 	github.com/elastic/go-ucfg v0.8.6
-	github.com/go-git/go-git/v5 v5.7.0
+	github.com/go-git/go-git/v5 v5.9.0
 	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.12.0
@@ -81,6 +81,7 @@ require (
 )
 
 require (
+	dario.cat/mergo v1.0.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
@@ -129,7 +130,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/Microsoft/hcsshim v0.11.2 // indirect
 	github.com/OneOfOne/xxhash v1.2.8 // indirect
-	github.com/ProtonMail/go-crypto v0.0.0-20230518184743-7afd39499903 // indirect
+	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect
 	github.com/Shopify/sarama v1.27.0 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/a8m/envsubst v1.4.2 // indirect
@@ -219,7 +220,6 @@ require (
 	github.com/elastic/go-sysinfo v1.11.1 // indirect
 	github.com/elastic/go-windows v1.0.1 // indirect
 	github.com/elastic/gosigar v0.14.2 // indirect
-	github.com/elazarl/goproxy v0.0.0-20230731152917-f99041a5c027 // indirect
 	github.com/elazarl/goproxy/ext v0.0.0-20230731152917-f99041a5c027 // indirect
 	github.com/elliotchance/orderedmap v1.5.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.10.1 // indirect
@@ -230,7 +230,7 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
-	github.com/go-git/go-billy/v5 v5.4.1 // indirect
+	github.com/go-git/go-billy/v5 v5.5.0 // indirect
 	github.com/go-gorp/gorp/v3 v3.0.5 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
@@ -364,8 +364,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/onsi/ginkgo/v2 v2.9.2 // indirect
-	github.com/onsi/gomega v1.27.6 // indirect
+	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc5 // indirect
 	github.com/opencontainers/runc v1.1.5 // indirect
@@ -403,7 +402,7 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sigstore/rekor v1.2.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/skeema/knownhosts v1.1.1 // indirect
+	github.com/skeema/knownhosts v1.2.0 // indirect
 	github.com/smartystreets/assertions v1.0.0 // indirect
 	github.com/spdx/tools-golang v0.5.0 // indirect
 	github.com/spf13/afero v1.10.0 // indirect
