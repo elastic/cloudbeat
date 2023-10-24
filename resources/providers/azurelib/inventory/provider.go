@@ -212,6 +212,7 @@ func (p *Provider) getAssetFromData(data map[string]any) AzureAsset {
 		SubscriptionId:   subId,
 		SubscriptionName: p.subscriptions[subId],
 		TenantId:         getString(data, "tenantId"),
+		Sku:              getString(data, "sku"),
 		Type:             getString(data, "type"),
 	}
 }

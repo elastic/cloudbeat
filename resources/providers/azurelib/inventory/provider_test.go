@@ -51,6 +51,7 @@ var nonTruncatedResponse = armresourcegraph.QueryResponse{
 			"subscriptionId": "3",
 			"tenantId":       "3",
 			"type":           "3",
+			"sku":            "3",
 		},
 	},
 	ResultTruncated: to.Ptr(armresourcegraph.ResultTruncatedFalse),
@@ -68,6 +69,7 @@ var truncatedResponse = armresourcegraph.QueryResponse{
 			"subscriptionId": "1",
 			"tenantId":       "1",
 			"type":           "1",
+			"sku":            "1",
 		},
 		map[string]any{
 			"id":             "2",
@@ -78,6 +80,7 @@ var truncatedResponse = armresourcegraph.QueryResponse{
 			"subscriptionId": "2",
 			"tenantId":       "2",
 			"type":           "2",
+			"sku":            "2",
 		},
 	},
 	ResultTruncated: to.Ptr(armresourcegraph.ResultTruncatedTrue),
@@ -178,6 +181,7 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 		s.Assert().Equal(r.ResourceGroup, strIndex)
 		s.Assert().Equal(r.SubscriptionId, strIndex)
 		s.Assert().Equal(r.TenantId, strIndex)
+		s.Assert().Equal(r.Sku, strIndex)
 		s.Assert().Equal(r.Type, strIndex)
 		s.Assert().Equal(r.Properties, map[string]any{"test": "test"})
 	})
