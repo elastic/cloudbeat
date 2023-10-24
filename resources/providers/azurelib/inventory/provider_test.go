@@ -50,6 +50,7 @@ var nonTruncatedResponse = armresourcegraph.QueryResponse{
 			"subscriptionId": "3",
 			"tenantId":       "3",
 			"type":           "3",
+			"sku":            "3",
 		},
 	},
 	ResultTruncated: to.Ptr(armresourcegraph.ResultTruncatedFalse),
@@ -67,6 +68,7 @@ var truncatedResponse = armresourcegraph.QueryResponse{
 			"subscriptionId": "1",
 			"tenantId":       "1",
 			"type":           "1",
+			"sku":            "1",
 		},
 		map[string]any{
 			"id":             "2",
@@ -77,6 +79,7 @@ var truncatedResponse = armresourcegraph.QueryResponse{
 			"subscriptionId": "2",
 			"tenantId":       "2",
 			"type":           "2",
+			"sku":            "2",
 		},
 	},
 	ResultTruncated: to.Ptr(armresourcegraph.ResultTruncatedTrue),
@@ -156,14 +159,18 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	s.Len(values, int(*nonTruncatedResponse.Count+*truncatedResponse.Count))
 	lo.ForEach(values, func(r AzureAsset, index int) {
 		strIndex := fmt.Sprintf("%d", index+1)
-		s.Equal(r.Id, strIndex)
-		s.Equal(r.Name, strIndex)
-		s.Equal(r.Location, strIndex)
-		s.Equal(r.ResourceGroup, strIndex)
-		s.Equal(r.SubscriptionId, strIndex)
-		s.Equal(r.TenantId, strIndex)
-		s.Equal(r.Type, strIndex)
-		s.Equal(map[string]any{"test": "test"}, r.Properties)
+		s.Equal(AzureAsset{
+			Id:               strIndex,
+			Name:             strIndex,
+			Location:         strIndex,
+			Properties:       map[string]any{"test": "test"},
+			ResourceGroup:    strIndex,
+			SubscriptionId:   strIndex,
+			SubscriptionName: "",
+			TenantId:         strIndex,
+			Type:             strIndex,
+			Sku:              strIndex,
+		}, r)
 	})
 }
 
