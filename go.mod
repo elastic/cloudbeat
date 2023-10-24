@@ -72,7 +72,7 @@ require (
 	golang.org/x/tools v0.14.0
 	google.golang.org/api v0.148.0
 	gopkg.in/yaml.v2 v2.4.0
-	gotest.tools/gotestsum v1.10.1
+	gotest.tools/gotestsum v1.11.0
 	k8s.io/api v0.26.3
 	k8s.io/apimachinery v0.26.3
 	k8s.io/client-go v0.26.3
@@ -82,6 +82,7 @@ require (
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
+	github.com/bitfield/gotestdox v0.2.1 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
