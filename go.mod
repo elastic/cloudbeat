@@ -70,7 +70,7 @@ require (
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.13.0
 	golang.org/x/tools v0.14.0
-	google.golang.org/api v0.146.0
+	google.golang.org/api v0.148.0
 	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools/gotestsum v1.10.1
 	k8s.io/api v0.26.3
@@ -264,7 +264,7 @@ require (
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
 	github.com/google/gnostic v0.6.9 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-containerregistry v0.14.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/licenseclassifier v0.0.0-20221004142553-c1ed8fcf4bab // indirect
