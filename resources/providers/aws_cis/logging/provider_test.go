@@ -27,6 +27,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
@@ -150,10 +151,10 @@ func TestProvider_DescribeTrails(t *testing.T) {
 
 			got, err := p.DescribeTrails(context.TODO())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			for i, g := range got {
 				assert.Equal(t, tt.want[i], g)
 			}

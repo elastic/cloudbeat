@@ -27,6 +27,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -126,8 +127,8 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})
 			resources := testhelper.CollectResources(ch)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expectedResources, len(resources))
+			require.NoError(t, err)
+			assert.Len(t, resources, tt.expectedResources)
 		})
 	}
 }
@@ -145,13 +146,13 @@ func TestEnrichedTrailResource_GetMetadata(t *testing.T) {
 
 	meta, err := r.GetMetadata()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fetching.ResourceMetadata{ID: "test-arn", Type: "cloud-audit", SubType: "aws-trail", Name: ""}, meta)
 	assert.Equal(t, logging.EnrichedTrail{TrailInfo: cloudtrail.TrailInfo{Trail: types.Trail{
 		TrailARN: aws.String("test-arn"),
 	}}}, r.GetData())
 	m, err := r.GetElasticCommonData()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, m, 1)
 	assert.Contains(t, m, "cloud.service.name")
 }
@@ -166,10 +167,10 @@ func TestConfigResource_GetMetadata(t *testing.T) {
 
 	meta, err := r.GetMetadata()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fetching.ResourceMetadata{ID: "configservice-test-account", Type: "cloud-config", SubType: "aws-config", Name: "configservice-test-account"}, meta)
 	assert.Nil(t, r.GetData())
 	m, err := r.GetElasticCommonData()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, m)
 }

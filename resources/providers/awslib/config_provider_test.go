@@ -77,10 +77,10 @@ func (s *ConfigProviderTestSuite) TestInitializeAWSConfig() {
 			SessionToken:    test.session,
 		}
 		awsConfig, err := configProvider.InitializeAWSConfig(context.Background(), agentAwsConfig)
-		s.NoError(err)
+		s.Require().NoError(err)
 
 		cred, err := awsConfig.Credentials.Retrieve(context.Background())
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.Equal(test.accessKey, cred.AccessKeyID)
 		s.Equal(test.secret, cred.SecretAccessKey)
 		s.Equal(test.session, cred.SessionToken)

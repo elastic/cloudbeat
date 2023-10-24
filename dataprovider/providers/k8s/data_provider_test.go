@@ -23,6 +23,7 @@ import (
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/elastic/elastic-agent-libs/mapstr"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -90,15 +91,15 @@ func TestK8sDataProvider_EnrichEvent(t *testing.T) {
 				Fields: mapstr.M{},
 			}
 			err := k.EnrichEvent(e, fetching.ResourceMetadata{})
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			fl := e.Fields.Flatten()
 
 			assert.Len(t, fl, len(tt.want))
 			for key, expectedValue := range tt.want {
 				actualValue, err := fl.GetValue(key)
-				assert.NoError(t, err)
-				assert.Equal(t, actualValue, expectedValue)
+				require.NoError(t, err)
+				assert.Equal(t, expectedValue, actualValue)
 			}
 		})
 	}

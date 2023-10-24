@@ -99,7 +99,7 @@ func (s *UserTestSuite) TestGetUserNameFromID() {
 			s.Equal(tt.result.name, username)
 
 			if tt.result.err {
-				s.NotNil(err)
+				s.Require().Error(err)
 			}
 		})
 	}
@@ -140,7 +140,7 @@ func (s *UserTestSuite) TestGetGroupNameFromID() {
 			s.Equal(tt.result.name, groupName)
 
 			if tt.result.err {
-				s.NotNil(err)
+				s.Require().Error(err)
 			}
 		})
 	}

@@ -27,6 +27,7 @@ import (
 	aws_securityhub "github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -126,12 +127,12 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 
 			err := m.Fetch(ctx, fetching.CycleMetadata{})
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 			resources := testhelper.CollectResources(ch)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expectedResources, len(resources))
+			require.NoError(t, err)
+			assert.Len(t, resources, tt.expectedResources)
 		})
 	}
 }
@@ -191,10 +192,10 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 			}
 			got, err := r.GetMetadata()
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -257,10 +258,10 @@ func TestSecurityHubResource_GetMetadata(t *testing.T) {
 			}
 			got, err := s.GetMetadata()
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}

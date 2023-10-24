@@ -141,7 +141,7 @@ func (s *ProviderTestSuite) TestGetString() {
 		},
 	}
 	for _, tt := range tests {
-		s.Assert().Equal(tt.want, getString(tt.data, tt.key), "getString(%v, %s) = %s", tt.data, tt.key, tt.want)
+		s.Equal(tt.want, getString(tt.data, tt.key), "getString(%v, %s) = %s", tt.data, tt.key, tt.want)
 	}
 }
 
@@ -155,19 +155,22 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	}
 
 	values, err := provider.ListAllAssetTypesByName(context.Background(), []string{"test"})
-	s.Assert().NoError(err)
-	s.Assert().Equal(int(*nonTruncatedResponse.Count+*truncatedResponse.Count), len(values))
+	s.Require().NoError(err)
+	s.Len(values, int(*nonTruncatedResponse.Count+*truncatedResponse.Count))
 	lo.ForEach(values, func(r AzureAsset, index int) {
 		strIndex := fmt.Sprintf("%d", index+1)
-		s.Assert().Equal(r.Id, strIndex)
-		s.Assert().Equal(r.Name, strIndex)
-		s.Assert().Equal(r.Location, strIndex)
-		s.Assert().Equal(r.ResourceGroup, strIndex)
-		s.Assert().Equal(r.SubscriptionId, strIndex)
-		s.Assert().Equal(r.TenantId, strIndex)
-		s.Assert().Equal(r.Sku, strIndex)
-		s.Assert().Equal(r.Type, strIndex)
-		s.Assert().Equal(r.Properties, map[string]any{"test": "test"})
+		s.Equal(AzureAsset{
+			Id:               strIndex,
+			Name:             strIndex,
+			Location:         strIndex,
+			Properties:       map[string]any{"test": "test"},
+			ResourceGroup:    strIndex,
+			SubscriptionId:   strIndex,
+			SubscriptionName: "",
+			TenantId:         strIndex,
+			Type:             strIndex,
+			Sku:              strIndex,
+		}, r)
 	})
 }
 

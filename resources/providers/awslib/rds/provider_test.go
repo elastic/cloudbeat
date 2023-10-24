@@ -140,7 +140,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 		ctx := context.Background()
 
 		results, err := rdsProvider.DescribeDBInstances(ctx)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.Equal(test.expected, results)
 	}
 }

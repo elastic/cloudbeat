@@ -231,7 +231,7 @@ func Test_listAccounts(t *testing.T) {
 
 			got, err := listAccounts(context.Background(), testhelper.NewLogger(t), m)
 			if tt.wantErr != "" {
-				assert.ErrorContains(t, err, tt.wantErr)
+				require.ErrorContains(t, err, tt.wantErr)
 			} else {
 				require.NoError(t, err)
 			}
@@ -317,7 +317,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 		).Return(nil, errors.New("some-error"))
 
 		_, err := getOUInfoForAccount(ctx, m, nil, &accountId)
-		assert.ErrorContains(t, err, "some-error")
+		require.ErrorContains(t, err, "some-error")
 	})
 
 	t.Run("error in list with NextToken", func(t *testing.T) {
@@ -336,7 +336,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 		).Return(&organizations.ListParentsOutput{}, errors.New("some-error"))
 
 		_, err := getOUInfoForAccount(ctx, m, nil, &accountId)
-		assert.ErrorContains(t, err, "some-error")
+		require.ErrorContains(t, err, "some-error")
 	})
 
 	t.Run("no parents?", func(t *testing.T) {
@@ -357,7 +357,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 		}, nil)
 
 		_, err := getOUInfoForAccount(ctx, m, nil, &accountId)
-		assert.ErrorContains(t, err, "empty response")
+		require.ErrorContains(t, err, "empty response")
 	})
 
 	t.Run("root ou", func(t *testing.T) {
@@ -381,7 +381,7 @@ func Test_getOUInfoForAccount(t *testing.T) {
 		}, nil)
 
 		got, err := getOUInfoForAccount(ctx, m, nil, &accountId)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, organizationalUnitInfo{
 			id:   "root-id",
 			name: "Root",
@@ -411,7 +411,7 @@ func Test_describeOU(t *testing.T) {
 			id:   ouID,
 			name: "some-name",
 		}, got)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	cache := map[string]string{}
@@ -422,7 +422,7 @@ func Test_describeOU(t *testing.T) {
 			id:   ouID,
 			name: "some-name",
 		}, got)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, cache, 1)
 	})
 
@@ -432,7 +432,7 @@ func Test_describeOU(t *testing.T) {
 			id:   ouID,
 			name: "some-name",
 		}, got)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Len(t, cache, 1)
 	})
 }

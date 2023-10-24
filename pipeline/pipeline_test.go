@@ -55,7 +55,7 @@ func TestStep(t *testing.T) {
 			close(inputChannel)
 
 			results := testhelper.CollectResourcesBlocking(outCh)
-			assert.Equal(t, tt.wantLen, len(results))
+			assert.Len(t, results, tt.wantLen)
 		})
 	}
 }
