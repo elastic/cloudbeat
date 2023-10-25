@@ -57,27 +57,63 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 		}
 
 		if len(assets) == 0 {
+			subs := f.provider.GetSubscriptions()
+			if len(subs) == 0 {
+				f.log.Errorf("no subscriptions and asset (%s, %s, %s) is empty, skipping", assetType, pair.SubType, pair.Type)
+				continue
+			}
+
+			// Hack backported into 8.11:
+			// Get the first subscription (should only be one), get the sub id and name and populate a mock resource
+			// with an empty array.
+			subId, subName := func() (string, string) {
+				for subId, subName := range subs {
+					return subId, subName
+				}
+				f.log.DPanic("unreachable")
+				return "", ""
+			}()
+
+			success := f.write(ctx, fetching.ResourceInfo{
+				Resource: &EmptyBatchResource{
+					Type:    pair.Type,
+					SubType: pair.SubType,
+					SubId:   subId,
+					SubName: subName,
+				},
+				CycleMetadata: cMetadata,
+			})
+			if !success {
+				return nil
+			}
 			continue
 		}
 
-		select {
-		case <-ctx.Done():
-			f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
-			return nil
-		// TODO: Groups by subscription id to create multiple batches of assets
-		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cMetadata,
+		success := f.write(ctx, fetching.ResourceInfo{
 			Resource: &AzureBatchResource{
 				// Every asset in the list has the same type and subtype
 				Type:    pair.Type,
 				SubType: pair.SubType,
 				Assets:  assets,
 			},
-		}:
+			CycleMetadata: cMetadata,
+		})
+		if !success {
+			return nil
 		}
 	}
 
 	return nil
+}
+
+func (f *AzureBatchAssetFetcher) write(ctx context.Context, resourceInfo fetching.ResourceInfo) bool {
+	select {
+	case <-ctx.Done():
+		f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
+		return false
+	case f.resourceCh <- resourceInfo:
+	}
+	return true
 }
 
 func (f *AzureBatchAssetFetcher) Stop() {}
@@ -114,6 +150,40 @@ func (r *AzureBatchResource) GetElasticCommonData() (map[string]any, error) {
 				"name": r.Assets[0].SubscriptionName,
 			},
 			// TODO: Organization fields
+		},
+	}, nil
+}
+
+type EmptyBatchResource struct {
+	Type    string
+	SubType string
+	SubId   string
+	SubName string
+}
+
+func (e *EmptyBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	id := fmt.Sprintf("%s-%s", e.SubType, e.SubId)
+	return fetching.ResourceMetadata{
+		ID:      id,
+		Type:    e.Type,
+		SubType: e.SubType,
+		Name:    id,
+		Region:  azurelib.GlobalRegion,
+	}, nil
+}
+
+func (e *EmptyBatchResource) GetData() any {
+	return []any{}
+}
+
+func (e *EmptyBatchResource) GetElasticCommonData() (map[string]any, error) {
+	return map[string]any{
+		"cloud": map[string]any{
+			"provider": "azure",
+			"account": map[string]any{
+				"id":   e.SubId,
+				"name": e.SubName,
+			},
 		},
 	}, nil
 }
