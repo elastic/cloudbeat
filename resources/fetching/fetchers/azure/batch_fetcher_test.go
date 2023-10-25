@@ -162,7 +162,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_EmptyBastion() {
 	mockInventoryService := inventory.NewMockServiceAPI(s.T())
 	mockInventoryService.EXPECT().ListAllAssetTypesByName(mock.AnythingOfType("[]string")).Return(nil, nil).Times(2)
-	mockInventoryService.EXPECT().GetSubscriptions().Return(map[string]string{"123": "name"})
+	mockInventoryService.EXPECT().GetSubscriptions().Return(map[string]string{"123": "name"}).Times(2)
 	fetcher := AzureBatchAssetFetcher{
 		log:        testhelper.NewLogger(s.T()),
 		resourceCh: s.resourceCh,
@@ -170,33 +170,46 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_EmptyBastion() {
 	}
 	s.Require().NoError(fetcher.Fetch(context.Background(), fetching.CycleMetadata{}))
 	results := testhelper.CollectResources(s.resourceCh)
-	s.Require().Len(results, 1)
-	emptyBastion := results[0]
-	metadata, err := emptyBastion.GetMetadata()
-	s.Require().NoError(err)
-	s.Equal(fetching.ResourceMetadata{
-		ID:                  "azure-bastion-123",
-		Type:                "cloud-dns",
-		SubType:             "azure-bastion",
-		Name:                "azure-bastion-123",
-		Region:              azurelib.GlobalRegion,
-		AwsAccountId:        "",
-		AwsAccountAlias:     "",
-		AwsOrganizationId:   "",
-		AwsOrganizationName: "",
-	}, metadata)
-	s.Empty(emptyBastion.GetData())
-	ecs, err := emptyBastion.GetElasticCommonData()
-	s.Require().NoError(err)
-	s.Equal(map[string]any{
-		"cloud": map[string]any{
-			"provider": "azure",
-			"account": map[string]any{
-				"id":   "123",
-				"name": "name",
+	s.Require().Len(results, 2)
+
+	for _, pair := range AzureBatchAssets {
+		resourceInfo := func() fetching.ResourceInfo {
+			for _, result := range results {
+				r, _ := result.GetMetadata()
+				if r.SubType == pair.SubType {
+					return result
+				}
+			}
+			s.Require().True(false)
+			panic("not reached")
+		}()
+
+		metadata, err := resourceInfo.GetMetadata()
+		s.Require().NoError(err)
+		s.Equal(fetching.ResourceMetadata{
+			ID:                  fmt.Sprintf("%s-123", pair.SubType),
+			Type:                pair.Type,
+			SubType:             pair.SubType,
+			Name:                fmt.Sprintf("%s-123", pair.SubType),
+			Region:              azurelib.GlobalRegion,
+			AwsAccountId:        "",
+			AwsAccountAlias:     "",
+			AwsOrganizationId:   "",
+			AwsOrganizationName: "",
+		}, metadata)
+		s.Empty(resourceInfo.GetData())
+		ecs, err := resourceInfo.GetElasticCommonData()
+		s.Require().NoError(err)
+		s.Equal(map[string]any{
+			"cloud": map[string]any{
+				"provider": "azure",
+				"account": map[string]any{
+					"id":   "123",
+					"name": "name",
+				},
 			},
-		},
-	}, ecs)
+		}, ecs)
+	}
 }
 
 func findResult(results []fetching.ResourceInfo, assetType string) *fetching.ResourceInfo {

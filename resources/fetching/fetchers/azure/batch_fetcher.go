@@ -57,27 +57,27 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 		}
 
 		if len(assets) == 0 {
-			if assetType == inventory.BastionAssetType {
-				// Hack backported into 8.11:
-				// Get the first subscription (should only be one), get the sub id and name and populate a mock resource
-				// with an empty array.
-				subId, subName := func() (string, string) {
-					for subId, subName := range f.provider.GetSubscriptions() {
-						return subId, subName
-					}
-					return "", ""
-				}()
-
-				success := f.write(ctx, fetching.ResourceInfo{
-					Resource: &EmptyBastionResource{
-						subId:   subId,
-						subName: subName,
-					},
-					CycleMetadata: cMetadata,
-				})
-				if !success {
-					return nil
+			// Hack backported into 8.11:
+			// Get the first subscription (should only be one), get the sub id and name and populate a mock resource
+			// with an empty array.
+			subId, subName := func() (string, string) {
+				for subId, subName := range f.provider.GetSubscriptions() {
+					return subId, subName
 				}
+				return "", ""
+			}()
+
+			success := f.write(ctx, fetching.ResourceInfo{
+				Resource: &EmptyBatchResource{
+					Type:    pair.Type,
+					SubType: pair.SubType,
+					SubId:   subId,
+					SubName: subName,
+				},
+				CycleMetadata: cMetadata,
+			})
+			if !success {
+				return nil
 			}
 			continue
 		}
@@ -147,34 +147,35 @@ func (r *AzureBatchResource) GetElasticCommonData() (map[string]any, error) {
 	}, nil
 }
 
-type EmptyBastionResource struct {
-	subId   string
-	subName string
+type EmptyBatchResource struct {
+	Type    string
+	SubType string
+	SubId   string
+	SubName string
 }
 
-func (e *EmptyBastionResource) GetMetadata() (fetching.ResourceMetadata, error) {
-	pair := AzureBatchAssets[inventory.BastionAssetType]
-	id := fmt.Sprintf("%s-%s", pair.SubType, e.subId)
+func (e *EmptyBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	id := fmt.Sprintf("%s-%s", e.SubType, e.SubId)
 	return fetching.ResourceMetadata{
 		ID:      id,
-		Type:    pair.Type,
-		SubType: pair.SubType,
+		Type:    e.Type,
+		SubType: e.SubType,
 		Name:    id,
 		Region:  azurelib.GlobalRegion,
 	}, nil
 }
 
-func (e *EmptyBastionResource) GetData() any {
+func (e *EmptyBatchResource) GetData() any {
 	return []any{}
 }
 
-func (e *EmptyBastionResource) GetElasticCommonData() (map[string]any, error) {
+func (e *EmptyBatchResource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]any{
 		"cloud": map[string]any{
 			"provider": "azure",
 			"account": map[string]any{
-				"id":   e.subId,
-				"name": e.subName,
+				"id":   e.SubId,
+				"name": e.SubName,
 			},
 		},
 	}, nil
