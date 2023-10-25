@@ -11,28 +11,28 @@ require (
 	github.com/aquasecurity/go-dep-parser v0.0.0-20230605080024-b71d9356a6c6
 	github.com/aquasecurity/trivy v0.42.1
 	github.com/aquasecurity/trivy-db v0.0.0-20230515061101-378ab9ed302c
-	github.com/aws/aws-sdk-go v1.46.2
+	github.com/aws/aws-sdk-go v1.46.3
 	github.com/aws/aws-sdk-go-v2 v1.21.2
-	github.com/aws/aws-sdk-go-v2/config v1.19.0
+	github.com/aws/aws-sdk-go-v2/config v1.19.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.43
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.13.13
 	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.21.2
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.31.0
-	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.35.0
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.32.0
+	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.36.0
 	github.com/aws/aws-sdk-go-v2/service/cloudtrail v1.29.2
-	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.27.9
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.28.0
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.24.2
-	github.com/aws/aws-sdk-go-v2/service/configservice v1.37.0
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.126.0
+	github.com/aws/aws-sdk-go-v2/service/configservice v1.38.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.127.0
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.20.2
-	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.17.2
-	github.com/aws/aws-sdk-go-v2/service/iam v1.22.7
+	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing v1.18.0
+	github.com/aws/aws-sdk-go-v2/service/iam v1.23.0
 	github.com/aws/aws-sdk-go-v2/service/kms v1.24.7
 	github.com/aws/aws-sdk-go-v2/service/organizations v1.20.8
-	github.com/aws/aws-sdk-go-v2/service/rds v1.57.0
+	github.com/aws/aws-sdk-go-v2/service/rds v1.58.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.40.2
-	github.com/aws/aws-sdk-go-v2/service/s3control v1.33.2
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.37.2
+	github.com/aws/aws-sdk-go-v2/service/s3control v1.34.0
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.38.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.22.2
 	github.com/aws/aws-sdk-go-v2/service/sts v1.23.2
 	github.com/aws/smithy-go v1.15.0
