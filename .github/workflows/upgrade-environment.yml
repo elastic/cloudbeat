@@ -82,7 +82,7 @@ jobs:
     secrets: inherit
   upgrade:
     runs-on: ubuntu-20.04
-    needs: deploy
+    needs: [init, deploy]
     timeout-minutes: 120
     defaults:
       run:
@@ -179,6 +179,7 @@ jobs:
         working-directory: ./tests
         env:
           USE_K8S: false
+          STACK_VERSION: ${{ needs.init.outputs.stack-version }}
         run: |
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
@@ -223,6 +224,7 @@ jobs:
         working-directory: ./tests
         env:
           STACK_VERSION: ${{ inputs.elk-stack-version }}
+          USE_K8S: false
         run: |
           poetry install
           poetry run pytest -m "upgrade" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
