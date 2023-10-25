@@ -52,7 +52,6 @@ func newPair(subType string, tpe string) typePair {
 }
 
 var AzureAssetTypeToTypePair = map[string]typePair{
-	inventory.ActivityLogAlertAssetType:          newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
 	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
 	inventory.ClassicVirtualMachineAssetType:     newPair(fetching.AzureClassicVMType, fetching.CloudCompute),
 	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
