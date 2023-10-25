@@ -217,3 +217,12 @@ jobs:
           STACK_VERSION: ${{ inputs.elk-stack-version }}
         run: |
           poetry run python upgrade_cnvm.py
+
+      - name: Run Upgrade Sanity checks
+        if: success()
+        working-directory: ./tests
+        env:
+          STACK_VERSION: ${{ inputs.elk-stack-version }}
+        run: |
+          poetry install
+          poetry run pytest -m "upgrade" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
