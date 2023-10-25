@@ -15,5 +15,7 @@ finding = result {
 }
 
 is_client_cert_enabled {
-	data_adapter.properties.clientCertEnabled == true
+	# Benchmark and Azure implementation in remediation checks previous implemented value
+	# Reading the description and rule metadata, we've decided to check the value of the property clientCertMode
+	data_adapter.properties.clientCertMode == "Required"
 } else = false
