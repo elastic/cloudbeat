@@ -2,11 +2,7 @@
   "policy_id": "${agent_policy_id}",
   "package": {
     "name": "cloud_security_posture",
-<<<<<<< HEAD
-    "version": "1.5.2-preview2"
-=======
     "version": "1.6.3"
->>>>>>> 59833c9 (Fix QA Environment GCP Deployment (#1447))
   },
   "name": "pkg-plcy-cspm-gcp-tf",
   "description": "",
