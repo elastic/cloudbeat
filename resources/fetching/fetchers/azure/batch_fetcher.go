@@ -57,27 +57,56 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 		}
 
 		if len(assets) == 0 {
+			if assetType == inventory.BastionAssetType {
+				// Hack backported into 8.11:
+				// Get the first subscription (should only be one), get the sub id and name and populate a mock resource
+				// with an empty array.
+				subId, subName := func() (string, string) {
+					for subId, subName := range f.provider.GetSubscriptions() {
+						return subId, subName
+					}
+					return "", ""
+				}()
+
+				success := f.write(ctx, fetching.ResourceInfo{
+					Resource: &EmptyBastionResource{
+						subId:   subId,
+						subName: subName,
+					},
+					CycleMetadata: cMetadata,
+				})
+				if !success {
+					return nil
+				}
+			}
 			continue
 		}
 
-		select {
-		case <-ctx.Done():
-			f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
-			return nil
-		// TODO: Groups by subscription id to create multiple batches of assets
-		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cMetadata,
+		success := f.write(ctx, fetching.ResourceInfo{
 			Resource: &AzureBatchResource{
 				// Every asset in the list has the same type and subtype
 				Type:    pair.Type,
 				SubType: pair.SubType,
 				Assets:  assets,
 			},
-		}:
+			CycleMetadata: cMetadata,
+		})
+		if !success {
+			return nil
 		}
 	}
 
 	return nil
+}
+
+func (f *AzureBatchAssetFetcher) write(ctx context.Context, resourceInfo fetching.ResourceInfo) bool {
+	select {
+	case <-ctx.Done():
+		f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
+		return false
+	case f.resourceCh <- resourceInfo:
+	}
+	return true
 }
 
 func (f *AzureBatchAssetFetcher) Stop() {}
@@ -114,6 +143,39 @@ func (r *AzureBatchResource) GetElasticCommonData() (map[string]any, error) {
 				"name": r.Assets[0].SubscriptionName,
 			},
 			// TODO: Organization fields
+		},
+	}, nil
+}
+
+type EmptyBastionResource struct {
+	subId   string
+	subName string
+}
+
+func (e *EmptyBastionResource) GetMetadata() (fetching.ResourceMetadata, error) {
+	pair := AzureBatchAssets[inventory.BastionAssetType]
+	id := fmt.Sprintf("%s-%s", pair.SubType, e.subId)
+	return fetching.ResourceMetadata{
+		ID:      id,
+		Type:    pair.Type,
+		SubType: pair.SubType,
+		Name:    id,
+		Region:  azurelib.GlobalRegion,
+	}, nil
+}
+
+func (e *EmptyBastionResource) GetData() any {
+	return []any{}
+}
+
+func (e *EmptyBastionResource) GetElasticCommonData() (map[string]any, error) {
+	return map[string]any{
+		"cloud": map[string]any{
+			"provider": "azure",
+			"account": map[string]any{
+				"id":   e.subId,
+				"name": e.subName,
+			},
 		},
 	}, nil
 }

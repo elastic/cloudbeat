@@ -26,6 +26,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -156,6 +157,46 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 			}, ecs)
 		})
 	}
+}
+
+func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_EmptyBastion() {
+	mockInventoryService := inventory.NewMockServiceAPI(s.T())
+	mockInventoryService.EXPECT().ListAllAssetTypesByName(mock.AnythingOfType("[]string")).Return(nil, nil).Times(2)
+	mockInventoryService.EXPECT().GetSubscriptions().Return(map[string]string{"123": "name"})
+	fetcher := AzureBatchAssetFetcher{
+		log:        testhelper.NewLogger(s.T()),
+		resourceCh: s.resourceCh,
+		provider:   mockInventoryService,
+	}
+	s.Require().NoError(fetcher.Fetch(context.Background(), fetching.CycleMetadata{}))
+	results := testhelper.CollectResources(s.resourceCh)
+	s.Require().Len(results, 1)
+	emptyBastion := results[0]
+	metadata, err := emptyBastion.GetMetadata()
+	s.Require().NoError(err)
+	s.Equal(fetching.ResourceMetadata{
+		ID:                  "azure-bastion-123",
+		Type:                "cloud-dns",
+		SubType:             "azure-bastion",
+		Name:                "azure-bastion-123",
+		Region:              azurelib.GlobalRegion,
+		AwsAccountId:        "",
+		AwsAccountAlias:     "",
+		AwsOrganizationId:   "",
+		AwsOrganizationName: "",
+	}, metadata)
+	s.Empty(emptyBastion.GetData())
+	ecs, err := emptyBastion.GetElasticCommonData()
+	s.Require().NoError(err)
+	s.Equal(map[string]any{
+		"cloud": map[string]any{
+			"provider": "azure",
+			"account": map[string]any{
+				"id":   "123",
+				"name": "name",
+			},
+		},
+	}, ecs)
 }
 
 func findResult(results []fetching.ResourceInfo, assetType string) *fetching.ResourceInfo {
