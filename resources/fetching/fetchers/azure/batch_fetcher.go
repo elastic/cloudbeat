@@ -57,13 +57,20 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 		}
 
 		if len(assets) == 0 {
+			subs := f.provider.GetSubscriptions()
+			if len(subs) == 0 {
+				f.log.Errorf("no subscriptions and asset (%s, %s, %s) is empty, skipping", assetType, pair.SubType, pair.Type)
+				continue
+			}
+
 			// Hack backported into 8.11:
 			// Get the first subscription (should only be one), get the sub id and name and populate a mock resource
 			// with an empty array.
 			subId, subName := func() (string, string) {
-				for subId, subName := range f.provider.GetSubscriptions() {
+				for subId, subName := range subs {
 					return subId, subName
 				}
+				f.log.DPanic("unreachable")
 				return "", ""
 			}()
 
