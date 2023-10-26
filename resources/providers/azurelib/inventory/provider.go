@@ -63,6 +63,7 @@ type AzureAsset struct {
 type ServiceAPI interface {
 	// ListAllAssetTypesByName List all content types of the given assets types
 	ListAllAssetTypesByName(ctx context.Context, assets []string) ([]AzureAsset, error)
+	GetSubscriptions() map[string]string
 }
 
 type ProviderInitializerAPI interface {
@@ -154,6 +155,10 @@ func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assets []string)
 	}
 
 	return resourceAssets, nil
+}
+
+func (p *Provider) GetSubscriptions() map[string]string {
+	return p.subscriptions
 }
 
 func generateQuery(assets []string) string {
