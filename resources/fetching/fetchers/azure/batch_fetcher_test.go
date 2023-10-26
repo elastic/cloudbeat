@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/maps"
@@ -256,7 +257,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Batches() {
 		}
 		return a.Type < b.Type
 	})
-	s.Equal([]fetching.ResourceInfo{
+	expected := []fetching.ResourceInfo{
 		{
 			Resource: &AzureBatchResource{
 				Type:    fetching.CloudDns,
@@ -337,7 +338,56 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Batches() {
 			},
 			CycleMetadata: fetching.CycleMetadata{Sequence: 111},
 		},
-	}, results)
+	}
+	s.Equal(expected, results)
+
+	var expectedMetadata []fetching.ResourceMetadata
+	for i := 0; i < 8; i++ {
+		subType := "azure-bastion"
+		tpe := "cloud-dns"
+		if i >= 4 {
+			subType = "azure-activity-log-alert"
+			tpe = "monitoring"
+		}
+		id := fmt.Sprintf("%s-%d", subType, i%4+1)
+		expectedMetadata = append(expectedMetadata, fetching.ResourceMetadata{
+			ID:                  id,
+			Type:                tpe,
+			SubType:             subType,
+			Name:                id,
+			Region:              "global",
+			AwsAccountId:        "",
+			AwsAccountAlias:     "",
+			AwsOrganizationId:   "",
+			AwsOrganizationName: "",
+		})
+	}
+	metadata := lo.Map(results, func(item fetching.ResourceInfo, index int) fetching.ResourceMetadata {
+		metadata, err := item.GetMetadata()
+		s.Require().NoError(err)
+		return metadata
+	})
+	s.Equal(expectedMetadata, metadata)
+
+	var expectedECS []map[string]any
+	for i := 0; i < 8; i++ {
+		subId := strconv.Itoa(i%4 + 1)
+		expectedECS = append(expectedECS, map[string]any{
+			"cloud": map[string]any{
+				"provider": "azure",
+				"account": map[string]any{
+					"id":   subId,
+					"name": subs[subId],
+				},
+			},
+		})
+	}
+	ecs := lo.Map(results, func(item fetching.ResourceInfo, _ int) map[string]any {
+		data, err := item.GetElasticCommonData()
+		s.Require().NoError(err)
+		return data
+	})
+	s.Equal(expectedECS, ecs)
 }
 
 func findResult(results []fetching.ResourceInfo, assetType string) *fetching.ResourceInfo {

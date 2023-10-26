@@ -109,7 +109,7 @@ func (r *AzureBatchResource) GetData() any {
 
 func (r *AzureBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	// Assuming all batch in not empty includes assets of the same subscription
-	id := fmt.Sprintf("%s-%s", r.SubType, r.Assets[0].SubscriptionId)
+	id := fmt.Sprintf("%s-%s", r.SubType, r.SubId)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    r.Type,
