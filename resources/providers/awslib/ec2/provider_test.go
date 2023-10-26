@@ -28,6 +28,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -81,12 +82,12 @@ func TestProvider_DescribeNetworkAcl(t *testing.T) {
 			}
 			got, err := p.DescribeNetworkAcl(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expectedResults, len(got))
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
 		})
 	}
 }
@@ -138,12 +139,12 @@ func TestProvider_DescribeSecurityGroups(t *testing.T) {
 
 			got, err := p.DescribeSecurityGroups(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expectedResults, len(got))
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
 		})
 	}
 }
@@ -198,12 +199,12 @@ func TestProvider_DescribeVPCs(t *testing.T) {
 
 			got, err := p.DescribeVPCs(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expectedResults, len(got))
+			require.NoError(t, err)
+			assert.Len(t, got, tt.expectedResults)
 		})
 	}
 }
@@ -258,11 +259,11 @@ func TestProvider_GetEbsEncryptionByDefault(t *testing.T) {
 			}
 			got, err := p.GetEbsEncryptionByDefault(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -349,11 +350,11 @@ func TestProvider_GetRouteTableForSubnet(t *testing.T) {
 			}
 			got, err := p.GetRouteTableForSubnet(context.Background(), tt.regions[0], "", "")
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -484,11 +485,11 @@ func TestProvider_DescribeVolumes(t *testing.T) {
 			}
 			got, err := p.DescribeVolumes(context.Background(), tt.instances)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}

@@ -21,18 +21,18 @@
 package launcher
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUnwrapError(t *testing.T) {
 	e1 := NewUnhealthyError("error_1")
 	e2 := fmt.Errorf("error 2 = %w", e1)
 	healthErr := &BeaterUnhealthyError{}
-	assert.False(t, errors.Is(e1, healthErr))
-	assert.True(t, errors.As(e2, healthErr))
+	require.NotErrorIs(t, e1, healthErr)
+	require.ErrorAs(t, e2, healthErr)
 	assert.Equal(t, "error_1", healthErr.Error())
 }

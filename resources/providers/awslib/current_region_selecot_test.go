@@ -53,19 +53,19 @@ func (s *CurrentRegionSelectorTestSuite) SetupTest() {
 func (s *CurrentRegionSelectorTestSuite) TestCurrentRegionSelector_SingleCall() {
 	s.mock.EXPECT().GetMetadata(mock.Anything, mock.Anything).Return(successfulCurrentCloudRegionOutput, nil)
 	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{euRegion}, result)
 }
 
 func (s *CurrentRegionSelectorTestSuite) TestCurrentRegionSelector_FirstFail() {
 	s.mock.EXPECT().GetMetadata(mock.Anything, mock.Anything).Return(nil, errors.New("mock")).Once()
 	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.Error(err)
-	s.Len(result, 0)
+	s.Require().Error(err)
+	s.Empty(result)
 
 	s.mock.EXPECT().GetMetadata(mock.Anything, mock.Anything).Return(successfulCurrentCloudRegionOutput, nil).Once()
 	result, err = s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{euRegion}, result)
 	s.mock.AssertNumberOfCalls(s.T(), "GetMetadata", 2)
 }

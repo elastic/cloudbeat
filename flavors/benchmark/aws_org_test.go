@@ -148,7 +148,7 @@ func Test_getAwsAccounts(t *testing.T) {
 			}
 			got, err := A.getAwsAccounts(context.Background(), nil, aws.Config{}, &tt.rootIdentity)
 			if tt.wantErr != "" {
-				assert.ErrorContains(t, err, tt.wantErr)
+				require.ErrorContains(t, err, tt.wantErr)
 				return
 			}
 			require.NoError(t, err)

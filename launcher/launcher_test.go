@@ -303,7 +303,7 @@ func (s *LauncherTestSuite) TestWaitForUpdates() {
 			}(tt.configs)
 
 			err := sut.run()
-			s.ErrorIs(err, ErrorGracefulExit)
+			s.Require().ErrorIs(err, ErrorGracefulExit)
 			beater, ok := sut.beater.(*beaterMock)
 			s.Require().True(ok)
 			s.Equal(tt.expected, beater.cfg)
@@ -326,7 +326,7 @@ func (s *LauncherTestSuite) TestErrorWaitForUpdates() {
 	}()
 
 	err := sut.run()
-	s.Error(err)
+	s.Require().Error(err)
 }
 
 func (s *LauncherTestSuite) TestLauncherValidator() {
@@ -422,9 +422,9 @@ func (s *LauncherTestSuite) TestLauncherValidator() {
 
 			cfg, err := sut.reconfigureWait(tt.timeout)
 			if tt.expected == nil {
-				s.Error(err)
+				s.Require().Error(err)
 			} else {
-				s.NoError(err)
+				s.Require().NoError(err)
 				s.Equal(tt.expected, cfg)
 			}
 		})
@@ -433,12 +433,12 @@ func (s *LauncherTestSuite) TestLauncherValidator() {
 
 // TestLauncherErrorBeater should not call sut.Stop as the launcher should stop without calling it
 func (s *LauncherTestSuite) TestLauncherErrorBeater() {
-	s.Error(s.newLauncher(s.initMocks(), errorBeaterMockCreator).run())
+	s.Require().Error(s.newLauncher(s.initMocks(), errorBeaterMockCreator).run())
 }
 
 // TestLauncherPanicBeater should not call sut.Stop as the launcher should stop without calling it
 func (s *LauncherTestSuite) TestLauncherPanicBeater() {
-	s.ErrorContains(s.newLauncher(s.initMocks(), panicBeaterMockCreator).run(), "panicBeaterMock panics")
+	s.Require().ErrorContains(s.newLauncher(s.initMocks(), panicBeaterMockCreator).run(), "panicBeaterMock panics")
 }
 
 func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
@@ -449,7 +449,7 @@ func (s *LauncherTestSuite) TestLauncherUpdateAndStop() {
 		sut.Stop()
 	}()
 	err := sut.run()
-	s.ErrorIs(err, ErrorGracefulExit)
+	s.Require().ErrorIs(err, ErrorGracefulExit)
 }
 
 func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
@@ -460,7 +460,7 @@ func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
 		sut.Stop()
 	}()
 	err := sut.run()
-	s.ErrorIs(err, ErrorGracefulExit)
+	s.Require().ErrorIs(err, ErrorGracefulExit)
 
 	s.Panics(func() {
 		sut.Stop()
@@ -469,7 +469,7 @@ func (s *LauncherTestSuite) TestLauncherStopTwicePanics() {
 
 // TestLauncherErrorBeaterCreation should not call sut.Stop as the launcher should stop without calling it
 func (s *LauncherTestSuite) TestLauncherErrorBeaterCreation() {
-	s.Error(s.newLauncher(s.initMocks(), errorBeaterCreator).run())
+	s.Require().Error(s.newLauncher(s.initMocks(), errorBeaterCreator).run())
 }
 
 func (s *LauncherTestSuite) TestLauncherStop() {
@@ -480,7 +480,7 @@ func (s *LauncherTestSuite) TestLauncherStop() {
 	}()
 
 	err := sut.run()
-	s.ErrorIs(err, ErrorGracefulExit)
+	s.Require().ErrorIs(err, ErrorGracefulExit)
 }
 
 func (s *LauncherTestSuite) TestLauncherStopTimeout() {
@@ -494,7 +494,7 @@ func (s *LauncherTestSuite) TestLauncherStopTimeout() {
 	}()
 
 	err := sut.run()
-	s.ErrorIs(err, ErrorTimeoutExit)
+	s.Require().ErrorIs(err, ErrorTimeoutExit)
 }
 
 func (s *LauncherTestSuite) initMocks() *launcherMocks {

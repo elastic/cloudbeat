@@ -24,7 +24,6 @@ import (
 
 	"github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
 	"github.com/elastic/elastic-agent-libs/config"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -100,10 +99,10 @@ config:
 	for i, test := range tests {
 		s.Run(fmt.Sprint(i), func() {
 			cfg, err := config.NewConfigFrom(test.config)
-			require.NoError(s.T(), err)
+			s.Require().NoError(err)
 
 			c, err := New(cfg)
-			require.NoError(s.T(), err)
+			s.Require().NoError(err)
 
 			s.Equal(test.expectedType, c.Benchmark)
 			s.Equal(test.expectedCloudConfig, c.CloudConfig)
@@ -140,14 +139,14 @@ config:
 	for i, test := range tests {
 		s.Run(fmt.Sprint(i), func() {
 			cfg, err := config.NewConfigFrom(test.config)
-			s.NoError(err)
+			s.Require().NoError(err)
 
 			c, err := New(cfg)
 			if test.wantError {
-				s.Error(err)
+				s.Require().Error(err)
 				return
 			}
-			s.NoError(err)
+			s.Require().NoError(err)
 			s.Equal(test.expected, c.Benchmark)
 		})
 	}
@@ -179,10 +178,10 @@ func (s *ConfigTestSuite) TestConfigPeriod() {
 	for i, test := range tests {
 		s.Run(fmt.Sprint(i), func() {
 			cfg, err := config.NewConfigFrom(test.config)
-			s.NoError(err)
+			s.Require().NoError(err)
 
 			c, err := New(cfg)
-			s.NoError(err)
+			s.Require().NoError(err)
 
 			s.Equal(test.expectedPeriod, c.Period)
 		})
@@ -223,7 +222,7 @@ revision: 1`,
 			cfg := config.MustNewConfigFrom(test.config)
 
 			c, err := New(cfg)
-			s.NoError(err)
+			s.Require().NoError(err)
 
 			s.Equal(test.expectedPackagePolicyID, c.PackagePolicyId)
 			s.Equal(test.expectedPackagePolicyRevision, c.PackagePolicyRevision)

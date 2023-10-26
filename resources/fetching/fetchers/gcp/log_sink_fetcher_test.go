@@ -26,6 +26,7 @@ import (
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -81,11 +82,11 @@ func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Success() {
 	)
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
-	s.NoError(err)
+	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
 	// ListMonitoringAssets mocked to return a single asset
-	s.Equal(1, len(results))
+	s.Len(results, 1)
 }
 
 func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Error() {
@@ -100,7 +101,7 @@ func (s *GcpLogSinkFetcherTestSuite) TestFetcher_Fetch_Error() {
 	mockInventoryService.On("ListLoggingAssets", mock.Anything).Return(nil, errors.New("api call error"))
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
-	s.Error(err)
+	s.Require().Error(err)
 }
 
 func TestLoggingAsset_GetMetadata(t *testing.T) {
@@ -138,7 +139,7 @@ func TestLoggingAsset_GetMetadata(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := tt.resource.GetMetadata()
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -197,7 +198,7 @@ func TestGcpLoggingAsset_GetElasticCommonData(t *testing.T) {
 
 			got, err := g.GetElasticCommonData()
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equalf(t, tt.want, got, "GetElasticCommonData()")
 		})
 	}

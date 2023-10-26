@@ -228,10 +228,10 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 			ctx := context.Background()
 
 			err := iamFetcher.Fetch(ctx, fetching.CycleMetadata{})
-			s.NoError(err)
+			s.Require().NoError(err)
 
 			results := testhelper.CollectResources(s.resourceCh)
-			s.Equal(test.numExpectedResults, len(results))
+			s.Len(results, test.numExpectedResults)
 		})
 	}
 }
@@ -362,11 +362,11 @@ func (s *IamFetcherTestSuite) TestIamResource_GetMetadata() {
 			}
 
 			meta, err := iamResource.GetMetadata()
-			s.NoError(err)
+			s.Require().NoError(err)
 			s.Equal(test.expected, meta)
 
 			m, err := iamResource.GetElasticCommonData()
-			s.NoError(err)
+			s.Require().NoError(err)
 			s.Len(m, 1)
 			s.Contains(m, "cloud.service.name")
 		})

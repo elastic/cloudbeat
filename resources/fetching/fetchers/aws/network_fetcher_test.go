@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -139,12 +140,12 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 
 			err := f.Fetch(ctx, fetching.CycleMetadata{})
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 			resources := testhelper.CollectResources(ch)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expectedResources, len(resources))
+			require.NoError(t, err)
+			assert.Len(t, resources, tt.expectedResources)
 		})
 	}
 }
@@ -155,11 +156,11 @@ func TestACLResource_GetMetadata(t *testing.T) {
 		identity:    &cloud.Identity{},
 	}
 	meta, err := r.GetMetadata()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fetching.ResourceMetadata{ID: "", Type: "cloud-compute", SubType: "aws-nacl", Name: ""}, meta)
 	assert.Equal(t, ec2.NACLInfo{}, r.GetData())
 	m, err := r.GetElasticCommonData()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, m, 1)
 	assert.Contains(t, m, "cloud.service.name")
 }

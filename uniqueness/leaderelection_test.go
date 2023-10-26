@@ -106,7 +106,7 @@ func (s *LeaderElectionTestSuite) TestNewLeaderElector() {
 	}
 	for _, tt := range tests {
 		got := NewLeaderElector(testhelper.NewLogger(s.T()), tt.args.k8sClient)
-		s.Truef(reflect.TypeOf(got) == reflect.TypeOf(tt.want), "NewLeaderElector() = %v, want %v", got, tt.want)
+		s.Equalf(reflect.TypeOf(got), reflect.TypeOf(tt.want), "NewLeaderElector() = %v, want %v", got, tt.want)
 	}
 }
 
@@ -115,22 +115,22 @@ func (s *LeaderElectionTestSuite) TestManager_RunWaitForLeader() {
 	err := s.manager.Run(context.Background())
 	elapsed := time.Since(sTime)
 
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.GreaterOrEqual(elapsed, FirstLeaderDeadline, "run did not wait a sufficient time to acquire the lease")
-	s.Equal(true, s.manager.IsLeader())
+	s.True(s.manager.IsLeader())
 }
 
 // Verify that when a pre-configured lease exists, eventually, the leader-manager will try to gain control if the
 // lease is not being renewed.
 func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 	podId := "this_pod"
-	s.NoError(os.Setenv(PodNameEnvar, podId))
+	s.Require().NoError(os.Setenv(PodNameEnvar, podId))
 
 	holderIdentity := LeaderLeaseName + "_another_pod"
 	lease := generateLease(&holderIdentity)
 	s.manager.kubeClient = k8sFake.NewSimpleClientset(lease)
 	err := s.manager.Run(context.Background())
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	updatedLease, err := s.manager.kubeClient.CoordinationV1().Leases(core.NamespaceDefault).Get(
 		context.Background(),
@@ -138,7 +138,7 @@ func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 		metav1.GetOptions{},
 	)
 
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Contains(*updatedLease.Spec.HolderIdentity, podId)
 }
 
@@ -146,11 +146,11 @@ func (s *LeaderElectionTestSuite) TestManager_RunWithExistingLease() {
 // After waiting for a FirstLeaderDeadline seconds we should be holding the lease again as it has not been renewed.
 func (s *LeaderElectionTestSuite) TestManager_ReRun() {
 	podId := "this_pod"
-	s.NoError(os.Setenv(PodNameEnvar, podId))
+	s.Require().NoError(os.Setenv(PodNameEnvar, podId))
 
 	s.manager.kubeClient = k8sFake.NewSimpleClientset()
 	err := s.manager.Run(context.Background())
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	holderIdentity := LeaderLeaseName + "_another_pod"
 	lease := generateLease(&holderIdentity)
@@ -161,8 +161,8 @@ func (s *LeaderElectionTestSuite) TestManager_ReRun() {
 	)
 
 	time.Sleep(FirstLeaderDeadline)
-	s.NoError(err)
-	s.Equal(true, s.manager.IsLeader())
+	s.Require().NoError(err)
+	s.True(s.manager.IsLeader())
 }
 
 func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
@@ -197,7 +197,7 @@ func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
 
 	for _, tt := range tests {
 		if tt.shouldSetEnvar {
-			s.NoError(os.Setenv(PodNameEnvar, podId))
+			s.Require().NoError(os.Setenv(PodNameEnvar, podId))
 		}
 
 		got, err := s.manager.buildConfig(context.TODO())
@@ -208,12 +208,12 @@ func (s *LeaderElectionTestSuite) TestManager_buildConfig() {
 		if !tt.shouldSetEnvar {
 			// verify that the lock identity has been constructed with uuid
 			err := parseUUID(got)
-			s.NoError(err)
+			s.Require().NoError(err)
 		} else {
 			s.Equal(got.Lock.Identity(), tt.want.Lock.Identity(), "buildConfig() got = %v, want %v", got, tt.want)
 		}
 
-		s.NoError(os.Unsetenv(PodNameEnvar))
+		s.Require().NoError(os.Unsetenv(PodNameEnvar))
 	}
 }
 

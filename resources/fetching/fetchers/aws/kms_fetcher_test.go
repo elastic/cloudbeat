@@ -93,10 +93,10 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 			ctx := context.Background()
 
 			err := kmsFetcher.Fetch(ctx, fetching.CycleMetadata{})
-			s.NoError(err)
+			s.Require().NoError(err)
 
 			results := testhelper.CollectResources(s.resourceCh)
-			s.Equal(test.numExpectedResults, len(results))
+			s.Len(results, test.numExpectedResults)
 		})
 	}
 }
@@ -117,11 +117,11 @@ func (s *KmsFetcherTestSuite) TestKmsResource_GetMetadata() {
 		},
 	}
 	meta, err := r.GetMetadata()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(fetching.ResourceMetadata{ID: "test-key-arn", Type: "key-management", SubType: "aws-kms", Name: "test-key-id"}, meta)
 
 	m, err := r.GetElasticCommonData()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Len(m, 4)
 	s.Contains(m, "cloud.service.name")
 	s.Equal(types.KeySpecEccNistP256, m["x509.public_key_algorithm"])

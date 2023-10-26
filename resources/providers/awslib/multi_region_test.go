@@ -29,6 +29,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -142,10 +143,10 @@ func TestMultiRegionFetch(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := MultiRegionFetch(context.Background(), tt.clients, tt.fetcher)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			if !assert.ElementsMatch(t, lo.Flatten(got), tt.want) {
 				t.Errorf("Fetch() got = %v, want %v", got, tt.want)
 			}

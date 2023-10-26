@@ -17,6 +17,7 @@ updates:
       google:
         patterns:
           - "cloud.google.com/*"
+          - "google.golang.org/api"
       elastic:
         patterns:
           - "github.com/elastic/*"

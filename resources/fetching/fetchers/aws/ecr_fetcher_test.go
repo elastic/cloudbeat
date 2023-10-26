@@ -213,7 +213,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 			},
 		}
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
-		s.NoError(err)
+		s.Require().NoError(err)
 
 		ecrProvider := &ecr.MockRepositoryDescriber{}
 		// Init private repositories provider
@@ -249,7 +249,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(len(test.expectedRepositoriesNames), len(results))
-		s.NoError(err)
+		s.Require().NoError(err)
 
 		// DO NOT REMOVE THIS METHOD
 		// The results provided by the channel can return the results in a different order
@@ -261,7 +261,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcher() {
 		for i, name := range test.expectedRepositoriesNames {
 			ecrResource := results[i].Resource.(EcrResource)
 			metadata, err := ecrResource.GetMetadata()
-			s.NoError(err)
+			s.Require().NoError(err)
 			s.Equal(name, *ecrResource.RepositoryName)
 			s.Equal(*ecrResource.RepositoryName, metadata.Name)
 			s.Equal(*ecrResource.RepositoryArn, metadata.ID)
@@ -309,7 +309,7 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 			},
 		}
 		_, err := kubeclient.CoreV1().Pods(test.namespace).Create(context.Background(), pods, metav1.CreateOptions{})
-		s.NoError(err)
+		s.Require().NoError(err)
 
 		ecrProvider := &ecr.MockRepositoryDescriber{}
 		ecrProvider.EXPECT().DescribeRepositories(mock.Anything, mock.Anything, mock.Anything).Return([]types.Repository{}, test.error)
@@ -329,9 +329,9 @@ func (s *EcrFetcherTestSuite) TestCreateFetcherErrorCases() {
 
 		ctx := context.Background()
 		err = ecrFetcher.Fetch(ctx, fetching.CycleMetadata{})
-		s.NoError(err)
+		s.Require().NoError(err)
 		results := testhelper.CollectResources(s.resourceCh)
-		s.Equal(0, len(results))
+		s.Empty(results)
 	}
 }
 
@@ -343,10 +343,10 @@ func (s *EcrFetcherTestSuite) TestEcrResource_GetMetadata() {
 		},
 	}
 	meta, err := r.GetMetadata()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(fetching.ResourceMetadata{ID: "test-ecr-arn", Type: "container-registry", SubType: "aws-ecr", Name: "test-ecr-name"}, meta)
 	m, err := r.GetElasticCommonData()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Len(m, 1)
 	s.Contains(m, "cloud.service.name")
 }
