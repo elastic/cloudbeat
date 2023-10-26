@@ -11,6 +11,7 @@ import sys
 import json
 from pathlib import Path
 from munch import Munch
+from packaging import version
 import configuration_fleet as cnfg
 from api.agent_policy_api import create_agent_policy
 from api.package_policy_api import create_cspm_integration
@@ -22,7 +23,7 @@ from api.common_api import (
     update_package_version,
 )
 from loguru import logger
-from state_file_manager import state_manager, PolicyState
+from state_file_manager import state_manager, PolicyState, HostType
 from package_policy import (
     load_data,
     version_compatible,
@@ -63,6 +64,10 @@ if __name__ == "__main__":
         package_name="cloud_security_posture",
         package_version=package_version,
     )
+    if version.parse(package_version) >= version.parse("1.6"):
+        INTEGRATION_INPUT["vars"] = {
+            "gcp.account_type": "single-account",
+        }
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
         cfg=cnfg.elk_config,
@@ -87,6 +92,8 @@ if __name__ == "__main__":
             package_policy_id,
             CSPM_GCP_EXPECTED_AGENTS,
             [],
+            HostType.LINUX_TAR.value,
+            INTEGRATION_INPUT["name"],
         ),
     )
 

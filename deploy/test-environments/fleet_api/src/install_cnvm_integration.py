@@ -22,7 +22,7 @@ from api.common_api import (
     get_cnvm_template,
 )
 from loguru import logger
-from state_file_manager import state_manager, PolicyState
+from state_file_manager import state_manager, PolicyState, HostType
 from package_policy import (
     version_compatible,
     VERSION_MAP,
@@ -86,6 +86,8 @@ if __name__ == "__main__":
             package_policy_id,
             CNVM_EXPECTED_AGENTS,
             CNVM_AGENT_TAGS,
+            HostType.LINUX_TAR.value,
+            INTEGRATION_INPUT["name"],
         ),
     )
 

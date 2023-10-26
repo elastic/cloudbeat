@@ -170,6 +170,8 @@ def generate_package_policy(template: dict, policy_input: dict) -> dict:
     for input_name, data in package_policy["inputs"].items():
         if integration_key in input_name:
             update_input(data, policy_input)
+            if "vars" in policy_input and "vars" not in data["streams"]["cloud_security_posture.findings"]:
+                data["streams"]["cloud_security_posture.findings"]["vars"] = policy_input["vars"]
     package_policy["vars"]["posture"] = policy_input.get("posture", "")
     package_policy["vars"]["deployment"] = policy_input.get("deployment", "")
     package_policy["name"] = policy_input.get("name", "")

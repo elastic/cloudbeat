@@ -21,7 +21,7 @@ from api.common_api import (
     update_package_version,
 )
 from loguru import logger
-from state_file_manager import state_manager, PolicyState
+from state_file_manager import state_manager, PolicyState, HostType
 from package_policy import (
     load_data,
     version_compatible,
@@ -84,6 +84,8 @@ if __name__ == "__main__":
             package_policy_id,
             KSPM_UNMANAGED_EXPECTED_AGENTS,
             [],
+            HostType.KUBERNETES.value,
+            INTEGRATION_INPUT["name"],
         ),
     )
 

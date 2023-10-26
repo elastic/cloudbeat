@@ -341,7 +341,7 @@ jobs:
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_d4c.yaml" "${{ env.S3_BUCKET }}/kspm_d4c.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/kspm_eks.yaml" "${{ env.S3_BUCKET }}/kspm_eks.yaml"
           aws s3 cp "${{ env.FLEET_API_DIR}}/cspm-linux.sh" "${{ env.S3_BUCKET }}/cspm-linux.sh"
-          aws s3 cp "../cloudformation/config.json" "${{ env.S3_BUCKET }}/cnvm_config.json"
+          aws s3 cp "${{ env.FLEET_API_DIR}}/state_data.json" "${{ env.S3_BUCKET }}/state_data.json"
 
       - name: Wait for agents to enroll
         id: wait-for-agents

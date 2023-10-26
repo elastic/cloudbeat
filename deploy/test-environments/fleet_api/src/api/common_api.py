@@ -1,8 +1,9 @@
 """
 This module contains API calls related to Fleet settings
 """
+import time
 import codecs
-from typing import Dict, Any
+from typing import Dict, Any, List
 from munch import Munch, munchify
 from loguru import logger
 from api.base_call_api import APICallException, perform_api_call
@@ -13,6 +14,7 @@ from utils import (
 )
 
 AGENT_ARTIFACT_SUFFIX = "/downloads/beats/elastic-agent"
+AGENT_ARTIFACT_SUFFIX_SHORT = "/downloads/"
 
 STAGING_ARTIFACTORY_URL = "https://staging.elastic.co/"
 SNAPSHOT_ARTIFACTORY_URL = "https://snapshots.elastic.co/"
@@ -188,26 +190,31 @@ def get_build_info(version: str) -> str:
         return ""
 
 
-def get_artifact_server(version: str) -> str:
+def get_artifact_server(version: str, is_short_url: bool = False) -> str:
     """
-    Retrieve the artifact server for a specific version of Elastic.
+    Retrieve the artifact server URL for a specific version of Elastic.
 
     Args:
-        version (str): The version of Elastic.
+        elastic_version (str): The version of Elastic.
+        is_snapshot_url (bool, optional): Indicates whether to use the short artifact URL.
+                                          Defaults to False.
 
     Returns:
-        str: The artifact server of the specified version.
+        str: The artifact server URL for the specified Elastic version.
 
     Raises:
         APICallException: If the API call to retrieve the artifact server fails.
     """
-
     if is_snapshot(version):
         url = SNAPSHOT_ARTIFACTORY_URL
     else:
         url = STAGING_ARTIFACTORY_URL
 
-    return url + get_build_info(version) + AGENT_ARTIFACT_SUFFIX
+    artifacts_suffix = AGENT_ARTIFACT_SUFFIX
+    if is_short_url:
+        artifacts_suffix = AGENT_ARTIFACT_SUFFIX_SHORT
+
+    return url + get_build_info(version) + artifacts_suffix
 
 
 def is_snapshot(version: str) -> bool:
@@ -368,3 +375,118 @@ def update_package_version(cfg: Munch, package_name: str, package_version: str):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
+
+
+def bulk_upgrade_agents(cfg: Munch, agent_ids: List[str], version: str, source_uri: str) -> str:
+    """
+    Upgrade a list of agents to a specified version using the Kibana API.
+
+    Args:
+        cfg (Munch): Configuration object containing Kibana URL and authentication details.
+        agent_ids (List[str]): List of agent IDs to upgrade.
+        version (str): The version to upgrade to.
+        source_uri (str): The source URI for the agent package.
+
+    Returns:
+        str: The action ID of the upgrade.
+
+    Raises:
+        APICallException: If the API call fails with a non-200 status code.
+    """
+    # pylint: disable=duplicate-code
+    url = f"{cfg.kibana_url}/api/fleet/agents/bulk_upgrade"
+    json_data = {
+        "agents": agent_ids,
+        "version": version,
+        "source_uri": source_uri,
+    }
+
+    try:
+        response = perform_api_call(
+            method="POST",
+            url=url,
+            auth=cfg.auth,
+            params={"json": json_data},
+        )
+        action_id = response.get("actionId")
+        if not action_id:
+            raise APICallException(
+                response.status_code,
+                "API response did not include an actionId",
+            )
+        logger.info(f"Agents '{agent_ids}' upgrade to version '{version}' is started")
+        return action_id
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        raise APICallException(api_ex.status_code, api_ex.response_text) from api_ex
+
+
+def get_action_status(cfg: Munch) -> List[dict]:
+    """
+    Retrieve action status for agents using the Kibana API.
+
+    Args:
+        cfg (Munch): Configuration object containing Kibana URL and authentication details.
+
+    Returns:
+        List[dict]: A list of action status items.
+
+    Raises:
+        APICallException: If the API call fails with a non-200 status code.
+    """
+    url = f"{cfg.kibana_url}/api/fleet/agents/action_status"
+
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            auth=cfg.auth,
+        )
+        return response.get("items", [])
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        raise APICallException(api_ex.status_code, api_ex.response_text) from api_ex
+
+
+def wait_for_action_status(
+    cfg: Munch,
+    target_action_id: str,
+    target_type: str,
+    target_status: str,
+    timeout_secs: int = 600,
+):
+    """
+    Wait for a specific action status to match the target criteria.
+
+    Args:
+        cfg (Munch): Configuration object containing Kibana URL and authentication details.
+        target_action_id (str): The action ID to match.
+        target_type (str): The target action type to match.
+        target_status (str): The target status to match.
+        timeout_secs (int): Maximum time to wait in seconds (default is 600 seconds).
+
+    Returns:
+        bool: True if the target criteria is met, False if the timeout is reached.
+
+    Raises:
+        APICallException: If the API call fails with a non-200 status code.
+    """
+    start_time = time.time()
+    while True:
+        action_status = get_action_status(cfg)
+        for item in action_status:
+            if (
+                item.get("actionId") == target_action_id
+                and item.get("type") == target_type
+                and item.get("status") == target_status
+            ):
+                return True  # Found the target criteria
+
+        if time.time() - start_time >= timeout_secs:
+            return False  # Timeout reached
+
+        time.sleep(1)  # Fixed sleep interval of 1 second

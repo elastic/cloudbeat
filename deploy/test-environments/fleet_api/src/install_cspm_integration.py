@@ -22,7 +22,7 @@ from api.common_api import (
 )
 from loguru import logger
 from utils import render_template
-from state_file_manager import state_manager, PolicyState
+from state_file_manager import state_manager, PolicyState, HostType
 from package_policy import (
     load_data,
     version_compatible,
@@ -97,6 +97,8 @@ if __name__ == "__main__":
             package_policy_id,
             CSPM_EXPECTED_AGENTS,
             [],
+            HostType.LINUX_TAR.value,
+            INTEGRATION_INPUT["name"],
         ),
     )
 

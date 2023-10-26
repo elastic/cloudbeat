@@ -46,7 +46,6 @@ tests_data = {
 
 
 @pytest.mark.sanity
-@pytest.mark.upgrade
 @pytest.mark.parametrize("match_type", tests_data["cis_k8s"])
 def test_kspm_unmanaged_findings(kspm_client, match_type):
     """
@@ -74,7 +73,6 @@ def test_kspm_unmanaged_findings(kspm_client, match_type):
 
 
 @pytest.mark.sanity
-@pytest.mark.upgrade
 @pytest.mark.parametrize("match_type", tests_data["cis_eks"])
 def test_kspm_e_k_s_findings(kspm_client, match_type):
     """
@@ -117,7 +115,11 @@ def test_cspm_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = [{"term": {"rule.benchmark.id": "cis_aws"}}, {"term": {"resource.type": match_type}}]
+    query_list = [
+        {"term": {"rule.benchmark.id": "cis_aws"}},
+        {"term": {"resource.type": match_type}},
+        {"term": {"agent.version": STACK_VERSION}},
+    ]
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
     results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
@@ -140,7 +142,7 @@ def test_cnvm_findings(cnvm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = []
+    query_list = [{"term": {"agent.version": STACK_VERSION}}]
     query, sort = cnvm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
     results = get_findings(cnvm_client, CNVM_CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
@@ -162,7 +164,11 @@ def test_cspm_gcp_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = [{"term": {"rule.benchmark.id": "cis_gcp"}}, {"term": {"resource.type": match_type}}]
+    query_list = [
+        {"term": {"rule.benchmark.id": "cis_gcp"}},
+        {"term": {"resource.type": match_type}},
+        {"term": {"agent.version": STACK_VERSION}},
+    ]
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
     results = get_findings(cspm_client, GCP_CONFIG_TIMEOUT, query, sort, match_type)
