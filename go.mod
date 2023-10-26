@@ -73,9 +73,9 @@ require (
 	google.golang.org/api v0.148.0
 	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools/gotestsum v1.11.0
-	k8s.io/api v0.28.1
-	k8s.io/apimachinery v0.28.1
-	k8s.io/client-go v0.28.1
+	k8s.io/api v0.28.3
+	k8s.io/apimachinery v0.28.3
+	k8s.io/client-go v0.28.3
 	k8s.io/klog/v2 v2.100.1
 	modernc.org/sqlite v1.26.0
 )
