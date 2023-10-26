@@ -24,6 +24,9 @@ updates:
       k8s:
         patterns:
           - "k8s.io/*"
+      trivy:
+        patterns:
+          - "github.com/aquasecurity/*"
     labels:
       - "backport-skip"
       - "dependency"
