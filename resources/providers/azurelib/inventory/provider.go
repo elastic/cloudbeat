@@ -64,6 +64,7 @@ type AzureAsset struct {
 type ServiceAPI interface {
 	// ListAllAssetTypesByName List all content types of the given assets types
 	ListAllAssetTypesByName(assets []string) ([]AzureAsset, error)
+	GetSubscriptions() map[string]string
 }
 
 type ProviderInitializerAPI interface {
@@ -108,6 +109,10 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, azureC
 		ctx:           ctx,
 		Config:        azureConfig,
 	}, nil
+}
+
+func (p *Provider) GetSubscriptions() map[string]string {
+	return p.subscriptions
 }
 
 func (p *ProviderInitializer) getSubscriptionIds(ctx context.Context, azureConfig auth.AzureFactoryConfig) (map[string]string, error) {
@@ -212,6 +217,7 @@ func (p *Provider) getAssetFromData(data map[string]any) AzureAsset {
 		SubscriptionId:   subId,
 		SubscriptionName: p.subscriptions[subId],
 		TenantId:         getString(data, "tenantId"),
+		Sku:              getString(data, "sku"),
 		Type:             getString(data, "type"),
 	}
 }
