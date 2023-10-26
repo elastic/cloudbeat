@@ -18,6 +18,9 @@
 package auth
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 )
 
@@ -25,9 +28,42 @@ type AzureAuthProvider struct{}
 
 type AzureAuthProviderAPI interface {
 	FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error)
+	FindUsernamePasswordCredentials(tenantID string, clientID string, username string, password string, options *azidentity.UsernamePasswordCredentialOptions) (*azidentity.UsernamePasswordCredential, error)
+	FindClientSecretCredentials(tenantID string, clientID string, clientSecret string, options *azidentity.ClientSecretCredentialOptions) (*azidentity.ClientSecretCredential, error)
+	FindCertificateCredential(tenantID string, clientID string, certPath string, password string, options *azidentity.ClientCertificateCredentialOptions) (*azidentity.ClientCertificateCredential, error)
 }
 
 // FindDefaultCredentials is a wrapper around azidentity.NewDefaultAzureCredential to make it easier to mock
 func (a *AzureAuthProvider) FindDefaultCredentials(options *azidentity.DefaultAzureCredentialOptions) (*azidentity.DefaultAzureCredential, error) {
 	return azidentity.NewDefaultAzureCredential(options)
+}
+
+// FindUsernamePasswordCredentials is a wrapper around azidentity.NewUsernamePasswordCredential to make it easier to mock
+func (a *AzureAuthProvider) FindUsernamePasswordCredentials(tenantID string, clientID string, username string, password string, options *azidentity.UsernamePasswordCredentialOptions) (*azidentity.UsernamePasswordCredential, error) {
+	return azidentity.NewUsernamePasswordCredential(tenantID, clientID, username, password, options)
+}
+
+// FindClientSecretCredentials is a wrapper around azidentity.NewClientSecretCredential to make it easier to mock
+func (a *AzureAuthProvider) FindClientSecretCredentials(tenantID string, clientID string, clientSecret string, options *azidentity.ClientSecretCredentialOptions) (*azidentity.ClientSecretCredential, error) {
+	return azidentity.NewClientSecretCredential(tenantID, clientID, clientSecret, options)
+}
+
+// FindCertificateCredential is a wrapper around azidentity.NewClientCertificateCredential and azidentity.ParseCertificates that loads certificates and a private key, in PEM or PKCS12 format.
+func (a *AzureAuthProvider) FindCertificateCredential(tenantID string, clientID string, certPath string, password string, options *azidentity.ClientCertificateCredentialOptions) (*azidentity.ClientCertificateCredential, error) {
+	certData, err := os.ReadFile(certPath)
+	if err != nil {
+		return nil, fmt.Errorf("error trying to read certificate file %s: %s", certPath, err.Error())
+	}
+
+	// ParseCertificates requires nil password if the private key isn't encrypted. It can't decrypt keys in PEM format.
+	var pwd []byte
+	if len(password) > 0 {
+		pwd = []byte(password)
+	}
+	certs, key, err := azidentity.ParseCertificates(certData, pwd)
+	if err != nil {
+		return nil, fmt.Errorf("error trying to load certificate from %s: %s", certPath, err.Error())
+	}
+
+	return azidentity.NewClientCertificateCredential(tenantID, clientID, certs, key, options)
 }

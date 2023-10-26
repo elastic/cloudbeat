@@ -24,20 +24,85 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/elastic/cloudbeat/config"
 )
 
 func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 	tests := []struct {
-		name         string
-		want         *AzureFactoryConfig
-		wantErr      bool
-		authProvider *MockAzureAuthProviderAPI
+		name               string
+		config             config.AzureConfig
+		authProviderInitFn func(*MockAzureAuthProviderAPI)
+		want               *AzureFactoryConfig
+		wantErr            bool
 	}{
 		{
-			name:         "Should return a DefaultAzureCredential",
-			authProvider: mockAzureAuthProvider(nil),
+			name:               "Should return a DefaultAzureCredential",
+			config:             config.AzureConfig{},
+			authProviderInitFn: initDefaultCredentialsMock(nil),
 			want: &AzureFactoryConfig{
 				Credentials: &azidentity.DefaultAzureCredential{},
+			},
+		},
+		{
+			name: "Should return a ClientSecretCredential",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					TenantID:     "tenant_a",
+					ClientID:     "client_id",
+					ClientSecret: "secret",
+				},
+			},
+			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {
+				m.EXPECT().
+					FindClientSecretCredentials("tenant_a", "client_id", "secret", mock.Anything).
+					Return(&azidentity.ClientSecretCredential{}, nil).
+					Once()
+			},
+			want: &AzureFactoryConfig{
+				Credentials: &azidentity.ClientSecretCredential{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Should return a UsernamePasswordCredential",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					TenantID:       "tenant_a",
+					ClientID:       "client_id",
+					ClientUsername: "username",
+					ClientPassword: "password",
+				},
+			},
+			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {
+				m.EXPECT().
+					FindUsernamePasswordCredentials("tenant_a", "client_id", "username", "password", mock.Anything).
+					Return(&azidentity.UsernamePasswordCredential{}, nil).
+					Once()
+			},
+			want: &AzureFactoryConfig{
+				Credentials: &azidentity.UsernamePasswordCredential{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "Should return a ClientCertificateCredential",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					TenantID:                  "tenant_a",
+					ClientID:                  "client_id",
+					ClientCertificatePath:     "/path/cert",
+					ClientCertificatePassword: "password",
+				},
+			},
+			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {
+				m.EXPECT().
+					FindCertificateCredential("tenant_a", "client_id", "/path/cert", "password", mock.Anything).
+					Return(&azidentity.ClientCertificateCredential{}, nil).
+					Once()
+			},
+			want: &AzureFactoryConfig{
+				Credentials: &azidentity.ClientCertificateCredential{},
 			},
 			wantErr: false,
 		},
@@ -45,12 +110,14 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			defer tt.authProvider.AssertExpectations(t)
+			azureProviderAPI := &MockAzureAuthProviderAPI{}
+			tt.authProviderInitFn(azureProviderAPI)
+			defer azureProviderAPI.AssertExpectations(t)
 
 			p := &ConfigProvider{
-				AuthProvider: tt.authProvider,
+				AuthProvider: azureProviderAPI,
 			}
-			got, err := p.GetAzureClientConfig()
+			got, err := p.GetAzureClientConfig(tt.config)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -61,16 +128,16 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 	}
 }
 
-func mockAzureAuthProvider(err error) *MockAzureAuthProviderAPI {
-	azureProviderAPI := &MockAzureAuthProviderAPI{}
-	on := azureProviderAPI.EXPECT().FindDefaultCredentials(mock.Anything)
-	if err == nil {
-		on.Return(
-			&azidentity.DefaultAzureCredential{},
-			nil,
-		).Once()
-	} else {
-		on.Return(nil, err).Once()
+func initDefaultCredentialsMock(err error) func(*MockAzureAuthProviderAPI) {
+	return func(azureProviderAPI *MockAzureAuthProviderAPI) {
+		on := azureProviderAPI.EXPECT().FindDefaultCredentials(mock.Anything)
+		if err == nil {
+			on.Return(
+				&azidentity.DefaultAzureCredential{},
+				nil,
+			).Once()
+		} else {
+			on.Return(nil, err).Once()
+		}
 	}
-	return azureProviderAPI
 }
