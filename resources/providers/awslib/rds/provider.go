@@ -69,9 +69,9 @@ func (p Provider) DescribeDBInstances(ctx context.Context) ([]awslib.AwsResource
 			result = append(result, DBInstance{
 				Identifier:              *dbInstance.DBInstanceIdentifier,
 				Arn:                     *dbInstance.DBInstanceArn,
-				StorageEncrypted:        dbInstance.StorageEncrypted,
-				AutoMinorVersionUpgrade: dbInstance.AutoMinorVersionUpgrade,
-				PubliclyAccessible:      dbInstance.PubliclyAccessible,
+				StorageEncrypted:        aws.ToBool(dbInstance.StorageEncrypted),
+				AutoMinorVersionUpgrade: aws.ToBool(dbInstance.AutoMinorVersionUpgrade),
+				PubliclyAccessible:      aws.ToBool(dbInstance.PubliclyAccessible),
 				Subnets:                 subnets,
 				region:                  region,
 			})
