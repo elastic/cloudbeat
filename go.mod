@@ -32,7 +32,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/rds v1.57.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.40.2
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.33.2
-	github.com/aws/aws-sdk-go-v2/service/securityhub v1.37.2
+	github.com/aws/aws-sdk-go-v2/service/securityhub v1.38.0
 	github.com/aws/aws-sdk-go-v2/service/sns v1.22.2
 	github.com/aws/aws-sdk-go-v2/service/sts v1.23.2
 	github.com/aws/smithy-go v1.15.0
