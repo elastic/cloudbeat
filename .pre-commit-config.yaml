@@ -75,7 +75,7 @@ repos:
       - id: shfmt
         args: ["-i", "4"]
       - id: shellcheck
-        files: (deploy/azure/.*sh|scripts/publish_cft.sh)
+        files: (deploy/azure/.*sh|scripts/publish_cft.sh|.ci/scripts/update-beats.sh)
 
   - repo: local
     hooks:
