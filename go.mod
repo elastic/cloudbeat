@@ -3,8 +3,8 @@ module github.com/elastic/cloudbeat
 go 1.20
 
 require (
-	cloud.google.com/go/asset v1.15.1
-	cloud.google.com/go/iam v1.1.3
+	cloud.google.com/go/asset v1.15.2
+	cloud.google.com/go/iam v1.1.4
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.4.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph v0.8.2
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions v1.2.0
@@ -45,7 +45,7 @@ require (
 	github.com/elastic/elastic-agent-libs v0.6.2
 	github.com/elastic/go-licenser v0.4.1
 	github.com/elastic/go-ucfg v0.8.6
-	github.com/go-git/go-git/v5 v5.9.0
+	github.com/go-git/go-git/v5 v5.10.0
 	github.com/gocarina/gocsv v0.0.0-20170324095351-ffef3ffc77be
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/googleapis/gax-go/v2 v2.12.0
