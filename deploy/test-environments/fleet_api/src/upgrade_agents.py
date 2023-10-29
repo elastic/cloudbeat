@@ -156,23 +156,25 @@ def main():
         sys.exit(1)
 
     linux_policies_list = update_linux_policies(download_source_id)
-
+    time.sleep(10)  # To ensure that policies updated
     agents = get_agents(cfg=cnfg.elk_config)
     linux_agent_ids = [agent.id for agent in agents if agent.policy_id in linux_policies_list]
+    for agent_id in linux_agent_ids:
+        action_id = bulk_upgrade_agents(
+            cfg=cnfg.elk_config,
+            agent_ids=agent_id,
+            version=cnfg.elk_config.stack_version,
+            source_uri=get_artifact_server(version=cnfg.elk_config.stack_version),
+        )
 
-    action_id = bulk_upgrade_agents(
-        cfg=cnfg.elk_config,
-        agent_ids=linux_agent_ids,
-        version=cnfg.elk_config.stack_version,
-        source_uri=get_artifact_server(version=cnfg.elk_config.stack_version),
-    )
-
-    wait_for_action_status(
-        cfg=cnfg.elk_config,
-        target_action_id=action_id,
-        target_type="UPGRADE",
-        target_status="COMPLETE",
-    )
+        if not wait_for_action_status(
+            cfg=cnfg.elk_config,
+            target_action_id=action_id,
+            target_type="UPGRADE",
+            target_status="COMPLETE",
+        ):
+            sys.exit(1)
+        logger.info(f"Agent {agent_id} upgrade is finished")
 
 
 if __name__ == "__main__":
