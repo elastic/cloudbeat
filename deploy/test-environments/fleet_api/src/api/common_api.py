@@ -400,7 +400,7 @@ def bulk_upgrade_agents(cfg: Munch, agent_ids: List[str], version: str, source_u
         "version": version,
         "source_uri": source_uri,
     }
-
+    logger.info(f"Source URI: {source_uri}")
     try:
         response = perform_api_call(
             method="POST",
@@ -415,6 +415,7 @@ def bulk_upgrade_agents(cfg: Munch, agent_ids: List[str], version: str, source_u
                 "API response did not include an actionId",
             )
         logger.info(f"Agents '{agent_ids}' upgrade to version '{version}' is started")
+        logger.info(f"Action status id: {action_id}")
         return action_id
     except APICallException as api_ex:
         logger.error(
@@ -479,14 +480,13 @@ def wait_for_action_status(
     while True:
         action_status = get_action_status(cfg)
         for item in action_status:
-            if (
-                item.get("actionId") == target_action_id
-                and item.get("type") == target_type
-                and item.get("status") == target_status
-            ):
-                return True  # Found the target criteria
+            if item.get("actionId") == target_action_id:
+                logger.info(f"Type: {item.get('type')}, Status: {item.get('status')}")
+                if item.get("type") == target_type and item.get("status") == target_status:
+                    return True  # Found the target criteria
 
         if time.time() - start_time >= timeout_secs:
+            logger.error(f"Agent upgrade process reached a timeout of {timeout_secs} seconds.")
             return False  # Timeout reached
 
-        time.sleep(1)  # Fixed sleep interval of 1 second
+        time.sleep(2)  # Fixed sleep interval of 1 second

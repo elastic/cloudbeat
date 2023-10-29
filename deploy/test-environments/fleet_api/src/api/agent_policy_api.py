@@ -62,7 +62,9 @@ def update_agent_policy(cfg: Munch, policy_id, json_policy: dict):
             auth=cfg.auth,
             params={"json": json_policy},
         )
-        logger.info(f"Agent policy '{policy_id}' has been updated")
+        logger.info(
+            f"Agent policy '{policy_id}' for integration '{json_policy.get('name', '')}' has been updated",
+        )
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",

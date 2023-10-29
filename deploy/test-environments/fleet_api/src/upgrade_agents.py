@@ -31,6 +31,7 @@ Example 'state_data.json':
 """
 
 import sys
+import time
 from pathlib import Path
 from loguru import logger
 import configuration_fleet as cnfg
@@ -43,7 +44,9 @@ from api.common_api import (
     get_artifact_server,
     bulk_upgrade_agents,
     wait_for_action_status,
+    get_package_version,
 )
+from api.package_policy_api import get_package_policy_by_id
 from state_file_manager import state_manager, HostType
 
 STATE_DATA_PATH = Path(__file__).parent / "state_data.json"
@@ -57,6 +60,7 @@ def create_custom_agent_download_source() -> str:
         name="custom_source",
         host=host_url,
     )
+    logger.info(f"Download source id '{download_source_id}' is created")
     return download_source_id
 
 
@@ -81,10 +85,70 @@ def update_linux_policies(download_source_id: str):
     return linux_policies_list
 
 
+def wait_for_packages_upgrade():
+    """
+    This function waits until all packages version is upgraded.
+    """
+    desired_version = get_package_version(cfg=cnfg.elk_config)
+    policies = state_manager.get_policies()
+    for policy in policies:
+        if policy.integration_name == "tf-ap-d4c":
+            continue
+        if not wait_for_package_policy_version(
+            cfg=cnfg.elk_config,
+            policy_id=policy.pkg_policy_id,
+            desired_version=desired_version,
+        ):
+            logger.error(f"Integration {policy.integration_name} failed to upgrade.")
+            sys.exit(1)
+
+
+def wait_for_package_policy_version(
+    cfg,
+    policy_id,
+    desired_version,
+    timeout_secs=300,
+    poll_interval_secs=10,
+):
+    """
+    Wait for a package policy to reach the desired version with a timeout.
+
+    Args:
+        cfg (Munch): A configuration object containing Kibana URL, authentication details, etc.
+        policy_id (str): The package policy ID to monitor.
+        desired_version (str): The desired version to wait for.
+        timeout_secs (int, optional): Maximum time to wait in seconds. Default is 300 seconds.
+        poll_interval_secs (int, optional): Time to wait between polling for the package version.
+                                            Default is 10 seconds.
+
+    Returns:
+        bool: True if the package policy reaches the desired version within the timeout,
+              False otherwise.
+    """
+    start_time = time.time()
+
+    while time.time() - start_time < timeout_secs:
+        policy_info = get_package_policy_by_id(cfg, policy_id)
+        policy_name = policy_info.get("name", "")
+        policy_version = policy_info.get("package", {}).get("version", "")
+        logger.info(
+            f"Integration: {policy_name}, current version: {policy_version}, desired version: {desired_version}",
+        )
+        if policy_version == desired_version:
+            return True  # Desired version reached
+
+        time.sleep(poll_interval_secs)  # Wait and poll again
+
+    return False  # Desired version not reached within the timeout
+
+
 def main():
     """
     Main linux agents upgrade flow
     """
+    # Ensure that all packages are on the latest version
+    wait_for_packages_upgrade()
+
     download_source_id = create_custom_agent_download_source()
 
     if not download_source_id:
