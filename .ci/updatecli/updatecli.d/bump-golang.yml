@@ -119,3 +119,12 @@ targets:
       files:
         - go.mod
       matchpattern: 'go \d+.\d+'
+  update-hermit:
+    name: 'Update hermit with Golang version {{ source "latestGoVersion" }}'
+    sourceid: latestGoVersion
+    scmid: default
+    kind: shell
+    spec:
+      command: .ci/scripts/hermit-bump-go.sh
+      environments:
+        - name: PATH
