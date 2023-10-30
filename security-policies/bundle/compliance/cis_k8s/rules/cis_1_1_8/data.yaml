@@ -1,0 +1,45 @@
+metadata:
+  id: 129b07b7-4470-5224-8246-6ae975d6304b
+  name: Ensure that the etcd pod specification file ownership is set to root:root
+  profile_applicability: '* Level 1 - Master Node'
+  description: Ensure that the `/etc/kubernetes/manifests/etcd.yaml` file ownership
+    is set to `root:root`.
+  rationale: |-
+    The etcd pod specification file `/etc/kubernetes/manifests/etcd.yaml` controls various parameters that set the behavior of the `etcd` service in the master node.
+    etcd is a highly-available key-value store which Kubernetes uses for persistent storage of all of its REST API object.
+    You should set its file ownership to maintain the integrity of the file.
+    The file should be owned by `root:root`.
+  audit: |-
+    Run the below command (based on the file location on your system) on the Control Plane node.
+    For example,
+
+    ```
+    stat -c %U:%G /etc/kubernetes/manifests/etcd.yaml
+    ```
+
+    Verify that the ownership is set to `root:root`.
+  remediation: |-
+    Run the below command (based on the file location on your system) on the Control Plane node.
+    For example,
+
+    ```
+    chown root:root /etc/kubernetes/manifests/etcd.yaml
+    ```
+  impact: None
+  default_value: >
+    By default, `/etc/kubernetes/manifests/etcd.yaml` file ownership is set to
+    `root:root`.
+  references: "1. https://coreos.com/etcd\n2. https://kubernetes.io/docs/admin/etcd/"
+  section: Control Plane Node Configuration Files
+  version: '1.0'
+  tags:
+  - CIS
+  - Kubernetes
+  - CIS 1.1.8
+  - Control Plane Node Configuration Files
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.1
+    id: cis_k8s
+    rule_number: 1.1.8
+    posture_type: kspm

@@ -1,0 +1,36 @@
+name: Test Coverage
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download OPA Binary
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          ./opa -h
+
+      - name: OPA test coverage
+        run: |
+          coverage=$( ./opa test ./bundle -c | jq '.coverage' )
+          echo "COVERAGE=$coverage" >> "$GITHUB_ENV"
+
+      - name: Create Coverage Badge
+        uses: schneegans/dynamic-badges-action@v1.1.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: a7160df46e48dff45b24096de9302d38
+          filename: csp-security-policies_coverage.json
+          label: coverage
+          message: ${{ (env.COVERAGE) }}
+          namedLogo: Elastic
+          color: green
+          logoColor: lightblue

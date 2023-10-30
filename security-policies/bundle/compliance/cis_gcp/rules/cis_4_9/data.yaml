@@ -1,0 +1,100 @@
+metadata:
+  id: 4a6a8b7a-d7a2-5a52-af5c-70009500bbc5
+  name: Ensure That Compute Instances Do Not Have Public IP Addresses
+  profile_applicability: '* Level 2'
+  description: Compute instances should not be configured to have external IP addresses.
+  rationale: |-
+    To reduce your attack surface, Compute instances should not have public IP addresses.
+    Instead, instances should be configured behind load balancers, to minimize the instance's exposure to the internet.
+  audit: |-
+    **From Google Cloud Console**
+
+    1. Go to the `VM instances` page by visiting: [https://console.cloud.google.com/compute/instances](https://console.cloud.google.com/compute/instances).
+
+    2. For every VM, ensure that there is no `External IP` configured.
+
+    **From Google Cloud CLI**
+
+    ```
+    gcloud compute instances list --format=json
+    ```
+
+    3. The output should not contain an `accessConfigs` section under `networkInterfaces`. Note that the `natIP` value is present only for instances that are running or for instances that are stopped but have a static IP address. For instances that are stopped and are configured to have an ephemeral public IP address, the `natIP` field will not be present. Example output:
+
+    ```
+    networkInterfaces:
+    - accessConfigs:
+     - kind: compute#accessConfig
+     name: External NAT
+     networkTier: STANDARD
+     type: ONE_TO_ONE_NAT
+    ```
+
+    **Exception:**
+    Instances created by GKE should be excluded because some of them have external IP addresses and cannot be changed by editing the instance settings.
+    Instances created by GKE should be excluded.
+    These instances have names that start with "gke-" and are labeled "goog-gke-node".
+  remediation: |-
+    **From Google Cloud Console**
+
+    1. Go to the `VM instances` page by visiting: [https://console.cloud.google.com/compute/instances](https://console.cloud.google.com/compute/instances).
+
+    2. Click on the instance name to go the the `Instance detail page`.
+
+    3. Click `Edit`.
+
+    4. For each Network interface, ensure that `External IP` is set to `None`.
+
+    5. Click `Done` and then click `Save`.
+
+    **From Google Cloud CLI**
+
+    6. Describe the instance properties:
+    ```
+    gcloud compute instances describe <INSTANCE_NAME> --zone=<ZONE>
+    ```
+
+    7. Identify the access config name that contains the external IP address. This access config appears in the following format:
+
+    ```
+    networkInterfaces:
+    - accessConfigs:
+     - kind: compute#accessConfig
+     name: External NAT
+     natIP: 130.211.181.55
+     type: ONE_TO_ONE_NAT
+    ```
+
+    8. Delete the access config. 
+    ```
+    gcloud compute instances delete-access-config <INSTANCE_NAME> --zone=<ZONE> --access-config-name <ACCESS_CONFIG_NAME>
+    ```
+
+    In the above example, the `ACCESS_CONFIG_NAME` is `External NAT`.
+    The name of your access config might be different.
+
+    **Prevention:**
+    You can configure the `Define allowed external IPs for VM instances` Organization Policy to prevent VMs from being configured with public IP addresses.
+    Learn more at: [https://console.cloud.google.com/orgpolicies/compute-vmExternalIpAccess](https://console.cloud.google.com/orgpolicies/compute-vmExternalIpAccess)
+  impact: |-
+    Removing the external IP address from your Compute instance may cause some applications to stop working.
+  default_value: ''
+  references: |-
+    1. https://cloud.google.com/load-balancing/docs/backend-service#backends_and_external_ip_addresses
+    2. https://cloud.google.com/compute/docs/instances/connecting-advanced#sshbetweeninstances
+    3. https://cloud.google.com/compute/docs/instances/connecting-to-instance
+    4. https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address#unassign_ip
+    5. https://cloud.google.com/resource-manager/docs/organization-policy/org-policy-constraints
+  section: Virtual Machines
+  version: '1.0'
+  tags:
+  - CIS
+  - GCP
+  - CIS 4.9
+  - Virtual Machines
+  benchmark:
+    name: CIS Google Cloud Platform Foundation
+    version: v2.0.0
+    id: cis_gcp
+    rule_number: '4.9'
+    posture_type: cspm

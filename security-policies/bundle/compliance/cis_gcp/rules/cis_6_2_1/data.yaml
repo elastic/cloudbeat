@@ -1,0 +1,77 @@
+metadata:
+  id: b64386ab-20fa-57d2-9b5b-631d64181531
+  name: |-
+    Ensure ‘Log_error_verbosity’ Database Flag for Cloud SQL PostgreSQL Instance Is Set to ‘DEFAULT’ or Stricter
+  profile_applicability: '* Level 2'
+  description: |-
+    The `log_error_verbosity` flag controls the verbosity/details of messages logged.
+    Valid values are:
+    - `TERSE`
+    - `DEFAULT`
+    - `VERBOSE`
+
+    `TERSE` excludes the logging of `DETAIL`, `HINT`, `QUERY`, and `CONTEXT` error information.
+
+    `VERBOSE` output includes the `SQLSTATE` error code, source code file name, function name, and line number that generated the error.
+
+    Ensure an appropriate value is set to 'DEFAULT' or stricter.
+  rationale: |-
+    Auditing helps in troubleshooting operational problems and also permits forensic analysis.
+    If `log_error_verbosity` is not set to the correct value, too many details or too few details may be logged.
+    This flag should be configured with a value of 'DEFAULT' or stricter.
+    This recommendation is applicable to PostgreSQL database instances.
+  audit: |-
+    **From Google Cloud Console**
+
+    1. Go to the Cloud SQL Instances page in the Google Cloud Console by visiting [https://console.cloud.google.com/sql/instances](https://console.cloud.google.com/sql/instances).
+    2. Select the instance to open its `Instance Overview` page
+    3. Go to `Configuration` card
+    4. Under `Database flags`, check the value of `log_error_verbosity` flag is set to 'DEFAULT' or stricter.
+
+    **From Google Cloud CLI**
+
+    5. Use the below command for every Cloud SQL PostgreSQL database instance to verify the value of `log_error_verbosity`
+    ```
+    gcloud sql instances list --format=json | jq '.settings.databaseFlags[] | select(.name=="log_error_verbosity")|.value'
+    ```
+  remediation: |-
+    **From Google Cloud Console**
+
+    1. Go to the Cloud SQL Instances page in the Google Cloud Console by visiting https://console.cloud.google.com/sql/instances.
+    2. Select the PostgreSQL instance for which you want to enable the database flag.
+    3. Click `Edit`.
+    4. Scroll down to the `Flags` section.
+    5. To set a flag that has not been set on the instance before, click `Add item`, choose the flag `log_error_verbosity` from the drop-down menu and set appropriate value.
+    6. Click `Save` to save your changes.
+    7. Confirm your changes under `Flags` on the Overview page.
+
+    **From Google Cloud CLI**
+
+    8. Configure the log_error_verbosity database flag for every Cloud SQL PosgreSQL database instance using the below command.
+    ```
+    gcloud sql instances patch <INSTANCE_NAME> --database-flags log_error_verbosity=<TERSE|DEFAULT|VERBOSE>
+    ```
+    ```
+    Note: This command will overwrite all database flags previously set.
+    To keep those and add new ones, include the values for all flags you want set on the instance; any flag not specifically included is set to its default value.
+    For flags that do not take a value, specify the flag name followed by an equals sign ("=").
+    ```
+  impact: |-
+    Turning on logging will increase the required storage over time. Mismanaged logs may cause your storage costs to increase. Setting custom flags via command line on certain instances will cause all omitted flags to be reset to defaults. This may cause you to lose custom flags and could result in unforeseen complications or instance restarts. Because of this, it is recommended you apply these flags changes during a period of low usage.
+  default_value: ''
+  references: |-
+    1. https://cloud.google.com/sql/docs/postgres/flags
+    2. https://www.postgresql.org/docs/current/runtime-config-logging.html#RUNTIME-CONFIG-LOGGING-WHAT
+  section: PostgreSQL Database
+  version: '1.0'
+  tags:
+  - CIS
+  - GCP
+  - CIS 6.2.1
+  - PostgreSQL Database
+  benchmark:
+    name: CIS Google Cloud Platform Foundation
+    version: v2.0.0
+    id: cis_gcp
+    rule_number: 6.2.1
+    posture_type: cspm
