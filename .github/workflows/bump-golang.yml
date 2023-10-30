@@ -4,7 +4,7 @@ name: bump-golang
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 20 * * 6'
+    - cron: '0 13 * * 1'
 
 permissions:
   contents: read
@@ -13,9 +13,7 @@ jobs:
   bump:
     runs-on: ubuntu-latest
     steps:
-
       - uses: actions/checkout@v4
-
       - uses: elastic/apm-pipeline-library/.github/actions/updatecli@current
         with:
           vaultUrl: ${{ secrets.VAULT_ADDR }}
