@@ -1,0 +1,73 @@
+metadata:
+  id: b56e76ca-b976-5b96-ab3f-359e5b51ddf2
+  name: Ensure That Instances Are Not Configured To Use the Default Service Account
+  profile_applicability: '* Level 1'
+  description: |-
+    It is recommended to configure your instance to not use the default Compute Engine service account because it has the Editor role on the project.
+  rationale: |-
+    The default Compute Engine service account has the Editor role on the project, which allows read and write access to most Google Cloud Services.
+    To defend against privilege escalations if your VM is compromised and prevent an attacker from gaining access to all of your project, it is recommended to not use the default Compute Engine service account.
+    Instead, you should create a new service account and assigning only the permissions needed by your instance.
+
+    The default Compute Engine service account is named `[PROJECT_NUMBER]-compute@developer.gserviceaccount.com`.
+  audit: |-
+    **From Google Cloud Console**
+
+    1. Go to the `VM instances` page by visiting: [https://console.cloud.google.com/compute/instances](https://console.cloud.google.com/compute/instances).
+    2. Click on each instance name to go to its `VM instance details` page.
+    3. Under the section `API and identity management`, ensure that the default Compute Engine service account is not used. This account is named `[PROJECT_NUMBER]-compute@developer.gserviceaccount.com`.
+
+    **From Google Cloud CLI**
+
+    4. List the instances in your project and get details on each instance:
+    ```
+    gcloud compute instances list --format=json | jq -r '.
+    | "SA: \(.[].serviceAccounts[].email) Name: \(.[].name)"'
+    ```
+    5. Ensure that the service account section has an email that does not match the pattern `[PROJECT_NUMBER]-compute@developer.gserviceaccount.com`.
+
+    **Exception:**
+    VMs created by GKE should be excluded.
+    These VMs have names that start with `gke-` and are labeled `goog-gke-node`.
+  remediation: |-
+    **From Google Cloud Console**
+
+    1. Go to the `VM instances` page by visiting: [https://console.cloud.google.com/compute/instances](https://console.cloud.google.com/compute/instances).
+    2. Click on the instance name to go to its `VM instance details` page.
+    3. Click `STOP` and then click `EDIT`.
+    4. Under the section `API and identity management`, select a service account other than the default Compute Engine service account. You may first need to create a new service account.
+    5. Click `Save` and then click `START`.
+
+    **From Google Cloud CLI**
+
+    6. Stop the instance:
+    ```
+    gcloud compute instances stop <INSTANCE_NAME>
+    ```
+    7. Update the instance:
+    ```
+    gcloud compute instances set-service-account <INSTANCE_NAME> --service-account=<SERVICE_ACCOUNT> 
+    ```
+    8. Restart the instance:
+    ```
+    gcloud compute instances start <INSTANCE_NAME>
+    ```
+  impact: ''
+  default_value: ''
+  references: |-
+    1. https://cloud.google.com/compute/docs/access/service-accounts
+    2. https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances
+    3. https://cloud.google.com/sdk/gcloud/reference/compute/instances/set-service-account
+  section: Virtual Machines
+  version: '1.0'
+  tags:
+  - CIS
+  - GCP
+  - CIS 4.1
+  - Virtual Machines
+  benchmark:
+    name: CIS Google Cloud Platform Foundation
+    version: v2.0.0
+    id: cis_gcp
+    rule_number: '4.1'
+    posture_type: cspm
