@@ -1,0 +1,63 @@
+metadata:
+  id: 6d58f558-d07a-541c-b720-689459524679
+  name: Ensure that Network Watcher is 'Enabled'
+  profile_applicability: '* Level 2'
+  description: Enable Network Watcher for Azure subscriptions.
+  rationale: |-
+    Network diagnostic and visualization tools available with Network Watcher help users understand, diagnose, and gain insights to the network in Azure.
+  audit: |-
+    **From Azure Portal**
+
+    1. Go to `Network Watcher`
+    2. Ensure that the `STATUS` is set to `Enabled`
+
+    **From Azure CLI**
+
+    ```
+    az network watcher list
+    ```
+    This will list all regions where `provisioningState` is `Succeeded`.
+
+
+    Then run
+    ```
+    az account list-locations
+    ```
+    This will list all regions that exist in the subscription.
+    Compare this list to the previous one to ensure that for all regions, `provisioningState` is set to `Succeeded`.
+
+    **From PowerShell**
+
+    Get a list of Network Watchers
+
+    ```
+    Get-AzNetworkWatcher
+    ```
+
+    Make sure each watcher is set with the `ProvisioningState` setting set to `Succeeded` and all `Locations` are set with a watcher.
+  remediation: |-
+    Opting out of Network Watcher automatic enablement is a permanent change.
+    Once you opt-out you cannot opt-in without contacting support.
+  impact: |-
+    There are additional costs per transaction to run and store network data. For high-volume networks these charges will add up quickly.
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-monitoring-overview
+    2. https://docs.azure.cn/zh-cn/cli/network/watcher?view=azure-cli-latest#az_network_watcher_list
+    3. https://docs.azure.cn/zh-cn/cli/network/watcher?view=azure-cli-latest#az_network_watcher_configure
+    4. https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-create
+    5. https://docs.microsoft.com/en-us/azure/security/benchmarks/security-controls-v2-logging-threat-detection#lt-3-enable-logging-for-azure-network-activities
+    6. https://azure.microsoft.com/en-ca/pricing/details/network-watcher/
+  section: Networking
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 6.6
+  - Networking
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: '6.6'
+    posture_type: cspm

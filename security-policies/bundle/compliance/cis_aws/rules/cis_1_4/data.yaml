@@ -1,0 +1,65 @@
+metadata:
+  id: 7a2ab526-3440-5a0f-804c-c5eea8158053
+  name: Ensure no 'root' user account access key exists
+  profile_applicability: '* Level 1'
+  description: |-
+    The 'root' user account is the most privileged user in an AWS account.
+    AWS Access Keys provide programmatic access to a given AWS account.
+    It is recommended that all access keys associated with the 'root' user account be removed.
+  rationale: |-
+    Removing access keys associated with the 'root' user account limits vectors by which the account can be compromised.
+    Additionally, removing the 'root' access keys encourages the creation and use of role based accounts that are least privileged.
+  audit: |-
+    Perform the following to determine if the 'root' user account has access keys:
+
+    **From Console:**
+
+    1. Login to the AWS Management Console
+    2. Click `Services` 
+    3. Click `IAM` 
+    4. Click on `Credential Report` 
+    5. This will download a `.csv` file which contains credential usage for all IAM users within an AWS Account - open this file
+    6. For the `<root_account>` user, ensure the `access_key_1_active` and `access_key_2_active` fields are set to `FALSE` .
+
+    **From Command Line:**
+
+    Run the following command:
+    ```
+     aws iam get-account-summary | grep "AccountAccessKeysPresent" 
+    ```
+    If no 'root' access keys exist the output will show "AccountAccessKeysPresent": 0,.
+
+
+    If the output shows a "1" than 'root' keys exist, refer to the remediation procedure below.
+  remediation: |-
+    Perform the following to delete or disable active 'root' user access keys
+
+    **From Console:**
+
+    1. Sign in to the AWS Management Console as 'root' and open the IAM console at [https://console.aws.amazon.com/iam/](https://console.aws.amazon.com/iam/).
+    2. Click on _<Root\_Account\_Name>_ at the top right and select `My Security Credentials` from the drop down list
+    3. On the pop out screen Click on `Continue to Security Credentials` 
+    4. Click on `Access Keys` _(Access Key ID and Secret Access Key)_
+    5. Under the `Status` column if there are any Keys which are Active
+     - Click on `Make Inactive` - (Temporarily disable Key - may be needed again)
+     - Click `Delete` - (Deleted keys cannot be recovered)
+  impact: ''
+  default_value: ''
+  references: |-
+    1. http://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html
+    2. http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html
+    3. http://docs.aws.amazon.com/IAM/latest/APIReference/API_GetAccountSummary.html
+    4. https://aws.amazon.com/blogs/security/an-easier-way-to-determine-the-presence-of-aws-account-access-keys/
+  section: Identity and Access Management
+  version: '1.0'
+  tags:
+  - CIS
+  - AWS
+  - CIS 1.4
+  - Identity and Access Management
+  benchmark:
+    name: CIS Amazon Web Services Foundations
+    version: v1.5.0
+    id: cis_aws
+    rule_number: '1.4'
+    posture_type: cspm

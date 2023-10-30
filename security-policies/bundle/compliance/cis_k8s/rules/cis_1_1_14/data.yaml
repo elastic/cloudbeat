@@ -1,0 +1,42 @@
+metadata:
+  id: e24bf247-bfdc-5bbf-9813-165b905b52e6
+  name: Ensure that the admin.conf file ownership is set to root:root
+  profile_applicability: '* Level 1 - Master Node'
+  description: Ensure that the `admin.conf` file ownership is set to `root:root`.
+  rationale: |-
+    The `admin.conf` file contains the admin credentials for the cluster.
+    You should set its file ownership to maintain the integrity and confidentiality of the file.
+    The file should be owned by root:root.
+  audit: |-
+    Run the below command (based on the file location on your system) on the Control Plane node.
+    For example,
+
+    ```
+    stat -c %U:%G /etc/kubernetes/admin.conf
+    ```
+
+    Verify that the ownership is set to `root:root`.
+  remediation: |-
+    Run the below command (based on the file location on your system) on the Control Plane node.
+    For example,
+
+    ```
+    chown root:root /etc/kubernetes/admin.conf
+    ```
+  impact: None.
+  default_value: |
+    By default, `admin.conf` file ownership is set to `root:root`.
+  references: 1. https://kubernetes.io/docs/admin/kubeadm/
+  section: Control Plane Node Configuration Files
+  version: '1.0'
+  tags:
+  - CIS
+  - Kubernetes
+  - CIS 1.1.14
+  - Control Plane Node Configuration Files
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.1
+    id: cis_k8s
+    rule_number: 1.1.14
+    posture_type: kspm

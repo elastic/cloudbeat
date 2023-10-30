@@ -1,0 +1,122 @@
+metadata:
+  id: 68cfd04b-fc79-5877-8638-af3aa82d92db
+  name: Ensure Instance IP assignment is set to private
+  profile_applicability: '* Level 1'
+  description: |-
+    Instance addresses can be public IP or private IP.
+    Public IP means that the instance is accessible through the public internet.
+    In contrast, instances using only private IP are not accessible through the public internet, but are accessible through a Virtual Private Cloud (VPC).
+
+    Limiting network access to your database will limit potential attacks.
+  rationale: Setting databases access only to private will reduce attack surface.
+  audit: |-
+    **From Google Cloud Console**
+
+    1. In the Google Cloud console, go to the `Cloud SQL Instances` page.
+    2. Open the `Overview page` of an instance by clicking the instance name.
+    3. Look for a field labeled `Private IP address` This field will only show if the Private IP option is checked. The IP listed should be in the private IP space.
+
+    **From Google Cloud CLI**
+    4. List cloud SQL instances
+    ```
+    gcloud sql instances list --format="json" | jq '.[] | .connectionName,.ipAddresses'
+    ```
+    Each instance listed should have a `type` of `PRIVATE`.
+
+    5. If you want to view a specific instance, note the <INSTANCE_NAME>(s) listed and run the following.
+    ```
+    gcloud sql instances describe <INSTANCE_NAME> --format="json" | jq '.ipAddresses'
+    ```
+    `Type` should be `"PRIVATE"`
+    ```
+     {
+        "ipAddress": "10.21.0.2",
+        "type": "PRIVATE"
+    }
+    ```
+  remediation: |-
+    **From Google Cloud Console**
+
+    1. In the Google Cloud console, go to the `Cloud SQL Instances` page.
+    2. Open the `Overview page` of an instance by clicking the instance name.
+    3. Select `Connections` from the SQL navigation menu.
+    4. Check the `Private IP` checkbox. A drop-down list shows the available networks in your project.
+    5. Select the VPC network you want to use:
+     If you see `Private service connection required`:
+     1.
+    Click `Set up connection`.
+     1.
+    In the `Allocate an IP range` section, choose one of the following options:
+     - Select one or more existing IP ranges or create a new one from the dropdown.
+    The dropdown includes previously allocated ranges, if there are any, or you can select Allocate a new IP range and enter a new range and name.
+     - Use an automatically allocated IP range in your network.
+     Note: You can specify an address range only for a primary instance, not for a read replica or clone.
+     3.
+    Click Continue.
+     1.
+    Click Create connection.
+     1.
+    Verify that you see the Private service connection for network VPC_NETWORK_NAME has been successfully created status.
+    6. [Optional step for Private Services Access - review reference links to VPC documents for additional detail] If you want to allow other Google Cloud services such as BigQuery to access data in Cloud SQL and make queries against this data over a private IP connection, then select the Private path for Google Cloud services check box.
+    7. Click Save
+
+    **From Google Cloud CLI**
+
+    8. List cloud SQL instances
+    ```
+    gcloud sql instances list --format="json" | jq '.[] | .connectionName,.ipAddresses'
+    ```
+    Note the `project name` of the instance you want to set to a private IP, this will be <PROJECT_ID>
+
+    Note the `instance name` of the instance you want to set to a private IP, this will be <INSTANCE_ID>
+
+    Example public instance output:
+
+    ```
+    "my-project-123456:us-central1:my-instance"
+    [
+     {
+     "ipAddress": "0.0.0.0",
+     "type": "PRIMARY"
+     },
+     {
+     "ipAddress": "0.0.0.0",
+     "type": "OUTGOING"
+     }
+    ```
+
+    9. run the following command to list the available VPCs 
+    ```
+    gcloud compute networks list --format="json" | jq '.[].name'
+    ```
+    Note the name of the VPC to use for the instance private IP, this will be <VPC_NETWORK_NAME>
+
+    10. run the following to set instance to a private IP
+    ```
+    gcloud beta sql instances patch <INSTANCE_ID> \
+    --project=<PROJECT_ID> \
+    --network=projects/<PROJECT_ID>/global/networks/<VPC_NETWORK_NAME> \
+    --no-assign-ip
+    ```
+  impact: |-
+    If you set a database IP to private, only host from the same network will have the ability to connect your database.
+
+    Configuring an existing Cloud SQL instance to use private IP causes the instance to restart.
+  default_value: ''
+  references: |-
+    1. https://cloud.google.com/sql/docs/postgres/configure-private-ip
+    2. https://cloud.google.com/vpc/docs/configure-private-services-access#procedure
+    3. https://cloud.google.com/vpc/docs/configure-private-services-access#creating-connection
+  section: PostgreSQL Database
+  version: '1.0'
+  tags:
+  - CIS
+  - GCP
+  - CIS 6.2.9
+  - PostgreSQL Database
+  benchmark:
+    name: CIS Google Cloud Platform Foundation
+    version: v2.0.0
+    id: cis_gcp
+    rule_number: 6.2.9
+    posture_type: cspm
