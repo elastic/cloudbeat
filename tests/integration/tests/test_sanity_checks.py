@@ -9,6 +9,7 @@ verifying that there are findings of 'resource.type' for each feature.
 import pytest
 from commonlib.utils import get_findings
 from configuration import elasticsearch
+from loguru import logger
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
@@ -17,7 +18,7 @@ CNVM_CONFIG_TIMEOUT = 3600
 STACK_VERSION = elasticsearch.stack_version
 # Check if STACK_VERSION is provided
 if not STACK_VERSION:
-    raise ValueError("STACK_VERSION is not provided. Please set the STACK_VERSION in the configuration.")
+    logger.warning("STACK_VERSION is not provided. Please set the STACK_VERSION in the configuration.")
 
 tests_data = {
     "cis_aws": [
