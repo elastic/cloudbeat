@@ -1,0 +1,54 @@
+metadata:
+  id: 919ef7a7-126c-517e-aa35-fb251b1ad587
+  name: Ensure that the kubelet service file ownership is set to root:root
+  profile_applicability: '* Level 1 - Worker Node'
+  description: Ensure that the `kubelet` service file ownership is set to `root:root`.
+  rationale: |-
+    The `kubelet` service file controls various parameters that set the behavior of the `kubelet` service in the worker node.
+    You should set its file ownership to maintain the integrity of the file.
+    The file should be owned by `root:root`.
+  audit: |-
+    Automated AAC auditing has been modified to allow CIS-CAT to input a variable for the <PATH>/<FILENAME> of the kubelet service config file.
+
+    Please set $kubelet_service_config=<PATH><filename> based on the file location on your system 
+
+    for example:
+    ```
+    export kubelet_service_config=/etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    ```
+
+    To perform the audit manually:
+    Run the below command (based on the file location on your system) on the each worker node.
+    For example,
+
+    ```
+    stat -c %a /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    ```
+    Verify that the ownership is set to `root:root`.
+  remediation: |-
+    Run the below command (based on the file location on your system) on the each worker node.
+    For example,
+
+    ```
+    chown root:root /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    ```
+  impact: None
+  default_value: |
+    By default, `kubelet` service file ownership is set to `root:root`.
+  references: |-
+    1. https://kubernetes.io/docs/admin/kubelet/
+    2. https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#44-joining-your-nodes
+    3. https://kubernetes.io/docs/admin/kubeadm/#kubelet-drop-in
+  section: Worker Node Configuration Files
+  version: '1.0'
+  tags:
+  - CIS
+  - Kubernetes
+  - CIS 4.1.2
+  - Worker Node Configuration Files
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.1
+    id: cis_k8s
+    rule_number: 4.1.2
+    posture_type: kspm

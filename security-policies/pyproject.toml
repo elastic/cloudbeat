@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "security-policies"
+version = "0.1.0"
+description = ""
+authors = ["oren zohar <oren.zohar@elastic.co>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^1.5.2"
+GitPython = "^3.1.32"
+openpyxl = "^3.0.10"
+tabulate = "^0.9.0"
+numpy = "^1.23.5"
+Jinja2 = "^3.1.2"
+regex = "^2022.10.31"
+"ruamel.yaml" = "^0.17.21"
+PyYAML = "^6.0"
+
+[tool.poetry.dev-dependencies]
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

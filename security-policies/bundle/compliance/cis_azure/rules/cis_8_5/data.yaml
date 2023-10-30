@@ -1,0 +1,112 @@
+metadata:
+  id: efec59bf-4563-5da7-a1db-f5c28e93b21f
+  name: Ensure the Key Vault is Recoverable
+  profile_applicability: '* Level 1'
+  description: |-
+    The Key Vault contains object keys, secrets, and certificates.
+    Accidental unavailability of a Key Vault can cause immediate data loss or loss of security functions (authentication, validation, verification, non-repudiation, etc.) supported by the Key Vault objects.
+
+    It is recommended the Key Vault be made recoverable by enabling the "Do Not Purge" and "Soft Delete" functions.
+    This is in order to prevent loss of encrypted data, including storage accounts, SQL databases, and/or dependent services provided by Key Vault objects (Keys, Secrets, Certificates) etc.
+    This may happen in the case of accidental deletion by a user or from disruptive activity by a malicious user.
+
+    WARNING: A current limitation of the soft-delete feature across all Azure services is role assignments disappearing when Key Vault is deleted.
+    All role assignments will need to be recreated after recovery.
+  rationale: |-
+    There could be scenarios where users accidentally run delete/purge commands on Key Vault or an attacker/malicious user deliberately does so in order to cause disruption.
+    Deleting or purging a Key Vault leads to immediate data loss, as keys encrypting data and secrets/certificates allowing access/services will become non-accessible.
+    There are 2 Key Vault properties that play a role in permanent unavailability of a Key Vault:
+
+    1. `enableSoftDelete`: 
+
+    Setting this parameter to "true" for a Key Vault ensures that even if Key Vault is deleted, Key Vault itself or its objects remain recoverable for the next 90 days.
+    Key Vault/objects can either be recovered or purged (permanent deletion) during those 90 days.
+    If no action is taken, key vault and its objects will subsequently be purged.
+
+    2. `enablePurgeProtection`: 
+
+    enableSoftDelete only ensures that Key Vault is not deleted permanently and will be recoverable for 90 days from date of deletion.
+    However, there are scenarios in which the Key Vault and/or its objects are accidentally purged and hence will not be recoverable.
+    Setting enablePurgeProtection to "true" ensures that the Key Vault and its objects cannot be purged.
+
+    Enabling both the parameters on Key Vaults ensures that Key Vaults and their objects cannot be deleted/purged permanently.
+  audit: |-
+    **From Azure Portal**
+
+    1. Go to `Key Vaults`
+    2. For each Key Vault
+    3. Click `Properties`
+    4. Ensure the status of soft-delete reads `Soft delete has been enabled on this key vault`
+
+    **From Azure CLI**
+
+    5. List all Resources of type Key Vaults:
+    ```
+    az resource list --query "[?type=='Microsoft.KeyVault/vaults']"
+    ```
+    6. For Every Key Vault ID ensure check parameters `enableSoftDelete` and `enablePurgeProtection` are set to enabled.
+    ```
+    az resource show --id /subscriptions/xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/<resourceGroupName>/providers/Microsoft.KeyVault
+    /vaults/<keyVaultName>
+    ```
+
+    **From PowerShell**
+
+    Get all Key Vaults.
+
+    ```
+    Get-AzKeyVault
+    ```
+
+    For each Key Vault run the following command.
+
+    ```
+    Get-AzKeyVault -VaultName <Vault Name>
+    ```
+
+    Examine the results of the above command for the `EnablePurgeProtection` setting and the `EnableSoftDelete` setting.
+    Make sure both settigns are set to `True`.
+  remediation: |-
+    To enable "Do Not Purge" and "Soft Delete" for a Key Vault: 
+
+    **From Azure Portal**
+
+    1. Go to `Key Vaults`
+    2. For each Key Vault
+    3. Click `Properties`
+    4. Ensure the status of soft-delete reads `Soft delete has been enabled on this key vault`.
+    5. At the bottom of the page, click 'Enable Purge Protection'
+    Note, once enabled you cannot disable it.
+
+    **From Azure CLI**
+    ```
+    az resource update --id /subscriptions/xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/<resourceGroupName>/providers/Microsoft.KeyVault
+    /vaults/<keyVaultName> --set properties.enablePurgeProtection=true properties.enableSoftDelete=true
+    ```
+
+    **From PowerShell**
+
+    ```
+    Update-AzKeyVault -VaultName <vaultName -ResourceGroupName <resourceGroupName -EnablePurgeProtection
+    ```
+  impact: Once purge-protection and soft-delete are enabled for a Key Vault, the action
+    is irreversible.
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/key-vault/key-vault-soft-delete-cli
+    2. https://blogs.technet.microsoft.com/kv/2017/05/10/azure-key-vault-recovery-options/
+    3. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-governance-strategy#gs-8-define-and-implement-backup-and-recovery-strategy
+    4. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-data-protection#dp-8-ensure-security-of-key-and-certificate-repository
+  section: Key Vault
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 8.5
+  - Key Vault
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: '8.5'
+    posture_type: cspm

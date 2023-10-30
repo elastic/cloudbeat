@@ -1,0 +1,77 @@
+metadata:
+  id: 76be4dd2-a77a-5981-a893-db6770b35911
+  name: Ensure all S3 buckets employ encryption-at-rest
+  profile_applicability: '* Level 2'
+  description: Amazon S3 provides a variety of no, or low, cost encryption options
+    to protect data at rest.
+  rationale: |-
+    Encrypting data at rest reduces the likelihood that it is unintentionally exposed and can nullify the impact of disclosure if the encryption remains unbroken.
+  audit: |-
+    **From Console:**
+
+    1. Login to AWS Management Console and open the Amazon S3 console using https://console.aws.amazon.com/s3/ 
+    2. Select a Bucket.
+    3. Click on 'Properties'.
+    4. Verify that `Default Encryption` is enabled, and displays either `AES-256`, `AWS-KMS`, `SSE-KMS` or `SSE-S3`.
+    5. Repeat for all the buckets in your AWS account.
+
+    **From Command Line:**
+
+    6. Run command to list buckets
+    ```
+    aws s3 ls
+    ```
+    7. For each bucket, run 
+    ```
+    aws s3api get-bucket-encryption --bucket <bucket name>
+    ```
+    8. Verify that either 
+    ```
+    "SSEAlgorithm": "AES256"
+    ```
+     or 
+    ```
+    "SSEAlgorithm": "aws:kms"```
+     is displayed.
+  remediation: |-
+    **From Console:**
+
+    1. Login to AWS Management Console and open the Amazon S3 console using https://console.aws.amazon.com/s3/ 
+    2. Select a Bucket.
+    3. Click on 'Properties'.
+    4. Click edit on `Default Encryption`.
+    5. Select either `AES-256`, `AWS-KMS`, `SSE-KMS` or `SSE-S3`.
+    6. Click `Save`
+    7. Repeat for all the buckets in your AWS account lacking encryption.
+
+    **From Command Line:**
+
+    Run either 
+    ```
+    aws s3api put-bucket-encryption --bucket <bucket name> --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
+    ```
+     or 
+    ```
+    aws s3api put-bucket-encryption --bucket <bucket name> --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "aws:kms","KMSMasterKeyID": "aws/s3"}}]}'
+    ```
+
+    **Note:** the KMSMasterKeyID can be set to the master key of your choosing; aws/s3 is an AWS preconfigured default.
+  impact: |-
+    Amazon S3 buckets with default bucket encryption using SSE-KMS cannot be used as destination buckets for Amazon S3 server access logging. Only SSE-S3 default encryption is supported for server access log destination buckets.
+  default_value: ''
+  references: |-
+    1. https://docs.aws.amazon.com/AmazonS3/latest/user-guide/default-bucket-encryption.html
+    2. https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html#bucket-encryption-related-resources
+  section: Simple Storage Service (S3)
+  version: '1.0'
+  tags:
+  - CIS
+  - AWS
+  - CIS 2.1.1
+  - Simple Storage Service (S3)
+  benchmark:
+    name: CIS Amazon Web Services Foundations
+    version: v1.5.0
+    id: cis_aws
+    rule_number: 2.1.1
+    posture_type: cspm

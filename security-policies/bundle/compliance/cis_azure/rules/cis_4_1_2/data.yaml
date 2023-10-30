@@ -1,0 +1,137 @@
+metadata:
+  id: 80db9189-cd4d-572a-94dc-e635ee8af7fa
+  name: Ensure no Azure SQL Databases allow ingress from 0.0.0.0/0 (ANY IP)
+  profile_applicability: '* Level 1'
+  description: Ensure that no SQL Databases allow ingress from 0.0.0.0/0 (ANY IP).
+  rationale: |-
+    Azure SQL Server includes a firewall to block access to unauthorized connections.
+    More granular IP addresses can be defined by referencing the range of addresses available from specific datacenters.
+
+    By default, for a SQL server, a Firewall exists with StartIp of 0.0.0.0 and EndIP of 0.0.0.0 allowing access to all the Azure services.
+
+
+    Additionally, a custom rule can be set up with StartIp of 0.0.0.0 and EndIP of 255.255.255.255 allowing access from ANY IP over the Internet.
+
+    In order to reduce the potential attack surface for a SQL server, firewall rules should be defined with more granular IP addresses by referencing the range of addresses available from specific datacenters.
+  audit: |-
+    **From Azure Portal**
+
+    1. Go to `SQL servers`
+    2. For each SQL server
+    3. Click on `Networking`
+    4. Ensure that `Allow Azure services and resources to access this server` is `Unchecked`
+    5. Ensure that no firewall rule exists with 
+     - Start IP of `0.0.0.0`
+     - or other combinations which allows access to wider public IP ranges
+
+    **From Azure CLI**
+
+    List all SQL servers
+
+    ```
+    az sql server list
+    ```
+
+    For each SQL server run the following command
+
+    ```
+    az sql server firewall-rule list --resource-group <resource group name> --server <sql server name>
+    ```
+
+    Ensure the output does not contain any firewall `allow` rules with a source of `0.0.0.0`, or any rules named `AllowAllWindowsAzureIps`
+
+    **From PowerShell**
+
+    Get the list of all SQL Servers 
+
+    ```
+    Get-AzSqlServer
+    ```
+
+    For each Server
+
+    ```
+    Get-AzSqlServerFirewallRule -ResourceGroupName <resource group name> -ServerName <server name>
+    ```
+
+    Ensure that `StartIpAddress` is not set to `0.0.0.0`, `/0` or other combinations which allows access to wider public IP ranges including Windows Azure IP ranges.
+    Also ensure that `FirewallRuleName` doesn't contain 
+     `AllowAllWindowsAzureIps` which is the rule created when the `Allow Azure services and resources to access this server` setting is enabled for that SQL Server.
+  remediation: |-
+    **From Azure Portal**
+
+    1. Go to `SQL servers`
+    2. For each SQL server
+    3. Click on `Networking`
+    4. `Uncheck` the checkbox for `Allow Azure services and resources to access this server`
+    5. Set firewall rules to limit access to only authorized connections
+
+    **From Azure CLI**
+
+    Disable default firewall rule `Allow access to Azure services`:
+
+    ```
+    az sql server firewall-rule delete --resource-group <resource group> --server <sql server name> --name "AllowAllWindowsAzureIps"
+    ```
+
+    Remove a custom firewall rule:
+
+    ```
+    az sql server firewall-rule delete --resource-group <resource group> --server <sql server name> --name <firewall rule name>
+    ```
+
+    Create a firewall rule:
+
+    ```
+    az sql server firewall-rule create --resource-group <resource group> --server <sql server name> --name <firewall rule name> --start-ip-address "<IP Address other than 0.0.0.0>" --end-ip-address "<IP Address other than 0.0.0.0 or 255.255.255.255>"
+    ```
+
+    Update a firewall rule:
+
+    ```
+    az sql server firewall-rule update --resource-group <resource group> --server <sql server name> --name <firewall rule name> --start-ip-address "<IP Address other than 0.0.0.0>" --end-ip-address "<IP Address other than 0.0.0.0 or 255.255.255.255>"
+    ```
+
+    **From PowerShell**
+
+    Disable Default Firewall Rule `Allow access to Azure services` : 
+
+    ```
+    Remove-AzSqlServerFirewallRule -FirewallRuleName "AllowAllWindowsAzureIps" -ResourceGroupName <resource group name> -ServerName <server name>
+    ```
+
+    Remove a custom Firewall rule:
+
+    ```
+    Remove-AzSqlServerFirewallRule -FirewallRuleName "<firewall rule name>" -ResourceGroupName <resource group name> -ServerName <server name>
+    ```
+
+    Set the appropriate firewall rules:
+
+    ```
+    Set-AzSqlServerFirewallRule -ResourceGroupName <resource group name> -ServerName <server name> -FirewallRuleName "<firewall rule name>" -StartIpAddress "<IP Address other than 0.0.0.0>" -EndIpAddress "<IP Address other than 0.0.0.0 or 255.255.255.255>"
+    ```
+  impact: |-
+    Disabling `Allow Azure services and resources to access this server` will break all connections to SQL server and Hosted Databases unless custom IP specific rules are added in Firewall Policy.
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/sql/database-engine/configure-windows/configure-a-windows-firewall-for-database-engine-access?view=sql-server-2017
+    2. https://docs.microsoft.com/en-us/powershell/module/azurerm.sql/get-azurermsqlserverfirewallrule?view=azurermps-5.2.0
+    3. https://docs.microsoft.com/en-us/powershell/module/azurerm.sql/set-azurermsqlserverfirewallrule?view=azurermps-5.2.0
+    4. https://docs.microsoft.com/en-us/powershell/module/azurerm.sql/remove-azurermsqlserverfirewallrule?view=azurermps-5.2.0
+    5. https://docs.microsoft.com/en-us/azure/sql-database/sql-database-firewall-configure
+    6. https://docs.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-set-database-firewall-rule-azure-sql-database?view=azuresqldb-current
+    7. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-2-secure-cloud-services-with-network-controls
+  section: SQL Server - Auditing
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 4.1.2
+  - SQL Server - Auditing
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: 4.1.2
+    posture_type: cspm

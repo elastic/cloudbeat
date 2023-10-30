@@ -1,0 +1,36 @@
+name: Test OPA Coverage
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-coverage:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./security-policies
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Init Hermit
+        run: ../bin/hermit env -r >> $GITHUB_ENV
+
+      - name: OPA test coverage
+        run: |
+          coverage=$( ./opa test ./bundle -c | jq '.coverage' )
+          echo "COVERAGE=$coverage" >> "$GITHUB_ENV"
+
+      - name: Create Coverage Badge
+        uses: schneegans/dynamic-badges-action@v1.1.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: a7160df46e48dff45b24096de9302d38
+          filename: csp-security-policies_coverage.json
+          label: coverage
+          message: ${{ (env.COVERAGE) }}
+          namedLogo: Elastic
+          color: green
+          logoColor: lightblue

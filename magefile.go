@@ -35,7 +35,6 @@ import (
 	"github.com/elastic/beats/v7/dev-tools/mage/gotool"
 	"github.com/elastic/e2e-testing/pkg/downloads"
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -50,7 +49,6 @@ import (
 	_ "github.com/elastic/beats/v7/dev-tools/mage/target/unittest"
 
 	cloudbeat "github.com/elastic/cloudbeat/scripts/mage"
-	"github.com/elastic/cloudbeat/version"
 )
 
 const (
@@ -350,57 +348,13 @@ func checkoutBranch(wt *git.Worktree, branch string) error {
 }
 
 func BuildOpaBundle() (err error) {
-	owner := "elastic"
-	repoName := "csp-security-policies"
-
 	// Override default SIGINT behaviour which does not allow deferred functions to be called
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
-	cspPoliciesPkgDir, err := os.MkdirTemp("", repoName)
-	if err != nil {
+	if err = sh.Run("bin/opa", "build", "-b", "security-policies/bundle", "-e", "security-policies/bundle/compliance"); err != nil {
 		return err
 	}
 
-	defer func() {
-		rmErr := os.RemoveAll(cspPoliciesPkgDir)
-		if rmErr != nil && err == nil {
-			err = rmErr
-		}
-		signal.Stop(c)
-	}()
-
-	repo, err := git.PlainClone(cspPoliciesPkgDir, false, &git.CloneOptions{
-		URL: fmt.Sprintf("https://github.com/%s/%s.git", owner, repoName),
-	})
-	if err != nil {
-		return err
-	}
-	err = repo.Fetch(&git.FetchOptions{
-		RefSpecs: []config.RefSpec{"refs/*:refs/*", "HEAD:refs/heads/HEAD"},
-	})
-	if err != nil {
-		return err
-	}
-	// Check out the provided release tag commit
-	wt, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	branch := getMajorMinorVersion(version.CloudbeatVersion().Version)
-	if err := checkoutBranch(wt, branch); err != nil {
-		fmt.Printf("Fallback from %s to main branch\n", branch)
-		branch = "main"
-		if err = checkoutBranch(wt, branch); err != nil {
-			return err
-		}
-	}
-
-	if err = sh.Run("bin/opa", "build", "-b", cspPoliciesPkgDir+"/bundle", "-e", cspPoliciesPkgDir+"/bundle/compliance"); err != nil {
-		return err
-	}
-
-	fmt.Printf("Generated OPA bundle from %s branch at %s\n", branch, cspPoliciesPkgDir)
 	return nil
 }

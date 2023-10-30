@@ -1,0 +1,42 @@
+metadata:
+  id: 9fc74adb-6ddd-5838-be72-cfd17fbfb74b
+  name: Ensure that the --profiling argument is set to false
+  profile_applicability: '* Level 1 - Master Node'
+  description: Disable profiling, if not needed.
+  rationale: |-
+    Profiling allows for the identification of specific performance bottlenecks.
+    It generates a significant amount of program data that could potentially be exploited to uncover system and program details.
+    If you are not experiencing any bottlenecks and do not need the profiler for troubleshooting purposes, it is recommended to turn it off to reduce the potential attack surface.
+  audit: |-
+    Run the following command on the Control Plane node:
+
+    ```
+    ps -ef | grep kube-scheduler
+    ```
+
+    Verify that the `--profiling` argument is set to `false`.
+  remediation: |-
+    Edit the Scheduler pod specification file `/etc/kubernetes/manifests/kube-scheduler.yaml` file on the Control Plane node and set the below parameter.
+
+    ```
+    --profiling=false
+    ```
+  impact: Profiling information would not be available.
+  default_value: |
+    By default, profiling is enabled.
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-scheduler/
+    2. https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md
+  section: Scheduler
+  version: '1.0'
+  tags:
+  - CIS
+  - Kubernetes
+  - CIS 1.4.1
+  - Scheduler
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.1
+    id: cis_k8s
+    rule_number: 1.4.1
+    posture_type: kspm
