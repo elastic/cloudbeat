@@ -2,7 +2,7 @@
 name: Bump golang-version to latest version
 
 scms:
-  githubConfig:
+  default:
     kind: github
     spec:
       user: '{{ requiredEnv "GIT_USER" }}'
@@ -16,13 +16,15 @@ scms:
 actions:
   cloudbeat:
     kind: github/pullrequest
-    scmid: githubConfig
+    scmid: default
     sourceid: latestGoVersion
     spec:
       automerge: false
       labels:
-        - dependencies
+        - automation
+        - dependency
         - backport-skip
+        - go
       title: '[Automation] Bump Golang version to {{ source "latestGoVersion" }}'
 
 sources:
@@ -50,7 +52,7 @@ sources:
       username: '{{ requiredEnv "GIT_USER" }}'
       versionfilter:
         kind: regex
-        pattern: go1\.{{ source "minor" }}\.(\d*)$
+        pattern: go1\.{{ source "minor" }}\.\d*$
 
   gomod:
     dependson:
@@ -59,7 +61,7 @@ sources:
     kind: shell
     transformers:
       - findsubmatch:
-          pattern: '^(\d+.\d+).\d+'
+          pattern: '^(\d+.\d+).\d*'
           captureindex: 1
     spec:
       command: echo {{ source "latestGoVersion" }}
@@ -82,29 +84,30 @@ conditions:
 
 targets:
   update-go-version:
-    name: 'Update .go-version {{ source "latestGoVersion" }}'
+    name: 'Update .go-version with Golang version {{ source "latestGoVersion" }}'
     sourceid: latestGoVersion
-    scmid: githubConfig
+    scmid: default
     kind: file
     spec:
       content: '{{ source "latestGoVersion" }}'
       file: .go-version
       matchpattern: '\d+.\d+.\d+'
-  update-version.asciidoc:
-    name: 'Update version.asciidoc {{ source "latestGoVersion" }}'
+  update-version-asciidoc:
+    name: 'Update version.asciidoc with Golang version {{ source "latestGoVersion" }}'
     sourceid: latestGoVersion
-    scmid: githubConfig
+    scmid: default
     kind: file
     spec:
-      content: ':go-version: {{ source "latestGoVersion" }}'
       file: docs/version.asciidoc
-      matchpattern: ':go-version: \d+.\d+.\d+'
+      matchpattern: '(:go-version:) \d+.\d+.\d+'
+      replacepattern: '$1 {{ source "latestGoVersion" }}'
   update-gomod:
-    name: 'Update go.mod {{ source "gomod" }}'
+    name: 'Update go.mod files with {{ source "gomod" }}'
     sourceid: gomod
-    scmid: githubConfig
+    scmid: default
     kind: file
     spec:
       content: 'go {{ source "gomod" }}'
-      file: go.mod
+      files:
+        - go.mod
       matchpattern: 'go \d+.\d+'
