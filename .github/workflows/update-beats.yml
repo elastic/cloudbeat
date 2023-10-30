@@ -10,12 +10,7 @@ permissions:
 
 jobs:
   bump:
-    needs:
-      - filter
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.filter.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
