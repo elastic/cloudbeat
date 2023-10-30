@@ -34,7 +34,7 @@ func TestNACLInfo(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, r.GetResourceArn(), "arn:aws:ec2:eu-west-1:account:network-acl/nacl-id")
-	assert.Equal(t, r.GetResourceName(), "nacl-id")
-	assert.Equal(t, r.GetResourceType(), "aws-nacl")
+	assert.Equal(t, "arn:aws:ec2:eu-west-1:account:network-acl/nacl-id", r.GetResourceArn())
+	assert.Equal(t, "nacl-id", r.GetResourceName())
+	assert.Equal(t, "aws-nacl", r.GetResourceType())
 }

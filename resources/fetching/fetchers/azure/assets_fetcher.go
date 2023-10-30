@@ -52,7 +52,6 @@ func newPair(subType string, tpe string) typePair {
 }
 
 var AzureAssetTypeToTypePair = map[string]typePair{
-	inventory.ActivityLogAlertAssetType:          newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
 	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
 	inventory.ClassicVirtualMachineAssetType:     newPair(fetching.AzureClassicVMType, fetching.CloudCompute),
 	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
@@ -79,7 +78,7 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
-	assets, err := f.provider.ListAllAssetTypesByName(maps.Keys(AzureAssetTypeToTypePair))
+	assets, err := f.provider.ListAllAssetTypesByName(ctx, maps.Keys(AzureAssetTypeToTypePair))
 	if err != nil {
 		return err
 	}

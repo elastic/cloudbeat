@@ -91,8 +91,8 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Equal(1, len(results))
-	s.Nil(err)
+	s.Len(results, 1)
+	s.Require().NoError(err)
 
 	processResource := results[0].Resource
 	evalRes := processResource.GetData().(EvalProcResource)
@@ -124,8 +124,8 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Equal(0, len(results))
-	s.Nil(err)
+	s.Empty(results)
+	s.Require().NoError(err)
 }
 
 func (s *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
@@ -142,8 +142,8 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 
 	results := testhelper.CollectResources(s.resourceCh)
-	s.Equal(1, len(results))
-	s.Nil(err)
+	s.Len(results, 1)
+	s.Require().NoError(err)
 
 	processResource := results[0].Resource
 	evalRes := processResource.GetData().(EvalProcResource)
@@ -174,7 +174,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 			B: 2,
 		}
 		configData, err := test.marshal(&processConfig)
-		s.Nil(err)
+		s.Require().NoError(err)
 
 		testProcess := TextProcessContext{
 			Pid:               "3",
@@ -194,29 +194,29 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 		err = processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
-		s.Equal(1, len(results))
-		s.Nil(err)
+		s.Len(results, 1)
+		s.Require().NoError(err)
 
 		processResource := results[0].Resource
 		evalRes := processResource.GetData().(EvalProcResource)
 		procCD, err := processResource.GetElasticCommonData()
-		s.NoError(err)
+		s.Require().NoError(err)
 
 		s.Equal(testProcess.Pid, evalRes.PID)
 		s.Equal("kubelet", evalRes.Stat.Name)
 		s.Contains(evalRes.Cmd, "/usr/bin/kubelet")
 
-		s.Equal(testProcess.Pid, strconv.FormatInt((procCD["process.pid"].(int64)), 10))
-		s.True(procCD["process.args_count"].(int64) > 0)
+		s.Equal(testProcess.Pid, strconv.FormatInt(procCD["process.pid"].(int64), 10))
+		s.Greater(procCD["process.args_count"].(int64), int64(0))
 		s.Contains(procCD["process.command_line"], "/usr/bin/kubelet")
 		s.Equal("kubelet", procCD["process.name"])
 
 		configResource := evalRes.ExternalData[configFlagKey]
 		var result ProcessConfigTestStruct
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{Result: &result})
-		s.Nil(err, "Could not decode process fetcherConfig result from %s type", test.configType)
+		s.Require().NoError(err, "Could not decode process fetcherConfig result from %s type", test.configType)
 		err = decoder.Decode(configResource)
-		s.Nil(err, "Could not decode process fetcherConfig result from file %s", test.configFileName)
+		s.Require().NoError(err, "Could not decode process fetcherConfig result from file %s", test.configFileName)
 
 		s.Equal(processConfig.A, result.A)
 		s.Equal(processConfig.B, result.B)

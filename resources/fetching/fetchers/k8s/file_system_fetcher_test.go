@@ -80,8 +80,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results = testhelper.CollectResources(s.resourceCh)
 
-	s.NoError(err, "Fetcher was not able to fetch files from FS")
-	s.Equal(1, len(results))
+	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
+	s.Len(results, 1)
 
 	fsResource := results[0].Resource
 	evalResource := fsResource.GetData().(EvalFSResource)
@@ -92,7 +92,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	s.Equal("root", evalResource.Group)
 
 	rMetadata, err := fsResource.GetMetadata()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.NotNil(rMetadata.ID)
 	s.Equal(filePaths[0], rMetadata.Name)
 	s.Equal(FileSubType, rMetadata.SubType)
@@ -129,8 +129,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.NoError(err, "Fetcher was not able to fetch files from FS")
-	s.Equal(2, len(results))
+	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
+	s.Len(results, 2)
 
 	firstFSResource := results[0].Resource
 	firstEvalResource := firstFSResource.GetData().(EvalFSResource)
@@ -140,7 +140,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Equal("root", firstEvalResource.Group)
 
 	rMetadata, err := firstFSResource.GetMetadata()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.NotNil(rMetadata.ID)
 	s.Equal(paths[0], rMetadata.Name)
 	s.Equal(FileSubType, rMetadata.SubType)
@@ -154,7 +154,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 	s.Equal("etcd", secEvalResource.Group)
 
 	SecResMetadata, err := secFSResource.GetMetadata()
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.NotNil(SecResMetadata.ID)
 	s.Equal(paths[1], SecResMetadata.Name)
 	s.Equal(FileSubType, SecResMetadata.SubType)
@@ -186,15 +186,15 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.NoError(err, "Fetcher was not able to fetch files from FS")
-	s.Equal(1, len(results))
+	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
+	s.Len(results, 1)
 
 	fsResource := results[0].Resource
 	evalResource := fsResource.GetData().(EvalFSResource)
 	expectedResult := filepath.Base(dir)
 	rMetadata, err := fsResource.GetMetadata()
 
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.NotNil(rMetadata.ID)
 	s.NotNil(rMetadata.Name)
 	s.Equal(DirSubType, rMetadata.SubType)
@@ -237,15 +237,15 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.NoError(err, "Fetcher was not able to fetch files from FS")
-	s.Equal(2, len(results))
+	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
+	s.Len(results, 2)
 
 	// All inner files should exist in the final result
 	expectedResult := []string{"output.txt", filepath.Base(innerDir)}
 	for i := 0; i < len(results); i++ {
 		fsResource := results[i].Resource
 		rMetadata, err := fsResource.GetMetadata()
-		s.NoError(err)
+		s.Require().NoError(err)
 		evalResource := fsResource.GetData().(EvalFSResource)
 
 		s.Contains(expectedResult, evalResource.Name)
@@ -255,7 +255,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 		s.Equal("root", evalResource.Group)
 		s.Equal("root", evalResource.Owner)
 		s.Equal(FSResourceType, rMetadata.Type)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(fsResource.GetElasticCommonData())
 	}
 }
@@ -294,8 +294,8 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.NoError(err, "Fetcher was not able to fetch files from FS")
-	s.Equal(6, len(results))
+	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
+	s.Len(results, 6)
 
 	directories := []string{filepath.Base(outerDir), filepath.Base(innerDir), filepath.Base(innerInnerDir)}
 	allFilesName := append(append(append(innerFiles, directories...), outerFiles...), innerInnerFiles...)
@@ -306,14 +306,14 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 		rMetadata, err := fsResource.GetMetadata()
 		evalResource := fsResource.GetData().(EvalFSResource)
 
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.NotNil(rMetadata.SubType)
 		s.NotNil(rMetadata.Name)
 		s.NotNil(rMetadata.ID)
 		s.Contains(allFilesName, evalResource.Name)
 		s.Equal(FSResourceType, rMetadata.Type)
 
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.Equal("root", evalResource.Owner)
 		s.Equal("root", evalResource.Group)
 		s.NotNil(fsResource.GetElasticCommonData())
@@ -347,13 +347,13 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
 	results = testhelper.CollectResources(s.resourceCh)
 
-	s.NoError(err, "Fetcher was not able to fetch files from FS")
-	s.Equal(1, len(results))
+	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
+	s.Len(results, 1)
 
 	fsResource := results[0].Resource
 	fileInfo := fsResource.GetData().(EvalFSResource)
 	fileCd, err := fsResource.GetElasticCommonData()
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.NotNil(fileCd)
 	s.Equal(fileInfo.Name, fileCd["file.name"])
@@ -376,7 +376,7 @@ func createDirectoriesWithFiles(s *suite.Suite, dirPath string, dirName string, 
 	}
 	for _, fileName := range filesToWriteInDirectory {
 		file := filepath.Join(dirPath, fileName)
-		s.Nil(os.WriteFile(file, []byte("test txt\n"), 0600), "Could not able to write a new file")
+		s.Require().NoError(os.WriteFile(file, []byte("test txt\n"), 0600), "Could not able to write a new file")
 	}
 	return dirPath
 }

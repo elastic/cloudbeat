@@ -35,10 +35,7 @@ func New(_ *beat.Beat, cfg *agentconfig.C) (beat.Beater, error) {
 	reloader := launcher.NewListener(log)
 	validator := &validator{}
 
-	s, err := launcher.New(log, "Cloudbeat", reloader, validator, NewBeater, cfg)
-	if err != nil {
-		return nil, err
-	}
+	s := launcher.New(log, "Cloudbeat", reloader, validator, NewBeater, cfg)
 
 	reload.RegisterV2.MustRegisterInput(reloader)
 	return s, nil

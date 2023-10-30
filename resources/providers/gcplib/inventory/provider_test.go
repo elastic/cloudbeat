@@ -26,6 +26,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
@@ -37,7 +38,6 @@ import (
 
 type ProviderTestSuite struct {
 	suite.Suite
-	ctx             context.Context
 	logger          *logp.Logger
 	mockedInventory *AssetsInventoryWrapper
 	mockedIterator  *MockIterator
@@ -50,7 +50,6 @@ func TestInventoryProviderTestSuite(t *testing.T) {
 }
 
 func (s *ProviderTestSuite) SetupTest() {
-	s.ctx = context.Background()
 	s.logger = logp.NewLogger("test")
 	s.mockedIterator = new(MockIterator)
 	s.mockedInventory = &AssetsInventoryWrapper{
@@ -68,17 +67,16 @@ func (s *ProviderTestSuite) TestProviderInit() {
 		ClientOpts: []option.ClientOption{},
 	}
 
-	initMock.On("Init", s.ctx, s.logger, gcpConfig).Return(&Provider{}, nil).Once()
-	provider, err := initMock.Init(s.ctx, s.logger, gcpConfig)
-	s.Assert().NoError(err)
-	s.Assert().NotNil(provider)
+	initMock.EXPECT().Init(mock.Anything, s.logger, gcpConfig).Return(&Provider{}, nil).Once()
+	provider, err := initMock.Init(context.Background(), s.logger, gcpConfig)
+	s.Require().NoError(err)
+	s.NotNil(provider)
 }
 
 func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	provider := &Provider{
 		log:       s.logger,
 		inventory: s.mockedInventory,
-		ctx:       s.ctx,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
@@ -100,32 +98,31 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "AssetName1", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/1", "organizations/1"}}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	value, err := provider.ListAllAssetTypesByName([]string{"test"})
-	s.Assert().NoError(err)
+	value, err := provider.ListAllAssetTypesByName(context.Background(), []string{"test"})
+	s.Require().NoError(err)
 
 	// test merging assets with same name:
 	assetNames := lo.Map(value, func(asset *ExtendedGcpAsset, _ int) string { return asset.Name })
 	resourceAssets := lo.Filter(value, func(asset *ExtendedGcpAsset, _ int) bool { return asset.Resource != nil })
 	policyAssets := lo.Filter(value, func(asset *ExtendedGcpAsset, _ int) bool { return asset.IamPolicy != nil })
-	s.Assert().Equal(lo.Contains(assetNames, "AssetName1"), true)
-	s.Assert().Equal(2, len(resourceAssets)) // 2 assets with resources (assetName1, assetName2)
-	s.Assert().Equal(1, len(policyAssets))   // 1 assets with policy 	(assetName1)
-	s.Assert().Equal(2, len(value))          // 2 assets in total 		(assetName1 merged resource/policy, assetName2)
+	s.True(lo.Contains(assetNames, "AssetName1"))
+	s.Len(resourceAssets, 2) // 2 assets with resources (assetName1, assetName2)
+	s.Len(policyAssets, 1)   // 1 asset with policy 	(assetName1)
+	s.Len(value, 2)          // 2 assets in total 		(assetName1 merged resource/policy, assetName2)
 
 	// tests extending assets with display names for org/prj:
 	projectNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.Ecs.ProjectName })
 	orgNames := lo.UniqBy(value, func(asset *ExtendedGcpAsset) string { return asset.Ecs.OrganizationName })
-	s.Assert().Equal(1, len(projectNames))
-	s.Assert().Equal("ProjectName", projectNames[0].Ecs.ProjectName)
-	s.Assert().Equal(1, len(orgNames))
-	s.Assert().Equal("OrganizationName", orgNames[0].Ecs.OrganizationName)
+	s.Len(projectNames, 1)
+	s.Equal("ProjectName", projectNames[0].Ecs.ProjectName)
+	s.Len(orgNames, 1)
+	s.Equal("OrganizationName", orgNames[0].Ecs.OrganizationName)
 }
 
 func (s *ProviderTestSuite) TestListMonitoringAssets() {
 	provider := &Provider{
 		log:       s.logger,
 		inventory: s.mockedInventory,
-		ctx:       s.ctx,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
@@ -201,9 +198,9 @@ func (s *ProviderTestSuite) TestListMonitoringAssets() {
 		"AlertPolicy": {MonitoringAlertPolicyAssetType},
 	}
 
-	values, err := provider.ListMonitoringAssets(monitoringAssetTypes)
+	values, err := provider.ListMonitoringAssets(context.Background(), monitoringAssetTypes)
 
-	s.Assert().NoError(err)
+	s.Require().NoError(err)
 	s.ElementsMatch(expected, values)
 }
 
@@ -211,7 +208,6 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 	provider := &Provider{
 		log:       s.logger,
 		inventory: s.mockedInventory,
-		ctx:       s.ctx,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
@@ -271,18 +267,18 @@ func (s *ProviderTestSuite) TestEnrichNetworkAssets() {
 	}, Ancestors: []string{"projects/1", "organizations/1"}}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	provider.enrichNetworkAssets(assets)
+	provider.enrichNetworkAssets(context.Background(), assets)
 
 	enrichedAssets := lo.Filter(assets, func(asset *ExtendedGcpAsset, _ int) bool {
 		return asset.GetResource().GetData().GetFields()["enabledDnsLogging"] != nil
 	})
 	assetNames := lo.Map(enrichedAssets, func(asset *ExtendedGcpAsset, _ int) string { return asset.Name })
 
-	s.Assert().Equal(lo.Contains(assetNames, "//compute.googleapis.com/projects/test-project/global/networks/test-network-1"), true)
-	s.Assert().Equal(lo.Contains(assetNames, "//compute.googleapis.com/projects/test-project/global/networks/test-network-2"), true)
+	s.True(lo.Contains(assetNames, "//compute.googleapis.com/projects/test-project/global/networks/test-network-1"))
+	s.True(lo.Contains(assetNames, "//compute.googleapis.com/projects/test-project/global/networks/test-network-2"))
 
-	s.Assert().Equal(3, len(assets))         // 3 network assets in total
-	s.Assert().Equal(2, len(enrichedAssets)) // 2 assets was enriched
+	s.Len(assets, 3)         // 3 network assets in total
+	s.Len(enrichedAssets, 2) // 2 assets was enriched
 }
 
 func (s *ProviderTestSuite) TestListServiceUsageAssets() {
@@ -323,7 +319,6 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 				return s.mockedIterator
 			},
 		},
-		ctx: s.ctx,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
@@ -352,11 +347,11 @@ func (s *ProviderTestSuite) TestListServiceUsageAssets() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "ServiceUsage2", IamPolicy: &iampb.Policy{}, Ancestors: []string{"projects/2", "organizations/1"}, AssetType: "serviceusage.googleapis.com/Service"}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	values, err := provider.ListServiceUsageAssets()
-	s.Assert().NoError(err)
+	values, err := provider.ListServiceUsageAssets(context.Background())
+	s.Require().NoError(err)
 
 	// 2 assets, 1 for each project
-	s.Assert().Equal(2, len(values))
+	s.Len(values, 2)
 	s.ElementsMatch(expected, values)
 }
 
@@ -408,7 +403,6 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 				return s.mockedIterator
 			},
 		},
-		ctx: s.ctx,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
@@ -444,11 +438,11 @@ func (s *ProviderTestSuite) TestListLoggingAssets() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "LogSink3", IamPolicy: nil, Ancestors: []string{"organizations/1"}, AssetType: "logging.googleapis.com/LogSink"}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	values, err := provider.ListLoggingAssets()
-	s.Assert().NoError(err)
+	values, err := provider.ListLoggingAssets(context.Background())
+	s.Require().NoError(err)
 
 	// 2 assets, 1 for each project
-	s.Assert().Equal(2, len(values))
+	s.Len(values, 2)
 	s.ElementsMatch(expected, values)
 }
 
@@ -456,7 +450,6 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 	provider := &Provider{
 		log:       s.logger,
 		inventory: s.mockedInventory,
-		ctx:       s.ctx,
 		config: auth.GcpFactoryConfig{
 			Parent:     "projects/1",
 			ClientOpts: []option.ClientOption{},
@@ -477,13 +470,13 @@ func (s *ProviderTestSuite) TestListProjectsAncestorsPolicies() {
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{Name: "AssetName2", IamPolicy: &iampb.Policy{}, Ancestors: []string{"organizations/1"}}, nil).Once()
 	s.mockedIterator.On("Next").Return(&assetpb.Asset{}, iterator.Done).Once()
 
-	value, err := provider.ListProjectsAncestorsPolicies()
-	s.Assert().NoError(err)
+	value, err := provider.ListProjectsAncestorsPolicies(context.Background())
+	s.Require().NoError(err)
 
-	s.Assert().Equal(1, len(value))             // single project
-	s.Assert().Equal(2, len(value[0].Policies)) // multiple policies - project + org
-	s.Assert().Equal("ProjectName", value[0].Ecs.ProjectName)
-	s.Assert().Equal("OrganizationName", value[0].Ecs.OrganizationName)
-	s.Assert().Equal("AssetName1", value[0].Policies[0].Name)
-	s.Assert().Equal("AssetName2", value[0].Policies[1].Name)
+	s.Len(value, 1)             // single project
+	s.Len(value[0].Policies, 2) // multiple policies - project + org
+	s.Equal("ProjectName", value[0].Ecs.ProjectName)
+	s.Equal("OrganizationName", value[0].Ecs.OrganizationName)
+	s.Equal("AssetName1", value[0].Policies[0].Name)
+	s.Equal("AssetName2", value[0].Policies[1].Name)
 }

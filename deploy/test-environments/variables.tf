@@ -76,4 +76,29 @@ variable "docker_image_override" {
   }
   type = map(string)
 }
+
+variable "division" {
+  default     = "engineering"
+  type        = string
+  description = "Optional division resource tag"
+}
+
+variable "org" {
+  default     = "security"
+  type        = string
+  description = "Optional org resource tag"
+}
+
+variable "team" {
+  default     = "cloud-security-posture"
+  type        = string
+  description = "Optional team resource tag"
+}
+
+variable "project" {
+  default     = "test-environments"
+  type        = string
+  description = "Optional project resource tag"
+}
+
 # ============================================

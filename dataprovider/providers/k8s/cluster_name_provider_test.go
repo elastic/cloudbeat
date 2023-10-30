@@ -69,7 +69,7 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterName() {
 	provider := KubernetesClusterNameProvider{KubeClient: client}
 
 	res, err := provider.GetClusterName(context.Background(), cfg)
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal(clusterName, res)
 }
 
@@ -87,6 +87,6 @@ func (s *KubernetesClusterNameProviderTestSuite) TestGetClusterMetadataNoCluster
 
 	res, err := provider.GetClusterName(context.Background(), cfg)
 	s.Empty(res)
-	s.Error(err)
-	s.ErrorContains(err, "fail to resolve the name of the cluster")
+	s.Require().Error(err)
+	s.Require().ErrorContains(err, "fail to resolve the name of the cluster")
 }

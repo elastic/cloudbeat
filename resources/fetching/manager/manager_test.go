@@ -34,7 +34,6 @@ import (
 
 type ManagerTestSuite struct {
 	suite.Suite
-	ctx        context.Context
 	registry   *registry.MockRegistry
 	opts       goleak.Option
 	resourceCh chan fetching.ResourceInfo
@@ -50,7 +49,6 @@ func TestManagerTestSuite(t *testing.T) {
 }
 
 func (s *ManagerTestSuite) SetupTest() {
-	s.ctx = context.Background()
 	s.opts = goleak.IgnoreCurrent()
 	s.resourceCh = make(chan fetching.ResourceInfo, 50)
 	s.registry = &registry.MockRegistry{}
@@ -73,8 +71,8 @@ func (s *ManagerTestSuite) TestManagerRun() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	s.Require().NoError(err)
 
 	m.Run()
 	waitForACycleToEnd(interval)
@@ -94,8 +92,8 @@ func (s *ManagerTestSuite) TestManagerRunPanic() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	s.Require().NoError(err)
 
 	m.Run()
 	waitForACycleToEnd(interval)
@@ -115,8 +113,8 @@ func (s *ManagerTestSuite) TestManagerRunTimeout() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	s.Require().NoError(err)
 
 	m.Run()
 	waitForACycleToEnd(interval)
@@ -141,11 +139,11 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 		}
 	}).Once()
 
-	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	s.Require().NoError(err)
 
-	err = m.fetchSingle(s.ctx, fetcherName, fetching.CycleMetadata{})
-	s.Error(err)
+	err = m.fetchSingle(context.Background(), fetcherName, fetching.CycleMetadata{})
+	s.Require().Error(err)
 	s.registry.AssertExpectations(s.T())
 }
 
@@ -158,8 +156,8 @@ func (s *ManagerTestSuite) TestManagerRunShouldNotRun() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	d, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, timeout, s.registry)
-	s.NoError(err)
+	d, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
+	s.Require().NoError(err)
 
 	d.Run()
 	waitForACycleToEnd(interval)
@@ -177,8 +175,8 @@ func (s *ManagerTestSuite) TestManagerStop() {
 	s.registry.EXPECT().Update().Once()
 	s.registry.EXPECT().Stop().Once()
 
-	m, err := NewManager(s.ctx, testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
-	s.NoError(err)
+	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
+	s.Require().NoError(err)
 
 	m.Run()
 	waitForACycleToEnd(2 * time.Second)
@@ -186,14 +184,14 @@ func (s *ManagerTestSuite) TestManagerStop() {
 	time.Sleep(2 * time.Second)
 
 	s.registry.AssertExpectations(s.T())
-	s.EqualError(context.Canceled, m.ctx.Err().Error())
+	s.Require().EqualError(context.Canceled, m.ctx.Err().Error())
 }
 
 func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
 	interval := 30 * time.Second
 	fetcherName := "run_fetcher"
 
-	ctx, cancel := context.WithTimeout(s.ctx, time.Second*2)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 
 	s.registry.EXPECT().Keys().Return([]string{fetcherName}).Twice()
@@ -202,11 +200,11 @@ func (s *ManagerTestSuite) TestManagerStopWithTimeout() {
 	s.registry.EXPECT().Update().Once()
 
 	m, err := NewManager(ctx, testhelper.NewLogger(s.T()), interval, time.Second*5, s.registry)
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	m.Run()
 	time.Sleep(3 * time.Second)
-	s.EqualError(context.DeadlineExceeded, ctx.Err().Error())
+	s.Require().EqualError(context.DeadlineExceeded, ctx.Err().Error())
 	s.registry.AssertExpectations(s.T())
 }
 

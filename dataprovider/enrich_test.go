@@ -22,6 +22,7 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEnrichSuccess(t *testing.T) {
@@ -74,11 +75,11 @@ func TestEnrichSuccess(t *testing.T) {
 				Fields: map[string]interface{}{},
 			}
 			err := NewEnricher(dp).EnrichEvent(ev)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			for key, expectedValue := range tt.expected {
 				actualValue, err := ev.GetValue(key)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, expectedValue, actualValue)
 			}
 		})
@@ -93,5 +94,5 @@ func TestEnrichError(t *testing.T) {
 		Fields: map[string]interface{}{},
 	}
 	err := NewEnricher(dp).EnrichEvent(ev)
-	assert.Error(t, err)
+	require.Error(t, err)
 }

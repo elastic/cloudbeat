@@ -55,7 +55,6 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockInventoryService := &inventory.MockServiceAPI{}
 	var mockAssets []inventory.AzureAsset
 	for _, assetType := range []string{
-		inventory.ActivityLogAlertAssetType,
 		inventory.ClassicStorageAccountAssetType,
 		inventory.ClassicVirtualMachineAssetType,
 		inventory.DiskAssetType,
@@ -86,7 +85,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		)
 	}
 	mockInventoryService.EXPECT().
-		ListAllAssetTypesByName(mock.AnythingOfType("[]string")).
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("[]string")).
 		Return(mockAssets, nil).Once()
 	defer mockInventoryService.AssertExpectations(s.T())
 

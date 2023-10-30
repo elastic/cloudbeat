@@ -38,7 +38,6 @@ type Provider struct {
 	log           *logp.Logger
 	client        *AzureClientWrapper
 	subscriptions map[string]string
-	ctx           context.Context
 	Config        auth.AzureFactoryConfig
 }
 
@@ -63,7 +62,7 @@ type AzureAsset struct {
 
 type ServiceAPI interface {
 	// ListAllAssetTypesByName List all content types of the given assets types
-	ListAllAssetTypesByName(assets []string) ([]AzureAsset, error)
+	ListAllAssetTypesByName(ctx context.Context, assets []string) ([]AzureAsset, error)
 }
 
 type ProviderInitializerAPI interface {
@@ -105,7 +104,6 @@ func (p *ProviderInitializer) Init(ctx context.Context, log *logp.Logger, azureC
 		log:           log,
 		client:        wrapper,
 		subscriptions: subscriptions,
-		ctx:           ctx,
 		Config:        azureConfig,
 	}, nil
 }
@@ -134,7 +132,7 @@ func (p *ProviderInitializer) getSubscriptionIds(ctx context.Context, azureConfi
 	return result, nil
 }
 
-func (p *Provider) ListAllAssetTypesByName(assets []string) ([]AzureAsset, error) {
+func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assets []string) ([]AzureAsset, error) {
 	p.log.Infof("Listing Azure assets: %v", assets)
 
 	var subscriptionKeys []*string
@@ -150,7 +148,7 @@ func (p *Provider) ListAllAssetTypesByName(assets []string) ([]AzureAsset, error
 		Subscriptions: subscriptionKeys,
 	}
 
-	resourceAssets, err := p.runPaginatedQuery(query)
+	resourceAssets, err := p.runPaginatedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -173,11 +171,11 @@ func generateQuery(assets []string) string {
 	return query.String()
 }
 
-func (p *Provider) runPaginatedQuery(query armresourcegraph.QueryRequest) ([]AzureAsset, error) {
+func (p *Provider) runPaginatedQuery(ctx context.Context, query armresourcegraph.QueryRequest) ([]AzureAsset, error) {
 	var resourceAssets []AzureAsset
 
 	for {
-		response, err := p.client.AssetQuery(p.ctx, query, nil)
+		response, err := p.client.AssetQuery(ctx, query, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -212,6 +210,7 @@ func (p *Provider) getAssetFromData(data map[string]any) AzureAsset {
 		SubscriptionId:   subId,
 		SubscriptionName: p.subscriptions[subId],
 		TenantId:         getString(data, "tenantId"),
+		Sku:              getString(data, "sku"),
 		Type:             getString(data, "type"),
 	}
 }

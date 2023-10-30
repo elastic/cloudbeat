@@ -26,6 +26,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -156,10 +157,10 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 
 			trails, err := p.DescribeTrails(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			for i, trail := range trails {
 				assert.Equal(t, tt.want[i], trail)
 			}

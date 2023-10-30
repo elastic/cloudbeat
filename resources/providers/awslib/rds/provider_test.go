@@ -22,6 +22,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	rdsClient "github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/rds/types"
@@ -80,8 +81,25 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 				"DescribeDBInstances": {
 					awslib.DefaultRegion: {&rdsClient.DescribeDBInstancesOutput{
 						DBInstances: []types.DBInstance{
-							{DBInstanceIdentifier: &identifier, DBInstanceArn: &arn, StorageEncrypted: false, AutoMinorVersionUpgrade: false, PubliclyAccessible: false, DBSubnetGroup: &types.DBSubnetGroup{VpcId: &identifier, Subnets: []types.Subnet{}}},
-							{DBInstanceIdentifier: &identifier2, DBInstanceArn: &arn2, StorageEncrypted: true, AutoMinorVersionUpgrade: true, PubliclyAccessible: true, DBSubnetGroup: &types.DBSubnetGroup{VpcId: &identifier, Subnets: []types.Subnet{{SubnetIdentifier: &identifier}, {SubnetIdentifier: &identifier2}}}},
+							{
+								DBInstanceIdentifier:    &identifier,
+								DBInstanceArn:           &arn,
+								StorageEncrypted:        aws.Bool(false),
+								AutoMinorVersionUpgrade: aws.Bool(false),
+								PubliclyAccessible:      aws.Bool(false),
+								DBSubnetGroup:           &types.DBSubnetGroup{VpcId: &identifier, Subnets: []types.Subnet{}},
+							},
+							{
+								DBInstanceIdentifier:    &identifier2,
+								DBInstanceArn:           &arn2,
+								StorageEncrypted:        aws.Bool(true),
+								AutoMinorVersionUpgrade: aws.Bool(true),
+								PubliclyAccessible:      aws.Bool(true),
+								DBSubnetGroup: &types.DBSubnetGroup{VpcId: &identifier, Subnets: []types.Subnet{
+									{SubnetIdentifier: &identifier},
+									{SubnetIdentifier: &identifier2},
+								}},
+							},
 						},
 					}, nil},
 				},
@@ -140,7 +158,7 @@ func (s *ProviderTestSuite) TestProvider_DescribeDBInstances() {
 		ctx := context.Background()
 
 		results, err := rdsProvider.DescribeDBInstances(ctx)
-		s.NoError(err)
+		s.Require().NoError(err)
 		s.Equal(test.expected, results)
 	}
 }

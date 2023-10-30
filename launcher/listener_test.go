@@ -168,14 +168,14 @@ func (s *ListenerTestSuite) TestReloadAndStop() {
 				wg.Add(1)
 				go func(listener *Listener, update configUpdate) {
 					err := listener.Reload(update)
-					s.NoError(err)
+					s.Require().NoError(err)
 					wg.Done()
 				}(sut, val)
 
 				if len(val) > 0 {
 					re := <-sut.Channel()
 					test, err := re.String("foo", -1)
-					s.NoError(err)
+					s.Require().NoError(err)
 					s.Equal("bar", test)
 				}
 			}

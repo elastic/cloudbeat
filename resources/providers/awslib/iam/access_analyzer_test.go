@@ -113,7 +113,7 @@ func TestProvider_GetAccessAnalyzers(t *testing.T) {
 
 			allAnalyzers, err := p.GetAccessAnalyzers(context.Background())
 			if tt.wantErr != "" {
-				assert.ErrorContains(t, err, tt.wantErr)
+				require.ErrorContains(t, err, tt.wantErr)
 				return
 			} else {
 				require.NoError(t, err)

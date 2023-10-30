@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/elastic/elastic-agent-libs/logp"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -63,7 +62,7 @@ func TestOpaTestSuite(t *testing.T) {
 
 func (s *OpaTestSuite) SetupSuite() {
 	err := logp.TestingSetup(logp.ToObserverOutput())
-	s.NoError(err)
+	s.Require().NoError(err)
 }
 
 func (s *OpaTestSuite) TestOpaEvaluator_decode() {
@@ -102,10 +101,10 @@ func (s *OpaTestSuite) TestOpaEvaluator_decode() {
 			}
 			got, err := o.decode(tt.args.result)
 			if tt.wantErr {
-				s.Error(err, "expected to have an error")
+				s.Require().Error(err, "expected to have an error")
 				return
 			}
-			s.NoError(err)
+			s.Require().NoError(err)
 			s.Equal(tt.want, got)
 		})
 	}
@@ -125,14 +124,14 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 		s.Run(fmt.Sprintf("TestEvaluationsDecisionLogs %+v", tt), func() {
 			cfg := s.getTestConfig()
 			e, err := NewOpaEvaluator(ctx, s.log, cfg)
-			s.NoError(err)
+			s.Require().NoError(err)
 
 			for i := 0; i < tt.evals; i++ {
 				_, err = e.Eval(ctx, fetching.ResourceInfo{
 					Resource:      &DummyResource{},
 					CycleMetadata: fetching.CycleMetadata{},
 				})
-				s.NoError(err)
+				s.Require().NoError(err)
 			}
 
 			logs := findDecisionLogs()
@@ -140,7 +139,7 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 			s.Len(logs, tt.expected)
 			if tt.expected > 0 {
 				s.Contains(logs[0].ContextMap(), "decision_id")
-				s.Equal(logs[0].Level, zapcore.DebugLevel)
+				s.Equal(zapcore.DebugLevel, logs[0].Level)
 			}
 		})
 	}
@@ -148,9 +147,9 @@ func (s *OpaTestSuite) TestOpaEvaluatorWithDecisionLogs() {
 
 func (s *OpaTestSuite) getTestConfig() *config.Config {
 	path, err := filepath.Abs("bundle.tar.gz")
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 	_, err = os.Stat(path)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 	return &config.Config{
 		BundlePath: path,
 	}

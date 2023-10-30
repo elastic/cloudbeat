@@ -95,11 +95,11 @@ func TestGetStrategy(t *testing.T) {
 		t.Run(fmt.Sprintf("%T", tt.wantType), func(t *testing.T) {
 			got, err := GetStrategy(&tt.cfg)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
 			assert.IsType(t, tt.wantType, got)
-			assert.NoError(t, got.checkDependencies())
+			require.NoError(t, got.checkDependencies())
 		})
 	}
 }
@@ -113,7 +113,7 @@ func testInitialize(t *testing.T, s benchInit, cfg *config.Config, wantErr strin
 
 	reg, dp, _, err := s.initialize(context.Background(), testhelper.NewLogger(t), cfg, make(chan fetching.ResourceInfo))
 	if wantErr != "" {
-		assert.ErrorContains(t, err, wantErr)
+		require.ErrorContains(t, err, wantErr)
 		return
 	}
 	reg.Update()

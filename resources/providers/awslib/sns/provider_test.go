@@ -26,6 +26,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sns/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -79,10 +80,10 @@ func TestProvider_ListSubscriptionsByTopic(t *testing.T) {
 			}
 			got, err := p.ListSubscriptionsByTopic(context.Background(), &regions[0], tt.topic)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}
