@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -117,11 +117,10 @@ func TestRepeater_Run(t *testing.T) {
 			err := repeater.Run(ctx, m.Execute)
 
 			if tc.expectedErrMsg != "" {
-				assert.Error(t, err)
-				assert.Equal(t, tc.expectedErrMsg, err.Error())
-			} else {
-				assert.NoError(t, err)
+				require.ErrorContains(t, err, tc.expectedErrMsg)
+				return
 			}
+			require.NoError(t, err)
 		})
 	}
 }

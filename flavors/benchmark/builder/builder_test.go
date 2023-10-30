@@ -25,6 +25,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/config"
 	"github.com/elastic/cloudbeat/dataprovider"
@@ -59,7 +60,7 @@ func TestBase_Build_Success(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			log := testhelper.NewLogger(t)
 			path, err := filepath.Abs("../../../bundle.tar.gz")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			resourceCh := make(chan fetching.ResourceInfo)
 			reg := registry.NewMockRegistry(t)
@@ -67,14 +68,14 @@ func TestBase_Build_Success(t *testing.T) {
 				BundlePath: path,
 				Period:     time.Minute,
 			}, resourceCh, reg)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.IsType(t, tt.benchType, benchmark)
 
 			reg.EXPECT().Keys().Return([]string{}).Twice()
 			reg.EXPECT().Update().Return().Once()
 			_, err = benchmark.Run(context.Background())
 			time.Sleep(100 * time.Millisecond)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 	}
 }
@@ -104,7 +105,7 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			log := testhelper.NewLogger(t)
 			path, err := filepath.Abs("../../../bundle.tar.gz")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			resourceCh := make(chan fetching.ResourceInfo)
 			reg := registry.NewMockRegistry(t)
@@ -113,7 +114,7 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 				BundlePath: path,
 				Period:     time.Minute,
 			}, resourceCh, reg, le)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.IsType(t, tt.benchType, benchmark)
 
 			reg.EXPECT().Keys().Return([]string{}).Twice()
@@ -121,7 +122,7 @@ func TestBase_BuildK8s_Success(t *testing.T) {
 			le.EXPECT().Run(mock.Anything).Return(nil).Once()
 			_, err = benchmark.Run(context.Background())
 			time.Sleep(100 * time.Millisecond)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 	}
 }

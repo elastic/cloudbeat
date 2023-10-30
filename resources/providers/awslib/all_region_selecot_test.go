@@ -60,19 +60,19 @@ func (s *AllRegionSelectorTestSuite) SetupTest() {
 func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_SingleCall() {
 	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(successfulDescribeCloudRegionOutput, nil)
 	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 }
 
 func (s *AllRegionSelectorTestSuite) TestAllRegionSelector_FirstFail() {
 	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(nil, errors.New("mock")).Once()
 	result, err := s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.Error(err)
-	s.Len(result, 0)
+	s.Require().Error(err)
+	s.Empty(result)
 
 	s.mock.EXPECT().DescribeRegions(mock.Anything, mock.Anything).Return(successfulDescribeCloudRegionOutput, nil).Once()
 	result, err = s.selector.Regions(context.Background(), *awssdk.NewConfig())
-	s.NoError(err)
+	s.Require().NoError(err)
 	s.Equal([]string{usRegion, euRegion}, result)
 	s.mock.AssertNumberOfCalls(s.T(), "DescribeRegions", 2)
 }

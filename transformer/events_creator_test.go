@@ -27,7 +27,6 @@ import (
 
 	"github.com/elastic/beats/v7/libbeat/beat"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/dataprovider"
@@ -90,16 +89,16 @@ func TestSuite(t *testing.T) {
 
 func (s *EventsCreatorTestSuite) SetupSuite() {
 	fetcherDataFile, err := os.Open(opaResultsFileName)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 	defer func() {
-		require.NoError(s.T(), fetcherDataFile.Close())
+		s.Require().NoError(fetcherDataFile.Close())
 	}()
 
 	byteValue, err := io.ReadAll(fetcherDataFile)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 
 	err = json.Unmarshal(byteValue, &opaResults)
-	require.NoError(s.T(), err)
+	s.Require().NoError(err)
 }
 
 func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
@@ -117,7 +116,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				dataProviderMock := dataprovider.NewMockCommonDataProvider(s.T())
 				mockEnrichEvent := func(event *beat.Event, meta fetching.ResourceMetadata) {
 					_, err := event.Fields.Put(enrichedKey, enrichedValue)
-					s.NoError(err)
+					s.Require().NoError(err)
 				}
 				dataProviderMock.EXPECT().EnrichEvent(mock.Anything, mock.Anything).Run(mockEnrichEvent).Return(nil)
 				return dataProviderMock
@@ -181,11 +180,11 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				s.NotEmpty(event.Fields["file"], "elastic common data is missing")
 				s.NotEmpty(resource.Raw, "raw resource is missing")
 				s.NotEmpty(resource.SubType, "resource sub type is missing")
-				s.Equal(resource.ID, "test_resource_id")
+				s.Equal("test_resource_id", resource.ID)
 				s.NotEmpty(resource.Type, "resource  type is missing")
 				s.NotEmpty(event.Fields["event"], "resource event is missing")
 				s.Equal(event.Fields["cloudbeat"], versionInfo)
-				s.Equal(event.Fields[enrichedKey], enrichedValue)
+				s.Equal(enrichedValue, event.Fields[enrichedKey])
 				s.Regexp(regexp.MustCompile("^Rule \".*\": (passed|failed)$"), event.Fields["message"], "event message is not correct")
 			}
 		})

@@ -519,9 +519,9 @@ func (s *ProviderTestSuite) TestProvider_DescribeBuckets() {
 
 		results, err := s3Provider.DescribeBuckets(ctx)
 		if test.expectError {
-			s.Error(err)
+			s.Require().Error(err)
 		} else {
-			s.NoError(err)
+			s.Require().NoError(err)
 		}
 
 		// Using `ElementsMatch` instead of the usual `Equals` since iterating over the regions map does not produce a

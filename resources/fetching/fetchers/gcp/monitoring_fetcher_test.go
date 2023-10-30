@@ -26,6 +26,7 @@ import (
 	"cloud.google.com/go/asset/apiv1/assetpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
@@ -65,7 +66,7 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Success() {
 		provider:   mockInventoryService,
 	}
 
-	mockInventoryService.On("ListMonitoringAssets", mock.Anything).Return(
+	mockInventoryService.EXPECT().ListMonitoringAssets(mock.Anything, mock.Anything).Return(
 		[]*inventory.MonitoringAsset{
 			{
 				Ecs: &fetching.EcsGcp{
@@ -86,11 +87,11 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Success() {
 	)
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
-	s.NoError(err)
+	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
 	// ListMonitoringAssets mocked to return a single asset
-	s.Equal(1, len(results))
+	s.Len(results, 1)
 }
 
 func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Error() {
@@ -102,10 +103,10 @@ func (s *GcpMonitoringFetcherTestSuite) TestFetcher_Fetch_Error() {
 		provider:   mockInventoryService,
 	}
 
-	mockInventoryService.On("ListMonitoringAssets", mock.Anything).Return(nil, errors.New("api call error"))
+	mockInventoryService.EXPECT().ListMonitoringAssets(mock.Anything, mock.Anything).Return(nil, errors.New("api call error"))
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
-	s.Error(err)
+	s.Require().ErrorContains(err, "api call error")
 }
 
 func TestMonitoringResource_GetMetadata(t *testing.T) {
@@ -144,7 +145,7 @@ func TestMonitoringResource_GetMetadata(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := tt.resource.GetMetadata()
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}
