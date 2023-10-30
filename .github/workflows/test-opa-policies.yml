@@ -1,0 +1,35 @@
+name: Test OPA Policies
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test-rego-policies:
+    name: Test Rego Policies
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./security-policies
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Init Hermit
+        run: ../bin/hermit env -r >> $GITHUB_ENV
+
+      - name: OPA format
+        run: opa fmt ./bundle --fail=true --diff
+
+      - name: OPA format list failed files
+        run: opa fmt ./bundle --list
+
+      - name: OPA build
+        run: opa build -b ./bundle -e ./bundle/compliance
+
+      - name: OPA test
+        run: opa test -b ./bundle -v
+
+      - name: OPA check -strict
+        run: opa check --strict --bundle ./bundle

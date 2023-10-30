@@ -1,0 +1,75 @@
+metadata:
+  id: f44d0940-2e62-5993-9028-d3e63ae23960
+  name: Ensure Logging is enabled for HTTP(S) Load Balancer
+  profile_applicability: '* Level 2'
+  description: Logging enabled on a HTTPS Load Balancer will show all network traffic
+    and its destination.
+  rationale: Logging will allow you to view HTTPS network traffic to your web applications.
+  audit: |-
+    **From Google Cloud Console**
+
+    1. From Google Cloud home open the Navigation Menu in the top left.
+
+    2. Under the `Networking` heading select `Network services`.
+
+    3. Select the HTTPS load-balancer you wish to audit.
+
+    4. Select `Edit` then `Backend Configuration`. 
+
+    5. Select `Edit` on the corresponding backend service.
+
+    6. Ensure that `Enable Logging` is selected. Also ensure that `Sample Rate` is set to an appropriate level for your needs.
+
+    **From Google Cloud CLI**
+
+    7. Run the following command
+
+    ```
+    gcloud compute backend-services describe <serviceName>
+    ```
+
+    8. Ensure that ```enable-logging``` is enabled and ```sample rate``` is set to your desired level.
+  remediation: |-
+    **From Google Cloud Console**
+
+    1. From Google Cloud home open the Navigation Menu in the top left.
+
+    2. Under the `Networking` heading select `Network services`.
+
+    3. Select the HTTPS load-balancer you wish to audit.
+
+    4. Select `Edit` then `Backend Configuration`. 
+
+    5. Select `Edit` on the corresponding backend service.
+
+    6. Click `Enable Logging`.
+
+    7. Set `Sample Rate` to a desired value. This is a percentage as a decimal point. 1.0 is 100%.
+
+    **From Google Cloud CLI**
+
+    8. Run the following command
+
+    ```
+    gcloud compute backend-services update <serviceName> --region=REGION --enable-logging --logging-sample-rate=<percentageAsADecimal>
+    ```
+  impact: |-
+    On high use systems with a high percentage sample rate, the logging file may grow to high capacity in a short amount of time. Ensure that the sample rate is set appropriately so that storage costs are not exorbitant.
+  default_value: ''
+  references: |-
+    1. https://cloud.google.com/load-balancing/
+    2. https://cloud.google.com/load-balancing/docs/https/https-logging-monitoring#gcloud:-global-mode
+    3. https://cloud.google.com/sdk/gcloud/reference/compute/backend-services/
+  section: Logging and Monitoring
+  version: '1.0'
+  tags:
+  - CIS
+  - GCP
+  - CIS 2.16
+  - Logging and Monitoring
+  benchmark:
+    name: CIS Google Cloud Platform Foundation
+    version: v2.0.0
+    id: cis_gcp
+    rule_number: '2.16'
+    posture_type: cspm

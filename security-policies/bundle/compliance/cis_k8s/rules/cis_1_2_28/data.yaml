@@ -1,0 +1,45 @@
+metadata:
+  id: 328a73c3-011d-5827-ae86-4e323739e4e1
+  name: Ensure that the --client-ca-file argument is set as appropriate
+  profile_applicability: '* Level 1 - Master Node'
+  description: Setup TLS connection on the API server.
+  rationale: |-
+    API server communication contains sensitive parameters that should remain encrypted in transit.
+    Configure the API server to serve only HTTPS traffic.
+    If `--client-ca-file` argument is set, any request presenting a client certificate signed by one of the authorities in the `client-ca-file` is authenticated with an identity corresponding to the CommonName of the client certificate.
+  audit: |-
+    Run the following command on the Control Plane node:
+
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+
+    Verify that the `--client-ca-file` argument exists and it is set as appropriate.
+  remediation: |-
+    Follow the Kubernetes documentation and set up the TLS connection on the apiserver.
+    Then, edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` on the master node and set the client certificate authority file.
+
+    ```
+    --client-ca-file=<path/to/client-ca-file>
+    ```
+  impact: TLS and client certificate authentication must be configured for your Kubernetes
+    cluster deployment.
+  default_value: |
+    By default, `--client-ca-file` argument is not set.
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. http://rootsquash.com/2016/05/10/securing-the-kubernetes-api/
+    3. https://github.com/kelseyhightower/docker-kubernetes-tls-guide
+  section: API Server
+  version: '1.0'
+  tags:
+  - CIS
+  - Kubernetes
+  - CIS 1.2.28
+  - API Server
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.1
+    id: cis_k8s
+    rule_number: 1.2.28
+    posture_type: kspm

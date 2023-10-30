@@ -1,0 +1,88 @@
+metadata:
+  id: fb4368ab-cdee-5188-814c-a8197411ba22
+  name: Ensure That Cloud Storage Bucket Is Not Anonymously or Publicly Accessible
+  profile_applicability: '* Level 1'
+  description: |-
+    It is recommended that IAM policy on Cloud Storage bucket does not allows anonymous or public access.
+  rationale: |-
+    Allowing anonymous or public access grants permissions to anyone to access bucket content.
+    Such access might not be desired if you are storing any sensitive data.
+    Hence, ensure that anonymous or public access to a bucket is not allowed.
+  audit: |-
+    **From Google Cloud Console**
+
+    1. Go to `Storage browser` by visiting [https://console.cloud.google.com/storage/browser](https://console.cloud.google.com/storage/browser).
+    2. Click on each bucket name to go to its `Bucket details` page.
+    3. Click on the `Permissions` tab.
+    4. Ensure that `allUsers` and `allAuthenticatedUsers` are not in the `Members` list.
+
+    **From Google Cloud CLI**
+
+    5. List all buckets in a project
+
+    ```
+    gsutil ls
+    ```
+
+    6. Check the IAM Policy for each bucket:
+
+    ```
+    gsutil iam get gs://BUCKET_NAME
+    ```
+
+    No role should contain `allUsers` and/or `allAuthenticatedUsers` as a member.
+
+    **Using Rest API**
+
+    7. List all buckets in a project
+
+    ```
+    Get https://www.googleapis.com/storage/v1/b?project=<ProjectName>
+    ```
+
+    8. Check the IAM Policy for each bucket
+
+    ```
+    GET https://www.googleapis.com/storage/v1/b/<bucketName>/iam
+    ```
+
+    No role should contain `allUsers` and/or `allAuthenticatedUsers` as a member.
+  remediation: |-
+    **From Google Cloud Console**
+
+    1. Go to `Storage browser` by visiting [https://console.cloud.google.com/storage/browser](https://console.cloud.google.com/storage/browser).
+    2. Click on the bucket name to go to its `Bucket details` page.
+    3. Click on the `Permissions` tab. 
+    4. Click `Delete` button in front of `allUsers` and `allAuthenticatedUsers` to remove that particular role assignment.
+
+    **From Google Cloud CLI**
+
+    Remove `allUsers` and `allAuthenticatedUsers` access.
+    ```
+    gsutil iam ch -d allUsers gs://BUCKET_NAME
+    gsutil iam ch -d allAuthenticatedUsers gs://BUCKET_NAME
+    ```
+
+    **Prevention:**
+
+    You can prevent Storage buckets from becoming publicly accessible by setting up the `Domain restricted sharing` organization policy at:[ https://console.cloud.google.com/iam-admin/orgpolicies/iam-allowedPolicyMemberDomains ](https://console.cloud.google.com/iam-admin/orgpolicies/iam-allowedPolicyMemberDomains).
+  impact: |-
+    No storage buckets would be publicly accessible. You would have to explicitly administer bucket access.
+  default_value: ''
+  references: |-
+    1. https://cloud.google.com/storage/docs/access-control/iam-reference
+    2. https://cloud.google.com/storage/docs/access-control/making-data-public
+    3. https://cloud.google.com/storage/docs/gsutil/commands/iam
+  section: Storage
+  version: '1.0'
+  tags:
+  - CIS
+  - GCP
+  - CIS 5.1
+  - Storage
+  benchmark:
+    name: CIS Google Cloud Platform Foundation
+    version: v2.0.0
+    id: cis_gcp
+    rule_number: '5.1'
+    posture_type: cspm

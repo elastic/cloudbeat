@@ -1,0 +1,75 @@
+metadata:
+  id: 64d37675-473f-5edc-882e-5b8b85b789c3
+  name: Ensure That the Cloud SQL Database Instance Requires All Incoming Connections
+    To Use SSL
+  profile_applicability: '* Level 1'
+  description: It is recommended to enforce all incoming connections to SQL database
+    instance to use SSL.
+  rationale: |-
+    SQL database connections if successfully trapped (MITM); can reveal sensitive data like credentials, database queries, query outputs etc.
+    For security, it is recommended to always use SSL encryption when connecting to your instance.
+    This recommendation is applicable for Postgresql, MySql generation 1, MySql generation 2 and SQL Server 2017 instances.
+  audit: |-
+    **From Google Cloud Console**
+
+    1. Go to [https://console.cloud.google.com/sql/instances](https://console.cloud.google.com/sql/instances).
+
+    2. Click on an instance name to see its configuration overview.
+
+    3. In the left-side panel, select `Connections`.
+
+    4. In the `SSL connections` section, ensure that `Only secured connections are allowed to connect to this instance.`.
+
+    **From Google Cloud CLI**
+
+    5. Get the detailed configuration for every SQL database instance using the following command:
+
+    ```
+    gcloud sql instances list --format=json
+    ```
+
+    Ensure that section `settings: ipConfiguration` has the parameter `requireSsl` set to `true`.
+  remediation: |-
+    **From Google Cloud Console**
+
+    1. Go to [https://console.cloud.google.com/sql/instances](https://console.cloud.google.com/sql/instances).
+
+    2. Click on an instance name to see its configuration overview.
+
+    3. In the left-side panel, select `Connections`.
+
+    4. In the `SSL connections` section, click `Allow only SSL connections`.
+
+    5. Under `Configure SSL server certificates` click `Create new certificate`.
+
+    6. Under `Configure SSL client certificates` click `Create a client certificate`. 
+
+    7. Follow the instructions shown to learn how to connect to your instance. 
+
+    **From Google Cloud CLI**
+
+    To enforce SSL encryption for an instance run the command:
+
+    ```
+    gcloud sql instances patch <INSTANCE_NAME> --require-ssl
+    ```
+
+    Note:
+    `RESTART` is required for type MySQL Generation 1 Instances (`backendType: FIRST_GEN`) to get this configuration in effect.
+  impact: |-
+    After enforcing SSL connection, existing client will not be able to communicate with SQL server unless configured with appropriate client-certificates to communicate to SQL database instance.
+  default_value: ''
+  references: 1. https://cloud.google.com/sql/docs/postgres/configure-ssl-instance/
+  section: Cloud SQL Database Services
+  version: '1.0'
+  tags:
+  - CIS
+  - GCP
+  - CIS 6.4
+  - Cloud SQL Database Services
+  benchmark:
+    name: CIS Google Cloud Platform Foundation
+    version: v2.0.0
+    id: cis_gcp
+    rule_number: '6.4'
+    posture_type: cspm
