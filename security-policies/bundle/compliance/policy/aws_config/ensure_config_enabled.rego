@@ -1,6 +1,6 @@
 package compliance.policy.aws_config.ensure_config_enabled
 
-import data.compliance.lib.common as common
+import data.compliance.lib.common
 import data.compliance.policy.aws_config.data_adapter
 import future.keywords.every
 

@@ -48,13 +48,13 @@ analyzers = input.resource.Analyzers
 
 analyzer_regions = input.resource.Regions
 
-used_active_access_keys = {access_key |
-	access_key = iam_user.access_keys[_]
+used_active_access_keys[access_key] {
+	access_key := iam_user.access_keys[_]
 	access_key.active
 	access_key.has_used
 }
 
-unused_active_access_keys = {access_key |
+unused_active_access_keys[access_key] {
 	access_key = iam_user.access_keys[_]
 	access_key.active
 	not access_key.has_used

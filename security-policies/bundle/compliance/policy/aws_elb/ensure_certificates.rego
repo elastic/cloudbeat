@@ -1,5 +1,7 @@
 package compliance.policy.aws_elb.ensure_certificates
 
+import future.keywords.every
+
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.aws_elb.data_adapter
 
@@ -12,7 +14,13 @@ rule_evaluation = false {
 
 # Verify that all listeners use https protocoal
 rule_evaluation = false {
-	data_adapter.listener_descriptions[_].Listener.InstanceProtocol != "HTTPS"
+	not all_https
+}
+
+all_https {
+	every description in data_adapter.listener_descriptions {
+		description.Listener.InstanceProtocol == "HTTPS"
+	}
 }
 
 finding = result {

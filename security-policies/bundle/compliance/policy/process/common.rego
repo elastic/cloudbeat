@@ -1,10 +1,12 @@
 package compliance.policy.process.common
 
+import future.keywords.in
+
 # checks if argument contains value (argument format is csv)
 arg_values_contains(arguments, key, value) {
 	argument := arguments[key]
 	values := split(argument, ",")
-	value == values[_]
+	value in values
 } else = false
 
 # splits key value string by first occurrence of =

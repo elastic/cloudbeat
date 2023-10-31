@@ -13,4 +13,5 @@ finding = result {
 		common.calculate_result(audit.is_private_connections),
 		{"Resource": data_adapter.resource},
 	)
+	print(common.calculate_result(audit.is_private_connections))
 }

@@ -19,6 +19,11 @@ jobs:
       - name: Init Hermit
         run: ../bin/hermit env -r >> $GITHUB_ENV
 
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: 0.53.1
+
       - name: OPA format
         run: opa fmt ./bundle --fail=true --diff
 
@@ -33,3 +38,11 @@ jobs:
 
       - name: OPA check -strict
         run: opa check --strict --bundle ./bundle
+
+      - name: Set up Regal
+        uses: StyraInc/setup-regal@v0.2.0
+        with:
+          version: v0.11.0
+
+      - name: Lint Rego
+        run: regal lint --format github bundle

@@ -1,5 +1,7 @@
 package compliance.policy.process.ensure_arguments_and_config
 
+import future.keywords.in
+
 import data.benchmark_data_adapter
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.process.data_adapter
@@ -47,7 +49,7 @@ process_arg_not_key_value(entity, key, value) {
 }
 
 process_contains_key(entity) {
-	lib_common.contains_key(process_args, entity)
+	entity in object.keys(process_args)
 }
 
 not_process_key_comparison(entity, variable, value) {
