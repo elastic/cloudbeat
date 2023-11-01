@@ -1,0 +1,65 @@
+metadata:
+  id: 449bf7bf-8070-580f-a3aa-66bc7f94a721
+  name: Ensure That 'Firewalls & Networks' Is Limited to Use Selected Networks Instead
+    of All Networks
+  profile_applicability: '* Level 2'
+  description: Limiting your Cosmos DB to only communicate on whitelisted networks
+    lowers its attack footprint.
+  rationale: |-
+    Selecting certain networks for your Cosmos DB to communicate restricts the number of networks including the internet that can interact with what is stored within the database.
+  audit: |-
+    **From Azure Portal**
+
+    1. Open the portal menu.
+    2. Select the Azure Cosmos DB blade
+    3. Select a Cosmos DB to audit.
+    4. Select `Networking`.
+    5. Under `Public network access`, ensure `Selected networks` is selected.
+    6. Under `Virtual networks`, ensure appropriate virtual networks are configured.
+
+    **From Azure CLI**
+
+    `az cosmosdb database list`
+
+    `az cosmosdb show <database id>`
+
+    `isVirtualNetworkFilterEnabled` should be set to `true`
+
+    **From PowerShell**
+  remediation: |-
+    **From Azure Portal**
+
+    1. Open the portal menu.
+    2. Select the Azure Cosmos DB blade.
+    3. Select a Cosmos DB account to audit.
+    4. Select `Networking`.
+    5. Under `Public network access`, select `Selected networks`.
+    6. Under `Virtual networks`, select `+ Add existing virtual network` or `+ Add a new virtual network`.
+    7. For existing networks, select subscription, virtual network, subnet and click `Add`. For new networks, provide a name, update the default values if required, and click `Create`.
+    8. Click `Save`.
+
+    **From Azure CLI**
+
+    **From PowerShell**
+  impact: Failure to whitelist the correct networks will result in a connection loss.
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-configure-private-endpoints
+    2. https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-configure-vnet-service-endpoint
+    3. https://docs.microsoft.com/en-us/cli/azure/cosmosdb?view=azure-cli-latest#az-cosmosdb-show
+    4. https://docs.microsoft.com/en-us/cli/azure/cosmosdb/database?view=azure-cli-latest#az-cosmosdb-database-list
+    5. https://docs.microsoft.com/en-us/powershell/module/az.cosmosdb/?view=azps-8.1.0
+    6. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-2-secure-cloud-services-with-network-controls
+  section: Cosmos DB
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 4.5.1
+  - Cosmos DB
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: 4.5.1
+    posture_type: cspm

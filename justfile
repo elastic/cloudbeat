@@ -4,7 +4,6 @@ kustomizeVanillaOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla"
 kustomizeVanillaNoCertOverlay := "deploy/kustomize/overlays/cloudbeat-vanilla-nocert"
 kustomizeEksOverlay := "deploy/kustomize/overlays/cloudbeat-eks"
 kustomizeAwsOverlay := "deploy/kustomize/overlays/cloudbeat-aws"
-cspPoliciesPkg := "github.com/elastic/csp-security-policies"
 hermitActivationScript := "bin/activate-hermit"
 
 # use env var if available

@@ -1,0 +1,42 @@
+metadata:
+  id: b0a70444-c719-5772-a8c1-2cd72578f8ee
+  name: Ensure that the --profiling argument is set to false
+  profile_applicability: '* Level 1 - Master Node'
+  description: Disable profiling, if not needed.
+  rationale: |-
+    Profiling allows for the identification of specific performance bottlenecks.
+    It generates a significant amount of program data that could potentially be exploited to uncover system and program details.
+    If you are not experiencing any bottlenecks and do not need the profiler for troubleshooting purposes, it is recommended to turn it off to reduce the potential attack surface.
+  audit: |-
+    Run the following command on the Control Plane node:
+
+    ```
+    ps -ef | grep kube-apiserver
+    ```
+
+    Verify that the `--profiling` argument is set to `false`.
+  remediation: |-
+    Edit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` on the Control Plane node and set the below parameter.
+
+    ```
+    --profiling=false
+    ```
+  impact: Profiling information would not be available.
+  default_value: |
+    By default, profiling is enabled.
+  references: |-
+    1. https://kubernetes.io/docs/admin/kube-apiserver/
+    2. https://github.com/kubernetes/community/blob/master/contributors/devel/profiling.md
+  section: API Server
+  version: '1.0'
+  tags:
+  - CIS
+  - Kubernetes
+  - CIS 1.2.18
+  - API Server
+  benchmark:
+    name: CIS Kubernetes V1.23
+    version: v1.0.1
+    id: cis_k8s
+    rule_number: 1.2.18
+    posture_type: kspm
