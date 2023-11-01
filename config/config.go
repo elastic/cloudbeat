@@ -97,8 +97,6 @@ type AzureClientOpt struct {
 	ClientPassword            string `config:"client_password"`
 	ClientCertificatePath     string `config:"client_certificate_path"`
 	ClientCertificatePassword string `config:"client_certificate_password"`
-	Username                  string `config:"username"`
-	Password                  string `config:"password"`
 }
 
 const (
