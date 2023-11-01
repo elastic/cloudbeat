@@ -236,6 +236,24 @@ jobs:
         run: |
           . ./set_env.sh && ./deploy.sh
 
+      - name: Install CSPM Azure integration
+        id: cspm-azure-integration
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/install_cspm_azure_integration.py
+
+      - id: azure-auth
+        name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy CSPM Azure agent
+        id: cspm-azure-agent
+        working-directory: deploy/azure
+        run: |
+          az deployment sub create --location EastUS --template-file azureARMTemplate.json --parameters @arm_parameters.json
+
       - name: Install D4C integration
         id: kspm-d4c
         working-directory: ${{ env.WORKING_DIR }}/fleet_api
@@ -309,6 +327,16 @@ jobs:
         run: |
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
+
+      - name: Cleanup Environment CSPM Azure agent
+        id: cspm-azure-agent-destroy
+        if: github.event.inputs.cleanup-env == 'true'
+        run: |
+          groups=$(az group list --query "[?starts_with(name, '${{ env.ENV_PREFIX }}')].name" -o tsv | grep -v '^${{ env.ENV_IGNORE_PREFIX }}')
+          for group in $groups
+          do
+            az group delete --resource-group $group --yes
+          done
 
       - name: Cleanup Environment
         if: github.event.inputs.cleanup-env == 'true'
