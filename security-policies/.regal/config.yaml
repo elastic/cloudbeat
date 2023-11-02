@@ -28,8 +28,5 @@ rules:
   testing:
     file-missing-test-suffix:
       level: ignore
-    print-or-trace-call:
-      # unsure if these are intentional
-      level: ignore
     test-outside-test-package:
       level: ignore

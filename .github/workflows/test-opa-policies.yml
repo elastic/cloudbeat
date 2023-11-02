@@ -19,11 +19,6 @@ jobs:
       - name: Init Hermit
         run: ../bin/hermit env -r >> $GITHUB_ENV
 
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v2
-        with:
-          version: 0.53.1
-
       - name: OPA format
         run: opa fmt ./bundle --fail=true --diff
 
