@@ -6,13 +6,10 @@ import data.compliance.policy.process.data_adapter
 
 process_args := benchmark_data_adapter.process_args
 
-finding(entities) = result {
-	# set result
-	result := lib_common.generate_result_without_expected(
-		lib_common.calculate_result(rule_evaluation(entities)),
-		{"process_args": process_args},
-	)
-}
+finding(entities) := lib_common.generate_result_without_expected(
+	lib_common.calculate_result(rule_evaluation(entities)),
+	{"process_args": process_args},
+)
 
 # TODO: Change index access to cycle
 rule_evaluation(entities) {

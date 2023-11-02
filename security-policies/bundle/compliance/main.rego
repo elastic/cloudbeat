@@ -7,6 +7,8 @@ import data.compliance.lib.common
 # output is findings
 resource = input.resource
 
+# METADATA
+# entrypoint: true
 findings = f {
 	input.benchmark
 

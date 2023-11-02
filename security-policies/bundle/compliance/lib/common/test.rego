@@ -33,36 +33,6 @@ test_ensure_array_from_string {
 	ensure_array("a") == ["a"]
 }
 
-test_array_contains {
-	array := ["a", "b", "c"]
-	key := "c"
-	array_contains(array, key)
-}
-
-test_array_contains_not_contains {
-	array := ["a", "b", "c"]
-	key := "d"
-	assert.is_false(array_contains(array, key))
-}
-
-test_array_contains_not_contains_substring {
-	array := ["a", "b", "ccc"]
-	key := "c"
-	assert.is_false(array_contains(array, key))
-}
-
-test_contains_key {
-	array := {"a": "aa", "b": "bb"}
-	key := "a"
-	contains_key(array, key)
-}
-
-test_contains_key_not_contains {
-	array := {"a": "aa", "b": "bb"}
-	key := "c"
-	assert.is_false(contains_key(array, key))
-}
-
 test_greater_or_equal_greater {
 	value := 10
 	minimum := 9

@@ -11,7 +11,6 @@ test_violation {
 
 test_pass {
 	eval_pass with input as rule_input("--feature-gates=RotateKubeletServerCertificate=true")
-	true
 }
 
 test_not_evaluated {

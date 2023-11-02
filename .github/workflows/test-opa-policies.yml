@@ -33,3 +33,6 @@ jobs:
 
       - name: OPA check -strict
         run: opa check --strict --bundle ./bundle
+
+      - name: Lint Rego
+        run: regal lint --format github bundle
