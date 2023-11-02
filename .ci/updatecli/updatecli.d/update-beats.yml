@@ -1,6 +1,6 @@
 ---
 name: Bump beats
-pipelineid: 'updatecli-update-beats-{{ requiredEnv "BRANCH_NAME" }}'
+pipelineid: 'updatecli-update-beats-{{ .github.branch }}'
 
 scms:
   default:
@@ -8,11 +8,11 @@ scms:
     spec:
       user: '{{ requiredEnv "GIT_USER" }}'
       email: '{{ requiredEnv "GIT_EMAIL" }}'
-      owner: elastic
-      repository: cloudbeat
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
       token: '{{ requiredEnv "GITHUB_TOKEN" }}'
       username: '{{ requiredEnv "GIT_USER" }}'
-      branch: '{{ requiredEnv "BRANCH_NAME" }}'
+      branch: "{{ .github.branch }}"
 
 actions:
   default:
@@ -37,7 +37,7 @@ sources:
   beats:
     kind: json
     spec:
-      file: 'https://api.github.com/repos/elastic/beats/commits?sha={{ requiredEnv "BRANCH_NAME" }}&per_page=1'
+      file: 'https://api.github.com/repos/elastic/beats/commits?sha={{ .github.branch }}&per_page=1'
       key: '.[0].sha'
     transformers:
       # substring 12 chars so it works for the condition

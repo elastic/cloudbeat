@@ -7,11 +7,11 @@ scms:
     spec:
       user: '{{ requiredEnv "GIT_USER" }}'
       email: '{{ requiredEnv "GIT_EMAIL" }}'
-      owner: elastic
-      repository: cloudbeat
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
       token: '{{ requiredEnv "GITHUB_TOKEN" }}'
       username: '{{ requiredEnv "GIT_USER" }}'
-      branch: main
+      branch: "{{ .github.branch }}"
 
 actions:
   cloudbeat:
