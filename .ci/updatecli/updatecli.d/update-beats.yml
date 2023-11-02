@@ -33,6 +33,8 @@ actions:
         *Changeset*
         * https://github.com/elastic/beats/commit/{{ source "beats" }}
 
+        Generated automatically with {{ requiredEnv "JOB_URL" }}
+
 sources:
   beats:
     kind: json

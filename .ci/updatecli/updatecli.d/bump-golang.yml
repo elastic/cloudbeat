@@ -26,6 +26,14 @@ actions:
         - backport-skip
         - go
       title: '[Automation] Bump Golang version to {{ source "latestGoVersion" }}'
+      description: |-
+        ### What
+        Bump go release version with the latest release.
+
+        ### Further details
+        See [changelog](https://github.com/golang/go/issues?q=milestone%3AGo{{ source "latestGoVersion" }}+label%3ACherryPickApproved) for {{ source "latestGoVersion" }}
+
+        Generated automatically with {{ requiredEnv "JOB_URL" }}
 
 sources:
   minor:
