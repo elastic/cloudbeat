@@ -24,3 +24,4 @@ jobs:
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
           pipeline: ./.ci/updatecli/updatecli.d/bump-golang.yml
           values: ./.ci/updatecli/values.yml
+          notifyIfFailure: false
