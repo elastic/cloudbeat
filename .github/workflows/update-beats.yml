@@ -1,5 +1,4 @@
----
-name: bump-golang
+name: update-beats
 
 on:
   workflow_dispatch:
@@ -17,11 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
       - uses: elastic/apm-pipeline-library/.github/actions/updatecli@current
         with:
           vaultUrl: ${{ secrets.VAULT_ADDR }}
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          pipeline: ./.ci/updatecli/updatecli.d/bump-golang.yml
+          pipeline: ./.ci/updatecli/updatecli.d/update-beats.yml
           values: ./.ci/updatecli/values.yml
           notifyIfFailure: false
