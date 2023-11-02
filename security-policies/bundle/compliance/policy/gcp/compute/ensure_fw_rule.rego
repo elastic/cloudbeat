@@ -1,7 +1,6 @@
 package compliance.policy.gcp.compute.ensure_fw_rule
 
 import data.compliance.lib.assert
-import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
 import future.keywords.every
 import future.keywords.if
@@ -13,7 +12,7 @@ is_valid_fw_rule(port) = false if {
 	data_adapter.resource.data.direction == "INGRESS"
 
 	some action in data_adapter.resource.data.allowed
-	common.array_contains(["tcp", "all"], action.IPProtocol)
+	action.IPProtocol in {"tcp", "all"}
 	is_port_effective(port, object.get(action, ["ports"], []))
 } else = true
 

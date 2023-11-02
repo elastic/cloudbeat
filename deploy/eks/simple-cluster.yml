@@ -6,6 +6,11 @@ metadata:
   name:
   region: eu-west-1
   version: "1.23"
+  tags:
+    division: engineering
+    org: security
+    team: cloud-security
+    project: eks-simple-cluster # change this to reflect your project
 
 vpc:
   # Don't change vpc settings

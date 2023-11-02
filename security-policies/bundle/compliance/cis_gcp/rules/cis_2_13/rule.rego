@@ -5,7 +5,7 @@ import data.compliance.policy.gcp.data_adapter
 import future.keywords.if
 import future.keywords.in
 
-#Ensure Cloud Asset Inventory Is Enabled
+# Ensure Cloud Asset Inventory Is Enabled
 finding = result if {
 	data_adapter.is_services_usage
 

@@ -22,13 +22,11 @@ file_permission_match_exact(filemode, user, group, other) {
 } else = false
 
 # return a list of file premission [user, group, other]
-parse_permission(filemode) = permissions {
-	# cast to numbers
-	permissions := [to_number(p) | p = split(filemode, "")[_]]
-}
+# cast to numbers
+parse_permission(filemode) := [to_number(p) | p := split(filemode, "")[_]]
 
 check_permissions(permissions, max_permissions) {
-	assert.all_true([r | r = bits.and(permissions[p], bits.negate(max_permissions[p])) == 0])
+	assert.all_true([r | some p; r = bits.and(permissions[p], bits.negate(max_permissions[p])) == 0])
 } else = false
 
 # check if file is in path

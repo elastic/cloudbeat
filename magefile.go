@@ -25,7 +25,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"os/signal"
 	"path/filepath"
 	"strings"
 	"time"
@@ -347,14 +346,6 @@ func checkoutBranch(wt *git.Worktree, branch string) error {
 	})
 }
 
-func BuildOpaBundle() (err error) {
-	// Override default SIGINT behaviour which does not allow deferred functions to be called
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-
-	if err = sh.Run("bin/opa", "build", "-b", "security-policies/bundle", "-e", "security-policies/bundle/compliance"); err != nil {
-		return err
-	}
-
-	return nil
+func BuildOpaBundle() error {
+	return sh.Run("bin/opa", "build", "-b", "security-policies/bundle", "-e", "security-policies/bundle/compliance")
 }

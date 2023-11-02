@@ -36,10 +36,6 @@ ensure_array(value) = [value] {
 	not is_array(value)
 } else = value
 
-array_contains(array, key) {
-	array[_] == key
-} else = false
-
 contains_key(object, key) {
 	object[key]
 } else = false
@@ -102,17 +98,13 @@ ranges_gte(ranges, value) {
 	not ranges_smaller_than(ranges, value)
 }
 
-generate_result(evaluation, evidence, expected) = result {
-	result := {
-		"evaluation": evaluation,
-		"evidence": evidence,
-		"expected": expected,
-	}
+generate_result(evaluation, evidence, expected) := {
+	"evaluation": evaluation,
+	"evidence": evidence,
+	"expected": expected,
 }
 
-generate_result_without_expected(evaluation, evidence) = result {
-	result := {
-		"evaluation": evaluation,
-		"evidence": evidence,
-	}
+generate_result_without_expected(evaluation, evidence) := {
+	"evaluation": evaluation,
+	"evidence": evidence,
 }
