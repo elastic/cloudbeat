@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
 jobs:
   bump:
     runs-on: ubuntu-latest
@@ -19,4 +22,6 @@ jobs:
           vaultUrl: ${{ secrets.VAULT_ADDR }}
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          pipeline: ./.ci/bump-golang.yml
+          pipeline: ./.ci/updatecli/updatecli.d/bump-golang.yml
+          values: ./.ci/updatecli/values.yml
+          notifyIfFailure: false
