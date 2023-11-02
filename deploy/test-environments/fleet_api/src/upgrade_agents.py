@@ -156,7 +156,7 @@ def main():
         sys.exit(1)
 
     linux_policies_list = update_linux_policies(download_source_id)
-    time.sleep(10)  # To ensure that policies updated
+    time.sleep(180)  # To ensure that policies updated
     agents = get_agents(cfg=cnfg.elk_config)
     linux_agent_ids = [agent.id for agent in agents if agent.policy_id in linux_policies_list]
     for agent_id in linux_agent_ids:
