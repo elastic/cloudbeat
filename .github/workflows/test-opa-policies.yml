@@ -34,10 +34,5 @@ jobs:
       - name: OPA check -strict
         run: opa check --strict --bundle ./bundle
 
-      - name: Set up Regal
-        uses: StyraInc/setup-regal@v0.2.0
-        with:
-          version: v0.11.0
-
       - name: Lint Rego
         run: regal lint --format github bundle
