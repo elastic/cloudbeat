@@ -1,5 +1,6 @@
 ---
-name: Bump golang-version to latest version
+name: Update Go Version
+pipelineid: 'updatecli-golang-{{ .github.branch }}'
 
 scms:
   default:
@@ -15,6 +16,7 @@ scms:
 
 actions:
   cloudbeat:
+    title: '[updatecli] Bump Golang version to {{ source "latestGoVersion" }}'
     kind: github/pullrequest
     scmid: default
     sourceid: latestGoVersion
@@ -25,7 +27,6 @@ actions:
         - dependency
         - backport-skip
         - go
-      title: '[Automation] Bump Golang version to {{ source "latestGoVersion" }}'
       description: |-
         ### What
         Bump go release version with the latest release.
