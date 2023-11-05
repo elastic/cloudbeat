@@ -196,7 +196,7 @@ def get_artifact_server(version: str, is_short_url: bool = False) -> str:
 
     Args:
         elastic_version (str): The version of Elastic.
-        is_snapshot_url (bool, optional): Indicates whether to use the short artifact URL.
+        is_short_url (bool, optional): Indicates whether to use the short artifact URL.
                                           Defaults to False.
 
     Returns:

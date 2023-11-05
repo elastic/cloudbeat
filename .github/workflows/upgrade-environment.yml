@@ -10,9 +10,9 @@ on:
         description: |
           Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
         required: true
-      elk-stack-version:
+      target-elk-stack-version:
         required: true
-        description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
+        description: "Target version of the ELK stack: For BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
         default: "8.11.0"
         type: string
       docker-image-override:
@@ -25,7 +25,7 @@ env:
   AWS_REGION: "eu-west-1"
   WORKING_DIR: deploy/test-environments
   FLEET_API_DIR: fleet_api/src
-  TF_VAR_stack_version: ${{ inputs.elk-stack-version }}
+  TF_VAR_stack_version: ${{ inputs.target-elk-stack-version }}
   TF_VAR_ess_region: gcp-us-west2
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
   DOCKER_IMAGE: ${{ inputs.docker-image-override }}
@@ -40,7 +40,7 @@ jobs:
       - name: Set Previous Version
         id: set-previous-version
         run: |
-          VERSION="${{ inputs.elk-stack-version }}"
+          VERSION="${{ inputs.target-elk-stack-version }}"
 
           # Extract the major and minor versions
           MAJOR_VERSION=$(echo $VERSION | cut -d'.' -f1)
@@ -187,7 +187,7 @@ jobs:
       - name: Set Docker Image version
         if: ${{ ! inputs.docker-image-override }}
         env:
-          VERSION: 'docker.elastic.co/beats/elastic-agent:${{ inputs.elk-stack-version }}'
+          VERSION: 'docker.elastic.co/beats/elastic-agent:${{ inputs.target-elk-stack-version }}'
         run: |
           echo "DOCKER_IMAGE=${{ env.VERSION }}" >> $GITHUB_ENV
 
@@ -215,7 +215,7 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}/${{ env.FLEET_API_DIR }}
         env:
           CNVM_STACK_NAME: ${{ needs.deploy.outputs.cnvm-stack-name }}
-          STACK_VERSION: ${{ inputs.elk-stack-version }}
+          STACK_VERSION: ${{ inputs.target-elk-stack-version }}
         run: |
           poetry run python upgrade_agents.py
 
@@ -223,7 +223,7 @@ jobs:
         if: success()
         working-directory: ./tests
         env:
-          STACK_VERSION: ${{ inputs.elk-stack-version }}
+          STACK_VERSION: ${{ inputs.target-elk-stack-version }}
           USE_K8S: false
         run: |
           poetry install
