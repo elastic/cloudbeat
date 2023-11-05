@@ -45,7 +45,7 @@ def update_cloudformation_stack(cfg: Munch):
     Update an AWS CloudFormation stack with the provided configuration.
 
     Args:
-        cnfg (Munch): A configuration object containing the following attributes:
+        cfg (Munch): A configuration object containing the following attributes:
             - stack_name (str): The name of the CloudFormation stack to update.
             - template (str): The URL or S3 path to the CloudFormation template.
             - elastic_agent_version (str): The Elastic Agent version to set as a parameter.
