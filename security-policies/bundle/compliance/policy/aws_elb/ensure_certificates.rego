@@ -1,21 +1,30 @@
 package compliance.policy.aws_elb.ensure_certificates
 
+import future.keywords.every
+
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.aws_elb.data_adapter
 
-default rule_evaluation = true
+default rule_evaluation := false
+
+rule_evaluation {
+	all_https
+	not any_null_certificate
+}
 
 # Verify that all listeners has an SSL Certificate
-rule_evaluation = false {
+any_null_certificate {
 	data_adapter.listener_descriptions[_].Listener.SSLCertificateId == null
 }
 
 # Verify that all listeners use https protocoal
-rule_evaluation = false {
-	data_adapter.listener_descriptions[_].Listener.InstanceProtocol != "HTTPS"
+all_https {
+	every description in data_adapter.listener_descriptions {
+		description.Listener.InstanceProtocol == "HTTPS"
+	}
 }
 
-finding = result {
+finding := result {
 	data_adapter.is_aws_elb
 
 	result := lib_common.generate_result_without_expected(

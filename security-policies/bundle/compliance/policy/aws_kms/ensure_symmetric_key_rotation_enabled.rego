@@ -1,6 +1,6 @@
 package compliance.policy.aws_kms.ensure_symmetric_key_rotation_enabled
 
-import data.compliance.lib.common as common
+import data.compliance.lib.common
 import data.compliance.policy.aws_kms.data_adapter
 
 default rule_evaluation = false

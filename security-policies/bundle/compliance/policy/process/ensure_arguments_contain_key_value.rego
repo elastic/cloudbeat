@@ -7,16 +7,14 @@ import data.compliance.policy.process.data_adapter
 
 process_args := benchmark_data_adapter.process_args
 
-finding(rule_evaluation) = result {
-	# set result
-	result := lib_common.generate_result_without_expected(
-		lib_common.calculate_result(rule_evaluation),
-		{"process_args": process_args},
-	)
-}
+finding(rule_evaluation) := lib_common.generate_result_without_expected(
+	lib_common.calculate_result(rule_evaluation),
+	{"process_args": process_args},
+)
 
 not_contains(entity, value) := assert.is_false(lib_common.contains_key_with_value(process_args, entity, value))
 
+# regal ignore:rule-shadows-builtin
 contains(entity, value) := lib_common.contains_key_with_value(process_args, entity, value)
 
 apiserver_filter := data_adapter.is_kube_apiserver

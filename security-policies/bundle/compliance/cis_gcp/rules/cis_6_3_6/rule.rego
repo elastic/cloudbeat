@@ -16,4 +16,4 @@ finding = result {
 	)
 }
 
-is_flag_configured_as_expected := audit.is_flag_configured_as_expected("3625", ["on"]) #trace flag
+is_flag_configured_as_expected := audit.is_flag_configured_as_expected("3625", ["on"]) # trace flag
