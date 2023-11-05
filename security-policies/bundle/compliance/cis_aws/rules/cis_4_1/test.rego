@@ -4,6 +4,7 @@ import data.cis_aws.test_data
 import data.compliance.cis_aws.data_adapter
 import data.lib.test
 
+# regal ignore:rule-length
 test_violation {
 	# No items
 	eval_fail with input as rule_input([])

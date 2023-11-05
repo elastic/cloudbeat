@@ -6,7 +6,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Ensure IAM policies that allow full "*:*" administrative privileges are not attached
-finding = result if {
+finding := result if {
 	# filter
 	data_adapter.is_iam_policy
 
@@ -20,6 +20,6 @@ finding = result if {
 policy_is_permissive if {
 	some statement in data_adapter.policy_document.Statement
 	statement.Effect == "Allow"
-	common.array_contains(common.ensure_array(statement.Action), "*")
-	common.array_contains(common.ensure_array(statement.Resource), "*")
+	"*" in common.ensure_array(statement.Action)
+	"*" in common.ensure_array(statement.Resource)
 } else = false

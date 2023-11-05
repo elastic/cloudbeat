@@ -49,6 +49,7 @@ test_violation {
 	])
 }
 
+# regal ignore:rule-length
 test_pass {
 	# No statements, no problems
 	eval_pass with input as generate_input([])

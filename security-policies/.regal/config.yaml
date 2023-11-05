@@ -1,0 +1,32 @@
+rules:
+  idiomatic:
+    use-some-for-output-vars:
+      level: ignore
+  imports:
+    prefer-package-imports:
+      level: ignore
+  style:
+    avoid-get-and-list-prefix:
+      level: ignore
+    default-over-else:
+      level: ignore
+    external-reference:
+      level: ignore
+    line-length:
+      level: ignore
+    prefer-some-in-iteration:
+      level: ignore
+    prefer-snake-case:
+      level: ignore
+    rule-length:
+      level: error
+      max-rule-length: 50
+    todo-comment:
+      level: ignore
+    use-assignment-operator:
+      level: ignore
+  testing:
+    file-missing-test-suffix:
+      level: ignore
+    test-outside-test-package:
+      level: ignore

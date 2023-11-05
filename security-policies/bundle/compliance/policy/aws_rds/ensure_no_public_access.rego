@@ -2,7 +2,8 @@ package compliance.policy.aws_rds.ensure_no_public_access
 
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.aws_rds.data_adapter
-import future.keywords
+import future.keywords.if
+import future.keywords.in
 
 default has_public_access = false
 

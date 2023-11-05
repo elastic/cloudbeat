@@ -9,6 +9,7 @@ type := "cloud-compute"
 
 subtype := "gcp-compute-subnetwork"
 
+# regal ignore:rule-length
 test_violation {
 	# fail when enableFlowLogs is missing
 	eval_fail with input as test_data.generate_gcp_asset(

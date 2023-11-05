@@ -2,6 +2,4 @@ package compliance.cis_k8s.rules.cis_5_2_6
 
 import data.compliance.policy.kube_api.minimize_admission as audit
 
-finding = result {
-	result := audit.finding("allowPrivilegeEscalation")
-}
+finding := audit.finding("allowPrivilegeEscalation")
