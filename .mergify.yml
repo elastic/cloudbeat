@@ -4,6 +4,9 @@ queue_rules:
       - check-success=Cloudbeat-CI / Integration Tests (pull_request)
       - check-success=Cloudbeat-CI / Build (pull_request)
       - check-success=UnitTests / Unit Tests (pull_request)
+      - check-success=Test Rego Policies (pull_request)
+      - check-success=Update rules status (pull_request)
+      - check-success=Update rules metadata (pull_request)
 pull_request_rules:
   - name: self-assign PRs
     conditions:

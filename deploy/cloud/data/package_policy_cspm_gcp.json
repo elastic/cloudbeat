@@ -2,7 +2,7 @@
   "policy_id": "${agent_policy_id}",
   "package": {
     "name": "cloud_security_posture",
-    "version": "1.5.2-preview2"
+    "version": "1.6.3"
   },
   "name": "pkg-plcy-cspm-gcp-tf",
   "description": "",
@@ -42,7 +42,9 @@
       "streams": {
         "cloud_security_posture.findings": {
           "enabled": true,
-          "vars": {}
+          "vars": {
+            "gcp.account_type": "single-account"
+          }
         }
       }
     },

@@ -25,6 +25,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/securityhub"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -125,10 +126,10 @@ func TestProvider_Describe(t *testing.T) {
 			}
 			got, err := p.Describe(context.Background())
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				return
 			}
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.ElementsMatch(t, tt.want, got)
 			names := []string{}
 			for _, r := range tt.regions {

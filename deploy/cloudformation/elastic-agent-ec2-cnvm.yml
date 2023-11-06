@@ -33,6 +33,11 @@ Parameters:
     Description: The version of elastic-agent to install
     Type: String
 
+Conditions:
+  UseElasticTags: !Equals
+    - !Ref "AWS::AccountId"
+    - 704479110758
+
 Resources:
 
   # Security Group for EC2 instance
@@ -134,6 +139,26 @@ Resources:
                   - !Ref "AWS::StackId"
         - Key: Task
           Value: Vulnerability Management Scanner
+        - Key: division
+          Value: !If
+            - UseElasticTags
+            - engineering
+            - AWS::NoValue
+        - Key: org
+          Value: !If
+            - UseElasticTags
+            - security
+            - AWS::NoValue
+        - Key: team
+          Value: !If
+            - UseElasticTags
+            - cloud-security
+            - AWS::NoValue
+        - Key: project
+          Value: !If
+            - UseElasticTags
+            - cloudformation
+            - AWS::NoValue
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ElasticAgentInstanceProfile
@@ -142,14 +167,26 @@ Resources:
       UserData: !Base64
         Fn::Sub: |
           #!/bin/bash -x
+          signal() {
+            sudo yum install -y aws-cfn-bootstrap || { sudo apt-get update && sudo apt-get -y install python3-pip && sudo pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz; }
+            cfn-signal --exit-code "$1" --stack ${AWS::StackName} --resource ElasticAgentEc2Instance --region ${AWS::Region}
+          }
+          is_version_valid() {
+            local agent_version="$1"
+            local min_version="$2"
+            [[ "$min_version" = CFT_* ]] && return 0 # if the file is not published do not check
+            printf '%s\n%s\n' "$min_version" "$agent_version" | sort --version-sort --check=quiet
+          }
+          if ! is_version_valid "${ElasticAgentVersion}" 'CFT_VERSION' &> /dev/null; then
+            signal 22
+            exit
+          fi
           ElasticAgentArtifact=elastic-agent-${ElasticAgentVersion}-linux-arm64
           curl -L -O ${ElasticArtifactServer}/$ElasticAgentArtifact.tar.gz
           tar xzvf $ElasticAgentArtifact.tar.gz
           cd $ElasticAgentArtifact
-          sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken} --tag=cft_version:CFT_VERSION --tag=cft_arn:${AWS::StackId}
-          code=$?
-          sudo yum install -y aws-cfn-bootstrap || { sudo apt-get update && sudo apt-get -y install python3-pip && sudo pip3 install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz; }
-          cfn-signal -e $code --stack ${AWS::StackName} --resource ElasticAgentEc2Instance --region ${AWS::Region}
+          sudo ./elastic-agent install --non-interactive --url=${FleetUrl} --enrollment-token=${EnrollmentToken} --tag=cft_version:cloudformation-cnvm-CFT_VERSION.yml --tag=cft_arn:${AWS::StackId}
+          signal $?
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:

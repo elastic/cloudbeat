@@ -137,7 +137,10 @@ jobs:
         id: apply
         if: success()
         run: |
-          terraform apply --auto-approve -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" -var="region=${{ env.AWS_REGION }}"
+          terraform apply --auto-approve \
+            -var="deployment_name=${{ env.DEPLOYMENT_NAME }}" \
+            -var="region=${{ env.AWS_REGION }}" \
+            -var="project=${{ github.actor }}"
 
       - name: Set Environment Output
         id: env-output
@@ -311,9 +314,3 @@ jobs:
         if: github.event.inputs.cleanup-env == 'true'
         run: |
           just delete-cloud-env ${{ env.DEPLOYMENT_NAME }} '' "false"
-
-      - name: Tag CNVM Instance
-        if: github.event.inputs.cleanup-env == 'false'
-        env:
-          STACK_NAME: "${{ env.CNVM_STACK_NAME}}"
-        run: just create-cnvm-stack-tags ${{ env.AWS_REGION}} ${{ env.STACK_NAME }} '${{ env.AWS_DEFAULT_TAGS }} Key=owner,Value=${{ github.actor }}'

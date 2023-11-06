@@ -4,6 +4,7 @@ run:
 
 linters:
   enable:
+    - containedctx
     - contextcheck
     - exhaustruct
     - exportloopref
@@ -14,6 +15,7 @@ linters:
     - misspell
     - nolintlint
     - reassign
+    - testifylint
     - unconvert
     - unparam
     - whitespace

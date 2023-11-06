@@ -60,7 +60,7 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		provider:   mockInventoryService,
 	}
 
-	mockInventoryService.On("ListAllAssetTypesByName", mock.MatchedBy(func(assets []string) bool {
+	mockInventoryService.EXPECT().ListAllAssetTypesByName(mock.Anything, mock.MatchedBy(func(assets []string) bool {
 		return true
 	})).Return(
 		[]*inventory.ExtendedGcpAsset{
@@ -80,22 +80,22 @@ func (s *GcpAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	)
 
 	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
-	s.NoError(err)
+	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Equal(len(GcpAssetTypes), len(results))
 
 	lo.ForEach(results, func(r fetching.ResourceInfo, _ int) {
 		ecs, err := r.Resource.GetElasticCommonData()
-		s.NoError(err)
+		s.Require().NoError(err)
 		cloud := ecs["cloud"].(map[string]interface{})
 		account := cloud["account"].(map[string]interface{})
 		org := cloud["Organization"].(map[string]interface{})
 
-		s.Equal(account["name"], "prjName")
-		s.Equal(account["id"], "prjId")
-		s.Equal(org["id"], "orgId")
-		s.Equal(org["name"], "orgName")
-		s.Equal(cloud["provider"], "gcp")
+		s.Equal("prjName", account["name"])
+		s.Equal("prjId", account["id"])
+		s.Equal("orgId", org["id"])
+		s.Equal("orgName", org["name"])
+		s.Equal("gcp", cloud["provider"])
 	})
 }

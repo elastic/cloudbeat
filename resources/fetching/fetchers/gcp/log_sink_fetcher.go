@@ -52,7 +52,7 @@ func NewGcpLogSinkFetcher(_ context.Context, log *logp.Logger, ch chan fetching.
 func (f *GcpLogSinkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting GcpLogSinkFetcher.Fetch")
 
-	loggingAssets, err := f.provider.ListLoggingAssets()
+	loggingAssets, err := f.provider.ListLoggingAssets(ctx)
 	if err != nil {
 		return err
 	}

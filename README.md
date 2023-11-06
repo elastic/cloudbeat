@@ -10,7 +10,7 @@ It is designed to be used as part of the [Cloud Security](https://www.elastic.co
 
 ### CSP Security Policies
 
-Cloudbeat uses security policies from the [CSP Security Policies](https://github.com/elastic/csp-security-policies) repository to evaluate cloud resources.
+Cloudbeat uses security policies from the [Security Policies](./security-policies) directory to evaluate cloud resources.
 
 ## Getting Started
 
