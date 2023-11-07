@@ -1,5 +1,5 @@
 ---
-name: Update Hermit Dependencies
+name: Update Dependencies with Updatecli
 
 on:
   workflow_dispatch:
@@ -13,8 +13,13 @@ env:
   JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
 jobs:
-  bump:
+  updatecli:
+    name: Update ${{ matrix.pipeline-name }} dependencies
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pipeline-name: [beats, golang, hermit]
     steps:
       - uses: actions/checkout@v4
       - name: Init Hermit
@@ -24,6 +29,6 @@ jobs:
           vaultUrl: ${{ secrets.VAULT_ADDR }}
           vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
           vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-          pipeline: ./.ci/updatecli/updatecli.d/update-hermit.yml
+          pipeline: ./.ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml
           values: ./.ci/updatecli/values.yml
           notifyIfFailure: false
