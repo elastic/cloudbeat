@@ -86,6 +86,34 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Should return error on incomplete Username Password Credential (missing password)",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					TenantID:       "tenant_a",
+					ClientID:       "client_id",
+					ClientUsername: "username",
+					ClientPassword: "",
+				},
+			},
+			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {},
+			want:               nil,
+			wantErr:            true,
+		},
+		{
+			name: "Should return error on incomplete Username Password Credential (missing username)",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					TenantID:       "tenant_a",
+					ClientID:       "client_id",
+					ClientUsername: "",
+					ClientPassword: "password",
+				},
+			},
+			authProviderInitFn: func(m *MockAzureAuthProviderAPI) {},
+			want:               nil,
+			wantErr:            true,
+		},
+		{
 			name: "Should return a ClientCertificateCredential",
 			config: config.AzureConfig{
 				Credentials: config.AzureClientOpt{

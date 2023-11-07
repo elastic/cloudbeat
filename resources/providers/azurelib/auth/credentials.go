@@ -18,6 +18,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -43,7 +44,10 @@ func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFac
 		return p.getSecretCredentialsConfig(cfg)
 	case cfg.Credentials.ClientCertificatePath != "":
 		return p.getCertificateCredentialsConfig(cfg)
-	case cfg.Credentials.ClientUsername != "" && cfg.Credentials.ClientPassword != "":
+	case cfg.Credentials.ClientUsername != "" || cfg.Credentials.ClientPassword != "":
+		if cfg.Credentials.ClientUsername == "" || cfg.Credentials.ClientPassword == "" {
+			return nil, ErrIncompleteUsernamePassword
+		}
 		return p.getUsernamePasswordCredentialsConfig(cfg)
 	}
 
@@ -110,3 +114,5 @@ func (p *ConfigProvider) getUsernamePasswordCredentialsConfig(cfg config.AzureCo
 		Credentials: creds,
 	}, nil
 }
+
+var ErrIncompleteUsernamePassword = errors.New("incomplete username and password credentials")
