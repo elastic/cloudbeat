@@ -54,12 +54,12 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
-func (a *Azure) initialize(ctx context.Context, log *logp.Logger, _ *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *Azure) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
 
-	azureConfig, err := a.CfgProvider.GetAzureClientConfig()
+	azureConfig, err := a.CfgProvider.GetAzureClientConfig(cfg.CloudConfig.Azure)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
 	}
