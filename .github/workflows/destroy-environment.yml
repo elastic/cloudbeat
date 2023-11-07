@@ -68,28 +68,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Destroy CSPM Azure agent
-        id: cspm-azure-agent-destroy
-        run: |
-          deployment_names=('cloudbeat-vm-deployment' 'role-assignment-deployment' 'elastic-agent-deployment')
-          groups=$(az group list --query "[?starts_with(name, '${{ env.ENV_PREFIX }}')].name" -o tsv | grep -v '^${{ env.ENV_IGNORE_PREFIX }}')
-          for group in $groups
-          do
-            for dep_name in ${deployment_names[@]}; do
-              resource_ids=$(az deployment group show --name $dep_name --resource-group $group --query "properties.outputResources[].id" --output tsv)
-              if [ -z $resource_ids ]; then
-                echo "No resources found for deployment $dep_name."
-              else
-                echo "Deleting resources deployed by $dep_name:"
-                for resource_id in $resource_ids; do
-                    az resource delete --ids $resource_id
-                done
-                az deployment group delete --name $dep_name --resource-group $group
-                echo "Resources deployed by $dep_name have been deleted."
-              fi
-            done
-          done
-
       - name: Destroy Environment
         run: |
           just delete-cloud-env ${{ env.ENV_PREFIX }} '${{ env.ENV_IGNORE_PREFIX }}' "false"

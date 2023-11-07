@@ -195,6 +195,34 @@ printf "%s\n" "${DELETED_DEPLOYMENTS[@]}"
 echo "Failed to delete GCP deployments (${#FAILED_DEPLOYMENTS[@]}):"
 printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
 
+# Delete Azure deployments
+deployment_names=('cloudbeat-vm-deployment' 'role-assignment-deployment' 'elastic-agent-deployment')
+groups=$(az group list --query "[?starts_with(name, '$ENV_PREFIX')].name" -o tsv | grep -v "^$IGNORE_PREFIX")
+for group in $groups; do
+    for dep_name in ${deployment_names[@]}; do
+        resource_ids=$(az deployment group show --name $dep_name --resource-group $group --query "properties.outputResources[].id" --output tsv)
+        if [ -z $resource_ids ]; then
+            echo "No resources found for deployment $dep_name."
+        else
+            echo "Deleting resources deployed by $dep_name:"
+            for resource_id in $resource_ids; do
+                az resource delete --ids $resource_id
+            done
+            az deployment group delete --name $dep_name --resource-group $group
+            echo "Resources deployed by $dep_name have been deleted."
+        fi
+    done
+    res_group=$(az resource list --resource-group $group --query '[].id' -o tsv)
+    if [[ $? != 0 ]]; then
+        echo "Failed to check resource group $group for pre-existing resources."
+    elif [[ $res_group ]]; then
+        echo "Pre-existing resources found in resource group $group skipping delete."
+    else
+        az group delete --name $group --yes
+        echo "Resource group $group has been deleted."
+    fi
+done
+
 # Final check to exit with an error if any deletions of environments, stacks, or deployments failed
 if [ ${#FAILED_ENVS[@]} -gt 0 ] || [ ${#FAILED_STACKS[@]} -gt 0 ] || [ ${#FAILED_DEPLOYMENTS[@]} -gt 0 ]; then
     echo "There were errors deleting one or more resources."

@@ -328,16 +328,6 @@ jobs:
           poetry install
           poetry run pytest -m "sanity" --alluredir=./allure/results/ --clean-alluredir --maxfail=4
 
-      - name: Cleanup Environment CSPM Azure agent
-        id: cspm-azure-agent-destroy
-        if: github.event.inputs.cleanup-env == 'true'
-        run: |
-          groups=$(az group list --query "[?starts_with(name, '${{ env.ENV_PREFIX }}')].name" -o tsv | grep -v '^${{ env.ENV_IGNORE_PREFIX }}')
-          for group in $groups
-          do
-            az group delete --resource-group $group --yes
-          done
-
       - name: Cleanup Environment
         if: github.event.inputs.cleanup-env == 'true'
         run: |
