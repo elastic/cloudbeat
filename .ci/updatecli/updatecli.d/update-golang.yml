@@ -126,7 +126,7 @@ targets:
     scmid: default
     kind: shell
     spec:
-      command: .ci/scripts/hermit-bump-go.sh
+      command: .ci/updatecli/scripts/hermit-bump-go.sh
       environments:
         - name: HOME
         - name: PATH
