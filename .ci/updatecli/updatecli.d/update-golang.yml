@@ -16,7 +16,7 @@ scms:
 
 actions:
   cloudbeat:
-    title: '[updatecli] Bump Golang version to {{ source "latestGoVersion" }}'
+    title: '[updatecli] Update Golang version to {{ source "latestGoVersion" }}'
     kind: github/pullrequest
     scmid: default
     sourceid: latestGoVersion
