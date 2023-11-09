@@ -28,7 +28,7 @@ function delete_environment() {
         echo "Downloaded Terraform state file from S3."
 
         # Check if the resource aws_auth exists in the local state file and remove it
-        terraform state rm -state "$tfstate" $(terraform state list -state "$tfstate" | grep "kubernetes_config_map_v1_data.aws_auth") || true
+        terraform state rm -state "$tfstate" "$(terraform state list -state "$tfstate" | grep "kubernetes_config_map_v1_data.aws_auth")" || true
         # Destroy environment and remove environment data from S3
         if terraform destroy -var="region=$AWS_REGION" -state "$tfstate" --auto-approve &&
             aws s3 rm "$BUCKET/$ENV" --recursive; then
@@ -91,7 +91,7 @@ done
 
 BUCKET=s3://tf-state-bucket-test-infra
 ALL_ENVS=$(aws s3 ls $BUCKET/"$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g')
-ALL_STACKS=$(aws cloudformation list-stacks --stack-status-filter "CREATE_COMPLETE" "UPDATE_COMPLETE" --region "$AWS_REGION" | jq -r '.StackSummaries[] | select(.StackName | startswith("'$ENV_PREFIX'") and (if "'$IGNORE_PREFIX'" != "" then .StackName | startswith("'$IGNORE_PREFIX'") | not else true end)) | .StackName')
+ALL_STACKS=$(aws cloudformation list-stacks --stack-status-filter "CREATE_COMPLETE" "UPDATE_COMPLETE" --region "$AWS_REGION" | jq -r '.StackSummaries[] | select(.StackName | startswith("'"$ENV_PREFIX"'") and (if "'"$IGNORE_PREFIX"'" != "" then .StackName | startswith("'"$IGNORE_PREFIX"'") | not else true end)) | .StackName')
 
 if [ -n "$IGNORE_PREFIX" ]; then
     # If IGNORE_PREFIX exists and is not empty
