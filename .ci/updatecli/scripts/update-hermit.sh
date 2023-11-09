@@ -10,6 +10,7 @@ bin/hermit upgrade \
     golangci-lint \
     jq \
     just \
+    kind \
     mage \
     opa \
     pre-commit \
