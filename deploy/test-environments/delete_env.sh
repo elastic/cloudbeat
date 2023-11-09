@@ -24,7 +24,7 @@ function delete_environment() {
     tfstate="./$ENV-terraform.tfstate"
 
     # Copy state file
-    if aws s3 cp "$BUCKET"/"$ENV"/terraform.tfstate "$tfstate"; then
+    if aws s3 cp "$BUCKET/$ENV/terraform.tfstate" "$tfstate"; then
         echo "Downloaded Terraform state file from S3."
 
         # Check if the resource aws_auth exists in the local state file and remove it
