@@ -30,6 +30,5 @@ import (
 	_ "github.com/tsg/go-daemon"
 	_ "go.elastic.co/go-licence-detector"
 	_ "golang.org/x/lint/golint"
-	_ "golang.org/x/tools/cmd/goimports"
 	_ "gotest.tools/gotestsum/cmd"
 )
