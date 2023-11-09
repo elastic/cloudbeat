@@ -24,14 +24,14 @@ function delete_environment() {
     tfstate="./$ENV-terraform.tfstate"
 
     # Copy state file
-    if aws s3 cp "$BUCKET"/"$ENV"/terraform.tfstate "$tfstate"; then
+    if aws s3 cp "$BUCKET/$ENV/terraform.tfstate" "$tfstate"; then
         echo "Downloaded Terraform state file from S3."
 
         # Check if the resource aws_auth exists in the local state file and remove it
         terraform state rm -state "$tfstate" $(terraform state list -state "$tfstate" | grep "kubernetes_config_map_v1_data.aws_auth") || true
         # Destroy environment and remove environment data from S3
         if terraform destroy -var="region=$AWS_REGION" -state "$tfstate" --auto-approve &&
-            aws s3 rm "$BUCKET"/"$ENV" --recursive; then
+            aws s3 rm "$BUCKET/$ENV" --recursive; then
             echo "Successfully deleted $ENV"
             DELETED_ENVS+=("$ENV")
         else
