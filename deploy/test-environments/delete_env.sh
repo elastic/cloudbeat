@@ -31,7 +31,7 @@ function delete_environment() {
         terraform state rm -state "$tfstate" $(terraform state list -state "$tfstate" | grep "kubernetes_config_map_v1_data.aws_auth") || true
         # Destroy environment and remove environment data from S3
         if terraform destroy -var="region=$AWS_REGION" -state "$tfstate" --auto-approve &&
-            aws s3 rm "$BUCKET"/"$ENV" --recursive; then
+            aws s3 rm "$BUCKET/$ENV" --recursive; then
             echo "Successfully deleted $ENV"
             DELETED_ENVS+=("$ENV")
         else
