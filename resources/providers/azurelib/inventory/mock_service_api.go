@@ -38,6 +38,49 @@ func (_m *MockServiceAPI) EXPECT() *MockServiceAPI_Expecter {
 	return &MockServiceAPI_Expecter{mock: &_m.Mock}
 }
 
+// GetSubscriptions provides a mock function with given fields:
+func (_m *MockServiceAPI) GetSubscriptions() map[string]string {
+	ret := _m.Called()
+
+	var r0 map[string]string
+	if rf, ok := ret.Get(0).(func() map[string]string); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]string)
+		}
+	}
+
+	return r0
+}
+
+// MockServiceAPI_GetSubscriptions_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSubscriptions'
+type MockServiceAPI_GetSubscriptions_Call struct {
+	*mock.Call
+}
+
+// GetSubscriptions is a helper method to define mock.On call
+func (_e *MockServiceAPI_Expecter) GetSubscriptions() *MockServiceAPI_GetSubscriptions_Call {
+	return &MockServiceAPI_GetSubscriptions_Call{Call: _e.mock.On("GetSubscriptions")}
+}
+
+func (_c *MockServiceAPI_GetSubscriptions_Call) Run(run func()) *MockServiceAPI_GetSubscriptions_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *MockServiceAPI_GetSubscriptions_Call) Return(_a0 map[string]string) *MockServiceAPI_GetSubscriptions_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockServiceAPI_GetSubscriptions_Call) RunAndReturn(run func() map[string]string) *MockServiceAPI_GetSubscriptions_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListAllAssetTypesByName provides a mock function with given fields: ctx, assets
 func (_m *MockServiceAPI) ListAllAssetTypesByName(ctx context.Context, assets []string) ([]AzureAsset, error) {
 	ret := _m.Called(ctx, assets)
