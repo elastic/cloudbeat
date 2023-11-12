@@ -202,9 +202,9 @@ FAILED_AZURE_GROUPS=()
 deployment_names=('cloudbeat-vm-deployment' 'role-assignment-deployment' 'elastic-agent-deployment')
 groups=$(az group list --query "[?starts_with(name, '$ENV_PREFIX')].name" -o tsv | grep -v "^$IGNORE_PREFIX")
 for group in $groups; do
-    for dep_name in ${deployment_names[@]}; do
+    for dep_name in ${#deployment_names[@]}; do
         resource_ids=$(az deployment group show --name "$dep_name" --resource-group "$group" --query "properties.outputResources[].id" --output tsv)
-        if [ -z $resource_ids ]; then
+        if [ -z "$resource_ids" ]; then
             echo "No resources found for deployment $dep_name."
         else
             echo "Deleting resources deployed by $dep_name:"
@@ -223,8 +223,8 @@ for group in $groups; do
             echo "Resources deployed by $dep_name have been deleted."
         fi
     done
-    res_group=$(az resource list --resource-group "$group" --query '[].id' -o tsv)
-    if [[ $? != 0 ]]; then
+
+    if ! res_group=$(az resource list --resource-group "$group" --query '[].id' -o tsv); then
         echo "Failed to check resource group $group for pre-existing resources."
         FAILED_AZURE_GROUPS+=("$group")
     elif [[ $res_group ]]; then
@@ -244,7 +244,6 @@ FAILED_AZURE_CLEANUP=false
 if [ ${#FAILED_AZURE_DEPLOYMENTS[@]} -gt 0 ] || [ ${#FAILED_AZURE_RESOURCES[@]} -gt 0 ] || [ ${#FAILED_AZURE_GROUPS[@]} -gt 0 ]; then
     FAILED_AZURE_CLEANUP=true
 fi
-
 
 # Final check to exit with an error if any deletions of environments, stacks, or deployments failed
 if [ ${#FAILED_ENVS[@]} -gt 0 ] || [ ${#FAILED_STACKS[@]} -gt 0 ] || [ ${#FAILED_DEPLOYMENTS[@]} -gt 0 ] || [ $FAILED_AZURE_CLEANUP != false ]; then
