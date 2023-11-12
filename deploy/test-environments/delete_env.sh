@@ -196,6 +196,9 @@ echo "Failed to delete GCP deployments (${#FAILED_DEPLOYMENTS[@]}):"
 printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
 
 # Delete Azure deployments
+FAILED_AZURE_DEPLOYMENTS=()
+FAILED_AZURE_RESOURCES=()
+FAILED_AZURE_GROUPS=()
 deployment_names=('cloudbeat-vm-deployment' 'role-assignment-deployment' 'elastic-agent-deployment')
 groups=$(az group list --query "[?starts_with(name, '$ENV_PREFIX')].name" -o tsv | grep -v "^$IGNORE_PREFIX")
 for group in $groups; do
@@ -208,11 +211,13 @@ for group in $groups; do
             for resource_id in $resource_ids; do
                 az resource delete --ids "$resource_id" || {
                     echo "Failed to delete resource: $resource_id"
+                    FAILED_AZURE_RESOURCES+=("$resource_id")
                     continue
                 }
             done
             az deployment group delete --name "$dep_name" --resource-group "$group" || {
                 echo "Failed to delete deployment: $dep_name"
+                FAILED_AZURE_DEPLOYMENTS+=("$dep_name")
                 continue
             }
             echo "Resources deployed by $dep_name have been deleted."
@@ -221,19 +226,28 @@ for group in $groups; do
     res_group=$(az resource list --resource-group "$group" --query '[].id' -o tsv)
     if [[ $? != 0 ]]; then
         echo "Failed to check resource group $group for pre-existing resources."
+        FAILED_AZURE_GROUPS+=("$group")
     elif [[ $res_group ]]; then
         echo "Pre-existing resources found in resource group $group skipping delete."
     else
         az group delete --name "$group" --yes || {
             echo "Failed to delete resource group: $group"
+            FAILED_AZURE_GROUPS+=("$group")
             continue
         }
         echo "Resource group $group has been deleted."
     fi
 done
 
+# Summary of azure deployments, resources and groups deletions
+FAILED_AZURE_CLEANUP=false
+if [ ${#FAILED_AZURE_DEPLOYMENTS[@]} -gt 0 ] || [ ${#FAILED_AZURE_RESOURCES[@]} -gt 0 ] || [ ${#FAILED_AZURE_GROUPS[@]} -gt 0 ]; then
+    FAILED_AZURE_CLEANUP=true
+fi
+
+
 # Final check to exit with an error if any deletions of environments, stacks, or deployments failed
-if [ ${#FAILED_ENVS[@]} -gt 0 ] || [ ${#FAILED_STACKS[@]} -gt 0 ] || [ ${#FAILED_DEPLOYMENTS[@]} -gt 0 ]; then
+if [ ${#FAILED_ENVS[@]} -gt 0 ] || [ ${#FAILED_STACKS[@]} -gt 0 ] || [ ${#FAILED_DEPLOYMENTS[@]} -gt 0 ] || [ $FAILED_AZURE_CLEANUP != false ]; then
     echo "There were errors deleting one or more resources."
     # Optionally, provide more details about which resources failed to delete
     if [ ${#FAILED_ENVS[@]} -gt 0 ]; then
@@ -247,6 +261,12 @@ if [ ${#FAILED_ENVS[@]} -gt 0 ] || [ ${#FAILED_STACKS[@]} -gt 0 ] || [ ${#FAILED
     if [ ${#FAILED_DEPLOYMENTS[@]} -gt 0 ]; then
         echo "Failed to delete the following GCP deployments:"
         printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
+    fi
+    if [ $FAILED_AZURE_CLEANUP != false ]; then
+        echo "Failed to delete the following Azure entities:"
+        printf "%s\n" "${FAILED_AZURE_DEPLOYMENTS[@]}"
+        printf "%s\n" "${FAILED_AZURE_RESOURCES[@]}"
+        printf "%s\n" "${FAILED_AZURE_GROUPS[@]}"
     fi
     exit 1
 fi
