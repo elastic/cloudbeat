@@ -23,6 +23,8 @@ import (
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -53,40 +55,37 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	ctx := context.Background()
 
 	mockInventoryService := &inventory.MockServiceAPI{}
-	var mockAssets []inventory.AzureAsset
-	for _, assetType := range []string{
-		inventory.ClassicStorageAccountAssetType,
-		inventory.ClassicVirtualMachineAssetType,
-		inventory.DiskAssetType,
-		inventory.DocumentDBDatabaseAccountAssetType,
-		inventory.MySQLDBAssetType,
-		inventory.NetworkWatchersAssetType,
-		inventory.NetworkWatchersFlowLogAssetType,
-		inventory.PostgreSQLDBAssetType,
-		inventory.SQLServersAssetType,
-		inventory.StorageAccountAssetType,
-		inventory.VirtualMachineAssetType,
-		inventory.WebsitesAssetType,
-		inventory.VaultAssetType,
-	} {
-		mockAssets = append(mockAssets,
-			inventory.AzureAsset{
-				Id:               "id",
-				Name:             "name",
-				Location:         "location",
-				Properties:       map[string]interface{}{"key": "value"},
-				ResourceGroup:    "rg",
-				SubscriptionId:   "subId",
-				SubscriptionName: "subName",
-				TenantId:         "tenantId",
-				Type:             assetType,
-				Sku:              "",
-			},
-		)
+	mockAssetGroups := make(map[string][]inventory.AzureAsset)
+	totalMockAssets := 0
+	var flatMockAssets []inventory.AzureAsset
+	for _, assetGroup := range maps.Keys(AzureAssetGroups) {
+		var mockAssets []inventory.AzureAsset
+		for _, assetType := range maps.Keys(AzureAssetGroups[assetGroup]) {
+			mockAssets = append(mockAssets,
+				inventory.AzureAsset{
+					Id:               "id",
+					Name:             "name",
+					Location:         "location",
+					Properties:       map[string]interface{}{"key": "value"},
+					ResourceGroup:    "rg",
+					SubscriptionId:   "subId",
+					SubscriptionName: "subName",
+					TenantId:         "tenantId",
+					Type:             assetType,
+					Sku:              "",
+				},
+			)
+		}
+		totalMockAssets += len(mockAssets)
+		mockAssetGroups[assetGroup] = mockAssets
+		flatMockAssets = append(flatMockAssets, mockAssets...)
 	}
+
 	mockInventoryService.EXPECT().
-		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("[]string")).
-		Return(mockAssets, nil).Once()
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
+		RunAndReturn(func(ctx context.Context, assert_group string, types []string) ([]inventory.AzureAsset, error) {
+			return mockAssetGroups[assert_group], nil
+		})
 	defer mockInventoryService.AssertExpectations(s.T())
 
 	fetcher := AzureAssetsFetcher{
@@ -98,17 +97,25 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Require().Len(results, len(AzureAssetTypeToTypePair))
-	s.Require().Len(results, len(mockAssets))
+	s.Require().Len(results, totalMockAssets)
 
 	for index, result := range results {
-		expected := mockAssets[index]
+		expected := flatMockAssets[index]
 		s.Run(expected.Type, func() {
 			s.Equal(expected, result.GetData())
 
 			meta, err := result.GetMetadata()
 			s.Require().NoError(err)
-			pair := AzureAssetTypeToTypePair[expected.Type]
+
+			var expectedAssetGroup string
+			for _, assetGroup := range maps.Keys(AzureAssetGroups) {
+				if slices.Contains(maps.Keys(AzureAssetGroups[assetGroup]), expected.Type) {
+					expectedAssetGroup = assetGroup
+					break
+				}
+			}
+
+			pair := AzureAssetGroups[expectedAssetGroup][expected.Type]
 			s.Equal(fetching.ResourceMetadata{
 				ID:                  expected.Id,
 				Type:                pair.Type,

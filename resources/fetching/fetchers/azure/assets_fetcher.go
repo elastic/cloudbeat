@@ -51,7 +51,7 @@ func newPair(subType string, tpe string) typePair {
 	}
 }
 
-var AzureAssetTypeToTypePair = map[string]typePair{
+var AzureAssetGroupResourcesTypeToTypePair = map[string]typePair{
 	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
 	inventory.ClassicVirtualMachineAssetType:     newPair(fetching.AzureClassicVMType, fetching.CloudCompute),
 	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
@@ -67,6 +67,18 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.VaultAssetType:                     newPair(fetching.AzureVaultType, fetching.KeyManagement),
 }
 
+// Example: How to add additional asset group types
+// var AzureAssetGroupAuthorizationResourcesTypeToTypePair = map[string]typePair{
+// 	// TODO: Should be CloudIdentity?
+// 	inventory.RoleDefinitionsType: newPair(fetching.AzureRoleDefinitionsType, fetching.CloudIdentity),
+// }
+
+var AzureAssetGroups = map[string]map[string]typePair{
+	inventory.AssetGroupResources: AzureAssetGroupResourcesTypeToTypePair,
+	// Example: How to add additional asset groups
+	// inventory.AssetGroupAuthorizationResources: AzureAssetGroupAuthorizationResourcesTypeToTypePair,
+}
+
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
 	return &AzureAssetsFetcher{
 		log:        log,
@@ -78,25 +90,33 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
-	assets, err := f.provider.ListAllAssetTypesByName(ctx, maps.Keys(AzureAssetTypeToTypePair))
-	if err != nil {
-		return err
+	assetsByAssetGroup := make(map[string][]inventory.AzureAsset, len(AzureAssetGroups))
+	for _, assetGroup := range maps.Keys(AzureAssetGroups) {
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureAssetGroups[assetGroup]))
+		if err != nil {
+			f.log.Errorf("AzureAssetsFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
+			// TODO: Should we stop and return an error if we fail to fetch a specific asset group?
+			continue
+		}
+		assetsByAssetGroup[assetGroup] = r
 	}
 
-	for _, asset := range assets {
-		select {
-		case <-ctx.Done():
-			f.log.Infof("AzureAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
-			return nil
-		case f.resourceCh <- resourceFromAsset(asset, cMetadata):
+	for _, assetGroup := range maps.Keys(assetsByAssetGroup) {
+		for _, asset := range assetsByAssetGroup[assetGroup] {
+			select {
+			case <-ctx.Done():
+				f.log.Infof("AzureAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
+				return nil
+			case f.resourceCh <- resourceFromAsset(assetGroup, asset, cMetadata):
+			}
 		}
 	}
 
 	return nil
 }
 
-func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetadata) fetching.ResourceInfo {
-	pair := AzureAssetTypeToTypePair[asset.Type]
+func resourceFromAsset(asset_group string, asset inventory.AzureAsset, cMetadata fetching.CycleMetadata) fetching.ResourceInfo {
+	pair := AzureAssetGroups[asset_group][asset.Type]
 	return fetching.ResourceInfo{
 		CycleMetadata: cMetadata,
 		Resource: &AzureResource{

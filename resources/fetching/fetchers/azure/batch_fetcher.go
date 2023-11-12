@@ -36,10 +36,20 @@ type AzureBatchAssetFetcher struct {
 	provider   inventory.ServiceAPI
 }
 
-var AzureBatchAssets = map[string]typePair{
+var AzureBatchAssetGroupResources = map[string]typePair{
 	inventory.ActivityLogAlertAssetType: newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
 	inventory.ApplicationInsights:       newPair(fetching.AzureInsightsComponentType, fetching.MonitoringIdentity),
 	inventory.BastionAssetType:          newPair(fetching.AzureBastionType, fetching.CloudDns),
+}
+
+var AzureBatchAssetGroupAuthorizationResources = map[string]typePair{
+	// TODO: Should be CloudIdentity?
+	inventory.RoleDefinitionsType: newPair(fetching.AzureRoleDefinitionsType, fetching.CloudIdentity),
+}
+
+var AzureBatchAssetGroups = map[string]map[string]typePair{
+	inventory.AssetGroupResources:              AzureBatchAssetGroupResources,
+	inventory.AssetGroupAuthorizationResources: AzureBatchAssetGroupAuthorizationResources,
 }
 
 func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureBatchAssetFetcher {
@@ -53,40 +63,51 @@ func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, 
 func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
 
-	allAssets, err := f.provider.ListAllAssetTypesByName(ctx, maps.Keys(AzureBatchAssets))
-	if err != nil {
-		return err
+	subscriptions := f.provider.GetSubscriptions()
+
+	assetsByAssetGroup := make(map[string][]inventory.AzureAsset, len(AzureBatchAssetGroups))
+	for _, assetGroup := range maps.Keys(AzureBatchAssetGroups) {
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchAssetGroups[assetGroup]))
+		if err != nil {
+			f.log.Errorf("AzureBatchAssetFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
+			// TODO: Should we stop and return an error if we fail to fetch a specific batch asset group?
+			continue
+		}
+		assetsByAssetGroup[assetGroup] = r
 	}
 
-	subscriptionGroups := lo.GroupBy(allAssets, func(item inventory.AzureAsset) string {
-		return item.SubscriptionId
-	})
-
-	for subId, subName := range f.provider.GetSubscriptions() {
-		assetGroups := lo.GroupBy(subscriptionGroups[subId], func(item inventory.AzureAsset) string {
-			return item.Type
+	for _, assetGroup := range maps.Keys(assetsByAssetGroup) {
+		allAssets := assetsByAssetGroup[assetGroup]
+		subscriptionGroups := lo.GroupBy(allAssets, func(item inventory.AzureAsset) string {
+			return item.SubscriptionId
 		})
-		for assetType, pair := range AzureBatchAssets {
-			assets := assetGroups[assetType]
-			if assets == nil {
-				assets = []inventory.AzureAsset{} // Use empty array instead of nil
-			}
 
-			select {
-			case <-ctx.Done():
-				f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
-				return nil
-			case f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cMetadata,
-				Resource: &AzureBatchResource{
-					// Every asset in the list has the same type and subtype
-					Type:    pair.Type,
-					SubType: pair.SubType,
-					SubId:   subId,
-					SubName: subName,
-					Assets:  assets,
-				},
-			}:
+		for subId, subName := range subscriptions {
+			assetGroups := lo.GroupBy(subscriptionGroups[subId], func(item inventory.AzureAsset) string {
+				return item.Type
+			})
+			for assetType, pair := range AzureBatchAssetGroups[assetGroup] {
+				assets := assetGroups[assetType]
+				if assets == nil {
+					assets = []inventory.AzureAsset{} // Use empty array instead of nil
+				}
+
+				select {
+				case <-ctx.Done():
+					f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
+					return nil
+				case f.resourceCh <- fetching.ResourceInfo{
+					CycleMetadata: cMetadata,
+					Resource: &AzureBatchResource{
+						// Every asset in the list has the same type and subtype
+						Type:    pair.Type,
+						SubType: pair.SubType,
+						SubId:   subId,
+						SubName: subName,
+						Assets:  assets,
+					},
+				}:
+				}
 			}
 		}
 	}

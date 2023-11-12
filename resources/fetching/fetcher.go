@@ -59,7 +59,7 @@ const (
 	GcpPolicies       = "gcp-policies"
 	GcpServiceUsage   = "gcp-service-usage"
 
-	// Azure subtypes
+	// Azure resources group subtypes
 	AzureActivityLogAlertType          = "azure-activity-log-alert"
 	AzureBastionType                   = "azure-bastion"
 	AzureClassicStorageAccountType     = "azure-classic-storage-account"
@@ -76,6 +76,9 @@ const (
 	AzureVMType                        = "azure-vm"
 	AzureVaultType                     = "azure-vault"
 	AzureWebSiteType                   = "azure-web-site"
+
+	// Azure authorizationresources group subtypes
+	AzureRoleDefinitionsType = "azure-role-definitions"
 
 	// Types
 	CloudAudit             = "cloud-audit"
