@@ -70,7 +70,7 @@ var AzureAssetGroupResourcesTypeToTypePair = map[string]typePair{
 // Example: How to add additional asset group types
 // var AzureAssetGroupAuthorizationResourcesTypeToTypePair = map[string]typePair{
 // 	// TODO: Should be CloudIdentity?
-// 	inventory.RoleDefinitionsType: newPair(fetching.AzureRoleDefinitionsType, fetching.CloudIdentity),
+// 	inventory.RoleDefinitionsType: newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
 // }
 
 var AzureAssetGroups = map[string]map[string]typePair{

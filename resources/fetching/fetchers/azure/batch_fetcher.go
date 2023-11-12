@@ -44,7 +44,7 @@ var AzureBatchAssetGroupResources = map[string]typePair{
 
 var AzureBatchAssetGroupAuthorizationResources = map[string]typePair{
 	// TODO: Should be CloudIdentity?
-	inventory.RoleDefinitionsType: newPair(fetching.AzureRoleDefinitionsType, fetching.CloudIdentity),
+	inventory.RoleDefinitionsType: newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
 }
 
 var AzureBatchAssetGroups = map[string]map[string]typePair{

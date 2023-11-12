@@ -361,7 +361,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 // 		{
 // 			Resource: &AzureBatchResource{
 // 				Type:    fetching.CloudIdentity,
-// 				SubType: fetching.AzureRoleDefinitionsType,
+// 				SubType: fetching.AzureRoleDefinitionType,
 // 				SubId:   "1",
 // 				SubName: "one",
 // 				Assets:  []inventory.AzureAsset{mockAssets[9]},
@@ -371,7 +371,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 // 		{
 // 			Resource: &AzureBatchResource{
 // 				Type:    fetching.CloudIdentity,
-// 				SubType: fetching.AzureRoleDefinitionsType,
+// 				SubType: fetching.AzureRoleDefinitionType,
 // 				SubId:   "2",
 // 				SubName: "two",
 // 				Assets:  []inventory.AzureAsset{},
@@ -381,7 +381,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 // 		{
 // 			Resource: &AzureBatchResource{
 // 				Type:    fetching.CloudIdentity,
-// 				SubType: fetching.AzureRoleDefinitionsType,
+// 				SubType: fetching.AzureRoleDefinitionType,
 // 				SubId:   "3",
 // 				SubName: "three",
 // 				Assets:  []inventory.AzureAsset{mockAssets[8], mockAssets[10]},
@@ -391,7 +391,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 // 		{
 // 			Resource: &AzureBatchResource{
 // 				Type:    fetching.CloudIdentity,
-// 				SubType: fetching.AzureRoleDefinitionsType,
+// 				SubType: fetching.AzureRoleDefinitionType,
 // 				SubId:   "4",
 // 				SubName: "four",
 // 				Assets:  []inventory.AzureAsset{mockAssets[11]},

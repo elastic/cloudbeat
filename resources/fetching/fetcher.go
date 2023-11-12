@@ -78,7 +78,7 @@ const (
 	AzureWebSiteType                   = "azure-web-site"
 
 	// Azure authorizationresources group subtypes
-	AzureRoleDefinitionsType = "azure-role-definitions"
+	AzureRoleDefinitionType = "azure-role-definition"
 
 	// Types
 	CloudAudit             = "cloud-audit"

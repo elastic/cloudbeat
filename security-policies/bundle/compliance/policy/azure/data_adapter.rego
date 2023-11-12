@@ -8,9 +8,15 @@ is_bastion {
 	input.subType == "azure-bastion"
 }
 
+is_role_definition {
+	input.subType == "azure-role-definition"
+}
+
 is_vault {
 	input.subType == "azure-vault"
 }
+
+role_definitions = resource
 
 bastions = resource
 
