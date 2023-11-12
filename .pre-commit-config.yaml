@@ -77,7 +77,8 @@ repos:
       - id: shfmt
         args: ["-i", "4"]
       - id: shellcheck
-        files: (deploy/azure/.*sh|scripts/publish_cft.sh|.ci/scripts/.*sh|deploy/test-environments/.*sh)
+        files: (deploy/.*sh|scripts/publish_cft.sh|.ci/scripts/.*sh)
+        exclude: deploy/deployment-manager/.*sh
 
   - repo: local
     hooks:
