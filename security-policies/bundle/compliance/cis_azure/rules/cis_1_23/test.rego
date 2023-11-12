@@ -1,8 +1,8 @@
 package compliance.cis_azure.rules.cis_1_23
 
+import data.cis_azure.test_data
 import data.compliance.policy.azure.data_adapter
 import data.lib.test
-import data.cis_azure.test_data
 
 generate_role_defenition_with_properties(properties) = {
 	"properties": properties,
