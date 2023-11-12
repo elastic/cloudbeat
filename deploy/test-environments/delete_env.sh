@@ -209,7 +209,7 @@ for group in $groups; do
                 az resource delete --ids "$resource_id" || {
                     echo "Failed to delete resource: $resource_id"
                     continue
-                }	                
+                }
             done
             az deployment group delete --name "$dep_name" --resource-group "$group" || {
                 echo "Failed to delete deployment: $dep_name"
