@@ -62,6 +62,12 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
+      - id: azure-auth
+        name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Destroy Environment
         run: |
           just delete-cloud-env ${{ env.ENV_PREFIX }} '${{ env.ENV_IGNORE_PREFIX }}' "false"
