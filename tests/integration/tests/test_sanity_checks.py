@@ -223,7 +223,7 @@ def test_cspm_azure_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = [{"term": {"rule.benchmark.id": "cis_azure"}}]
+    query_list = build_query_list(benchmark_id="cis_azure", version=STACK_VERSION)
     query, sort = cspm_client.build_es_must_match_query(
         must_query_list=query_list,
         time_range="now-24h",
