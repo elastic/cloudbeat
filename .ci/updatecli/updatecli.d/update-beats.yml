@@ -1,6 +1,6 @@
 ---
-name: Bump beats
-pipelineid: 'updatecli-update-beats-{{ .github.branch }}'
+name: Update Elastic Beats go.mod Version
+pipelineid: 'updatecli-beats-{{ .github.branch }}'
 
 scms:
   default:
@@ -65,7 +65,7 @@ targets:
     scmid: default
     kind: shell
     spec:
-      command: .ci/scripts/update-beats.sh
+      command: .ci/updatecli/scripts/update-beats.sh
       environments:
         - name: PATH
         - name: GOPATH
