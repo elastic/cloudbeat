@@ -41,8 +41,14 @@ tests_data = {
         "project-management",
         "data-processing",
     ],
+    "cis_azure": [
+        "configuration",
+    ],  # Azure environment is not static, so we can't guarantee findings of all types.
     "cis_k8s": ["file", "process", "k8s_object"],
-    "cis_eks": ["process", "k8s_object"],  # Optimize search findings by excluding 'file'.
+    "cis_eks": [
+        "process",
+        "k8s_object",
+    ],  # Optimize search findings by excluding 'file'.
     "cnvm": ["vulnerability"],
 }
 
@@ -94,7 +100,6 @@ def test_kspm_unmanaged_findings(kspm_client, match_type):
         version=STACK_VERSION,
     )
     query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
-
     result = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(result) > 0, f"The resource type '{match_type}' is missing"
 
@@ -199,4 +204,30 @@ def test_cspm_gcp_findings(cspm_client, match_type):
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
     results = get_findings(cspm_client, GCP_CONFIG_TIMEOUT, query, sort, match_type)
+    assert len(results) > 0, f"The resource type '{match_type}' is missing"
+
+
+@pytest.mark.sanity
+@pytest.mark.parametrize("match_type", tests_data["cis_azure"])
+def test_cspm_azure_findings(cspm_client, match_type):
+    """
+    Test case to check for Azure findings in CSPM.
+
+    Args:
+        cspm_client: The elastic client object.
+        match_type (str): The resource type to match.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the resource type is missing.
+    """
+    query_list = [{"term": {"rule.benchmark.id": "cis_azure"}}]
+    query, sort = cspm_client.build_es_must_match_query(
+        must_query_list=query_list,
+        time_range="now-24h",
+    )
+
+    results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"

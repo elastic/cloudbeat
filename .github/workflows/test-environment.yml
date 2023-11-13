@@ -284,6 +284,24 @@ jobs:
         run: |
           . ./set_env.sh && ./deploy.sh
 
+      - name: Install CSPM Azure integration
+        id: cspm-azure-integration
+        working-directory: ${{ env.WORKING_DIR }}/fleet_api
+        run: |
+          poetry run python src/install_cspm_azure_integration.py
+
+      - id: azure-auth
+        name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy CSPM Azure agent
+        id: cspm-azure-agent
+        working-directory: deploy/azure
+        run: |
+          az deployment sub create --location EastUS --template-file azureARMTemplate.json --parameters @arm_parameters.json
+
       - name: Install D4C integration
         id: kspm-d4c
         working-directory: ${{ env.WORKING_DIR }}/fleet_api

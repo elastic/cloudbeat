@@ -45,21 +45,21 @@ func TestAzure_Initialize(t *testing.T) {
 		{
 			name:                 "config provider error",
 			cfg:                  baseAzureConfig,
-			configProvider:       mockAzureCfgProvider(errors.New("some error")),
+			configProvider:       mockAzureCfgProvider(baseAzureConfig.CloudConfig.Azure, errors.New("some error")),
 			inventoryInitializer: mockAzureInventoryInitializerService(nil),
 			wantErr:              "some error",
 		},
 		{
 			name:                 "inventory init error",
 			cfg:                  validAzureConfig,
-			configProvider:       mockAzureCfgProvider(nil),
+			configProvider:       mockAzureCfgProvider(validAzureConfig.CloudConfig.Azure, nil),
 			inventoryInitializer: mockAzureInventoryInitializerService(errors.New("some error")),
 			wantErr:              "some error",
 		},
 		{
 			name:                 "no error",
 			cfg:                  validAzureConfig,
-			configProvider:       mockAzureCfgProvider(nil),
+			configProvider:       mockAzureCfgProvider(validAzureConfig.CloudConfig.Azure, nil),
 			inventoryInitializer: mockAzureInventoryInitializerService(nil),
 			want: []string{
 				"azure_cloud_assets_fetcher",
@@ -69,7 +69,7 @@ func TestAzure_Initialize(t *testing.T) {
 		{
 			name:                 "no inventory initializer",
 			cfg:                  validAzureConfig,
-			configProvider:       mockAzureCfgProvider(nil),
+			configProvider:       mockAzureCfgProvider(validAzureConfig.CloudConfig.Azure, nil),
 			inventoryInitializer: nil,
 			wantErr:              "azure asset inventory is uninitialized",
 		},
@@ -94,9 +94,9 @@ func TestAzure_Initialize(t *testing.T) {
 	}
 }
 
-func mockAzureCfgProvider(err error) auth.ConfigProviderAPI {
+func mockAzureCfgProvider(cfg config.AzureConfig, err error) auth.ConfigProviderAPI {
 	cfgProvider := &auth.MockConfigProviderAPI{}
-	on := cfgProvider.EXPECT().GetAzureClientConfig()
+	on := cfgProvider.EXPECT().GetAzureClientConfig(cfg)
 	if err == nil {
 		on.Return(
 			&auth.AzureFactoryConfig{},

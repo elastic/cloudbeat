@@ -46,3 +46,7 @@ gcp_dm_config = Munch()
 gcp_dm_config.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
 gcp_dm_config.zone = os.getenv("ZONE", "us-central1-a")
 gcp_dm_config.allow_ssh = os.getenv("ALLOW_SSH", "false") == "true"
+
+azure_arm_parameters = Munch()
+azure_arm_parameters.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
+azure_arm_parameters.location = os.getenv("LOCATION", "CentralUS")
