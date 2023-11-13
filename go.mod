@@ -38,7 +38,7 @@ require (
 	github.com/aws/smithy-go v1.15.0
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231106191710-475eaf5784b4
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231113094831-9b932c47cec8
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
 	github.com/elastic/elastic-agent-autodiscover v0.6.4
 	github.com/elastic/elastic-agent-client/v7 v7.4.0
@@ -69,7 +69,6 @@ require (
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.13.0
-	golang.org/x/tools v0.14.0
 	google.golang.org/api v0.148.0
 	gopkg.in/yaml.v2 v2.4.0
 	gotest.tools/gotestsum v1.11.0
@@ -90,6 +89,7 @@ require (
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
+	golang.org/x/tools v0.14.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 )
 
@@ -109,8 +109,8 @@ require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20230306123547-8075edf89bb0 // indirect
 	github.com/Azure/azure-sdk-for-go v68.0.0+incompatible // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.9.0-beta.1
-	github.com/Azure/azure-sdk-for-go/sdk/internal v1.3.0 // indirect
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.9.0
+	github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.29 // indirect

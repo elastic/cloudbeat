@@ -19,4 +19,9 @@ bin/hermit upgrade \
     shellcheck \
     shfmt \
     yq
-git status # git diff might not have output because only binaries change
+
+# Update pre-commit hooks
+pre-commit autoupdate
+pre-commit run --all || true # Run to generate diffs, fix failures in PR
+
+git status # git diff might not have output when only binaries change
