@@ -1,0 +1,43 @@
+---
+name: Update Hermit Dependencies
+pipelineid: 'updatecli-hermit-{{ .github.branch }}'
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: '{{ requiredEnv "GIT_USER" }}'
+      email: '{{ requiredEnv "GIT_EMAIL" }}'
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: '{{ requiredEnv "GITHUB_TOKEN" }}'
+      username: '{{ requiredEnv "GIT_USER" }}'
+      branch: "{{ .github.branch }}"
+
+actions:
+  default:
+    title: '[updatecli] Update hermit dependencies'
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      automerge: false
+      labels:
+        - automation
+        - backport-skip
+        - dependency
+      description: |-
+        ### What
+        `hermit` automatic sync
+
+        Generated automatically with {{ requiredEnv "JOB_URL" }}
+
+targets:
+  hermit:
+    name: 'Update hermit packages'
+    scmid: default
+    kind: shell
+    spec:
+      command: .ci/updatecli/scripts/update-hermit.sh
+      environments:
+        - name: PATH
+        - name: HOME
