@@ -16,6 +16,7 @@ GCP_CONFIG_TIMEOUT = 600
 CNVM_CONFIG_TIMEOUT = 3600
 
 STACK_VERSION = elasticsearch.stack_version
+
 # Check if STACK_VERSION is provided
 if not STACK_VERSION:
     logger.warning("STACK_VERSION is not provided. Please set the STACK_VERSION in the configuration.")
@@ -46,6 +47,31 @@ tests_data = {
 }
 
 
+def build_query_list(benchmark_id: str = "", match_type: str = "", version: str = "") -> list:
+    """
+    Build a list of terms for Elasticsearch query based on the provided parameters.
+
+    Parameters:
+    - benchmark_id (str, optional): The benchmark ID for filtering.
+    - match_type (str, optional): The resource type for filtering.
+    - version (str, optional): The agent version for filtering.
+
+    Returns:
+    list: A list of terms for Elasticsearch query.
+    """
+    query_list = []
+    if benchmark_id:
+        query_list.append({"term": {"rule.benchmark.id": benchmark_id}})
+
+    if match_type:
+        query_list.append({"term": {"resource.type": match_type}})
+
+    if version:
+        query_list.append({"term": {"agent.version": version}})
+
+    return query_list
+
+
 @pytest.mark.sanity
 @pytest.mark.parametrize("match_type", tests_data["cis_k8s"])
 def test_kspm_unmanaged_findings(kspm_client, match_type):
@@ -62,11 +88,11 @@ def test_kspm_unmanaged_findings(kspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = [
-        {"term": {"rule.benchmark.id": "cis_k8s"}},
-        {"term": {"resource.type": match_type}},
-        {"term": {"agent.version": STACK_VERSION}},
-    ]
+    query_list = build_query_list(
+        benchmark_id="cis_k8s",
+        match_type=match_type,
+        version=STACK_VERSION,
+    )
     query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
 
     result = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
@@ -89,11 +115,11 @@ def test_kspm_e_k_s_findings(kspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = [
-        {"term": {"rule.benchmark.id": "cis_eks"}},
-        {"term": {"resource.type": match_type}},
-        {"term": {"agent.version": STACK_VERSION}},
-    ]
+    query_list = build_query_list(
+        benchmark_id="cis_eks",
+        match_type=match_type,
+        version=STACK_VERSION,
+    )
     query, sort = kspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-4h")
 
     results = get_findings(kspm_client, CONFIG_TIMEOUT, query, sort, match_type)
@@ -116,11 +142,11 @@ def test_cspm_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = [
-        {"term": {"rule.benchmark.id": "cis_aws"}},
-        {"term": {"resource.type": match_type}},
-        {"term": {"agent.version": STACK_VERSION}},
-    ]
+    query_list = build_query_list(
+        benchmark_id="cis_aws",
+        match_type=match_type,
+        version=STACK_VERSION,
+    )
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
     results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
@@ -143,7 +169,7 @@ def test_cnvm_findings(cnvm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = [{"term": {"agent.version": STACK_VERSION}}]
+    query_list = build_query_list(version=STACK_VERSION)
     query, sort = cnvm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
     results = get_findings(cnvm_client, CNVM_CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
@@ -165,11 +191,11 @@ def test_cspm_gcp_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = [
-        {"term": {"rule.benchmark.id": "cis_gcp"}},
-        {"term": {"resource.type": match_type}},
-        {"term": {"agent.version": STACK_VERSION}},
-    ]
+    query_list = build_query_list(
+        benchmark_id="cis_gcp",
+        match_type=match_type,
+        version=STACK_VERSION,
+    )
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
     results = get_findings(cspm_client, GCP_CONFIG_TIMEOUT, query, sort, match_type)
