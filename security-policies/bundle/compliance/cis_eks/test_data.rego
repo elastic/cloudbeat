@@ -67,6 +67,7 @@ generate_ecr_input_with_one_repo(image_scan_on_push) = {
 	"subType": "aws-ecr",
 }
 
+# regal ignore:rule-length
 generate_elb_input_with_two_load_balancers(first_instance_protocol, first_instance_ssl_cert, sec_instance_protocol, sec_instance_ssl_cert) = {
 	"resource": {
 		"AvailabilityZones": [
