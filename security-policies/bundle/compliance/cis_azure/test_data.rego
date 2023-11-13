@@ -131,6 +131,7 @@ valid_managed_disk = {
 	"storageAccountType": "Standard_LRS",
 }
 
+# regal ignore:rule-length
 generate_vm(managed_disk) = {
 	"subType": "azure-vm",
 	"resource": {
