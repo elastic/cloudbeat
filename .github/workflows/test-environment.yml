@@ -99,7 +99,6 @@ jobs:
       DEPLOYMENT_NAME: ${{ inputs.deployment_name }}
       S3_BASE_BUCKET: "s3://tf-state-bucket-test-infra"
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
-      STACK_VERSION: ${{ inputs.elk-stack-version }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
     # Add "id-token" with the intended permissions.
     permissions:
