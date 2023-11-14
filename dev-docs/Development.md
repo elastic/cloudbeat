@@ -5,13 +5,29 @@
 For Golang, we try to follow [Google's code style](https://google.github.io/styleguide/go/)
 For Python we try to follow [PEP8](https://peps.python.org/pep-0008/) style guid
 
+### Hermit
+
+We use [hermit](https://cashapp.github.io/hermit/) to manage development environment.
+
+To install, [follow the official docs](https://cashapp.github.io/hermit/usage/get-started/#installing-hermit).
+
+Once installed, to have hermit environment active in any folder with a hermit project, run:
+
+```zsh
+hermit shell-hooks --zsh
+```
+
+If you don't wish to have the shell-hook, [you can also manually activate environments](https://cashapp.github.io/hermit/usage/get-started/#activating-an-environment).
+
 ### Pre-commit hooks
 
 We use [pre-commit](https://pre-commit.com/) package to enforce our pre commit hooks.
+
+`pre-commit` is available through hermit
+
 To install:
 
 ```zsh
-brew install pre-commit # Install the package
 pre-commit install # install the pre commits hooks
 pre-commit run --all-files --verbose # run it!
 ```
