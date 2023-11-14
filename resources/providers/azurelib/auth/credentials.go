@@ -39,12 +39,12 @@ type ConfigProvider struct {
 }
 
 func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error) {
-	switch {
-	case cfg.Credentials.ClientSecret != "":
+	switch cfg.Credentials.ClientCredentialsType {
+	case config.AzureClientCredentialsTypeSecret:
 		return p.getSecretCredentialsConfig(cfg)
-	case cfg.Credentials.ClientCertificatePath != "":
+	case config.AzureClientCredentialsTypeCertificate:
 		return p.getCertificateCredentialsConfig(cfg)
-	case cfg.Credentials.ClientUsername != "" || cfg.Credentials.ClientPassword != "":
+	case config.AzureClientCredentialsTypeUsernamePassword:
 		if cfg.Credentials.ClientUsername == "" || cfg.Credentials.ClientPassword == "" {
 			return nil, ErrIncompleteUsernamePassword
 		}
