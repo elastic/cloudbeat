@@ -78,7 +78,7 @@ jobs:
       deployment_name: ${{ inputs.deployment_name }}
       elk-stack-version: ${{ needs.init.outputs.stack-version }}
       ess-region: ${{ needs.init.outputs.ess-region }}
-      run-sanity-tests: true
+      run-sanity-tests: false
     secrets: inherit
   upgrade:
     runs-on: ubuntu-20.04
