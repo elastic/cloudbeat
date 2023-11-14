@@ -1,6 +1,10 @@
 // doc-branch can be: master, 8.1, 8.2, etc.
 :doc-branch: master
+<<<<<<< HEAD
 :go-version: 1.20
+=======
+:go-version: 1.20.11
+>>>>>>> a79f2baa ([updatecli] Update Golang version to 1.20.11 (#1542))
 :python: 3.7
 :docker: 1.12
 :docker-compose: 1.11
