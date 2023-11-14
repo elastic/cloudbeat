@@ -78,7 +78,7 @@ jobs:
       deployment_name: ${{ inputs.deployment_name }}
       elk-stack-version: ${{ needs.init.outputs.stack-version }}
       ess-region: ${{ needs.init.outputs.ess-region }}
-      run-sanity-tests: false
+      run-sanity-tests: false # Set to true once the issue at https://github.com/elastic/kibana/pull/171200 is resolved.
     secrets: inherit
   upgrade:
     runs-on: ubuntu-20.04
