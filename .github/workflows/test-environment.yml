@@ -57,7 +57,7 @@ jobs:
       run:
         working-directory: ${{ env.WORKING_DIR }}
     env:
-      TF_VAR_serverless_mode: ${{ github.event.inputs.serverless }}
+      TF_VAR_serverless_mode: ${{ github.event.inputs.serverless_mode }}
       TF_VAR_stack_version: ${{ github.event.inputs.elk-stack-version }}
       TF_VAR_ess_region: ${{ github.event.inputs.ess-region }}
       DEPLOYMENT_NAME: ${{ github.event.inputs.deployment_name }}
