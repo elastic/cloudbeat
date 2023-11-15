@@ -9,6 +9,11 @@ variable "ec_apikey" {
 }
 
 variable "project_name" {
-    description = "Elastic Cloud Project Name"
-    type        = string
+  description = "Elastic Cloud Project Name"
+  type        = string
+}
+
+variable "region_id" {
+  description = "Elastic Cloud Project Region ID"
+  type        = string
 }

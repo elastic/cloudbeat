@@ -70,6 +70,7 @@ module "serverless" {
   ec_apikey = vars.ec_api_key
   ec_url = "https://cloud.elastic.co"
   project_name = vars.deployment_name
+  region_id = vars.ess_region
 }
 
 module "eks" {

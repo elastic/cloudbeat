@@ -1,5 +1,5 @@
 provider "restapi" {
-  uri      = "${var.ec_url}"
+  uri      = var.ec_url
   insecure = true
 
   write_returns_object = true
@@ -14,8 +14,8 @@ provider "restapi" {
 resource "restapi_object" "ec_project" {
   path = "/api/v1/serverless/projects/security"
   data = jsonencode({
-    region_id = "local-k8s"
-    name      = "${var.project_name}"
+    region_id = var.region_id
+    name      = var.project_name
   })
 }
 
