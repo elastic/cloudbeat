@@ -33,6 +33,8 @@ jobs:
 
       - name: Init Hermit
         run: |
+          # Pre-fetch hermit binaries otherwise pre-commit can fail when running multiple commands in parallel. This
+          # leads to hermit attempting to download the same binary multiple times which results in a race condition.
           ./bin/hermit install
           ./bin/hermit env -r >> $GITHUB_ENV
 
