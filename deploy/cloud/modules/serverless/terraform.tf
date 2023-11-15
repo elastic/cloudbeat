@@ -3,6 +3,7 @@ terraform {
     restapi = {
       source  = "mastercard/restapi"
       version = "~> 1.18.0"
+      configuration_aliases = [ restapi.elastic_cloud ]
     }
     http = {
       source  = "hashicorp/http"

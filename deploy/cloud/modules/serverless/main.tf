@@ -5,14 +5,8 @@ locals {
   }
 }
 
-provider "restapi" {
-  uri      = var.ec_url
-  insecure = true
-  write_returns_object = true
-  headers = local.ec_headers
-}
-
 resource "restapi_object" "ec_project" {
+  provider = restapi.elastic_cloud
   path = "/api/v1/serverless/projects/security"
   data = jsonencode({
     region_id = var.region_id
