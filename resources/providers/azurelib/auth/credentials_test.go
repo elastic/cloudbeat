@@ -45,6 +45,18 @@ func TestConfigProvider_GetAzureClientConfig(t *testing.T) {
 			},
 		},
 		{
+			name: "Should return a DefaultAzureCredential on unknown client credentials type",
+			config: config.AzureConfig{
+				Credentials: config.AzureClientOpt{
+					ClientCredentialsType: "unknown",
+				},
+			},
+			authProviderInitFn: initDefaultCredentialsMock(nil),
+			want: &AzureFactoryConfig{
+				Credentials: &azidentity.DefaultAzureCredential{},
+			},
+		},
+		{
 			name: "Should return a ClientSecretCredential",
 			config: config.AzureConfig{
 				Credentials: config.AzureClientOpt{
