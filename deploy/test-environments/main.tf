@@ -81,7 +81,7 @@ module "ec_project" {
   providers = {
     restapi.elastic_cloud = restapi.ec
   }
-  # count = var.serverless_mode ? 1 : 0
+  count = var.serverless_mode ? 1 : 0
   source = "../cloud/modules/serverless"
   ec_apikey = var.ec_api_key
   ec_url = local.ec_url
