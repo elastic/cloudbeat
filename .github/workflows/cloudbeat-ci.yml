@@ -33,7 +33,7 @@ jobs:
 
       - name: Init Hermit
         run: |
-          hermit install
+          ./bin/hermit install
           ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Install poetry
