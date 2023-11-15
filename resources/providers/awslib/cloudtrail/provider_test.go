@@ -143,10 +143,11 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
 			clientMock := &MockClient{}
 			for funcName, calls := range tt.cloudtrailClientMockReturnVals {
 				for _, returnVals := range calls {
-					clientMock.On(funcName, context.TODO(), mock.Anything).Return(returnVals...).Once()
+					clientMock.On(funcName, ctx, mock.Anything).Return(returnVals...).Once()
 				}
 			}
 
@@ -155,7 +156,7 @@ func TestProvider_DescribeCloudTrails(t *testing.T) {
 				clients: createMockClients(clientMock, tt.regions),
 			}
 
-			trails, err := p.DescribeTrails(context.Background())
+			trails, err := p.DescribeTrails(ctx)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
