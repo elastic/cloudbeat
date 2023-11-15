@@ -42,6 +42,7 @@ provider "ec" {
 
 # Elastic Cloud (EC) deployment
 module "ec_deployment" {
+  count = vars.serverless_mode ? 0 : 1
   source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
 
   region        = var.ess_region
@@ -61,6 +62,14 @@ module "ec_deployment" {
     "kibana" : "",
     "apm" : ""
   }
+}
+
+module "serverless" {
+  count = vars.serverless_mode ? 1 : 0
+  source = "../cloud/modules/serverless"
+  ec_apikey = vars.ec_api_key
+  ec_url = "https://cloud.elastic.co"
+  project_name = vars.deployment_name
 }
 
 module "eks" {
