@@ -45,6 +45,7 @@ jobs:
           # Skipping golangci-lint as it's tested by golangci/golangci-lint-action
           SKIP: golangci-lint
         run: |
+          pre-commit install
           pre-commit run --all-files
         shell: bash
 
