@@ -79,9 +79,10 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
+			ctx := context.Background()
 			kmsProviderMock := &kms.MockKMS{}
 			for funcName, returnVals := range test.kmsMocksReturnVals {
-				kmsProviderMock.On(funcName, context.TODO()).Return(returnVals...)
+				kmsProviderMock.On(funcName, ctx).Return(returnVals...)
 			}
 
 			kmsFetcher := KmsFetcher{
@@ -89,8 +90,6 @@ func (s *KmsFetcherTestSuite) TestFetcher_Fetch() {
 				kms:        kmsProviderMock,
 				resourceCh: s.resourceCh,
 			}
-
-			ctx := context.Background()
 
 			err := kmsFetcher.Fetch(ctx, fetching.CycleMetadata{})
 			s.Require().NoError(err)
