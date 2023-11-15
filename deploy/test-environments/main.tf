@@ -77,7 +77,7 @@ module "ec_deployment" {
   }
 }
 
-module "serverless" {
+module "ec_project" {
   providers = {
     restapi.elastic_cloud = restapi.ec
   }
@@ -85,7 +85,7 @@ module "serverless" {
   source = "../cloud/modules/serverless"
   ec_apikey = var.ec_api_key
   ec_url = local.ec_url
-  project_name = var.deployment_name
+  project_name = "${var.deployment_name}-${random_string.suffix.result}"
   region_id = var.ess_region
 }
 
