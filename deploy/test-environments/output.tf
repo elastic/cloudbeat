@@ -45,17 +45,17 @@ output "elasticsearch_url" {
   description = "The secure Elasticsearch URL"
 }
 
-# output "elasticsearch_username" {
-#   value       = module.ec_deployment.elasticsearch_username
-#   description = "The Elasticsearch username"
-#   sensitive   = true
-# }
+output "elasticsearch_username" {
+  value       = var.serverless_mode ? module.serverless.elasticsearch_username : module.ec_deployment.elasticsearch_username
+  description = "The Elasticsearch username"
+  sensitive   = true
+}
 
-# output "elasticsearch_password" {
-#   value       = module.ec_deployment.elasticsearch_password
-#   description = "The Elasticsearch password"
-#   sensitive   = true
-# }
+output "elasticsearch_password" {
+  value       = var.serverless_mode ? module.serverless.elasticsearch_password : module.ec_deployment.elasticsearch_password
+  description = "The Elasticsearch password"
+  sensitive   = true
+}
 
 output "kibana_url" {
   value       = var.serverless_mode ? module.serverless.kibana_url : module.ec_deployment.kibana_url
