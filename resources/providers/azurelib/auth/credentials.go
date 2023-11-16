@@ -39,19 +39,21 @@ type ConfigProvider struct {
 }
 
 func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error) {
-	switch {
-	case cfg.Credentials.ClientSecret != "":
+	switch cfg.Credentials.ClientCredentialsType {
+	case config.AzureClientCredentialsTypeSecret:
 		return p.getSecretCredentialsConfig(cfg)
-	case cfg.Credentials.ClientCertificatePath != "":
+	case config.AzureClientCredentialsTypeCertificate:
 		return p.getCertificateCredentialsConfig(cfg)
-	case cfg.Credentials.ClientUsername != "" || cfg.Credentials.ClientPassword != "":
+	case config.AzureClientCredentialsTypeUsernamePassword:
 		if cfg.Credentials.ClientUsername == "" || cfg.Credentials.ClientPassword == "" {
 			return nil, ErrIncompleteUsernamePassword
 		}
 		return p.getUsernamePasswordCredentialsConfig(cfg)
+	case "", config.AzureClientCredentialsTypeManagedIdentity:
+		return p.getDefaultCredentialsConfig()
 	}
 
-	return p.getDefaultCredentialsConfig()
+	return nil, ErrWrongCredentialsType
 }
 
 func (p *ConfigProvider) getDefaultCredentialsConfig() (*AzureFactoryConfig, error) {
@@ -115,4 +117,7 @@ func (p *ConfigProvider) getUsernamePasswordCredentialsConfig(cfg config.AzureCo
 	}, nil
 }
 
-var ErrIncompleteUsernamePassword = errors.New("incomplete username and password credentials")
+var (
+	ErrWrongCredentialsType       = errors.New("wrong credentials type")
+	ErrIncompleteUsernamePassword = errors.New("incomplete username and password credentials")
+)

@@ -31,8 +31,13 @@ jobs:
         with:
           go-version-file: .go-version
 
+      # hermit install is needed to pre-fetch hermit binaries otherwise pre-commit can fail when running multiple
+      # commands in parallel. This leads to hermit attempting to download the same binary multiple times which results
+      # in a race condition. See https://github.com/cashapp/hermit/issues/391.
       - name: Init Hermit
-        run: ./bin/hermit env -r >> $GITHUB_ENV
+        run: |
+          ./bin/hermit install
+          ./bin/hermit env -r >> $GITHUB_ENV
 
       - name: Install poetry
         run: |

@@ -36,8 +36,7 @@ import (
 )
 
 func TestProvider_DescribeTrails(t *testing.T) {
-	logger := testhelper.NewLogger(t)
-
+	ctx := context.Background()
 	tests := []struct {
 		name    string
 		clients map[string]func() any
@@ -52,7 +51,7 @@ func TestProvider_DescribeTrails(t *testing.T) {
 				},
 				"cloudTrailProvider": func() any {
 					m := &cloudtrail.MockTrailService{}
-					m.On("DescribeTrails", context.Background()).Return(nil, errors.New("bad, very bad"))
+					m.On("DescribeTrails", ctx).Return(nil, errors.New("bad, very bad"))
 					return m
 				},
 			},
@@ -67,7 +66,7 @@ func TestProvider_DescribeTrails(t *testing.T) {
 				},
 				"cloudTrailProvider": func() any {
 					m := &cloudtrail.MockTrailService{}
-					m.On("DescribeTrails", context.Background()).Return([]cloudtrail.TrailInfo{}, nil)
+					m.On("DescribeTrails", ctx).Return([]cloudtrail.TrailInfo{}, nil)
 					return m
 				},
 			},
@@ -79,14 +78,14 @@ func TestProvider_DescribeTrails(t *testing.T) {
 			clients: map[string]func() any{
 				"s3Provider": func() any {
 					m := &s3.MockS3{}
-					m.On("GetBucketPolicy", context.Background(), mock.Anything, mock.Anything).Return(nil, errors.New("no bucket policy"))
-					m.On("GetBucketACL", context.Background(), mock.Anything, mock.Anything).Return(nil, errors.New("no bucket ACL data"))
-					m.On("GetBucketLogging", context.Background(), mock.Anything, mock.Anything).Return(s3.Logging{}, errors.New("no bucket logging data"))
+					m.On("GetBucketPolicy", ctx, mock.Anything, mock.Anything).Return(nil, errors.New("no bucket policy"))
+					m.On("GetBucketACL", ctx, mock.Anything, mock.Anything).Return(nil, errors.New("no bucket ACL data"))
+					m.On("GetBucketLogging", ctx, mock.Anything, mock.Anything).Return(s3.Logging{}, errors.New("no bucket logging data"))
 					return m
 				},
 				"cloudTrailProvider": func() any {
 					m := &cloudtrail.MockTrailService{}
-					m.On("DescribeTrails", context.Background()).Return([]cloudtrail.TrailInfo{{Trail: types.Trail{
+					m.On("DescribeTrails", ctx).Return([]cloudtrail.TrailInfo{{Trail: types.Trail{
 						TrailARN: aws.String("test-arn"),
 					}}}, nil)
 					return m
@@ -107,14 +106,14 @@ func TestProvider_DescribeTrails(t *testing.T) {
 			clients: map[string]func() any{
 				"s3Provider": func() any {
 					m := &s3.MockS3{}
-					m.On("GetBucketPolicy", context.Background(), mock.Anything, mock.Anything).Return(s3.BucketPolicy{}, nil)
-					m.On("GetBucketACL", context.Background(), mock.Anything, mock.Anything).Return(&s3Client.GetBucketAclOutput{}, nil)
-					m.On("GetBucketLogging", context.Background(), mock.Anything, mock.Anything).Return(s3.Logging{Enabled: true}, nil)
+					m.On("GetBucketPolicy", ctx, mock.Anything, mock.Anything).Return(s3.BucketPolicy{}, nil)
+					m.On("GetBucketACL", ctx, mock.Anything, mock.Anything).Return(&s3Client.GetBucketAclOutput{}, nil)
+					m.On("GetBucketLogging", ctx, mock.Anything, mock.Anything).Return(s3.Logging{Enabled: true}, nil)
 					return m
 				},
 				"cloudTrailProvider": func() any {
 					m := &cloudtrail.MockTrailService{}
-					m.On("DescribeTrails", context.Background()).Return([]cloudtrail.TrailInfo{
+					m.On("DescribeTrails", ctx).Return([]cloudtrail.TrailInfo{
 						{
 							Trail: types.Trail{
 								TrailARN: aws.String("test-arn"),
@@ -144,12 +143,12 @@ func TestProvider_DescribeTrails(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p := &Provider{
-				log:           logger,
+				log:           testhelper.NewLogger(t),
 				s3Provider:    tt.clients["s3Provider"]().(s3.S3),
 				trailProvider: tt.clients["cloudTrailProvider"]().(cloudtrail.TrailService),
 			}
 
-			got, err := p.DescribeTrails(context.TODO())
+			got, err := p.DescribeTrails(ctx)
 			if tt.wantErr {
 				require.Error(t, err)
 				return

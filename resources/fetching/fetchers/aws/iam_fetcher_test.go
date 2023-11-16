@@ -211,9 +211,10 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
+			ctx := context.Background()
 			iamProviderMock := &iam.MockAccessManagement{}
 			for funcName, returnVals := range test.mocksReturnVals {
-				iamProviderMock.On(funcName, context.TODO()).Return(returnVals...)
+				iamProviderMock.On(funcName, ctx).Return(returnVals...)
 			}
 
 			iamFetcher := IAMFetcher{
@@ -224,8 +225,6 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 					Account: test.account,
 				},
 			}
-
-			ctx := context.Background()
 
 			err := iamFetcher.Fetch(ctx, fetching.CycleMetadata{})
 			s.Require().NoError(err)

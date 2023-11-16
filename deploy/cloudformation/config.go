@@ -23,10 +23,10 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 
 	"github.com/spf13/viper"
-	"golang.org/x/exp/slices"
 )
 
 type config struct {
