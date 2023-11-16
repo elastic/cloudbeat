@@ -96,6 +96,20 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 				Sku:              "",
 			},
 		},
+		inventory.ApplicationInsights: {
+			{
+				Id:               "id4",
+				Name:             "name4",
+				Location:         "location4",
+				Properties:       map[string]interface{}{"key4": "value4"},
+				ResourceGroup:    "rg4",
+				SubscriptionId:   "subId1",
+				SubscriptionName: "subName1",
+				TenantId:         "tenantId4",
+				Type:             inventory.ApplicationInsights,
+				Sku:              "",
+			},
+		},
 	}
 
 	mockInventoryService := inventory.NewMockServiceAPI(s.T())
