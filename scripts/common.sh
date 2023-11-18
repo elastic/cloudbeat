@@ -3,14 +3,14 @@
 exec_pod() {
     pod=$1
     cmd=$2
-    kubectl -n kube-system exec $pod -- $cmd
+    kubectl -n kube-system exec "$pod" -- "$cmd"
 }
 
 cp_to_pod() {
     pod=$1
     source=$2
     dest=$3
-    kubectl cp $2 kube-system/$1:$dest
+    kubectl cp "$source" kube-system/"$pod":"$dest"
 }
 
 get_agents() {
@@ -30,8 +30,8 @@ is_eks() {
 }
 
 get_agent_sha() {
-    out=$(exec_pod $1 "elastic-agent version --yaml --binary-only")
-    echo $out | cut -d ":" -f4 | awk '{$1=$1};1' | awk '{ print substr($0, 0, 6) }'
+    out=$(exec_pod "$1" "elastic-agent version --yaml --binary-only")
+    echo "$out" | cut -d ":" -f4 | awk '{$1=$1};1' | awk '{ print substr($0, 0, 6) }'
 }
 
 _kubectl_node_info() {
@@ -41,7 +41,7 @@ _kubectl_node_info() {
 # Iterates over the agents, and copies a list of files into each one of them to the `components` folder
 copy_to_agents() {
     for P in $(get_agents); do
-        POD=$(echo $P | cut -d '/' -f 2)
+        POD=$(echo "$P" | cut -d '/' -f 2)
         SHA=$(get_agent_sha "$POD")
         echo "Found sha=$SHA in pod=$POD"
 
@@ -57,7 +57,7 @@ copy_to_agents() {
 
 restart_agents() {
     for P in $(get_agents); do
-        POD=$(echo $P | cut -d '/' -f 2)
-        exec_pod $POD "elastic-agent restart"
+        POD=$(echo "$P" | cut -d '/' -f 2)
+        exec_pod "$POD" "elastic-agent restart"
     done
 }
