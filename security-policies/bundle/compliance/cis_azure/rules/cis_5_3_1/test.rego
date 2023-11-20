@@ -36,4 +36,4 @@ not_eval {
 
 component1 = test_data.generate_insights_component("rcg1", "cmp1")
 
-component2 = test_data.generate_insights_component("rcg1", "cmp1")
+component2 = test_data.generate_insights_component("rcg2", "cmp2")
