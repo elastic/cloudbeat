@@ -217,11 +217,11 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 			s.Equal(md.Name, fmt.Sprintf("%s-%s", AzureBatchResources[assets[0].Type].SubType, subKey))
 			s.Equal(md.SubType, AzureBatchResources[assets[0].Type].SubType)
 			s.Equal(md.Type, AzureBatchResources[assets[0].Type].Type)
-			s.Equal(md.Region, "global")
+			s.Equal("global", md.Region)
 
 			ecs, err := subTypeRes.Resource.GetElasticCommonData()
 			s.Require().NoError(err)
-			s.Equal(ecs, map[string]any{
+			s.Equal(map[string]any{
 				"cloud": map[string]any{
 					"provider": "azure",
 					"account": map[string]any{
@@ -229,7 +229,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 						"name": subMap[subKey],
 					},
 				},
-			})
+			}, ecs)
 		}
 	}
 }
