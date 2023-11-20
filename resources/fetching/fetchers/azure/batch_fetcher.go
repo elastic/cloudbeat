@@ -57,30 +57,36 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 		return err
 	}
 
-	if len(allAssets) == 0 {
-		return nil
-	}
-
-	assetGroups := lo.GroupBy(allAssets, func(item inventory.AzureAsset) string {
-		return fmt.Sprintf("%s-%s", item.SubscriptionId, item.Type)
+	subscriptionGroups := lo.GroupBy(allAssets, func(item inventory.AzureAsset) string {
+		return item.SubscriptionId
 	})
 
-	for _, assets := range assetGroups {
-		pair := AzureBatchAssets[assets[0].Type]
+	for subId, subName := range f.provider.GetSubscriptions() {
+		assetGroups := lo.GroupBy(subscriptionGroups[subId], func(item inventory.AzureAsset) string {
+			return item.Type
+		})
+		for assetType, pair := range AzureBatchAssets {
+			assets := assetGroups[assetType]
+			if assets == nil {
+				assets = []inventory.AzureAsset{} // Use empty array instead of nil
+			}
 
-		select {
-		case <-ctx.Done():
-			f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
-			return nil
-		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cMetadata,
-			Resource: &AzureBatchResource{
-				// Every asset in the list has the same type and subtype
-				Type:    pair.Type,
-				SubType: pair.SubType,
-				Assets:  assets,
-			},
-		}:
+			select {
+			case <-ctx.Done():
+				f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
+				return nil
+			case f.resourceCh <- fetching.ResourceInfo{
+				CycleMetadata: cMetadata,
+				Resource: &AzureBatchResource{
+					// Every asset in the list has the same type and subtype
+					Type:    pair.Type,
+					SubType: pair.SubType,
+					SubId:   subId,
+					SubName: subName,
+					Assets:  assets,
+				},
+			}:
+			}
 		}
 	}
 
@@ -92,6 +98,8 @@ func (f *AzureBatchAssetFetcher) Stop() {}
 type AzureBatchResource struct {
 	Type    string
 	SubType string
+	SubId   string
+	SubName string
 	Assets  []inventory.AzureAsset `json:"assets,omitempty"`
 }
 
@@ -101,7 +109,7 @@ func (r *AzureBatchResource) GetData() any {
 
 func (r *AzureBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	// Assuming all batch in not empty includes assets of the same subscription
-	id := fmt.Sprintf("%s-%s", r.SubType, r.Assets[0].SubscriptionId)
+	id := fmt.Sprintf("%s-%s", r.SubType, r.SubId)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    r.Type,
@@ -117,8 +125,8 @@ func (r *AzureBatchResource) GetElasticCommonData() (map[string]any, error) {
 		"cloud": map[string]any{
 			"provider": "azure",
 			"account": map[string]any{
-				"id":   r.Assets[0].SubscriptionId,
-				"name": r.Assets[0].SubscriptionName,
+				"id":   r.SubId,
+				"name": r.SubName,
 			},
 			// TODO: Organization fields
 		},

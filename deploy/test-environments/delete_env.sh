@@ -24,14 +24,14 @@ function delete_environment() {
     tfstate="./$ENV-terraform.tfstate"
 
     # Copy state file
-    if aws s3 cp $BUCKET/"$ENV"/terraform.tfstate "$tfstate"; then
+    if aws s3 cp "$BUCKET/$ENV/terraform.tfstate" "$tfstate"; then
         echo "Downloaded Terraform state file from S3."
 
         # Check if the resource aws_auth exists in the local state file and remove it
-        terraform state rm -state "$tfstate" $(terraform state list -state "$tfstate" | grep "kubernetes_config_map_v1_data.aws_auth") || true
+        terraform state rm -state "$tfstate" "$(terraform state list -state "$tfstate" | grep "kubernetes_config_map_v1_data.aws_auth")" || true
         # Destroy environment and remove environment data from S3
         if terraform destroy -var="region=$AWS_REGION" -state "$tfstate" --auto-approve &&
-            aws s3 rm $BUCKET/"$ENV" --recursive; then
+            aws s3 rm "$BUCKET/$ENV" --recursive; then
             echo "Successfully deleted $ENV"
             DELETED_ENVS+=("$ENV")
         else
@@ -91,7 +91,7 @@ done
 
 BUCKET=s3://tf-state-bucket-test-infra
 ALL_ENVS=$(aws s3 ls $BUCKET/"$ENV_PREFIX" | awk '{print $2}' | sed 's/\///g')
-ALL_STACKS=$(aws cloudformation list-stacks --stack-status-filter "CREATE_COMPLETE" "UPDATE_COMPLETE" --region "$AWS_REGION" | jq -r '.StackSummaries[] | select(.StackName | startswith("'$ENV_PREFIX'") and (if "'$IGNORE_PREFIX'" != "" then .StackName | startswith("'$IGNORE_PREFIX'") | not else true end)) | .StackName')
+ALL_STACKS=$(aws cloudformation list-stacks --stack-status-filter "CREATE_COMPLETE" "UPDATE_COMPLETE" --region "$AWS_REGION" | jq -r '.StackSummaries[] | select(.StackName | startswith("'"$ENV_PREFIX"'") and (if "'"$IGNORE_PREFIX"'" != "" then .StackName | startswith("'"$IGNORE_PREFIX"'") | not else true end)) | .StackName')
 
 if [ -n "$IGNORE_PREFIX" ]; then
     # If IGNORE_PREFIX exists and is not empty
@@ -144,9 +144,7 @@ FAILED_STACKS=()
 
 # Wait for the CloudFormation stacks to be deleted
 for STACK in $ALL_STACKS; do
-    delete_stack "$STACK"
-    aws cloudformation wait stack-delete-complete --stack-name "$STACK" --region "$AWS_REGION"
-    if [ $? -eq 0 ]; then
+    if delete_stack "$STACK" && aws cloudformation wait stack-delete-complete --stack-name "$STACK" --region "$AWS_REGION"; then
         echo "Successfully deleted CloudFormation stack: $STACK"
         DELETED_STACKS+=("$STACK")
     else
@@ -165,17 +163,18 @@ printf "%s\n" "${FAILED_STACKS[@]}"
 DELETED_DEPLOYMENTS=()
 FAILED_DEPLOYMENTS=()
 
-export PROJECT_NAME=$(gcloud config get-value core/project)
-export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
+PROJECT_NAME=$(gcloud config get-value core/project)
+PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+export PROJECT_NAME
+export PROJECT_NUMBER
 
 # Delete GCP Deployments
 for DEPLOYMENT in $ALL_GCP_DEPLOYMENTS; do
     # Add the needed roles to delete the templates to the project using the deployment manager
-    gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin --no-user-output-enabled
-    gcloud projects add-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
+    gcloud projects add-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin --no-user-output-enabled
+    gcloud projects add-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
 
-    gcloud deployment-manager deployments delete "$DEPLOYMENT" -q
-    if [ $? -eq 0 ]; then
+    if gcloud deployment-manager deployments delete "$DEPLOYMENT" -q; then
         echo "Successfully deleted GCP deployment: $DEPLOYMENT"
         DELETED_DEPLOYMENTS+=("$DEPLOYMENT")
     else
@@ -184,14 +183,89 @@ for DEPLOYMENT in $ALL_GCP_DEPLOYMENTS; do
     fi
 
     # Remove the roles required to deploy the DM templates
-    gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin --no-user-output-enabled
-    gcloud projects remove-iam-policy-binding ${PROJECT_NAME} --member=serviceAccount:${PROJECT_NUMBER}@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
+    gcloud projects remove-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/iam.roleAdmin --no-user-output-enabled
+    gcloud projects remove-iam-policy-binding "${PROJECT_NAME}" --member=serviceAccount:"${PROJECT_NUMBER}"@cloudservices.gserviceaccount.com --role=roles/resourcemanager.projectIamAdmin --no-user-output-enabled
 
 done
 
 # Print summary of gcp deployments deletions
-echo "Successfully deleted GCP deploments (${#DELETED_DEPLOYMENTS[@]}):"
+echo "Successfully deleted GCP deployments (${#DELETED_DEPLOYMENTS[@]}):"
 printf "%s\n" "${DELETED_DEPLOYMENTS[@]}"
 
 echo "Failed to delete GCP deployments (${#FAILED_DEPLOYMENTS[@]}):"
 printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
+
+# Delete Azure deployments
+FAILED_AZURE_DEPLOYMENTS=()
+FAILED_AZURE_RESOURCES=()
+FAILED_AZURE_GROUPS=()
+deployment_names=('cloudbeat-vm-deployment' 'role-assignment-deployment' 'elastic-agent-deployment')
+groups=$(az group list --query "[?starts_with(name, '$ENV_PREFIX')].name" -o tsv | awk -v prefix="$IGNORE_PREFIX" '{if (prefix == "") print $0; else if (!($0 ~ "^" prefix)) print $0}')
+for group in $groups; do
+    for dep_name in ${#deployment_names[@]}; do
+        resource_ids=$(az deployment group show --name "$dep_name" --resource-group "$group" --query "properties.outputResources[].id" --output tsv)
+        if [ -z "$resource_ids" ]; then
+            echo "No resources found for deployment $dep_name."
+        else
+            echo "Deleting resources deployed by $dep_name:"
+            for resource_id in $resource_ids; do
+                az resource delete --ids "$resource_id" || {
+                    echo "Failed to delete resource: $resource_id"
+                    FAILED_AZURE_RESOURCES+=("$resource_id")
+                    continue
+                }
+            done
+            az deployment group delete --name "$dep_name" --resource-group "$group" || {
+                echo "Failed to delete deployment: $dep_name"
+                FAILED_AZURE_DEPLOYMENTS+=("$dep_name")
+                continue
+            }
+            echo "Resources deployed by $dep_name have been deleted."
+        fi
+    done
+
+    if ! res_group=$(az resource list --resource-group "$group" --query '[].id' -o tsv); then
+        echo "Failed to check resource group $group for pre-existing resources."
+        FAILED_AZURE_GROUPS+=("$group")
+    elif [[ $res_group ]]; then
+        echo "Pre-existing resources found in resource group $group skipping delete."
+    else
+        az group delete --name "$group" --yes || {
+            echo "Failed to delete resource group: $group"
+            FAILED_AZURE_GROUPS+=("$group")
+            continue
+        }
+        echo "Resource group $group has been deleted."
+    fi
+done
+
+# Summary of azure deployments, resources and groups deletions
+FAILED_AZURE_CLEANUP=false
+if [ ${#FAILED_AZURE_DEPLOYMENTS[@]} -gt 0 ] || [ ${#FAILED_AZURE_RESOURCES[@]} -gt 0 ] || [ ${#FAILED_AZURE_GROUPS[@]} -gt 0 ]; then
+    FAILED_AZURE_CLEANUP=true
+fi
+
+# Final check to exit with an error if any deletions of environments, stacks, or deployments failed
+if [ ${#FAILED_ENVS[@]} -gt 0 ] || [ ${#FAILED_STACKS[@]} -gt 0 ] || [ ${#FAILED_DEPLOYMENTS[@]} -gt 0 ] || [ $FAILED_AZURE_CLEANUP != false ]; then
+    echo "There were errors deleting one or more resources."
+    # Optionally, provide more details about which resources failed to delete
+    if [ ${#FAILED_ENVS[@]} -gt 0 ]; then
+        echo "Failed to delete the following environments:"
+        printf "%s\n" "${FAILED_ENVS[@]}"
+    fi
+    if [ ${#FAILED_STACKS[@]} -gt 0 ]; then
+        echo "Failed to delete the following CloudFormation stacks:"
+        printf "%s\n" "${FAILED_STACKS[@]}"
+    fi
+    if [ ${#FAILED_DEPLOYMENTS[@]} -gt 0 ]; then
+        echo "Failed to delete the following GCP deployments:"
+        printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
+    fi
+    if [ $FAILED_AZURE_CLEANUP != false ]; then
+        echo "Failed to delete the following Azure entities:"
+        printf "%s\n" "${FAILED_AZURE_DEPLOYMENTS[@]}"
+        printf "%s\n" "${FAILED_AZURE_RESOURCES[@]}"
+        printf "%s\n" "${FAILED_AZURE_GROUPS[@]}"
+    fi
+    exit 1
+fi

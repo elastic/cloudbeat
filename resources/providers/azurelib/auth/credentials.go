@@ -18,25 +18,42 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+
+	"github.com/elastic/cloudbeat/config"
 )
 
 type AzureFactoryConfig struct {
-	Credentials *azidentity.DefaultAzureCredential
+	Credentials azcore.TokenCredential
 }
 
 type ConfigProviderAPI interface {
-	GetAzureClientConfig() (*AzureFactoryConfig, error)
+	GetAzureClientConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error)
 }
 
 type ConfigProvider struct {
 	AuthProvider AzureAuthProviderAPI
 }
 
-func (p *ConfigProvider) GetAzureClientConfig() (*AzureFactoryConfig, error) {
-	return p.getDefaultCredentialsConfig()
+func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error) {
+	switch cfg.Credentials.ClientCredentialsType {
+	case config.AzureClientCredentialsTypeSecret:
+		return p.getSecretCredentialsConfig(cfg)
+	case config.AzureClientCredentialsTypeCertificate:
+		return p.getCertificateCredentialsConfig(cfg)
+	case config.AzureClientCredentialsTypeUsernamePassword:
+		if cfg.Credentials.ClientUsername == "" || cfg.Credentials.ClientPassword == "" {
+			return nil, ErrIncompleteUsernamePassword
+		}
+		return p.getUsernamePasswordCredentialsConfig(cfg)
+	case "", config.AzureClientCredentialsTypeManagedIdentity, config.AzureClientCredentialsTypeARMTemplate:
+		return p.getDefaultCredentialsConfig()
+	}
+
+	return nil, ErrWrongCredentialsType
 }
 
 func (p *ConfigProvider) getDefaultCredentialsConfig() (*AzureFactoryConfig, error) {
@@ -49,3 +66,58 @@ func (p *ConfigProvider) getDefaultCredentialsConfig() (*AzureFactoryConfig, err
 		Credentials: creds,
 	}, nil
 }
+
+func (p *ConfigProvider) getSecretCredentialsConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error) {
+	creds, err := p.AuthProvider.FindClientSecretCredentials(
+		cfg.Credentials.TenantID,
+		cfg.Credentials.ClientID,
+		cfg.Credentials.ClientSecret,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get secret credentials: %w", err)
+	}
+
+	return &AzureFactoryConfig{
+		Credentials: creds,
+	}, nil
+}
+
+func (p *ConfigProvider) getCertificateCredentialsConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error) {
+	creds, err := p.AuthProvider.FindCertificateCredential(
+		cfg.Credentials.TenantID,
+		cfg.Credentials.ClientID,
+		cfg.Credentials.ClientCertificatePath,
+		cfg.Credentials.ClientCertificatePassword,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get secret credentials: %w", err)
+	}
+
+	return &AzureFactoryConfig{
+		Credentials: creds,
+	}, nil
+}
+
+func (p *ConfigProvider) getUsernamePasswordCredentialsConfig(cfg config.AzureConfig) (*AzureFactoryConfig, error) {
+	creds, err := p.AuthProvider.FindUsernamePasswordCredentials(
+		cfg.Credentials.TenantID,
+		cfg.Credentials.ClientID,
+		cfg.Credentials.ClientUsername,
+		cfg.Credentials.ClientPassword,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get username and password credentials: %w", err)
+	}
+
+	return &AzureFactoryConfig{
+		Credentials: creds,
+	}, nil
+}
+
+var (
+	ErrWrongCredentialsType       = errors.New("wrong credentials type")
+	ErrIncompleteUsernamePassword = errors.New("incomplete username and password credentials")
+)

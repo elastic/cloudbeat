@@ -57,8 +57,9 @@ type Config struct {
 }
 
 type CloudConfig struct {
-	Aws AwsConfig `config:"aws"`
-	Gcp GcpConfig `config:"gcp"`
+	Aws   AwsConfig   `config:"aws"`
+	Gcp   GcpConfig   `config:"gcp"`
+	Azure AzureConfig `config:"azure"`
 }
 
 type AwsConfig struct {
@@ -83,6 +84,29 @@ type GcpClientOpt struct {
 	CredentialsJSON     string `config:"credentials_json"`
 	CredentialsFilePath string `config:"credentials_file_path"`
 }
+
+type AzureConfig struct {
+	Credentials AzureClientOpt `config:"credentials"`
+}
+
+type AzureClientOpt struct {
+	ClientCredentialsType     string `config:"type"`
+	ClientID                  string `config:"client_id"`
+	TenantID                  string `config:"tenant_id"`
+	ClientSecret              string `config:"client_secret"`
+	ClientUsername            string `config:"client_username"`
+	ClientPassword            string `config:"client_password"`
+	ClientCertificatePath     string `config:"client_certificate_path"`
+	ClientCertificatePassword string `config:"client_certificate_password"`
+}
+
+const (
+	AzureClientCredentialsTypeARMTemplate      = "arm_template"
+	AzureClientCredentialsTypeManagedIdentity  = "managed_identity"
+	AzureClientCredentialsTypeSecret           = "service_principal_with_client_secret"
+	AzureClientCredentialsTypeCertificate      = "service_principal_with_client_certificate"
+	AzureClientCredentialsTypeUsernamePassword = "service_principal_with_client_username_and_password"
+)
 
 const (
 	SingleAccount       = "single-account"
