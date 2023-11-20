@@ -27,7 +27,7 @@ CNVM_AGENT_POLICY = "../../../cloud/data/agent_policy_cnvm_aws.json"
 CNVM_PACKAGE_POLICY = "../../../cloud/data/package_policy_cnvm_aws.json"
 CNVM_EXPECTED_AGENTS = 1
 CNVM_CLOUDFORMATION_CONFIG = "../../../cloudformation/config.json"
-CNVM_AGENT_TAGS = ["cft_version:CFT_VERSION", "cft_arn:arn:aws:cloudformation:.*"]
+CNVM_AGENT_TAGS = ["cft_version:cloudformation-cnvm-CFT_VERSION.yml", "cft_arn:arn:aws:cloudformation:.*"]
 
 cnvm_agent_policy_data = Path(__file__).parent / CNVM_AGENT_POLICY
 cnvm_pkg_policy_data = Path(__file__).parent / CNVM_PACKAGE_POLICY
