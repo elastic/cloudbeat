@@ -67,7 +67,10 @@ def get_fleet_server_host(cfg: Munch) -> str:
             auth=cfg.auth,
         )
         response_obj = munchify(response)
-        return response_obj.item.fleet_server_hosts[0]
+        # TODO: Delete this line once the API is fixed
+        if "internal" not in response_obj.item.fleet_server_hosts[0]:
+            return response_obj.item.fleet_server_hosts[0]
+        return response_obj.item.fleet_server_hosts[1]
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
