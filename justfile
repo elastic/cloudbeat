@@ -165,7 +165,7 @@ delete-cloud-env prefix ignore-prefix="" interactive="true":
 # generate new and update existing mocks from golang interfaces
 # and update the license header
 generate-mocks:
-  mockery --dir . --inpackage --all --with-expecter --case underscore --recursive --exclude vendor
+  mockery --config=.mockery.yaml
   mage AddLicenseHeaders
 
 # run to validate no mocks are missing

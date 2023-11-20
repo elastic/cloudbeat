@@ -101,6 +101,7 @@ type AzureClientOpt struct {
 }
 
 const (
+	AzureClientCredentialsTypeARMTemplate      = "arm_template"
 	AzureClientCredentialsTypeManagedIdentity  = "managed_identity"
 	AzureClientCredentialsTypeSecret           = "service_principal_with_client_secret"
 	AzureClientCredentialsTypeCertificate      = "service_principal_with_client_certificate"
