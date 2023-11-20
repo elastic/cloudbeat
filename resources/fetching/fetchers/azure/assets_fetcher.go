@@ -82,7 +82,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
 	assets := []inventory.AzureAsset{}
 	for _, assetGroup := range AzureAssetGroups {
-		// Fetching all types even if non existant in asset group for simplicity
+		// Fetching all types even if non existent in asset group for simplicity
 		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureResourceTypeToTypePair))
 		if err != nil {
 			f.log.Errorf("AzureAssetsFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
