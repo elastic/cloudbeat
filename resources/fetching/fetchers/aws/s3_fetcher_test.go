@@ -76,9 +76,10 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
+			ctx := context.Background()
 			s3ProviderMock := &s3.MockS3{}
 			for funcName, returnVals := range test.s3mocksReturnVals {
-				s3ProviderMock.On(funcName, context.TODO()).Return(returnVals...)
+				s3ProviderMock.On(funcName, ctx).Return(returnVals...)
 			}
 
 			s3Fetcher := S3Fetcher{
@@ -86,8 +87,6 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 				s3:         s3ProviderMock,
 				resourceCh: s.resourceCh,
 			}
-
-			ctx := context.Background()
 
 			err := s3Fetcher.Fetch(ctx, fetching.CycleMetadata{})
 			s.Require().NoError(err)

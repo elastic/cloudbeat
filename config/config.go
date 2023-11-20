@@ -90,6 +90,7 @@ type AzureConfig struct {
 }
 
 type AzureClientOpt struct {
+	ClientCredentialsType     string `config:"type"`
 	ClientID                  string `config:"client_id"`
 	TenantID                  string `config:"tenant_id"`
 	ClientSecret              string `config:"client_secret"`
@@ -98,6 +99,14 @@ type AzureClientOpt struct {
 	ClientCertificatePath     string `config:"client_certificate_path"`
 	ClientCertificatePassword string `config:"client_certificate_password"`
 }
+
+const (
+	AzureClientCredentialsTypeARMTemplate      = "arm_template"
+	AzureClientCredentialsTypeManagedIdentity  = "managed_identity"
+	AzureClientCredentialsTypeSecret           = "service_principal_with_client_secret"
+	AzureClientCredentialsTypeCertificate      = "service_principal_with_client_certificate"
+	AzureClientCredentialsTypeUsernamePassword = "service_principal_with_client_username_and_password"
+)
 
 const (
 	SingleAccount       = "single-account"
