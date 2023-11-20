@@ -33,11 +33,6 @@ Parameters:
     Description: The version of elastic-agent to install
     Type: String
 
-Conditions:
-  UseElasticTags: !Equals
-    - !Ref "AWS::AccountId"
-    - 704479110758
-
 Resources:
 
   # Security Group for EC2 instance
@@ -107,26 +102,6 @@ Resources:
                   - !Ref "AWS::StackId"
         - Key: Task
           Value: Cloud Security Posture Management Scanner
-        - Key: division
-          Value: !If
-            - UseElasticTags
-            - engineering
-            - AWS::NoValue
-        - Key: org
-          Value: !If
-            - UseElasticTags
-            - security
-            - AWS::NoValue
-        - Key: team
-          Value: !If
-            - UseElasticTags
-            - cloud-security
-            - AWS::NoValue
-        - Key: project
-          Value: !If
-            - UseElasticTags
-            - cloudformation
-            - AWS::NoValue
       ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ElasticAgentInstanceProfile
