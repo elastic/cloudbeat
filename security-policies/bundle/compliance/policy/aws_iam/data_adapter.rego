@@ -1,37 +1,40 @@
 package compliance.policy.aws_iam.data_adapter
 
-is_server_certificate {
+import future.keywords.contains
+import future.keywords.if
+
+is_server_certificate if {
 	input.subType == "aws-iam-server-certificate"
 }
 
-is_pwd_policy {
+is_pwd_policy if {
 	input.subType == "aws-password-policy"
 }
 
-is_iam_user {
+is_iam_user if {
 	input.subType == "aws-iam-user"
 	input.resource.name != "<root_account>"
 }
 
-is_root_user {
+is_root_user if {
 	input.subType == "aws-iam-user"
 	input.resource.name == "<root_account>"
 }
 
-is_iam_policy {
+is_iam_policy if {
 	input.subType == "aws-policy"
 }
 
-is_aws_support_access {
+is_aws_support_access if {
 	is_iam_policy
 	input.resource.Arn == "arn:aws:iam::aws:policy/AWSSupportAccess"
 }
 
-is_access_analyzers {
+is_access_analyzers if {
 	input.subType == "aws-access-analyzers"
 }
 
-pwd_policy = policy {
+pwd_policy = policy if {
 	is_pwd_policy
 	policy := input.resource
 }
@@ -48,13 +51,13 @@ analyzers = input.resource.Analyzers
 
 analyzer_regions = input.resource.Regions
 
-used_active_access_keys[access_key] {
+used_active_access_keys contains access_key if {
 	access_key := iam_user.access_keys[_]
 	access_key.active
 	access_key.has_used
 }
 
-unused_active_access_keys[access_key] {
+unused_active_access_keys contains access_key if {
 	access_key = iam_user.access_keys[_]
 	access_key.active
 	not access_key.has_used

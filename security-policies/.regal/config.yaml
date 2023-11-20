@@ -2,6 +2,8 @@ rules:
   idiomatic:
     use-some-for-output-vars:
       level: ignore
+    use-if:
+      level: ignore
   imports:
     prefer-package-imports:
       level: ignore
