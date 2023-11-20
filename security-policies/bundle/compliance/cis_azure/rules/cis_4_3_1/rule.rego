@@ -2,8 +2,9 @@ package compliance.cis_azure.rules.cis_4_3_1
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
+import future.keywords.if
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_postgresql_server_db
 
@@ -14,6 +15,6 @@ finding = result {
 	)
 }
 
-ssl_enforcement_enabled {
+ssl_enforcement_enabled if {
 	data_adapter.properties.sslEnforcement == "Enabled"
 } else = false

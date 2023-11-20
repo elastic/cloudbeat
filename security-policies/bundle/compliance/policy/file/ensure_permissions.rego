@@ -3,6 +3,7 @@ package compliance.policy.file.ensure_permissions
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.file.common as file_common
 import data.compliance.policy.file.data_adapter
+import future.keywords.if
 
 finding(rule_evaluation) := lib_common.generate_result(
 	lib_common.calculate_result(rule_evaluation.evaluation),
@@ -16,7 +17,7 @@ filename_filter(name) := data_adapter.filename == name
 
 filename_suffix_filter(suffix) := endswith(data_adapter.filename, suffix)
 
-file_permission_match(user, group, other) := result {
+file_permission_match(user, group, other) := result if {
 	mode := data_adapter.filemode
 	result := {
 		"evaluation": file_common.file_permission_match(mode, user, group, other),
@@ -27,7 +28,7 @@ file_permission_match(user, group, other) := result {
 	}
 }
 
-file_permission_match_exact(user, group, other) := result {
+file_permission_match_exact(user, group, other) := result if {
 	mode := data_adapter.filemode
 	result := {
 		"evaluation": file_common.file_permission_match_exact(mode, user, group, other),

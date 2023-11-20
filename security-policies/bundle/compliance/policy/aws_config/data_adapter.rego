@@ -1,6 +1,8 @@
 package compliance.policy.aws_config.data_adapter
 
-is_configservice {
+import future.keywords.if
+
+is_configservice if {
 	input.subType == "aws-config"
 }
 

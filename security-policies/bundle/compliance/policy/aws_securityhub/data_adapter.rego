@@ -1,6 +1,8 @@
 package compliance.policy.aws_securityhub.data_adapter
 
-is_securityhub_subType {
+import future.keywords.if
+
+is_securityhub_subType if {
 	input.subType == "aws-securityhub"
 }
 
