@@ -221,7 +221,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 
 			ecs, err := subTypeRes.Resource.GetElasticCommonData()
 			s.Require().NoError(err)
-			s.Equal(map[string]any{
+			s.Equal(ecs, map[string]any{
 				"cloud": map[string]any{
 					"provider": "azure",
 					"account": map[string]any{
@@ -229,7 +229,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 						"name": subMap[subKey],
 					},
 				},
-			}, ecs)
+			})
 		}
 	}
 }
