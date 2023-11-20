@@ -24,7 +24,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -58,9 +57,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	mockAssetGroups := make(map[string][]inventory.AzureAsset)
 	totalMockAssets := 0
 	var flatMockAssets []inventory.AzureAsset
-	for _, assetGroup := range maps.Keys(AzureAssetGroups) {
+	for _, assetGroup := range AzureAssetGroups {
 		var mockAssets []inventory.AzureAsset
-		for _, assetType := range maps.Keys(AzureAssetGroups[assetGroup]) {
+		for _, assetType := range maps.Keys(AzureResourceTypeToTypePair) {
 			mockAssets = append(mockAssets,
 				inventory.AzureAsset{
 					Id:               "id",
@@ -83,8 +82,8 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 
 	mockInventoryService.EXPECT().
 		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
-		RunAndReturn(func(ctx context.Context, assert_group string, types []string) ([]inventory.AzureAsset, error) {
-			return mockAssetGroups[assert_group], nil
+		RunAndReturn(func(ctx context.Context, assetGroup string, types []string) ([]inventory.AzureAsset, error) {
+			return mockAssetGroups[assetGroup], nil
 		})
 	defer mockInventoryService.AssertExpectations(s.T())
 
@@ -107,15 +106,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 			meta, err := result.GetMetadata()
 			s.Require().NoError(err)
 
-			var expectedAssetGroup string
-			for _, assetGroup := range maps.Keys(AzureAssetGroups) {
-				if slices.Contains(maps.Keys(AzureAssetGroups[assetGroup]), expected.Type) {
-					expectedAssetGroup = assetGroup
-					break
-				}
-			}
-
-			pair := AzureAssetGroups[expectedAssetGroup][expected.Type]
+			pair := AzureResourceTypeToTypePair[expected.Type]
 			s.Equal(fetching.ResourceMetadata{
 				ID:                  expected.Id,
 				Type:                pair.Type,

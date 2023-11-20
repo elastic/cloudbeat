@@ -36,21 +36,14 @@ type AzureBatchAssetFetcher struct {
 	provider   inventory.ServiceAPI
 }
 
-var AzureBatchAssetGroupResources = map[string]typePair{
+var AzureBatchResources = map[string]typePair{
 	inventory.ActivityLogAlertAssetType: newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
 	inventory.ApplicationInsights:       newPair(fetching.AzureInsightsComponentType, fetching.MonitoringIdentity),
 	inventory.BastionAssetType:          newPair(fetching.AzureBastionType, fetching.CloudDns),
+	inventory.RoleDefinitionsType:       newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
 }
 
-var AzureBatchAssetGroupAuthorizationResources = map[string]typePair{
-	// TODO: Should be CloudIdentity?
-	inventory.RoleDefinitionsType: newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
-}
-
-var AzureBatchAssetGroups = map[string]map[string]typePair{
-	inventory.AssetGroupResources:              AzureBatchAssetGroupResources,
-	inventory.AssetGroupAuthorizationResources: AzureBatchAssetGroupAuthorizationResources,
-}
+var AzureBatchAssetGroups = []string{inventory.AssetGroupResources, inventory.AssetGroupAuthorizationResources}
 
 func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureBatchAssetFetcher {
 	return &AzureBatchAssetFetcher{
@@ -65,49 +58,46 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 
 	subscriptions := f.provider.GetSubscriptions()
 
-	assetsByAssetGroup := make(map[string][]inventory.AzureAsset, len(AzureBatchAssetGroups))
-	for _, assetGroup := range maps.Keys(AzureBatchAssetGroups) {
-		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchAssetGroups[assetGroup]))
+	assets := []inventory.AzureAsset{}
+	for _, assetGroup := range AzureBatchAssetGroups {
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchResources))
 		if err != nil {
 			f.log.Errorf("AzureBatchAssetFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
 			// TODO: Should we stop and return an error if we fail to fetch a specific batch asset group?
 			continue
 		}
-		assetsByAssetGroup[assetGroup] = r
+		assets = append(assets, r...)
 	}
 
-	for _, assetGroup := range maps.Keys(assetsByAssetGroup) {
-		allAssets := assetsByAssetGroup[assetGroup]
-		subscriptionGroups := lo.GroupBy(allAssets, func(item inventory.AzureAsset) string {
-			return item.SubscriptionId
+	subscriptionGroups := lo.GroupBy(assets, func(item inventory.AzureAsset) string {
+		return item.SubscriptionId
+	})
+
+	for subId, subName := range subscriptions {
+		assetGroups := lo.GroupBy(subscriptionGroups[subId], func(item inventory.AzureAsset) string {
+			return item.Type
 		})
+		for assetType, pair := range AzureBatchResources {
+			batchAssets := assetGroups[assetType]
+			if batchAssets == nil {
+				batchAssets = []inventory.AzureAsset{} // Use empty array instead of nil
+			}
 
-		for subId, subName := range subscriptions {
-			assetGroups := lo.GroupBy(subscriptionGroups[subId], func(item inventory.AzureAsset) string {
-				return item.Type
-			})
-			for assetType, pair := range AzureBatchAssetGroups[assetGroup] {
-				assets := assetGroups[assetType]
-				if assets == nil {
-					assets = []inventory.AzureAsset{} // Use empty array instead of nil
-				}
-
-				select {
-				case <-ctx.Done():
-					f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
-					return nil
-				case f.resourceCh <- fetching.ResourceInfo{
-					CycleMetadata: cMetadata,
-					Resource: &AzureBatchResource{
-						// Every asset in the list has the same type and subtype
-						Type:    pair.Type,
-						SubType: pair.SubType,
-						SubId:   subId,
-						SubName: subName,
-						Assets:  assets,
-					},
-				}:
-				}
+			select {
+			case <-ctx.Done():
+				f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
+				return nil
+			case f.resourceCh <- fetching.ResourceInfo{
+				CycleMetadata: cMetadata,
+				Resource: &AzureBatchResource{
+					// Every asset in the list has the same type and subtype
+					Type:    pair.Type,
+					SubType: pair.SubType,
+					SubId:   subId,
+					SubName: subName,
+					Assets:  batchAssets,
+				},
+			}:
 			}
 		}
 	}
