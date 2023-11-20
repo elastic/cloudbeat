@@ -48,7 +48,6 @@ provider "ec" {
 provider "restapi" {
   alias = "ec"
   uri      = local.ec_url
-  insecure = true
   write_returns_object = true
   headers = local.ec_headers
 }
