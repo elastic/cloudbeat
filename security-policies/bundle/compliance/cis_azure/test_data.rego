@@ -213,3 +213,43 @@ generate_vm(managed_disk) = {
 		"zones": null,
 	},
 }
+
+generate_insights_components_empty = {
+	"subType": "azure-insights-component",
+	"resource": [],
+}
+
+generate_insights_components(rules) = {
+	"subType": "azure-insights-component",
+	"resource": rules,
+}
+
+generate_insights_component(resource_group, name) = {
+	"id": sprintf("/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/%s/providers/microsoft.insights/components/%s", [resource_group, name]),
+	"name": name,
+	"type": "microsoft.insights/components",
+	"location": "eastus",
+	"tags": {},
+	"kind": "web",
+	"etag": "\"00000000-0000-0000-0000-000000000004\"",
+	"properties": {
+		"ApplicationId": name,
+		"AppId": "00000000-0000-0000-0000-000000000003",
+		"Application_Type": "web",
+		"Flow_Type": "Redfield",
+		"Request_Source": "IbizaAIExtension",
+		"InstrumentationKey": "00000000-0000-0000-0000-000000000002",
+		"ConnectionString": "InstrumentationKey=00000000-0000-0000-0000-000000000002;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/",
+		"Name": name,
+		"CreationDate": "2023-10-29T15:04:34.0549974+00:00",
+		"TenantId": "00000000-0000-0000-0000-000000000001",
+		"provisioningState": "Succeeded",
+		"SamplingPercentage": null,
+		"RetentionInDays": 90,
+		"WorkspaceResourceId": sprintf("/subscriptions/00000000-0000-0000-0000-000000000001/resourcegroups/%s/providers/Microsoft.OperationalInsights/workspaces/00000000-0000-0000-0000-000000000001-%s-EUS", [resource_group, resource_group]),
+		"IngestionMode": "LogAnalytics",
+		"publicNetworkAccessForIngestion": "Enabled",
+		"publicNetworkAccessForQuery": "Enabled",
+		"Ver": "v2",
+	},
+}

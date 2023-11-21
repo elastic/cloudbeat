@@ -77,3 +77,9 @@ is_sql_server {
 is_document_db_database_account {
 	input.subType == "azure-document-db-database-account"
 }
+
+insights_components = resource
+
+is_insights_component {
+	input.subType == "azure-insights-component"
+}
