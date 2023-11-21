@@ -38,6 +38,7 @@ type AzureBatchAssetFetcher struct {
 
 var AzureBatchAssets = map[string]typePair{
 	inventory.ActivityLogAlertAssetType: newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
+	inventory.ApplicationInsights:       newPair(fetching.AzureInsightsComponentType, fetching.MonitoringIdentity),
 	inventory.BastionAssetType:          newPair(fetching.AzureBastionType, fetching.CloudDns),
 }
 
