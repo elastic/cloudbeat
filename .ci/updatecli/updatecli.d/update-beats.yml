@@ -1,6 +1,6 @@
 ---
 name: Update Elastic Beats go.mod Version
-pipelineid: 'updatecli-beats-{{ .github.branch }}'
+pipelineid: 'updatecli-beats-{{ requiredEnv "GIT_BRANCH" }}'
 
 scms:
   default:
@@ -12,7 +12,7 @@ scms:
       repository: "{{ .github.repository }}"
       token: '{{ requiredEnv "GITHUB_TOKEN" }}'
       username: '{{ requiredEnv "GIT_USER" }}'
-      branch: "{{ .github.branch }}"
+      branch: '{{ requiredEnv "GIT_BRANCH" }}'
 
 actions:
   default:
@@ -39,7 +39,7 @@ sources:
   beats:
     kind: json
     spec:
-      file: 'https://api.github.com/repos/elastic/beats/commits?sha={{ .github.branch }}&per_page=1'
+      file: 'https://api.github.com/repos/elastic/beats/commits?sha={{ requiredEnv "GIT_BRANCH" }}&per_page=1'
       key: '.[0].sha'
     transformers:
       # substring 12 chars so it works for the condition
