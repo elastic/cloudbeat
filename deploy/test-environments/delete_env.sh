@@ -200,7 +200,7 @@ FAILED_AZURE_DEPLOYMENTS=()
 FAILED_AZURE_RESOURCES=()
 FAILED_AZURE_GROUPS=()
 deployment_names=('cloudbeat-vm-deployment' 'role-assignment-deployment' 'elastic-agent-deployment')
-groups=$(az group list --query "[?starts_with(name, '$ENV_PREFIX')].name" -o tsv | grep -v "^$IGNORE_PREFIX")
+groups=$(az group list --query "[?starts_with(name, '$ENV_PREFIX')].name" -o tsv | awk -v prefix="$IGNORE_PREFIX" '{if (prefix == "") print $0; else if (!($0 ~ "^" prefix)) print $0}')
 for group in $groups; do
     for dep_name in ${#deployment_names[@]}; do
         resource_ids=$(az deployment group show --name "$dep_name" --resource-group "$group" --query "properties.outputResources[].id" --output tsv)
