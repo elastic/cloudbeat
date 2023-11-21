@@ -46,15 +46,15 @@ provider "ec" {
 }
 
 provider "restapi" {
-  alias = "ec"
-  uri      = local.ec_url
+  alias                = "ec"
+  uri                  = local.ec_url
   write_returns_object = true
-  headers = local.ec_headers
+  headers              = local.ec_headers
 }
 
 # Elastic Cloud (EC) deployment
 module "ec_deployment" {
-  count = var.serverless_mode ? 0 : 1
+  count  = var.serverless_mode ? 0 : 1
   source = "github.com/elastic/apm-server/testing/infra/terraform/modules/ec_deployment"
 
   region        = var.ess_region
@@ -80,12 +80,12 @@ module "ec_project" {
   providers = {
     restapi.elastic_cloud = restapi.ec
   }
-  count = var.serverless_mode ? 1 : 0
-  source = "../cloud/modules/serverless"
-  ec_apikey = var.ec_api_key
-  ec_url = local.ec_url
+  count        = var.serverless_mode ? 1 : 0
+  source       = "../cloud/modules/serverless"
+  ec_apikey    = var.ec_api_key
+  ec_url       = local.ec_url
   project_name = "${var.deployment_name}-${random_string.suffix.result}"
-  region_id = var.ess_region
+  region_id    = var.ess_region
 }
 
 module "eks" {
