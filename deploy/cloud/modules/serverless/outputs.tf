@@ -3,7 +3,7 @@ output "kibana_url" {
 }
 
 output "elasticsearch_url" {
-  value = jsondecode(restapi_object.ec_project.api_response)["endpoints"]["elasticsearch"]
+  value = "${jsondecode(restapi_object.ec_project.api_response).endpoints.elasticsearch}:443"
 }
 
 output "elasticsearch_username" {
