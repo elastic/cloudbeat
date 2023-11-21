@@ -27,8 +27,8 @@ name: Update Dependencies with Updatecli
 #       schedule
 #       ```
 #
-# TEST ON YOUR LOCAL FORK:
-# It doesn't work in local forks because of lacking vault permissions
+# TEST ON YOUR FORK:
+# It doesn't work in forks because of lacking vault permissions
 
 on:
   workflow_dispatch:
