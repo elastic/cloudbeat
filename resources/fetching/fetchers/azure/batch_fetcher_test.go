@@ -96,6 +96,20 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 				Sku:              "",
 			},
 		},
+		inventory.ApplicationInsights: {
+			{
+				Id:               "id4",
+				Name:             "name4",
+				Location:         "location4",
+				Properties:       map[string]interface{}{"key4": "value4"},
+				ResourceGroup:    "rg4",
+				SubscriptionId:   "subId1",
+				SubscriptionName: "subName1",
+				TenantId:         "tenantId4",
+				Type:             inventory.ApplicationInsights,
+				Sku:              "",
+			},
+		},
 	}
 
 	mockInventoryService := inventory.NewMockServiceAPI(s.T())
@@ -217,6 +231,11 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Batches() {
 			sub: "4",
 			tpe: inventory.BastionAssetType,
 		},
+		{
+			// 8
+			sub: "1",
+			tpe: inventory.ApplicationInsights,
+		},
 	} {
 		id := strconv.Itoa(i)
 		mockAssets = append(mockAssets, inventory.AzureAsset{
@@ -251,11 +270,17 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Batches() {
 	sort.Slice(results, func(i, j int) bool {
 		a := results[i].Resource.(*AzureBatchResource)
 		b := results[j].Resource.(*AzureBatchResource)
-		if a.Type == b.Type {
-			s.NotEqualf(a.SubId, b.SubId, "two resources of same type %s and SubId %s", a.Type, a.SubId)
+		if a.Type != b.Type {
+			return a.Type < b.Type
+		}
+		if a.SubType != b.SubType {
+			return a.SubType < b.SubType
+		}
+		if a.SubId != b.SubId {
 			return a.SubId < b.SubId
 		}
-		return a.Type < b.Type
+		s.Fail("two resources of same Type %s and SubType %s and SubId %s", a.Type, a.SubType, a.SubId)
+		return false
 	})
 	expected := []fetching.ResourceInfo{
 		{
@@ -338,15 +363,64 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Batches() {
 			},
 			CycleMetadata: fetching.CycleMetadata{Sequence: 111},
 		},
+		{
+			Resource: &AzureBatchResource{
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.AzureInsightsComponentType,
+				SubId:   "1",
+				SubName: "one",
+				Assets:  []inventory.AzureAsset{mockAssets[8]},
+			},
+			CycleMetadata: fetching.CycleMetadata{Sequence: 111},
+		},
+		{
+			Resource: &AzureBatchResource{
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.AzureInsightsComponentType,
+				SubId:   "2",
+				SubName: "two",
+				Assets:  []inventory.AzureAsset{},
+			},
+			CycleMetadata: fetching.CycleMetadata{Sequence: 111},
+		},
+		{
+			Resource: &AzureBatchResource{
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.AzureInsightsComponentType,
+				SubId:   "3",
+				SubName: "three",
+				Assets:  []inventory.AzureAsset{},
+			},
+			CycleMetadata: fetching.CycleMetadata{Sequence: 111},
+		},
+		{
+			Resource: &AzureBatchResource{
+				Type:    fetching.MonitoringIdentity,
+				SubType: fetching.AzureInsightsComponentType,
+				SubId:   "4",
+				SubName: "four",
+				Assets:  []inventory.AzureAsset{},
+			},
+			CycleMetadata: fetching.CycleMetadata{Sequence: 111},
+		},
 	}
 	s.Equal(expected, results)
 
 	var expectedMetadata []fetching.ResourceMetadata
-	for i := 0; i < 8; i++ {
-		subType := "azure-bastion"
-		tpe := "cloud-dns"
-		if i >= 4 {
+	for i := 0; i < 12; i++ {
+		var (
+			subType string
+			tpe     string
+		)
+		switch {
+		case i >= 0 && i < 4:
+			subType = "azure-bastion"
+			tpe = "cloud-dns"
+		case i >= 4 && i < 8:
 			subType = "azure-activity-log-alert"
+			tpe = "monitoring"
+		case i >= 8:
+			subType = "azure-insights-component"
 			tpe = "monitoring"
 		}
 		id := fmt.Sprintf("%s-%d", subType, i%4+1)
@@ -367,10 +441,10 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Batches() {
 		s.Require().NoError(err)
 		return metadata
 	})
-	s.Equal(expectedMetadata, metadata)
+	s.ElementsMatch(expectedMetadata, metadata)
 
 	var expectedECS []map[string]any
-	for i := 0; i < 8; i++ {
+	for i := 0; i < 12; i++ {
 		subId := strconv.Itoa(i%4 + 1)
 		expectedECS = append(expectedECS, map[string]any{
 			"cloud": map[string]any{
@@ -387,7 +461,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Batches() {
 		s.Require().NoError(err)
 		return data
 	})
-	s.Equal(expectedECS, ecs)
+	s.ElementsMatch(expectedECS, ecs)
 }
 
 func findResult(results []fetching.ResourceInfo, assetType string) *fetching.ResourceInfo {
