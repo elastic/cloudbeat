@@ -152,7 +152,7 @@ jobs:
         id: env-output
         run: |
           echo "KIBANA_URL=$(terraform output -raw kibana_url)" >> $GITHUB_ENV
-          echo "ES_URL=$(terraform output -raw elasticsearch_url)" >> $GITHUB_ENV
+          echo "ES_URL=$(terraform output -raw elasticsearch_url):443" >> $GITHUB_ENV
           echo "ES_USER=$(terraform output -raw elasticsearch_username)" >> $GITHUB_ENV
 
           export ES_PASSWORD=$(terraform output -raw elasticsearch_password)
