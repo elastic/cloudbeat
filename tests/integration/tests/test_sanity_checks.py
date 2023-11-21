@@ -31,8 +31,7 @@ tests_data = {
         "cloud-storage",
         "cloud-dns",
         "project-management",
-        "data-processing",
-    ],
+    ], # Exclude "data-processing" due to lack of fetcher control and potential delays.
     "cis_azure": [
         "configuration",
     ],  # Azure environment is not static, so we can't guarantee findings of all types.
