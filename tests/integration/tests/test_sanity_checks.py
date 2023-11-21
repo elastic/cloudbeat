@@ -10,7 +10,7 @@ import pytest
 from commonlib.utils import get_findings
 
 CONFIG_TIMEOUT = 120
-GCP_CONFIG_TIMEOUT = 600
+GCP_CONFIG_TIMEOUT = 900
 CNVM_CONFIG_TIMEOUT = 3600
 
 tests_data = {
@@ -29,9 +29,8 @@ tests_data = {
         "identity-management",
         "monitoring",
         "cloud-storage",
-        "cloud-dns",
         "project-management",
-    ], # Exclude "data-processing" due to lack of fetcher control and potential delays.
+    ],  # Exclude "data-processing" and "cloud-dns" due to lack of fetcher control and potential delays.
     "cis_azure": [
         "configuration",
     ],  # Azure environment is not static, so we can't guarantee findings of all types.
