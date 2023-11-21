@@ -176,37 +176,37 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 
 func Test_generateQuery(t *testing.T) {
 	tests := []struct {
-		asserts_group string
-		assets        []string
-		want          string
+		assetsGroup string
+		assets      []string
+		want        string
 	}{
 		{
 			want: "",
 		},
 		{
-			asserts_group: "resources",
-			assets:        []string{"one"},
-			want:          "resources | where type == 'one'",
+			assetsGroup: "resources",
+			assets:      []string{"one"},
+			want:        "resources | where type == 'one'",
 		},
 		{
-			asserts_group: "resources",
-			assets:        []string{"one", "two", "three four five"},
-			want:          "resources | where type == 'one' or type == 'two' or type == 'three four five'",
+			assetsGroup: "resources",
+			assets:      []string{"one", "two", "three four five"},
+			want:        "resources | where type == 'one' or type == 'two' or type == 'three four five'",
 		},
 		{
-			asserts_group: "authorizationresources",
-			assets:        []string{"one"},
-			want:          "authorizationresources | where type == 'one'",
+			assetsGroup: "authorizationresources",
+			assets:      []string{"one"},
+			want:        "authorizationresources | where type == 'one'",
 		},
 		{
-			asserts_group: "authorizationresources",
-			assets:        []string{"one", "two", "three four five"},
-			want:          "authorizationresources | where type == 'one' or type == 'two' or type == 'three four five'",
+			assetsGroup: "authorizationresources",
+			assets:      []string{"one", "two", "three four five"},
+			want:        "authorizationresources | where type == 'one' or type == 'two' or type == 'three four five'",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.want, func(t *testing.T) {
-			assert.Equal(t, tt.want, generateQuery(tt.asserts_group, tt.assets))
+			assert.Equal(t, tt.want, generateQuery(tt.assetsGroup, tt.assets))
 		})
 	}
 }

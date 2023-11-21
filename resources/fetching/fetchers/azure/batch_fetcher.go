@@ -36,13 +36,15 @@ type AzureBatchAssetFetcher struct {
 	provider   inventory.ServiceAPI
 }
 
-var AzureBatchResources = map[string]typePair{
+var AzureBatchAssets = map[string]typePair{
 	inventory.ActivityLogAlertAssetType: newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
 	inventory.ApplicationInsights:       newPair(fetching.AzureInsightsComponentType, fetching.MonitoringIdentity),
 	inventory.BastionAssetType:          newPair(fetching.AzureBastionType, fetching.CloudDns),
 	inventory.RoleDefinitionsType:       newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
 }
 
+// In order to simplify the mappings, we are trying to query all AzureBatchAssets on every asset group
+// Because this is done with an "|"" this means that we won't get irrelevant data
 var AzureBatchAssetGroups = []string{inventory.AssetGroupResources, inventory.AssetGroupAuthorizationResources}
 
 func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureBatchAssetFetcher {
@@ -60,7 +62,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 
 	assets := []inventory.AzureAsset{}
 	for _, assetGroup := range AzureBatchAssetGroups {
-		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchResources))
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchAssets))
 		if err != nil {
 			f.log.Errorf("AzureBatchAssetFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
 			// TODO: Should we stop and return an error if we fail to fetch a specific batch asset group?
@@ -77,7 +79,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 		assetGroups := lo.GroupBy(subscriptionGroups[subId], func(item inventory.AzureAsset) string {
 			return item.Type
 		})
-		for assetType, pair := range AzureBatchResources {
+		for assetType, pair := range AzureBatchAssets {
 			batchAssets := assetGroups[assetType]
 			if batchAssets == nil {
 				batchAssets = []inventory.AzureAsset{} // Use empty array instead of nil

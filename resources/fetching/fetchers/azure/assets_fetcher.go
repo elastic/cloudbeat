@@ -51,7 +51,7 @@ func newPair(subType string, tpe string) typePair {
 	}
 }
 
-var AzureResourceTypeToTypePair = map[string]typePair{
+var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.ClassicStorageAccountAssetType:     newPair(fetching.AzureClassicStorageAccountType, fetching.CloudStorage),
 	inventory.ClassicVirtualMachineAssetType:     newPair(fetching.AzureClassicVMType, fetching.CloudCompute),
 	inventory.DiskAssetType:                      newPair(fetching.AzureDiskType, fetching.CloudCompute),
@@ -67,6 +67,8 @@ var AzureResourceTypeToTypePair = map[string]typePair{
 	inventory.VaultAssetType:                     newPair(fetching.AzureVaultType, fetching.KeyManagement),
 }
 
+// In order to simplify the mappings, we are trying to query all AzureAssetTypeToTypePair on every asset group
+// Because this is done with an "|"" this means that we won't get irrelevant data
 var AzureAssetGroups = []string{inventory.AssetGroupResources}
 
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
@@ -83,7 +85,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 	assets := []inventory.AzureAsset{}
 	for _, assetGroup := range AzureAssetGroups {
 		// Fetching all types even if non existent in asset group for simplicity
-		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureResourceTypeToTypePair))
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureAssetTypeToTypePair))
 		if err != nil {
 			f.log.Errorf("AzureAssetsFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
 			// TODO: Should we stop and return an error if we fail to fetch a specific asset group?
@@ -105,7 +107,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 }
 
 func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetadata) fetching.ResourceInfo {
-	pair := AzureResourceTypeToTypePair[asset.Type]
+	pair := AzureAssetTypeToTypePair[asset.Type]
 	return fetching.ResourceInfo{
 		CycleMetadata: cMetadata,
 		Resource: &AzureResource{

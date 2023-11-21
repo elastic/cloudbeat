@@ -59,7 +59,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 	var flatMockAssets []inventory.AzureAsset
 	for _, assetGroup := range AzureAssetGroups {
 		var mockAssets []inventory.AzureAsset
-		for _, assetType := range maps.Keys(AzureResourceTypeToTypePair) {
+		for _, assetType := range maps.Keys(AzureAssetTypeToTypePair) {
 			mockAssets = append(mockAssets,
 				inventory.AzureAsset{
 					Id:               "id",
@@ -106,7 +106,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 			meta, err := result.GetMetadata()
 			s.Require().NoError(err)
 
-			pair := AzureResourceTypeToTypePair[expected.Type]
+			pair := AzureAssetTypeToTypePair[expected.Type]
 			s.Equal(fetching.ResourceMetadata{
 				ID:                  expected.Id,
 				Type:                pair.Type,

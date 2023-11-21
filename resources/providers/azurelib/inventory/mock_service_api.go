@@ -81,17 +81,17 @@ func (_c *MockServiceAPI_GetSubscriptions_Call) RunAndReturn(run func() map[stri
 	return _c
 }
 
-// ListAllAssetTypesByName provides a mock function with given fields: ctx, assets_group, assets
-func (_m *MockServiceAPI) ListAllAssetTypesByName(ctx context.Context, assets_group string, assets []string) ([]AzureAsset, error) {
-	ret := _m.Called(ctx, assets_group, assets)
+// ListAllAssetTypesByName provides a mock function with given fields: ctx, assetsGroup, assets
+func (_m *MockServiceAPI) ListAllAssetTypesByName(ctx context.Context, assetsGroup string, assets []string) ([]AzureAsset, error) {
+	ret := _m.Called(ctx, assetsGroup, assets)
 
 	var r0 []AzureAsset
 	var r1 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, []string) ([]AzureAsset, error)); ok {
-		return rf(ctx, assets_group, assets)
+		return rf(ctx, assetsGroup, assets)
 	}
 	if rf, ok := ret.Get(0).(func(context.Context, string, []string) []AzureAsset); ok {
-		r0 = rf(ctx, assets_group, assets)
+		r0 = rf(ctx, assetsGroup, assets)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]AzureAsset)
@@ -99,7 +99,7 @@ func (_m *MockServiceAPI) ListAllAssetTypesByName(ctx context.Context, assets_gr
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string, []string) error); ok {
-		r1 = rf(ctx, assets_group, assets)
+		r1 = rf(ctx, assetsGroup, assets)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -114,13 +114,13 @@ type MockServiceAPI_ListAllAssetTypesByName_Call struct {
 
 // ListAllAssetTypesByName is a helper method to define mock.On call
 //   - ctx context.Context
-//   - assets_group string
+//   - assetsGroup string
 //   - assets []string
-func (_e *MockServiceAPI_Expecter) ListAllAssetTypesByName(ctx interface{}, assets_group interface{}, assets interface{}) *MockServiceAPI_ListAllAssetTypesByName_Call {
-	return &MockServiceAPI_ListAllAssetTypesByName_Call{Call: _e.mock.On("ListAllAssetTypesByName", ctx, assets_group, assets)}
+func (_e *MockServiceAPI_Expecter) ListAllAssetTypesByName(ctx interface{}, assetsGroup interface{}, assets interface{}) *MockServiceAPI_ListAllAssetTypesByName_Call {
+	return &MockServiceAPI_ListAllAssetTypesByName_Call{Call: _e.mock.On("ListAllAssetTypesByName", ctx, assetsGroup, assets)}
 }
 
-func (_c *MockServiceAPI_ListAllAssetTypesByName_Call) Run(run func(ctx context.Context, assets_group string, assets []string)) *MockServiceAPI_ListAllAssetTypesByName_Call {
+func (_c *MockServiceAPI_ListAllAssetTypesByName_Call) Run(run func(ctx context.Context, assetsGroup string, assets []string)) *MockServiceAPI_ListAllAssetTypesByName_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(string), args[2].([]string))
 	})

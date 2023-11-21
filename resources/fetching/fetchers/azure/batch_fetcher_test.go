@@ -59,8 +59,8 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 	var flatMockAssets []inventory.AzureAsset
 	for _, assetGroup := range AzureBatchAssetGroups {
 		var mockAssets []inventory.AzureAsset
-		for _, assetType := range maps.Keys(AzureBatchResources) {
-			mockId := fmt.Sprintf("%s-%s", AzureBatchResources[assetType].SubType, "subId1")
+		for _, assetType := range maps.Keys(AzureBatchAssets) {
+			mockId := fmt.Sprintf("%s-%s", AzureBatchAssets[assetType].SubType, "subId1")
 			mockAssets = append(mockAssets,
 				inventory.AzureAsset{
 					Id:               mockId,
@@ -100,7 +100,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Len(results, len(AzureBatchResources))
+	s.Len(results, len(AzureBatchAssets))
 
 	expectedAssetsGrouped := lo.GroupBy(flatMockAssets, func(asset inventory.AzureAsset) string {
 		return asset.Id
@@ -115,7 +115,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 			meta, err := result.GetMetadata()
 			s.Require().NoError(err)
 
-			pair := AzureBatchResources[expected[0].Type]
+			pair := AzureBatchAssets[expected[0].Type]
 			exNameAndId := fmt.Sprintf("%s-subId1", pair.SubType)
 			s.Equal(fetching.ResourceMetadata{
 				ID:                  exNameAndId,
@@ -157,9 +157,9 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 	}
 	for _, assetGroup := range AzureBatchAssetGroups {
 		var mockAssets []inventory.AzureAsset
-		for _, assetType := range maps.Keys(AzureBatchResources) {
+		for _, assetType := range maps.Keys(AzureBatchAssets) {
 			for _, subKey := range maps.Keys(subMap) {
-				mockId := fmt.Sprintf("%s-%s", AzureBatchResources[assetType].SubType, subKey)
+				mockId := fmt.Sprintf("%s-%s", AzureBatchAssets[assetType].SubType, subKey)
 				mockAssets = append(mockAssets,
 					inventory.AzureAsset{
 						Id:               mockId,
@@ -198,7 +198,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
-	s.Len(results, len(AzureBatchResources)*len(subMap))
+	s.Len(results, len(AzureBatchAssets)*len(subMap))
 
 	expectedSubs := lo.GroupBy(results, func(result fetching.ResourceInfo) string {
 		return result.Resource.(*AzureBatchResource).SubId
@@ -207,16 +207,16 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 
 	for _, subKey := range maps.Keys(expectedSubs) {
 		typesPerSub := expectedSubs[subKey]
-		s.Len(typesPerSub, len(AzureBatchResources))
+		s.Len(typesPerSub, len(AzureBatchAssets))
 		for _, subTypeRes := range typesPerSub {
 			assets := subTypeRes.Resource.(*AzureBatchResource).Assets
 			s.Len(assets, len(AzureBatchAssetGroups))
 			md, err := subTypeRes.Resource.GetMetadata()
 			s.Require().NoError(err)
-			s.Equal(md.ID, fmt.Sprintf("%s-%s", AzureBatchResources[assets[0].Type].SubType, subKey))
-			s.Equal(md.Name, fmt.Sprintf("%s-%s", AzureBatchResources[assets[0].Type].SubType, subKey))
-			s.Equal(md.SubType, AzureBatchResources[assets[0].Type].SubType)
-			s.Equal(md.Type, AzureBatchResources[assets[0].Type].Type)
+			s.Equal(md.ID, fmt.Sprintf("%s-%s", AzureBatchAssets[assets[0].Type].SubType, subKey))
+			s.Equal(md.Name, fmt.Sprintf("%s-%s", AzureBatchAssets[assets[0].Type].SubType, subKey))
+			s.Equal(md.SubType, AzureBatchAssets[assets[0].Type].SubType)
+			s.Equal(md.Type, AzureBatchAssets[assets[0].Type].Type)
 			s.Equal("global", md.Region)
 
 			ecs, err := subTypeRes.Resource.GetElasticCommonData()
