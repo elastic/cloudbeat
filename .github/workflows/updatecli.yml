@@ -31,7 +31,6 @@ name: Update Dependencies with Updatecli
 # It doesn't work in forks because of lacking vault permissions
 
 on:
-  pull_request: # temp for testing purposes
   workflow_dispatch:
   schedule:
     - cron: '0 13 * * 1'
@@ -43,27 +42,27 @@ env:
   JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
 jobs:
-#  updatecli:
-#    name: Update ${{ matrix.pipeline-name }} dependencies
-#    runs-on: ubuntu-latest
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        pipeline-name: [ beats, golang, hermit ]
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Init Hermit
-#        run: ./bin/hermit env -r >> $GITHUB_ENV
-#      - uses: elastic/apm-pipeline-library/.github/actions/updatecli@current
-#        with:
-#          vaultUrl: ${{ secrets.VAULT_ADDR }}
-#          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
-#          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
-#          pipeline: ./.ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml
-#          values: ./.ci/updatecli/values.yml
-#          notifyIfFailure: false
-#        env:
-#          GIT_BRANCH: main
+  updatecli:
+    name: Update ${{ matrix.pipeline-name }} dependencies
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pipeline-name: [ beats, golang, hermit ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+      - uses: elastic/apm-pipeline-library/.github/actions/updatecli@current
+        with:
+          vaultUrl: ${{ secrets.VAULT_ADDR }}
+          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
+          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
+          pipeline: ./.ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml
+          values: ./.ci/updatecli/values.yml
+          notifyIfFailure: false
+        env:
+          GIT_BRANCH: main
 
   updatecli-backport:
     name: Update ${{ matrix.pipeline-name }} dependencies - backport
@@ -76,14 +75,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
-      - name: Debug
-        run: |
-          git ls-remote --heads \
-            | awk '{print $2}' \
-            | grep -E 'refs/heads/[0-9]+\.[0-9]+' \
-            | awk -F/ '{print $3}' \
-            | sort -Vr \
-            | head -n 1
       - name: Set Branch
         run: |
           branchName=$(git ls-remote --heads \
