@@ -202,7 +202,7 @@ FAILED_AZURE_GROUPS=()
 deployment_names=('cloudbeat-vm-deployment' 'elastic-agent-deployment')
 groups=$(az group list --query "[?starts_with(name, '$ENV_PREFIX')].name" -o tsv | awk -v prefix="$IGNORE_PREFIX" '{if (prefix == "") print $0; else if (!($0 ~ "^" prefix)) print $0}')
 for group in $groups; do
-    for dep_name in ${deployment_names[@]}; do
+    for dep_name in "${deployment_names[@]}"; do
         resource_ids=$(az deployment group show --name "$dep_name" --resource-group "$group" --query "properties.outputResources[].id" --output tsv)
         if [ -z "$resource_ids" ]; then
             echo "No resources found for deployment $dep_name."
@@ -216,9 +216,9 @@ for group in $groups; do
                 elif [[ $resource_id == *"Microsoft.Compute/virtualMachines"* ]]; then
                     disk_ids=$(az disk list --resource-group "$group" --query "[?managedBy=='$resource_id')].id" --output tsv)
                     for disk_id in $disk_ids; do
-                        az resource delete --ids "$resource_id" || {
-                            echo "Failed to delete resource: $resource_id"
-                            FAILED_AZURE_RESOURCES+=("$resource_id")
+                        az resource delete --ids "$disk_id" || {
+                            echo "Failed to delete resource: $disk_id"
+                            FAILED_AZURE_RESOURCES+=("$disk_id")
                             continue
                         }
                     done
