@@ -2,9 +2,10 @@ package compliance.cis_aws.rules.cis_1_13
 
 import data.compliance.lib.common
 import data.compliance.policy.aws_iam.data_adapter
+import future.keywords.if
 
 # Ensure that there is only a single active access key per user.
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_iam_user
 

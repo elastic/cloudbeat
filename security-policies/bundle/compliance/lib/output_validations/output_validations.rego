@@ -2,8 +2,9 @@ package compliance.lib.output_validations
 
 import data.compliance
 import future.keywords.every
+import future.keywords.if
 
-validate_common_provider_metadata(metadata) {
+validate_common_provider_metadata(metadata) if {
 	metadata.id
 	metadata.name
 	metadata.profile_applicability
@@ -25,12 +26,12 @@ validate_common_provider_metadata(metadata) {
 	metadata.benchmark.posture_type
 }
 
-validate_metadata(metadata) {
+validate_metadata(metadata) if {
 	validate_common_provider_metadata(metadata)
 } else = false
 
 # validate every rule metadata
-test_validate_rule_metadata {
+test_validate_rule_metadata if {
 	all_k8s_rules := [rule | rule := compliance.cis_k8s.rules[rule_id]]
 	all_eks_rules := [rule | rule := compliance.cis_eks.rules[rule_id]]
 	all_aws_rules := [rule | rule := compliance.cis_aws.rules[rule_id]]

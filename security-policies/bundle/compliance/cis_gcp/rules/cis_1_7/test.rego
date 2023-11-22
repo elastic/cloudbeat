@@ -1,6 +1,7 @@
 package compliance.cis_gcp.rules.cis_1_7
 
 import data.cis_gcp.test_data
+import future.keywords.if
 
 import data.compliance.policy.gcp.data_adapter
 import data.lib.test
@@ -13,7 +14,7 @@ type := "identity-management"
 
 subType := "gcp-iam-service-account-key"
 
-test_violation {
+test_violation if {
 	eval_fail with input as test_data.generate_gcp_asset(
 		type, subType,
 		{"data": {"validAfterTime": date_before_last_90_days}},
@@ -21,7 +22,7 @@ test_violation {
 	)
 }
 
-test_pass {
+test_pass if {
 	eval_pass with input as test_data.generate_gcp_asset(
 		type, subType,
 		{"data": {"validAfterTime": date_within_last_90_days}},
@@ -29,18 +30,18 @@ test_pass {
 	)
 }
 
-test_not_evaluated {
+test_not_evaluated if {
 	not_eval with input as test_data.not_eval_resource
 }
 
-eval_fail {
+eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-eval_pass {
+eval_pass if {
 	test.assert_pass(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-not_eval {
+not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }

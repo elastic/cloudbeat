@@ -3,9 +3,10 @@ package compliance.cis_gcp.rules.cis_4_4
 import data.compliance.lib.common
 import data.compliance.policy.gcp.compute.assess_instance_metadata as audit
 import data.compliance.policy.gcp.data_adapter
+import future.keywords.if
 
 # Ensure Oslogin Is Enabled for a Project
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_compute_instance
 

@@ -1,5 +1,7 @@
 package cis_eks.test_data
 
+import future.keywords.if
+
 generate_eks_input(logging, encryption_config, endpoint_private_access, endpoint_public_access, public_access_cidrs) = {
 	"type": "caas",
 	"subType": "aws-eks",
@@ -30,7 +32,7 @@ generate_eks_input(logging, encryption_config, endpoint_private_access, endpoint
 	}},
 }
 
-generate_eks_input_with_vpc_config(endpoint_private_access, endpoint_public_access, public_access_cidrs) = result {
+generate_eks_input_with_vpc_config(endpoint_private_access, endpoint_public_access, public_access_cidrs) = result if {
 	logging = {"ClusterLogging": [
 		{
 			"Enabled": false,

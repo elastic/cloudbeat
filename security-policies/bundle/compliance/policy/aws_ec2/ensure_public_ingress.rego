@@ -4,10 +4,11 @@ import data.compliance.lib.common
 import data.compliance.policy.aws_ec2.data_adapter
 import data.compliance.policy.aws_ec2.ports
 import future.keywords.every
+import future.keywords.if
 
 default rule_evaluation = false
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_nacl_policy
 
@@ -18,7 +19,7 @@ finding = result {
 	)
 }
 
-rule_evaluation {
+rule_evaluation if {
 	count(data_adapter.ingresses_with_all_ports_open) == 0
 	every entry in data_adapter.nacl_ingresses {
 		every port in ports.admin_ports {

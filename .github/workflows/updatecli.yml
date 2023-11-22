@@ -1,6 +1,35 @@
 ---
 name: Update Dependencies with Updatecli
 
+# TESTING
+# This workflow depends on elastic/apm-pipeline-library/.github/actions/updatecli, which is tricky to test
+#
+# TEST LOCALLY (with act):
+# 1. Logging to github with `gh auth`
+#
+# 2. Configure the job you want to run by replacing the step `elastic/apm-pipeline-library/.github/actions/updatecli` by
+#       ```
+#      - name: Install Updatecli in the runner
+#        uses: updatecli/updatecli-action@v2
+#      - name: Run Updatecli in apply mode
+#        run: "updatecli apply --debug --config .ci/updatecli/updatecli.d/update-beats.yml --values .ci/updatecli/values.yml"
+#        env:
+#          GITHUB_TOKEN: "${{ secrets.MY_GITHUB_TOKEN }}"
+#          GIT_USER: foo
+#          GIT_EMAIL: bar@elastic.co
+#       ```
+#
+# 3. Pass the secret `MY_GITHUB_TOKEN` in the act command. e.g:
+#       ```
+#       act --container-architecture linux/amd64 \
+#       -s MY_GITHUB_TOKEN="$(gh auth token)" \
+#       --workflows ./.github/workflows/updatecli.yml \
+#       schedule
+#       ```
+#
+# TEST ON YOUR FORK:
+# It doesn't work in forks because of lacking vault permissions
+
 on:
   workflow_dispatch:
   schedule:
@@ -19,11 +48,42 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [beats, golang, hermit]
+        pipeline-name: [ beats, golang, hermit ]
     steps:
       - uses: actions/checkout@v4
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
+      - uses: elastic/apm-pipeline-library/.github/actions/updatecli@current
+        with:
+          vaultUrl: ${{ secrets.VAULT_ADDR }}
+          vaultRoleId: ${{ secrets.VAULT_ROLE_ID }}
+          vaultSecretId: ${{ secrets.VAULT_SECRET_ID }}
+          pipeline: ./.ci/updatecli/updatecli.d/update-${{ matrix.pipeline-name }}.yml
+          values: ./.ci/updatecli/values.yml
+          notifyIfFailure: false
+        env:
+          GIT_BRANCH: main
+
+  updatecli-backport:
+    name: Update ${{ matrix.pipeline-name }} dependencies - backport
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pipeline-name: [ golang, beats ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+      - name: Set Branch
+        run: |
+          branchName=$(git branch -r \
+            | grep -E 'origin/[0-9]+\.[0-9]+' \
+            | awk -F/ '{print $2}' \
+            | sort -Vr \
+            | head -n 1)
+
+          echo "GIT_BRANCH=$branchName" >> $GITHUB_ENV
       - uses: elastic/apm-pipeline-library/.github/actions/updatecli@current
         with:
           vaultUrl: ${{ secrets.VAULT_ADDR }}

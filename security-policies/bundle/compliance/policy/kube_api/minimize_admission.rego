@@ -2,8 +2,9 @@ package compliance.policy.kube_api.minimize_admission
 
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.kube_api.data_adapter
+import future.keywords.if
 
-finding(entity) = result {
+finding(entity) = result if {
 	data_adapter.is_kube_api
 
 	# set result
@@ -18,7 +19,7 @@ finding(entity) = result {
 	)
 }
 
-rule_evaluation(entity) = false {
+rule_evaluation(entity) = false if {
 	some container_type # "containers", "init_containers", "ephemeral_containers"
 	container := data_adapter.containers[container_type][_]
 	lib_common.contains_key_with_value(container.securityContext, entity, true)

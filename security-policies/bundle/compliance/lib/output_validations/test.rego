@@ -1,6 +1,7 @@
 package compliance.lib.output_validations
 
 import future.keywords.every
+import future.keywords.if
 
 valid_metadata := {
 	"id": "rule id",
@@ -24,7 +25,7 @@ valid_metadata := {
 	"rule_number": "1.2.3",
 }
 
-test_required_metadata_fields {
+test_required_metadata_fields if {
 	every key, _ in valid_metadata {
 		not validate_metadata(object.remove(valid_metadata, [key]))
 	}
