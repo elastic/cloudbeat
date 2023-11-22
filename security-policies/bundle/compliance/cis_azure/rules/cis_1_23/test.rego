@@ -44,6 +44,14 @@ test_pass {
 		"type": "CustomRole",
 	})
 	eval_pass with input as test_data.generate_azure_asset("azure-role-definition", {
+		"assignableScopes": [
+			"/",
+			"/subscriptions/11111111-2222-3333-4444-555555555555/RandomScope",
+		],
+		"permissions": [{"actions": ["RandomAction"]}],
+		"type": "CustomRole",
+	})
+	eval_pass with input as test_data.generate_azure_asset("azure-role-definition", {
 		"assignableScopes": ["RandomScope"],
 		"permissions": [{"actions": ["*"]}],
 		"type": "CustomRole",
