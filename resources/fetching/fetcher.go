@@ -66,6 +66,7 @@ const (
 	AzureClassicVMType                 = "azure-classic-vm"
 	AzureDiskType                      = "azure-disk"
 	AzureDocumentDBDatabaseAccountType = "azure-document-db-database-account"
+	AzureInsightsComponentType         = "azure-insights-component"
 	AzureMySQLDBType                   = "azure-mysql-server-db"
 	AzureNetworkWatchersFlowLogType    = "azure-network-watchers-flow-log"
 	AzureNetworkWatchersType           = "azure-network-watcher"
