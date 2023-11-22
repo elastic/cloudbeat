@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"golang.org/x/exp/maps"
@@ -81,6 +82,7 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 
 func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
+	var errAgg error
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
 	assets := []inventory.AzureAsset{}
 	for _, assetGroup := range AzureAssetGroups {
@@ -88,7 +90,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureAssetTypeToTypePair))
 		if err != nil {
 			f.log.Errorf("AzureAssetsFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
-			// TODO: Should we stop and return an error if we fail to fetch a specific asset group?
+			errAgg = errors.Join(errAgg, err)
 			continue
 		}
 		assets = append(assets, r...)
@@ -97,13 +99,15 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 	for _, asset := range assets {
 		select {
 		case <-ctx.Done():
-			f.log.Infof("AzureAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
-			return nil
+			err := ctx.Err()
+			f.log.Infof("AzureAssetsFetcher.Fetch context err: %s", err.Error())
+			errAgg = errors.Join(errAgg, err)
+			return errAgg
 		case f.resourceCh <- resourceFromAsset(asset, cMetadata):
 		}
 	}
 
-	return nil
+	return errAgg
 }
 
 func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetadata) fetching.ResourceInfo {

@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -57,7 +58,7 @@ func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, 
 
 func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
-
+	var errAgg error
 	subscriptions := f.provider.GetSubscriptions()
 
 	assets := []inventory.AzureAsset{}
@@ -65,7 +66,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchAssets))
 		if err != nil {
 			f.log.Errorf("AzureBatchAssetFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
-			// TODO: Should we stop and return an error if we fail to fetch a specific batch asset group?
+			errAgg = errors.Join(errAgg, err)
 			continue
 		}
 		assets = append(assets, r...)
@@ -87,8 +88,10 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 
 			select {
 			case <-ctx.Done():
-				f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
-				return nil
+				err := ctx.Err()
+				f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", err.Error())
+				errAgg = errors.Join(errAgg, err)
+				return errAgg
 			case f.resourceCh <- fetching.ResourceInfo{
 				CycleMetadata: cMetadata,
 				Resource: &AzureBatchResource{
@@ -104,7 +107,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 		}
 	}
 
-	return nil
+	return errAgg
 }
 
 func (f *AzureBatchAssetFetcher) Stop() {}

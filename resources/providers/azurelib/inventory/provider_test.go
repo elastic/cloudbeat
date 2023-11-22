@@ -181,7 +181,8 @@ func Test_generateQuery(t *testing.T) {
 		want        string
 	}{
 		{
-			want: "",
+			assetsGroup: "empty assets",
+			want:        "empty assets",
 		},
 		{
 			assetsGroup: "resources",
