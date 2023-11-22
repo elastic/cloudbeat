@@ -23,11 +23,14 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -203,6 +206,349 @@ func Test_generateQuery(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.want, func(t *testing.T) {
 			assert.Equal(t, tt.want, generateQuery(tt.assetsGroup, tt.assets))
+		})
+	}
+}
+
+func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
+	log := testhelper.NewLogger(t)
+
+	response := func(v []*armmonitor.DiagnosticSettingsResource) armmonitor.DiagnosticSettingsClientListResponse {
+		return armmonitor.DiagnosticSettingsClientListResponse{
+			DiagnosticSettingsResourceCollection: armmonitor.DiagnosticSettingsResourceCollection{Value: v},
+		}
+	}
+
+	tests := map[string]struct {
+		subscriptions            map[string]string
+		responsesPerSubscription map[string][]armmonitor.DiagnosticSettingsClientListResponse
+		expected                 []AzureAsset
+		expecterError            bool
+	}{
+		"one element one subscription": {
+			subscriptions: map[string]string{"sub1": "subName1"},
+			responsesPerSubscription: map[string][]armmonitor.DiagnosticSettingsClientListResponse{
+				"sub1": {
+					response([]*armmonitor.DiagnosticSettingsResource{
+						{
+							ID:   to.Ptr("id1"),
+							Name: to.Ptr("name1"),
+							Type: to.Ptr("Microsoft.Insights/diagnosticSettings"),
+							Properties: &armmonitor.DiagnosticSettings{
+								EventHubAuthorizationRuleID: nil,
+								EventHubName:                nil,
+								LogAnalyticsDestinationType: nil,
+								MarketplacePartnerID:        nil,
+								ServiceBusRuleID:            nil,
+								StorageAccountID:            nil,
+								WorkspaceID:                 to.Ptr("/workspace1"),
+								Logs: []*armmonitor.LogSettings{
+									{
+										Category:        to.Ptr("Administrative"),
+										Enabled:         to.Ptr(true),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+									{
+										Category:        to.Ptr("Security"),
+										Enabled:         to.Ptr(false),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+								},
+								Metrics: nil,
+							},
+						},
+					}),
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:       "id1",
+					Name:     "name1",
+					Location: "",
+					Properties: map[string]interface{}{
+						"logs": []interface{}{
+							map[string]interface{}{
+								"category": "Administrative",
+								"enabled":  true,
+							},
+							map[string]interface{}{
+								"category": "Security",
+								"enabled":  false,
+							},
+						},
+						"workspaceId": "/workspace1",
+					},
+					ResourceGroup:  "",
+					SubscriptionId: "sub1",
+					TenantId:       "",
+					Type:           "Microsoft.Insights/diagnosticSettings",
+					Sku:            "",
+				},
+			},
+			expecterError: false,
+		},
+		"two elements one subscription": {
+			subscriptions: map[string]string{"sub1": "subName1"},
+			responsesPerSubscription: map[string][]armmonitor.DiagnosticSettingsClientListResponse{
+				"sub1": {
+					response([]*armmonitor.DiagnosticSettingsResource{
+						{
+							ID:   to.Ptr("id2"),
+							Name: to.Ptr("name2"),
+							Type: to.Ptr("Microsoft.Insights/diagnosticSettings"),
+							Properties: &armmonitor.DiagnosticSettings{
+								EventHubAuthorizationRuleID: nil,
+								EventHubName:                nil,
+								LogAnalyticsDestinationType: nil,
+								MarketplacePartnerID:        nil,
+								ServiceBusRuleID:            nil,
+								StorageAccountID:            nil,
+								WorkspaceID:                 to.Ptr("/workspace2"),
+								Logs: []*armmonitor.LogSettings{
+									{
+										Category:        to.Ptr("Administrative"),
+										Enabled:         to.Ptr(false),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+									{
+										Category:        to.Ptr("Security"),
+										Enabled:         to.Ptr(true),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+								},
+								Metrics: nil,
+							},
+						},
+						{
+							ID:   to.Ptr("id3"),
+							Name: to.Ptr("name3"),
+							Type: to.Ptr("Microsoft.Insights/diagnosticSettings"),
+							Properties: &armmonitor.DiagnosticSettings{
+								EventHubAuthorizationRuleID: nil,
+								EventHubName:                nil,
+								LogAnalyticsDestinationType: nil,
+								MarketplacePartnerID:        nil,
+								ServiceBusRuleID:            nil,
+								StorageAccountID:            nil,
+								WorkspaceID:                 to.Ptr("/workspace3"),
+								Logs: []*armmonitor.LogSettings{
+									{
+										Category:        to.Ptr("Administrative"),
+										Enabled:         to.Ptr(true),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+									{
+										Category:        to.Ptr("Security"),
+										Enabled:         to.Ptr(true),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+								},
+								Metrics: nil,
+							},
+						},
+					}),
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:       "id2",
+					Name:     "name2",
+					Location: "",
+					Properties: map[string]interface{}{
+						"logs": []interface{}{
+							map[string]interface{}{
+								"category": "Administrative",
+								"enabled":  false,
+							},
+							map[string]interface{}{
+								"category": "Security",
+								"enabled":  true,
+							},
+						},
+						"workspaceId": "/workspace2",
+					},
+					ResourceGroup:  "",
+					SubscriptionId: "sub1",
+					TenantId:       "",
+					Type:           "Microsoft.Insights/diagnosticSettings",
+					Sku:            "",
+				},
+				{
+					Id:       "id3",
+					Name:     "name3",
+					Location: "",
+					Properties: map[string]interface{}{
+						"logs": []interface{}{
+							map[string]interface{}{
+								"category": "Administrative",
+								"enabled":  true,
+							},
+							map[string]interface{}{
+								"category": "Security",
+								"enabled":  true,
+							},
+						},
+						"workspaceId": "/workspace3",
+					},
+					ResourceGroup:  "",
+					SubscriptionId: "sub1",
+					TenantId:       "",
+					Type:           "Microsoft.Insights/diagnosticSettings",
+					Sku:            "",
+				},
+			},
+			expecterError: false,
+		},
+		"two elements two subscriptions": {
+			subscriptions: map[string]string{"sub1": "subName1", "sub2": "subName2"},
+			responsesPerSubscription: map[string][]armmonitor.DiagnosticSettingsClientListResponse{
+				"sub1": {
+					response([]*armmonitor.DiagnosticSettingsResource{
+						{
+							ID:   to.Ptr("id2"),
+							Name: to.Ptr("name2"),
+							Type: to.Ptr("Microsoft.Insights/diagnosticSettings"),
+							Properties: &armmonitor.DiagnosticSettings{
+								EventHubAuthorizationRuleID: nil,
+								EventHubName:                nil,
+								LogAnalyticsDestinationType: nil,
+								MarketplacePartnerID:        nil,
+								ServiceBusRuleID:            nil,
+								StorageAccountID:            nil,
+								WorkspaceID:                 to.Ptr("/workspace2"),
+								Logs: []*armmonitor.LogSettings{
+									{
+										Category:        to.Ptr("Administrative"),
+										Enabled:         to.Ptr(false),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+									{
+										Category:        to.Ptr("Security"),
+										Enabled:         to.Ptr(true),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+								},
+								Metrics: nil,
+							},
+						},
+					}),
+				},
+				"sub2": {
+					response([]*armmonitor.DiagnosticSettingsResource{
+						{
+							ID:   to.Ptr("id3"),
+							Name: to.Ptr("name3"),
+							Type: to.Ptr("Microsoft.Insights/diagnosticSettings"),
+							Properties: &armmonitor.DiagnosticSettings{
+								EventHubAuthorizationRuleID: nil,
+								EventHubName:                nil,
+								LogAnalyticsDestinationType: nil,
+								MarketplacePartnerID:        nil,
+								ServiceBusRuleID:            nil,
+								StorageAccountID:            nil,
+								WorkspaceID:                 to.Ptr("/workspace3"),
+								Logs: []*armmonitor.LogSettings{
+									{
+										Category:        to.Ptr("Administrative"),
+										Enabled:         to.Ptr(true),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+									{
+										Category:        to.Ptr("Security"),
+										Enabled:         to.Ptr(true),
+										CategoryGroup:   nil,
+										RetentionPolicy: nil,
+									},
+								},
+								Metrics: nil,
+							},
+						},
+					}),
+				},
+			},
+			expected: []AzureAsset{
+				{
+					Id:       "id2",
+					Name:     "name2",
+					Location: "",
+					Properties: map[string]interface{}{
+						"logs": []interface{}{
+							map[string]interface{}{
+								"category": "Administrative",
+								"enabled":  false,
+							},
+							map[string]interface{}{
+								"category": "Security",
+								"enabled":  true,
+							},
+						},
+						"workspaceId": "/workspace2",
+					},
+					ResourceGroup:  "",
+					SubscriptionId: "sub1",
+					TenantId:       "",
+					Type:           "Microsoft.Insights/diagnosticSettings",
+					Sku:            "",
+				},
+				{
+					Id:       "id3",
+					Name:     "name3",
+					Location: "",
+					Properties: map[string]interface{}{
+						"logs": []interface{}{
+							map[string]interface{}{
+								"category": "Administrative",
+								"enabled":  true,
+							},
+							map[string]interface{}{
+								"category": "Security",
+								"enabled":  true,
+							},
+						},
+						"workspaceId": "/workspace3",
+					},
+					ResourceGroup:  "",
+					SubscriptionId: "sub2",
+					TenantId:       "",
+					Type:           "Microsoft.Insights/diagnosticSettings",
+					Sku:            "",
+				},
+			},
+			expecterError: false,
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			provider := &provider{
+				log: log,
+				client: &azureClientWrapper{
+					AssetDiagnosticSettings: func(ctx context.Context, subID string, _ *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
+						response := tc.responsesPerSubscription[subID]
+						return response, nil
+					},
+				},
+			}
+
+			got, err := provider.ListDiagnosticSettingsAssetTypes(context.Background(), cycle.Metadata{}, lo.Keys[string](tc.subscriptions))
+			if tc.expecterError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.ElementsMatch(t, tc.expected, got)
 		})
 	}
 }
