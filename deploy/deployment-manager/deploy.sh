@@ -40,8 +40,11 @@ ELASTIC_ARTIFACT_SERVER=${ELASTIC_ARTIFACT_SERVER:-https://artifacts.elastic.co/
 DEPLOYMENT_LABELS=${DEPLOYMENT_LABELS:-type=cspm-gcp}
 
 # Set environment variables with the name and number of your project.
-export PROJECT_NAME=$(gcloud config get-value core/project)
-export PROJECT_NUMBER=$(gcloud projects list --filter=${PROJECT_NAME} --format="value(PROJECT_NUMBER)")
+PROJECT_NAME=$(gcloud config get-value core/project)
+export PROJECT_NAME
+
+PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+export PROJECT_NUMBER
 
 # Function to check if an environment variable is not provided
 check_env_not_provided() {
@@ -55,7 +58,7 @@ check_env_not_provided() {
 
 # Function to run a gcloud command and check its exit code
 run_command() {
-    eval $1
+    eval "$1"
     local status=$?
     if [ $status -ne 0 ]; then
         echo "Error: Command \"$1\" failed with exit code $status. Exiting..."
@@ -78,7 +81,7 @@ configure_scope() {
 # Function to check if a role is assigned to the service account
 is_role_not_assigned() {
     local role_assigned
-    role_assigned=$(gcloud ${SCOPE} get-iam-policy "${PARENT_ID}" \
+    role_assigned=$(gcloud "${SCOPE}" get-iam-policy "${PARENT_ID}" \
         --flatten="bindings[].members" --format="value(bindings.members)" \
         --filter="bindings.role=${ROLE}" \
         --format="table[no-heading](bindings.members)" |
@@ -92,8 +95,10 @@ is_role_not_assigned() {
 }
 
 # Set environment variables with the name and number of your project.
-export PROJECT_NAME=$(gcloud config get-value core/project)
-export PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+PROJECT_NAME=$(gcloud config get-value core/project)
+export PROJECT_NAME
+PROJECT_NUMBER=$(gcloud projects list --filter="${PROJECT_NAME}" --format="value(PROJECT_NUMBER)")
+export PROJECT_NUMBER
 
 # Fail fast if any of the required environment variables are not provided
 check_env_not_provided "FLEET_URL"

@@ -11,5 +11,8 @@ fi
 
 # Use jq to extract the key-value pairs and format them as "key=value" strings
 for kv in $(jq -r "to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]" "$config_file"); do
-    export $kv
+    # Suppress because the value of kv must be exported (export var `key` to `value`)
+    #   and not export KV to its value (var `kv` to `key=value`)
+    # shellcheck disable=SC2163
+    export "$kv"
 done

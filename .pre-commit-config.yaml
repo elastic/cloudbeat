@@ -78,7 +78,6 @@ repos:
         args: ["-i", "4"]
       - id: shellcheck
         files: (deploy/.*sh|scripts/publish_cft.sh|.ci/scripts/.*sh)
-        exclude: deploy/deployment-manager/.*sh
 
   - repo: local
     hooks:
