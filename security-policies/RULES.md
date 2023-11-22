@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 32/151 implemented rules (21%)
+### 33/151 implemented rules (22%)
 
-#### Automated rules: 32/77 (42%)
+#### Automated rules: 33/77 (43%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -401,7 +401,7 @@
 |                          1.20                          | Identity and Access Management          | Ensure that 'Owners can manage group membership requests in the Access Panel' is set to 'No'                                                           |        :x:         |  Manual   |
 |                          1.21                          | Identity and Access Management          | Ensure that 'Users can create Microsoft 365 groups in Azure portals, API or PowerShell' is set to 'No'                                                 |        :x:         |  Manual   |
 |                          1.22                          | Identity and Access Management          | Ensure that 'Require Multi-Factor Authentication to register or join devices with Azure AD' is set to 'Yes'                                            |        :x:         |  Manual   |
-|                          1.23                          | Identity and Access Management          | Ensure That No Custom Subscription Administrator Roles Exist                                                                                           |        :x:         | Automated |
+|   [1.23](bundle/compliance/cis_azure/rules/cis_1_23)   | Identity and Access Management          | Ensure That No Custom Subscription Administrator Roles Exist                                                                                           | :white_check_mark: | Automated |
 |                          1.24                          | Identity and Access Management          | Ensure a Custom Role is Assigned Permissions for Administering Resource Locks                                                                          |        :x:         |  Manual   |
 |                          1.25                          | Identity and Access Management          | Ensure That ‘Subscription Entering AAD Directory’ and ‘Subscription Leaving AAD Directory’ Is Set To ‘Permit No One’                                   |        :x:         |  Manual   |
 |                          1.3                           | Identity and Access Management          | Ensure that 'Users can create Azure AD Tenants' is set to 'No'                                                                                         |        :x:         | Automated |

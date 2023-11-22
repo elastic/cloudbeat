@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/elastic/elastic-agent-libs/logp"
@@ -42,6 +43,10 @@ var AzureBatchAssets = map[string]typePair{
 	inventory.BastionAssetType:          newPair(fetching.AzureBastionType, fetching.CloudDns),
 }
 
+// In order to simplify the mappings, we are trying to query all AzureBatchAssets on every asset group
+// Because this is done with an "|"" this means that we won't get irrelevant data
+var AzureBatchAssetGroups = []string{inventory.AssetGroupResources}
+
 func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureBatchAssetFetcher {
 	return &AzureBatchAssetFetcher{
 		log:        log,
@@ -52,30 +57,40 @@ func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, 
 
 func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
+	var errAgg error
+	subscriptions := f.provider.GetSubscriptions()
 
-	allAssets, err := f.provider.ListAllAssetTypesByName(ctx, maps.Keys(AzureBatchAssets))
-	if err != nil {
-		return err
+	assets := []inventory.AzureAsset{}
+	for _, assetGroup := range AzureBatchAssetGroups {
+		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchAssets))
+		if err != nil {
+			f.log.Errorf("AzureBatchAssetFetcher.Fetch failed to fetch asset group %s: %s", assetGroup, err.Error())
+			errAgg = errors.Join(errAgg, err)
+			continue
+		}
+		assets = append(assets, r...)
 	}
 
-	subscriptionGroups := lo.GroupBy(allAssets, func(item inventory.AzureAsset) string {
+	subscriptionGroups := lo.GroupBy(assets, func(item inventory.AzureAsset) string {
 		return item.SubscriptionId
 	})
 
-	for subId, subName := range f.provider.GetSubscriptions() {
+	for subId, subName := range subscriptions {
 		assetGroups := lo.GroupBy(subscriptionGroups[subId], func(item inventory.AzureAsset) string {
 			return item.Type
 		})
 		for assetType, pair := range AzureBatchAssets {
-			assets := assetGroups[assetType]
-			if assets == nil {
-				assets = []inventory.AzureAsset{} // Use empty array instead of nil
+			batchAssets := assetGroups[assetType]
+			if batchAssets == nil {
+				batchAssets = []inventory.AzureAsset{} // Use empty array instead of nil
 			}
 
 			select {
 			case <-ctx.Done():
-				f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", ctx.Err().Error())
-				return nil
+				err := ctx.Err()
+				f.log.Infof("AzureBatchAssetFetcher.Fetch context err: %s", err.Error())
+				errAgg = errors.Join(errAgg, err)
+				return errAgg
 			case f.resourceCh <- fetching.ResourceInfo{
 				CycleMetadata: cMetadata,
 				Resource: &AzureBatchResource{
@@ -84,14 +99,14 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 					SubType: pair.SubType,
 					SubId:   subId,
 					SubName: subName,
-					Assets:  assets,
+					Assets:  batchAssets,
 				},
 			}:
 			}
 		}
 	}
 
-	return nil
+	return errAgg
 }
 
 func (f *AzureBatchAssetFetcher) Stop() {}
