@@ -41,12 +41,11 @@ var AzureBatchAssets = map[string]typePair{
 	inventory.ActivityLogAlertAssetType: newPair(fetching.AzureActivityLogAlertType, fetching.MonitoringIdentity),
 	inventory.ApplicationInsights:       newPair(fetching.AzureInsightsComponentType, fetching.MonitoringIdentity),
 	inventory.BastionAssetType:          newPair(fetching.AzureBastionType, fetching.CloudDns),
-	inventory.RoleDefinitionsType:       newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
 }
 
 // In order to simplify the mappings, we are trying to query all AzureBatchAssets on every asset group
 // Because this is done with an "|"" this means that we won't get irrelevant data
-var AzureBatchAssetGroups = []string{inventory.AssetGroupResources, inventory.AssetGroupAuthorizationResources}
+var AzureBatchAssetGroups = []string{inventory.AssetGroupResources}
 
 func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureBatchAssetFetcher {
 	return &AzureBatchAssetFetcher{

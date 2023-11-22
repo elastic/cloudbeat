@@ -2,21 +2,37 @@ package compliance.cis_azure.rules.cis_1_23
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
-import future.keywords.every
+import future.keywords.in
+import future.keywords.if
 
 finding = result {
 	# filter
-	data_adapter.is_role_definition
+	data_adapter.is_custom_role_definition
 
+print("JENIA TEST", has_administrator_action, has_subscription_scope, has_administrator_subscription_scope, evaluation_results)
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(no_custom_roles),
+		common.calculate_result(evaluation_results),
 		{"Resource": data_adapter.resource},
 	)
 }
 
-no_custom_roles {
-	every role_def in data_adapter.role_definitions {
-		role_def.properties.type != "CustomRole"
-	}
+has_administrator_action if {
+	some permission in data_adapter.properties.permissions
+	some action in permission.actions
+	action == "*"
+}
+
+has_subscription_scope if {
+	some scope in data_adapter.properties.assignableScopes
+	regex.match("^\/(?:subscriptions\/[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12})?$", scope)
+}
+
+has_administrator_subscription_scope if {
+	has_subscription_scope
+	has_administrator_action
+}
+
+evaluation_results {
+	not has_administrator_subscription_scope
 } else = false

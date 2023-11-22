@@ -66,11 +66,12 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.VirtualMachineAssetType:            newPair(fetching.AzureVMType, fetching.CloudCompute),
 	inventory.WebsitesAssetType:                  newPair(fetching.AzureWebSiteType, fetching.CloudCompute),
 	inventory.VaultAssetType:                     newPair(fetching.AzureVaultType, fetching.KeyManagement),
+	inventory.RoleDefinitionsType:                newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
 }
 
 // In order to simplify the mappings, we are trying to query all AzureAssetTypeToTypePair on every asset group
 // Because this is done with an "|"" this means that we won't get irrelevant data
-var AzureAssetGroups = []string{inventory.AssetGroupResources}
+var AzureAssetGroups = []string{inventory.AssetGroupResources, inventory.AssetGroupAuthorizationResources}
 
 func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
 	return &AzureAssetsFetcher{

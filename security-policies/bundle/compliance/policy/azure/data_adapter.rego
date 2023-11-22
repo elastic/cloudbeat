@@ -12,6 +12,11 @@ is_role_definition {
 	input.subType == "azure-role-definition"
 }
 
+is_custom_role_definition {
+	is_role_definition
+	properties.type == "CustomRole"
+}
+
 is_vault {
 	input.subType == "azure-vault"
 }

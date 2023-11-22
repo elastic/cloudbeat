@@ -4,30 +4,82 @@ import data.cis_azure.test_data
 import data.compliance.policy.azure.data_adapter
 import data.lib.test
 
-generate_role_defenition_with_properties(properties) = {
-	"properties": properties,
-	"type": "microsoft.authorization/roledefinitions",
-}
-
-generate_role_defenitions(assets) = {
-	"subType": "azure-role-definition",
-	"resource": assets,
-}
-
 test_violation {
-	eval_fail with input as generate_role_defenitions([generate_role_defenition_with_properties({"type": "CustomRole"})])
-	eval_fail with input as generate_role_defenitions([
-		generate_role_defenition_with_properties({"type": "CustomRole"}),
-		generate_role_defenition_with_properties({"type": "BuiltInRole"}),
-	])
+	eval_fail with input as test_data.generate_azure_asset("azure-role-definition", {
+			"assignableScopes": [
+				"/",
+				"/subscriptions/11111111-2222-3333-4444-555555555555"
+				],
+			"permissions": [{
+				"actions": ["*"],
+			}],
+			"type": "CustomRole",
+	})
+	eval_fail with input as test_data.generate_azure_asset("azure-role-definition", {
+			"assignableScopes": [
+				"/subscriptions/11111111-2222-3333-4444-555555555555"
+				],
+			"permissions": [{
+				"actions": ["*"],
+			}],
+			"type": "CustomRole",
+	})
+	eval_fail with input as test_data.generate_azure_asset("azure-role-definition", {
+			"assignableScopes": [
+				"/"
+				],
+			"permissions": [{
+				"actions": ["*"],
+			}],
+			"type": "CustomRole",
+	})
+	eval_fail with input as test_data.generate_azure_asset("azure-role-definition", {
+			"assignableScopes": [
+				"RandomScope",
+				"/",
+				"/subscriptions/11111111-2222-3333-4444-555555555555"
+				],
+			"permissions": [{
+				"actions": [
+					"RandomAction", "*"],
+			}],
+			"type": "CustomRole",
+	})
 }
 
 test_pass {
-	eval_pass with input as generate_role_defenitions([])
-	eval_pass with input as generate_role_defenitions([generate_role_defenition_with_properties({"type": "BuiltInRole"})])
+	eval_pass with input as test_data.generate_azure_asset("azure-role-definition", {
+			"assignableScopes": [
+				"/",
+				"/subscriptions/11111111-2222-3333-4444-555555555555"
+				],
+			"permissions": [{
+				"actions": ["RandomAction"],
+			}],
+			"type": "CustomRole",
+	})
+	eval_pass with input as test_data.generate_azure_asset("azure-role-definition", {
+			"assignableScopes": [
+				"RandomScope",
+				],
+			"permissions": [{
+				"actions": ["*"],
+			}],
+			"type": "CustomRole",
+	})
 }
 
 test_not_evaluated {
+	not_eval with input as test_data.generate_azure_asset("azure-role-definition", {
+		"assignableScopes": [
+			"/",
+			"/subscriptions/11111111-2222-3333-4444-555555555555"
+			],
+		"permissions": [{
+			"actions": ["*"],
+		}],
+		"type": "BuiltInRole",
+	})
 	not_eval with input as test_data.not_eval_resource
 }
 
