@@ -8,9 +8,20 @@ is_bastion {
 	input.subType == "azure-bastion"
 }
 
+is_role_definition {
+	input.subType == "azure-role-definition"
+}
+
+is_custom_role_definition {
+	is_role_definition
+	properties.type == "CustomRole"
+}
+
 is_vault {
 	input.subType == "azure-vault"
 }
+
+role_definitions = resource
 
 bastions = resource
 
@@ -76,4 +87,10 @@ is_sql_server {
 
 is_document_db_database_account {
 	input.subType == "azure-document-db-database-account"
+}
+
+insights_components = resource
+
+is_insights_component {
+	input.subType == "azure-insights-component"
 }

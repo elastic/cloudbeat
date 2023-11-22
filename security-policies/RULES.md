@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 31/151 implemented rules (21%)
+### 33/151 implemented rules (22%)
 
-#### Automated rules: 31/77 (40%)
+#### Automated rules: 33/77 (43%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -401,7 +401,7 @@
 |                          1.20                          | Identity and Access Management          | Ensure that 'Owners can manage group membership requests in the Access Panel' is set to 'No'                                                           |        :x:         |  Manual   |
 |                          1.21                          | Identity and Access Management          | Ensure that 'Users can create Microsoft 365 groups in Azure portals, API or PowerShell' is set to 'No'                                                 |        :x:         |  Manual   |
 |                          1.22                          | Identity and Access Management          | Ensure that 'Require Multi-Factor Authentication to register or join devices with Azure AD' is set to 'Yes'                                            |        :x:         |  Manual   |
-|                          1.23                          | Identity and Access Management          | Ensure That No Custom Subscription Administrator Roles Exist                                                                                           |        :x:         | Automated |
+|   [1.23](bundle/compliance/cis_azure/rules/cis_1_23)   | Identity and Access Management          | Ensure That No Custom Subscription Administrator Roles Exist                                                                                           | :white_check_mark: | Automated |
 |                          1.24                          | Identity and Access Management          | Ensure a Custom Role is Assigned Permissions for Administering Resource Locks                                                                          |        :x:         |  Manual   |
 |                          1.25                          | Identity and Access Management          | Ensure That ‘Subscription Entering AAD Directory’ and ‘Subscription Leaving AAD Directory’ Is Set To ‘Permit No One’                                   |        :x:         |  Manual   |
 |                          1.3                           | Identity and Access Management          | Ensure that 'Users can create Azure AD Tenants' is set to 'No'                                                                                         |        :x:         | Automated |
@@ -493,7 +493,7 @@
 |  [5.2.7](bundle/compliance/cis_azure/rules/cis_5_2_7)  | Monitoring using Activity Log Alerts    | Ensure that Activity Log Alert exists for Create or Update SQL Server Firewall Rule                                                                    | :white_check_mark: | Automated |
 |  [5.2.8](bundle/compliance/cis_azure/rules/cis_5_2_8)  | Monitoring using Activity Log Alerts    | Ensure that Activity Log Alert exists for Delete SQL Server Firewall Rule                                                                              | :white_check_mark: | Automated |
 |  [5.2.9](bundle/compliance/cis_azure/rules/cis_5_2_9)  | Monitoring using Activity Log Alerts    | Ensure that Activity Log Alert exists for Create or Update Public IP Address rule                                                                      | :white_check_mark: | Automated |
-|                         5.3.1                          | Configuring Application Insights        | Ensure Application Insights are Configured                                                                                                             |        :x:         | Automated |
+|  [5.3.1](bundle/compliance/cis_azure/rules/cis_5_3_1)  | Configuring Application Insights        | Ensure Application Insights are Configured                                                                                                             | :white_check_mark: | Automated |
 |                          5.4                           | Logging and Monitoring                  | Ensure that Azure Monitor Resource Logging is Enabled for All Services that Support it                                                                 |        :x:         |  Manual   |
 |    [5.5](bundle/compliance/cis_azure/rules/cis_5_5)    | Logging and Monitoring                  | Ensure that SKU Basic/Consumption is not used on artifacts that need to be monitored (Particularly for Production Workloads)                           | :white_check_mark: | Automated |
 |                          6.1                           | Networking                              | Ensure that RDP access from the Internet is evaluated and restricted                                                                                   |        :x:         | Automated |
