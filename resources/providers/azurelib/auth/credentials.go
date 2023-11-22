@@ -49,7 +49,7 @@ func (p *ConfigProvider) GetAzureClientConfig(cfg config.AzureConfig) (*AzureFac
 			return nil, ErrIncompleteUsernamePassword
 		}
 		return p.getUsernamePasswordCredentialsConfig(cfg)
-	case "", config.AzureClientCredentialsTypeManagedIdentity, config.AzureClientCredentialsTypeARMTemplate:
+	case "", config.AzureClientCredentialsTypeManagedIdentity, config.AzureClientCredentialsTypeARMTemplate, config.AzureClientCredentialsTypeManual:
 		return p.getDefaultCredentialsConfig()
 	}
 
