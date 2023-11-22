@@ -85,7 +85,7 @@ module "ec_project" {
   ec_apikey    = var.ec_api_key
   ec_url       = local.ec_url
   project_name = "${var.deployment_name}-${random_string.suffix.result}"
-  region_id    = var.ess_region
+  region_id    = "aws-us-east-1" # TODO: replace with var.ess_region when more regions are supported
 }
 
 module "eks" {
