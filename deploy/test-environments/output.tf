@@ -62,9 +62,5 @@ output "kibana_url" {
   description = "The secure Kibana URL"
 }
 
-# output "admin_console_url" {
-#   value       = module.ec_deployment.admin_console_url
-#   description = "The admin console URL"
-# }
 # =============================================================
 
