@@ -70,7 +70,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pipeline-name: [ golang, beat ]
+        pipeline-name: [ golang, beats ]
     steps:
       - uses: actions/checkout@v4
       - name: Init Hermit
