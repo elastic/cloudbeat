@@ -24,7 +24,7 @@ has_administrator_action if {
 
 has_subscription_scope if {
 	some scope in data_adapter.properties.assignableScopes
-	regex.match("^/(?:subscriptions/[a-f\\d]{8}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{4}-[a-f\\d]{12})?$", scope)
+	regex.match(`^/(?:subscriptions/[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12})?$`, scope)
 }
 
 has_administrator_subscription_scope if {
