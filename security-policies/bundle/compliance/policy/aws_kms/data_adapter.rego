@@ -1,6 +1,8 @@
 package compliance.policy.aws_kms.data_adapter
 
-is_kms {
+import future.keywords.if
+
+is_kms if {
 	input.subType == "aws-kms"
 }
 

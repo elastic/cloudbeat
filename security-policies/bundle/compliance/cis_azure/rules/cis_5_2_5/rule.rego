@@ -3,8 +3,9 @@ package compliance.cis_azure.rules.cis_5_2_5
 import data.compliance.lib.common
 import data.compliance.policy.azure.activity_log_alert.activity_log_alert_operation_enabled as audit
 import data.compliance.policy.azure.data_adapter
+import future.keywords.if
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_activity_log_alerts
 

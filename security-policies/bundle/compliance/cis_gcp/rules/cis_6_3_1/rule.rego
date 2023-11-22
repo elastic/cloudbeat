@@ -4,8 +4,9 @@ import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
 import data.compliance.policy.gcp.sql.ensure_db_flag as audit
+import future.keywords.if
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_cloud_sql
 	data_adapter.is_sql_server

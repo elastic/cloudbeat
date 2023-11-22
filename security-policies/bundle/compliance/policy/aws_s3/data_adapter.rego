@@ -1,6 +1,8 @@
 package compliance.policy.aws_s3.data_adapter
 
-is_s3 {
+import future.keywords.if
+
+is_s3 if {
 	input.subType == "aws-s3"
 }
 

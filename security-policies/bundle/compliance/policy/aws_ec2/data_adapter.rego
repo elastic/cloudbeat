@@ -1,18 +1,20 @@
 package compliance.policy.aws_ec2.data_adapter
 
-is_nacl_policy {
+import future.keywords.if
+
+is_nacl_policy if {
 	input.subType == "aws-nacl"
 }
 
-is_security_group_policy {
+is_security_group_policy if {
 	input.subType == "aws-security-group"
 }
 
-is_vpc_policy {
+is_vpc_policy if {
 	input.subType == "aws-vpc"
 }
 
-is_ebs_policy {
+is_ebs_policy if {
 	input.subType == "aws-ebs"
 }
 
@@ -20,7 +22,7 @@ nacl_entries := input.resource.Entries
 
 security_groups_ip_permissions := input.resource.IpPermissions
 
-is_default_security_group {
+is_default_security_group if {
 	input.resource.GroupName == "default"
 }
 

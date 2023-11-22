@@ -4,9 +4,10 @@ import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.policy.gcp.compute.ensure_default_sa as audit
 import data.compliance.policy.gcp.data_adapter
+import future.keywords.if
 
 # Ensure That Instances Are Not Configured To Use the Default Service Account.
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_compute_instance
 
