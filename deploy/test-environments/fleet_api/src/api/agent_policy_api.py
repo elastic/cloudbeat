@@ -21,7 +21,6 @@ def create_agent_policy(cfg: Munch, json_policy: dict) -> str:
     Raises:
         APICallException: If the API call fails or returns a non-200 status code.
     """
-    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/agent_policies"
 
     try:
@@ -52,7 +51,6 @@ def update_agent_policy(cfg: Munch, policy_id, json_policy: dict):
     Raises:
         APICallException: If the API call fails or returns a non-200 status code.
     """
-    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/agent_policies/{policy_id}"
 
     try:
@@ -81,7 +79,6 @@ def delete_agent_policy(cfg: Munch, agent_policy_id: str):
     Raises:
         APICallException: If the API call fails or returns a non-200 status code.
     """
-    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/agent_policies/delete"
     json_data = {
         "agentPolicyId": agent_policy_id,
@@ -113,7 +110,6 @@ def get_agent_policy_id_by_name(cfg: Munch, policy_name: str) -> str:
     Returns:
         str: The ID of the agent policy if it exists, otherwise None.
     """
-    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/agent_policies"
 
     try:
@@ -148,7 +144,6 @@ def get_agents(cfg: Munch) -> list:
     Raises:
         APICallException: If the API call fails with a non-200 status code.
     """
-    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/agents"
 
     try:
@@ -217,7 +212,6 @@ def create_agent_download_source(
         str: The ID of the newly created agent download source,
              or None if the ID cannot be retrieved.
     """
-    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/agent_download_sources"
     json_data = {
         "name": name,

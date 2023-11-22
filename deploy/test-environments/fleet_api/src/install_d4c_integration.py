@@ -50,7 +50,6 @@ def load_data() -> Tuple[Dict, Dict]:
 
 
 if __name__ == "__main__":
-    # pylint: disable=duplicate-code
     package_version = get_package_version(cfg=cnfg.elk_config, package_name="cloud_defend")
     logger.info(f"Package version: {package_version}")
     update_package_version(

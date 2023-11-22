@@ -89,7 +89,6 @@ def create_kubernetes_manifest(cfg: Munch, params: Munch):
         cfg (Munch): Config object containing authentication data.
         params (Munch): The parameters object containing additional information.
     """
-    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/kubernetes"
 
     request_params = {
@@ -341,7 +340,7 @@ def get_package(
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return {}
+        raise
 
 
 def update_package_version(cfg: Munch, package_name: str, package_version: str):
@@ -356,7 +355,6 @@ def update_package_version(cfg: Munch, package_name: str, package_version: str):
         APICallException: If the API call fails with an error.
 
     """
-    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/epm/packages/{package_name}/{package_version}"
     try:
         perform_api_call(
@@ -393,7 +391,6 @@ def bulk_upgrade_agents(cfg: Munch, agent_ids: List[str], version: str, source_u
     Raises:
         APICallException: If the API call fails with a non-200 status code.
     """
-    # pylint: disable=duplicate-code
     url = f"{cfg.kibana_url}/api/fleet/agents/bulk_upgrade"
     json_data = {
         "agents": agent_ids,

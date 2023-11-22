@@ -18,6 +18,8 @@ have been set in the system environment.
 import os
 from munch import Munch
 
+# CNVM_TAGS format: "Key=<key1>,Value=<value1> Key=<key2>,Value=<value2> ..."
+# Note: Each key-value pair is separated by a space. This space is required and used in the add_tags function.
 CNVM_TAGS = (
     "Key=division,Value=engineering "
     "Key=org,Value=security "

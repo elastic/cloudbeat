@@ -15,7 +15,7 @@ from api.common_api import get_package
 # Constants
 CLOUD_SECURITY_POSTURE = "cloud_security_posture"
 REQUIRE_VARS = ["cloudbeat/cis_aws", "cloudbeat/cis_eks"]
-SIMPLIFIED_PACKAGE_POLICY = {
+DEFAULT_PACKAGE_POLICY_TEMPLATE = {
     "policy_id": "",
     "package": {},
     "name": "",
@@ -107,9 +107,11 @@ def format_vars(package_vars: list) -> dict:
     return vars_dict
 
 
-def update_input(data, input_data):
+def update_policy_input_data(data, input_data):
     """
     Recursively updates a dictionary structure with values from another dictionary.
+
+    This function is particularly designed for updating policy-related data structures.
 
     Args:
         data (dict or list): The dictionary structure to be updated.
@@ -122,10 +124,10 @@ def update_input(data, input_data):
             elif key == "vars" and isinstance(value, dict):
                 data[key] = input_data.get("vars", {})
             elif isinstance(value, (dict, list)):
-                update_input(value, input_data)
+                update_policy_input_data(value, input_data)
     elif isinstance(data, list):
         for item in data:
-            update_input(item, input_data)
+            update_policy_input_data(item, input_data)
 
 
 def generate_policy_template(cfg: Munch, policy_template: dict = None) -> dict:
@@ -141,7 +143,7 @@ def generate_policy_template(cfg: Munch, policy_template: dict = None) -> dict:
         dict: Generated policy template.
     """
     if policy_template is None:
-        policy_template = SIMPLIFIED_PACKAGE_POLICY
+        policy_template = DEFAULT_PACKAGE_POLICY_TEMPLATE
 
     generated_policy = copy.deepcopy(policy_template)
     package_policy_info = get_package(cfg=cfg)
@@ -169,7 +171,7 @@ def generate_package_policy(template: dict, policy_input: dict) -> dict:
     integration_key = policy_input.get("input_name", "")
     for input_name, data in package_policy["inputs"].items():
         if integration_key in input_name:
-            update_input(data, policy_input)
+            update_policy_input_data(data, policy_input)
             if "vars" in policy_input and "vars" not in data["streams"]["cloud_security_posture.findings"]:
                 data["streams"]["cloud_security_posture.findings"]["vars"] = policy_input["vars"]
     package_policy["vars"]["posture"] = policy_input.get("posture", "")

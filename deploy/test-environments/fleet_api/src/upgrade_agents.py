@@ -173,6 +173,7 @@ def main():
             target_type="UPGRADE",
             target_status="COMPLETE",
         ):
+            logger.error("Failed to complete the upgrade action within the expected timeframe.")
             sys.exit(1)
         logger.info(f"Agent {agent_id} upgrade is finished")
 

@@ -1,7 +1,7 @@
 # Cloud Environment Upgrade Testing
 
 The [`Test Upgrade Environment`](https://github.com/elastic/cloudbeat/actions/workflows/upgrade-environment.yml) GitHub action automates the process of deploying a fully-featured cloud environment, pre-configured with all integrations (KSPM, CSPM, and D4C).
-It also facilitates the upgrade of the environment to a new version of the ELK stack and all installed agents, along with performing findings retrieval checks.
+It also facilitates the upgrade of the environment to a new version of the ELK stack and all installed agents, while also performing checks for findings retrieval. For example, if the target ELK version is 8.12.0, the workflow will automatically calculate the previous released version (e.g., 8.11.1), install that version, and then proceed to upgrade to the specified target version (8.12.0). Essentially, this workflow is designed to test the upgrade feature on upcoming versions that are currently in development or will be release candidates (BC).
 
 
 ## How to Run the Workflow
@@ -21,12 +21,11 @@ Follow these steps to run the workflow:
     - **`deployment_name`**: Name your environment (Allowed characters: a-z0-9 and `-`). For
       instance: `john-8-11-0-nov1`.
 
-    - **`elk-stack-version`**: Specify the version of Elastic Cloud stack, either a SNAPSHOT or a build candidate (BC)
-      version. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
+    - **`target-elk-stack-version`**: Specify the target version for the Elastic Cloud stack upgrade. This version represents the goal to which the workflow will upgrade the stack. Check the available versions [here](https://artifacts-staging.elastic.co/dra-info/index.html).
       For BC, enter only the version without additions/commit sha, e.g. `8.11.0`.
       For SNAPSHOT, enter the full version, e.g. `8.12.0-SNAPSHOT`.
 
-   ![Required Parameters](https://github.com/elastic/cloudbeat/assets/99176494/a50141d7-7554-4761-a737-e0f23f0b0492)
+   ![Required Parameters](https://github.com/elastic/cloudbeat/assets/99176494/3e363d00-313e-4660-a575-6c688de3d1f1)
 
 4. Optionally, modify other parameters if required:
 
