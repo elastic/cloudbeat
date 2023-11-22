@@ -2,8 +2,9 @@ package compliance.cis_azure.rules.cis_6_6
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
+import future.keywords.if
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_network_watcher
 
@@ -14,6 +15,6 @@ finding = result {
 	)
 }
 
-ensure_enabled {
+ensure_enabled if {
 	data_adapter.properties.provisioningState == "Succeeded"
 } else = false

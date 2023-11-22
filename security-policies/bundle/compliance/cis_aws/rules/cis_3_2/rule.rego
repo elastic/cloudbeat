@@ -2,9 +2,10 @@ package compliance.cis_aws.rules.cis_3_2
 
 import data.compliance.lib.common
 import data.compliance.policy.aws_cloudtrail.data_adapter
+import future.keywords.if
 
 # Ensure CloudTrail log file validation is enabled.
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_single_trail
 

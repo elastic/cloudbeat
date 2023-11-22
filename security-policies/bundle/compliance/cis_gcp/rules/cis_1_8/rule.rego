@@ -2,12 +2,13 @@ package compliance.cis_gcp.rules.cis_1_8
 
 import data.compliance.lib.common
 import data.compliance.policy.gcp.data_adapter
+import future.keywords.contains
 import future.keywords.if
 
 # a user should not have both admin and user role
 # this creates a set of such members, and
 # if the set is empty, the policy is valid
-members_with_both_roles[m] {
+members_with_both_roles contains m if {
 	# get all members with admin role
 	admin = data_adapter.iam_policy.bindings[_]
 	admin.role == "roles/iam.serviceAccountAdmin"

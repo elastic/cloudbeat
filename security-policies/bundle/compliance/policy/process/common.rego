@@ -1,16 +1,17 @@
 package compliance.policy.process.common
 
+import future.keywords.if
 import future.keywords.in
 
 # checks if argument contains value (argument format is csv)
-arg_values_contains(arguments, key, value) {
+arg_values_contains(arguments, key, value) if {
 	argument := arguments[key]
 	values := split(argument, ",")
 	value in values
 } else = false
 
 # splits key value string by first occurrence of =
-split_key_value(key_value_string, delimiter) = [key, value] {
+split_key_value(key_value_string, delimiter) = [key, value] if {
 	seperator_index := indexof(key_value_string, delimiter)
 
 	# extract key

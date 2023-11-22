@@ -2,8 +2,9 @@ package compliance.policy.aws_ecr.ensure_image_scan
 
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.aws_ecr.data_adapter
+import future.keywords.if
 
-finding = result {
+finding = result if {
 	data_adapter.is_aws_ecr
 
 	rule_evaluation := data_adapter.image_scan_config.ScanOnPush

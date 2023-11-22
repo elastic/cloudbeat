@@ -3,10 +3,11 @@ package compliance.cis_aws.rules.cis_3_1
 import data.compliance.lib.common
 import data.compliance.policy.aws_cloudtrail.data_adapter
 import data.compliance.policy.aws_cloudtrail.trail
+import future.keywords.if
 
 default rule_evaluation = false
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_multi_trails_type
 
@@ -17,7 +18,7 @@ finding = result {
 	)
 }
 
-rule_evaluation {
+rule_evaluation if {
 	some i
 	t := data_adapter.trail_items[i]
 	trail.cloudtrail_enabled(t)

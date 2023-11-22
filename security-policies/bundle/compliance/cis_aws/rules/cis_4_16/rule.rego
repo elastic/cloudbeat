@@ -2,10 +2,11 @@ package compliance.cis_aws.rules.cis_4_16
 
 import data.compliance.lib.common
 import data.compliance.policy.aws_securityhub.data_adapter
+import future.keywords.if
 
 default rule_evaluation = false
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_securityhub_subType
 

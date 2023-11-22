@@ -2,8 +2,9 @@ package compliance.cis_azure.rules.cis_9_4
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
+import future.keywords.if
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_website_asset
 
@@ -14,7 +15,7 @@ finding = result {
 	)
 }
 
-is_client_cert_enabled {
+is_client_cert_enabled if {
 	# Benchmark and Azure implementation in remediation checks previous implemented value
 	# Reading the description and rule metadata, we've decided to check the value of the property clientCertMode
 	data_adapter.properties.clientCertMode == "Required"

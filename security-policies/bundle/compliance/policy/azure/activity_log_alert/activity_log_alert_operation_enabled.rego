@@ -1,10 +1,11 @@
 package compliance.policy.azure.activity_log_alert.activity_log_alert_operation_enabled
 
 import data.compliance.policy.azure.data_adapter
+import future.keywords.if
 import future.keywords.in
 
 # Ensure that the Activity Log Alert for specific Administrative operations exists, is enabled, and meets specific conditions
-activity_log_alert_operation_enabled(operation_names, categories) {
+activity_log_alert_operation_enabled(operation_names, categories) if {
 	# Ensure at least one Activity Log Alert passes the following conditions
 	some activity_log_alert in data_adapter.activity_log_alerts
 

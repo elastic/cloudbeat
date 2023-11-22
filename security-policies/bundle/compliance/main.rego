@@ -2,6 +2,7 @@ package main
 
 import data.compliance
 import data.compliance.lib.common
+import future.keywords.if
 
 # input contains the resource and the configuration
 # output is findings
@@ -9,7 +10,7 @@ resource = input.resource
 
 # METADATA
 # entrypoint: true
-findings = f {
+findings = f if {
 	input.benchmark
 
 	# iterate over activated benchmark rules
@@ -25,7 +26,7 @@ findings = f {
 	}
 }
 
-findings = f {
+findings = f if {
 	not input.benchmark
 
 	# aggregate findings from all benchmarks

@@ -3,8 +3,9 @@ package compliance.policy.kube_api.minimize_sharing
 import data.compliance.lib.assert
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.kube_api.data_adapter
+import future.keywords.if
 
-finding(entity) := result {
+finding(entity) := result if {
 	data_adapter.is_kube_api
 
 	rule_evaluation := assert.is_false(lib_common.contains_key_with_value(data_adapter.pod.spec, entity, true))

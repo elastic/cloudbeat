@@ -3,9 +3,10 @@ package compliance.cis_aws.rules.cis_3_4
 import data.compliance.lib.common
 import data.compliance.policy.aws_cloudtrail.data_adapter
 import data.compliance.policy.aws_cloudtrail.ensure_cloudwatch as audit
+import future.keywords.if
 
 # Ensure CloudTrail trails are integrated with CloudWatch Logs.
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_single_trail
 

@@ -3,9 +3,10 @@ package compliance.policy.aws_eks.ensure_logs_enabled
 import data.compliance.lib.assert
 import data.compliance.lib.common
 import data.compliance.policy.aws_eks.data_adapter
+import future.keywords.if
 
 # Ensure that all audit logs are enabled
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_aws_eks
 

@@ -3,18 +3,19 @@ package compliance.cis_k8s.rules.cis_4_2_3
 import data.compliance.cis_k8s.data_adapter
 import data.kubernetes_common.test_data
 import data.lib.test
+import future.keywords.if
 
-test_violation {
+test_violation if {
 	eval_fail with input as rule_input("")
 }
 
-test_pass {
+test_pass if {
 	eval_pass with input as rule_input("--client-ca-file=<path/to/client-ca-file>")
 	eval_pass with input as rule_input_with_external("--client-ca-file=<path/to/client-ca-file>", create_process_config("<path/to/client-ca-file>"))
 	eval_pass with input as rule_input_with_external("", create_process_config("<path/to/client-ca-file>"))
 }
 
-test_not_evaluated {
+test_not_evaluated if {
 	not_eval with input as test_data.process_input("some_process", [])
 }
 
@@ -31,14 +32,14 @@ create_process_config(client_CA_path) = {"config": {"authentication": {
 	},
 }}}
 
-eval_fail {
+eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-eval_pass {
+eval_pass if {
 	test.assert_pass(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-not_eval {
+not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }
