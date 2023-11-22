@@ -8,13 +8,13 @@ test_violation {
 	eval_fail with input as test_data.generate_azure_asset("azure-role-definition", {
 		"assignableScopes": [
 			"/",
-			"/subscriptions/11111111-2222-3333-4444-555555555555",
+			"/subscriptions/11111111-2f22-3333-44e4-555f555g5555",
 		],
 		"permissions": [{"actions": ["*"]}],
 		"type": "CustomRole",
 	})
 	eval_fail with input as test_data.generate_azure_asset("azure-role-definition", {
-		"assignableScopes": ["/subscriptions/11111111-2222-3333-4444-555555555555"],
+		"assignableScopes": ["/subscriptions/11111111-2f22-3333-44e4-555f555g5555"],
 		"permissions": [{"actions": ["*"]}],
 		"type": "CustomRole",
 	})
@@ -27,7 +27,7 @@ test_violation {
 		"assignableScopes": [
 			"RandomScope",
 			"/",
-			"/subscriptions/11111111-2222-3333-4444-555555555555",
+			"/subscriptions/11111111-2f22-3333-44e4-555f555g5555",
 		],
 		"permissions": [{"actions": ["RandomAction", "*"]}],
 		"type": "CustomRole",
@@ -38,7 +38,7 @@ test_pass {
 	eval_pass with input as test_data.generate_azure_asset("azure-role-definition", {
 		"assignableScopes": [
 			"/",
-			"/subscriptions/11111111-2222-3333-4444-555555555555",
+			"/subscriptions/11111111-2f22-3333-44e4-555f555g5555",
 		],
 		"permissions": [{"actions": ["RandomAction"]}],
 		"type": "CustomRole",
@@ -46,7 +46,7 @@ test_pass {
 	eval_pass with input as test_data.generate_azure_asset("azure-role-definition", {
 		"assignableScopes": [
 			"/",
-			"/subscriptions/11111111-2222-3333-4444-555555555555/RandomScope",
+			"/subscriptions/11111111-2f22-3333-44e4-555f555g5555/RandomScope",
 		],
 		"permissions": [{"actions": ["RandomAction"]}],
 		"type": "CustomRole",
@@ -62,7 +62,7 @@ test_not_evaluated {
 	not_eval with input as test_data.generate_azure_asset("azure-role-definition", {
 		"assignableScopes": [
 			"/",
-			"/subscriptions/11111111-2222-3333-4444-555555555555",
+			"/subscriptions/11111111-2f22-3333-44e4-555f555g5555",
 		],
 		"permissions": [{"actions": ["*"]}],
 		"type": "BuiltInRole",
