@@ -1,10 +1,12 @@
 package compliance.policy.aws_cloudtrail.data_adapter
 
-is_multi_trails_type {
+import future.keywords.if
+
+is_multi_trails_type if {
 	input.subType = "aws-multi-trails"
 }
 
-is_single_trail {
+is_single_trail if {
 	input.subType == "aws-trail"
 }
 

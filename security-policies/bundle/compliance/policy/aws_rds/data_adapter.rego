@@ -1,6 +1,8 @@
 package compliance.policy.aws_rds.data_adapter
 
-is_rds {
+import future.keywords.if
+
+is_rds if {
 	input.subType == "aws-rds"
 }
 

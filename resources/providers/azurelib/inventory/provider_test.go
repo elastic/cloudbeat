@@ -154,7 +154,7 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 		},
 	}
 
-	values, err := provider.ListAllAssetTypesByName(context.Background(), []string{"test"})
+	values, err := provider.ListAllAssetTypesByName(context.Background(), "test", []string{"test"})
 	s.Require().NoError(err)
 	s.Len(values, int(*nonTruncatedResponse.Count+*truncatedResponse.Count))
 	lo.ForEach(values, func(r AzureAsset, index int) {
@@ -176,24 +176,38 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 
 func Test_generateQuery(t *testing.T) {
 	tests := []struct {
-		assets []string
-		want   string
+		assetsGroup string
+		assets      []string
+		want        string
 	}{
 		{
-			want: "Resources",
+			assetsGroup: "empty assets",
+			want:        "empty assets",
 		},
 		{
-			assets: []string{"one"},
-			want:   "Resources | where type == 'one'",
+			assetsGroup: "resources",
+			assets:      []string{"one"},
+			want:        "resources | where type == 'one'",
 		},
 		{
-			assets: []string{"one", "two", "three four five"},
-			want:   "Resources | where type == 'one' or type == 'two' or type == 'three four five'",
+			assetsGroup: "resources",
+			assets:      []string{"one", "two", "three four five"},
+			want:        "resources | where type == 'one' or type == 'two' or type == 'three four five'",
+		},
+		{
+			assetsGroup: "authorizationresources",
+			assets:      []string{"one"},
+			want:        "authorizationresources | where type == 'one'",
+		},
+		{
+			assetsGroup: "authorizationresources",
+			assets:      []string{"one", "two", "three four five"},
+			want:        "authorizationresources | where type == 'one' or type == 'two' or type == 'three four five'",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.want, func(t *testing.T) {
-			assert.Equal(t, tt.want, generateQuery(tt.assets))
+			assert.Equal(t, tt.want, generateQuery(tt.assetsGroup, tt.assets))
 		})
 	}
 }

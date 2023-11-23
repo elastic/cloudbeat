@@ -3,8 +3,9 @@ package compliance.cis_gcp.rules.cis_2_1
 import data.cis_gcp.test_data
 import data.compliance.policy.gcp.data_adapter
 import data.lib.test
+import future.keywords.if
 
-test_violation {
+test_violation if {
 	# fail when no read/write logs are set for project/folder/org level
 	eval_fail with input as test_data.generate_policies_asset([{}])
 
@@ -54,7 +55,7 @@ test_violation {
 	])
 }
 
-test_pass {
+test_pass if {
 	# passes when project has DATA_READ/DATA_WRITE/ADMIN_READ
 	# for all services, and with no exempted members
 	eval_pass with input as test_data.generate_policies_asset([{"iam_policy": {"audit_configs": [{
@@ -67,18 +68,18 @@ test_pass {
 	}]}}])
 }
 
-test_not_evaluated {
+test_not_evaluated if {
 	not_eval with input as test_data.not_eval_resource
 }
 
-eval_fail {
+eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-eval_pass {
+eval_pass if {
 	test.assert_pass(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-not_eval {
+not_eval if {
 	not finding with data.benchmark_data_adapter as data_adapter
 }

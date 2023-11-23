@@ -35,6 +35,12 @@ variable "stack_version" {
   type        = string
 }
 
+variable "serverless_mode" {
+  default     = false
+  description = "Set to true to create a serverless security project instead of an ESS deployment"
+  type        = bool
+}
+
 variable "deployment_template" {
   default     = "gcp-compute-optimized-v2"
   description = "Optional deployment template. Defaults to the CPU optimized template for GCP"

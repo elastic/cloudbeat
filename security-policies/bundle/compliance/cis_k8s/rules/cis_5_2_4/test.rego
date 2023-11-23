@@ -2,17 +2,18 @@ package compliance.cis_k8s.rules.cis_5_2_4
 
 import data.kubernetes_common.test_data
 import data.lib.test
+import future.keywords.if
 
-test_violation {
+test_violation if {
 	test.assert_fail(finding) with input as rule_input(violating_psp)
 }
 
-test_pass {
+test_pass if {
 	test.assert_pass(finding) with input as rule_input(non_violating_psp)
 	test.assert_pass(finding) with input as rule_input(non_violating_psp2)
 }
 
-test_not_evaluated {
+test_not_evaluated if {
 	not finding with input as {"type": "no-kube-api"}
 }
 

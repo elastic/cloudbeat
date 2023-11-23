@@ -3,8 +3,9 @@ package compliance.policy.file.ensure_ownership
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.file.common as file_common
 import data.compliance.policy.file.data_adapter
+import future.keywords.if
 
-finding(owner_user, owner_group) = result {
+finding(owner_user, owner_group) = result if {
 	user = data_adapter.owner_user
 	group = data_adapter.owner_group
 	rule_evaluation := file_common.file_ownership_match(user, group, owner_user, owner_group)

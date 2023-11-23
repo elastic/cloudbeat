@@ -65,7 +65,7 @@ def get_fleet_server_host(cfg: Munch) -> str:
         str: The Fleet server host URL.
     """
 
-    url = f"{cfg.kibana_url}/api/fleet/settings"
+    url = f"{cfg.kibana_url}/api/fleet/fleet_server_hosts"
 
     try:
         response = perform_api_call(
@@ -74,7 +74,10 @@ def get_fleet_server_host(cfg: Munch) -> str:
             auth=cfg.auth,
         )
         response_obj = munchify(response)
-        return response_obj.item.fleet_server_hosts[0]
+        for fleet_server in response_obj["items"]:
+            if fleet_server.is_default:
+                return fleet_server.host_urls[0]
+        raise Exception("No default fleet server found")
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",

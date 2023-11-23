@@ -39,7 +39,7 @@ tests_data = {
         "cloud-storage",
         "cloud-dns",
         "project-management",
-        "data-processing",
+        # Exclude "data-processing" due to lack of Dataproc assets in the test account.
     ],
     "cis_azure": [
         "configuration",

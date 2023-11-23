@@ -3,10 +3,11 @@ package compliance.cis_aws.rules.cis_4_12
 import data.compliance.lib.common
 import data.compliance.policy.aws_cloudtrail.data_adapter
 import data.compliance.policy.aws_cloudtrail.trail
+import future.keywords.if
 
 default rule_evaluation = false
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_multi_trails_type
 

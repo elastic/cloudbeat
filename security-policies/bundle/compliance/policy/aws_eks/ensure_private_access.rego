@@ -2,18 +2,19 @@ package compliance.policy.aws_eks.ensure_private_access
 
 import data.compliance.lib.common
 import data.compliance.policy.aws_eks.data_adapter
+import future.keywords.if
 
 # Allow only private access to cluster.
-is_only_private(cluster, cidr_allowed) {
+is_only_private(cluster, cidr_allowed) if {
 	cluster.ResourcesVpcConfig.EndpointPrivateAccess
 	public_access_is_restricted(cluster, cidr_allowed)
 } else = false
 
-public_access_is_restricted(cluster, _) {
+public_access_is_restricted(cluster, _) if {
 	not cluster.ResourcesVpcConfig.EndpointPublicAccess
 }
 
-public_access_is_restricted(cluster, cidr_allowed) {
+public_access_is_restricted(cluster, cidr_allowed) if {
 	cidr_allowed
 
 	cluster.ResourcesVpcConfig.EndpointPublicAccess
@@ -26,7 +27,7 @@ public_access_is_restricted(cluster, cidr_allowed) {
 }
 
 # Ensure there Kuberenetes endpoint private access is enabled
-finding(cidr_allowed) = result {
+finding(cidr_allowed) = result if {
 	# filter
 	data_adapter.is_aws_eks
 
@@ -46,7 +47,7 @@ finding(cidr_allowed) = result {
 	)
 }
 
-cidr_evidence(config, cidr_allowed) = result {
+cidr_evidence(config, cidr_allowed) = result if {
 	cidr_allowed
 	result := {"public_access_cidrs": config.PublicAccessCidrs}
 } else = {}

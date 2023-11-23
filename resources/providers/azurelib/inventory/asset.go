@@ -18,7 +18,9 @@
 package inventory
 
 const (
+	// Resources group
 	ActivityLogAlertAssetType          = "microsoft.insights/activitylogalerts"
+	ApplicationInsights                = "microsoft.insights/components"
 	BastionAssetType                   = "microsoft.network/bastionhosts"
 	ClassicStorageAccountAssetType     = "microsoft.classicstorage/storageaccounts"
 	ClassicVirtualMachineAssetType     = "microsoft.classiccompute/virtualmachines"
@@ -33,4 +35,11 @@ const (
 	VaultAssetType                     = "microsoft.keyvault/vaults"
 	VirtualMachineAssetType            = "microsoft.compute/virtualmachines"
 	WebsitesAssetType                  = "microsoft.web/sites"
+
+	// Authorizationresources group
+	RoleDefinitionsType = "microsoft.authorization/roledefinitions"
+
+	// Azure Resource Graph table groups
+	AssetGroupResources              = "resources"
+	AssetGroupAuthorizationResources = "authorizationresources"
 )

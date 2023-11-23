@@ -3,17 +3,18 @@ package compliance.cis_eks.rules.cis_5_4_3
 import data.cis_eks.test_data as eks_test_data
 import data.kubernetes_common.test_data
 import data.lib.test
+import future.keywords.if
 
-test_violation {
+test_violation if {
 	test.assert_fail(finding) with input as rule_input(violating_input_public_ip_and_public_address)
 }
 
-test_pass {
+test_pass if {
 	test.assert_pass(finding) with input as rule_input(valid_input_no_external_IP)
 	test.assert_pass(finding) with input as rule_input(valid_input_external_IP_set_to_local_host)
 }
 
-test_not_evaluated {
+test_not_evaluated if {
 	not finding with input as eks_test_data.not_evaluated_input
 }
 

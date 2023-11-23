@@ -3,8 +3,9 @@ package compliance.cis_aws.rules.cis_4_3
 import data.cis_aws.test_data
 import data.compliance.cis_aws.data_adapter
 import data.lib.test
+import future.keywords.if
 
-test_pass {
+test_pass if {
 	eval_pass with input as rule_input([{
 		"TrailInfo": {
 			"Trail": {"IsMultiRegionTrail": true},
@@ -16,7 +17,7 @@ test_pass {
 	}])
 }
 
-test_fail {
+test_fail if {
 	# on the required filter alarm is not configured with sns topic
 	# and on irrelevant filter an alaram is configured
 	# so it should not pass
@@ -44,10 +45,10 @@ test_fail {
 
 rule_input(entry) = test_data.generate_monitoring_resources(entry)
 
-eval_pass {
+eval_pass if {
 	test.assert_pass(finding) with data.benchmark_data_adapter as data_adapter
 }
 
-eval_fail {
+eval_fail if {
 	test.assert_fail(finding) with data.benchmark_data_adapter as data_adapter
 }

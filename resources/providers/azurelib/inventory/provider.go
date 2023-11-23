@@ -62,7 +62,7 @@ type AzureAsset struct {
 
 type ServiceAPI interface {
 	// ListAllAssetTypesByName List all content types of the given assets types
-	ListAllAssetTypesByName(ctx context.Context, assets []string) ([]AzureAsset, error)
+	ListAllAssetTypesByName(ctx context.Context, assetsGroup string, assets []string) ([]AzureAsset, error)
 	GetSubscriptions() map[string]string
 }
 
@@ -133,8 +133,8 @@ func (p *ProviderInitializer) getSubscriptionIds(ctx context.Context, azureConfi
 	return result, nil
 }
 
-func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assets []string) ([]AzureAsset, error) {
-	p.log.Infof("Listing Azure assets: %v", assets)
+func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assetsGroup string, assets []string) ([]AzureAsset, error) {
+	p.log.Infof("Listing Azure assetsGroup: %v assets: %v", assetsGroup, assets)
 
 	var subscriptionKeys []*string
 	for subId := range p.subscriptions {
@@ -142,28 +142,28 @@ func (p *Provider) ListAllAssetTypesByName(ctx context.Context, assets []string)
 	}
 
 	query := armresourcegraph.QueryRequest{
-		Query: to.Ptr(generateQuery(assets)),
+		Query: to.Ptr(generateQuery(assetsGroup, assets)),
 		Options: &armresourcegraph.QueryRequestOptions{
 			ResultFormat: to.Ptr(armresourcegraph.ResultFormatObjectArray),
 		},
 		Subscriptions: subscriptionKeys,
 	}
 
-	resourceAssets, err := p.runPaginatedQuery(ctx, query)
+	resAssets, err := p.runPaginatedQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
-	return resourceAssets, nil
+	return resAssets, nil
 }
 
 func (p *Provider) GetSubscriptions() map[string]string {
 	return p.subscriptions
 }
 
-func generateQuery(assets []string) string {
+func generateQuery(assetsGroup string, assets []string) string {
 	var query bytes.Buffer
-	query.WriteString("Resources")
+	query.WriteString(assetsGroup)
 	for index, asset := range assets {
 		if index == 0 {
 			query.WriteString(" | where type == '")
