@@ -215,13 +215,6 @@ for group in $groups; do
                     continue
                 elif [[ $resource_id == *"Microsoft.Compute/virtualMachines"* ]]; then
                     disk_ids=$(az disk list --resource-group "$group" --query "[?managedBy=='$resource_id'].id" --output tsv)
-                    for disk_id in $disk_ids; do
-                        az resource delete --ids "$disk_id" || {
-                            echo "Failed to delete resource: $disk_id"
-                            FAILED_AZURE_RESOURCES+=("$disk_id")
-                            continue
-                        }
-                    done
                 fi
                 az resource delete --ids "$resource_id" || {
                     echo "Failed to delete resource: $resource_id"
@@ -229,6 +222,15 @@ for group in $groups; do
                     continue
                 }
             done
+            # Delete VM disk
+            for disk_id in $disk_ids; do
+                az resource delete --ids "$disk_id" || {
+                    echo "Failed to delete resource: $disk_id"
+                    FAILED_AZURE_RESOURCES+=("$disk_id")
+                    continue
+                }
+            done
+
             az deployment group delete --name "$dep_name" --resource-group "$group" || {
                 echo "Failed to delete deployment: $dep_name"
                 FAILED_AZURE_DEPLOYMENTS+=("$dep_name")
