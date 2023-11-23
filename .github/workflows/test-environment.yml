@@ -10,6 +10,11 @@ on:
         description: |
           Name with letters, numbers, hyphens; start with a letter. Max 20 chars. e.g., 'my-env-123'
         required: true
+      serverless_mode:
+        description: "Deploy a serverless project instead of an ESS deployment"
+        type: boolean
+        required: true
+        default: false
       elk-stack-version:
         required: true
         description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"
@@ -52,6 +57,7 @@ jobs:
       run:
         working-directory: ${{ env.WORKING_DIR }}
     env:
+      TF_VAR_serverless_mode: ${{ github.event.inputs.serverless_mode }}
       TF_VAR_stack_version: ${{ github.event.inputs.elk-stack-version }}
       TF_VAR_ess_region: ${{ github.event.inputs.ess-region }}
       DEPLOYMENT_NAME: ${{ github.event.inputs.deployment_name }}
