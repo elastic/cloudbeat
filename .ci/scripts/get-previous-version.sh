@@ -1,4 +1,14 @@
 #!/bin/bash
+# Calculate Previous Version
+#
+# This script takes a version as input, calculates the previous version,
+# fetches the corresponding release version from Elastic snapshots,
+# and outputs the previous version.
+#
+# Usage: ./get_previous_version.sh <version>
+#
+# Example:
+# ./get_previous_version.sh 8.12.0-SNAPSHOT
 
 # Input: version to calculate previous version
 VERSION="$1"
