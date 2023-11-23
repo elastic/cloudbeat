@@ -77,12 +77,12 @@ def get_fleet_server_host(cfg: Munch) -> str:
         for fleet_server in response_obj["items"]:
             if fleet_server.is_default:
                 return fleet_server.host_urls[0]
-        raise Exception("No default fleet server found")
+        raise KeyError("No default fleet server found")
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
-        return ""
+        raise
 
 
 def create_kubernetes_manifest(cfg: Munch, params: Munch):
