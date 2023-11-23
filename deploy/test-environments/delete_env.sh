@@ -223,14 +223,18 @@ for group in $groups; do
                 }
             done
 
-            # Delete VM disk
-            for disk_id in $disk_ids; do
-                az resource delete --ids "$disk_id" || {
-                    echo "Failed to delete resource: $disk_id"
-                    FAILED_AZURE_RESOURCES+=("$disk_id")
-                    continue
-                }
-            done
+            if [ -z "$disk_ids" ]; then
+                echo "No disks found for deployment."
+            else
+                # Delete VM disk
+                for disk_id in $disk_ids; do
+                    az resource delete --ids "$disk_id" || {
+                        echo "Failed to delete resource: $disk_id"
+                        FAILED_AZURE_RESOURCES+=("$disk_id")
+                        continue
+                    }
+                done
+            fi
 
             az deployment group delete --name "$dep_name" --resource-group "$group" || {
                 echo "Failed to delete deployment: $dep_name"
