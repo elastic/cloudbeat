@@ -49,6 +49,7 @@ INTEGRATION_INPUT = {
 AGENT_INPUT = {
     "name": generate_random_name("cnvm-aws"),
 }
+
 cnvm_cloudformation_config = Path(__file__).parent / CNVM_CLOUDFORMATION_CONFIG
 cnvm_cloudformation_template = Path(__file__).parent / CNMV_TEMPLATE
 

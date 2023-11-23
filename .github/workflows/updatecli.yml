@@ -77,9 +77,10 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Set Branch
         run: |
-          branchName=$(git branch -r \
-            | grep -E 'origin/[0-9]+\.[0-9]+' \
-            | awk -F/ '{print $2}' \
+          branchName=$(git ls-remote --heads \
+            | awk '{print $2}' \
+            | grep -E 'refs/heads/[0-9]+\.[0-9]+' \
+            | awk -F/ '{print $3}' \
             | sort -Vr \
             | head -n 1)
 
