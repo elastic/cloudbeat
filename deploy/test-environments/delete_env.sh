@@ -222,6 +222,7 @@ for group in $groups; do
                     continue
                 }
             done
+
             # Delete VM disk
             for disk_id in $disk_ids; do
                 az resource delete --ids "$disk_id" || {
