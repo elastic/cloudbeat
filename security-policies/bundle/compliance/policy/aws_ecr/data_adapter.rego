@@ -1,6 +1,8 @@
 package compliance.policy.aws_ecr.data_adapter
 
-is_aws_ecr {
+import future.keywords.if
+
+is_aws_ecr if {
 	input.subType == "aws-ecr"
 }
 

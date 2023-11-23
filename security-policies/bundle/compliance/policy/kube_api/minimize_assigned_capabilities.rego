@@ -4,16 +4,17 @@ import data.compliance.lib.assert
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.kube_api.data_adapter
 import future.keywords.every
+import future.keywords.if
 
 default rule_evaluation = false
 
-rule_evaluation {
+rule_evaluation if {
 	every container in data_adapter.containers.app_containers {
 		capabilities_restricted(container)
 	}
 }
 
-finding := result {
+finding := result if {
 	data_adapter.is_kube_api
 	data_adapter.containers
 
@@ -24,8 +25,8 @@ finding := result {
 	)
 }
 
-capabilities_restricted(container) {
+capabilities_restricted(container) if {
 	assert.array_is_empty(object.get(container, ["securityContext", "capabilities", "add"], []))
-} else {
+} else if {
 	object.get(container, ["securityContext", "capabilities", "drop"], []) == ["ALL"]
 }

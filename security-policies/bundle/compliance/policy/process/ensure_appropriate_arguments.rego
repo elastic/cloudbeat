@@ -3,6 +3,7 @@ package compliance.policy.process.ensure_appropriate_arguments
 import data.benchmark_data_adapter
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.process.data_adapter
+import future.keywords.if
 
 process_args := benchmark_data_adapter.process_args
 
@@ -12,7 +13,7 @@ finding(entities) := lib_common.generate_result_without_expected(
 )
 
 # TODO: Change index access to cycle
-rule_evaluation(entities) {
+rule_evaluation(entities) if {
 	process_args[entities[0]]
 	process_args[entities[1]]
 } else = false

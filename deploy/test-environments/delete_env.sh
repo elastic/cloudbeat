@@ -199,7 +199,7 @@ printf "%s\n" "${FAILED_DEPLOYMENTS[@]}"
 FAILED_AZURE_DEPLOYMENTS=()
 FAILED_AZURE_RESOURCES=()
 FAILED_AZURE_GROUPS=()
-deployment_names=('cloudbeat-vm-deployment' 'role-assignment-deployment' 'elastic-agent-deployment')
+deployment_names=('cloudbeat-vm-deployment' 'elastic-agent-deployment')
 groups=$(az group list --query "[?starts_with(name, '$ENV_PREFIX')].name" -o tsv | awk -v prefix="$IGNORE_PREFIX" '{if (prefix == "") print $0; else if (!($0 ~ "^" prefix)) print $0}')
 for group in $groups; do
     for dep_name in "${deployment_names[@]}"; do
@@ -209,6 +209,20 @@ for group in $groups; do
         else
             echo "Deleting resources deployed by $dep_name:"
             for resource_id in $resource_ids; do
+                # Skip deleting the MSI extension resource because it will be deleted with the VM
+                # Removing this condition will cause failure when VM is deleted prior to the extension
+                if [[ $resource_id == *"extensions/EnableMSIExtension"* ]]; then
+                    continue
+                elif [[ $resource_id == *"Microsoft.Compute/virtualMachines"* ]]; then
+                    disk_ids=$(az disk list --resource-group "$group" --query "[?managedBy=='$resource_id')].id" --output tsv)
+                    for disk_id in $disk_ids; do
+                        az resource delete --ids "$disk_id" || {
+                            echo "Failed to delete resource: $disk_id"
+                            FAILED_AZURE_RESOURCES+=("$disk_id")
+                            continue
+                        }
+                    done
+                fi
                 az resource delete --ids "$resource_id" || {
                     echo "Failed to delete resource: $resource_id"
                     FAILED_AZURE_RESOURCES+=("$resource_id")

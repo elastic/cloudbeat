@@ -3,8 +3,9 @@ package compliance.policy.kube_api.minimize_added_capabilities
 import data.compliance.lib.assert
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.kube_api.data_adapter
+import future.keywords.if
 
-finding := result {
+finding := result if {
 	data_adapter.is_kube_api
 
 	allowedCapabilities := object.get(data_adapter.pod.spec, "allowedCapabilities", [])

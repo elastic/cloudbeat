@@ -1,9 +1,11 @@
 package lib.test
 
-assert_pass(finding) {
+import future.keywords.if
+
+assert_pass(finding) if {
 	finding.evaluation == "passed"
 }
 
-assert_fail(finding) {
+assert_fail(finding) if {
 	finding.evaluation == "failed"
 }

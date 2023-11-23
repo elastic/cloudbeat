@@ -2,16 +2,17 @@ package compliance.cis_eks.rules.cis_5_1_1
 
 import data.cis_eks.test_data
 import data.lib.test
+import future.keywords.if
 
-test_violation {
+test_violation if {
 	test.assert_fail(finding) with input as violating_input_scan_on_push_disabled
 }
 
-test_pass {
+test_pass if {
 	test.assert_pass(finding) with input as valid_input
 }
 
-test_not_evaluated {
+test_not_evaluated if {
 	not finding with input as test_data.not_evaluated_input
 }
 

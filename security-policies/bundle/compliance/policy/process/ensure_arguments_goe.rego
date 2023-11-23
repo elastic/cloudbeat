@@ -3,10 +3,11 @@ package compliance.policy.process.ensure_arguments_goe
 import data.benchmark_data_adapter
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.process.data_adapter
+import future.keywords.if
 
 process_args := benchmark_data_adapter.process_args
 
-finding(entity, value) = result {
+finding(entity, value) = result if {
 	data_adapter.is_kube_apiserver
 
 	# set result
@@ -16,7 +17,7 @@ finding(entity, value) = result {
 	)
 }
 
-rule_evaluation(entity, value) {
+rule_evaluation(entity, value) if {
 	e := process_args[entity]
 	lib_common.greater_or_equal(e, value)
 } else = false

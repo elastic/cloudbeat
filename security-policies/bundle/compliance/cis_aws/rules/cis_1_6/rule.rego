@@ -3,9 +3,10 @@ package compliance.cis_aws.rules.cis_1_6
 import data.compliance.lib.common
 import data.compliance.policy.aws_iam.data_adapter
 import data.compliance.policy.aws_iam.ensure_hardware_mfa as audit
+import future.keywords.if
 
 # Ensure hardware MFA is enabled for the 'root' user account.
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_root_user
 

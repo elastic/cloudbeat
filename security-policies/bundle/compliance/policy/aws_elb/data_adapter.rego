@@ -1,6 +1,8 @@
 package compliance.policy.aws_elb.data_adapter
 
-is_aws_elb {
+import future.keywords.if
+
+is_aws_elb if {
 	input.subType == "aws-elb"
 }
 

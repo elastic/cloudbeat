@@ -5,10 +5,11 @@ import data.compliance.lib.assert
 import data.compliance.lib.common as lib_common
 import data.compliance.policy.process.common as process_common
 import data.compliance.policy.process.data_adapter
+import future.keywords.if
 
 process_args := benchmark_data_adapter.process_args
 
-finding(rule_evaluation) = result {
+finding(rule_evaluation) = result if {
 	data_adapter.is_kube_apiserver
 
 	# set result
