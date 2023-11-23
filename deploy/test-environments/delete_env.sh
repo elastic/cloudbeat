@@ -214,7 +214,7 @@ for group in $groups; do
                 if [[ $resource_id == *"extensions/EnableMSIExtension"* ]]; then
                     continue
                 elif [[ $resource_id == *"Microsoft.Compute/virtualMachines"* ]]; then
-                    disk_ids=$(az disk list --resource-group "$group" --query "[?managedBy=='$resource_id')].id" --output tsv)
+                    disk_ids=$(az disk list --resource-group "$group" --query "[?managedBy=='$resource_id'].id" --output tsv)
                     for disk_id in $disk_ids; do
                         az resource delete --ids "$disk_id" || {
                             echo "Failed to delete resource: $disk_id"
