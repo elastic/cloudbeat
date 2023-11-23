@@ -38,11 +38,11 @@ require (
 	github.com/aws/smithy-go v1.14.2
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.5.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231011163740-10b198c985eb
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231122190641-05eb1979ea11
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
 	github.com/elastic/elastic-agent-autodiscover v0.6.4
 	github.com/elastic/elastic-agent-client/v7 v7.4.0
-	github.com/elastic/elastic-agent-libs v0.5.0
+	github.com/elastic/elastic-agent-libs v0.6.2
 	github.com/elastic/go-licenser v0.4.1
 	github.com/elastic/go-ucfg v0.8.6
 	github.com/go-git/go-git/v5 v5.7.0
@@ -201,7 +201,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/elastic-agent-shipper-client v0.5.1-0.20230228231646-f04347b666f3 // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.6.1 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.8.2 // indirect
 	github.com/elastic/go-concert v0.2.0 // indirect
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.3.0 // indirect
@@ -428,7 +428,7 @@ require (
 	github.com/zclconf/go-cty v1.10.0 // indirect
 	github.com/zclconf/go-cty-yaml v1.0.2 // indirect
 	go.elastic.co/apm v1.13.0 // indirect
-	go.elastic.co/apm/module/apmelasticsearch/v2 v2.0.0 // indirect
+	go.elastic.co/apm/module/apmelasticsearch/v2 v2.4.4 // indirect
 	go.elastic.co/apm/module/apmhttp/v2 v2.4.5 // indirect
 	go.elastic.co/apm/v2 v2.4.5 // indirect
 	go.elastic.co/ecszap v1.0.2 // indirect
