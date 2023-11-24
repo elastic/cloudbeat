@@ -27,8 +27,8 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider/providers/k8s"
 	"github.com/elastic/cloudbeat/flavors/benchmark/builder"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	azure_auth "github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
-	azure_inventory "github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 	gcp_auth "github.com/elastic/cloudbeat/resources/providers/gcplib/auth"
 	gcp_inventory "github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
@@ -72,9 +72,9 @@ func GetStrategy(cfg *config.Config) (Strategy, error) {
 		}, nil
 	case config.CIS_AZURE:
 		return &Azure{
-			// IdentityProvider:     &azure_identity.Provider{},
-			CfgProvider:          &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}},
-			inventoryInitializer: &azure_inventory.ProviderInitializer{}}, nil
+			// IdentityProvider:     &azure_identity.provider{},
+			CfgProvider:         &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}},
+			providerInitializer: &azurelib.ProviderInitializer{}}, nil
 	}
 	return nil, fmt.Errorf("unknown benchmark: '%s'", cfg.Benchmark)
 }

@@ -66,9 +66,11 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 		{
 			name: "replace alias",
 			resMetadata: fetching.ResourceMetadata{
-				Region:          someRegion,
-				AwsAccountId:    "",
-				AwsAccountAlias: "some alias",
+				Region: someRegion,
+				CloudAccountMetadata: fetching.CloudAccountMetadata{
+					AccountId:   "",
+					AccountName: "some alias",
+				},
 			},
 			identity: Identity{
 				Account:      accountId,
@@ -85,9 +87,11 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 		{
 			name: "replace both",
 			resMetadata: fetching.ResourceMetadata{
-				Region:          someRegion,
-				AwsAccountId:    "12345654321",
-				AwsAccountAlias: "some alias",
+				Region: someRegion,
+				CloudAccountMetadata: fetching.CloudAccountMetadata{
+					AccountId:   "12345654321",
+					AccountName: "some alias",
+				},
 			},
 			identity: Identity{
 				Account:      accountId,

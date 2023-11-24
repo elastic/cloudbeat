@@ -62,12 +62,12 @@ func NewDataProvider(options ...Option) DataProvider {
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
 	return errors.Join(
-		insertIfNotEmpty(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AwsAccountId, a.accountId), event),
-		insertIfNotEmpty(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AwsAccountAlias, a.accountName), event),
+		insertIfNotEmpty(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AccountId, a.accountId), event),
+		insertIfNotEmpty(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AccountName, a.accountName), event),
 		insertIfNotEmpty(cloudProviderField, a.providerName, event),
 		insertIfNotEmpty(cloudRegionField, resMetadata.Region, event),
-		insertIfNotEmpty(cloudOrganizationIdField, resMetadata.AwsOrganizationId, event),
-		insertIfNotEmpty(cloudOrganizationNameField, resMetadata.AwsOrganizationName, event),
+		insertIfNotEmpty(cloudOrganizationIdField, resMetadata.OrganisationId, event),
+		insertIfNotEmpty(cloudOrganizationNameField, resMetadata.OrganizationName, event),
 	)
 }
 

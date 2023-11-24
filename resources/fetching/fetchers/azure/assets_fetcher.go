@@ -25,19 +25,22 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
 type AzureAssetsFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	provider   inventory.ServiceAPI
+	provider   azurelib.ProviderAPI
 }
 
 type AzureResource struct {
-	Type    string
-	SubType string
-	Asset   inventory.AzureAsset `json:"asset,omitempty"`
+	Type         string
+	SubType      string
+	Asset        inventory.AzureAsset `json:"asset,omitempty"`
+	Subscription governance.Subscription
 }
 
 type typePair struct {
@@ -73,7 +76,7 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 // Because this is done with an "|"" this means that we won't get irrelevant data
 var AzureAssetGroups = []string{inventory.AssetGroupResources, inventory.AssetGroupAuthorizationResources}
 
-func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureAssetsFetcher {
+func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureAssetsFetcher {
 	return &AzureAssetsFetcher{
 		log:        log,
 		resourceCh: ch,
@@ -97,6 +100,10 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 		assets = append(assets, r...)
 	}
 
+	subscriptions, err := f.provider.GetSubscriptions(ctx, cMetadata)
+	if err != nil {
+		f.log.Errorf("Error fetching subscription information: %v", err)
+	}
 	for _, asset := range assets {
 		select {
 		case <-ctx.Done():
@@ -104,21 +111,22 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 			f.log.Infof("AzureAssetsFetcher.Fetch context err: %s", err.Error())
 			errAgg = errors.Join(errAgg, err)
 			return errAgg
-		case f.resourceCh <- resourceFromAsset(asset, cMetadata):
+		case f.resourceCh <- resourceFromAsset(asset, cMetadata, subscriptions):
 		}
 	}
 
 	return errAgg
 }
 
-func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetadata) fetching.ResourceInfo {
+func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetadata, subscriptions map[string]governance.Subscription) fetching.ResourceInfo {
 	pair := AzureAssetTypeToTypePair[asset.Type]
 	return fetching.ResourceInfo{
 		CycleMetadata: cMetadata,
 		Resource: &AzureResource{
-			Type:    pair.Type,
-			SubType: pair.SubType,
-			Asset:   asset,
+			Type:         pair.Type,
+			SubType:      pair.SubType,
+			Asset:        asset,
+			Subscription: subscriptions[asset.SubscriptionId],
 		},
 	}
 }
@@ -131,11 +139,12 @@ func (r *AzureResource) GetData() any {
 
 func (r *AzureResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	return fetching.ResourceMetadata{
-		ID:      r.Asset.Id,
-		Type:    r.Type,
-		SubType: r.SubType,
-		Name:    r.Asset.Name,
-		Region:  r.Asset.Location,
+		ID:                   r.Asset.Id,
+		Type:                 r.Type,
+		SubType:              r.SubType,
+		Name:                 r.Asset.Name,
+		Region:               r.Asset.Location,
+		CloudAccountMetadata: r.Subscription.GetCloudAccountMetadata(),
 	}, nil
 }
 
@@ -143,11 +152,6 @@ func (r *AzureResource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]any{
 		"cloud": map[string]any{
 			"provider": "azure",
-			"account": map[string]any{
-				"id":   r.Asset.SubscriptionId,
-				"name": r.Asset.SubscriptionName,
-			},
-			// TODO: Organization fields
 		},
 	}, nil
 }

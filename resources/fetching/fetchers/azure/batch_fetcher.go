@@ -28,13 +28,14 @@ import (
 
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
 type AzureBatchAssetFetcher struct {
 	log        *logp.Logger
 	resourceCh chan fetching.ResourceInfo
-	provider   inventory.ServiceAPI
+	provider   azurelib.ProviderAPI
 }
 
 var AzureBatchAssets = map[string]typePair{
@@ -47,7 +48,7 @@ var AzureBatchAssets = map[string]typePair{
 // Because this is done with an "|"" this means that we won't get irrelevant data
 var AzureBatchAssetGroups = []string{inventory.AssetGroupResources}
 
-func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider inventory.ServiceAPI) *AzureBatchAssetFetcher {
+func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, provider azurelib.ProviderAPI) *AzureBatchAssetFetcher {
 	return &AzureBatchAssetFetcher{
 		log:        log,
 		resourceCh: ch,
@@ -57,9 +58,12 @@ func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, 
 
 func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
-	var errAgg error
-	subscriptions := f.provider.GetSubscriptions()
+	subscriptions, err := f.provider.GetSubscriptions(ctx, cMetadata)
+	if err != nil {
+		return fmt.Errorf("failed to fetch governance info: %w", err)
+	}
 
+	var errAgg error
 	assets := []inventory.AzureAsset{}
 	for _, assetGroup := range AzureBatchAssetGroups {
 		r, err := f.provider.ListAllAssetTypesByName(ctx, assetGroup, maps.Keys(AzureBatchAssets))
@@ -75,8 +79,8 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 		return item.SubscriptionId
 	})
 
-	for subId, subName := range subscriptions {
-		assetGroups := lo.GroupBy(subscriptionGroups[subId], func(item inventory.AzureAsset) string {
+	for _, sub := range subscriptions {
+		assetGroups := lo.GroupBy(subscriptionGroups[sub.ID], func(item inventory.AzureAsset) string {
 			return item.Type
 		})
 		for assetType, pair := range AzureBatchAssets {
@@ -95,11 +99,9 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 				CycleMetadata: cMetadata,
 				Resource: &AzureBatchResource{
 					// Every asset in the list has the same type and subtype
-					Type:    pair.Type,
-					SubType: pair.SubType,
-					SubId:   subId,
-					SubName: subName,
-					Assets:  batchAssets,
+					typePair:     pair,
+					Subscription: sub,
+					Assets:       batchAssets,
 				},
 			}:
 			}
@@ -112,11 +114,9 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 func (f *AzureBatchAssetFetcher) Stop() {}
 
 type AzureBatchResource struct {
-	Type    string
-	SubType string
-	SubId   string
-	SubName string
-	Assets  []inventory.AzureAsset `json:"assets,omitempty"`
+	typePair
+	Subscription governance.Subscription
+	Assets       []inventory.AzureAsset `json:"assets,omitempty"`
 }
 
 func (r *AzureBatchResource) GetData() any {
@@ -125,14 +125,15 @@ func (r *AzureBatchResource) GetData() any {
 
 func (r *AzureBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	// Assuming all batch in not empty includes assets of the same subscription
-	id := fmt.Sprintf("%s-%s", r.SubType, r.SubId)
+	id := fmt.Sprintf("%s-%s", r.SubType, r.Subscription.ID)
 	return fetching.ResourceMetadata{
 		ID:      id,
 		Type:    r.Type,
 		SubType: r.SubType,
 		Name:    id,
 		// TODO: Make sure ActivityLogAlerts are not location scoped (benchmarks do not check location)
-		Region: azurelib.GlobalRegion,
+		Region:               azurelib.GlobalRegion,
+		CloudAccountMetadata: r.Subscription.GetCloudAccountMetadata(),
 	}, nil
 }
 
@@ -140,11 +141,6 @@ func (r *AzureBatchResource) GetElasticCommonData() (map[string]any, error) {
 	return map[string]any{
 		"cloud": map[string]any{
 			"provider": "azure",
-			"account": map[string]any{
-				"id":   r.SubId,
-				"name": r.SubName,
-			},
-			// TODO: Organization fields
 		},
 	}, nil
 }

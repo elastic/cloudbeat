@@ -31,13 +31,13 @@ import (
 	"github.com/elastic/cloudbeat/resources/fetching"
 	"github.com/elastic/cloudbeat/resources/fetching/preset"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
-	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 )
 
 type Azure struct {
-	CfgProvider          auth.ConfigProviderAPI
-	inventoryInitializer inventory.ProviderInitializerAPI
+	CfgProvider         auth.ConfigProviderAPI
+	providerInitializer azurelib.ProviderInitializerAPI
 }
 
 func (a *Azure) Run(context.Context) error { return nil }
@@ -54,7 +54,7 @@ func (a *Azure) NewBenchmark(ctx context.Context, log *logp.Logger, cfg *config.
 	).Build(ctx, log, cfg, resourceCh, reg)
 }
 
-func (a *Azure) initialize(ctx context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
+func (a *Azure) initialize(_ context.Context, log *logp.Logger, cfg *config.Config, ch chan fetching.ResourceInfo) (registry.Registry, dataprovider.CommonDataProvider, dataprovider.IdProvider, error) {
 	if err := a.checkDependencies(); err != nil {
 		return nil, nil, nil, err
 	}
@@ -64,12 +64,12 @@ func (a *Azure) initialize(ctx context.Context, log *logp.Logger, cfg *config.Co
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
 	}
 
-	assetProvider, err := a.inventoryInitializer.Init(ctx, log, *azureConfig)
+	provider, err := a.providerInitializer.Init(log, *azureConfig)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure asset inventory: %v", err)
 	}
 
-	fetchers, err := preset.NewCisAzureFactory(log, ch, assetProvider)
+	fetchers, err := preset.NewCisAzureFactory(log, ch, provider)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure fetchers: %v", err)
 	}
@@ -85,7 +85,7 @@ func (a *Azure) checkDependencies() error {
 		return errors.New("azure config provider is uninitialized")
 	}
 
-	if a.inventoryInitializer == nil {
+	if a.providerInitializer == nil {
 		return errors.New("azure asset inventory is uninitialized")
 	}
 	return nil
