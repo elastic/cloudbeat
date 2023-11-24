@@ -36,7 +36,7 @@ import (
 )
 
 type Azure struct {
-	CfgProvider         auth.ConfigProviderAPI
+	cfgProvider         auth.ConfigProviderAPI
 	providerInitializer azurelib.ProviderInitializerAPI
 }
 
@@ -59,7 +59,7 @@ func (a *Azure) initialize(_ context.Context, log *logp.Logger, cfg *config.Conf
 		return nil, nil, nil, err
 	}
 
-	azureConfig, err := a.CfgProvider.GetAzureClientConfig(cfg.CloudConfig.Azure)
+	azureConfig, err := a.cfgProvider.GetAzureClientConfig(cfg.CloudConfig.Azure)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("failed to initialize azure config: %w", err)
 	}
@@ -81,7 +81,7 @@ func (a *Azure) initialize(_ context.Context, log *logp.Logger, cfg *config.Conf
 }
 
 func (a *Azure) checkDependencies() error {
-	if a.CfgProvider == nil {
+	if a.cfgProvider == nil {
 		return errors.New("azure config provider is uninitialized")
 	}
 

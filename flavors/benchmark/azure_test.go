@@ -87,7 +87,7 @@ func TestAzure_Initialize(t *testing.T) {
 			t.Parallel()
 
 			testInitialize(t, &Azure{
-				CfgProvider:         tt.configProvider,
+				cfgProvider:         tt.configProvider,
 				providerInitializer: tt.inventoryInitializer,
 			}, &tt.cfg, tt.wantErr, tt.want)
 		})

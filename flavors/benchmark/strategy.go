@@ -72,8 +72,7 @@ func GetStrategy(cfg *config.Config) (Strategy, error) {
 		}, nil
 	case config.CIS_AZURE:
 		return &Azure{
-			// IdentityProvider:     &azure_identity.provider{},
-			CfgProvider:         &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}},
+			cfgProvider:         &azure_auth.ConfigProvider{AuthProvider: &azure_auth.AzureAuthProvider{}},
 			providerInitializer: &azurelib.ProviderInitializer{}}, nil
 	}
 	return nil, fmt.Errorf("unknown benchmark: '%s'", cfg.Benchmark)
