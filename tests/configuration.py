@@ -65,6 +65,7 @@ elasticsearch.url = os.getenv("ES_URL", f"{elasticsearch.protocol}://{elasticsea
 elasticsearch.kspm_index = os.getenv("KSPM_INDEX", FINDINGS_INDEX_PATTERN)
 elasticsearch.cspm_index = os.getenv("CSPM_INDEX", FINDINGS_INDEX_PATTERN)
 elasticsearch.cnvm_index = os.getenv("CNVM_INDEX", VULNERABILITIES_INDEX_PATTERN)
+elasticsearch.stack_version = os.getenv("STACK_VERSION", "")
 
 # --- Docker environment definition
 docker = Munch()

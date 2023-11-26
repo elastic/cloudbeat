@@ -29,9 +29,8 @@ def fixture_start_stop_cloudbeat(k8s, api_client, cloudbeat_agent):
     try:
         file_path = Path(__file__).parent / DEPLOY_YML_DICT[f"{cloudbeat_agent.name}_{cloudbeat_agent.cluster_type}"]
     except KeyError:
-        raise Exception(
-            f"configuration {cloudbeat_agent.name}_{cloudbeat_agent.cluster_type} is unknown",
-        ) from KeyError
+        logger.error(f"configuration {cloudbeat_agent.name}_{cloudbeat_agent.cluster_type} is unknown")
+        raise
 
     if k8s.get_agent_pod_instances(
         agent_name=cloudbeat_agent.name,

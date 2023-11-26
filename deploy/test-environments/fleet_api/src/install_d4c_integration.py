@@ -23,10 +23,11 @@ from api.common_api import (
 )
 from loguru import logger
 from utils import read_json
-from state_file_manager import state_manager, PolicyState
+from state_file_manager import state_manager, PolicyState, HostType
 
 D4C_AGENT_POLICY = "../../../cloud/data/agent_policy_d4c.json"
 D4C_PACKAGE_POLICY = "../../../cloud/data/package_policy_d4c.json"
+D4C_AGENT_POLICY_NAME = "tf-ap-d4c"
 D4C_EXPECTED_AGENTS = 2
 INTEGRATAION_NAME = "D4C"
 
@@ -49,7 +50,6 @@ def load_data() -> Tuple[Dict, Dict]:
 
 
 if __name__ == "__main__":
-    # pylint: disable=duplicate-code
     package_version = get_package_version(cfg=cnfg.elk_config, package_name="cloud_defend")
     logger.info(f"Package version: {package_version}")
     update_package_version(
@@ -78,6 +78,8 @@ if __name__ == "__main__":
             package_policy_id,
             D4C_EXPECTED_AGENTS,
             [],
+            HostType.KUBERNETES.value,
+            D4C_AGENT_POLICY_NAME,
         ),
     )
 

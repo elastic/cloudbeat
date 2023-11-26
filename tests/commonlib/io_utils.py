@@ -87,7 +87,7 @@ def get_k8s_yaml_objects(file_path: Path) -> list[str:dict]:
     :return: [ {<k8s_kind> : {<k8s_metadata}}]
     """
     if not file_path:
-        raise Exception(f"{file_path} is required")
+        raise ValueError(f"{file_path} is required")
     with file_path.open(encoding="utf-8") as yaml_file:
         return list(yaml.safe_load_all(yaml_file))
 
@@ -131,11 +131,11 @@ class FsClient:
             return
 
         if container_name == "":
-            raise Exception("Unknown container name is sent")
+            raise ValueError("Unknown container name is sent")
 
         current_resource = Path(resource)
         if not (current_resource.is_file() or current_resource.is_dir()):
-            raise Exception(f"File {resource} does not exist or mount missing.")
+            raise ValueError(f"File {resource} does not exist or mount missing.")
 
         if command == "chmod":
             os.chmod(path=resource, mode=int(param_value, base=8))
@@ -143,9 +143,8 @@ class FsClient:
             try:
                 uid, gid = param_value.split(":")
             except ValueError as exc:
-                raise Exception(
-                    "User and group parameter shall be separated by ':' ",
-                ) from exc
+                logger.error("User and group parameter shall be separated by ':' ")
+                raise exc
 
             FsClient.add_users_to_node([uid, gid], in_place=True)
             shutil.chown(path=resource, user=uid, group=gid)
@@ -153,7 +152,7 @@ class FsClient:
             if not Path(param_value).is_dir():
                 Path(param_value).unlink()
         else:
-            raise Exception(
+            raise ValueError(
                 f"Command '{command}' still not implemented in test framework",
             )
 
@@ -229,11 +228,11 @@ class FsClient:
         @return: None
         """
         if container_name == "":
-            raise Exception("Unknown container name is sent")
+            raise ValueError("Unknown container name is sent")
 
         current_resource = Path(resource)
         if not current_resource.is_file():
-            raise Exception(f"File {resource} does not exist or mount missing.")
+            raise FileNotFoundError(f"File {resource} does not exist or mount missing.")
 
         # Open and load the YAML into variable
         with current_resource.open(encoding="utf-8") as file:
@@ -279,11 +278,11 @@ class FsClient:
         @return: None
         """
         if container_name == "":
-            raise Exception("Unknown container name is sent")
+            raise ValueError("Unknown container name is sent")
 
         current_resource = Path(resource)
         if not current_resource.is_file():
-            raise Exception(f"File {resource} does not exist or mount missing.")
+            raise FileExistsError(f"File {resource} does not exist or mount missing.")
 
         # Open and load the YAML into variable
         with current_resource.open(encoding="utf-8") as file:

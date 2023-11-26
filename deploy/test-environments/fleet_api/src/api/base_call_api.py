@@ -33,13 +33,15 @@ class APICallException(Exception):
         self.response_text = response_text
 
 
-def perform_api_call(method, url, headers=None, auth=None, params=None):
+def perform_api_call(method, url, return_json=True, headers=None, auth=None, params=None):
     """
     Perform an API call using the provided parameters.
 
     Args:
         method (str): The HTTP method for the API call (e.g., 'GET', 'POST', 'PUT', 'DELETE').
         url (str): The URL of the API endpoint.
+        return_json (bool, optional): Indicates whether the function should return
+                                      JSON data (default is True).
         headers (dict, optional): The headers to be included in the API request.
                                   If not provided, default headers will be used.
         auth (tuple or None, optional): The authentication tuple (username, password)
@@ -68,4 +70,6 @@ def perform_api_call(method, url, headers=None, auth=None, params=None):
     if response.status_code != 200:
         raise APICallException(response.status_code, response.text)
 
+    if not return_json:
+        return response.content
     return response.json()
