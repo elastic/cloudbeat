@@ -4,10 +4,27 @@ Exports state_manager object as a singleton.
 """
 import json
 from pathlib import Path
+from enum import Enum
 from utils import delete_file
 from loguru import logger
 
 __state_file = Path(__file__).parent / "state_data.json"
+
+
+class HostType(Enum):
+    """
+    Enumeration representing different host types for deployment.
+
+    The `HostType` enumeration defines constants for various host types,
+    such as Kubernetes or Linux-based deployments.
+
+    Attributes:
+        KUBERNETES (str): Represents a Kubernetes-based deployment.
+        LINUX_TAR (str): Represents a Linux-based deployment using TAR archives.
+    """
+
+    KUBERNETES = "kubernetes"
+    LINUX_TAR = "linux"
 
 
 class PolicyStateEncoder(json.JSONEncoder):
@@ -27,17 +44,30 @@ class PolicyState:
     Class to represent a policy state.
     """
 
-    def __init__(self, agnt_policy_id: str, pkg_policy_id: str, expected_agents: int, expected_tags: list[str]):
+    def __init__(
+        self,
+        agnt_policy_id: str,
+        pkg_policy_id: str,
+        expected_agents: int,
+        expected_tags: list[str],
+        host_type: HostType,
+        integration_name: str,
+    ):
         """
         Args:
             agnt_policy_id (str): ID of the agent policy.
             pkg_policy_id (str): ID of the package policy.
             expected_agents (int): Expected number of deployed agents.
+            expected_tags: (list(int)): List of expected tags count.
+            host_type (HostType): Deployment host type
+            integration_name (str): Name of installed integration
         """
         self.agnt_policy_id = agnt_policy_id
         self.pkg_policy_id = pkg_policy_id
         self.expected_agents = expected_agents
         self.expected_tags = expected_tags
+        self.host_type = host_type
+        self.integration_name = integration_name
 
 
 class StateFileManager:

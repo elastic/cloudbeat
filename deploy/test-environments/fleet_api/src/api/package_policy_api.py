@@ -143,7 +143,6 @@ def delete_package_policy(cfg: Munch, policy_ids: list):
         cfg (Munch): Config object containing authentication data.
         policy_ids (list): A list of policy IDs to be deleted.
     """
-    # pylint: disable=duplicate-code
     data_json = {
         "packagePolicyIds": policy_ids,
         "force": "true",
@@ -163,3 +162,35 @@ def delete_package_policy(cfg: Munch, policy_ids: list):
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
         )
+
+
+def get_package_policy_by_id(cfg: Munch, policy_id: str) -> dict:
+    """
+    Retrieve package policy information by its ID.
+
+    Args:
+        cfg (Munch): A configuration object containing Kibana URL, authentication details, etc.
+        policy_id (str): The package policy ID to retrieve.
+
+    Returns:
+        dict: A dictionary containing the package policy information,
+              or an empty dictionary if not found.
+
+    Raises:
+        APICallException: If the API call to retrieve the package policy fails.
+    """
+    url = f"{cfg.kibana_url}/api/fleet/package_policies/{policy_id}"
+
+    try:
+        response = perform_api_call(
+            method="GET",
+            url=url,
+            auth=cfg.auth,
+        )
+
+        return response.get("item", {})
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        raise

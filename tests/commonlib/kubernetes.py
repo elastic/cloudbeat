@@ -1,7 +1,7 @@
 """
 This module provides kubernetes functionality based on original kubernetes python library.
 """
-
+from subprocess import CalledProcessError
 from typing import Union
 from pathlib import Path
 
@@ -432,7 +432,7 @@ class KubernetesHelper:
 
         resp.close()
         if resp.returncode != 0:
-            raise Exception(f"Response failure, response code: {resp.returncode}")
+            raise CalledProcessError(returncode=resp.returncode, cmd=command, output=response)
         return response
 
     def get_cluster_leader(self, namespace: str, pods: list) -> str:
