@@ -33,9 +33,6 @@ env:
 jobs:
   init:
     runs-on: ubuntu-20.04
-    permissions:
-      contents: 'read'
-      id-token: 'write'
     outputs:
       stack-version: ${{ steps.set-previous-version.outputs.PREVIOUS_VERSION }}
       ess-region: ${{ env.TF_VAR_ess_region }}
@@ -49,15 +46,6 @@ jobs:
           VERSION="${{ inputs.target-elk-stack-version }}"
           PREVIOUS_VERSION=$(./.ci/scripts/get-previous-version.sh "$VERSION")
           echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::704479110758:role/Developer_eks
-          role-session-name: github-ci
-          aws-region: ${{ env.AWS_REGION }}
-      - name: Stop execution Temporary
-        run:
-          exit 1
   deploy:
     uses: ./.github/workflows/test-environment.yml
     needs: init
