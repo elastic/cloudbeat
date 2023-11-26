@@ -33,6 +33,9 @@ env:
 jobs:
   init:
     runs-on: ubuntu-20.04
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     outputs:
       stack-version: ${{ steps.set-previous-version.outputs.PREVIOUS_VERSION }}
       ess-region: ${{ env.TF_VAR_ess_region }}
