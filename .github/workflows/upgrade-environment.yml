@@ -50,6 +50,7 @@ jobs:
     uses: ./.github/workflows/test-environment.yml
     needs: init
     permissions:
+      contents: 'read'
       id-token: 'write'
     with:
       deployment_name: ${{ inputs.deployment_name }}
