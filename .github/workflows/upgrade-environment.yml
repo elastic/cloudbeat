@@ -49,6 +49,8 @@ jobs:
   deploy:
     uses: ./.github/workflows/test-environment.yml
     needs: init
+    permissions:
+      id-token: 'write'
     with:
       deployment_name: ${{ inputs.deployment_name }}
       elk-stack-version: ${{ needs.init.outputs.stack-version }}
