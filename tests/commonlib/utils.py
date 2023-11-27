@@ -313,13 +313,15 @@ def get_telemetry(config):
     """
     method = 'POST'
     url = f"{config.kibana_url}/internal/telemetry/clusters/_stats"
-    headers = {"Content-Type": "application/json",
-               "kbn-xsrf": "true",
-               "elastic-api-version": "2",
-               "x-elastic-internal-origin": "Kibana"}
+    headers = {
+        "Content-Type": "application/json",
+        "kbn-xsrf": "true",
+        "elastic-api-version": "2",
+        "x-elastic-internal-origin": "Kibana",
+    }
     auth = config.basic_auth
 
-    response = requests.request(method=method, url=url, headers=headers, auth=auth, json= {"unencrypted": "true" })
+    response = requests.request(method=method, url=url, headers=headers, auth=auth, json= {"unencrypted": "true"})
     if response.status_code != 200:
         raise Exception("Error in fetching telemetry data")
 
