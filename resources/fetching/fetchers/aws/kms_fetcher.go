@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/kms"
 )
@@ -46,7 +47,7 @@ func NewKMSFetcher(log *logp.Logger, provider kms.KMS, ch chan fetching.Resource
 	}
 }
 
-func (f *KmsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *KmsFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
 	f.log.Info("Starting KMSFetcher.Fetch")
 
 	keys, err := f.kms.DescribeSymmetricKeys(ctx)

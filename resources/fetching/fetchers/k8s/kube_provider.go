@@ -25,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 )
 
 type K8sResource struct {
@@ -38,7 +39,7 @@ const (
 	K8sObjType           = "k8s_object"
 )
 
-func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cMetadata fetching.CycleMetadata) {
+func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cMetadata cycle.Metadata) {
 	log.Debug("Starting getKubeData")
 
 	for _, watcher := range watchers {

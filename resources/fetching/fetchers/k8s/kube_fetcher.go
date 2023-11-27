@@ -30,6 +30,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 )
 
 const (
@@ -153,7 +154,7 @@ func (f *KubeFetcher) initWatchers() error {
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *KubeFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) error {
 	f.log.Debug("Starting KubeFetcher.Fetch")
 
 	var err error

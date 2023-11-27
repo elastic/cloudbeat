@@ -25,6 +25,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 )
@@ -56,7 +57,7 @@ func NewIAMFetcher(log *logp.Logger, provider iam.AccessManagement, ch chan fetc
 
 // Fetch collects IAM resources, such as password-policy and IAM users.
 // The resources are enriched by the provider and being send to evaluation.
-func (f IAMFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f IAMFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
 	iamResources := make([]awslib.AwsResource, 0)
 

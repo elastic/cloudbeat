@@ -35,6 +35,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 )
 
 const (
@@ -127,7 +128,7 @@ func NewProcessFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, processe
 	}
 }
 
-func (f *ProcessesFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *ProcessesFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) error {
 	f.log.Debug("Starting ProcessesFetcher.Fetch")
 
 	pids, err := proc.ListFS(f.Fs)

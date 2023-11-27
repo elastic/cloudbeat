@@ -21,6 +21,8 @@ import (
 	"context"
 
 	awssdk "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 )
 
 const (
@@ -100,7 +102,7 @@ const (
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {
-	Fetch(context.Context, CycleMetadata) error
+	Fetch(context.Context, cycle.Metadata) error
 	Stop()
 }
 
@@ -111,11 +113,7 @@ type Condition interface {
 
 type ResourceInfo struct {
 	Resource
-	CycleMetadata
-}
-
-type CycleMetadata struct {
-	Sequence int64
+	CycleMetadata cycle.Metadata
 }
 
 type EcsGcp struct {

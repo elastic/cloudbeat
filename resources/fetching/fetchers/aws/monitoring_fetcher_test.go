@@ -31,6 +31,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/monitoring"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/securityhub"
@@ -125,7 +126,7 @@ func TestMonitoringFetcher_Fetch(t *testing.T) {
 				cloudIdentity: &cloud.Identity{Account: "account"},
 			}
 
-			err := m.Fetch(ctx, fetching.CycleMetadata{})
+			err := m.Fetch(ctx, cycle.Metadata{})
 			if tt.wantErr {
 				require.Error(t, err)
 				return

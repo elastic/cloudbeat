@@ -22,7 +22,7 @@ package governance
 import (
 	context "context"
 
-	fetching "github.com/elastic/cloudbeat/resources/fetching"
+	cycle "github.com/elastic/cloudbeat/resources/fetching/cycle"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,25 +39,25 @@ func (_m *MockProviderAPI) EXPECT() *MockProviderAPI_Expecter {
 	return &MockProviderAPI_Expecter{mock: &_m.Mock}
 }
 
-// GetSubscriptions provides a mock function with given fields: ctx, cycle
-func (_m *MockProviderAPI) GetSubscriptions(ctx context.Context, cycle fetching.CycleMetadata) (map[string]Subscription, error) {
-	ret := _m.Called(ctx, cycle)
+// GetSubscriptions provides a mock function with given fields: ctx, _a1
+func (_m *MockProviderAPI) GetSubscriptions(ctx context.Context, _a1 cycle.Metadata) (map[string]Subscription, error) {
+	ret := _m.Called(ctx, _a1)
 
 	var r0 map[string]Subscription
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, fetching.CycleMetadata) (map[string]Subscription, error)); ok {
-		return rf(ctx, cycle)
+	if rf, ok := ret.Get(0).(func(context.Context, cycle.Metadata) (map[string]Subscription, error)); ok {
+		return rf(ctx, _a1)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, fetching.CycleMetadata) map[string]Subscription); ok {
-		r0 = rf(ctx, cycle)
+	if rf, ok := ret.Get(0).(func(context.Context, cycle.Metadata) map[string]Subscription); ok {
+		r0 = rf(ctx, _a1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(map[string]Subscription)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, fetching.CycleMetadata) error); ok {
-		r1 = rf(ctx, cycle)
+	if rf, ok := ret.Get(1).(func(context.Context, cycle.Metadata) error); ok {
+		r1 = rf(ctx, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -72,14 +72,14 @@ type MockProviderAPI_GetSubscriptions_Call struct {
 
 // GetSubscriptions is a helper method to define mock.On call
 //   - ctx context.Context
-//   - cycle fetching.CycleMetadata
-func (_e *MockProviderAPI_Expecter) GetSubscriptions(ctx interface{}, cycle interface{}) *MockProviderAPI_GetSubscriptions_Call {
-	return &MockProviderAPI_GetSubscriptions_Call{Call: _e.mock.On("GetSubscriptions", ctx, cycle)}
+//   - _a1 cycle.Metadata
+func (_e *MockProviderAPI_Expecter) GetSubscriptions(ctx interface{}, _a1 interface{}) *MockProviderAPI_GetSubscriptions_Call {
+	return &MockProviderAPI_GetSubscriptions_Call{Call: _e.mock.On("GetSubscriptions", ctx, _a1)}
 }
 
-func (_c *MockProviderAPI_GetSubscriptions_Call) Run(run func(ctx context.Context, cycle fetching.CycleMetadata)) *MockProviderAPI_GetSubscriptions_Call {
+func (_c *MockProviderAPI_GetSubscriptions_Call) Run(run func(ctx context.Context, _a1 cycle.Metadata)) *MockProviderAPI_GetSubscriptions_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(fetching.CycleMetadata))
+		run(args[0].(context.Context), args[1].(cycle.Metadata))
 	})
 	return _c
 }
@@ -89,7 +89,7 @@ func (_c *MockProviderAPI_GetSubscriptions_Call) Return(_a0 map[string]Subscript
 	return _c
 }
 
-func (_c *MockProviderAPI_GetSubscriptions_Call) RunAndReturn(run func(context.Context, fetching.CycleMetadata) (map[string]Subscription, error)) *MockProviderAPI_GetSubscriptions_Call {
+func (_c *MockProviderAPI_GetSubscriptions_Call) RunAndReturn(run func(context.Context, cycle.Metadata) (map[string]Subscription, error)) *MockProviderAPI_GetSubscriptions_Call {
 	_c.Call.Return(run)
 	return _c
 }

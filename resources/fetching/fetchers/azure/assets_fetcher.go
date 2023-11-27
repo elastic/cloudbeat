@@ -25,6 +25,7 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -84,7 +85,7 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 	}
 }
 
-func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
 	var errAgg error
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
@@ -118,7 +119,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 	return errAgg
 }
 
-func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetadata, subscriptions map[string]governance.Subscription) fetching.ResourceInfo {
+func resourceFromAsset(asset inventory.AzureAsset, cMetadata cycle.Metadata, subscriptions map[string]governance.Subscription) fetching.ResourceInfo {
 	pair := AzureAssetTypeToTypePair[asset.Type]
 	subscription, ok := subscriptions[asset.SubscriptionId]
 	if !ok {

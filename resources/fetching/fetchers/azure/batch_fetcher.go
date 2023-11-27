@@ -27,6 +27,7 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -56,7 +57,7 @@ func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, 
 	}
 }
 
-func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
 	subscriptions, err := f.provider.GetSubscriptions(ctx, cMetadata)
 	if err != nil {

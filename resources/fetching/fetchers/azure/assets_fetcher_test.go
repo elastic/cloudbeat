@@ -27,6 +27,7 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -178,7 +179,7 @@ func (s *AzureAssetsFetcherTestSuite) fetch(provider *azurelib.MockProviderAPI, 
 		resourceCh: s.resourceCh,
 		provider:   provider,
 	}
-	err := fetcher.Fetch(context.Background(), fetching.CycleMetadata{})
+	err := fetcher.Fetch(context.Background(), cycle.Metadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 	s.Require().Len(results, expectedLength)
 	return results, err

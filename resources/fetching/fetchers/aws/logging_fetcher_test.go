@@ -31,6 +31,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/cloudtrail"
@@ -125,7 +126,7 @@ func TestLoggingFetcher_Fetch(t *testing.T) {
 				},
 			}
 
-			err := f.Fetch(ctx, fetching.CycleMetadata{})
+			err := f.Fetch(ctx, cycle.Metadata{})
 			resources := testhelper.CollectResources(ch)
 			require.NoError(t, err)
 			assert.Len(t, resources, tt.expectedResources)

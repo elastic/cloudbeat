@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
@@ -49,7 +50,7 @@ func NewGcpLogSinkFetcher(_ context.Context, log *logp.Logger, ch chan fetching.
 	}
 }
 
-func (f *GcpLogSinkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *GcpLogSinkFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpLogSinkFetcher.Fetch")
 
 	loggingAssets, err := f.provider.ListLoggingAssets(ctx)

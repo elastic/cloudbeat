@@ -32,6 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -74,7 +75,7 @@ func subtest(t *testing.T, drain bool) {
 					for i := 0; i < resourcesPerAccount; i++ {
 						ch <- fetching.ResourceInfo{
 							Resource:      mockResource(),
-							CycleMetadata: fetching.CycleMetadata{Sequence: int64(i)},
+							CycleMetadata: cycle.Metadata{Sequence: int64(i)},
 						}
 					}
 				}()
@@ -152,7 +153,7 @@ func TestNewCisAwsOrganizationFetchers_LeakContextDone(t *testing.T) {
 			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) registry.FetchersMap {
 				ch <- fetching.ResourceInfo{
 					Resource:      mockResource(),
-					CycleMetadata: fetching.CycleMetadata{Sequence: 1},
+					CycleMetadata: cycle.Metadata{Sequence: 1},
 				}
 
 				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}

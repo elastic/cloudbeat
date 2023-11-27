@@ -20,12 +20,12 @@ package governance
 import (
 	"context"
 	"fmt"
-	"sync"
 
 	"github.com/elastic/elastic-agent-libs/logp"
 	"github.com/samber/lo"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 	"github.com/elastic/cloudbeat/resources/utils/strings"
 )
@@ -51,58 +51,27 @@ func (s Subscription) GetCloudAccountMetadata() fetching.CloudAccountMetadata {
 }
 
 type ProviderAPI interface {
-	GetSubscriptions(ctx context.Context, cycle fetching.CycleMetadata) (map[string]Subscription, error)
+	GetSubscriptions(ctx context.Context, cycle cycle.Metadata) (map[string]Subscription, error)
 }
 
 type provider struct {
-	log          *logp.Logger
-	lastSequence int64
-	mu           sync.Mutex
-	client       inventory.ProviderAPI
-
-	cachedSubscriptions map[string]Subscription
+	cache  cycle.Cache[map[string]Subscription]
+	client inventory.ProviderAPI
 }
 
 func NewProvider(log *logp.Logger, client inventory.ProviderAPI) ProviderAPI {
-	return &provider{
-		log:          log.Named("governance"),
-		client:       client,
-		lastSequence: -1,
+	p := provider{
+		client: client,
 	}
+	p.cache = cycle.NewCache(log.Named("governance"), p.scan)
+	return &p
 }
 
-func (p *provider) GetSubscriptions(ctx context.Context, cycle fetching.CycleMetadata) (map[string]Subscription, error) {
-	err := p.maybeScan(ctx, cycle)
-	return p.cachedSubscriptions, err
+func (p *provider) GetSubscriptions(ctx context.Context, cycle cycle.Metadata) (map[string]Subscription, error) {
+	return p.cache.GetValue(ctx, cycle)
 }
 
-func (p *provider) maybeScan(ctx context.Context, cycle fetching.CycleMetadata) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	if !p.needsUpdate(cycle) {
-		return nil
-	}
-
-	if err := p.scan(ctx); err != nil {
-		if p.cachedSubscriptions == nil {
-			return fmt.Errorf("failed to scan subscriptions: %w", err)
-		}
-
-		p.lastSequence = cycle.Sequence
-		p.log.Errorf("Failed to scan subscriptions, re-using cached values: %v", err)
-		return nil
-	}
-
-	p.lastSequence = cycle.Sequence
-	return nil
-}
-
-func (p *provider) needsUpdate(cycle fetching.CycleMetadata) bool {
-	return p.lastSequence < cycle.Sequence
-}
-
-func (p *provider) scan(ctx context.Context) error {
+func (p *provider) scan(ctx context.Context) (map[string]Subscription, error) {
 	const (
 		managementGroupType       = "microsoft.management/managementgroups"
 		subscriptionType          = "microsoft.resources/subscriptions"
@@ -115,7 +84,7 @@ func (p *provider) scan(ctx context.Context) error {
 		[]string{managementGroupType, subscriptionType},
 	)
 	if err != nil {
-		return fmt.Errorf("failed to scan resources: %w", err)
+		return nil, fmt.Errorf("failed to scan resources: %w", err)
 	}
 
 	managementGroups := make(map[string]ManagementGroup)
@@ -142,8 +111,7 @@ func (p *provider) scan(ctx context.Context) error {
 		}
 	}
 
-	p.cachedSubscriptions = subscriptions
-	return nil
+	return subscriptions, nil
 }
 
 func typeFilter(tpe string) func(item inventory.AzureAsset, index int) bool {
