@@ -123,6 +123,7 @@ jobs:
         working-directory: ./
 
       - name: Create Slack Payload
+        working-directory: ./
         run: |
           SLACK_PAYLOAD=$(cat ./.ci/slack/create-env-payload.json)
           echo "SLACK_PAYLOAD=$SLACK_PAYLOAD" >> $GITHUB_ENV
