@@ -17,8 +17,6 @@
 
 package cycle
 
-// TODO: test
-
 import (
 	"context"
 	"sync"
