@@ -32,3 +32,8 @@ func Dereference(s *string) string {
 	}
 	return *s
 }
+
+func FromMap(data map[string]any, key string) string {
+	value, _ := data[key].(string)
+	return value
+}

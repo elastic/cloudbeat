@@ -115,14 +115,14 @@ func subtest(t *testing.T, drain bool) {
 			cd, err := resource.GetElasticCommonData()
 			require.NoError(t, err)
 			assert.NotNil(t, cd)
-			mdata, err := resource.GetMetadata()
-			require.NotNil(t, mdata)
+			metadata, err := resource.GetMetadata()
+			require.NotNil(t, metadata)
 			require.NoError(t, err)
-			assert.Equal(t, "some-region", mdata.Region)
-			assert.NotEqual(t, "some-id", mdata.AwsAccountId)
-			assert.NotEqual(t, "some-alias", mdata.AwsAccountAlias)
-			nameCounts[mdata.AwsAccountId]++
-			nameCounts[mdata.AwsAccountAlias]++
+			assert.Equal(t, "some-region", metadata.Region)
+			assert.NotEqual(t, "some-id", metadata.AccountId)
+			assert.NotEqual(t, "some-alias", metadata.AccountName)
+			nameCounts[metadata.AccountId]++
+			nameCounts[metadata.AccountName]++
 		}
 		assert.Len(t, nameCounts, 2*nAccounts)
 		for _, v := range nameCounts {
@@ -226,9 +226,11 @@ func mockResource() *fetching.MockResource {
 	m := fetching.MockResource{}
 	m.EXPECT().GetData().Return(struct{}{}).Once()
 	m.EXPECT().GetMetadata().Return(fetching.ResourceMetadata{
-		Region:          "some-region",
-		AwsAccountId:    "some-id",
-		AwsAccountAlias: "some-alias",
+		Region: "some-region",
+		CloudAccountMetadata: fetching.CloudAccountMetadata{
+			AccountId:   "some-id",
+			AccountName: "some-alias",
+		},
 	}, nil).Once()
 	m.EXPECT().GetElasticCommonData().Return(map[string]interface{}{}, nil).Once()
 	return &m
