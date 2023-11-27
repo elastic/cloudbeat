@@ -17,8 +17,6 @@
 
 package governance
 
-// TODO: tests
-
 import (
 	"context"
 	"fmt"
@@ -67,13 +65,15 @@ type provider struct {
 
 func NewProvider(log *logp.Logger, client inventory.ProviderAPI) ProviderAPI {
 	return &provider{
-		log:    log.Named("governance"),
-		client: client,
+		log:          log.Named("governance"),
+		client:       client,
+		lastSequence: -1,
 	}
 }
 
 func (p *provider) GetSubscriptions(ctx context.Context, cycle fetching.CycleMetadata) (map[string]Subscription, error) {
-	return p.cachedSubscriptions, p.maybeScan(ctx, cycle)
+	err := p.maybeScan(ctx, cycle)
+	return p.cachedSubscriptions, err
 }
 
 func (p *provider) maybeScan(ctx context.Context, cycle fetching.CycleMetadata) error {
@@ -84,15 +84,17 @@ func (p *provider) maybeScan(ctx context.Context, cycle fetching.CycleMetadata) 
 		return nil
 	}
 
-	p.lastSequence = cycle.Sequence
 	if err := p.scan(ctx); err != nil {
 		if p.cachedSubscriptions == nil {
 			return fmt.Errorf("failed to scan subscriptions: %w", err)
 		}
 
+		p.lastSequence = cycle.Sequence
 		p.log.Errorf("Failed to scan subscriptions, re-using cached values: %v", err)
 		return nil
 	}
+
+	p.lastSequence = cycle.Sequence
 	return nil
 }
 
