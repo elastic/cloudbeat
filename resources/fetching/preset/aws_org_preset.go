@@ -44,10 +44,10 @@ func (w *wrapResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	if err != nil {
 		return mdata, err
 	}
-	mdata.AwsAccountAlias = w.identity.AccountAlias
-	mdata.AwsAccountId = w.identity.Account
-	mdata.AwsOrganizationId = w.identity.OrganizationId
-	mdata.AwsOrganizationName = w.identity.OrganizationName
+	mdata.AccountName = w.identity.AccountAlias
+	mdata.AccountId = w.identity.Account
+	mdata.OrganisationId = w.identity.OrganizationId
+	mdata.OrganizationName = w.identity.OrganizationName
 	return mdata, nil
 }
 
