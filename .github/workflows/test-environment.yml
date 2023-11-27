@@ -122,6 +122,32 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
 
+      - name: Create Slack Payload
+        run: |
+          SLACK_PAYLOAD=$(cat ./.ci/slack/create-env-payload.json)
+          echo "SLACK_PAYLOAD=$SLACK_PAYLOAD" >> $GITHUB_ENV
+
+      - name: Publish to Slack channel
+        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          payload: ${{ env.SLACK_PAYLOAD}}
+          channel: "C044L9QBQ49"
+        env:
+          RUN_URL: "${{ github.run_url }}"
+          DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}"
+          JOB_STATUS: "${{ job.status }}"
+          GITHUB_ACTOR: "${{ env.GITHUB_ACTOR }}"
+          JOB_TYPE: "create-environment" #TODO: Replace later
+          KIBANA_URL: "https://localhost:9200" #TODO: Replace later
+          BUCKET: "${{ env.S3_BASE_BUCKET }}"
+
+      - name: fast exit
+        run: |
+          exit 1
+
       - name: Check Deployment Name
         run: |
           deployment_name="${{ inputs.deployment_name }}"
