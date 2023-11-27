@@ -107,6 +107,8 @@ jobs:
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       STACK_VERSION: ${{ inputs.elk-stack-version }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
+      RUN_URL: ${{ github.run_url }}
+      GITHUB_ACTOR: ${{ github.actor }}
     # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
@@ -126,7 +128,7 @@ jobs:
         id: prepare-data
         working-directory: ./
         env:
-          RUN_URL: "${{ github.run_url }}"
+          RUN_URL: ${{ env.RUN_URL }}
           DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}"
           JOB_STATUS: "${{ job.status }}"
           GITHUB_ACTOR: "${{ env.GITHUB_ACTOR }}"
