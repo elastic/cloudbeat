@@ -123,19 +123,8 @@ jobs:
         working-directory: ./
 
       - name: Create Slack Payload
+        id: prepare-data
         working-directory: ./
-        run: |
-          SLACK_PAYLOAD=$(cat ./.ci/slack/create-env-payload.json)
-          echo "SLACK_PAYLOAD=$SLACK_PAYLOAD" >> $GITHUB_ENV
-
-      - name: Publish to Slack channel
-        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
-        with:
-          url: ${{ secrets.VAULT_ADDR }}
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-          payload: ${{ env.SLACK_PAYLOAD}}
-          channel: "C044L9QBQ49"
         env:
           RUN_URL: "${{ github.run_url }}"
           DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}"
@@ -143,7 +132,18 @@ jobs:
           GITHUB_ACTOR: "${{ env.GITHUB_ACTOR }}"
           JOB_TYPE: "create-environment" #TODO: Replace later
           KIBANA_URL: "https://localhost:9200" #TODO: Replace later
-          BUCKET: "${{ env.S3_BASE_BUCKET }}"
+          S3_BUCKET: "${{ env.S3_BASE_BUCKET }}" #TODO: Replace later
+        run: |
+          python3 ./.ci/scripts/prepare_slack_data.py
+
+      - name: Publish to Slack channel
+        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          payload: ${{ steps.prepare-data.outputs.payload }}
+          channel: "C044L9QBQ49"
 
       - name: fast exit
         run: |

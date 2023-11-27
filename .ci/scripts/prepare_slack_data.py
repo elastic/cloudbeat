@@ -1,0 +1,163 @@
+#!/usr/bin/env python
+"""
+This script is designed to be used in a GitHub Actions workflow to send Slack notifications.
+It reads environment variables set by the GitHub Actions runtime, validates them, and
+constructs a Slack payload based on the workflow status.
+"""
+import os
+import json
+
+
+def check_env_var(env_var: str) -> str:
+    """
+    Retrieve the value of the specified environment variable.
+
+    Parameters:
+        env_var (str): The name of the environment variable to retrieve.
+
+    Returns:
+        str: The value of the specified environment variable.
+    """
+    value = os.environ.get(env_var)
+    if value is None or value == "":
+        raise ValueError(f"The env var '{env_var}' isn't defined.")
+    return value
+
+
+def set_output(name: str, value: str):
+    """
+    Set an output variable for the GitHub Actions workflow.
+
+    Parameters:
+        name (str): The name of the output variable.
+        value (str): The value to set for the output variable.
+    """
+    print(f"::set-output name={name}::{value}")
+
+
+def set_failed(message: str):
+    """
+    Set the GitHub Actions workflow status to 'failed' with a specified message.
+
+    Parameters:
+        message (str): The message to be associated with the failure.
+    """
+    print(f"::set-failed::{message}")
+
+
+def color_by_job_status(status: str) -> str:
+    """
+    Determine the Slack color based on the GitHub Actions job status.
+
+    Parameters:
+        status (str): The GitHub Actions job status, e.g., "success", "failure", etc.
+
+    Returns:
+        str: The Slack color corresponding to the GitHub Actions job status.
+             Possible values: "good" for success, "danger" for failure, or an empty string.
+    """
+    if status == "success":
+        return "good"
+    if status == "failure":
+        return "danger"
+    return ""
+
+
+class BuildSlackException(Exception):
+    """
+    Custom exception class for errors related to building Slack notifications.
+    """
+
+
+def run():
+    """
+    Main function to run the Slack notification workflow.
+
+    This function is responsible for validating environment variables, generating a Slack payload,
+    setting GitHub Action outputs, and handling exceptions related to building Slack notifications.
+    """
+    try:
+        # Validate env vars
+        github_actor = check_env_var("GITHUB_ACTOR")
+        github_run_url = check_env_var("RUN_URL")
+        job_type = check_env_var("JOB_TYPE")
+        job_status = check_env_var("JOB_STATUS")
+        kibana_url = check_env_var("KIBANA_URL")
+        s3_bucket = check_env_var("S3_BUCKET")
+        deployment_name = check_env_var("DEPLOYMENT_NAME")
+
+        color = color_by_job_status(job_status)
+
+        # Set output
+        set_output("color", color)
+        set_output("run_url", github_run_url)
+        set_output("kibana_url", github_run_url)
+
+        slack_payload = {
+            "attachments": [
+                {
+                    "color": color,
+                    "falback": "test",
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "fields": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Deployment:*\n<{github_run_url}|{deployment_name}>",
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Status:*\n`{job_status}`",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "section",
+                            "fields": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Author:*\n`{github_actor}`",
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Job Type:*\n`{job_type}`",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "divider",
+                        },
+                        {
+                            "type": "actions",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "kibana",
+                                    },
+                                    "url": f"{kibana_url}",
+                                },
+                                {
+                                    "type": "button",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "state bucket",
+                                    },
+                                    "url": f"{s3_bucket}",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+        set_output("payload", json.dumps(slack_payload))
+
+    except BuildSlackException as err:
+        set_failed(str(err))
+
+
+if __name__ == "__main__":
+    run()
