@@ -50,7 +50,7 @@ func NewRdsFetcher(log *logp.Logger, provider rds.Rds, ch chan fetching.Resource
 	}
 }
 
-func (f *RdsFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
+func (f *RdsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting RdsFetcher.Fetch")
 	dbInstances, err := f.provider.DescribeDBInstances(ctx)
 	if err != nil {
@@ -62,7 +62,7 @@ func (f *RdsFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error 
 		f.log.Debugf("Fetched DB instance: %s", dbInstance.GetResourceName())
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      resource,
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 

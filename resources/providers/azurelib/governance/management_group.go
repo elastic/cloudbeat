@@ -51,7 +51,7 @@ func (s Subscription) GetCloudAccountMetadata() fetching.CloudAccountMetadata {
 }
 
 type ProviderAPI interface {
-	GetSubscriptions(ctx context.Context, cycle cycle.Metadata) (map[string]Subscription, error)
+	GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]Subscription, error)
 }
 
 type provider struct {
@@ -67,8 +67,8 @@ func NewProvider(log *logp.Logger, client inventory.ProviderAPI) ProviderAPI {
 	return &p
 }
 
-func (p *provider) GetSubscriptions(ctx context.Context, cycle cycle.Metadata) (map[string]Subscription, error) {
-	return p.cache.GetValue(ctx, cycle)
+func (p *provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]Subscription, error) {
+	return p.cache.GetValue(ctx, cycleMetadata)
 }
 
 func (p *provider) scan(ctx context.Context) (map[string]Subscription, error) {

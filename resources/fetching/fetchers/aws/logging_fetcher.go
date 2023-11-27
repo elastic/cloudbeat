@@ -64,7 +64,7 @@ func NewLoggingFetcher(
 	}
 }
 
-func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
+func (f LoggingFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting LoggingFetcher.Fetch")
 	trails, err := f.loggingProvider.DescribeTrails(ctx)
 	if err != nil {
@@ -76,7 +76,7 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) err
 			Resource: LoggingResource{
 				AwsResource: resource,
 			},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 
@@ -88,7 +88,7 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) err
 
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      ConfigResource{configs: configs, identity: f.cloudIdentity},
-		CycleMetadata: cMetadata,
+		CycleMetadata: cycleMetadata,
 	}
 
 	return nil

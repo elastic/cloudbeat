@@ -58,7 +58,7 @@ func NewMonitoringFetcher(log *logp.Logger, provider monitoring.Client, security
 	}
 }
 
-func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
+func (m MonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	m.log.Debug("Starting MonitoringFetcher.Fetch")
 	out, err := m.provider.AggregateResources(ctx)
 	if err != nil {
@@ -67,7 +67,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) 
 	if out != nil {
 		m.resourceCh <- fetching.ResourceInfo{
 			Resource:      MonitoringResource{*out, m.cloudIdentity},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 	hubs, err := m.securityhub.Describe(ctx)
@@ -81,7 +81,7 @@ func (m MonitoringFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) 
 			Resource: SecurityHubResource{
 				SecurityHub: hub,
 			},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 

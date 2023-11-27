@@ -154,7 +154,7 @@ func (f *KubeFetcher) initWatchers() error {
 	return nil
 }
 
-func (f *KubeFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) error {
+func (f *KubeFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting KubeFetcher.Fetch")
 
 	var err error
@@ -167,7 +167,7 @@ func (f *KubeFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) error {
 		return fmt.Errorf("could not initate Kubernetes watchers: %w", err)
 	}
 
-	getKubeData(f.log, f.watchers, f.resourceCh, cMetadata)
+	getKubeData(f.log, f.watchers, f.resourceCh, cycleMetadata)
 	return nil
 }
 

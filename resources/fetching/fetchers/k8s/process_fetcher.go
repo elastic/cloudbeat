@@ -128,7 +128,7 @@ func NewProcessFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, processe
 	}
 }
 
-func (f *ProcessesFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) error {
+func (f *ProcessesFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting ProcessesFetcher.Fetch")
 
 	pids, err := proc.ListFS(f.Fs)
@@ -153,7 +153,7 @@ func (f *ProcessesFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) er
 			f.log.Error(err)
 			continue
 		}
-		f.resourceCh <- fetching.ResourceInfo{Resource: fetchedResource, CycleMetadata: cMetadata}
+		f.resourceCh <- fetching.ResourceInfo{Resource: fetchedResource, CycleMetadata: cycleMetadata}
 	}
 
 	return nil

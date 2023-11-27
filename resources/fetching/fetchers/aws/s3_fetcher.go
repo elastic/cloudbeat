@@ -46,7 +46,7 @@ func NewS3Fetcher(log *logp.Logger, s3 s3.S3, ch chan fetching.ResourceInfo) *S3
 	}
 }
 
-func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
+func (f *S3Fetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting S3Fetcher.Fetch")
 	buckets, err := f.s3.DescribeBuckets(ctx)
 	if err != nil {
@@ -59,7 +59,7 @@ func (f *S3Fetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
 		f.log.Debugf("Fetched bucket: %s", bucket.GetResourceName())
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      resource,
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 

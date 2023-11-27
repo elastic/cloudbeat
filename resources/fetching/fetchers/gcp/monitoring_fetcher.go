@@ -55,7 +55,7 @@ var monitoringAssetTypes = map[string][]string{
 	"AlertPolicy": {inventory.MonitoringAlertPolicyAssetType},
 }
 
-func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
+func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
 
 	monitoringAssets, err := f.provider.ListMonitoringAssets(ctx, monitoringAssetTypes)
@@ -69,7 +69,7 @@ func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata cycle.Metada
 			f.log.Infof("GcpMonitoringFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
 			return nil
 		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 			Resource: &GcpMonitoringAsset{
 				Type:    fetching.MonitoringIdentity,
 				subType: fetching.GcpMonitoringType,

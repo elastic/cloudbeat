@@ -57,7 +57,7 @@ func NewIAMFetcher(log *logp.Logger, provider iam.AccessManagement, ch chan fetc
 
 // Fetch collects IAM resources, such as password-policy and IAM users.
 // The resources are enriched by the provider and being send to evaluation.
-func (f IAMFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
+func (f IAMFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting IAMFetcher.Fetch")
 	iamResources := make([]awslib.AwsResource, 0)
 
@@ -102,7 +102,7 @@ func (f IAMFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
 				AwsResource: iamResource,
 				identity:    f.cloudIdentity,
 			},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 

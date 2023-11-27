@@ -39,7 +39,7 @@ const (
 	K8sObjType           = "k8s_object"
 )
 
-func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cMetadata cycle.Metadata) {
+func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cycleMetadata cycle.Metadata) {
 	log.Debug("Starting getKubeData")
 
 	for _, watcher := range watchers {
@@ -59,7 +59,7 @@ func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fet
 				log.Errorf("Bad resource: %v", err)
 				continue
 			} // See https://github.com/kubernetes/kubernetes/issues/3030
-			resCh <- fetching.ResourceInfo{Resource: K8sResource{log, resource}, CycleMetadata: cMetadata}
+			resCh <- fetching.ResourceInfo{Resource: K8sResource{log, resource}, CycleMetadata: cycleMetadata}
 		}
 	}
 }

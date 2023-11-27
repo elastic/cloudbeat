@@ -59,7 +59,7 @@ func NewElbFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider
 	}
 }
 
-func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
+func (f *ElbFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting ElbFetcher.Fetch")
 
 	balancers, err := f.GetLoadBalancers(ctx)
@@ -74,7 +74,7 @@ func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error 
 	for _, loadBalancer := range result {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      ElbResource{lb: loadBalancer, identity: f.cloudIdentity},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 	return nil

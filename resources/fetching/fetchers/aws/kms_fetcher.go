@@ -47,7 +47,7 @@ func NewKMSFetcher(log *logp.Logger, provider kms.KMS, ch chan fetching.Resource
 	}
 }
 
-func (f *KmsFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
+func (f *KmsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting KMSFetcher.Fetch")
 
 	keys, err := f.kms.DescribeSymmetricKeys(ctx)
@@ -61,7 +61,7 @@ func (f *KmsFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error 
 		f.log.Debugf("Fetched key: %s", key.GetResourceName())
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      resource,
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 

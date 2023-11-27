@@ -98,7 +98,7 @@ func NewFsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, patterns []st
 	}
 }
 
-func (f *FileSystemFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) error {
+func (f *FileSystemFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting FileSystemFetcher.Fetch")
 
 	// Input files might contain glob pattern
@@ -115,7 +115,7 @@ func (f *FileSystemFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) e
 				continue
 			}
 
-			f.resourceCh <- fetching.ResourceInfo{Resource: resource, CycleMetadata: cMetadata}
+			f.resourceCh <- fetching.ResourceInfo{Resource: resource, CycleMetadata: cycleMetadata}
 		}
 	}
 

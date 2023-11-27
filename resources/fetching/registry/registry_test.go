@@ -187,10 +187,10 @@ type syncNumberFetcher struct {
 	resourceCh chan fetching.ResourceInfo
 }
 
-func (f *syncNumberFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) error {
+func (f *syncNumberFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      numberResource{f.num},
-		CycleMetadata: cMetadata,
+		CycleMetadata: cycleMetadata,
 	}
 
 	return nil
@@ -229,12 +229,12 @@ func newNumberFetcher(num int, wg *sync.WaitGroup) fetching.Fetcher {
 	return &numberFetcher{num, false, nil, wg}
 }
 
-func (f *numberFetcher) Fetch(_ context.Context, cMetadata cycle.Metadata) error {
+func (f *numberFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
 	defer f.wg.Done()
 
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      numberResource{f.num},
-		CycleMetadata: cMetadata,
+		CycleMetadata: cycleMetadata,
 	}
 
 	return nil

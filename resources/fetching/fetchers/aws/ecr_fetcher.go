@@ -68,7 +68,7 @@ func NewEcrFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider
 
 func (f *EcrFetcher) Stop() {}
 
-func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error {
+func (f *EcrFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting EcrFetcher.Fetch")
 
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
@@ -81,7 +81,7 @@ func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata cycle.Metadata) error 
 	for _, repository := range ecrDescribedRepositories {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      EcrResource{ecr.Repository(repository)},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 	return nil
