@@ -23,7 +23,7 @@ from api.common_api import (
 )
 from loguru import logger
 from utils import read_json
-from state_file_manager import state_manager, PolicyState
+from state_file_manager import state_manager, PolicyState, HostType
 
 CSPM_AZURE_AGENT_POLICY = "../../../cloud/data/agent_policy_cspm_azure.json"
 CSPM_AZURE_PACKAGE_POLICY = "../../../cloud/data/package_policy_cspm_azure.json"
@@ -77,6 +77,8 @@ if __name__ == "__main__":
             package_policy_id,
             CSPM_AZURE_EXPECTED_AGENTS,
             [],
+            HostType.LINUX_TAR.value,
+            package_data.get("name", ""),
         ),
     )
 
