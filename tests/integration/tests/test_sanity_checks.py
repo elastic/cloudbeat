@@ -234,7 +234,6 @@ def test_cspm_azure_findings(cspm_client, match_type):
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
 
 
-# @pytest.mark.parametrize("match_type", tests_data["cis_azure"])
 @pytest.mark.sanity
 def test_telemetry():
     """
@@ -246,41 +245,53 @@ def test_telemetry():
     telemetry_payload = get_telemetry(elasticsearch)
 
     telemetry_object = munchify(telemetry_payload[0])
-    assert len(telemetry_object.stats.stack_stats.kibana.plugins.cloud_security_posture.keys()) > 0,\
-        f"The telemetry payload is missing the cloud_security_posture key"
+    assert len(telemetry_object.stats.stack_stats.kibana.plugins.cloud_security_posture.keys()) > 0, \
+        "The telemetry payload is missing the cloud_security_posture key"
 
     cloud_security_telemetry_data = telemetry_object.stats.stack_stats.kibana.plugins.cloud_security_posture
 
     indices_stats = cloud_security_telemetry_data.indices
     indices = ["findings", "latest_findings", "vulnerabilities", "latest_vulnerabilities", "score"]
 
-    ## indices stats
+    # indices stats
     for index in indices:
         assert indices_stats[index].doc_count > 0, \
             f"Expected {index} index to contain data"
-    assert len(telemetry_payload[0]["stats"]["stack_stats"]["kibana"]["plugins"]["cloud_security_posture"]["indices"]["latestPackageVersion"]) > 0, \
-            f"Package version is missing from telemetry payload"
+    assert len(
+        telemetry_payload[0]["stats"]["stack_stats"]["kibana"]["plugins"]["cloud_security_posture"]["indices"]
+        ["latestPackageVersion"],
+    ) > 0, "Package version is missing from telemetry payload"
 
-    ## account stats
+    # account stats
     cloud_account_stats = cloud_security_telemetry_data.cloud_account_stats
     for account in cloud_account_stats:
         if account.product == 'cspm':
-            assert len(account.account_id) > 0 , f"Telemetry data missing account_id for cloud_account_stats {account}"
-            assert len(account.cloud_provider) > 0 , f"Telemetry data missing cloud_provider for cloud_account_stats {account}"
-            assert len(account.package_policy_id) > 0 , f"Telemetry data missing package_policy_id for cloud_account_stats {account}"
-            assert len(account.product) > 0 , f"Telemetry data missing product for cloud_account_stats {account}"
-            assert len(account.posture_management_stats.benchmark_name) > 0 , f"Telemetry data missing benchmark_name for cloud_account_stats {account}"
-            assert len(account.posture_management_stats.benchmark_version) > 0 , f"Telemetry data missing benchmark_version for cloud_account_stats {account}"
+            assert len(account.account_id) > 0 , f"Telemetry data missing account_id for \
+                cloud_account_stats {account}"
+            assert len(account.cloud_provider) > 0 , f"Telemetry data missing cloud_provider for \
+                cloud_account_stats {account}"
+            assert len(account.package_policy_id) > 0 , f"Telemetry data missing package_policy_id for \
+                 cloud_account_stats {account}"
+            assert len(account.product) > 0 , f"Telemetry data missing product for \
+                 cloud_account_stats {account}"
+            assert len(account.posture_management_stats.benchmark_name) > 0 , f"Telemetry data missing benchmark_name \
+                 for cloud_account_stats {account}"
+            assert len(account.posture_management_stats.benchmark_version) > 0 , f"Telemetry data missing \
+                benchmark_version for cloud_account_stats {account}"
 
-    ## installation stats
+    # installation stats
     installation_stats = cloud_security_telemetry_data.installation_stats
     for installation in installation_stats:
-        assert len(installation.package_policy_id) > 0, f"Telemetry data missing package_policy_id in installation stats"
-        assert len(installation.feature) > 0, f"Telemetry data missing feature in installation_stats for {installation}"
-        assert installation.agent_count > 0, f"Telemetry data missing agent in installation_stats for {installation}"
-        assert len(installation.deployment_mode) > 0, f"Telemetry data missing account_type in installation_stats for {installation}"
-        assert len(installation.package_version) > 0, f"Telemetry data missing package_version in installation_stats for {installation}"
+        assert len(installation.package_policy_id) > 0, "Telemetry data missing package_policy_id in \
+                installation stats"
+        assert len(installation.feature) > 0, f"Telemetry data missing feature in installation_stats \
+                for {installation}"
+        assert installation.agent_count > 0, f"Telemetry data missing agent in installation_stats \
+                for {installation}"
+        assert len(installation.deployment_mode) > 0, f"Telemetry data missing account_type in installation_stats \
+                for {installation}"
+        assert len(installation.package_version) > 0, f"Telemetry data missing package_version in installation_stats \
+                for {installation}"
         if installation.feature == 'cspm':
-            assert isinstance(installation.is_setup_automatic, bool), f"Telemetry data missing is_setup_automatic in installation_stats for {installation}"
-            # assert len(installation.setup_access_option) > 0, f"Telemetry data missing setup_access_option in installation_stats for {installation}"
-
+            assert isinstance(installation.is_setup_automatic, bool), f"Telemetry data missing is_setup_automatic \
+                 in installation_stats for {installation}"

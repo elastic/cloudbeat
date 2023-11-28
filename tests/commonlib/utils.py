@@ -304,6 +304,7 @@ def get_findings(elastic_client, config_timeout, query, sort, match_type):
 
     return result
 
+
 def get_telemetry(config):
     """
     This function create eAPI call to Kibana snapshot telemetry api and return is payload.
@@ -321,7 +322,7 @@ def get_telemetry(config):
     }
     auth = config.basic_auth
 
-    response = requests.request(method=method, url=url, headers=headers, auth=auth, json= {"unencrypted": "true"})
+    response = requests.request(method=method, url=url, headers=headers, auth=auth, json={"unencrypted": "true"})
     if response.status_code != 200:
         raise Exception("Error in fetching telemetry data")
 
