@@ -60,6 +60,7 @@ func NewProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client,
 			return readPager(ctx, pager)
 		},
 	}
+
 	return &provider{log: log, client: wrapper}
 }
 

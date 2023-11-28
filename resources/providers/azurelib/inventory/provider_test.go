@@ -19,9 +19,11 @@ package inventory
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/runtime"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
@@ -534,7 +536,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 			provider := &provider{
 				log: log,
 				client: &azureClientWrapper{
-					AssetDiagnosticSettings: func(ctx context.Context, subID string, _ *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
+					AssetDiagnosticSettings: func(_ context.Context, subID string, _ *armmonitor.DiagnosticSettingsClientListOptions) ([]armmonitor.DiagnosticSettingsClientListResponse, error) {
 						response := tc.responsesPerSubscription[subID]
 						return response, nil
 					},
@@ -549,6 +551,68 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 			}
 
 			assert.ElementsMatch(t, tc.expected, got)
+		})
+	}
+}
+
+func TestReadPager(t *testing.T) {
+	tests := map[string]struct {
+		moreFn    func(i int) bool
+		fetchFn   func(context.Context, *int) (int, error)
+		expectErr bool
+		expected  []int
+	}{
+		"happy path, four pages": {
+			moreFn: func(i int) bool {
+				return i < 4
+			},
+			fetchFn: func(_ context.Context, i *int) (int, error) {
+				if i == nil {
+					i = to.Ptr(0)
+				}
+				*i++
+				return *i, nil
+			},
+			expectErr: false,
+			expected:  []int{1, 2, 3, 4},
+		},
+
+		"error at third of four pages": {
+			moreFn: func(i int) bool {
+				return i < 4
+			},
+			fetchFn: func(_ context.Context, i *int) (int, error) {
+				if i == nil {
+					i = to.Ptr(0)
+				}
+				*i++
+				if *i == 3 {
+					return *i, errors.New("mock error")
+				}
+				return *i, nil
+			},
+			expectErr: true,
+			expected:  nil,
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			pagerHandlerMock := runtime.PagingHandler[int]{
+				More:    tc.moreFn,
+				Fetcher: tc.fetchFn,
+			}
+			pager := runtime.NewPager[int](pagerHandlerMock)
+			intSlice, err := readPager[int](context.Background(), pager)
+
+			if tc.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			require.Equal(t, tc.expected, intSlice)
 		})
 	}
 }
