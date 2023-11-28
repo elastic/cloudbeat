@@ -107,7 +107,6 @@ jobs:
       DOCKER_IMAGE_OVERRIDE: ${{ inputs.docker-image-override }}
       STACK_VERSION: ${{ inputs.elk-stack-version }}
       CNVM_STACK_NAME: "${{ inputs.deployment_name }}-cnvm-sanity-test-stack"
-      GITHUB_ACTOR: ${{ github.actor }}
     # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
@@ -127,13 +126,17 @@ jobs:
         id: prepare-data
         working-directory: ./
         env:
+          WORKFLOW: "${{ github.workflow }}"
           RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          GITHUB_ACTOR: "${{ github.actor }}"
           DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}"
+          ESS_REGION: "${{ inputs.ess-region }}"
+          DOCKER_IMAGE: ${{ inputs.docker-image-override }}
+          ESS_TYPE: ${{ inputs.serverless_mode }}
           JOB_STATUS: "${{ job.status }}"
-          GITHUB_ACTOR: "${{ env.GITHUB_ACTOR }}"
-          JOB_TYPE: "create-environment" #TODO: Replace later
           KIBANA_URL: "https://localhost:9200" #TODO: Replace later
           S3_BUCKET: "${{ env.S3_BASE_BUCKET }}" #TODO: Replace later
+          ES_PASSWORD: "helloworld" #TODO: Replace later
         run: |
           python3 ./.ci/scripts/prepare_slack_data.py
 

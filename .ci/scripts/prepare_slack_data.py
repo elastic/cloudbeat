@@ -83,13 +83,21 @@ def run():
     """
     try:
         # Validate env vars
+        workflow = check_env_var("WORKFLOW")
         github_actor = check_env_var("GITHUB_ACTOR")
         github_run_url = check_env_var("RUN_URL")
-        job_type = check_env_var("JOB_TYPE")
         job_status = check_env_var("JOB_STATUS")
         kibana_url = check_env_var("KIBANA_URL")
         s3_bucket = check_env_var("S3_BUCKET")
         deployment_name = check_env_var("DEPLOYMENT_NAME")
+        stack_version = check_env_var("STACK_VERSION")
+        es_password = check_env_var("ES_PASSWORD")
+        ess_region = check_env_var("ESS_REGION")
+        docker_image = os.getenv("DOCKER_IMAGE", "N/A")
+        is_project = bool(os.getenv("ESS_TYPE", "true") == "true")
+        ess_type = "Deployment"
+        if is_project:
+            ess_type = "Project"
 
         color = color_by_job_status(job_status)
         # Set output
@@ -99,12 +107,13 @@ def run():
         slack_name = github_to_slack.get(github_actor, github_actor)
 
         slack_payload = {
+            "text": "Create / Destroy github workflow",
             "blocks": [
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"Create Environment job <{github_run_url}|{deployment_name}> by `{github_actor}`",
+                        "text": f"{workflow} job <{github_run_url}|{deployment_name}> by <@{slack_name}>",
                     },
                 },
                 {
@@ -115,11 +124,11 @@ def run():
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*Deployment:*\n<{github_run_url}|{deployment_name}>",
+                            "text": f"*ESS Type:*\n`{ess_type}`",
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Status:*\n`{job_status}`",
+                            "text": f"*Stack Version:*\n`{stack_version}`",
                         },
                     ],
                 },
@@ -128,11 +137,11 @@ def run():
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*Author:*\n<@{slack_name}>",
+                            "text": f"*Cloud Region:*\n`{ess_region}`",
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Job Type:*\n`{job_type}`",
+                            "text": f"*Docker Override:*\n`{docker_image}`",
                         },
                     ],
                 },
@@ -161,6 +170,16 @@ def run():
                             "action_id": "s3-bucket-button",
                         },
                     ],
+                },
+                {
+                    "type": "divider",
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"Kibana password: {es_password}",
+                    },
                 },
             ],
         }
