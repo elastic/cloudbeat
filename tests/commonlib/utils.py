@@ -312,7 +312,7 @@ def get_telemetry(config):
     @param config: configuration object contains kibana host and auth
     @return: Telemetry payload
     """
-    method = 'POST'
+    method = "POST"
     url = f"{config.kibana_url}/internal/telemetry/clusters/_stats"
     headers = {
         "Content-Type": "application/json",
