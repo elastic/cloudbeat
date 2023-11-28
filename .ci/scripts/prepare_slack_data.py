@@ -94,6 +94,9 @@ def run():
         es_password = check_env_var("ES_PASSWORD")
         ess_region = check_env_var("ESS_REGION")
         docker_image = os.getenv("DOCKER_IMAGE", "N/A")
+        if docker_image == "":
+            docker_image = "N/A"
+
         is_project = bool(os.getenv("ESS_TYPE", "true") == "true")
         ess_type = "Deployment"
         if is_project:
