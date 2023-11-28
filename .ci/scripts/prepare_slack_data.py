@@ -7,6 +7,10 @@ constructs a Slack payload based on the workflow status.
 import os
 import json
 
+github_to_slack = {
+    "gurevichdmitry": "Dima Gurevich",
+}
+
 
 def check_env_var(env_var: str) -> str:
     """
@@ -32,7 +36,7 @@ def set_output(name: str, value: str):
         name (str): The name of the output variable.
         value (str): The value to set for the output variable.
     """
-    print(f"::set-output name={name}::{value}")
+    print(f"{name}={value} >> $GITHUB_OUTPUT")
 
 
 def set_failed(message: str):
@@ -87,11 +91,11 @@ def run():
         deployment_name = check_env_var("DEPLOYMENT_NAME")
 
         color = color_by_job_status(job_status)
-
         # Set output
         set_output("color", color)
         set_output("run_url", github_run_url)
         set_output("kibana_url", github_run_url)
+        slack_name = github_to_slack.get(github_actor, github_actor)
 
         slack_payload = {
             "blocks": [
@@ -99,7 +103,7 @@ def run():
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"*Deployment:*\n<{github_run_url}|{deployment_name}> has been executed",
+                        "text": f"Create Environment job <{github_run_url}|{deployment_name}> by `{github_actor}`",
                     },
                 },
                 {
@@ -123,7 +127,7 @@ def run():
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*Author:*\n`{github_actor}`",
+                            "text": f"*Author:*\n@{slack_name}",
                         },
                         {
                             "type": "mrkdwn",
