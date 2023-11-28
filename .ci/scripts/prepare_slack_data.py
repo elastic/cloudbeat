@@ -178,7 +178,7 @@ def run():
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"Kibana password: {es_password}",
+                        "text": f"*Kibana password:* `{es_password}`",
                     },
                 },
             ],
