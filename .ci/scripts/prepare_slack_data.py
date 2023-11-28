@@ -8,7 +8,7 @@ import os
 import json
 
 github_to_slack = {
-    "gurevichdmitry": "Dima Gurevich",
+    "gurevichdmitry": "U030XM1N3BP",
 }
 
 
@@ -128,7 +128,7 @@ def run():
                     "fields": [
                         {
                             "type": "mrkdwn",
-                            "text": f"*Author:*\n@{slack_name}",
+                            "text": f"*Author:*\n<@{slack_name}>",
                         },
                         {
                             "type": "mrkdwn",
