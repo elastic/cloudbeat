@@ -36,7 +36,8 @@ def set_output(name: str, value: str):
         name (str): The name of the output variable.
         value (str): The value to set for the output variable.
     """
-    print(f"{name}={value} >> $GITHUB_OUTPUT")
+    with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+        print(f"{name}={value}", file=fh)
 
 
 def set_failed(message: str):
