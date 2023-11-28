@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "ResourceGroupName": {
@@ -7,6 +7,12 @@
             "defaultValue": "[concat('cloudbeat-resource-group-', dateTimeToEpoch(utcNow('u')))]",
             "metadata": {
                 "description": "The resource group name where the virtual machine with the Elastic Agent is running on"
+            }
+        },
+        "SubscriptionId": {
+            "type": "string",
+            "metadata": {
+                "description": "The id of the subscription where the virtual machine with the Elastic Agent is running on"
             }
         },
         "Location": {
@@ -46,17 +52,11 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Resources/resourceGroups",
-            "apiVersion": "2022-09-01",
-            "name": "[parameters('ResourceGroupName')]",
-            "location": "[parameters('Location')]"
-        },
-        {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
-            "name": "role-assignment-deployment",
+            "name": "resource-group-deployment",
             "location": "[deployment().location]",
-            "subscriptionId": "[subscription().subscriptionId]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
             "properties": {
                 "expressionEvaluationOptions": {
                     "scope": "inner"
@@ -65,6 +65,9 @@
                 "parameters": {
                     "ResourceGroupName": {
                         "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "Location": {
+                        "value": "[parameters('Location')]"
                     }
                 },
                 "template": {
@@ -73,16 +76,59 @@
                     "parameters": {
                         "ResourceGroupName": {
                             "type": "string"
+                        },
+                        "Location": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Resources/resourceGroups",
+                            "apiVersion": "2022-09-01",
+                            "name": "[parameters('ResourceGroupName')]",
+                            "location": "[parameters('Location')]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "role-assignment-deployment",
+            "location": "[deployment().location]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "ResourceGroupName": {
+                        "value": "[parameters('ResourceGroupName')]"
+                    },
+                    "SubscriptionId": {
+                        "value": "[parameters('SubscriptionId')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ResourceGroupName": {
+                            "type": "string"
+                        },
+                        "SubscriptionId": {
+                            "type": "string"
                         }
                     },
                     "resources": [
                         {
                             "type": "Microsoft.Authorization/roleAssignments",
                             "apiVersion": "2022-04-01",
-                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name)]",
+                            "name": "[guid(managementGroup().id, parameters('SubscriptionId'), parameters('ResourceGroupName'), deployment().name)]",
                             "properties": {
                                 "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
-                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
+                                "principalId": "[reference(resourceId(parameters('SubscriptionId'), parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
                                 "principalType": "ServicePrincipal"
                             }
                         }
@@ -90,7 +136,7 @@
                 }
             },
             "dependsOn": [
-                "[parameters('ResourceGroupName')]",
+                "resource-group-deployment",
                 "cloudbeat-vm-deployment"
             ]
         },
@@ -99,6 +145,7 @@
             "apiVersion": "2022-09-01",
             "name": "cloudbeat-vm-deployment",
             "resourceGroup": "[parameters('ResourceGroupName')]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
             "properties": {
                 "expressionEvaluationOptions": {
                     "scope": "inner"
@@ -238,7 +285,7 @@
                 }
             },
             "dependsOn": [
-                "[parameters('ResourceGroupName')]"
+                "resource-group-deployment"
             ]
         },
         {
@@ -246,6 +293,7 @@
             "apiVersion": "2022-09-01",
             "name": "elastic-agent-deployment",
             "resourceGroup": "[parameters('ResourceGroupName')]",
+            "subscriptionId": "[parameters('SubscriptionId')]",
             "properties": {
                 "expressionEvaluationOptions": {
                     "scope": "inner"
