@@ -94,60 +94,66 @@ def run():
         set_output("kibana_url", github_run_url)
 
         slack_payload = {
-            "attachments": [
+            "blocks": [
                 {
-                    "color": color,
-                    "falback": "test",
-                    "blocks": [
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Deployment:*\n<{github_run_url}|{deployment_name}> has been executed",
+                    },
+                },
+                {
+                    "type": "divider",
+                },
+                {
+                    "type": "section",
+                    "fields": [
                         {
-                            "type": "section",
-                            "fields": [
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Deployment:*\n<{github_run_url}|{deployment_name}>",
-                                },
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Status:*\n`{job_status}`",
-                                },
-                            ],
+                            "type": "mrkdwn",
+                            "text": f"*Deployment:*\n<{github_run_url}|{deployment_name}>",
                         },
                         {
-                            "type": "section",
-                            "fields": [
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Author:*\n`{github_actor}`",
-                                },
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Job Type:*\n`{job_type}`",
-                                },
-                            ],
+                            "type": "mrkdwn",
+                            "text": f"*Status:*\n`{job_status}`",
+                        },
+                    ],
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Author:*\n`{github_actor}`",
                         },
                         {
-                            "type": "divider",
+                            "type": "mrkdwn",
+                            "text": f"*Job Type:*\n`{job_type}`",
+                        },
+                    ],
+                },
+                {
+                    "type": "divider",
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "kibana",
+                            },
+                            "url": f"{kibana_url}",
+                            "action_id": "kibana-instance-button",
                         },
                         {
-                            "type": "actions",
-                            "elements": [
-                                {
-                                    "type": "button",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "kibana",
-                                    },
-                                    "url": f"{kibana_url}",
-                                },
-                                {
-                                    "type": "button",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "state bucket",
-                                    },
-                                    "url": f"{s3_bucket}",
-                                },
-                            ],
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "bucket",
+                            },
+                            "url": f"{s3_bucket}",
+                            "action_id": "s3-bucket-button",
                         },
                     ],
                 },

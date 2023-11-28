@@ -127,7 +127,7 @@ jobs:
         id: prepare-data
         working-directory: ./
         env:
-          RUN_URL: "https://localhost:9300" #TODO: Replace later
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}"
           JOB_STATUS: "${{ job.status }}"
           GITHUB_ACTOR: "${{ env.GITHUB_ACTOR }}"
@@ -144,7 +144,7 @@ jobs:
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
           payload: ${{ steps.prepare-data.outputs.payload }}
-          channel: "C044L9QBQ49"
+          channel: "#csp-qa-alerts"
 
       - name: fast exit
         run: |
