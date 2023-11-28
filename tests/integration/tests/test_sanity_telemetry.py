@@ -6,6 +6,7 @@ have been created.
 The goal of this suite is to perform basic sanity checks to verify the telemetry fetchers are working
  as expected.
 """
+# pylint: disable=redefined-outer-name
 import pytest
 from commonlib.utils import get_telemetry
 from configuration import elasticsearch
@@ -17,8 +18,7 @@ def cloud_security_telemetry_data():
     """Fixture to fetch telemetry data"""
     telemetry_payload = get_telemetry(elasticsearch)
     telemetry_object = munchify(telemetry_payload[0])
-    cloud_security_telemetry_data = telemetry_object.stats.stack_stats.kibana.plugins.cloud_security_posture
-    return cloud_security_telemetry_data
+    return telemetry_object.stats.stack_stats.kibana.plugins.cloud_security_posture
 
 
 @pytest.mark.sanity
