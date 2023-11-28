@@ -1,0 +1,312 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ResourceGroupName": {
+            "type": "string",
+            "defaultValue": "[concat('cloudbeat-resource-group-', dateTimeToEpoch(utcNow('u')))]",
+            "metadata": {
+                "description": "The resource group name where the virtual machine with the Elastic Agent is running on"
+            }
+        },
+        "Location": {
+            "type": "string",
+            "minLength": 6,
+            "metadata": {
+                "description": "The location to deploy the resource group with the virtual machine on"
+            },
+            "defaultValue": "[deployment().location]"
+        },
+        "ElasticArtifactServer": {
+            "type": "string",
+            "defaultValue": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
+            "metadata": {
+                "description": "The URL of the artifact server"
+            }
+        },
+        "ElasticAgentVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "The version of elastic-agent to install"
+            },
+            "defaultValue": "8.11.0"
+        },
+        "FleetUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "The fleet URL of elastic-agent"
+            }
+        },
+        "EnrollmentToken": {
+            "type": "string",
+            "metadata": {
+                "description": "The enrollment token of elastic-agent"
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2022-09-01",
+            "name": "[parameters('ResourceGroupName')]",
+            "location": "[parameters('Location')]"
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "role-assignment-deployment",
+            "location": "[deployment().location]",
+            "subscriptionId": "[subscription().subscriptionId]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "ResourceGroupName": {
+                        "value": "[parameters('ResourceGroupName')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ResourceGroupName": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2022-04-01",
+                            "name": "[guid(subscription().id, parameters('ResourceGroupName'), deployment().name)]",
+                            "properties": {
+                                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+                                "principalId": "[reference(resourceId(subscription().subscriptionId, parameters('ResourceGroupName'), 'Microsoft.Compute/virtualMachines', 'cloudbeatVM'), '2019-07-01', 'Full').identity.principalId]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[parameters('ResourceGroupName')]",
+                "cloudbeat-vm-deployment"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "cloudbeat-vm-deployment",
+            "resourceGroup": "[parameters('ResourceGroupName')]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "apiVersion": "2021-04-01",
+                            "name": "cloudbeatVM",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "cloudbeatNic",
+                                "cloudbeatGenerateKeypair"
+                            ],
+                            "properties": {
+                                "hardwareProfile": {
+                                    "vmSize": "Standard_DS2_v2"
+                                },
+                                "storageProfile": {
+                                    "osDisk": {
+                                        "createOption": "FromImage",
+                                        "managedDisk": {
+                                            "storageAccountType": "Standard_LRS"
+                                        }
+                                    },
+                                    "imageReference": {
+                                        "publisher": "canonical",
+                                        "offer": "0001-com-ubuntu-server-jammy",
+                                        "sku": "22_04-lts-gen2",
+                                        "version": "latest"
+                                    }
+                                },
+                                "osProfile": {
+                                    "computerName": "cloudbeatVM",
+                                    "adminUsername": "cloudbeat",
+                                    "linuxConfiguration": {
+                                        "disablePasswordAuthentication": true,
+                                        "ssh": {
+                                            "publicKeys": [
+                                                {
+                                                    "path": "/home/cloudbeat/.ssh/authorized_keys",
+                                                    "keyData": "[reference('cloudbeatGenerateKeypair').outputs.public_key]"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[resourceId('Microsoft.Network/networkInterfaces', 'cloudbeatNic')]"
+                                        }
+                                    ]
+                                }
+                            },
+                            "identity": {
+                                "type": "SystemAssigned"
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/virtualNetworks",
+                            "apiVersion": "2021-04-01",
+                            "name": "cloudbeatVNet",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "addressSpace": {
+                                    "addressPrefixes": ["10.0.0.0/16"]
+                                },
+                                "subnets": [
+                                    {
+                                        "name": "cloudbeatSubnet",
+                                        "properties": {
+                                            "addressPrefix": "10.0.0.0/24"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "apiVersion": "2021-04-01",
+                            "name": "cloudbeatNic",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "cloudbeatVNet"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'cloudbeatVNet', 'cloudbeatSubnet')]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "apiVersion": "2021-04-01",
+                            "name": "cloudbeatVM/EnableMSIExtension",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "cloudbeatVM"
+                            ],
+                            "properties": {
+                                "publisher": "Microsoft.ManagedIdentity",
+                                "type": "ManagedIdentityExtensionForLinux",
+                                "typeHandlerVersion": "1.0",
+                                "autoUpgradeMinorVersion": true,
+                                "settings": {
+                                    "port": 50342
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Resources/deploymentScripts",
+                            "apiVersion": "2020-10-01",
+                            "name": "cloudbeatGenerateKeypair",
+                            "location": "[resourceGroup().location]",
+                            "kind": "AzureCLI",
+                            "properties": {
+                                "azCliVersion": "2.51.0",
+                                "cleanupPreference": "Always",
+                                "retentionInterval": "P1D",
+                                "scriptContent": "#/bin/bash -e\nyes | ssh-keygen -f sshkey -N ''\necho \"{\\\"public_key\\\":\\\"$(cat sshkey.pub)\\\"}\" > $AZ_SCRIPTS_OUTPUT_PATH",
+                                "timeout": "PT30M"
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[parameters('ResourceGroupName')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2022-09-01",
+            "name": "elastic-agent-deployment",
+            "resourceGroup": "[parameters('ResourceGroupName')]",
+            "properties": {
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                    "ElasticArtifactServer": {
+                        "value": "[parameters('ElasticArtifactServer')]"
+                    },
+                    "FleetUrl": {
+                        "value": "[parameters('FleetUrl')]"
+                    },
+                    "EnrollmentToken": {
+                        "value": "[parameters('EnrollmentToken')]"
+                    },
+                    "ElasticAgentVersion": {
+                        "value": "[parameters('ElasticAgentVersion')]"
+                    }
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "ElasticArtifactServer": {
+                            "type": "string"
+                        },
+                        "FleetUrl": {
+                            "type": "string"
+                        },
+                        "EnrollmentToken": {
+                            "type": "string"
+                        },
+                        "ElasticAgentVersion": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "apiVersion": "2021-04-01",
+                            "name": "cloudbeatVM/customScriptExtension",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "publisher": "Microsoft.Azure.Extensions",
+                                "type": "CustomScript",
+                                "typeHandlerVersion": "2.1",
+                                "settings": {
+                                    "fileUris": [
+                                        "https://raw.githubusercontent.com/elastic/cloudbeat/main/deploy/azure/install-agent.sh"
+                                    ],
+                                    "commandToExecute": "[concat('bash install-agent.sh ', parameters('ElasticAgentVersion'), ' ', parameters('ElasticArtifactServer'), ' ', parameters('FleetUrl'), ' ', parameters('EnrollmentToken'))]"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "cloudbeat-vm-deployment",
+                "role-assignment-deployment"
+            ]
+        }
+    ]
+}
