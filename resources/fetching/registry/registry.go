@@ -23,13 +23,13 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 )
 
 type Registry interface {
 	Keys() []string
 	ShouldRun(key string) bool
-	Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error
+	Run(ctx context.Context, key string, metadata cycle.Metadata) error
 	Update()
 	Stop()
 }
@@ -91,7 +91,7 @@ func (r *registry) ShouldRun(key string) bool {
 	return true
 }
 
-func (r *registry) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
+func (r *registry) Run(ctx context.Context, key string, metadata cycle.Metadata) error {
 	registered, ok := r.reg[key]
 	if !ok {
 		return fmt.Errorf("fetcher %v not found", key)

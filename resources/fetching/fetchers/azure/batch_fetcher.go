@@ -27,6 +27,7 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -56,9 +57,9 @@ func NewAzureBatchAssetFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, 
 	}
 }
 
-func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting AzureBatchAssetFetcher.Fetch")
-	subscriptions, err := f.provider.GetSubscriptions(ctx, cMetadata)
+	subscriptions, err := f.provider.GetSubscriptions(ctx, cycleMetadata)
 	if err != nil {
 		return fmt.Errorf("failed to fetch governance info: %w", err)
 	}
@@ -96,7 +97,7 @@ func (f *AzureBatchAssetFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 				errAgg = errors.Join(errAgg, err)
 				return errAgg
 			case f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cMetadata,
+				CycleMetadata: cycleMetadata,
 				Resource: &AzureBatchResource{
 					// Every asset in the list has the same type and subtype
 					typePair:     pair,

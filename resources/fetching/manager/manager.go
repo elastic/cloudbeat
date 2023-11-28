@@ -25,7 +25,7 @@ import (
 
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 )
 
@@ -102,7 +102,7 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 		wg.Add(1)
 		go func(k string) {
 			defer wg.Done()
-			err := m.fetchSingle(ctx, k, fetching.CycleMetadata{Sequence: seq})
+			err := m.fetchSingle(ctx, k, cycle.Metadata{Sequence: seq})
 			if err != nil {
 				m.log.Errorf("Error running fetcher for key %s: %v", k, err)
 			}
@@ -114,7 +114,7 @@ func (m *Manager) fetchIteration(ctx context.Context) {
 	m.log.Infof("Cycle %d resource fetching has ended", seq)
 }
 
-func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata fetching.CycleMetadata) error {
+func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata cycle.Metadata) error {
 	if !m.fetcherRegistry.ShouldRun(k) {
 		return nil
 	}
@@ -147,7 +147,7 @@ func (m *Manager) fetchSingle(ctx context.Context, k string, cycleMetadata fetch
 }
 
 // fetchProtected protect the fetching goroutine from getting panic
-func (m *Manager) fetchProtected(ctx context.Context, k string, metadata fetching.CycleMetadata) (err error) {
+func (m *Manager) fetchProtected(ctx context.Context, k string, metadata cycle.Metadata) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("fetcher %s recovered from panic: %v", k, r)

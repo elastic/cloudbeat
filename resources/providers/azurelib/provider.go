@@ -24,7 +24,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/elastic/elastic-agent-libs/logp"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -67,6 +67,6 @@ func (p provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string
 	return p.inventory.ListAllAssetTypesByName(ctx, assetGroup, assets)
 }
 
-func (p provider) GetSubscriptions(ctx context.Context, cycle fetching.CycleMetadata) (map[string]governance.Subscription, error) {
-	return p.governance.GetSubscriptions(ctx, cycle)
+func (p provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]governance.Subscription, error) {
+	return p.governance.GetSubscriptions(ctx, cycleMetadata)
 }

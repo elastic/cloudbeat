@@ -28,6 +28,7 @@ import (
 	"go.uber.org/goleak"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -130,7 +131,7 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 	fetcherName := "timeout_fetcher"
 
 	s.registry.EXPECT().ShouldRun(mock.Anything).Return(true).Once()
-	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Call.Return(func(ctx context.Context, key string, metadata fetching.CycleMetadata) {
+	s.registry.EXPECT().Run(mock.Anything, mock.Anything, mock.Anything).Call.Return(func(ctx context.Context, key string, metadata cycle.Metadata) {
 		select {
 		case <-ctx.Done():
 			return
@@ -142,7 +143,7 @@ func (s *ManagerTestSuite) TestManagerFetchSingleTimeout() {
 	m, err := NewManager(context.Background(), testhelper.NewLogger(s.T()), interval, timeout, s.registry)
 	s.Require().NoError(err)
 
-	err = m.fetchSingle(context.Background(), fetcherName, fetching.CycleMetadata{})
+	err = m.fetchSingle(context.Background(), fetcherName, cycle.Metadata{})
 	s.Require().Error(err)
 	s.registry.AssertExpectations(s.T())
 }

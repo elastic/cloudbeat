@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
@@ -49,7 +50,7 @@ func NewGcpServiceUsageFetcher(_ context.Context, log *logp.Logger, ch chan fetc
 	}
 }
 
-func (f *GcpServiceUsageFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *GcpServiceUsageFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpServiceUsageFetcher.Fetch")
 
 	serviceUsageAssets, err := f.provider.ListServiceUsageAssets(ctx)
@@ -63,7 +64,7 @@ func (f *GcpServiceUsageFetcher) Fetch(ctx context.Context, cMetadata fetching.C
 			f.log.Infof("GcpServiceUsageFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
 			return nil
 		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 			Resource: &GcpServiceUsageAsset{
 				Type:    fetching.MonitoringIdentity,
 				subType: fetching.GcpServiceUsage,

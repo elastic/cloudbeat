@@ -25,6 +25,7 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -84,7 +85,7 @@ func NewAzureAssetsFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, prov
 	}
 }
 
-func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting AzureAssetsFetcher.Fetch")
 	var errAgg error
 	// This might be relevant if we'd like to fetch assets in parallel in order to evaluate a rule that uses multiple resources
@@ -100,7 +101,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 		assets = append(assets, r...)
 	}
 
-	subscriptions, err := f.provider.GetSubscriptions(ctx, cMetadata)
+	subscriptions, err := f.provider.GetSubscriptions(ctx, cycleMetadata)
 	if err != nil {
 		f.log.Errorf("Error fetching subscription information: %v", err)
 	}
@@ -111,14 +112,14 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.Cycle
 			f.log.Infof("AzureAssetsFetcher.Fetch context err: %s", err.Error())
 			errAgg = errors.Join(errAgg, err)
 			return errAgg
-		case f.resourceCh <- resourceFromAsset(asset, cMetadata, subscriptions):
+		case f.resourceCh <- resourceFromAsset(asset, cycleMetadata, subscriptions):
 		}
 	}
 
 	return errAgg
 }
 
-func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetadata, subscriptions map[string]governance.Subscription) fetching.ResourceInfo {
+func resourceFromAsset(asset inventory.AzureAsset, cycleMetadata cycle.Metadata, subscriptions map[string]governance.Subscription) fetching.ResourceInfo {
 	pair := AzureAssetTypeToTypePair[asset.Type]
 	subscription, ok := subscriptions[asset.SubscriptionId]
 	if !ok {
@@ -127,7 +128,7 @@ func resourceFromAsset(asset inventory.AzureAsset, cMetadata fetching.CycleMetad
 		}
 	}
 	return fetching.ResourceInfo{
-		CycleMetadata: cMetadata,
+		CycleMetadata: cycleMetadata,
 		Resource: &AzureResource{
 			Type:         pair.Type,
 			SubType:      pair.SubType,

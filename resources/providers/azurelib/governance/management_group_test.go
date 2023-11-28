@@ -31,7 +31,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -67,38 +67,38 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 
 	t.Run("no assets", func(t *testing.T) {
 		p := NewProvider(testhelper.NewLogger(t), mockClient(t, nil, nil))
-		subs, err := p.GetSubscriptions(ctx, fetching.CycleMetadata{Sequence: 1})
+		subs, err := p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 1})
 		require.NoError(t, err)
 		assert.Equal(t, map[string]Subscription{}, subs)
 
-		subsSame, err := p.GetSubscriptions(ctx, fetching.CycleMetadata{Sequence: 1})
+		subsSame, err := p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 1})
 		require.NoError(t, err)
 		assert.Equal(t, subs, subsSame)
 	})
 
 	t.Run("error on first call", func(t *testing.T) {
 		p := NewProvider(testhelper.NewLogger(t), mockClient(t, nil, err1))
-		_, err := p.GetSubscriptions(ctx, fetching.CycleMetadata{Sequence: 10})
+		_, err := p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 10})
 		require.ErrorIs(t, err, err1)
 
 		p.(*provider).client = mockClient(t, nil, err2)
-		_, err = p.GetSubscriptions(ctx, fetching.CycleMetadata{Sequence: 1})
+		_, err = p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 1})
 		require.ErrorIs(t, err, err2)
 
 		p.(*provider).client = mockClient(t, assets, nil)
-		got, err := p.GetSubscriptions(ctx, fetching.CycleMetadata{Sequence: 1})
+		got, err := p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 1})
 		require.NoError(t, err)
 		assert.Equal(t, expectedSubscriptions, got)
 	})
 
 	t.Run("error on later call", func(t *testing.T) {
 		p := NewProvider(testhelper.NewLogger(t), mockClient(t, assets, nil))
-		got, err := p.GetSubscriptions(ctx, fetching.CycleMetadata{Sequence: 1})
+		got, err := p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 1})
 		require.NoError(t, err)
 		assert.Equal(t, expectedSubscriptions, got)
 
 		p.(*provider).client = mockClient(t, nil, err1)
-		got, err = p.GetSubscriptions(ctx, fetching.CycleMetadata{Sequence: 10})
+		got, err = p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 10})
 		require.NoError(t, err)
 		assert.Equal(t, expectedSubscriptions, got)
 	})
@@ -123,12 +123,12 @@ func Test_provider_GetSubscriptions(t *testing.T) {
 		go func() {
 			defer wg.Done()
 
-			got, err := p.GetSubscriptions(ctx, fetching.CycleMetadata{Sequence: 1})
+			got, err := p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 1})
 			require.NoError(t, err)
 			assert.Equal(t, expectedSubscriptions, got)
 		}()
 
-		got, err := p.GetSubscriptions(ctx, fetching.CycleMetadata{Sequence: 1})
+		got, err := p.GetSubscriptions(ctx, cycle.Metadata{Sequence: 1})
 		require.NoError(t, err)
 		assert.Equal(t, expectedSubscriptions, got)
 	})

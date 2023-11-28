@@ -31,6 +31,7 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -186,7 +187,7 @@ func (s *KubeFetcherTestSuite) TestKubeFetcher_TestFetch() {
 			client := k8sfake.NewSimpleClientset(tt)
 			kubeFetcher := NewKubeFetcher(testhelper.NewLogger(s.T()), s.resourceCh, client)
 
-			err := kubeFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+			err := kubeFetcher.Fetch(context.TODO(), cycle.Metadata{})
 			results := testhelper.CollectResources(s.resourceCh)
 
 			s.Require().NoError(err, "Fetcher was not able to fetch resources from kube api")

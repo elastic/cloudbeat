@@ -29,6 +29,7 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ecr"
 )
 
@@ -67,7 +68,7 @@ func NewEcrFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider
 
 func (f *EcrFetcher) Stop() {}
 
-func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *EcrFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting EcrFetcher.Fetch")
 
 	podsList, err := f.kubeClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{})
@@ -80,7 +81,7 @@ func (f *EcrFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 	for _, repository := range ecrDescribedRepositories {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      EcrResource{ecr.Repository(repository)},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 	return nil

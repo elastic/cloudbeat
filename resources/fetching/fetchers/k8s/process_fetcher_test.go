@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -88,7 +89,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsButNoFile() {
 	}
 	processesFetcher := &ProcessesFetcher{log: testhelper.NewLogger(s.T()), Fs: sysfs, resourceCh: s.resourceCh, processes: procCfg}
 
-	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	err := processesFetcher.Fetch(context.TODO(), cycle.Metadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Len(results, 1)
@@ -121,7 +122,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenProcessDoesNotExist() {
 		processes:  procCfg,
 	}
 
-	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	err := processesFetcher.Fetch(context.TODO(), cycle.Metadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Empty(results)
@@ -139,7 +140,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenNoFlagRequired() {
 	var procCfg = ProcessesConfigMap{
 		"kubelet": {ConfigFileArguments: []string{}}}
 	processesFetcher := &ProcessesFetcher{log: testhelper.NewLogger(s.T()), Fs: fsys, resourceCh: s.resourceCh, processes: procCfg}
-	err := processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	err := processesFetcher.Fetch(context.TODO(), cycle.Metadata{})
 
 	results := testhelper.CollectResources(s.resourceCh)
 	s.Len(results, 1)
@@ -191,7 +192,7 @@ func (s *ProcessFetcherTestSuite) TestFetchWhenFlagExistsWithConfigFile() {
 			testProcess.Name: {ConfigFileArguments: []string{"fetcherConfig"}},
 		}
 		processesFetcher := &ProcessesFetcher{log: testhelper.NewLogger(s.T()), Fs: sysfs, resourceCh: s.resourceCh, processes: procCfg}
-		err = processesFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+		err = processesFetcher.Fetch(context.TODO(), cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Len(results, 1)

@@ -33,6 +33,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -137,7 +138,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcher() {
 			cloudIdentity:   &identity,
 		}
 
-		err = elbFetcher.Fetch(context.Background(), fetching.CycleMetadata{})
+		err = elbFetcher.Fetch(context.Background(), cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Equal(len(test.expectedlbNames), len(results))
@@ -208,7 +209,7 @@ func (s *ElbFetcherTestSuite) TestCreateFetcherErrorCases() {
 
 		ctx := context.Background()
 
-		err = elbFetcher.Fetch(ctx, fetching.CycleMetadata{})
+		err = elbFetcher.Fetch(ctx, cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Nil(results)
