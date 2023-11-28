@@ -1,5 +1,5 @@
 name: Destroy Environment
-run-name: Destroying ${{ github.event.inputs.prefix }}* by @${{ github.actor }}
+run-name: Destroying ${{ inputs.prefix }}* by @${{ github.actor }}
 
 on:
   # Ability to execute on demand
@@ -21,8 +21,8 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: "eu-west-1"
-  ENV_PREFIX: ${{ github.event.inputs.prefix }}
-  ENV_IGNORE_PREFIX: ${{ github.event.inputs.ignore-prefix }}
+  ENV_PREFIX: ${{ inputs.prefix }}
+  ENV_IGNORE_PREFIX: ${{ inputs.ignore-prefix }}
   TF_VAR_ec_api_key: ${{ secrets.EC_API_KEY }}
 
 jobs:
@@ -42,7 +42,7 @@ jobs:
         working-directory: ./
 
       - name: Mask API Key
-        if: ${{ github.event.inputs.ec-api-key != '' }}
+        if: ${{ inputs.ec-api-key != '' }}
         run: |
           ec_api_key=$(jq -r '.inputs["ec-api-key"]' $GITHUB_EVENT_PATH)
           echo "::add-mask::$ec_api_key"
@@ -71,3 +71,26 @@ jobs:
       - name: Destroy Environment
         run: |
           just delete-cloud-env ${{ env.ENV_PREFIX }} '${{ env.ENV_IGNORE_PREFIX }}' "false"
+
+      - name: Publish to Slack channel
+        if: always()
+        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        env:
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          channel: "#csp-qa-alerts"
+          payload: |
+            {
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "Destroy job <${{env.RUN_URL}}|${{ inputs.prefix }}> triggered by `${{github.actor}}`"
+                        }
+                    }
+                ]
+            }

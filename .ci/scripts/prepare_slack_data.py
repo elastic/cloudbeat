@@ -62,9 +62,9 @@ def color_by_job_status(status: str) -> str:
              Possible values: "good" for success, "danger" for failure, or an empty string.
     """
     if status == "success":
-        return "good"
+        return ":white_check_mark:"
     if status == "failure":
-        return "danger"
+        return ":x:"
     return ""
 
 
@@ -93,7 +93,7 @@ def run():
         stack_version = check_env_var("STACK_VERSION")
         es_password = check_env_var("ES_PASSWORD")
         ess_region = check_env_var("ESS_REGION")
-        docker_image = os.getenv("DOCKER_IMAGE", "N/A")
+        docker_image = os.getenv("DOCKER_IMAGE_OVERRIDE", "N/A")
         if docker_image == "":
             docker_image = "N/A"
 
@@ -103,20 +103,17 @@ def run():
             ess_type = "Project"
 
         color = color_by_job_status(job_status)
-        # Set output
-        set_output("color", color)
-        set_output("run_url", github_run_url)
-        set_output("kibana_url", github_run_url)
         slack_name = github_to_slack.get(github_actor, github_actor)
+        message = f"{workflow} job <{github_run_url}|{deployment_name}> triggered by <@{slack_name}>"
 
         slack_payload = {
-            "text": "Create / Destroy github workflow",
+            "text": "Create github workflow",
             "blocks": [
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": f"{workflow} job <{github_run_url}|{deployment_name}> by <@{slack_name}>",
+                        "text": f"{color} {message} {color}",
                     },
                 },
                 {
