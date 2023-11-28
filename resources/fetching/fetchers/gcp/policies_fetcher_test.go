@@ -30,6 +30,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -81,7 +82,7 @@ func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Success() {
 		}, nil,
 	)
 
-	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
+	err := fetcher.Fetch(ctx, cycle.Metadata{})
 	s.Require().NoError(err)
 	results := testhelper.CollectResources(s.resourceCh)
 
@@ -99,7 +100,7 @@ func (s *GcpPoliciesFetcherTestSuite) TestFetcher_Fetch_Error() {
 
 	mockInventoryService.On("ListProjectsAncestorsPolicies", mock.Anything).Return(nil, errors.New("api call error"))
 
-	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
+	err := fetcher.Fetch(ctx, cycle.Metadata{})
 	s.Require().Error(err)
 }
 

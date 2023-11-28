@@ -15,13 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package transformer
+package cycle
 
-import (
-	"github.com/elastic/cloudbeat/resources/fetching/cycle"
-)
-
-type ResourceTypeMetadata struct {
-	cycle.Metadata
-	Type string
+type Metadata struct {
+	Sequence int64
 }

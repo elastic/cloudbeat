@@ -32,6 +32,7 @@ import (
 	"github.com/elastic/cloudbeat/dataprovider"
 	"github.com/elastic/cloudbeat/evaluator"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	fetchers "github.com/elastic/cloudbeat/resources/fetching/fetchers/k8s"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/version"
@@ -109,7 +110,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				RuleResult: opaResults,
 				ResourceInfo: fetching.ResourceInfo{
 					Resource:      fetcherResult,
-					CycleMetadata: fetching.CycleMetadata{},
+					CycleMetadata: cycle.Metadata{},
 				},
 			},
 			bdpp: func() dataprovider.CommonDataProvider {
@@ -145,7 +146,7 @@ func (s *EventsCreatorTestSuite) TestTransformer_ProcessAggregatedResources() {
 				},
 				ResourceInfo: fetching.ResourceInfo{
 					Resource:      fetcherResult,
-					CycleMetadata: fetching.CycleMetadata{},
+					CycleMetadata: cycle.Metadata{},
 				},
 			},
 			bdpp: func() dataprovider.CommonDataProvider {

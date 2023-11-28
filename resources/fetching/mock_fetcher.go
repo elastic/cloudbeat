@@ -22,6 +22,7 @@ package fetching
 import (
 	context "context"
 
+	cycle "github.com/elastic/cloudbeat/resources/fetching/cycle"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,11 +40,11 @@ func (_m *MockFetcher) EXPECT() *MockFetcher_Expecter {
 }
 
 // Fetch provides a mock function with given fields: _a0, _a1
-func (_m *MockFetcher) Fetch(_a0 context.Context, _a1 CycleMetadata) error {
+func (_m *MockFetcher) Fetch(_a0 context.Context, _a1 cycle.Metadata) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, CycleMetadata) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, cycle.Metadata) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)
@@ -59,14 +60,14 @@ type MockFetcher_Fetch_Call struct {
 
 // Fetch is a helper method to define mock.On call
 //   - _a0 context.Context
-//   - _a1 CycleMetadata
+//   - _a1 cycle.Metadata
 func (_e *MockFetcher_Expecter) Fetch(_a0 interface{}, _a1 interface{}) *MockFetcher_Fetch_Call {
 	return &MockFetcher_Fetch_Call{Call: _e.mock.On("Fetch", _a0, _a1)}
 }
 
-func (_c *MockFetcher_Fetch_Call) Run(run func(_a0 context.Context, _a1 CycleMetadata)) *MockFetcher_Fetch_Call {
+func (_c *MockFetcher_Fetch_Call) Run(run func(_a0 context.Context, _a1 cycle.Metadata)) *MockFetcher_Fetch_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(CycleMetadata))
+		run(args[0].(context.Context), args[1].(cycle.Metadata))
 	})
 	return _c
 }
@@ -76,7 +77,7 @@ func (_c *MockFetcher_Fetch_Call) Return(_a0 error) *MockFetcher_Fetch_Call {
 	return _c
 }
 
-func (_c *MockFetcher_Fetch_Call) RunAndReturn(run func(context.Context, CycleMetadata) error) *MockFetcher_Fetch_Call {
+func (_c *MockFetcher_Fetch_Call) RunAndReturn(run func(context.Context, cycle.Metadata) error) *MockFetcher_Fetch_Call {
 	_c.Call.Return(run)
 	return _c
 }

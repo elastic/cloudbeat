@@ -30,6 +30,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/iam"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -226,7 +227,7 @@ func (s *IamFetcherTestSuite) TestIamFetcher_Fetch() {
 				},
 			}
 
-			err := iamFetcher.Fetch(ctx, fetching.CycleMetadata{})
+			err := iamFetcher.Fetch(ctx, cycle.Metadata{})
 			s.Require().NoError(err)
 
 			results := testhelper.CollectResources(s.resourceCh)

@@ -562,14 +562,8 @@ github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.4.0 h1:BMAjVKJM0U/CYF27gA0ZM
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.4.0/go.mod h1:1fXstnBMas5kzG+S3q8UoJcmyU6nUeunJcMDHcRYHhs=
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.0 h1:d81/ng9rET2YqdVkVwkb6EXeRrLJIwyGnJcAlAWKwhs=
 github.com/Azure/azure-sdk-for-go/sdk/internal v1.5.0/go.mod h1:s4kgfzA0covAXNicZHDMN58jExvcng2mC/DepXiF1EI=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/internal v1.1.2 h1:mLY+pNLjCUeKhgnAJWAKhEUQM+RJQo2H1fuGSw1Ky1E=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/internal v1.1.2/go.mod h1:FbdwsQ2EzwvXxOPcMFYO8ogEc9uMMIj3YkmCdXdAFmk=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph v0.8.2 h1:f9lam+D19V0TDn17+aFhrVhWPpfsF5zaGHeqDGJZAVc=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph v0.8.2/go.mod h1:29c9+gYpdWhyC4TPANZBPlgoWllMDhguL2AIByPYQtk=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources v1.0.0 h1:ECsQtyERDVz3NP3kvDOTLvbQhqWp/x9EsGKtb4ogUr8=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources v1.0.0/go.mod h1:s1tW/At+xHqjNFvWU4G0c0Qv33KOhvbGNj0RCTQDV8s=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions v1.2.0 h1:Pmy0+3ox1IC3sp6musv87BFPIdQbqyPFjn7I8I0o2Js=
-github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions v1.2.0/go.mod h1:ThfyMjs6auYrWPnYJjI3H4H++oVPrz01pizpu8lfl3A=
 github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
 github.com/Azure/go-ansiterm v0.0.0-20210608223527-2377c96fe795/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
 github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 h1:UQHMgLO+TxOElx5B5HZ4hJQsoJ/PvUvKRhJHDQXO8P8=
@@ -1280,8 +1274,8 @@ github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 h1:YEetp8
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0 h1:YOEu7KNc61ntiQlcEeUIoDTJ2o8mQznoNvUhiigpIqc=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231113094831-9b932c47cec8 h1:tbTbbVSnhTAWOrlOelevj5Ae/oXCf0o02nzB8/AC4eA=
-github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231113094831-9b932c47cec8/go.mod h1:lHmvjDNRv+ZZUW1j0OnvunpHDG77jP//HAz70s/B1wI=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231127093858-296183ca0d11 h1:BXiFJ3HLLG5o5K13aygR3WLrayx2R5DKjDFmjbciE90=
+github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231127093858-296183ca0d11/go.mod h1:E8InL/F98oNrwxO5Fu2ZgtCLkMGshVYNrXyvIyxJWko=
 github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc h1:3hGO3+tipLIULlrabnXpXpOV5qSDbN/EJo9Xsj3hqyo=
 github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc/go.mod h1:8q2d8dmwavJXISowwaoreHFBnbR/uK4qanfRGhC/W9A=
 github.com/elastic/elastic-agent-autodiscover v0.6.4 h1:K+xC7OGgcy4fLXVuGgOGLs+eXCqRnRg2SQQinxP+KsA=
@@ -1292,8 +1286,8 @@ github.com/elastic/elastic-agent-libs v0.6.2 h1:tE5pFK4y7xm1FtXm+r+63G7STjJAaWh3
 github.com/elastic/elastic-agent-libs v0.6.2/go.mod h1:o+EySawBZGeYu49shJxerg2wRCimS1dhrD4As0MS700=
 github.com/elastic/elastic-agent-shipper-client v0.5.1-0.20230228231646-f04347b666f3 h1:sb+25XJn/JcC9/VL8HX4r4QXSUq4uTNzGS2kxOE7u1U=
 github.com/elastic/elastic-agent-shipper-client v0.5.1-0.20230228231646-f04347b666f3/go.mod h1:rWarFM7qYxJKsi9WcV6ONcFjH/NA3niDNpTxO+8/GVI=
-github.com/elastic/elastic-agent-system-metrics v0.7.0 h1:qDLY30UDforSd/TfHfqUDiiHSL6Nu6qLXHsKSxz4OuQ=
-github.com/elastic/elastic-agent-system-metrics v0.7.0/go.mod h1:9C1UEfj0P687HAzZepHszN6zXA+2tN2Lx3Osvq1zby8=
+github.com/elastic/elastic-agent-system-metrics v0.8.2 h1:99H1o+WTD/g6jcQr1hUOZ+dsZkZF0SfNePmjGg7TnhU=
+github.com/elastic/elastic-agent-system-metrics v0.8.2/go.mod h1:9C1UEfj0P687HAzZepHszN6zXA+2tN2Lx3Osvq1zby8=
 github.com/elastic/elastic-integration-corpus-generator-tool v0.5.0/go.mod h1:uf9N86y+UACGybdEhZLpwZ93XHWVhsYZAA4c2T2v6YM=
 github.com/elastic/elastic-package v0.77.0/go.mod h1:Xeqx0OOVnKBfFoSHsHmKI74RxgRGiDhU6yXEu8BkJJM=
 github.com/elastic/glog v1.0.1-0.20210831205241-7d8b5c89dfc4 h1:ViJxdtOsHeO+SWVekzM82fYHH1xnvZ8CvGPXZj+G4YI=

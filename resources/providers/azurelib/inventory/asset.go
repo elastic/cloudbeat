@@ -17,6 +17,10 @@
 
 package inventory
 
+import (
+	"github.com/elastic/cloudbeat/resources/utils/strings"
+)
+
 const (
 	// Resources group
 	ActivityLogAlertAssetType          = "microsoft.insights/activitylogalerts"
@@ -43,3 +47,34 @@ const (
 	AssetGroupResources              = "resources"
 	AssetGroupAuthorizationResources = "authorizationresources"
 )
+
+type AzureAsset struct {
+	Id             string         `json:"id,omitempty"`
+	Name           string         `json:"name,omitempty"`
+	DisplayName    string         `json:"display_name,omitempty"`
+	Location       string         `json:"location,omitempty"`
+	Properties     map[string]any `json:"properties,omitempty"`
+	ResourceGroup  string         `json:"resource_group,omitempty"`
+	SubscriptionId string         `json:"subscription_id,omitempty"`
+	TenantId       string         `json:"tenant_id,omitempty"`
+	Type           string         `json:"type,omitempty"`
+	Sku            string         `json:"sku,omitempty"`
+}
+
+func getAssetFromData(data map[string]any) AzureAsset {
+	subId := strings.FromMap(data, "subscriptionId")
+	properties, _ := data["properties"].(map[string]any)
+
+	return AzureAsset{
+		Id:             strings.FromMap(data, "id"),
+		Name:           strings.FromMap(data, "name"),
+		DisplayName:    strings.FromMap(data, "displayName"),
+		Location:       strings.FromMap(data, "location"),
+		Properties:     properties,
+		ResourceGroup:  strings.FromMap(data, "resourceGroup"),
+		SubscriptionId: subId,
+		TenantId:       strings.FromMap(data, "tenantId"),
+		Sku:            strings.FromMap(data, "sku"),
+		Type:           strings.FromMap(data, "type"),
+	}
+}

@@ -24,6 +24,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/logp"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
@@ -54,7 +55,7 @@ var monitoringAssetTypes = map[string][]string{
 	"AlertPolicy": {inventory.MonitoringAlertPolicyAssetType},
 }
 
-func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpMonitoringFetcher.Fetch")
 
 	monitoringAssets, err := f.provider.ListMonitoringAssets(ctx, monitoringAssetTypes)
@@ -68,7 +69,7 @@ func (f *GcpMonitoringFetcher) Fetch(ctx context.Context, cMetadata fetching.Cyc
 			f.log.Infof("GcpMonitoringFetcher.ListMonitoringAssets context err: %s", ctx.Err().Error())
 			return nil
 		case f.resourceCh <- fetching.ResourceInfo{
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 			Resource: &GcpMonitoringAsset{
 				Type:    fetching.MonitoringIdentity,
 				subType: fetching.GcpMonitoringType,

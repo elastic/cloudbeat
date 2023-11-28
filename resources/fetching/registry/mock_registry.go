@@ -22,7 +22,7 @@ package registry
 import (
 	context "context"
 
-	fetching "github.com/elastic/cloudbeat/resources/fetching"
+	cycle "github.com/elastic/cloudbeat/resources/fetching/cycle"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -83,11 +83,11 @@ func (_c *MockRegistry_Keys_Call) RunAndReturn(run func() []string) *MockRegistr
 }
 
 // Run provides a mock function with given fields: ctx, key, metadata
-func (_m *MockRegistry) Run(ctx context.Context, key string, metadata fetching.CycleMetadata) error {
+func (_m *MockRegistry) Run(ctx context.Context, key string, metadata cycle.Metadata) error {
 	ret := _m.Called(ctx, key, metadata)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, fetching.CycleMetadata) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, cycle.Metadata) error); ok {
 		r0 = rf(ctx, key, metadata)
 	} else {
 		r0 = ret.Error(0)
@@ -104,14 +104,14 @@ type MockRegistry_Run_Call struct {
 // Run is a helper method to define mock.On call
 //   - ctx context.Context
 //   - key string
-//   - metadata fetching.CycleMetadata
+//   - metadata cycle.Metadata
 func (_e *MockRegistry_Expecter) Run(ctx interface{}, key interface{}, metadata interface{}) *MockRegistry_Run_Call {
 	return &MockRegistry_Run_Call{Call: _e.mock.On("Run", ctx, key, metadata)}
 }
 
-func (_c *MockRegistry_Run_Call) Run(run func(ctx context.Context, key string, metadata fetching.CycleMetadata)) *MockRegistry_Run_Call {
+func (_c *MockRegistry_Run_Call) Run(run func(ctx context.Context, key string, metadata cycle.Metadata)) *MockRegistry_Run_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(fetching.CycleMetadata))
+		run(args[0].(context.Context), args[1].(string), args[2].(cycle.Metadata))
 	})
 	return _c
 }
@@ -121,7 +121,7 @@ func (_c *MockRegistry_Run_Call) Return(_a0 error) *MockRegistry_Run_Call {
 	return _c
 }
 
-func (_c *MockRegistry_Run_Call) RunAndReturn(run func(context.Context, string, fetching.CycleMetadata) error) *MockRegistry_Run_Call {
+func (_c *MockRegistry_Run_Call) RunAndReturn(run func(context.Context, string, cycle.Metadata) error) *MockRegistry_Run_Call {
 	_c.Call.Return(run)
 	return _c
 }

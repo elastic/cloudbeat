@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/s3"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -88,7 +89,7 @@ func (s *S3FetcherTestSuite) TestFetcher_Fetch() {
 				resourceCh: s.resourceCh,
 			}
 
-			err := s3Fetcher.Fetch(ctx, fetching.CycleMetadata{})
+			err := s3Fetcher.Fetch(ctx, cycle.Metadata{})
 			s.Require().NoError(err)
 
 			results := testhelper.CollectResources(s.resourceCh)

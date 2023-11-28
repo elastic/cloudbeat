@@ -32,6 +32,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/fetching/registry"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -74,7 +75,7 @@ func subtest(t *testing.T, drain bool) {
 					for i := 0; i < resourcesPerAccount; i++ {
 						ch <- fetching.ResourceInfo{
 							Resource:      mockResource(),
-							CycleMetadata: fetching.CycleMetadata{Sequence: int64(i)},
+							CycleMetadata: cycle.Metadata{Sequence: int64(i)},
 						}
 					}
 				}()
@@ -115,14 +116,14 @@ func subtest(t *testing.T, drain bool) {
 			cd, err := resource.GetElasticCommonData()
 			require.NoError(t, err)
 			assert.NotNil(t, cd)
-			mdata, err := resource.GetMetadata()
-			require.NotNil(t, mdata)
+			metadata, err := resource.GetMetadata()
+			require.NotNil(t, metadata)
 			require.NoError(t, err)
-			assert.Equal(t, "some-region", mdata.Region)
-			assert.NotEqual(t, "some-id", mdata.AwsAccountId)
-			assert.NotEqual(t, "some-alias", mdata.AwsAccountAlias)
-			nameCounts[mdata.AwsAccountId]++
-			nameCounts[mdata.AwsAccountAlias]++
+			assert.Equal(t, "some-region", metadata.Region)
+			assert.NotEqual(t, "some-id", metadata.AccountId)
+			assert.NotEqual(t, "some-alias", metadata.AccountName)
+			nameCounts[metadata.AccountId]++
+			nameCounts[metadata.AccountName]++
 		}
 		assert.Len(t, nameCounts, 2*nAccounts)
 		for _, v := range nameCounts {
@@ -152,7 +153,7 @@ func TestNewCisAwsOrganizationFetchers_LeakContextDone(t *testing.T) {
 			func(_ *logp.Logger, _ aws.Config, ch chan fetching.ResourceInfo, _ *cloud.Identity) registry.FetchersMap {
 				ch <- fetching.ResourceInfo{
 					Resource:      mockResource(),
-					CycleMetadata: fetching.CycleMetadata{Sequence: 1},
+					CycleMetadata: cycle.Metadata{Sequence: 1},
 				}
 
 				return registry.FetchersMap{"fetcher": registry.RegisteredFetcher{}}
@@ -226,9 +227,11 @@ func mockResource() *fetching.MockResource {
 	m := fetching.MockResource{}
 	m.EXPECT().GetData().Return(struct{}{}).Once()
 	m.EXPECT().GetMetadata().Return(fetching.ResourceMetadata{
-		Region:          "some-region",
-		AwsAccountId:    "some-id",
-		AwsAccountAlias: "some-alias",
+		Region: "some-region",
+		CloudAccountMetadata: fetching.CloudAccountMetadata{
+			AccountId:   "some-id",
+			AccountName: "some-alias",
+		},
 	}, nil).Once()
 	m.EXPECT().GetElasticCommonData().Return(map[string]interface{}{}, nil).Once()
 	return &m

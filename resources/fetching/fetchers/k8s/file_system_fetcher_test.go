@@ -28,6 +28,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 	"github.com/elastic/cloudbeat/resources/utils/user"
 )
@@ -77,7 +78,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchASingleFile() {
 	}
 
 	var results []fetching.ResourceInfo
-	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	err := fileFetcher.Fetch(context.TODO(), cycle.Metadata{})
 	results = testhelper.CollectResources(s.resourceCh)
 
 	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
@@ -126,7 +127,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchTwoPatterns() {
 		patterns:   paths,
 	}
 
-	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	err := fileFetcher.Fetch(context.TODO(), cycle.Metadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
@@ -183,7 +184,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryOnly() {
 		osUser:     osUserMock,
 		resourceCh: s.resourceCh,
 	}
-	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	err := fileFetcher.Fetch(context.TODO(), cycle.Metadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
@@ -234,7 +235,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchOuterDirectoryOnly() {
 		resourceCh: s.resourceCh,
 	}
 
-	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	err := fileFetcher.Fetch(context.TODO(), cycle.Metadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
@@ -291,7 +292,7 @@ func (s *FSFetcherTestSuite) TestFileFetcherFetchDirectoryRecursively() {
 		resourceCh: s.resourceCh,
 	}
 
-	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	err := fileFetcher.Fetch(context.TODO(), cycle.Metadata{})
 	results := testhelper.CollectResources(s.resourceCh)
 
 	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")
@@ -344,7 +345,7 @@ func (s *FSFetcherTestSuite) TestElasticCommonData() {
 	}
 
 	var results []fetching.ResourceInfo
-	err := fileFetcher.Fetch(context.TODO(), fetching.CycleMetadata{})
+	err := fileFetcher.Fetch(context.TODO(), cycle.Metadata{})
 	results = testhelper.CollectResources(s.resourceCh)
 
 	s.Require().NoError(err, "Fetcher was not able to fetch files from FS")

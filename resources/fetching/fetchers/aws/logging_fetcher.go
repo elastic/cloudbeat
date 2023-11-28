@@ -25,6 +25,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/aws_cis/logging"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/configservice"
@@ -63,7 +64,7 @@ func NewLoggingFetcher(
 	}
 }
 
-func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f LoggingFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting LoggingFetcher.Fetch")
 	trails, err := f.loggingProvider.DescribeTrails(ctx)
 	if err != nil {
@@ -75,7 +76,7 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetad
 			Resource: LoggingResource{
 				AwsResource: resource,
 			},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 
@@ -87,7 +88,7 @@ func (f LoggingFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetad
 
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      ConfigResource{configs: configs, identity: f.cloudIdentity},
-		CycleMetadata: cMetadata,
+		CycleMetadata: cycleMetadata,
 	}
 
 	return nil

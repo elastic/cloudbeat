@@ -21,6 +21,8 @@ import (
 	"context"
 
 	awssdk "github.com/elastic/beats/v7/x-pack/libbeat/common/aws"
+
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 )
 
 const (
@@ -100,7 +102,7 @@ const (
 
 // Fetcher represents a data fetcher.
 type Fetcher interface {
-	Fetch(context.Context, CycleMetadata) error
+	Fetch(context.Context, cycle.Metadata) error
 	Stop()
 }
 
@@ -111,11 +113,7 @@ type Condition interface {
 
 type ResourceInfo struct {
 	Resource
-	CycleMetadata
-}
-
-type CycleMetadata struct {
-	Sequence int64
+	CycleMetadata cycle.Metadata
 }
 
 type EcsGcp struct {
@@ -138,15 +136,20 @@ type ResourceFields struct {
 }
 
 type ResourceMetadata struct {
-	ID                  string `json:"id"`
-	Type                string `json:"type"`
-	SubType             string `json:"sub_type,omitempty"`
-	Name                string `json:"name,omitempty"`
-	Region              string `json:"region,omitempty"`
-	AwsAccountId        string `json:"aws_account_id,omitempty"`
-	AwsAccountAlias     string `json:"aws_account_alias,omitempty"`
-	AwsOrganizationId   string `json:"aws_organization_id,omitempty"`
-	AwsOrganizationName string `json:"aws_organization_name,omitempty"`
+	ID      string `json:"id"`
+	Type    string `json:"type"`
+	SubType string `json:"sub_type,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Region  string `json:"region,omitempty"`
+
+	CloudAccountMetadata
+}
+
+type CloudAccountMetadata struct {
+	AccountId        string `json:"account_id,omitempty"`
+	AccountName      string `json:"account_name,omitempty"`
+	OrganisationId   string `json:"organization_id,omitempty"`
+	OrganizationName string `json:"organization_name,omitempty"`
 }
 
 type Result struct {
