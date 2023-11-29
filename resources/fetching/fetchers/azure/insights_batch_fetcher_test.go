@@ -20,6 +20,7 @@ package fetchers
 import (
 	"context"
 	"errors"
+	"reflect"
 	"sort"
 	"testing"
 
@@ -138,7 +139,15 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 			}
 
 			m.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(subscriptions, nil).Once()
-			m.EXPECT().ListDiagnosticSettingsAssetTypes(mock.Anything, mock.Anything, lo.Keys(subscriptions)).Return(tc.mockInventoryAssets, tc.mockInventoryError).Once()
+
+			// check of subscriptionIDs argument
+			subIDsCheck := mock.MatchedBy(func(s []string) bool {
+				ids := lo.Keys(subscriptions)
+				sort.Strings(ids)
+				sort.Strings(s)
+				return reflect.DeepEqual(ids, s)
+			})
+			m.EXPECT().ListDiagnosticSettingsAssetTypes(mock.Anything, mock.Anything, subIDsCheck).Return(tc.mockInventoryAssets, tc.mockInventoryError).Once()
 
 			ch := make(chan fetching.ResourceInfo, 100)
 			defer close(ch)
