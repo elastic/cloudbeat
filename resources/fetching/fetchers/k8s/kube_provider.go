@@ -82,7 +82,20 @@ func (r K8sResource) GetMetadata() (fetching.ResourceMetadata, error) {
 	}, nil
 }
 
-func (r K8sResource) GetElasticCommonData() (map[string]any, error) { return nil, nil }
+func (r K8sResource) GetElasticCommonData() (map[string]any, error) {
+	metadata, err := r.GetMetadata()
+	if err != nil {
+		return nil, err
+	}
+
+	fields := map[string]any{
+		"orchestrator.resource.type": metadata.SubType,
+		"orchestrator.resource.name": metadata.Name,
+		"orchestrator.resource.id":   metadata.ID,
+	}
+
+	return fields, nil
+}
 
 func getK8sObjectMeta(log *logp.Logger, k8sObj reflect.Value) metav1.ObjectMeta {
 	metadata, ok := k8sObj.FieldByName(k8sObjMetadataField).Interface().(metav1.ObjectMeta)

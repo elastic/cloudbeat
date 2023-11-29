@@ -30,6 +30,8 @@ const (
 	clusterNameField    = "orchestrator.cluster.name"
 	clusterVersionField = "orchestrator.cluster.version"
 	clusterIdField      = "orchestrator.cluster.id"
+	orchestratorType    = "orchestrator.type"
+	orchestratorName    = "kubernetes"
 )
 
 type DataProvider struct {
@@ -52,6 +54,7 @@ func (k DataProvider) EnrichEvent(event *beat.Event, _ fetching.ResourceMetadata
 		insertIfNotEmpty(clusterNameField, k.cluster, event),
 		insertIfNotEmpty(clusterIdField, k.clusterID, event),
 		insertIfNotEmpty(clusterVersionField, k.clusterVersion, event),
+		insertIfNotEmpty(orchestratorType, orchestratorName, event),
 	)
 }
 
