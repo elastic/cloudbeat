@@ -37,6 +37,10 @@ const (
 	k8sObjMetadataField  = "ObjectMeta"
 	k8sTypeMetadataField = "TypeMeta"
 	K8sObjType           = "k8s_object"
+
+	ecsResourceTypeField = "orchestrator.resource.type"
+	ecsResourceIdField   = "orchestrator.resource.id"
+	ecsResourceNameField = "orchestrator.resource.name"
 )
 
 func getKubeData(log *logp.Logger, watchers []kubernetes.Watcher, resCh chan fetching.ResourceInfo, cycleMetadata cycle.Metadata) {
@@ -89,9 +93,9 @@ func (r K8sResource) GetElasticCommonData() (map[string]any, error) {
 	}
 
 	fields := map[string]any{
-		"orchestrator.resource.type": metadata.SubType,
-		"orchestrator.resource.name": metadata.Name,
-		"orchestrator.resource.id":   metadata.ID,
+		ecsResourceTypeField: metadata.SubType,
+		ecsResourceNameField: metadata.Name,
+		ecsResourceIdField:   metadata.ID,
 	}
 
 	return fields, nil
