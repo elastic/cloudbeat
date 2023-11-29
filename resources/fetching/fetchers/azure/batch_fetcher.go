@@ -139,9 +139,5 @@ func (r *AzureBatchResource) GetMetadata() (fetching.ResourceMetadata, error) {
 }
 
 func (r *AzureBatchResource) GetElasticCommonData() (map[string]any, error) {
-	return map[string]any{
-		"cloud": map[string]any{
-			"provider": "azure",
-		},
-	}, nil
+	return nil, nil
 }

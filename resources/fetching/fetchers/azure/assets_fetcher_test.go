@@ -91,7 +91,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 			"subId": {
 				ID:          "subId",
 				DisplayName: "subName",
-				MG: governance.ManagementGroup{
+				ManagementGroup: governance.ManagementGroup{
 					ID:          "mgId",
 					DisplayName: "mgName",
 				},
