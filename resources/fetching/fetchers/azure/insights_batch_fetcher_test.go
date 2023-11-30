@@ -63,6 +63,7 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 		mockInventoryError  error
 		cycleMetadata       cycle.Metadata
 		expected            []fetching.ResourceInfo
+		expectedMetaData    []fetching.ResourceMetadata
 		expectedErr         bool
 	}{
 		"error": {
@@ -71,6 +72,7 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 			mockInventoryError:  errors.New("mock error"),
 			cycleMetadata:       newCycle(123),
 			expected:            nil,
+			expectedMetaData:    []fetching.ResourceMetadata{},
 			expectedErr:         true,
 		},
 
@@ -86,6 +88,21 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 						typePair:     expectedPair,
 						Subscription: subscriptionOne,
 						Assets:       []inventory.AzureAsset{},
+					},
+				},
+			},
+			expectedMetaData: []fetching.ResourceMetadata{
+				{
+					ID:      "azure-diagnostic-settings-sub1",
+					Type:    "monitoring",
+					SubType: "azure-diagnostic-settings",
+					Name:    "azure-diagnostic-settings-sub1",
+					Region:  "global",
+					CloudAccountMetadata: fetching.CloudAccountMetadata{
+						AccountId:        "sub1",
+						AccountName:      "subName1",
+						OrganisationId:   "",
+						OrganizationName: "",
 					},
 				},
 			},
@@ -121,6 +138,34 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 						Assets: []inventory.AzureAsset{
 							{Id: "id3", Name: "name3", SubscriptionId: "sub2"},
 						},
+					},
+				},
+			},
+			expectedMetaData: []fetching.ResourceMetadata{
+				{
+					ID:      "azure-diagnostic-settings-sub2",
+					Type:    "monitoring",
+					SubType: "azure-diagnostic-settings",
+					Name:    "azure-diagnostic-settings-sub2",
+					Region:  "global",
+					CloudAccountMetadata: fetching.CloudAccountMetadata{
+						AccountId:        "sub2",
+						AccountName:      "subName2",
+						OrganisationId:   "",
+						OrganizationName: "",
+					},
+				},
+				{
+					ID:      "azure-diagnostic-settings-sub1",
+					Type:    "monitoring",
+					SubType: "azure-diagnostic-settings",
+					Name:    "azure-diagnostic-settings-sub1",
+					Region:  "global",
+					CloudAccountMetadata: fetching.CloudAccountMetadata{
+						AccountId:        "sub1",
+						AccountName:      "subName1",
+						OrganisationId:   "",
+						OrganizationName: "",
 					},
 				},
 			},
@@ -167,6 +212,19 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 			sortResourceInfoSlice(got)
 
 			assert.Equal(t, tc.expected, got)
+
+			for _, resourceInfo := range got {
+				elm, err := resourceInfo.GetElasticCommonData()
+				require.NoError(t, err)
+				assert.Equal(t, map[string]any(nil), elm)
+			}
+
+			metadata := lo.Map(got, func(item fetching.ResourceInfo, _ int) fetching.ResourceMetadata {
+				metadata, err := item.GetMetadata()
+				require.NoError(t, err)
+				return metadata
+			})
+			assert.Equal(t, tc.expectedMetaData, metadata)
 		})
 	}
 }
