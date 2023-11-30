@@ -152,12 +152,8 @@ def generate_policy_template(cfg: Munch, policy_template: dict = None) -> dict:
         "name": package_policy_info.get("name", ""),
         "version": package_policy_info.get("version", ""),
     }
-    generated_policy["inputs"] = format_inputs(
-        package_policy_info.get("policy_templates", []),
-    )
-    generated_policy["vars"] = format_vars(
-        package_vars=package_policy_info.get("vars", []),
-    )
+    generated_policy["inputs"] = format_inputs(package_policy_info.get("policy_templates", []))
+    generated_policy["vars"] = format_vars(package_vars=package_policy_info.get("vars", []))
     return generated_policy
 
 
