@@ -2,6 +2,7 @@
 This module contains API calls related to Fleet settings
 """
 import time
+import json
 import codecs
 from typing import Dict, Any, List
 from munch import Munch, munchify
@@ -181,8 +182,8 @@ def get_arm_template(url: str, template_path: str):
             return_json=True,
         )
 
-        with codecs.open(template_path, "w", encoding="utf-8") as arm_json:
-            arm_json.write(template_json)
+        with open(template_path, 'w') as arm_json:
+            json.dump(template_json, arm_json)
         logger.info(f"ARM template is available at: '{template_path}'")
     except APICallException as api_ex:
         logger.error(
