@@ -62,9 +62,9 @@ def color_by_job_status(status: str) -> str:
              Possible values: "good" for success, "danger" for failure, or an empty string.
     """
     if status == "success":
-        return "good"
+        return "#36a64f"
     if status == "failure":
-        return "danger"
+        return "#9c1729"
     return ""
 
 
