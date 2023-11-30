@@ -147,6 +147,7 @@ if __name__ == "__main__":
     template_url = extract_arm_template_url(url_string=default_url)
 
     logger.info(f"Using {template_url} for stack creation")
+    # If file exists, rename it
     rename_file_by_suffix(
         file_path=cspm_azure_arm_template,
         suffix="-orig",
