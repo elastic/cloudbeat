@@ -62,9 +62,9 @@ def color_by_job_status(status: str) -> str:
              Possible values: "good" for success, "danger" for failure, or an empty string.
     """
     if status == "success":
-        return ":white_check_mark:"
+        return "good"
     if status == "failure":
-        return ":x:"
+        return "danger"
     return ""
 
 
@@ -92,7 +92,6 @@ def run():
         deployment_name = check_env_var("DEPLOYMENT_NAME")
         stack_version = check_env_var("STACK_VERSION")
         es_password = check_env_var("ES_PASSWORD")
-        ess_region = check_env_var("ESS_REGION")
         docker_image = os.getenv("DOCKER_IMAGE_OVERRIDE", "N/A")
         if docker_image == "":
             docker_image = "N/A"
@@ -104,84 +103,94 @@ def run():
 
         color = color_by_job_status(job_status)
         slack_name = github_to_slack.get(github_actor, github_actor)
-        message = f"{workflow} job <{github_run_url}|{deployment_name}> triggered by <@{slack_name}>"
 
         slack_payload = {
             "text": "Create github workflow",
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"{color} {message} {color}",
+            "attachments": {
+                "color": color,
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"{workflow} job `{deployment_name}` triggered by <@{slack_name}>",
+                        },
                     },
-                },
-                {
-                    "type": "divider",
-                },
-                {
-                    "type": "section",
-                    "fields": [
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*ESS Type:*\n`{ess_type}`",
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Stack Version:*\n`{stack_version}`",
-                        },
-                    ],
-                },
-                {
-                    "type": "section",
-                    "fields": [
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Cloud Region:*\n`{ess_region}`",
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Docker Override:*\n`{docker_image}`",
-                        },
-                    ],
-                },
-                {
-                    "type": "divider",
-                },
-                {
-                    "type": "actions",
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "kibana",
-                            },
-                            "url": f"{kibana_url}",
-                            "action_id": "kibana-instance-button",
-                        },
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "bucket",
-                            },
-                            "url": f"{s3_bucket}",
-                            "action_id": "s3-bucket-button",
-                        },
-                    ],
-                },
-                {
-                    "type": "divider",
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"*Kibana password:* `{es_password}`",
+                    {
+                        "type": "divider",
                     },
-                },
-            ],
+                    {
+                        "type": "section",
+                        "fields": [
+                            {
+                                "type": "mrkdwn",
+                                "text": f"*ESS Type:*\n`{ess_type}`",
+                            },
+                            {
+                                "type": "mrkdwn",
+                                "text": f"*Stack Version:*\n`{stack_version}`",
+                            },
+                        ],
+                    },
+                    {
+                        "type": "section",
+                        "fields": [
+                            {
+                                "type": "mrkdwn",
+                                "text": f"*Docker Override:*\n`{docker_image}`",
+                            },
+                        ],
+                    },
+                    {
+                        "type": "divider",
+                    },
+                    {
+                        "type": "actions",
+                        "elements": [
+                            {
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "kibana link",
+                                },
+                                "style": "primary",
+                                "url": f"{kibana_url}",
+                                "action_id": "kibana-instance-button",
+                            },
+                            {
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "state bucket",
+                                },
+                                "style": "primary",
+                                "url": f"{s3_bucket}",
+                                "action_id": "s3-bucket-button",
+                            },
+                            {
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "action run",
+                                },
+                                "style": "primary",
+                                "url": f"{github_run_url}",
+                                "action_id": "action-run-button",
+                            },
+                        ],
+                    },
+                    {
+                        "type": "divider",
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"*Kibana password:* `{es_password}`",
+                        },
+                    },
+                ],
+            },
         }
         set_output("payload", json.dumps(slack_payload))
 
