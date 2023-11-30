@@ -142,7 +142,7 @@ if __name__ == "__main__":
     default_url = get_package_default_url(
         cfg=cnfg.elk_config,
         policy_name=INTEGRATION_INPUT["posture"],
-        policy_type="cspm-cloudbeat/cis_azure",
+        policy_type="cloudbeat/cis_azure",
     )
     template_url = extract_arm_template_url(url_string=default_url)
 
