@@ -35,6 +35,7 @@ VERSION_MAP = {
     "cis_aws": "1.2.0",
     "vuln_mgmt_aws": "1.3.0",
     "cis_gcp": "1.5.0",
+    "cis_azure": "1.6.0",
 }
 
 
