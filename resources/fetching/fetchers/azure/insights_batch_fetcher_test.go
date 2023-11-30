@@ -224,7 +224,7 @@ func TestAzureInsightsBatchAssetFetcher(t *testing.T) {
 				require.NoError(t, err)
 				return metadata
 			})
-			assert.Equal(t, tc.expectedMetaData, metadata)
+			assert.ElementsMatch(t, tc.expectedMetaData, metadata)
 		})
 	}
 }
