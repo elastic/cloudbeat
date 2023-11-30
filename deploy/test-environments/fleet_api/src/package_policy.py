@@ -6,7 +6,7 @@ and inputs based on provided data and templates.
 import copy
 import uuid
 from typing import Dict, Tuple
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 from packaging import version
 from munch import Munch
 from loguru import logger
@@ -87,8 +87,12 @@ def format_inputs(policy_templates: list) -> dict:
             }
             # Conditionally add "vars" based on input_type
             if input_type in REQUIRE_VARS:
-                input_dict["streams"][f"{CLOUD_SECURITY_POSTURE}.{data_stream}"]["vars"] = {}
-            inputs_dict[generate_input_id(name=name, input_type=input_type)] = input_dict
+                input_dict["streams"][f"{CLOUD_SECURITY_POSTURE}.{data_stream}"][
+                    "vars"
+                ] = {}
+            inputs_dict[
+                generate_input_id(name=name, input_type=input_type)
+            ] = input_dict
     return inputs_dict
 
 
@@ -152,8 +156,12 @@ def generate_policy_template(cfg: Munch, policy_template: dict = None) -> dict:
         "name": package_policy_info.get("name", ""),
         "version": package_policy_info.get("version", ""),
     }
-    generated_policy["inputs"] = format_inputs(package_policy_info.get("policy_templates", []))
-    generated_policy["vars"] = format_vars(package_vars=package_policy_info.get("vars", []))
+    generated_policy["inputs"] = format_inputs(
+        package_policy_info.get("policy_templates", [])
+    )
+    generated_policy["vars"] = format_vars(
+        package_vars=package_policy_info.get("vars", [])
+    )
     return generated_policy
 
 
@@ -173,8 +181,13 @@ def generate_package_policy(template: dict, policy_input: dict) -> dict:
     for input_name, data in package_policy["inputs"].items():
         if integration_key in input_name:
             update_policy_input_data(data, policy_input)
-            if "vars" in policy_input and "vars" not in data["streams"]["cloud_security_posture.findings"]:
-                data["streams"]["cloud_security_posture.findings"]["vars"] = policy_input["vars"]
+            if (
+                "vars" in policy_input
+                and "vars" not in data["streams"]["cloud_security_posture.findings"]
+            ):
+                data["streams"]["cloud_security_posture.findings"][
+                    "vars"
+                ] = policy_input["vars"]
     package_policy["vars"]["posture"] = policy_input.get("posture", "")
     package_policy["vars"]["deployment"] = policy_input.get("deployment", "")
     package_policy["name"] = policy_input.get("name", "")
@@ -308,3 +321,18 @@ def extract_template_url(url_string: str) -> str:
         return ""
 
     return template_url[0]
+
+
+def extract_arm_template_url(url_string: str) -> str:
+    """
+    Extracts the arm template link from a given URL string.
+
+    Args:
+        url_string (str): The URL string from which to extract the arm template link.
+
+    Returns:
+        str: The arm template link.
+
+    """
+    parsed_url = urlparse(url_string, allow_fragments=False)
+    return unquote(parsed_url.path.split("/")[-1])

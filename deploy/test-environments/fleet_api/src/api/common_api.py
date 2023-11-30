@@ -159,6 +159,38 @@ def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
         return
 
 
+def get_arm_template(url: str, template_path: str):
+    """
+    Download a ARM template from a specified URL,
+    and save it to a file.
+
+    Args:
+        url (str): The URL to download the ARM template.
+        template_path (str): The file path where the modified template will be saved.
+
+    Returns:
+        None
+
+    Raises:
+        APICallException: If there's an issue with the API call.
+    """
+    try:
+        template_json = perform_api_call(
+            method="GET",
+            url=url,
+            return_json=True,
+        )
+
+        with codecs.open(template_path, "w", encoding="utf-8") as arm_json:
+            arm_json.write(template_json)
+        logger.info(f"ARM template is available at: '{template_path}'")
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return
+
+
 def get_build_info(version: str) -> str:
     """
     Retrieve the build ID for a specific version of Elastic.
@@ -378,7 +410,9 @@ def update_package_version(cfg: Munch, package_name: str, package_version: str):
         )
 
 
-def bulk_upgrade_agents(cfg: Munch, agent_ids: List[str], version: str, source_uri: str) -> str:
+def bulk_upgrade_agents(
+    cfg: Munch, agent_ids: List[str], version: str, source_uri: str
+) -> str:
     """
     Upgrade a list of agents to a specified version using the Kibana API.
 
@@ -482,11 +516,16 @@ def wait_for_action_status(
         for item in action_status:
             if item.get("actionId") == target_action_id:
                 logger.info(f"Type: {item.get('type')}, Status: {item.get('status')}")
-                if item.get("type") == target_type and item.get("status") == target_status:
+                if (
+                    item.get("type") == target_type
+                    and item.get("status") == target_status
+                ):
                     return True  # Found the target criteria
 
         if time.time() - start_time >= timeout_secs:
-            logger.error(f"Agent upgrade process reached a timeout of {timeout_secs} seconds.")
+            logger.error(
+                f"Agent upgrade process reached a timeout of {timeout_secs} seconds."
+            )
             return False  # Timeout reached
 
         time.sleep(2)  # Fixed sleep interval of 1 second
