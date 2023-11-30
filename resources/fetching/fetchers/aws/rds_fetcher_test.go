@@ -26,6 +26,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/rds"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -77,10 +78,10 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 			},
 			expected: []fetching.ResourceInfo{{
 				Resource:      RdsResource{dbInstance: dbInstance1},
-				CycleMetadata: fetching.CycleMetadata{},
+				CycleMetadata: cycle.Metadata{},
 			}, {
 				Resource:      RdsResource{dbInstance: dbInstance2},
-				CycleMetadata: fetching.CycleMetadata{},
+				CycleMetadata: cycle.Metadata{},
 			}},
 		},
 	}
@@ -100,7 +101,7 @@ func (s *RdsFetcherTestSuite) TestFetcher_Fetch() {
 
 			ctx := context.Background()
 
-			err := rdsFetcher.Fetch(ctx, fetching.CycleMetadata{})
+			err := rdsFetcher.Fetch(ctx, cycle.Metadata{})
 			s.Require().NoError(err)
 
 			results := testhelper.CollectResources(s.resourceCh)

@@ -26,6 +26,7 @@ import (
 	"github.com/huandu/xstrings"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/gcplib/inventory"
 )
 
@@ -91,7 +92,7 @@ func NewGcpAssetsFetcher(_ context.Context, log *logp.Logger, ch chan fetching.R
 	}
 }
 
-func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Info("Starting GcpAssetsFetcher.Fetch")
 
 	for typeName, assetTypes := range GcpAssetTypes {
@@ -107,7 +108,7 @@ func (f *GcpAssetsFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMe
 				f.log.Infof("GcpAssetsFetcher.Fetch context err: %s", ctx.Err().Error())
 				return nil
 			case f.resourceCh <- fetching.ResourceInfo{
-				CycleMetadata: cMetadata,
+				CycleMetadata: cycleMetadata,
 				Resource: &GcpAsset{
 					Type:          typeName,
 					SubType:       getGcpSubType(asset.AssetType),

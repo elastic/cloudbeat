@@ -29,6 +29,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
@@ -138,7 +139,7 @@ func TestNetworkFetcher_Fetch(t *testing.T) {
 				cloudIdentity: &cloud.Identity{Account: tt.name},
 			}
 
-			err := f.Fetch(ctx, fetching.CycleMetadata{})
+			err := f.Fetch(ctx, cycle.Metadata{})
 			if tt.wantErr {
 				require.Error(t, err)
 				return

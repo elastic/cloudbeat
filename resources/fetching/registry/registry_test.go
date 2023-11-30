@@ -29,6 +29,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
@@ -92,7 +93,7 @@ func (s *registryTestSuite) TestRunNotRegistered() {
 	f := newNumberFetcher(1, s.wg)
 	s.registerFetcher(f, "some-key")
 
-	err := s.registry.Run(context.TODO(), "unknown", fetching.CycleMetadata{})
+	err := s.registry.Run(context.TODO(), "unknown", cycle.Metadata{})
 	s.Require().Error(err)
 }
 
@@ -122,7 +123,7 @@ func (s *registryTestSuite) TestRunRegistered() {
 	}
 
 	for _, test := range tests {
-		err := s.registry.Run(context.TODO(), test.key, fetching.CycleMetadata{})
+		err := s.registry.Run(context.TODO(), test.key, cycle.Metadata{})
 		results := testhelper.CollectResources(s.resourceCh)
 
 		s.Require().NoError(err)
@@ -186,10 +187,10 @@ type syncNumberFetcher struct {
 	resourceCh chan fetching.ResourceInfo
 }
 
-func (f *syncNumberFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *syncNumberFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      numberResource{f.num},
-		CycleMetadata: cMetadata,
+		CycleMetadata: cycleMetadata,
 	}
 
 	return nil
@@ -228,12 +229,12 @@ func newNumberFetcher(num int, wg *sync.WaitGroup) fetching.Fetcher {
 	return &numberFetcher{num, false, nil, wg}
 }
 
-func (f *numberFetcher) Fetch(_ context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *numberFetcher) Fetch(_ context.Context, cycleMetadata cycle.Metadata) error {
 	defer f.wg.Done()
 
 	f.resourceCh <- fetching.ResourceInfo{
 		Resource:      numberResource{f.num},
-		CycleMetadata: cMetadata,
+		CycleMetadata: cycleMetadata,
 	}
 
 	return nil
@@ -303,7 +304,7 @@ func Test_registry_Update(t *testing.T) {
 				emptyFn(t, r) // empty at beginning because of error
 				r.Update()
 				assert.Len(t, r.Keys(), 1)
-				require.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
+				require.NoError(t, r.Run(context.Background(), "fetcher", cycle.Metadata{}))
 				assert.Panics(t, r.Update)
 			},
 		},
@@ -323,11 +324,11 @@ func Test_registry_Update(t *testing.T) {
 			},
 			testFn: func(t *testing.T, r Registry) {
 				assert.Len(t, r.Keys(), 1)
-				require.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
+				require.NoError(t, r.Run(context.Background(), "fetcher", cycle.Metadata{}))
 
 				r.Update() // update fails, registry remains as is
 				assert.Len(t, r.Keys(), 1)
-				require.NoError(t, r.Run(context.Background(), "fetcher", fetching.CycleMetadata{}))
+				require.NoError(t, r.Run(context.Background(), "fetcher", cycle.Metadata{}))
 
 				assert.Panics(t, r.Update)
 			},

@@ -24,6 +24,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/ec2"
 )
@@ -54,7 +55,7 @@ func NewNetworkFetcher(log *logp.Logger, ec2Client ec2.ElasticCompute, ch chan f
 }
 
 // Fetch collects network resource such as network acl and security groups
-func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f NetworkFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting NetworkFetcher.Fetch")
 	resources := f.aggregateResources(ctx, f.ec2Client)
 
@@ -64,7 +65,7 @@ func (f NetworkFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetad
 				AwsResource: resource,
 				identity:    f.cloudIdentity,
 			},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 

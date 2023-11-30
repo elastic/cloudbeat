@@ -47,6 +47,11 @@ on:
         description: Name of the deployment to create
         type: string
         required: true
+      serverless_mode:
+        description: "Deploy a serverless project instead of an ESS deployment"
+        type: boolean
+        required: true
+        default: false
       elk-stack-version:
         required: true
         description: "Stack version: For released/BC version use 8.x.y, for SNAPSHOT use 8.x.y-SNAPSHOT"

@@ -30,6 +30,7 @@ import (
 
 	"github.com/elastic/cloudbeat/dataprovider/providers/cloud"
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
 	"github.com/elastic/cloudbeat/resources/providers/awslib/elb"
 )
 
@@ -58,7 +59,7 @@ func NewElbFetcher(log *logp.Logger, ch chan fetching.ResourceInfo, kubeProvider
 	}
 }
 
-func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata) error {
+func (f *ElbFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Metadata) error {
 	f.log.Debug("Starting ElbFetcher.Fetch")
 
 	balancers, err := f.GetLoadBalancers(ctx)
@@ -73,7 +74,7 @@ func (f *ElbFetcher) Fetch(ctx context.Context, cMetadata fetching.CycleMetadata
 	for _, loadBalancer := range result {
 		f.resourceCh <- fetching.ResourceInfo{
 			Resource:      ElbResource{lb: loadBalancer, identity: f.cloudIdentity},
-			CycleMetadata: cMetadata,
+			CycleMetadata: cycleMetadata,
 		}
 	}
 	return nil

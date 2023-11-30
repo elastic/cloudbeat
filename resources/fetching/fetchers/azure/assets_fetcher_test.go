@@ -19,6 +19,7 @@ package fetchers
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -26,6 +27,9 @@ import (
 	"golang.org/x/exp/maps"
 
 	"github.com/elastic/cloudbeat/resources/fetching"
+	"github.com/elastic/cloudbeat/resources/fetching/cycle"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib"
+	"github.com/elastic/cloudbeat/resources/providers/azurelib/governance"
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
@@ -51,9 +55,6 @@ func (s *AzureAssetsFetcherTestSuite) TearDownTest() {
 }
 
 func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
-	ctx := context.Background()
-
-	mockInventoryService := &inventory.MockServiceAPI{}
 	mockAssetGroups := make(map[string][]inventory.AzureAsset)
 	totalMockAssets := 0
 	var flatMockAssets []inventory.AzureAsset
@@ -62,16 +63,15 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		for _, assetType := range maps.Keys(AzureAssetTypeToTypePair) {
 			mockAssets = append(mockAssets,
 				inventory.AzureAsset{
-					Id:               "id",
-					Name:             "name",
-					Location:         "location",
-					Properties:       map[string]interface{}{"key": "value"},
-					ResourceGroup:    "rg",
-					SubscriptionId:   "subId",
-					SubscriptionName: "subName",
-					TenantId:         "tenantId",
-					Type:             assetType,
-					Sku:              "",
+					Id:             "id",
+					Name:           "name",
+					Location:       "location",
+					Properties:     map[string]interface{}{"key": "value"},
+					ResourceGroup:  "rg",
+					SubscriptionId: "subId",
+					TenantId:       "tenantId",
+					Type:           assetType,
+					Sku:            "",
 				},
 			)
 		}
@@ -80,24 +80,27 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 		flatMockAssets = append(flatMockAssets, mockAssets...)
 	}
 
-	mockInventoryService.EXPECT().
+	mockProvider := azurelib.NewMockProviderAPI(s.T())
+	mockProvider.EXPECT().
 		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
-		RunAndReturn(func(ctx context.Context, assetGroup string, types []string) ([]inventory.AzureAsset, error) {
+		RunAndReturn(func(ctx context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
 			return mockAssetGroups[assetGroup], nil
 		})
-	defer mockInventoryService.AssertExpectations(s.T())
+	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(
+		map[string]governance.Subscription{
+			"subId": {
+				ID:          "subId",
+				DisplayName: "subName",
+				ManagementGroup: governance.ManagementGroup{
+					ID:          "mgId",
+					DisplayName: "mgName",
+				},
+			},
+		}, nil,
+	).Once()
 
-	fetcher := AzureAssetsFetcher{
-		log:        testhelper.NewLogger(s.T()),
-		resourceCh: s.resourceCh,
-		provider:   mockInventoryService,
-	}
-	err := fetcher.Fetch(ctx, fetching.CycleMetadata{})
+	results, err := s.fetch(mockProvider, totalMockAssets)
 	s.Require().NoError(err)
-	results := testhelper.CollectResources(s.resourceCh)
-
-	s.Require().Len(results, totalMockAssets)
-
 	for index, result := range results {
 		expected := flatMockAssets[index]
 		s.Run(expected.Type, func() {
@@ -108,28 +111,72 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 
 			pair := AzureAssetTypeToTypePair[expected.Type]
 			s.Equal(fetching.ResourceMetadata{
-				ID:                  expected.Id,
-				Type:                pair.Type,
-				SubType:             pair.SubType,
-				Name:                expected.Name,
-				Region:              expected.Location,
-				AwsAccountId:        "",
-				AwsAccountAlias:     "",
-				AwsOrganizationId:   "",
-				AwsOrganizationName: "",
+				ID:      expected.Id,
+				Type:    pair.Type,
+				SubType: pair.SubType,
+				Name:    expected.Name,
+				Region:  expected.Location,
+				CloudAccountMetadata: fetching.CloudAccountMetadata{
+					AccountId:        "subId",
+					AccountName:      "subName",
+					OrganisationId:   "mgId",
+					OrganizationName: "mgName",
+				},
 			}, meta)
 
 			ecs, err := result.GetElasticCommonData()
 			s.Require().NoError(err)
-			s.Equal(map[string]any{
-				"cloud": map[string]any{
-					"provider": "azure",
-					"account": map[string]any{
-						"id":   expected.SubscriptionId,
-						"name": expected.SubscriptionName,
-					},
-				},
-			}, ecs)
+			s.Empty(ecs)
 		})
 	}
+}
+
+func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch_Errors() {
+	asset := inventory.AzureAsset{
+		Id:             "id",
+		Name:           "name",
+		SubscriptionId: "sub-id",
+		Type:           inventory.DiskAssetType,
+	}
+
+	mockProvider := azurelib.NewMockProviderAPI(s.T())
+	mockProvider.EXPECT().
+		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
+		RunAndReturn(func(ctx context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
+			if assetGroup == AzureAssetGroups[0] {
+				return []inventory.AzureAsset{asset}, nil
+			}
+			return nil, errors.New("some list asset error")
+		})
+	mockProvider.EXPECT().GetSubscriptions(mock.Anything, mock.Anything).Return(nil, errors.New("some get subscription error")).Once()
+
+	results, err := s.fetch(mockProvider, 1)
+	s.Require().ErrorContains(err, "some list asset error")
+
+	resource := results[0]
+	s.Equal(asset, resource.GetData())
+	metadata, err := resource.GetMetadata()
+	s.Require().NoError(err)
+	s.Equal(fetching.ResourceMetadata{
+		ID:      "id",
+		Type:    fetching.CloudCompute,
+		SubType: fetching.AzureDiskType,
+		Name:    "name",
+		Region:  "",
+		CloudAccountMetadata: fetching.CloudAccountMetadata{
+			AccountId: "sub-id",
+		},
+	}, metadata)
+}
+
+func (s *AzureAssetsFetcherTestSuite) fetch(provider *azurelib.MockProviderAPI, expectedLength int) ([]fetching.ResourceInfo, error) {
+	fetcher := AzureAssetsFetcher{
+		log:        testhelper.NewLogger(s.T()),
+		resourceCh: s.resourceCh,
+		provider:   provider,
+	}
+	err := fetcher.Fetch(context.Background(), cycle.Metadata{})
+	results := testhelper.CollectResources(s.resourceCh)
+	s.Require().Len(results, expectedLength)
+	return results, err
 }

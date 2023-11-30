@@ -6,8 +6,7 @@ require (
 	cloud.google.com/go/asset v1.15.2
 	cloud.google.com/go/iam v1.1.4
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.4.0
-	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph v0.9.0
-	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions v1.3.0
+	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph v0.8.2
 	github.com/aquasecurity/go-dep-parser v0.0.0-20231013060839-6f348921ea39
 	github.com/aquasecurity/trivy v0.46.1
 	github.com/aquasecurity/trivy-db v0.0.0-20231005141211-4fc651f7ac8d
@@ -38,7 +37,7 @@ require (
 	github.com/aws/smithy-go v1.15.0
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231113094831-9b932c47cec8
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231127093858-296183ca0d11
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
 	github.com/elastic/elastic-agent-autodiscover v0.6.4
 	github.com/elastic/elastic-agent-client/v7 v7.4.0
@@ -213,7 +212,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/elastic-agent-shipper-client v0.5.1-0.20230228231646-f04347b666f3 // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.7.0 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.8.2 // indirect
 	github.com/elastic/go-concert v0.2.0 // indirect
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.3.0 // indirect

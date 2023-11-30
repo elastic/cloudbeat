@@ -23,19 +23,18 @@ import (
 	"testing"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/elastic/cloudbeat/resources/providers/azurelib/auth"
+	"github.com/elastic/cloudbeat/resources/utils/strings"
 	"github.com/elastic/cloudbeat/resources/utils/testhelper"
 )
 
 type ProviderTestSuite struct {
 	suite.Suite
-	mockedClient *AzureClientWrapper
+	mockedClient *azureClientWrapper
 }
 
 var nonTruncatedResponse = armresourcegraph.QueryResponse{
@@ -93,7 +92,7 @@ func TestInventoryProviderTestSuite(t *testing.T) {
 }
 
 func (s *ProviderTestSuite) SetupTest() {
-	s.mockedClient = &AzureClientWrapper{
+	s.mockedClient = &azureClientWrapper{
 		AssetQuery: func(ctx context.Context, query armresourcegraph.QueryRequest, options *armresourcegraph.ClientResourcesOptions) (armresourcegraph.ClientResourcesResponse, error) {
 			if query.Options.SkipToken != nil && *query.Options.SkipToken != "" {
 				return armresourcegraph.ClientResourcesResponse{
@@ -141,17 +140,14 @@ func (s *ProviderTestSuite) TestGetString() {
 		},
 	}
 	for _, tt := range tests {
-		s.Equal(tt.want, getString(tt.data, tt.key), "getString(%v, %s) = %s", tt.data, tt.key, tt.want)
+		s.Equal(tt.want, strings.FromMap(tt.data, tt.key), "getString(%v, %s) = %s", tt.data, tt.key, tt.want)
 	}
 }
 
 func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
-	provider := &Provider{
+	provider := &provider{
 		log:    testhelper.NewLogger(s.T()),
 		client: s.mockedClient,
-		Config: auth.AzureFactoryConfig{
-			Credentials: &azidentity.DefaultAzureCredential{},
-		},
 	}
 
 	values, err := provider.ListAllAssetTypesByName(context.Background(), "test", []string{"test"})
@@ -160,16 +156,15 @@ func (s *ProviderTestSuite) TestListAllAssetTypesByName() {
 	lo.ForEach(values, func(r AzureAsset, index int) {
 		strIndex := fmt.Sprintf("%d", index+1)
 		s.Equal(AzureAsset{
-			Id:               strIndex,
-			Name:             strIndex,
-			Location:         strIndex,
-			Properties:       map[string]any{"test": "test"},
-			ResourceGroup:    strIndex,
-			SubscriptionId:   strIndex,
-			SubscriptionName: "",
-			TenantId:         strIndex,
-			Type:             strIndex,
-			Sku:              strIndex,
+			Id:             strIndex,
+			Name:           strIndex,
+			Location:       strIndex,
+			Properties:     map[string]any{"test": "test"},
+			ResourceGroup:  strIndex,
+			SubscriptionId: strIndex,
+			TenantId:       strIndex,
+			Type:           strIndex,
+			Sku:            strIndex,
 		}, r)
 	})
 }
