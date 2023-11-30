@@ -268,7 +268,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 				{
 					Id:       "id1",
 					Name:     "name1",
-					Location: "",
+					Location: "global",
 					Properties: map[string]interface{}{
 						"logs": []interface{}{
 							map[string]interface{}{
@@ -361,7 +361,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 				{
 					Id:       "id2",
 					Name:     "name2",
-					Location: "",
+					Location: "global",
 					Properties: map[string]interface{}{
 						"logs": []interface{}{
 							map[string]interface{}{
@@ -384,7 +384,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 				{
 					Id:       "id3",
 					Name:     "name3",
-					Location: "",
+					Location: "global",
 					Properties: map[string]interface{}{
 						"logs": []interface{}{
 							map[string]interface{}{
@@ -481,7 +481,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 				{
 					Id:       "id2",
 					Name:     "name2",
-					Location: "",
+					Location: "global",
 					Properties: map[string]interface{}{
 						"logs": []interface{}{
 							map[string]interface{}{
@@ -504,7 +504,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 				{
 					Id:       "id3",
 					Name:     "name3",
-					Location: "",
+					Location: "global",
 					Properties: map[string]interface{}{
 						"logs": []interface{}{
 							map[string]interface{}{
