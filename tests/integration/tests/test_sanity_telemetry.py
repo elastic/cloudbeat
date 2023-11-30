@@ -94,7 +94,8 @@ def test_telemetry_installation_stats(cloud_security_telemetry_data):
         ), f"Telemetry data missing deployment_mode in installation_stats for {installation}"
         if installation.feature == "cspm":
             assert isinstance(
-                installation.is_setup_automatic, bool
+                installation.is_setup_automatic,
+                bool,
             ), f"Telemetry data missing is_setup_automatic in installation_stats for {installation}"
             assert (
                 len(installation.account_type) > 0
