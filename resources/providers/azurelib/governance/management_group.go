@@ -36,17 +36,17 @@ type ManagementGroup struct {
 }
 
 type Subscription struct {
-	ID          string
-	DisplayName string
-	MG          ManagementGroup
+	ID              string
+	DisplayName     string
+	ManagementGroup ManagementGroup
 }
 
 func (s Subscription) GetCloudAccountMetadata() fetching.CloudAccountMetadata {
 	return fetching.CloudAccountMetadata{
 		AccountId:        s.ID,
 		AccountName:      s.DisplayName,
-		OrganisationId:   s.MG.ID,
-		OrganizationName: s.MG.DisplayName,
+		OrganisationId:   s.ManagementGroup.ID,
+		OrganizationName: s.ManagementGroup.DisplayName,
 	}
 }
 
@@ -91,7 +91,7 @@ func (p *provider) scan(ctx context.Context) (map[string]Subscription, error) {
 	for _, asset := range lo.Filter(assets, typeFilter(managementGroupType)) {
 		managementGroups[asset.Name] = ManagementGroup{
 			ID:          asset.Id,
-			DisplayName: asset.DisplayName,
+			DisplayName: strings.FirstNonEmpty(asset.DisplayName, asset.Name),
 		}
 	}
 
@@ -105,9 +105,9 @@ func (p *provider) scan(ctx context.Context) (map[string]Subscription, error) {
 
 		mg := managementGroups[strings.FromMap(parent, "name")]
 		subscriptions[asset.SubscriptionId] = Subscription{
-			ID:          asset.Id,
-			DisplayName: asset.Name,
-			MG:          mg,
+			ID:              asset.Id,
+			DisplayName:     strings.FirstNonEmpty(asset.DisplayName, asset.Name),
+			ManagementGroup: mg,
 		}
 	}
 
