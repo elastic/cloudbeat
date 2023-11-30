@@ -103,7 +103,7 @@ def run():
 
         color = color_by_job_status(job_status)
         slack_name = github_to_slack.get(github_actor, github_actor)
-
+        message = f"*ESS Type:* `{ess_type}`\n*Stack Version:*`{stack_version}`\n*Docker Override:*\n`{docker_image}`"
         slack_payload = {
             "attachments": [
                 {
@@ -121,21 +121,28 @@ def run():
                         },
                         {
                             "type": "section",
-                            "fields": [
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*ESS Type:*\n`{ess_type}`",
-                                },
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Stack Version:*\n`{stack_version}`",
-                                },
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"*Docker Override:*\n`{docker_image}`",
-                                },
-                            ],
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": message,
+                            },
                         },
+                        # {
+                        #     "type": "section",
+                        #     "fields": [
+                        #         {
+                        #             "type": "mrkdwn",
+                        #             "text": f"*ESS Type:*\n`{ess_type}`",
+                        #         },
+                        #         {
+                        #             "type": "mrkdwn",
+                        #             "text": f"*Stack Version:*\n`{stack_version}`",
+                        #         },
+                        #         {
+                        #             "type": "mrkdwn",
+                        #             "text": f"*Docker Override:*\n`{docker_image}`",
+                        #         },
+                        #     ],
+                        # },
                         {
                             "type": "divider",
                         },
