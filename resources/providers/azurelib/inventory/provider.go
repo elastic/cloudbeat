@@ -166,7 +166,7 @@ func transformDiagnosticSettingsResource(v *armmonitor.DiagnosticSettingsResourc
 	return AzureAsset{
 		Id:             strings.Dereference(v.ID),
 		Name:           strings.Dereference(v.Name),
-		Location:       "",
+		Location:       "global",
 		Properties:     properties,
 		ResourceGroup:  "",
 		SubscriptionId: subID,
