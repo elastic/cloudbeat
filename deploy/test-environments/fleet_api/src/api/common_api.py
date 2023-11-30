@@ -518,9 +518,7 @@ def wait_for_action_status(
                     return True  # Found the target criteria
 
         if time.time() - start_time >= timeout_secs:
-            logger.error(
-                f"Agent upgrade process reached a timeout of {timeout_secs} seconds.",
-            )
+            logger.error(f"Agent upgrade process reached a timeout of {timeout_secs} seconds.")
             return False  # Timeout reached
 
         time.sleep(2)  # Fixed sleep interval of 1 second
