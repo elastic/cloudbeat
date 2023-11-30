@@ -5,7 +5,6 @@ This script installs CSPM Azure integration
 The following steps are performed:
 1. Create an agent policy.
 2. Create a CSPM Azure integration.
-3. Create a deploy/deployment-manager/config.json file to be used by the just deploy-dm command.
 """
 import sys
 import json
@@ -19,6 +18,11 @@ from api.common_api import (
     get_fleet_server_host,
     get_artifact_server,
     get_package_version,
+    get_arm_template,
+)
+from package_policy import (
+    get_package_default_url,
+    extract_arm_template_url,
 )
 from package_policy import (
     version_compatible,
@@ -29,16 +33,21 @@ from package_policy import (
 
 
 from loguru import logger
+from utils import (
+    rename_file_by_suffix,
+)
 from state_file_manager import state_manager, PolicyState, HostType
 
 CSPM_AZURE_AGENT_POLICY = "../../../cloud/data/agent_policy_cspm_azure.json"
 CSPM_AZURE_PACKAGE_POLICY = "../../../cloud/data/package_policy_cspm_azure.json"
 CSPM_AZURE_EXPECTED_AGENTS = 1
 AZURE_ARM_PARAMETERS = "../../../azure/arm_parameters.json"
+AZURE_ARM_TEMPLATE = "../../../azure/azureARMTemplate.json"
 
 cspm_azure_agent_policy_data = Path(__file__).parent / CSPM_AZURE_AGENT_POLICY
 cspm_azure_pkg_policy_data = Path(__file__).parent / CSPM_AZURE_PACKAGE_POLICY
 cspm_azure_arm_parameters = Path(__file__).parent / AZURE_ARM_PARAMETERS
+cspm_azure_arm_template = Path(__file__).parent / AZURE_ARM_TEMPLATE
 INTEGRATION_NAME = "CSPM Azure"
 
 PKG_DEFAULT_VERSION = VERSION_MAP.get("cis_azure", "")
@@ -128,5 +137,24 @@ if __name__ == "__main__":
 
     with open(cspm_azure_arm_parameters, "w") as file:
         json.dump(azure_arm_parameters, file)
+
+    logger.info(f"Get {INTEGRATION_NAME} template")
+    default_url = get_package_default_url(
+        cfg=cnfg.elk_config,
+        policy_name=INTEGRATION_INPUT["posture"],
+        policy_type="cloudbeat/cis_azure",
+    )
+    template_url = extract_arm_template_url(url_string=default_url)
+
+    logger.info(f"Using {template_url} for stack creation")
+    # If file exists, rename it
+    rename_file_by_suffix(
+        file_path=cspm_azure_arm_template,
+        suffix="-orig",
+    )
+    get_arm_template(
+        url=template_url,
+        template_path=cspm_azure_arm_template,
+    )
 
     logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
