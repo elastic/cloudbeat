@@ -85,42 +85,114 @@ def run():
         # Validate env vars
         workflow = check_env_var("WORKFLOW")
         github_actor = check_env_var("GITHUB_ACTOR")
-        # github_run_url = check_env_var("RUN_URL")
+        github_run_url = check_env_var("RUN_URL")
         job_status = check_env_var("JOB_STATUS")
-        # kibana_url = check_env_var("KIBANA_URL")
-        # s3_bucket = check_env_var("S3_BUCKET")
+        kibana_url = check_env_var("KIBANA_URL")
+        s3_bucket = check_env_var("S3_BUCKET")
         deployment_name = check_env_var("DEPLOYMENT_NAME")
-        # stack_version = check_env_var("STACK_VERSION")
-        # es_password = check_env_var("ES_PASSWORD")
+        stack_version = check_env_var("STACK_VERSION")
+        es_password = check_env_var("ES_PASSWORD")
         docker_image = os.getenv("DOCKER_IMAGE_OVERRIDE", "N/A")
         if docker_image == "":
             docker_image = "N/A"
 
-        # is_project = bool(os.getenv("ESS_TYPE", "true") == "true")
-        # ess_type = "Deployment"
-        # if is_project:
-        #     ess_type = "Project"
+        is_project = bool(os.getenv("ESS_TYPE", "true") == "true")
+        ess_type = "Deployment"
+        if is_project:
+            ess_type = "Project"
 
         color = color_by_job_status(job_status)
         slack_name = github_to_slack.get(github_actor, github_actor)
 
         slack_payload = {
             "text": "Create Environment workflow run",
-            "attachments": {
-                "color": color,
-                "blocks": [
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": f"{workflow} job `{deployment_name}` triggered by <@{slack_name}>",
+            "attachments": [
+                {
+                    "color": color,
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"{workflow} job `{deployment_name}` triggered by <@{slack_name}>",
+                            },
                         },
-                    },
-                    {
-                        "type": "divider",
-                    },
-                ],
-            },
+                        {
+                            "type": "divider",
+                        },
+                        {
+                            "type": "section",
+                            "fields": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*ESS Type:*\n`{ess_type}`",
+                                },
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Stack Version:*\n`{stack_version}`",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "section",
+                            "fields": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"*Docker Override:*\n`{docker_image}`",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "divider",
+                        },
+                        {
+                            "type": "actions",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "kibana link",
+                                    },
+                                    "style": "primary",
+                                    "url": f"{kibana_url}",
+                                    "action_id": "kibana-instance-button",
+                                },
+                                {
+                                    "type": "button",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "state bucket",
+                                    },
+                                    "style": "primary",
+                                    "url": f"{s3_bucket}",
+                                    "action_id": "s3-bucket-button",
+                                },
+                                {
+                                    "type": "button",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "action run",
+                                    },
+                                    "style": "primary",
+                                    "url": f"{github_run_url}",
+                                    "action_id": "action-run-button",
+                                },
+                            ],
+                        },
+                        {
+                            "type": "divider",
+                        },
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"*Kibana password:* `{es_password}`",
+                            },
+                        },
+                    ],
+                },
+            ],
         }
         set_output("payload", json.dumps(slack_payload))
 
