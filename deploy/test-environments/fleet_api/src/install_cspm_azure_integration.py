@@ -5,10 +5,8 @@ This script installs CSPM Azure integration
 The following steps are performed:
 1. Create an agent policy.
 2. Create a CSPM Azure integration.
-3. Create a deploy/deployment-manager/config.json file to be used by the just deploy-dm command.
 """
 import sys
-import json
 from pathlib import Path
 from munch import Munch
 import configuration_fleet as cnfg
@@ -19,7 +17,6 @@ from api.common_api import (
     get_fleet_server_host,
     get_artifact_server,
     get_package_version,
-    update_package_version,
     get_arm_template,
 )
 from package_policy import (
@@ -155,7 +152,6 @@ if __name__ == "__main__":
     get_arm_template(
         url=template_url,
         template_path=cspm_azure_arm_template,
-        cnvm_tags=cnfg.aws_config.cnvm_tags,
     )
 
     logger.info(f"Installation of {INTEGRATION_NAME} integration is done")
