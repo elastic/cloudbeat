@@ -106,8 +106,8 @@ def run():
 
         slack_payload = {
             "attachments": {
-                "color": color,
                 "text": "Create Environment workflow run",
+                "color": color,
                 "fallback": "attachment fallback",
                 "blocks": [
                     {
