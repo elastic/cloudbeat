@@ -182,7 +182,7 @@ def get_arm_template(url: str, template_path: str):
             return_json=True,
         )
 
-        with open(template_path, 'w') as arm_json:
+        with open(template_path, "w") as arm_json:
             json.dump(template_json, arm_json)
         logger.info(f"ARM template is available at: '{template_path}'")
     except APICallException as api_ex:
