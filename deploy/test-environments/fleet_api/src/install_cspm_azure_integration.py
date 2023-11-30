@@ -70,9 +70,7 @@ if __name__ == "__main__":
         current_version=package_version,
         required_version=PKG_DEFAULT_VERSION,
     ):
-        logger.warning(
-            f"{INTEGRATION_NAME} is not supported in version {package_version}",
-        )
+        logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
         sys.exit(0)
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
     agent_data, package_data = load_data(
