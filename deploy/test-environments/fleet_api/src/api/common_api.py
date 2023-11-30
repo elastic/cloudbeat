@@ -410,12 +410,7 @@ def update_package_version(cfg: Munch, package_name: str, package_version: str):
         )
 
 
-def bulk_upgrade_agents(
-    cfg: Munch,
-    agent_ids: List[str],
-    version: str,
-    source_uri: str,
-) -> str:
+def bulk_upgrade_agents(cfg: Munch, agent_ids: List[str], version: str, source_uri: str) -> str:
     """
     Upgrade a list of agents to a specified version using the Kibana API.
 
