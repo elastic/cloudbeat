@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 33/151 implemented rules (22%)
+### 34/151 implemented rules (23%)
 
-#### Automated rules: 33/77 (43%)
+#### Automated rules: 34/77 (44%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -477,7 +477,7 @@
 |                         4.5.2                          | Cosmos DB                               | Ensure That Private Endpoints Are Used Where Possible                                                                                                  |        :x:         |  Manual   |
 |                         4.5.3                          | Cosmos DB                               | Use Azure Active Directory (AAD) Client Authentication and Azure RBAC where possible.                                                                  |        :x:         |  Manual   |
 |                         5.1.1                          | Configuring Diagnostic Settings         | Ensure that a 'Diagnostic Setting' exists                                                                                                              |        :x:         |  Manual   |
-|                         5.1.2                          | Configuring Diagnostic Settings         | Ensure Diagnostic Setting captures appropriate categories                                                                                              |        :x:         | Automated |
+|  [5.1.2](bundle/compliance/cis_azure/rules/cis_5_1_2)  | Configuring Diagnostic Settings         | Ensure Diagnostic Setting captures appropriate categories                                                                                              | :white_check_mark: | Automated |
 |                         5.1.3                          | Configuring Diagnostic Settings         | Ensure the Storage Container Storing the Activity Logs is not Publicly Accessible                                                                      |        :x:         | Automated |
 |                         5.1.4                          | Configuring Diagnostic Settings         | Ensure the storage account containing the container with activity logs is encrypted with Customer Managed Key                                          |        :x:         | Automated |
 |                         5.1.5                          | Configuring Diagnostic Settings         | Ensure that logging for Azure Key Vault is 'Enabled'                                                                                                   |        :x:         | Automated |
