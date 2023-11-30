@@ -7,9 +7,9 @@ The following steps are performed:
 2. Create a CSPM Azure integration.
 3. Create a deploy/deployment-manager/config.json file to be used by the just deploy-dm command.
 """
+import sys
 import json
 from pathlib import Path
-from typing import Dict, Tuple
 from munch import Munch
 import configuration_fleet as cnfg
 from api.agent_policy_api import create_agent_policy
@@ -19,10 +19,16 @@ from api.common_api import (
     get_fleet_server_host,
     get_artifact_server,
     get_package_version,
-    update_package_version,
 )
+from package_policy import (
+    version_compatible,
+    VERSION_MAP,
+    load_data,
+    generate_random_name,
+)
+
+
 from loguru import logger
-from utils import read_json
 from state_file_manager import state_manager, PolicyState, HostType
 
 CSPM_AZURE_AGENT_POLICY = "../../../cloud/data/agent_policy_cspm_azure.json"
@@ -35,30 +41,34 @@ cspm_azure_pkg_policy_data = Path(__file__).parent / CSPM_AZURE_PACKAGE_POLICY
 cspm_azure_arm_parameters = Path(__file__).parent / AZURE_ARM_PARAMETERS
 INTEGRATION_NAME = "CSPM Azure"
 
-
-def load_data() -> Tuple[Dict, Dict]:
-    """Loads data.
-
-    Returns:
-        Tuple[Dict, Dict]: A tuple containing the loaded agent and package policies.
-    """
-    logger.info("Loading agent and package policies")
-    agent_policy = read_json(json_path=cspm_azure_agent_policy_data)
-    package_policy = read_json(json_path=cspm_azure_pkg_policy_data)
-    return agent_policy, package_policy
+PKG_DEFAULT_VERSION = VERSION_MAP.get("cis_azure", "")
+INTEGRATION_INPUT = {
+    "name": generate_random_name("pkg-cspm-azure"),
+    "input_name": "cis_azure",
+    "posture": "cspm",
+    "deployment": "azure",
+}
+AGENT_INPUT = {
+    "name": generate_random_name("cspm-azure"),
+}
 
 
 if __name__ == "__main__":
     # pylint: disable=duplicate-code
     package_version = get_package_version(cfg=cnfg.elk_config)
     logger.info(f"Package version: {package_version}")
-    update_package_version(
-        cfg=cnfg.elk_config,
-        package_name="cloud_security_posture",
-        package_version=package_version,
-    )
+    if not version_compatible(
+        current_version=package_version,
+        required_version=PKG_DEFAULT_VERSION,
+    ):
+        logger.warning(f"{INTEGRATION_NAME} is not supported in version {package_version}")
+        sys.exit(0)
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")
-    agent_data, package_data = load_data()
+    agent_data, package_data = load_data(
+        cfg=cnfg.elk_config,
+        agent_input=AGENT_INPUT,
+        package_input=INTEGRATION_INPUT,
+    )
 
     logger.info("Create agent policy")
     agent_policy_id = create_agent_policy(cfg=cnfg.elk_config, json_policy=agent_data)
