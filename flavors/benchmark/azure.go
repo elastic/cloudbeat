@@ -75,7 +75,12 @@ func (a *Azure) initialize(_ context.Context, log *logp.Logger, cfg *config.Conf
 	}
 
 	return registry.NewRegistry(log, registry.WithFetchersMap(fetchers)),
-		cloud.NewDataProvider(cloud.WithLogger(log)),
+		cloud.NewDataProvider(
+			cloud.WithLogger(log),
+			cloud.WithAccount(cloud.Identity{
+				Provider: "azure",
+			}),
+		),
 		nil,
 		nil
 }
