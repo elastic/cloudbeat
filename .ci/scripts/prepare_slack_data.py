@@ -130,11 +130,6 @@ def run():
                                     "type": "mrkdwn",
                                     "text": f"*Stack Version:*\n`{stack_version}`",
                                 },
-                            ],
-                        },
-                        {
-                            "type": "section",
-                            "fields": [
                                 {
                                     "type": "mrkdwn",
                                     "text": f"*Docker Override:*\n`{docker_image}`",
