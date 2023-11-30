@@ -105,6 +105,7 @@ def run():
         slack_name = github_to_slack.get(github_actor, github_actor)
 
         slack_payload = {
+            "text": "Create Environment workflow run",
             "attachments": {
                 "text": "Create Environment workflow run",
                 "color": color,
