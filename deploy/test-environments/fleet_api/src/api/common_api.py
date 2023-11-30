@@ -411,7 +411,10 @@ def update_package_version(cfg: Munch, package_name: str, package_version: str):
 
 
 def bulk_upgrade_agents(
-    cfg: Munch, agent_ids: List[str], version: str, source_uri: str,
+    cfg: Munch,
+    agent_ids: List[str],
+    version: str,
+    source_uri: str,
 ) -> str:
     """
     Upgrade a list of agents to a specified version using the Kibana API.
@@ -516,10 +519,7 @@ def wait_for_action_status(
         for item in action_status:
             if item.get("actionId") == target_action_id:
                 logger.info(f"Type: {item.get('type')}, Status: {item.get('status')}")
-                if (
-                    item.get("type") == target_type
-                    and item.get("status") == target_status
-                ):
+                if item.get("type") == target_type and item.get("status") == target_status:
                     return True  # Found the target criteria
 
         if time.time() - start_time >= timeout_secs:

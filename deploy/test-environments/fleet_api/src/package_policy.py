@@ -87,12 +87,8 @@ def format_inputs(policy_templates: list) -> dict:
             }
             # Conditionally add "vars" based on input_type
             if input_type in REQUIRE_VARS:
-                input_dict["streams"][f"{CLOUD_SECURITY_POSTURE}.{data_stream}"][
-                    "vars"
-                ] = {}
-            inputs_dict[
-                generate_input_id(name=name, input_type=input_type)
-            ] = input_dict
+                input_dict["streams"][f"{CLOUD_SECURITY_POSTURE}.{data_stream}"]["vars"] = {}
+            inputs_dict[generate_input_id(name=name, input_type=input_type)] = input_dict
     return inputs_dict
 
 
@@ -181,13 +177,8 @@ def generate_package_policy(template: dict, policy_input: dict) -> dict:
     for input_name, data in package_policy["inputs"].items():
         if integration_key in input_name:
             update_policy_input_data(data, policy_input)
-            if (
-                "vars" in policy_input
-                and "vars" not in data["streams"]["cloud_security_posture.findings"]
-            ):
-                data["streams"]["cloud_security_posture.findings"][
-                    "vars"
-                ] = policy_input["vars"]
+            if "vars" in policy_input and "vars" not in data["streams"]["cloud_security_posture.findings"]:
+                data["streams"]["cloud_security_posture.findings"]["vars"] = policy_input["vars"]
     package_policy["vars"]["posture"] = policy_input.get("posture", "")
     package_policy["vars"]["deployment"] = policy_input.get("deployment", "")
     package_policy["name"] = policy_input.get("name", "")
