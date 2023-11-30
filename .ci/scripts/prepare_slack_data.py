@@ -103,7 +103,7 @@ def run():
 
         color = color_by_job_status(job_status)
         slack_name = github_to_slack.get(github_actor, github_actor)
-        message = f"*ESS Type:* `{ess_type}`\n*Stack Version:*`{stack_version}`\n*Docker Override:*\n`{docker_image}`"
+        message = f"*ESS Type:* `{ess_type}`\n*Stack Version: *`{stack_version}`\n*Docker Override:* `{docker_image}`"
         slack_payload = {
             "attachments": [
                 {
