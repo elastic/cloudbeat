@@ -7,6 +7,7 @@ The following steps are performed:
 2. Create a CSPM Azure integration.
 """
 import sys
+import json
 from pathlib import Path
 from munch import Munch
 import configuration_fleet as cnfg
@@ -135,6 +136,9 @@ if __name__ == "__main__":
     azure_arm_parameters["parameters"]["Location"] = {
         "value": cnfg.azure_arm_parameters.location,
     }
+
+    with open(cspm_azure_arm_parameters, "w") as file:
+        json.dump(azure_arm_parameters, file)
 
     logger.info(f"Get {INTEGRATION_NAME} template")
     default_url = get_package_default_url(
