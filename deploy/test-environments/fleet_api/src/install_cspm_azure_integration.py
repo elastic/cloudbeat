@@ -73,7 +73,7 @@ if __name__ == "__main__":
         required_version=PKG_DEFAULT_VERSION,
     ):
         logger.warning(
-            f"{INTEGRATION_NAME} is not supported in version {package_version}"
+            f"{INTEGRATION_NAME} is not supported in version {package_version}",
         )
         sys.exit(0)
     logger.info(f"Starting installation of {INTEGRATION_NAME} integration.")

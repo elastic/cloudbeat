@@ -411,7 +411,7 @@ def update_package_version(cfg: Munch, package_name: str, package_version: str):
 
 
 def bulk_upgrade_agents(
-    cfg: Munch, agent_ids: List[str], version: str, source_uri: str
+    cfg: Munch, agent_ids: List[str], version: str, source_uri: str,
 ) -> str:
     """
     Upgrade a list of agents to a specified version using the Kibana API.
@@ -524,7 +524,7 @@ def wait_for_action_status(
 
         if time.time() - start_time >= timeout_secs:
             logger.error(
-                f"Agent upgrade process reached a timeout of {timeout_secs} seconds."
+                f"Agent upgrade process reached a timeout of {timeout_secs} seconds.",
             )
             return False  # Timeout reached
 
