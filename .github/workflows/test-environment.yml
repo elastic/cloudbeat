@@ -125,7 +125,7 @@ jobs:
 
       - name: Create Slack Payload
         if: always()
-        id: prepare-data
+        id: prepare-data-debug
         working-directory: ./
         env:
           WORKFLOW: "${{ github.workflow }}"
@@ -150,7 +150,7 @@ jobs:
           url: ${{ secrets.VAULT_ADDR }}
           roleId: ${{ secrets.VAULT_ROLE_ID }}
           secretId: ${{ secrets.VAULT_SECRET_ID }}
-          payload: ${{ steps.prepare-data.outputs.payload }}
+          payload: ${{ steps.prepare-data-debug.outputs.payload }}
           channel: "#csp-qa-alerts"
 
       - name: Fast fail
