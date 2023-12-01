@@ -45,8 +45,9 @@ type ProviderAPI interface {
 }
 
 type provider struct {
-	client *azureClientWrapper
-	log    *logp.Logger
+	client                  *azureClientWrapper
+	log                     *logp.Logger
+	diagnosticSettingsCache *cycle.Cache[[]AzureAsset]
 }
 
 func NewProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client, diagnosticSettingsClient *armmonitor.DiagnosticSettingsClient) ProviderAPI {
@@ -61,7 +62,7 @@ func NewProvider(log *logp.Logger, resourceGraphClient *armresourcegraph.Client,
 		},
 	}
 
-	return &provider{log: log, client: wrapper}
+	return &provider{log: log, client: wrapper, diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log)}
 }
 
 func (p *provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string, assets []string) ([]AzureAsset, error) {
@@ -77,9 +78,15 @@ func (p *provider) ListAllAssetTypesByName(ctx context.Context, assetGroup strin
 	return p.runPaginatedQuery(ctx, query)
 }
 
-func (p *provider) ListDiagnosticSettingsAssetTypes(ctx context.Context, _ cycle.Metadata, subscriptionIDs []string) ([]AzureAsset, error) {
+func (p *provider) ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]AzureAsset, error) {
 	p.log.Info("Listing Azure Diagnostic Monitor Settings")
 
+	return p.diagnosticSettingsCache.GetValue(ctx, cycleMetadata, func(ctx context.Context) ([]AzureAsset, error) {
+		return p.getDiagnosticSettings(ctx, subscriptionIDs)
+	})
+}
+
+func (p *provider) getDiagnosticSettings(ctx context.Context, subscriptionIDs []string) ([]AzureAsset, error) {
 	var assets []AzureAsset
 
 	for _, subID := range subscriptionIDs {
@@ -163,6 +170,7 @@ func transformDiagnosticSettingsResource(v *armmonitor.DiagnosticSettingsResourc
 		return AzureAsset{}, err
 	}
 
+	// v.Properties.StorageAccountID
 	return AzureAsset{
 		Id:             strings.Dereference(v.ID),
 		Name:           strings.Dereference(v.Name),
