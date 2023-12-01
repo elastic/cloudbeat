@@ -22,6 +22,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/exp/maps"
@@ -98,6 +99,9 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch() {
 			},
 		}, nil,
 	).Once()
+	mockProvider.EXPECT().
+		ListDiagnosticSettingsAssetTypes(mock.Anything, cycle.Metadata{}, []string{"subId"}).
+		Return(nil, nil)
 
 	results, err := s.fetch(mockProvider, totalMockAssets)
 	s.Require().NoError(err)
@@ -142,7 +146,7 @@ func (s *AzureAssetsFetcherTestSuite) TestFetcher_Fetch_Errors() {
 	mockProvider := azurelib.NewMockProviderAPI(s.T())
 	mockProvider.EXPECT().
 		ListAllAssetTypesByName(mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("[]string")).
-		RunAndReturn(func(ctx context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
+		RunAndReturn(func(_ context.Context, assetGroup string, _ []string) ([]inventory.AzureAsset, error) {
 			if assetGroup == AzureAssetGroups[0] {
 				return []inventory.AzureAsset{asset}, nil
 			}
@@ -179,4 +183,65 @@ func (s *AzureAssetsFetcherTestSuite) fetch(provider *azurelib.MockProviderAPI, 
 	results := testhelper.CollectResources(s.resourceCh)
 	s.Require().Len(results, expectedLength)
 	return results, err
+}
+
+func TestAddUsedForActivityLogsFlag(t *testing.T) {
+	tests := map[string]struct {
+		inputAssets       []inventory.AzureAsset
+		inputDiagSettings []inventory.AzureAsset
+		expected          []inventory.AzureAsset
+	}{
+		"no storage account asset": {
+			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
+			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{}}},
+			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.DiskAssetType}},
+		},
+		"storage account asset not used for activity log": {
+			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType}},
+			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{}}},
+			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType}},
+		},
+		"storage account asset used for activity log": {
+			inputAssets:       []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType}},
+			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{"storageAccountId": "id_1"}}},
+			expected:          []inventory.AzureAsset{{Id: "id_1", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}}},
+		},
+		"multiple storage account asset, one used for activity log": {
+			inputAssets: []inventory.AzureAsset{
+				{Id: "id_1", Type: inventory.StorageAccountAssetType},
+				{Id: "id_2", Type: inventory.StorageAccountAssetType},
+				{Id: "id_3", Type: inventory.StorageAccountAssetType},
+			},
+			inputDiagSettings: []inventory.AzureAsset{{Properties: map[string]any{"storageAccountId": "id_2"}}},
+			expected: []inventory.AzureAsset{
+				{Id: "id_1", Type: inventory.StorageAccountAssetType},
+				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}},
+				{Id: "id_3", Type: inventory.StorageAccountAssetType},
+			},
+		},
+		"multiple storage account asset, two used for activity log": {
+			inputAssets: []inventory.AzureAsset{
+				{Id: "id_1", Type: inventory.StorageAccountAssetType},
+				{Id: "id_2", Type: inventory.StorageAccountAssetType},
+				{Id: "id_3", Type: inventory.StorageAccountAssetType},
+			},
+			inputDiagSettings: []inventory.AzureAsset{
+				{Properties: map[string]any{"storageAccountId": "id_2"}},
+				{Properties: map[string]any{"storageAccountId": "id_3"}},
+			},
+			expected: []inventory.AzureAsset{
+				{Id: "id_1", Type: inventory.StorageAccountAssetType},
+				{Id: "id_2", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}},
+				{Id: "id_3", Type: inventory.StorageAccountAssetType, Extension: map[string]any{"usedForActivityLogs": true}},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			addUsedForActivityLogsFlag(tc.inputAssets, tc.inputDiagSettings)
+			assert.Equal(t, tc.expected, tc.inputAssets)
+		})
+	}
 }

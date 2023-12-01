@@ -170,7 +170,6 @@ func transformDiagnosticSettingsResource(v *armmonitor.DiagnosticSettingsResourc
 		return AzureAsset{}, err
 	}
 
-	// v.Properties.StorageAccountID
 	return AzureAsset{
 		Id:             strings.Dereference(v.ID),
 		Name:           strings.Dereference(v.Name),

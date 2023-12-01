@@ -110,7 +110,7 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 	}
 
 	if err := f.enrichStorageAccountAssets(ctx, cycleMetadata, subscriptions, assets); err != nil {
-		errAgg = errors.Join(errAgg, fmt.Errorf("error while enriching assets"))
+		errAgg = errors.Join(errAgg, fmt.Errorf("error while enriching assets: %w", err))
 	}
 
 	for _, asset := range assets {
@@ -133,6 +133,12 @@ func (f *AzureAssetsFetcher) enrichStorageAccountAssets(ctx context.Context, cyc
 		return err
 	}
 
+	addUsedForActivityLogsFlag(assets, diagSettings)
+
+	return nil
+}
+
+func addUsedForActivityLogsFlag(assets []inventory.AzureAsset, diagSettings []inventory.AzureAsset) {
 	usedStorageAccountIDs := map[string]struct{}{}
 	for _, d := range diagSettings {
 		storageAccountID := strings.FromMap(d.Properties, "storageAccountId")
@@ -157,8 +163,6 @@ func (f *AzureAssetsFetcher) enrichStorageAccountAssets(ctx context.Context, cyc
 		a.Extension["usedForActivityLogs"] = true
 		assets[i] = a
 	}
-
-	return nil
 }
 
 func resourceFromAsset(asset inventory.AzureAsset, cycleMetadata cycle.Metadata, subscriptions map[string]governance.Subscription) fetching.ResourceInfo {
