@@ -128,39 +128,6 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
         working-directory: ./
 
-      # - name: Create Slack Payload
-      #   if: always()
-      #   id: prepare-data-debug
-      #   working-directory: ./
-      #   env:
-      #     WORKFLOW: "${{ github.workflow }}"
-      #     RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-      #     GITHUB_ACTOR: "${{ github.actor }}"
-      #     # DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}"
-      #     # ESS_REGION: "${{ inputs.ess-region }}"
-      #     # DOCKER_IMAGE: ${{ inputs.docker-image-override }}
-      #     ESS_TYPE: ${{ inputs.serverless_mode }}
-      #     JOB_STATUS: "${{ job.status }}"
-      #     KIBANA_URL: "https://localhost:9200" #TODO: Replace later
-      #     S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
-      #     ES_PASSWORD: "helloworld" #TODO: Replace later
-      #   run: |
-      #     echo "TF_STATE_FOLDER=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
-      #     python3 ./.ci/scripts/prepare_slack_data.py
-
-      # - name: Publish to Slack channel
-      #   if: always()
-      #   uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
-      #   with:
-      #     url: ${{ secrets.VAULT_ADDR }}
-      #     roleId: ${{ secrets.VAULT_ROLE_ID }}
-      #     secretId: ${{ secrets.VAULT_SECRET_ID }}
-      #     payload: ${{ steps.prepare-data-debug.outputs.payload }}
-      #     channel: "#csp-qa-alerts"
-
-      # - name: Fast fail
-      #   run: exit 1
-
       - name: Check Deployment Name
         run: |
           deployment_name="${{ inputs.deployment_name }}"
@@ -435,14 +402,9 @@ jobs:
           WORKFLOW: "${{ github.workflow }}"
           RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           GITHUB_ACTOR: "${{ github.actor }}"
-          # DEPLOYMENT_NAME: "${{ env.DEPLOYMENT_NAME }}"
-          # ESS_REGION: "${{ inputs.ess-region }}"
-          # DOCKER_IMAGE: ${{ inputs.docker-image-override }}
           ESS_TYPE: ${{ inputs.serverless_mode }}
           JOB_STATUS: "${{ job.status }}"
-          # KIBANA_URL: "https://localhost:9200" #TODO: Replace later
           S3_BUCKET: "${{ env.S3_BUCKET_URL }}?region=${{ env.AWS_REGION }}&prefix=${{ env.DEPLOYMENT_NAME }}_${{ env.TF_STATE_FOLDER }}/"
-          # ES_PASSWORD: "helloworld" #TODO: Replace later
         run: |
           python3 ./.ci/scripts/prepare_slack_data.py
 

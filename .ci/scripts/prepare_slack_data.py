@@ -7,10 +7,6 @@ constructs a Slack payload based on the workflow status.
 import os
 import json
 
-github_to_slack = {
-    "gurevichdmitry": "U030XM1N3BP",
-}
-
 
 def check_env_var(env_var: str) -> str:
     """
@@ -64,7 +60,7 @@ def color_by_job_status(status: str) -> str:
     if status == "success":
         return "#36a64f"
     if status == "failure":
-        return "#9c1729"
+        return "#D40E0D"
     return ""
 
 
@@ -91,7 +87,6 @@ def run():
         s3_bucket = check_env_var("S3_BUCKET")
         deployment_name = check_env_var("DEPLOYMENT_NAME")
         stack_version = check_env_var("STACK_VERSION")
-        es_password = check_env_var("ES_PASSWORD")
         docker_image = os.getenv("DOCKER_IMAGE_OVERRIDE", "N/A")
         if docker_image == "":
             docker_image = "N/A"
@@ -102,8 +97,8 @@ def run():
             ess_type = "Project"
 
         color = color_by_job_status(job_status)
-        slack_name = github_to_slack.get(github_actor, github_actor)
         message = f"*ESS Type:* `{ess_type}`\n*Stack Version: *`{stack_version}`\n*Docker Override:* `{docker_image}`"
+        docs_url = "https://github.com/elastic/cloudbeat/blob/main/dev-docs/Cloud-Env-Testing.md"
         slack_payload = {
             "attachments": [
                 {
@@ -113,7 +108,7 @@ def run():
                             "type": "section",
                             "text": {
                                 "type": "mrkdwn",
-                                "text": f"{workflow} job `{deployment_name}` triggered by <@{slack_name}>",
+                                "text": f"{workflow} job `{deployment_name}` triggered by `{github_actor}`",
                             },
                         },
                         {
@@ -126,23 +121,6 @@ def run():
                                 "text": message,
                             },
                         },
-                        # {
-                        #     "type": "section",
-                        #     "fields": [
-                        #         {
-                        #             "type": "mrkdwn",
-                        #             "text": f"*ESS Type:*\n`{ess_type}`",
-                        #         },
-                        #         {
-                        #             "type": "mrkdwn",
-                        #             "text": f"*Stack Version:*\n`{stack_version}`",
-                        #         },
-                        #         {
-                        #             "type": "mrkdwn",
-                        #             "text": f"*Docker Override:*\n`{docker_image}`",
-                        #         },
-                        #     ],
-                        # },
                         {
                             "type": "divider",
                         },
@@ -179,17 +157,17 @@ def run():
                                     "url": f"{github_run_url}",
                                     "action_id": "action-run-button",
                                 },
+                                {
+                                    "type": "button",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "docs",
+                                    },
+                                    "style": "primary",
+                                    "url": docs_url,
+                                    "action_id": "docs-button",
+                                },
                             ],
-                        },
-                        {
-                            "type": "divider",
-                        },
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": f"*Kibana password:* `{es_password}`",
-                            },
                         },
                     ],
                 },
