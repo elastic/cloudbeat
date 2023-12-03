@@ -154,6 +154,62 @@ func (_c *MockProviderAPI_ListAllAssetTypesByName_Call) RunAndReturn(run func(co
 	return _c
 }
 
+// ListDiagnosticSettingsAssetTypes provides a mock function with given fields: ctx, cycleMetadata, subscriptionIDs
+func (_m *MockProviderAPI) ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]inventory.AzureAsset, error) {
+	ret := _m.Called(ctx, cycleMetadata, subscriptionIDs)
+
+	var r0 []inventory.AzureAsset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, cycle.Metadata, []string) ([]inventory.AzureAsset, error)); ok {
+		return rf(ctx, cycleMetadata, subscriptionIDs)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, cycle.Metadata, []string) []inventory.AzureAsset); ok {
+		r0 = rf(ctx, cycleMetadata, subscriptionIDs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]inventory.AzureAsset)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, cycle.Metadata, []string) error); ok {
+		r1 = rf(ctx, cycleMetadata, subscriptionIDs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListDiagnosticSettingsAssetTypes'
+type MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call struct {
+	*mock.Call
+}
+
+// ListDiagnosticSettingsAssetTypes is a helper method to define mock.On call
+//   - ctx context.Context
+//   - cycleMetadata cycle.Metadata
+//   - subscriptionIDs []string
+func (_e *MockProviderAPI_Expecter) ListDiagnosticSettingsAssetTypes(ctx interface{}, cycleMetadata interface{}, subscriptionIDs interface{}) *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call {
+	return &MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call{Call: _e.mock.On("ListDiagnosticSettingsAssetTypes", ctx, cycleMetadata, subscriptionIDs)}
+}
+
+func (_c *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call) Run(run func(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string)) *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(cycle.Metadata), args[2].([]string))
+	})
+	return _c
+}
+
+func (_c *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call) Return(_a0 []inventory.AzureAsset, _a1 error) *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call) RunAndReturn(run func(context.Context, cycle.Metadata, []string) ([]inventory.AzureAsset, error)) *MockProviderAPI_ListDiagnosticSettingsAssetTypes_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewMockProviderAPI creates a new instance of MockProviderAPI. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewMockProviderAPI(t interface {

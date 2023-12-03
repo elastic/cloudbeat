@@ -322,4 +322,4 @@ def extract_arm_template_url(url_string: str) -> str:
 
     """
     parsed_url = urlparse(url_string, allow_fragments=False)
-    return unquote(parsed_url.path.split("/")[-1])
+    return unquote(parsed_url.path.split("/")[-1]).replace("ACCOUNT_TYPE", "single-account")

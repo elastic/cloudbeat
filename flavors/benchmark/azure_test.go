@@ -64,6 +64,7 @@ func TestAzure_Initialize(t *testing.T) {
 			want: []string{
 				"azure_cloud_assets_fetcher",
 				"azure_cloud_batch_asset_fetcher",
+				"azure_cloud_insights_batch_asset_fetcher",
 			},
 		},
 		{
