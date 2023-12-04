@@ -10,11 +10,11 @@ finding = result if {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(is_tls_version("1.2")),
+		common.calculate_result(is_latest_tls_version("1.2")),
 		data_adapter.resource,
 	)
 }
 
-is_tls_version(version) if {
-	data_adapter.site_config.minTlsVersion == version
+is_latest_tls_version(version) if {
+	data_adapter.site_config.minTlsVersion >= version
 } else = false
