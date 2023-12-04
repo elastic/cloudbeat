@@ -9,15 +9,15 @@ finding = result {
 
 	# set result
 	result := common.generate_result_without_expected(
-		common.calculate_result(is_ftp_disabled),
+		common.calculate_result(is_ftps_disabled),
 		data_adapter.resource,
 	)
 }
 
-is_ftp_disabled {
-	is_ftp_enabled != true
+is_ftps_disabled {
+	is_ftps_enabled != true
 } else = false
 
-is_ftp_enabled {
+is_ftps_enabled {
 	data_adapter.site_config.ftpsState == "AllAllowed"
 } else = false
