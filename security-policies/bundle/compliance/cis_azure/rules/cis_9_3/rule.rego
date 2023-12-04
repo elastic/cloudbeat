@@ -17,8 +17,3 @@ finding = result {
 is_tls_version(version) {
 	data_adapter.site_config.minTlsVersion == version
 } else = false
-
-is_tls_configured(version) = r {
-	data_adapter.site_config.minTlsVersion
-	r = is_tls_version(version)
-}
