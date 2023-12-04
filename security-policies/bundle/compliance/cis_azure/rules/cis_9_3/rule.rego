@@ -2,8 +2,9 @@ package compliance.cis_azure.rules.cis_9_3
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
+import future.keywords.if
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_website_asset
 
@@ -14,6 +15,6 @@ finding = result {
 	)
 }
 
-is_tls_version(version) {
+is_tls_version(version) if {
 	data_adapter.site_config.minTlsVersion == version
 } else = false

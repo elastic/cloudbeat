@@ -2,10 +2,11 @@ package compliance.cis_azure.rules.cis_9_5
 
 import data.compliance.lib.common
 import data.compliance.policy.azure.data_adapter
+import future.keywords.if
 
 default rule_evaluation = false
 
-finding = result {
+finding = result if {
 	# filter
 	data_adapter.is_website_asset
 
@@ -16,10 +17,10 @@ finding = result {
 	)
 }
 
-rule_evaluation {
+rule_evaluation if {
 	data_adapter.site_config.xManagedServiceIdentityId
 }
 
-rule_evaluation {
+rule_evaluation if {
 	data_adapter.site_config.managedServiceIdentityId
 }
