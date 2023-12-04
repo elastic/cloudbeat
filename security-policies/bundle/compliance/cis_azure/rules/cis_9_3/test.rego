@@ -29,6 +29,10 @@ test_pass if {
 		"azure-web-site",
 		{"siteConfig": {"minTlsVersion": "1.2"}},
 	)
+	eval_pass with input as test_data.generate_azure_asset(
+		"azure-web-site",
+		{"siteConfig": {"minTlsVersion": "1.3"}},
+	)
 }
 
 test_not_evaluated if {
