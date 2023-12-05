@@ -1,0 +1,59 @@
+name: Update Integration
+
+on:
+  create:
+    branches:
+      # whenever a new release branch is created, this workflow will be triggered
+      - "[0-9].[0-9]+"
+
+jobs:
+  extract-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Cloudbeat repo
+        uses: actions/checkout@v4
+
+      - name: Extract version from file
+        id: extract_version
+        run: |
+          version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
+          echo "::set-output name=version::$version"
+
+  modify-integration:
+    needs: extract-version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Integrations repo
+        uses: actions/checkout@v4
+        with:
+          # get ELASTIC_MACHINE_USER_PAT from somewhere
+          token: ${{ secrets.ELASTIC_MACHINE_USER_PAT }}
+          repository: elastic/integrations
+          ref: main
+
+      - name: Update URLs
+        run: |
+          manifest_file_path="packages/cloud_security_posture/manifest.yml"
+          new_version="${{ needs.extract-version.outputs.version }}"
+
+          # example: 8.12
+          new_cloudshell_git_branch=$(echo $new_version | cut -d '.' -f1,2) 
+
+          # example: 8.12.0
+          new_cloud_formation_template=$new_version
+
+          # update cloudshell_git_branch
+          sed -i '' -E "s/cloudshell_git_branch=[0-9]+\.[0-9]+/cloudshell_git_branch=$new_cloudshell_git_branch/g" $manifest_file_path
+
+          # update cloud_formation_template
+          sed -i '' -E "s/cloud_formation_template=[0-9]+\.[0-9]+/cloud_formation_template=$new_cloud_formation_template/g" $manifest_file_path
+
+      - uses: peter-evans/create-pull-request@v5
+        with:
+          # get ELASTIC_MACHINE_USER_PAT from somewhere
+          token: ${{ secrets.ELASTIC_MACHINE_USER_PAT }}
+          commit-message: Update manifest
+          committer: "Elastic Machine <elasticmachine@users.noreply.github.com>"
+          author: "Elastic Machine <elasticmachine@users.noreply.github.com>"
