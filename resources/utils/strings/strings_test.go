@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDereference(t *testing.T) {
@@ -91,6 +92,60 @@ func TestFirstNonEmpty(t *testing.T) {
 			if got := FirstNonEmpty(tt.args...); got != tt.want {
 				t.Errorf("FirstNonEmpty() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestFromMap(t *testing.T) {
+	tests := []struct {
+		name string
+		data map[string]any
+		key  string
+		want string
+	}{
+		{
+			name: "everything empty",
+		},
+		{
+			name: "nil",
+			data: nil,
+			key:  "key",
+			want: "",
+		},
+		{
+			name: "empty map",
+			data: make(map[string]any),
+			key:  "key",
+			want: "",
+		},
+		{
+			name: "wrong key",
+			data: map[string]any{"a": "b"},
+			key:  "key",
+			want: "",
+		},
+		{
+			name: "nil value",
+			data: map[string]any{"key": nil},
+			key:  "key",
+			want: "",
+		},
+		{
+			name: "wrong type",
+			data: map[string]any{"key": map[any]any{"other": "map"}},
+			key:  "key",
+			want: "",
+		},
+		{
+			name: "success",
+			data: map[string]any{"key": "value"},
+			key:  "key",
+			want: "value",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, FromMap(tt.data, tt.key))
 		})
 	}
 }
