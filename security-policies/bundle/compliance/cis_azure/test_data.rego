@@ -50,6 +50,11 @@ generate_storage_account_with_property(key, value) = {
 	"resource": {"properties": {key: value}},
 }
 
+generate_storage_account_with_extensions(properties, extension) = {
+	"subType": "azure-storage-account",
+	"resource": {"properties": properties, "extension": extension},
+}
+
 generate_azure_asset(type, properties) = {
 	"subType": type,
 	"resource": {"properties": properties},
