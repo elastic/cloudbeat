@@ -49,6 +49,8 @@ private_endpoint_connections = properties.privateEndpointConnections
 
 network_acls = properties.networkAcls
 
+site_config = properties.siteConfig
+
 activity_log_alerts = resource
 
 diagnostic_settings = resource
