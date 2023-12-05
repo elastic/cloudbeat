@@ -3,14 +3,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "Location": {
-            "type": "string",
-            "minLength": 6,
-            "metadata": {
-                "description": "The location to deploy the resource group with the virtual machine on"
-            },
-            "defaultValue": "[resourceGroup().location]"
-        },
         "ElasticArtifactServer": {
             "type": "string",
             "defaultValue": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
