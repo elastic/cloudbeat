@@ -34,15 +34,6 @@ func Dereference(s *string) string {
 }
 
 func FromMap(data map[string]any, key string) string {
-	if len(data) == 0 {
-		return ""
-	}
-
-	val, found := data[key]
-	if !found || val == nil {
-		return ""
-	}
-
-	value, _ := val.(string)
+	value, _ := data[key].(string)
 	return value
 }
