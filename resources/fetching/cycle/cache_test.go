@@ -44,7 +44,7 @@ func (h *helper) cb(_ context.Context) (int, error) {
 
 func TestCache(t *testing.T) {
 	h := helper{}
-	cache := NewCache(testhelper.NewLogger(t), h.cb)
+	cache := NewCache[int](testhelper.NewLogger(t))
 
 	tests := []struct {
 		name string
@@ -134,7 +134,7 @@ func TestCache(t *testing.T) {
 				h.err = nil
 			}
 			h.called.Store(0)
-			got, err := cache.GetValue(context.Background(), Metadata{Sequence: tt.sequence})
+			got, err := cache.GetValue(context.Background(), Metadata{Sequence: tt.sequence}, h.cb)
 			if tt.wantErr {
 				require.ErrorContains(t, err, "some error")
 			} else {
@@ -154,7 +154,7 @@ func TestCache_Lock(t *testing.T) {
 	ctx := context.Background()
 	count := 0
 	ch := make(chan struct{})
-	cache := NewCache(testhelper.NewLogger(t), func(_ context.Context) (int, error) {
+	fetch := func(_ context.Context) (int, error) {
 		count++
 		if count == 1 {
 			close(ch)
@@ -162,7 +162,8 @@ func TestCache_Lock(t *testing.T) {
 			return 1, nil
 		}
 		return -1, errors.New("some error")
-	})
+	}
+	cache := NewCache[int](testhelper.NewLogger(t))
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -170,13 +171,13 @@ func TestCache_Lock(t *testing.T) {
 	go func() {
 		defer wg.Done()
 
-		got, err := cache.GetValue(ctx, Metadata{Sequence: 1})
+		got, err := cache.GetValue(ctx, Metadata{Sequence: 1}, fetch)
 		require.NoError(t, err)
 		assert.Equal(t, 1, got)
 	}()
 
 	<-ch // wait until callback is blocked
-	got, err := cache.GetValue(ctx, Metadata{Sequence: 1})
+	got, err := cache.GetValue(ctx, Metadata{Sequence: 1}, fetch)
 	require.NoError(t, err)
 	assert.Equal(t, 1, got)
 	assert.Equal(t, 1, count)

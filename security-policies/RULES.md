@@ -370,9 +370,9 @@
 
 ## AZURE CIS Benchmark
 
-### 39/151 implemented rules (26%)
+### 40/151 implemented rules (26%)
 
-#### Automated rules: 39/77 (51%)
+#### Automated rules: 40/77 (52%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -478,7 +478,7 @@
 |                         4.5.3                          | Cosmos DB                               | Use Azure Active Directory (AAD) Client Authentication and Azure RBAC where possible.                                                                  |        :x:         |  Manual   |
 |                         5.1.1                          | Configuring Diagnostic Settings         | Ensure that a 'Diagnostic Setting' exists                                                                                                              |        :x:         |  Manual   |
 |  [5.1.2](bundle/compliance/cis_azure/rules/cis_5_1_2)  | Configuring Diagnostic Settings         | Ensure Diagnostic Setting captures appropriate categories                                                                                              | :white_check_mark: | Automated |
-|                         5.1.3                          | Configuring Diagnostic Settings         | Ensure the Storage Container Storing the Activity Logs is not Publicly Accessible                                                                      |        :x:         | Automated |
+|  [5.1.3](bundle/compliance/cis_azure/rules/cis_5_1_3)  | Configuring Diagnostic Settings         | Ensure the Storage Container Storing the Activity Logs is not Publicly Accessible                                                                      | :white_check_mark: | Automated |
 |                         5.1.4                          | Configuring Diagnostic Settings         | Ensure the storage account containing the container with activity logs is encrypted with Customer Managed Key                                          |        :x:         | Automated |
 |                         5.1.5                          | Configuring Diagnostic Settings         | Ensure that logging for Azure Key Vault is 'Enabled'                                                                                                   |        :x:         | Automated |
 |                         5.1.6                          | Configuring Diagnostic Settings         | Ensure that Network Security Group Flow logs are captured and sent to Log Analytics                                                                    |        :x:         |  Manual   |

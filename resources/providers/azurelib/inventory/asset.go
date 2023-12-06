@@ -55,6 +55,7 @@ type AzureAsset struct {
 	DisplayName    string         `json:"display_name,omitempty"`
 	Location       string         `json:"location,omitempty"`
 	Properties     map[string]any `json:"properties,omitempty"`
+	Extension      map[string]any `json:"extension,omitempty"`
 	ResourceGroup  string         `json:"resource_group,omitempty"`
 	SubscriptionId string         `json:"subscription_id,omitempty"`
 	TenantId       string         `json:"tenant_id,omitempty"`

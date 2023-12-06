@@ -541,6 +541,7 @@ func TestListDiagnosticSettingsAssetTypes(t *testing.T) {
 						return response, nil
 					},
 				},
+				diagnosticSettingsCache: cycle.NewCache[[]AzureAsset](log),
 			}
 
 			got, err := provider.ListDiagnosticSettingsAssetTypes(context.Background(), cycle.Metadata{}, lo.Keys[string](tc.subscriptions))
