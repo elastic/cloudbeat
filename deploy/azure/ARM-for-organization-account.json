@@ -50,6 +50,9 @@
             }
         }
     },
+    "variables": {
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', deployment().location)]"
+    },
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
@@ -95,7 +98,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
-            "name": "role-assignment-deployment",
+            "name": "[variables('roleAssignmentDeployment')]",
             "location": "[deployment().location]",
             "properties": {
                 "expressionEvaluationOptions": {
@@ -353,7 +356,7 @@
             },
             "dependsOn": [
                 "cloudbeat-vm-deployment",
-                "role-assignment-deployment"
+                "[variables('roleAssignmentDeployment')]"
             ]
         }
     ]
