@@ -1,10 +1,13 @@
 name: Update Integration
 
 on:
-  create:
+  push:
     branches:
-      # whenever a new release branch is created, this workflow will be triggered
-      - "[0-9].[0-9]+"
+      - main
+#   create:
+#     branches:
+#       # whenever a new release branch is created, this workflow will be triggered
+#       - "[0-9].[0-9]+"
 
 jobs:
   extract-version:
@@ -19,6 +22,7 @@ jobs:
         run: |
           version=$(grep defaultBeatVersion version/version.go | cut -f2 -d "\"")
           echo "::set-output name=version::$version"
+          echo "Version is $version"
 
   modify-integration:
     needs: extract-version
@@ -29,8 +33,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           # get ELASTIC_MACHINE_USER_PAT from somewhere
-          token: ${{ secrets.ELASTIC_MACHINE_USER_PAT }}
-          repository: elastic/integrations
+          #   token: ${{ secrets.ELASTIC_MACHINE_USER_PAT }}
+          #   repository: elastic/integrations
+          repository: orouz/integrations
           ref: main
 
       - name: Update URLs
@@ -40,9 +45,11 @@ jobs:
 
           # example: 8.12
           new_cloudshell_git_branch=$(echo $new_version | cut -d '.' -f1,2) 
+          echo "new_cloudshell_git_branch is $new_cloudshell_git_branch"
 
           # example: 8.12.0
           new_cloud_formation_template=$new_version
+          echo "new_cloud_formation_template is $new_cloud_formation_template"
 
           # update cloudshell_git_branch
           sed -i '' -E "s/cloudshell_git_branch=[0-9]+\.[0-9]+/cloudshell_git_branch=$new_cloudshell_git_branch/g" $manifest_file_path
@@ -50,10 +57,14 @@ jobs:
           # update cloud_formation_template
           sed -i '' -E "s/cloud_formation_template=[0-9]+\.[0-9]+/cloud_formation_template=$new_cloud_formation_template/g" $manifest_file_path
 
-      - uses: peter-evans/create-pull-request@v5
-        with:
-          # get ELASTIC_MACHINE_USER_PAT from somewhere
-          token: ${{ secrets.ELASTIC_MACHINE_USER_PAT }}
-          commit-message: Update manifest
-          committer: "Elastic Machine <elasticmachine@users.noreply.github.com>"
-          author: "Elastic Machine <elasticmachine@users.noreply.github.com>"
+      - name: Create Pull Request
+        run: |
+          gh pr create --base main --head "main" --title "[Cloud Security] Update manifest" --body "Your pull request description here" --author "Elastic Machine <elasticmachine@users.noreply.github.com>"
+
+    #   - uses: peter-evans/create-pull-request@v5
+    #     with:
+    #       # get ELASTIC_MACHINE_USER_PAT from somewhere
+    #       token: ${{ secrets.ELASTIC_MACHINE_USER_PAT }}
+    #       commit-message: Update manifest
+    #       committer: "Elastic Machine <elasticmachine@users.noreply.github.com>"
+    #       author: "Elastic Machine <elasticmachine@users.noreply.github.com>"
