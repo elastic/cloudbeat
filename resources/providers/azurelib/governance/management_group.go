@@ -55,7 +55,7 @@ type ProviderAPI interface {
 }
 
 type provider struct {
-	cache  cycle.Cache[map[string]Subscription]
+	cache  *cycle.Cache[map[string]Subscription]
 	client inventory.ProviderAPI
 }
 
@@ -63,12 +63,12 @@ func NewProvider(log *logp.Logger, client inventory.ProviderAPI) ProviderAPI {
 	p := provider{
 		client: client,
 	}
-	p.cache = cycle.NewCache(log.Named("governance"), p.scan)
+	p.cache = cycle.NewCache[map[string]Subscription](log.Named("governance"))
 	return &p
 }
 
 func (p *provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]Subscription, error) {
-	return p.cache.GetValue(ctx, cycleMetadata)
+	return p.cache.GetValue(ctx, cycleMetadata, p.scan)
 }
 
 func (p *provider) scan(ctx context.Context) (map[string]Subscription, error) {
