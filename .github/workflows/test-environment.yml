@@ -311,7 +311,7 @@ jobs:
         id: cspm-azure-agent
         working-directory: deploy/azure
         run: |
-          az deployment sub create --location EastUS --template-file azureARMTemplate.json --parameters @arm_parameters.json
+          az deployment sub create --location EastUS --template-file ARM-for-single-account.json --parameters @arm_parameters.json
 
       - name: Install D4C integration
         id: kspm-d4c
