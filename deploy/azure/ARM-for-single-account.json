@@ -1,4 +1,3 @@
-
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
@@ -30,11 +29,14 @@
             }
         }
     },
+    "variables": {
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().location)]"
+    },
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
-            "name": "role-assignment-deployment",
+            "name": "[variables('roleAssignmentDeployment')]",
             "location": "[resourceGroup().location]",
             "subscriptionId": "[subscription().subscriptionId]",
             "properties": {
@@ -279,7 +281,7 @@
             },
             "dependsOn": [
                 "cloudbeat-vm-deployment",
-                "role-assignment-deployment"
+                "[variables('roleAssignmentDeployment')]"
             ]
         }
     ]
