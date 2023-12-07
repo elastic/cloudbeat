@@ -122,6 +122,19 @@ func TestDataProvider_EnrichEvent(t *testing.T) {
 				cloudAccountNameField: gcpProjectName,
 			},
 		},
+		{
+			name: "missing fields",
+			resMetadata: fetching.ResourceMetadata{
+				Region: someRegion,
+			},
+			identity: Identity{
+				Provider: awsProvider,
+			},
+			expectedFields: map[string]string{
+				cloudProviderField:  awsProvider,
+				cloudAccountIdField: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
