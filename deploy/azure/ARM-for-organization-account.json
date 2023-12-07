@@ -15,14 +15,6 @@
                 "description": "The id of the subscription where the virtual machine with the Elastic Agent is running on"
             }
         },
-        "Location": {
-            "type": "string",
-            "minLength": 6,
-            "metadata": {
-                "description": "The location to deploy the resource group with the virtual machine on"
-            },
-            "defaultValue": "[deployment().location]"
-        },
         "ElasticArtifactServer": {
             "type": "string",
             "defaultValue": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
@@ -71,7 +63,7 @@
                         "value": "[parameters('ResourceGroupName')]"
                     },
                     "Location": {
-                        "value": "[parameters('Location')]"
+                        "value": "[deployment().location]"
                     }
                 },
                 "template": {
