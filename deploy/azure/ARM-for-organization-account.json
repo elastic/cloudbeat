@@ -51,13 +51,14 @@
         }
     },
     "variables": {
+        "resourceGroupDeployment": "[concat('resource-group-deployment-', deployment().location)]",
         "roleAssignmentDeployment": "[concat('role-assignment-deployment-', deployment().location)]"
     },
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
-            "name": "resource-group-deployment",
+            "name": "[variables('resourceGroupDeployment')]",
             "location": "[deployment().location]",
             "subscriptionId": "[parameters('SubscriptionId')]",
             "properties": {
@@ -139,7 +140,7 @@
                 }
             },
             "dependsOn": [
-                "resource-group-deployment",
+                "[variables('resourceGroupDeployment')]",
                 "cloudbeat-vm-deployment"
             ]
         },
@@ -288,7 +289,7 @@
                 }
             },
             "dependsOn": [
-                "resource-group-deployment"
+                "[variables('resourceGroupDeployment')]"
             ]
         },
         {
