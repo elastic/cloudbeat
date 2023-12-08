@@ -73,6 +73,7 @@ var AzureAssetTypeToTypePair = map[string]typePair{
 	inventory.WebsitesAssetType:                  newPair(fetching.AzureWebSiteType, fetching.CloudCompute),
 	inventory.VaultAssetType:                     newPair(fetching.AzureVaultType, fetching.KeyManagement),
 	inventory.RoleDefinitionsType:                newPair(fetching.AzureRoleDefinitionType, fetching.CloudIdentity),
+	inventory.NetworkSecurityGroup:               newPair(fetching.AzureNetworkSecurityGroupType, fetching.MonitoringIdentity),
 }
 
 // In order to simplify the mappings, we are trying to query all AzureAssetTypeToTypePair on every asset group
@@ -114,6 +115,8 @@ func (f *AzureAssetsFetcher) Fetch(ctx context.Context, cycleMetadata cycle.Meta
 			errAgg = errors.Join(errAgg, fmt.Errorf("error while enriching assets: %w", err))
 		}
 	}
+
+	enrichVirtualMachinesWithNetworkSecurityGroups(assets)
 
 	for _, asset := range assets {
 		select {

@@ -73,6 +73,7 @@ const (
 	AzureMySQLDBType                   = "azure-mysql-server-db"
 	AzureNetworkWatchersFlowLogType    = "azure-network-watchers-flow-log"
 	AzureNetworkWatchersType           = "azure-network-watcher"
+	AzureNetworkSecurityGroupType      = "azure-network-group"
 	AzurePostgreSQLDBType              = "azure-postgresql-server-db"
 	AzureSQLServerType                 = "azure-sql-server"
 	AzureStorageAccountType            = "azure-storage-account"
