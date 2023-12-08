@@ -106,6 +106,12 @@ repos:
         language: system
         files: (go.mod|go.sum)
         pass_filenames: false
+      - id: generate-arm-dev-templates
+        name: Generate ARM dev templates
+        entry: bash -c 'deploy/azure/generate_dev_template.py --template-type single-account && deploy/azure/generate_dev_template.py --template-type organization-account'
+        language: python
+        files: deploy/azure/.*
+        pass_filenames: false
 
   - repo: local
     hooks:
