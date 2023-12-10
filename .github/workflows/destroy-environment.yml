@@ -74,16 +74,16 @@ jobs:
 
       - name: Publish to Slack channel
         if: always()
-        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        working-directory: ./
+        uses: ./.github/actions/slack-notification
         env:
           RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           JOB_STATUS_COLOR: "${{ job.status == 'success' && '#36a64f' || '#D40E0D' }}"
         with:
-          url: ${{ secrets.VAULT_ADDR }}
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-          channel: "#csp-qa-alerts"
-          payload: |
+          vault-url: ${{ secrets.VAULT_ADDR }}
+          vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
+          vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
+          slack-payload: |
             {
               "attachments": [
                 {

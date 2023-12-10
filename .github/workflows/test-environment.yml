@@ -410,10 +410,10 @@ jobs:
 
       - name: Publish to Slack channel
         if: always()
-        uses: elastic/apm-pipeline-library/.github/actions/slack-message@current
+        working-directory: ./
+        uses: ./.github/actions/slack-notification
         with:
-          url: ${{ secrets.VAULT_ADDR }}
-          roleId: ${{ secrets.VAULT_ROLE_ID }}
-          secretId: ${{ secrets.VAULT_SECRET_ID }}
-          payload: ${{ steps.prepare-data.outputs.payload }}
-          channel: "#csp-qa-alerts"
+          vault-url: ${{ secrets.VAULT_ADDR }}
+          vault-role-id: ${{ secrets.CSP_VAULT_ROLE_ID }}
+          vault-secret-id: ${{ secrets.CSP_VAULT_SECRET_ID }}
+          slack-payload: ${{ steps.prepare-data.outputs.payload }}
