@@ -62,13 +62,19 @@ func NewDataProvider(options ...Option) DataProvider {
 
 func (a DataProvider) EnrichEvent(event *beat.Event, resMetadata fetching.ResourceMetadata) error {
 	return errors.Join(
-		insertIfNotEmpty(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AccountId, a.accountId), event),
+		// always insert cloud.account.id as missing fields can crash the dashboard
+		insert(cloudAccountIdField, strings.FirstNonEmpty(resMetadata.AccountId, a.accountId), event),
 		insertIfNotEmpty(cloudAccountNameField, strings.FirstNonEmpty(resMetadata.AccountName, a.accountName), event),
 		insertIfNotEmpty(cloudProviderField, a.providerName, event),
 		insertIfNotEmpty(cloudRegionField, resMetadata.Region, event),
 		insertIfNotEmpty(cloudOrganizationIdField, resMetadata.OrganisationId, event),
 		insertIfNotEmpty(cloudOrganizationNameField, resMetadata.OrganizationName, event),
 	)
+}
+
+func insert(field string, value string, event *beat.Event) error {
+	_, err := event.Fields.Put(field, value)
+	return err
 }
 
 func insertIfNotEmpty(field string, value string, event *beat.Event) error {

@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/asset v1.15.2
 	cloud.google.com/go/iam v1.1.4
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.4.0
-	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.10.2
+	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.11.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph v0.9.0
 	github.com/aquasecurity/go-dep-parser v0.0.0-20231013060839-6f348921ea39
 	github.com/aquasecurity/trivy v0.46.1
@@ -38,11 +38,11 @@ require (
 	github.com/aws/smithy-go v1.15.0
 	github.com/dgraph-io/ristretto v0.1.1
 	github.com/djherbis/times v1.6.0
-	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231127093858-296183ca0d11
+	github.com/elastic/beats/v7 v7.0.0-alpha2.0.20231204124921-be42a3369f94
 	github.com/elastic/e2e-testing v1.99.2-0.20231005090720-556e60d449dc
 	github.com/elastic/elastic-agent-autodiscover v0.6.4
-	github.com/elastic/elastic-agent-client/v7 v7.4.0
-	github.com/elastic/elastic-agent-libs v0.6.2
+	github.com/elastic/elastic-agent-client/v7 v7.5.0
+	github.com/elastic/elastic-agent-libs v0.7.2
 	github.com/elastic/go-licenser v0.4.1
 	github.com/elastic/go-ucfg v0.8.6
 	github.com/go-git/go-git/v5 v5.10.0
@@ -81,7 +81,6 @@ require (
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
-	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources v1.1.1 // indirect
 	github.com/bitfield/gotestdox v0.2.1 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
@@ -214,7 +213,7 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/elastic/elastic-agent-shipper-client v0.5.1-0.20230228231646-f04347b666f3 // indirect
-	github.com/elastic/elastic-agent-system-metrics v0.8.2 // indirect
+	github.com/elastic/elastic-agent-system-metrics v0.9.0 // indirect
 	github.com/elastic/go-concert v0.2.0 // indirect
 	github.com/elastic/go-lumber v0.1.2-0.20220819171948-335fde24ea0f // indirect
 	github.com/elastic/go-seccomp-bpf v1.3.0 // indirect
@@ -437,7 +436,7 @@ require (
 	go.elastic.co/apm v1.13.0 // indirect
 	go.elastic.co/apm/module/apmelasticsearch/v2 v2.4.4 // indirect
 	go.elastic.co/apm/module/apmhttp/v2 v2.4.5 // indirect
-	go.elastic.co/apm/v2 v2.4.5 // indirect
+	go.elastic.co/apm/v2 v2.4.7 // indirect
 	go.elastic.co/ecszap v1.0.2 // indirect
 	go.elastic.co/fastjson v1.3.0 // indirect
 	go.etcd.io/bbolt v1.3.7 // indirect
