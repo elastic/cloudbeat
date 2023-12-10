@@ -10,6 +10,7 @@ import pytest
 from commonlib.utils import get_findings
 from configuration import elasticsearch
 from loguru import logger
+from agent_param import AgentComponentHelper
 
 CONFIG_TIMEOUT = 120
 GCP_CONFIG_TIMEOUT = 600
@@ -53,7 +54,7 @@ tests_data = {
 }
 
 
-def build_query_list(benchmark_id: str = "", match_type: str = "", version: str = "") -> list:
+def build_query_list(benchmark_id: str = "", match_type: str = "", version: str = "", agent: str = "") -> list:
     """
     Build a list of terms for Elasticsearch query based on the provided parameters.
 
@@ -74,6 +75,9 @@ def build_query_list(benchmark_id: str = "", match_type: str = "", version: str 
 
     if version:
         query_list.append({"term": {"agent.version": version}})
+
+    if agent:
+        query_list.append({"term": {"agent.id": agent}})
 
     return query_list
 
@@ -132,8 +136,9 @@ def test_kspm_e_k_s_findings(kspm_client, match_type):
 
 
 @pytest.mark.sanity
+@pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_aws"])
-def test_cspm_findings(cspm_client, match_type):
+def test_cspm_aws_findings(cspm_client, match_type, cis_aws_agent):
     """
     Test case to check for AWS findings in CSPM.
 
@@ -151,6 +156,7 @@ def test_cspm_findings(cspm_client, match_type):
         benchmark_id="cis_aws",
         match_type=match_type,
         version=STACK_VERSION,
+        agent=cis_aws_agent,
     )
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
@@ -181,8 +187,9 @@ def test_cnvm_findings(cnvm_client, match_type):
 
 
 @pytest.mark.sanity
+@pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_gcp"])
-def test_cspm_gcp_findings(cspm_client, match_type):
+def test_cspm_gcp_findings(cspm_client, match_type, cis_gcp_agent):
     """
     Test case to check for GCP findings in CSPM.
 
@@ -200,6 +207,7 @@ def test_cspm_gcp_findings(cspm_client, match_type):
         benchmark_id="cis_gcp",
         match_type=match_type,
         version=STACK_VERSION,
+        agent=cis_gcp_agent,
     )
     query, sort = cspm_client.build_es_must_match_query(must_query_list=query_list, time_range="now-24h")
 
@@ -208,8 +216,9 @@ def test_cspm_gcp_findings(cspm_client, match_type):
 
 
 @pytest.mark.sanity
+@pytest.mark.agentless
 @pytest.mark.parametrize("match_type", tests_data["cis_azure"])
-def test_cspm_azure_findings(cspm_client, match_type):
+def test_cspm_azure_findings(cspm_client, match_type, cis_azure_agent):
     """
     Test case to check for Azure findings in CSPM.
 
@@ -223,7 +232,11 @@ def test_cspm_azure_findings(cspm_client, match_type):
     Raises:
         AssertionError: If the resource type is missing.
     """
-    query_list = build_query_list(benchmark_id="cis_azure", version=STACK_VERSION)
+    query_list = build_query_list(
+        benchmark_id="cis_azure",
+        version=STACK_VERSION,
+        agent=cis_azure_agent,
+    )
     query, sort = cspm_client.build_es_must_match_query(
         must_query_list=query_list,
         time_range="now-24h",
@@ -231,3 +244,23 @@ def test_cspm_azure_findings(cspm_client, match_type):
 
     results = get_findings(cspm_client, CONFIG_TIMEOUT, query, sort, match_type)
     assert len(results) > 0, f"The resource type '{match_type}' is missing"
+
+
+@pytest.mark.sanity
+@pytest.mark.agentless
+def test_agent_components_mapping():
+    """
+    Test case to check that the expected number of agents are running each component.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the expected number of agents are not running each component.
+    """
+    helper = AgentComponentHelper()
+    helper.load_map()
+    helper.assert_agents()
