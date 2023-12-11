@@ -66,6 +66,7 @@ const (
 	AzureBastionType                   = "azure-bastion"
 	AzureClassicStorageAccountType     = "azure-classic-storage-account"
 	AzureClassicVMType                 = "azure-classic-vm"
+	AzureDiagnosticSettingsType        = "azure-diagnostic-settings"
 	AzureDiskType                      = "azure-disk"
 	AzureDocumentDBDatabaseAccountType = "azure-document-db-database-account"
 	AzureInsightsComponentType         = "azure-insights-component"

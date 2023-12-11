@@ -1,22 +1,7 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "ResourceGroupName": {
-            "type": "string",
-            "defaultValue": "[concat('cloudbeat-resource-group-', dateTimeToEpoch(utcNow('u')))]",
-            "metadata": {
-                "description": "The resource group name where the virtual machine with the Elastic Agent is running on"
-            }
-        },
-        "Location": {
-            "type": "string",
-            "minLength": 6,
-            "metadata": {
-                "description": "The location to deploy the resource group with the virtual machine on"
-            },
-            "defaultValue": "[deployment().location]"
-        },
         "ElasticArtifactServer": {
             "type": "string",
             "defaultValue": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
@@ -29,7 +14,7 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             },
-            "defaultValue": "8.12.0"
+            "defaultValue": "8.13.0"
         },
         "FleetUrl": {
             "type": "string",
@@ -44,18 +29,15 @@
             }
         }
     },
+    "variables": {
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', resourceGroup().location)]"
+    },
     "resources": [
-        {
-            "type": "Microsoft.Resources/resourceGroups",
-            "apiVersion": "2022-09-01",
-            "name": "[parameters('ResourceGroupName')]",
-            "location": "[parameters('Location')]"
-        },
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
-            "name": "role-assignment-deployment",
-            "location": "[deployment().location]",
+            "name": "[variables('roleAssignmentDeployment')]",
+            "location": "[resourceGroup().location]",
             "subscriptionId": "[subscription().subscriptionId]",
             "properties": {
                 "expressionEvaluationOptions": {
@@ -64,7 +46,7 @@
                 "mode": "Incremental",
                 "parameters": {
                     "ResourceGroupName": {
-                        "value": "[parameters('ResourceGroupName')]"
+                        "value": "[resourceGroup().name]"
                     }
                 },
                 "template": {
@@ -90,7 +72,6 @@
                 }
             },
             "dependsOn": [
-                "[parameters('ResourceGroupName')]",
                 "cloudbeat-vm-deployment"
             ]
         },
@@ -98,7 +79,6 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
             "name": "cloudbeat-vm-deployment",
-            "resourceGroup": "[parameters('ResourceGroupName')]",
             "properties": {
                 "expressionEvaluationOptions": {
                     "scope": "inner"
@@ -236,16 +216,12 @@
                         }
                     ]
                 }
-            },
-            "dependsOn": [
-                "[parameters('ResourceGroupName')]"
-            ]
+            }
         },
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
             "name": "elastic-agent-deployment",
-            "resourceGroup": "[parameters('ResourceGroupName')]",
             "properties": {
                 "expressionEvaluationOptions": {
                     "scope": "inner"
@@ -305,7 +281,7 @@
             },
             "dependsOn": [
                 "cloudbeat-vm-deployment",
-                "role-assignment-deployment"
+                "[variables('roleAssignmentDeployment')]"
             ]
         }
     ]

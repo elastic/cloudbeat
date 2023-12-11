@@ -93,7 +93,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 			"subId1": {
 				ID:          "subId1",
 				DisplayName: "subName1",
-				MG: governance.ManagementGroup{
+				ManagementGroup: governance.ManagementGroup{
 					ID:          "mgId1",
 					DisplayName: "mgName1",
 				},
@@ -143,11 +143,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch() {
 
 			ecs, err := result.GetElasticCommonData()
 			s.Require().NoError(err)
-			s.Equal(map[string]any{
-				"cloud": map[string]any{
-					"provider": "azure",
-				},
-			}, ecs)
+			s.Empty(ecs)
 		})
 	}
 }
@@ -162,7 +158,7 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 		subMap[subIdStr] = governance.Subscription{
 			ID:          subIdStr,
 			DisplayName: fmt.Sprintf("subName%d", subId),
-			MG: governance.ManagementGroup{
+			ManagementGroup: governance.ManagementGroup{
 				ID:          fmt.Sprintf("mgId%d", subId),
 				DisplayName: fmt.Sprintf("mgName%d", subId),
 			},
@@ -236,18 +232,14 @@ func (s *AzureBatchAssetFetcherTestSuite) TestFetcher_Fetch_Subscriptions() {
 				CloudAccountMetadata: fetching.CloudAccountMetadata{
 					AccountId:        expectedSub.ID,
 					AccountName:      expectedSub.DisplayName,
-					OrganisationId:   expectedSub.MG.ID,
-					OrganizationName: expectedSub.MG.DisplayName,
+					OrganisationId:   expectedSub.ManagementGroup.ID,
+					OrganizationName: expectedSub.ManagementGroup.DisplayName,
 				},
 			}, metadata)
 
 			ecs, err := subTypeRes.Resource.GetElasticCommonData()
 			s.Require().NoError(err)
-			s.Equal(map[string]any{
-				"cloud": map[string]any{
-					"provider": "azure",
-				},
-			}, ecs)
+			s.Empty(ecs)
 		}
 	}
 }

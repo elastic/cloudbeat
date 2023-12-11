@@ -153,9 +153,9 @@ func generateManagementGroup(id int) ManagementGroup {
 
 func generateSubscription(id int, parentId int) Subscription {
 	return Subscription{
-		ID:          fmtField("sub-id", id),
-		DisplayName: fmtField("sub-display-name", id),
-		MG:          generateManagementGroup(parentId),
+		ID:              fmtField("sub-id", id),
+		DisplayName:     fmtField("sub-display-name", id),
+		ManagementGroup: generateManagementGroup(parentId),
 	}
 }
 

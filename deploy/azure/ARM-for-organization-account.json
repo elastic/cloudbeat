@@ -15,14 +15,6 @@
                 "description": "The id of the subscription where the virtual machine with the Elastic Agent is running on"
             }
         },
-        "Location": {
-            "type": "string",
-            "minLength": 6,
-            "metadata": {
-                "description": "The location to deploy the resource group with the virtual machine on"
-            },
-            "defaultValue": "[deployment().location]"
-        },
         "ElasticArtifactServer": {
             "type": "string",
             "defaultValue": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
@@ -35,7 +27,7 @@
             "metadata": {
                 "description": "The version of elastic-agent to install"
             },
-            "defaultValue": "8.12.0"
+            "defaultValue": "8.13.0"
         },
         "FleetUrl": {
             "type": "string",
@@ -50,11 +42,15 @@
             }
         }
     },
+    "variables": {
+        "resourceGroupDeployment": "[concat('resource-group-deployment-', deployment().location)]",
+        "roleAssignmentDeployment": "[concat('role-assignment-deployment-', deployment().location)]"
+    },
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
-            "name": "resource-group-deployment",
+            "name": "[variables('resourceGroupDeployment')]",
             "location": "[deployment().location]",
             "subscriptionId": "[parameters('SubscriptionId')]",
             "properties": {
@@ -67,7 +63,7 @@
                         "value": "[parameters('ResourceGroupName')]"
                     },
                     "Location": {
-                        "value": "[parameters('Location')]"
+                        "value": "[deployment().location]"
                     }
                 },
                 "template": {
@@ -95,7 +91,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2022-09-01",
-            "name": "role-assignment-deployment",
+            "name": "[variables('roleAssignmentDeployment')]",
             "location": "[deployment().location]",
             "properties": {
                 "expressionEvaluationOptions": {
@@ -136,7 +132,7 @@
                 }
             },
             "dependsOn": [
-                "resource-group-deployment",
+                "[variables('resourceGroupDeployment')]",
                 "cloudbeat-vm-deployment"
             ]
         },
@@ -285,7 +281,7 @@
                 }
             },
             "dependsOn": [
-                "resource-group-deployment"
+                "[variables('resourceGroupDeployment')]"
             ]
         },
         {
@@ -353,7 +349,7 @@
             },
             "dependsOn": [
                 "cloudbeat-vm-deployment",
-                "role-assignment-deployment"
+                "[variables('roleAssignmentDeployment')]"
             ]
         }
     ]

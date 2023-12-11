@@ -6,7 +6,7 @@ and inputs based on provided data and templates.
 import copy
 import uuid
 from typing import Dict, Tuple
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 from packaging import version
 from munch import Munch
 from loguru import logger
@@ -35,6 +35,7 @@ VERSION_MAP = {
     "cis_aws": "1.2.0",
     "vuln_mgmt_aws": "1.3.0",
     "cis_gcp": "1.5.0",
+    "cis_azure": "1.6.0",
 }
 
 
@@ -307,3 +308,18 @@ def extract_template_url(url_string: str) -> str:
         return ""
 
     return template_url[0]
+
+
+def extract_arm_template_url(url_string: str) -> str:
+    """
+    Extracts the arm template link from a given URL string.
+
+    Args:
+        url_string (str): The URL string from which to extract the arm template link.
+
+    Returns:
+        str: The arm template link.
+
+    """
+    parsed_url = urlparse(url_string, allow_fragments=False)
+    return unquote(parsed_url.path.split("/")[-1]).replace("ACCOUNT_TYPE", "single-account")

@@ -49,7 +49,11 @@ private_endpoint_connections = properties.privateEndpointConnections
 
 network_acls = properties.networkAcls
 
+site_config = properties.siteConfig
+
 activity_log_alerts = resource
+
+diagnostic_settings = resource
 
 is_storage_account if {
 	input.subType == "azure-storage-account"
@@ -61,6 +65,10 @@ is_activity_log_alerts if {
 
 is_storage_account if {
 	input.subType == "azure-classic-storage-account"
+}
+
+is_diagnostic_settings if {
+	input.subType == "azure-diagnostic-settings"
 }
 
 is_postgresql_server_db if {
