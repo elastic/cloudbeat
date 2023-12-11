@@ -112,7 +112,7 @@ jobs:
           ref: ${{ (github.event.pull_request_target || github.event.pull_request).head.sha }}
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version-file: .go-version
           cache: false
