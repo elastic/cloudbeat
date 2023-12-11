@@ -162,8 +162,7 @@ def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
 
 def get_arm_template(url: str, template_path: str):
     """
-    Download a ARM template from a specified URL,
-    and save it to a file.
+    Download an ARM template from a specified URL and save it to a file.
 
     Args:
         url (str): The URL to download the ARM template.
