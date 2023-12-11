@@ -28,22 +28,21 @@ import (
 // determined by cycle metadata, the callback function is called and a new value is initialized. If the callback fails
 // and an old value exists, it is re-used.
 type Cache[T any] struct {
-	log         *logp.Logger
-	lastCycle   Metadata
-	cb          func(context.Context) (T, error)
+	log       *logp.Logger
+	lastCycle Metadata
+
 	cachedValue T
 	mu          sync.RWMutex
 }
 
-func NewCache[T any](log *logp.Logger, cb func(context.Context) (T, error)) Cache[T] {
-	return Cache[T]{
+func NewCache[T any](log *logp.Logger) *Cache[T] {
+	return &Cache[T]{
 		log:       log.Named("cycle.cache"),
-		cb:        cb,
 		lastCycle: Metadata{Sequence: -1},
 	}
 }
 
-func (c *Cache[T]) GetValue(ctx context.Context, cycle Metadata) (T, error) {
+func (c *Cache[T]) GetValue(ctx context.Context, cycle Metadata, fetch func(context.Context) (T, error)) (T, error) {
 	if !c.needsUpdate(cycle) {
 		return c.cachedValue, nil
 	}
@@ -53,7 +52,7 @@ func (c *Cache[T]) GetValue(ctx context.Context, cycle Metadata) (T, error) {
 		return c.cachedValue, nil
 	}
 
-	result, err := c.cb(ctx)
+	result, err := fetch(ctx)
 	if err != nil {
 		if c.lastCycle.Sequence < 0 {
 			return result, err

@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcegraph/armresourcegraph"
 	"github.com/elastic/elastic-agent-libs/logp"
 
@@ -49,9 +50,14 @@ func (p *ProviderInitializer) Init(log *logp.Logger, azureConfig auth.AzureFacto
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize resource graph factory: %w", err)
 	}
-	client := factory.NewClient()
+	resourceGraphClientFactory := factory.NewClient()
 
-	inventoryProvider := inventory.NewProvider(log, client)
+	diagnosticSettingsClient, err := armmonitor.NewDiagnosticSettingsClient(azureConfig.Credentials, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to init monitor client: %w", err)
+	}
+
+	inventoryProvider := inventory.NewProvider(log, resourceGraphClientFactory, diagnosticSettingsClient)
 	return &provider{
 		inventory:  inventoryProvider,
 		governance: governance.NewProvider(log, inventoryProvider),
@@ -65,6 +71,10 @@ type provider struct {
 
 func (p provider) ListAllAssetTypesByName(ctx context.Context, assetGroup string, assets []string) ([]inventory.AzureAsset, error) {
 	return p.inventory.ListAllAssetTypesByName(ctx, assetGroup, assets)
+}
+
+func (p provider) ListDiagnosticSettingsAssetTypes(ctx context.Context, cycleMetadata cycle.Metadata, subscriptionIDs []string) ([]inventory.AzureAsset, error) {
+	return p.inventory.ListDiagnosticSettingsAssetTypes(ctx, cycleMetadata, subscriptionIDs)
 }
 
 func (p provider) GetSubscriptions(ctx context.Context, cycleMetadata cycle.Metadata) (map[string]governance.Subscription, error) {

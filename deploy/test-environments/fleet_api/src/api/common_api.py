@@ -2,6 +2,7 @@
 This module contains API calls related to Fleet settings
 """
 import time
+import json
 import codecs
 from typing import Dict, Any, List
 from munch import Munch, munchify
@@ -152,6 +153,37 @@ def get_cnvm_template(url: str, template_path: str, cnvm_tags: str):
         with codecs.open(template_path, "w", encoding="utf-8") as cnvm_yaml:
             cnvm_yaml.write(template_yaml)
         logger.info(f"CNVM template is available at: '{template_path}'")
+    except APICallException as api_ex:
+        logger.error(
+            f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",
+        )
+        return
+
+
+def get_arm_template(url: str, template_path: str):
+    """
+    Download an ARM template from a specified URL and save it to a file.
+
+    Args:
+        url (str): The URL to download the ARM template.
+        template_path (str): The file path where the modified template will be saved.
+
+    Returns:
+        None
+
+    Raises:
+        APICallException: If there's an issue with the API call.
+    """
+    try:
+        template_json = perform_api_call(
+            method="GET",
+            url=url,
+            return_json=True,
+        )
+
+        with open(template_path, "w") as arm_json:
+            json.dump(template_json, arm_json)
+        logger.info(f"ARM template is available at: '{template_path}'")
     except APICallException as api_ex:
         logger.error(
             f"API call failed, status code {api_ex.status_code}. Response: {api_ex.response_text}",

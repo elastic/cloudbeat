@@ -390,9 +390,9 @@
 
 ## AZURE CIS Benchmark
 
-### 33/151 implemented rules (22%)
+### 40/151 implemented rules (26%)
 
-#### Automated rules: 33/77 (43%)
+#### Automated rules: 40/77 (52%)
 
 #### Manual rules: 0/74 (0%)
 
@@ -499,8 +499,8 @@
 |                         4.5.2                          | Cosmos DB                               | Ensure That Private Endpoints Are Used Where Possible                                                                                                  |        :x:         |  Manual   |
 |                         4.5.3                          | Cosmos DB                               | Use Azure Active Directory (AAD) Client Authentication and Azure RBAC where possible.                                                                  |        :x:         |  Manual   |
 |                         5.1.1                          | Configuring Diagnostic Settings         | Ensure that a 'Diagnostic Setting' exists                                                                                                              |        :x:         |  Manual   |
-|                         5.1.2                          | Configuring Diagnostic Settings         | Ensure Diagnostic Setting captures appropriate categories                                                                                              |        :x:         | Automated |
-|                         5.1.3                          | Configuring Diagnostic Settings         | Ensure the Storage Container Storing the Activity Logs is not Publicly Accessible                                                                      |        :x:         | Automated |
+|  [5.1.2](bundle/compliance/cis_azure/rules/cis_5_1_2)  | Configuring Diagnostic Settings         | Ensure Diagnostic Setting captures appropriate categories                                                                                              | :white_check_mark: | Automated |
+|  [5.1.3](bundle/compliance/cis_azure/rules/cis_5_1_3)  | Configuring Diagnostic Settings         | Ensure the Storage Container Storing the Activity Logs is not Publicly Accessible                                                                      | :white_check_mark: | Automated |
 |                         5.1.4                          | Configuring Diagnostic Settings         | Ensure the storage account containing the container with activity logs is encrypted with Customer Managed Key                                          |        :x:         | Automated |
 |                         5.1.5                          | Configuring Diagnostic Settings         | Ensure that logging for Azure Key Vault is 'Enabled'                                                                                                   |        :x:         | Automated |
 |                         5.1.6                          | Configuring Diagnostic Settings         | Ensure that Network Security Group Flow logs are captured and sent to Log Analytics                                                                    |        :x:         |  Manual   |
@@ -541,14 +541,14 @@
 |                          8.7                           | Key Vault                               | Ensure that Private Endpoints are Used for Azure Key Vault                                                                                             |        :x:         |  Manual   |
 |                          8.8                           | Key Vault                               | Ensure Automatic Key Rotation is Enabled Within Azure Key Vault for the Supported Services                                                             |        :x:         |  Manual   |
 |                          9.1                           | AppService                              | Ensure App Service Authentication is set up for apps in Azure App Service                                                                              |        :x:         | Automated |
-|                          9.10                          | AppService                              | Ensure FTP deployments are Disabled                                                                                                                    |        :x:         | Automated |
+|   [9.10](bundle/compliance/cis_azure/rules/cis_9_10)   | AppService                              | Ensure FTP deployments are Disabled                                                                                                                    | :white_check_mark: | Automated |
 |                          9.11                          | AppService                              | Ensure Azure Key Vaults are Used to Store Secrets                                                                                                      |        :x:         |  Manual   |
-|                          9.2                           | AppService                              | Ensure Web App Redirects All HTTP traffic to HTTPS in Azure App Service                                                                                |        :x:         | Automated |
-|                          9.3                           | AppService                              | Ensure Web App is using the latest version of TLS encryption                                                                                           |        :x:         | Automated |
+|    [9.2](bundle/compliance/cis_azure/rules/cis_9_2)    | AppService                              | Ensure Web App Redirects All HTTP traffic to HTTPS in Azure App Service                                                                                | :white_check_mark: | Automated |
+|    [9.3](bundle/compliance/cis_azure/rules/cis_9_3)    | AppService                              | Ensure Web App is using the latest version of TLS encryption                                                                                           | :white_check_mark: | Automated |
 |    [9.4](bundle/compliance/cis_azure/rules/cis_9_4)    | AppService                              | Ensure the web app has 'Client Certificates (Incoming client certificates)' set to 'On'                                                                | :white_check_mark: | Automated |
-|                          9.5                           | AppService                              | Ensure that Register with Azure Active Directory is enabled on App Service                                                                             |        :x:         | Automated |
+|    [9.5](bundle/compliance/cis_azure/rules/cis_9_5)    | AppService                              | Ensure that Register with Azure Active Directory is enabled on App Service                                                                             | :white_check_mark: | Automated |
 |                          9.6                           | AppService                              | Ensure That 'PHP version' is the Latest, If Used to Run the Web App                                                                                    |        :x:         |  Manual   |
 |                          9.7                           | AppService                              | Ensure that 'Python version' is the Latest Stable Version, if Used to Run the Web App                                                                  |        :x:         |  Manual   |
 |                          9.8                           | AppService                              | Ensure that 'Java version' is the latest, if used to run the Web App                                                                                   |        :x:         |  Manual   |
-|                          9.9                           | AppService                              | Ensure that 'HTTP Version' is the Latest, if Used to Run the Web App                                                                                   |        :x:         | Automated |
+|    [9.9](bundle/compliance/cis_azure/rules/cis_9_9)    | AppService                              | Ensure that 'HTTP Version' is the Latest, if Used to Run the Web App                                                                                   | :white_check_mark: | Automated |
 </details>

@@ -1,0 +1,109 @@
+metadata:
+  id: 7c908585-ec93-52dc-81bb-ceb17cd4c313
+  name: Ensure the Storage Container Storing the Activity Logs is not Publicly Accessible
+  profile_applicability: '* Level 1'
+  description: The storage account container containing the activity log export should
+    not be publicly accessible.
+  rationale: |-
+    Allowing public access to activity log content may aid an adversary in identifying weaknesses in the affected account's use or configuration.
+  audit: |-
+    **From Azure Portal**
+
+    1. From Azure Home select the Portal Menu
+    2. Select `Diagnostic Settings` in the left column.
+    3. In section `Storage Account`, note the name of the Storage account
+    4. Close `Diagnostic settings`. Close the `Monitor - Activity Log` blade.
+    5. In left menu, Click `Storage Accounts`
+    6. For each storage account, go to the `Configuration` setting
+    7. Check if Blob public access is `Disabled`.
+
+    **From Azure CLI**
+
+    8. Get storage account id configured with Diagnostic Settings:
+
+    ```
+    az monitor diagnostic-settings subscription list --subscription $subscription.Id --query 'value[*].storageAccountId'
+    ```
+
+    9. Ensure the container storing activity logs (insights-activity-logs) is not publicly accessible:
+
+    ```
+    az storage container list --account-name <Storage Account Name> --query "[?name=='insights-activity-logs']"
+    ```
+
+    If this command returns output and no errors, the storage account is publicly accessible.
+
+    10. Otherwise, list `Storage Account Keys` for the storage account.
+
+    ```
+    az storage account keys list --resource-group <storage account resource group> --account-name <storage account name>
+    ```
+
+    11. Use a key to determine if the `Container` is also publicly accessible (in the event the storage account is)
+
+    ```
+    az storage container list --account-name <Storage Account Name> --query "[?name=='insights-activity-logs']" --sas-token "<base64 key value from step 3>"
+    ```
+
+    Ensure `publicAccess` is set to `null` in the output of the command in step 4.
+
+    **From PowerShell**
+
+    Create a new storage account context with either a Storage-level SAS token with at least read/list permissions for Blob > Service, Container, Object.
+    ```
+    $context = New-AzStorageContext -StorageAccountName <storage account name> -SasToken "<SAS token>"
+    ```
+
+    Use the newly created storage account context to determine if the `insights-activity-logs` container is publicly accessible.
+
+    ```
+    Get-AzStorageContainer -Context $context -name "insights-activity-logs"
+    ```
+
+    Ensure `PublicAccess` is `empty` or set to `null`, `0`, or `off`.
+  remediation: |-
+    **From Azure Portal**
+
+    1. From Azure Home select the Portal Menu
+    2. Search for `Storage Accounts` to access Storage account blade
+    3. Click on the storage account name
+    4. Click on `Configuration` under settings
+    5. Select `Enabled` under "Allow Blob public access"
+
+    **From Azure CLI**
+
+    ```
+    az storage container set-permission --name insights-activity-logs --account-name <Storage Account Name> --sas-token <SAS token> --public-access off
+    ```
+
+    **From PowerShell**
+
+    Create a new storage account context for the storage account holding the `insight-activity-logs` container making sure to use a valid `Shared Access Signature (SAS)` token.
+
+    ```
+    $context = New-AzStorageContext -StorageAccountName <storage account name> -SasToken "<SAS token>"
+    ```
+
+    Change the `insights-activity-logs` container public access to `off`
+    ```
+    Set-AzStorageContainerAcl -Context $context -Name "insights-activity-logs" -Permission Off -PassThru
+    ```
+  impact: |-
+    Configuring container `Access policy` to `private` will remove access from the container for everyone except owners of the storage account. Access policy needs to be set explicitly in order to allow access to other desired users.
+  default_value: ''
+  references: |-
+    1. https://docs.microsoft.com/en-us/azure/storage/blobs/anonymous-read-access-configure
+    2. https://docs.microsoft.com/en-us/security/benchmark/azure/security-controls-v3-network-security#ns-2-secure-cloud-services-with-network-controls
+  section: Configuring Diagnostic Settings
+  version: '1.0'
+  tags:
+  - CIS
+  - AZURE
+  - CIS 5.1.3
+  - Configuring Diagnostic Settings
+  benchmark:
+    name: CIS Microsoft Azure Foundations
+    version: v2.0.0
+    id: cis_azure
+    rule_number: 5.1.3
+    posture_type: cspm

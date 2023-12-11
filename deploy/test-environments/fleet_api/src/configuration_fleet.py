@@ -31,7 +31,7 @@ CNVM_TAGS = (
 elk_config = Munch()
 elk_config.user = os.getenv("ES_USER", "NA")
 elk_config.password = os.getenv("ES_PASSWORD", "NA")
-elk_config.kibana_url = os.getenv("KIBANA_URL", "NA")
+elk_config.kibana_url = os.getenv("KIBANA_URL", "")
 elk_config.stack_version = os.getenv("STACK_VERSION", "NA")
 elk_config.auth = (elk_config.user, elk_config.password)
 
@@ -48,7 +48,3 @@ gcp_dm_config = Munch()
 gcp_dm_config.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
 gcp_dm_config.zone = os.getenv("ZONE", "us-central1-a")
 gcp_dm_config.allow_ssh = os.getenv("ALLOW_SSH", "false") == "true"
-
-azure_arm_parameters = Munch()
-azure_arm_parameters.deployment_name = os.getenv("DEPLOYMENT_NAME", "")
-azure_arm_parameters.location = os.getenv("LOCATION", "CentralUS")
