@@ -230,7 +230,7 @@ if __name__ == "__main__":
 
             table, description, percentage = generate_md_table(benchmark_id)
             f.write(description)
-            f.write(f"<details><h2><summary>Extended View</summary></h2>\n\n")
+            f.write(f"<details><summary><h3>Full Table 📋</h3></summary>\n\n")
             f.write(table)
             f.write("\n</details>")
 
