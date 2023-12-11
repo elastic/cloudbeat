@@ -1,4 +1,10 @@
-# Rules Status
+# Rules Status## Table of Contents
+
+- [Kubernetes CIS Benchmark](#k8s-cis-benchmark)
+- [Amazon EKS CIS Benchmark](#eks-cis-benchmark)
+- [Amazon AWS CIS Benchmark](#aws-cis-benchmark)
+- [Google Cloud CIS Benchmark](#gcp-cis-benchmark)
+- [Microsoft Azure CIS Benchmark](#azure-cis-benchmark)
 
 ## K8S CIS Benchmark
 
@@ -7,6 +13,8 @@
 #### Automated rules: 73/74 (99%)
 
 #### Manual rules: 19/51 (37%)
+
+<details><h2><summary>Extended View</summary></h2>
 
 |                     Rule Number                      | Section                                | Description                                                                                              |       Status       |   Type    |
 |:----------------------------------------------------:|:---------------------------------------|:---------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -135,6 +143,7 @@
 |                        5.7.2                         | General Policies                       | Ensure that the seccomp profile is set to docker/default in your pod definitions                         |        :x:         |  Manual   |
 |                        5.7.3                         | General Policies                       | Apply Security Context to Your Pods and Containers                                                       |        :x:         |  Manual   |
 |                        5.7.4                         | General Policies                       | The default namespace should not be used                                                                 |        :x:         |  Manual   |
+</details>
 
 ## EKS CIS Benchmark
 
@@ -143,6 +152,8 @@
 #### Automated rules: 14/16 (88%)
 
 #### Manual rules: 17/36 (47%)
+
+<details><h2><summary>Extended View</summary></h2>
 
 |                     Rule Number                      | Section                              | Description                                                                                              |       Status       |   Type    |
 |:----------------------------------------------------:|:-------------------------------------|:---------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -198,6 +209,7 @@
 |  [5.4.5](bundle/compliance/cis_eks/rules/cis_5_4_5)  | Cluster Networking                   | Encrypt traffic to HTTPS load balancers with TLS certificates                                            | :white_check_mark: |  Manual   |
 |                        5.5.1                         | Authentication and Authorization     | Manage Kubernetes RBAC users with AWS IAM Authenticator for Kubernetes                                   |        :x:         |  Manual   |
 |                        5.6.1                         | Other Cluster Configurations         | Consider Fargate for running untrusted workloads                                                         |        :x:         |  Manual   |
+</details>
 
 ## AWS CIS Benchmark
 
@@ -206,6 +218,8 @@
 #### Automated rules: 55/55 (100%)
 
 #### Manual rules: 0/8 (0%)
+
+<details><h2><summary>Extended View</summary></h2>
 
 |                    Rule Number                     | Section                           | Description                                                                                                        |       Status       |   Type    |
 |:--------------------------------------------------:|:----------------------------------|:-------------------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -272,6 +286,7 @@
 |   [5.3](bundle/compliance/cis_aws/rules/cis_5_3)   | Networking                        | Ensure no security groups allow ingress from ::/0 to remote server administration ports                            | :white_check_mark: | Automated |
 |   [5.4](bundle/compliance/cis_aws/rules/cis_5_4)   | Networking                        | Ensure the default security group of every VPC restricts all traffic                                               | :white_check_mark: | Automated |
 |                        5.5                         | Networking                        | Ensure routing tables for VPC peering are "least access"                                                           |        :x:         |  Manual   |
+</details>
 
 ## GCP CIS Benchmark
 
@@ -280,6 +295,8 @@
 #### Automated rules: 71/73 (97%)
 
 #### Manual rules: 0/11 (0%)
+
+<details><h2><summary>Extended View</summary></h2>
 
 |                    Rule Number                     | Section                        | Description                                                                                                                       |       Status       |   Type    |
 |:--------------------------------------------------:|:-------------------------------|:----------------------------------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -367,6 +384,7 @@
 |   [7.1](bundle/compliance/cis_gcp/rules/cis_7_1)   | BigQuery                       | Ensure That BigQuery Datasets Are Not Anonymously or Publicly Accessible                                                          | :white_check_mark: | Automated |
 |   [7.2](bundle/compliance/cis_gcp/rules/cis_7_2)   | BigQuery                       | Ensure That All BigQuery Tables Are Encrypted With Customer-Managed Encryption Key (CMEK)                                         | :white_check_mark: | Automated |
 |   [7.3](bundle/compliance/cis_gcp/rules/cis_7_3)   | BigQuery                       | Ensure That a Default Customer-Managed Encryption Key (CMEK) Is Specified for All BigQuery Data Sets                              | :white_check_mark: | Automated |
+</details>
 
 ## AZURE CIS Benchmark
 
@@ -375,6 +393,8 @@
 #### Automated rules: 33/77 (43%)
 
 #### Manual rules: 0/74 (0%)
+
+<details><h2><summary>Extended View</summary></h2>
 
 |                      Rule Number                       | Section                                 | Description                                                                                                                                            |       Status       |   Type    |
 |:------------------------------------------------------:|:----------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------:|:---------:|
@@ -529,3 +549,4 @@
 |                          9.7                           | AppService                              | Ensure that 'Python version' is the Latest Stable Version, if Used to Run the Web App                                                                  |        :x:         |  Manual   |
 |                          9.8                           | AppService                              | Ensure that 'Java version' is the latest, if used to run the Web App                                                                                   |        :x:         |  Manual   |
 |                          9.9                           | AppService                              | Ensure that 'HTTP Version' is the Latest, if Used to Run the Web App                                                                                   |        :x:         | Automated |
+</details>

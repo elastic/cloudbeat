@@ -94,8 +94,9 @@ def generate_md_table(benchmark_id):
     description = f"### {total_implemented}/{total_rules} implemented rules ({total_status:.0%})\n\n"
     description += f"#### Automated rules: {automated_implemented}/{total_automated} ({automated_status:.0%})\n\n"
     description += f"#### Manual rules: {manual_implemented}/{total_manual} ({manual_status:.0%})\n\n"
+    total_percentage = total_status * 100
 
-    return table, description, total_status
+    return table, description, total_percentage
 
 
 def total_rules_status(rules_data):
@@ -153,9 +154,6 @@ def update_main_readme_status_badge(percentage, service):
     :param percentage: Percentage of implemented rules
     :param service: Service name (k8s, eks, aws)
     """
-
-    """
-    """
     readme_path = "../README.md"
     badge_api = "https://img.shields.io/badge"
     with open(readme_path, "r+") as f:
@@ -206,6 +204,15 @@ def get_badge_line_number(readme, service):
             return i
 
 
+def generate_table_of_contents():
+    return """## Table of Contents\n
+- [Kubernetes CIS Benchmark](#k8s-cis-benchmark)
+- [Amazon EKS CIS Benchmark](#eks-cis-benchmark)
+- [Amazon AWS CIS Benchmark](#aws-cis-benchmark)
+- [Google Cloud CIS Benchmark](#gcp-cis-benchmark)
+- [Microsoft Azure CIS Benchmark](#azure-cis-benchmark)"""
+
+
 if __name__ == "__main__":
     # Set working directory to the dev directory
     os.chdir(os.path.join(common.repo_root.working_dir, "security-policies", "dev"))
@@ -213,16 +220,22 @@ if __name__ == "__main__":
     # Write Markdown table to file
     with open("../RULES.md", "w") as f:
         f.write(f"# Rules Status")
+        table_of_contents = generate_table_of_contents()
+        f.write(table_of_contents)
+
         for benchmark_id in common.benchmark.keys():
             print(f"Generating Markdown table for '{benchmark_id}' service")
-            f.write(
-                f"\n\n## {benchmark_id.removeprefix('cis_').upper()} CIS Benchmark\n\n",
-            )
+            benchmark_title = f"{benchmark_id.removeprefix('cis_').upper()} CIS Benchmark"
+            f.write(f"\n\n## {benchmark_title}\n\n")
+
             table, description, percentage = generate_md_table(benchmark_id)
             f.write(description)
+            f.write(f"<details><h2><summary>Extended View</summary></h2>\n\n")
             f.write(table)
+            f.write("\n</details>")
+
             update_main_readme_status_badge(
-                percentage * 100,
-                benchmark_id.removeprefix("cis_"),
+                percentage=percentage,
+                service=benchmark_id.removeprefix("cis_"),
             )
         f.write("\n")
