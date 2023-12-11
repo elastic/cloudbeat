@@ -127,14 +127,6 @@ if __name__ == "__main__":
         "value": cnfg.elk_config.stack_version,
     }
 
-    azure_arm_parameters["parameters"]["ResourceGroupName"] = {
-        "value": cnfg.azure_arm_parameters.deployment_name,
-    }
-
-    azure_arm_parameters["parameters"]["Location"] = {
-        "value": cnfg.azure_arm_parameters.location,
-    }
-
     with open(cspm_azure_arm_parameters, "w") as file:
         json.dump(azure_arm_parameters, file)
 
