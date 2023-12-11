@@ -205,7 +205,8 @@ def get_badge_line_number(readme, service):
 
 
 def generate_table_of_contents():
-    return """## Table of Contents\n
+    return """
+## Table of Contents\n
 - [Kubernetes CIS Benchmark](#k8s-cis-benchmark)
 - [Amazon EKS CIS Benchmark](#eks-cis-benchmark)
 - [Amazon AWS CIS Benchmark](#aws-cis-benchmark)
@@ -219,7 +220,7 @@ if __name__ == "__main__":
 
     # Write Markdown table to file
     with open("../RULES.md", "w") as f:
-        f.write(f"# Rules Status")
+        f.write(f"# Rules Status\n")
         table_of_contents = generate_table_of_contents()
         f.write(table_of_contents)
 

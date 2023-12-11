@@ -1,4 +1,6 @@
-# Rules Status## Table of Contents
+# Rules Status
+
+## Table of Contents
 
 - [Kubernetes CIS Benchmark](#k8s-cis-benchmark)
 - [Amazon EKS CIS Benchmark](#eks-cis-benchmark)
