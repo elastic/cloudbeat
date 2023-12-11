@@ -19,7 +19,6 @@ package fetchers
 
 import (
 	"errors"
-
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/elastic/cloudbeat/resources/providers/azurelib/inventory"
@@ -47,12 +46,9 @@ type networkSecurityRules struct {
 	Properties extensionNetworkSecurityRules `mapstructure:"properties"`
 }
 
-func enrichVirtualMachinesWithNetworkSecurityGroups(assets []inventory.AzureAsset) {
-	// loop through nics
-	// create entry for every nic to default rules and rules
-	// merge nics with old nics
-	// 		Nice to have: remove duplicated rules (could be solved with a hash set)
-
+func enrichVirtualMachinesWithNetworkSecurityGroups(assets []inventory.AzureAsset) error {
+	// VMs are connected to NSGs via Network Interfaces (https://learn.microsoft.com/en-us/azure/virtual-network/network-overview)
+	// Therefore, aggregate security rules by Network Interface to easy access later on
 	securityRulesByNetworkInterface := make(map[string][]extensionNetworkSecurityRules)
 	var errAgg error
 
@@ -75,6 +71,8 @@ func enrichVirtualMachinesWithNetworkSecurityGroups(assets []inventory.AzureAsse
 
 		assets[idx] = asset
 	}
+
+	return errAgg
 }
 
 func extractNetworkSecurityGroupRules(asset inventory.AzureAsset, securityRulesByNetworkInterface map[string][]extensionNetworkSecurityRules) (map[string][]extensionNetworkSecurityRules, error) {

@@ -26,114 +26,211 @@ import (
 )
 
 func TestEnrichVirtualMachinesWithNetworkSecurityGroup(t *testing.T) {
-	// Todo
-	// 	- test with multiple nsg to multiple vms
-	// 	- test with one nsg to multiple vms
-	//  - test with multiple vms to one nsg
-	// 	- test with legacy vms
+	// TODO Test with Classic VMS
 
 	tests := map[string]struct {
 		input  []inventory.AzureAsset
 		output []inventory.AzureAsset
 	}{
-		"1 Security Network Group with default security rules maps to 1 Virtual Machine with same Network Interface": {
+		"1 NSG maps to 1 VM (and one NSG without interface)": {
 			input: []inventory.AzureAsset{
-				{Id: "vm#1", Type: inventory.VirtualMachineAssetType, Properties: map[string]any{
-					"networkProfile": map[string]any{
-						"networkInterfaces": []map[string]any{
-							{
-								"id": "nic#1",
-							},
-						},
-					},
-				}},
-				{Id: "nsg#1", Type: inventory.NetworkSecurityGroup, Properties: map[string]any{
-					"networkInterfaces": []map[string]any{
-						{
-							"id": "nic#1",
-						},
-					},
-					"securityRules": []map[string]any{
-						{
-							"properties": map[string]any{
-								"provisioningState":          "Succeeded",
-								"destinationAddressPrefixes": make([]string, 0),
-								"destinationAddressPrefix":   "*",
-								"sourceAddressPrefixes":      make([]string, 0),
-								"destinationPortRanges":      make([]string, 0),
-								"sourceAddressPrefix":        "*",
-								"destinationPortRange":       "22",
-								"sourcePortRanges":           make([]string, 0),
-								"sourcePortRange":            "*",
-								"protocol":                   "TCP",
-								"direction":                  "Inbound",
-								"priority":                   100,
-								"access":                     "Allow",
-							},
-						},
-					},
-				}},
+				mockVMs("vm#1", []string{"nic#1"}),
+				mockNSGs("nsg#1", []string{"nic#1"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{}, withSecRules(secRule("8080", "Block"))),
 			},
 			output: []inventory.AzureAsset{
-				{Id: "vm#1", Type: inventory.VirtualMachineAssetType, Properties: map[string]any{
-					"networkProfile": map[string]any{
-						"networkInterfaces": []map[string]any{
-							{
-								"id": "nic#1",
-							},
-						},
-					},
-				},
-					Extension: map[string]any{
-						"network": map[string]any{
-							"securityRules": []map[string]any{
-								{
-									"access":                "Allow",
-									"destinationPortRange":  "22",
-									"destinationPortRanges": make([]string, 0),
-									"direction":             "Inbound",
-									"protocol":              "TCP",
-									"sourceAddressPrefix":   "*",
-									"sourceAddressPrefixes": make([]string, 0),
-								},
-							},
-						},
-					},
-				},
-				{Id: "nsg#1", Type: inventory.NetworkSecurityGroup, Properties: map[string]any{
-					"networkInterfaces": []map[string]any{
-						{
-							"id": "nic#1",
-						},
-					},
-					"securityRules": []map[string]any{
-						{
-							"properties": map[string]any{
-								"provisioningState":          "Succeeded",
-								"destinationAddressPrefixes": make([]string, 0),
-								"destinationAddressPrefix":   "*",
-								"sourceAddressPrefixes":      make([]string, 0),
-								"destinationPortRanges":      make([]string, 0),
-								"sourceAddressPrefix":        "*",
-								"destinationPortRange":       "22",
-								"sourcePortRanges":           make([]string, 0),
-								"sourcePortRange":            "*",
-								"protocol":                   "TCP",
-								"direction":                  "Inbound",
-								"priority":                   100,
-								"access":                     "Allow",
-							},
-						},
-					},
-				}},
+				mockVMs("vm#1", []string{"nic#1"}, withExtendedSecRules(extendedSecRule("22", "Allow"))),
+				mockNSGs("nsg#1", []string{"nic#1"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{}, withSecRules(secRule("8080", "Block"))),
+			},
+		},
+
+		"2 NSG map to 1 VM, 1 NSG doesn't match": {
+			input: []inventory.AzureAsset{
+				mockVMs("vm#1", []string{"nic#1", "nic#3"}),
+				mockNSGs("nsg#1", []string{"nic#1"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{"nic#2"}, withSecRules(secRule("80", "Block"))),
+				mockNSGs("nsg#3", []string{"nic#3"}, withSecRules(secRule("8080", "Block"))),
+			},
+			output: []inventory.AzureAsset{
+				mockVMs("vm#1", []string{"nic#1", "nic#3"}, withExtendedSecRules(
+					extendedSecRule("22", "Allow"),
+					extendedSecRule("8080", "Block"),
+				)),
+				mockNSGs("nsg#1", []string{"nic#1"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{"nic#2"}, withSecRules(secRule("80", "Block"))),
+				mockNSGs("nsg#3", []string{"nic#3"}, withSecRules(secRule("8080", "Block"))),
+			},
+		},
+
+		"1 NSG maps to 2 VMS (and NSG without rule)": {
+			input: []inventory.AzureAsset{
+				mockVMs("vm#1", []string{"nic#1"}),
+				mockVMs("vm#2", []string{"nic#1"}),
+				mockNSGs("nsg#1", []string{"nic#1"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{"nic#1"}),
+			},
+			output: []inventory.AzureAsset{
+				mockVMs("vm#1", []string{"nic#1"}, withExtendedSecRules(extendedSecRule("22", "Allow"))),
+				mockVMs("vm#2", []string{"nic#1"}, withExtendedSecRules(extendedSecRule("22", "Allow"))),
+				mockNSGs("nsg#1", []string{"nic#1"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{"nic#1"}),
+			},
+		},
+
+		"2 NSG with same interface to 1 VM (and VM without interface)": {
+			input: []inventory.AzureAsset{
+				mockVMs("vm#1", []string{"nic#1"}),
+				mockVMs("vm#2", []string{}),
+				mockNSGs("nsg#1", []string{"nic#1"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{"nic#1"}, withSecRules(secRule("8080", "Block"))),
+			},
+			output: []inventory.AzureAsset{
+				mockVMs("vm#1", []string{"nic#1"}, withExtendedSecRules(
+					extendedSecRule("22", "Allow"),
+					extendedSecRule("8080", "Block"),
+				)),
+				mockVMs("vm#2", []string{}),
+				mockNSGs("nsg#1", []string{"nic#1"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{"nic#1"}, withSecRules(secRule("8080", "Block"))),
+			},
+		},
+
+		"Multiple NSGs to Multiple VMS": {
+			input: []inventory.AzureAsset{
+				mockVMs("vm#1", []string{"nic#1", "nic#2"}),
+				mockVMs("vm#2", []string{"nic#5", "nic#4", "nic#6"}),
+				mockVMs("vm#3", []string{"nic#3"}),
+				mockNSGs("nsg#1", []string{"nic#1", "nic#3"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{"nic#2", "nic#5"}, withSecRules(secRule("80", "Block"), secRule("7000", "Block"))),
+				mockNSGs("nsg#3", []string{"nic#4"}, withSecRules(secRule("8080", "Allow"))),
+				mockNSGs("nsg#4", []string{"nic#6"}, withSecRules(secRule("7812", "Block"))),
+			},
+
+			output: []inventory.AzureAsset{
+				mockVMs("vm#1", []string{"nic#1", "nic#2"}, withExtendedSecRules(
+					extendedSecRule("22", "Allow"),
+					extendedSecRule("80", "Block"),
+					extendedSecRule("7000", "Block"),
+				)),
+				mockVMs("vm#2", []string{"nic#5", "nic#4", "nic#6"}, withExtendedSecRules(
+					extendedSecRule("80", "Block"),
+					extendedSecRule("7000", "Block"),
+					extendedSecRule("8080", "Allow"),
+					extendedSecRule("7812", "Block"),
+				)),
+				mockVMs("vm#3", []string{"nic#3"}, withExtendedSecRules(
+					extendedSecRule("22", "Allow"),
+				)),
+				mockNSGs("nsg#1", []string{"nic#1", "nic#3"}, withSecRules(secRule("22", "Allow"))),
+				mockNSGs("nsg#2", []string{"nic#2", "nic#5"}, withSecRules(secRule("80", "Block"), secRule("7000", "Block"))),
+				mockNSGs("nsg#3", []string{"nic#4"}, withSecRules(secRule("8080", "Allow"))),
+				mockNSGs("nsg#4", []string{"nic#6"}, withSecRules(secRule("7812", "Block"))),
 			},
 		},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			enrichVirtualMachinesWithNetworkSecurityGroups(tc.input)
+			err := enrichVirtualMachinesWithNetworkSecurityGroups(tc.input)
+			if err != nil {
+				assert.Fail(t, err.Error())
+			}
 			assert.Equal(t, tc.output, tc.input)
 		})
 	}
+}
+
+type mockAssetOption func(asset *inventory.AzureAsset)
+
+func withSecRules(rules ...map[string]any) mockAssetOption {
+	return func(asset *inventory.AzureAsset) {
+		asset.Properties["securityRules"] = rules
+	}
+}
+
+func withExtendedSecRules(rules ...map[string]any) mockAssetOption {
+	return func(asset *inventory.AzureAsset) {
+		if asset.Extension == nil {
+			asset.Extension = map[string]any{}
+		}
+
+		asset.Extension["network"] = map[string]any{
+			"securityRules": rules,
+		}
+	}
+}
+
+func mockVMs(id string, nics []string, opts ...mockAssetOption) inventory.AzureAsset {
+	asset := inventory.AzureAsset{
+		Id:   id,
+		Type: inventory.VirtualMachineAssetType,
+		Properties: map[string]any{
+			"networkProfile": map[string]any{
+				"networkInterfaces": mapNics(nics),
+			},
+		}}
+
+	for _, opt := range opts {
+		opt(&asset)
+	}
+
+	return asset
+}
+
+func mockNSGs(id string, nics []string, opts ...mockAssetOption) inventory.AzureAsset {
+	asset := inventory.AzureAsset{
+		Id:   id,
+		Type: inventory.NetworkSecurityGroup,
+		Properties: map[string]any{
+			"networkInterfaces": mapNics(nics),
+		}}
+
+	for _, opt := range opts {
+		opt(&asset)
+	}
+
+	return asset
+}
+
+func secRule(destinationPortRange, access string) map[string]any {
+	return map[string]any{
+		"properties": map[string]any{
+			"provisioningState":          "Succeeded",
+			"destinationAddressPrefixes": make([]string, 0),
+			"destinationAddressPrefix":   "*",
+			"sourceAddressPrefixes":      make([]string, 0),
+			"destinationPortRanges":      make([]string, 0),
+			"sourceAddressPrefix":        "*",
+			"destinationPortRange":       destinationPortRange,
+			"sourcePortRanges":           make([]string, 0),
+			"sourcePortRange":            "*",
+			"protocol":                   "TCP",
+			"direction":                  "Inbound",
+			"priority":                   100,
+			"access":                     access,
+		},
+	}
+}
+
+func extendedSecRule(destinationPortRange, access string) map[string]any {
+	return map[string]any{
+		"access":                access,
+		"destinationPortRange":  destinationPortRange,
+		"destinationPortRanges": make([]string, 0),
+		"direction":             "Inbound",
+		"protocol":              "TCP",
+		"sourceAddressPrefix":   "*",
+		"sourceAddressPrefixes": make([]string, 0),
+	}
+}
+
+func mapNics(nics []string) []map[string]any {
+	nicMap := make([]map[string]any, len(nics))
+	for i, nic := range nics {
+		nicMap[i] = map[string]any{
+			"id": nic,
+		}
+	}
+	return nicMap
 }
