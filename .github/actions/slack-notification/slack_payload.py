@@ -78,6 +78,7 @@ def process_message_env():
           }
     """
     message = os.environ.get("MESSAGE", "No message")
+    message = replace_user_mentions(message, load_users_from_env())
     if os.environ["URL_ENCODED"] == "true":
         message = unquote(message)
     message = "\n".join(line.strip() for line in message.splitlines())
@@ -99,6 +100,39 @@ def set_output(name: str, value: str):
         print(f"{name}={value}", file=fh)
 
 
+def load_users_from_env():
+    """
+    Load a dictionary of users from the 'USERS' environment variable.
+
+    Returns:
+    dict: A dict of users.
+    """
+    users = os.environ.get("USERS")
+    if users is None or users == "":
+        return {}
+    try:
+        return json.loads(users)
+    except json.decoder.JSONDecodeError:
+        print(f"::warning::Invalid value for USERS: {users}")
+        return {}
+
+
+def replace_user_mentions(message, users):
+    """
+    Replace user mentions in the message with the corresponding Slack user IDs.
+
+    Parameters:
+    - message (str): The message to be processed.
+    - users (dict): A dict of users.
+
+    Returns:
+    str: The message with user mentions replaced with Slack user IDs.
+    """
+    for user in users:
+        message = message.replace(f"{user}", f"<@{users[user]}>")
+    return message
+
+
 def main():
     """
     Main function to process environment variables and generate a Slack-compatible message.
@@ -106,7 +140,8 @@ def main():
     if os.environ.get("MESSAGE"):
         json_data = process_message_env()
     elif os.environ.get("PAYLOAD"):
-        json_data = json.loads(os.environ["PAYLOAD"])
+        payload = replace_user_mentions(os.environ["PAYLOAD"], load_users_from_env())
+        json_data = json.loads(payload)
     else:
         raise SlackException("Either message or payload must be set.")
 
