@@ -61,7 +61,7 @@ func enrichVirtualMachinesWithNetworkSecurityGroups(assets []inventory.AzureAsse
 	}
 
 	for idx, asset := range assets {
-		if asset.Type != inventory.VirtualMachineAssetType && asset.Type != inventory.ClassicVirtualMachineAssetType {
+		if asset.Type != inventory.VirtualMachineAssetType {
 			continue
 		}
 

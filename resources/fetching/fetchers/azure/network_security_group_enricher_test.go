@@ -26,8 +26,6 @@ import (
 )
 
 func TestEnrichVirtualMachinesWithNetworkSecurityGroup(t *testing.T) {
-	// TODO Test with Classic VMS
-
 	tests := map[string]struct {
 		input  []inventory.AzureAsset
 		output []inventory.AzureAsset
